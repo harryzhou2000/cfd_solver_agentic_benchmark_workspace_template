@@ -1,8 +1,6 @@
 # AGENTS.md
 
-Common project instructions for coding agents working in benchmark
-workspaces. Each init branch extends this file with its branch-specific
-policies (e.g. subagent model rules) in later sections.
+Project instructions for coding agents working in this repository.
 
 ## Sandbox (read/write restriction)
 
@@ -19,7 +17,13 @@ policies (e.g. subagent model rules) in later sections.
   rolled back. Local checkpoint commits do not require approval; only pushing
   and branch/remote mutations require it.
 
-## 2. Persistence
+## 2. Subagents
+
+- Delegating independent subtasks to subagents is encouraged.
+- Every subagent spawned from this repository MUST use the model
+  `BLSC/GLM-5.2` (passed as the `model` override to `spawn_agent`).
+
+## 3. Persistence
 
 - Once the user has started a task, do not stop until the specified task is
   accomplished to a level of satisfaction: completed results, validated
