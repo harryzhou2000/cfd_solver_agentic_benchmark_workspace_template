@@ -244,6 +244,21 @@ void add_scaled_identity(StateJacobian& matrix, Real value) noexcept {
            (*lift_range.second - *lift_range.first) < 1.0e-4;
 }
 
+[[nodiscard]] bool stable_force_tail(const std::deque<Real>& drag,
+                                     const std::deque<Real>& lift) {
+    constexpr std::size_t kWindow = 200;
+    if (drag.size() < kWindow || lift.size() < kWindow) return false;
+    const auto drag_begin = drag.end() - static_cast<std::ptrdiff_t>(kWindow);
+    const auto lift_begin = lift.end() - static_cast<std::ptrdiff_t>(kWindow);
+    const auto drag_range = std::minmax_element(drag_begin, drag.end());
+    const auto lift_range = std::minmax_element(lift_begin, lift.end());
+    const Real drag_scale = std::max({std::abs(*drag_range.first),
+                                      std::abs(*drag_range.second), Real{1.0e-3}});
+    return (*drag_range.second - *drag_range.first) <=
+               std::max(Real{1.0e-4}, Real{0.03} * drag_scale) &&
+           (*lift_range.second - *lift_range.first) <= Real{1.0e-3};
+}
+
 }  // namespace
 
 class FlowSolver::Impl {
@@ -1334,7 +1349,11 @@ class FlowSolver::Impl {
                 emit_progress(callbacks, step, accepted_spatial.residual_l2,
                               final_reduction, accepted.force_sample);
             }
-            if (step >= 50 && final_reduction >= target_orders) {
+            const bool viscous_force_stable =
+                viscosity_ <= 0.0 ||
+                (step >= 500 && stable_force_tail(drag_history, lift_history));
+            if (step >= 50 && final_reduction >= target_orders &&
+                viscous_force_stable) {
                 converged = true;
                 break;
             }
