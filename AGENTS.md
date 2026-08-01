@@ -20,9 +20,14 @@ Project instructions for coding agents working in this repository.
 ## 2. Subagents
 
 - Delegating independent subtasks to subagents is encouraged.
-- Subagent model policy: the ONLY allowed subagent model is
-  `BLSC/DeepSeek-V4-Flash` (passed as the `model` override to `spawn_agent`).
+- Subagent model policy: the allowed subagent models are
+  `deepseek/deepseek-v4-flash` and `BLSC/MiniMax-M3` (passed as the `model`
+  override to `spawn_agent`).
   Do not spawn subagents with any other model.
+- Visual handoff (important): whenever a subagent produces something visual —
+  a report, plot, figure, or postprocessing output — hand it off to a
+  `BLSC/MiniMax-M3` subagent for visual checks and design review before the
+  task is considered done.
 
 ## 3. Use Subagents (Important)
 
