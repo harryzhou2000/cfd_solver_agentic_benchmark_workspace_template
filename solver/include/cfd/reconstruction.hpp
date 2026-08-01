@@ -33,11 +33,6 @@ struct FaceReconstruction {
     bool used_positivity_fallback{};
 };
 
-/// Continuous thermodynamically-coupled flattening for the one-ring-dilated
-/// pressure-jump sensor.  Smooth stencils (sensor <= 0.10) retain P1 exactly;
-/// strong jumps (sensor >= 0.25) use local P0, with a linear transition.
-[[nodiscard]] Real pressure_jump_flattening_factor(Real sensor) noexcept;
-
 /// Computes weighted least-squares gradients of [rho,u,v,p].  Weights are
 /// inverse squared distance; rank-deficient stencils use a bounded one-
 /// dimensional projection fallback rather than an unstable matrix inverse.

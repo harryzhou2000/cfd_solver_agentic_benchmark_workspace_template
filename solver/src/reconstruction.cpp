@@ -64,14 +64,6 @@ void update_bounds(Primitive& minimum, Primitive& maximum, const Primitive& valu
 
 }  // namespace
 
-Real pressure_jump_flattening_factor(Real sensor) noexcept {
-    constexpr Real kSmooth = 0.10;
-    constexpr Real kStrong = 0.25;
-    if (!std::isfinite(sensor) || sensor >= kStrong) return 0.0;
-    if (sensor <= kSmooth) return 1.0;
-    return (kStrong - sensor) / (kStrong - kSmooth);
-}
-
 PrimitiveGradients weighted_least_squares_gradients(const Vec2& cell_center,
                                                      const Primitive& cell_value,
                                                      const std::vector<PrimitiveSample>& samples,
