@@ -29,10 +29,12 @@ struct CommandLine {
     std::filesystem::path case_file;
     std::filesystem::path output_directory;
     std::optional<std::filesystem::path> restart_file;
+    bool restart_perturbation{};
     std::string report_level{"full"};
     std::optional<int> diagnostic_steps;
     std::optional<int> diagnostic_order;
     std::optional<cfd::Real> diagnostic_cfl;
+    std::optional<cfd::Real> pseudo_cfl;
     bool diagnostic_uniform{};
     std::string command;
 };
@@ -70,6 +72,12 @@ struct CommandLine {
         if (option == "--case") result.case_file = value;
         else if (option == "--output") result.output_directory = value;
         else if (option == "--restart") result.restart_file = value;
+        else if (option == "--restart-perturbation") {
+            if (value != "true" && value != "false") {
+                throw std::invalid_argument("--restart-perturbation must be true or false");
+            }
+            result.restart_perturbation = value == "true";
+        }
         else if (option == "--report-level") result.report_level = value;
         else if (option == "--diagnostic-steps") {
             try {
@@ -99,6 +107,18 @@ struct CommandLine {
                 throw std::invalid_argument("--diagnostic-cfl must be a positive finite number");
             }
         }
+        else if (option == "--pseudo-cfl") {
+            try {
+                std::size_t consumed = 0;
+                const cfd::Real cfl = std::stod(value, &consumed);
+                if (consumed != value.size() || !std::isfinite(cfl) || !(cfl > 0.0)) {
+                    throw std::invalid_argument("range");
+                }
+                result.pseudo_cfl = cfl;
+            } catch (const std::exception&) {
+                throw std::invalid_argument("--pseudo-cfl must be a positive finite number");
+            }
+        }
         else if (option == "--diagnostic-uniform") {
             if (value != "true" && value != "false") {
                 throw std::invalid_argument("--diagnostic-uniform must be true or false");
@@ -112,6 +132,12 @@ struct CommandLine {
     }
     if (result.report_level != "brief" && result.report_level != "full") {
         throw std::invalid_argument("--report-level must be 'brief' or 'full'");
+    }
+    if (result.restart_perturbation && !result.restart_file) {
+        throw std::invalid_argument("--restart-perturbation=true requires --restart");
+    }
+    if (result.pseudo_cfl && result.diagnostic_cfl) {
+        throw std::invalid_argument("--pseudo-cfl and --diagnostic-cfl are mutually exclusive");
     }
     return result;
 }
@@ -275,8 +301,7 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
                                    ? "true_dual_time_BDF2"
                                    : "local_pseudo_time_defect_correction";
     metadata.implicit_solver = "analytic_4x4_Euler_block_Jacobi_defect_correction";
-    metadata.reconstruction =
-        "weighted_least_squares_piecewise_linear_with_compressive_shock_face_fallback";
+    metadata.reconstruction = "weighted_least_squares_piecewise_linear";
     metadata.limiter = "Barth_Jespersen_active";
     metadata.spatial_order_claimed = 2;
     metadata.positivity_preservation =
@@ -341,6 +366,10 @@ int main(int argc, char** argv) {
         if (command.diagnostic_order) {
             config.numerics_required.spatial_order = *command.diagnostic_order;
         }
+        if (command.pseudo_cfl) {
+            config.run_control.cfl_initial = *command.pseudo_cfl;
+            config.run_control.cfl_max = *command.pseudo_cfl;
+        }
         if (command.diagnostic_cfl) {
             config.run_control.cfl_initial = *command.diagnostic_cfl;
             config.run_control.cfl_max = *command.diagnostic_cfl;
@@ -374,6 +403,7 @@ int main(int argc, char** argv) {
         }
         cfd::FlowSolver solver(config, std::move(distributed), MPI_COMM_WORLD);
         if (command.restart_file) apply_restart(solver, *command.restart_file);
+        if (command.restart_perturbation) solver.apply_transient_symmetry_seed();
 
         cfd::SolverCallbacks callbacks{};
         callbacks.residual = [&](const cfd::SolverResidualSample& sample) {
@@ -461,9 +491,7 @@ int main(int argc, char** argv) {
             status.notes = summary.notes + "; positivity fallbacks=" +
                            std::to_string(summary.positivity_backtracks) +
                            "; Riemann fallbacks=" +
-                           std::to_string(summary.hllc_fallback_faces) +
-                           "; compressive shock-face first-order fallbacks=" +
-                           std::to_string(summary.shock_reconstruction_fallback_faces);
+                           std::to_string(summary.hllc_fallback_faces);
             if (status.convergence_status == cfd::ConvergenceStatus::failed) {
                 output->record_failure(status);
             } else {

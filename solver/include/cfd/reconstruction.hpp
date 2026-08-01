@@ -61,15 +61,6 @@ struct FaceReconstruction {
     const Vec2& cell_center, const Primitive& cell_value,
     const PrimitiveGradients& gradients, const Vec2& face_location, const GasModel& gas);
 
-/// Detects a strong compressive pressure jump across an oriented interior
-/// face.  Such faces may use cell-centre inviscid states to prevent a limited
-/// second-order shock from oscillating between adjacent cells; smooth and
-/// expansive faces remain second order.
-[[nodiscard]] bool compressive_shock_face(const Primitive& left,
-                                          const Primitive& right,
-                                          const Vec2& left_to_right_normal,
-                                          Real relative_pressure_threshold = 0.15);
-
 /// Converts primitive density/pressure gradients to grad(T) for T=p/(rho R).
 [[nodiscard]] Vec2 temperature_gradient(const Primitive& primitive,
                                          const PrimitiveGradients& gradients,

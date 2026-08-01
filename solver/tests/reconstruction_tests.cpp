@@ -83,23 +83,6 @@ void test_face_positivity_and_state_encoding() {
     assert(cfd::is_admissible(face.conservative, gas));
 }
 
-void test_compressive_shock_sensor_is_local_and_directional() {
-    cfd::Primitive left{};
-    left.rho = 1.0; left.u = 2.0; left.v = 0.0; left.p = 2.0;
-    cfd::Primitive right{};
-    right.rho = 1.4; right.u = 1.0; right.v = 0.0; right.p = 3.0;
-    assert(cfd::compressive_shock_face(left, right, {1.0, 0.0}));
-
-    // Reversing only the velocity jump makes the face expansive.
-    std::swap(left.u, right.u);
-    assert(!cfd::compressive_shock_face(left, right, {1.0, 0.0}));
-    std::swap(left.u, right.u);
-
-    // A smooth compressive face stays second order.
-    right.p = 2.1;
-    assert(!cfd::compressive_shock_face(left, right, {1.0, 0.0}));
-}
-
 void test_viscous_and_wall_helpers() {
     const cfd::GasModel gas{};
     cfd::Primitive primitive{};
@@ -149,7 +132,6 @@ int main() {
     test_constant_preservation_and_singular_fallback();
     test_active_barth_jespersen_limiter();
     test_face_positivity_and_state_encoding();
-    test_compressive_shock_sensor_is_local_and_directional();
     test_viscous_and_wall_helpers();
     std::cout << "reconstruction tests passed\n";
     return 0;

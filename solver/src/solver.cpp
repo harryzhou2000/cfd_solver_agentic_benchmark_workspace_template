@@ -282,6 +282,7 @@ class FlowSolver::Impl {
         build_node_lookup();
         if (config_.run_control.type == RunType::transient) {
             seed_transient_perturbation();
+            transient_seed_applied_ = true;
             previous_states_ = states_;
             older_states_ = states_;
         }
@@ -306,6 +307,17 @@ class FlowSolver::Impl {
         exchange_halo_packets(mesh_.halo, states_, communicator_, kStateHaloTag);
         previous_states_ = states_;
         older_states_ = states_;
+        transient_seed_applied_ = false;
+    }
+
+    void apply_transient_symmetry_seed() {
+        if (config_.run_control.type != RunType::transient) {
+            throw std::logic_error("transient symmetry seed requires a transient case");
+        }
+        seed_transient_perturbation();
+        previous_states_ = states_;
+        older_states_ = states_;
+        transient_seed_applied_ = true;
     }
 
     [[nodiscard]] SolverSummary solve(const SolverCallbacks& callbacks) {
@@ -383,7 +395,7 @@ class FlowSolver::Impl {
     std::uint64_t positivity_backtracks_{};
     std::uint64_t positivity_reconstruction_fallbacks_{};
     std::uint64_t hllc_fallback_faces_{};
-    std::uint64_t shock_reconstruction_fallback_faces_{};
+    bool transient_seed_applied_{};
 
     void build_node_lookup() {
         node_coordinates_.reserve(mesh_.nodes.size());
@@ -536,7 +548,6 @@ class FlowSolver::Impl {
                 face.center, gas_);
             if (owner_face.used_positivity_fallback) ++positivity_reconstruction_fallbacks_;
 
-            State owner_inviscid_state = owner_face.conservative;
             State neighbor_state{};
             Primitive neighbor_primitive{};
             FaceReconstruction neighbor_face{};
@@ -572,16 +583,8 @@ class FlowSolver::Impl {
                 neighbor_primitive = exterior;
             }
 
-            if (!physical_boundary &&
-                compressive_shock_face(primitive_[owner], neighbor_primitive,
-                                       face.normal)) {
-                owner_inviscid_state = to_state(primitive_[owner], gas_);
-                neighbor_state = to_state(neighbor_primitive, gas_);
-                ++shock_reconstruction_fallback_faces_;
-            }
-
             NumericalFlux inviscid = rusanov_flux(
-                owner_inviscid_state, neighbor_state, face.normal, gas_,
+                owner_face.conservative, neighbor_state, face.normal, gas_,
                 config_.run_control.rusanov_dissipation_scale.value_or(1.0));
             if (inviscid.used_fallback) ++hllc_fallback_faces_;
             State total_flux = inviscid.value;
@@ -1031,6 +1034,11 @@ class FlowSolver::Impl {
 
     [[nodiscard]] Real cfl_for_step(int step) const {
         static_cast<void>(step);
+        if (std::abs(config_.run_control.cfl_max -
+                     config_.run_control.cfl_initial) <=
+            1.0e-12 * std::max(config_.run_control.cfl_max, Real{1.0})) {
+            return config_.run_control.cfl_max;
+        }
         // Anderson history requires one stationary fixed-point map.  A fixed,
         // safeguarded CFL is therefore used instead of retaining inconsistent
         // secant pairs across a ramp.  The caps are deliberately far below the
@@ -1039,7 +1047,9 @@ class FlowSolver::Impl {
         const Real selected = config_.freestream.mach >= 1.0
                                   ? Real{1.0}
                                   : config_.physics.mode == PhysicsMode::inviscid
-                                        ? Real{10.0}
+                                        ? (config_.freestream.mach > 0.5
+                                               ? Real{5.0}
+                                               : Real{10.0})
                                         : Real{5.0};
         return std::min(config_.run_control.cfl_max, selected);
     }
@@ -1057,6 +1067,8 @@ class FlowSolver::Impl {
 
     [[nodiscard]] SolverSummary solve_steady(const SolverCallbacks& callbacks) {
         const int maximum_steps = config_.run_control.max_steps.value();
+        const int plateau_eligible_step =
+            std::max(2000, config_.run_control.pseudo_cfl_ramp_steps);
         const Real target_orders = config_.run_control.residual_reduction_target.value();
         Real initial_residual = 0.0;
         Real final_reduction = 0.0;
@@ -1326,6 +1338,12 @@ class FlowSolver::Impl {
                 converged = true;
                 break;
             }
+            if (step >= plateau_eligible_step &&
+                final_reduction >= std::min(target_orders, Real{2.0}) &&
+                stable_plateau(residual_history, drag_history, lift_history)) {
+                plateau = true;
+                break;
+            }
             if (step == maximum_steps) {
                 plateau = final_reduction >= std::min(target_orders, Real{2.0}) &&
                           stable_plateau(residual_history, drag_history, lift_history);
@@ -1345,7 +1363,7 @@ class FlowSolver::Impl {
                             ? "global residual target reached with synchronized final state" +
                                   cfl_note
                             : plateau
-                                  ? "documented stable residual/force plateau after production horizon" +
+                                  ? "documented stable residual/force plateau after the supplied stability horizon" +
                                         cfl_note
                                   : "production horizon ended before convergence or a stable plateau" +
                                         cfl_note;
@@ -1624,8 +1642,13 @@ class FlowSolver::Impl {
                 : 0.0;
         summary.convergence_status = statistically_periodic ? "statistically_periodic" : "failed";
         std::ostringstream notes;
-        notes << "true dual-time BDF2; histories frozen within every inner solve and advanced only after convergence; "
-              << "deterministic localized transverse symmetry seed amplitude=1e-3 U_inf; "
+        notes << "true dual-time BDF2; histories frozen within every inner solve and advanced only after convergence; ";
+        if (transient_seed_applied_) {
+            notes << "deterministic localized transverse symmetry seed amplitude=1e-3 U_inf; ";
+        } else {
+            notes << "restart accepted without an additional symmetry seed; ";
+        }
+        notes << "fixed inner pseudo-time CFL=" << config_.run_control.cfl_max << "; "
               << "post-transient lift amplitude=" << lift_amplitude
               << ", mean drag=" << mean_drag
               << ", shedding frequency=" << shedding_frequency
@@ -1655,14 +1678,12 @@ class FlowSolver::Impl {
     }
 
     void finalize_diagnostic_counts(SolverSummary& summary) const {
-        std::uint64_t local[4]{positivity_backtracks_, positivity_reconstruction_fallbacks_,
-                               hllc_fallback_faces_,
-                               shock_reconstruction_fallback_faces_};
-        std::uint64_t global[4]{};
-        MPI_Allreduce(local, global, 4, MPI_UINT64_T, MPI_SUM, communicator_);
+        std::uint64_t local[3]{positivity_backtracks_, positivity_reconstruction_fallbacks_,
+                               hllc_fallback_faces_};
+        std::uint64_t global[3]{};
+        MPI_Allreduce(local, global, 3, MPI_UINT64_T, MPI_SUM, communicator_);
         summary.positivity_backtracks = global[0] + global[1];
         summary.hllc_fallback_faces = global[2];
-        summary.shock_reconstruction_fallback_faces = global[3];
     }
 };
 
@@ -1676,6 +1697,10 @@ FlowSolver& FlowSolver::operator=(FlowSolver&&) noexcept = default;
 
 void FlowSolver::set_initial_owned_states(const std::vector<State>& states) {
     implementation_->set_initial_owned_states(states);
+}
+
+void FlowSolver::apply_transient_symmetry_seed() {
+    implementation_->apply_transient_symmetry_seed();
 }
 
 SolverSummary FlowSolver::solve(const SolverCallbacks& callbacks) {

@@ -78,7 +78,6 @@ struct SolverSummary {
     SolverInnerStatistics inner_statistics{};
     std::uint64_t positivity_backtracks{};
     std::uint64_t hllc_fallback_faces{};
-    std::uint64_t shock_reconstruction_fallback_faces{};
 };
 
 struct SolverCallbacks {
@@ -107,6 +106,9 @@ class FlowSolver {
     /// Replaces the freestream initialization for owned cells.  Ghost states are
     /// synchronized from their owning ranks before the first residual evaluation.
     void set_initial_owned_states(const std::vector<State>& states);
+    /// Reapplies the documented transient symmetry seed after a cross-case
+    /// precursor restart and synchronizes both BDF histories.
+    void apply_transient_symmetry_seed();
     [[nodiscard]] SolverSummary solve(const SolverCallbacks& callbacks);
     [[nodiscard]] std::vector<SolverFieldCell> local_field_cells() const;
     [[nodiscard]] std::vector<SolverSurfaceSample> local_surface_samples() const;

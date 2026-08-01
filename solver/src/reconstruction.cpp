@@ -252,23 +252,6 @@ FaceReconstruction reconstruct_face_state(const Vec2& cell_center, const Primiti
     return result;
 }
 
-bool compressive_shock_face(const Primitive& left, const Primitive& right,
-                            const Vec2& left_to_right_normal,
-                            Real relative_pressure_threshold) {
-    if (!finite_primitive_vector(left) || !finite_primitive_vector(right) ||
-        !finite(left_to_right_normal) || !(left.p > 0.0) || !(right.p > 0.0) ||
-        !std::isfinite(relative_pressure_threshold) ||
-        !(relative_pressure_threshold > 0.0)) {
-        throw std::invalid_argument("compression sensor requires finite admissible inputs");
-    }
-    const Real pressure_jump =
-        std::abs(left.p - right.p) / std::max(std::min(left.p, right.p), Real{1.0e-30});
-    const Real normal_velocity_jump =
-        (left.u - right.u) * left_to_right_normal[0] +
-        (left.v - right.v) * left_to_right_normal[1];
-    return pressure_jump >= relative_pressure_threshold && normal_velocity_jump > 0.0;
-}
-
 Vec2 temperature_gradient(const Primitive& primitive, const PrimitiveGradients& gradients,
                           const GasModel& gas) {
     if (!(primitive.rho > gas.density_floor) || !(gas.gas_constant > 0.0) ||
