@@ -15,7 +15,8 @@ Project instructions for coding agents working in this repository.
 
 - Delegating independent subtasks to subagents is encouraged.
 - Subagent model policy: the ONLY allowed subagent model is
-  `BLSC/DeepSeek-V4-Flash` (passed as the `model` override to `spawn_agent`).
+  `deepseek/deepseek-v4-flash` (the deepseek-provided model id reported by
+  `opencode models`; passed as the `model` override to `spawn_agent`).
   Do not spawn subagents with any other model.
 
 ## 3. Persistence
