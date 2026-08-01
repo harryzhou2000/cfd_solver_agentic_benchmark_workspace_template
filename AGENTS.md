@@ -14,8 +14,13 @@ Project instructions for coding agents working in this repository.
 ## 2. Subagents
 
 - Delegating independent subtasks to subagents is encouraged.
-- Every subagent spawned from this repository MUST use the model
-  `BLSC/GLM-5.2` (passed as the `model` override to `spawn_agent`).
+- Subagent model policy: the allowed subagent models are `BLSC/GLM-5.2` and
+  `BLSC/MiniMax-M3` (passed as the `model` override to `spawn_agent`).
+  Do not spawn subagents with any other model.
+- Visual handoff (important): whenever a subagent produces something visual —
+  a report, plot, figure, or postprocessing output — hand it off to a
+  `BLSC/MiniMax-M3` subagent for visual checks and design review before the
+  task is considered done.
 
 ## 3. Persistence
 
