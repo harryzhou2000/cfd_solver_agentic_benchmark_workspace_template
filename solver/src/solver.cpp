@@ -782,8 +782,28 @@ class FlowSolver::Impl {
                     }
                 }
             } else if (mesh_.is_owned(owner)) {
-                add_scaled_identity(evaluation.block_diagonal[owner],
-                                    diagonal_contribution);
+                if (stationary_wall) {
+                    const StateJacobian wall_jacobian =
+                        stationary_wall_flux_jacobian(owner_face.conservative,
+                                                      face.normal, gas_);
+                    for (std::size_t row = 0; row < kStateVariables; ++row) {
+                        for (std::size_t column = 0; column < kStateVariables;
+                             ++column) {
+                            evaluation.block_diagonal[owner][row][column] +=
+                                wall_jacobian[row][column] * face.length;
+                        }
+                    }
+                    // The scalar spectral contribution remains in
+                    // evaluation.diagonal and therefore in the pseudo-time
+                    // mass.  Only the physical wall derivative is exact here.
+                    if (viscous_diagonal > 0.0) {
+                        add_scaled_identity(evaluation.block_diagonal[owner],
+                                            viscous_diagonal);
+                    }
+                } else {
+                    add_scaled_identity(evaluation.block_diagonal[owner],
+                                        diagonal_contribution);
+                }
             }
 
             if (physical_boundary && physical_type != BoundaryType::farfield &&
@@ -1063,17 +1083,15 @@ class FlowSolver::Impl {
     }
 
     [[nodiscard]] Real cfl_for_step(int step) const {
-        static_cast<void>(step);
         if (std::abs(config_.run_control.cfl_max -
                      config_.run_control.cfl_initial) <=
             1.0e-12 * std::max(config_.run_control.cfl_max, Real{1.0})) {
             return config_.run_control.cfl_max;
         }
-        // Anderson history requires one stationary fixed-point map.  A fixed,
-        // safeguarded CFL is therefore used instead of retaining inconsistent
-        // secant pairs across a ramp.  The caps are deliberately far below the
-        // supplied 50--100 maxima; the stronger block solve and residual
-        // acceptance provide the corresponding nonlinear acceleration.
+        // Preserve the supplied startup CFL and ramp horizon, but cap the
+        // terminal value at the range proven stable for this nonlinear map.
+        // Anderson history is reset whenever this value changes, so secant
+        // pairs never mix different fixed-point maps.
         const Real selected = config_.freestream.mach >= 1.0
                                   ? Real{1.0}
                                   : config_.physics.mode == PhysicsMode::inviscid
@@ -1081,7 +1099,18 @@ class FlowSolver::Impl {
                                                ? Real{5.0}
                                                : Real{10.0})
                                         : Real{5.0};
-        return std::min(config_.run_control.cfl_max, selected);
+        const Real cap = std::min(config_.run_control.cfl_max, selected);
+        const Real initial = std::min(config_.run_control.cfl_initial, cap);
+        const int ramp_steps = config_.run_control.pseudo_cfl_ramp_steps;
+        if (ramp_steps <= 1 || step >= ramp_steps ||
+            std::abs(cap - initial) <=
+                1.0e-12 * std::max(cap, Real{1.0})) {
+            return cap;
+        }
+        const Real fraction = std::clamp(
+            static_cast<Real>(step - 1) / static_cast<Real>(ramp_steps - 1),
+            Real{0.0}, Real{1.0});
+        return initial * std::pow(cap / initial, fraction);
     }
 
     void emit_progress(const SolverCallbacks& callbacks, int step, Real residual,
@@ -1101,7 +1130,9 @@ class FlowSolver::Impl {
             std::max(2000, config_.run_control.pseudo_cfl_ramp_steps);
         const Real target_orders = config_.run_control.residual_reduction_target.value();
         Real initial_residual = 0.0;
+        Real initial_linf_residual = 0.0;
         Real final_reduction = 0.0;
+        Real final_linf_reduction = 0.0;
         int final_step = 0;
         bool converged = false;
         bool plateau = false;
@@ -1122,9 +1153,18 @@ class FlowSolver::Impl {
         std::deque<Real> drag_history;
         std::deque<Real> lift_history;
         SolverForceSample final_force{};
+        Real previous_cfl = std::numeric_limits<Real>::quiet_NaN();
 
         for (int step = 1; step <= maximum_steps; ++step) {
             const Real cfl = cfl_for_step(step);
+            if (std::isfinite(previous_cfl) &&
+                std::abs(cfl - previous_cfl) >
+                    1.0e-13 * std::max({std::abs(cfl), std::abs(previous_cfl),
+                                        Real{1.0}})) {
+                anderson_residual_history.clear();
+                anderson_image_history.clear();
+            }
+            previous_cfl = cfl;
             const std::vector<State> pseudo_old = states_;
             std::vector<Real> pseudo_coefficient(mesh_.owned_count);
             Real first_inner_total = 0.0;
@@ -1317,7 +1357,9 @@ class FlowSolver::Impl {
                         Evaluation accelerated_evaluation =
                             assemble_spatial(step, 0.0, used_inner, cfl, 0.0);
                         if (accelerated_evaluation.residual_sample.residual_l2 <=
-                            (1.0 - 1.0e-6) * accepted_spatial.residual_l2) {
+                                (1.0 - 1.0e-6) * accepted_spatial.residual_l2 &&
+                            accelerated_evaluation.residual_sample.residual_linf <=
+                                (1.0 - 1.0e-6) * accepted_spatial.residual_linf) {
                             accepted = std::move(accelerated_evaluation);
                             accepted_spatial = accepted.residual_sample;
                         } else {
@@ -1345,9 +1387,13 @@ class FlowSolver::Impl {
             if (step == 1) {
                 initial_residual =
                     std::max(accepted_spatial.residual_l2, Real{1.0e-300});
+                initial_linf_residual =
+                    std::max(accepted_spatial.residual_linf, Real{1.0e-300});
             }
             final_reduction = finite_log_reduction(
                 initial_residual, accepted_spatial.residual_l2);
+            final_linf_reduction = finite_log_reduction(
+                initial_linf_residual, accepted_spatial.residual_linf);
             final_step = step;
             final_force = accepted.force_sample;
             residual_history.push_back(accepted_spatial.residual_l2);
@@ -1372,18 +1418,22 @@ class FlowSolver::Impl {
             const bool force_tail_stable =
                 step >= 500 && stable_force_tail(drag_history, lift_history);
             if (step >= 50 && final_reduction >= target_orders &&
+                final_linf_reduction >= target_orders &&
                 force_tail_stable) {
                 converged = true;
                 break;
             }
             if (step >= plateau_eligible_step &&
                 final_reduction >= std::min(target_orders, Real{2.0}) &&
+                final_linf_reduction >= std::min(target_orders, Real{2.0}) &&
                 stable_plateau(residual_history, drag_history, lift_history)) {
                 plateau = true;
                 break;
             }
             if (step == maximum_steps) {
                 plateau = final_reduction >= std::min(target_orders, Real{2.0}) &&
+                          final_linf_reduction >=
+                              std::min(target_orders, Real{2.0}) &&
                           stable_plateau(residual_history, drag_history, lift_history);
                 break;
             }
@@ -1395,8 +1445,13 @@ class FlowSolver::Impl {
         summary.residual_reduction_orders = final_reduction;
         summary.convergence_status = converged || plateau ? "converged" : "failed";
         const std::string cfl_note =
-            "; stationary safeguarded CFL=" + std::to_string(cfl_for_step(1)) +
-            " (below supplied cap; required by Anderson fixed-point history)";
+            "; safeguarded CFL ramp=" + std::to_string(cfl_for_step(1)) +
+            " to " +
+            std::to_string(cfl_for_step(
+                std::max(1, config_.run_control.pseudo_cfl_ramp_steps))) +
+            " over " +
+            std::to_string(config_.run_control.pseudo_cfl_ramp_steps) +
+            " pseudo steps (terminal cap may be below supplied maximum; Anderson history is reset while CFL changes)";
         summary.notes = converged
                             ? "global residual target reached with synchronized final state" +
                                   cfl_note
@@ -1405,6 +1460,8 @@ class FlowSolver::Impl {
                                         cfl_note
                                   : "production horizon ended before convergence or a stable plateau" +
                                         cfl_note;
+        summary.notes += "; global Linf residual reduction=" +
+                         std::to_string(final_linf_reduction) + " orders";
         if (!observed_inner_iterations.empty()) {
             const int observed_min = *std::min_element(observed_inner_iterations.begin(),
                                                        observed_inner_iterations.end());

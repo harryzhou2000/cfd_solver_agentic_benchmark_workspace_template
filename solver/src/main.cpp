@@ -301,7 +301,8 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
     metadata.time_integrator = config.run_control.type == cfd::RunType::transient
                                    ? "true_dual_time_BDF2"
                                    : "local_pseudo_time_defect_correction";
-    metadata.implicit_solver = "analytic_4x4_Euler_block_Jacobi_defect_correction";
+    metadata.implicit_solver =
+        "analytic_4x4_block_Jacobi_with_exact_stationary_wall_pressure_block";
     metadata.reconstruction = "weighted_least_squares_piecewise_linear";
     metadata.limiter = "Barth_Jespersen_active";
     metadata.spatial_order_claimed = 2;

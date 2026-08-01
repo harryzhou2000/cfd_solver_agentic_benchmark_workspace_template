@@ -89,6 +89,21 @@ int main() {
     assert(close(exact_wall.spectral_radius,
                  std::abs(raw_normal_velocity) + oblique_decoded.sound_speed));
     assert(!exact_wall.used_fallback);
+    const auto exact_wall_jacobian =
+        cfd::stationary_wall_flux_jacobian(oblique_state, oblique_normal, gas);
+    for (std::size_t column = 0; column < oblique_state.size(); ++column) {
+        auto perturbed = oblique_state;
+        const double epsilon =
+            1.0e-7 * std::max(1.0, std::abs(oblique_state[column]));
+        perturbed[column] += epsilon;
+        const auto changed =
+            cfd::stationary_wall_flux(perturbed, oblique_normal, gas);
+        for (std::size_t row = 0; row < oblique_state.size(); ++row) {
+            assert(close(exact_wall_jacobian[row][column],
+                         (changed.value[row] - exact_wall.value[row]) / epsilon,
+                         2.0e-6));
+        }
+    }
 
     const auto characteristic = cfd::characteristic_farfield_exterior(
         tangential_state, tangential_state, normal, gas);

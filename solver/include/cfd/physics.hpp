@@ -71,6 +71,11 @@ using StateJacobian = std::array<ConservativeState, 4>;
 [[nodiscard]] NumericalFlux stationary_wall_flux(const ConservativeState& interior,
                                                   const Vec2& outward_unit_normal,
                                                   const GasModel& gas);
+/// Analytic derivative of stationary_wall_flux.value with respect to the
+/// conservative interior state.
+[[nodiscard]] StateJacobian stationary_wall_flux_jacobian(
+    const ConservativeState& interior, const Vec2& outward_unit_normal,
+    const GasModel& gas);
 [[nodiscard]] NumericalFlux hllc_flux(const ConservativeState& left,
                                       const ConservativeState& right,
                                       const Vec2& unit_normal,

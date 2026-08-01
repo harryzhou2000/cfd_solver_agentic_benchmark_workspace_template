@@ -4,6 +4,11 @@ The C++17 solver reads the benchmark CGNS meshes, partitions with METIS, and
 runs under MPI. Python is used only to inspect already-written solver output and
 render a report; it does not generate solver histories or upgrade a failed run.
 
+Steady runs preserve the supplied startup CFL and ramp duration while using a
+documented conservative terminal cap. Anderson history is reset as the CFL
+changes, accelerated states must reduce both global L2 and Linf residuals, and
+completion requires both residual targets together with a stable force tail.
+
 ## Build and tests
 
 From the repository root, configure with the supplied external dependency prefix:

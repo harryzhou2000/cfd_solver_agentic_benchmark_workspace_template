@@ -192,6 +192,30 @@ NumericalFlux stationary_wall_flux(const ConservativeState& interior,
     return result;
 }
 
+StateJacobian stationary_wall_flux_jacobian(
+    const ConservativeState& interior, const Vec2& outward_unit_normal,
+    const GasModel& gas) {
+    const ThermodynamicState primitive = decode_state(interior, gas);
+    const Real velocity_squared =
+        primitive.velocity_x * primitive.velocity_x +
+        primitive.velocity_y * primitive.velocity_y;
+    const Real gamma_minus_one = gas.gamma - 1.0;
+    const ConservativeState pressure_derivative{
+        0.5 * gamma_minus_one * velocity_squared,
+        -gamma_minus_one * primitive.velocity_x,
+        -gamma_minus_one * primitive.velocity_y,
+        gamma_minus_one,
+    };
+    StateJacobian result{};
+    for (std::size_t column = 0; column < pressure_derivative.size(); ++column) {
+        result[1][column] =
+            outward_unit_normal[0] * pressure_derivative[column];
+        result[2][column] =
+            outward_unit_normal[1] * pressure_derivative[column];
+    }
+    return result;
+}
+
 NumericalFlux hllc_flux(const ConservativeState& left, const ConservativeState& right,
                         const Vec2& unit_normal, const GasModel& gas,
                         Real fallback_dissipation_scale) {

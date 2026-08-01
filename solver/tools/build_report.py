@@ -233,20 +233,30 @@ def _residual_reduction(case: CaseData) -> float:
     return math.log10(initial / final)
 
 
+def _linf_residual_reduction(case: CaseData) -> float:
+    initial = float(case.residuals[0]["residual_linf"])
+    final = float(case.residuals[-1]["residual_linf"])
+    if initial <= 0.0 or final <= 0.0:
+        raise BuildError(f"{case.case_id}: residual history must have positive Linf values")
+    return math.log10(initial / final)
+
+
 def _steady_terminal_plateau(residuals: list[dict[str, float | str]],
                              forces: list[dict[str, float | str]]) -> bool:
     """A conservative fallback when the supplied residual target is not reached."""
     if len(residuals) < STEADY_MIN_HISTORY_ROWS or len(forces) < STEADY_TERMINAL_WINDOW:
         return False
     residual_tail = np.asarray([float(row["residual_l2"]) for row in residuals[-STEADY_TERMINAL_WINDOW:]])
+    linf_tail = np.asarray([float(row["residual_linf"]) for row in residuals[-STEADY_TERMINAL_WINDOW:]])
     drag_tail = np.asarray([float(row["cd"]) for row in forces[-STEADY_TERMINAL_WINDOW:]])
     lift_tail = np.asarray([float(row["cl"]) for row in forces[-STEADY_TERMINAL_WINDOW:]])
-    if not np.all(residual_tail > 0.0):
+    if not np.all(residual_tail > 0.0) or not np.all(linf_tail > 0.0):
         return False
     residual_spread = float(np.ptp(np.log10(residual_tail)))
+    linf_spread = float(np.ptp(np.log10(linf_tail)))
     force_scale = max(float(np.max(np.abs(drag_tail))), float(np.max(np.abs(lift_tail))), 1.0e-8)
     force_spread = max(float(np.ptp(drag_tail)), float(np.ptp(lift_tail))) / force_scale
-    return residual_spread <= 0.15 and force_spread <= 0.01
+    return residual_spread <= 0.15 and linf_spread <= 0.15 and force_spread <= 0.01
 
 
 def _validate_transient_evidence(case_id: str, controls: dict[str, Any], metadata: dict,
@@ -294,9 +304,13 @@ def _validate_production_evidence(case_id: str, case_input: dict[str, Any], meta
     if len(residuals) < STEADY_MIN_HISTORY_ROWS or len(forces) < STEADY_MIN_HISTORY_ROWS:
         raise BuildError(f"{case_id}: steady production evidence needs at least {STEADY_MIN_HISTORY_ROWS} residual and force rows")
     reduction = math.log10(float(residuals[0]["residual_l2"]) / float(residuals[-1]["residual_l2"]))
+    linf_reduction = math.log10(float(residuals[0]["residual_linf"]) /
+                                float(residuals[-1]["residual_linf"]))
     target = _number(controls["residual_reduction_target"], f"{case_id} residual target")
-    if reduction + 1.0e-12 < target and not _steady_terminal_plateau(residuals, forces):
-        raise BuildError(f"{case_id}: steady run misses residual target without a stable terminal plateau")
+    if ((reduction + 1.0e-12 < target or linf_reduction + 1.0e-12 < target) and
+            not _steady_terminal_plateau(residuals, forces)):
+        raise BuildError(
+            f"{case_id}: steady run misses L2/Linf residual target without a stable terminal plateau")
 
 
 def _tail_rows(case: CaseData) -> list[dict[str, float | str]]:
@@ -316,6 +330,7 @@ def case_analysis(case: CaseData) -> dict[str, object]:
     final = case.forces[-1]
     analysis: dict[str, object] = {
         "computed_residual_reduction_orders": _residual_reduction(case),
+        "computed_linf_residual_reduction_orders": _linf_residual_reduction(case),
         "reported_residual_reduction_orders": _number(case.status["residual_reduction_orders"], f"{case.case_id} residual_reduction_orders"),
         "final_cd": float(final["cd"]),
         "final_cl": float(final["cl"]),
@@ -363,6 +378,11 @@ def parameter_deviations(case: CaseData) -> list[str]:
         deviations.append("observed residual CFL falls below the supplied initial CFL")
     if "cfl_max" in controls and float(observed_cfl[1]) > float(controls["cfl_max"]) + 1.0e-12:
         deviations.append("observed residual CFL exceeds the supplied CFL cap")
+    if (controls.get("type") == "steady" and "cfl_max" in controls and
+            float(observed_cfl[1]) < float(controls["cfl_max"]) -
+            1.0e-12 * max(float(controls["cfl_max"]), 1.0)):
+        deviations.append(
+            f"safeguarded terminal CFL {float(observed_cfl[1]):g} is below the supplied cap {float(controls['cfl_max']):g}")
     if (controls.get("type") == "steady" and
             int(controls.get("pseudo_cfl_ramp_steps", 0)) > 0 and
             abs(float(observed_cfl[1]) - float(observed_cfl[0])) <= 1.0e-12):
@@ -432,6 +452,8 @@ def _sanity_for_case(case: CaseData) -> dict:
         "surface_cp_varies": bool(np.ptp(cp) > 1.0e-12),
         "cp_range": [float(np.min(cp)), float(np.max(cp))],
         "computed_residual_reduction_orders": case_analysis(case)["computed_residual_reduction_orders"],
+        "computed_linf_residual_reduction_orders":
+            case_analysis(case)["computed_linf_residual_reduction_orders"],
         "parameter_deviations": parameter_deviations(case),
     }
     if "inviscid" in case.case_id:
@@ -551,7 +573,7 @@ def _actual_control_text(case: CaseData) -> str:
         text += (f"; dt observed {_fmt(analysis['observed_dt_range'][0])}--"
                  f"{_fmt(analysis['observed_dt_range'][1])}; tf {case.status['final_physical_time']}")
     else:
-        text += "; ramp=n/a (not stored)"
+        text += "; ramp=observed directly in residual CFL rows"
     return text
 
 
@@ -565,6 +587,7 @@ def _render_report(cases: list[CaseData], records: list[dict[str, str]],
     status_rows = "\n".join(
         f"{_latex(case.case_id)} & {case.status['mpi_ranks']} & {case.status['final_step']} & "
         f"{_fmt(case.status['final_physical_time'])} & {_fmt(analyses[case.case_id]['computed_residual_reduction_orders'], 3)} & "
+        f"{_fmt(analyses[case.case_id]['computed_linf_residual_reduction_orders'], 3)} & "
         f"{_fmt(case.status['wall_time_seconds'], 4)} & {_latex(case.status['convergence_status'])} \\\\" for case in cases
     )
     force_rows = "\n".join(
@@ -618,7 +641,9 @@ def _render_report(cases: list[CaseData], records: list[dict[str, str]],
         analysis = analyses[case.case_id]
         result_text = (
             f"The submitted status is \\texttt{{{_latex(case.status['convergence_status'])}}}; the computed first-to-last "
-            f"L2 residual reduction is {_fmt(analysis['computed_residual_reduction_orders'], 3)} orders. "
+            f"$L_2$/$L_\\infty$ residual reductions are "
+            f"{_fmt(analysis['computed_residual_reduction_orders'], 3)}/"
+            f"{_fmt(analysis['computed_linf_residual_reduction_orders'], 3)} orders. "
             f"The final force row gives $C_D={_fmt(analysis['final_cd'])}$, $C_L={_fmt(analysis['final_cl'])}$, and "
             f"$C_m={_fmt(analysis['final_cmz'])}$. {references} provide the residual, force, wall $C_p/C_f$, Mach, and pressure evidence."
         )
@@ -684,7 +709,7 @@ Case & inviscid flux & viscous flux & time integrator & implicit solver\\\midrul
 {method_rows}
 \bottomrule\end{{tabularx}}\end{{center}}
 \section{{Implicit steady march and true transient BDF2}}
-Steady cases use the submitted local pseudo-time integrator and inner solver.  Their requested controls and any detectable departures from submitted histories are listed in \cref{{tab:controls}}.  For the Re 200 cylinder, metadata identifies \texttt{{{_latex(bdf2['time_integrator'])}}}, with true BDF2 inner loop set to \texttt{{{_latex(bdf2['true_bdf2_inner_loop'])}}}.  The required outer physical-time loop holds $U^n$ and $U^{{n-1}}$ fixed while inner iterations solve for $U^{{n+1}}$, then advances the histories after accepted inner convergence.  Its submitted observed inner-iteration range is {_latex(bdf2.get('observed_min_inner_iterations'))}--{_latex(bdf2.get('observed_max_inner_iterations'))}, mean {_fmt(bdf2.get('observed_mean_inner_iterations', bdf2.get('typical_inner_iterations', 0)))}, target-miss count {_latex(bdf2.get('inner_target_misses'))}, converged-step fraction {_fmt(bdf2.get('inner_target_converged_fraction'))}, and last ratio {_fmt(bdf2.get('last_inner_residual_ratio'))}.
+Steady cases use the submitted local pseudo-time integrator and inner solver.  They retain the supplied startup CFL and ramp horizon while applying a documented conservative terminal cap; Anderson history is reset whenever the CFL changes.  Accelerated iterates must strictly reduce both global $L_2$ and $L_\infty$ residuals, and target convergence requires both norms plus a stable force tail.  The stationary-wall block uses the analytic pressure-flux Jacobian while its spectral radius remains in the pseudo-time mass.  Requested controls and detectable departures are listed in \cref{{tab:controls}}.  For the Re 200 cylinder, metadata identifies \texttt{{{_latex(bdf2['time_integrator'])}}}, with true BDF2 inner loop set to \texttt{{{_latex(bdf2['true_bdf2_inner_loop'])}}}.  The required outer physical-time loop holds $U^n$ and $U^{{n-1}}$ fixed while inner iterations solve for $U^{{n+1}}$, then advances the histories after accepted inner convergence.  Its submitted observed inner-iteration range is {_latex(bdf2.get('observed_min_inner_iterations'))}--{_latex(bdf2.get('observed_max_inner_iterations'))}, mean {_fmt(bdf2.get('observed_mean_inner_iterations', bdf2.get('typical_inner_iterations', 0)))}, target-miss count {_latex(bdf2.get('inner_target_misses'))}, converged-step fraction {_fmt(bdf2.get('inner_target_converged_fraction'))}, and last ratio {_fmt(bdf2.get('last_inner_residual_ratio'))}.
 \begin{{table}}[htbp]\centering\scriptsize
 \caption{{Supplied and observed controls.  Steady ramp details are explicitly marked unavailable when metadata does not store them.}}\label{{tab:controls}}
 \begin{{tabularx}}{{\linewidth}}{{lXXX}}\toprule Case & supplied controls & actual stored evidence & detected deviation\\\midrule
@@ -702,8 +727,8 @@ The generated \texttt{{run\_manifest.csv}} records both production and rank-vali
 \section{{Results}}
 \subsection{{Run status and final forces}}
 \begin{{table}}[htbp]\centering\small
-\caption{{Submitted run status.  Residual reduction is recomputed from the first and final L2 rows.}}\label{{tab:status}}
-\begin{{tabular}}{{lrrrrrl}}\toprule Case & ranks & steps & time & residual orders & wall s & status\\\midrule
+\caption{{Submitted run status.  Both residual reductions are recomputed from the first and final rows.}}\label{{tab:status}}
+\begin{{tabular}}{{lrrrrrrl}}\toprule Case & ranks & steps & time & $L_2$ orders & $L_\infty$ orders & wall s & status\\\midrule
 {status_rows}
 \bottomrule\end{{tabular}}\end{{table}}
 \begin{{table}}[htbp]\centering\small
