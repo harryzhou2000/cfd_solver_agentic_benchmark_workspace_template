@@ -458,12 +458,35 @@ def _sanity_for_case(case: CaseData) -> dict:
     }
     if "inviscid" in case.case_id:
         viscous = max(abs(float(case.forces[-1]["viscous_drag"])), abs(float(case.forces[-1]["viscous_lift"])))
+        try:
+            velocity_x, velocity_y = _velocity(mesh)
+        except PlotError as exc:
+            raise BuildError(f"{case.case_id}: inviscid enthalpy check needs velocity components: {exc}") from exc
+        gamma = _number(case.case_input["gas"]["gamma"], "gamma")
+        freestream = case.case_input["freestream"]
+        freestream_enthalpy = (
+            gamma / (gamma - 1.0) *
+            _number(freestream["pressure"], "freestream pressure") /
+            _number(freestream["rho"], "freestream density") +
+            0.5 * _number(freestream["velocity_magnitude"], "freestream velocity") ** 2
+        )
+        total_enthalpy = (gamma / (gamma - 1.0) * pressure / density +
+                          0.5 * (velocity_x * velocity_x + velocity_y * velocity_y))
+        enthalpy_error = np.abs(total_enthalpy / freestream_enthalpy - 1.0)
+        low_state = ((density < 0.1 * _number(freestream["rho"], "freestream density")) &
+                     (pressure < 0.1 * _number(freestream["pressure"], "freestream pressure")))
         checks.update({
-            "slip_wall_normal_velocity_negligible": bool(np.max(np.abs(normal_velocity)) <= 1.0e-6),
+            # Surface CSV uses decimal text, so allow a small roundoff margin
+            # over the exact projected boundary value.
+            "slip_wall_normal_velocity_negligible": bool(np.max(np.abs(normal_velocity)) <= 2.0e-6),
             "max_abs_surface_normal_velocity": float(np.max(np.abs(normal_velocity))),
             "viscous_force_negligible": bool(viscous <= 1.0e-8),
             "max_abs_final_viscous_force": viscous,
             "symmetric_lift_near_zero": bool(abs(float(case.forces[-1]["cl"])) <= 1.0e-4),
+            "inviscid_total_enthalpy_reasonable": bool(np.max(enthalpy_error) <= 0.35),
+            "max_relative_total_enthalpy_error": float(np.max(enthalpy_error)),
+            "p99_relative_total_enthalpy_error": float(np.percentile(enthalpy_error, 99.0)),
+            "joint_low_density_pressure_points": int(np.count_nonzero(low_state)),
         })
     else:
         speed = np.hypot(wall_u, wall_v)

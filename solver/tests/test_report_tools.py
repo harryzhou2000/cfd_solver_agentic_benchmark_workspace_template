@@ -27,10 +27,14 @@ def _write_csv(path: Path, header: list[str], rows: list[list[object]]) -> None:
         writer.writerows(rows)
 
 
-def _write_field(path: Path) -> None:
+def _write_field(path: Path, case_input: dict) -> None:
     # A real, tiny, unstructured legacy VTK field—not a plotted-image fixture.
+    rho = float(case_input["freestream"]["rho"])
+    pressure = float(case_input["freestream"]["pressure"])
+    velocity = float(case_input["freestream"]["velocity_magnitude"])
+    mach = float(case_input["freestream"]["mach"])
     path.write_text(
-        """# vtk DataFile Version 3.0
+        f"""# vtk DataFile Version 3.0
 tiny actual unstructured field
 ASCII
 DATASET UNSTRUCTURED_GRID
@@ -43,15 +47,15 @@ CELL_TYPES 1
 POINT_DATA 4
 SCALARS density float 1
 LOOKUP_TABLE default
-1 1 1 1
+{rho} {rho} {rho} {rho}
 SCALARS pressure float 1
 LOOKUP_TABLE default
-1 1.1 1.2 1.1
+{pressure} {0.995 * pressure} {1.005 * pressure} {pressure}
 SCALARS mach float 1
 LOOKUP_TABLE default
-0.1 0.2 0.3 0.2
+{mach} {mach} {mach} {mach}
 VECTORS velocity float
-0 0 0  0 1 0  -1 1 0  -1 0 0
+{velocity} 0 0  {velocity} 0 0  {velocity} 0 0  {velocity} 0 0
 """,
         encoding="utf-8",
     )
@@ -60,6 +64,10 @@ VECTORS velocity float
 def create_results(root: Path) -> Path:
     results = root / "results"
     for case_id in REQUIRED_CASES:
+        case_input = json.loads(
+            (ROOT.parent / "cfd_solver_agentic_benchmark" / "inputs" / "cases" /
+             f"{case_id}.json").read_text(encoding="utf-8")
+        )
         case = results / case_id
         case.mkdir(parents=True)
         transient = "re200" in case_id
@@ -142,7 +150,7 @@ def create_results(root: Path) -> Path:
                    ["rank", "num_cells_owned", "num_cells_ghost", "num_boundary_faces",
                     "num_neighbor_ranks", "neighbor_ranks", "send_cells", "recv_cells"],
                    [[0, 1, 0, 4, 0, "", "", ""]])
-        _write_field(case / "field_final.vtk")
+        _write_field(case / "field_final.vtk", case_input)
     return results
 
 
