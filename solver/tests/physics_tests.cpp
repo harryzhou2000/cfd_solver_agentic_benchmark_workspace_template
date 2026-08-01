@@ -52,6 +52,29 @@ int main() {
     assert(std::abs(wall_flux.value[0]) < 1.0e-12);
     assert(close(wall_flux.value[2], 3.0));
 
+    // A reconstructed wall-face state generally has a nonzero normal
+    // velocity.  The physical stationary-wall flux must nevertheless be
+    // exactly impermeable and pressure-only for an arbitrary unit normal.
+    const cfd::Vec2 oblique_normal{0.6, 0.8};
+    cfd::ThermodynamicState oblique_primitive{};
+    oblique_primitive.density = 1.7;
+    oblique_primitive.velocity_x = -2.3;
+    oblique_primitive.velocity_y = 0.4;
+    oblique_primitive.pressure = 4.2;
+    const auto oblique_state = cfd::encode_state(oblique_primitive, gas);
+    const auto exact_wall = cfd::stationary_wall_flux(oblique_state, oblique_normal, gas);
+    assert(exact_wall.value[0] == 0.0);
+    assert(close(exact_wall.value[1], 4.2 * oblique_normal[0]));
+    assert(close(exact_wall.value[2], 4.2 * oblique_normal[1]));
+    assert(exact_wall.value[3] == 0.0);
+    const auto oblique_decoded = cfd::decode_state(oblique_state, gas);
+    const double raw_normal_velocity =
+        oblique_decoded.velocity_x * oblique_normal[0] +
+        oblique_decoded.velocity_y * oblique_normal[1];
+    assert(close(exact_wall.spectral_radius,
+                 std::abs(raw_normal_velocity) + oblique_decoded.sound_speed));
+    assert(!exact_wall.used_fallback);
+
     const auto characteristic = cfd::characteristic_farfield_exterior(
         tangential_state, tangential_state, normal, gas);
     for (std::size_t component = 0; component < state.size(); ++component) {

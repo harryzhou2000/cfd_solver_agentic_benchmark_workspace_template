@@ -64,6 +64,13 @@ using StateJacobian = std::array<ConservativeState, 4>;
                                          const Vec2& unit_normal,
                                          const GasModel& gas,
                                          Real dissipation_scale = 1.0);
+/// Exact inviscid flux through a stationary impermeable wall.  The raw
+/// interior state supplies pressure and a conservative spectral radius for
+/// the implicit preconditioner; reflected-state dissipation is not part of
+/// the physical wall flux.
+[[nodiscard]] NumericalFlux stationary_wall_flux(const ConservativeState& interior,
+                                                  const Vec2& outward_unit_normal,
+                                                  const GasModel& gas);
 [[nodiscard]] NumericalFlux hllc_flux(const ConservativeState& left,
                                       const ConservativeState& right,
                                       const Vec2& unit_normal,

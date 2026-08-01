@@ -176,6 +176,22 @@ NumericalFlux rusanov_flux(const ConservativeState& left, const ConservativeStat
     return result;
 }
 
+NumericalFlux stationary_wall_flux(const ConservativeState& interior,
+                                   const Vec2& outward_unit_normal,
+                                   const GasModel& gas) {
+    const ThermodynamicState primitive = decode_state(interior, gas);
+    const Real normal_velocity = primitive.velocity_x * outward_unit_normal[0] +
+                                 primitive.velocity_y * outward_unit_normal[1];
+    NumericalFlux result{};
+    result.value = {0.0,
+                    primitive.pressure * outward_unit_normal[0],
+                    primitive.pressure * outward_unit_normal[1],
+                    0.0};
+    result.spectral_radius = std::abs(normal_velocity) + primitive.sound_speed;
+    result.used_fallback = false;
+    return result;
+}
+
 NumericalFlux hllc_flux(const ConservativeState& left, const ConservativeState& right,
                         const Vec2& unit_normal, const GasModel& gas,
                         Real fallback_dissipation_scale) {
