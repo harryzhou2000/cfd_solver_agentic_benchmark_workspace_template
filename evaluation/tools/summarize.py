@@ -179,6 +179,13 @@ def main() -> int:
     ap.add_argument("--sessions-root", default=str(defaults["sessions_root"]))
     ap.add_argument("--cost-metadata", default=str(ROOT / "config" / "cost_metadata.json"))
     ap.add_argument("--out", default=None)
+    ap.add_argument(
+        "--roots",
+        default=None,
+        help="Comma-separated root thread ids to include (each with its subagent "
+             "tree). Default: all sessions whose cwd is inside the workspace, "
+             "including botched ones.",
+    )
     args = ap.parse_args()
 
     ws = Path(args.workspace).resolve()
@@ -186,15 +193,22 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. sub-pipelines
-    subprocess.run([sys.executable, str(ROOT / "tools" / "extract_expenses.py"),
-                    "--workspace", str(ws), "--out", str(out_dir / "expenses.json"),
-                    "--state-db", args.state_db, "--goals-db", args.goals_db,
-                    "--logs-db", args.logs_db, "--sessions-root", args.sessions_root,
-                    "--cost-metadata", args.cost_metadata], check=True)
-    subprocess.run([sys.executable, str(ROOT / "tools" / "extract_measurements.py"),
-                    "--workspace", str(ws), "--out", str(out_dir / "measurements.json"),
-                    "--state-db", args.state_db, "--logs-db", args.logs_db,
-                    "--sessions-root", args.sessions_root], check=True)
+    def _base_cmd(tool: str, out_file: str):
+        cmd = [sys.executable, str(ROOT / "tools" / tool),
+               "--workspace", str(ws), "--out", str(out_dir / out_file),
+               "--state-db", args.state_db]
+        if tool == "extract_expenses.py":
+            cmd += ["--goals-db", args.goals_db, "--logs-db", args.logs_db,
+                    "--sessions-root", args.sessions_root,
+                    "--cost-metadata", args.cost_metadata]
+        else:
+            cmd += ["--logs-db", args.logs_db, "--sessions-root", args.sessions_root]
+        if args.roots:
+            cmd += ["--roots", args.roots]
+        return cmd
+
+    subprocess.run(_base_cmd("extract_expenses.py", "expenses.json"), check=True)
+    subprocess.run(_base_cmd("extract_measurements.py", "measurements.json"), check=True)
     subprocess.run([sys.executable, str(ROOT / "tools" / "generate_review_forms.py"),
                     "--out", str(out_dir)], check=True)
 
@@ -315,6 +329,21 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
         f"- Tokens: **{e['tokens']['total']:,}** "
         f"(main {e['tokens']['main_vs_subagent']['main']:,} / "
         f"subagents {e['tokens']['main_vs_subagent']['subagent']:,})",
+        "",
+        "### Per root session",
+        "",
+        "| Root | Status | Model | Threads | Tokens | Goal time (s) |",
+        "|------|--------|-------|--------:|-------:|--------------:|",
+    ]
+    for rid, info in sorted(
+        e["time_seconds"].get("by_root_tree", {}).items(),
+        key=lambda kv: -kv[1]["tokens_used"],
+    ):
+        lines.append(
+            f"| `{rid[:8]}` | {info['status']} | {info['model']} | "
+            f"{info['threads']} | {info['tokens_used']:,} | {info['goal_time_seconds']} |"
+        )
+    lines += [
         "",
         "| Model | Input | Cached | Output | Total |",
         "|-------|------:|-------:|-------:|------:|",

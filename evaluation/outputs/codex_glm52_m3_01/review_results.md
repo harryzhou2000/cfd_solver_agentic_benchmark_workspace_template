@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-08-01T21:03:27.702018+00:00
+Generated: 2026-08-01T21:12:14.307333+00:00
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
@@ -42,3 +42,18 @@ Generated: 2026-08-01T21:03:27.702018+00:00
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
+
+
+## Structural evidence (automated)
+
+- Required cases: cylinder_m010_laminar_re20, cylinder_m010_laminar_re200, naca0012_m015_inviscid, naca0012_m015_laminar_re5000, naca0012_m080_inviscid, naca0012_m080_laminar_re5000, naca0012_m200_inviscid, naca0012_m200_laminar_re5000
+- Found case dirs: cylinder_m010_laminar_re20, naca0012_m015_inviscid, naca0012_m015_laminar_re5000, naca0012_m080_inviscid, naca0012_m080_laminar_re5000, naca0012_m200_inviscid, naca0012_m200_laminar_re5000
+- Missing cases: cylinder_m010_laminar_re200
+- Figure manifest: {"manifest_present": false}
+- `cylinder_m010_laminar_re20`: missing=[] completed=True status=converged csv={'residuals.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}, 'forces.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}}
+- `naca0012_m015_inviscid`: missing=[] completed=True status=converged csv={'residuals.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}, 'forces.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}}
+- `naca0012_m015_laminar_re5000`: missing=[] completed=True status=converged csv={'residuals.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}, 'forces.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}}
+- `naca0012_m080_inviscid`: missing=[] completed=True status=converged csv={'residuals.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}, 'forces.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}}
+- `naca0012_m080_laminar_re5000`: missing=[] completed=True status=converged csv={'residuals.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}, 'forces.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}}
+- `naca0012_m200_inviscid`: missing=[] completed=True status=converged csv={'residuals.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}, 'forces.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}}
+- `naca0012_m200_laminar_re5000`: missing=[] completed=True status=converged csv={'residuals.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}, 'forces.csv': {'header_ok': True, 'rows': 2000, 'last_row_finite': True}}

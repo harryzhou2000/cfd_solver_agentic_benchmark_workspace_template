@@ -11,6 +11,15 @@
 - Wall time: **21885 s**
 - Tokens: **954,876,689** (main 141,947,209 / subagents 813,040,729)
 
+### Per root session
+
+| Root | Status | Model | Threads | Tokens | Goal time (s) |
+|------|--------|-------|--------:|-------:|--------------:|
+| `019fb9e3` | complete | gpt-5.6-sol | 22 | 946,579,960 | 20354 |
+| `019fb9cd` | paused | gpt-5.6-sol | 13 | 6,799,649 | 381 |
+| `019fb9df` | blocked | gpt-5.6-sol | 4 | 1,010,966 | 135 |
+| `019fb9d5` | paused | gpt-5.6-sol | 7 | 597,363 | 108 |
+
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
 | gpt-5.6-luna | 1,572,880 | 1,235,968 | 18,262 | 3,413,672 |

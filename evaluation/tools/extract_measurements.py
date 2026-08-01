@@ -249,6 +249,12 @@ def main() -> int:
     ap.add_argument("--logs-db", default=str(defaults["logs_db"]))
     ap.add_argument("--sessions-root", default=str(defaults["sessions_root"]))
     ap.add_argument("--out", default=None)
+    ap.add_argument(
+        "--roots",
+        default=None,
+        help="Comma-separated root thread ids to include (each with its subagent "
+             "tree). Default: all sessions whose cwd is inside the workspace.",
+    )
     args = ap.parse_args()
 
     workspace = Path(args.workspace).resolve()
@@ -261,6 +267,15 @@ def main() -> int:
     selected = cd.select_threads(threads, str(workspace))
     _, all_ids = cd.thread_trees(selected, edges)
     children = {c for _, c in edges}
+    requested_roots = cd.parse_roots(args.roots)
+    if requested_roots is not None:
+        missing = [r for r in requested_roots if r not in threads]
+        if missing:
+            print(f"ERROR: unknown root thread ids: {missing}", file=sys.stderr)
+            return 2
+        all_ids = set()
+        for r in requested_roots:
+            all_ids |= cd.tree_of(r, threads, edges)
 
     # ---- tool usage + violations ----------------------------------------
     by_tool = Counter()

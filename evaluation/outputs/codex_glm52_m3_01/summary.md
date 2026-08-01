@@ -7,22 +7,29 @@
 
 ## Expenses
 
-- Goal time (codex): **2902 s**
-- Wall time: **3033 s**
-- Tokens: **17,732,975** (main 17,732,975 / subagents 0)
+- Goal time (codex): **3430 s**
+- Wall time: **3561 s**
+- Tokens: **22,319,057** (main 22,319,057 / subagents 0)
+
+### Per root session
+
+| Root | Status | Model | Threads | Tokens | Goal time (s) |
+|------|--------|-------|--------:|-------:|--------------:|
+| `019fbef6` | active | BLSC/GLM-5.2 | 1 | 22,240,938 | 3408 |
+| `019fbef4` | paused | BLSC/GLM-5.2 | 1 | 78,119 | 22 |
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| BLSC/GLM-5.2 | 0 | 0 | 0 | 17,732,975 |
+| BLSC/GLM-5.2 | 0 | 0 | 0 | 22,319,057 |
 
-- Cost estimate: **$12.41** (estimate; unpriced tokens: 0)
+- Cost estimate: **$15.62** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
-- Tool calls: **164**; top tools: exec_command=158, apply_patch=5, update_plan=1
+- Tool calls: **185**; top tools: exec_command=179, apply_patch=5, update_plan=1
 - Subagent spawns: 0
-- LOC (file scan): 3,857 lines / 15 files
-- LOC (git tracked): 4,617 lines
+- LOC (file scan): 3,850 lines / 15 files
+- LOC (git tracked): 4,610 lines
 
 ### Rule-violation candidates
 

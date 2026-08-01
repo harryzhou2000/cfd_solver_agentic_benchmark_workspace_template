@@ -223,3 +223,27 @@ def thread_trees(selected: dict[str, dict], edges: list[tuple[str, str]]) -> tup
                 all_ids.add(c)
                 stack.append(c)
     return roots, all_ids
+
+
+def tree_of(root: str, threads: dict[str, dict], edges: list[tuple[str, str]]) -> set[str]:
+    """All thread ids in the spawn tree rooted at `root` (root included)."""
+    children = {}
+    for p, c in edges:
+        children.setdefault(p, []).append(c)
+    ids = {root}
+    stack = [root]
+    while stack:
+        tid = stack.pop()
+        for c in children.get(tid, []):
+            if c not in ids:
+                ids.add(c)
+                stack.append(c)
+    return ids
+
+
+def parse_roots(roots_arg: str | None) -> list[str] | None:
+    """Parse a comma-separated --roots value; None means 'all roots'."""
+    if not roots_arg:
+        return None
+    out = [r.strip() for r in roots_arg.split(",") if r.strip()]
+    return out or None

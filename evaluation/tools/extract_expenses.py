@@ -68,6 +68,13 @@ def main() -> int:
     root = Path(__file__).resolve().parents[1]
     ap.add_argument("--cost-metadata", default=str(root / "config" / "cost_metadata.json"))
     ap.add_argument("--out", default=None)
+    ap.add_argument(
+        "--roots",
+        default=None,
+        help="Comma-separated root thread ids to include (each with its subagent "
+             "tree). Default: all sessions whose cwd is inside the workspace, "
+             "including botched/paused/blocked ones.",
+    )
     args = ap.parse_args()
 
     workspace = str(Path(args.workspace).resolve())
@@ -81,10 +88,40 @@ def main() -> int:
     goals = cd.load_goals(args.goals_db)
     selected = cd.select_threads(threads, workspace)
     roots, all_ids = cd.thread_trees(selected, edges)
-    full_threads = {tid: threads.get(tid) for tid in all_ids}
-    # Recompute roots among the full tree (roots of the complete trees).
     children = {c for _, c in edges}
-    roots = [tid for tid in all_ids if tid not in children and full_threads.get(tid)]
+    full_threads = {tid: threads.get(tid) for tid in all_ids}
+    requested_roots = cd.parse_roots(args.roots)
+    if requested_roots is not None:
+        missing = [r for r in requested_roots if r not in threads]
+        if missing:
+            print(f"ERROR: unknown root thread ids: {missing}", file=sys.stderr)
+            return 2
+        all_ids = set()
+        for r in requested_roots:
+            all_ids |= cd.tree_of(r, threads, edges)
+        roots = [r for r in requested_roots]
+        full_threads = {tid: threads.get(tid) for tid in all_ids}
+    else:
+        # Recompute roots among the full tree (roots of the complete trees).
+        roots = [tid for tid in all_ids if tid not in children and full_threads.get(tid)]
+
+    # Per-root-tree summary (so botched/abandoned sessions stay visible and
+    # separable from the real run).
+    by_root_tree = {}
+    for rid in roots:
+        tree_ids = cd.tree_of(rid, threads, edges)
+        tree_tokens = sum(
+            (threads.get(tid) or {}).get("tokens_used", 0) for tid in tree_ids
+        )
+        g = goals.get(rid, {})
+        by_root_tree[rid] = {
+            "status": g.get("status"),
+            "goal_time_seconds": g.get("time_used_seconds", 0),
+            "goal_tokens": g.get("tokens_used", 0),
+            "threads": len(tree_ids),
+            "tokens_used": tree_tokens,
+            "model": (full_threads.get(rid) or {}).get("model"),
+        }
 
     usage = cd.load_turn_usage(args.logs_db, all_ids)
     meta = json.loads(Path(args.cost_metadata).read_text())
@@ -242,6 +279,7 @@ def main() -> int:
             "goal_time": round(goal_time, 1),
             "wall_time": round(wall_time, 1),
             "by_root_thread": goal_by_root,
+            "by_root_tree": by_root_tree,
         },
         "tokens": {
             "total": total_tokens,
@@ -276,6 +314,11 @@ def main() -> int:
         f"goal_time={goal_time:.0f}s wall_time={wall_time:.0f}s "
         f"cost≈${total_cost:.2f}"
     )
+    for rid, info in by_root_tree.items():
+        print(
+            f"  root {rid[:8]} [{info['status']}] threads={info['threads']} "
+            f"tokens={info['tokens_used']:,} goal_time={info['goal_time_seconds']}s"
+        )
     return 0
 
 

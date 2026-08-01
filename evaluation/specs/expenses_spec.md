@@ -23,6 +23,18 @@ Two values are reported and never mixed:
 Both are summed across root threads when a workspace contains several
 independent runs (multiple roots).
 
+**Botched/abandoned sessions are included by default**: every codex session
+whose `cwd` is inside the contestant workspace is part of the accounting
+(roots that are `paused`/`blocked`/`active` as well as `complete`), because a
+directory can accumulate failed first attempts. To keep them separable:
+
+- `expenses.json` reports `time_seconds.by_root_tree`: per root session, its
+  status, goal time, thread count, and token total.
+- `--roots <thread-id,...>` restricts the extraction to the given root
+  session(s) and their subagent trees (e.g. `--roots
+  019fb9e3-ba6e-7e40-99d3-84d723942dc8` for the complete run only).
+- `summarize.py` forwards the same `--roots` flag to all extractors.
+
 ## 2. Token usage
 
 Authoritative source, in priority order:
@@ -72,6 +84,9 @@ editable). Rules:
 {
   "workspace": "...",
   "time_seconds": { "goal_time": 0, "wall_time": 0, "by_root_thread": {...} },
+  "by_root_tree": { "<root>": { "status": "...", "goal_time_seconds": 0,
+                   "goal_tokens": 0, "threads": 0, "tokens_used": 0,
+                   "model": "..." } },
   "tokens": {
     "total": 0,
     "by_model": { "gpt-5.6-terra": { "input": 0, "cached_input": 0,
