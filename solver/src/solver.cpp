@@ -599,12 +599,11 @@ class FlowSolver::Impl {
             }
 
             // Both slip and no-slip stationary walls are impermeable.  A
-            // reflected reconstructed state passed through Rusanov would add
-            // rho*u_n^2 + alpha*rho*u_n to the normal momentum flux whenever
-            // the raw P1 face state has u_n != 0.  At sharp corners that term
-            // can create a severe artificial suction pocket.  Enforce the
-            // exact physical inviscid wall flux; viscous traction remains a
-            // separate contribution below for no-slip walls.
+            // reflected reconstructed wall Riemann problem can add a
+            // nonphysical normal-momentum contribution whenever the raw P1
+            // face state has u_n != 0.  Enforce the exact physical inviscid
+            // wall flux; viscous traction remains a separate contribution
+            // below for no-slip walls.
             const bool stationary_wall =
                 physical_boundary &&
                 (physical_type == BoundaryType::slip_wall ||
@@ -612,7 +611,7 @@ class FlowSolver::Impl {
             NumericalFlux inviscid = stationary_wall
                                          ? stationary_wall_flux(owner_face.conservative,
                                                                 face.normal, gas_)
-                                         : rusanov_flux(
+                                         : hllc_flux(
                                                owner_face.conservative, neighbor_state,
                                                face.normal, gas_,
                                                config_.run_control.rusanov_dissipation_scale

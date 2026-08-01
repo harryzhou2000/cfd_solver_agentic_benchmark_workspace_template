@@ -225,6 +225,8 @@ NumericalFlux hllc_flux(const ConservativeState& left, const ConservativeState& 
     } else if (valid && contact >= 0.0) {
         ConservativeState star{};
         const Real rho_star = pl.density * (sl - unl) / (sl - contact);
+        const Real pressure_star =
+            pl.pressure + pl.density * (sl - unl) * (contact - unl);
         const Real specific_energy = ul[3] / pl.density;
         star[0] = rho_star;
         star[1] = rho_star * contact;
@@ -233,13 +235,16 @@ NumericalFlux hllc_flux(const ConservativeState& left, const ConservativeState& 
                   (specific_energy + (contact - unl) *
                                          (contact + pl.pressure /
                                                         (pl.density * (sl - unl))));
-        valid = finite_state(star) && star[0] > gas.density_floor && star[3] > 0.0;
+        valid = std::isfinite(pressure_star) && pressure_star > gas.pressure_floor &&
+                is_admissible(star, gas);
         for (std::size_t component = 0; component < local_flux.size(); ++component) {
             local_flux[component] = fl[component] + sl * (star[component] - ul[component]);
         }
     } else if (valid && sr > 0.0) {
         ConservativeState star{};
         const Real rho_star = pr.density * (sr - unr) / (sr - contact);
+        const Real pressure_star =
+            pr.pressure + pr.density * (sr - unr) * (contact - unr);
         const Real specific_energy = ur[3] / pr.density;
         star[0] = rho_star;
         star[1] = rho_star * contact;
@@ -248,7 +253,8 @@ NumericalFlux hllc_flux(const ConservativeState& left, const ConservativeState& 
                   (specific_energy + (contact - unr) *
                                          (contact + pr.pressure /
                                                         (pr.density * (sr - unr))));
-        valid = finite_state(star) && star[0] > gas.density_floor && star[3] > 0.0;
+        valid = std::isfinite(pressure_star) && pressure_star > gas.pressure_floor &&
+                is_admissible(star, gas);
         for (std::size_t component = 0; component < local_flux.size(); ++component) {
             local_flux[component] = fr[component] + sr * (star[component] - ur[component]);
         }

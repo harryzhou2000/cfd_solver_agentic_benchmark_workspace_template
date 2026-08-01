@@ -33,6 +33,21 @@ int main() {
     }
     assert(!hllc.used_fallback);
 
+    // Davis-wave-speed HLLC is not positivity preserving for every strong
+    // two-rarefaction state.  Such a star state must use the robust Rusanov
+    // fallback instead of emitting a finite flux built from negative pressure.
+    cfd::ThermodynamicState expansion_left{};
+    expansion_left.density = 1.0;
+    expansion_left.velocity_x = -2.0;
+    expansion_left.pressure = 0.1;
+    cfd::ThermodynamicState expansion_right = expansion_left;
+    expansion_right.velocity_x = 2.0;
+    const auto expansion_flux = cfd::hllc_flux(
+        cfd::encode_state(expansion_left, gas),
+        cfd::encode_state(expansion_right, gas), normal, gas);
+    assert(expansion_flux.used_fallback);
+    for (double component : expansion_flux.value) assert(std::isfinite(component));
+
     const auto jacobian = cfd::euler_flux_jacobian(state, normal, gas);
     for (std::size_t column = 0; column < state.size(); ++column) {
         auto perturbed = state;

@@ -292,8 +292,8 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
     metadata.partition_edge_cut = mesh.partition_edge_cut;
     metadata.halo_exchange = "neighbor_isend_irecv";
     metadata.equation_set = "compressible_navier_stokes_2d";
-        metadata.inviscid_flux =
-            "Rusanov_local_Lax_Friedrichs_scale_1_with_exact_stationary_wall_flux";
+    metadata.inviscid_flux =
+        "HLLC_with_admissibility_checked_Rusanov_fallback_and_exact_stationary_wall_flux";
     metadata.entropy_fix = std::nullopt;
     metadata.viscous_flux = config.physics.mode == cfd::PhysicsMode::laminar
                                 ? "corrected_central_Newtonian_Fourier"
