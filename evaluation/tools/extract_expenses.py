@@ -1,0 +1,283 @@
+#!/usr/bin/env python3
+"""Extract execution expenses (time, tokens, estimated cost) for a codex
+benchmark contestant run.
+
+Usage:
+  python3 evaluation/tools/extract_expenses.py --workspace <contestant-workspace>
+    [--state-db PATH] [--goals-db PATH] [--logs-db PATH]
+    [--sessions-root PATH] [--cost-metadata PATH] [--out PATH]
+
+Sources (spec: evaluation/specs/expenses_spec.md):
+  - time:    goals_1.sqlite thread_goals.time_used_seconds (goal time, direct)
+  - tokens:  logs_2.sqlite per-turn codex.turn.token_usage.*; fallback
+             state_5.sqlite threads.tokens_used
+  - cost:    evaluation/config/cost_metadata.json * tokens
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import codex_data as cd  # noqa: E402
+
+
+def model_cost(meta: dict, model: str | None):
+    """Return (prices dict or None, used_defaults: bool)."""
+    defaults = meta.get("defaults", {})
+    if not model:
+        return defaults, True
+    entry = meta.get("models", {}).get(model.lower())
+    if entry is None:
+        return defaults, True
+    return {
+        "input_per_mtok": entry.get("input_per_mtok", defaults["input_per_mtok"]),
+        "cached_input_per_mtok": entry.get("cached_input_per_mtok", defaults["cached_input_per_mtok"]),
+        "output_per_mtok": entry.get("output_per_mtok", defaults["output_per_mtok"]),
+        "input_share": defaults["input_share"],
+        "note": entry.get("note"),
+    }, False
+
+
+def cost_for(price: dict, *, input_t=None, cached_t=None, output_t=None, total_t=None) -> float:
+    """Estimate USD for a token bundle. Exact splits when available, else
+    blended fallback using input_share."""
+    if total_t is not None and input_t is None and output_t is None:
+        share = price["input_share"]
+        return total_t / 1e6 * (share * price["input_per_mtok"] + (1 - share) * price["output_per_mtok"])
+    non_cached = (input_t or 0) - (cached_t or 0)
+    return (
+        non_cached * price["input_per_mtok"]
+        + (cached_t or 0) * price["cached_input_per_mtok"]
+        + (output_t or 0) * price["output_per_mtok"]
+    ) / 1e6
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Extract codex contestant expenses")
+    ap.add_argument("--workspace", required=True)
+    defaults = cd.default_paths()
+    ap.add_argument("--state-db", default=str(defaults["state_db"]))
+    ap.add_argument("--goals-db", default=str(defaults["goals_db"]))
+    ap.add_argument("--logs-db", default=str(defaults["logs_db"]))
+    ap.add_argument("--sessions-root", default=str(defaults["sessions_root"]))
+    root = Path(__file__).resolve().parents[1]
+    ap.add_argument("--cost-metadata", default=str(root / "config" / "cost_metadata.json"))
+    ap.add_argument("--out", default=None)
+    args = ap.parse_args()
+
+    workspace = str(Path(args.workspace).resolve())
+    eval_root = Path(__file__).resolve().parents[1]
+    out_path = Path(args.out) if args.out else (
+        eval_root / "outputs" / Path(workspace).name / "expenses.json"
+    )
+
+    threads = cd.load_threads(args.state_db)
+    edges = cd.load_spawn_edges(args.state_db)
+    goals = cd.load_goals(args.goals_db)
+    selected = cd.select_threads(threads, workspace)
+    roots, all_ids = cd.thread_trees(selected, edges)
+    full_threads = {tid: threads.get(tid) for tid in all_ids}
+    # Recompute roots among the full tree (roots of the complete trees).
+    children = {c for _, c in edges}
+    roots = [tid for tid in all_ids if tid not in children and full_threads.get(tid)]
+
+    usage = cd.load_turn_usage(args.logs_db, all_ids)
+    meta = json.loads(Path(args.cost_metadata).read_text())
+
+    # ---- tokens ----------------------------------------------------------
+    by_thread = {}
+    by_model = {}
+    fallback_tokens_total = 0
+    discrepancy_notes = []
+    main_tokens = 0
+    sub_tokens = 0
+
+    for tid in sorted(all_ids):
+        t = full_threads[tid]
+        if t is None:
+            continue
+        is_sub = tid in children
+        recs = usage.get(tid, [])
+        if recs:
+            thread_model = t["model"]
+            per_model_log = {}
+            log_total = 0
+            for rec in recs:
+                m = rec["model"] or thread_model
+                agg = per_model_log.setdefault(
+                    m,
+                    {"input": 0, "cached": 0, "non_cached": 0, "output": 0, "reasoning_output": 0, "total": 0},
+                )
+                agg["input"] += rec["input_tokens"]
+                agg["cached"] += rec["cached_input_tokens"]
+                agg["non_cached"] += rec["non_cached_input_tokens"]
+                agg["output"] += rec["output_tokens"]
+                agg["reasoning_output"] += rec["reasoning_output_tokens"]
+                agg["total"] += rec["total_tokens"]
+                log_total += rec["total_tokens"]
+            declared = t["tokens_used"]
+            # logs may only cover a window; threads.tokens_used is codex's own
+            # authoritative per-thread total, so scale the observed splits.
+            if declared and abs(declared - log_total) / max(declared, 1) > 0.05:
+                source = "logs_scaled_to_threads"
+                scale = declared / log_total if log_total else 1.0
+                discrepancy_notes.append(
+                    f"thread {tid}: usage-log total {log_total} scaled to "
+                    f"threads.tokens_used {declared} (x{scale:.3f})"
+                )
+            else:
+                source = "logs"
+                scale = 1.0
+            per_model = {}
+            total = declared or log_total
+            for m, agg in per_model_log.items():
+                per_model[m] = {
+                    "input": int(round(agg["input"] * scale)),
+                    "cached": int(round(agg["cached"] * scale)),
+                    "non_cached": int(round(agg["non_cached"] * scale)),
+                    "output": int(round(agg["output"] * scale)),
+                    "reasoning_output": int(round(agg["reasoning_output"] * scale)),
+                    "total": int(round(agg["total"] * scale)),
+                }
+            thread_entry = {
+                "model": thread_model,
+                "is_subagent": is_sub,
+                "source": source,
+                "tokens": per_model,
+                "total": total,
+            }
+        else:
+            total = t["tokens_used"]
+            m = t["model"]
+            thread_entry = {
+                "model": m,
+                "is_subagent": is_sub,
+                "source": "threads_fallback",
+                "tokens": {m: {"input": 0, "cached": 0, "non_cached": 0, "output": 0,
+                               "reasoning_output": 0, "total": total}},
+                "total": total,
+                "fallback_tokens": total,
+            }
+            fallback_tokens_total += total
+        by_thread[tid] = thread_entry
+        for m, agg in thread_entry["tokens"].items():
+            m = m or "unknown"
+            bm = by_model.setdefault(
+                m,
+                {"input": 0, "cached_input": 0, "non_cached_input": 0,
+                 "output": 0, "reasoning_output": 0, "total": 0, "fallback_tokens": 0},
+            )
+            bm["input"] += agg["input"]
+            bm["cached_input"] += agg["cached"]
+            bm["non_cached_input"] += agg["non_cached"]
+            bm["output"] += agg["output"]
+            bm["reasoning_output"] += agg["reasoning_output"]
+            bm["total"] += agg["total"]
+            if "fallback_tokens" in thread_entry:
+                bm["fallback_tokens"] += thread_entry["fallback_tokens"]
+        if is_sub:
+            sub_tokens += total
+        else:
+            main_tokens += total
+
+    total_tokens = sum(b["total"] for b in by_model.values())
+
+    # ---- cost ------------------------------------------------------------
+    by_model_cost = {}
+    unpriced_tokens = 0
+    total_cost = 0.0
+    for m, agg in by_model.items():
+        price, used_defaults = model_cost(meta, m)
+        if used_defaults and meta.get("models", {}).get(m.lower()) is None:
+            unpriced_tokens += agg["total"]
+        cost = cost_for(
+            price,
+            input_t=agg["input"] or None,
+            cached_t=agg["cached_input"] or None,
+            output_t=agg["output"] or None,
+            total_t=agg["total"] if not agg["input"] and not agg["output"] else None,
+        )
+        by_model_cost[m] = {
+            "usd": round(cost, 4),
+            "tokens": agg["total"],
+            "pricing": "defaults" if used_defaults else "metadata",
+        }
+        total_cost += cost
+
+    # ---- time ------------------------------------------------------------
+    goal_by_root = {}
+    goal_time = 0.0
+    for rid in roots:
+        g = goals.get(rid)
+        if g:
+            goal_by_root[rid] = {
+                "status": g["status"],
+                "time_used_seconds": g["time_used_seconds"],
+                "tokens_used": g["tokens_used"],
+            }
+            goal_time += g["time_used_seconds"]
+
+    starts, ends = [], []
+    for tid in all_ids:
+        t = full_threads.get(tid)
+        if not t:
+            continue
+        s, e = cd.session_window(t["rollout_path"])
+        if s and e:
+            starts.append(s)
+            ends.append(e)
+        else:
+            starts.append(datetime.fromtimestamp(t["created_at"], tz=timezone.utc))
+            ends.append(datetime.fromtimestamp(t["updated_at"], tz=timezone.utc))
+    wall_time = (max(ends) - min(starts)).total_seconds() if starts else 0.0
+
+    expenses = {
+        "workspace": workspace,
+        "time_seconds": {
+            "goal_time": round(goal_time, 1),
+            "wall_time": round(wall_time, 1),
+            "by_root_thread": goal_by_root,
+        },
+        "tokens": {
+            "total": total_tokens,
+            "by_model": by_model,
+            "by_thread": by_thread,
+            "main_vs_subagent": {"main": main_tokens, "subagent": sub_tokens},
+            "fallback_tokens": fallback_tokens_total,
+            "discrepancy_notes": discrepancy_notes,
+        },
+        "cost_estimate_usd": {
+            "total": round(total_cost, 4),
+            "by_model": by_model_cost,
+            "unpriced_tokens": unpriced_tokens,
+            "estimate": True,
+            "metadata": args.cost_metadata,
+        },
+        "provenance": {
+            "state_db": args.state_db,
+            "goals_db": args.goals_db,
+            "logs_db": args.logs_db,
+            "sessions_root": args.sessions_root,
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+            "num_threads": len(all_ids),
+            "num_roots": len(roots),
+        },
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(expenses, indent=2) + "\n")
+    print(f"wrote {out_path}")
+    print(
+        f"threads={len(all_ids)} roots={len(roots)} tokens={total_tokens:,} "
+        f"goal_time={goal_time:.0f}s wall_time={wall_time:.0f}s "
+        f"cost≈${total_cost:.2f}"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

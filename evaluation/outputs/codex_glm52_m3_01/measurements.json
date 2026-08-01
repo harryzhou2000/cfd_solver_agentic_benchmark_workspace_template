@@ -1,0 +1,116 @@
+{
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_glm52_m3_01",
+  "tool_usage": {
+    "total": 164,
+    "by_tool": {
+      "exec_command": 158,
+      "apply_patch": 5,
+      "update_plan": 1
+    },
+    "by_thread": {
+      "019fbef4-a59e-7ec0-9455-8c961d3b1cbf": {
+        "exec_command": 9
+      },
+      "019fbef6-8a0e-71f0-8642-db5302a41979": {
+        "exec_command": 149,
+        "update_plan": 1,
+        "apply_patch": 5
+      }
+    },
+    "subagent_spawns": 0,
+    "risk_context": [
+      {
+        "thread_id": "019fbef4-a59e-7ec0-9455-8c961d3b1cbf",
+        "approval_policy": "never",
+        "permission_profile": ":danger-full-access"
+      },
+      {
+        "thread_id": "019fbef4-a59e-7ec0-9455-8c961d3b1cbf",
+        "approval_policy": "never",
+        "sandbox": "danger-full-access",
+        "network_access": null
+      },
+      {
+        "thread_id": "019fbef6-8a0e-71f0-8642-db5302a41979",
+        "approval_policy": "never",
+        "permission_profile": ":danger-full-access"
+      },
+      {
+        "thread_id": "019fbef6-8a0e-71f0-8642-db5302a41979",
+        "approval_policy": "never",
+        "sandbox": "danger-full-access",
+        "network_access": null
+      }
+    ]
+  },
+  "loc": {
+    "method": "git+file",
+    "git": {
+      "method": "git",
+      "repos": {
+        "workspace": {
+          "branch": "codex/glm52-m3/init",
+          "commit": "44ff3cb3726e35ab0623171b48b7ff8b285f8707",
+          "tracked_source_files": 20,
+          "tracked_source_lines": 4293,
+          "by_extension": {
+            "cmake": 372,
+            "cpp": 3162,
+            "hpp": 759
+          },
+          "diff_vs_base": {
+            "added": 11995,
+            "deleted": 0,
+            "base": "746ef3980fddf8558a8b7e29370ff32117604d8e"
+          }
+        },
+        "cfd_solver_agentic_benchmark": {
+          "branch": "HEAD",
+          "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+          "tracked_source_files": 1,
+          "tracked_source_lines": 324,
+          "by_extension": {
+            "py": 324
+          },
+          "diff_vs_base": null
+        }
+      },
+      "lines_total": 4617
+    },
+    "file": {
+      "method": "file",
+      "files": 15,
+      "lines": 3857,
+      "by_extension": {
+        "cmake": 46,
+        "cpp": 2293,
+        "hpp": 759,
+        "py": 759
+      }
+    }
+  },
+  "rule_violations": [
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "019fbef6-8a0e-71f0-8642-db5302a41979",
+      "timestamp": "2026-08-01T20:15:45.578Z",
+      "tool": "exec_command",
+      "evidence": "python3 -m venv .venv && .venv/bin/pip install --quiet h5py numpy matplotlib scipy 2>&1 | tail -5 && echo \"VENV READY\""
+    },
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "019fbef6-8a0e-71f0-8642-db5302a41979",
+      "timestamp": "2026-08-01T20:16:33.553Z",
+      "tool": "exec_command",
+      "evidence": ".venv/bin/pip install h5py 2>&1 | tail -3"
+    }
+  ],
+  "provenance": {
+    "state_db": "/home/harry/.codex/state_5.sqlite",
+    "sessions_root": "/home/harry/.codex/sessions",
+    "generated_at": "2026-08-01T21:03:27.632317+00:00",
+    "num_threads": 2
+  }
+}

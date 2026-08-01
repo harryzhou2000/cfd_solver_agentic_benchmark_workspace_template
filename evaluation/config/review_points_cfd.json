@@ -1,0 +1,92 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "score_scale": "0-5 per point; weights are fractions of the area total",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "guidance": "2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly.",
+      "evidence": "Source flux assembly and report equations."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "guidance": "Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction.",
+      "evidence": "Mesh reader code, geometry tests, partition diagnostics."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "guidance": "Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction.",
+      "evidence": "residual assembly code; residuals.csv shows global reduction."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "guidance": "Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries.",
+      "evidence": "Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "guidance": "Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip.",
+      "evidence": "BC code; surface.csv checks; metadata wall_boundary_output_semantics."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "guidance": "Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed.",
+      "evidence": "Gradient/reconstruction code; metadata reconstruction field; report disclosure."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "guidance": "Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates.",
+      "evidence": "Limiter code; metadata limiter/positivity_preservation; shock-captured fields."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "guidance": "Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split.",
+      "evidence": "Viscous flux code; forces.csv viscous columns; report formulas."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "guidance": "LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction.",
+      "evidence": "Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "guidance": "True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported.",
+      "evidence": "Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "guidance": "METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces.",
+      "evidence": "partition_diagnostics.csv; metadata partitioner; rank comparison runs."
+    }
+  ],
+  "disqualification_flags": [
+    "Solver uses explicit time stepping only",
+    "Report claims second-order reconstruction or limiter that is disabled in production",
+    "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+    "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+    "Normal viscous traction mislabeled as skin friction",
+    "Surface no-slip rows are actually adjacent cell-center velocities without documentation"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "score_scale": "0-5 per point; weights are fractions of the area total",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "guidance": "Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality.",
+      "evidence": "Directory listing per case; header check; validate_outputs.py --report."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "guidance": "validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed.",
+      "evidence": "Validator output/log in workspace."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "guidance": "All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent.",
+      "evidence": "run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "guidance": "Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate.",
+      "evidence": "Forces/residuals/surface CSVs; rank comparison dirs; report analysis."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "guidance": "Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure.",
+      "evidence": "Figures dir + figure_manifest.csv; render a sample; compare with source data."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "guidance": "Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts.",
+      "evidence": "report.pdf/report.tex review; cross-check claims vs metadata and CSVs."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "guidance": "Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state.",
+      "evidence": "figure_manifest.csv; spot-check values in text vs CSVs."
+    }
+  ],
+  "disqualification_flags": [
+    "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+    "Report figures do not correspond to submitted field/CSV outputs",
+    "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+    "metadata.json marks incomplete or failed runs as successful",
+    "Debug outputs presented as final case results"
+  ]
+}

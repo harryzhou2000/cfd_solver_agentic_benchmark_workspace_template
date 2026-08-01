@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Benchmark contestant final result summary",
+  "type": "object",
+  "required": ["contestant", "expenses", "code_review", "cfd_review", "result_review", "measurements", "provenance"],
+  "properties": {
+    "contestant": {
+      "type": "object",
+      "required": ["workspace", "branch", "git_commit", "benchmark_submodule_commit", "layout"],
+      "properties": {
+        "workspace": { "type": "string" },
+        "branch": { "type": ["string", "null"] },
+        "git_commit": { "type": ["string", "null"] },
+        "benchmark_submodule_commit": { "type": ["string", "null"] },
+        "layout": { "enum": ["standard", "non_standard", "unknown"] },
+        "solver_dir": { "type": ["string", "null"] },
+        "results_dir": { "type": ["string", "null"] },
+        "report_dir": { "type": ["string", "null"] },
+        "session_window": {
+          "type": "object",
+          "properties": {
+            "start": { "type": ["string", "null"] },
+            "end": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "expenses": {
+      "type": "object",
+      "required": ["time_seconds", "tokens", "cost_estimate_usd"],
+      "properties": {
+        "time_seconds": {
+          "type": "object",
+          "properties": {
+            "goal_time": { "type": "number" },
+            "wall_time": { "type": "number" },
+            "by_root_thread": { "type": "object" }
+          }
+        },
+        "tokens": {
+          "type": "object",
+          "properties": {
+            "total": { "type": "integer" },
+            "by_model": { "type": "object" },
+            "by_thread": { "type": "object" },
+            "main_vs_subagent": { "type": "object" },
+            "discrepancy_notes": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "cost_estimate_usd": {
+          "type": "object",
+          "properties": {
+            "total": { "type": "number" },
+            "by_model": { "type": "object" },
+            "unpriced_tokens": { "type": "integer" },
+            "estimate": { "type": "boolean" },
+            "metadata": { "type": "string" }
+          }
+        }
+      }
+    },
+    "code_review": { "$ref": "#/definitions/review" },
+    "cfd_review": { "$ref": "#/definitions/review" },
+    "result_review": { "$ref": "#/definitions/review" },
+    "measurements": {
+      "type": "object",
+      "required": ["tool_usage", "loc", "rule_violations"],
+      "properties": {
+        "tool_usage": {
+          "type": "object",
+          "properties": {
+            "total": { "type": "integer" },
+            "by_tool": { "type": "object" },
+            "by_thread": { "type": "object" },
+            "subagent_spawns": { "type": "integer" },
+            "risk_context": { "type": "array", "items": { "type": "object" } }
+          }
+        },
+        "loc": {
+          "type": "object",
+          "properties": {
+            "method": { "type": "string" },
+            "git": { "type": ["object", "null"] },
+            "file": { "type": ["object", "null"] }
+          }
+        },
+        "rule_violations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["category", "severity", "thread_id", "timestamp", "tool"],
+            "properties": {
+              "category": { "type": "string" },
+              "severity": { "enum": ["high", "medium", "low"] },
+              "thread_id": { "type": "string" },
+              "timestamp": { "type": ["string", "null"] },
+              "tool": { "type": "string" },
+              "evidence": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "state_db": { "type": "string" },
+        "goals_db": { "type": "string" },
+        "logs_db": { "type": "string" },
+        "sessions_root": { "type": "string" },
+        "generated_at": { "type": "string" },
+        "tools": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "definitions": {
+    "review": {
+      "type": "object",
+      "required": ["points", "overall_score"],
+      "properties": {
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "weight", "score"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "weight": { "type": "number" },
+              "score": { "type": ["number", "null"] },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "overall_score": { "type": ["number", "null"] },
+        "disqualification_flags": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      }
+    }
+  }
+}

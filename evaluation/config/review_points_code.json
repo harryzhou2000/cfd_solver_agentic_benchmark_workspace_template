@@ -1,0 +1,80 @@
+{
+  "review_area": "code_review",
+  "title": "Code review scorecard",
+  "score_scale": "0-5 per point; weights are fractions of the area total",
+  "points": [
+    {
+      "id": "code.build",
+      "title": "Build system and reproducibility",
+      "weight": 0.15,
+      "guidance": "Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits.",
+      "evidence": "CMakeLists.txt and README build commands; try a clean configure/build."
+    },
+    {
+      "id": "code.cli",
+      "title": "CLI and error handling",
+      "weight": 0.1,
+      "guidance": "Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names.",
+      "evidence": "Argument parser, main(), error paths; spot-run bad input."
+    },
+    {
+      "id": "code.organization",
+      "title": "Code organization and extensibility",
+      "weight": 0.12,
+      "guidance": "Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension.",
+      "evidence": "Directory layout, class/interface design, absence of case-specific branches."
+    },
+    {
+      "id": "code.originality",
+      "title": "Originality and license compliance",
+      "weight": 0.15,
+      "guidance": "Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected.",
+      "evidence": "Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments."
+    },
+    {
+      "id": "code.hardcoding",
+      "title": "No hard-coded case logic",
+      "weight": 0.08,
+      "guidance": "Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case.",
+      "evidence": "grep for mesh/case names in source; input-driven parameters."
+    },
+    {
+      "id": "code.mpi",
+      "title": "MPI correctness",
+      "weight": 0.15,
+      "guidance": "Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run.",
+      "evidence": "Communication code review; metadata.json halo_exchange field; diagnostics."
+    },
+    {
+      "id": "code.robustness",
+      "title": "Robustness and memory sanity",
+      "weight": 0.08,
+      "guidance": "Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry.",
+      "evidence": "Defensive checks; memory footprint on np=8; crash tests."
+    },
+    {
+      "id": "code.testing",
+      "title": "Testing and validation evidence",
+      "weight": 0.1,
+      "guidance": "Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission.",
+      "evidence": "tests/ dir, CI or run logs, validate_outputs.py output."
+    },
+    {
+      "id": "code.hygiene",
+      "title": "Code hygiene",
+      "weight": 0.07,
+      "guidance": "Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting.",
+      "evidence": "Skim sources; check for TODO/FIXME/abandoned experiments in tracked files."
+    }
+  ],
+  "disqualification_flags": [
+    "Existing solver executable called internally",
+    "Force/residual files generated without solving",
+    "Code only reads the two benchmark mesh filenames through hard-coded branches",
+    "MPI rank count changes results by order-one amounts for steady cases",
+    "Explicit time stepping only (no implicit/steady capability claimed where required)",
+    "Report claims algorithms that cannot be found in source",
+    "metadata.json marks incomplete/failed runs as successful",
+    "Solver core, time integration, or MPI communication copied/adapted/wrapped from an existing open-source CFD codebase"
+  ]
+}
