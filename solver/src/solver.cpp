@@ -1349,11 +1349,15 @@ class FlowSolver::Impl {
                 emit_progress(callbacks, step, accepted_spatial.residual_l2,
                               final_reduction, accepted.force_sample);
             }
-            const bool viscous_force_stable =
-                viscosity_ <= 0.0 ||
-                (step >= 500 && stable_force_tail(drag_history, lift_history));
+            // A residual target alone can be crossed while the integrated
+            // loads are still moving, especially during early airfoil
+            // startup.  Require a resolved force tail for every steady
+            // model; this is a physical convergence check, not a viscous-only
+            // condition.
+            const bool force_tail_stable =
+                step >= 500 && stable_force_tail(drag_history, lift_history);
             if (step >= 50 && final_reduction >= target_orders &&
-                viscous_force_stable) {
+                force_tail_stable) {
                 converged = true;
                 break;
             }
