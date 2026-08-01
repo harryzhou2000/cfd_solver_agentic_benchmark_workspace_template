@@ -106,6 +106,24 @@ double signed_area(const std::array<GlobalIndex, 4>& v, std::uint8_t n,
     return 0.5 * twice;
 }
 
+Vec2 polygon_area_centroid(const std::array<GlobalIndex, 4>& vertices,
+                           std::uint8_t count, const std::vector<Node>& nodes,
+                           double signed_area_value) {
+    Vec2 centroid{};
+    for (std::uint8_t i = 0; i < count; ++i) {
+        const Vec2& p = nodes.at(static_cast<std::size_t>(vertices[i])).xy;
+        const Vec2& q =
+            nodes.at(static_cast<std::size_t>(vertices[(i + 1) % count])).xy;
+        const double cross = p[0] * q[1] - q[0] * p[1];
+        centroid[0] += (p[0] + q[0]) * cross;
+        centroid[1] += (p[1] + q[1]) * cross;
+    }
+    const double inverse_six_area = 1.0 / (6.0 * signed_area_value);
+    centroid[0] *= inverse_six_area;
+    centroid[1] *= inverse_six_area;
+    return centroid;
+}
+
 } // namespace
 
 void Mesh::clear() noexcept {
@@ -295,11 +313,11 @@ Mesh read_cgns_mesh(const std::filesystem::path& filename) {
         const double a = signed_area(cell.vertices, cell.vertex_count, mesh.nodes);
         if (!(a > 0.0) || !std::isfinite(a)) throw std::runtime_error("CGNS cell is not positively oriented in XY");
         cell.area = a;
-        for (std::uint8_t j = 0; j < cell.vertex_count; ++j) {
-            const auto& p = mesh.nodes[static_cast<std::size_t>(cell.vertices[j])].xy;
-            cell.centroid[0] += p[0]; cell.centroid[1] += p[1];
+        cell.centroid =
+            polygon_area_centroid(cell.vertices, cell.vertex_count, mesh.nodes, a);
+        if (!std::isfinite(cell.centroid[0]) || !std::isfinite(cell.centroid[1])) {
+            throw std::runtime_error("CGNS cell has a non-finite area centroid");
         }
-        cell.centroid[0] /= cell.vertex_count; cell.centroid[1] /= cell.vertex_count;
         mesh.cells.push_back(cell);
     }
 
