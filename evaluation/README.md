@@ -44,6 +44,20 @@ python3 evaluation/tools/extract_measurements.py --workspace ../codex_gpt56_01
 python3 evaluation/tools/generate_review_forms.py --out evaluation/outputs/codex_gpt56_01
 ```
 
+## Session selection
+
+By default, **all** codex sessions whose `cwd` is the contestant workspace are
+included — including botched/abandoned/paused runs, not just the latest main
+thread. `summary.json`/`expenses.json` report a per-root-session breakdown
+(`time_seconds.by_root_tree`: status, model, thread count, tokens, goal time),
+and `--roots <thread-id,...>` scopes the whole pipeline to the chosen root
+session(s) and their subagent trees, e.g.:
+
+```bash
+python3 evaluation/tools/summarize.py --workspace ../codex_gpt56_01 \
+  --roots 019fb9e3-ba6e-7e40-99d3-84d723942dc8
+```
+
 All codex data paths (`~/.codex/state_5.sqlite`, `goals_1.sqlite`,
 `logs_2.sqlite`, `sessions/`) are overridable via `--state-db`, `--goals-db`,
 `--logs-db`, `--sessions-root`, so the same tools work against a snapshot of

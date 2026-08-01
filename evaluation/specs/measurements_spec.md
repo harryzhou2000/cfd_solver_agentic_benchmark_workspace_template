@@ -4,6 +4,11 @@
 
 Extracted from codex session history (all threads of the contestant tree):
 
+Session scoping follows `expenses_spec.md`: by default **all** sessions whose
+`cwd` is inside the workspace are included (botched/abandoned runs included);
+`--roots <thread-id,...>` restricts measurements to the given root session(s)
+and their subagent trees.
+
 - Per-tool call counts (`exec_command`, `apply_patch`, file reads, `view_image`,
   `spawn_agent`, ...) from `response_item` `function_call`/`custom_tool_call`
   records, aggregated and per thread.

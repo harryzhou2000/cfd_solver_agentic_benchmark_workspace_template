@@ -253,7 +253,8 @@ def main() -> int:
         "--roots",
         default=None,
         help="Comma-separated root thread ids to include (each with its subagent "
-             "tree). Default: all sessions whose cwd is inside the workspace.",
+             "tree). Default: all sessions whose cwd is inside the workspace, "
+             "including botched/paused/blocked ones.",
     )
     args = ap.parse_args()
 

@@ -34,7 +34,22 @@
           "properties": {
             "goal_time": { "type": "number" },
             "wall_time": { "type": "number" },
-            "by_root_thread": { "type": "object" }
+            "by_root_thread": { "type": "object" },
+            "by_root_tree": {
+              "type": "object",
+              "description": "Per root session: status, model, thread count, token total, goal time. Makes botched/abandoned sessions visible and separable via --roots.",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": ["string", "null"] },
+                  "goal_time_seconds": { "type": "number" },
+                  "goal_tokens": { "type": "integer" },
+                  "threads": { "type": "integer" },
+                  "tokens_used": { "type": "integer" },
+                  "model": { "type": ["string", "null"] }
+                }
+              }
+            }
           }
         },
         "tokens": {

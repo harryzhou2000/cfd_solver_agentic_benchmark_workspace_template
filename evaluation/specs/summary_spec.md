@@ -26,6 +26,22 @@ workspace.
 All codex paths are overridable via CLI flags so the utilities also work on a
 copied snapshot of another machine's `~/.codex`.
 
+## Session selection
+
+By default **every** codex session whose `cwd` is inside the contestant
+workspace is included in expenses and measurements — including botched,
+abandoned, `paused`, `blocked`, or still-`active` runs, not only the latest
+main thread. This is deliberate: a workspace directory can accumulate failed
+first attempts, and they must not be silently dropped.
+
+The generated summary keeps them separable:
+
+- `expenses.time_seconds.by_root_tree` lists each root session with its
+  status, model, thread count, token total, and goal time.
+- `--roots <thread-id,...>` (accepted by `summarize.py` and both extractors)
+  restricts the pipeline to the given root session(s) and their subagent
+  trees.
+
 ## Outputs
 
 `summarize.py --workspace <dir>` writes into
@@ -55,6 +71,9 @@ copied snapshot of another machine's `~/.codex`.
   },
   "expenses": {             // expenses_spec.md
     "time_seconds": { "goal_time": 0, "wall_time": 0 },
+    // plus time_seconds.by_root_tree: per root session (status, tokens,
+    // goal time, thread count) so botched sessions are visible and
+    // separable via --roots
     "tokens": { "total": 0, "by_model": {}, "by_thread": {}, "per_turn_source": "logs|threads" },
     "cost_estimate_usd": { "total": 0, "by_model": {}, "unpriced_tokens": 0, "metadata": "..." }
   },
