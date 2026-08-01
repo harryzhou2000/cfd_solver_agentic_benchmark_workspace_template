@@ -12,7 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from build_report import BuildError, REQUIRED_CASES, build_report
+from build_report import (BuildError, REQUIRED_CASES, _native_primitive_fields,
+                          build_report, read_field)
 
 
 RESIDUAL_HEADER = ["step", "physical_time", "inner_iter", "cfl", "dt", "rho", "rhou", "rhov", "rhoE", "residual_l2", "residual_linf"]
@@ -56,6 +57,40 @@ LOOKUP_TABLE default
 {mach} {mach} {mach} {mach}
 VECTORS velocity float
 {velocity} 0 0  {velocity} 0 0  {velocity} 0 0  {velocity} 0 0
+""",
+        encoding="utf-8",
+    )
+
+
+def _write_bad_cell_field(path: Path, case_input: dict) -> None:
+    rho = float(case_input["freestream"]["rho"])
+    pressure = float(case_input["freestream"]["pressure"])
+    velocity = float(case_input["freestream"]["velocity_magnitude"])
+    mach = float(case_input["freestream"]["mach"])
+    path.write_text(
+        f"""# vtk DataFile Version 3.0
+two native cell tuples with one numerical-vacuum state
+ASCII
+DATASET UNSTRUCTURED_GRID
+POINTS 8 float
+0 0 0  1 0 0  1 1 0  0 1 0  2 0 0  3 0 0  3 1 0  2 1 0
+CELLS 2 10
+4 0 1 2 3
+4 4 5 6 7
+CELL_TYPES 2
+9 9
+CELL_DATA 2
+SCALARS density float 1
+LOOKUP_TABLE default
+{rho} {0.01 * rho}
+SCALARS pressure float 1
+LOOKUP_TABLE default
+{pressure} {0.01 * pressure}
+SCALARS mach float 1
+LOOKUP_TABLE default
+{mach} {mach}
+VECTORS velocity float
+{velocity} 0 0  {velocity} 0 0
 """,
         encoding="utf-8",
     )
@@ -105,7 +140,8 @@ def create_results(root: Path) -> Path:
                 "min_inner_iterations": 5,
                 "max_inner_iterations": 10,
                 "observed_min_inner_iterations": 5,
-                "observed_max_inner_iterations": 8,
+                "observed_max_inner_iterations": 5,
+                "observed_mean_inner_iterations": 5.0,
                 "inner_residual_reduction_target": 1e-3,
                 "inner_target_misses": 0,
                 "inner_target_converged_fraction": 1.0,
@@ -132,20 +168,29 @@ def create_results(root: Path) -> Path:
             for step in range(1, 30001):
                 time = step * 0.01
                 cl = 0.2 * math.sin(2.0 * math.pi * 0.2 * time)
-                residual_rows.append([step, time, 5, 1, 0.01, 0.1, 0.1, 0.1, 0.1,
-                                      0.01 + 1.0e-5 * abs(math.sin(time)), 0.02])
-                force_rows.append([step, time, cl, 1.1 + 0.01 * math.cos(2.0 * math.pi * 0.4 * time),
-                                   0.0, 1.0, viscous, cl, 0.0])
+                for inner in range(1, 6):
+                    residual = 10.0 ** (-(inner - 1))
+                    residual_rows.append([step, time, inner, 1, 0.01, residual, residual,
+                                          residual, residual, residual, 2.0 * residual])
+                cd = 1.1 + 0.01 * math.cos(2.0 * math.pi * 0.4 * time)
+                force_rows.append([step, time, cl, cd, 0.0, cd - viscous, viscous, cl, 0.0])
         else:
             residual_rows = [[step, 0.0, 3, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
                               10.0 ** (-0.1 * step), 2.0 * 10.0 ** (-0.1 * step)]
                              for step in range(1, 61)]
-            force_rows = [[step, 0.0, cl_final, 1.1 + 1.0e-4 * math.sin(step), 0.0,
-                           1.0, viscous, cl_final, 0.0] for step in range(1, 61)]
+            force_rows = []
+            for step in range(1, 61):
+                cd = 1.1 + 1.0e-4 * math.sin(step)
+                force_rows.append([step, 0.0, cl_final, cd, 0.0, cd - viscous,
+                                   viscous, cl_final, 0.0])
         _write_csv(case / "residuals.csv", RESIDUAL_HEADER, residual_rows)
         _write_csv(case / "forces.csv", FORCE_HEADER, force_rows)
         cf = 0.0 if inviscid else 0.01
-        _write_csv(case / "surface.csv", SURFACE_HEADER, [[0, 0, 0, 1, 1.0, -1.0, cf, 1, 0, 0, 0, "wall"], [1, 0, 0, 1, 1.1, 1.0, cf, 1, 0, 0, 0, "wall"]])
+        wall_tag = next(tag for tag, kind in case_input["boundary_conditions"].items()
+                        if "wall" in kind)
+        _write_csv(case / "surface.csv", SURFACE_HEADER,
+                   [[0, -0.1, 0, -1, 1.0, -1.0, cf, 1, 0, 0, 0, wall_tag],
+                    [1, 0.1, 0, 1, 1.1, 1.0, cf, 1, 0, 0, 0, wall_tag]])
         _write_csv(case / "partition_diagnostics.csv",
                    ["rank", "num_cells_owned", "num_cells_ghost", "num_boundary_faces",
                     "num_neighbor_ranks", "neighbor_ranks", "send_cells", "recv_cells"],
@@ -165,8 +210,10 @@ def create_rank_results(root: Path, results: Path) -> tuple[Path, ...]:
                 payload = json.loads(path.read_text(encoding="utf-8"))
                 payload["mpi_ranks"] = ranks
                 path.write_text(json.dumps(payload), encoding="utf-8")
-            rows = [[rank, 1, 1 if ranks > 1 else 0, 1, 1 if ranks > 1 else 0,
-                     str((rank + 1) % ranks) if ranks > 1 else "", "0", "0"]
+            rows = [[rank, 1 if rank == 0 else 0, 1 if ranks > 1 else 0, 1,
+                     1 if ranks > 1 else 0,
+                     str((rank + 1) % ranks) if ranks > 1 else "",
+                     "0" if ranks > 1 else "", "0" if ranks > 1 else ""]
                     for rank in range(ranks)]
             _write_csv(target / "partition_diagnostics.csv",
                        ["rank", "num_cells_owned", "num_cells_ghost", "num_boundary_faces",
@@ -260,6 +307,50 @@ class ReportAutomationTests(unittest.TestCase):
             with target.open("w", newline="", encoding="utf-8") as handle:
                 csv.writer(handle).writerows(rows)
             with self.assertRaisesRegex(BuildError, "physical_time does not match"):
+                build_report(results, root / "report", rank_results=rank_results)
+
+    def test_uses_native_cell_tuples_for_physics_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "field.vtk"
+            case_input = json.loads(
+                (ROOT.parent / "cfd_solver_agentic_benchmark" / "inputs" / "cases" /
+                 "naca0012_m200_inviscid.json").read_text(encoding="utf-8")
+            )
+            _write_bad_cell_field(path, case_input)
+            density, pressure, u, v, association = _native_primitive_fields(read_field(path))
+            self.assertEqual(association, "cell_data")
+            self.assertEqual(len(density), 2)
+            self.assertAlmostEqual(float(density[1]), 0.01 * case_input["freestream"]["rho"])
+            self.assertAlmostEqual(float(pressure[1]), 0.01 * case_input["freestream"]["pressure"])
+            self.assertEqual(len(u), len(v))
+
+    def test_refuses_re200_pseudo_cfl_override(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            results = create_results(root)
+            rank_results = create_rank_results(root, results)
+            target = results / "cylinder_m010_laminar_re200" / "residuals.csv"
+            rows = list(csv.reader(target.open(newline="", encoding="utf-8")))
+            rows[1][3] = "10"
+            with target.open("w", newline="", encoding="utf-8") as handle:
+                csv.writer(handle).writerows(rows)
+            with self.assertRaisesRegex(BuildError, "pseudo-time CFL"):
+                build_report(results, root / "report", rank_results=rank_results)
+
+    def test_refuses_rank_dependent_force_solution(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            results = create_results(root)
+            rank_results = create_rank_results(root, results)
+            target_dir = next(path for path in rank_results
+                              if path.name == "naca0012_m015_inviscid_np8")
+            target = target_dir / "forces.csv"
+            rows = list(csv.reader(target.open(newline="", encoding="utf-8")))
+            rows[-1][3] = str(float(rows[-1][3]) + 0.1)
+            rows[-1][5] = str(float(rows[-1][5]) + 0.1)
+            with target.open("w", newline="", encoding="utf-8") as handle:
+                csv.writer(handle).writerows(rows)
+            with self.assertRaisesRegex(BuildError, "rank-validation drag"):
                 build_report(results, root / "report", rank_results=rank_results)
 
 

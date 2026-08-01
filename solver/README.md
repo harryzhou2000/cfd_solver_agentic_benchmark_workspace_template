@@ -60,16 +60,14 @@ mpirun -np 8 solver/build/cfd_solver solve \
 A same-case restart is not perturbed. For the Re200 production run, the
 converged Re20 field is used as a cross-case precursor and the documented wake
 seed is explicitly reapplied. The physical step remains exactly `0.01`, the
-final time remains `300`, and every physical step must still meet the `1e-3`
-total BDF2 residual target. `--pseudo-cfl 10` changes only inner convergence and
-is retained in the command, residual history, and report as a supplied-control
-deviation:
+final time remains `300`, every physical step must meet the `1e-3` total BDF2
+residual target, and the supplied fixed pseudo-time CFL of 1 is retained:
 
 ```bash
 mpirun -np 8 solver/build/cfd_solver solve \
   --case cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re200.json \
   --restart solver/results/cylinder_m010_laminar_re20/restart_final.bin \
-  --restart-perturbation true --pseudo-cfl 10 \
+  --restart-perturbation true \
   --output solver/results/cylinder_m010_laminar_re200 --report-level full
 ```
 

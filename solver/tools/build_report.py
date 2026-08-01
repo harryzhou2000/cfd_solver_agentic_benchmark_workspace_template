@@ -22,8 +22,7 @@ import numpy as np
 
 from plot_results import (
     PlotError,
-    _field,
-    _velocity,
+    _normalise,
     final_field_path,
     generate_case_figures,
     lift_spectrum,
@@ -56,6 +55,12 @@ RUN_MANIFEST_COLUMNS = (
 STEADY_MIN_HISTORY_ROWS = 50
 STEADY_TERMINAL_WINDOW = 20
 RE200_MIN_SPECTRUM_SAMPLES = 512
+INVISCID_H0_P99_LIMIT = 0.05
+INVISCID_H0_MAX_LIMIT = 0.10
+RANK_CD_ABSOLUTE_TOLERANCE = 1.0e-4
+RANK_CD_RELATIVE_TOLERANCE = 0.01
+RANK_CL_ABSOLUTE_TOLERANCE = 1.0e-4
+RANK_RESIDUAL_ORDER_TOLERANCE = 0.25
 METHOD_METADATA_FIELDS = (
     "equation_set", "inviscid_flux", "viscous_flux", "time_integrator",
     "implicit_solver", "reconstruction", "limiter", "positivity_preservation",
@@ -158,6 +163,77 @@ def _read_partition_diagnostics(case_dir: Path) -> list[dict[str, int | str]]:
     return sorted(rows, key=lambda entry: int(entry["rank"]))
 
 
+def _split_integer_list(value: object, label: str) -> list[int]:
+    text = str(value).strip()
+    if not text:
+        return []
+    result: list[int] = []
+    for token in text.split(";"):
+        number = _number(token, label)
+        if number < 0 or int(number) != number:
+            raise BuildError(f"{label} must contain semicolon-separated non-negative integers")
+        result.append(int(number))
+    return result
+
+
+def _validate_partition_evidence(case_id: str, metadata: dict[str, Any],
+                                 rows: list[dict[str, int | str]], ranks: int) -> None:
+    if len(rows) != ranks or [int(row["rank"]) for row in rows] != list(range(ranks)):
+        raise BuildError(f"{case_id}: partition diagnostics must have one row for every MPI rank")
+    owned_total = sum(int(row["num_cells_owned"]) for row in rows)
+    expected_cells = int(_number(metadata.get("num_cells_global"), f"{case_id} num_cells_global"))
+    if owned_total != expected_cells:
+        raise BuildError(
+            f"{case_id}: partition owned-cell total {owned_total} does not equal global cell count {expected_cells}")
+    for row in rows:
+        rank = int(row["rank"])
+        expected_neighbors = int(row["num_neighbor_ranks"])
+        neighbors = _split_integer_list(row["neighbor_ranks"], f"{case_id} rank {rank} neighbor_ranks")
+        sends = _split_integer_list(row["send_cells"], f"{case_id} rank {rank} send_cells")
+        receives = _split_integer_list(row["recv_cells"], f"{case_id} rank {rank} recv_cells")
+        if not (len(neighbors) == len(sends) == len(receives) == expected_neighbors):
+            raise BuildError(
+                f"{case_id}: rank {rank} neighbor/send/receive list lengths must equal num_neighbor_ranks")
+        if any(neighbor == rank or neighbor >= ranks for neighbor in neighbors):
+            raise BuildError(f"{case_id}: rank {rank} has an invalid neighbor rank")
+
+
+def _validate_force_evidence(case_id: str, case_input: dict[str, Any],
+                             forces: list[dict[str, float | str]]) -> None:
+    inviscid = case_input["physics"]["mode"] == "inviscid"
+    for row_number, row in enumerate(forces, start=2):
+        cd = float(row["cd"])
+        cl = float(row["cl"])
+        pressure_drag = float(row["pressure_drag"])
+        viscous_drag = float(row["viscous_drag"])
+        pressure_lift = float(row["pressure_lift"])
+        viscous_lift = float(row["viscous_lift"])
+        # CSV values are written with six significant digits.  Allow the
+        # independent decimal roundoff of the total and both split columns.
+        if not math.isclose(cd, pressure_drag + viscous_drag, rel_tol=2.0e-5, abs_tol=2.0e-6):
+            raise BuildError(f"{case_id}: forces.csv row {row_number} has an inconsistent drag split")
+        if not math.isclose(cl, pressure_lift + viscous_lift, rel_tol=2.0e-5, abs_tol=2.0e-6):
+            raise BuildError(f"{case_id}: forces.csv row {row_number} has an inconsistent lift split")
+        if inviscid and max(abs(viscous_drag), abs(viscous_lift)) > 1.0e-8:
+            raise BuildError(f"{case_id}: inviscid forces.csv row {row_number} has a non-negligible viscous force")
+
+
+def _validate_surface_evidence(case_id: str, case_input: dict[str, Any],
+                               surface: list[dict[str, float | str]]) -> None:
+    expected_wall_tags = {
+        str(tag) for tag, kind in case_input["boundary_conditions"].items()
+        if "wall" in str(kind).lower()
+    }
+    observed_tags = {str(row["tag"]) for row in surface}
+    missing = sorted(expected_wall_tags - observed_tags)
+    if missing:
+        raise BuildError(f"{case_id}: surface.csv omits configured wall tags: {', '.join(missing)}")
+    if case_id.startswith("naca"):
+        y = np.asarray([float(row["y"]) for row in surface])
+        if not (np.any(y > 0.0) and np.any(y < 0.0)):
+            raise BuildError(f"{case_id}: NACA surface output must contain both upper and lower wall samples")
+
+
 def _require_metadata_claims(case_id: str, metadata: dict[str, Any]) -> None:
     for name in METHOD_METADATA_FIELDS:
         if not str(metadata.get(name, "")).strip():
@@ -206,11 +282,12 @@ def _load_case_dir(directory: Path, case_id: str, case_input: dict[str, Any]) ->
         raise BuildError(f"{case_id}: final forces row does not match run_status final_step")
     if not math.isclose(float(forces[-1]["physical_time"]), final_time, rel_tol=0.0, abs_tol=1.0e-10):
         raise BuildError(f"{case_id}: final forces row physical_time does not match run_status")
+    _validate_force_evidence(case_id, case_input, forces)
+    _validate_surface_evidence(case_id, case_input, surface)
     _validate_production_evidence(case_id, case_input, metadata, status, residuals, forces)
     partition_rows = _read_partition_diagnostics(directory)
     ranks = int(_number(status["mpi_ranks"], f"{case_id} mpi_ranks"))
-    if len(partition_rows) != ranks or [int(row["rank"]) for row in partition_rows] != list(range(ranks)):
-        raise BuildError(f"{case_id}: partition diagnostics must have one row for every MPI rank")
+    _validate_partition_evidence(case_id, metadata, partition_rows, ranks)
     return CaseData(case_id, directory, metadata, status, residuals, forces, surface, field_path,
                     case_input, partition_rows)
 
@@ -272,13 +349,26 @@ def _validate_transient_evidence(case_id: str, controls: dict[str, Any], metadat
         raise BuildError(f"{case_id}: final step must equal supplied dt/final-time horizon")
     if metadata.get("true_bdf2_inner_loop") is not True or "bdf2" not in str(metadata.get("time_integrator", "")).lower():
         raise BuildError(f"{case_id}: this report supports the submitted true BDF2 production path")
+    if status.get("convergence_status") != "statistically_periodic":
+        raise BuildError(f"{case_id}: Re200 production output must be statistically_periodic")
+    supplied_min = int(_number(controls["min_inner_iterations"], f"{case_id} supplied minimum inner iterations"))
+    supplied_max = int(_number(controls["max_inner_iterations"], f"{case_id} supplied maximum inner iterations"))
+    supplied_target = _number(controls["inner_residual_reduction_target"], f"{case_id} supplied inner target")
+    configured_min = int(_number(metadata.get("min_inner_iterations"), f"{case_id} configured minimum inner iterations"))
+    configured_max = int(_number(metadata.get("max_inner_iterations"), f"{case_id} configured maximum inner iterations"))
+    configured_target = _number(metadata.get("inner_residual_reduction_target"), f"{case_id} configured inner target")
+    if configured_min < supplied_min or configured_max > supplied_max or configured_min > configured_max:
+        raise BuildError(f"{case_id}: configured transient inner bounds are looser than supplied production controls")
+    if configured_target > supplied_target:
+        raise BuildError(f"{case_id}: configured transient inner target is looser than supplied production control")
     if len(forces) != expected_steps:
         raise BuildError(f"{case_id}: forces.csv must contain one accepted sample for every physical step")
     for expected_step, row in enumerate(forces, start=1):
         if int(float(row["step"])) != expected_step or not math.isclose(float(row["physical_time"]), expected_step * dt,
                                                                            rel_tol=0.0, abs_tol=1.0e-10):
             raise BuildError(f"{case_id}: force history is not sampled at the supplied physical-time cadence")
-    residual_steps: set[int] = set()
+    residuals_by_step: dict[int, list[dict[str, float | str]]] = {}
+    supplied_cfl = _number(controls["cfl_max"], f"{case_id} supplied transient CFL")
     for row in residuals:
         step = int(float(row["step"]))
         if step < 1 or step > expected_steps:
@@ -287,11 +377,45 @@ def _validate_transient_evidence(case_id: str, controls: dict[str, Any], metadat
             raise BuildError(f"{case_id}: residual dt differs from the supplied production dt")
         if not math.isclose(float(row["physical_time"]), step * dt, rel_tol=0.0, abs_tol=1.0e-10):
             raise BuildError(f"{case_id}: residual physical time differs from step*dt")
-        residual_steps.add(step)
-    if len(residual_steps) != expected_steps:
+        if not math.isclose(float(row["cfl"]), supplied_cfl, rel_tol=0.0, abs_tol=1.0e-12):
+            raise BuildError(f"{case_id}: transient pseudo-time CFL differs from the supplied fixed value")
+        residuals_by_step.setdefault(step, []).append(row)
+    if len(residuals_by_step) != expected_steps:
         raise BuildError(f"{case_id}: residual history must cover every accepted physical step")
-    if _number(metadata.get("inner_target_converged_fraction"), "inner_target_converged_fraction") < 0.95:
-        raise BuildError(f"{case_id}: insufficient transient inner-target convergence")
+    observed_iterations: list[int] = []
+    final_ratios: list[float] = []
+    for step in range(1, expected_steps + 1):
+        rows = residuals_by_step[step]
+        inner_indices = [int(float(row["inner_iter"])) for row in rows]
+        if inner_indices != list(range(1, len(rows) + 1)):
+            raise BuildError(f"{case_id}: physical step {step} must contain a contiguous inner-iteration trace")
+        used = inner_indices[-1]
+        if used < configured_min or used > configured_max:
+            raise BuildError(f"{case_id}: physical step {step} violates configured inner-iteration bounds")
+        first = float(rows[0]["residual_l2"])
+        final = float(rows[-1]["residual_l2"])
+        if first <= 0.0 or final < 0.0:
+            raise BuildError(f"{case_id}: physical step {step} has an invalid inner residual")
+        ratio = final / first
+        if ratio > configured_target * (1.0 + 1.0e-6):
+            raise BuildError(f"{case_id}: physical step {step} misses the configured total-residual target")
+        observed_iterations.append(used)
+        final_ratios.append(ratio)
+    observed_min = int(_number(metadata.get("observed_min_inner_iterations"), "observed_min_inner_iterations"))
+    observed_max = int(_number(metadata.get("observed_max_inner_iterations"), "observed_max_inner_iterations"))
+    observed_mean = _number(metadata.get("observed_mean_inner_iterations"), "observed_mean_inner_iterations")
+    if observed_min != min(observed_iterations) or observed_max != max(observed_iterations):
+        raise BuildError(f"{case_id}: stored transient inner extrema do not match residuals.csv")
+    if not math.isclose(observed_mean, float(np.mean(observed_iterations)), rel_tol=1.0e-10, abs_tol=1.0e-10):
+        raise BuildError(f"{case_id}: stored transient mean inner iterations do not match residuals.csv")
+    if int(_number(metadata.get("inner_target_misses"), "inner_target_misses")) != 0:
+        raise BuildError(f"{case_id}: completed transient production output may not contain inner-target misses")
+    if not math.isclose(_number(metadata.get("inner_target_converged_fraction"), "inner_target_converged_fraction"),
+                        1.0, rel_tol=0.0, abs_tol=1.0e-12):
+        raise BuildError(f"{case_id}: every accepted transient step must meet the inner target")
+    if not math.isclose(_number(metadata.get("last_inner_residual_ratio"), "last_inner_residual_ratio"),
+                        final_ratios[-1], rel_tol=1.0e-4, abs_tol=1.0e-12):
+        raise BuildError(f"{case_id}: stored final inner ratio does not match residuals.csv")
 
 
 def _validate_production_evidence(case_id: str, case_input: dict[str, Any], metadata: dict,
@@ -303,6 +427,13 @@ def _validate_production_evidence(case_id: str, case_input: dict[str, Any], meta
         return
     if len(residuals) < STEADY_MIN_HISTORY_ROWS or len(forces) < STEADY_MIN_HISTORY_ROWS:
         raise BuildError(f"{case_id}: steady production evidence needs at least {STEADY_MIN_HISTORY_ROWS} residual and force rows")
+    final_step = int(_number(status["final_step"], f"{case_id} final_step"))
+    if len(residuals) != final_step or len(forces) != final_step:
+        raise BuildError(f"{case_id}: cadence-1 steady histories must contain exactly one row per final step")
+    expected_steps = list(range(1, final_step + 1))
+    if ([int(float(row["step"])) for row in residuals] != expected_steps or
+            [int(float(row["step"])) for row in forces] != expected_steps):
+        raise BuildError(f"{case_id}: steady histories must be sequential through the final step")
     reduction = math.log10(float(residuals[0]["residual_l2"]) / float(residuals[-1]["residual_l2"]))
     linf_reduction = math.log10(float(residuals[0]["residual_linf"]) /
                                 float(residuals[-1]["residual_linf"]))
@@ -425,15 +556,73 @@ def load_rank_validation(rank_directories: tuple[Path, ...], case_inputs: dict[s
         raise BuildError("rank validation needs at least one NACA case with two rank counts including np=8")
     if not any(case_id.startswith("cylinder") for case_id in qualifying):
         raise BuildError("rank validation needs at least one cylinder case with two rank counts including np=8")
+    for case_id, runs in qualifying.items():
+        baseline = runs[0]
+        baseline_cd = float(baseline.forces[-1]["cd"])
+        baseline_cl = float(baseline.forces[-1]["cl"])
+        baseline_l2 = _residual_reduction(baseline)
+        baseline_linf = _linf_residual_reduction(baseline)
+        for run in runs[1:]:
+            if run.status["convergence_status"] != baseline.status["convergence_status"]:
+                raise BuildError(f"{case_id}: rank-validation convergence statuses disagree")
+            cd_tolerance = max(RANK_CD_ABSOLUTE_TOLERANCE,
+                               RANK_CD_RELATIVE_TOLERANCE * abs(baseline_cd))
+            if abs(float(run.forces[-1]["cd"]) - baseline_cd) > cd_tolerance:
+                raise BuildError(f"{case_id}: rank-validation drag differs beyond tolerance")
+            if abs(float(run.forces[-1]["cl"]) - baseline_cl) > RANK_CL_ABSOLUTE_TOLERANCE:
+                raise BuildError(f"{case_id}: rank-validation lift differs beyond tolerance")
+            if abs(_residual_reduction(run) - baseline_l2) > RANK_RESIDUAL_ORDER_TOLERANCE:
+                raise BuildError(f"{case_id}: rank-validation L2 reduction differs beyond tolerance")
+            if abs(_linf_residual_reduction(run) - baseline_linf) > RANK_RESIDUAL_ORDER_TOLERANCE:
+                raise BuildError(f"{case_id}: rank-validation Linf reduction differs beyond tolerance")
     return qualifying
+
+
+def _native_scalar(source: dict[str, np.ndarray], names: tuple[str, ...],
+                   component: int = 0) -> np.ndarray | None:
+    wanted = {_normalise(name) for name in names}
+    for name, values in source.items():
+        if _normalise(name) not in wanted:
+            continue
+        if values.ndim != 2 or values.shape[1] <= component:
+            raise PlotError(f"field {name!r} lacks component {component}")
+        return values[:, component]
+    return None
+
+
+def _native_primitive_fields(mesh: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, str]:
+    """Return unmodified primitive tuples from one VTK data association.
+
+    Cell data are preferred for this cell-centred solver. Point conversion in
+    ``plot_results._field`` is intentionally reserved for visualization and
+    must never alter extrema used by a physical sanity gate.
+    """
+    for association, source in (("cell_data", mesh.cell_data), ("point_data", mesh.point_data)):
+        density = _native_scalar(source, ("density", "rho"))
+        pressure = _native_scalar(source, ("pressure", "p"))
+        velocity_x: np.ndarray | None = None
+        velocity_y: np.ndarray | None = None
+        for name, values in source.items():
+            if _normalise(name) in {"velocity", "vel"} and values.ndim == 2 and values.shape[1] >= 2:
+                velocity_x, velocity_y = values[:, 0], values[:, 1]
+                break
+        if velocity_x is None:
+            velocity_x = _native_scalar(source, ("u", "velocityx", "velx"))
+            velocity_y = _native_scalar(source, ("v", "velocityy", "vely"))
+        if density is None or pressure is None or velocity_x is None or velocity_y is None:
+            continue
+        lengths = {len(density), len(pressure), len(velocity_x), len(velocity_y)}
+        if len(lengths) != 1:
+            raise PlotError(f"{association} primitive fields have mismatched tuple counts")
+        return density, pressure, velocity_x, velocity_y, association
+    raise PlotError("density, pressure, and both velocity components must share one field-data association")
 
 
 def _sanity_for_case(case: CaseData) -> dict:
     """Compute transparent checks from actual submitted values; never fabricate a pass."""
     try:
         mesh = read_field(case.field_path)
-        density = _field(mesh, ("density", "rho"))
-        pressure = _field(mesh, ("pressure", "p"))
+        density, pressure, native_u, native_v, association = _native_primitive_fields(mesh)
     except PlotError as exc:
         raise BuildError(f"{case.case_id}: cannot perform field sanity checks: {exc}") from exc
     force_cd = np.asarray([float(row["cd"]) for row in case.forces])
@@ -449,6 +638,7 @@ def _sanity_for_case(case: CaseData) -> dict:
         "min_density": float(np.min(density)),
         "positive_pressure": bool(np.all(pressure > 0.0)),
         "min_pressure": float(np.min(pressure)),
+        "native_field_association": association,
         "surface_cp_varies": bool(np.ptp(cp) > 1.0e-12),
         "cp_range": [float(np.min(cp)), float(np.max(cp))],
         "computed_residual_reduction_orders": case_analysis(case)["computed_residual_reduction_orders"],
@@ -458,10 +648,6 @@ def _sanity_for_case(case: CaseData) -> dict:
     }
     if "inviscid" in case.case_id:
         viscous = max(abs(float(case.forces[-1]["viscous_drag"])), abs(float(case.forces[-1]["viscous_lift"])))
-        try:
-            velocity_x, velocity_y = _velocity(mesh)
-        except PlotError as exc:
-            raise BuildError(f"{case.case_id}: inviscid enthalpy check needs velocity components: {exc}") from exc
         gamma = _number(case.case_input["gas"]["gamma"], "gamma")
         freestream = case.case_input["freestream"]
         freestream_enthalpy = (
@@ -471,7 +657,7 @@ def _sanity_for_case(case: CaseData) -> dict:
             0.5 * _number(freestream["velocity_magnitude"], "freestream velocity") ** 2
         )
         total_enthalpy = (gamma / (gamma - 1.0) * pressure / density +
-                          0.5 * (velocity_x * velocity_x + velocity_y * velocity_y))
+                          0.5 * (native_u * native_u + native_v * native_v))
         enthalpy_error = np.abs(total_enthalpy / freestream_enthalpy - 1.0)
         low_state = ((density < 0.1 * _number(freestream["rho"], "freestream density")) &
                      (pressure < 0.1 * _number(freestream["pressure"], "freestream pressure")))
@@ -483,9 +669,13 @@ def _sanity_for_case(case: CaseData) -> dict:
             "viscous_force_negligible": bool(viscous <= 1.0e-8),
             "max_abs_final_viscous_force": viscous,
             "symmetric_lift_near_zero": bool(abs(float(case.forces[-1]["cl"])) <= 1.0e-4),
-            "inviscid_total_enthalpy_reasonable": bool(np.max(enthalpy_error) <= 0.35),
+            "inviscid_total_enthalpy_p99_within_5pct": bool(
+                np.percentile(enthalpy_error, 99.0) <= INVISCID_H0_P99_LIMIT),
+            "inviscid_total_enthalpy_max_within_10pct": bool(
+                np.max(enthalpy_error) <= INVISCID_H0_MAX_LIMIT),
             "max_relative_total_enthalpy_error": float(np.max(enthalpy_error)),
             "p99_relative_total_enthalpy_error": float(np.percentile(enthalpy_error, 99.0)),
+            "joint_low_density_pressure_absent": bool(np.count_nonzero(low_state) == 0),
             "joint_low_density_pressure_points": int(np.count_nonzero(low_state)),
         })
     else:
@@ -499,14 +689,12 @@ def _sanity_for_case(case: CaseData) -> dict:
     if "cylinder" in case.case_id:
         checks.update({"positive_mean_drag": bool(np.mean(force_cd) > 0.0), "mean_drag": float(np.mean(force_cd))})
     if "re200" in case.case_id:
-        try:
-            u, v = _velocity(mesh)
-        except PlotError as exc:
-            raise BuildError(f"{case.case_id}: Re200 wake plot needs velocity components: {exc}") from exc
+        tail_lift = np.asarray([float(row["cl"]) for row in _tail_rows(case)])
         checks.update({
-            "unsteady_lift_variation": bool(np.ptp(force_cl) > 1.0e-8),
+            "unsteady_lift_variation": bool(np.ptp(tail_lift) >= 2.0e-3),
             "lift_range": [float(np.min(force_cl)), float(np.max(force_cl))],
-            "velocity_present_for_wake": bool(np.isfinite(u).all() and np.isfinite(v).all()),
+            "post_transient_lift_amplitude": float(0.5 * np.ptp(tail_lift)),
+            "velocity_present_for_wake": bool(np.isfinite(native_u).all() and np.isfinite(native_v).all()),
             "final_physical_time_at_least_300": bool(_number(case.status.get("final_physical_time"), "final_physical_time") >= 300.0),
             "true_bdf2_inner_loop": case.metadata.get("true_bdf2_inner_loop") is True,
             "inner_target_converged_fraction_at_least_095": bool(_number(case.metadata.get("inner_target_converged_fraction"), "inner_target_converged_fraction") >= 0.95),
@@ -798,9 +986,12 @@ def build_report(results_root: Path, output_dir: Path, *,
             records.extend(generate_case_figures(case.directory, figures))
         _write_csv(output_dir / "figure_manifest.csv", MANIFEST_COLUMNS, records)
         def manifest_row(case: CaseData, record_type: str) -> dict[str, object]:
+            command = str(case.status.get("command", "")).strip()
+            if command and not command.startswith("mpirun "):
+                command = f"mpirun -np {case.status.get('mpi_ranks', '')} {command}"
             return {
                 "record_type": record_type, "case_id": case.case_id,
-                "source_directory": str(case.directory), "command": case.status.get("command", ""),
+                "source_directory": str(case.directory), "command": command,
                 "mpi_ranks": case.status.get("mpi_ranks", ""), "wall_time_seconds": case.status.get("wall_time_seconds", ""),
                 "final_step": case.status.get("final_step", ""),
                 "final_physical_time": case.status.get("final_physical_time", ""),
