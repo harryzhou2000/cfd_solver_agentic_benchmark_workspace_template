@@ -17,7 +17,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 from collections import Counter
@@ -136,6 +138,244 @@ def fallback_prompts(rollout_path: str) -> list[dict]:
     return out
 
 
+def extract_opencode(args, workspace: str) -> dict:
+    """Best-effort metadata from the opencode harness (opencode.db). Anything
+    that cannot be extracted is emitted as a question for the user."""
+    questions: list[dict] = []
+    harness = {
+        "harness": "opencode",
+        "version": _run([shutil.which("opencode") or "opencode", "--version"]),
+        "config_dir": args.opencode_config_dir,
+        "config_entries": None,
+        "model_provider": None,
+    }
+    cfg = Path(args.opencode_config_dir)
+    if cfg.is_dir():
+        harness["config_entries"] = sorted(p.name for p in cfg.iterdir())
+
+    sessions: list[dict] = []
+    try:
+        db = sqlite3.connect(f"file:{args.opencode_db}?mode=ro", uri=True)
+        try:
+            rows = db.execute(
+                "SELECT id, parent_id, directory, title, agent, model, "
+                "tokens_input, tokens_output, tokens_reasoning, cost, "
+                "time_created, time_updated, version FROM session "
+                "WHERE directory = ? OR directory LIKE ?",
+                (workspace, workspace + "/%"),
+            ).fetchall()
+        finally:
+            db.close()
+    except sqlite3.Error as exc:
+        questions.append({
+            "id": "opencode_db",
+            "question": "Where is the opencode session database/log for this run?",
+            "reason": f"opencode session database is unavailable: {exc}",
+            "suggested_source": "~/.local/share/opencode/opencode.db or opencode export",
+            "answer": None,
+        })
+        rows = []
+
+    for r in rows:
+        m = json.loads(r[5]) if r[5] else {}
+        sessions.append({
+            "session_id": r[0],
+            "parent_id": r[1],
+            "title": r[3],
+            "agent": r[4],
+            "model": m.get("id") or m.get("modelID"),
+            "provider": m.get("providerID"),
+            "variant": m.get("variant"),
+            "tokens_input": r[6] or 0,
+            "tokens_output": r[7] or 0,
+            "tokens_reasoning": r[8] or 0,
+            "cost": r[9] or 0.0,
+            "time_created": r[10],
+            "time_updated": r[11],
+        })
+    if not sessions:
+        questions.append({
+            "id": "opencode_sessions",
+            "question": "Which opencode sessions belong to this contestant run?",
+            "reason": "no opencode sessions found for the workspace in the local database",
+            "suggested_source": "opencode session list / opencode export <sessionID>",
+            "answer": None,
+        })
+
+    roots = [s for s in sessions if not s["parent_id"]]
+    children = [s for s in sessions if s["parent_id"]]
+
+    catalog = load_catalog(args.ocx_catalog)
+    models: dict[str, dict] = {}
+    for s in sessions:
+        key = f"{s['model']}@{s['variant']}" if s["variant"] else (s["model"] or "unknown")
+        agg = models.setdefault(key, {
+            "model": s["model"], "variant": s["variant"], "provider": s["provider"],
+            "catalog": {"display_name": None, "context_window": None},
+            "reasoning_efforts_seen": [s["variant"]] if s["variant"] else [],
+            "max_context_used": 0, "threads": 0,
+            "tokens_input": 0, "tokens_output": 0, "tokens_reasoning": 0,
+            "cost": 0.0,
+        })
+        agg["threads"] += 1
+        agg["tokens_input"] += s["tokens_input"]
+        agg["tokens_output"] += s["tokens_output"]
+        agg["tokens_reasoning"] += s["tokens_reasoning"]
+        agg["cost"] += s["cost"]
+        agg["max_context_used"] = max(agg["max_context_used"], s["tokens_input"])
+        if s["variant"] and s["variant"] not in agg["reasoning_efforts_seen"]:
+            agg["reasoning_efforts_seen"].append(s["variant"])
+        if not agg["catalog"]["context_window"]:
+            match = next(
+                (m for slug, m in catalog.items()
+                 if slug.rsplit("/", 1)[-1] == (s["model"] or "").lower()),
+                None,
+            )
+            if match:
+                agg["catalog"] = {
+                    "display_name": match.get("display_name"),
+                    "context_window": match.get("context_window"),
+                }
+    for key, agg in models.items():
+        if not agg["catalog"]["context_window"]:
+            questions.append({
+                "id": f"context_window_{key.replace('/', '_')}",
+                "question": f"What is the context window (max tokens) of model "
+                            f"`{agg['model']}`?",
+                "reason": "model is not listed in the local model catalog",
+                "suggested_source": "provider docs or model card",
+                "answer": None,
+            })
+
+    subagents = []
+    for s in children:
+        m = re.search(r"@(\w+)", s["title"] or "")
+        typ = m.group(1) if m else (s["agent"] or None)
+        subagents.append({
+            "session_id": s["session_id"],
+            "parent_session_id": s["parent_id"],
+            "title": s["title"],
+            "type": typ,
+            "model": s["model"],
+            "variant": s["variant"],
+            "tokens_used": s["tokens_input"] + s["tokens_output"] + s["tokens_reasoning"],
+            "cost": s["cost"],
+        })
+
+    prompts = {"by_root_session": {}}
+    for s in roots[:3]:
+        user_msgs = []
+        try:
+            db = sqlite3.connect(f"file:{args.opencode_db}?mode=ro", uri=True)
+            try:
+                msgs = db.execute(
+                    "SELECT id, data FROM message WHERE session_id=? "
+                    "ORDER BY time_created", (s["session_id"],)
+                ).fetchall()
+                for mid, data in msgs:
+                    try:
+                        d = json.loads(data)
+                    except json.JSONDecodeError:
+                        continue
+                    if d.get("role") != "user":
+                        continue
+                    parts = db.execute(
+                        "SELECT data FROM part WHERE message_id=?", (mid,)
+                    ).fetchall()
+                    text = ""
+                    for (pdata,) in parts:
+                        try:
+                            p = json.loads(pdata)
+                        except json.JSONDecodeError:
+                            continue
+                        if p.get("type") == "text":
+                            text += p.get("text", "")
+                    if not text.strip():
+                        continue
+                    created = (d.get("time") or {}).get("created")
+                    ts = (datetime.fromtimestamp(created / 1000, tz=timezone.utc).isoformat()
+                          if created else None)
+                    user_msgs.append({"timestamp": ts, "text": text.strip()[:2000]})
+                    if len(user_msgs) >= 11:
+                        break
+            finally:
+                db.close()
+        except sqlite3.Error:
+            pass
+        prompts["by_root_session"][s["session_id"]] = {
+            "initial_user_prompt": user_msgs[0] if user_msgs else None,
+            "resume_prompts": user_msgs[1:],
+        }
+        if not user_msgs:
+            questions.append({
+                "id": f"prompts_{s['session_id']}",
+                "question": f"What was the initial prompt (and any resume prompts) "
+                            f"for opencode session `{s['session_id']}`?",
+                "reason": "message content could not be read from the opencode database",
+                "suggested_source": "opencode export <sessionID> --sanitize",
+                "answer": None,
+            })
+
+    context = {
+        "by_model": {
+            key: {"context_window": agg["catalog"]["context_window"],
+                  "max_context_used": agg["max_context_used"]}
+            for key, agg in models.items()
+        },
+        "by_session": {
+            s["session_id"]: {"model": s["model"], "variant": s["variant"],
+                              "max_input_tokens": s["tokens_input"]}
+            for s in sessions
+        },
+        "notes": [],
+    }
+    return {
+        "harness": harness,
+        "models": models,
+        "context": context,
+        "subagents": subagents,
+        "opencodex": None,
+        "opencode": {
+            "sessions": sessions,
+            "root_session_count": len(roots),
+            "subagent_session_count": len(children),
+        },
+        "prompts": prompts,
+        "questions": questions,
+        "user_answers": {},
+        "status": "needs_user_input" if questions else "complete",
+        "provenance": {
+            "opencode_db": args.opencode_db,
+            "opencode_config_dir": args.opencode_config_dir,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "num_sessions": len(sessions),
+        },
+    }
+
+
+def finalize(metadata: dict, questions: list[dict], answers_path: str | None) -> dict:
+    """Record user-provided answers for unextractable metadata. The evaluation
+    agent is expected to query the user for anything in `questions` and supply
+    the answers via --answers."""
+    metadata["questions"] = questions
+    metadata["user_answers"] = {}
+    if answers_path and Path(answers_path).exists():
+        try:
+            answers = json.loads(Path(answers_path).read_text())
+        except (OSError, json.JSONDecodeError):
+            answers = {}
+        if isinstance(answers, dict):
+            for q in questions:
+                if q["id"] in answers:
+                    q["answer"] = answers[q["id"]]
+            metadata["user_answers"] = answers
+    metadata["status"] = (
+        "complete" if questions and all(q.get("answer") for q in questions)
+        else "needs_user_input" if questions else "complete"
+    )
+    return metadata
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Extract contestant run metadata")
     ap.add_argument("--workspace", required=True)
@@ -151,6 +391,13 @@ def main() -> int:
                     default=str(cd.codex_home() / "opencodex-catalog.json"))
     ap.add_argument("--plugins-root", default=str(cd.codex_home() / "plugins"))
     ap.add_argument("--roots", default=None)
+    ap.add_argument("--opencode-db",
+                    default=str(Path.home() / ".local" / "share" / "opencode" / "opencode.db"))
+    ap.add_argument("--opencode-config-dir",
+                    default=str(Path.home() / ".config" / "opencode"))
+    ap.add_argument("--answers", default=None,
+                    help="JSON file mapping question ids to user-provided answers "
+                         "(evaluation agent asks the user for anything not extractable).")
     eval_root = Path(__file__).resolve().parents[1]
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
@@ -166,6 +413,16 @@ def main() -> int:
     roots, all_ids = cd.thread_trees(selected, edges)
     children = {c for _, c in edges}
     requested = cd.parse_roots(args.roots)
+    if not all_ids and requested is None:
+        metadata = extract_opencode(args, workspace)
+        metadata = finalize(metadata, metadata.get("questions", []), args.answers)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(metadata, indent=2) + "\n")
+        print(f"wrote {out_path}")
+        print(f"harness={metadata['harness'].get('harness')} "
+              f"version={metadata['harness'].get('version')} "
+              f"status={metadata['status']} questions={len(metadata['questions'])}")
+        return 0
     if requested is not None:
         missing = [r for r in requested if r not in threads]
         if missing:
@@ -182,6 +439,7 @@ def main() -> int:
     catalog = load_catalog(args.ocx_catalog)
     history = load_history(args.history)
     plugins = load_plugins(args.plugins_root)
+    questions = []
 
     # ---- harness ---------------------------------------------------------
     metas = [session_meta(threads[r]["rollout_path"]) for r in roots]
@@ -323,6 +581,29 @@ def main() -> int:
         if fallback.exists():
             opencodex["codex_proxy_fallback_config"] = str(fallback)
 
+    # ---- questions: anything the evaluator could not extract -------------
+    for m, info in models.items():
+        if not info["catalog"].get("context_window"):
+            questions.append({
+                "id": f"context_window_{m.replace('/', '_')}",
+                "question": f"What is the context window (max tokens) of model `{m}`?",
+                "reason": "model is not listed in the model catalog",
+                "suggested_source": "provider docs or model card",
+                "answer": None,
+            })
+        if (m or "").lower() in VANILLA_MODELS:
+            continue
+        if not info["reasoning_efforts_seen"]:
+            questions.append({
+                "id": f"effort_{m.replace('/', '_')}",
+                "question": f"Which reasoning effort/mode was used for model `{m}`?",
+                "reason": "codex does not record reasoning effort for router-managed "
+                          "(non-vanilla) models",
+                "suggested_source": "ocx-relay logs (/tmp/ocx-relay*.log) or "
+                                    "~/.opencodex/config.json effort map",
+                "answer": None,
+            })
+
     # ---- prompts ---------------------------------------------------------
     prompts = {"by_root_thread": {}}
     for rid in roots:
@@ -368,12 +649,14 @@ def main() -> int:
             "num_threads": len(all_ids),
         },
     }
+    metadata = finalize(metadata, questions, args.answers)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(metadata, indent=2) + "\n")
     print(f"wrote {out_path}")
     print(f"harness={harness['harness']} cli={harness['cli_version']} "
           f"threads={len(all_ids)} subagents={len(subagents)} "
-          f"non_vanilla={non_vanilla or 'no'}")
+          f"non_vanilla={non_vanilla or 'no'} status={metadata['status']} "
+          f"questions={len(metadata['questions'])}")
     return 0
 
 

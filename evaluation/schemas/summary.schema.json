@@ -140,7 +140,24 @@
         "context": { "type": "object" },
         "subagents": { "type": "array", "items": { "type": "object" } },
         "opencodex": { "type": ["object", "null"] },
-        "prompts": { "type": "object" }
+        "opencode": { "type": ["object", "null"] },
+        "prompts": { "type": "object" },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "question", "reason", "suggested_source", "answer"],
+            "properties": {
+              "id": { "type": "string" },
+              "question": { "type": "string" },
+              "reason": { "type": "string" },
+              "suggested_source": { "type": "string" },
+              "answer": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "user_answers": { "type": "object" },
+        "status": { "enum": ["complete", "needs_user_input"] }
       }
     },
     "provenance": {

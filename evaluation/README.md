@@ -60,6 +60,25 @@ python3 evaluation/tools/summarize.py --workspace ../codex_gpt56_01 \
   --roots 019fb9e3-ba6e-7e40-99d3-84d723942dc8
 ```
 
+## Missing metadata → query the user
+
+`extract_metadata.py` never guesses. When a metadata field cannot be extracted
+(e.g. opencode session data is unavailable, a model is missing from the
+catalog, or reasoning effort is not recorded for a router-managed model), it
+emits a structured `questions` entry, sets `status: needs_user_input`, and
+lists the questions in `summary.md`. The evaluation agent asks the user,
+records answers (`{"<question_id>": "..."}`), and re-runs with `--answers`:
+
+```bash
+python3 evaluation/tools/summarize.py --workspace ../opencode_omoslim_deepseek \
+  --answers evaluation/outputs/opencode_omoslim_deepseek/metadata_answers.json
+```
+
+For opencode contestants the pipeline extracts harness/version, sessions
+(roots + subagents, model + reasoning variant), tokens/cost per session, and
+prompts from the opencode database; codex-only expense/measurement extractors
+are skipped for those runs.
+
 All codex data paths (`~/.codex/state_5.sqlite`, `goals_1.sqlite`,
 `logs_2.sqlite`, `sessions/`) are overridable via `--state-db`, `--goals-db`,
 `--logs-db`, `--sessions-root`, so the same tools work against a snapshot of

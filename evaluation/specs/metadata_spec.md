@@ -87,8 +87,39 @@ user-role messages in the session rollout are used, with harness-injected
 blocks (`<codex_internal_context>`, `<environment_context>`, AGENTS.md
 wrappers) excluded.
 
+## 7. Missing metadata → query the user
+
+If a required metadata field cannot be extracted, the evaluation agent does
+**not** guess. The extractor:
+
+1. emits a structured entry in `metadata.questions` — `id`, `question`,
+   `reason`, `suggested_source` (where the user can look it up), and
+   `answer: null`;
+2. sets `metadata.status` to `needs_user_input`;
+3. surfaces the questions in `summary.md` under "Metadata questions for user".
+
+The evaluation agent then asks the user, records the answers as
+`{"<question_id>": "<answer>"}` in a JSON file, and re-runs with
+`--answers <file>` (accepted by `extract_metadata.py` and `summarize.py`).
+Answered questions flip `metadata.status` to `complete`.
+
+Known situations that produce questions:
+
+- **opencode harness**: when the opencode session database is unavailable or
+  contains no sessions for the workspace (harness version, session list,
+  models, prompts).
+- **Router-managed models (codex)**: per-turn reasoning effort is not
+  recorded by codex for non-vanilla models when the usage logs lack it; the
+  suggested source is the ocx-relay capture or the ocx effort map.
+- **Uncataloged models**: a model absent from the local model catalog has no
+  context-window figure; the user supplies it from provider docs.
+- **Unreadable prompt content**: session message bodies that cannot be read
+  from the local data store (`opencode export <sessionID> --sanitize` is the
+  suggested source).
+
 ## Output
 
 `metadata.json` (embedded in `summary.json` as `metadata`), with sections:
 `harness`, `models`, `context`, `subagents`, `opencodex` (conditional),
-`prompts`, and `provenance`.
+`opencode` (conditional), `prompts`, `questions`, `user_answers`, `status`,
+and `provenance`.

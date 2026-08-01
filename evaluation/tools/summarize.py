@@ -182,6 +182,11 @@ def main() -> int:
     ap.add_argument("--ocx-config", default=str(Path.home() / ".opencodex" / "config.json"))
     ap.add_argument("--ocx-catalog", default=str(cd.codex_home() / "opencodex-catalog.json"))
     ap.add_argument("--plugins-root", default=str(cd.codex_home() / "plugins"))
+    ap.add_argument(
+        "--answers", default=None,
+        help="JSON file mapping metadata question ids to user-provided answers "
+             "(for metadata the evaluator could not extract).",
+    )
     ap.add_argument("--out", default=None)
     ap.add_argument(
         "--roots",
@@ -196,7 +201,7 @@ def main() -> int:
     out_dir = Path(args.out) if args.out else ROOT / "outputs" / ws.name
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. sub-pipelines
+    # 1. sub-pipelines (metadata first: its harness decides the rest)
     def _base_cmd(tool: str, out_file: str):
         cmd = [sys.executable, str(ROOT / "tools" / tool),
                "--workspace", str(ws), "--out", str(out_dir / out_file),
@@ -213,19 +218,43 @@ def main() -> int:
                     "--history", args.history, "--ocx-config", args.ocx_config,
                     "--ocx-catalog", args.ocx_catalog,
                     "--plugins-root", args.plugins_root]
+            if args.answers:
+                cmd += ["--answers", args.answers]
         if args.roots:
             cmd += ["--roots", args.roots]
         return cmd
 
-    subprocess.run(_base_cmd("extract_expenses.py", "expenses.json"), check=True)
-    subprocess.run(_base_cmd("extract_measurements.py", "measurements.json"), check=True)
     subprocess.run(_base_cmd("extract_metadata.py", "metadata.json"), check=True)
     subprocess.run([sys.executable, str(ROOT / "tools" / "generate_review_forms.py"),
                     "--out", str(out_dir)], check=True)
 
-    expenses = json.loads((out_dir / "expenses.json").read_text())
-    measurements = json.loads((out_dir / "measurements.json").read_text())
     metadata = json.loads((out_dir / "metadata.json").read_text())
+    harness = metadata.get("harness", {}).get("harness")
+    if harness == "opencode":
+        # codex-only extractors are not applicable; opencode tokens/cost live
+        # in opencode.db and are recorded under metadata.opencode.sessions.
+        expenses = {"note": "opencode harness: codex expenses extraction not applicable",
+                    "time_seconds": {"goal_time": 0, "wall_time": 0},
+                    "tokens": {"total": 0, "by_model": {}, "by_thread": {},
+                               "main_vs_subagent": {"main": 0, "subagent": 0}},
+                    "cost_estimate_usd": {"total": 0.0, "by_model": {},
+                                          "unpriced_tokens": 0, "estimate": False,
+                                          "metadata": "opencode.db cost column"}}
+        measurements = {"note": "opencode harness: codex tool-usage/LOC extraction "
+                                "not applicable",
+                        "tool_usage": {"total": 0, "by_tool": {}, "by_thread": {},
+                                       "subagent_spawns": 0, "risk_context": []},
+                        "loc": {"method": "file", "git": None,
+                                "file": {"method": "file", "files": 0, "lines": 0,
+                                         "by_extension": {}}},
+                        "rule_violations": []}
+        (out_dir / "expenses.json").write_text(json.dumps(expenses, indent=2) + "\n")
+        (out_dir / "measurements.json").write_text(json.dumps(measurements, indent=2) + "\n")
+    else:
+        subprocess.run(_base_cmd("extract_expenses.py", "expenses.json"), check=True)
+        subprocess.run(_base_cmd("extract_measurements.py", "measurements.json"), check=True)
+        expenses = json.loads((out_dir / "expenses.json").read_text())
+        measurements = json.loads((out_dir / "measurements.json").read_text())
     review_areas = {}
     for name in ("code", "cfd", "results"):
         review_areas[name] = json.loads((out_dir / f"review_{name}.json").read_text())
@@ -386,14 +415,22 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
         "",
         "## Metadata",
         "",
-        f"- Harness: {md['harness'].get('harness')} "
-        f"cli {md['harness'].get('cli_version')} "
-        f"({md['harness'].get('originator')}, provider "
-        f"{md['harness'].get('model_provider')})",
     ]
+    if md["harness"].get("harness") == "opencode":
+        lines.append(f"- Harness: opencode v{md['harness'].get('version')} "
+                     f"(config: {md['harness'].get('config_dir')})")
+    else:
+        lines.append(f"- Harness: {md['harness'].get('harness')} "
+                     f"cli {md['harness'].get('cli_version')} "
+                     f"({md['harness'].get('originator')}, provider "
+                     f"{md['harness'].get('model_provider')})")
     if md["harness"].get("plugins"):
         lines.append("- Plugins: " + ", ".join(
             f"{p['name']} {p['version']}" for p in md["harness"]["plugins"]))
+    if md.get("opencode"):
+        lines.append(f"- opencode: v{md['harness'].get('version')}, "
+                     f"{md['opencode'].get('root_session_count')} root / "
+                     f"{md['opencode'].get('subagent_session_count')} subagent sessions")
     lines += [
         "",
         "| Model | Effort(s) | Context window | Max context used | Threads |",
@@ -406,6 +443,21 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
             f"| {model} | {', '.join(info['reasoning_efforts_seen']) or 'n/a'} | "
             f"{info['catalog'].get('context_window') or '?'} | "
             f"{used_str} | {info['threads']} |"
+        )
+    if md.get("questions"):
+        lines += [
+            "",
+            "### Metadata questions for user (unextractable fields)",
+            "",
+            "| Question | Reason | Suggested source | Answer |",
+            "|----------|--------|------------------|--------|",
+        ]
+        for q in md["questions"]:
+            lines.append(f"| {q['id']}: {q['question']} | {q['reason']} | "
+                         f"{q['suggested_source']} | {q['answer'] or ''} |")
+        lines.append(
+            "Provide answers as `{\"<question_id>\": \"...\"}` and re-run with "
+            "`--answers <file>`; status then flips to complete."
         )
     if md.get("opencodex"):
         o = md["opencodex"]
@@ -427,11 +479,20 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
             "|--------|--------|----------|------|-------|--------|-------:|",
         ]
         for sa in md["subagents"][:30]:
+            if "thread_id" in sa:
+                sid, parent = sa["thread_id"], sa.get("parent_thread_id") or ""
+                model = sa["model"]
+                effort = ", ".join(sa["reasoning_effort"] or []) or "n/a"
+                tokens = sa["tokens_used"]
+            else:  # opencode sessions
+                sid, parent = sa["session_id"], sa.get("parent_session_id") or ""
+                model = f"{sa['model']}@{sa.get('variant') or ''}".rstrip("@")
+                effort = sa.get("variant") or "n/a"
+                tokens = sa["tokens_used"]
             lines.append(
-                f"| `{sa['thread_id'][:8]}` | `{(sa.get('parent_thread_id') or '')[:8]}` | "
+                f"| `{sid[:8]}` | `{parent[:8]}` | "
                 f"{sa.get('nickname') or ''} | {sa.get('type') or ''} | "
-                f"{sa['model']} | {', '.join(sa['reasoning_effort'] or []) or 'n/a'} | "
-                f"{sa['tokens_used']:,} |"
+                f"{model} | {effort} | {tokens:,} |"
             )
         if len(md["subagents"]) > 30:
             lines.append(f"| ... | {len(md['subagents']) - 30} more | | | | | |")
