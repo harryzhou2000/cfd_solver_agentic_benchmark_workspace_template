@@ -36,7 +36,8 @@ def load_threads(state_db) -> dict[str, dict]:
     try:
         rows = db.execute(
             "SELECT id, rollout_path, created_at, updated_at, cwd, model, "
-            "tokens_used, git_branch, title FROM threads"
+            "tokens_used, git_branch, title, model_provider, agent_nickname, "
+            "agent_role, agent_path, thread_source FROM threads"
         ).fetchall()
     finally:
         db.close()
@@ -52,6 +53,11 @@ def load_threads(state_db) -> dict[str, dict]:
             "tokens_used": r[6] or 0,
             "git_branch": r[7],
             "title": r[8],
+            "model_provider": r[9],
+            "agent_nickname": r[10],
+            "agent_role": r[11],
+            "agent_path": r[12],
+            "thread_source": r[13],
         }
     return out
 

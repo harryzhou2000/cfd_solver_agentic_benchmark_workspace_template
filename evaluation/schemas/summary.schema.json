@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Benchmark contestant final result summary",
   "type": "object",
-  "required": ["contestant", "expenses", "code_review", "cfd_review", "result_review", "measurements", "provenance"],
+    "required": ["contestant", "expenses", "code_review", "cfd_review", "result_review", "measurements", "metadata", "provenance"],
   "properties": {
     "contestant": {
       "type": "object",
@@ -114,6 +114,33 @@
             }
           }
         }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["harness", "models", "context", "subagents", "prompts"],
+      "properties": {
+        "harness": {
+          "type": "object",
+          "properties": {
+            "harness": { "type": "string" },
+            "cli_version": { "type": ["string", "null"] },
+            "originator": { "type": ["string", "null"] },
+            "source": { "type": ["string", "null"] },
+            "thread_source": { "type": ["string", "null"] },
+            "multi_agent_version": { "type": ["string", "null"] },
+            "history_mode": { "type": ["string", "null"] },
+            "memory_mode": { "type": ["string", "null"] },
+            "model_provider": { "type": ["string", "null"] },
+            "codex_runtime_version": { "type": ["string", "null"] },
+            "plugins": { "type": "array", "items": { "type": "object" } }
+          }
+        },
+        "models": { "type": "object" },
+        "context": { "type": "object" },
+        "subagents": { "type": "array", "items": { "type": "object" } },
+        "opencodex": { "type": ["object", "null"] },
+        "prompts": { "type": "object" }
       }
     },
     "provenance": {

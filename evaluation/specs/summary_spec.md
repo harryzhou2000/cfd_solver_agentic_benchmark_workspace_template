@@ -22,6 +22,7 @@ workspace.
 | Codex session history | `~/.codex/sessions/**/rollout-*.jsonl` | timestamps, tool usage, subagent messages, rule-violation evidence |
 | Cost metadata | `evaluation/config/cost_metadata.json` | cost estimation |
 | Review points | `evaluation/config/review_points_{code,cfd,results}.json` | scorecard generation |
+| Execution metadata | `~/.codex/history.jsonl`, `~/.opencodex/config.json`, model catalog, plugins dir | metadata record (see `metadata_spec.md`) |
 
 All codex paths are overridable via CLI flags so the utilities also work on a
 copied snapshot of another machine's `~/.codex`.
@@ -53,7 +54,9 @@ The generated summary keeps them separable:
 3. `expenses.json` — time / tokens / cost detail (see `expenses_spec.md`).
 4. `measurements.json` — tool usage, LOC, rule-violation findings
    (see `measurements_spec.md`).
-5. `review_code.md`, `review_cfd.md`, `review_results.md` — blank scorecards
+5. `metadata.json` — harness / model / context / subagent / router / prompt
+   metadata (see `metadata_spec.md`).
+6. `review_code.md`, `review_cfd.md`, `review_results.md` — blank scorecards
    for reviewers, one point per row with a score column.
 
 ## Summary structure
@@ -84,6 +87,18 @@ The generated summary keeps them separable:
     "tool_usage": { "total": 0, "by_tool": {}, "subagent_spawns": 0 },
     "loc": { "method": "git|file", "files": 0, "lines": 0, "by_extension": {} },
     "rule_violations": []
+  },
+  "metadata": {             // metadata_spec.md
+    "harness": { "harness": "codex", "cli_version": "...", "plugins": [...] },
+    "models": { "<model>": { "catalog": {...}, "reasoning_efforts_seen": [...],
+                "max_context_used": 0, "threads": 0 } },
+    "context": { "by_model": {...}, "by_thread": {...} },
+    "subagents": [ { "thread_id": "...", "parent_thread_id": "...",
+                     "nickname": "...", "type": "mesh_analysis", "model": "...",
+                     "reasoning_effort": [...], "tokens_used": 0 } ],
+    "opencodex": null | { "opencodex_version": "...", "config_facts": {...} },
+    "prompts": { "by_root_thread": { "<root>": { "goal_objective": "...",
+                 "initial_user_prompt": {...}, "resume_prompts": [...] } } }
   }
 }
 ```

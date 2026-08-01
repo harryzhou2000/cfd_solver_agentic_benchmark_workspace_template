@@ -178,6 +178,10 @@ def main() -> int:
     ap.add_argument("--logs-db", default=str(defaults["logs_db"]))
     ap.add_argument("--sessions-root", default=str(defaults["sessions_root"]))
     ap.add_argument("--cost-metadata", default=str(ROOT / "config" / "cost_metadata.json"))
+    ap.add_argument("--history", default=str(cd.codex_home() / "history.jsonl"))
+    ap.add_argument("--ocx-config", default=str(Path.home() / ".opencodex" / "config.json"))
+    ap.add_argument("--ocx-catalog", default=str(cd.codex_home() / "opencodex-catalog.json"))
+    ap.add_argument("--plugins-root", default=str(cd.codex_home() / "plugins"))
     ap.add_argument("--out", default=None)
     ap.add_argument(
         "--roots",
@@ -201,19 +205,27 @@ def main() -> int:
             cmd += ["--goals-db", args.goals_db, "--logs-db", args.logs_db,
                     "--sessions-root", args.sessions_root,
                     "--cost-metadata", args.cost_metadata]
-        else:
+        elif tool == "extract_measurements.py":
             cmd += ["--logs-db", args.logs_db, "--sessions-root", args.sessions_root]
+        elif tool == "extract_metadata.py":
+            cmd += ["--goals-db", args.goals_db, "--logs-db", args.logs_db,
+                    "--sessions-root", args.sessions_root,
+                    "--history", args.history, "--ocx-config", args.ocx_config,
+                    "--ocx-catalog", args.ocx_catalog,
+                    "--plugins-root", args.plugins_root]
         if args.roots:
             cmd += ["--roots", args.roots]
         return cmd
 
     subprocess.run(_base_cmd("extract_expenses.py", "expenses.json"), check=True)
     subprocess.run(_base_cmd("extract_measurements.py", "measurements.json"), check=True)
+    subprocess.run(_base_cmd("extract_metadata.py", "metadata.json"), check=True)
     subprocess.run([sys.executable, str(ROOT / "tools" / "generate_review_forms.py"),
                     "--out", str(out_dir)], check=True)
 
     expenses = json.loads((out_dir / "expenses.json").read_text())
     measurements = json.loads((out_dir / "measurements.json").read_text())
+    metadata = json.loads((out_dir / "metadata.json").read_text())
     review_areas = {}
     for name in ("code", "cfd", "results"):
         review_areas[name] = json.loads((out_dir / f"review_{name}.json").read_text())
@@ -284,6 +296,7 @@ def main() -> int:
         "cfd_review": review_areas["cfd"],
         "result_review": result_review_area,
         "measurements": measurements,
+        "metadata": metadata,
         "provenance": {
             "state_db": args.state_db,
             "goals_db": args.goals_db,
@@ -291,13 +304,14 @@ def main() -> int:
             "sessions_root": args.sessions_root,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "tools": ["extract_expenses.py", "extract_measurements.py",
-                      "generate_review_forms.py", "summarize.py"],
+                      "extract_metadata.py", "generate_review_forms.py",
+                      "summarize.py"],
         },
     }
 
     # 3. light schema self-check
     required_top = ["contestant", "expenses", "code_review", "cfd_review",
-                    "result_review", "measurements", "provenance"]
+                    "result_review", "measurements", "metadata", "provenance"]
     missing = [k for k in required_top if k not in summary]
     if missing:
         print(f"ERROR: summary missing required keys: {missing}", file=sys.stderr)
@@ -313,6 +327,7 @@ def main() -> int:
 def render_md(path: Path, s: dict, out_dir: Path) -> None:
     e = s["expenses"]
     m = s["measurements"]
+    md = s["metadata"]
     c = s["contestant"]
     lines = [
         f"# Final Result Summary — {Path(c['workspace']).name}",
@@ -367,6 +382,66 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
     ]
     if m["loc"].get("git"):
         lines.append(f"- LOC (git tracked): {m['loc']['git'].get('lines_total', 0):,} lines")
+    lines += [
+        "",
+        "## Metadata",
+        "",
+        f"- Harness: {md['harness'].get('harness')} "
+        f"cli {md['harness'].get('cli_version')} "
+        f"({md['harness'].get('originator')}, provider "
+        f"{md['harness'].get('model_provider')})",
+    ]
+    if md["harness"].get("plugins"):
+        lines.append("- Plugins: " + ", ".join(
+            f"{p['name']} {p['version']}" for p in md["harness"]["plugins"]))
+    lines += [
+        "",
+        "| Model | Effort(s) | Context window | Max context used | Threads |",
+        "|-------|-----------|---------------:|-----------------:|--------:|",
+    ]
+    for model, info in sorted(md["models"].items()):
+        max_used = info["max_context_used"]
+        used_str = f"{max_used:,}" if max_used else "n/a"
+        lines.append(
+            f"| {model} | {', '.join(info['reasoning_efforts_seen']) or 'n/a'} | "
+            f"{info['catalog'].get('context_window') or '?'} | "
+            f"{used_str} | {info['threads']} |"
+        )
+    if md.get("opencodex"):
+        o = md["opencodex"]
+        lines += [
+            "",
+            f"### opencodex router (non-vanilla models: "
+            f"{', '.join(o['non_vanilla_models'])})",
+            "",
+            f"- opencodex version: {o.get('opencodex_version')} "
+            f"(submodule {o.get('opencodex_submodule_pin')})",
+            f"- config facts: {json.dumps(o.get('config_facts'))[:400]}",
+        ]
+    if md.get("subagents"):
+        lines += [
+            "",
+            "### Subagent threads",
+            "",
+            "| Thread | Parent | Nickname | Type | Model | Effort | Tokens |",
+            "|--------|--------|----------|------|-------|--------|-------:|",
+        ]
+        for sa in md["subagents"][:30]:
+            lines.append(
+                f"| `{sa['thread_id'][:8]}` | `{(sa.get('parent_thread_id') or '')[:8]}` | "
+                f"{sa.get('nickname') or ''} | {sa.get('type') or ''} | "
+                f"{sa['model']} | {', '.join(sa['reasoning_effort'] or []) or 'n/a'} | "
+                f"{sa['tokens_used']:,} |"
+            )
+        if len(md["subagents"]) > 30:
+            lines.append(f"| ... | {len(md['subagents']) - 30} more | | | | | |")
+    lines += ["", "### Prompts", ""]
+    for rid, p in md["prompts"].get("by_root_thread", {}).items():
+        lines.append(f"- `{rid[:8]}` goal: {p.get('goal_objective') or 'none'}")
+        if p.get("initial_user_prompt"):
+            lines.append(f"  - initial: {p['initial_user_prompt'].get('text', '')[:200]}")
+        for rp in p.get("resume_prompts", []):
+            lines.append(f"  - resume: {rp.get('text', '')[:200]}")
     lines += ["", "### Rule-violation candidates", ""]
     if not m["rule_violations"]:
         lines.append("None detected.")
