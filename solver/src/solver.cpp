@@ -1095,9 +1095,7 @@ class FlowSolver::Impl {
         const Real selected = config_.freestream.mach >= 1.0
                                   ? Real{1.0}
                                   : config_.physics.mode == PhysicsMode::inviscid
-                                        ? (config_.freestream.mach > 0.5
-                                               ? Real{2.0}
-                                               : Real{10.0})
+                                        ? Real{2.0}
                                         : Real{5.0};
         const Real cap = std::min(config_.run_control.cfl_max, selected);
         const Real initial = std::min(config_.run_control.cfl_initial, cap);
