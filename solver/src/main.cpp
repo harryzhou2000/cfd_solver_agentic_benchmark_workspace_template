@@ -302,8 +302,10 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
                                    ? "true_dual_time_BDF2"
                                    : "local_pseudo_time_defect_correction";
     metadata.implicit_solver = "analytic_4x4_Euler_block_Jacobi_defect_correction";
-    metadata.reconstruction = "weighted_least_squares_piecewise_linear";
-    metadata.limiter = "Barth_Jespersen_active";
+        metadata.reconstruction =
+            "weighted_least_squares_piecewise_linear_with_one_ring_pressure_jump_flattening";
+        metadata.limiter =
+            "Barth_Jespersen_active_P1_smooth_P0_for_dilated_pressure_jump_ge_0.25";
     metadata.spatial_order_claimed = 2;
     metadata.positivity_preservation =
         "face_increment_scaling_and_global_update_backtracking";
@@ -492,7 +494,11 @@ int main(int argc, char** argv) {
             status.notes = summary.notes + "; positivity fallbacks=" +
                            std::to_string(summary.positivity_backtracks) +
                            "; Riemann fallbacks=" +
-                           std::to_string(summary.hllc_fallback_faces);
+                           std::to_string(summary.hllc_fallback_faces) +
+                           "; final strong-jump P0 cells=" +
+                           std::to_string(summary.hard_first_order_cells) +
+                           "; final max pressure-jump sensor=" +
+                           std::to_string(summary.max_pressure_jump_sensor);
             if (status.convergence_status == cfd::ConvergenceStatus::failed) {
                 output->record_failure(status);
             } else {

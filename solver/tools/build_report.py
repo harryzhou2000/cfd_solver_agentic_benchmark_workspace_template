@@ -670,7 +670,7 @@ For viscous fluxes the Newtonian/Fourier model is $\tau_{{xx}}=2\mu u_x-\tfrac23
 \section{{Meshes, boundaries, and spatial discretization}}
 Each residual is a sum of oriented face fluxes over an unstructured control volume, $R_i=\sum_{{f\in\partial\Omega_i}}(\widehat{{F}}^i_f-\widehat{{F}}^v_f)|S_f|$, with each face normal directed from the owner cell to its neighbour or exterior.  The case inputs map CGNS boundary families to farfield plus either inviscid slip wall or viscous no-slip adiabatic wall.  Farfield faces use a characteristic exterior state.  Every stationary impermeable body face uses the exact inviscid flux $[0,pn_x,pn_y,0]^T$ rather than applying Rusanov dissipation to a reflected reconstructed state; no-slip walls additionally impose $u=v=0$ and zero normal temperature gradient in the viscous flux.  Submitted surface data are declared as \texttt{{boundary\_value}} output, so wall velocities in the report are not conflated with adjacent cell-centre velocities.
 
-Gradients are weighted least-squares reconstructions, face states are piecewise linear, and the production limiter is the submitted Barth--Jespersen method.  Face-state density/pressure positivity uses the submitted scaling/backtracking method.  The report does not infer any first-order fallback: its occurrence and trigger must be recorded in run notes or metadata before it can be claimed.
+Gradients are weighted least-squares reconstructions, face states are piecewise linear, and the production limiter is the submitted Barth--Jespersen method.  A thermodynamically coupled strong-jump fallback forms $\chi_f=|p_R-p_L|/(p_R+p_L)$, takes the maximum over one face-neighbour ring, retains the limited P1 gradient for $\chi\le0.10$, linearly flattens all four primitive gradients for $0.10<\chi<0.25$, and uses local P0 for $\chi\ge0.25$.  Thus smooth cells remain second order while strong shocks use a disclosed local first-order fallback.  Face-state density/pressure positivity additionally uses the submitted scaling/backtracking method.  Each run note records the final hard-P0 cell count and maximum pressure-jump sensor.
 
 \begin{{table}}[htbp]\centering\scriptsize
 \caption{{Submitted mesh/case evidence. Boundary tags are the tags present in submitted wall surface rows.}}\label{{tab:mesh}}
@@ -678,7 +678,7 @@ Gradients are weighted least-squares reconstructions, face states are piecewise 
 {mesh_rows}
 \bottomrule\end{{tabularx}}\end{{table}}
 
-The production metadata identifies the reconstruction, limiter, and positivity method for every result: piecewise-linear reconstruction is applied to face states, the stated limiter controls oscillations, and the stated positivity control protects density and pressure.  The report does not infer an unused first-order fallback; any fallback must be described by the submitted metadata/notes.
+The production metadata identifies the reconstruction, limiter, strong-jump trigger, and positivity method for every result.  Piecewise-linear reconstruction remains active outside the localized sensor region, and the run notes make the final P0 extent traceable rather than silently claiming global second order.
 \begin{{center}}\small\begin{{tabularx}}{{\linewidth}}{{lXX X X}}\toprule
 Case & inviscid flux & viscous flux & time integrator & implicit solver\\\midrule
 {method_rows}

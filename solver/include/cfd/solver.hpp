@@ -78,6 +78,8 @@ struct SolverSummary {
     SolverInnerStatistics inner_statistics{};
     std::uint64_t positivity_backtracks{};
     std::uint64_t hllc_fallback_faces{};
+    std::uint64_t hard_first_order_cells{};
+    Real max_pressure_jump_sensor{};
 };
 
 struct SolverCallbacks {

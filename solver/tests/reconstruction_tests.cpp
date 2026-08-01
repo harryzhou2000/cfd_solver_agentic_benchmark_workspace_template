@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <vector>
 
 namespace {
@@ -66,6 +67,17 @@ void test_active_barth_jespersen_limiter() {
         assert(rho <= center.rho + 1.0e-12);
         assert(rho >= 1.0 - 1.0e-12);
     }
+}
+
+void test_pressure_jump_flattening_factor() {
+    assert(close(cfd::pressure_jump_flattening_factor(0.0), 1.0));
+    assert(close(cfd::pressure_jump_flattening_factor(0.10), 1.0));
+    assert(close(cfd::pressure_jump_flattening_factor(0.175), 0.5));
+    assert(close(cfd::pressure_jump_flattening_factor(0.25), 0.0));
+    assert(close(cfd::pressure_jump_flattening_factor(0.90), 0.0));
+    assert(close(cfd::pressure_jump_flattening_factor(
+                     std::numeric_limits<double>::quiet_NaN()),
+                 0.0));
 }
 
 void test_face_positivity_and_state_encoding() {
@@ -131,6 +143,7 @@ int main() {
     test_exact_linear_gradient_on_irregular_stencil();
     test_constant_preservation_and_singular_fallback();
     test_active_barth_jespersen_limiter();
+    test_pressure_jump_flattening_factor();
     test_face_positivity_and_state_encoding();
     test_viscous_and_wall_helpers();
     std::cout << "reconstruction tests passed\n";

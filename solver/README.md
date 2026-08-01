@@ -4,6 +4,12 @@ The C++17 solver reads the benchmark CGNS meshes, partitions with METIS, and
 runs under MPI. Python is used only to inspect already-written solver output and
 render a report; it does not generate solver histories or upgrade a failed run.
 
+The production spatial scheme is weighted-least-squares P1 reconstruction with
+an active Barth--Jespersen limiter. A one-ring pressure-jump sensor leaves
+smooth cells unchanged, continuously flattens all primitive gradients between
+sensor values 0.10 and 0.25, and uses local P0 only at stronger jumps. Final
+hard-P0 cell counts and maximum sensor values are written into each run status.
+
 ## Build and tests
 
 From the repository root, configure with the supplied external dependency prefix:

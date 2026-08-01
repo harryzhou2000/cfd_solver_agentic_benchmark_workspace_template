@@ -21,6 +21,7 @@ namespace {
 constexpr int kStateHaloTag = 31001;
 constexpr int kGradientHaloTag = 31002;
 constexpr int kCorrectionHaloTag = 31003;
+constexpr int kPressureSensorHaloTag = 31004;
 
 [[nodiscard]] Real dot(const Vec2& lhs, const Vec2& rhs) noexcept {
     return lhs[0] * rhs[0] + lhs[1] * rhs[1];
@@ -410,6 +411,8 @@ class FlowSolver::Impl {
     std::uint64_t positivity_backtracks_{};
     std::uint64_t positivity_reconstruction_fallbacks_{};
     std::uint64_t hllc_fallback_faces_{};
+    std::uint64_t last_hard_first_order_cells_{};
+    Real last_max_pressure_jump_sensor_{};
     bool transient_seed_applied_{};
 
     void build_node_lookup() {
@@ -487,9 +490,49 @@ class FlowSolver::Impl {
             primitive_[local] = to_primitive(states_[local], gas_);
         }
         if (config_.numerics_required.spatial_order <= 1) {
+            last_hard_first_order_cells_ = 0;
+            last_max_pressure_jump_sensor_ = 0.0;
             std::fill(gradients_.begin(), gradients_.end(), PrimitiveGradients{});
             exchange_halo_packets(mesh_.halo, gradients_, communicator_, kGradientHaloTag);
             return;
+        }
+
+        // Detect strong interior pressure jumps before reconstruction, then
+        // dilate the sensor by one face-neighbor ring.  Using one scalar to
+        // flatten all primitive gradients keeps the fallback
+        // thermodynamically coupled.  Smooth stencils retain their P1 WLS/BJ
+        // reconstruction exactly; only strong discontinuities become local
+        // P0 for the existing Rusanov flux.
+        std::vector<Real> pressure_jump(states_.size(), 0.0);
+        for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
+            for (const LocalIndex neighbor_index : mesh_.adjacency[local]) {
+                const std::size_t neighbor =
+                    static_cast<std::size_t>(neighbor_index);
+                const Real left_pressure = primitive_[local].p;
+                const Real right_pressure = primitive_[neighbor].p;
+                const Real denominator = std::max(
+                    left_pressure + right_pressure, 2.0 * gas_.pressure_floor);
+                pressure_jump[local] = std::max(
+                    pressure_jump[local],
+                    std::abs(right_pressure - left_pressure) / denominator);
+            }
+        }
+        exchange_halo_packets(mesh_.halo, pressure_jump, communicator_,
+                              kPressureSensorHaloTag);
+        std::vector<Real> flattening(mesh_.owned_count, 1.0);
+        last_hard_first_order_cells_ = 0;
+        last_max_pressure_jump_sensor_ = 0.0;
+        for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
+            Real dilated_sensor = pressure_jump[local];
+            for (const LocalIndex neighbor_index : mesh_.adjacency[local]) {
+                dilated_sensor = std::max(
+                    dilated_sensor,
+                    pressure_jump[static_cast<std::size_t>(neighbor_index)]);
+            }
+            flattening[local] = pressure_jump_flattening_factor(dilated_sensor);
+            last_max_pressure_jump_sensor_ =
+                std::max(last_max_pressure_jump_sensor_, dilated_sensor);
+            if (flattening[local] <= 0.0) ++last_hard_first_order_cells_;
         }
         for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
             const Vec2 center = mesh_.cells[local].cell.centroid;
@@ -526,6 +569,10 @@ class FlowSolver::Impl {
                                     center, primitive_[local], samples, face_locations,
                                     boundary_values)
                                     .gradients;
+            for (Vec2& gradient : gradients_[local]) {
+                gradient[0] *= flattening[local];
+                gradient[1] *= flattening[local];
+            }
         }
         exchange_halo_packets(mesh_.halo, gradients_, communicator_, kGradientHaloTag);
     }
@@ -1717,12 +1764,16 @@ class FlowSolver::Impl {
     }
 
     void finalize_diagnostic_counts(SolverSummary& summary) const {
-        std::uint64_t local[3]{positivity_backtracks_, positivity_reconstruction_fallbacks_,
-                               hllc_fallback_faces_};
-        std::uint64_t global[3]{};
-        MPI_Allreduce(local, global, 3, MPI_UINT64_T, MPI_SUM, communicator_);
+        std::uint64_t local[4]{positivity_backtracks_, positivity_reconstruction_fallbacks_,
+                               hllc_fallback_faces_, last_hard_first_order_cells_};
+        std::uint64_t global[4]{};
+        MPI_Allreduce(local, global, 4, MPI_UINT64_T, MPI_SUM, communicator_);
         summary.positivity_backtracks = global[0] + global[1];
         summary.hllc_fallback_faces = global[2];
+        summary.hard_first_order_cells = global[3];
+        MPI_Allreduce(&last_max_pressure_jump_sensor_,
+                      &summary.max_pressure_jump_sensor, 1, MPI_DOUBLE, MPI_MAX,
+                      communicator_);
     }
 };
 
