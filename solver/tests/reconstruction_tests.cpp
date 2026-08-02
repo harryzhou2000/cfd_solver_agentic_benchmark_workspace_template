@@ -21,6 +21,16 @@ cfd::Primitive linear_value(const cfd::Vec2& x) {
     return value;
 }
 
+cfd::Primitive smooth_value(const cfd::Vec2& x) {
+    cfd::Primitive value{};
+    value.rho = 2.0 + 0.3 * x[0] - 0.2 * x[1] + 0.1 * x[0] * x[0] +
+                0.05 * x[0] * x[1] - 0.08 * x[1] * x[1];
+    value.u = -0.4 + 0.2 * x[0] + 0.1 * x[1] + 0.07 * x[0] * x[0];
+    value.v = 0.7 - 0.1 * x[0] + 0.3 * x[1] + 0.05 * x[0] * x[1];
+    value.p = 4.0 + 0.4 * x[0] - 0.2 * x[1] + 0.09 * x[1] * x[1];
+    return value;
+}
+
 void test_exact_linear_gradient_on_irregular_stencil() {
     const cfd::Vec2 center{0.2, -0.4};
     const std::vector<cfd::Vec2> locations{{1.1, -0.1}, {-0.7, 0.9}, {0.5, -1.8}, {1.6, 1.2}};
@@ -33,6 +43,39 @@ void test_exact_linear_gradient_on_irregular_stencil() {
     assert(close(gradients[1][0], -2.0)); assert(close(gradients[1][1], 0.25));
     assert(close(gradients[2][0], 0.5)); assert(close(gradients[2][1], 3.0));
     assert(close(gradients[3][0], -1.0)); assert(close(gradients[3][1], 2.5));
+}
+
+void test_second_order_face_value_on_scaled_irregular_stencil() {
+    const cfd::Vec2 center{0.37, -0.22};
+    const std::vector<cfd::Vec2> offsets{{1.0, 0.1}, {-0.8, 0.4}, {0.2, 1.1},
+                                          {-0.3, -0.9}, {0.9, -0.7}, {-1.0, -0.5}};
+    const cfd::Vec2 face_offset{0.23, -0.17};
+    std::vector<double> errors;
+    for (const double h : {0.2, 0.1, 0.05, 0.025}) {
+        std::vector<cfd::PrimitiveSample> samples;
+        for (const cfd::Vec2& offset : offsets) {
+            const cfd::Vec2 location{center[0] + h * offset[0],
+                                     center[1] + h * offset[1]};
+            samples.push_back({location, smooth_value(location)});
+        }
+        const cfd::Vec2 face{center[0] + h * face_offset[0],
+                             center[1] + h * face_offset[1]};
+        const auto reconstruction = cfd::reconstruct_limited_primitive(
+            center, smooth_value(center), samples, {face});
+        assert(!reconstruction.used_singular_fallback);
+        assert(reconstruction.limiter[0] > 0.999999);
+        const double reconstructed =
+            smooth_value(center).rho +
+            reconstruction.gradients[0][0] * (face[0] - center[0]) +
+            reconstruction.gradients[0][1] * (face[1] - center[1]);
+        errors.push_back(std::abs(reconstructed - smooth_value(face).rho));
+    }
+    for (std::size_t level = 1; level < errors.size(); ++level) {
+        assert(errors[level] > 0.0);
+        const double observed_order =
+            std::log(errors[level - 1] / errors[level]) / std::log(2.0);
+        assert(observed_order > 1.95);
+    }
 }
 
 void test_constant_preservation_and_singular_fallback() {
@@ -129,6 +172,7 @@ void test_viscous_and_wall_helpers() {
 
 int main() {
     test_exact_linear_gradient_on_irregular_stencil();
+    test_second_order_face_value_on_scaled_irregular_stencil();
     test_constant_preservation_and_singular_fallback();
     test_active_barth_jespersen_limiter();
     test_face_positivity_and_state_encoding();
