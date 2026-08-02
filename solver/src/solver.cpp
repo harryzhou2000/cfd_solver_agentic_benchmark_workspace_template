@@ -334,6 +334,7 @@ class FlowSolver::Impl {
         previous_states_ = states_;
         older_states_ = states_;
         transient_seed_applied_ = false;
+        started_from_restart_ = true;
     }
 
     void apply_transient_symmetry_seed() {
@@ -423,6 +424,7 @@ class FlowSolver::Impl {
     std::uint64_t positivity_reconstruction_fallbacks_{};
     std::uint64_t hllc_fallback_faces_{};
     bool transient_seed_applied_{};
+    bool started_from_restart_{};
 
     void build_node_lookup() {
         node_coordinates_.reserve(mesh_.nodes.size());
@@ -1467,17 +1469,24 @@ class FlowSolver::Impl {
                 converged = true;
                 break;
             }
-            if (step >= plateau_eligible_step &&
-                final_reduction >= std::min(target_orders, Real{2.0}) &&
-                final_linf_reduction >= std::min(target_orders, Real{2.0}) &&
+            const Real minimum_plateau_reduction =
+                started_from_restart_ ? Real{0.0}
+                                      : std::min(target_orders, Real{2.0});
+            const bool restart_plateau_bounded =
+                !started_from_restart_ ||
+                (accepted_spatial.residual_l2 <= 2.0 * initial_residual &&
+                 accepted_spatial.residual_linf <= 2.0 * initial_linf_residual);
+            if (step >= plateau_eligible_step && restart_plateau_bounded &&
+                final_reduction >= minimum_plateau_reduction &&
+                final_linf_reduction >= minimum_plateau_reduction &&
                 stable_plateau(residual_history, drag_history, lift_history)) {
                 plateau = true;
                 break;
             }
             if (step == maximum_steps) {
-                plateau = final_reduction >= std::min(target_orders, Real{2.0}) &&
-                          final_linf_reduction >=
-                              std::min(target_orders, Real{2.0}) &&
+                plateau = restart_plateau_bounded &&
+                          final_reduction >= minimum_plateau_reduction &&
+                          final_linf_reduction >= minimum_plateau_reduction &&
                           stable_plateau(residual_history, drag_history, lift_history);
                 break;
             }
@@ -1500,7 +1509,9 @@ class FlowSolver::Impl {
                             ? "global residual target reached with synchronized final state" +
                                   cfl_note
                             : plateau
-                                  ? "documented stable residual/force plateau after the supplied stability horizon" +
+                                  ? std::string(started_from_restart_
+                                                    ? "documented bounded restart-origin residual/force plateau after the supplied stability horizon"
+                                                    : "documented stable residual/force plateau after the supplied stability horizon") +
                                         cfl_note
                                   : "production horizon ended before convergence or a stable plateau" +
                                         cfl_note;
