@@ -483,7 +483,7 @@ class FlowSolver::Impl {
     bool steady_inviscid_total_enthalpy_{};
     Real freestream_total_enthalpy_{};
     static constexpr Real kJointReferenceFloorFraction = 0.1;
-    static constexpr Real kRarefactionResponseRange = 3.0;
+    static constexpr Real kRarefactionResponseRange = 7.0;
     std::vector<State> states_;
     std::vector<State> previous_states_;
     std::vector<State> older_states_;
@@ -1428,9 +1428,7 @@ class FlowSolver::Impl {
                 if (inner == 1) {
                     for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
                         pseudo_coefficient[local] =
-                            std::max(evaluation.diagonal[local], Real{1.0e-30}) / cfl *
-                            (1.0 + kRarefactionResponseRange *
-                                       rarefaction_sensor(local));
+                            std::max(evaluation.diagonal[local], Real{1.0e-30}) / cfl;
                     }
                 }
                 for (std::size_t local = 0; local < mesh_.owned_count; ++local) {

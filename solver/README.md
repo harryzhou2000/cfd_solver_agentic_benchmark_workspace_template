@@ -19,8 +19,8 @@ freestream references, that face alone falls back to its admissible cell-center
 state. A smooth pre-emptive sensor is active only on cells with compactness
 `4A/sum(edge_length^2) < 0.1`: as both density and pressure fall from 25% toward
 10% of freestream, it continuously flattens the face increment, raises shared
-Rusanov jump dissipation from 1x to at most 4x, and reduces local pseudo-time
-CFL by at most four. The same numerical flux is applied with opposite signs to
+Rusanov jump dissipation from 1x to at most 8x, and uses that same enlarged
+spectral radius in the implicit diagonal. The same numerical flux is applied with opposite signs to
 its two cells, so the stabilization remains conservative and does not clamp the
 state. These constraints are deliberately disabled for laminar and transient
 cases.

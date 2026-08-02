@@ -336,7 +336,7 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
              << config.run_control.rusanov_dissipation_scale.value_or(1.0)
              << "_with_exact_stationary_wall_flux";
         if (config.run_control.type == cfd::RunType::steady) {
-            flux << "_and_conservative_compactness_joint_rarefaction_jump_dissipation_1x_to_4x";
+            flux << "_and_conservative_compactness_joint_rarefaction_jump_dissipation_1x_to_8x";
         }
         metadata.inviscid_flux = flux.str();
     } else {
