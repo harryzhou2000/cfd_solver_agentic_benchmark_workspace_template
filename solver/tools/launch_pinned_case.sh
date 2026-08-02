@@ -25,6 +25,27 @@ if [[ ! -f $case_json ]]; then
     echo "missing case JSON: $case_json" >&2
     exit 66
 fi
+if [[ ! -f solver/build/cfd_solver ]]; then
+    echo "missing solver binary: solver/build/cfd_solver" >&2
+    exit 66
+fi
+
+restart_file=""
+solver_options=("$@")
+for ((option_index = 0; option_index < ${#solver_options[@]}; ++option_index)); do
+    if [[ ${solver_options[option_index]} == "--restart" ]]; then
+        if ((option_index + 1 >= ${#solver_options[@]})); then
+            echo "missing value after --restart" >&2
+            exit 64
+        fi
+        restart_file=${solver_options[option_index + 1]}
+        break
+    fi
+done
+if [[ -n $restart_file && ! -f $restart_file ]]; then
+    echo "missing restart file: $restart_file" >&2
+    exit 66
+fi
 if [[ -e $output_dir && ! -d $output_dir ]]; then
     echo "output path exists and is not a directory: $output_dir" >&2
     exit 73
@@ -53,6 +74,15 @@ fi
 exec >>"$launch_log" 2>&1
 printf 'launcher_pid=%d\n' "$$"
 printf 'working_directory=%s\n' "$PWD"
+printf 'source_revision=%s\n' "$(git rev-parse --verify HEAD 2>/dev/null || printf unavailable)"
+printf 'solver_binary_path=%s\n' "$(realpath solver/build/cfd_solver)"
+printf 'solver_binary_sha256=%s\n' "$(sha256sum solver/build/cfd_solver | awk '{print $1}')"
+printf 'case_json_path=%s\n' "$(realpath "$case_json")"
+printf 'case_json_sha256=%s\n' "$(sha256sum "$case_json" | awk '{print $1}')"
+if [[ -n $restart_file ]]; then
+    printf 'restart_path=%s\n' "$(realpath "$restart_file")"
+    printf 'restart_sha256=%s\n' "$(sha256sum "$restart_file" | awk '{print $1}')"
+fi
 printf 'command='
 printf '%q ' mpirun -np "$mpi_ranks" solver/build/cfd_solver solve \
     --case "$case_json" --output "$output_dir" --report-level full "$@"
