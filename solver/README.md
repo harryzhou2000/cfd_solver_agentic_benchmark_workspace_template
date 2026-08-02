@@ -13,10 +13,11 @@ For steady inviscid flow, uniform freestream total enthalpy is enforced as the
 adiabatic-Euler invariant during nonlinear updates and at reconstructed face
 states. The Rusanov energy flux is the upwind total enthalpy times its numerical
 mass flux, so the constrained path is compatible with the conservative spatial
-residual. Candidate updates and face extrapolations also use a documented joint
-anti-vacuum safeguard: density and pressure may each cross 10% of their
-freestream reference independently, but not simultaneously. These constraints
-are deliberately disabled for laminar and transient cases.
+residual. Face extrapolations also use a documented joint anti-vacuum safeguard:
+when reconstructed density and pressure would both cross 10% of their
+freestream references, that face alone falls back to its admissible cell-center
+state. This does not impose a freestream-relative floor on cell averages. These
+constraints are deliberately disabled for laminar and transient cases.
 
 ## Build and tests
 

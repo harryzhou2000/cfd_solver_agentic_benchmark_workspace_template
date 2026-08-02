@@ -520,15 +520,16 @@ class FlowSolver::Impl {
 
     /// Conditions nonlinear iterates onto the exact uniform-H0 manifold of a
     /// steady, adiabatic Euler flow. The finite-volume residual remains fully
-    /// conservative; this constrains only the nonlinear solution path. A
-    /// freestream-relative joint rho/p floor prevents a single sharp-cusp cell
-    /// from approaching vacuum while leaving one-variable shock extrema free.
+    /// conservative; this constrains only the nonlinear solution path.
     [[nodiscard]] bool condition_iteration_state(State& state) const noexcept {
         if (!steady_inviscid_total_enthalpy_) return is_admissible(state, gas_);
-        if (!project_state_to_total_enthalpy(state, freestream_total_enthalpy_, gas_)) {
-            return false;
-        }
-        return !violates_joint_reference_floor(
+        return project_state_to_total_enthalpy(
+            state, freestream_total_enthalpy_, gas_);
+    }
+
+    [[nodiscard]] bool violates_face_rarefaction_guard(
+        const State& state) const noexcept {
+        return violates_joint_reference_floor(
             state, config_.freestream.density, config_.freestream.pressure,
             kJointReferenceFloorFraction, gas_);
     }
@@ -545,8 +546,9 @@ class FlowSolver::Impl {
                                     freestream_primitive_),
                                 gas_);
         }
+        const bool exterior_conditioned = condition_iteration_state(exterior);
         if (steady_inviscid_total_enthalpy_ &&
-            !condition_iteration_state(exterior)) {
+            (!exterior_conditioned || violates_face_rarefaction_guard(exterior))) {
             exterior = to_state(interior, gas_);
             if (!condition_iteration_state(exterior)) {
                 throw std::runtime_error(
@@ -564,7 +566,8 @@ class FlowSolver::Impl {
         if (!steady_inviscid_total_enthalpy_) return result;
 
         State conditioned = result.conservative;
-        if (!condition_iteration_state(conditioned)) {
+        if (!condition_iteration_state(conditioned) ||
+            violates_face_rarefaction_guard(conditioned)) {
             conditioned = to_state(cell_value, gas_);
             if (!condition_iteration_state(conditioned)) {
                 throw std::runtime_error(
@@ -1237,7 +1240,8 @@ class FlowSolver::Impl {
             alpha *= 0.5;
         }
         if (backtracks == 45) {
-            throw std::runtime_error("implicit correction cannot preserve positive density/pressure");
+            throw std::runtime_error(
+                "implicit correction cannot satisfy the active physical safeguards");
         }
         positivity_backtracks_ += static_cast<std::uint64_t>(backtracks);
         for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
@@ -1651,8 +1655,8 @@ class FlowSolver::Impl {
         if (steady_inviscid_total_enthalpy_) {
             summary.notes +=
                 "; steady inviscid nonlinear iterates and reconstructed face states "
-                "constrained to freestream total enthalpy with a 0.1 freestream-relative "
-                "joint density/pressure rarefaction safeguard";
+                "constrained to freestream total enthalpy with a reconstructed-face-only "
+                "0.1 freestream-relative joint density/pressure rarefaction safeguard";
         }
         summary.notes += "; global Linf residual reduction=" +
                          std::to_string(final_linf_reduction) + " orders";

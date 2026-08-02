@@ -366,7 +366,7 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
     metadata.positivity_preservation =
         config.run_control.type == cfd::RunType::steady &&
                 config.physics.mode == cfd::PhysicsMode::inviscid
-            ? "face_increment_scaling_global_update_backtracking_and_0.1_freestream_relative_joint_density_pressure_rarefaction_guard"
+            ? "face_increment_scaling_global_update_backtracking_and_reconstructed_face_only_0.1_freestream_relative_joint_density_pressure_rarefaction_guard"
             : "face_increment_scaling_and_global_update_backtracking";
     metadata.wall_boundary_output_semantics = "boundary_value";
     metadata.true_bdf2_inner_loop = config.run_control.type == cfd::RunType::transient;
