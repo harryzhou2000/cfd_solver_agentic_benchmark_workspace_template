@@ -1571,7 +1571,6 @@ class FlowSolver::Impl {
                 }
                 last_ratio = evaluation.residual_sample.residual_l2 / first_inner_residual;
                 used_inner = inner;
-                if (rank_ == 0 && callbacks.residual) callbacks.residual(evaluation.residual_sample);
                 if (inner >= minimum_inner && last_ratio <= target) {
                     inner_converged = true;
                     accepted = std::move(evaluation);
@@ -1616,6 +1615,14 @@ class FlowSolver::Impl {
             final_global_residual = accepted.residual_sample.residual_l2;
             lift_history.push_back(accepted.force_sample.lift);
             drag_history.push_back(accepted.force_sample.drag);
+            // The transient output cadence is one accepted sample per physical
+            // step.  Intermediate inner iterates remain represented by the
+            // accepted row's inner_iter and by aggregate target statistics;
+            // writing every trial iterate would create millions of rows and
+            // misrepresent pseudo-time iterations as physical samples.
+            if (rank_ == 0 && callbacks.residual) {
+                callbacks.residual(accepted.residual_sample);
+            }
             if (rank_ == 0 && callbacks.force) callbacks.force(accepted.force_sample);
 
             older_states_ = previous_states_;

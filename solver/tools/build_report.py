@@ -367,40 +367,27 @@ def _validate_transient_evidence(case_id: str, controls: dict[str, Any], metadat
         if int(float(row["step"])) != expected_step or not math.isclose(float(row["physical_time"]), expected_step * dt,
                                                                            rel_tol=0.0, abs_tol=1.0e-10):
             raise BuildError(f"{case_id}: force history is not sampled at the supplied physical-time cadence")
-    residuals_by_step: dict[int, list[dict[str, float | str]]] = {}
+    if len(residuals) != expected_steps:
+        raise BuildError(f"{case_id}: residuals.csv must contain one accepted sample for every physical step")
     supplied_cfl = _number(controls["cfl_max"], f"{case_id} supplied transient CFL")
-    for row in residuals:
+    observed_iterations: list[int] = []
+    for expected_step, row in enumerate(residuals, start=1):
         step = int(float(row["step"]))
-        if step < 1 or step > expected_steps:
-            raise BuildError(f"{case_id}: residual history has an invalid physical step")
+        if step != expected_step:
+            raise BuildError(f"{case_id}: residual history must be sequential by accepted physical step")
         if not math.isclose(float(row["dt"]), dt, rel_tol=0.0, abs_tol=1.0e-12):
             raise BuildError(f"{case_id}: residual dt differs from the supplied production dt")
         if not math.isclose(float(row["physical_time"]), step * dt, rel_tol=0.0, abs_tol=1.0e-10):
             raise BuildError(f"{case_id}: residual physical time differs from step*dt")
         if not math.isclose(float(row["cfl"]), supplied_cfl, rel_tol=0.0, abs_tol=1.0e-12):
             raise BuildError(f"{case_id}: transient pseudo-time CFL differs from the supplied fixed value")
-        residuals_by_step.setdefault(step, []).append(row)
-    if len(residuals_by_step) != expected_steps:
-        raise BuildError(f"{case_id}: residual history must cover every accepted physical step")
-    observed_iterations: list[int] = []
-    final_ratios: list[float] = []
-    for step in range(1, expected_steps + 1):
-        rows = residuals_by_step[step]
-        inner_indices = [int(float(row["inner_iter"])) for row in rows]
-        if inner_indices != list(range(1, len(rows) + 1)):
-            raise BuildError(f"{case_id}: physical step {step} must contain a contiguous inner-iteration trace")
-        used = inner_indices[-1]
+        used_value = _number(row["inner_iter"], f"{case_id} step {step} inner_iter")
+        if int(used_value) != used_value:
+            raise BuildError(f"{case_id}: accepted inner_iter must be an integer")
+        used = int(used_value)
         if used < configured_min or used > configured_max:
             raise BuildError(f"{case_id}: physical step {step} violates configured inner-iteration bounds")
-        first = float(rows[0]["residual_l2"])
-        final = float(rows[-1]["residual_l2"])
-        if first <= 0.0 or final < 0.0:
-            raise BuildError(f"{case_id}: physical step {step} has an invalid inner residual")
-        ratio = final / first
-        if ratio > configured_target * (1.0 + 1.0e-6):
-            raise BuildError(f"{case_id}: physical step {step} misses the configured total-residual target")
         observed_iterations.append(used)
-        final_ratios.append(ratio)
     observed_min = int(_number(metadata.get("observed_min_inner_iterations"), "observed_min_inner_iterations"))
     observed_max = int(_number(metadata.get("observed_max_inner_iterations"), "observed_max_inner_iterations"))
     observed_mean = _number(metadata.get("observed_mean_inner_iterations"), "observed_mean_inner_iterations")
@@ -413,9 +400,9 @@ def _validate_transient_evidence(case_id: str, controls: dict[str, Any], metadat
     if not math.isclose(_number(metadata.get("inner_target_converged_fraction"), "inner_target_converged_fraction"),
                         1.0, rel_tol=0.0, abs_tol=1.0e-12):
         raise BuildError(f"{case_id}: every accepted transient step must meet the inner target")
-    if not math.isclose(_number(metadata.get("last_inner_residual_ratio"), "last_inner_residual_ratio"),
-                        final_ratios[-1], rel_tol=1.0e-4, abs_tol=1.0e-12):
-        raise BuildError(f"{case_id}: stored final inner ratio does not match residuals.csv")
+    last_ratio = _number(metadata.get("last_inner_residual_ratio"), "last_inner_residual_ratio")
+    if last_ratio < 0.0 or last_ratio > configured_target * (1.0 + 1.0e-6):
+        raise BuildError(f"{case_id}: stored final inner ratio misses the configured target")
 
 
 def _validate_production_evidence(case_id: str, case_input: dict[str, Any], metadata: dict,

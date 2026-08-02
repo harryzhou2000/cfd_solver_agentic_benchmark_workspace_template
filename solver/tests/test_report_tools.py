@@ -168,10 +168,9 @@ def create_results(root: Path) -> Path:
             for step in range(1, 30001):
                 time = step * 0.01
                 cl = 0.2 * math.sin(2.0 * math.pi * 0.2 * time)
-                for inner in range(1, 6):
-                    residual = 10.0 ** (-(inner - 1))
-                    residual_rows.append([step, time, inner, 1, 0.01, residual, residual,
-                                          residual, residual, residual, 2.0 * residual])
+                residual = 1.0e-4
+                residual_rows.append([step, time, 5, 1, 0.01, residual, residual,
+                                      residual, residual, residual, 2.0 * residual])
                 cd = 1.1 + 0.01 * math.cos(2.0 * math.pi * 0.4 * time)
                 force_rows.append([step, time, cl, cd, 0.0, cd - viscous, viscous, cl, 0.0])
         else:
