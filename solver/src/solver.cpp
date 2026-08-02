@@ -1193,8 +1193,19 @@ class FlowSolver::Impl {
             int used_inner = 0;
             bool inner_converged = false;
             Real step_inner_ratio = 1.0;
-            for (int inner = 1; inner <= config_.run_control.max_inner_iterations;
-                 ++inner) {
+            // Once both global convergence targets have been demonstrated,
+            // the remaining work is the explicit 200-step force-tail gate.
+            // Do not spend the full nonlinear allowance repeatedly solving a
+            // vanishing pseudo-time subproblem; use the configured minimum,
+            // and automatically restore the full allowance if either global
+            // norm rises below target on the next outer step.
+            const bool settling_force_tail =
+                final_reduction >= target_orders &&
+                final_linf_reduction >= target_orders;
+            const int nonlinear_inner_limit =
+                settling_force_tail ? config_.run_control.min_inner_iterations
+                                    : config_.run_control.max_inner_iterations;
+            for (int inner = 1; inner <= nonlinear_inner_limit; ++inner) {
                 Evaluation evaluation = assemble_spatial(step, 0.0, inner, cfl, 0.0);
                 const SolverResidualSample spatial_sample = evaluation.residual_sample;
                 if (inner == 1) {
@@ -1230,7 +1241,7 @@ class FlowSolver::Impl {
                     inner_converged = true;
                     break;
                 }
-                if (inner == config_.run_control.max_inner_iterations) {
+                if (inner == nonlinear_inner_limit) {
                     accepted = std::move(evaluation);
                     accepted_spatial = spatial_sample;
                     break;
