@@ -51,7 +51,7 @@ void test_second_order_face_value_on_scaled_irregular_stencil() {
                                           {-0.3, -0.9}, {0.9, -0.7}, {-1.0, -0.5}};
     const cfd::Vec2 face_offset{0.23, -0.17};
     std::vector<double> errors;
-    for (const double h : {0.2, 0.1, 0.05, 0.025}) {
+    for (const double h : {0.05, 0.025, 0.0125, 0.00625}) {
         std::vector<cfd::PrimitiveSample> samples;
         for (const cfd::Vec2& offset : offsets) {
             const cfd::Vec2 location{center[0] + h * offset[0],
@@ -64,6 +64,7 @@ void test_second_order_face_value_on_scaled_irregular_stencil() {
             center, smooth_value(center), samples, {face});
         assert(!reconstruction.used_singular_fallback);
         assert(reconstruction.limiter[0] > 0.999999);
+        assert(close(reconstruction.shock_flattening, 1.0));
         const double reconstructed =
             smooth_value(center).rho +
             reconstruction.gradients[0][0] * (face[0] - center[0]) +
@@ -75,6 +76,39 @@ void test_second_order_face_value_on_scaled_irregular_stencil() {
         const double observed_order =
             std::log(errors[level - 1] / errors[level]) / std::log(2.0);
         assert(observed_order > 1.95);
+    }
+}
+
+void test_coupled_pressure_jump_shock_flattening() {
+    cfd::Primitive center{};
+    center.rho = 1.0; center.p = 1.0;
+    cfd::Primitive low_jump = center;
+    low_jump.p = 1.01;
+    cfd::Primitive middle_jump = center;
+    middle_jump.p = 1.02;
+    cfd::Primitive strong_jump = center;
+    strong_jump.p = 1.03;
+    assert(close(cfd::pressure_jump_flattening_factor(
+                     center, {{{1.0, 0.0}, low_jump}}),
+                 1.0));
+    assert(close(cfd::pressure_jump_flattening_factor(
+                     center, {{{1.0, 0.0}, middle_jump}}),
+                 0.5));
+    assert(close(cfd::pressure_jump_flattening_factor(
+                     center, {{{1.0, 0.0}, strong_jump}}),
+                 0.0));
+
+    const std::vector<cfd::PrimitiveSample> samples{
+        {{1.0, 0.0}, strong_jump},
+        {{0.0, 1.0}, center},
+        {{-1.0, -1.0}, center},
+    };
+    const auto reconstruction = cfd::reconstruct_limited_primitive(
+        {0.0, 0.0}, center, samples, {{0.5, 0.0}});
+    assert(close(reconstruction.shock_flattening, 0.0));
+    for (const auto& gradient : reconstruction.gradients) {
+        assert(close(gradient[0], 0.0));
+        assert(close(gradient[1], 0.0));
     }
 }
 
@@ -124,6 +158,7 @@ void test_face_positivity_and_state_encoding() {
     assert(face.primitive.density > gas.density_floor);
     assert(face.primitive.pressure > gas.pressure_floor);
     assert(cfd::is_admissible(face.conservative, gas));
+
 }
 
 void test_viscous_and_wall_helpers() {
@@ -173,6 +208,7 @@ void test_viscous_and_wall_helpers() {
 int main() {
     test_exact_linear_gradient_on_irregular_stencil();
     test_second_order_face_value_on_scaled_irregular_stencil();
+    test_coupled_pressure_jump_shock_flattening();
     test_constant_preservation_and_singular_fallback();
     test_active_barth_jespersen_limiter();
     test_face_positivity_and_state_encoding();

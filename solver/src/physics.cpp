@@ -154,6 +154,10 @@ StateJacobian euler_flux_jacobian(const ConservativeState& state,
 NumericalFlux rusanov_flux(const ConservativeState& left, const ConservativeState& right,
                            const Vec2& unit_normal, const GasModel& gas,
                            Real dissipation_scale) {
+    if (!std::isfinite(dissipation_scale) || !(dissipation_scale > 0.0)) {
+        throw std::invalid_argument(
+            "Rusanov dissipation scale must be positive and finite");
+    }
     const ThermodynamicState left_primitive = decode_state(left, gas);
     const ThermodynamicState right_primitive = decode_state(right, gas);
     const ConservativeState left_flux = euler_flux(left, unit_normal, gas);
@@ -166,13 +170,30 @@ NumericalFlux rusanov_flux(const ConservativeState& left, const ConservativeStat
                                    std::abs(right_normal_velocity) +
                                        right_primitive.sound_speed);
     NumericalFlux result{};
-    result.spectral_radius = spectral;
+    // The implicit diagonal and local pseudo-time step consume this radius.
+    // Extra numerical dissipation increases the flux Jacobian magnitude, while
+    // sub-unit experimental scales must still retain the physical wave speed.
+    result.spectral_radius = std::max(Real{1.0}, dissipation_scale) * spectral;
     result.used_fallback = false;
     for (std::size_t component = 0; component < result.value.size(); ++component) {
         result.value[component] =
             0.5 * (left_flux[component] + right_flux[component]) -
             0.5 * dissipation_scale * spectral * (right[component] - left[component]);
     }
+    return result;
+}
+
+NumericalFlux enthalpy_upwind_rusanov_flux(
+    const ConservativeState& left, const ConservativeState& right,
+    const Vec2& unit_normal, const GasModel& gas, Real dissipation_scale) {
+    NumericalFlux result =
+        rusanov_flux(left, right, unit_normal, gas, dissipation_scale);
+    const ThermodynamicState left_primitive = decode_state(left, gas);
+    const ThermodynamicState right_primitive = decode_state(right, gas);
+    const Real upwind_enthalpy = result.value[0] >= 0.0
+                                     ? left_primitive.total_enthalpy
+                                     : right_primitive.total_enthalpy;
+    result.value[3] = upwind_enthalpy * result.value[0];
     return result;
 }
 

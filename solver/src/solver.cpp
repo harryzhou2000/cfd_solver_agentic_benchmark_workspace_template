@@ -633,7 +633,7 @@ class FlowSolver::Impl {
                 // enthalpy far better; retain HLLC for transonic/supersonic
                 // shock resolution and for viscous cases where diffusion
                 // damps this mode.
-                inviscid = rusanov_flux(
+                inviscid = enthalpy_upwind_rusanov_flux(
                     owner_face.conservative, neighbor_state, face.normal, gas_,
                     config_.run_control.rusanov_dissipation_scale.value_or(1.0));
             } else {

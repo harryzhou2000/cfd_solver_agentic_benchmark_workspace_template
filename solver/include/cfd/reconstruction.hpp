@@ -23,8 +23,21 @@ struct ReconstructionResult {
     PrimitiveGradients gradients{};
     /// Barth--Jespersen factor for [rho, u, v, p].
     std::array<Real, kStateVariables> limiter{{1.0, 1.0, 1.0, 1.0}};
+    /// Smooth pressure-jump shock flattening applied to every primitive
+    /// gradient.  It is one in smooth regions and approaches zero across a
+    /// strong local pressure jump.
+    Real shock_flattening{1.0};
     bool used_singular_fallback{};
 };
+
+/// Returns a linear pressure-jump shock-flattening factor.  Relative jumps at
+/// or below onset keep full P1 reconstruction; jumps at or above full flatten
+/// the cell to piecewise constant.  The same factor is applied to every
+/// primitive component so reconstructed thermodynamic and velocity increments
+/// remain coupled through a captured shock.
+[[nodiscard]] Real pressure_jump_flattening_factor(
+    const Primitive& cell_value, const std::vector<PrimitiveSample>& samples,
+    Real onset = 0.01, Real full = 0.03);
 
 struct FaceReconstruction {
     ThermodynamicState primitive{};
@@ -46,9 +59,10 @@ struct FaceReconstruction {
     const Primitive& cell_value, const std::vector<PrimitiveSample>& samples,
     const std::vector<Primitive>& boundary_values = {});
 
-/// Applies the multidimensional Barth--Jespersen limiter at all supplied face
-/// locations.  Boundary values participate in the extrema, so the caller can
-/// use the same routine for owned, ghost, and physical-boundary faces.
+/// Applies multidimensional Barth--Jespersen component bounds at all supplied
+/// face locations followed by pressure-jump shock flattening.  Boundary values
+/// participate in the extrema, so the caller can use the same routine for
+/// owned, ghost, and physical-boundary faces.
 [[nodiscard]] ReconstructionResult reconstruct_limited_primitive(
     const Vec2& cell_center, const Primitive& cell_value,
     const std::vector<PrimitiveSample>& samples, const std::vector<Vec2>& face_locations,

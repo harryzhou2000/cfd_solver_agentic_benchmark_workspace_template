@@ -64,6 +64,13 @@ using StateJacobian = std::array<ConservativeState, 4>;
                                          const Vec2& unit_normal,
                                          const GasModel& gas,
                                          Real dissipation_scale = 1.0);
+/// Rusanov mass and momentum flux with the Euler energy flux written as
+/// numerical mass flux times upwind total enthalpy.  This is conservative and
+/// consistent, and preserves a uniform-total-enthalpy inviscid manifold.
+[[nodiscard]] NumericalFlux enthalpy_upwind_rusanov_flux(
+    const ConservativeState& left, const ConservativeState& right,
+    const Vec2& unit_normal, const GasModel& gas,
+    Real dissipation_scale = 1.0);
 /// Exact inviscid flux through a stationary impermeable wall.  The raw
 /// interior state supplies pressure and a conservative spectral radius for
 /// the implicit preconditioner; reflected-state dissipation is not part of

@@ -166,6 +166,32 @@ ReconstructionBounds primitive_bounds(const Primitive& cell_value,
     return result;
 }
 
+Real pressure_jump_flattening_factor(const Primitive& cell_value,
+                                     const std::vector<PrimitiveSample>& samples,
+                                     Real onset, Real full) {
+    if (!finite_primitive_vector(cell_value) || !(cell_value.p > 0.0) ||
+        !std::isfinite(onset) || !std::isfinite(full) || !(onset >= 0.0) ||
+        !(full > onset)) {
+        throw std::invalid_argument(
+            "pressure-jump flattening requires positive pressure and 0 <= onset < full");
+    }
+    Real maximum_jump = 0.0;
+    for (const PrimitiveSample& sample : samples) {
+        if (!finite_primitive_vector(sample.value) || !(sample.value.p > 0.0)) {
+            throw std::invalid_argument(
+                "pressure-jump flattening sample requires positive finite pressure");
+        }
+        const Real scale = std::max(
+            std::min(cell_value.p, sample.value.p),
+            std::numeric_limits<Real>::min());
+        maximum_jump = std::max(
+            maximum_jump, std::abs(sample.value.p - cell_value.p) / scale);
+    }
+    if (maximum_jump <= onset) return 1.0;
+    if (maximum_jump >= full) return 0.0;
+    return (full - maximum_jump) / (full - onset);
+}
+
 ReconstructionResult reconstruct_limited_primitive(
     const Vec2& cell_center, const Primitive& cell_value,
     const std::vector<PrimitiveSample>& samples, const std::vector<Vec2>& face_locations,
@@ -194,6 +220,12 @@ ReconstructionResult reconstruct_limited_primitive(
     for (std::size_t variable = 0; variable < kStateVariables; ++variable) {
         result.gradients[variable][0] *= result.limiter[variable];
         result.gradients[variable][1] *= result.limiter[variable];
+    }
+    result.shock_flattening =
+        pressure_jump_flattening_factor(cell_value, samples);
+    for (Vec2& gradient : result.gradients) {
+        gradient[0] *= result.shock_flattening;
+        gradient[1] *= result.shock_flattening;
     }
     return result;
 }

@@ -34,7 +34,9 @@ struct CommandLine {
     std::optional<int> diagnostic_steps;
     std::optional<int> diagnostic_order;
     std::optional<cfd::Real> diagnostic_cfl;
+    std::optional<int> diagnostic_max_inner_iterations;
     std::optional<cfd::Real> pseudo_cfl;
+    std::optional<cfd::Real> rusanov_dissipation_scale;
     bool diagnostic_uniform{};
     std::string command;
 };
@@ -107,6 +109,19 @@ struct CommandLine {
                 throw std::invalid_argument("--diagnostic-cfl must be a positive finite number");
             }
         }
+        else if (option == "--diagnostic-max-inner") {
+            try {
+                std::size_t consumed = 0;
+                const int iterations = std::stoi(value, &consumed);
+                if (consumed != value.size() || iterations <= 0) {
+                    throw std::invalid_argument("range");
+                }
+                result.diagnostic_max_inner_iterations = iterations;
+            } catch (const std::exception&) {
+                throw std::invalid_argument(
+                    "--diagnostic-max-inner must be a positive integer");
+            }
+        }
         else if (option == "--pseudo-cfl") {
             try {
                 std::size_t consumed = 0;
@@ -117,6 +132,20 @@ struct CommandLine {
                 result.pseudo_cfl = cfl;
             } catch (const std::exception&) {
                 throw std::invalid_argument("--pseudo-cfl must be a positive finite number");
+            }
+        }
+        else if (option == "--rusanov-dissipation-scale") {
+            try {
+                std::size_t consumed = 0;
+                const cfd::Real scale = std::stod(value, &consumed);
+                if (consumed != value.size() || !std::isfinite(scale) ||
+                    !(scale > 0.0)) {
+                    throw std::invalid_argument("range");
+                }
+                result.rusanov_dissipation_scale = scale;
+            } catch (const std::exception&) {
+                throw std::invalid_argument(
+                    "--rusanov-dissipation-scale must be a positive finite number");
             }
         }
         else if (option == "--diagnostic-uniform") {
@@ -292,11 +321,18 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
     metadata.partition_edge_cut = mesh.partition_edge_cut;
     metadata.halo_exchange = "neighbor_isend_irecv";
     metadata.equation_set = "compressible_navier_stokes_2d";
-    metadata.inviscid_flux =
-        config.physics.mode == cfd::PhysicsMode::inviscid &&
-                config.freestream.mach < 1.0
-            ? "Rusanov_local_Lax_Friedrichs_scale_1_with_exact_stationary_wall_flux"
-            : "HLLC_with_admissibility_checked_Rusanov_fallback_and_exact_stationary_wall_flux";
+    if (config.physics.mode == cfd::PhysicsMode::inviscid &&
+        config.freestream.mach < 1.0) {
+        std::ostringstream flux;
+        flux << "Rusanov_local_Lax_Friedrichs_with_upwind_total_enthalpy_energy_flux_scale_"
+             << std::setprecision(8)
+             << config.run_control.rusanov_dissipation_scale.value_or(1.0)
+             << "_with_exact_stationary_wall_flux";
+        metadata.inviscid_flux = flux.str();
+    } else {
+        metadata.inviscid_flux =
+            "HLLC_with_admissibility_checked_Rusanov_fallback_and_exact_stationary_wall_flux";
+    }
     metadata.entropy_fix = std::nullopt;
     metadata.viscous_flux = config.physics.mode == cfd::PhysicsMode::laminar
                                 ? "corrected_central_Newtonian_Fourier"
@@ -306,9 +342,15 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
                                    : "local_pseudo_time_defect_correction";
     metadata.implicit_solver =
         "analytic_4x4_block_Jacobi_with_exact_stationary_wall_pressure_block";
-    metadata.reconstruction = "weighted_least_squares_piecewise_linear";
-    metadata.limiter = "Barth_Jespersen_active";
-    metadata.spatial_order_claimed = 2;
+    if (config.numerics_required.spatial_order >= 2) {
+        metadata.reconstruction =
+            "weighted_least_squares_piecewise_linear_with_pressure_jump_shock_flattening_0.01_to_0.03";
+        metadata.limiter = "Barth_Jespersen_active";
+    } else {
+        metadata.reconstruction = "piecewise_constant";
+        metadata.limiter = "disabled_for_first_order_diagnostic";
+    }
+    metadata.spatial_order_claimed = config.numerics_required.spatial_order;
     metadata.positivity_preservation =
         "face_increment_scaling_and_global_update_backtracking";
     metadata.wall_boundary_output_semantics = "boundary_value";
@@ -378,6 +420,19 @@ int main(int argc, char** argv) {
         if (command.diagnostic_cfl) {
             config.run_control.cfl_initial = *command.diagnostic_cfl;
             config.run_control.cfl_max = *command.diagnostic_cfl;
+        }
+        if (command.diagnostic_max_inner_iterations) {
+            if (*command.diagnostic_max_inner_iterations <
+                config.run_control.min_inner_iterations) {
+                throw std::invalid_argument(
+                    "--diagnostic-max-inner cannot be below the supplied minimum inner iterations");
+            }
+            config.run_control.max_inner_iterations =
+                *command.diagnostic_max_inner_iterations;
+        }
+        if (command.rusanov_dissipation_scale) {
+            config.run_control.rusanov_dissipation_scale =
+                *command.rusanov_dissipation_scale;
         }
         if (command.diagnostic_uniform) {
             for (auto& [tag, type] : config.boundary_conditions) {
@@ -453,7 +508,7 @@ int main(int argc, char** argv) {
         const double start = MPI_Wtime();
         cfd::SolverSummary summary = solver.solve(callbacks);
         if (command.diagnostic_steps || command.diagnostic_order ||
-            command.diagnostic_cfl ||
+            command.diagnostic_cfl || command.diagnostic_max_inner_iterations ||
             command.diagnostic_uniform) {
             summary.convergence_status = "failed";
             summary.notes += "; diagnostic numerical override was used; this is not a final result";

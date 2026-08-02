@@ -27,11 +27,64 @@ int main() {
     const auto exact = cfd::euler_flux(state, normal, gas);
     const auto hllc = cfd::hllc_flux(state, state, normal, gas);
     const auto rusanov = cfd::rusanov_flux(state, state, normal, gas);
+    const auto scaled_rusanov = cfd::rusanov_flux(state, state, normal, gas, 2.0);
     for (std::size_t component = 0; component < state.size(); ++component) {
         assert(close(hllc.value[component], exact[component]));
         assert(close(rusanov.value[component], exact[component]));
+        assert(close(scaled_rusanov.value[component], exact[component]));
     }
+    assert(close(scaled_rusanov.spectral_radius, 2.0 * rusanov.spectral_radius));
     assert(!hllc.used_fallback);
+
+    cfd::ThermodynamicState right_primitive{};
+    right_primitive.density = 0.9;
+    right_primitive.velocity_x = 1.5;
+    right_primitive.velocity_y = -0.2;
+    right_primitive.pressure = 2.5;
+    const auto right_state = cfd::encode_state(right_primitive, gas);
+    const auto right_flux = cfd::euler_flux(right_state, normal, gas);
+    const auto unscaled_jump = cfd::rusanov_flux(state, right_state, normal, gas);
+    const auto scaled_jump = cfd::rusanov_flux(state, right_state, normal, gas, 2.0);
+    for (std::size_t component = 0; component < state.size(); ++component) {
+        const double central = 0.5 * (exact[component] + right_flux[component]);
+        assert(close(scaled_jump.value[component] - central,
+                     2.0 * (unscaled_jump.value[component] - central)));
+    }
+    assert(close(scaled_jump.spectral_radius,
+                 2.0 * unscaled_jump.spectral_radius));
+
+    const auto enthalpy_equal =
+        cfd::enthalpy_upwind_rusanov_flux(state, state, normal, gas);
+    for (std::size_t component = 0; component < state.size(); ++component) {
+        assert(close(enthalpy_equal.value[component], exact[component]));
+    }
+
+    // The Euler energy flux is mass flux times total enthalpy.  When two
+    // states share H0, the enthalpy-upwind Rusanov flux must preserve that
+    // invariant exactly even though rho, velocity, and pressure jump.
+    constexpr double common_enthalpy = 6.0;
+    const auto constant_enthalpy_state = [&](double density, double velocity_x,
+                                              double velocity_y) {
+        cfd::ThermodynamicState value{};
+        value.density = density;
+        value.velocity_x = velocity_x;
+        value.velocity_y = velocity_y;
+        const double kinetic = 0.5 *
+            (velocity_x * velocity_x + velocity_y * velocity_y);
+        value.pressure = (common_enthalpy - kinetic) * density *
+                         (gas.gamma - 1.0) / gas.gamma;
+        return cfd::encode_state(value, gas);
+    };
+    const auto enthalpy_left = constant_enthalpy_state(1.0, 1.2, 0.1);
+    const auto enthalpy_right = constant_enthalpy_state(0.7, 0.4, -0.2);
+    assert(close(cfd::decode_state(enthalpy_left, gas).total_enthalpy,
+                 common_enthalpy));
+    assert(close(cfd::decode_state(enthalpy_right, gas).total_enthalpy,
+                 common_enthalpy));
+    const auto invariant_flux = cfd::enthalpy_upwind_rusanov_flux(
+        enthalpy_left, enthalpy_right, normal, gas);
+    assert(close(invariant_flux.value[3],
+                 common_enthalpy * invariant_flux.value[0]));
 
     // Davis-wave-speed HLLC is not positivity preserving for every strong
     // two-rarefaction state.  Such a star state must use the robust Rusanov
