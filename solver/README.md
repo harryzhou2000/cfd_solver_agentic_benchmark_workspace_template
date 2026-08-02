@@ -16,7 +16,10 @@ mass flux, so the constrained path is compatible with the conservative spatial
 residual. Face extrapolations also use a documented joint anti-vacuum safeguard:
 when reconstructed density and pressure would both cross 10% of their
 freestream references, that face alone falls back to its admissible cell-center
-state. This does not impose a freestream-relative floor on cell averages. These
+state. If a cell average nevertheless enters that joint-rarefaction range, the
+shared Rusanov jump dissipation on its interior faces is multiplied by four;
+the same numerical flux is applied with opposite signs to its two cells, so the
+stabilization remains conservative and does not clamp the state. These
 constraints are deliberately disabled for laminar and transient cases.
 
 ## Build and tests

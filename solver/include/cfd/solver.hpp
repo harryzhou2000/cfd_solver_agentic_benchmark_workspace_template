@@ -103,6 +103,7 @@ struct SolverSummary {
     SolverInnerStatistics inner_statistics{};
     std::uint64_t positivity_backtracks{};
     std::uint64_t hllc_fallback_faces{};
+    std::uint64_t rarefaction_dissipation_faces{};
 };
 
 struct SolverCallbacks {

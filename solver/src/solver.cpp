@@ -482,6 +482,7 @@ class FlowSolver::Impl {
     bool steady_inviscid_total_enthalpy_{};
     Real freestream_total_enthalpy_{};
     static constexpr Real kJointReferenceFloorFraction = 0.1;
+    static constexpr Real kJointRarefactionDissipationMultiplier = 4.0;
     std::vector<State> states_;
     std::vector<State> previous_states_;
     std::vector<State> older_states_;
@@ -495,6 +496,7 @@ class FlowSolver::Impl {
     std::uint64_t positivity_backtracks_{};
     std::uint64_t positivity_reconstruction_fallbacks_{};
     std::uint64_t hllc_fallback_faces_{};
+    std::uint64_t rarefaction_dissipation_faces_{};
     bool transient_seed_applied_{};
     bool started_from_restart_{};
     int resume_step_{};
@@ -766,9 +768,31 @@ class FlowSolver::Impl {
                 // while the consistent Euler energy flux is written as mass
                 // flux times upwind total enthalpy, preserving the uniform-H0
                 // inviscid manifold at every Mach number.
+                Real dissipation_scale =
+                    config_.run_control.rusanov_dissipation_scale.value_or(1.0);
+                if (steady_inviscid_total_enthalpy_) {
+                    const State& neighbor_center =
+                        physical_boundary
+                            ? neighbor_state
+                            : states_[static_cast<std::size_t>(
+                                  local_face.neighbor_local)];
+                    if (violates_face_rarefaction_guard(states_[owner]) ||
+                        violates_face_rarefaction_guard(neighbor_center)) {
+                        // A sharp, highly anisotropic trailing-edge stencil can
+                        // form a low-rho/low-p pocket even while remaining
+                        // positive and exactly H0-consistent.  Increase only
+                        // the shared Rusanov jump term on faces touching such
+                        // a state.  The identical flux is applied with
+                        // opposite signs to both cells, so conservation and
+                        // the consistent central flux are unchanged.
+                        dissipation_scale *=
+                            kJointRarefactionDissipationMultiplier;
+                        ++rarefaction_dissipation_faces_;
+                    }
+                }
                 inviscid = enthalpy_upwind_rusanov_flux(
                     owner_face.conservative, neighbor_state, face.normal, gas_,
-                    config_.run_control.rusanov_dissipation_scale.value_or(1.0));
+                    dissipation_scale);
             } else {
                 inviscid = hllc_flux(
                     owner_face.conservative, neighbor_state, face.normal, gas_,
@@ -2025,12 +2049,15 @@ class FlowSolver::Impl {
     }
 
     void finalize_diagnostic_counts(SolverSummary& summary) const {
-        std::uint64_t local[3]{positivity_backtracks_, positivity_reconstruction_fallbacks_,
-                               hllc_fallback_faces_};
-        std::uint64_t global[3]{};
-        MPI_Allreduce(local, global, 3, MPI_UINT64_T, MPI_SUM, communicator_);
+        std::uint64_t local[4]{positivity_backtracks_,
+                               positivity_reconstruction_fallbacks_,
+                               hllc_fallback_faces_,
+                               rarefaction_dissipation_faces_};
+        std::uint64_t global[4]{};
+        MPI_Allreduce(local, global, 4, MPI_UINT64_T, MPI_SUM, communicator_);
         summary.positivity_backtracks = global[0] + global[1];
         summary.hllc_fallback_faces = global[2];
+        summary.rarefaction_dissipation_faces = global[3];
     }
 };
 

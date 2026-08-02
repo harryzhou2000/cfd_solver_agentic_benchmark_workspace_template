@@ -335,6 +335,9 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
              << std::setprecision(8)
              << config.run_control.rusanov_dissipation_scale.value_or(1.0)
              << "_with_exact_stationary_wall_flux";
+        if (config.run_control.type == cfd::RunType::steady) {
+            flux << "_and_conservative_4x_joint_rarefaction_jump_dissipation";
+        }
         metadata.inviscid_flux = flux.str();
     } else {
         metadata.inviscid_flux =
@@ -657,7 +660,9 @@ int main(int argc, char** argv) {
             status.notes = summary.notes + "; positivity fallbacks=" +
                            std::to_string(summary.positivity_backtracks) +
                            "; Riemann fallbacks=" +
-                           std::to_string(summary.hllc_fallback_faces);
+                           std::to_string(summary.hllc_fallback_faces) +
+                           "; joint-rarefaction high-dissipation face evaluations=" +
+                           std::to_string(summary.rarefaction_dissipation_faces);
             if (status.convergence_status == cfd::ConvergenceStatus::failed) {
                 output->record_failure(status);
             } else {
