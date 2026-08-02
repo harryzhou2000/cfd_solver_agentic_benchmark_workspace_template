@@ -483,6 +483,7 @@ class FlowSolver::Impl {
     bool steady_inviscid_total_enthalpy_{};
     Real freestream_total_enthalpy_{};
     static constexpr Real kJointReferenceFloorFraction = 0.1;
+    static constexpr Real kRarefactionResponseRange = 3.0;
     std::vector<State> states_;
     std::vector<State> previous_states_;
     std::vector<State> older_states_;
@@ -827,7 +828,9 @@ class FlowSolver::Impl {
                     // Rusanov jump term here as a joint rarefaction develops
                     // on a low-compactness cell. The identical face flux is
                     // applied with opposite signs, preserving conservation.
-                    dissipation_scale *= 1.0 + face_rarefaction_sensor;
+                    dissipation_scale *=
+                        1.0 + kRarefactionResponseRange *
+                                  face_rarefaction_sensor;
                     ++rarefaction_dissipation_faces_;
                 }
                 inviscid = enthalpy_upwind_rusanov_flux(
@@ -1426,7 +1429,8 @@ class FlowSolver::Impl {
                     for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
                         pseudo_coefficient[local] =
                             std::max(evaluation.diagonal[local], Real{1.0e-30}) / cfl *
-                            (1.0 + rarefaction_sensor(local));
+                            (1.0 + kRarefactionResponseRange *
+                                       rarefaction_sensor(local));
                     }
                 }
                 for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
