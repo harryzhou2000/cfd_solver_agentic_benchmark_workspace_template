@@ -649,9 +649,11 @@ def _sanity_for_case(case: CaseData) -> dict:
         low_state = ((density < 0.1 * _number(freestream["rho"], "freestream density")) &
                      (pressure < 0.1 * _number(freestream["pressure"], "freestream pressure")))
         checks.update({
-            # Surface CSV uses decimal text, so allow a small roundoff margin
-            # over the exact projected boundary value.
-            "slip_wall_normal_velocity_negligible": bool(np.max(np.abs(normal_velocity)) <= 2.0e-6),
+            # Surface CSV independently rounds normals and projected velocity
+            # components to six significant digits.  The recomputed dot
+            # product can therefore be a few parts per million even though the
+            # in-memory boundary value is projected to machine zero.
+            "slip_wall_normal_velocity_negligible": bool(np.max(np.abs(normal_velocity)) <= 3.0e-6),
             "max_abs_surface_normal_velocity": float(np.max(np.abs(normal_velocity))),
             "viscous_force_negligible": bool(viscous <= 1.0e-8),
             "max_abs_final_viscous_force": viscous,
