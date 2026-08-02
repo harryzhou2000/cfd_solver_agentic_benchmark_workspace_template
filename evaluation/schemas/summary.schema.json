@@ -142,6 +142,46 @@
         "opencodex": { "type": ["object", "null"] },
         "opencode": { "type": ["object", "null"] },
         "prompts": { "type": "object" },
+        "workspace": {
+          "type": "object",
+          "properties": {
+            "git": {
+              "type": ["object", "null"],
+              "properties": {
+                "branch": { "type": ["string", "null"] },
+                "commit": { "type": ["string", "null"] }
+              }
+            },
+            "agents_md": {
+              "type": "object",
+              "properties": {
+                "path": { "type": "string" },
+                "exists": { "type": "boolean" },
+                "sha256": { "type": ["string", "null"] },
+                "content": { "type": ["string", "null"] },
+                "matches_git_head": { "type": ["boolean", "null"] }
+              }
+            },
+            "codegraph": {
+              "type": "object",
+              "properties": {
+                "exists": { "type": "boolean" },
+                "path": { "type": ["string", "null"] }
+              }
+            },
+            "benchmark_submodule": {
+              "type": "object",
+              "properties": {
+                "path": { "type": "string" },
+                "exists": { "type": "boolean" },
+                "commit": { "type": ["string", "null"] },
+                "branch": { "type": ["string", "null"] },
+                "dirty": { "type": ["boolean", "null"] },
+                "origin_url": { "type": ["string", "null"] }
+              }
+            }
+          }
+        },
         "questions": {
           "type": "array",
           "items": {

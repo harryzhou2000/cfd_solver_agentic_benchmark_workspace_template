@@ -15,6 +15,7 @@ Spec: evaluation/specs/metadata_spec.md
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -99,6 +100,49 @@ def load_plugins(root: str) -> list[dict]:
                 out.append({"source": source.name, "name": name_dir.name,
                             "version": ver.name})
     return out
+
+
+def workspace_state(ws: Path) -> dict:
+    """AGENTS.md contents, .codegraph presence, and the benchmark submodule
+    pointer for a contestant workspace."""
+    agents = {"path": str(ws / "AGENTS.md"), "exists": False,
+              "sha256": None, "content": None, "matches_git_head": None}
+    am = ws / "AGENTS.md"
+    if am.is_file():
+        try:
+            content = am.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            content = None
+        if content is not None:
+            agents.update({
+                "exists": True,
+                "sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
+                "content": content,
+            })
+            head = _run(["git", "-C", str(ws), "show", "HEAD:AGENTS.md"])
+            if head is not None:
+                agents["matches_git_head"] = (head.rstrip("\n") == content.rstrip("\n"))
+    codegraph = {"exists": (ws / ".codegraph").is_dir(),
+                 "path": str(ws / ".codegraph") if (ws / ".codegraph").is_dir() else None}
+    bm_path = ws / "cfd_solver_agentic_benchmark"
+    bm = {"path": str(bm_path), "exists": bm_path.is_dir(),
+          "commit": None, "branch": None, "dirty": None, "origin_url": None}
+    if bm["exists"]:
+        bm["commit"] = _run(["git", "-C", str(bm_path), "rev-parse", "HEAD"])
+        bm["branch"] = _run(["git", "-C", str(bm_path), "rev-parse", "--abbrev-ref", "HEAD"])
+        dirty = _run(["git", "-C", str(bm_path), "status", "--porcelain"])
+        bm["dirty"] = bool(dirty)
+        bm["origin_url"] = _run(["git", "-C", str(bm_path), "config", "--get",
+                                 "remote.origin.url"])
+    return {
+        "git": {
+            "branch": _run(["git", "-C", str(ws), "rev-parse", "--abbrev-ref", "HEAD"]),
+            "commit": _run(["git", "-C", str(ws), "rev-parse", "HEAD"]),
+        },
+        "agents_md": agents,
+        "codegraph": codegraph,
+        "benchmark_submodule": bm,
+    }
 
 
 def load_history(path: str) -> dict[str, list[dict]]:
@@ -329,6 +373,15 @@ def extract_opencode(args, workspace: str) -> dict:
         },
         "notes": [],
     }
+    if not workspace_state(Path(workspace))["agents_md"]["exists"]:
+        questions.append({
+            "id": "agents_md",
+            "question": "Which AGENTS.md was in effect for this run? The "
+                        "workspace has no AGENTS.md file.",
+            "reason": "AGENTS.md contents could not be recorded from the workspace",
+            "suggested_source": "the branch's AGENTS.md or the session's world_state",
+            "answer": None,
+        })
     return {
         "harness": harness,
         "models": models,
@@ -341,6 +394,7 @@ def extract_opencode(args, workspace: str) -> dict:
             "subagent_session_count": len(children),
         },
         "prompts": prompts,
+        "workspace": workspace_state(Path(workspace)),
         "questions": questions,
         "user_answers": {},
         "status": "needs_user_input" if questions else "complete",
@@ -582,6 +636,15 @@ def main() -> int:
             opencodex["codex_proxy_fallback_config"] = str(fallback)
 
     # ---- questions: anything the evaluator could not extract -------------
+    if not workspace_state(Path(workspace))["agents_md"]["exists"]:
+        questions.append({
+            "id": "agents_md",
+            "question": "Which AGENTS.md was in effect for this run? The "
+                        "workspace has no AGENTS.md file.",
+            "reason": "AGENTS.md contents could not be recorded from the workspace",
+            "suggested_source": "the branch's AGENTS.md or the session's world_state",
+            "answer": None,
+        })
     for m, info in models.items():
         if not info["catalog"].get("context_window"):
             questions.append({
@@ -636,6 +699,7 @@ def main() -> int:
         "subagents": subagents,
         "opencodex": opencodex,
         "prompts": prompts,
+        "workspace": workspace_state(Path(workspace)),
         "provenance": {
             "state_db": args.state_db,
             "goals_db": args.goals_db,

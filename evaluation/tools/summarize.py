@@ -427,6 +427,19 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
     if md["harness"].get("plugins"):
         lines.append("- Plugins: " + ", ".join(
             f"{p['name']} {p['version']}" for p in md["harness"]["plugins"]))
+    ws_md = md.get("workspace", {})
+    am = ws_md.get("agents_md", {})
+    if am.get("exists"):
+        head_ok = "matches HEAD" if am.get("matches_git_head") else "differs from HEAD"
+        lines.append(f"- AGENTS.md: sha256 {am.get('sha256', '')[:12]} ({head_ok})")
+    else:
+        lines.append("- AGENTS.md: MISSING (question raised for user)")
+    cg = ws_md.get("codegraph", {})
+    lines.append(f"- CodeGraph: {'present' if cg.get('exists') else 'absent'}")
+    bm = ws_md.get("benchmark_submodule", {})
+    if bm.get("exists"):
+        lines.append(f"- Benchmark submodule: {bm.get('commit', '?')[:12]} "
+                     f"({'dirty' if bm.get('dirty') else 'clean'})")
     if md.get("opencode"):
         lines.append(f"- opencode: v{md['harness'].get('version')}, "
                      f"{md['opencode'].get('root_session_count')} root / "

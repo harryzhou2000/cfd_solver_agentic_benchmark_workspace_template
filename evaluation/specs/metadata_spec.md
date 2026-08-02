@@ -117,9 +117,28 @@ Known situations that produce questions:
   from the local data store (`opencode export <sessionID> --sanitize` is the
   suggested source).
 
+## 8. Workspace repository state (AGENTS.md, CodeGraph, benchmark submodule)
+
+Each contestant run may use a slightly different `AGENTS.md` (per-branch
+versions, local edits, or none at all), so the exact state is recorded, not
+assumed:
+
+- `workspace.agents_md`: the actual file content of `<workspace>/AGENTS.md`,
+  its `sha256`, and whether it matches the workspace's git `HEAD` version
+  (`matches_git_head`). A missing file is reported explicitly and raises a
+  metadata question ("which AGENTS.md was in effect?"), because the harness
+  injects it into the run.
+- `workspace.codegraph`: whether `<workspace>/.codegraph/` exists (agents are
+  instructed to use CodeGraph when present).
+- `workspace.benchmark_submodule`: the `cfd_solver_agentic_benchmark`
+  submodule's `commit`, `branch`, `dirty` state, and `origin_url`, so the
+  exact benchmark revision under test is pinned in the record.
+- `workspace.git`: the workspace repository's own `branch` and `commit` (the
+  version of the workspace the run executed from).
+
 ## Output
 
 `metadata.json` (embedded in `summary.json` as `metadata`), with sections:
 `harness`, `models`, `context`, `subagents`, `opencodex` (conditional),
 `opencode` (conditional), `prompts`, `questions`, `user_answers`, `status`,
-and `provenance`.
+`workspace`, and `provenance`.

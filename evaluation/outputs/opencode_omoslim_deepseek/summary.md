@@ -30,12 +30,22 @@
 ## Metadata
 
 - Harness: opencode v1.18.11 (config: /home/harry/.config/opencode)
+- AGENTS.md: MISSING (question raised for user)
+- CodeGraph: absent
+- Benchmark submodule: a29ae3e02d84 (clean)
 - opencode: v1.18.11, 1 root / 12 subagent sessions
 
 | Model | Effort(s) | Context window | Max context used | Threads |
 |-------|-----------|---------------:|-----------------:|--------:|
 | deepseek-v4-pro@max | max | 550000 | 4,616,480 | 4 |
 | deepseek-v4-pro@medium | medium | 550000 | 63,596 | 9 |
+
+### Metadata questions for user (unextractable fields)
+
+| Question | Reason | Suggested source | Answer |
+|----------|--------|------------------|--------|
+| agents_md: Which AGENTS.md was in effect for this run? The workspace has no AGENTS.md file. | AGENTS.md contents could not be recorded from the workspace | the branch's AGENTS.md or the session's world_state |  |
+Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`; status then flips to complete.
 
 ### Subagent threads
 

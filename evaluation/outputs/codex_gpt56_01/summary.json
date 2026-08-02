@@ -15,34 +15,34 @@
       "goal_time": 20978.0,
       "wall_time": 21885.4,
       "by_root_thread": {
-        "019fb9e3-ba6e-7e40-99d3-84d723942dc8": {
-          "status": "complete",
-          "time_used_seconds": 20354,
-          "tokens_used": 2958604
+        "019fb9d5-b206-7ce3-ae53-f2cb03b03487": {
+          "status": "paused",
+          "time_used_seconds": 108,
+          "tokens_used": 35258
         },
         "019fb9cd-4b1b-7110-bfb2-057b00382a6f": {
           "status": "paused",
           "time_used_seconds": 381,
           "tokens_used": 84235
         },
-        "019fb9d5-b206-7ce3-ae53-f2cb03b03487": {
-          "status": "paused",
-          "time_used_seconds": 108,
-          "tokens_used": 35258
-        },
         "019fb9df-2884-7790-95c9-e87d2e1fc936": {
           "status": "blocked",
           "time_used_seconds": 135,
           "tokens_used": 96901
+        },
+        "019fb9e3-ba6e-7e40-99d3-84d723942dc8": {
+          "status": "complete",
+          "time_used_seconds": 20354,
+          "tokens_used": 2958604
         }
       },
       "by_root_tree": {
-        "019fb9e3-ba6e-7e40-99d3-84d723942dc8": {
-          "status": "complete",
-          "goal_time_seconds": 20354,
-          "goal_tokens": 2958604,
-          "threads": 22,
-          "tokens_used": 946579960,
+        "019fb9d5-b206-7ce3-ae53-f2cb03b03487": {
+          "status": "paused",
+          "goal_time_seconds": 108,
+          "goal_tokens": 35258,
+          "threads": 7,
+          "tokens_used": 597363,
           "model": "gpt-5.6-sol"
         },
         "019fb9cd-4b1b-7110-bfb2-057b00382a6f": {
@@ -53,20 +53,20 @@
           "tokens_used": 6799649,
           "model": "gpt-5.6-sol"
         },
-        "019fb9d5-b206-7ce3-ae53-f2cb03b03487": {
-          "status": "paused",
-          "goal_time_seconds": 108,
-          "goal_tokens": 35258,
-          "threads": 7,
-          "tokens_used": 597363,
-          "model": "gpt-5.6-sol"
-        },
         "019fb9df-2884-7790-95c9-e87d2e1fc936": {
           "status": "blocked",
           "goal_time_seconds": 135,
           "goal_tokens": 96901,
           "threads": 4,
           "tokens_used": 1010966,
+          "model": "gpt-5.6-sol"
+        },
+        "019fb9e3-ba6e-7e40-99d3-84d723942dc8": {
+          "status": "complete",
+          "goal_time_seconds": 20354,
+          "goal_tokens": 2958604,
+          "threads": 22,
+          "tokens_used": 946579960,
           "model": "gpt-5.6-sol"
         }
       }
@@ -907,7 +907,7 @@
       "goals_db": "/home/harry/.codex/goals_1.sqlite",
       "logs_db": "/home/harry/.codex/logs_2.sqlite",
       "sessions_root": "/home/harry/.codex/sessions",
-      "fetched_at": "2026-08-01T22:28:25.115659+00:00",
+      "fetched_at": "2026-08-02T08:05:22.704916+00:00",
       "num_threads": 46,
       "num_roots": 4
     }
@@ -3087,7 +3087,7 @@
     "provenance": {
       "state_db": "/home/harry/.codex/state_5.sqlite",
       "sessions_root": "/home/harry/.codex/sessions",
-      "generated_at": "2026-08-01T22:28:26.689141+00:00",
+      "generated_at": "2026-08-02T08:05:24.130734+00:00",
       "num_threads": 46
     }
   },
@@ -4053,6 +4053,31 @@
         }
       }
     },
+    "workspace": {
+      "git": {
+        "branch": "codex/gpt56/work01",
+        "commit": "727cbfd4891b661a99ad51f0ef42686c90f00c08"
+      },
+      "agents_md": {
+        "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_gpt56_01/AGENTS.md",
+        "exists": true,
+        "sha256": "8c9f03983ec1681aaa8145eca7b8b64077af56e4fc898ccdb5eb3fdfc8e002ff",
+        "content": "# AGENTS.md\n\nProject instructions for coding agents working in this repository.\n\n## 1. Git Discipline\n\n- Do NOT run `git pull`, `git push`, or switch branches without explicit user\n  authorization. Unauthorized remote or branch mutations are prohibited.\n- Do use `git commit` (and `git stash` when needed) freely as code checkpoints:\n  commit or stash working progress regularly so partial work can be resumed or\n  rolled back. Local checkpoint commits do not require approval; only pushing\n  and branch/remote mutations require it.\n\n## 2. Subagents\n\n- Delegating independent subtasks to subagents is encouraged.\n- Subagent model policy: the ONLY allowed subagent models are `gpt-5.6-terra`\n  and `gpt-5.6-luna` (passed as the `model` override to `spawn_agent`).\n  Do not spawn subagents with any other model.\n\n## 3. Persistence\n\n- Once the user has started a task, do not stop until the specified task is\n  accomplished to a level of satisfaction: completed results, validated\n  artifacts, and an honest report. Work through blockers with safe in-scope\n  checks and alternatives; only stop early when genuinely blocked or explicitly\n  told to stop.\n",
+        "matches_git_head": true
+      },
+      "codegraph": {
+        "exists": false,
+        "path": null
+      },
+      "benchmark_submodule": {
+        "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_gpt56_01/cfd_solver_agentic_benchmark",
+        "exists": true,
+        "commit": "ba3f9a8b1443d43c9d4ec1fdd110b8d112cd6701",
+        "branch": "codex/gpt56/work_01",
+        "dirty": false,
+        "origin_url": "https://github.com/harryzhou2000/cfd_solver_agentic_benchmark"
+      }
+    },
     "provenance": {
       "state_db": "/home/harry/.codex/state_5.sqlite",
       "goals_db": "/home/harry/.codex/goals_1.sqlite",
@@ -4062,7 +4087,7 @@
       "ocx_config": "/home/harry/.opencodex/config.json",
       "ocx_catalog": "/home/harry/.codex/opencodex-catalog.json",
       "plugins_root": "/home/harry/.codex/plugins",
-      "generated_at": "2026-08-01T22:28:24.279493+00:00",
+      "generated_at": "2026-08-02T08:05:21.789564+00:00",
       "num_threads": 46
     },
     "questions": [],
@@ -4074,7 +4099,7 @@
     "goals_db": "/home/harry/.codex/goals_1.sqlite",
     "logs_db": "/home/harry/.codex/logs_2.sqlite",
     "sessions_root": "/home/harry/.codex/sessions",
-    "generated_at": "2026-08-01T22:28:29.815501+00:00",
+    "generated_at": "2026-08-02T08:05:26.939121+00:00",
     "tools": [
       "extract_expenses.py",
       "extract_measurements.py",

@@ -97,6 +97,10 @@ The generated summary keeps them separable:
                      "nickname": "...", "type": "mesh_analysis", "model": "...",
                      "reasoning_effort": [...], "tokens_used": 0 } ],
     "opencodex": null | { "opencodex_version": "...", "config_facts": {...} },
+    "workspace": { "agents_md": { "exists": true, "sha256": "...",
+                   "content": "...", "matches_git_head": true },
+                   "codegraph": { "exists": false },
+                   "benchmark_submodule": { "commit": "...", "dirty": false } },
     "prompts": { "by_root_thread": { "<root>": { "goal_objective": "...",
                  "initial_user_prompt": {...}, "resume_prompts": [...] } } }
   }

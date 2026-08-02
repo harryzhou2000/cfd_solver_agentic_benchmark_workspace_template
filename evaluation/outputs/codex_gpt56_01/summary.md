@@ -39,6 +39,9 @@
 
 - Harness: codex cli 0.146.0 (codex-tui, provider openai)
 - Plugins: openai-curated-remote github, openai-curated-remote google-drive, openai-curated-remote openai-templates, openai-curated-remote outlook-calendar, openai-curated-remote outlook-email, openai-curated-remote slack, openai-curated-remote teams, openai-curated-remote workspace-agents
+- AGENTS.md: sha256 8c9f03983ec1 (matches HEAD)
+- CodeGraph: absent
+- Benchmark submodule: ba3f9a8b1443 (clean)
 
 | Model | Effort(s) | Context window | Max context used | Threads |
 |-------|-----------|---------------:|-----------------:|--------:|

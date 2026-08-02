@@ -17,7 +17,7 @@ all inputs are read-only and outputs land under `evaluation/outputs/`.
 | 3. CFD methods & algorithm review points | [specs/cfd_review_spec.md](specs/cfd_review_spec.md) | [config/review_points_cfd.json](config/review_points_cfd.json) |
 | 4. Result review (outputs, visualizations, report) | [specs/result_review_spec.md](specs/result_review_spec.md) | [config/review_points_results.json](config/review_points_results.json) |
 | 5. Other measurements: tool usage, LOC, rule violations | [specs/measurements_spec.md](specs/measurements_spec.md) | session rollouts, git, filesystem scan |
-| 6. Execution metadata: harness, models/effort, context window, subagent types, opencodex router, prompts | [specs/metadata_spec.md](specs/metadata_spec.md) | codex state/history, opencodex config + catalog, plugins |
+| 6. Execution metadata: harness, models/effort, context, subagent types, opencodex router, prompts, AGENTS.md/codegraph/submodule state | [specs/metadata_spec.md](specs/metadata_spec.md) | codex state/history, opencodex config + catalog, plugins, workspace git |
 
 Root spec: [specs/summary_spec.md](specs/summary_spec.md). Output schema:
 [schemas/summary.schema.json](schemas/summary.schema.json).
