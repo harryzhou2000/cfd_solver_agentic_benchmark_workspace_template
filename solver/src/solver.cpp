@@ -309,6 +309,7 @@ class FlowSolver::Impl {
         reconstruction_face_locations_scratch_.reserve(maximum_faces);
         reconstruction_boundary_values_scratch_.reserve(maximum_faces);
         build_node_lookup();
+        compute_cell_compactness();
         if (config_.run_control.type == RunType::transient) {
             seed_transient_perturbation();
             transient_seed_applied_ = true;
@@ -482,7 +483,6 @@ class FlowSolver::Impl {
     bool steady_inviscid_total_enthalpy_{};
     Real freestream_total_enthalpy_{};
     static constexpr Real kJointReferenceFloorFraction = 0.1;
-    static constexpr Real kJointRarefactionDissipationMultiplier = 4.0;
     std::vector<State> states_;
     std::vector<State> previous_states_;
     std::vector<State> older_states_;
@@ -492,6 +492,7 @@ class FlowSolver::Impl {
     std::vector<Vec2> reconstruction_face_locations_scratch_;
     std::vector<Primitive> reconstruction_boundary_values_scratch_;
     std::unordered_map<GlobalIndex, Vec2> node_coordinates_;
+    std::vector<Real> cell_compactness_;
     std::vector<SolverSurfaceSample> last_surface_samples_;
     std::uint64_t positivity_backtracks_{};
     std::uint64_t positivity_reconstruction_fallbacks_{};
@@ -508,6 +509,35 @@ class FlowSolver::Impl {
         node_coordinates_.reserve(mesh_.nodes.size());
         for (const Node& node : mesh_.nodes) {
             node_coordinates_.emplace(node.global_id, node.xy);
+        }
+    }
+
+    void compute_cell_compactness() {
+        cell_compactness_.resize(mesh_.cells.size());
+        for (std::size_t local = 0; local < mesh_.cells.size(); ++local) {
+            const Cell& cell = mesh_.cells[local].cell;
+            Real squared_edge_sum = 0.0;
+            for (std::size_t vertex = 0; vertex < cell.vertex_count; ++vertex) {
+                const GlobalIndex first_id = cell.vertices[vertex];
+                const GlobalIndex second_id =
+                    cell.vertices[(vertex + 1U) % cell.vertex_count];
+                const auto first = node_coordinates_.find(first_id);
+                const auto second = node_coordinates_.find(second_id);
+                if (first == node_coordinates_.end() ||
+                    second == node_coordinates_.end()) {
+                    throw std::runtime_error(
+                        "cell compactness references a missing local node");
+                }
+                const Vec2 edge{second->second[0] - first->second[0],
+                                second->second[1] - first->second[1]};
+                squared_edge_sum += dot(edge, edge);
+            }
+            const Real compactness = 4.0 * cell.area / squared_edge_sum;
+            if (!(compactness > 0.0) || !std::isfinite(compactness)) {
+                throw std::runtime_error(
+                    "cell compactness is non-positive or non-finite");
+            }
+            cell_compactness_[local] = compactness;
         }
     }
 
@@ -536,6 +566,13 @@ class FlowSolver::Impl {
             kJointReferenceFloorFraction, gas_);
     }
 
+    [[nodiscard]] Real rarefaction_sensor(std::size_t local) const noexcept {
+        if (!steady_inviscid_total_enthalpy_) return 0.0;
+        return joint_reference_rarefaction_sensor(
+            states_[local], config_.freestream.density,
+            config_.freestream.pressure, cell_compactness_[local], gas_);
+    }
+
     [[nodiscard]] Primitive boundary_exterior_primitive(
         const Primitive& interior, BoundaryType type, const Vec2& outward_normal) const {
         State exterior{};
@@ -562,9 +599,16 @@ class FlowSolver::Impl {
 
     [[nodiscard]] FaceReconstruction reconstruct_solver_face_state(
         const Vec2& cell_center, const Primitive& cell_value,
-        const PrimitiveGradients& gradients, const Vec2& face_location) const {
+        const PrimitiveGradients& gradients, const Vec2& face_location,
+        Real increment_scale) const {
+        PrimitiveGradients face_gradients = gradients;
+        const Real bounded_scale = std::clamp(increment_scale, Real{0.0}, Real{1.0});
+        for (Vec2& gradient : face_gradients) {
+            gradient[0] *= bounded_scale;
+            gradient[1] *= bounded_scale;
+        }
         FaceReconstruction result = reconstruct_face_state(
-            cell_center, cell_value, gradients, face_location, gas_);
+            cell_center, cell_value, face_gradients, face_location, gas_);
         if (!steady_inviscid_total_enthalpy_) return result;
 
         State conditioned = result.conservative;
@@ -704,24 +748,32 @@ class FlowSolver::Impl {
                 throw std::runtime_error("rank-local face is missing its CGNS owner cell");
             }
             const std::size_t owner = static_cast<std::size_t>(local_face.owner_local);
+            const bool physical_boundary = face.neighbor < 0;
+            if (!physical_boundary && local_face.neighbor_local < 0) {
+                throw std::runtime_error("interior local face has no ghost/neighbor cell");
+            }
+            Real face_rarefaction_sensor = rarefaction_sensor(owner);
+            if (!physical_boundary) {
+                face_rarefaction_sensor = std::max(
+                    face_rarefaction_sensor,
+                    rarefaction_sensor(static_cast<std::size_t>(
+                        local_face.neighbor_local)));
+            }
             const FaceReconstruction owner_face = reconstruct_solver_face_state(
                 mesh_.cells[owner].cell.centroid, primitive_[owner], gradients_[owner],
-                face.center);
+                face.center, 1.0 - face_rarefaction_sensor);
             if (owner_face.used_positivity_fallback) ++positivity_reconstruction_fallbacks_;
 
             State neighbor_state{};
             Primitive neighbor_primitive{};
             FaceReconstruction neighbor_face{};
             BoundaryType physical_type = BoundaryType::farfield;
-            const bool physical_boundary = face.neighbor < 0;
             if (!physical_boundary) {
-                if (local_face.neighbor_local < 0) {
-                    throw std::runtime_error("interior local face has no ghost/neighbor cell");
-                }
                 const std::size_t neighbor = static_cast<std::size_t>(local_face.neighbor_local);
                 neighbor_face = reconstruct_solver_face_state(
                     mesh_.cells[neighbor].cell.centroid, primitive_[neighbor],
-                    gradients_[neighbor], face.center);
+                    gradients_[neighbor], face.center,
+                    1.0 - face_rarefaction_sensor);
                 neighbor_state = neighbor_face.conservative;
                 neighbor_primitive = primitive_[neighbor];
                 if (neighbor_face.used_positivity_fallback) {
@@ -770,25 +822,13 @@ class FlowSolver::Impl {
                 // inviscid manifold at every Mach number.
                 Real dissipation_scale =
                     config_.run_control.rusanov_dissipation_scale.value_or(1.0);
-                if (steady_inviscid_total_enthalpy_) {
-                    const State& neighbor_center =
-                        physical_boundary
-                            ? neighbor_state
-                            : states_[static_cast<std::size_t>(
-                                  local_face.neighbor_local)];
-                    if (violates_face_rarefaction_guard(states_[owner]) ||
-                        violates_face_rarefaction_guard(neighbor_center)) {
-                        // A sharp, highly anisotropic trailing-edge stencil can
-                        // form a low-rho/low-p pocket even while remaining
-                        // positive and exactly H0-consistent.  Increase only
-                        // the shared Rusanov jump term on faces touching such
-                        // a state.  The identical flux is applied with
-                        // opposite signs to both cells, so conservation and
-                        // the consistent central flux are unchanged.
-                        dissipation_scale *=
-                            kJointRarefactionDissipationMultiplier;
-                        ++rarefaction_dissipation_faces_;
-                    }
+                if (face_rarefaction_sensor > 0.0) {
+                    // Smoothly flatten P1 above and increase only the shared
+                    // Rusanov jump term here as a joint rarefaction develops
+                    // on a low-compactness cell. The identical face flux is
+                    // applied with opposite signs, preserving conservation.
+                    dissipation_scale *= 1.0 + face_rarefaction_sensor;
+                    ++rarefaction_dissipation_faces_;
                 }
                 inviscid = enthalpy_upwind_rusanov_flux(
                     owner_face.conservative, neighbor_state, face.normal, gas_,
@@ -1385,7 +1425,8 @@ class FlowSolver::Impl {
                 if (inner == 1) {
                     for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
                         pseudo_coefficient[local] =
-                            std::max(evaluation.diagonal[local], Real{1.0e-30}) / cfl;
+                            std::max(evaluation.diagonal[local], Real{1.0e-30}) / cfl *
+                            (1.0 + rarefaction_sensor(local));
                     }
                 }
                 for (std::size_t local = 0; local < mesh_.owned_count; ++local) {

@@ -336,7 +336,7 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
              << config.run_control.rusanov_dissipation_scale.value_or(1.0)
              << "_with_exact_stationary_wall_flux";
         if (config.run_control.type == cfd::RunType::steady) {
-            flux << "_and_conservative_4x_joint_rarefaction_jump_dissipation";
+            flux << "_and_conservative_compactness_joint_rarefaction_jump_dissipation_1x_to_2x";
         }
         metadata.inviscid_flux = flux.str();
     } else {
@@ -358,7 +358,7 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
         if (config.run_control.type == cfd::RunType::steady &&
             config.physics.mode == cfd::PhysicsMode::inviscid) {
             metadata.reconstruction +=
-                "_with_freestream_total_enthalpy_consistent_face_states";
+                "_with_freestream_total_enthalpy_consistent_face_states_and_smooth_compactness_joint_rarefaction_flattening";
         }
         metadata.limiter = "Barth_Jespersen_active";
     } else {

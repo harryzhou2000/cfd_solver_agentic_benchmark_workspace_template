@@ -70,6 +70,16 @@ using StateJacobian = std::array<ConservativeState, 4>;
                                                   Real fraction,
                                                   const GasModel& gas) noexcept;
 
+/// Smooth sensor for a joint low-density/low-pressure state on a compactness-
+/// limited mesh cell. It is zero above either onset fraction or outside the
+/// compactness range, and rises linearly to one as both variables approach the
+/// full-response fraction. Invalid input returns one (the conservative choice).
+[[nodiscard]] Real joint_reference_rarefaction_sensor(
+    const ConservativeState& state, Real reference_density,
+    Real reference_pressure, Real cell_compactness, const GasModel& gas,
+    Real compactness_threshold = 0.1, Real onset_fraction = 0.25,
+    Real full_response_fraction = 0.1) noexcept;
+
 [[nodiscard]] ConservativeState euler_flux(const ConservativeState& state,
                                            const Vec2& unit_normal,
                                            const GasModel& gas);

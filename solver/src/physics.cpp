@@ -144,6 +144,32 @@ bool violates_joint_reference_floor(const ConservativeState& state,
            pressure_unchecked(state, gas) < fraction * reference_pressure;
 }
 
+Real joint_reference_rarefaction_sensor(
+    const ConservativeState& state, Real reference_density,
+    Real reference_pressure, Real cell_compactness, const GasModel& gas,
+    Real compactness_threshold, Real onset_fraction,
+    Real full_response_fraction) noexcept {
+    if (!is_admissible(state, gas) || !(reference_density > 0.0) ||
+        !(reference_pressure > 0.0) || !(cell_compactness > 0.0) ||
+        !(compactness_threshold > 0.0) || !(onset_fraction > full_response_fraction) ||
+        !(full_response_fraction > 0.0) || !std::isfinite(reference_density) ||
+        !std::isfinite(reference_pressure) || !std::isfinite(cell_compactness) ||
+        !std::isfinite(compactness_threshold) || !std::isfinite(onset_fraction) ||
+        !std::isfinite(full_response_fraction)) {
+        return 1.0;
+    }
+    if (!(cell_compactness < compactness_threshold)) return 0.0;
+    const Real denominator = onset_fraction - full_response_fraction;
+    const Real density_signal = std::clamp(
+        (onset_fraction - state[0] / reference_density) / denominator,
+        Real{0.0}, Real{1.0});
+    const Real pressure_signal = std::clamp(
+        (onset_fraction - pressure_unchecked(state, gas) / reference_pressure) /
+            denominator,
+        Real{0.0}, Real{1.0});
+    return std::min(density_signal, pressure_signal);
+}
+
 ConservativeState euler_flux(const ConservativeState& state, const Vec2& unit_normal,
                              const GasModel& gas) {
     const ThermodynamicState primitive = decode_state(state, gas);

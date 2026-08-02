@@ -116,6 +116,22 @@ int main() {
     assert(!cfd::violates_joint_reference_floor(
         cfd::encode_state(rarefied, gas), 1.0, 1.0, 0.1, gas));
 
+    rarefied.density = 0.175;
+    rarefied.pressure = 0.175;
+    const auto half_sensor_state = cfd::encode_state(rarefied, gas);
+    assert(close(cfd::joint_reference_rarefaction_sensor(
+                     half_sensor_state, 1.0, 1.0, 0.05, gas),
+                 0.5));
+    assert(cfd::joint_reference_rarefaction_sensor(
+               half_sensor_state, 1.0, 1.0, 0.2, gas) == 0.0);
+    rarefied.density = 0.09;
+    rarefied.pressure = 0.09;
+    assert(cfd::joint_reference_rarefaction_sensor(
+               cfd::encode_state(rarefied, gas), 1.0, 1.0, 0.05, gas) == 1.0);
+    rarefied.density = 0.3;
+    assert(cfd::joint_reference_rarefaction_sensor(
+               cfd::encode_state(rarefied, gas), 1.0, 1.0, 0.05, gas) == 0.0);
+
     // Davis-wave-speed HLLC is not positivity preserving for every strong
     // two-rarefaction state.  Such a star state must use the robust Rusanov
     // fallback instead of emitting a finite flux built from negative pressure.
