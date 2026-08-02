@@ -1133,7 +1133,9 @@ class FlowSolver::Impl {
                                         ? (config_.freestream.mach <= 0.2
                                                ? Real{10.0}
                                                : Real{2.0})
-                                        : Real{5.0};
+                                        : (config_.freestream.mach >= 0.5
+                                               ? Real{1.0}
+                                               : Real{5.0});
         const Real cap = std::min(config_.run_control.cfl_max, selected);
         const Real initial = std::min(config_.run_control.cfl_initial, cap);
         const int ramp_steps = config_.run_control.pseudo_cfl_ramp_steps;
