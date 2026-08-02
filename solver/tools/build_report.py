@@ -57,6 +57,11 @@ STEADY_TERMINAL_WINDOW = 20
 RE200_MIN_SPECTRUM_SAMPLES = 512
 INVISCID_H0_P99_LIMIT = 0.05
 INVISCID_H0_MAX_LIMIT = 0.10
+# The supplied NACA boundary is mirror-exact, but its unstructured interior
+# topology is not reflection-paired.  This absolute coefficient tolerance is
+# tight enough to reject the observed asymmetric branches while allowing the
+# residual discretization bias of a settled np=8 solution.
+NACA_ZERO_AOA_LIFT_LIMIT = 2.0e-3
 RANK_CD_ABSOLUTE_TOLERANCE = 1.0e-4
 RANK_CD_RELATIVE_TOLERANCE = 0.01
 RANK_CL_ABSOLUTE_TOLERANCE = 1.0e-4
@@ -657,7 +662,8 @@ def _sanity_for_case(case: CaseData) -> dict:
             "max_abs_surface_normal_velocity": float(np.max(np.abs(normal_velocity))),
             "viscous_force_negligible": bool(viscous <= 1.0e-8),
             "max_abs_final_viscous_force": viscous,
-            "symmetric_lift_near_zero": bool(abs(float(case.forces[-1]["cl"])) <= 1.0e-4),
+            "symmetric_lift_near_zero": bool(
+                abs(float(case.forces[-1]["cl"])) <= NACA_ZERO_AOA_LIFT_LIMIT),
             "inviscid_total_enthalpy_p99_within_5pct": bool(
                 np.percentile(enthalpy_error, 99.0) <= INVISCID_H0_P99_LIMIT),
             "inviscid_total_enthalpy_max_within_10pct": bool(

@@ -12,8 +12,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from build_report import (BuildError, REQUIRED_CASES, _native_primitive_fields,
-                          build_report, read_field)
+from build_report import (BuildError, NACA_ZERO_AOA_LIFT_LIMIT, REQUIRED_CASES,
+                          _load_case_dir, _native_primitive_fields,
+                          _sanity_for_case, build_report, read_field)
 
 
 RESIDUAL_HEADER = ["step", "physical_time", "inner_iter", "cfl", "dt", "rho", "rhou", "rhov", "rhoE", "residual_l2", "residual_linf"]
@@ -223,6 +224,36 @@ def create_rank_results(root: Path, results: Path) -> tuple[Path, ...]:
 
 
 class ReportAutomationTests(unittest.TestCase):
+    def test_zero_aoa_lift_tolerance_has_a_strict_boundary(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            results = create_results(root)
+            case_id = "naca0012_m080_inviscid"
+            case_dir = results / case_id
+            case_input = json.loads(
+                (ROOT.parent / "cfd_solver_agentic_benchmark" / "inputs" /
+                 "cases" / f"{case_id}.json").read_text(encoding="utf-8")
+            )
+
+            def set_final_lift(value: float) -> None:
+                path = case_dir / "forces.csv"
+                with path.open(newline="", encoding="utf-8") as handle:
+                    rows = list(csv.DictReader(handle))
+                rows[-1]["cl"] = str(value)
+                rows[-1]["pressure_lift"] = str(value)
+                _write_csv(path, FORCE_HEADER,
+                           [[row[name] for name in FORCE_HEADER] for row in rows])
+
+            set_final_lift(NACA_ZERO_AOA_LIFT_LIMIT)
+            passing = _sanity_for_case(
+                _load_case_dir(case_dir, case_id, case_input))
+            self.assertTrue(passing["symmetric_lift_near_zero"])
+
+            set_final_lift(math.nextafter(NACA_ZERO_AOA_LIFT_LIMIT, math.inf))
+            failing = _sanity_for_case(
+                _load_case_dir(case_dir, case_id, case_input))
+            self.assertFalse(failing["symmetric_lift_near_zero"])
+
     def test_builds_complete_written_contract_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
