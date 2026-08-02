@@ -286,6 +286,9 @@ class FlowSolver::Impl {
                                config_.reference.reynolds_length /
                                config_.physics.reynolds.value()
                          : 0.0;
+        subsonic_inviscid_rusanov_ =
+            config_.physics.mode == PhysicsMode::inviscid &&
+            config_.freestream.mach < 1.0;
         states_.assign(mesh_.cells.size(), freestream_state_);
         previous_states_ = states_;
         older_states_ = states_;
@@ -397,6 +400,7 @@ class FlowSolver::Impl {
     State freestream_state_{};
     Primitive freestream_primitive_{};
     Real viscosity_{};
+    bool subsonic_inviscid_rusanov_{};
     std::vector<State> states_;
     std::vector<State> previous_states_;
     std::vector<State> older_states_;
@@ -608,14 +612,25 @@ class FlowSolver::Impl {
                 physical_boundary &&
                 (physical_type == BoundaryType::slip_wall ||
                  physical_type == BoundaryType::no_slip_adiabatic_wall);
-            NumericalFlux inviscid = stationary_wall
-                                         ? stationary_wall_flux(owner_face.conservative,
-                                                                face.normal, gas_)
-                                         : hllc_flux(
-                                               owner_face.conservative, neighbor_state,
-                                               face.normal, gas_,
-                                               config_.run_control.rusanov_dissipation_scale
-                                                   .value_or(1.0));
+            NumericalFlux inviscid{};
+            if (stationary_wall) {
+                inviscid = stationary_wall_flux(owner_face.conservative,
+                                                face.normal, gas_);
+            } else if (subsonic_inviscid_rusanov_) {
+                // HLLC's low dissipation amplified antisymmetric modes in the
+                // zero-incidence subsonic Euler cases.  Rusanov is the
+                // benchmark's robust minimum flux and preserves their total
+                // enthalpy far better; retain HLLC for transonic/supersonic
+                // shock resolution and for viscous cases where diffusion
+                // damps this mode.
+                inviscid = rusanov_flux(
+                    owner_face.conservative, neighbor_state, face.normal, gas_,
+                    config_.run_control.rusanov_dissipation_scale.value_or(1.0));
+            } else {
+                inviscid = hllc_flux(
+                    owner_face.conservative, neighbor_state, face.normal, gas_,
+                    config_.run_control.rusanov_dissipation_scale.value_or(1.0));
+            }
             if (inviscid.used_fallback) ++hllc_fallback_faces_;
             State total_flux = inviscid.value;
             ViscousGradients viscous_gradients{};
