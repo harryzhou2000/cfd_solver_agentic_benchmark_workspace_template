@@ -22,6 +22,10 @@ Project instructions for coding agents working in this repository.
 - Delegating independent subtasks to subagents is encouraged.
 - There is NO subagent model policy on this branch: subagents may use any
   available model. No model is required, restricted, or pinned.
+- Visual handoff (important): the orchestrator and other subagents are NOT
+  visual-enabled. Whenever a subagent produces something visual — figures,
+  plots, reports, or rendered output — hand it off to a `designer` subagent
+  to check and fix visual problems before the task is considered done.
 
 ## 3. Persistence
 
