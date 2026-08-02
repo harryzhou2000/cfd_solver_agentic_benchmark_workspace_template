@@ -1283,13 +1283,14 @@ class FlowSolver::Impl {
     }
 
     void emit_progress(const SolverCallbacks& callbacks, int step, Real residual,
-                       Real reduction, const SolverForceSample& force) const {
+                       Real reduction, int inner_iterations,
+                       const SolverForceSample& force) const {
         if (rank_ != 0 || !callbacks.log) return;
         std::ostringstream message;
         message << "step=" << step << " residual=" << std::scientific
                 << std::setprecision(5) << residual << " reduction=" << std::fixed
-                << std::setprecision(3) << reduction << " orders cd=" << force.drag
-                << " cl=" << force.lift;
+                << std::setprecision(3) << reduction << " orders inner="
+                << inner_iterations << " cd=" << force.drag << " cl=" << force.lift;
         callbacks.log(message.str());
     }
 
@@ -1373,6 +1374,24 @@ class FlowSolver::Impl {
                     }
                     evaluation.diagonal[local] += coefficient;
                     add_scaled_identity(evaluation.block_diagonal[local], coefficient);
+                }
+                if (steady_inviscid_total_enthalpy_) {
+                    // Every steady Euler face state shares H0 and the
+                    // enthalpy-upwind flux therefore gives R_E = H0 R_rho.
+                    // The energy density is a dependent nonlinear function
+                    // of (rho,rhou,rhov) on that manifold.  Treating
+                    // E-E_old as an independent pseudo-time defect makes the
+                    // inner target impossible after the state projection and
+                    // needlessly exhausts max_inner_iterations.  Restore the
+                    // exact residual dependency for convergence and RHS use;
+                    // the accepted spatial residual remains the conservative
+                    // flux assembly computed above.
+                    for (std::size_t local = 0; local < mesh_.owned_count;
+                         ++local) {
+                        evaluation.residual[local][3] =
+                            freestream_total_enthalpy_ *
+                            evaluation.residual[local][0];
+                    }
                 }
                 compute_norms(evaluation);
                 if (inner == 1) {
@@ -1588,7 +1607,7 @@ class FlowSolver::Impl {
             if (rank_ == 0 && callbacks.force) callbacks.force(accepted.force_sample);
             if (step == 1 || step % 250 == 0) {
                 emit_progress(callbacks, step, accepted_spatial.residual_l2,
-                              final_reduction, accepted.force_sample);
+                              final_reduction, used_inner, accepted.force_sample);
             }
             if (callbacks.checkpoint && step % 250 == 0) {
                 callbacks.checkpoint(step, local_field_cells());
@@ -1847,7 +1866,7 @@ class FlowSolver::Impl {
                 emit_progress(callbacks, step, accepted.residual_sample.residual_l2,
                               finite_log_reduction(initial_global_residual,
                                                    accepted.residual_sample.residual_l2),
-                              accepted.force_sample);
+                              used_inner, accepted.force_sample);
             }
         }
 
