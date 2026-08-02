@@ -286,9 +286,8 @@ class FlowSolver::Impl {
                                config_.reference.reynolds_length /
                                config_.physics.reynolds.value()
                          : 0.0;
-        subsonic_inviscid_rusanov_ =
-            config_.physics.mode == PhysicsMode::inviscid &&
-            config_.freestream.mach < 1.0;
+        inviscid_enthalpy_rusanov_ =
+            config_.physics.mode == PhysicsMode::inviscid;
         states_.assign(mesh_.cells.size(), freestream_state_);
         previous_states_ = states_;
         older_states_ = states_;
@@ -473,7 +472,7 @@ class FlowSolver::Impl {
     State freestream_state_{};
     Primitive freestream_primitive_{};
     Real viscosity_{};
-    bool subsonic_inviscid_rusanov_{};
+    bool inviscid_enthalpy_rusanov_{};
     std::vector<State> states_;
     std::vector<State> previous_states_;
     std::vector<State> older_states_;
@@ -696,13 +695,16 @@ class FlowSolver::Impl {
             if (stationary_wall) {
                 inviscid = stationary_wall_flux(owner_face.conservative,
                                                 face.normal, gas_);
-            } else if (subsonic_inviscid_rusanov_) {
+            } else if (inviscid_enthalpy_rusanov_) {
                 // HLLC's low dissipation amplified antisymmetric modes in the
-                // zero-incidence subsonic Euler cases.  Rusanov is the
-                // benchmark's robust minimum flux and preserves their total
-                // enthalpy far better; retain HLLC for transonic/supersonic
-                // shock resolution and for viscous cases where diffusion
-                // damps this mode.
+                // zero-incidence subsonic Euler cases and produced a
+                // near-vacuum trailing-edge cluster plus large stagnation-H0
+                // error for the sharp M2 airfoil.  The benchmark explicitly
+                // accepts local Lax--Friedrichs as its robust approximate
+                // Riemann solver.  Its mass and momentum fluxes are retained
+                // while the consistent Euler energy flux is written as mass
+                // flux times upwind total enthalpy, preserving the uniform-H0
+                // inviscid manifold at every Mach number.
                 inviscid = enthalpy_upwind_rusanov_flux(
                     owner_face.conservative, neighbor_state, face.normal, gas_,
                     config_.run_control.rusanov_dissipation_scale.value_or(1.0));

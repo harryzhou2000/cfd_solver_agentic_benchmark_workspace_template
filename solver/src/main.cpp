@@ -329,8 +329,7 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
     metadata.partition_edge_cut = mesh.partition_edge_cut;
     metadata.halo_exchange = "neighbor_isend_irecv";
     metadata.equation_set = "compressible_navier_stokes_2d";
-    if (config.physics.mode == cfd::PhysicsMode::inviscid &&
-        config.freestream.mach < 1.0) {
+    if (config.physics.mode == cfd::PhysicsMode::inviscid) {
         std::ostringstream flux;
         flux << "Rusanov_local_Lax_Friedrichs_with_upwind_total_enthalpy_energy_flux_scale_"
              << std::setprecision(8)
