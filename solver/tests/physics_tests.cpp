@@ -86,6 +86,36 @@ int main() {
     assert(close(invariant_flux.value[3],
                  common_enthalpy * invariant_flux.value[0]));
 
+    // A steady-Euler nonlinear update may move density and momentum off the
+    // uniform-H0 manifold. The projection restores only energy and rejects a
+    // velocity whose kinetic enthalpy already exceeds the target.
+    auto projected = right_state;
+    const auto projected_before = projected;
+    assert(cfd::project_state_to_total_enthalpy(projected, common_enthalpy, gas));
+    assert(projected[0] == projected_before[0]);
+    assert(projected[1] == projected_before[1]);
+    assert(projected[2] == projected_before[2]);
+    assert(close(cfd::decode_state(projected, gas).total_enthalpy,
+                 common_enthalpy));
+    auto impossible_projection = cfd::freestream_state(1.0, 4.0, 0.0, 1.0, gas);
+    const auto impossible_before = impossible_projection;
+    assert(!cfd::project_state_to_total_enthalpy(impossible_projection, 2.0, gas));
+    assert(impossible_projection == impossible_before);
+
+    cfd::ThermodynamicState rarefied{};
+    rarefied.density = 0.09;
+    rarefied.velocity_x = 0.1;
+    rarefied.pressure = 0.09;
+    assert(cfd::violates_joint_reference_floor(
+        cfd::encode_state(rarefied, gas), 1.0, 1.0, 0.1, gas));
+    rarefied.density = 0.1;
+    assert(!cfd::violates_joint_reference_floor(
+        cfd::encode_state(rarefied, gas), 1.0, 1.0, 0.1, gas));
+    rarefied.density = 0.09;
+    rarefied.pressure = 0.1;
+    assert(!cfd::violates_joint_reference_floor(
+        cfd::encode_state(rarefied, gas), 1.0, 1.0, 0.1, gas));
+
     // Davis-wave-speed HLLC is not positivity preserving for every strong
     // two-rarefaction state.  Such a star state must use the robust Rusanov
     // fallback instead of emitting a finite flux built from negative pressure.

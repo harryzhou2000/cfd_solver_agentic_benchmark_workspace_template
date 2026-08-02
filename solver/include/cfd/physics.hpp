@@ -53,6 +53,23 @@ using StateJacobian = std::array<ConservativeState, 4>;
                                                  const GasModel& gas);
 [[nodiscard]] bool is_admissible(const ConservativeState& state, const GasModel& gas) noexcept;
 
+/// Replaces only total energy so the state has the requested perfect-gas
+/// total enthalpy. Density and both momentum components are preserved. The
+/// state is left unchanged and false is returned when the requested enthalpy
+/// cannot produce finite pressure above the gas-model floor.
+[[nodiscard]] bool project_state_to_total_enthalpy(ConservativeState& state,
+                                                   Real target_total_enthalpy,
+                                                   const GasModel& gas) noexcept;
+
+/// True when both density and pressure are strictly below the same fraction
+/// of positive reference values. Invalid states or invalid reference inputs
+/// are treated as violations so this can be composed with update safeguards.
+[[nodiscard]] bool violates_joint_reference_floor(const ConservativeState& state,
+                                                  Real reference_density,
+                                                  Real reference_pressure,
+                                                  Real fraction,
+                                                  const GasModel& gas) noexcept;
+
 [[nodiscard]] ConservativeState euler_flux(const ConservativeState& state,
                                            const Vec2& unit_normal,
                                            const GasModel& gas);

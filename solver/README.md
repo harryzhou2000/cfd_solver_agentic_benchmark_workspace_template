@@ -9,6 +9,15 @@ documented conservative terminal cap. Anderson history is reset as the CFL
 changes, accelerated states must reduce both global L2 and Linf residuals, and
 completion requires both residual targets together with a stable force tail.
 
+For steady inviscid flow, uniform freestream total enthalpy is enforced as the
+adiabatic-Euler invariant during nonlinear updates and at reconstructed face
+states. The Rusanov energy flux is the upwind total enthalpy times its numerical
+mass flux, so the constrained path is compatible with the conservative spatial
+residual. Candidate updates and face extrapolations also use a documented joint
+anti-vacuum safeguard: density and pressure may each cross 10% of their
+freestream reference independently, but not simultaneously. These constraints
+are deliberately disabled for laminar and transient cases.
+
 ## Build and tests
 
 From the repository root, configure with the supplied external dependency prefix:

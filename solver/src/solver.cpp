@@ -281,6 +281,10 @@ class FlowSolver::Impl {
                                              config_.freestream.aoa_degrees,
                                              config_.freestream.pressure, gas_);
         freestream_primitive_ = to_primitive(freestream_state_, gas_);
+        steady_inviscid_total_enthalpy_ =
+            config_.run_control.type == RunType::steady &&
+            config_.physics.mode == PhysicsMode::inviscid;
+        freestream_total_enthalpy_ = freestream_primitive_.H;
         viscosity_ = config_.physics.mode == PhysicsMode::laminar
                          ? config_.freestream.density * config_.freestream.velocity_magnitude *
                                config_.reference.reynolds_length /
@@ -324,10 +328,12 @@ class FlowSolver::Impl {
             throw std::invalid_argument("restart owned-state count does not match local mesh");
         }
         for (std::size_t i = 0; i < values.size(); ++i) {
-            if (!is_admissible(values[i], gas_)) {
-                throw std::domain_error("restart contains inadmissible conservative state");
+            State conditioned = values[i];
+            if (!condition_iteration_state(conditioned)) {
+                throw std::domain_error(
+                    "restart contains a state rejected by the active physical safeguards");
             }
-            states_[i] = values[i];
+            states_[i] = conditioned;
         }
         exchange_halo_packets(mesh_.halo, states_, communicator_, kStateHaloTag);
         previous_states_ = states_;
@@ -473,6 +479,9 @@ class FlowSolver::Impl {
     Primitive freestream_primitive_{};
     Real viscosity_{};
     bool inviscid_enthalpy_rusanov_{};
+    bool steady_inviscid_total_enthalpy_{};
+    Real freestream_total_enthalpy_{};
+    static constexpr Real kJointReferenceFloorFraction = 0.1;
     std::vector<State> states_;
     std::vector<State> previous_states_;
     std::vector<State> older_states_;
@@ -509,15 +518,64 @@ class FlowSolver::Impl {
         return found->second;
     }
 
+    /// Conditions nonlinear iterates onto the exact uniform-H0 manifold of a
+    /// steady, adiabatic Euler flow. The finite-volume residual remains fully
+    /// conservative; this constrains only the nonlinear solution path. A
+    /// freestream-relative joint rho/p floor prevents a single sharp-cusp cell
+    /// from approaching vacuum while leaving one-variable shock extrema free.
+    [[nodiscard]] bool condition_iteration_state(State& state) const noexcept {
+        if (!steady_inviscid_total_enthalpy_) return is_admissible(state, gas_);
+        if (!project_state_to_total_enthalpy(state, freestream_total_enthalpy_, gas_)) {
+            return false;
+        }
+        return !violates_joint_reference_floor(
+            state, config_.freestream.density, config_.freestream.pressure,
+            kJointReferenceFloorFraction, gas_);
+    }
+
     [[nodiscard]] Primitive boundary_exterior_primitive(
         const Primitive& interior, BoundaryType type, const Vec2& outward_normal) const {
+        State exterior{};
         if (type == BoundaryType::farfield) {
-            const State exterior = characteristic_farfield_exterior(
+            exterior = characteristic_farfield_exterior(
                 to_state(interior, gas_), freestream_state_, outward_normal, gas_);
-            return to_primitive(exterior, gas_);
+        } else {
+            exterior = to_state(reflected_boundary_primitive(
+                                    interior, type, outward_normal,
+                                    freestream_primitive_),
+                                gas_);
         }
-        return reflected_boundary_primitive(interior, type, outward_normal,
-                                            freestream_primitive_);
+        if (steady_inviscid_total_enthalpy_ &&
+            !condition_iteration_state(exterior)) {
+            exterior = to_state(interior, gas_);
+            if (!condition_iteration_state(exterior)) {
+                throw std::runtime_error(
+                    "steady inviscid boundary state cannot satisfy physical safeguards");
+            }
+        }
+        return to_primitive(exterior, gas_);
+    }
+
+    [[nodiscard]] FaceReconstruction reconstruct_solver_face_state(
+        const Vec2& cell_center, const Primitive& cell_value,
+        const PrimitiveGradients& gradients, const Vec2& face_location) const {
+        FaceReconstruction result = reconstruct_face_state(
+            cell_center, cell_value, gradients, face_location, gas_);
+        if (!steady_inviscid_total_enthalpy_) return result;
+
+        State conditioned = result.conservative;
+        if (!condition_iteration_state(conditioned)) {
+            conditioned = to_state(cell_value, gas_);
+            if (!condition_iteration_state(conditioned)) {
+                throw std::runtime_error(
+                    "steady inviscid cell-center state cannot satisfy physical safeguards");
+            }
+            result.positivity_scale = 0.0;
+            result.used_positivity_fallback = true;
+        }
+        result.conservative = conditioned;
+        result.primitive = decode_state(conditioned, gas_);
+        return result;
     }
 
     void seed_transient_perturbation() {
@@ -641,9 +699,9 @@ class FlowSolver::Impl {
                 throw std::runtime_error("rank-local face is missing its CGNS owner cell");
             }
             const std::size_t owner = static_cast<std::size_t>(local_face.owner_local);
-            const FaceReconstruction owner_face = reconstruct_face_state(
+            const FaceReconstruction owner_face = reconstruct_solver_face_state(
                 mesh_.cells[owner].cell.centroid, primitive_[owner], gradients_[owner],
-                face.center, gas_);
+                face.center);
             if (owner_face.used_positivity_fallback) ++positivity_reconstruction_fallbacks_;
 
             State neighbor_state{};
@@ -656,9 +714,9 @@ class FlowSolver::Impl {
                     throw std::runtime_error("interior local face has no ghost/neighbor cell");
                 }
                 const std::size_t neighbor = static_cast<std::size_t>(local_face.neighbor_local);
-                neighbor_face = reconstruct_face_state(mesh_.cells[neighbor].cell.centroid,
-                                                       primitive_[neighbor], gradients_[neighbor],
-                                                       face.center, gas_);
+                neighbor_face = reconstruct_solver_face_state(
+                    mesh_.cells[neighbor].cell.centroid, primitive_[neighbor],
+                    gradients_[neighbor], face.center);
                 neighbor_state = neighbor_face.conservative;
                 neighbor_primitive = primitive_[neighbor];
                 if (neighbor_face.used_positivity_fallback) {
@@ -1157,6 +1215,7 @@ class FlowSolver::Impl {
         }
         Real alpha = global_ratio > 0.25 ? 0.25 / global_ratio : 1.0;
         if (alpha < 1.0) ++positivity_backtracks_;
+        std::vector<State> conditioned_candidates(mesh_.owned_count);
         int backtracks = 0;
         for (; backtracks < 45; ++backtracks) {
             int local_valid = 1;
@@ -1166,10 +1225,11 @@ class FlowSolver::Impl {
                     candidate[component] = states_[local][component] +
                                            alpha * correction[local][component];
                 }
-                if (!is_admissible(candidate, gas_)) {
+                if (!condition_iteration_state(candidate)) {
                     local_valid = 0;
                     break;
                 }
+                conditioned_candidates[local] = candidate;
             }
             int global_valid = 0;
             MPI_Allreduce(&local_valid, &global_valid, 1, MPI_INT, MPI_MIN, communicator_);
@@ -1181,9 +1241,7 @@ class FlowSolver::Impl {
         }
         positivity_backtracks_ += static_cast<std::uint64_t>(backtracks);
         for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
-            for (std::size_t component = 0; component < kStateVariables; ++component) {
-                states_[local][component] += alpha * correction[local][component];
-            }
+            states_[local] = conditioned_candidates[local];
         }
     }
 
@@ -1440,6 +1498,8 @@ class FlowSolver::Impl {
                     Real beta = global_acceleration_ratio > 1.0
                                     ? 1.0 / global_acceleration_ratio
                                     : 1.0;
+                    std::vector<State> conditioned_accelerated(mesh_.owned_count);
+                    bool acceleration_valid = false;
                     for (int backtrack = 0; backtrack < 30; ++backtrack) {
                         int local_valid = 1;
                         for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
@@ -1450,27 +1510,25 @@ class FlowSolver::Impl {
                                     beta * (accelerated[local][component] -
                                             fixed_point_image[local][component]);
                             }
-                            if (!is_admissible(candidate, gas_)) {
+                            if (!condition_iteration_state(candidate)) {
                                 local_valid = 0;
                                 break;
                             }
+                            conditioned_accelerated[local] = candidate;
                         }
                         int global_valid = 0;
                         MPI_Allreduce(&local_valid, &global_valid, 1, MPI_INT, MPI_MIN,
                                       communicator_);
-                        if (global_valid != 0) break;
+                        if (global_valid != 0) {
+                            acceleration_valid = true;
+                            break;
+                        }
                         beta *= 0.5;
                     }
                     minimum_anderson_beta = std::min(minimum_anderson_beta, beta);
-                    if (beta > 1.0e-8) {
+                    if (acceleration_valid && beta > 1.0e-8) {
                         for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
-                            for (std::size_t component = 0; component < kStateVariables;
-                                 ++component) {
-                                states_[local][component] =
-                                    fixed_point_image[local][component] + beta *
-                                    (accelerated[local][component] -
-                                     fixed_point_image[local][component]);
-                            }
+                            states_[local] = conditioned_accelerated[local];
                         }
                         Evaluation accelerated_evaluation =
                             assemble_spatial(step, 0.0, used_inner, cfl, 0.0);
@@ -1590,6 +1648,12 @@ class FlowSolver::Impl {
                                         cfl_note
                                   : "production horizon ended before convergence or a stable plateau" +
                                         cfl_note;
+        if (steady_inviscid_total_enthalpy_) {
+            summary.notes +=
+                "; steady inviscid nonlinear iterates and reconstructed face states "
+                "constrained to freestream total enthalpy with a 0.1 freestream-relative "
+                "joint density/pressure rarefaction safeguard";
+        }
         summary.notes += "; global Linf residual reduction=" +
                          std::to_string(final_linf_reduction) + " orders";
         if (!observed_inner_iterations.empty()) {

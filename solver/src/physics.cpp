@@ -107,6 +107,43 @@ bool is_admissible(const ConservativeState& state, const GasModel& gas) noexcept
            pressure_unchecked(state, gas) > gas.pressure_floor;
 }
 
+bool project_state_to_total_enthalpy(ConservativeState& state,
+                                     Real target_total_enthalpy,
+                                     const GasModel& gas) noexcept {
+    if (!finite_state(state) || !(state[0] > gas.density_floor) ||
+        !(gas.gamma > 1.0) || !std::isfinite(target_total_enthalpy)) {
+        return false;
+    }
+    const Real density = state[0];
+    const Real momentum_squared = state[1] * state[1] + state[2] * state[2];
+    const Real kinetic_per_mass = 0.5 * momentum_squared / (density * density);
+    const Real thermal_enthalpy = target_total_enthalpy - kinetic_per_mass;
+    const Real pressure = density * (gas.gamma - 1.0) / gas.gamma * thermal_enthalpy;
+    const Real energy = pressure / (gas.gamma - 1.0) +
+                        0.5 * momentum_squared / density;
+    if (!(pressure > gas.pressure_floor) || !std::isfinite(pressure) ||
+        !std::isfinite(energy)) {
+        return false;
+    }
+    state[3] = energy;
+    return true;
+}
+
+bool violates_joint_reference_floor(const ConservativeState& state,
+                                    Real reference_density,
+                                    Real reference_pressure,
+                                    Real fraction,
+                                    const GasModel& gas) noexcept {
+    if (!is_admissible(state, gas) || !(reference_density > 0.0) ||
+        !(reference_pressure > 0.0) || !(fraction >= 0.0) ||
+        !std::isfinite(reference_density) || !std::isfinite(reference_pressure) ||
+        !std::isfinite(fraction)) {
+        return true;
+    }
+    return state[0] < fraction * reference_density &&
+           pressure_unchecked(state, gas) < fraction * reference_pressure;
+}
+
 ConservativeState euler_flux(const ConservativeState& state, const Vec2& unit_normal,
                              const GasModel& gas) {
     const ThermodynamicState primitive = decode_state(state, gas);

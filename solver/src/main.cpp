@@ -352,6 +352,11 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
     if (config.numerics_required.spatial_order >= 2) {
         metadata.reconstruction =
             "weighted_least_squares_piecewise_linear_with_pressure_jump_shock_flattening_0.01_to_0.03";
+        if (config.run_control.type == cfd::RunType::steady &&
+            config.physics.mode == cfd::PhysicsMode::inviscid) {
+            metadata.reconstruction +=
+                "_with_freestream_total_enthalpy_consistent_face_states";
+        }
         metadata.limiter = "Barth_Jespersen_active";
     } else {
         metadata.reconstruction = "piecewise_constant";
@@ -359,7 +364,10 @@ void copy_string(const std::string& source, std::array<char, 512>& destination) 
     }
     metadata.spatial_order_claimed = config.numerics_required.spatial_order;
     metadata.positivity_preservation =
-        "face_increment_scaling_and_global_update_backtracking";
+        config.run_control.type == cfd::RunType::steady &&
+                config.physics.mode == cfd::PhysicsMode::inviscid
+            ? "face_increment_scaling_global_update_backtracking_and_0.1_freestream_relative_joint_density_pressure_rarefaction_guard"
+            : "face_increment_scaling_and_global_update_backtracking";
     metadata.wall_boundary_output_semantics = "boundary_value";
     metadata.true_bdf2_inner_loop = config.run_control.type == cfd::RunType::transient;
     metadata.transient_statistics.typical_inner_iterations =
