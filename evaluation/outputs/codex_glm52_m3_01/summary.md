@@ -4,6 +4,7 @@
 - Branch: `codex/glm52-m3/init` commit `52a1e520a92df0793499c5fa7888c576a7120d70`
 - Benchmark submodule: `1bc6580b84825037bbeac097ede1b2226d8185d1`
 - Layout: standard (solver: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_glm52_m3_01/solver`, results: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_glm52_m3_01/solver/results`, report: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_glm52_m3_01/solver/report`)
+- Session window: 2026-08-01T20:12:51.919000+00:00 → 2026-08-01T21:36:57.469000+00:00
 
 ## Expenses
 

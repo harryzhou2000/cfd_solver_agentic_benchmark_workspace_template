@@ -4,6 +4,7 @@
 - Branch: `main` commit `abf2bf665491546f6097a45b6068714d1d27619b`
 - Benchmark submodule: `a29ae3e02d8423f4e58d454d43eb34713a67a512`
 - Layout: non_standard (solver: `None`, results: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/opencode_omoslim_deepseek/cfd_solver/results`, report: `None`)
+- Session window: 2026-07-04T17:53:04.401000+00:00 → 2026-07-19T10:27:09.717000+00:00
 
 ## Expenses
 

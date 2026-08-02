@@ -221,6 +221,10 @@ def extract_opencode(args, workspace: str) -> dict:
 
     for r in rows:
         m = json.loads(r[5]) if r[5] else {}
+        started = (datetime.fromtimestamp(r[10] / 1000, tz=timezone.utc).isoformat()
+                   if r[10] else None)
+        ended = (datetime.fromtimestamp(r[11] / 1000, tz=timezone.utc).isoformat()
+                 if r[11] else None)
         sessions.append({
             "session_id": r[0],
             "parent_id": r[1],
@@ -235,6 +239,8 @@ def extract_opencode(args, workspace: str) -> dict:
             "cost": r[9] or 0.0,
             "time_created": r[10],
             "time_updated": r[11],
+            "started_at": started,
+            "ended_at": ended,
         })
     if not sessions:
         questions.append({
@@ -394,6 +400,12 @@ def extract_opencode(args, workspace: str) -> dict:
         },
         "prompts": prompts,
         "workspace": workspace_state(Path(workspace)),
+        "session_window": {
+            "started_at": min((s["started_at"] for s in sessions if s["started_at"]),
+                              default=None),
+            "ended_at": max((s["ended_at"] for s in sessions if s["ended_at"]),
+                            default=None),
+        },
         "questions": questions,
         "user_answers": {},
         "status": "needs_user_input" if questions else "complete",
@@ -521,6 +533,7 @@ def main(argv: list[str] | None = None) -> int:
     models: dict[str, dict] = {}
     context = {"by_model": {}, "by_thread": {}, "notes": []}
     subagents = []
+    threads_out: dict[str, dict] = {}
     for tid in sorted(all_ids):
         t = threads.get(tid)
         if not t:
@@ -541,9 +554,21 @@ def main(argv: list[str] | None = None) -> int:
             "git_branch": t["git_branch"],
             "created_at": t["created_at"],
             "updated_at": t["updated_at"],
+            "started_at": None,
+            "ended_at": None,
             "context_used_max_input": max_input,
             "context_used_mean_input": round(mean_input, 1) if mean_input is not None else None,
         }
+        s, e = cd.session_window(t["rollout_path"])
+        entry["started_at"] = (
+            s.isoformat() if s
+            else datetime.fromtimestamp(t["created_at"], tz=timezone.utc).isoformat()
+        )
+        entry["ended_at"] = (
+            e.isoformat() if e
+            else datetime.fromtimestamp(t["updated_at"], tz=timezone.utc).isoformat()
+        )
+        threads_out[tid] = entry
         if is_sub:
             parent = next((p for p, c in edges if c == tid), None)
             subagents.append({
@@ -695,10 +720,17 @@ def main(argv: list[str] | None = None) -> int:
         "harness": harness,
         "models": models,
         "context": context,
+        "threads": threads_out,
         "subagents": subagents,
         "opencodex": opencodex,
         "prompts": prompts,
         "workspace": workspace_state(Path(workspace)),
+        "session_window": {
+            "started_at": min((x["started_at"] for x in threads_out.values()),
+                              default=None),
+            "ended_at": max((x["ended_at"] for x in threads_out.values()),
+                            default=None),
+        },
         "provenance": {
             "state_db": args.state_db,
             "goals_db": args.goals_db,

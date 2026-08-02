@@ -234,9 +234,12 @@ def main(argv: list[str] | None = None) -> int:
     if harness == "opencode":
         # codex-only extractors are not applicable; opencode tokens/cost live
         # in opencode.db and are recorded under metadata.opencode.sessions.
+        sw = metadata.get("session_window", {})
         expenses = {"note": "opencode harness: codex expenses extraction not applicable",
                     "workspace": str(ws),
-                    "time_seconds": {"goal_time": 0, "wall_time": 0},
+                    "time_seconds": {"goal_time": 0, "wall_time": 0,
+                                     "started_at": sw.get("started_at"),
+                                     "ended_at": sw.get("ended_at")},
                     "tokens": {"total": 0, "by_model": {}, "by_thread": {},
                                "main_vs_subagent": {"main": 0, "subagent": 0}},
                     "cost_estimate_usd": {"total": 0.0, "by_model": {},
@@ -276,6 +279,11 @@ def main(argv: list[str] | None = None) -> int:
         "solver_dir": layout.get("solver_dir"),
         "results_dir": layout.get("results_dir"),
         "report_dir": layout.get("report_dir"),
+    }
+    sw = metadata.get("session_window", {})
+    contestant["session_window"] = {
+        "start": sw.get("started_at"),
+        "end": sw.get("ended_at"),
     }
 
     result_checks = {}
@@ -388,6 +396,8 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
         f"- Branch: `{c['branch']}` commit `{c['git_commit']}`",
         f"- Benchmark submodule: `{c['benchmark_submodule_commit']}`",
         f"- Layout: {c['layout']} (solver: `{c['solver_dir']}`, results: `{c['results_dir']}`, report: `{c['report_dir']}`)",
+        f"- Session window: {c.get('session_window', {}).get('start')} → "
+        f"{c.get('session_window', {}).get('end')}",
         "",
         "## Expenses",
         "",

@@ -136,6 +136,20 @@ assumed:
 - `workspace.git`: the workspace repository's own `branch` and `commit` (the
   version of the workspace the run executed from).
 
+## 9. Session timestamps
+
+When each session started (and ended) is recorded explicitly:
+
+- `metadata.threads.<id>.started_at` / `ended_at` (codex: rollout first/last
+  event, fallback `threads.created_at`/`updated_at`) and
+  `metadata.opencode.sessions[].started_at` / `ended_at` (opencode:
+  `time_created`/`time_updated`).
+- `metadata.session_window` — the run-wide minimum `started_at` and maximum
+  `ended_at`.
+- The same window is mirrored in `expenses.time_seconds.started_at` /
+  `ended_at` and in `summary.contestant.session_window.{start,end}` for
+  query convenience (`cfdeval query get <c> contestant.session_window.start`).
+
 ## Output
 
 `metadata.json` (embedded in `summary.json` as `metadata`), with sections:

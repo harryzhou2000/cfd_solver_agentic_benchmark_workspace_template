@@ -277,6 +277,8 @@ def main(argv: list[str] | None = None) -> int:
         "time_seconds": {
             "goal_time": round(goal_time, 1),
             "wall_time": round(wall_time, 1),
+            "started_at": min(starts).isoformat() if starts else None,
+            "ended_at": max(ends).isoformat() if ends else None,
             "by_root_thread": goal_by_root,
             "by_root_tree": by_root_tree,
         },
