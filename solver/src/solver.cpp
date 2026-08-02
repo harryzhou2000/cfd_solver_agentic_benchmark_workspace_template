@@ -392,6 +392,7 @@ class FlowSolver::Impl {
     struct Evaluation {
         SolverResidualSample residual_sample{};
         SolverForceSample force_sample{};
+        std::array<Real, 8> local_force{};
         std::vector<State> residual;
         std::vector<Real> diagonal;
         std::vector<StateJacobian> block_diagonal;
@@ -543,7 +544,9 @@ class FlowSolver::Impl {
     }
 
     [[nodiscard]] Evaluation assemble_spatial(int step, Real physical_time, int inner_iteration,
-                                              Real cfl, Real physical_dt) {
+                                              Real cfl, Real physical_dt,
+                                              bool reduce_force = true,
+                                              bool compute_residual_norms = true) {
         update_reconstruction();
         Evaluation evaluation{};
         evaluation.residual.assign(mesh_.owned_count, State{});
@@ -884,12 +887,29 @@ class FlowSolver::Impl {
             }
         }
 
-        std::array<Real, 8> global_force{};
-        MPI_Allreduce(local_force.data(), global_force.data(),
-                      static_cast<int>(global_force.size()), MPI_DOUBLE, MPI_SUM,
-                      communicator_);
+        evaluation.local_force = local_force;
         evaluation.force_sample.step = step;
         evaluation.force_sample.physical_time = physical_time;
+        if (reduce_force) reduce_force_observables(evaluation);
+        evaluation.residual_sample.step = step;
+        evaluation.residual_sample.physical_time = physical_time;
+        evaluation.residual_sample.inner_iteration = inner_iteration;
+        evaluation.residual_sample.cfl = cfl;
+        evaluation.residual_sample.physical_dt = physical_dt;
+        if (compute_residual_norms) compute_norms(evaluation);
+        return evaluation;
+    }
+
+    void reduce_force_observables(Evaluation& evaluation) const {
+        std::array<Real, 8> global_force{};
+        MPI_Allreduce(evaluation.local_force.data(), global_force.data(),
+                      static_cast<int>(global_force.size()), MPI_DOUBLE, MPI_SUM,
+                      communicator_);
+        for (const Real value : global_force) {
+            if (!std::isfinite(value)) {
+                throw std::runtime_error("global force reduction became non-finite");
+            }
+        }
         evaluation.force_sample.pressure_drag = global_force[0];
         evaluation.force_sample.viscous_drag = global_force[1];
         evaluation.force_sample.pressure_lift = global_force[2];
@@ -897,13 +917,6 @@ class FlowSolver::Impl {
         evaluation.force_sample.drag = global_force[0] + global_force[1];
         evaluation.force_sample.lift = global_force[2] + global_force[3];
         evaluation.force_sample.moment_z = global_force[4];
-        evaluation.residual_sample.step = step;
-        evaluation.residual_sample.physical_time = physical_time;
-        evaluation.residual_sample.inner_iteration = inner_iteration;
-        evaluation.residual_sample.cfl = cfl;
-        evaluation.residual_sample.physical_dt = physical_dt;
-        compute_norms(evaluation);
-        return evaluation;
     }
 
     void compute_norms(Evaluation& evaluation) const {
@@ -1561,7 +1574,7 @@ class FlowSolver::Impl {
             for (int inner = 1; inner <= maximum_inner; ++inner) {
                 Evaluation evaluation = assemble_spatial(step, physical_time, inner,
                                                          config_.run_control.cfl_max,
-                                                         physical_dt);
+                                                         physical_dt, false, false);
                 const std::vector<Real> spatial_pseudo_diagonal = evaluation.diagonal;
                 add_bdf_residual(evaluation, physical_dt, step == 1);
                 bool finite_evaluation =
@@ -1628,6 +1641,7 @@ class FlowSolver::Impl {
                 }
                 break;
             }
+            reduce_force_observables(accepted);
             final_global_residual = accepted.residual_sample.residual_l2;
             lift_history.push_back(accepted.force_sample.lift);
             drag_history.push_back(accepted.force_sample.drag);
