@@ -37,6 +37,26 @@ Run each case without diagnostic overrides. The command recorded by the solver
 contains only the executable arguments, so keep the corresponding `mpirun` line
 in your launch log as well.
 
+For long runs on a shared machine, `tools/launch_pinned_case.sh` records the
+exact `mpirun` command, pins each rank to a consecutive CPU, and writes sibling
+`.launch.log`, `.launcher.pid`, and `.launcher.status` evidence. A user service
+keeps the solve independent of the invoking terminal; use one production
+service at a time when host resource pressure is high:
+
+```bash
+stage=$(mktemp -d solver/results/.naca0012_m015_inviscid.staging.XXXXXX)
+systemd-run --user --unit=asteria-naca-m015i \
+  --property=WorkingDirectory="$PWD" \
+  /usr/bin/env -u CODEX_THREAD_ID -u CODEX_CI -u CODEX_PERMISSION_PROFILE \
+  solver/tools/launch_pinned_case.sh 8 0 \
+  cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_inviscid.json \
+  "$stage"
+```
+
+The launcher refuses non-empty outputs or pre-existing evidence files. Promote
+a staging directory only after its status, examiner result, force tail, and
+field sanity checks all pass.
+
 ```bash
 mpirun -np 8 solver/build/cfd_solver solve \
   --case cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_inviscid.json \
