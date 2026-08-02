@@ -1458,6 +1458,9 @@ class FlowSolver::Impl {
                 emit_progress(callbacks, step, accepted_spatial.residual_l2,
                               final_reduction, accepted.force_sample);
             }
+            if (callbacks.checkpoint && step % 250 == 0) {
+                callbacks.checkpoint(step, local_field_cells());
+            }
             // A residual target alone can be crossed while the integrated
             // loads are still moving, especially during early airfoil
             // startup.  Require a resolved force tail for every steady

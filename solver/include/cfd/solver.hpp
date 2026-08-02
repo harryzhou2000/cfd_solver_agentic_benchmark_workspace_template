@@ -89,6 +89,10 @@ struct SolverCallbacks {
     /// Called collectively at requested transient snapshot times.  Each rank passes
     /// only its owned-cell records; the callback may gather them to rank zero.
     std::function<void(int, Real, const std::vector<SolverFieldCell>&)> snapshot;
+    /// Called collectively at durable steady checkpoint intervals.  Each rank
+    /// passes only owned cells; the callback may atomically replace a restart
+    /// on rank zero without changing final-state completion bookkeeping.
+    std::function<void(int, const std::vector<SolverFieldCell>&)> checkpoint;
     /// Called on rank zero for concise progress diagnostics.
     std::function<void(const std::string&)> log;
 };

@@ -487,6 +487,17 @@ int main(int argc, char** argv) {
             output->log(message);
             std::cout << message << '\n' << std::flush;
         };
+        callbacks.checkpoint = [&](
+                                   int step,
+                                   const std::vector<cfd::SolverFieldCell>& local) {
+            const auto gathered =
+                cfd::gather_field_cells(local, MPI_COMM_WORLD);
+            if (rank == 0) {
+                output->write_final_restart(make_restart_records(gathered));
+                output->log("wrote durable steady restart checkpoint step=" +
+                            std::to_string(step));
+            }
+        };
         // A physical-time snapshot cadence is part of the case output contract,
         // not merely a verbosity choice.  Honor it for every production run;
         // report_level controls presentation only.

@@ -147,12 +147,30 @@ void test_invalid_status_and_nan_refused() {
     expect(status_refused, "invalid/failing completion status was accepted");
 }
 
+void test_atomic_restart_replacement() {
+    const auto directory = unique_directory("atomic_restart");
+    OutputSession output(test_case(), directory, metadata());
+    output.write_final_restart({{2, {1.0, 2.0, 3.0, 4.0}}});
+    auto restart = cfd::read_restart_file(directory / "restart_final.bin");
+    expect(restart.size() == 1U && restart[0].state[0] == 1.0,
+           "first restart checkpoint is unreadable");
+
+    output.write_final_restart({{2, {9.0, 8.0, 7.0, 6.0}}});
+    restart = cfd::read_restart_file(directory / "restart_final.bin");
+    expect(restart.size() == 1U && restart[0].state[0] == 9.0 &&
+               restart[0].state[3] == 6.0,
+           "replacement restart checkpoint is not the complete newer state");
+    expect(!std::filesystem::exists(directory / "restart_final.bin.tmp"),
+           "atomic restart left a temporary file after success");
+}
+
 }  // namespace
 
 int main() {
     const std::vector<std::pair<std::string, std::function<void()>>> tests = {
         {"exact contract, VTK, and restart", test_exact_contract_and_vtk_restart},
         {"invalid status and NaN refusal", test_invalid_status_and_nan_refused},
+        {"atomic restart replacement", test_atomic_restart_replacement},
     };
     int failures = 0;
     for (const auto& [name, test] : tests) {

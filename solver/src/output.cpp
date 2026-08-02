@@ -442,8 +442,10 @@ void OutputSession::write_final_restart(const std::vector<RestartStateRecord>& r
         }
     }
     const auto path = impl_->directory / "restart_final.bin";
-    std::ofstream output(path, std::ios::binary);
-    require_open(output, path);
+    auto temporary = path;
+    temporary += ".tmp";
+    std::ofstream output(temporary, std::ios::binary | std::ios::trunc);
+    require_open(output, temporary);
     const auto count = static_cast<std::uint64_t>(sorted.size());
     output.write(kRestartMagic.data(), static_cast<std::streamsize>(kRestartMagic.size()));
     output.write(reinterpret_cast<const char*>(&kRestartVersion), sizeof(kRestartVersion));
@@ -454,7 +456,18 @@ void OutputSession::write_final_restart(const std::vector<RestartStateRecord>& r
         output.write(reinterpret_cast<const char*>(record.state.data()),
                      static_cast<std::streamsize>(sizeof(Real) * record.state.size()));
     }
-    require_open(output, path);
+    output.flush();
+    require_open(output, temporary);
+    output.close();
+    if (output.fail()) fail("cannot close restart checkpoint " + temporary.string());
+    std::error_code rename_error;
+    std::filesystem::rename(temporary, path, rename_error);
+    if (rename_error) {
+        std::error_code cleanup_error;
+        std::filesystem::remove(temporary, cleanup_error);
+        fail("cannot atomically replace restart " + path.string() + ": " +
+             rename_error.message());
+    }
     impl_->has_restart = true;
 }
 
