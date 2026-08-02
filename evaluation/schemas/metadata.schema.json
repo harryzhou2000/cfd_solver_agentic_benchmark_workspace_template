@@ -29,14 +29,27 @@
     "threads": { "type": "object" },
     "subagents": { "type": "array", "items": { "type": "object" } },
     "opencodex": { "type": ["object", "null"] },
-    "opencode": { "type": ["object", "null"] },
+    "opencode": {
+      "type": ["object", "null"],
+      "properties": {
+        "sessions": { "type": "array", "items": { "type": "object" } },
+        "root_session_count": { "type": "integer" },
+        "subagent_session_count": { "type": "integer" },
+        "activity_time_seconds": { "type": "number" },
+        "idle_time_seconds": { "type": "number" },
+        "idle_gap_threshold_seconds": { "type": "integer" }
+      }
+    },
     "prompts": { "type": "object" },
     "workspace": { "type": "object" },
     "session_window": {
       "type": ["object", "null"],
       "properties": {
         "started_at": { "type": ["string", "null"] },
-        "ended_at": { "type": ["string", "null"] }
+        "ended_at": { "type": ["string", "null"] },
+        "activity_time_seconds": { "type": "number" },
+        "idle_time_seconds": { "type": "number" },
+        "idle_gap_threshold_seconds": { "type": "integer" }
       }
     },
     "questions": {

@@ -181,10 +181,62 @@ def fallback_prompts(rollout_path: str) -> list[dict]:
     return out
 
 
+def opencode_activity_times(db_path: str, session_ids: list[str],
+                            idle_gap_seconds: int = 600) -> dict[str, dict]:
+    """Per-session activity time from opencode message history.
+
+    Each message carries `time.created` and (for assistant messages)
+    `time.completed`, so consecutive events bracket actual work (turns and
+    tool execution). Gaps between consecutive events longer than
+    `idle_gap_seconds` are treated as interrupted idle time (user away / API
+    stall) and excluded from activity time.
+    """
+    out: dict[str, dict] = {}
+    try:
+        db = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    except sqlite3.Error:
+        return out
+    try:
+        for sid in session_ids:
+            events = []
+            for (data,) in db.execute(
+                    "SELECT data FROM message WHERE session_id=?", (sid,)).fetchall():
+                try:
+                    d = json.loads(data)
+                except json.JSONDecodeError:
+                    continue
+                t = d.get("time") or {}
+                if t.get("created"):
+                    events.append(t["created"])
+                if t.get("completed"):
+                    events.append(t["completed"])
+            events = sorted(set(events))
+            if len(events) < 2:
+                out[sid] = {"activity_time_seconds": 0, "wall_time_seconds": 0,
+                            "idle_time_seconds": 0, "idle_gaps": 0, "events": len(events)}
+                continue
+            wall = (events[-1] - events[0]) / 1000.0
+            gaps = [(events[i + 1] - events[i]) / 1000.0
+                    for i in range(len(events) - 1)]
+            idle = [g for g in gaps if g > idle_gap_seconds]
+            out[sid] = {
+                "activity_time_seconds": round(wall - sum(idle), 1),
+                "wall_time_seconds": round(wall, 1),
+                "idle_time_seconds": round(sum(idle), 1),
+                "idle_gaps": len(idle),
+                "idle_gap_threshold_seconds": idle_gap_seconds,
+                "events": len(events),
+            }
+    finally:
+        db.close()
+    return out
+
+
 def extract_opencode(args, workspace: str) -> dict:
     """Best-effort metadata from the opencode harness (opencode.db). Anything
     that cannot be extracted is emitted as a question for the user."""
     questions: list[dict] = []
+    idle_gap = getattr(args, "idle_gap_seconds", 600)
     harness = {
         "harness": "opencode",
         "version": _run([shutil.which("opencode") or "opencode", "--version"]),
@@ -242,6 +294,17 @@ def extract_opencode(args, workspace: str) -> dict:
             "started_at": started,
             "ended_at": ended,
         })
+    # per-session activity time from message history (created/completed),
+    # excluding idle gaps > threshold (interrupted by user or API).
+    activity = opencode_activity_times(args.opencode_db,
+                                       [s["session_id"] for s in sessions],
+                                       idle_gap)
+    for s in sessions:
+        s["activity"] = activity.get(s["session_id"], {
+            "activity_time_seconds": 0, "wall_time_seconds": 0,
+            "idle_time_seconds": 0, "idle_gaps": 0, "events": 0})
+    total_activity = sum((a["activity_time_seconds"] for a in activity.values()), 0.0)
+    total_idle = sum((a["idle_time_seconds"] for a in activity.values()), 0.0)
     if not sessions:
         questions.append({
             "id": "opencode_sessions",
@@ -397,6 +460,9 @@ def extract_opencode(args, workspace: str) -> dict:
             "sessions": sessions,
             "root_session_count": len(roots),
             "subagent_session_count": len(children),
+            "activity_time_seconds": round(total_activity, 1),
+            "idle_time_seconds": round(total_idle, 1),
+            "idle_gap_threshold_seconds": idle_gap,
         },
         "prompts": prompts,
         "workspace": workspace_state(Path(workspace)),
@@ -405,6 +471,9 @@ def extract_opencode(args, workspace: str) -> dict:
                               default=None),
             "ended_at": max((s["ended_at"] for s in sessions if s["ended_at"]),
                             default=None),
+            "activity_time_seconds": round(total_activity, 1),
+            "idle_time_seconds": round(total_idle, 1),
+            "idle_gap_threshold_seconds": idle_gap,
         },
         "questions": questions,
         "user_answers": {},
@@ -456,6 +525,11 @@ def main(argv: list[str] | None = None) -> int:
                     default=str(cd.codex_home() / "opencodex-catalog.json"))
     ap.add_argument("--plugins-root", default=str(cd.codex_home() / "plugins"))
     ap.add_argument("--roots", default=None)
+    ap.add_argument(
+        "--idle-gap-seconds", type=int, default=600,
+        help="opencode: gaps between session-history events longer than this "
+             "many seconds count as interrupted idle time (default 600)",
+    )
     ap.add_argument("--opencode-db",
                     default=str(Path.home() / ".local" / "share" / "opencode" / "opencode.db"))
     ap.add_argument("--opencode-config-dir",

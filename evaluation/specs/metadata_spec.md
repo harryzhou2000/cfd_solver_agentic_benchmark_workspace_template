@@ -150,6 +150,29 @@ When each session started (and ended) is recorded explicitly:
   `ended_at` and in `summary.contestant.session_window.{start,end}` for
   query convenience (`cfdeval query get <c> contestant.session_window.start`).
 
+## 10. Session activity time (opencode)
+
+For opencode runs, session **wall time includes idle periods** (user away,
+API stalls, interrupted runs), so an activity time is computed from session
+history instead:
+
+- Every message carries `time.created` and (assistant messages)
+  `time.completed`, so consecutive history events bracket real work
+  (turns plus tool execution).
+- Gaps between consecutive events longer than `idle_gap_seconds`
+  (default **600 s**, CLI `--idle-gap-seconds`) are treated as interrupted
+  idle time and excluded:
+  `activity_time = wall_time − Σ idle gaps`.
+- Recorded per session (`metadata.opencode.sessions[].activity`:
+  `activity_time_seconds`, `wall_time_seconds`, `idle_time_seconds`,
+  `idle_gaps`, `events`) and aggregated in
+  `metadata.opencode.activity_time_seconds` /
+  `idle_time_seconds` and `metadata.session_window`; mirrored in
+  `expenses.time_seconds.activity_time_seconds` for opencode runs.
+
+Validated on `omo_slim_dsv4_01`: 14 sessions, 20.5 h total wall time →
+9.3 h activity (11.2 h idle excluded at the 600 s threshold).
+
 ## Output
 
 `metadata.json` (embedded in `summary.json` as `metadata`), with sections:

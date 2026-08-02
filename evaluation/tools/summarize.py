@@ -183,6 +183,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ocx-config", default=str(Path.home() / ".opencodex" / "config.json"))
     ap.add_argument("--ocx-catalog", default=str(cd.codex_home() / "opencodex-catalog.json"))
     ap.add_argument("--plugins-root", default=str(cd.codex_home() / "plugins"))
+    ap.add_argument("--idle-gap-seconds", type=int, default=600,
+                    help="opencode: gaps longer than this count as interrupted idle")
     ap.add_argument(
         "--answers", default=None,
         help="JSON file mapping metadata question ids to user-provided answers "
@@ -218,7 +220,8 @@ def main(argv: list[str] | None = None) -> int:
                     "--sessions-root", args.sessions_root,
                     "--history", args.history, "--ocx-config", args.ocx_config,
                     "--ocx-catalog", args.ocx_catalog,
-                    "--plugins-root", args.plugins_root]
+                    "--plugins-root", args.plugins_root,
+                    "--idle-gap-seconds", str(args.idle_gap_seconds)]
             if args.answers:
                 cmd += ["--answers", args.answers]
         if args.roots:
@@ -238,6 +241,9 @@ def main(argv: list[str] | None = None) -> int:
         expenses = {"note": "opencode harness: codex expenses extraction not applicable",
                     "workspace": str(ws),
                     "time_seconds": {"goal_time": 0, "wall_time": 0,
+                                     "activity_time_seconds": sw.get("activity_time_seconds"),
+                                     "idle_time_seconds": sw.get("idle_time_seconds"),
+                                     "idle_gap_threshold_seconds": sw.get("idle_gap_threshold_seconds"),
                                      "started_at": sw.get("started_at"),
                                      "ended_at": sw.get("ended_at")},
                     "tokens": {"total": 0, "by_model": {}, "by_thread": {},
@@ -474,9 +480,13 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
         lines.append(f"- Benchmark submodule: {bm.get('commit', '?')[:12]} "
                      f"({'dirty' if bm.get('dirty') else 'clean'})")
     if md.get("opencode"):
+        act = md["opencode"]
         lines.append(f"- opencode: v{md['harness'].get('version')}, "
-                     f"{md['opencode'].get('root_session_count')} root / "
-                     f"{md['opencode'].get('subagent_session_count')} subagent sessions")
+                     f"{act.get('root_session_count')} root / "
+                     f"{act.get('subagent_session_count')} subagent sessions; "
+                     f"activity {act.get('activity_time_seconds', 0) / 3600:.1f}h "
+                     f"(idle {act.get('idle_time_seconds', 0) / 3600:.1f}h excluded, "
+                     f"gap threshold {act.get('idle_gap_threshold_seconds', 600)}s)")
     lines += [
         "",
         "| Model | Effort(s) | Context window | Max context used | Threads |",
