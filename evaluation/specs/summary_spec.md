@@ -48,16 +48,24 @@ The generated summary keeps them separable:
 `summarize.py --workspace <dir>` writes into
 `evaluation/outputs/<workspace-basename>/`:
 
-1. `summary.json` — machine-readable final summary (schema:
+1. `index.json` — contract manifest (schema: `index.schema.json`) listing
+   every artifact with its schema and sha256 (contract:
+   `evaluation/contract/README.md`).
+2. `summary.json` — machine-readable final summary (schema:
    `evaluation/schemas/summary.schema.json`).
-2. `summary.md` — human-readable report of the same content.
-3. `expenses.json` — time / tokens / cost detail (see `expenses_spec.md`).
-4. `measurements.json` — tool usage, LOC, rule-violation findings
+3. `summary.md` — human-readable report of the same content.
+4. `expenses.json` — time / tokens / cost detail (see `expenses_spec.md`).
+5. `measurements.json` — tool usage, LOC, rule-violation findings
    (see `measurements_spec.md`).
-5. `metadata.json` — harness / model / context / subagent / router / prompt
+6. `metadata.json` — harness / model / context / subagent / router / prompt
    metadata (see `metadata_spec.md`).
-6. `review_code.md`, `review_cfd.md`, `review_results.md` — blank scorecards
+7. `review_code.md`, `review_cfd.md`, `review_results.md` — blank scorecards
    for reviewers, one point per row with a score column.
+
+All JSON artifacts validate against the schemas in `evaluation/schemas/`
+and are format-checked by `cfdeval check` / `tools/check_result.py`; the
+`cfdeval` package (uv) also provides `query` for listing, comparing, and
+dot-path access to results.
 
 ## Summary structure
 

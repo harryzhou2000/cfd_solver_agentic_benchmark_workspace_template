@@ -1,0 +1,80 @@
+# Evaluation Result Contract v1.0
+
+This contract standardizes the **self-contained evaluation result folder**
+produced for each benchmark contestant run. A result folder is the single
+unit of evaluation evidence: everything about a run is inside it, in
+machine-readable JSON (standardized by schema) and human-readable MD
+(derived renderings).
+
+## Folder layout
+
+`evaluation/outputs/<contestant>/`:
+
+```text
+index.json              # manifest: contract version, artifacts + schemas + sha256
+summary.json            # canonical summary (embeds the areas below)
+summary.md              # human-readable rendering of summary.json
+metadata.json           # harness, models, context, subagents, router, prompts,
+                        # workspace state (AGENTS.md, codegraph, submodule)
+expenses.json           # time, tokens, cost estimate
+measurements.json       # tool usage, LOC, rule violations
+review_code.json|md     # code review scorecard
+review_cfd.json|md      # CFD methods review scorecard
+review_results.json|md  # result review scorecard (+ structural evidence)
+```
+
+## Standardization rules
+
+1. **Every JSON artifact validates against its schema** in
+   `evaluation/schemas/` (`summary.schema.json`, `metadata.schema.json`,
+   `expenses.schema.json`, `measurements.schema.json`, `review.schema.json`,
+   `index.schema.json`). The schema version is recorded per artifact in
+   `index.json`.
+2. **`index.json` is the integrity manifest**: it lists every artifact with
+   its schema reference and sha256 digest. A folder is contract-conformant
+   only if all digests match.
+3. **MD files are derived renderings** of the JSON artifacts — never edited
+   by hand. Scores and notes are recorded in the `review_*.json` sidecars and
+   rendered into the MD scorecards.
+4. **Nothing writes into the benchmark repo or contestant workspaces**; the
+   result folder is generated read-only from those sources.
+5. **Unextractable metadata is recorded as questions**, not guesses
+   (`metadata.questions` + `status: needs_user_input`); user answers are
+   merged via `--answers` and persisted in `metadata.user_answers`.
+
+## Fill, check, query
+
+Fill (generates the folder + `index.json`):
+
+```bash
+python3 evaluation/tools/summarize.py --workspace ../codex_gpt56_01
+# or, with the cfdeval package:
+cd evaluation && uv run cfdeval summarize --workspace ../codex_gpt56_01
+```
+
+Format-check (schemas + sha256 manifest):
+
+```bash
+uv run cfdeval check evaluation/outputs/codex_gpt56_01
+python3 evaluation/tools/check_result.py evaluation/outputs/codex_gpt56_01
+```
+
+Query:
+
+```bash
+uv run cfdeval query list                       # result folders + status
+uv run cfdeval query table --json               # comparison table
+uv run cfdeval query show codex_gpt56_01        # summary.md
+uv run cfdeval query get codex_gpt56_01 expenses.tokens.total
+uv run cfdeval query get codex_gpt56_01 metadata.workspace.benchmark_submodule.commit
+```
+
+Scoring: reviewers edit `review_*.json` scores, then re-render
+(`generate_review_forms.py` refreshes the MD from the JSON sidecars).
+
+## Contract versioning
+
+`index.json.contract_version` identifies the contract revision that produced
+the folder. Schema files are the normative definitions; contract changes bump
+the version and keep old folders readable (schemas are backward-compatible or
+versioned by filename).

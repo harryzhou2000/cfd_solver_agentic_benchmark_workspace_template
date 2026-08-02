@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Review scorecard",
+  "type": "object",
+  "required": ["points", "overall_score"],
+  "properties": {
+    "review_area": { "type": "string" },
+    "title": { "type": "string" },
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "weight", "score"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "weight": { "type": "number" },
+          "score": { "type": ["number", "null"] },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "disqualification_flags": { "type": "array", "items": { "type": "object" } },
+    "structural_checks": { "type": ["object", "null"] },
+    "overall_score": { "type": ["number", "null"] }
+  }
+}

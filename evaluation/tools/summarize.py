@@ -24,8 +24,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import codex_data as cd  # noqa: E402
+sys.path.insert(0, str(ROOT / "src"))
+from cfdeval import codex_data as cd  # noqa: E402
+from cfdeval import recording, validation  # noqa: E402
 
 
 def _git(args: list[str], cwd: Path) -> str | None:
@@ -169,7 +170,7 @@ def required_cases(ws: Path) -> list[str]:
     ]
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Generate contestant final result summary")
     ap.add_argument("--workspace", required=True)
     defaults = cd.default_paths()
@@ -195,7 +196,7 @@ def main() -> int:
              "tree). Default: all sessions whose cwd is inside the workspace, "
              "including botched ones.",
     )
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
 
     ws = Path(args.workspace).resolve()
     out_dir = Path(args.out) if args.out else ROOT / "outputs" / ws.name
@@ -234,6 +235,7 @@ def main() -> int:
         # codex-only extractors are not applicable; opencode tokens/cost live
         # in opencode.db and are recorded under metadata.opencode.sessions.
         expenses = {"note": "opencode harness: codex expenses extraction not applicable",
+                    "workspace": str(ws),
                     "time_seconds": {"goal_time": 0, "wall_time": 0},
                     "tokens": {"total": 0, "by_model": {}, "by_thread": {},
                                "main_vs_subagent": {"main": 0, "subagent": 0}},
@@ -348,7 +350,28 @@ def main() -> int:
 
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     render_md(out_dir / "summary.md", summary, out_dir)
+    recording.write_index(
+        out_dir,
+        ws.name,
+        artifacts={
+            "index.json": "index.schema.json",
+            "summary.json": "summary.schema.json",
+            "metadata.json": "metadata.schema.json",
+            "expenses.json": "expenses.schema.json",
+            "measurements.json": "measurements.schema.json",
+            "review_code.json": "review.schema.json",
+            "review_cfd.json": "review.schema.json",
+            "review_results.json": "review.schema.json",
+        },
+        tools=["cfdeval", "summarize.py", "extract_expenses.py",
+               "extract_measurements.py", "extract_metadata.py",
+               "generate_review_forms.py"],
+        schema_dir=ROOT / "schemas",
+    )
+    if validation.check_cli([str(out_dir), "--schemas", str(ROOT / "schemas")]) != 0:
+        print("WARNING: format check failed — see messages above", file=sys.stderr)
     print(f"wrote {out_dir / 'summary.json'}")
+    print(f"wrote {out_dir / 'index.json'}")
     print(f"wrote {out_dir / 'summary.md'}")
     return 0
 

@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Contestant measurements (tool usage, LOC, rule violations)",
+  "type": "object",
+  "required": ["tool_usage", "loc", "rule_violations"],
+  "properties": {
+    "note": { "type": ["string", "null"] },
+    "workspace": { "type": "string" },
+    "tool_usage": {
+      "type": "object",
+      "properties": {
+        "total": { "type": "integer" },
+        "by_tool": { "type": "object" },
+        "by_thread": { "type": "object" },
+        "subagent_spawns": { "type": "integer" },
+        "risk_context": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "loc": {
+      "type": "object",
+      "properties": {
+        "method": { "type": "string" },
+        "git": { "type": ["object", "null"] },
+        "file": { "type": ["object", "null"] }
+      }
+    },
+    "rule_violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["category", "severity", "thread_id", "timestamp", "tool"],
+        "properties": {
+          "category": { "type": "string" },
+          "severity": { "enum": ["high", "medium", "low"] },
+          "thread_id": { "type": ["string", "null"] },
+          "timestamp": { "type": ["string", "null"] },
+          "tool": { "type": "string" },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "provenance": { "type": "object" }
+  }
+}

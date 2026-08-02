@@ -22,6 +22,31 @@ all inputs are read-only and outputs land under `evaluation/outputs/`.
 Root spec: [specs/summary_spec.md](specs/summary_spec.md). Output schema:
 [schemas/summary.schema.json](schemas/summary.schema.json).
 
+## Evaluation result contract
+
+Each contestant run produces a **self-contained result folder** under
+`evaluation/outputs/<contestant>/` per [contract/README.md](contract/README.md):
+standardized JSON artifacts (each with a schema in `schemas/`), derived MD
+renderings, and an `index.json` manifest with sha256 digests for
+format-checking.
+
+## Centralized Python module (uv)
+
+The centralized `cfdeval` package (`src/cfdeval/`) owns metadata extraction,
+recording (index manifest), format-checking, and querying:
+
+```bash
+cd evaluation
+uv sync                                   # creates .venv, installs cfdeval
+uv run cfdeval check outputs/codex_gpt56_01
+uv run cfdeval query table --json
+uv run cfdeval query get codex_gpt56_01 expenses.tokens.total
+```
+
+The `tools/` scripts are thin wrappers and work with plain `python3` too
+(no install required): `extract_metadata.py`, `extract_expenses.py`,
+`extract_measurements.py`, `summarize.py`, `check_result.py`.
+
 ## Usage
 
 ```bash

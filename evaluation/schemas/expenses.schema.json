@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Contestant expenses (time, tokens, estimated cost)",
+  "type": "object",
+  "required": ["workspace", "time_seconds", "tokens", "cost_estimate_usd"],
+  "properties": {
+    "workspace": { "type": "string" },
+    "note": { "type": ["string", "null"] },
+    "time_seconds": {
+      "type": "object",
+      "properties": {
+        "goal_time": { "type": "number" },
+        "wall_time": { "type": "number" },
+        "by_root_thread": { "type": "object" },
+        "by_root_tree": { "type": "object" }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "properties": {
+        "total": { "type": "integer" },
+        "by_model": { "type": "object" },
+        "by_thread": { "type": "object" },
+        "main_vs_subagent": { "type": "object" },
+        "fallback_tokens": { "type": "integer" },
+        "discrepancy_notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "cost_estimate_usd": {
+      "type": "object",
+      "properties": {
+        "total": { "type": "number" },
+        "by_model": { "type": "object" },
+        "unpriced_tokens": { "type": "integer" },
+        "estimate": { "type": "boolean" },
+        "metadata": { "type": "string" }
+      }
+    },
+    "provenance": { "type": "object" }
+  }
+}

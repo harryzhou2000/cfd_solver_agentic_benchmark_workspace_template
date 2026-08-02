@@ -45,7 +45,7 @@
 
 ### opencodex router (non-vanilla models: BLSC/GLM-5.2)
 
-- opencodex version: opencodex 2.8.0 (submodule v2.8.0-498-g02601815)
+- opencodex version: opencodex 2.8.0 (submodule None)
 - config facts: {"default_provider": "deepseek", "providers": ["BLSC", "deepseek", "openai", "opencode-free"], "multi_agent_mode": "v2", "subagent_models": ["gpt-5.6-terra", "gpt-5.6-luna", "BLSC/DeepSeek-V4-Flash", "BLSC/GLM-5.2", "BLSC/MiniMax-M3"], "disabled_models": ["BLSC/Baichuan-M2", "BLSC/Baichuan-M3", "BLSC/Baichuan-M2-128K", "BLSC/DeepSeek-R1", "BLSC/DeepSeek-V3-250324", "BLSC/DeepSeek-R1-0528", "BLSC/D
 
 ### Prompts

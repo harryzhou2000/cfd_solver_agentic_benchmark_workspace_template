@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Contestant execution metadata",
+  "type": "object",
+  "required": ["harness", "models", "context", "subagents", "prompts", "workspace", "status"],
+  "properties": {
+    "harness": {
+      "type": "object",
+      "required": ["harness"],
+      "properties": {
+        "harness": { "enum": ["codex", "opencode", "unknown"] },
+        "version": { "type": ["string", "null"] },
+        "cli_version": { "type": ["string", "null"] },
+        "originator": { "type": ["string", "null"] },
+        "source": { "type": ["string", "null"] },
+        "thread_source": { "type": ["string", "null"] },
+        "multi_agent_version": { "type": ["string", "null"] },
+        "history_mode": { "type": ["string", "null"] },
+        "memory_mode": { "type": ["string", "null"] },
+        "model_provider": { "type": ["string", "null"] },
+        "codex_runtime_version": { "type": ["string", "null"] },
+        "config_dir": { "type": ["string", "null"] },
+        "config_entries": { "type": ["array", "null"], "items": { "type": "string" } },
+        "plugins": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "models": { "type": "object" },
+    "context": { "type": "object" },
+    "subagents": { "type": "array", "items": { "type": "object" } },
+    "opencodex": { "type": ["object", "null"] },
+    "opencode": { "type": ["object", "null"] },
+    "prompts": { "type": "object" },
+    "workspace": { "type": "object" },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "question", "reason", "suggested_source", "answer"],
+        "properties": {
+          "id": { "type": "string" },
+          "question": { "type": "string" },
+          "reason": { "type": "string" },
+          "suggested_source": { "type": "string" },
+          "answer": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "user_answers": { "type": "object" },
+    "status": { "enum": ["complete", "needs_user_input"] },
+    "provenance": { "type": "object" }
+  }
+}

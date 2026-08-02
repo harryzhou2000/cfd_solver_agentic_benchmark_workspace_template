@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evaluation result folder index",
+  "type": "object",
+  "required": ["contract_version", "contestant", "generated_at", "artifacts"],
+  "properties": {
+    "contract_version": { "type": "string" },
+    "contestant": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "tools": { "type": "array", "items": { "type": "string" } },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["schema", "sha256"],
+        "properties": {
+          "schema": { "type": "string" },
+          "sha256": { "type": "string" },
+          "bytes": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
