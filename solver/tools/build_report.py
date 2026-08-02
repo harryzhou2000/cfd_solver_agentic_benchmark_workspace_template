@@ -955,6 +955,24 @@ def _write_csv(path: Path, columns: tuple[str, ...], rows: list[dict[str, object
         writer.writerows(rows)
 
 
+def _recorded_launch_command(case: CaseData) -> str:
+    launch_log = case.directory / "launch.log"
+    if launch_log.is_file():
+        for line in launch_log.read_text(encoding="utf-8").splitlines():
+            if line.startswith("command="):
+                command = line.removeprefix("command=").strip()
+                expected = f"mpirun -np {case.status.get('mpi_ranks', '')} "
+                if not command.startswith(expected):
+                    raise BuildError(
+                        f"{case.case_id}: launch.log command does not match the stored MPI rank count")
+                return command
+        raise BuildError(f"{case.case_id}: launch.log does not contain its recorded command")
+    command = str(case.status.get("command", "")).strip()
+    if command and not command.startswith("mpirun "):
+        command = f"mpirun -np {case.status.get('mpi_ranks', '')} {command}"
+    return command
+
+
 def build_report(results_root: Path, output_dir: Path, *,
                  rank_results: tuple[Path, ...] = (),
                  case_inputs_dir: Path | None = None) -> None:
@@ -973,12 +991,10 @@ def build_report(results_root: Path, output_dir: Path, *,
             records.extend(generate_case_figures(case.directory, figures))
         _write_csv(output_dir / "figure_manifest.csv", MANIFEST_COLUMNS, records)
         def manifest_row(case: CaseData, record_type: str) -> dict[str, object]:
-            command = str(case.status.get("command", "")).strip()
-            if command and not command.startswith("mpirun "):
-                command = f"mpirun -np {case.status.get('mpi_ranks', '')} {command}"
             return {
                 "record_type": record_type, "case_id": case.case_id,
-                "source_directory": str(case.directory), "command": command,
+                "source_directory": str(case.directory),
+                "command": _recorded_launch_command(case),
                 "mpi_ranks": case.status.get("mpi_ranks", ""), "wall_time_seconds": case.status.get("wall_time_seconds", ""),
                 "final_step": case.status.get("final_step", ""),
                 "final_physical_time": case.status.get("final_physical_time", ""),
