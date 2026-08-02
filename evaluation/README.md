@@ -104,10 +104,66 @@ For opencode contestants the pipeline extracts harness/version, sessions
 prompts from the opencode database; codex-only expense/measurement extractors
 are skipped for those runs.
 
+### Session activity time (opencode)
+
+Wall-clock session time is not a fair measure of work: sessions are frequently
+interrupted by the user (away from keyboard) or by API stalls. For opencode
+runs the pipeline therefore computes **activity time** per session from the
+message history (`time.created` / `time.completed` events): gaps between
+consecutive events longer than the idle threshold count as interrupted idle
+time and are excluded from activity time. Reported as
+`opencode.activity_time_seconds` (and per-session
+`sessions[].activity.activity_time_seconds`, with wall/idle breakdown and the
+number of idle gaps).
+
+The threshold defaults to 600 s and can be tuned per run:
+
+```bash
+python3 evaluation/tools/summarize.py --workspace ../omo_slim_dsv4_01 \
+  --idle-gap-seconds 300
+```
+
 All codex data paths (`~/.codex/state_5.sqlite`, `goals_1.sqlite`,
 `logs_2.sqlite`, `sessions/`) are overridable via `--state-db`, `--goals-db`,
 `--logs-db`, `--sessions-root`, so the same tools work against a snapshot of
 another machine's `~/.codex`.
+
+## Publishing a contestant's results
+
+When a contestant run is complete (marked with the `done` file), its
+self-contained result lives on a regulated `results/<slug>` branch. The
+publish helper prepares and pushes that branch for a contestant workspace:
+
+```bash
+python3 evaluation/tools/publish_results.py --workspace ../omo_slim_dsv4_01 \
+  --dry-run          # preview every action, change nothing
+python3 evaluation/tools/publish_results.py --workspace ../omo_slim_dsv4_01 \
+  --push             # restore origin, fetch full history, branch, commit, push
+```
+
+What it does, in order (each step is printed):
+
+1. Restores the `origin` remote if missing (default URL: this manager
+   repository's origin, i.e. the workspace template repo; override with
+   `--origin-url`).
+2. Fetches the full remote history — contestant clones are usually **shallow**,
+   and remotes reject shallow pushes, so it runs `git fetch --unshallow origin`
+   first when needed, then `git fetch --all --tags --prune`.
+3. Moves to a regulated branch named `results/<slug>` (default slug = the
+   workspace directory name, normalized to lowercase hyphens; `--branch`
+   overrides). It creates the branch from the current branch, or renames the
+   current branch with `--rename-current`; existing targets are switched to.
+4. Commits the whole working tree (`git add -A`, default message
+   `results: <slug>`); skip with `--exclude GLOB` (repeatable) for large
+   artifacts you do not want in the branch.
+5. Pushes with `git push -u <remote> <branch>` — **only when `--push` is
+   given**; the default remote is `origin` (`--push-remote` overrides, add an
+   unconfigured remote with `--push-url`). Without `--push` the helper only
+   prepares the local branch and prints the push command it would run.
+
+The helper is the mechanical front-end for the "results branch" contract in
+[contract/README.md](contract/README.md); run it with `--dry-run` first, then
+with `--push` once the preview matches what you want to publish.
 
 ## Data sources (codex contestants, for now)
 
