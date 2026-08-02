@@ -112,6 +112,7 @@ struct TransientCheckpoint {
     Real physical_time{};
     Real time_step{};
     Real initial_global_residual{};
+    bool initial_symmetry_seed_applied{};
     std::int64_t global_cell_count{};
     std::vector<TransientRestartStateRecord> states;
     std::vector<TransientCheckpointForceRecord> force_history;

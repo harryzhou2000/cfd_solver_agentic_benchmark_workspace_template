@@ -338,6 +338,7 @@ class FlowSolver::Impl {
     }
 
     void set_transient_owned_states(int accepted_step, Real initial_global_residual,
+                                    bool initial_symmetry_seed_applied,
                                     const std::vector<State>& previous,
                                     const std::vector<State>& older,
                                     const std::vector<SolverForceSample>& force_history,
@@ -386,7 +387,7 @@ class FlowSolver::Impl {
         resumed_initial_global_residual_ = initial_global_residual;
         resumed_force_history_ = force_history;
         resumed_inner_iterations_ = inner_iterations;
-        transient_seed_applied_ = false;
+        transient_seed_applied_ = initial_symmetry_seed_applied;
         started_from_restart_ = true;
     }
 
@@ -1756,6 +1757,7 @@ class FlowSolver::Impl {
                 checkpoint.step = step;
                 checkpoint.physical_time = physical_time;
                 checkpoint.initial_global_residual = initial_global_residual;
+                checkpoint.initial_symmetry_seed_applied = transient_seed_applied_;
                 checkpoint.states = local_transient_states();
                 checkpoint.inner_iterations = observed_iterations;
                 checkpoint.force_history.reserve(lift_history.size());
@@ -1956,12 +1958,13 @@ void FlowSolver::set_initial_owned_states(const std::vector<State>& states) {
 }
 
 void FlowSolver::set_transient_owned_states(
-    int accepted_step, Real initial_global_residual, const std::vector<State>& previous,
-    const std::vector<State>& older, const std::vector<SolverForceSample>& force_history,
+    int accepted_step, Real initial_global_residual, bool initial_symmetry_seed_applied,
+    const std::vector<State>& previous, const std::vector<State>& older,
+    const std::vector<SolverForceSample>& force_history,
     const std::vector<int>& inner_iterations) {
     implementation_->set_transient_owned_states(accepted_step, initial_global_residual,
-                                                previous, older, force_history,
-                                                inner_iterations);
+                                                initial_symmetry_seed_applied, previous,
+                                                older, force_history, inner_iterations);
 }
 
 void FlowSolver::apply_transient_symmetry_seed() {

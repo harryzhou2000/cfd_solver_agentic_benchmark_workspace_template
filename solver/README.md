@@ -94,10 +94,11 @@ mpirun -np 8 solver/build/cfd_solver solve \
 The transient solver atomically replaces `transient_checkpoint.bin` every 100
 accepted physical steps.  Unlike the state-only `restart_final.bin`, this
 checkpoint contains both accepted BDF2 states, the original residual baseline,
-the complete inner-iteration accounting, and the force history needed for an
-uninterrupted statistical analysis.  After an interruption, resume into the
-same unfinished output directory; rows newer than the durable checkpoint are
-validated and trimmed before cadence-1 output continues:
+the complete inner-iteration accounting, the initial wake-seed provenance, and
+the force history needed for an uninterrupted statistical analysis.  After an
+interruption, resume into the same unfinished output directory; rows newer than
+the durable checkpoint are validated and trimmed before cadence-1 output
+continues:
 
 ```bash
 solver/tools/launch_pinned_case.sh 8 0 \
@@ -110,6 +111,36 @@ solver/tools/launch_pinned_case.sh 8 0 \
 for the same transient case, mesh size, physical time step, and unfinished
 history package; the launcher records each continuation in distinct hashed
 evidence files.
+
+For the long Re200 production package, use the restart-safe supervisor under a
+user service with `Restart=on-failure`.  It records the initial launch before
+starting it, takes an advisory per-output lock, and subsequently permits only a
+matching unfinished package with a durable checkpoint.  The service exits
+successfully (without relaunching MPI) when it finds a validated completed or
+explicitly failed `run_status.json`; it also refuses if a live `cfd_solver`
+already advertises that output directory.
+
+```bash
+systemd-run --user --unit=asteria-cylinder-re200 \
+  --property=WorkingDirectory="$PWD" \
+  --property=Restart=on-failure \
+  --property=RestartSec=15 \
+  --property='RestartPreventExitStatus=64 66 69 73' \
+  /usr/bin/env -u CODEX_THREAD_ID -u CODEX_CI -u CODEX_PERMISSION_PROFILE \
+  solver/tools/supervise_transient_case.sh 8 0 \
+  cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re200.json \
+  solver/results/cylinder_m010_laminar_re200 \
+  --restart solver/results/cylinder_m010_laminar_re20/restart_final.bin \
+  --restart-perturbation true
+```
+
+Do not remove the sibling `.transient-supervisor.state` while a run is active;
+it prevents an interrupted initial attempt from being launched twice and pins
+the case, initial options, rank/CPU allocation, and solver-binary hash across
+all continuation segments.  Exit status 75 alone is treated as retryable;
+systemd suppresses retries for usage, missing-input, safety, and lock refusals.
+The `.transient-supervisor.lock` file may remain after a clean stop, but the
+actual `flock` is released automatically when its supervisor exits.
 
 For rank validation, retain independently completed directories for at least one
 NACA case and one cylinder case at two rank counts including `np=8`, for example

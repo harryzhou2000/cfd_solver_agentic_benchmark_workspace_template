@@ -177,7 +177,7 @@ void test_transient_checkpoint_round_trip_and_history_resume() {
                                  0.01 * step, 0.0});
         }
         output.write_transient_checkpoint(
-            {test_case().case_id, 2, 0.02, 0.01, 7.5, 2,
+            {test_case().case_id, 2, 0.02, 0.01, 7.5, true, 2,
              {{2, {1.0, 2.0, 3.0, 4.0}, {0.5, 1.5, 2.5, 3.5}},
               {9, {4.0, 3.0, 2.0, 1.0}, {3.5, 2.5, 1.5, 0.5}}},
              {{1, 0.01, 0.01, 0.05}, {2, 0.02, 0.02, 0.05}},
@@ -187,6 +187,7 @@ void test_transient_checkpoint_round_trip_and_history_resume() {
     expect(checkpoint.step == 2 && checkpoint.states.size() == 2U &&
                checkpoint.states[1].older[3] == 0.5 && checkpoint.force_history.size() == 2U &&
                checkpoint.initial_global_residual == 7.5 &&
+               checkpoint.initial_symmetry_seed_applied &&
                checkpoint.inner_iterations == std::vector<int>({5, 6}),
            "transient checkpoint did not preserve BDF histories and accepted statistics");
     expect(std::filesystem::is_regular_file(directory / "transient_checkpoint.json"),

@@ -671,6 +671,8 @@ void OutputSession::write_transient_checkpoint(const TransientCheckpoint& checkp
     const auto state_count = static_cast<std::uint64_t>(states.size());
     const auto force_count = static_cast<std::uint64_t>(checkpoint.force_history.size());
     const auto inner_count = static_cast<std::uint64_t>(checkpoint.inner_iterations.size());
+    const auto seed_applied = static_cast<std::uint8_t>(
+        checkpoint.initial_symmetry_seed_applied ? 1U : 0U);
     output.write(kTransientCheckpointMagic.data(), static_cast<std::streamsize>(kTransientCheckpointMagic.size()));
     output.write(reinterpret_cast<const char*>(&kTransientCheckpointVersion), sizeof(kTransientCheckpointVersion));
     output.write(reinterpret_cast<const char*>(&case_size), sizeof(case_size));
@@ -679,6 +681,7 @@ void OutputSession::write_transient_checkpoint(const TransientCheckpoint& checkp
     output.write(reinterpret_cast<const char*>(&checkpoint.time_step), sizeof(checkpoint.time_step));
     output.write(reinterpret_cast<const char*>(&checkpoint.initial_global_residual),
                  sizeof(checkpoint.initial_global_residual));
+    output.write(reinterpret_cast<const char*>(&seed_applied), sizeof(seed_applied));
     output.write(reinterpret_cast<const char*>(&checkpoint.global_cell_count), sizeof(checkpoint.global_cell_count));
     output.write(reinterpret_cast<const char*>(&state_count), sizeof(state_count));
     output.write(reinterpret_cast<const char*>(&force_count), sizeof(force_count));
@@ -713,6 +716,8 @@ void OutputSession::write_transient_checkpoint(const TransientCheckpoint& checkp
                          {"case_id", checkpoint.case_id}, {"accepted_step", checkpoint.step},
                          {"physical_time", checkpoint.physical_time}, {"time_step", checkpoint.time_step},
                          {"initial_global_residual", checkpoint.initial_global_residual},
+                         {"initial_symmetry_seed_applied",
+                          checkpoint.initial_symmetry_seed_applied},
                          {"global_cell_count", checkpoint.global_cell_count},
                          {"force_history_samples", checkpoint.force_history.size()},
                          {"inner_iteration_samples", checkpoint.inner_iterations.size()},
@@ -845,6 +850,7 @@ TransientCheckpoint read_transient_checkpoint_file(const std::filesystem::path& 
     std::uint64_t state_count{};
     std::uint64_t force_count{};
     std::uint64_t inner_count{};
+    std::uint8_t seed_applied{};
     TransientCheckpoint checkpoint{};
     input.read(magic.data(), static_cast<std::streamsize>(magic.size()));
     input.read(reinterpret_cast<char*>(&version), sizeof(version));
@@ -854,6 +860,7 @@ TransientCheckpoint read_transient_checkpoint_file(const std::filesystem::path& 
     input.read(reinterpret_cast<char*>(&checkpoint.time_step), sizeof(checkpoint.time_step));
     input.read(reinterpret_cast<char*>(&checkpoint.initial_global_residual),
                sizeof(checkpoint.initial_global_residual));
+    input.read(reinterpret_cast<char*>(&seed_applied), sizeof(seed_applied));
     input.read(reinterpret_cast<char*>(&checkpoint.global_cell_count), sizeof(checkpoint.global_cell_count));
     input.read(reinterpret_cast<char*>(&state_count), sizeof(state_count));
     input.read(reinterpret_cast<char*>(&force_count), sizeof(force_count));
@@ -864,6 +871,7 @@ TransientCheckpoint read_transient_checkpoint_file(const std::filesystem::path& 
         !finite(checkpoint.time_step) || !(checkpoint.time_step > 0.0) ||
         !finite(checkpoint.initial_global_residual) ||
         !(checkpoint.initial_global_residual > 0.0) ||
+        seed_applied > 1U ||
         std::abs(checkpoint.physical_time - static_cast<Real>(checkpoint.step) *
                                                checkpoint.time_step) > 1.0e-12 ||
         state_count != static_cast<std::uint64_t>(checkpoint.global_cell_count) ||
@@ -874,6 +882,7 @@ TransientCheckpoint read_transient_checkpoint_file(const std::filesystem::path& 
         inner_count > static_cast<std::uint64_t>(std::numeric_limits<std::size_t>::max())) {
         fail("transient checkpoint has an unsupported or corrupt header");
     }
+    checkpoint.initial_symmetry_seed_applied = seed_applied != 0U;
     checkpoint.case_id.resize(static_cast<std::size_t>(case_size));
     input.read(checkpoint.case_id.data(), static_cast<std::streamsize>(case_size));
     checkpoint.states.resize(static_cast<std::size_t>(state_count));

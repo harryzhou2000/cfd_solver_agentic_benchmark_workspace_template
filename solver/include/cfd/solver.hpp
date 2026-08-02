@@ -72,6 +72,8 @@ struct SolverTransientCheckpoint {
     /// First-inner total residual at physical step one, retained so resumed
     /// run-status reduction evidence uses the original production baseline.
     Real initial_global_residual{};
+    /// Whether the documented wake seed was applied before physical step one.
+    bool initial_symmetry_seed_applied{};
     std::vector<SolverTransientState> states;
     /// Globally reduced accepted force samples, retained so an interrupted late
     /// run has the same statistical-periodicity evidence as an uninterrupted run.
@@ -141,6 +143,7 @@ class FlowSolver {
     /// matched by global cell id by the caller; ghost histories are exchanged
     /// before the next residual evaluation.
     void set_transient_owned_states(int accepted_step, Real initial_global_residual,
+                                    bool initial_symmetry_seed_applied,
                                     const std::vector<State>& previous,
                                     const std::vector<State>& older,
                                     const std::vector<SolverForceSample>& force_history,

@@ -427,8 +427,9 @@ void apply_transient_checkpoint(cfd::FlowSolver& solver,
         history.push_back({sample.step, sample.physical_time, sample.lift, sample.drag});
     }
     solver.set_transient_owned_states(static_cast<int>(checkpoint.step),
-                                      checkpoint.initial_global_residual, previous, older,
-                                      history, checkpoint.inner_iterations);
+                                      checkpoint.initial_global_residual,
+                                      checkpoint.initial_symmetry_seed_applied, previous,
+                                      older, history, checkpoint.inner_iterations);
 }
 
 }  // namespace
@@ -567,6 +568,8 @@ int main(int argc, char** argv) {
                 durable.physical_time = checkpoint.physical_time;
                 durable.time_step = config.run_control.time_step.value();
                 durable.initial_global_residual = checkpoint.initial_global_residual;
+                durable.initial_symmetry_seed_applied =
+                    checkpoint.initial_symmetry_seed_applied;
                 durable.global_cell_count = solver.mesh().global_cell_count;
                 durable.inner_iterations = checkpoint.inner_iterations;
                 durable.states.reserve(gathered.size());

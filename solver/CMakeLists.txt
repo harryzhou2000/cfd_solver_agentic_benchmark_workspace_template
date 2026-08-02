@@ -109,6 +109,9 @@ if(CFD_BUILD_TESTING)
         CFD_BENCHMARK_CASES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/../cfd_solver_agentic_benchmark/inputs/cases")
     add_test(NAME output_tests COMMAND output_tests)
 
+    add_test(NAME supervise_transient_case_tests
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_supervise_transient_case.sh")
+
     add_executable(mesh_tests tests/test_mesh.cpp)
     target_link_libraries(mesh_tests PRIVATE cfd_core)
     target_compile_definitions(mesh_tests PRIVATE
