@@ -164,6 +164,66 @@ void test_atomic_restart_replacement() {
            "atomic restart left a temporary file after success");
 }
 
+void test_transient_checkpoint_round_trip_and_history_resume() {
+    const auto directory = unique_directory("transient_resume");
+    {
+        OutputSession output(test_case(), directory, metadata());
+        output.write_partition_diagnostics({{0, 2, 0, 2, 0, "", "", ""}});
+        for (int step = 1; step <= 2; ++step) {
+            const double time = 0.01 * static_cast<double>(step);
+            output.append_residual({step, time, 5, 1.0, 0.01, 0.1, 0.2, 0.3, 0.4,
+                                    1e-4, 2e-4});
+            output.append_force({step, time, 0.01 * step, 0.05, 0.0, 0.05, 0.0,
+                                 0.01 * step, 0.0});
+        }
+        output.write_transient_checkpoint(
+            {test_case().case_id, 2, 0.02, 0.01, 7.5, 2,
+             {{2, {1.0, 2.0, 3.0, 4.0}, {0.5, 1.5, 2.5, 3.5}},
+              {9, {4.0, 3.0, 2.0, 1.0}, {3.5, 2.5, 1.5, 0.5}}},
+             {{1, 0.01, 0.01, 0.05}, {2, 0.02, 0.02, 0.05}},
+             {5, 6}});
+    }
+    const auto checkpoint = cfd::read_transient_checkpoint_file(directory / "transient_checkpoint.bin");
+    expect(checkpoint.step == 2 && checkpoint.states.size() == 2U &&
+               checkpoint.states[1].older[3] == 0.5 && checkpoint.force_history.size() == 2U &&
+               checkpoint.initial_global_residual == 7.5 &&
+               checkpoint.inner_iterations == std::vector<int>({5, 6}),
+           "transient checkpoint did not preserve BDF histories and accepted statistics");
+    expect(std::filesystem::is_regular_file(directory / "transient_checkpoint.json"),
+           "transient checkpoint manifest is missing");
+
+    // Simulate rows flushed immediately before an interruption but after the
+    // durable step-2 checkpoint.  Resume must remove them rather than duplicate
+    // or skip accepted physical samples.
+    {
+        std::ofstream residuals(directory / "residuals.csv", std::ios::app);
+        std::ofstream forces(directory / "forces.csv", std::ios::app);
+        residuals << "3,0.03,5,1,0.01,0.1,0.2,0.3,0.4,0.0001,0.0002\n";
+        forces << "3,0.03,0.03,0.05,0,0.05,0,0.03,0\n";
+    }
+    OutputSession resumed(test_case(), directory, metadata(), 0,
+                          cfd::OutputResumeState{2, 0.02,
+                                                 directory / "transient_checkpoint.bin"});
+    resumed.append_residual({3, 0.03, 5, 1.0, 0.01, 0.1, 0.2, 0.3, 0.4, 1e-4, 2e-4});
+    resumed.append_force({3, 0.03, 0.03, 0.05, 0.0, 0.05, 0.0, 0.03, 0.0});
+    resumed.write_final_surface({{0.0, 0.0, 1.0, 0.0, 1.0, 0.1, 0.0, 1.0, 1.0, 0.0, 0.15, "bc-4"}},
+                                {3, 0.03});
+    resumed.write_final_field_vtk({{4, {{0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}}, 1.0,
+                                    {1.0, 0.0}, 1.0, 0.15, 2.5, 1.0, 0}}, {3, 0.03});
+    resumed.write_final_restart({{2, {1.0, 2.0, 3.0, 4.0}}, {9, {4.0, 3.0, 2.0, 1.0}}});
+    resumed.complete({"resume test", 1, 1.0, {3, 0.03}, ConvergenceStatus::converged, 1.0,
+                      "resumed"});
+    std::ifstream residuals(directory / "residuals.csv");
+    std::string line;
+    int rows = 0;
+    while (std::getline(residuals, line)) ++rows;
+    expect(rows == 4, "resumed residual history has duplicate or missing rows");
+    std::ifstream metadata_input(directory / "metadata.json");
+    const auto metadata_json = nlohmann::json::parse(metadata_input);
+    expect(metadata_json.at("resumed_from_checkpoint").at("step") == 2,
+           "resume provenance was not retained in metadata");
+}
+
 }  // namespace
 
 int main() {
@@ -171,6 +231,7 @@ int main() {
         {"exact contract, VTK, and restart", test_exact_contract_and_vtk_restart},
         {"invalid status and NaN refusal", test_invalid_status_and_nan_refused},
         {"atomic restart replacement", test_atomic_restart_replacement},
+        {"transient checkpoint and history resume", test_transient_checkpoint_round_trip_and_history_resume},
     };
     int failures = 0;
     for (const auto& [name, test] : tests) {

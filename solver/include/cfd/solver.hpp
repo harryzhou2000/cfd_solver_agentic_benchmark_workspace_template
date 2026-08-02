@@ -58,6 +58,29 @@ struct SolverFieldCell {
     Real vorticity{};
 };
 
+/// Per-owned-cell data needed to restart a true BDF2 physical-time sequence.
+/// `previous` is U^n and `older` is U^(n-1), both from accepted steps only.
+struct SolverTransientState {
+    GlobalIndex global_id{-1};
+    State previous{};
+    State older{};
+};
+
+struct SolverTransientCheckpoint {
+    int step{};
+    Real physical_time{};
+    /// First-inner total residual at physical step one, retained so resumed
+    /// run-status reduction evidence uses the original production baseline.
+    Real initial_global_residual{};
+    std::vector<SolverTransientState> states;
+    /// Globally reduced accepted force samples, retained so an interrupted late
+    /// run has the same statistical-periodicity evidence as an uninterrupted run.
+    std::vector<SolverForceSample> force_history;
+    /// Accepted inner-iteration counts through `step`; required for final
+    /// metadata to agree exactly with the complete residual CSV after resume.
+    std::vector<int> inner_iterations;
+};
+
 struct SolverInnerStatistics {
     int requested_min{};
     int requested_max{};
@@ -93,6 +116,10 @@ struct SolverCallbacks {
     /// passes only owned cells; the callback may atomically replace a restart
     /// on rank zero without changing final-state completion bookkeeping.
     std::function<void(int, const std::vector<SolverFieldCell>&)> checkpoint;
+    /// Called collectively after an accepted transient physical step at the
+    /// configured durable-checkpoint cadence.  The BDF histories are already
+    /// advanced and never contain a trial inner iterate.
+    std::function<void(const SolverTransientCheckpoint&)> transient_checkpoint;
     /// Called on rank zero for concise progress diagnostics.
     std::function<void(const std::string&)> log;
 };
@@ -110,6 +137,14 @@ class FlowSolver {
     /// Replaces the freestream initialization for owned cells.  Ghost states are
     /// synchronized from their owning ranks before the first residual evaluation.
     void set_initial_owned_states(const std::vector<State>& states);
+    /// Restores an accepted transient BDF2 state.  The supplied histories are
+    /// matched by global cell id by the caller; ghost histories are exchanged
+    /// before the next residual evaluation.
+    void set_transient_owned_states(int accepted_step, Real initial_global_residual,
+                                    const std::vector<State>& previous,
+                                    const std::vector<State>& older,
+                                    const std::vector<SolverForceSample>& force_history,
+                                    const std::vector<int>& inner_iterations);
     /// Reapplies the documented transient symmetry seed after a cross-case
     /// precursor restart and synchronizes both BDF histories.
     void apply_transient_symmetry_seed();
@@ -129,5 +164,7 @@ class FlowSolver {
     const std::vector<SolverFieldCell>& local, MPI_Comm communicator, int root = 0);
 [[nodiscard]] std::vector<SolverSurfaceSample> gather_surface_samples(
     const std::vector<SolverSurfaceSample>& local, MPI_Comm communicator, int root = 0);
+[[nodiscard]] std::vector<SolverTransientState> gather_transient_states(
+    const std::vector<SolverTransientState>& local, MPI_Comm communicator, int root = 0);
 
 }  // namespace cfd

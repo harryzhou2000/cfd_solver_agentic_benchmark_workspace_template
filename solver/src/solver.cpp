@@ -337,6 +337,59 @@ class FlowSolver::Impl {
         started_from_restart_ = true;
     }
 
+    void set_transient_owned_states(int accepted_step, Real initial_global_residual,
+                                    const std::vector<State>& previous,
+                                    const std::vector<State>& older,
+                                    const std::vector<SolverForceSample>& force_history,
+                                    const std::vector<int>& inner_iterations) {
+        if (config_.run_control.type != RunType::transient) {
+            throw std::logic_error("transient checkpoint requires a transient case");
+        }
+        const int final_step = static_cast<int>(std::llround(
+            config_.run_control.final_time.value() / config_.run_control.time_step.value()));
+        if (accepted_step < 1 || accepted_step >= final_step ||
+            !std::isfinite(initial_global_residual) || !(initial_global_residual > 0.0) ||
+            previous.size() != mesh_.owned_count || older.size() != mesh_.owned_count ||
+            force_history.size() != static_cast<std::size_t>(accepted_step) ||
+            inner_iterations.size() != static_cast<std::size_t>(accepted_step)) {
+            throw std::invalid_argument("transient checkpoint has incompatible BDF history");
+        }
+        for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
+            if (!is_admissible(previous[local], gas_) || !is_admissible(older[local], gas_)) {
+                throw std::domain_error("transient checkpoint contains inadmissible BDF state");
+            }
+            states_[local] = previous[local];
+        }
+        exchange_halo_packets(mesh_.halo, states_, communicator_, kStateHaloTag);
+        previous_states_ = states_;
+        for (std::size_t local = 0; local < mesh_.owned_count; ++local) states_[local] = older[local];
+        exchange_halo_packets(mesh_.halo, states_, communicator_, kStateHaloTag);
+        older_states_ = states_;
+        states_ = previous_states_;
+        for (std::size_t index = 0; index < force_history.size(); ++index) {
+            const auto& sample = force_history[index];
+            const int expected_step = static_cast<int>(index) + 1;
+            const Real expected_time = static_cast<Real>(expected_step) *
+                                       config_.run_control.time_step.value();
+            if (sample.step != expected_step ||
+                std::abs(sample.physical_time - expected_time) > 1.0e-12 ||
+                !std::isfinite(sample.lift) || !std::isfinite(sample.drag)) {
+                throw std::invalid_argument("transient checkpoint force history is not sequential");
+            }
+            if (inner_iterations[index] < config_.run_control.min_inner_iterations ||
+                inner_iterations[index] > config_.run_control.max_inner_iterations) {
+                throw std::invalid_argument(
+                    "transient checkpoint inner-iteration history violates case bounds");
+            }
+        }
+        resume_step_ = accepted_step;
+        resumed_initial_global_residual_ = initial_global_residual;
+        resumed_force_history_ = force_history;
+        resumed_inner_iterations_ = inner_iterations;
+        transient_seed_applied_ = false;
+        started_from_restart_ = true;
+    }
+
     void apply_transient_symmetry_seed() {
         if (config_.run_control.type != RunType::transient) {
             throw std::logic_error("transient symmetry seed requires a transient case");
@@ -376,6 +429,16 @@ class FlowSolver::Impl {
             record.owner_rank = rank_;
             record.vorticity = gradients_[local][2][0] - gradients_[local][1][1];
             output.push_back(record);
+        }
+        return output;
+    }
+
+    [[nodiscard]] std::vector<SolverTransientState> local_transient_states() const {
+        std::vector<SolverTransientState> output;
+        output.reserve(mesh_.owned_count);
+        for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
+            output.push_back({mesh_.cells[local].cell.global_id, previous_states_[local],
+                              older_states_[local]});
         }
         return output;
     }
@@ -425,6 +488,10 @@ class FlowSolver::Impl {
     std::uint64_t hllc_fallback_faces_{};
     bool transient_seed_applied_{};
     bool started_from_restart_{};
+    int resume_step_{};
+    Real resumed_initial_global_residual_{};
+    std::vector<SolverForceSample> resumed_force_history_;
+    std::vector<int> resumed_inner_iterations_;
 
     void build_node_lookup() {
         node_coordinates_.reserve(mesh_.nodes.size());
@@ -1558,28 +1625,37 @@ class FlowSolver::Impl {
     }
 
     [[nodiscard]] SolverSummary solve_transient(const SolverCallbacks& callbacks) {
+        constexpr int kDurableTransientCheckpointInterval = 100;
         const Real physical_dt = config_.run_control.time_step.value();
         const Real final_time = config_.run_control.final_time.value();
         const int physical_steps = static_cast<int>(std::llround(final_time / physical_dt));
         const int minimum_inner = config_.run_control.min_inner_iterations;
         const int maximum_inner = config_.run_control.max_inner_iterations;
         const Real target = config_.run_control.inner_residual_reduction_target;
-        std::vector<int> observed_iterations;
+        std::vector<int> observed_iterations = resumed_inner_iterations_;
         observed_iterations.reserve(static_cast<std::size_t>(physical_steps));
         int target_misses = 0;
         Real last_ratio = 1.0;
-        Real initial_global_residual = 0.0;
+        Real initial_global_residual = resumed_initial_global_residual_;
         Real final_global_residual = 0.0;
         std::vector<Real> lift_history;
         std::vector<Real> drag_history;
         lift_history.reserve(static_cast<std::size_t>(physical_steps));
         drag_history.reserve(static_cast<std::size_t>(physical_steps));
-        int accepted_steps = 0;
+        int accepted_steps = resume_step_;
         int failed_step = 0;
-        Real next_snapshot = config_.outputs.write_field_every_time.value_or(
-            std::numeric_limits<Real>::infinity());
+        Real next_snapshot = std::numeric_limits<Real>::infinity();
+        if (config_.outputs.write_field_every_time) {
+            const Real cadence = config_.outputs.write_field_every_time.value();
+            next_snapshot = (std::floor(static_cast<Real>(accepted_steps) * physical_dt /
+                                        cadence + Real{1.0e-12}) + Real{1.0}) * cadence;
+        }
+        for (const auto& sample : resumed_force_history_) {
+            lift_history.push_back(sample.lift);
+            drag_history.push_back(sample.drag);
+        }
 
-        for (int step = 1; step <= physical_steps; ++step) {
+        for (int step = accepted_steps + 1; step <= physical_steps; ++step) {
             states_ = previous_states_;
             const Real physical_time = static_cast<Real>(step) * physical_dt;
             Real first_inner_residual = 0.0;
@@ -1674,6 +1750,23 @@ class FlowSolver::Impl {
             older_states_ = previous_states_;
             previous_states_ = states_;
             accepted_steps = step;
+            if (callbacks.transient_checkpoint &&
+                step % kDurableTransientCheckpointInterval == 0) {
+                SolverTransientCheckpoint checkpoint{};
+                checkpoint.step = step;
+                checkpoint.physical_time = physical_time;
+                checkpoint.initial_global_residual = initial_global_residual;
+                checkpoint.states = local_transient_states();
+                checkpoint.inner_iterations = observed_iterations;
+                checkpoint.force_history.reserve(lift_history.size());
+                for (std::size_t index = 0; index < lift_history.size(); ++index) {
+                    checkpoint.force_history.push_back(
+                        {static_cast<int>(index) + 1,
+                         static_cast<Real>(index + 1U) * physical_dt,
+                         lift_history[index], drag_history[index]});
+                }
+                callbacks.transient_checkpoint(checkpoint);
+            }
             if (callbacks.snapshot && physical_time + 0.5 * physical_dt >= next_snapshot) {
                 callbacks.snapshot(step, physical_time, local_field_cells());
                 next_snapshot += config_.outputs.write_field_every_time.value();
@@ -1862,6 +1955,15 @@ void FlowSolver::set_initial_owned_states(const std::vector<State>& states) {
     implementation_->set_initial_owned_states(states);
 }
 
+void FlowSolver::set_transient_owned_states(
+    int accepted_step, Real initial_global_residual, const std::vector<State>& previous,
+    const std::vector<State>& older, const std::vector<SolverForceSample>& force_history,
+    const std::vector<int>& inner_iterations) {
+    implementation_->set_transient_owned_states(accepted_step, initial_global_residual,
+                                                previous, older, force_history,
+                                                inner_iterations);
+}
+
 void FlowSolver::apply_transient_symmetry_seed() {
     implementation_->apply_transient_symmetry_seed();
 }
@@ -1898,6 +2000,11 @@ std::vector<SolverFieldCell> gather_field_cells(const std::vector<SolverFieldCel
 
 std::vector<SolverSurfaceSample> gather_surface_samples(
     const std::vector<SolverSurfaceSample>& local, MPI_Comm communicator, int root) {
+    return gather_trivial_packets(local, communicator, root);
+}
+
+std::vector<SolverTransientState> gather_transient_states(
+    const std::vector<SolverTransientState>& local, MPI_Comm communicator, int root) {
     return gather_trivial_packets(local, communicator, root);
 }
 

@@ -29,6 +29,7 @@ struct CommandLine {
     std::filesystem::path case_file;
     std::filesystem::path output_directory;
     std::optional<std::filesystem::path> restart_file;
+    std::optional<std::filesystem::path> resume_file;
     bool restart_perturbation{};
     std::string report_level{"full"};
     std::optional<int> diagnostic_steps;
@@ -56,7 +57,7 @@ struct CommandLine {
     if (argc < 2 || std::string(argv[1]) != "solve") {
         throw std::invalid_argument(
             "usage: cfd_solver solve --case <case.json> --output <directory> "
-            "[--restart <restart-file>] [--report-level brief|full]");
+            "[--restart <restart-file>] [--resume <transient-checkpoint>] [--report-level brief|full]");
     }
     CommandLine result{};
     std::ostringstream command;
@@ -74,6 +75,7 @@ struct CommandLine {
         if (option == "--case") result.case_file = value;
         else if (option == "--output") result.output_directory = value;
         else if (option == "--restart") result.restart_file = value;
+        else if (option == "--resume") result.resume_file = value;
         else if (option == "--restart-perturbation") {
             if (value != "true" && value != "false") {
                 throw std::invalid_argument("--restart-perturbation must be true or false");
@@ -164,6 +166,12 @@ struct CommandLine {
     }
     if (result.restart_perturbation && !result.restart_file) {
         throw std::invalid_argument("--restart-perturbation=true requires --restart");
+    }
+    if (result.restart_file && result.resume_file) {
+        throw std::invalid_argument("--restart and --resume are mutually exclusive");
+    }
+    if (result.restart_perturbation && result.resume_file) {
+        throw std::invalid_argument("--restart-perturbation cannot be used with --resume");
     }
     if (result.pseudo_cfl && result.diagnostic_cfl) {
         throw std::invalid_argument("--pseudo-cfl and --diagnostic-cfl are mutually exclusive");
@@ -386,6 +394,43 @@ void apply_restart(cfd::FlowSolver& solver, const std::filesystem::path& restart
     solver.set_initial_owned_states(owned);
 }
 
+void apply_transient_checkpoint(cfd::FlowSolver& solver,
+                                const cfd::TransientCheckpoint& checkpoint) {
+    if (solver.config().run_control.type != cfd::RunType::transient ||
+        checkpoint.case_id != solver.config().case_id ||
+        checkpoint.global_cell_count != solver.mesh().global_cell_count ||
+        std::abs(checkpoint.time_step - solver.config().run_control.time_step.value()) > 1.0e-12 ||
+        std::abs(checkpoint.physical_time - static_cast<cfd::Real>(checkpoint.step) *
+                                            checkpoint.time_step) > 1.0e-12) {
+        throw std::runtime_error("transient checkpoint is incompatible with the requested case");
+    }
+    std::unordered_map<cfd::GlobalIndex, const cfd::TransientRestartStateRecord*> by_id;
+    by_id.reserve(checkpoint.states.size());
+    for (const auto& record : checkpoint.states) by_id.emplace(record.global_cell_id, &record);
+    std::vector<cfd::State> previous;
+    std::vector<cfd::State> older;
+    previous.reserve(solver.mesh().owned_count);
+    older.reserve(solver.mesh().owned_count);
+    for (std::size_t local = 0; local < solver.mesh().owned_count; ++local) {
+        const auto global_id = solver.mesh().cells[local].cell.global_id;
+        const auto found = by_id.find(global_id);
+        if (found == by_id.end()) {
+            throw std::runtime_error("transient checkpoint is missing global cell " +
+                                     std::to_string(global_id));
+        }
+        previous.push_back(found->second->previous);
+        older.push_back(found->second->older);
+    }
+    std::vector<cfd::SolverForceSample> history;
+    history.reserve(checkpoint.force_history.size());
+    for (const auto& sample : checkpoint.force_history) {
+        history.push_back({sample.step, sample.physical_time, sample.lift, sample.drag});
+    }
+    solver.set_transient_owned_states(static_cast<int>(checkpoint.step),
+                                      checkpoint.initial_global_residual, previous, older,
+                                      history, checkpoint.inner_iterations);
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -401,6 +446,15 @@ int main(int argc, char** argv) {
     try {
         const CommandLine command = parse_command_line(argc, argv);
         cfd::CaseConfig config = cfd::load_case_config(command.case_file);
+        std::optional<cfd::TransientCheckpoint> resume_checkpoint;
+        if (command.resume_file) {
+            resume_checkpoint = cfd::read_transient_checkpoint_file(*command.resume_file);
+            if (config.run_control.type != cfd::RunType::transient ||
+                resume_checkpoint->case_id != config.case_id ||
+                std::abs(resume_checkpoint->time_step - config.run_control.time_step.value()) > 1.0e-12) {
+                throw std::runtime_error("--resume checkpoint does not match this transient case");
+            }
+        }
         if (command.diagnostic_steps) {
             if (config.run_control.type == cfd::RunType::steady) {
                 config.run_control.max_steps = *command.diagnostic_steps;
@@ -452,9 +506,14 @@ int main(int argc, char** argv) {
         const auto diagnostics = gather_partition_diagnostics(distributed, MPI_COMM_WORLD);
         std::unique_ptr<cfd::OutputSession> output;
         if (rank == 0) {
+            std::optional<cfd::OutputResumeState> output_resume;
+            if (resume_checkpoint) {
+                output_resume = {resume_checkpoint->step, resume_checkpoint->physical_time,
+                                 *command.resume_file};
+            }
             output = std::make_unique<cfd::OutputSession>(
-                config, command.output_directory, make_metadata(config, distributed), rank);
-            output->write_partition_diagnostics(diagnostics);
+                config, command.output_directory, make_metadata(config, distributed), rank, output_resume);
+            if (!resume_checkpoint) output->write_partition_diagnostics(diagnostics);
             output->log("command: " + command.command);
             output->log("distributed METIS mesh: global cells=" +
                         std::to_string(distributed.global_cell_count) +
@@ -462,7 +521,8 @@ int main(int argc, char** argv) {
                         " edge cut=" + std::to_string(distributed.partition_edge_cut));
         }
         cfd::FlowSolver solver(config, std::move(distributed), MPI_COMM_WORLD);
-        if (command.restart_file) apply_restart(solver, *command.restart_file);
+        if (resume_checkpoint) apply_transient_checkpoint(solver, *resume_checkpoint);
+        else if (command.restart_file) apply_restart(solver, *command.restart_file);
         if (command.restart_perturbation) solver.apply_transient_symmetry_seed();
 
         cfd::SolverCallbacks callbacks{};
@@ -496,6 +556,31 @@ int main(int argc, char** argv) {
                 output->write_final_restart(make_restart_records(gathered));
                 output->log("wrote durable steady restart checkpoint step=" +
                             std::to_string(step));
+            }
+        };
+        callbacks.transient_checkpoint = [&](const cfd::SolverTransientCheckpoint& checkpoint) {
+            const auto gathered = cfd::gather_transient_states(checkpoint.states, MPI_COMM_WORLD);
+            if (rank == 0) {
+                cfd::TransientCheckpoint durable{};
+                durable.case_id = config.case_id;
+                durable.step = checkpoint.step;
+                durable.physical_time = checkpoint.physical_time;
+                durable.time_step = config.run_control.time_step.value();
+                durable.initial_global_residual = checkpoint.initial_global_residual;
+                durable.global_cell_count = solver.mesh().global_cell_count;
+                durable.inner_iterations = checkpoint.inner_iterations;
+                durable.states.reserve(gathered.size());
+                for (const auto& state : gathered) {
+                    durable.states.push_back({state.global_id, state.previous, state.older});
+                }
+                durable.force_history.reserve(checkpoint.force_history.size());
+                for (const auto& sample : checkpoint.force_history) {
+                    durable.force_history.push_back(
+                        {sample.step, sample.physical_time, sample.lift, sample.drag});
+                }
+                output->write_transient_checkpoint(durable);
+                output->log("wrote durable transient BDF2 checkpoint step=" +
+                            std::to_string(checkpoint.step));
             }
         };
         // A physical-time snapshot cadence is part of the case output contract,

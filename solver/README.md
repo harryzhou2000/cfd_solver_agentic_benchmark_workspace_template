@@ -91,6 +91,26 @@ mpirun -np 8 solver/build/cfd_solver solve \
   --output solver/results/cylinder_m010_laminar_re200 --report-level full
 ```
 
+The transient solver atomically replaces `transient_checkpoint.bin` every 100
+accepted physical steps.  Unlike the state-only `restart_final.bin`, this
+checkpoint contains both accepted BDF2 states, the original residual baseline,
+the complete inner-iteration accounting, and the force history needed for an
+uninterrupted statistical analysis.  After an interruption, resume into the
+same unfinished output directory; rows newer than the durable checkpoint are
+validated and trimmed before cadence-1 output continues:
+
+```bash
+solver/tools/launch_pinned_case.sh 8 0 \
+  cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re200.json \
+  solver/results/cylinder_m010_laminar_re200 \
+  --resume solver/results/cylinder_m010_laminar_re200/transient_checkpoint.bin
+```
+
+`--restart` and `--resume` are mutually exclusive.  A resume is accepted only
+for the same transient case, mesh size, physical time step, and unfinished
+history package; the launcher records each continuation in distinct hashed
+evidence files.
+
 For rank validation, retain independently completed directories for at least one
 NACA case and one cylinder case at two rank counts including `np=8`, for example
 `solver/rank_validation/naca0012_m015_inviscid_np1` and `_np8`. Do not overwrite

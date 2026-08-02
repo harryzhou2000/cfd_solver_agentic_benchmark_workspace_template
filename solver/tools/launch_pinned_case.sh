@@ -31,6 +31,7 @@ if [[ ! -f solver/build/cfd_solver ]]; then
 fi
 
 restart_file=""
+resume_file=""
 solver_options=("$@")
 for ((option_index = 0; option_index < ${#solver_options[@]}; ++option_index)); do
     if [[ ${solver_options[option_index]} == "--restart" ]]; then
@@ -39,18 +40,31 @@ for ((option_index = 0; option_index < ${#solver_options[@]}; ++option_index)); 
             exit 64
         fi
         restart_file=${solver_options[option_index + 1]}
-        break
+    elif [[ ${solver_options[option_index]} == "--resume" ]]; then
+        if ((option_index + 1 >= ${#solver_options[@]})); then
+            echo "missing value after --resume" >&2
+            exit 64
+        fi
+        resume_file=${solver_options[option_index + 1]}
     fi
 done
 if [[ -n $restart_file && ! -f $restart_file ]]; then
     echo "missing restart file: $restart_file" >&2
     exit 66
 fi
+if [[ -n $resume_file && ! -f $resume_file ]]; then
+    echo "missing transient checkpoint file: $resume_file" >&2
+    exit 66
+fi
+if [[ -n $restart_file && -n $resume_file ]]; then
+    echo "--restart and --resume are mutually exclusive" >&2
+    exit 64
+fi
 if [[ -e $output_dir && ! -d $output_dir ]]; then
     echo "output path exists and is not a directory: $output_dir" >&2
     exit 73
 fi
-if [[ -d $output_dir ]] && find "$output_dir" -mindepth 1 -print -quit | grep -q .; then
+if [[ -z $resume_file && -d $output_dir ]] && find "$output_dir" -mindepth 1 -print -quit | grep -q .; then
     echo "refusing non-empty output directory: $output_dir" >&2
     exit 73
 fi
@@ -63,9 +77,15 @@ if (( last_cpu >= available_cpus )); then
 fi
 
 mkdir -p "$(dirname "$output_dir")"
-launch_log="${output_dir}.launch.log"
-pid_file="${output_dir}.launcher.pid"
-status_file="${output_dir}.launcher.status"
+evidence_suffix=""
+if [[ -n $resume_file ]]; then
+    # Preserve the interrupted launch evidence and make each continuation
+    # independently auditable.  Nanoseconds avoid collisions during retries.
+    evidence_suffix=".resume.$(date -u +%Y%m%dT%H%M%S%N)"
+fi
+launch_log="${output_dir}${evidence_suffix}.launch.log"
+pid_file="${output_dir}${evidence_suffix}.launcher.pid"
+status_file="${output_dir}${evidence_suffix}.launcher.status"
 if [[ -e $launch_log || -e $pid_file || -e $status_file ]]; then
     echo "refusing to overwrite existing launcher evidence for $output_dir" >&2
     exit 73
@@ -82,6 +102,10 @@ printf 'case_json_sha256=%s\n' "$(sha256sum "$case_json" | awk '{print $1}')"
 if [[ -n $restart_file ]]; then
     printf 'restart_path=%s\n' "$(realpath "$restart_file")"
     printf 'restart_sha256=%s\n' "$(sha256sum "$restart_file" | awk '{print $1}')"
+fi
+if [[ -n $resume_file ]]; then
+    printf 'resume_checkpoint_path=%s\n' "$(realpath "$resume_file")"
+    printf 'resume_checkpoint_sha256=%s\n' "$(sha256sum "$resume_file" | awk '{print $1}')"
 fi
 printf 'command='
 printf '%q ' mpirun -np "$mpi_ranks" solver/build/cfd_solver solve \

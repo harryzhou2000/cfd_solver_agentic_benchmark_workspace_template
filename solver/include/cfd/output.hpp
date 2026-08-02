@@ -90,6 +90,40 @@ struct RestartStateRecord {
     State state{};
 };
 
+/// A versioned, self-describing continuation checkpoint for a transient BDF2
+/// run.  This is deliberately distinct from restart_final.bin, which remains
+/// a portable state-only final/cross-case restart.
+struct TransientRestartStateRecord {
+    GlobalIndex global_cell_id{};
+    State previous{};
+    State older{};
+};
+
+struct TransientCheckpointForceRecord {
+    int step{};
+    Real physical_time{};
+    Real lift{};
+    Real drag{};
+};
+
+struct TransientCheckpoint {
+    std::string case_id;
+    std::int64_t step{};
+    Real physical_time{};
+    Real time_step{};
+    Real initial_global_residual{};
+    std::int64_t global_cell_count{};
+    std::vector<TransientRestartStateRecord> states;
+    std::vector<TransientCheckpointForceRecord> force_history;
+    std::vector<int> inner_iterations;
+};
+
+struct OutputResumeState {
+    std::int64_t step{};
+    Real physical_time{};
+    std::filesystem::path checkpoint_file;
+};
+
 struct FinalStateDescriptor {
     std::int64_t step{};
     Real physical_time{};
@@ -131,6 +165,7 @@ struct OutputMetadata {
     std::string positivity_preservation;
     std::string wall_boundary_output_semantics{"boundary_value"};
     bool true_bdf2_inner_loop{false};
+    std::optional<OutputResumeState> resumed_from;
     TransientStatistics transient_statistics;
     std::string start_time_utc;
 };
@@ -150,7 +185,8 @@ struct RunStatus {
 class OutputSession {
   public:
     OutputSession(const CaseConfig& case_config, std::filesystem::path output_directory,
-                  OutputMetadata metadata, int mpi_rank = 0);
+                  OutputMetadata metadata, int mpi_rank = 0,
+                  std::optional<OutputResumeState> resume = std::nullopt);
     ~OutputSession();
 
     OutputSession(const OutputSession&) = delete;
@@ -174,6 +210,8 @@ class OutputSession {
     void write_field_snapshot_vtk(const std::vector<GatheredPolygonRecord>& records,
                                   const std::string& filename);
     void write_final_restart(const std::vector<RestartStateRecord>& records);
+    /// Atomically replaces the latest durable BDF2 continuation checkpoint.
+    void write_transient_checkpoint(const TransientCheckpoint& checkpoint);
 
     /// Writes metadata.json and run_status.json only after all mandatory output
     /// data is present and agrees on the final physical state.
@@ -190,6 +228,8 @@ class OutputSession {
 
 /// Reads the endian-native, versioned restart format written by OutputSession.
 [[nodiscard]] std::vector<RestartStateRecord> read_restart_file(
+    const std::filesystem::path& restart_file);
+[[nodiscard]] TransientCheckpoint read_transient_checkpoint_file(
     const std::filesystem::path& restart_file);
 
 }  // namespace cfd
