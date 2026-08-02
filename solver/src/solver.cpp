@@ -294,9 +294,17 @@ class FlowSolver::Impl {
         older_states_ = states_;
         primitive_.resize(mesh_.cells.size());
         gradients_.resize(mesh_.cells.size());
-        residual_.resize(mesh_.owned_count);
-        diagonal_.resize(mesh_.owned_count);
-        face_coupling_.resize(mesh_.faces.size());
+        std::size_t maximum_faces = 0;
+        std::size_t maximum_samples = 0;
+        for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
+            maximum_faces = std::max(maximum_faces, mesh_.cell_faces[local].size());
+            maximum_samples = std::max(maximum_samples,
+                                       mesh_.adjacency[local].size() +
+                                           mesh_.cell_faces[local].size());
+        }
+        reconstruction_samples_scratch_.reserve(maximum_samples);
+        reconstruction_face_locations_scratch_.reserve(maximum_faces);
+        reconstruction_boundary_values_scratch_.reserve(maximum_faces);
         build_node_lookup();
         if (config_.run_control.type == RunType::transient) {
             seed_transient_perturbation();
@@ -386,7 +394,6 @@ class FlowSolver::Impl {
         SolverForceSample force_sample{};
         std::vector<State> residual;
         std::vector<Real> diagonal;
-        std::vector<Real> face_coupling;
         std::vector<StateJacobian> block_diagonal;
         std::vector<FaceBlocks> face_blocks;
     };
@@ -406,9 +413,9 @@ class FlowSolver::Impl {
     std::vector<State> older_states_;
     std::vector<Primitive> primitive_;
     std::vector<PrimitiveGradients> gradients_;
-    std::vector<State> residual_;
-    std::vector<Real> diagonal_;
-    std::vector<Real> face_coupling_;
+    std::vector<PrimitiveSample> reconstruction_samples_scratch_;
+    std::vector<Vec2> reconstruction_face_locations_scratch_;
+    std::vector<Primitive> reconstruction_boundary_values_scratch_;
     std::unordered_map<GlobalIndex, Vec2> node_coordinates_;
     std::vector<SolverSurfaceSample> last_surface_samples_;
     std::uint64_t positivity_backtracks_{};
@@ -497,15 +504,16 @@ class FlowSolver::Impl {
         }
         for (std::size_t local = 0; local < mesh_.owned_count; ++local) {
             const Vec2 center = mesh_.cells[local].cell.centroid;
-            std::vector<PrimitiveSample> samples;
-            samples.reserve(mesh_.adjacency[local].size() + 4U);
+            auto& samples = reconstruction_samples_scratch_;
+            auto& face_locations = reconstruction_face_locations_scratch_;
+            auto& boundary_values = reconstruction_boundary_values_scratch_;
+            samples.clear();
+            face_locations.clear();
+            boundary_values.clear();
             for (const LocalIndex neighbor : mesh_.adjacency[local]) {
                 samples.push_back({mesh_.cells[static_cast<std::size_t>(neighbor)].cell.centroid,
                                    primitive_[static_cast<std::size_t>(neighbor)]});
             }
-            std::vector<Vec2> face_locations;
-            std::vector<Primitive> boundary_values;
-            face_locations.reserve(mesh_.cell_faces[local].size());
             for (const LocalIndex face_index : mesh_.cell_faces[local]) {
                 const LocalFace& local_face = mesh_.faces[static_cast<std::size_t>(face_index)];
                 face_locations.push_back(local_face.face.center);
@@ -540,7 +548,6 @@ class FlowSolver::Impl {
         Evaluation evaluation{};
         evaluation.residual.assign(mesh_.owned_count, State{});
         evaluation.diagonal.assign(mesh_.owned_count, 0.0);
-        evaluation.face_coupling.assign(mesh_.faces.size(), 0.0);
         evaluation.block_diagonal.resize(mesh_.owned_count);
         evaluation.face_blocks.resize(mesh_.faces.size());
         last_surface_samples_.clear();
@@ -731,8 +738,6 @@ class FlowSolver::Impl {
             // pseudo-time estimate and block-Jacobi preconditioner.
             const Real diagonal_contribution =
                 inviscid.spectral_radius * face.length + viscous_diagonal;
-            evaluation.face_coupling[face_index] =
-                0.5 * inviscid.spectral_radius * face.length + viscous_diagonal;
             if (mesh_.is_owned(owner)) {
                 for (std::size_t component = 0; component < kStateVariables; ++component) {
                     evaluation.residual[owner][component] +=
