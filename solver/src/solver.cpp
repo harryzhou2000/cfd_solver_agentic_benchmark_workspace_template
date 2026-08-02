@@ -483,7 +483,7 @@ class FlowSolver::Impl {
     bool steady_inviscid_total_enthalpy_{};
     Real freestream_total_enthalpy_{};
     static constexpr Real kJointReferenceFloorFraction = 0.1;
-    static constexpr Real kRarefactionResponseRange = 7.0;
+    static constexpr Real kMaximumRarefactionDissipationMultiplier = 32.0;
     std::vector<State> states_;
     std::vector<State> previous_states_;
     std::vector<State> older_states_;
@@ -572,6 +572,15 @@ class FlowSolver::Impl {
         return joint_reference_rarefaction_sensor(
             states_[local], config_.freestream.density,
             config_.freestream.pressure, cell_compactness_[local], gas_);
+    }
+
+    [[nodiscard]] Real rarefaction_dissipation_response(
+        std::size_t local, Real sensor) const noexcept {
+        if (!(sensor > 0.0)) return 0.0;
+        const Real maximum_multiplier = std::min(
+            kMaximumRarefactionDissipationMultiplier,
+            1.0 / cell_compactness_[local]);
+        return sensor * (maximum_multiplier - 1.0);
     }
 
     [[nodiscard]] Primitive boundary_exterior_primitive(
@@ -753,12 +762,22 @@ class FlowSolver::Impl {
             if (!physical_boundary && local_face.neighbor_local < 0) {
                 throw std::runtime_error("interior local face has no ghost/neighbor cell");
             }
-            Real face_rarefaction_sensor = rarefaction_sensor(owner);
+            const Real owner_rarefaction_sensor = rarefaction_sensor(owner);
+            Real face_rarefaction_sensor = owner_rarefaction_sensor;
+            Real face_rarefaction_response =
+                rarefaction_dissipation_response(
+                    owner, owner_rarefaction_sensor);
             if (!physical_boundary) {
+                const std::size_t neighbor = static_cast<std::size_t>(
+                    local_face.neighbor_local);
+                const Real neighbor_rarefaction_sensor =
+                    rarefaction_sensor(neighbor);
                 face_rarefaction_sensor = std::max(
-                    face_rarefaction_sensor,
-                    rarefaction_sensor(static_cast<std::size_t>(
-                        local_face.neighbor_local)));
+                    face_rarefaction_sensor, neighbor_rarefaction_sensor);
+                face_rarefaction_response = std::max(
+                    face_rarefaction_response,
+                    rarefaction_dissipation_response(
+                        neighbor, neighbor_rarefaction_sensor));
             }
             const FaceReconstruction owner_face = reconstruct_solver_face_state(
                 mesh_.cells[owner].cell.centroid, primitive_[owner], gradients_[owner],
@@ -823,14 +842,12 @@ class FlowSolver::Impl {
                 // inviscid manifold at every Mach number.
                 Real dissipation_scale =
                     config_.run_control.rusanov_dissipation_scale.value_or(1.0);
-                if (face_rarefaction_sensor > 0.0) {
+                if (face_rarefaction_response > 0.0) {
                     // Smoothly flatten P1 above and increase only the shared
                     // Rusanov jump term here as a joint rarefaction develops
                     // on a low-compactness cell. The identical face flux is
                     // applied with opposite signs, preserving conservation.
-                    dissipation_scale *=
-                        1.0 + kRarefactionResponseRange *
-                                  face_rarefaction_sensor;
+                    dissipation_scale *= 1.0 + face_rarefaction_response;
                     ++rarefaction_dissipation_faces_;
                 }
                 inviscid = enthalpy_upwind_rusanov_flux(
