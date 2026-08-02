@@ -430,7 +430,7 @@ int main(int argc, char** argv) {
         callbacks.log = [&](const std::string& message) {
             if (rank != 0) return;
             output->log(message);
-            std::cout << message << '\n';
+            std::cout << message << '\n' << std::flush;
         };
         // A physical-time snapshot cadence is part of the case output contract,
         // not merely a verbosity choice.  Honor it for every production run;
