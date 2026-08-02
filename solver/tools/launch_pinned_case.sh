@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# When this launcher is handed to a user service manager, do not propagate the
+# parent agent's lifecycle markers into MPI ranks.  The service has its own
+# explicit PID/status/log evidence and must be allowed to finish independently.
+unset CODEX_THREAD_ID CODEX_CI CODEX_PERMISSION_PROFILE || true
+
 if (( $# < 4 )); then
     echo "usage: $0 <mpi-ranks> <first-cpu> <case-json> <output-dir> [solver-options ...]" >&2
     exit 64
