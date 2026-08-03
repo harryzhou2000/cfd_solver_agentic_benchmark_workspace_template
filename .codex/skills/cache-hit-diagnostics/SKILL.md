@@ -30,6 +30,10 @@ node scripts/probe_tool_turns.js --steps 5 --stream --system --repeat 3
 # 2. Session: what did a real codex session pay?
 node scripts/session_cache_stats.mjs --cwd codex_dsv4_flash_03
 node scripts/session_cache_stats.mjs --session <session-id>
+
+# 2b. opencode session: what did an opencode run pay (incl. subagents)?
+node scripts/opencode_session_cache_stats.mjs --session <ses_id> [--subagents]
+node scripts/opencode_session_cache_stats.mjs --workspace <dir-substring> [--subagents]
 ```
 
 ## Workflow
@@ -71,6 +75,24 @@ Read the results as:
 - `out=1, cached=0` rows are unmeasurable (stub accounting), not misses.
 - Non-200 rows have `in=0`; exclude them from the rate.
 
+### 2b. opencode sessions (SQLite store)
+
+opencode keeps sessions in `~/.local/share/opencode/opencode.db`; per-request
+usage lives on each assistant `message.data.tokens` where `input` is the
+**non-cached** prompt portion and `cache.read` the cached prefix, so
+hit rate = `cache.read / (input + cache.read + cache.write)`. Subagent
+sessions link through `session.parent_id` and carry an `agent` label
+(e.g. orchestrator/fixer/oracle). `scripts/opencode_session_cache_stats.mjs`
+scans the DB directly (no server needed):
+
+```bash
+node scripts/opencode_session_cache_stats.mjs --session <ses_id> --subagents
+```
+
+`--subagents` adds the per-child breakdown plus a combined window; `--json`
+emits the machine-readable report. Full schema and caveats in
+`notes/opencode-session-history.md`.
+
 ### 3. Explain and report
 
 - Healthy: `cached/input ≥ 95%` at tail; warm-up hits 99% quickly.
@@ -89,6 +111,9 @@ Read the results as:
   (`~/.codex/sessions/**/rollout-*.jsonl`, `~/.opencodex/usage.jsonl`,
   `ocx observe usage/logs`, `ocx debug usage`, `ocx-relay/` wire capture) and
   the correlation recipe.
+- `notes/opencode-session-history.md` — opencode's SQLite session store,
+  message-level token/cache schema, subagent `parent_id` extraction, and the
+  direct-DB scanning recipe.
 
 ## Scripts
 
@@ -97,3 +122,5 @@ Read the results as:
 - `scripts/probe_tool_turns.js` — tool-turn + streaming probe (stub detection).
 - `scripts/session_cache_stats.mjs` — session↔usage correlation and head/tail
   cache statistics.
+- `scripts/opencode_session_cache_stats.mjs` — opencode session cache stats
+  from the SQLite store, with recursive subagent extraction (`--subagents`).
