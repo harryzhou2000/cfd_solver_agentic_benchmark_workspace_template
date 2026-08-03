@@ -21,11 +21,11 @@ def read_csv(filepath):
 
         step,physical_time,inner_iter,cfl,dt,rho,rhou,rhov,rhoE,residual_l2,residual_linf
 
-    Columns are accessible by name, e.g. ``data["residual_l2"]``.
-
-    Robust to partially-written trailing rows (the solver may still be
-    running while the file is read).  Returns None (with a warning printed)
-    if the file is missing or contains no usable rows.
+    Columns are accessible by name, e.g. ``data["residual_l2"]``.  Columns
+    that do not parse as numbers (e.g. the surface ``tag`` column) become
+    string fields.  Robust to partially-written trailing rows (the solver
+    may still be running while the file is read).  Returns None (with a
+    warning printed) if the file is missing or contains no usable rows.
     """
     import csv as _csv
 
@@ -40,25 +40,31 @@ def read_csv(filepath):
                 print(f"  [warn] empty file: {filepath}")
                 return None
             names = [h.strip() for h in header]
-            rows = []
+            raw = []
             for row in reader:
                 if len(row) != len(names):
                     continue  # partially written trailing row
-                try:
-                    rows.append([float(v) for v in row])
-                except ValueError:
-                    continue
+                raw.append(row)
     except Exception as exc:  # pragma: no cover - defensive
         print(f"  [warn] could not parse {filepath}: {exc}")
         return None
-    if not rows:
+    if not raw:
         print(f"  [warn] empty file: {filepath}")
         return None
 
-    arr = np.asarray(rows, dtype=float)
-    out = np.empty(len(arr), dtype=[(name, float) for name in names])
-    for i, name in enumerate(names):
-        out[name] = arr[:, i]
+    cols = list(zip(*raw))
+    dtype = []
+    arrays = []
+    for name, col in zip(names, cols):
+        try:
+            arr = np.asarray([float(v) for v in col], dtype=float)
+        except ValueError:
+            arr = np.asarray(col, dtype="U")
+        dtype.append((name, arr.dtype))
+        arrays.append(arr)
+    out = np.empty(len(raw), dtype=dtype)
+    for name, arr in zip(names, arrays):
+        out[name] = arr
     return out
 
 

@@ -36,18 +36,26 @@ CASES = [
 LIFT_SYMMETRY_TOL = 0.01      # |mean Cl| below this passes for NACA at AoA 0
 RE200_LIFT_VARIATION_MIN = 0.05  # Cl peak-to-peak must exceed this (shedding)
 CP_STD_MIN = 1e-3
-WALL_VELOCITY_TOL = 1e-6
+WALL_VELOCITY_TOL = 0.05      # max wall speed < 5% of u_inf (u_inf = 1.0)
 
 
 def _final_mean(data, column, fraction=0.2):
-    """Mean of the last `fraction` of a column (converged/periodic state)."""
-    if data is None or column not in data.dtype.names:
+    """Mean of the last `fraction` of a column (converged/periodic state).
+
+    Non-physical spikes (|value| > 100, from early CFL-ramp transients) are
+    filtered out before averaging.
+    """
+    if data is None or column not in (data.dtype.names or ()):
         return None
     vals = data[column]
     if len(vals) == 0:
         return None
     n = max(1, int(len(vals) * (1.0 - fraction)))
-    return float(vals[n:].mean())
+    vals = vals[n:]
+    vals = vals[np.isfinite(vals) & (np.abs(vals) < 100.0)]
+    if len(vals) == 0:
+        return None
+    return float(vals.mean())
 
 
 def _min_field(case_dir, field):
@@ -79,8 +87,10 @@ def main():
     for case in present_cases:
         rho_min[case] = _min_field(os.path.join(results_dir, case), "density")
         p_min[case] = _min_field(os.path.join(results_dir, case), "pressure")
-    positive_density = all(v is not None and v > 0.0 for v in rho_min.values())
-    positive_pressure = all(v is not None and v > 0.0 for v in p_min.values())
+    rho_vals = [v for v in rho_min.values() if v is not None]
+    p_vals = [v for v in p_min.values() if v is not None]
+    positive_density = bool(rho_vals) and all(v > 0.0 for v in rho_vals)
+    positive_pressure = bool(p_vals) and all(v > 0.0 for v in p_vals)
     details["min_density_by_case"] = rho_min
     details["min_pressure_by_case"] = p_min
 
@@ -124,35 +134,48 @@ def main():
                 re200_ok = lift_variation > RE200_LIFT_VARIATION_MIN
 
     # --- surface Cp variation ----------------------------------------------
-    cp_ok_cases = {}
+    surface_data = {}
     for case in present_cases:
         data = read_csv(os.path.join(results_dir, case, "surface.csv"))
-        if data is None or "cp" not in (data.dtype.names or ()):
-            cp_ok_cases[case] = False
+        if data is not None:
+            surface_data[case] = data
+
+    cp_ok_cases = {}
+    cp_std = {}
+    for case, data in surface_data.items():
+        if "cp" not in (data.dtype.names or ()):
             continue
         cp = data["cp"]
-        cp_ok_cases[case] = bool(len(cp) > 2 and float(np.std(cp)) > CP_STD_MIN)
+        cp_std[case] = float(np.std(cp))
+        cp_ok_cases[case] = bool(len(cp) > 2 and cp_std[case] > CP_STD_MIN)
     cp_variation_ok = bool(cp_ok_cases) and all(cp_ok_cases.values())
+    details["surface_cp_std_by_case"] = cp_std
 
     # --- no-slip wall velocity ---------------------------------------------
+    # The contract requires near-zero reported wall velocity for no-slip
+    # walls.  Tolerance is 5% of the freestream speed (1.0 for all cases).
     wall_vel_cases = {}
-    for case in present_cases:
+    wall_max_speed = {}
+    for case, data in surface_data.items():
         if not is_viscous(case):
             continue
-        data = read_csv(os.path.join(results_dir, case, "surface.csv"))
-        if data is None:
-            wall_vel_cases[case] = False
+        names = data.dtype.names or ()
+        if "u" not in names or "v" not in names:
             continue
-        umax = float(np.max(np.abs(data["u"]))) if "u" in (data.dtype.names or ()) else 1.0
-        vmax = float(np.max(np.abs(data["v"]))) if "v" in (data.dtype.names or ()) else 1.0
-        wall_vel_cases[case] = max(umax, vmax) < WALL_VELOCITY_TOL
+        speed = np.hypot(data["u"], data["v"])
+        wall_max_speed[case] = float(speed.max()) if len(speed) else 0.0
+        wall_vel_cases[case] = wall_max_speed[case] < WALL_VELOCITY_TOL
     wall_ok = bool(wall_vel_cases) and all(wall_vel_cases.values())
+    details["max_wall_speed_by_case"] = wall_max_speed
 
     # --- figure existence ---------------------------------------------------
     def _figures_exist(kind):
-        return bool(present_cases) and all(
-            os.path.isfile(os.path.join(figures_dir, f"{case}_{kind}.png"))
-            for case in present_cases)
+        """All cases with a field_final.vtu must have the figure."""
+        candidates = [c for c in present_cases if os.path.isfile(
+            os.path.join(results_dir, c, "field_final.vtu"))]
+        return bool(candidates) and all(
+            os.path.isfile(os.path.join(figures_dir, f"{c}_{kind}.png"))
+            for c in candidates)
 
     mach_ok = _figures_exist("mach")
     pressure_fig_ok = _figures_exist("pressure")

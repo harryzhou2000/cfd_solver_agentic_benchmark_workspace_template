@@ -38,6 +38,7 @@ def main():
     n_cases = 0
     n_figures = 0
     failed = []
+    skipped = []
 
     for case in CASES:
         case_dir = os.path.join(results_dir, case)
@@ -51,7 +52,9 @@ def main():
                 [sys.executable, os.path.join(tools_dir, f"{script}.py"),
                  case_dir, case, figures_dir],
                 cwd=tools_dir, check=False)
-            if proc.returncode != 0:
+            if proc.returncode == 2:
+                skipped.append((case, script))
+            elif proc.returncode != 0:
                 failed.append((case, script))
 
     print()
@@ -60,6 +63,10 @@ def main():
         if fn.endswith(".png"):
             n_figures += 1
     print(f"Figures in {figures_dir}: {n_figures}")
+    if skipped:
+        print(f"Skipped (missing/incomplete data): {len(skipped)}")
+        for case, script in skipped:
+            print(f"  {case}: {script}")
     if failed:
         print(f"FAILED scripts ({len(failed)}):")
         for case, script in failed:

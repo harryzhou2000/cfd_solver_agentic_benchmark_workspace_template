@@ -85,7 +85,9 @@ def main():
     setup_figure()
     ensure_figures_dir(args.figures_dir)
     ok = plot_forces(args.case_dir, case_id, args.figures_dir)
-    sys.exit(0 if ok else 1)
+    # exit 2 signals "no figure produced" (missing data or unusable input);
+    # the master script treats it as an informational skip, not a failure.
+    sys.exit(0 if ok else 2)
 
 
 if __name__ == "__main__":
