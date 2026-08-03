@@ -5,6 +5,7 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -164,6 +165,35 @@ void test_atomic_restart_replacement() {
            "atomic restart left a temporary file after success");
 }
 
+void test_csv_round_trip_precision() {
+    const auto directory = unique_directory("csv_precision");
+    constexpr double physical_time = 0.012345678901234567;
+    constexpr double lift = 0.024872012345678901;
+    constexpr double drag = -0.072275312345678901;
+    constexpr double pressure_drag = -7.6814812345678901;
+    constexpr double viscous_drag = drag - pressure_drag;
+    {
+        OutputSession output(test_case(), directory, metadata());
+        output.append_force({1, physical_time, lift, drag, 0.0, pressure_drag,
+                             viscous_drag, 0.00578125123456789,
+                             lift - 0.00578125123456789});
+    }
+
+    std::ifstream input(directory / "forces.csv");
+    std::string line;
+    std::getline(input, line);
+    std::getline(input, line);
+    std::stringstream parser(line);
+    std::vector<std::string> columns;
+    while (std::getline(parser, line, ',')) columns.push_back(line);
+    expect(columns.size() == 9U, "force CSV precision fixture has the wrong width");
+    expect(std::stod(columns[1]) == physical_time &&
+               std::stod(columns[2]) == lift && std::stod(columns[3]) == drag &&
+               std::stod(columns[5]) == pressure_drag &&
+               std::stod(columns[6]) == viscous_drag,
+           "force CSV did not preserve round-trip floating-point precision");
+}
+
 void test_transient_checkpoint_round_trip_and_history_resume() {
     const auto directory = unique_directory("transient_resume");
     {
@@ -232,6 +262,7 @@ int main() {
         {"exact contract, VTK, and restart", test_exact_contract_and_vtk_restart},
         {"invalid status and NaN refusal", test_invalid_status_and_nan_refused},
         {"atomic restart replacement", test_atomic_restart_replacement},
+        {"CSV round-trip precision", test_csv_round_trip_precision},
         {"transient checkpoint and history resume", test_transient_checkpoint_round_trip_and_history_resume},
     };
     int failures = 0;

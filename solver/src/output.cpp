@@ -430,6 +430,10 @@ OutputSession::OutputSession(const CaseConfig& case_config, std::filesystem::pat
     require_open(impl_->forces, impl_->directory / "forces.csv");
     require_open(impl_->surface, impl_->directory / "surface.csv");
     require_open(impl_->partition_diagnostics, impl_->directory / "partition_diagnostics.csv");
+    const int round_trip_precision = std::numeric_limits<Real>::max_digits10;
+    impl_->residuals << std::setprecision(round_trip_precision);
+    impl_->forces << std::setprecision(round_trip_precision);
+    impl_->surface << std::setprecision(round_trip_precision);
     if (!resume) {
         impl_->residuals << "step,physical_time,inner_iter,cfl,dt,rho,rhou,rhov,rhoE,residual_l2,residual_linf\n";
         impl_->forces << "step,physical_time,cl,cd,cmz,pressure_drag,viscous_drag,pressure_lift,viscous_lift\n";

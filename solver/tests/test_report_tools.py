@@ -14,7 +14,8 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from build_report import (BuildError, NACA_ZERO_AOA_LIFT_LIMIT, REQUIRED_CASES,
                           _load_case_dir, _native_primitive_fields,
-                          _sanity_for_case, build_report, read_field)
+                          _sanity_for_case, _validate_force_evidence,
+                          build_report, read_field)
 
 
 RESIDUAL_HEADER = ["step", "physical_time", "inner_iter", "cfl", "dt", "rho", "rhou", "rhov", "rhoE", "residual_l2", "residual_linf"]
@@ -224,6 +225,24 @@ def create_rank_results(root: Path, results: Path) -> tuple[Path, ...]:
 
 
 class ReportAutomationTests(unittest.TestCase):
+    def test_force_split_tolerance_accounts_for_printed_component_cancellation(self) -> None:
+        case_input = {"physics": {"mode": "laminar"}}
+        row = {
+            "cd": -0.0722753,
+            "cl": 0.024872,
+            "pressure_drag": -7.68148,
+            "viscous_drag": 7.60921,
+            "pressure_lift": 0.00578125,
+            "viscous_lift": 0.0190907,
+        }
+        _validate_force_evidence("cancellation_fixture", case_input, [row])
+
+        inconsistent = dict(row)
+        inconsistent["cd"] = -0.0722
+        with self.assertRaisesRegex(BuildError, "inconsistent drag split"):
+            _validate_force_evidence("cancellation_fixture", case_input,
+                                     [inconsistent])
+
     def test_zero_aoa_lift_tolerance_has_a_strict_boundary(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

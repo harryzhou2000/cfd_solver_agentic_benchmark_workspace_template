@@ -205,6 +205,23 @@ def _validate_partition_evidence(case_id: str, metadata: dict[str, Any],
 
 def _validate_force_evidence(case_id: str, case_input: dict[str, Any],
                              forces: list[dict[str, float | str]]) -> None:
+    def six_digit_roundoff(value: float) -> float:
+        """Worst-case absolute error from legacy defaultfloat precision=6."""
+        if value == 0.0:
+            return 0.0
+        exponent = math.floor(math.log10(abs(value)))
+        return 0.5 * 10.0 ** (exponent - 5)
+
+    def split_is_consistent(total: float, first: float, second: float) -> bool:
+        # Older packages used six significant digits.  Scale the independent
+        # print-roundoff bounds with each component, not with their possibly
+        # near-cancelling total.  New packages use max_digits10 and therefore
+        # pass this conservative backward-compatible bound by a wide margin.
+        tolerance = (six_digit_roundoff(total) + six_digit_roundoff(first) +
+                     six_digit_roundoff(second))
+        tolerance += 1.0e-12 * max(1.0, abs(total), abs(first), abs(second))
+        return abs(total - first - second) <= tolerance
+
     inviscid = case_input["physics"]["mode"] == "inviscid"
     for row_number, row in enumerate(forces, start=2):
         cd = float(row["cd"])
@@ -213,11 +230,9 @@ def _validate_force_evidence(case_id: str, case_input: dict[str, Any],
         viscous_drag = float(row["viscous_drag"])
         pressure_lift = float(row["pressure_lift"])
         viscous_lift = float(row["viscous_lift"])
-        # CSV values are written with six significant digits.  Allow the
-        # independent decimal roundoff of the total and both split columns.
-        if not math.isclose(cd, pressure_drag + viscous_drag, rel_tol=2.0e-5, abs_tol=2.0e-6):
+        if not split_is_consistent(cd, pressure_drag, viscous_drag):
             raise BuildError(f"{case_id}: forces.csv row {row_number} has an inconsistent drag split")
-        if not math.isclose(cl, pressure_lift + viscous_lift, rel_tol=2.0e-5, abs_tol=2.0e-6):
+        if not split_is_consistent(cl, pressure_lift, viscous_lift):
             raise BuildError(f"{case_id}: forces.csv row {row_number} has an inconsistent lift split")
         if inviscid and max(abs(viscous_drag), abs(viscous_lift)) > 1.0e-8:
             raise BuildError(f"{case_id}: inviscid forces.csv row {row_number} has a non-negligible viscous force")
