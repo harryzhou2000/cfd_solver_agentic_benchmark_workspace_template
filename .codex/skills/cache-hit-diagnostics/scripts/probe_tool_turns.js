@@ -28,6 +28,7 @@ const path = require("node:path");
 const TARGETS = {
   "blsc-flash": { provider: "BLSC", model: "DeepSeek-V4-Flash" },
   "deepseek-flash": { provider: "deepseek", model: "deepseek-v4-flash" },
+  "deepseek-pro": { provider: "deepseek", model: "deepseek-v4-pro" },
 };
 
 const U = "What time is it right now? Call the get_current_time tool, then tell me the time you received.";

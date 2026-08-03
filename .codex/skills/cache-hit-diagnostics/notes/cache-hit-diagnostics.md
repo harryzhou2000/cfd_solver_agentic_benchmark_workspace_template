@@ -142,3 +142,64 @@ Lesson: always probe before trusting session-layer numbers, and report the
   to extract per-session/per-turn history.
 - `ocx-relay/` — wire-capture relay used to verify reasoning-content
   preservation on the ocx→provider hop.
+
+## Case study: deepseek-v4-pro probes + opencode late-summary cache loss (2026-08-03)
+
+Symptom: an opencode orchestrator session (`ses_040b656bdffeVJcS8XFIqGFGTw`,
+omo_slim_dsv4_01, opencode 1.18.11, deepwork plugin) showed only 10.8% prompt
+cache hits (cached 1.65M of 15.18M prompt, 120 requests), while its
+fixer/oracle subagent children cached at 99.2%. Was the provider broken?
+
+Probes against `api.deepseek.com` `deepseek-v4-pro` (effort max):
+
+- `probe_model_cache.js --targets deepseek-pro`: #1 miss, #2-5 cached 1280/1306
+  (~98%) — identical-request caching works.
+- `probe_tool_turns.js --targets deepseek-pro` (non-stream): growth 68-94%,
+  re-send 97.8% — healthy.
+- same with `--stream`: growth 68-95%, re-send 94.3%, no stub rows
+  (no `cached=0, out=1`) — streaming accounting is real.
+- `probe_real_turns.js --targets deepseek-pro`: growing conversation with
+  reasoning_content replay 48-83%, re-send 99.5% — reasoning replay does not
+  break caching.
+
+Conclusion: the provider is healthy; the client was breaking its own cache.
+
+Session forensics (opencode SQLite store):
+
+- Requests 1-15 warm up normally (cached 0 → 56,704).
+- At 21:47:02 UTC the **first user message was mutated in place**: opencode
+  attached `message.data.summary.diffs` (.gitignore/.ignore edits) after the
+  message had already been sent and cached.
+- The next request (21:50:39 UTC) collapsed from cached=56,704 to cached=896,
+  then stayed pinned at ~9,216 for 100+ requests despite tiny per-request
+  additions (200-3K tokens). The pinned value ≈ system prompt + first user
+  message.
+- All 18 orchestrator user messages carry `summary.diffs`; 14 were attached
+  late (after the message was sent); the last two arrived 1-2 hours late with
+  124 and 117 file diffs.
+- Children had only 4 user messages → rare mutations → 99.2%. The single
+  child zero-cache request (in=201,533 at 11:24 local) coincides with a
+  compaction event (`agent=compaction` stream in opencode.log).
+
+Mechanism: DeepSeek prefix caching is byte-exact. opencode serializes the
+per-message `summary.diffs` into the request body, so attaching/updating a
+summary on an already-sent message invalidates the provider cache from that
+message onward, every time it happens.
+
+Related opencode issues/PRs:
+
+- #21518 — queued user messages wrapped in `<system-reminder>` serialize
+  inconsistently across turns, breaking prompt caching (closed "not planned",
+  2026-04-08). Same failure family (stored-vs-sent serialization drift).
+- #24104 / #24190 / #24130 + PRs #24146 / #24200 / #24435 — DeepSeek
+  `reasoning_content` round-trip (fixed April 2026; present in 1.18.11; NOT
+  the cause here — children replay reasoning and still cache at 99%).
+- #4416 — auto-compaction earlier than expected with caching enabled
+  (provider/version-specific; explains occasional one-off big misses).
+- #4317 — feature request for fork-aware cache keys (`prompt_cache_key`).
+
+Takeaways for the skill: when a session shows a persistent low plateau
+(cached ≈ system prompt + first message), suspect client-side mutation of
+already-sent messages (summaries, queued-message wrappers, in-place part
+rewrites by plugins), not the provider — probe the provider first, then check
+the session store for late `time_updated` on user messages.

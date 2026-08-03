@@ -18,11 +18,16 @@ against the provider API, and real codex/opencodex session accounting.
 
 ## Quick start
 
-Run the repo scripts from the workspace root (they read keys from
+This skill is self-contained: all scripts and notes live **inside this skill
+directory** (`.codex/skills/cache-hit-diagnostics/scripts/` and
+`.../notes/`), and every path in this file is relative to the skill directory.
+Run them from the skill directory (they read keys from
 `~/.opencodex/config.json` or `BLSC_KEY`/`DEEPSEEK_KEY` env; keys are never
 printed):
 
 ```bash
+# cd .codex/skills/cache-hit-diagnostics
+
 # 1. Probe: does the provider cache, and does it report truthfully?
 node scripts/probe_model_cache.js --targets blsc-flash,deepseek-flash
 node scripts/probe_tool_turns.js --steps 5 --stream --system --repeat 3
@@ -124,3 +129,6 @@ emits the machine-readable report. Full schema and caveats in
   cache statistics.
 - `scripts/opencode_session_cache_stats.mjs` — opencode session cache stats
   from the SQLite store, with recursive subagent extraction (`--subagents`).
+
+Probe targets: `blsc-flash`, `deepseek-flash`, `deepseek-pro` (official
+`api.deepseek.com`, `deepseek-v4-pro`).
