@@ -412,7 +412,8 @@ def lift_spectrum(time: np.ndarray, lift: np.ndarray) -> dict[str, np.ndarray | 
     }
 
 
-def _lift_spectrum_plot(spectrum: dict[str, np.ndarray | float], case_id: str, path: Path) -> None:
+def _lift_spectrum_plot(spectrum: dict[str, np.ndarray | float], case_id: str,
+                        path: Path) -> float:
     frequency = np.asarray(spectrum["frequency"], dtype=float)
     amplitude = np.asarray(spectrum["amplitude"], dtype=float)
     fig, ax = plt.subplots(figsize=(6.4, 4.0))
@@ -420,12 +421,16 @@ def _lift_spectrum_plot(spectrum: dict[str, np.ndarray | float], case_id: str, p
     dominant = float(spectrum["dominant_frequency"])
     ax.axvline(dominant, color="tab:red", linestyle="--", linewidth=1.1,
                label=f"dominant {dominant:.5g}")
+    resolution = float(spectrum["frequency_resolution"])
+    plot_max = min(float(frequency[-1]), max(5.0 * dominant, 10.0 * resolution))
+    ax.set_xlim(0.0, plot_max)
     ax.set_xlabel("frequency / $U_\\infty L_{ref}^{-1}$")
     ax.set_ylabel("windowed lift-spectrum magnitude")
     ax.set_title(f"{case_id}: post-transient lift spectrum")
     ax.grid(True, alpha=0.3)
     ax.legend()
     _save(fig, path)
+    return plot_max
 
 
 def _surface_plot(surface: list[dict[str, float | str]], case_id: str, path: Path) -> None:
@@ -519,13 +524,15 @@ def generate_case_figures(case_dir: Path, figures_dir: Path) -> list[dict[str, s
         spectrum = lift_spectrum(force_time[spectrum_mask],
                                  np.asarray([float(row["cl"]) for row in forces])[spectrum_mask])
         spectrum_path = add(f"{case_id}_lift_spectrum.png", "line_plot", "lift_spectrum", "forces.csv", "")
-        _lift_spectrum_plot(spectrum, case_id, spectrum_path)
+        spectrum_plot_max = _lift_spectrum_plot(spectrum, case_id, spectrum_path)
         records[-1]["caption"] = (
             "Post-transient detrended Hann-window lift spectrum from forces.csv; "
             f"sample interval {float(spectrum['sample_dt']):.5g}, window {float(spectrum['window_duration']):.5g}, "
             f"frequency resolution {float(spectrum['frequency_resolution']):.5g}, dominant frequency "
             f"{float(spectrum['dominant_frequency']):.5g}, peak/second ratio "
-            f"{float(spectrum['peak_to_second_ratio']):.3g}.")
+            f"{float(spectrum['peak_to_second_ratio']):.3g}. The displayed low-frequency window ends at "
+            f"{spectrum_plot_max:.5g}; the FFT was evaluated through the Nyquist frequency "
+            f"{float(np.asarray(spectrum['frequency'])[-1]):.5g}.")
     return records
 
 

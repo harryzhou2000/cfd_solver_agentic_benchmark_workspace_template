@@ -294,12 +294,27 @@ class ReportAutomationTests(unittest.TestCase):
             re200_variables = {entry["variable"] for entry in entries if entry["case_id"] == "cylinder_m010_laminar_re200"}
             self.assertIn("vorticity", re200_variables)
             self.assertIn("lift_spectrum", re200_variables)
+            spectrum_entry = next(
+                entry for entry in entries
+                if entry["case_id"] == "cylinder_m010_laminar_re200"
+                and entry["variable"] == "lift_spectrum"
+            )
+            self.assertIn("FFT was evaluated through the Nyquist frequency",
+                          spectrum_entry["caption"])
             sanity = json.loads((report / "sanity_checks.json").read_text(encoding="utf-8"))
             self.assertEqual(len(sanity["cases"]), 8)
             self.assertIn("submitted solver output only", sanity["generated_from"])
             tex = (report / "report.tex").read_text(encoding="utf-8")
             self.assertIn("Final force coefficients", tex)
             self.assertIn("cylinder\\_m010\\_laminar\\_re200", tex)
+            self.assertIn("Concise labels are used for readability", tex)
+            self.assertIn("$4\\times4$ block Jacobi", tex)
+            self.assertIn("\\[\nR_i=\\sum_", tex)
+            self.assertIn(
+                "\\begin{table}[htbp]\\centering\\scriptsize\n"
+                "\\caption{Submitted run status.",
+                tex,
+            )
 
     def test_refuses_failed_case(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

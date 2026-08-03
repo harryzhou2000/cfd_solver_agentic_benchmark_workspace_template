@@ -798,6 +798,46 @@ def _actual_control_text(case: CaseData) -> str:
     return text
 
 
+def _compact_case_label(case: CaseData) -> str:
+    """Return a width-safe scientific label for dense summary tables."""
+    body = "NACA0012" if case.case_id.startswith("naca") else "Cylinder"
+    mach = _fmt(case.case_input["freestream"]["mach"])
+    if case.case_input["physics"]["mode"] == "inviscid":
+        regime = "inviscid"
+    else:
+        regime = f"Re={_fmt(case.case_input['physics']['reynolds'])}"
+    return f"{body} M={mach} {regime}"
+
+
+def _compact_method_label(value: object, category: str) -> str:
+    """Summarise exact metadata identifiers without printing unbreakable tokens."""
+    raw = str(value)
+    lowered = raw.lower()
+    if category == "inviscid_flux":
+        if "hllc" in lowered:
+            return "HLLC + Rusanov fallback"
+        if "rusanov" in lowered:
+            modifiers = []
+            if "enthalpy" in lowered:
+                modifiers.append("$H_0$ consistent")
+            if "rarefaction" in lowered:
+                modifiers.append("rarefaction guard")
+            return "Rusanov" + (" (" + ", ".join(modifiers) + ")" if modifiers else "")
+    if category == "viscous_flux":
+        if "disabled" in lowered or "zero_transport" in lowered:
+            return "none"
+        if "newtonian" in lowered and "fourier" in lowered:
+            return "Newtonian/Fourier"
+    if category == "time_integrator":
+        if "bdf2" in lowered:
+            return "dual-time BDF2"
+        if "pseudo" in lowered:
+            return "local pseudo-time"
+    if category == "implicit_solver" and "jacobi" in lowered:
+        return "$4\\times4$ block Jacobi"
+    return raw.replace("_", " ")
+
+
 def _render_report(cases: list[CaseData], records: list[dict[str, str]],
                    rank_validation: dict[str, list[CaseData]]) -> str:
     """Render a source-backed technical report; all result numbers come from CSV/JSON."""
@@ -806,10 +846,12 @@ def _render_report(cases: list[CaseData], records: list[dict[str, str]],
         records_by_case[record["case_id"]].append(record)
     analyses = {case.case_id: case_analysis(case) for case in cases}
     status_rows = "\n".join(
-        f"{_latex(case.case_id)} & {case.status['mpi_ranks']} & {case.status['final_step']} & "
+        f"{_latex(_compact_case_label(case))} & {case.status['mpi_ranks']} & {case.status['final_step']} & "
         f"{_fmt(case.status['final_physical_time'])} & {_fmt(analyses[case.case_id]['computed_residual_reduction_orders'], 3)} & "
         f"{_fmt(analyses[case.case_id]['computed_linf_residual_reduction_orders'], 3)} & "
-        f"{_fmt(case.status['wall_time_seconds'], 4)} & {_latex(case.status['convergence_status'])} \\\\" for case in cases
+        f"{_fmt(case.status['wall_time_seconds'], 4)} & "
+        f"{'stat. periodic' if case.status['convergence_status'] == 'statistically_periodic' else _latex(case.status['convergence_status'])} \\\\"
+        for case in cases
     )
     force_rows = "\n".join(
         f"{_latex(case.case_id)} & {_fmt(analyses[case.case_id]['final_cd'])} & {_fmt(analyses[case.case_id]['final_cl'])} & "
@@ -817,8 +859,10 @@ def _render_report(cases: list[CaseData], records: list[dict[str, str]],
         f"{_fmt(analyses[case.case_id]['final_viscous_drag'])} \\\\" for case in cases
     )
     method_rows = "\n".join(
-        f"{_latex(case.case_id)} & {_latex(case.metadata['inviscid_flux'])} & {_latex(case.metadata['viscous_flux'])} & "
-        f"{_latex(case.metadata['time_integrator'])} & {_latex(case.metadata['implicit_solver'])} \\\\" for case in cases
+        f"{_latex(_compact_case_label(case))} & {_compact_method_label(case.metadata['inviscid_flux'], 'inviscid_flux')} & "
+        f"{_compact_method_label(case.metadata['viscous_flux'], 'viscous_flux')} & "
+        f"{_compact_method_label(case.metadata['time_integrator'], 'time_integrator')} & "
+        f"{_compact_method_label(case.metadata['implicit_solver'], 'implicit_solver')} \\\\" for case in cases
     )
     mesh_rows = "\n".join(
         f"{_latex(case.case_id)} & {case.metadata['num_cells_global']} & {case.metadata['num_faces_global']} & "
@@ -903,7 +947,7 @@ This report is generated from completed solver outputs only.  It covers all eigh
 \section{{Introduction}}
 The benchmark solves the two-dimensional NACA0012 and circular-cylinder cases with a cell-centred, unstructured finite-volume compressible-flow solver.  Required results are accepted here only when their submitted status is \texttt{{converged}} or \texttt{{statistically\_periodic}}.  Values in tables and figures are read from the submitted CSV, VTK, JSON, and partition-diagnostic files; no histories, fields, or convergence labels are synthesized by this script.  These checks establish output consistency, not independent physical validation or proof of solver provenance.
 \section{{Governing equations and nondimensionalization}}
-The conservative state is $\mathbf U=[\rho,\rho u,\rho v,\rho E]^T$ and the reported equation set is \texttt{{compressible\_navier\_stokes\_2d}}.  The discretized equation is
+The conservative state is $\mathbf U=[\rho,\rho u,\rho v,\rho E]^T$ and the reported equation set is the two-dimensional compressible Navier--Stokes system.  The discretized equation is
 \[
 \frac{{\partial\mathbf U}}{{\partial t}}+\frac{{\partial\mathbf F^i}}{{\partial x}}+\frac{{\partial\mathbf G^i}}{{\partial y}}=\frac{{\partial\mathbf F^v}}{{\partial x}}+\frac{{\partial\mathbf G^v}}{{\partial y}},
 \quad
@@ -914,7 +958,11 @@ For the calorically perfect gas, $p=(\gamma-1)\rho e$, $E=e+\tfrac12(u^2+v^2)$, 
 
 For viscous fluxes the Newtonian/Fourier model is $\tau_{{xx}}=2\mu u_x-\tfrac23\mu(u_x+v_y)$, $\tau_{{yy}}=2\mu v_y-\tfrac23\mu(u_x+v_y)$, $\tau_{{xy}}=\mu(u_y+v_x)$, and $\mathbf q=-\mu c_p\nabla T/Pr$.  The force split reports pressure traction separately from the tangential component of viscous traction; $C_f$ is based on this tangential traction rather than normal viscous traction.
 \section{{Meshes, boundaries, and spatial discretization}}
-Each residual is a sum of oriented face fluxes over an unstructured control volume, $R_i=\sum_{{f\in\partial\Omega_i}}(\widehat{{F}}^i_f-\widehat{{F}}^v_f)|S_f|$, with each face normal directed from the owner cell to its neighbour or exterior.  The submitted metadata records the case-selectable inviscid flux: subsonic inviscid cases use Rusanov mass/momentum flux with the consistent Euler energy flux written as numerical mass flux times upwind reconstructed total enthalpy, while the remaining cases use HLLC with an admissibility-checked Rusanov fallback.  The case inputs map CGNS boundary families to farfield plus either inviscid slip wall or viscous no-slip adiabatic wall.  Farfield faces use a characteristic exterior state.  Every stationary impermeable body face uses the exact inviscid flux $[0,pn_x,pn_y,0]^T$ rather than solving a reflected reconstructed wall Riemann problem; no-slip walls additionally impose $u=v=0$ and zero normal temperature gradient in the viscous flux.  Submitted surface data are declared as \texttt{{boundary\_value}} output, so wall velocities in the report are not conflated with adjacent cell-centre velocities.
+Each residual is a sum of oriented face fluxes over an unstructured control volume:
+\[
+R_i=\sum_{{f\in\partial\Omega_i}}(\widehat{{F}}^i_f-\widehat{{F}}^v_f)|S_f|.
+\]
+Each face normal is directed from the owner cell to its neighbour or exterior.  The submitted metadata records the case-selectable inviscid flux: inviscid NACA packages use Rusanov variants, with recorded total-enthalpy consistency and rarefaction protection where active, while the remaining cases use HLLC with an admissibility-checked Rusanov fallback.  The case inputs map CGNS boundary families to farfield plus either inviscid slip wall or viscous no-slip adiabatic wall.  Farfield faces use a characteristic exterior state.  Every stationary impermeable body face uses the exact inviscid flux $[0,pn_x,pn_y,0]^T$ rather than solving a reflected reconstructed wall Riemann problem; no-slip walls additionally impose $u=v=0$ and zero normal temperature gradient in the viscous flux.  Submitted surface data are declared as \texttt{{boundary\_value}} output, so wall velocities in the report are not conflated with adjacent cell-centre velocities.
 
 Gradients are weighted least-squares reconstructions and face states are piecewise linear.  The production limiter is the submitted Barth--Jespersen method, followed by a pressure-jump sensor that smoothly flattens all primitive gradients only across captured shocks while remaining exactly inactive below its smooth-region onset.  Exact linear reproduction is unit-tested on an irregular stencil, and an asymptotic scaled irregular-stencil manufactured-solution regression requires observed smooth face-value order greater than 1.95 across successive refinements with the production sensor inactive.  Face-state density/pressure positivity uses the submitted scaling/backtracking method.  The report does not infer any other first-order fallback: its occurrence and trigger must be recorded in run notes or metadata before it can be claimed.
 
@@ -925,10 +973,13 @@ Gradients are weighted least-squares reconstructions and face states are piecewi
 \bottomrule\end{{tabularx}}\end{{table}}
 
 The production metadata identifies the reconstruction, limiter, and positivity method for every result: piecewise-linear reconstruction is applied to face states, the stated limiter controls oscillations, and the stated positivity control protects density and pressure.  The report does not infer an unused first-order fallback; any fallback must be described by the submitted metadata/notes.
-\begin{{center}}\small\begin{{tabularx}}{{\linewidth}}{{lXX X X}}\toprule
+\begin{{table}}[htbp]\centering\scriptsize
+\caption{{Production numerical methods. Concise labels are used for readability; exact method identifiers are retained in each \texttt{{metadata.json}}.}}\label{{tab:methods}}
+\begin{{tabularx}}{{\linewidth}}{{@{{}}lXXXX@{{}}}}\toprule
 Case & inviscid flux & viscous flux & time integrator & implicit solver\\\midrule
 {method_rows}
-\bottomrule\end{{tabularx}}\end{{center}}
+\bottomrule\end{{tabularx}}
+\end{{table}}
 \section{{Implicit steady march and true transient BDF2}}
 Steady cases use the submitted local pseudo-time integrator and inner solver.  They retain the supplied startup CFL and ramp horizon while applying a documented conservative terminal cap; Anderson history is reset whenever the CFL changes.  Accelerated iterates must strictly reduce both global $L_2$ and $L_\infty$ residuals, and target convergence requires both norms plus a stable force tail.  The stationary-wall block uses the analytic pressure-flux Jacobian while its spectral radius remains in the pseudo-time mass.  Requested controls and detectable departures are listed in \cref{{tab:controls}}.  For the Re 200 cylinder, metadata identifies \texttt{{{_latex(bdf2['time_integrator'])}}}, with true BDF2 inner loop set to \texttt{{{_latex(bdf2['true_bdf2_inner_loop'])}}}.  The required outer physical-time loop holds $U^n$ and $U^{{n-1}}$ fixed while inner iterations solve for $U^{{n+1}}$, then advances the histories after accepted inner convergence.  Its submitted observed inner-iteration range is {_latex(bdf2.get('observed_min_inner_iterations'))}--{_latex(bdf2.get('observed_max_inner_iterations'))}, mean {_fmt(bdf2.get('observed_mean_inner_iterations', bdf2.get('typical_inner_iterations', 0)))}, target-miss count {_latex(bdf2.get('inner_target_misses'))}, converged-step fraction {_fmt(bdf2.get('inner_target_converged_fraction'))}, and last ratio {_fmt(bdf2.get('last_inner_residual_ratio'))}.
 \begin{{table}}[htbp]\centering\scriptsize
@@ -939,15 +990,15 @@ Steady cases use the submitted local pseudo-time integrator and inner solver.  T
 \section{{MPI decomposition, halo exchange, and no replication}}
 The metadata identifies the partitioner and halo exchange for every submitted run.  It explicitly declares both full-mesh and full-conservative-state replication during solver iterations false.  Partition diagnostics below are the actual rank-local owned/ghost counts, neighbour ranges, and edge-cut metadata, rather than a preprocessing-only estimate.  Halo communication is neighbour-scoped as named in metadata; residuals and forces are the submitted global histories.
 \begin{{table}}[htbp]\centering\small
-\caption{{Final-run partition evidence.  Load balance is maximum owned cells divided by mean owned cells.}}\label{{tab:partition}}
-\begin{{tabular}}{{lrrrrrr}}\toprule Case & ranks & owned min--max & ghost min--max & neighbours min--max & load balance & edge cut\\\midrule
+\caption{{Final-run partition evidence.  Owned, ghost, and neighbour entries are rankwise min--max; balance is maximum owned cells divided by the mean.}}\label{{tab:partition}}
+\begin{{tabular}}{{lrrrrrr}}\toprule Case & ranks & owned & ghost & neighbours & balance & cut\\\midrule
 {partition_rows}
 \bottomrule\end{{tabular}}\end{{table}}
 \section{{Output reproducibility and sanity checks}}
 The generated \texttt{{run\_manifest.csv}} records both production and rank-validation commands, source directories, ranks, wall times, final steps, and statuses.  \texttt{{figure\_manifest.csv}} maps every figure to the actual CSV or field file and named variable.  \texttt{{sanity\_checks.json}} records contract-derived positivity, wall-condition, force, pressure-coefficient, and Re 200 wake checks.  Regeneration is documented with this repository's report tool; the TeX source is ready for \texttt{{latexmk}}.
 \section{{Results}}
 \subsection{{Run status and final forces}}
-\begin{{table}}[htbp]\centering\small
+\begin{{table}}[htbp]\centering\scriptsize
 \caption{{Submitted run status.  Both residual reductions are recomputed from the first and final rows.}}\label{{tab:status}}
 \begin{{tabular}}{{lrrrrrrl}}\toprule Case & ranks & steps & time & $L_2$ orders & $L_\infty$ orders & wall s & status\\\midrule
 {status_rows}
