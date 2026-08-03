@@ -212,6 +212,29 @@ void test_transient_checkpoint_round_trip_and_history_resume() {
               {9, {4.0, 3.0, 2.0, 1.0}, {3.5, 2.5, 1.5, 0.5}}},
              {{1, 0.01, 0.01, 0.05}},
              {5}});
+
+        // Checkpoint durability includes static package evidence and CSV
+        // headers, not only the two cadence-1 histories.  Read these while the
+        // OutputSession streams are still open so destructor flushing cannot
+        // mask an interruption-time data-loss regression.
+        const auto expect_visible_line = [&](const std::string& filename,
+                                             const std::string& expected) {
+            std::ifstream input(directory / filename);
+            std::string line;
+            std::getline(input, line);
+            expect(line == expected,
+                   filename + " was not durable when the checkpoint became visible");
+        };
+        expect_visible_line(
+            "partition_diagnostics.csv",
+            "rank,num_cells_owned,num_cells_ghost,num_boundary_faces,num_neighbor_ranks,neighbor_ranks,send_cells,recv_cells");
+        expect_visible_line("surface.csv",
+                            "x,y,nx,ny,pressure,cp,cf,rho,u,v,mach,tag");
+        std::ifstream log_input(directory / "stdout.log");
+        const std::string log_text{std::istreambuf_iterator<char>(log_input),
+                                   std::istreambuf_iterator<char>()};
+        expect(log_text.find("OutputSession initialized") != std::string::npos,
+               "stdout log was not durable when the checkpoint became visible");
     }
     const auto checkpoint = cfd::read_transient_checkpoint_file(directory / "transient_checkpoint.bin");
     expect(checkpoint.step == 1 && checkpoint.states.size() == 2U &&

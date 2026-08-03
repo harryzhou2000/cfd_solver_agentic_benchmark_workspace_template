@@ -31,6 +31,7 @@ From the repository root, configure with the supplied external dependency prefix
 
 ```bash
 cmake -S solver -B solver/build \
+  -DCMAKE_BUILD_TYPE=Release \
   -DCFD_EXTERNALS_ROOT="$PWD/external/cfd_externals/install" \
   -DCFD_BUILD_TESTING=ON
 cmake --build solver/build -j
@@ -107,9 +108,10 @@ mpirun -np 8 solver/build/cfd_solver solve \
   --output solver/results/cylinder_m010_laminar_re200 --report-level full
 ```
 
-The transient solver atomically writes `transient_checkpoint.bin` after accepted
-physical step 1, then replaces it every 100 accepted physical steps.  Unlike the
-state-only `restart_final.bin`, this
+The transient solver flushes the matching histories, log, CSV headers, and
+partition evidence before atomically writing `transient_checkpoint.bin` after
+accepted physical step 1, then replaces it every 100 accepted physical steps.
+Unlike the state-only `restart_final.bin`, this
 checkpoint contains both accepted BDF2 states, the original residual baseline,
 the complete inner-iteration accounting, the initial wake-seed provenance, and
 the force history needed for an uninterrupted statistical analysis.  After an

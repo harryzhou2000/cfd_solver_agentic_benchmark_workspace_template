@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.20)
 
 project(cfd_solver LANGUAGES CXX)
 
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING
+        "Build type (defaults to Release so production solves are optimized)" FORCE)
+endif()
+
 option(CFD_BUILD_TESTING "Build CFD solver foundation tests" ON)
 set(CFD_EXTERNALS_ROOT "" CACHE PATH
     "Root of DNDSR-style external dependencies (contains include/, lib/, etc.)")

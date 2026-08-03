@@ -633,10 +633,17 @@ void OutputSession::write_transient_checkpoint(const TransientCheckpoint& checkp
     // have reached stable storage first.  If interruption occurs before the
     // subsequent atomic rename, resume discards any newer rows back to the
     // preceding checkpoint rather than manufacturing a discontinuity.
+    impl_->stdout_log.flush();
     impl_->residuals.flush();
     impl_->forces.flush();
+    impl_->surface.flush();
+    impl_->partition_diagnostics.flush();
+    require_open(impl_->stdout_log, impl_->directory / "stdout.log");
     require_open(impl_->residuals, impl_->directory / "residuals.csv");
     require_open(impl_->forces, impl_->directory / "forces.csv");
+    require_open(impl_->surface, impl_->directory / "surface.csv");
+    require_open(impl_->partition_diagnostics,
+                 impl_->directory / "partition_diagnostics.csv");
     auto states = checkpoint.states;
     std::sort(states.begin(), states.end(), [](const auto& lhs, const auto& rhs) {
         return lhs.global_cell_id < rhs.global_cell_id;
