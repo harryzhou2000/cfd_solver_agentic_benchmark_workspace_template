@@ -5,6 +5,9 @@
 
 namespace solver {
 
+// Conservative state size per cell: rho, rhou, rhov, rhoE
+constexpr int kStateSize = 4;  // Vec4
+
 struct NeighborInfo {
     int rank;
     std::vector<int> send_indices;  // owned cell LOCAL indices to send
@@ -13,8 +16,8 @@ struct NeighborInfo {
 
 struct HaloBuffers {
     std::vector<MPI_Request> requests;
-    std::vector<std::vector<double>> send_bufs;  // per-neighbor, flat doubles (4 * nsend)
-    std::vector<std::vector<double>> recv_bufs;  // per-neighbor, flat doubles (4 * nrecv)
+    std::vector<std::vector<double>> send_bufs;  // per-neighbor, flat doubles (kStateSize * nsend)
+    std::vector<std::vector<double>> recv_bufs;  // per-neighbor, flat doubles (kStateSize * nrecv)
 };
 
 struct DistributedMesh {

@@ -5,7 +5,6 @@
 #include <mpi.h>
 
 #include <algorithm>
-#include <cstdlib>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -462,12 +461,36 @@ RankMeshData recv_rank_mesh(MPI_Comm comm, int src) {
             ro += rcounts[i];
         }
     }
-    if (d.owned_gids.size() != static_cast<size_t>(num_owned) ||
-        d.ghost_gids.size() != static_cast<size_t>(num_ghost) ||
-        d.face_left.size() != static_cast<size_t>(num_faces)) {
-        throw std::runtime_error(
-            "build_distributed_mesh: received mesh data size mismatch");
+    // Validate every field of the received header against the actual data.
+    // The header is trusted to size the arrays above, so any mismatch here
+    // indicates a corrupted/desynchronized transfer.
+    size_t nface_ids = 0;
+    for (const auto& ids : d.owned_face_ids) nface_ids += ids.size();
+    size_t nfam_faces = 0;
+    for (const BCFamily& f : d.bc_families) nfam_faces += f.face_ids.size();
+    size_t nsend = 0;
+    size_t nrecv = 0;
+    for (const NeighborInfo& ni : d.neighbors) {
+        nsend += ni.send_indices.size();
+        nrecv += ni.recv_indices.size();
     }
+    auto check_header = [](size_t got, int want, const char* field) {
+        if (got != static_cast<size_t>(want)) {
+            throw std::runtime_error(
+                "build_distributed_mesh: header field '" + std::string(field) +
+                "' mismatch: received " + std::to_string(got) + ", expected " +
+                std::to_string(want));
+        }
+    };
+    check_header(d.owned_gids.size(), num_owned, "num_owned");
+    check_header(d.ghost_gids.size(), num_ghost, "num_ghost");
+    check_header(d.face_left.size(), num_faces, "num_faces");
+    check_header(d.bc_families.size(), num_fams, "num_fams");
+    check_header(d.neighbors.size(), num_neigh, "num_neigh");
+    check_header(nface_ids, header[6], "nface_ids");
+    check_header(nfam_faces, header[7], "nfam_faces");
+    check_header(nsend, header[8], "nsend");
+    check_header(nrecv, header[9], "nrecv");
     return d;
 }
 
@@ -528,12 +551,17 @@ DistributedMesh assemble_distributed(const RankMeshData& d, int rank,
 
 } // namespace
 
-std::vector<int> partition_mesh(const CellGraph& graph, int num_cells,
-                                int nparts) {
+PartitionResult partition_mesh(const CellGraph& graph, int num_cells,
+                               int nparts) {
+    // METIS requires nparts <= num_cells; clamp to keep tiny meshes working
+    // (produces nparts=1, i.e. a single partition).
+    if (nparts > num_cells) {
+        nparts = std::max(1, num_cells);
+    }
     if (nparts <= 1) {
         // METIS_PartGraphKway divides by (nparts - 1); single-partition
         // cases are handled directly.
-        return std::vector<int>(num_cells, 0);
+        return {std::vector<int>(num_cells, 0), 0};
     }
     idx_t nvtxs = static_cast<idx_t>(num_cells);
     idx_t ncon = 1;
@@ -558,11 +586,11 @@ std::vector<int> partition_mesh(const CellGraph& graph, int num_cells,
                             options.data(), &edgecut, part.data());
 
     if (status != METIS_OK) {
-        fmt::print(stderr, "METIS_PartGraphKway failed: {}\n", status);
-        std::exit(1);
+        throw std::runtime_error("METIS failure: " + std::to_string(status));
     }
 
-    return std::vector<int>(part.begin(), part.end());
+    return {std::vector<int>(part.begin(), part.end()),
+            static_cast<int>(edgecut)};
 }
 
 DistributedMesh build_distributed_mesh(const Mesh& global_mesh,

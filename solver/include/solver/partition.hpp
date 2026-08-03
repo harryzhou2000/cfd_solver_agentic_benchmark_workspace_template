@@ -5,8 +5,14 @@
 
 namespace solver {
 
+// Result of partitioning: per-cell rank assignment plus the METIS edge cut.
+struct PartitionResult {
+    std::vector<int> assignment;  // global_cell_id -> rank
+    int edge_cut = 0;
+};
+
 // Returns partition assignment: part[global_cell_id] = rank index
-std::vector<int> partition_mesh(const CellGraph& graph, int num_cells, int nparts);
+PartitionResult partition_mesh(const CellGraph& graph, int num_cells, int nparts);
 
 // Build distributed mesh on all ranks.
 // On rank 0: global_mesh is valid, used to build all local meshes and send them
