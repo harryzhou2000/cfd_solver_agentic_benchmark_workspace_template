@@ -39,6 +39,9 @@ node scripts/session_cache_stats.mjs --session <session-id>
 # 2b. opencode session: what did an opencode run pay (incl. subagents)?
 node scripts/opencode_session_cache_stats.mjs --session <ses_id> [--subagents]
 node scripts/opencode_session_cache_stats.mjs --workspace <dir-substring> [--subagents]
+
+# 3. opencode wire capture: which bytes break the cache between requests?
+node scripts/opencode_wire_proxy.mjs 8791 /tmp/oc-wire api.deepseek.com /v1
 ```
 
 ## Workflow
@@ -98,7 +101,41 @@ node scripts/opencode_session_cache_stats.mjs --session <ses_id> --subagents
 emits the machine-readable report. Full schema and caveats in
 `notes/opencode-session-history.md`.
 
-### 3. Explain and report
+### 3. opencode: check for per-request system-prompt mutations
+
+The #1 opencode-side cache killer found so far is a plugin that renders
+**mutable state into the system prompt**. Known case:
+`@prevalentware/opencode-goal-plugin` appends a "goal mode active reminder"
+with volatile counters (`Time spent pursuing goal: N seconds`, `Tokens used:
+N`, `Auto-continues used: N`) to the system prompt on every request while a
+goal is active. DeepSeek's byte-exact prefix cache then breaks at the same
+fixed position every request → `cache.read` pins at a **constant** value
+(≈ system-prompt-before-reminder) while `in_new` grows with the full history.
+
+Diagnose:
+
+```bash
+# 1) constant-pin signature: flat cache.read + growing in_new
+node scripts/opencode_session_cache_stats.mjs --session ses_<id>
+
+# 2) active goal for that session?
+node -e "const g=require(process.env.HOME+'/.local/share/opencode-goal-plugin/goals.json').goals; console.log(g['ses_<id>']?.status)"
+
+# 3) wire proof: proxy opencode and byte-diff consecutive system prompts
+node scripts/opencode_wire_proxy.mjs 8791 /tmp/oc-wire api.deepseek.com /v1
+```
+
+`OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS` and omo-slim's summary-diff
+attachments were investigated and **exonerated** for the pinned sessions;
+the goal-plugin reminder is the cause (see
+`notes/cache-hit-diagnostics.md` "UPDATE" section and
+`notes/opencode-session-history.md`). Subagent children have no goal entry,
+which is why they cache at 96–99% while the orchestrator pins.
+
+Environment gotcha: unset `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY` when running
+the wire proxy — a LAN proxy intercepts `127.0.0.1` and returns 503 with
+nothing logged.
+### 4. Explain and report
 
 - Healthy: `cached/input ≥ 95%` at tail; warm-up hits 99% quickly.
 - Stub accounting signature: `cached=0, out=1` on streaming rows while
@@ -129,6 +166,8 @@ emits the machine-readable report. Full schema and caveats in
   cache statistics.
 - `scripts/opencode_session_cache_stats.mjs` — opencode session cache stats
   from the SQLite store, with recursive subagent extraction (`--subagents`).
+- `scripts/opencode_wire_proxy.mjs` — logging reverse proxy to byte-diff
+  consecutive opencode provider requests (finds which bytes break caching).
 
 Probe targets: `blsc-flash`, `deepseek-flash`, `deepseek-pro` (official
 `api.deepseek.com`, `deepseek-v4-pro`).

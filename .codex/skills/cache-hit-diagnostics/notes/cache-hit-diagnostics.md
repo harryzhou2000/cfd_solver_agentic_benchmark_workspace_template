@@ -203,3 +203,91 @@ Takeaways for the skill: when a session shows a persistent low plateau
 already-sent messages (summaries, queued-message wrappers, in-place part
 rewrites by plugins), not the provider — probe the provider first, then check
 the session store for late `time_updated` on user messages.
+
+## UPDATE (2026-08-03, later same day): root cause found — the goal plugin
+
+Wire capture + forensics overturned the "late summary" mechanism above. The
+pinned sessions were broken by **`@prevalentware/opencode-goal-plugin`**
+(loaded globally from `~/.opencode/opencode.json`), not by summary diffs.
+
+### Mechanism
+
+The plugin's `experimental.chat.system.transform` hook calls
+`mergeSystemReminder()`, which appends a "goal mode active reminder" block to
+the **end of the system prompt on every request** while the session has an
+active goal. The reminder contains per-request volatile counters:
+
+```text
+Budget:
+- Time spent pursuing goal: 66 seconds      <- wall clock since goal creation
+- Tokens used: 8718                          <- plugin's cumulative accounting,
+                                                updated on every request
+- Token budget: none
+- Tokens remaining: unbounded
+- Auto-continues used: 0/25                  <- increments on auto-continue
+- Duration limit: none
+```
+
+DeepSeek prefix caching is byte-exact, so the cache breaks at the **first
+changed number — a fixed byte position** (the budget line). Everything after
+it (rest of system + entire message history + all tool definitions) is re-sent
+as new tokens every request. Hence the observed signature: `cache.read` pins
+at a **constant** value ≈ system-prompt tokens before the reminder, while
+`in_new` grows by the whole history each turn.
+
+### Evidence
+
+- Both bad sessions had **active goals** in
+  `~/.local/share/opencode-goal-plugin/goals.json`, created at session start:
+  kimi `ses_04148d309ffegp6AE6TufXkdJW` (10.3%, goal created 19:05:09,
+  `timeUsedSeconds` 147,416 / `tokensUsed` 22.3M at close), dsv4
+  `ses_040b656bdffeVJcS8XFIqGFGTw` (10.8%, goal created 21:50:39), plus a
+  third goal session `ses_03e6cdbcaffefVyMLw9N6OIQGR` (6.8%).
+- **Every goal-less session** on the same opencode 1.18.11, same workspaces,
+  same `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true`, and omo-slim loaded
+  cached at 95–99.6% (including a 378-request session at 99.6%). The
+  background-subagent flag is **exonerated**: wire capture with the flag on
+  and no goal was perfectly cache-stable (system + tools byte-identical,
+  messages append-only, 8,704/8,705 cached).
+- The July "1.18.3 regression" (36.4%) is the same plugin: the only large
+  1.18.3 session (1,006 reqs, 13.3%) had a goal created 2026-07-18 06:30Z —
+  matching the `~/.opencode/opencode.json` mtime (14:28 +08:00) when the
+  plugin was added. A concurrent goal-less 1.18.3 session cached 93.6%, and
+  1.18.2 (July 16, 86.2%) predates the install. Subagent children have no
+  goal entry → no reminder → 96–99% (matches the fixer/oracle numbers).
+- Live repro through `scripts/opencode_wire_proxy.mjs` (1.18.11 +
+  deepseek-v4-pro): with a seeded active goal, consecutive requests' system
+  prompts differed at the same fixed byte — `Time spent pursuing goal: 66 →
+  74 → 82 seconds`, `Tokens used: 8718 → 18035 → 27373` — and the response
+  usage collapsed from cached 8,704/8,705 (99.9%) to 1,920/9,296 (20.6%) on
+  the first goal request, staying pinned.
+
+### Why summaries were a red herring
+
+omo-slim attaches `summary.diffs` to user messages, and the goal sessions are
+exactly the ones that accumulate them; but (a) the kimi session had omo-slim
+disabled and still pinned, (b) the legacy serializer
+(`MessageV2.toModelMessagesEffect`) does not read `message.summary` at all,
+and (c) the wire diff places the break in the **system prompt**, not in any
+message.
+
+### Diagnosis recipe
+
+1. Run the opencode scanner and look for the **constant-pin signature**:
+   `cache.read` flat (e.g. 18,176) for 100+ requests while `in_new` grows.
+2. Check for an active goal:
+   `~/.local/share/opencode-goal-plugin/goals.json` (or
+   `OPENCODE_GOAL_STATE_PATH`) — session ID present with `status != complete`.
+3. Optionally repro on the wire (see `scripts/opencode_wire_proxy.mjs`):
+   seed a goal entry and diff consecutive system prompts.
+
+### Fix options (upstream)
+
+- Do not render per-request volatile counters into the system prompt. Keep
+  the reminder static and refresh it only on goal status changes.
+- Or append the reminder **after the message history** (or into the last user
+  message), so the byte-exact prefix up to the reminder stays cached and only
+  the small tail is re-sent.
+- Same guidance for any plugin hook that renders mutable state into the
+  system prompt: omo-slim's background-job board and running-task placeholder
+  rewrites are the same failure family when active.

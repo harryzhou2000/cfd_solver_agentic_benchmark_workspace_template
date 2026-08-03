@@ -89,3 +89,40 @@ and a combined window over main + subagents. `--json` emits the full object
 - Requests that failed or returned no usage appear as assistant messages
   without tokens (counted in `noUsage`), not as cache misses.
 - Timestamps are epoch milliseconds (`time_created`).
+
+## Plugin system-prompt mutation (the goal-plugin pitfall)
+
+`@prevalentware/opencode-goal-plugin` (loaded globally via
+`~/.opencode/opencode.json`) injects a per-request-changing "goal mode active
+reminder" into the **system prompt** of every request while the session has an
+active goal. The reminder ends with volatile budget counters:
+
+```text
+- Time spent pursuing goal: 66 seconds   <- changes every request
+- Tokens used: 8718                       <- changes every request
+- Auto-continues used: 0/25               <- changes on auto-continue
+```
+
+Because DeepSeek prefix caching is byte-exact, the cache breaks at the first
+changed number (a fixed position), so `cache.read` **pins at a constant**
+value ≈ system-prompt-before-reminder while `in_new` carries the full history
+every request. Sessions without an active goal (including all subagent
+children, which have no goal entry) cache normally (95–99.6%).
+
+Diagnosis steps:
+
+1. Scanner: `node scripts/opencode_session_cache_stats.mjs --session <id>`
+   — look for a flat `cache.read` plateau with growing `in_new` (the
+   "persistent low plateau" signature).
+2. Goal state: check `~/.local/share/opencode-goal-plugin/goals.json` (or
+   `OPENCODE_GOAL_STATE_PATH`) for an entry with `status: "active"` for the
+   session ID.
+3. Wire proof (optional):
+   `node scripts/opencode_wire_proxy.mjs 8791 /tmp/oc-wire api.deepseek.com /v1`,
+   point a minimal opencode config at `http://127.0.0.1:8791`, seed a goal via
+   `OPENCODE_GOAL_STATE_PATH`, and diff consecutive `NNN_req.txt` system
+   prompts — the only diffs will be the budget numbers.
+
+Environment gotcha: if `HTTP_PROXY`/`HTTPS_PROXY` are set, opencode's fetch
+routes even `127.0.0.1` through the LAN proxy (silent 503, nothing logged).
+Unset the proxy vars when running the wire proxy.
