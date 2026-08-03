@@ -79,6 +79,8 @@ add_executable(cfd_solver
   src/geometry.cpp
   src/case_parser.cpp
   src/adjacency.cpp
+  src/partition.cpp
+  src/halo_exchange.cpp
 )
 
 target_include_directories(cfd_solver PRIVATE

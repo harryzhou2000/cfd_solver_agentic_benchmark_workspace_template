@@ -2,30 +2,125 @@
 #include "solver/mesh_reader.hpp"
 #include "solver/geometry.hpp"
 #include "solver/adjacency.hpp"
-#include <iostream>
+#include "solver/partition.hpp"
+#include "solver/partition_types.hpp"
+#include <mpi.h>
 #include <fmt/core.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <numeric>
+#include <sys/stat.h>
 
 int main(int argc, char* argv[]) {
-    // For now, hardcode a test — later will parse CLI
+    MPI_Init(&argc, &argv);
+    int rank, nranks;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &nranks);
+
     if (argc < 2) {
-        fmt::print(stderr, "Usage: {} <case.json>\n", argv[0]);
+        if (rank == 0) fmt::print("Usage: {} solve --case <json> --output <dir>\n", argv[0]);
+        MPI_Finalize();
         return 1;
     }
+    std::string cmd = argv[1];
+    if (cmd != "solve") {
+        if (rank == 0) fmt::print("Unknown command: {}\n", cmd);
+        MPI_Finalize();
+        return 1;
+    }
+
+    std::string case_file, output_dir;
+    for (int i = 2; i < argc; ++i) {
+        std::string a = argv[i];
+        if (a == "--case" && i+1 < argc) case_file = argv[++i];
+        else if (a == "--output" && i+1 < argc) output_dir = argv[++i];
+        else {
+            if (rank == 0) fmt::print(stderr, "Unknown option: {}\n", a);
+            MPI_Finalize();
+            return 1;
+        }
+    }
+    if (case_file.empty() || output_dir.empty()) {
+        if (rank == 0) fmt::print("Usage: {} solve --case <json> --output <dir>\n", argv[0]);
+        MPI_Finalize();
+        return 1;
+    }
+
+    // Create output directory
+    if (rank == 0) mkdir(output_dir.c_str(), 0755);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    // Parse case config
+    solver::CaseConfig config;
+    if (rank == 0) config = solver::parse_case_config(case_file);
     
-    auto config = solver::parse_case_config(argv[1]);
-    fmt::print("Case: {}\n", config.case_id);
-    fmt::print("Mesh: {}\n", config.mesh.file);
+    if (rank == 0) {
+        fmt::print("=== Case: {} ({})\n", config.case_id, config.description);
+        fmt::print("=== MPI ranks: {}\n", nranks);
+        fmt::print("=== Mode: {}, Mach: {}\n", config.physics.mode, config.freestream.mach);
+    }
+
+    // Read and process mesh on rank 0
+    solver::Mesh global_mesh;
+    int num_global_cells = 0;
+    if (rank == 0) {
+        global_mesh = solver::read_cgns_mesh(config.mesh.file, config);
+        solver::compute_geometry(global_mesh);
+        num_global_cells = global_mesh.num_cells;
+        fmt::print("[Rank 0] Read mesh: {} cells, {} faces, {} bnd faces\n",
+                   num_global_cells, global_mesh.num_faces, global_mesh.num_bnd_faces);
+    }
+    MPI_Bcast(&num_global_cells, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Partition
+    std::vector<int> partition(num_global_cells);
+    if (rank == 0) {
+        auto graph = solver::build_cell_graph(global_mesh);
+        partition = solver::partition_mesh(graph, num_global_cells, nranks);
+        
+        // Count cells per rank
+        std::vector<int> counts(nranks, 0);
+        for (int p : partition) counts[p]++;
+        fmt::print("[Rank 0] Partition: ");
+        for (int r = 0; r < nranks; ++r) fmt::print("{} ", counts[r]);
+        fmt::print("\n");
+    }
+    MPI_Bcast(partition.data(), num_global_cells, MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Build distributed mesh
+    auto dist = solver::build_distributed_mesh(global_mesh, partition, MPI_COMM_WORLD);
+
+    // Print per-rank diagnostics
+    int owned = dist.owned_cells.size();
+    int ghost = dist.ghost_cells.size();
+    int nfaces = dist.local_faces.size();
+    int nneigh = dist.neighbors.size();
     
-    auto mesh = solver::read_cgns_mesh(config.mesh.file, config);
-    fmt::print("Cells: {}, Faces: {}, Bnd faces: {}\n", 
-               mesh.num_cells, mesh.num_faces, mesh.num_bnd_faces);
+    std::vector<int> all_owned(nranks), all_ghost(nranks);
+    MPI_Gather(&owned, 1, MPI_INT, all_owned.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Gather(&ghost, 1, MPI_INT, all_ghost.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
     
-    solver::compute_geometry(mesh);
-    fmt::print("Geometry computed. Cell 0 centroid: ({}, {})\n",
-               mesh.cells[0].centroid.x(), mesh.cells[0].centroid.y());
+    if (rank == 0) {
+        fmt::print("\n=== Partition diagnostics ===\n");
+        fmt::print("Rank  Owned  Ghost  Faces  Neighbors\n");
+        fmt::print("{}     {}     {}     {}      {}\n", rank, owned, ghost, nfaces, nneigh);
+    }
+    // Other ranks print their diagnostics after rank 0's table
+    for (int r = 1; r < nranks; ++r) {
+        if (rank == r) {
+            fmt::print("Rank {}: owned={}, ghost={}, faces={}, neighbors={}\n", 
+                       r, owned, ghost, nfaces, nneigh);
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
     
-    auto graph = solver::build_cell_graph(mesh);
-    fmt::print("Cell graph: {} edges\n", graph.adjncy.size());
-    
+    if (rank == 0) {
+        int total_owned = std::accumulate(all_owned.begin(), all_owned.end(), 0);
+        fmt::print("Total owned: {} (expected: {})\n", total_owned, num_global_cells);
+    }
+
+    MPI_Finalize();
     return 0;
 }
