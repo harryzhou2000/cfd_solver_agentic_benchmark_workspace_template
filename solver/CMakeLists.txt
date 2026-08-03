@@ -112,6 +112,11 @@ if(CFD_BUILD_TESTING)
     add_test(NAME supervise_transient_case_tests
         COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_supervise_transient_case.sh")
 
+    add_test(NAME transient_step1_checkpoint_test
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_transient_step1_checkpoint.sh"
+                $<TARGET_FILE:cfd_solver>
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/transient_checkpoint_step1.json")
+
     add_executable(mesh_tests tests/test_mesh.cpp)
     target_link_libraries(mesh_tests PRIVATE cfd_core)
     target_compile_definitions(mesh_tests PRIVATE

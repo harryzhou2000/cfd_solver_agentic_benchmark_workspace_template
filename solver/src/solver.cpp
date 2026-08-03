@@ -1925,7 +1925,7 @@ class FlowSolver::Impl {
             previous_states_ = states_;
             accepted_steps = step;
             if (callbacks.transient_checkpoint &&
-                step % kDurableTransientCheckpointInterval == 0) {
+                (step == 1 || step % kDurableTransientCheckpointInterval == 0)) {
                 SolverTransientCheckpoint checkpoint{};
                 checkpoint.step = step;
                 checkpoint.physical_time = physical_time;

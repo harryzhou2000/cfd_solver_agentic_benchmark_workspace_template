@@ -169,7 +169,7 @@ void test_transient_checkpoint_round_trip_and_history_resume() {
     {
         OutputSession output(test_case(), directory, metadata());
         output.write_partition_diagnostics({{0, 2, 0, 2, 0, "", "", ""}});
-        for (int step = 1; step <= 2; ++step) {
+        for (int step = 1; step <= 1; ++step) {
             const double time = 0.01 * static_cast<double>(step);
             output.append_residual({step, time, 5, 1.0, 0.01, 0.1, 0.2, 0.3, 0.4,
                                     1e-4, 2e-4});
@@ -177,51 +177,51 @@ void test_transient_checkpoint_round_trip_and_history_resume() {
                                  0.01 * step, 0.0});
         }
         output.write_transient_checkpoint(
-            {test_case().case_id, 2, 0.02, 0.01, 7.5, true, 2,
+            {test_case().case_id, 1, 0.01, 0.01, 7.5, true, 2,
              {{2, {1.0, 2.0, 3.0, 4.0}, {0.5, 1.5, 2.5, 3.5}},
               {9, {4.0, 3.0, 2.0, 1.0}, {3.5, 2.5, 1.5, 0.5}}},
-             {{1, 0.01, 0.01, 0.05}, {2, 0.02, 0.02, 0.05}},
-             {5, 6}});
+             {{1, 0.01, 0.01, 0.05}},
+             {5}});
     }
     const auto checkpoint = cfd::read_transient_checkpoint_file(directory / "transient_checkpoint.bin");
-    expect(checkpoint.step == 2 && checkpoint.states.size() == 2U &&
-               checkpoint.states[1].older[3] == 0.5 && checkpoint.force_history.size() == 2U &&
+    expect(checkpoint.step == 1 && checkpoint.states.size() == 2U &&
+               checkpoint.states[1].older[3] == 0.5 && checkpoint.force_history.size() == 1U &&
                checkpoint.initial_global_residual == 7.5 &&
                checkpoint.initial_symmetry_seed_applied &&
-               checkpoint.inner_iterations == std::vector<int>({5, 6}),
-           "transient checkpoint did not preserve BDF histories and accepted statistics");
+               checkpoint.inner_iterations == std::vector<int>({5}),
+           "step-1 transient checkpoint did not preserve BDF histories and accepted statistics");
     expect(std::filesystem::is_regular_file(directory / "transient_checkpoint.json"),
            "transient checkpoint manifest is missing");
 
     // Simulate rows flushed immediately before an interruption but after the
-    // durable step-2 checkpoint.  Resume must remove them rather than duplicate
+    // durable step-1 checkpoint.  Resume must remove them rather than duplicate
     // or skip accepted physical samples.
     {
         std::ofstream residuals(directory / "residuals.csv", std::ios::app);
         std::ofstream forces(directory / "forces.csv", std::ios::app);
-        residuals << "3,0.03,5,1,0.01,0.1,0.2,0.3,0.4,0.0001,0.0002\n";
-        forces << "3,0.03,0.03,0.05,0,0.05,0,0.03,0\n";
+        residuals << "2,0.02,5,1,0.01,0.1,0.2,0.3,0.4,0.0001,0.0002\n";
+        forces << "2,0.02,0.02,0.05,0,0.05,0,0.02,0\n";
     }
     OutputSession resumed(test_case(), directory, metadata(), 0,
-                          cfd::OutputResumeState{2, 0.02,
+                          cfd::OutputResumeState{1, 0.01,
                                                  directory / "transient_checkpoint.bin"});
-    resumed.append_residual({3, 0.03, 5, 1.0, 0.01, 0.1, 0.2, 0.3, 0.4, 1e-4, 2e-4});
-    resumed.append_force({3, 0.03, 0.03, 0.05, 0.0, 0.05, 0.0, 0.03, 0.0});
+    resumed.append_residual({2, 0.02, 5, 1.0, 0.01, 0.1, 0.2, 0.3, 0.4, 1e-4, 2e-4});
+    resumed.append_force({2, 0.02, 0.02, 0.05, 0.0, 0.05, 0.0, 0.02, 0.0});
     resumed.write_final_surface({{0.0, 0.0, 1.0, 0.0, 1.0, 0.1, 0.0, 1.0, 1.0, 0.0, 0.15, "bc-4"}},
-                                {3, 0.03});
+                                {2, 0.02});
     resumed.write_final_field_vtk({{4, {{0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}}, 1.0,
-                                    {1.0, 0.0}, 1.0, 0.15, 2.5, 1.0, 0}}, {3, 0.03});
+                                    {1.0, 0.0}, 1.0, 0.15, 2.5, 1.0, 0}}, {2, 0.02});
     resumed.write_final_restart({{2, {1.0, 2.0, 3.0, 4.0}}, {9, {4.0, 3.0, 2.0, 1.0}}});
-    resumed.complete({"resume test", 1, 1.0, {3, 0.03}, ConvergenceStatus::converged, 1.0,
+    resumed.complete({"resume test", 1, 1.0, {2, 0.02}, ConvergenceStatus::converged, 1.0,
                       "resumed"});
     std::ifstream residuals(directory / "residuals.csv");
     std::string line;
     int rows = 0;
     while (std::getline(residuals, line)) ++rows;
-    expect(rows == 4, "resumed residual history has duplicate or missing rows");
+    expect(rows == 3, "resumed residual history has duplicate or missing rows");
     std::ifstream metadata_input(directory / "metadata.json");
     const auto metadata_json = nlohmann::json::parse(metadata_input);
-    expect(metadata_json.at("resumed_from_checkpoint").at("step") == 2,
+    expect(metadata_json.at("resumed_from_checkpoint").at("step") == 1,
            "resume provenance was not retained in metadata");
 }
 

@@ -28,7 +28,7 @@ write_unfinished() {
     for file in stdout.log residuals.csv forces.csv surface.csv partition_diagnostics.csv; do : >"$output/$file"; done
     printf 'CFDTRN01' >"$output/transient_checkpoint.bin"
     cat >"$output/transient_checkpoint.json" <<JSON
-{"format":"CFDTRN01","version":1,"case_id":"fixture_re200","accepted_step":100,"physical_time":1.0,"time_step":0.01,"force_history_samples":100,"inner_iteration_samples":100}
+{"format":"CFDTRN01","version":1,"case_id":"fixture_re200","accepted_step":1,"physical_time":0.01,"time_step":0.01,"force_history_samples":1,"inner_iteration_samples":1}
 JSON
 }
 write_completed() {
