@@ -909,7 +909,7 @@ RunSummary FlowSolver::solve() {
         floor_best_outer_norm = std::min(floor_best_outer_norm, previous_outer_norm);
       }
       const bool reject_high_cfl_correction =
-          !at_steady_cfl_floor && std::isfinite(previous_outer_norm) && final_record.l2 > 1.10 * previous_outer_norm;
+          !at_steady_cfl_floor && std::isfinite(previous_outer_norm) && final_record.l2 > 1.02 * previous_outer_norm;
       const bool reject_floor_correction =
           at_steady_cfl_floor && std::isfinite(floor_best_outer_norm) &&
           final_record.l2 > 1.02 * floor_best_outer_norm;
