@@ -849,18 +849,14 @@ RunSummary FlowSolver::solve() {
     double floor_relaxation = 0.5;
     int floor_decline_streak = 0;
     int floor_retry_count = 0;
-    constexpr double minimum_floor_relaxation = 0.0625;
-    // A steady nonlinear solve can make small, bounded residual excursions
-    // while still converging.  Keep the trust region local to the recent
-    // accepted trajectory: an all-time residual minimum turns a harmless
-    // trough into a permanent rejection threshold and repeatedly re-solves
-    // the same floor-CFL correction without changing the state.
-    std::vector<double> accepted_outer_norms;
-    accepted_outer_norms.reserve(static_cast<std::size_t>(config_.run.max_steps));
-    // The controller separately reduces the next CFL after a 10% accepted
-    // step-to-step increase below.  Reserve this wider envelope for rejecting
-    // genuinely unstable trials rather than normal nonlinear ringing.
-    constexpr double residual_trust_factor = 1.25;
+    constexpr double minimum_floor_relaxation = 0.00390625;
+    // Retain the best accepted nonlinear state.  This makes the outer
+    // correction a genuine merit-function line search: a rejected correction
+    // cannot become part of the next trial merely because a retry budget was
+    // exhausted.
+    double best_outer_norm = std::numeric_limits<double>::infinity();
+    std::vector<double> best_outer_state;
+    constexpr double monotone_tolerance = 1.0 + 1.0e-10;
     double previous_outer_norm = std::numeric_limits<double>::infinity();
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
@@ -917,28 +913,15 @@ RunSummary FlowSolver::solve() {
       }
       Assembly diagnostic = assemble_spatial_residual();
       final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
-      const std::size_t rolling_count = std::min<std::size_t>(25U, accepted_outer_norms.size());
-      const double rolling_outer_norm = rolling_count == 0
-                                            ? std::numeric_limits<double>::infinity()
-                                            : *std::min_element(accepted_outer_norms.end() -
-                                                                    static_cast<std::ptrdiff_t>(rolling_count),
-                                                                accepted_outer_norms.end());
-      const bool reject_high_cfl_correction =
-          !at_steady_cfl_floor && std::isfinite(rolling_outer_norm) &&
-          final_record.l2 > residual_trust_factor * rolling_outer_norm;
-      const bool reject_floor_correction =
-          at_steady_cfl_floor && std::isfinite(rolling_outer_norm) &&
-          final_record.l2 > residual_trust_factor * rolling_outer_norm;
+      const bool reject_correction =
+          std::isfinite(best_outer_norm) && final_record.l2 > monotone_tolerance * best_outer_norm;
       bool accepted_by_outer_line_search = false;
-      if ((reject_high_cfl_correction || reject_floor_correction) && std::isfinite(rolling_outer_norm)) {
+      if (reject_correction) {
         // The inner solve may produce a useful correction whose full nonlinear
-        // amplitude is outside the residual trust region.  Backtracking that
-        // outer correction is both more direct and much cheaper than accepting
-        // a rebound after several identical floor-CFL re-solves.  Interpolate
-        // only owned cells, then refresh ghosts before measuring the trial.
+        // amplitude is outside the monotone residual region.  Interpolate only
+        // owned cells, then refresh ghosts before measuring the trial.
         const std::vector<double> full_correction_state = state_;
-        const double trust_limit = residual_trust_factor * rolling_outer_norm;
-        for (int line_search_step = 1; line_search_step <= 8; ++line_search_step) {
+        for (int line_search_step = 1; line_search_step <= 12; ++line_search_step) {
           const double fraction = std::ldexp(1.0, -line_search_step);
           for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
             const auto offset = static_cast<std::size_t>(local_cell) * 4U;
@@ -953,7 +936,7 @@ RunSummary FlowSolver::solve() {
           diagnostic = assemble_spatial_residual();
           const ResidualRecord line_record =
               global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
-          if (std::isfinite(line_record.l2) && line_record.l2 <= trust_limit) {
+          if (std::isfinite(line_record.l2) && line_record.l2 <= monotone_tolerance * best_outer_norm) {
             final_record = line_record;
             // A damped outer correction has not completed the requested
             // implicit solve, so prevent the CFL controller from immediately
@@ -964,28 +947,28 @@ RunSummary FlowSolver::solve() {
           }
         }
         if (!accepted_by_outer_line_search) {
-          state_ = outer_state;
+          state_ = best_outer_state;
           synchronize_state();
         }
       }
-      if (reject_high_cfl_correction && !accepted_by_outer_line_search) {
+      if (reject_correction && !accepted_by_outer_line_search && !at_steady_cfl_floor) {
         // A growing correction away from the CFL floor is recoverable by
         // returning to the accepted outer state and retrying at lower CFL.
         // Do this before recording force/residual output so the controller
         // never advances from a knowingly rejected nonlinear state.
-        state_ = outer_state;
+        state_ = best_outer_state;
         synchronize_state();
         adaptive_cfl = std::max(steady_cfl_floor, 0.5 * cfl);
         floor_decline_streak = 0;
         --step;
         continue;
       }
-      if (reject_floor_correction && !accepted_by_outer_line_search && floor_retry_count < 4) {
+      if (reject_correction && !accepted_by_outer_line_search && at_steady_cfl_floor && floor_retry_count < 7) {
         // Reuse the same outer state with a smaller correction, so a failed
         // trial cannot contaminate the accepted residual/force history.  A
         // bounded retry count avoids indefinitely re-solving an identical
         // floor-CFL correction once the local relaxation reaches its limit.
-        state_ = outer_state;
+        state_ = best_outer_state;
         synchronize_state();
         floor_relaxation = std::max(minimum_floor_relaxation, 0.5 * floor_relaxation);
         floor_decline_streak = 0;
@@ -993,8 +976,15 @@ RunSummary FlowSolver::solve() {
         --step;
         continue;
       }
+      if (reject_correction && !accepted_by_outer_line_search) {
+        summary_.diagnostic = "steady nonlinear line search could not reduce the retained residual baseline";
+        break;
+      }
       floor_retry_count = 0;
-      accepted_outer_norms.push_back(final_record.l2);
+      if (final_record.l2 < best_outer_norm) {
+        best_outer_norm = final_record.l2;
+        best_outer_state = state_;
+      }
       summary_.residuals.push_back(final_record);
       const std::vector<double> dtau = local_time_steps(diagnostic.spectral_radius, cfl);
       double local_dt_sum = std::accumulate(dtau.begin(), dtau.end(), 0.0);
@@ -1058,7 +1048,7 @@ RunSummary FlowSolver::solve() {
       }
       previous_outer_norm = final_record.l2;
     }
-    if (!summary_.converged) {
+    if (!summary_.converged && summary_.diagnostic.empty()) {
       summary_.diagnostic = "steady residual target was not reached before the supplied maximum pseudo steps";
     }
     summary_.inner_statistics.minimum = observed_min_inner == std::numeric_limits<int>::max() ? 0 : observed_min_inner;
