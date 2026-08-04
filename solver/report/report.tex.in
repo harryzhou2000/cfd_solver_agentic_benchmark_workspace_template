@@ -1,0 +1,32 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,hyperref,float}
+\graphicspath{{figures/}}
+\title{2-D Unstructured Compressible Navier--Stokes Solver Benchmark Report}
+\author{Solver team}
+\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+This report is generated from completed solver outputs. The generated tables,
+sanity checks, and figures are traceable through \texttt{run\_manifest.csv} and
+\texttt{figure\_manifest.csv}; no result values are entered by hand.
+\end{abstract}
+\section{Method and reproducibility}
+Describe the conservative finite-volume discretization, second-order
+reconstruction and limiter, inviscid/viscous fluxes, implicit method, boundary
+conditions, METIS/ParMETIS partitioning, and neighbor-only halo exchanges used
+by the solver. State the nondimensional references and exact build/run
+commands. The generated manifest records the command, rank count, wall time,
+and completion status for each actual run.
+
+\section{Generated results and checks}
+\input{generated_results.tex}
+
+\section{Interpretation}
+Discuss the residual and force histories, NACA symmetry at zero angle of
+attack, viscous-wall behavior, cylinder drag, and (where present) Re 200 vortex
+shedding. Explain rank-count consistency using the automatically generated
+comparison table. Do not describe a case as successful if its generated
+sanity status is failed.
+\end{document}
