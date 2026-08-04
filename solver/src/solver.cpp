@@ -847,6 +847,7 @@ RunSummary FlowSolver::solve() {
     // physical discretization.
     double floor_relaxation = 0.5;
     int floor_decline_streak = 0;
+    int floor_retry_count = 0;
     double previous_outer_norm = std::numeric_limits<double>::infinity();
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
@@ -903,6 +904,22 @@ RunSummary FlowSolver::solve() {
       }
       const Assembly diagnostic = assemble_spatial_residual();
       final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+      const bool reject_floor_correction =
+          at_steady_cfl_floor && std::isfinite(previous_outer_norm) && final_record.l2 > 1.02 * previous_outer_norm;
+      if (reject_floor_correction && floor_retry_count < 6) {
+        // Do not retain a growing nonlinear correction merely because the CFL
+        // controller has reached its floor.  Reuse the same outer state with a
+        // smaller correction, so the failed trial cannot contaminate the
+        // accepted residual/force history or the next nonlinear solve.
+        state_ = outer_state;
+        synchronize_state();
+        floor_relaxation = std::max(0.0078125, 0.5 * floor_relaxation);
+        floor_decline_streak = 0;
+        ++floor_retry_count;
+        --step;
+        continue;
+      }
+      floor_retry_count = 0;
       summary_.residuals.push_back(final_record);
       const std::vector<double> dtau = local_time_steps(diagnostic.spectral_radius, cfl);
       double local_dt_sum = std::accumulate(dtau.begin(), dtau.end(), 0.0);
@@ -941,15 +958,11 @@ RunSummary FlowSolver::solve() {
         break;
       }
       if (at_steady_cfl_floor && std::isfinite(previous_outer_norm)) {
-        // A residual increase at the minimum permitted CFL identifies an
-        // under-damped nonlinear correction, rather than a request to lower
-        // CFL again.  Back off just that correction for the following outer
-        // step.  Recover it slowly only after sustained improvement, so an
-        // isolated good step cannot re-excite a high-Reynolds-number mode.
-        if (final_record.l2 > 1.02 * previous_outer_norm) {
-          floor_relaxation = std::max(0.1, 0.5 * floor_relaxation);
-          floor_decline_streak = 0;
-        } else if (final_record.l2 < 0.98 * previous_outer_norm) {
+        // Rejected growing trials above already reduce the correction and
+        // restore the outer state.  Recover it slowly only after sustained
+        // improvement, so an isolated good step cannot re-excite a
+        // high-Reynolds-number mode.
+        if (final_record.l2 < 0.98 * previous_outer_norm) {
           ++floor_decline_streak;
           if (floor_decline_streak >= 5) {
             floor_relaxation = std::min(0.5, 1.25 * floor_relaxation);
