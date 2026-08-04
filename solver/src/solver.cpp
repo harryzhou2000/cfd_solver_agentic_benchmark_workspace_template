@@ -979,7 +979,7 @@ RunSummary FlowSolver::solve() {
         if (final_record.l2 < previous_outer_norm) {
           ++floor_decline_streak;
           if (floor_decline_streak >= 5) {
-            floor_relaxation = std::min(0.0125, 1.25 * floor_relaxation);
+            floor_relaxation = std::min(0.005, 1.25 * floor_relaxation);
             floor_decline_streak = 0;
           }
         } else {
