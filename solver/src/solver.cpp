@@ -1003,7 +1003,6 @@ RunSummary FlowSolver::solve() {
         ++attempted_inner_solves;
         for (int inner_iteration = 1; inner_iteration <= config_.run.max_inner_iterations; ++inner_iteration) {
           Assembly assembly = assemble_spatial_residual();
-          const std::vector<double> dtau = local_time_steps(assembly.spectral_radius, cfl);
           std::vector<double> total = assembly.residual;
           std::vector<double> diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
           const bool first_order_start = step == 1;
@@ -1044,7 +1043,10 @@ RunSummary FlowSolver::solve() {
           if (inner_iteration == config_.run.max_inner_iterations) {
             break;
           }
-          implicit_update(total, assembly.spectral_radius, diagonal, 1.2);
+          // Retrying a difficult physical step at a lower pseudo-CFL also
+          // reduces the nonlinear correction relaxation, while the production
+          // CFL=1 path uses the tested full 1.2 relaxation.
+          implicit_update(total, assembly.spectral_radius, diagonal, 1.2 * std::min(1.0, cfl));
         }
         // Make the candidate state and reported force/surface state use the
         // same synchronized reconstruction before deciding whether to accept.

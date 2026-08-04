@@ -61,9 +61,11 @@ mpirun -np 8 solver/build/cfd_solver solve \
   for laminar cases with viscosity calculated from the requested Reynolds
   number.
 - Farfield, inviscid slip-wall, and no-slip adiabatic-wall boundary treatments.
-- Multi-sweep block-Jacobi pseudo-implicit updates with local convective and
+- Multi-sweep rank-local LU--SGS Rusanov corrections with local convective and
   viscous spectral-radius time scales. The Re200 path is a frozen-history BDF2
-  physical-time outer loop with inner nonlinear iterations.
+  physical-time outer loop with full spatial-plus-BDF residual checks,
+  extrapolated nonlinear guesses, and retry-without-history-advance on an inner
+  target miss.
 - Rank zero preprocesses and METIS-partitions the global cell graph, sends
   compact rank-local partitions, and then releases the global mesh. Iterations
   retain only owned cells plus a one-ring ghost layer and exchange halo values
@@ -74,7 +76,9 @@ mpirun -np 8 solver/build/cfd_solver solve \
 Each successful `solve` writes the CSV/JSON contract, distributed VTU/PVTU
 field output, partition-specific restart pieces, and `stdout.log` to its output
 directory. The root field manifest is `field_final.pvtu`; rank-local VTU pieces
-are referenced by it and are readable in ParaView and MeshIO.
+are referenced by it and are readable in ParaView. MeshIO does not directly
+open PVTU indices, so the included report tool reads and merges the referenced
+rank-local VTU pieces without changing their field values.
 
 Create the required local Python environment before generating figures and the
 LaTeX report:
