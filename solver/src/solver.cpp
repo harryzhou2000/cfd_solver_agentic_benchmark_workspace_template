@@ -904,8 +904,22 @@ RunSummary FlowSolver::solve() {
       }
       const Assembly diagnostic = assemble_spatial_residual();
       final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+      const bool reject_high_cfl_correction =
+          !at_steady_cfl_floor && std::isfinite(previous_outer_norm) && final_record.l2 > 1.10 * previous_outer_norm;
       const bool reject_floor_correction =
           at_steady_cfl_floor && std::isfinite(previous_outer_norm) && final_record.l2 > 1.02 * previous_outer_norm;
+      if (reject_high_cfl_correction) {
+        // A growing correction away from the CFL floor is recoverable by
+        // returning to the accepted outer state and retrying at lower CFL.
+        // Do this before recording force/residual output so the controller
+        // never advances from a knowingly rejected nonlinear state.
+        state_ = outer_state;
+        synchronize_state();
+        adaptive_cfl = std::max(steady_cfl_floor, 0.5 * cfl);
+        floor_decline_streak = 0;
+        --step;
+        continue;
+      }
       if (reject_floor_correction && floor_retry_count < 6) {
         // Do not retain a growing nonlinear correction merely because the CFL
         // controller has reached its floor.  Reuse the same outer state with a
