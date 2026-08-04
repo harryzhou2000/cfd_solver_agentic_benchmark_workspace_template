@@ -156,6 +156,9 @@ nothing logged.
 - `notes/opencode-session-history.md` — opencode's SQLite session store,
   message-level token/cache schema, subagent `parent_id` extraction, and the
   direct-DB scanning recipe.
+- `notes/goal-plugin-no-interrupt.md` — goal-plugin fork/PR (#53) adding the
+  `noInterruptOnUserMessage` option, the three gated pause sites, and how
+  synthetic background-task messages falsely paused goals.
 
 ## Scripts
 
