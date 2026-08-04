@@ -20,6 +20,11 @@ Project instructions for coding agents working in this repository.
 ## 2. Subagents
 
 - Delegating independent subtasks to subagents is encouraged.
+- Dispatch subagents with the `task` tool (normal dispatch) or the same
+  `task` tool with `background: true` (experimental background subagents;
+  requires `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true`); either form
+  may be used. `subagent_type` selects the agent, `prompt`/`description`
+  carry the task, and `task_id` resumes an earlier subagent session.
 - There is NO subagent model policy on this branch: subagents may use any
   available model. No model is required, restricted, or pinned.
 - Visual handoff (important): the orchestrator and other subagents are NOT
