@@ -41,6 +41,30 @@ def load_surface(path: Path) -> np.ndarray:
     return np.atleast_1d(np.genfromtxt(path, delimiter=",", names=True, usecols=range(11), dtype=float))
 
 
+def terminal_residual(path: Path) -> float:
+    residuals = np.atleast_1d(np.genfromtxt(path, delimiter=",", names=True, dtype=float))
+    final_step = np.max(residuals["step"])
+    return float(residuals["residual_l2"][residuals["step"] == final_step][-1])
+
+
+def partition_summary(path: Path) -> dict[str, float | int]:
+    with path.open(newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    if not rows:
+        raise ValueError(f"empty partition diagnostics: {path}")
+    owned = [int(row["num_cells_owned"]) for row in rows]
+    ghosts = [int(row["num_cells_ghost"]) for row in rows]
+    neighbours = [int(row["num_neighbor_ranks"]) for row in rows]
+    return {
+        "owned_min": min(owned),
+        "owned_max": max(owned),
+        "owned_mean": float(np.mean(owned)),
+        "load_balance_ratio": max(owned) / min(owned),
+        "ghost_total": sum(ghosts),
+        "neighbor_mean": float(np.mean(neighbours)),
+    }
+
+
 def shedding_statistics(forces: np.ndarray) -> dict[str, float]:
     time = forces["physical_time"]
     late = time >= max(200.0, float(time[-1]) - 100.0)
@@ -134,24 +158,62 @@ def rank_validation(results: Path) -> tuple[list[dict], list[dict]]:
     rows: list[dict] = []
     checks: list[dict] = []
     for case_id in ("naca0012_m015_inviscid", "cylinder_m010_laminar_re20"):
-        values = []
-        for ranks in (1, 2, 8):
-            directory = (results / case_id if ranks == 8 else
-                         results / "rank_validation" / f"{case_id}_np{ranks}")
+        values: list[dict] = []
+        locations = [
+            results / "rank_validation" / f"{case_id}_np1",
+            results / "rank_validation" / f"{case_id}_np2",
+            results / case_id,
+        ]
+        for directory in locations:
             status = load_json(directory / "run_status.json")
+            metadata = load_json(directory / "metadata.json")
             force = load_forces(directory / "forces.csv")[-1]
-            row = {"case_id": case_id, "mpi_ranks": ranks, "cd": float(force["cd"]),
-                   "cl": float(force["cl"]), "wall_time_seconds": float(status["wall_time_seconds"]),
-                   "status": status["convergence_status"]}
+            ranks = int(status["mpi_ranks"])
+            row = {
+                "case_id": case_id,
+                "mpi_ranks": ranks,
+                "cd": float(force["cd"]),
+                "cl": float(force["cl"]),
+                "terminal_residual_l2": terminal_residual(directory / "residuals.csv"),
+                "wall_time_seconds": float(status["wall_time_seconds"]),
+                "status": status["convergence_status"],
+                "completed": metadata.get("completed") is True,
+                "partition": partition_summary(directory / "partition_diagnostics.csv"),
+            }
             values.append(row)
             rows.append(row)
-        baseline = values[0]
-        for row in values[1:]:
+            checks.append({
+                "name": f"{case_id}_np{ranks}_completed",
+                "passed": row["completed"] and row["status"] in {"converged", "statistically_periodic"},
+                "value": {"completed": row["completed"], "status": row["status"]},
+                "criterion": "rank-validation run completed with an accepted final status",
+            })
+        actual_ranks = {row["mpi_ranks"] for row in values}
+        checks.append({
+            "name": f"{case_id}_rank_set",
+            "passed": actual_ranks == {1, 2, 8},
+            "value": sorted(actual_ranks),
+            "criterion": "independent rank-validation outputs use exactly np=1, np=2, and np=8",
+        })
+        baseline = next(row for row in values if row["mpi_ranks"] == 1)
+        for row in values:
+            if row is baseline:
+                continue
             cd_scale = max(abs(baseline["cd"]), 1.0e-8)
-            relative = abs(row["cd"] - baseline["cd"]) / cd_scale
-            checks.append({"name": f"{case_id}_np1_np{row['mpi_ranks']}_drag_consistency",
-                           "passed": relative < 0.02, "value": relative,
-                           "criterion": "relative terminal Cd difference < 2%"})
+            cd_relative = abs(row["cd"] - baseline["cd"]) / cd_scale
+            cl_absolute = abs(row["cl"] - baseline["cl"])
+            residual_ratio = row["terminal_residual_l2"] / max(baseline["terminal_residual_l2"], 1.0e-300)
+            checks.extend([
+                {"name": f"{case_id}_np1_np{row['mpi_ranks']}_drag_consistency",
+                 "passed": cd_relative < 0.02, "value": cd_relative,
+                 "criterion": "relative terminal Cd difference < 2%"},
+                {"name": f"{case_id}_np1_np{row['mpi_ranks']}_lift_consistency",
+                 "passed": cl_absolute < 0.02, "value": cl_absolute,
+                 "criterion": "absolute terminal Cl difference < 0.02"},
+                {"name": f"{case_id}_np1_np{row['mpi_ranks']}_residual_comparison",
+                 "passed": math.isfinite(residual_ratio), "value": residual_ratio,
+                 "criterion": "terminal global residual ratio is finite and reported for manual comparison"},
+            ])
     return rows, checks
 
 
@@ -250,6 +312,15 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
                     f"{case_data[case_id][0]['partition_edge_cut']}\\\\")
     partition_table_lines.append(r"\bottomrule\end{tabular}\end{center}")
 
+    fallback_table_lines = [r"\begin{center}\scriptsize\begin{tabular}{lrrr}\toprule Case & reconstructed-state fallbacks & damped updates & Rusanov evaluations/fallbacks\\\midrule"]
+    for case_id in CASE_ORDER:
+        metadata = case_data[case_id][0]
+        fallback_table_lines.append(
+            f"{latex_escape(case_id)} & {metadata.get('reconstruction_positivity_fallbacks', 0)} & "
+            f"{metadata.get('damped_conservative_updates', 0)} & "
+            f"{metadata.get('rusanov_flux_face_evaluations', 0)}\\\\")
+    fallback_table_lines.append(r"\bottomrule\end{tabular}\end{center}")
+
     lines = [r"\documentclass[10pt]{article}",
              r"\usepackage[margin=0.72in]{geometry}",
              r"\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,subcaption,hyperref,longtable}",
@@ -261,8 +332,7 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
              "compressible Euler and laminar Navier--Stokes equations. It combines CGNS multi-zone topology, "
              "METIS graph partitioning, neighbour-only halos, limited second-order reconstruction, a Rusanov "
              "flux, Newton--Fourier viscous terms, 4-by-4 block implicit defect correction, and frozen-history "
-             "BDF2. All eight required cases completed; the steady cases met their residual/force gates and the "
-             "Reynolds-200 cylinder reached a post-transient statistically periodic state. Every numerical claim "
+             "BDF2. The run-status table identifies the actual completion status for every required case; every numerical claim "
              "and figure in this report is regenerated from the submitted CSV and parallel VTK files.",
              r"\end{abstract}",
              r"\section{Governing equations and nondimensionalization}",
@@ -302,10 +372,16 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
              r"Primitive gradients use inverse-distance weighted least squares with conditioning regularization. "
              r"Piecewise-linear face values are limited componentwise by Barth--Jespersen bounds; density and "
              r"pressure receive an additional positive-face scaling and conservative updates use a common "
-             r"positivity line search. Reconstruction is active for every production result.",
+             r"positivity line search. Reconstruction is active for every production result. If a reconstructed "
+             r"face has non-finite density/pressure or a value at/below its positivity floor, that face alone "
+             r"falls back to its adjacent cell-centre primitive state; if a conservative update remains inadmissible, "
+             r"its line search reduces the update. The measured counts below identify every affected submitted case.",
              r"Steady cases use a conservative Rusanov/LLF numerical flux with unit dissipation scale. The "
              r"transient cylinder uses HLLC to retain contact/shear waves, with unit-scale Rusanov as a positivity "
-             r"fallback. Farfield "
+             r"fallback. For the transient HLLC path, the fallback is taken for a non-finite/degenerate star-state "
+             r"denominator, non-positive/non-finite star pressure, inadmissible star state, or non-finite flux; "
+             r"steady runs intentionally use Rusanov, so their final column is an evaluation count rather than a "
+             r"failure count. Farfield "
              r"states use incoming freestream and outgoing interior Riemann invariants, which avoids reflective "
              r"low-Mach pseudo-time modes. Slip walls use zero normal mass flux and direct pressure momentum "
              r"flux. No-slip walls impose $u=v=0$ and correct wall-normal velocity gradients; the pressure "
@@ -313,6 +389,7 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
              r"are arithmetic averages plus a two-point normal correction. Reported viscous force is tangential "
              r"skin friction; normal viscous traction is not mislabeled as friction. Surface CSV velocities are "
              r"boundary values rather than adjacent cell-centre values.",
+             *fallback_table_lines,
              r"\section{Implicit steady and transient integration}",
              r"Steady cases use the supplied geometric CFL ramps and local spectral pseudo-time steps. Each "
              r"defect correction assembles normal 4-by-4 Euler Jacobian blocks plus viscous spectral coupling; "
@@ -321,13 +398,14 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
              r"For the Reynolds-200 cylinder, BDF1 starts the calculation and BDF2 thereafter solves",
              r"\[\mathbf G(\mathbf U^{n+1})=\frac{V}{2\Delta t}"
              r"(3\mathbf U^{n+1}-4\mathbf U^n+\mathbf U^{n-1})+\mathbf R(\mathbf U^{n+1})=0.\]",
-             r"The histories $\mathbf U^n$ and $\mathbf U^{n-1}$ remain frozen during all inner Newton/block "
+             r"The histories $\mathbf U^n$ and $\mathbf U^{n-1}$ remain frozen during all inner nonlinear/block "
              r"iterations and shift only after acceptance. The production values are $\Delta t=0.01$, "
              r"$t_f=300$, a minimum of five and maximum of 1000 nonlinear iterations, and a $10^{-3}$ reduction "
              r"of the complete spatial-plus-BDF residual. Metadata reports actual min/mean/max iterations, misses, "
              r"converged fraction, and the last ratio. The configured CFL of one caps globalization updates; the "
-             r"BDF mass-plus-spatial Newton system is solved directly, without an extra pseudo-time diagonal, "
-             r"which is a stricter implicit solve and is named explicitly in metadata. A deterministic localized "
+             r"BDF mass-plus-spatial defect equation uses an inexact distributed 4-by-4 block-Jacobi correction "
+             r"(two to four linear sweeps per nonlinear update), without an additional pseudo-time diagonal. "
+             r"A deterministic localized "
              r"cross-flow perturbation of amplitude $10^{-3}U_\infty$ breaks exact discrete symmetry; late-window "
              r"statistics exclude the resulting startup transient.",
              r"\section{Run status and force summary}",
@@ -350,8 +428,8 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
         lines += [rf"\subsection{{{latex_escape(case_id)}}}",
                   f"The submitted status is {latex_escape(case_data[case_id][1]['convergence_status'])}. "
                   + case_discussion(case_id, case_data[case_id][2]) + " The first pair shows convergence and force "
-                  "evidence; the second pair renders Mach and pressure on the actual unstructured cells, and the "
-                  "wall plot supplies the boundary distribution.",
+                  rf"evidence in \cref{{fig:{label}-history}}; \cref{{fig:{label}-field}} renders Mach and pressure "
+                  rf"on the actual unstructured cells, and \cref{{fig:{label}-surface}} supplies the wall distribution.",
                   rf"\begin{{figure}}[htbp]\centering {figure(case_id + '_residual.png')}"
                   rf"\hfill {figure(case_id + '_forces.png')}"
                   rf"\caption{{Residual and force histories for {latex_escape(case_id)}.}}\label{{fig:{label}-history}}\end{{figure}}",
@@ -365,21 +443,29 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
         if case_id == "cylinder_m010_laminar_re200":
             lines += [rf"Over $t\ge {re200['sample_start_time']:.1f}$, the mean drag is {re200['mean_drag']:.5g}, "
                       f"lift RMS is {re200['lift_rms']:.5g}, robust lift amplitude is {re200['lift_amplitude']:.5g}, "
-                      rf"and the dominant frequency gives $St=fL/U_\infty={re200['strouhal']:.5g}$.",
+                      rf"and the dominant frequency gives $St=fL/U_\infty={re200['strouhal']:.5g}$; the post-transient "
+                      rf"wake is shown in \cref{{fig:{label}-wake}}.",
                       rf"\begin{{figure}}[htbp]\centering {figure(case_id + '_vorticity.png', r'0.78\textwidth')}"
                       rf"\caption{{Post-transient cylinder wake vorticity, clipped to $[-5,5]$ to preserve vortex-street contrast.}}"
                       rf"\label{{fig:{label}-wake}}\end{{figure}}"]
+    actual_rank_sets = {
+        case_id: sorted({row["mpi_ranks"] for row in rank_rows if row["case_id"] == case_id})
+        for case_id in ("naca0012_m015_inviscid", "cylinder_m010_laminar_re20")
+    }
     lines += [r"\clearpage\section{Parallel validation}",
-              r"The same converged NACA and cylinder cases were repeated at one, two, and eight ranks. "
-              r"The table reports independently generated final forces and measured wall time; partitioned face "
-              r"fluxes are evaluated from synchronized ghost states and agree to roundoff/tolerance.",
-              r"\begin{center}\small\begin{tabular}{lrrrrl}\toprule Case & ranks & $C_D$ & $C_L$ & wall (s) & status\\\midrule"]
+              "The following independently generated comparisons use the actual MPI ranks recorded in "
+              r"\texttt{run\_status.json}: " + "; ".join(
+                  f"{latex_escape(case_id)}={','.join(str(rank) for rank in ranks)}" for case_id, ranks in actual_rank_sets.items()) + ". "
+              r"The table reports final forces, terminal global residuals, timing, and the measured partition load balance.",
+              r"\begin{center}\scriptsize\begin{tabular}{lrrrrrrl}\toprule Case & ranks & $C_D$ & $C_L$ & $L_2$ residual & load ratio & wall (s) & status\\\midrule"]
     for row in rank_rows:
         lines.append(f"{latex_escape(row['case_id'])} & {row['mpi_ranks']} & {row['cd']:.8g} & {row['cl']:.8g} & "
+                     f"{row['terminal_residual_l2']:.3g} & {row['partition']['load_balance_ratio']:.4f} & "
                      f"{row['wall_time_seconds']:.3f} & {latex_escape(row['status'])}\\\\")
     lines += [r"\bottomrule\end{tabular}\end{center}",
-              r"At this mesh size, eight ranks reduce cell work but increase halo synchronization in the inner "
-              r"block solve; the rank-local diagnostics make that communication/load-balance tradeoff explicit.",
+              r"The accompanying machine-readable sanity checks retain the $C_D$, $C_L$, and terminal-residual "
+              r"comparisons. At this mesh size, additional ranks reduce cell work but may increase halo synchronization; "
+              r"the rank-local diagnostics make that communication/load-balance tradeoff explicit.",
               r"\section{Reproducibility, traceability, and sanity gates}",
               r"The documented CMake command locates MPI, CGNS, and METIS through configurable dependency roots. "
               r"The exact commands, ranks, measured time, step, and status appear in \texttt{run\_manifest.csv}. "
@@ -435,6 +521,13 @@ def main() -> int:
               "rank_validation": {"passed": all(check["passed"] for check in rank_checks), "checks": rank_checks}}
     sanity["all_passed"] = all(case["passed"] for case in case_results.values()) and sanity["rank_validation"]["passed"]
     (args.report / "sanity_checks.json").write_text(json.dumps(sanity, indent=2) + "\n")
+    if not sanity["all_passed"]:
+        failed_cases = [case_id for case_id, result in case_results.items() if not result["passed"]]
+        failed_rank_checks = [check["name"] for check in rank_checks if not check["passed"]]
+        raise RuntimeError(
+            "sanity gate failed; no final report/PDF was generated. "
+            f"cases={failed_cases}, rank_checks={failed_rank_checks}; inspect {args.report / 'sanity_checks.json'}"
+        )
     write_report(args.results, args.report, manifest_rows, rank_rows, re200_analysis)
 
     pdflatex = shutil.which("pdflatex")
@@ -442,9 +535,6 @@ def main() -> int:
         for _ in range(2):
             subprocess.run([pdflatex, "-interaction=nonstopmode", "-halt-on-error", "report.tex"],
                            cwd=args.report, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    if not sanity["all_passed"]:
-        failed = [case_id for case_id, result in case_results.items() if not result["passed"]]
-        raise RuntimeError(f"sanity gate failed for: {failed}; inspect {args.report / 'sanity_checks.json'}")
     print(f"report complete: {args.report / 'report.tex'}")
     return 0
 

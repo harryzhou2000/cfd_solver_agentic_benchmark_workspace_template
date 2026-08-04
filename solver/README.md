@@ -114,13 +114,26 @@ Production orchestration and report regeneration are then:
 solver/.venv/bin/python solver/tools/run_cases.py --mode production
 solver/.venv/bin/python solver/tools/run_cases.py --mode rank-validation
 solver/.venv/bin/python solver/tools/generate_report.py
+solver/.venv/bin/python cfd_solver_agentic_benchmark/examiner/validate_outputs.py \
+  solver/results/naca0012_m015_inviscid \
+  solver/results/naca0012_m080_inviscid \
+  solver/results/naca0012_m200_inviscid \
+  solver/results/naca0012_m015_laminar_re5000 \
+  solver/results/naca0012_m080_laminar_re5000 \
+  solver/results/naca0012_m200_laminar_re5000 \
+  solver/results/cylinder_m010_laminar_re20 \
+  solver/results/cylinder_m010_laminar_re200 \
+  --report solver/report
 ```
 
 `run_cases.py` never fabricates or edits solver outputs.  It launches the exact
 CLI, stops on nonzero status, and records the command already emitted by the
 solver.  `generate_report.py` reads only submitted CSV/VTK/JSON artifacts,
 writes the figure and run manifests plus machine-readable sanity checks, and
-runs `pdflatex` when available.
+runs `pdflatex` when available. The final validator invocation is mandatory:
+it checks all eight case packages and report artifacts using the transparent
+benchmark contract. `generate_report.py` refuses to write a final report/PDF
+when its data-derived sanity or MPI-rank checks fail.
 
 ## Output notes
 
@@ -136,10 +149,10 @@ Normal final runs return zero only for `converged` or
 limits, or missed completion gates return nonzero and are written honestly as
 incomplete artifacts.
 
-For the transient Newton path, the case-file CFL value of one is the maximum
-globalization/update factor.  The converged BDF mass-plus-spatial Jacobian is
-solved directly rather than weakened by an additional pseudo-time diagonal;
-the full transient defect is still rebuilt and tested after every nonlinear
-inner iteration.  This conservative implicit equivalent is recorded as
-`BDF2_frozen_history_block_Newton` rather than being mislabeled as a
+For the transient inexact Newton path, the case-file CFL value of one is the
+maximum globalization/update factor. The BDF mass-plus-spatial defect equation
+uses a distributed 4-by-4 block-Jacobi correction (two to four linear sweeps
+per nonlinear update) without an additional pseudo-time diagonal; the full
+transient defect is rebuilt and tested after every nonlinear inner iteration.
+This is recorded as `BDF2_frozen_history_block_Newton`, not as a
 pseudo-time-only calculation.

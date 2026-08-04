@@ -656,14 +656,23 @@ double cfl_at_step(const RunControl& run, int step) {
   return run.cfl_initial * std::pow(run.cfl_max / run.cfl_initial, fraction);
 }
 
-int solve_scalar_block_jacobi(const LocalMesh& mesh, HaloExchange& halo,
-                              const Evaluation& evaluation, const std::vector<Conserved>& right_hand_side,
-                              double pseudo_cfl, const std::vector<double>& physical_diagonal,
-                              int minimum_iterations, int maximum_iterations, double target,
-                              std::vector<Conserved>& increment, MPI_Comm communicator) {
+struct BlockJacobiResult {
+  int iterations = 0;
+  double final_change_ratio = 1.0;
+  bool target_met = false;
+};
+
+BlockJacobiResult solve_scalar_block_jacobi(const LocalMesh& mesh, HaloExchange& halo,
+                                            const Evaluation& evaluation,
+                                            const std::vector<Conserved>& right_hand_side,
+                                            double pseudo_cfl,
+                                            const std::vector<double>& physical_diagonal,
+                                            int minimum_iterations, int maximum_iterations, double target,
+                                            std::vector<Conserved>& increment, MPI_Comm communicator) {
   increment.assign(mesh.cells.size(), zeros());
   std::vector<Conserved> next = increment;
   double initial_change_norm = -1.0;
+  BlockJacobiResult result;
   for (int iteration = 1; iteration <= maximum_iterations; ++iteration) {
     halo.state(increment, 7410);
     double local_change_sum = 0.0;
@@ -694,9 +703,14 @@ int solve_scalar_block_jacobi(const LocalMesh& mesh, HaloExchange& halo,
     MPI_Allreduce(&local_change_sum, &global_change_sum, 1, MPI_DOUBLE, MPI_SUM, communicator);
     const double change_norm = std::sqrt(global_change_sum / static_cast<double>(mesh.global_cell_count));
     if (initial_change_norm < 0.0) initial_change_norm = std::max(change_norm, 1.0e-300);
-    if (iteration >= minimum_iterations && change_norm / initial_change_norm <= target) return iteration;
+    result.iterations = iteration;
+    result.final_change_ratio = change_norm / initial_change_norm;
+    if (iteration >= minimum_iterations && result.final_change_ratio <= target) {
+      result.target_met = true;
+      return result;
+    }
   }
-  return maximum_iterations;
+  return result;
 }
 
 std::int64_t apply_increment(const LocalMesh& mesh, const PerfectGasPhysics& physics,
@@ -741,19 +755,23 @@ bool forces_stable(const std::vector<ForceRow>& history, std::size_t window, dou
   double max_cd = -std::numeric_limits<double>::infinity();
   double min_cl = std::numeric_limits<double>::infinity();
   double max_cl = -std::numeric_limits<double>::infinity();
+  double min_cmz = std::numeric_limits<double>::infinity();
+  double max_cmz = -std::numeric_limits<double>::infinity();
   for (std::size_t i = history.size() - window; i < history.size(); ++i) {
     min_cd = std::min(min_cd, history[i].cd);
     max_cd = std::max(max_cd, history[i].cd);
     min_cl = std::min(min_cl, history[i].cl);
     max_cl = std::max(max_cl, history[i].cl);
+    min_cmz = std::min(min_cmz, history[i].cmz);
+    max_cmz = std::max(max_cmz, history[i].cmz);
   }
   const double drag_tolerance = tolerance * std::max(1.0, std::abs(0.5 * (min_cd + max_cd)));
-  // At nominally symmetric zero-incidence cases, roundoff-level antisymmetric
-  // modes can leave CL jitter that is immaterial relative to the required
-  // |CL| < 0.05 physics gate.  Keep drag strict while allowing a small,
-  // explicitly bounded absolute lift window.
-  const double lift_tolerance = std::max(tolerance, 50.0 * tolerance);
-  return max_cd - min_cd < drag_tolerance && max_cl - min_cl < lift_tolerance;
+  // Force plateaus must be steady in all reported coefficients.  Keep the
+  // supplied tolerance when it is stricter, but never relax lift or moment
+  // spans beyond 1e-4 for nominally symmetric cases.
+  const double lift_moment_tolerance = std::min(tolerance, 1.0e-4);
+  return max_cd - min_cd < drag_tolerance && max_cl - min_cl < lift_moment_tolerance &&
+         max_cmz - min_cmz < lift_moment_tolerance;
 }
 
 bool statistically_periodic(const std::vector<ForceRow>& history, double final_time, std::string& details) {
@@ -775,15 +793,75 @@ bool statistically_periodic(const std::vector<ForceRow>& history, double final_t
   double variance = 0.0;
   for (const ForceRow* row : late) variance += (row->cl - mean_lift) * (row->cl - mean_lift);
   const double lift_rms = std::sqrt(variance / static_cast<double>(late.size()));
+
   std::vector<double> crossings;
   for (std::size_t i = 1; i < late.size(); ++i) {
     if (late[i - 1]->cl < mean_lift && late[i]->cl >= mean_lift) crossings.push_back(late[i]->physical_time);
   }
+
+  std::vector<double> periods;
+  for (std::size_t i = 1; i < crossings.size(); ++i) periods.push_back(crossings[i] - crossings[i - 1]);
+  double mean_period = 0.0;
+  for (double period : periods) mean_period += period;
+  if (!periods.empty()) mean_period /= static_cast<double>(periods.size());
+  double period_variance = 0.0;
+  for (double period : periods) period_variance += (period - mean_period) * (period - mean_period);
+  const double period_cv = periods.empty() || mean_period <= 0.0
+      ? std::numeric_limits<double>::infinity()
+      : std::sqrt(period_variance / static_cast<double>(periods.size())) / mean_period;
+
+  const double split_time = 0.5 * (late.front()->physical_time + late.back()->physical_time);
+  std::vector<const ForceRow*> first_half;
+  std::vector<const ForceRow*> second_half;
+  for (const ForceRow* row : late) {
+    (row->physical_time < split_time ? first_half : second_half).push_back(row);
+  }
+  auto half_statistics = [](const std::vector<const ForceRow*>& samples) {
+    std::array<double, 2> result{};  // mean drag, lift RMS about the half-window mean.
+    if (samples.empty()) return result;
+    double mean_lift_half = 0.0;
+    for (const ForceRow* row : samples) {
+      result[0] += row->cd;
+      mean_lift_half += row->cl;
+    }
+    result[0] /= static_cast<double>(samples.size());
+    mean_lift_half /= static_cast<double>(samples.size());
+    for (const ForceRow* row : samples) {
+      const double deviation = row->cl - mean_lift_half;
+      result[1] += deviation * deviation;
+    }
+    result[1] = std::sqrt(result[1] / static_cast<double>(samples.size()));
+    return result;
+  };
+  const auto first = half_statistics(first_half);
+  const auto second = half_statistics(second_half);
+  const double drag_half_relative_difference = std::abs(second[0] - first[0]) /
+      std::max({std::abs(mean_drag), std::abs(first[0]), std::abs(second[0]), 1.0e-12});
+  const double amplitude_half_relative_difference = std::abs(second[1] - first[1]) /
+      std::max({first[1], second[1], 1.0e-12});
+
+  constexpr int minimum_crossings = 5;
+  constexpr double maximum_period_cv = 0.15;
+  constexpr double maximum_drag_half_relative_difference = 0.05;
+  constexpr double maximum_amplitude_half_relative_difference = 0.20;
+  const bool period_regular = periods.size() >= static_cast<std::size_t>(minimum_crossings - 1) &&
+                              period_cv <= maximum_period_cv;
+  const bool drag_stationary = drag_half_relative_difference <= maximum_drag_half_relative_difference;
+  const bool amplitude_stationary =
+      amplitude_half_relative_difference <= maximum_amplitude_half_relative_difference;
+
   std::ostringstream stream;
   stream << "post-transient mean Cd=" << mean_drag << ", lift RMS=" << lift_rms
-         << ", upward mean crossings=" << crossings.size();
+         << ", upward mean crossings=" << crossings.size()
+         << ", mean period=" << mean_period << ", period CV=" << period_cv
+         << " (limit " << maximum_period_cv << ')'
+         << ", first/second-half Cd relative difference=" << drag_half_relative_difference
+         << " (limit " << maximum_drag_half_relative_difference << ')'
+         << ", lift-RMS relative difference=" << amplitude_half_relative_difference
+         << " (limit " << maximum_amplitude_half_relative_difference << ')';
   details = stream.str();
-  return mean_drag > 0.0 && lift_rms > 1.0e-5 && crossings.size() >= 4;
+  return mean_drag > 0.0 && lift_rms > 1.0e-5 && crossings.size() >= minimum_crossings &&
+         period_regular && drag_stationary && amplitude_stationary;
 }
 
 void initialize_freestream(const CaseConfig& config, const LocalMesh& mesh,
@@ -848,14 +926,15 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
       const double cfl = cfl_at_step(config.run, step);
       std::vector<Conserved> rhs = evaluation.residual;
       for (Conserved& value : rhs) value = value * -1.0;
-      const int linear_iterations = solve_scalar_block_jacobi(
+      const BlockJacobiResult linear_result = solve_scalar_block_jacobi(
           mesh, halo, evaluation, rhs, cfl, zero_physical_diagonal,
           config.run.min_inner_iterations, config.run.max_inner_iterations,
           config.run.inner_residual_reduction_target, increment, communicator);
+      const int linear_iterations = linear_result.iterations;
       result.inner_statistics.observed_min = std::min(result.inner_statistics.observed_min, linear_iterations);
       result.inner_statistics.observed_max = std::max(result.inner_statistics.observed_max, linear_iterations);
-      result.inner_statistics.last_ratio = linear_iterations < config.run.max_inner_iterations
-          ? config.run.inner_residual_reduction_target : 1.0;
+      result.inner_statistics.last_ratio = linear_result.final_change_ratio;
+      if (!linear_result.target_met) ++result.inner_statistics.target_misses;
       total_linear_iterations += linear_iterations;
       ++steady_steps;
       const std::int64_t local_damped = apply_increment(mesh, physics, result.state, increment);
@@ -896,8 +975,10 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
     }
     if (steady_steps > 0) {
       result.inner_statistics.observed_mean = static_cast<double>(total_linear_iterations) /
-                                              static_cast<double>(steady_steps);
-      result.inner_statistics.target_converged_fraction = 1.0;
+                                            static_cast<double>(steady_steps);
+      result.inner_statistics.target_converged_fraction =
+          1.0 - static_cast<double>(result.inner_statistics.target_misses) /
+                    static_cast<double>(steady_steps);
     } else {
       result.inner_statistics.observed_min = 0;
       result.inner_statistics.target_converged_fraction = 0.0;
@@ -953,6 +1034,10 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
                                             config.run.cfl_max, config.run.time_step, evaluation));
         used_inner_iterations = inner;
         if (inner >= config.run.min_inner_iterations && final_ratio <= config.run.inner_residual_reduction_target) break;
+        // Do not accept an update that has not been evaluated.  On a target
+        // miss at the final permitted inner iteration, current, evaluation,
+        // force output, and the physical-time state must remain coherent.
+        if (inner == config.run.max_inner_iterations) break;
 
         const double alpha = first_bdf_step ? 1.0 : 1.5;
         std::vector<double> physical_diagonal(static_cast<std::size_t>(mesh.owned_cell_count));
@@ -963,8 +1048,8 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
         std::vector<Conserved> rhs = evaluation.residual;
         for (Conserved& value : rhs) value = value * -1.0;
         std::vector<Conserved> increment;
-        solve_scalar_block_jacobi(mesh, halo, evaluation, rhs, 0.0, physical_diagonal,
-                                  2, 4, 1.0e-1, increment, communicator);
+        (void)solve_scalar_block_jacobi(mesh, halo, evaluation, rhs, 0.0, physical_diagonal,
+                                        2, 4, 1.0e-1, increment, communicator);
         const std::int64_t local_damped = apply_increment(mesh, physics, current, increment,
                                                           config.run.cfl_max);
         std::int64_t global_damped = 0;
