@@ -467,7 +467,9 @@ FlowSolver::Assembly FlowSolver::assemble_spatial_residual() {
       if (!mesh_.is_owned(local_cell)) {
         return;
       }
-      const double convective = std::abs(state.u * face.unit_normal.x + state.v * face.unit_normal.y) + state.sound_speed;
+      const double convective = config_.run.rusanov_dissipation_scale *
+                                (std::abs(state.u * face.unit_normal.x + state.v * face.unit_normal.y) +
+                                 state.sound_speed);
       const double viscous = viscosity > 0.0
                                  ? 4.0 * viscosity * face.length /
                                        std::max(state.rho * mesh_.cells[static_cast<std::size_t>(local_cell)].area, kTiny)
