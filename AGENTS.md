@@ -20,10 +20,15 @@ Project instructions for coding agents working in this repository.
 ## 2. Subagents
 
 - Delegating independent subtasks to subagents is encouraged.
+- Dispatch subagents with the `task` tool (normal dispatch) or the same
+  `task` tool with `background: true` (experimental background subagents;
+  requires `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true`); either form
+  may be used. `subagent_type` selects the agent, `prompt`/`description`
+  carry the task, and `task_id` resumes an earlier subagent session.
 - Subagent model policy: the ONLY allowed subagent model is
   `deepseek/deepseek-v4-flash` (the deepseek-provided model id reported by
-  `opencode models`; passed as the `model` override to `spawn_agent`).
-  Do not spawn subagents with any other model.
+  `opencode models`, configured on the subagent agent type used with the
+  `task` tool). Do not dispatch subagents with any other model.
 
 ## 3. Persistence
 
