@@ -73,18 +73,31 @@ Primitive characteristic_farfield(const PerfectGas& gas, const Primitive& inside
   if (!(sound_speed > kTiny) || !std::isfinite(sound_speed)) {
     return freestream;
   }
-  const bool outflow = normal_velocity >= 0.0;
-  const double entropy = (outflow ? inside.pressure / std::pow(inside.rho, parameters.gamma)
-                                  : freestream.pressure / std::pow(freestream.rho, parameters.gamma));
-  if (!(entropy > kTiny) || !std::isfinite(entropy)) {
+  // The entropy and tangential velocity are convected characteristics.  A
+  // hard inflow/outflow switch at u_n=0 is numerically disruptive on the
+  // nominally tangential top/bottom parts of an external farfield: tiny
+  // acoustic perturbations would alternately select interior and freestream
+  // data.  Blend only over a narrow convective-speed band; the acoustic
+  // Riemann invariants above remain unchanged.
+  const double inside_entropy = inside.pressure / std::pow(inside.rho, parameters.gamma);
+  const double freestream_entropy = freestream.pressure / std::pow(freestream.rho, parameters.gamma);
+  if (!(inside_entropy > kTiny) || !(freestream_entropy > kTiny) ||
+      !std::isfinite(inside_entropy) || !std::isfinite(freestream_entropy)) {
     return freestream;
   }
+  const double freestream_speed = std::hypot(freestream.u, freestream.v);
+  const double blend_speed = std::max(0.02 * freestream_speed, 1.0e-3 * freestream.sound_speed);
+  const double convective_weight =
+      0.5 * (1.0 + std::tanh(normal_velocity / std::max(blend_speed, kTiny)));
+  const double entropy = std::exp(convective_weight * std::log(inside_entropy) +
+                                  (1.0 - convective_weight) * std::log(freestream_entropy));
   Primitive result;
   result.rho = std::pow(sound_speed * sound_speed / (parameters.gamma * entropy),
                         1.0 / (parameters.gamma - 1.0));
   result.pressure = entropy * std::pow(result.rho, parameters.gamma);
-  const double tangential_velocity = outflow ? inner({inside.u, inside.v}, wall_tangent)
-                                              : inner({freestream.u, freestream.v}, wall_tangent);
+  const double tangential_velocity =
+      convective_weight * inner({inside.u, inside.v}, wall_tangent) +
+      (1.0 - convective_weight) * inner({freestream.u, freestream.v}, wall_tangent);
   result.u = normal_velocity * outward_normal.x + tangential_velocity * wall_tangent.x;
   result.v = normal_velocity * outward_normal.y + tangential_velocity * wall_tangent.y;
   result.temperature = result.pressure / (result.rho * parameters.gas_constant);
@@ -354,30 +367,48 @@ FlowSolver::Assembly FlowSolver::assemble_spatial_residual() {
     Primitive left = reconstructed_primitive(left_index, face.centroid);
     Primitive right = left;
     bool no_slip_wall = false;
+    bool impermeable_wall = false;
+    bool characteristic_boundary = false;
     if (face.right_cell >= 0) {
       right = reconstructed_primitive(face.right_cell, face.centroid);
     } else {
       switch (face.boundary_type) {
         case BoundaryType::farfield:
           right = characteristic_farfield(gas_, left, farfield, face.unit_normal);
+          characteristic_boundary = true;
           break;
-        case BoundaryType::slip_wall:
+        case BoundaryType::slip_wall: {
+          // Constrain the reconstructed face velocity itself.  Reflecting an
+          // unconstrained state and feeding it to LLF/Rusanov adds an
+          // artificial O(a rho u_n) wall traction at low Mach.
+          const double normal_velocity = left.u * face.unit_normal.x + left.v * face.unit_normal.y;
+          left.u -= normal_velocity * face.unit_normal.x;
+          left.v -= normal_velocity * face.unit_normal.y;
           right = reflected_slip_state(left, face.unit_normal);
+          impermeable_wall = true;
           break;
+        }
         case BoundaryType::no_slip_adiabatic_wall:
           right = reflected_no_slip_adiabatic_state(left);
           no_slip_wall = true;
+          impermeable_wall = true;
           break;
         case BoundaryType::interior:
         case BoundaryType::unspecified:
           throw std::runtime_error("invalid boundary classification during residual assembly");
       }
     }
-    // A reflected boundary state supplies the pressure wall flux and, while a
-    // reconstructed state still has a small forbidden normal velocity, the
-    // Rusanov dissipation drives that component to its kinematic constraint.
-    const Conserved inviscid = rusanov_flux(gas_, left, right, face.unit_normal,
-                                            config_.run.rusanov_dissipation_scale);
+    // For impermeable walls, the inviscid boundary flux is exactly the wall
+    // pressure traction.  For farfield boundaries, the characteristic helper
+    // returns the boundary trace itself, so evaluate its physical Euler flux
+    // directly rather than applying a second, reflective Rusanov interface.
+    const Conserved inviscid = impermeable_wall
+                                   ? Conserved{0.0, left.pressure * face.unit_normal.x,
+                                               left.pressure * face.unit_normal.y, 0.0}
+                                   : characteristic_boundary
+                                         ? euler_flux(gas_, right, face.unit_normal)
+                                         : rusanov_flux(gas_, left, right, face.unit_normal,
+                                                        config_.run.rusanov_dissipation_scale);
     std::array<double, 4> total = inviscid;
 
     if (viscosity > 0.0) {

@@ -46,6 +46,7 @@ class PerfectGas {
 
 Conserved rusanov_flux(const PerfectGas& gas, const Primitive& left, const Primitive& right,
                        Vec2 unit_normal, double dissipation_scale = 1.0);
+Conserved euler_flux(const PerfectGas& gas, const Primitive& state, Vec2 unit_normal);
 Conserved hllc_flux(const PerfectGas& gas, const Primitive& left, const Primitive& right,
                     Vec2 unit_normal, double dissipation_scale = 1.0);
 Primitive reflected_slip_state(const Primitive& inside, Vec2 unit_normal);

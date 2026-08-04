@@ -75,6 +75,10 @@ Conserved normal_euler_flux(const PerfectGas& gas, const Primitive& state, const
 
 }  // namespace
 
+Conserved euler_flux(const PerfectGas& gas, const Primitive& state, const Vec2 unit_normal) {
+  return normal_euler_flux(gas, state, unit_normal);
+}
+
 Conserved rusanov_flux(const PerfectGas& gas, const Primitive& left, const Primitive& right,
                        const Vec2 unit_normal, const double dissipation_scale) {
   const Conserved ul = gas.conserved(left);
