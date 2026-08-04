@@ -253,9 +253,15 @@ class ResidualEvaluator {
     MPI_Comm_rank(communicator_, &rank_);
   }
 
-  Evaluation evaluate(std::vector<Conserved>& state, bool collect_surface) {
+  void evaluate(std::vector<Conserved>& state, bool collect_surface, Evaluation& out) {
     halo_.state(state, 7400);
-    Evaluation out;
+    out.surface.clear();
+    out.component_l2.fill(0.0);
+    out.total_l2 = 0.0;
+    out.total_linf = 0.0;
+    out.force = {};
+    out.hllc_fallbacks = 0;
+    out.positivity_fallbacks = 0;
     const std::size_t local_count = mesh_.cells.size();
     const std::size_t owned_count = static_cast<std::size_t>(mesh_.owned_cell_count);
     out.residual.assign(owned_count, zeros());
@@ -308,7 +314,9 @@ class ResidualEvaluator {
           right = right_center;
           ++local_positivity_fallbacks;
         }
-        const FluxResult flux = physics_.rusanov_flux(left, right, face.normal);
+        const FluxResult flux = config_.run.transient
+            ? physics_.hllc_flux(left, right, face.normal)
+            : physics_.rusanov_flux(left, right, face.normal);
         inviscid = flux.flux;
         wave_speed = flux.spectral_radius;
         if (flux.used_rusanov_fallback) ++local_hllc_fallbacks;
@@ -330,7 +338,9 @@ class ResidualEvaluator {
         }
       } else if (face.boundary_type == BoundaryType::farfield) {
         const Primitive right = physics_.boundary_state(left, BoundaryType::farfield, face.normal);
-        const FluxResult flux = physics_.rusanov_flux(left, right, face.normal);
+        const FluxResult flux = config_.run.transient
+            ? physics_.hllc_flux(left, right, face.normal)
+            : physics_.rusanov_flux(left, right, face.normal);
         inviscid = flux.flux;
         wave_speed = flux.spectral_radius;
         if (flux.used_rusanov_fallback) ++local_hllc_fallbacks;
@@ -472,7 +482,6 @@ class ResidualEvaluator {
     out.force.cl = out.force.pressure_lift + out.force.viscous_lift;
     out.force.cmz = global_force[4] /
         (config_.dynamic_pressure() * config_.reference.area * config_.reference.length);
-    return out;
   }
 
   void add_physical_time_residual(Evaluation& evaluation, const std::vector<Conserved>& current,
@@ -649,7 +658,7 @@ double cfl_at_step(const RunControl& run, int step) {
 
 int solve_scalar_block_jacobi(const LocalMesh& mesh, HaloExchange& halo,
                               const Evaluation& evaluation, const std::vector<Conserved>& right_hand_side,
-                              double cfl, const std::vector<double>& physical_diagonal,
+                              double pseudo_cfl, const std::vector<double>& physical_diagonal,
                               int minimum_iterations, int maximum_iterations, double target,
                               std::vector<Conserved>& increment, MPI_Comm communicator) {
   increment.assign(mesh.cells.size(), zeros());
@@ -661,7 +670,8 @@ int solve_scalar_block_jacobi(const LocalMesh& mesh, HaloExchange& halo,
     for (int cell = 0; cell < mesh.owned_cell_count; ++cell) {
       const auto i = static_cast<std::size_t>(cell);
       Matrix4 diagonal = evaluation.diagonal_jacobian[i];
-      add_identity(diagonal, physical_diagonal[i] + evaluation.spectral_sum[i] / cfl);
+      const double pseudo_diagonal = pseudo_cfl > 0.0 ? evaluation.spectral_sum[i] / pseudo_cfl : 0.0;
+      add_identity(diagonal, physical_diagonal[i] + pseudo_diagonal);
       Conserved rhs = right_hand_side[i];
       for (int face_index : mesh.cells[i].faces) {
         const LocalFace& face = mesh.faces[static_cast<std::size_t>(face_index)];
@@ -812,8 +822,15 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
   }
 
   if (!config.run.transient) {
-    Evaluation evaluation = evaluator.evaluate(result.state, false);
+    Evaluation evaluation;
+    evaluator.evaluate(result.state, false, evaluation);
     const double initial_residual = std::max(evaluation.total_l2, 1.0e-300);
+    result.inner_statistics.requested_min = config.run.min_inner_iterations;
+    result.inner_statistics.requested_max = config.run.max_inner_iterations;
+    result.inner_statistics.target = config.run.inner_residual_reduction_target;
+    result.inner_statistics.observed_min = std::numeric_limits<int>::max();
+    long long total_linear_iterations = 0;
+    int steady_steps = 0;
     int maximum_steps = config.run.max_steps;
     if (options.debug_max_steps > 0 && options.debug_max_steps < maximum_steps) {
       maximum_steps = options.debug_max_steps;
@@ -829,11 +846,17 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
           mesh, halo, evaluation, rhs, cfl, zero_physical_diagonal,
           config.run.min_inner_iterations, config.run.max_inner_iterations,
           config.run.inner_residual_reduction_target, increment, communicator);
+      result.inner_statistics.observed_min = std::min(result.inner_statistics.observed_min, linear_iterations);
+      result.inner_statistics.observed_max = std::max(result.inner_statistics.observed_max, linear_iterations);
+      result.inner_statistics.last_ratio = linear_iterations < config.run.max_inner_iterations
+          ? config.run.inner_residual_reduction_target : 1.0;
+      total_linear_iterations += linear_iterations;
+      ++steady_steps;
       const std::int64_t local_damped = apply_increment(mesh, physics, result.state, increment);
       std::int64_t global_damped = 0;
       MPI_Allreduce(&local_damped, &global_damped, 1, MPI_INT64_T, MPI_SUM, communicator);
       result.damped_updates += global_damped;
-      evaluation = evaluator.evaluate(result.state, false);
+      evaluator.evaluate(result.state, false, evaluation);
       result.hllc_fallback_faces += evaluation.hllc_fallbacks;
       result.reconstruction_positivity_fallbacks += evaluation.positivity_fallbacks;
       const double reduction = std::log10(initial_residual / std::max(evaluation.total_l2, 1.0e-300));
@@ -864,6 +887,14 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
     if (result.convergence_status != "converged") {
       result.notes = result.debug_limited ? "Debug step limit reached; this is not a final result."
                                           : "Steady convergence criteria were not reached.";
+    }
+    if (steady_steps > 0) {
+      result.inner_statistics.observed_mean = static_cast<double>(total_linear_iterations) /
+                                              static_cast<double>(steady_steps);
+      result.inner_statistics.target_converged_fraction = 1.0;
+    } else {
+      result.inner_statistics.observed_min = 0;
+      result.inner_statistics.target_converged_fraction = 0.0;
     }
   } else {
     const int supplied_steps = static_cast<int>(std::llround(config.run.final_time / config.run.time_step));
@@ -905,9 +936,11 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
       int used_inner_iterations = 0;
       Evaluation evaluation;
       for (int inner = 1; inner <= config.run.max_inner_iterations; ++inner) {
-        evaluation = evaluator.evaluate(current, false);
+        evaluator.evaluate(current, false, evaluation);
         evaluator.add_physical_time_residual(evaluation, current, previous, older,
                                              config.run.time_step, first_bdf_step);
+        result.hllc_fallback_faces += evaluation.hllc_fallbacks;
+        result.reconstruction_positivity_fallbacks += evaluation.positivity_fallbacks;
         if (inner == 1) initial_inner_residual = std::max(evaluation.total_l2, 1.0e-300);
         final_ratio = evaluation.total_l2 / initial_inner_residual;
         observer.residual(make_residual_row(step, static_cast<double>(step) * config.run.time_step, inner,
@@ -924,8 +957,8 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
         std::vector<Conserved> rhs = evaluation.residual;
         for (Conserved& value : rhs) value = value * -1.0;
         std::vector<Conserved> increment;
-        solve_scalar_block_jacobi(mesh, halo, evaluation, rhs, config.run.cfl_max, physical_diagonal,
-                                  2, 5, 0.1, increment, communicator);
+        solve_scalar_block_jacobi(mesh, halo, evaluation, rhs, 0.0, physical_diagonal,
+                                  2, 4, 1.0e-1, increment, communicator);
         const std::int64_t local_damped = apply_increment(mesh, physics, current, increment);
         std::int64_t global_damped = 0;
         MPI_Allreduce(&local_damped, &global_damped, 1, MPI_INT64_T, MPI_SUM, communicator);
@@ -944,8 +977,6 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
       result.previous_state = older;
       result.final_step = step;
       result.final_physical_time = static_cast<double>(step) * config.run.time_step;
-      result.hllc_fallback_faces += evaluation.hllc_fallbacks;
-      result.reconstruction_positivity_fallbacks += evaluation.positivity_fallbacks;
       ForceRow force = evaluation.force;
       force.step = step;
       force.physical_time = result.final_physical_time;
@@ -956,7 +987,8 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
                                         -std::log10(std::max(final_ratio, 1.0e-300)), used_inner_iterations));
       }
       if (config.outputs.write_field_every_time > 0.0 && result.final_physical_time + 1.0e-10 >= next_field_time) {
-        Evaluation snapshot = evaluator.evaluate(result.state, false);
+        Evaluation snapshot;
+        evaluator.evaluate(result.state, false, snapshot);
         observer.field(step, result.final_physical_time, result.state, snapshot.vorticity, false);
         next_field_time += config.outputs.write_field_every_time;
       }
@@ -971,6 +1003,7 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
       result.inner_statistics.observed_min = 0;
       result.inner_statistics.target_converged_fraction = 0.0;
     }
+    result.residual_reduction_orders = -std::log10(std::max(result.inner_statistics.last_ratio, 1.0e-300));
     std::string periodic_details;
     const bool periodic = statistically_periodic(result.force_history, config.run.final_time, periodic_details);
     if (!result.debug_limited && result.final_physical_time + 1.0e-10 >= config.run.final_time &&
@@ -984,7 +1017,8 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
     }
   }
 
-  Evaluation final_evaluation = evaluator.evaluate(result.state, true);
+  Evaluation final_evaluation;
+  evaluator.evaluate(result.state, true, final_evaluation);
   result.vorticity = std::move(final_evaluation.vorticity);
   result.local_surface = std::move(final_evaluation.surface);
   observer.field(result.final_step, result.final_physical_time, result.state, result.vorticity, true);
