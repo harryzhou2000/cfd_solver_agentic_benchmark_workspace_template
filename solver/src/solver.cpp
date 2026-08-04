@@ -765,7 +765,12 @@ bool forces_stable(const std::vector<ForceRow>& history, std::size_t window, dou
     min_cmz = std::min(min_cmz, history[i].cmz);
     max_cmz = std::max(max_cmz, history[i].cmz);
   }
-  const double drag_tolerance = tolerance * std::max(1.0, std::abs(0.5 * (min_cd + max_cd)));
+  const double mean_drag = 0.5 * (min_cd + max_cd);
+  // Scale the terminal drag span with the force magnitude, while keeping a
+  // tight absolute floor for low-drag cases and a conservative upper bound
+  // for high-drag cases.
+  const double drag_tolerance =
+      std::max(tolerance, std::min(5.0e-4, 5.0e-3 * std::abs(mean_drag)));
   // Force plateaus must be steady in all reported coefficients.  Permit only
   // bounded symmetry-mode jitter in lift and moment; the absolute span is
   // never relaxed beyond 1e-4.
