@@ -845,7 +845,7 @@ RunSummary FlowSolver::solve() {
     // oscillation.  Keep a separate correction relaxation that can back off
     // locally without changing the requested continuation schedule or the
     // physical discretization.
-    double floor_relaxation = 0.5;
+    double floor_relaxation = 0.025;
     int floor_decline_streak = 0;
     int floor_retry_count = 0;
     double previous_outer_norm = std::numeric_limits<double>::infinity();
