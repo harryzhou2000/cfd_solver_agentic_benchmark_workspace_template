@@ -849,7 +849,7 @@ RunSummary FlowSolver::solve() {
     double floor_relaxation = 0.5;
     int floor_decline_streak = 0;
     int floor_retry_count = 0;
-    constexpr double minimum_floor_relaxation = 0.00390625;
+    constexpr double minimum_floor_relaxation = 0.0625;
     // A steady nonlinear solve can make small, bounded residual excursions
     // while still converging.  Keep the trust region local to the recent
     // accepted trajectory: an all-time residual minimum turns a harmless
@@ -860,7 +860,7 @@ RunSummary FlowSolver::solve() {
     // The controller separately reduces the next CFL after a 10% accepted
     // step-to-step increase below.  Reserve this wider envelope for rejecting
     // genuinely unstable trials rather than normal nonlinear ringing.
-    constexpr double residual_trust_factor = 1.15;
+    constexpr double residual_trust_factor = 1.25;
     double previous_outer_norm = std::numeric_limits<double>::infinity();
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
@@ -917,7 +917,7 @@ RunSummary FlowSolver::solve() {
       }
       const Assembly diagnostic = assemble_spatial_residual();
       final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
-      const std::size_t rolling_count = std::min<std::size_t>(100U, accepted_outer_norms.size());
+      const std::size_t rolling_count = std::min<std::size_t>(25U, accepted_outer_norms.size());
       const double rolling_outer_norm = rolling_count == 0
                                             ? std::numeric_limits<double>::infinity()
                                             : *std::min_element(accepted_outer_norms.end() -
@@ -941,7 +941,7 @@ RunSummary FlowSolver::solve() {
         --step;
         continue;
       }
-      if (reject_floor_correction && floor_retry_count < 7) {
+      if (reject_floor_correction && floor_retry_count < 4) {
         // Reuse the same outer state with a smaller correction, so a failed
         // trial cannot contaminate the accepted residual/force history.  A
         // bounded retry count avoids indefinitely re-solving an identical
@@ -998,10 +998,7 @@ RunSummary FlowSolver::solve() {
         // restore the outer state.  Recover it slowly only after sustained
         // improvement, so an isolated good step cannot re-excite a
         // high-Reynolds-number mode.
-        // Only recover the floor correction after it establishes a new local
-        // baseline.  A decline that is still above the retained envelope is a
-        // rebound, not evidence that more aggressive damping is safe.
-        if (final_record.l2 < previous_outer_norm && final_record.l2 <= rolling_outer_norm) {
+        if (final_record.l2 < previous_outer_norm) {
           ++floor_decline_streak;
           if (floor_decline_streak >= 5) {
             floor_relaxation = std::min(0.5, 1.25 * floor_relaxation);
