@@ -136,7 +136,8 @@ def rank_validation(results: Path) -> tuple[list[dict], list[dict]]:
     for case_id in ("naca0012_m015_inviscid", "cylinder_m010_laminar_re20"):
         values = []
         for ranks in (1, 2, 8):
-            directory = results / "rank_validation" / f"{case_id}_np{ranks}"
+            directory = (results / case_id if ranks == 8 else
+                         results / "rank_validation" / f"{case_id}_np{ranks}")
             status = load_json(directory / "run_status.json")
             force = load_forces(directory / "forces.csv")[-1]
             row = {"case_id": case_id, "mpi_ranks": ranks, "cd": float(force["cd"]),

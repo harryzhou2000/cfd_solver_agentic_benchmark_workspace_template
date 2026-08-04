@@ -79,7 +79,9 @@ def main() -> int:
     else:
         validation = ["naca0012_m015_inviscid", "cylinder_m010_laminar_re20"]
         for case_id in validation:
-            for ranks in (1, 2, 8):
+            # The production directory is already the required np=8 member of
+            # each comparison; generate only the independent smaller-rank runs.
+            for ranks in (1, 2):
                 output = args.results / "rank_validation" / f"{case_id}_np{ranks}"
                 if completed(output) and not args.force:
                     print(f"skip completed {output.name}")

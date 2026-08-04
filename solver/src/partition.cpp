@@ -363,12 +363,23 @@ void validate_distributed_mesh(const LocalMesh& mesh, MPI_Comm communicator) {
   std::int64_t global_owned = 0;
   MPI_Allreduce(&local_owned, &global_owned, 1, MPI_INT64_T, MPI_SUM, communicator);
   if (global_owned != mesh.global_cell_count) throw std::runtime_error("distributed owned-cell total does not match global mesh");
-  std::vector<int> send_counts(static_cast<std::size_t>(size), 0);
-  std::vector<int> receive_counts(static_cast<std::size_t>(size), 0);
-  for (const HaloLink& link : mesh.halo_links) {
+  std::vector<int> remote_send_counts(mesh.halo_links.size(), 0);
+  std::vector<int> local_send_counts(mesh.halo_links.size(), 0);
+  std::vector<MPI_Request> count_requests;
+  count_requests.reserve(mesh.halo_links.size() * 2);
+  for (std::size_t link_index = 0; link_index < mesh.halo_links.size(); ++link_index) {
+    MPI_Request request{};
+    MPI_Irecv(&remote_send_counts[link_index], 1, MPI_INT, mesh.halo_links[link_index].rank,
+              7320, communicator, &request);
+    count_requests.push_back(request);
+  }
+  for (std::size_t link_index = 0; link_index < mesh.halo_links.size(); ++link_index) {
+    const HaloLink& link = mesh.halo_links[link_index];
     if (link.rank < 0 || link.rank >= size || link.rank == rank) throw std::runtime_error("invalid halo neighbor rank");
-    send_counts[static_cast<std::size_t>(link.rank)] = static_cast<int>(link.send_cells.size());
-    receive_counts[static_cast<std::size_t>(link.rank)] = static_cast<int>(link.receive_cells.size());
+    local_send_counts[link_index] = static_cast<int>(link.send_cells.size());
+    MPI_Request request{};
+    MPI_Isend(&local_send_counts[link_index], 1, MPI_INT, link.rank, 7320, communicator, &request);
+    count_requests.push_back(request);
     for (int cell : link.send_cells) {
       if (!mesh.is_owned(cell)) throw std::runtime_error("halo send list contains a non-owned cell");
     }
@@ -378,10 +389,12 @@ void validate_distributed_mesh(const LocalMesh& mesh, MPI_Comm communicator) {
       }
     }
   }
-  std::vector<int> remote_send_counts(static_cast<std::size_t>(size), 0);
-  MPI_Alltoall(send_counts.data(), 1, MPI_INT, remote_send_counts.data(), 1, MPI_INT, communicator);
-  for (int source = 0; source < size; ++source) {
-    if (remote_send_counts[static_cast<std::size_t>(source)] != receive_counts[static_cast<std::size_t>(source)]) {
+  if (!count_requests.empty()) {
+    MPI_Waitall(static_cast<int>(count_requests.size()), count_requests.data(), MPI_STATUSES_IGNORE);
+  }
+  for (std::size_t link_index = 0; link_index < mesh.halo_links.size(); ++link_index) {
+    if (remote_send_counts[link_index] !=
+        static_cast<int>(mesh.halo_links[link_index].receive_cells.size())) {
       throw std::runtime_error("halo send/receive counts are asymmetric");
     }
   }

@@ -26,6 +26,10 @@
 namespace cfd {
 namespace {
 
+#ifndef SATURN_GIT_REVISION
+#define SATURN_GIT_REVISION "unknown"
+#endif
+
 using json = nlohmann::json;
 
 std::string rank_suffix(int rank) {
@@ -311,7 +315,7 @@ void OutputManager::write_metadata(const RunResult& result, const std::string& s
   const auto& inner = result.inner_statistics;
   json metadata{
       {"case_id", config_.case_id}, {"solver_name", "SaturnCFD"}, {"solver_version", "0.1.0"},
-      {"git_revision", nullptr}, {"mpi_ranks", rank_count_}, {"mesh_file", config_.mesh_path.string()},
+      {"git_revision", SATURN_GIT_REVISION}, {"mpi_ranks", rank_count_}, {"mesh_file", config_.mesh_path.string()},
       {"num_cells_global", mesh_.global_cell_count}, {"num_faces_global", mesh_.global_face_count},
       {"num_cells_owned_local", mesh_.owned_cell_count}, {"num_cells_ghost_local", mesh_.ghost_cell_count()},
       {"partitioner", "metis_kway"}, {"partition_edge_cut", mesh_.partition_edge_cut},

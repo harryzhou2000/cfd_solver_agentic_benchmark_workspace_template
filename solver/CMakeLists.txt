@@ -30,6 +30,15 @@ add_executable(saturn_cfd
   src/solver.cpp
   src/output.cpp
 )
+execute_process(
+  COMMAND git -C "${CMAKE_CURRENT_SOURCE_DIR}/.." rev-parse --verify HEAD
+  OUTPUT_VARIABLE SATURN_GIT_REVISION
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_QUIET
+)
+if(SATURN_GIT_REVISION)
+  target_compile_definitions(saturn_cfd PRIVATE SATURN_GIT_REVISION="${SATURN_GIT_REVISION}")
+endif()
 target_include_directories(saturn_cfd PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
   "${CGNS_INCLUDE_DIR}"
