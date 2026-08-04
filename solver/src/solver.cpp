@@ -840,6 +840,7 @@ RunSummary FlowSolver::solve() {
     // off when the current implicit solve or outer residual rejects the next
     // increase; the actual local CFL is retained in residuals.csv.
     const double steady_cfl_floor = std::min(config_.run.cfl_initial, 0.05);
+    const double steady_cfl_ceiling = std::min(config_.run.cfl_max, 1.0);
     double adaptive_cfl = config_.run.cfl_initial;
     // At the CFL floor, lowering CFL can no longer damp a nonlinear outer
     // oscillation.  Keep a separate correction relaxation that can back off
@@ -997,7 +998,7 @@ RunSummary FlowSolver::solve() {
         floor_decline_streak = 0;
       }
       if (inner_target_reached && final_record.l2 <= 1.02 * previous_outer_norm) {
-        adaptive_cfl = std::min(config_.run.cfl_max, cfl * 1.15);
+        adaptive_cfl = std::min(steady_cfl_ceiling, cfl * 1.15);
       } else if (!inner_target_reached || final_record.l2 > 1.10 * previous_outer_norm) {
         adaptive_cfl = std::max(steady_cfl_floor, cfl * 0.5);
       } else {
