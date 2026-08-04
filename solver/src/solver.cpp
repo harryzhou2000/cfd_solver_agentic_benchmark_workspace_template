@@ -849,7 +849,7 @@ RunSummary FlowSolver::solve() {
     double floor_relaxation = 0.5;
     int floor_decline_streak = 0;
     int floor_retry_count = 0;
-    double floor_best_outer_norm = std::numeric_limits<double>::infinity();
+    double best_outer_norm = std::numeric_limits<double>::infinity();
     double previous_outer_norm = std::numeric_limits<double>::infinity();
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
@@ -906,14 +906,10 @@ RunSummary FlowSolver::solve() {
       }
       const Assembly diagnostic = assemble_spatial_residual();
       final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
-      if (at_steady_cfl_floor && std::isfinite(previous_outer_norm)) {
-        floor_best_outer_norm = std::min(floor_best_outer_norm, previous_outer_norm);
-      }
       const bool reject_high_cfl_correction =
-          !at_steady_cfl_floor && std::isfinite(previous_outer_norm) && final_record.l2 > 1.02 * previous_outer_norm;
+          !at_steady_cfl_floor && std::isfinite(best_outer_norm) && final_record.l2 > 1.02 * best_outer_norm;
       const bool reject_floor_correction =
-          at_steady_cfl_floor && std::isfinite(floor_best_outer_norm) &&
-          final_record.l2 > 1.02 * floor_best_outer_norm;
+          at_steady_cfl_floor && std::isfinite(best_outer_norm) && final_record.l2 > 1.02 * best_outer_norm;
       if (reject_high_cfl_correction) {
         // A growing correction away from the CFL floor is recoverable by
         // returning to the accepted outer state and retrying at lower CFL.
@@ -940,9 +936,7 @@ RunSummary FlowSolver::solve() {
         continue;
       }
       floor_retry_count = 0;
-      if (at_steady_cfl_floor) {
-        floor_best_outer_norm = std::min(floor_best_outer_norm, final_record.l2);
-      }
+      best_outer_norm = std::min(best_outer_norm, final_record.l2);
       summary_.residuals.push_back(final_record);
       const std::vector<double> dtau = local_time_steps(diagnostic.spectral_radius, cfl);
       double local_dt_sum = std::accumulate(dtau.begin(), dtau.end(), 0.0);
