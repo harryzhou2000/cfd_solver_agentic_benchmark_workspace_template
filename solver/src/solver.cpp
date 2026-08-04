@@ -839,13 +839,13 @@ RunSummary FlowSolver::solve() {
     // The supplied ramp is the target continuation schedule.  We only back it
     // off when the current implicit solve or outer residual rejects the next
     // increase; the actual local CFL is retained in residuals.csv.
-    const double steady_cfl_floor = std::min(config_.run.cfl_initial, 0.2);
+    const double steady_cfl_floor = std::min(config_.run.cfl_initial, 0.05);
     double adaptive_cfl = config_.run.cfl_initial;
     // At the CFL floor, lowering CFL can no longer damp a nonlinear outer
     // oscillation.  Keep a separate correction relaxation that can back off
     // locally without changing the requested continuation schedule or the
     // physical discretization.
-    double floor_relaxation = 0.005;
+    double floor_relaxation = 0.5;
     int floor_decline_streak = 0;
     int floor_retry_count = 0;
     double floor_best_outer_norm = std::numeric_limits<double>::infinity();
@@ -932,7 +932,7 @@ RunSummary FlowSolver::solve() {
         // accepted residual/force history or the next nonlinear solve.
         state_ = outer_state;
         synchronize_state();
-        floor_relaxation = std::max(0.003125, 0.5 * floor_relaxation);
+        floor_relaxation = std::max(0.0625, 0.5 * floor_relaxation);
         floor_decline_streak = 0;
         ++floor_retry_count;
         --step;
@@ -987,7 +987,7 @@ RunSummary FlowSolver::solve() {
         if (final_record.l2 < previous_outer_norm) {
           ++floor_decline_streak;
           if (floor_decline_streak >= 5) {
-            floor_relaxation = std::min(0.005, 1.25 * floor_relaxation);
+            floor_relaxation = std::min(0.5, 1.25 * floor_relaxation);
             floor_decline_streak = 0;
           }
         } else {
