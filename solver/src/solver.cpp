@@ -547,14 +547,13 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
                                  const double relaxation) {
   if (total_residual.size() != state_.size() || spectral.size() != static_cast<std::size_t>(mesh_.owned_cell_count) ||
       time_diagonal.size() != static_cast<std::size_t>(mesh_.owned_cell_count)) {
-    throw std::invalid_argument("invalid block-Jacobi implicit update arrays");
+    throw std::invalid_argument("invalid implicit update arrays");
   }
-  // This is a point-implicit block-Jacobi update of the frozen nonlinear
-  // residual.  Repeating it in the outer inner-iteration loop gives a true
-  // multi-sweep implicit solve while retaining neighbor-only state exchange.
-  // A scalar spectral diagonal is deliberately conservative; the four
-  // conservative components are updated together and a local positivity line
-  // search prevents a rejected high-CFL correction from freezing a cell.
+  // This is a rank-local LU-SGS update of a frozen nonlinear residual.  MPI
+  // interfaces remain block-Jacobi (ghost corrections are lagged), while
+  // owned-owned Rusanov couplings are swept in both local directions.  The
+  // four conservative components are updated together and a local positivity
+  // line search prevents a rejected high-CFL correction from freezing a cell.
   std::vector<double> diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
   for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
     diagonal[static_cast<std::size_t>(local_cell)] =
@@ -562,15 +561,69 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
                      spectral[static_cast<std::size_t>(local_cell)],
                  kTiny);
   }
+
+  // Retain the positive, scalar Rusanov diffusion couplings in the frozen
+  // approximate Jacobian.  The original point update discarded every
+  // off-diagonal contribution, which makes a low-Mach acoustic mode converge
+  // only through very small CFL steps.  A local LU-SGS application keeps the
+  // block-Jacobi MPI boundary (ghost corrections remain lagged) while coupling
+  // cells owned by this rank.  The diagonal deliberately remains the more
+  // conservative full spectral radius: it is at least twice the sum of these
+  // Rusanov half-couplings on an interior-only row.
+  std::vector<std::vector<std::pair<int, double>>> couplings(
+      static_cast<std::size_t>(mesh_.owned_cell_count));
+  for (const LocalFace& face : mesh_.faces) {
+    if (face.right_cell < 0 || !mesh_.is_owned(face.right_cell)) {
+      continue;
+    }
+    const Primitive left = reconstructed_primitive(face.left_cell, face.centroid);
+    const Primitive right = reconstructed_primitive(face.right_cell, face.centroid);
+    const double left_signal = std::abs(left.u * face.unit_normal.x + left.v * face.unit_normal.y) +
+                               left.sound_speed;
+    const double right_signal = std::abs(right.u * face.unit_normal.x + right.v * face.unit_normal.y) +
+                                right.sound_speed;
+    const double coupling = 0.5 * config_.run.rusanov_dissipation_scale *
+                            std::max(left_signal, right_signal) * face.length;
+    if (!(coupling > 0.0) || !std::isfinite(coupling)) {
+      continue;
+    }
+    couplings[static_cast<std::size_t>(face.left_cell)].emplace_back(face.right_cell, coupling);
+    couplings[static_cast<std::size_t>(face.right_cell)].emplace_back(face.left_cell, coupling);
+  }
+
+  std::vector<double> forward(static_cast<std::size_t>(mesh_.owned_cell_count) * 4U, 0.0);
+  std::vector<double> correction(static_cast<std::size_t>(mesh_.owned_cell_count) * 4U, 0.0);
+  for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+    const auto offset = static_cast<std::size_t>(local_cell) * 4U;
+    for (int component_index = 0; component_index < 4; ++component_index) {
+      double right_hand_side = -total_residual[offset + static_cast<std::size_t>(component_index)];
+      for (const auto& [neighbor, coupling] : couplings[static_cast<std::size_t>(local_cell)]) {
+        if (neighbor < local_cell) {
+          right_hand_side += coupling * forward[static_cast<std::size_t>(neighbor) * 4U +
+                                                static_cast<std::size_t>(component_index)];
+        }
+      }
+      forward[offset + static_cast<std::size_t>(component_index)] =
+          right_hand_side / diagonal[static_cast<std::size_t>(local_cell)];
+    }
+  }
+  for (int local_cell = mesh_.owned_cell_count - 1; local_cell >= 0; --local_cell) {
+    const auto offset = static_cast<std::size_t>(local_cell) * 4U;
+    for (int component_index = 0; component_index < 4; ++component_index) {
+      double value = forward[offset + static_cast<std::size_t>(component_index)];
+      for (const auto& [neighbor, coupling] : couplings[static_cast<std::size_t>(local_cell)]) {
+        if (neighbor > local_cell) {
+          value += coupling * correction[static_cast<std::size_t>(neighbor) * 4U +
+                                         static_cast<std::size_t>(component_index)] /
+                   diagonal[static_cast<std::size_t>(local_cell)];
+        }
+      }
+      correction[offset + static_cast<std::size_t>(component_index)] = value;
+    }
+  }
   for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
     const auto offset = static_cast<std::size_t>(local_cell) * 4U;
     const Conserved before = state_at(state_, local_cell);
-    std::array<double, 4> correction{};
-    for (int component_index = 0; component_index < 4; ++component_index) {
-      correction[static_cast<std::size_t>(component_index)] =
-          -total_residual[offset + static_cast<std::size_t>(component_index)] /
-          diagonal[static_cast<std::size_t>(local_cell)];
-    }
     double accepted_relaxation = relaxation;
     Conserved candidate = before;
     bool accepted = false;
@@ -578,7 +631,7 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
       candidate = before;
       for (int component_index = 0; component_index < 4; ++component_index) {
         candidate[static_cast<std::size_t>(component_index)] +=
-            accepted_relaxation * correction[static_cast<std::size_t>(component_index)];
+            accepted_relaxation * correction[offset + static_cast<std::size_t>(component_index)];
       }
       if (gas_.physical(candidate)) {
         accepted = true;

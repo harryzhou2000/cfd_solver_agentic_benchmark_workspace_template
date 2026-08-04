@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
                                 ? "unstructured_primitive_gradient_newtonian_fourier"
                                 : "disabled";
     metadata.inviscid_flux = "rusanov_local_lax_friedrichs";
-    metadata.implicit_solver = "multi_sweep_point_implicit_block_jacobi";
+    metadata.implicit_solver = "multi_sweep_rank_local_lu_sgs_rusanov_preconditioner";
     metadata.true_bdf2_inner_loop = config.run.type == cfd::RunType::Transient;
     metadata.typical_inner_iterations = static_cast<int>(std::llround(summary.inner_statistics.mean));
     metadata.min_inner_iterations = config.run.min_inner_iterations;
