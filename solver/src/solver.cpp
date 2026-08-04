@@ -981,7 +981,22 @@ RunSummary FlowSolver::solve() {
       constexpr int kMaximumStepRetries = 4;
       for (int retry = 0; retry < kMaximumStepRetries && !target_reached; ++retry) {
         const double cfl = requested_cfl * std::pow(0.5, retry);
-        state_ = previous;  // U^n is the initial nonlinear iterate.
+        state_ = previous;
+        if (step > 1) {
+          // A second-order extrapolation is only an initial nonlinear guess;
+          // U^n and U^{n-1} below remain frozen BDF history states.
+          for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+            const auto offset = static_cast<std::size_t>(local_cell) * 4U;
+            Conserved predicted{};
+            for (int component_index = 0; component_index < 4; ++component_index) {
+              const std::size_t index = offset + static_cast<std::size_t>(component_index);
+              predicted[static_cast<std::size_t>(component_index)] =
+                  2.0 * previous[index] - previous_previous[index];
+            }
+            const Conserved safe = gas_.enforce_physical(predicted, state_at(previous, local_cell));
+            std::copy(safe.begin(), safe.end(), state_.begin() + static_cast<std::ptrdiff_t>(offset));
+          }
+        }
         synchronize_state();
         double first_inner_norm = 0.0;
         used_inner = 0;
@@ -996,8 +1011,12 @@ RunSummary FlowSolver::solve() {
                                                                  : 1.5 / config_.run.time_step;
           for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
             const double area = mesh_.cells[static_cast<std::size_t>(local_cell)].area;
-            const double pseudo_diagonal = area / std::max(dtau[static_cast<std::size_t>(local_cell)], kTiny);
-            diagonal[static_cast<std::size_t>(local_cell)] = physical_coefficient * area + pseudo_diagonal;
+            // The BDF defect contains the physical mass term and the spatial
+            // residual only.  implicit_update() supplies its frozen spatial
+            // spectral Jacobian; adding A/dtau here would add a second,
+            // unmatched pseudo-time damping term and severely slow the
+            // nonlinear BDF correction at the required CFL=1.
+            diagonal[static_cast<std::size_t>(local_cell)] = physical_coefficient * area;
             const auto offset = static_cast<std::size_t>(local_cell) * 4U;
             for (int component_index = 0; component_index < 4; ++component_index) {
               const std::size_t index = offset + static_cast<std::size_t>(component_index);
@@ -1025,7 +1044,7 @@ RunSummary FlowSolver::solve() {
           if (inner_iteration == config_.run.max_inner_iterations) {
             break;
           }
-          implicit_update(total, assembly.spectral_radius, diagonal, 0.9);
+          implicit_update(total, assembly.spectral_radius, diagonal, 1.2);
         }
         // Make the candidate state and reported force/surface state use the
         // same synchronized reconstruction before deciding whether to accept.
