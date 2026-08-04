@@ -841,6 +841,12 @@ RunSummary FlowSolver::solve() {
     // increase; the actual local CFL is retained in residuals.csv.
     const double steady_cfl_floor = std::min(config_.run.cfl_initial, 0.2);
     double adaptive_cfl = config_.run.cfl_initial;
+    // At the CFL floor, lowering CFL can no longer damp a nonlinear outer
+    // oscillation.  Keep a separate correction relaxation that can back off
+    // locally without changing the requested continuation schedule or the
+    // physical discretization.
+    double floor_relaxation = 0.5;
+    int floor_decline_streak = 0;
     double previous_outer_norm = std::numeric_limits<double>::infinity();
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
@@ -849,8 +855,8 @@ RunSummary FlowSolver::solve() {
       // CFL backoff cannot damp a nonlinear oscillation.  Use a more
       // conservative implicit correction in that regime instead of allowing
       // a high-Reynolds-number steady solve to repeatedly amplify it.
-      const double steady_relaxation =
-          cfl <= steady_cfl_floor * (1.0 + 1.0e-12) ? 0.5 : 0.8;
+      const bool at_steady_cfl_floor = cfl <= steady_cfl_floor * (1.0 + 1.0e-12);
+      const double steady_relaxation = at_steady_cfl_floor ? floor_relaxation : 0.8;
       const std::vector<double> outer_state = state_;
       double first_inner_norm = 0.0;
       int used_inner = 0;
@@ -933,6 +939,27 @@ RunSummary FlowSolver::solve() {
         summary_.converged = true;
         summary_.diagnostic = "global residual target reached by CFL-controlled block-Jacobi pseudo-time solve";
         break;
+      }
+      if (at_steady_cfl_floor && std::isfinite(previous_outer_norm)) {
+        // A residual increase at the minimum permitted CFL identifies an
+        // under-damped nonlinear correction, rather than a request to lower
+        // CFL again.  Back off just that correction for the following outer
+        // step.  Recover it slowly only after sustained improvement, so an
+        // isolated good step cannot re-excite a high-Reynolds-number mode.
+        if (final_record.l2 > 1.02 * previous_outer_norm) {
+          floor_relaxation = std::max(0.1, 0.5 * floor_relaxation);
+          floor_decline_streak = 0;
+        } else if (final_record.l2 < 0.98 * previous_outer_norm) {
+          ++floor_decline_streak;
+          if (floor_decline_streak >= 5) {
+            floor_relaxation = std::min(0.5, 1.25 * floor_relaxation);
+            floor_decline_streak = 0;
+          }
+        } else {
+          floor_decline_streak = 0;
+        }
+      } else {
+        floor_decline_streak = 0;
       }
       if (inner_target_reached && final_record.l2 <= 1.02 * previous_outer_norm) {
         adaptive_cfl = std::min(config_.run.cfl_max, cfl * 1.15);
