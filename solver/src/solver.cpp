@@ -907,7 +907,7 @@ RunSummary FlowSolver::solve() {
       const bool reject_high_cfl_correction =
           !at_steady_cfl_floor && std::isfinite(previous_outer_norm) && final_record.l2 > 1.10 * previous_outer_norm;
       const bool reject_floor_correction =
-          at_steady_cfl_floor && std::isfinite(previous_outer_norm) && final_record.l2 > 1.02 * previous_outer_norm;
+          at_steady_cfl_floor && std::isfinite(previous_outer_norm) && final_record.l2 > previous_outer_norm;
       if (reject_high_cfl_correction) {
         // A growing correction away from the CFL floor is recoverable by
         // returning to the accepted outer state and retrying at lower CFL.
@@ -920,14 +920,14 @@ RunSummary FlowSolver::solve() {
         --step;
         continue;
       }
-      if (reject_floor_correction && floor_retry_count < 6) {
+      if (reject_floor_correction && floor_retry_count < 10) {
         // Do not retain a growing nonlinear correction merely because the CFL
         // controller has reached its floor.  Reuse the same outer state with a
         // smaller correction, so the failed trial cannot contaminate the
         // accepted residual/force history or the next nonlinear solve.
         state_ = outer_state;
         synchronize_state();
-        floor_relaxation = std::max(0.0078125, 0.5 * floor_relaxation);
+        floor_relaxation = std::max(0.0009765625, 0.5 * floor_relaxation);
         floor_decline_streak = 0;
         ++floor_retry_count;
         --step;
