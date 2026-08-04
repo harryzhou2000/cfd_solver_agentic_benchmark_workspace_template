@@ -848,6 +848,7 @@ RunSummary FlowSolver::solve() {
     // physical discretization.
     double floor_relaxation = 0.5;
     int floor_decline_streak = 0;
+    int floor_retry_count = 0;
     constexpr double minimum_floor_relaxation = 0.0625;
     // A steady nonlinear solve can make small, bounded residual excursions
     // while still converging.  Keep the trust region local to the recent
@@ -856,6 +857,10 @@ RunSummary FlowSolver::solve() {
     // the same floor-CFL correction without changing the state.
     std::vector<double> accepted_outer_norms;
     accepted_outer_norms.reserve(static_cast<std::size_t>(config_.run.max_steps));
+    // The controller separately reduces the next CFL after a 10% accepted
+    // step-to-step increase below.  Reserve this wider envelope for rejecting
+    // genuinely unstable trials rather than normal nonlinear ringing.
+    constexpr double residual_trust_factor = 1.25;
     double previous_outer_norm = std::numeric_limits<double>::infinity();
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
@@ -920,10 +925,10 @@ RunSummary FlowSolver::solve() {
                                                                 accepted_outer_norms.end());
       const bool reject_high_cfl_correction =
           !at_steady_cfl_floor && std::isfinite(rolling_outer_norm) &&
-          final_record.l2 > 1.10 * rolling_outer_norm;
+          final_record.l2 > residual_trust_factor * rolling_outer_norm;
       const bool reject_floor_correction =
           at_steady_cfl_floor && std::isfinite(rolling_outer_norm) &&
-          final_record.l2 > 1.10 * rolling_outer_norm;
+          final_record.l2 > residual_trust_factor * rolling_outer_norm;
       if (reject_high_cfl_correction) {
         // A growing correction away from the CFL floor is recoverable by
         // returning to the accepted outer state and retrying at lower CFL.
@@ -936,23 +941,20 @@ RunSummary FlowSolver::solve() {
         --step;
         continue;
       }
-      if (reject_floor_correction) {
+      if (reject_floor_correction && floor_retry_count < 4) {
         // Reuse the same outer state with a smaller correction, so a failed
-        // trial cannot contaminate the accepted residual/force history.  At
-        // the minimum relaxation, retrying the same deterministic correction
-        // would only waste inner solves; report controlled non-convergence
-        // rather than advancing a rejected state.
+        // trial cannot contaminate the accepted residual/force history.  A
+        // bounded retry count avoids indefinitely re-solving an identical
+        // floor-CFL correction once the local relaxation reaches its limit.
         state_ = outer_state;
         synchronize_state();
-        if (floor_relaxation <= minimum_floor_relaxation * (1.0 + 1.0e-12)) {
-          summary_.diagnostic = "steady floor-CFL recovery exhausted its nonlinear relaxation trust region";
-          break;
-        }
         floor_relaxation = std::max(minimum_floor_relaxation, 0.5 * floor_relaxation);
         floor_decline_streak = 0;
+        ++floor_retry_count;
         --step;
         continue;
       }
+      floor_retry_count = 0;
       accepted_outer_norms.push_back(final_record.l2);
       summary_.residuals.push_back(final_record);
       const std::vector<double> dtau = local_time_steps(diagnostic.spectral_radius, cfl);
