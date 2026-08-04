@@ -845,7 +845,7 @@ RunSummary FlowSolver::solve() {
     // oscillation.  Keep a separate correction relaxation that can back off
     // locally without changing the requested continuation schedule or the
     // physical discretization.
-    double floor_relaxation = 0.025;
+    double floor_relaxation = 0.005;
     int floor_decline_streak = 0;
     int floor_retry_count = 0;
     double previous_outer_norm = std::numeric_limits<double>::infinity();
@@ -979,7 +979,7 @@ RunSummary FlowSolver::solve() {
         if (final_record.l2 < previous_outer_norm) {
           ++floor_decline_streak;
           if (floor_decline_streak >= 5) {
-            floor_relaxation = std::min(0.5, 1.25 * floor_relaxation);
+            floor_relaxation = std::min(0.0125, 1.25 * floor_relaxation);
             floor_decline_streak = 0;
           }
         } else {
