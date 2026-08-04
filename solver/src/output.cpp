@@ -322,12 +322,15 @@ void OutputManager::write_metadata(const RunResult& result, const std::string& s
                                                : "Rusanov_local_Lax_Friedrichs"},
       {"entropy_fix", nullptr},
       {"viscous_flux", config_.viscous ? "corrected_primitive_gradient_Newton_Fourier" : "disabled"},
-      {"time_integrator", config_.run.transient ? "BDF2_dual_time_frozen_history" : "implicit_steady_pseudo_time"},
+      {"time_integrator", config_.run.transient ? "BDF2_frozen_history_block_Newton" : "implicit_steady_pseudo_time"},
       {"implicit_solver", "distributed_4x4_block_Jacobi_Newton_defect_correction"},
       {"reconstruction", "weighted_least_squares_piecewise_linear"},
       {"limiter", "Barth-Jespersen_primitive_component_limiter"}, {"spatial_order_claimed", 2},
       {"positivity_preservation", "face_scaling_and_conservative_update_line_search"},
       {"wall_boundary_output_semantics", "boundary_value"},
+      {"initial_condition", config_.run.transient
+          ? "freestream_plus_deterministic_localized_crossflow_perturbation_1e-3"
+          : "uniform_freestream"},
       {"true_bdf2_inner_loop", config_.run.transient},
       {"typical_inner_iterations", inner.observed_mean}, {"min_inner_iterations", config_.run.min_inner_iterations},
       {"max_inner_iterations", config_.run.max_inner_iterations},

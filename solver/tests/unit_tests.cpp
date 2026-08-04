@@ -46,6 +46,19 @@ int main() {
     require(std::abs((slip.u + p.u) * normal.x + (slip.v + p.v) * normal.y) < 1.0e-12,
             "slip reflection must reverse normal velocity");
     require(std::abs(physics.viscosity() - 0.01) < 1.0e-14, "Reynolds-matched viscosity");
+    const auto no_slip = physics.boundary_state(p, cfd::BoundaryType::no_slip_adiabatic_wall, normal);
+    require(std::abs(no_slip.u + p.u) < 1.0e-14 && std::abs(no_slip.v + p.v) < 1.0e-14,
+            "no-slip ghost reflection");
+    const auto freestream = config.freestream_primitive();
+    for (const cfd::Vec2 farfield_normal : {cfd::Vec2{1.0, 0.0}, cfd::Vec2{-1.0, 0.0},
+                                             cfd::Vec2{0.0, 1.0}, cfd::Vec2{0.0, -1.0}}) {
+      const auto characteristic = physics.boundary_state(freestream, cfd::BoundaryType::farfield, farfield_normal);
+      require(std::abs(characteristic.rho - freestream.rho) < 1.0e-12 &&
+              std::abs(characteristic.u - freestream.u) < 1.0e-12 &&
+              std::abs(characteristic.v - freestream.v) < 1.0e-12 &&
+              std::abs(characteristic.p - freestream.p) < 1.0e-12,
+              "characteristic farfield must preserve a uniform freestream");
+    }
     std::cout << "all unit tests passed\n";
     return 0;
   } catch (const std::exception& error) {

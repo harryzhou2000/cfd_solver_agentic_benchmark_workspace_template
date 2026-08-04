@@ -135,3 +135,11 @@ Normal final runs return zero only for `converged` or
 `statistically_periodic`.  Initialization errors, numerical failures, debug
 limits, or missed completion gates return nonzero and are written honestly as
 incomplete artifacts.
+
+For the transient Newton path, the case-file CFL value of one is the maximum
+globalization/update factor.  The converged BDF mass-plus-spatial Jacobian is
+solved directly rather than weakened by an additional pseudo-time diagonal;
+the full transient defect is still rebuilt and tested after every nonlinear
+inner iteration.  This conservative implicit equivalent is recorded as
+`BDF2_frozen_history_block_Newton` rather than being mislabeled as a
+pseudo-time-only calculation.

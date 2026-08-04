@@ -55,4 +55,11 @@ if(BUILD_TESTING)
     $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-Wpedantic>
   )
   add_test(NAME saturn_unit_tests COMMAND saturn_unit_tests)
+  set(BENCHMARK_CASE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../cfd_solver_agentic_benchmark/inputs/cases")
+  if(EXISTS "${BENCHMARK_CASE_ROOT}/naca0012_m015_inviscid.json")
+    add_test(NAME inspect_naca_mesh COMMAND saturn_cfd inspect
+      --case "${BENCHMARK_CASE_ROOT}/naca0012_m015_inviscid.json")
+    add_test(NAME inspect_multizone_cylinder_mesh COMMAND saturn_cfd inspect
+      --case "${BENCHMARK_CASE_ROOT}/cylinder_m010_laminar_re20.json")
+  endif()
 endif()

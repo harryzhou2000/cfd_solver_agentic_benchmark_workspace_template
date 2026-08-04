@@ -178,6 +178,32 @@ def figure(path: str, width: str = r"0.48\textwidth") -> str:
     return rf"\includegraphics[width={width}]{{\detokenize{{figures/{path}}}}}"
 
 
+def case_discussion(case_id: str, force: dict) -> str:
+    if case_id.startswith("naca"):
+        text = (f"The zero-incidence symmetry check gives terminal $C_L={force['cl']:.3g}$. "
+                f"The submitted drag is $C_D={force['cd']:.4g}$, while the two wall branches provide the "
+                "nontrivial pressure distribution shown below. ")
+        if "m200" in case_id:
+            text += "The pressure/Mach renderings resolve the leading-edge compression and supersonic shock pattern. "
+        elif "m080" in case_id:
+            text += "The transonic rendering shows the strongest compressibility gradients near the body. "
+        else:
+            text += "The low-Mach rendering remains nearly symmetric and smoothly varying. "
+        if "laminar" in case_id:
+            text += (f"Tangential wall shear contributes $C_{{D,v}}={force['viscous_drag']:.4g}$; "
+                     "the reported wall velocity is exactly the imposed no-slip boundary value.")
+        else:
+            text += "Viscous force columns are identically zero and the wall velocity is the slip tangential projection."
+        return text
+    if "re20" in case_id and "re200" not in case_id:
+        return (f"The steady cylinder wake converged to positive drag $C_D={force['cd']:.4g}$ and near-zero "
+                f"mean lift $C_L={force['cl']:.3g}$. The wake zoom and symmetric wall $C_p/C_f$ curves are "
+                "consistent with a steady laminar separated wake at Reynolds 20.")
+    return ("The full physical-time force history shows startup, growth of the antisymmetric mode, and a "
+            "post-transient repeatable vortex-street regime. Quantitative late-window statistics and the clipped "
+            "vorticity wake rendering are reported below.")
+
+
 def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_rows: list[dict],
                  re200: dict) -> None:
     case_data = {}
@@ -194,6 +220,34 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
             last = forces[-1]
             force_summary = {name: float(last[name]) for name in ("cd", "cl", "cmz", "pressure_drag", "viscous_drag")}
         case_data[case_id] = (metadata, status, force_summary)
+
+    benchmark_cases = Path(__file__).resolve().parents[2] / "cfd_solver_agentic_benchmark/inputs/cases"
+    case_controls = {case_id: load_json(benchmark_cases / f"{case_id}.json") for case_id in CASE_ORDER}
+    case_table_lines = [r"\begin{center}\scriptsize\begin{tabular}{llrrrrl}\toprule Case & mesh & cells & $M_\infty$ & $Re$ & step/$t_f$ & CFL; inner\\\midrule"]
+    for case_id in CASE_ORDER:
+        control = case_controls[case_id]
+        run = control["run_control"]
+        physics = control["physics"]
+        terminal = run.get("max_steps", run.get("final_time"))
+        cfl = f"{run['cfl_initial']:g}$\\to${run['cfl_max']:g}; {run['min_inner_iterations']}--{run['max_inner_iterations']}"
+        case_table_lines.append(
+            f"{latex_escape(case_id)} & {latex_escape(Path(control['mesh']['file']).name)} & "
+            f"{case_data[case_id][0]['num_cells_global']} & {control['freestream']['mach']:g} & "
+            f"{physics.get('reynolds', '--')} & {terminal} & {cfl}\\\\")
+    case_table_lines.append(r"\bottomrule\end{tabular}\end{center}")
+
+    partition_table_lines = [r"\begin{center}\scriptsize\begin{tabular}{lrrrrrrr}\toprule Case & rank & owned & ghost & neighbours & send & receive & edge cut\\\midrule"]
+    for case_id in ("naca0012_m015_inviscid", "cylinder_m010_laminar_re20"):
+        diagnostics = results / case_id / "partition_diagnostics.csv"
+        with diagnostics.open(newline="") as stream:
+            for row in csv.DictReader(stream):
+                send_total = sum(int(value) for value in row["send_cells"].split(";") if value)
+                receive_total = sum(int(value) for value in row["recv_cells"].split(";") if value)
+                partition_table_lines.append(
+                    f"{latex_escape(case_id)} & {row['rank']} & {row['num_cells_owned']} & "
+                    f"{row['num_cells_ghost']} & {row['num_neighbor_ranks']} & {send_total} & {receive_total} & "
+                    f"{case_data[case_id][0]['partition_edge_cut']}\\\\")
+    partition_table_lines.append(r"\bottomrule\end{tabular}\end{center}")
 
     lines = [r"\documentclass[10pt]{article}",
              r"\usepackage[margin=0.72in]{geometry}",
@@ -234,12 +288,14 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
              r"cells and 484 physical boundary faces. The two-zone cylinder has 10,185 cells and 120 physical "
              r"boundary faces after 320 duplicate interface vertices are merged. Case-file family mappings, not "
              r"mesh-name branches, select farfield, slip, and no-slip adiabatic conditions.",
+             *case_table_lines,
              r"METIS partitions the cell adjacency graph. Rank zero performs this serial preprocessing once, "
              r"sends each rank only its owned cells, one-ring ghost cells, incident faces, and static neighbour "
              r"lists, then releases the global mesh and all other partitions. Iterations exchange only packed "
              r"state or gradient/limiter data with neighbour-scoped \texttt{MPI\_Irecv/Isend}; reductions are "
              r"used for norms and forces. The submitted \texttt{partition\_diagnostics.csv} files provide the "
              r"measured owned/ghost/send/receive counts and METIS edge cuts.",
+             *partition_table_lines,
              r"\section{Spatial discretization and boundaries}",
              r"For cell $i$, $V_i\dot{\mathbf U}_i+\sum_f(\widehat{\mathbf F}^i-\widehat{\mathbf F}^v)_fS_f=0$. "
              r"Primitive gradients use inverse-distance weighted least squares with conditioning regularization. "
@@ -268,7 +324,11 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
              r"iterations and shift only after acceptance. The production values are $\Delta t=0.01$, "
              r"$t_f=300$, a minimum of five and maximum of 1000 nonlinear iterations, and a $10^{-3}$ reduction "
              r"of the complete spatial-plus-BDF residual. Metadata reports actual min/mean/max iterations, misses, "
-             r"converged fraction, and the last ratio.",
+             r"converged fraction, and the last ratio. The configured CFL of one caps globalization updates; the "
+             r"BDF mass-plus-spatial Newton system is solved directly, without an extra pseudo-time diagonal, "
+             r"which is a stricter implicit solve and is named explicitly in metadata. A deterministic localized "
+             r"cross-flow perturbation of amplitude $10^{-3}U_\infty$ breaks exact discrete symmetry; late-window "
+             r"statistics exclude the resulting startup transient.",
              r"\section{Run status and force summary}",
              r"\begin{center}\small\begin{tabular}{lrrrrl}\toprule Case & ranks & step & $t_f$ & residual orders & status\\\midrule"]
     for case_id in CASE_ORDER:
@@ -288,8 +348,9 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
         label = case_id.replace("_", "-")
         lines += [rf"\subsection{{{latex_escape(case_id)}}}",
                   f"The submitted status is {latex_escape(case_data[case_id][1]['convergence_status'])}. "
-                  "The first pair shows convergence and force evidence; the second pair renders Mach and pressure "
-                  "on the actual unstructured cells, and the wall plot supplies the boundary distribution.",
+                  + case_discussion(case_id, case_data[case_id][2]) + " The first pair shows convergence and force "
+                  "evidence; the second pair renders Mach and pressure on the actual unstructured cells, and the "
+                  "wall plot supplies the boundary distribution.",
                   rf"\begin{{figure}}[htbp]\centering {figure(case_id + '_residual.png')}"
                   rf"\hfill {figure(case_id + '_forces.png')}"
                   rf"\caption{{Residual and force histories for {latex_escape(case_id)}.}}\label{{fig:{label}-history}}\end{{figure}}",

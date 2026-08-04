@@ -143,8 +143,7 @@ def save_surface_figure(case_id: str, result: Path, figures: Path, report: Path,
         order = np.argsort(key)
         xlabel = r"$x/c$"
     else:
-        key = np.unwrap(np.arctan2(surface["y"], surface["x"]))
-        key = np.degrees(key)
+        key = np.degrees(np.arctan2(surface["y"], surface["x"]))
         order = np.argsort(key)
         xlabel = r"cylinder angle $\theta$ (deg)"
     rows = 2 if viscous else 1
