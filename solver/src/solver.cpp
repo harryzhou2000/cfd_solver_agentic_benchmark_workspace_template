@@ -856,7 +856,10 @@ RunSummary FlowSolver::solve() {
     // off when the current implicit solve or outer residual rejects the next
     // increase; the actual local CFL is retained in residuals.csv.
     const double steady_cfl_floor = std::min(config_.run.cfl_initial, 0.05);
-    const double steady_cfl_ceiling = std::min(config_.run.cfl_max, 1.0);
+    // Keep high-Re steady trials bounded, but allow a branch that has shown
+    // sustained accepted descent to accelerate beyond the conservative CFL-1
+    // startup regime.  Rejected trials restore the prior outer state.
+    const double steady_cfl_ceiling = std::min(config_.run.cfl_max, 3.0);
     double adaptive_cfl = config_.run.cfl_initial;
     // At the CFL floor, lowering CFL can no longer damp a nonlinear outer
     // oscillation.  Keep a separate correction relaxation that can back off
