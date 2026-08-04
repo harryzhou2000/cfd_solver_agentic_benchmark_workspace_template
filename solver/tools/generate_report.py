@@ -11,6 +11,7 @@ import csv
 import json
 import math
 import shutil
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -128,7 +129,41 @@ def load_field(path: Path) -> Field:
     except ModuleNotFoundError as exc:
         raise OutputError("meshio is required; install solver/tools/requirements.txt in .venv") from exc
     try:
-        mesh = meshio.read(path)
+        if path.suffix.lower() == ".pvtu":
+            # meshio does not register PVTU as a readable extension.  A PVTU
+            # file is an XML index over ordinary VTU pieces, so merge those
+            # pieces here without changing or fabricating their field values.
+            root = ET.parse(path).getroot()
+            sources = [node.attrib["Source"] for node in root.iter()
+                       if node.tag.rsplit("}", 1)[-1] == "Piece" and "Source" in node.attrib]
+            if not sources:
+                raise OutputError(f"{path}: PVTU contains no Piece Source entries")
+            pieces = [meshio.read(path.parent / source) for source in sources]
+            point_data_keys = set(pieces[0].point_data)
+            cell_data_keys = set(pieces[0].cell_data)
+            if any(set(piece.point_data) != point_data_keys or set(piece.cell_data) != cell_data_keys for piece in pieces[1:]):
+                raise OutputError(f"{path}: PVTU pieces have inconsistent field arrays")
+            points: list[np.ndarray] = []
+            cells: list[Any] = []
+            point_data = {name: [] for name in point_data_keys}
+            cell_data = {name: [] for name in cell_data_keys}
+            offset = 0
+            for piece in pieces:
+                points.append(np.asarray(piece.points))
+                for name in point_data:
+                    point_data[name].append(np.asarray(piece.point_data[name]))
+                for index, block in enumerate(piece.cells):
+                    cells.append((block.type, np.asarray(block.data) + offset))
+                    for name in cell_data:
+                        cell_data[name].append(np.asarray(piece.cell_data[name][index]))
+                offset += len(piece.points)
+            mesh = meshio.Mesh(points=np.vstack(points), cells=cells,
+                               point_data={name: np.concatenate(values) for name, values in point_data.items()},
+                               cell_data=cell_data)
+        else:
+            mesh = meshio.read(path)
+    except OutputError:
+        raise
     except Exception as exc:
         raise OutputError(f"cannot read {path} with meshio: {exc}") from exc
     points = np.asarray(mesh.points, dtype=float)

@@ -32,7 +32,8 @@ generated report if LaTeX is installed:
 cd solver/report && latexmk -pdf report.tex
 ```
 
-`meshio` reads VTK/VTU/CGNS field files. The solver must write named density,
+`meshio` reads VTK/VTU/CGNS field files. Parallel `field_final.pvtu` indexes
+are supported by reading and merging their referenced VTU pieces. The solver must write named density,
 pressure, Mach, and velocity fields (case-insensitive aliases are accepted;
 velocity may be `u`/`v`, component names, or a two-component `velocity`
 vector).

@@ -470,9 +470,26 @@ FlowSolver::Assembly FlowSolver::assemble_spatial_residual() {
       const double convective = config_.run.rusanov_dissipation_scale *
                                 (std::abs(state.u * face.unit_normal.x + state.v * face.unit_normal.y) +
                                  state.sound_speed);
+      double normal_distance = 0.0;
+      if (face.right_cell >= 0) {
+        const int neighbor = local_cell == face.left_cell ? face.right_cell : face.left_cell;
+        normal_distance = std::abs(inner(
+            subtract(mesh_.cells[static_cast<std::size_t>(neighbor)].centroid,
+                     mesh_.cells[static_cast<std::size_t>(local_cell)].centroid),
+            face.unit_normal));
+      } else {
+        normal_distance = std::abs(inner(
+            subtract(face.centroid, mesh_.cells[static_cast<std::size_t>(local_cell)].centroid),
+            face.unit_normal));
+      }
+      normal_distance = std::max(
+          normal_distance, 0.15 * std::sqrt(mesh_.cells[static_cast<std::size_t>(local_cell)].area));
+      // A diffusion Jacobian scales as mu * face_length / (rho * d_n).
+      // Keeping the normal distance explicit gives it the same units as the
+      // convective face spectral radius, including on stretched wall cells.
       const double viscous = viscosity > 0.0
                                  ? 4.0 * viscosity * face.length /
-                                       std::max(state.rho * mesh_.cells[static_cast<std::size_t>(local_cell)].area, kTiny)
+                                       std::max(state.rho * normal_distance, kTiny)
                                  : 0.0;
       result.spectral_radius[static_cast<std::size_t>(local_cell)] += face.length * convective + viscous;
     };
@@ -911,12 +928,17 @@ RunSummary FlowSolver::solve() {
         summary_.diagnostic = "global residual target reached by CFL-controlled block-Jacobi pseudo-time solve";
         break;
       }
-      if (inner_target_reached && final_record.l2 <= 1.02 * previous_outer_norm) {
-        adaptive_cfl = std::min(config_.run.cfl_max, cfl * 1.15);
-      } else if (!inner_target_reached || final_record.l2 > 1.10 * previous_outer_norm) {
+      // Treat an outer-residual increase as a nonlinear rejection rather than
+      // continuing to amplify the local pseudo-CFL.  The old broad 2--10%
+      // tolerance produced a low-Mach limit cycle: inner pseudo solves could
+      // meet their relative target while the actual spatial residual wandered
+      // upward from one outer state to the next.
+      if (inner_target_reached && final_record.l2 <= 0.98 * previous_outer_norm) {
+        adaptive_cfl = std::min(config_.run.cfl_max, cfl * 1.05);
+      } else if (!inner_target_reached || final_record.l2 > 1.02 * previous_outer_norm) {
         adaptive_cfl = std::max(steady_cfl_floor, cfl * 0.5);
       } else {
-        adaptive_cfl = std::max(steady_cfl_floor, cfl * 0.9);
+        adaptive_cfl = std::max(steady_cfl_floor, cfl * 0.95);
       }
       previous_outer_norm = final_record.l2;
     }
@@ -944,112 +966,146 @@ RunSummary FlowSolver::solve() {
     long long total_inner_iterations = 0;
     int min_inner_observed = std::numeric_limits<int>::max();
     int max_inner_observed = 0;
+    // Count attempts rather than silently accepting an under-converged physical
+    // state.  A retry keeps the same BDF history frozen, so an unsuccessful
+    // pseudo-time solve cannot contaminate U^n or U^{n-1}.
+    int attempted_inner_solves = 0;
+    int accepted_physical_steps = 0;
     int target_misses = 0;
     double final_ratio = 1.0;
     for (int step = 1; step <= physical_steps; ++step) {
       const double physical_time = static_cast<double>(step) * config_.run.time_step;
-      const double cfl = cfl_for_step(step);
-      state_ = previous;  // U^n is the starting guess and remains separately frozen below.
-      double first_inner_norm = 0.0;
-      int used_inner = 0;
+      const double requested_cfl = cfl_for_step(step);
       bool target_reached = false;
       ResidualRecord final_record;
-      for (int inner_iteration = 1; inner_iteration <= config_.run.max_inner_iterations; ++inner_iteration) {
-        Assembly assembly = assemble_spatial_residual();
-        const std::vector<double> dtau = local_time_steps(assembly.spectral_radius, cfl);
-        std::vector<double> total = assembly.residual;
-        std::vector<double> diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
+      double accepted_cfl = requested_cfl;
+      int used_inner = 0;
+      // Pseudo-CFL backoff is a controlled retry of the same physical step.
+      // The external BDF states remain immutable until an attempt reaches the
+      // full spatial-plus-physical residual target.
+      constexpr int kMaximumStepRetries = 4;
+      for (int retry = 0; retry < kMaximumStepRetries && !target_reached; ++retry) {
+        const double cfl = requested_cfl * std::pow(0.5, retry);
+        state_ = previous;  // U^n is the initial nonlinear iterate.
+        synchronize_state();
+        double first_inner_norm = 0.0;
+        used_inner = 0;
+        ++attempted_inner_solves;
+        for (int inner_iteration = 1; inner_iteration <= config_.run.max_inner_iterations; ++inner_iteration) {
+          Assembly assembly = assemble_spatial_residual();
+          const std::vector<double> dtau = local_time_steps(assembly.spectral_radius, cfl);
+          std::vector<double> total = assembly.residual;
+          std::vector<double> diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
+          const bool first_order_start = step == 1;
+          const double physical_coefficient = first_order_start ? 1.0 / config_.run.time_step
+                                                                 : 1.5 / config_.run.time_step;
+          for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+            const double area = mesh_.cells[static_cast<std::size_t>(local_cell)].area;
+            const double pseudo_diagonal = area / std::max(dtau[static_cast<std::size_t>(local_cell)], kTiny);
+            diagonal[static_cast<std::size_t>(local_cell)] = physical_coefficient * area + pseudo_diagonal;
+            const auto offset = static_cast<std::size_t>(local_cell) * 4U;
+            for (int component_index = 0; component_index < 4; ++component_index) {
+              const std::size_t index = offset + static_cast<std::size_t>(component_index);
+              if (first_order_start) {
+                total[index] += area / config_.run.time_step * (state_[index] - previous[index]);
+              } else {
+                total[index] += area / (2.0 * config_.run.time_step) *
+                                (3.0 * state_[index] - 4.0 * previous[index] + previous_previous[index]);
+              }
+            }
+          }
+          const ResidualRecord record =
+              global_residual_record(step, physical_time, inner_iteration, cfl, config_.run.time_step, total);
+          if (first_inner_norm == 0.0) {
+            first_inner_norm = std::max(record.l2, kTiny);
+          }
+          final_ratio = record.l2 / first_inner_norm;
+          used_inner = inner_iteration;
+          final_record = record;
+          if (inner_iteration >= config_.run.min_inner_iterations &&
+              final_ratio <= config_.run.inner_residual_reduction_target) {
+            target_reached = true;
+            break;
+          }
+          if (inner_iteration == config_.run.max_inner_iterations) {
+            break;
+          }
+          implicit_update(total, assembly.spectral_radius, diagonal, 0.9);
+        }
+        // Make the candidate state and reported force/surface state use the
+        // same synchronized reconstruction before deciding whether to accept.
+        const Assembly final_assembly = assemble_spatial_residual();
+        std::vector<double> final_total = final_assembly.residual;
         const bool first_order_start = step == 1;
-        const double physical_coefficient = first_order_start ? 1.0 / config_.run.time_step
-                                                               : 1.5 / config_.run.time_step;
         for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
           const double area = mesh_.cells[static_cast<std::size_t>(local_cell)].area;
-          const double pseudo_diagonal = area / std::max(dtau[static_cast<std::size_t>(local_cell)], kTiny);
-          diagonal[static_cast<std::size_t>(local_cell)] = physical_coefficient * area + pseudo_diagonal;
           const auto offset = static_cast<std::size_t>(local_cell) * 4U;
           for (int component_index = 0; component_index < 4; ++component_index) {
             const std::size_t index = offset + static_cast<std::size_t>(component_index);
             if (first_order_start) {
-              total[index] += area / config_.run.time_step * (state_[index] - previous[index]);
+              final_total[index] += area / config_.run.time_step * (state_[index] - previous[index]);
             } else {
-              total[index] += area / (2.0 * config_.run.time_step) *
-                              (3.0 * state_[index] - 4.0 * previous[index] + previous_previous[index]);
+              final_total[index] += area / (2.0 * config_.run.time_step) *
+                                    (3.0 * state_[index] - 4.0 * previous[index] + previous_previous[index]);
             }
           }
         }
-        const ResidualRecord record =
-            global_residual_record(step, physical_time, inner_iteration, cfl, config_.run.time_step, total);
-        if (first_inner_norm == 0.0) {
-          first_inner_norm = std::max(record.l2, kTiny);
-        }
-        final_ratio = record.l2 / first_inner_norm;
-        used_inner = inner_iteration;
-        final_record = record;
-        if (inner_iteration >= config_.run.min_inner_iterations &&
-            final_ratio <= config_.run.inner_residual_reduction_target) {
-          target_reached = true;
+        final_record = global_residual_record(step, physical_time, used_inner, cfl, config_.run.time_step, final_total);
+        final_ratio = final_record.l2 / std::max(first_inner_norm, kTiny);
+        target_reached = used_inner >= config_.run.min_inner_iterations &&
+                         final_ratio <= config_.run.inner_residual_reduction_target;
+        if (target_reached) {
+          accepted_cfl = cfl;
           break;
         }
-        if (inner_iteration == config_.run.max_inner_iterations) {
-          break;
-        }
-        implicit_update(total, assembly.spectral_radius, diagonal, 0.9);
+        ++target_misses;
+        // Reject the candidate.  In particular, do not append output or move
+        // BDF history forward from an under-converged physical solve.
+        state_ = previous;
+        synchronize_state();
       }
-      // Make the final accepted state and the reported force/surface state use
-      // the same synchronized reconstruction.
-      const Assembly final_assembly = assemble_spatial_residual();
-      std::vector<double> final_total = final_assembly.residual;
-      const bool first_order_start = step == 1;
-      for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
-        const double area = mesh_.cells[static_cast<std::size_t>(local_cell)].area;
-        const auto offset = static_cast<std::size_t>(local_cell) * 4U;
-        for (int component_index = 0; component_index < 4; ++component_index) {
-          const std::size_t index = offset + static_cast<std::size_t>(component_index);
-          if (first_order_start) {
-            final_total[index] += area / config_.run.time_step * (state_[index] - previous[index]);
-          } else {
-            final_total[index] += area / (2.0 * config_.run.time_step) *
-                                  (3.0 * state_[index] - 4.0 * previous[index] + previous_previous[index]);
-          }
-        }
-      }
-      final_record = global_residual_record(step, physical_time, used_inner, cfl, config_.run.time_step, final_total);
-      final_ratio = final_record.l2 / std::max(first_inner_norm, kTiny);
-      if (used_inner >= config_.run.min_inner_iterations &&
-          final_ratio <= config_.run.inner_residual_reduction_target) {
-        target_reached = true;
+      if (!target_reached) {
+        summary_.diagnostic = "transient inner target was not reached after controlled pseudo-CFL retries; BDF history was not advanced";
+        break;
       }
       summary_.residuals.push_back(final_record);
       summary_.forces.push_back(integrated_forces(step, physical_time));
       total_inner_iterations += used_inner;
       min_inner_observed = std::min(min_inner_observed, used_inner);
       max_inner_observed = std::max(max_inner_observed, used_inner);
-      if (!target_reached) {
-        ++target_misses;
-      }
       previous_previous = previous;
       previous = state_;  // history updates only after the complete inner loop is accepted.
       summary_.final_step = step;
       summary_.final_physical_time = physical_time;
+      ++accepted_physical_steps;
       if (rank_ == 0 && (step % 1000 == 0 || step == 1)) {
-        std::cout << "transient step=" << step << " t=" << physical_time << " residual_ratio=" << final_ratio
+        std::cout << "transient step=" << step << " t=" << physical_time << " cfl=" << accepted_cfl
+                  << " residual_ratio=" << final_ratio
                   << " inner_sweeps=" << used_inner << '\n' << std::flush;
       }
     }
     summary_.inner_statistics.minimum = min_inner_observed == std::numeric_limits<int>::max() ? 0 : min_inner_observed;
     summary_.inner_statistics.maximum = max_inner_observed;
-    summary_.inner_statistics.mean = static_cast<double>(total_inner_iterations) / static_cast<double>(physical_steps);
+    summary_.inner_statistics.mean = accepted_physical_steps > 0
+                                         ? static_cast<double>(total_inner_iterations) /
+                                               static_cast<double>(accepted_physical_steps)
+                                         : 0.0;
     summary_.inner_statistics.target_misses = target_misses;
-    summary_.inner_statistics.converged_fraction =
-        1.0 - static_cast<double>(target_misses) / static_cast<double>(physical_steps);
+    summary_.inner_statistics.converged_fraction = attempted_inner_solves > 0
+                                                        ? static_cast<double>(accepted_physical_steps) /
+                                                              static_cast<double>(attempted_inner_solves)
+                                                        : 0.0;
     summary_.inner_statistics.last_ratio = final_ratio;
     summary_.residual_reduction_orders = final_ratio > 0.0 ? -std::log10(final_ratio) : 0.0;
-    summary_.statistically_periodic = summary_.inner_statistics.converged_fraction >= 0.95 &&
+    const bool reached_requested_horizon = accepted_physical_steps == physical_steps;
+    summary_.statistically_periodic = reached_requested_horizon && summary_.inner_statistics.converged_fraction >= 0.95 &&
                                       transient_force_is_periodic();
     summary_.converged = summary_.statistically_periodic;
-    summary_.diagnostic = summary_.statistically_periodic
-                              ? "BDF2 outer physical-time loop reached the requested horizon with settled lift oscillations"
-                              : "transient run reached the requested horizon without satisfying periodicity or inner convergence criteria";
+    if (summary_.statistically_periodic) {
+      summary_.diagnostic = "BDF2 outer physical-time loop reached the requested horizon with settled lift oscillations";
+    } else if (reached_requested_horizon) {
+      summary_.diagnostic = "transient run reached the requested horizon without satisfying periodicity or inner convergence criteria";
+    }
   }
   synchronize_state();
   reconstruct_gradients_and_limit();
