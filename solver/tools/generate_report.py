@@ -225,7 +225,13 @@ def write_run_manifest(results: Path, report: Path) -> list[dict]:
         directories.extend((directory.name, directory) for directory in sorted(rank_root.iterdir()) if directory.is_dir())
     for label, directory in directories:
         status = load_json(directory / "run_status.json")
-        rows.append({"case_id": label, "command": status["command"], "mpi_ranks": status["mpi_ranks"],
+        metadata = load_json(directory / "metadata.json")
+        case_id = status.get("case_id")
+        if not case_id or metadata.get("case_id") != case_id:
+            raise ValueError(f"inconsistent case IDs in run artifacts: {directory}")
+        rows.append({"case_id": case_id, "run_label": label,
+                     "output_directory": directory.relative_to(results).as_posix(),
+                     "command": status["command"], "mpi_ranks": status["mpi_ranks"],
                      "wall_time_seconds": status["wall_time_seconds"], "final_step": status["final_step"],
                      "final_physical_time": status["final_physical_time"],
                      "residual_reduction_orders": status["residual_reduction_orders"],
@@ -448,15 +454,10 @@ def write_report(results: Path, report: Path, manifest_rows: list[dict], rank_ro
                       rf"\begin{{figure}}[htbp]\centering {figure(case_id + '_vorticity.png', r'0.78\textwidth')}"
                       rf"\caption{{Post-transient cylinder wake vorticity, clipped to $[-5,5]$ to preserve vortex-street contrast.}}"
                       rf"\label{{fig:{label}-wake}}\end{{figure}}"]
-    actual_rank_sets = {
-        case_id: sorted({row["mpi_ranks"] for row in rank_rows if row["case_id"] == case_id})
-        for case_id in ("naca0012_m015_inviscid", "cylinder_m010_laminar_re20")
-    }
     lines += [r"\clearpage\section{Parallel validation}",
               "The following independently generated comparisons use the actual MPI ranks recorded in "
-              r"\texttt{run\_status.json}: " + "; ".join(
-                  f"{latex_escape(case_id)}={','.join(str(rank) for rank in ranks)}" for case_id, ranks in actual_rank_sets.items()) + ". "
-              r"The table reports final forces, terminal global residuals, timing, and the measured partition load balance.",
+              r"\texttt{run\_status.json}. The table records those ranks alongside final forces, terminal global "
+              r"residuals, timing, and the measured partition load balance.",
               r"\begin{center}\scriptsize\begin{tabular}{lrrrrrrl}\toprule Case & ranks & $C_D$ & $C_L$ & $L_2$ residual & load ratio & wall (s) & status\\\midrule"]
     for row in rank_rows:
         lines.append(f"{latex_escape(row['case_id'])} & {row['mpi_ranks']} & {row['cd']:.8g} & {row['cl']:.8g} & "

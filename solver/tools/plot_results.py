@@ -123,6 +123,16 @@ def save_line_figures(case_id: str, result: Path, figures: Path, report: Path,
     ax.plot(x, cl, label=r"$C_L$", color="#204a87")
     ax.set(xlabel=xlabel, ylabel="force coefficient", title=case_id.replace("_", " "))
     ax.legend(ncol=2)
+    if case_id == "cylinder_m010_laminar_re200":
+        late_start = max(200.0, float(x[-1]) - 100.0)
+        late = x >= late_start
+        inset = ax.inset_axes([0.53, 0.25, 0.44, 0.45])
+        inset.plot(x[late], cd[late], color="#a40000")
+        inset.plot(x[late], cl[late], color="#204a87")
+        inset.set_title(rf"late window $t\geq {late_start:g}$", fontsize=8)
+        inset.set_xlim(late_start, float(x[-1]))
+        inset.tick_params(labelsize=7)
+        inset.grid(True, alpha=0.25)
     fig.tight_layout()
     filename = f"{case_id}_forces.png"
     fig.savefig(figures / filename)
@@ -139,8 +149,6 @@ def save_surface_figure(case_id: str, result: Path, figures: Path, report: Path,
     surface = np.atleast_1d(surface)
     viscous = "laminar" in case_id
     if case_id.startswith("naca"):
-        key = surface["x"]
-        order = np.argsort(key)
         xlabel = r"$x/c$"
     else:
         key = np.degrees(np.arctan2(surface["y"], surface["x"]))
@@ -149,12 +157,27 @@ def save_surface_figure(case_id: str, result: Path, figures: Path, report: Path,
     rows = 2 if viscous else 1
     fig, axes = plt.subplots(rows, 1, figsize=(5.6, 2.8 + 1.8 * (rows - 1)), sharex=True,
                              squeeze=False)
-    axes[0, 0].plot(key[order], surface["cp"][order], color="#204a87")
+    if case_id.startswith("naca"):
+        branches = (
+            ("upper", surface["y"] >= 0.0, "#204a87", "-"),
+            ("lower", surface["y"] < 0.0, "#a40000", "--"),
+        )
+        for label, mask, color, linestyle in branches:
+            branch_order = np.argsort(surface["x"][mask])
+            axes[0, 0].plot(surface["x"][mask][branch_order], surface["cp"][mask][branch_order],
+                            color=color, linestyle=linestyle, label=label)
+            if viscous:
+                axes[1, 0].plot(surface["x"][mask][branch_order], surface["cf"][mask][branch_order],
+                                color=color, linestyle=linestyle)
+        axes[0, 0].legend(ncol=2)
+    else:
+        axes[0, 0].plot(key[order], surface["cp"][order], color="#204a87")
     axes[0, 0].set_ylabel(r"$C_p$")
     if case_id.startswith("naca"):
         axes[0, 0].invert_yaxis()
     if viscous:
-        axes[1, 0].plot(key[order], surface["cf"][order], color="#a40000")
+        if not case_id.startswith("naca"):
+            axes[1, 0].plot(key[order], surface["cf"][order], color="#a40000")
         axes[1, 0].axhline(0.0, color="black", linewidth=0.6)
         axes[1, 0].set_ylabel(r"$C_f$")
     axes[-1, 0].set_xlabel(xlabel)
