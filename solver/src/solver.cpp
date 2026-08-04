@@ -915,7 +915,7 @@ RunSummary FlowSolver::solve() {
         }
         implicit_update(total, assembly.spectral_radius, diagonal, steady_relaxation);
       }
-      const Assembly diagnostic = assemble_spatial_residual();
+      Assembly diagnostic = assemble_spatial_residual();
       final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
       const std::size_t rolling_count = std::min<std::size_t>(25U, accepted_outer_norms.size());
       const double rolling_outer_norm = rolling_count == 0
@@ -929,7 +929,46 @@ RunSummary FlowSolver::solve() {
       const bool reject_floor_correction =
           at_steady_cfl_floor && std::isfinite(rolling_outer_norm) &&
           final_record.l2 > residual_trust_factor * rolling_outer_norm;
-      if (reject_high_cfl_correction) {
+      bool accepted_by_outer_line_search = false;
+      if ((reject_high_cfl_correction || reject_floor_correction) && std::isfinite(rolling_outer_norm)) {
+        // The inner solve may produce a useful correction whose full nonlinear
+        // amplitude is outside the residual trust region.  Backtracking that
+        // outer correction is both more direct and much cheaper than accepting
+        // a rebound after several identical floor-CFL re-solves.  Interpolate
+        // only owned cells, then refresh ghosts before measuring the trial.
+        const std::vector<double> full_correction_state = state_;
+        const double trust_limit = residual_trust_factor * rolling_outer_norm;
+        for (int line_search_step = 1; line_search_step <= 8; ++line_search_step) {
+          const double fraction = std::ldexp(1.0, -line_search_step);
+          for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+            const auto offset = static_cast<std::size_t>(local_cell) * 4U;
+            for (int component_index = 0; component_index < 4; ++component_index) {
+              const auto component = static_cast<std::size_t>(component_index);
+              state_[offset + component] = outer_state[offset + component] +
+                                           fraction * (full_correction_state[offset + component] -
+                                                       outer_state[offset + component]);
+            }
+          }
+          synchronize_state();
+          diagnostic = assemble_spatial_residual();
+          const ResidualRecord line_record =
+              global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+          if (std::isfinite(line_record.l2) && line_record.l2 <= trust_limit) {
+            final_record = line_record;
+            // A damped outer correction has not completed the requested
+            // implicit solve, so prevent the CFL controller from immediately
+            // increasing the next trial.
+            inner_target_reached = false;
+            accepted_by_outer_line_search = true;
+            break;
+          }
+        }
+        if (!accepted_by_outer_line_search) {
+          state_ = outer_state;
+          synchronize_state();
+        }
+      }
+      if (reject_high_cfl_correction && !accepted_by_outer_line_search) {
         // A growing correction away from the CFL floor is recoverable by
         // returning to the accepted outer state and retrying at lower CFL.
         // Do this before recording force/residual output so the controller
@@ -941,7 +980,7 @@ RunSummary FlowSolver::solve() {
         --step;
         continue;
       }
-      if (reject_floor_correction && floor_retry_count < 4) {
+      if (reject_floor_correction && !accepted_by_outer_line_search && floor_retry_count < 4) {
         // Reuse the same outer state with a smaller correction, so a failed
         // trial cannot contaminate the accepted residual/force history.  A
         // bounded retry count avoids indefinitely re-solving an identical
