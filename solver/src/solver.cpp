@@ -860,7 +860,7 @@ RunSummary FlowSolver::solve() {
     // The controller separately reduces the next CFL after a 10% accepted
     // step-to-step increase below.  Reserve this wider envelope for rejecting
     // genuinely unstable trials rather than normal nonlinear ringing.
-    constexpr double residual_trust_factor = 1.25;
+    constexpr double residual_trust_factor = 1.10;
     double previous_outer_norm = std::numeric_limits<double>::infinity();
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
