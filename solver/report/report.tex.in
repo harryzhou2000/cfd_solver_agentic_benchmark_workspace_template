@@ -12,21 +12,103 @@ This report is generated from completed solver outputs. The generated tables,
 sanity checks, and figures are traceable through \texttt{run\_manifest.csv} and
 \texttt{figure\_manifest.csv}; no result values are entered by hand.
 \end{abstract}
-\section{Method and reproducibility}
-Describe the conservative finite-volume discretization, second-order
-reconstruction and limiter, inviscid/viscous fluxes, implicit method, boundary
-conditions, METIS/ParMETIS partitioning, and neighbor-only halo exchanges used
-by the solver. State the nondimensional references and exact build/run
-commands. The generated manifest records the command, rank count, wall time,
-and completion status for each actual run.
+\section{Governing equations and reference quantities}
+The solver advances the conservative two-dimensional compressible
+Navier--Stokes state
+\[
+  \mathbf U=[\rho,\rho u,\rho v,\rho E]^T,
+  \qquad
+  \frac{\partial\mathbf U}{\partial t}+
+  \frac{\partial\mathbf F^i}{\partial x}+
+  \frac{\partial\mathbf G^i}{\partial y}=
+  \frac{\partial\mathbf F^v}{\partial x}+
+  \frac{\partial\mathbf G^v}{\partial y}.
+\]
+The inviscid fluxes are
+\[
+ \mathbf F^i=[\rho u,\rho u^2+p,\rho uv,u(\rho E+p)]^T,\qquad
+ \mathbf G^i=[\rho v,\rho uv,\rho v^2+p,v(\rho E+p)]^T.
+\]
+The calorically perfect gas closure is
+\(p=(\gamma-1)\rho e\), \(E=e+\tfrac12(u^2+v^2)\), and
+\(a=\sqrt{\gamma p/\rho}\).  Each case file provides the reference density,
+velocity, length, pressure, and force-reference area.  Force coefficients use
+\(q_\infty=\tfrac12\rho_\infty U_\infty^2\) and the supplied reference area.
+For laminar cases the constant viscosity is evaluated as
+\(\mu=\rho_\infty U_\infty L_{Re}/Re\), with
+\(k=\mu c_p/Pr\).
+
+\section{Spatial discretization and boundary conditions}
+The implementation is a cell-centred finite-volume method on the imported CGNS
+unstructured triangles and quadrilaterals.  Face residuals are assembled once
+with opposite signs on adjacent owned cells.  Least-squares primitive-variable
+gradients support linear face reconstruction, and an active Barth--Jespersen
+limiter bounds each reconstructed primitive component by its neighbouring
+values.  Density and temperature are floored at reconstructed faces; a
+positivity line search rejects nonphysical conservative updates.
+
+Inviscid faces use a local Lax--Friedrichs/Rusanov approximate Riemann flux.
+Laminar faces use the reconstructed velocity and temperature gradients to form
+the Newtonian stress tensor and Fourier heat flux.  The far field is evaluated
+from a characteristic trace.  Slip walls impose zero normal velocity and use
+the exact pressure traction; no-slip adiabatic walls impose zero reported wall
+velocity, a wall-normal velocity gradient, and zero wall-normal temperature
+gradient.  Pressure and tangential viscous forces are accumulated separately,
+so the reported skin friction is not contaminated by normal viscous traction.
+
+\section{Implicit iteration and physical-time integration}
+Steady cases use local pseudo-time stepping with the case-supplied CFL
+continuation schedule.  The frozen residual is corrected by a rank-local
+LU--SGS Rusanov preconditioner: owned--owned scalar Rusanov couplings are swept
+locally while inter-rank corrections remain lagged.  The diagonal contains the
+local pseudo-time and spectral-radius contributions, and every outer residual
+and force is a global MPI reduction.
+
+The Re~200 cylinder computation uses a BDF1 startup followed by BDF2,
+\[
+ \frac{A}{2\Delta t}\left(3U^{n+1}-4U^n+U^{n-1}\right)+R(U^{n+1})=0.
+\]
+For every physical step the two history states remain frozen during the inner
+solve.  A second-order extrapolation is used only as the initial nonlinear
+guess.  The accepted residual includes both the spatial residual and BDF term;
+an attempt that misses the configured reduction target is restored and retried
+at a reduced pseudo-CFL without advancing the history or emitting a force row.
+The reported inner statistics therefore refer only to accepted physical steps
+and explicit failed attempts.
+
+\section{MPI decomposition, output, and reproducibility}
+The global cell adjacency graph is partitioned with METIS.  Each rank stores
+only owned cells, its one-ring ghosts, and neighbour-scoped send/receive maps.
+Halo exchange uses nonblocking neighbour point-to-point communication for
+states and gradients; full mesh and full conservative-state replication are
+not used during iterations.  Rank-local VTU pieces and a PVTU index preserve
+the distributed final field.  The report reader merges only those real pieces
+for rendering; it never constructs synthetic field data.
+
+Build with \texttt{cmake -S solver -B solver/build} followed by
+\texttt{cmake --build solver/build}, then run
+\texttt{mpirun -np <ranks> solver/build/cfd\_solver solve --case <case.json>
+--output <directory>}.  The generated manifest records the exact command,
+rank count, wall time, and status for every submitted output, and the figure
+manifest links every plot below to its source CSV or field file.
 
 \section{Generated results and checks}
 \input{generated_results.tex}
 
-\section{Interpretation}
-Discuss the residual and force histories, NACA symmetry at zero angle of
-attack, viscous-wall behavior, cylinder drag, and (where present) Re 200 vortex
-shedding. Explain rank-count consistency using the automatically generated
-comparison table. Do not describe a case as successful if its generated
-sanity status is failed.
+\section{Interpretation and limitations}
+The generated residual, force, surface, Mach, and pressure figures are the
+evidence for each status in the following section.  At zero angle of attack,
+the NACA cases are checked for near-symmetric lift; viscous cases are checked
+for zero reported wall speed and nonzero skin friction.  Cylinder cases are
+checked for positive mean drag, and the Re~200 case additionally requires
+nonzero post-startup lift variation before it can be called statistically
+periodic.  The rank-count table is descriptive rather than a claim of ideal
+strong scaling: it records only runs actually supplied to the generator.
+
+The method deliberately uses a robust scalar Rusanov approximate Jacobian and
+rank-local block-Jacobi treatment across MPI interfaces.  These choices favour
+positivity and reproducibility over the sharper shocks and faster low-Mach
+convergence that a fully coupled Roe/HLLC or Krylov implementation could
+provide.  No case is described as successful if its generated sanity status is
+failed.
 \end{document}
