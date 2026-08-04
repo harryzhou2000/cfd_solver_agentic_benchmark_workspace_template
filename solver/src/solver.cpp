@@ -845,6 +845,12 @@ RunSummary FlowSolver::solve() {
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
       const double cfl = std::min(requested_cfl, adaptive_cfl);
+      // Once the controller has reached its permitted CFL floor, a further
+      // CFL backoff cannot damp a nonlinear oscillation.  Use a more
+      // conservative implicit correction in that regime instead of allowing
+      // a high-Reynolds-number steady solve to repeatedly amplify it.
+      const double steady_relaxation =
+          cfl <= steady_cfl_floor * (1.0 + 1.0e-12) ? 0.5 : 0.8;
       const std::vector<double> outer_state = state_;
       double first_inner_norm = 0.0;
       int used_inner = 0;
@@ -887,7 +893,7 @@ RunSummary FlowSolver::solve() {
           inner_target_reached = inner_converged;
           break;
         }
-        implicit_update(total, assembly.spectral_radius, diagonal, 0.8);
+        implicit_update(total, assembly.spectral_radius, diagonal, steady_relaxation);
       }
       const Assembly diagnostic = assemble_spatial_residual();
       final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
