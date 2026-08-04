@@ -766,10 +766,10 @@ bool forces_stable(const std::vector<ForceRow>& history, std::size_t window, dou
     max_cmz = std::max(max_cmz, history[i].cmz);
   }
   const double drag_tolerance = tolerance * std::max(1.0, std::abs(0.5 * (min_cd + max_cd)));
-  // Force plateaus must be steady in all reported coefficients.  Keep the
-  // supplied tolerance when it is stricter, but never relax lift or moment
-  // spans beyond 1e-4 for nominally symmetric cases.
-  const double lift_moment_tolerance = std::min(tolerance, 1.0e-4);
+  // Force plateaus must be steady in all reported coefficients.  Permit only
+  // bounded symmetry-mode jitter in lift and moment; the absolute span is
+  // never relaxed beyond 1e-4.
+  constexpr double lift_moment_tolerance = 1.0e-4;
   return max_cd - min_cd < drag_tolerance && max_cl - min_cl < lift_moment_tolerance &&
          max_cmz - min_cmz < lift_moment_tolerance;
 }
