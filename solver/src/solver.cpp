@@ -276,8 +276,12 @@ void FlowSolver::reconstruct_gradients_and_limit() {
 
   std::vector<std::array<double, 4>> minima(static_cast<std::size_t>(mesh_.owned_cell_count));
   std::vector<std::array<double, 4>> maxima(static_cast<std::size_t>(mesh_.owned_cell_count));
+  std::vector<double> pressure_min(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
+  std::vector<double> pressure_max(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
   for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
     const Primitive base = primitive_at(local_cell);
+    pressure_min[static_cast<std::size_t>(local_cell)] = base.pressure;
+    pressure_max[static_cast<std::size_t>(local_cell)] = base.pressure;
     for (int variable = 0; variable < 4; ++variable) {
       minima[static_cast<std::size_t>(local_cell)][static_cast<std::size_t>(variable)] = component(base, variable);
       maxima[static_cast<std::size_t>(local_cell)][static_cast<std::size_t>(variable)] = component(base, variable);
@@ -295,6 +299,10 @@ void FlowSolver::reconstruct_gradients_and_limit() {
             std::max(maxima[static_cast<std::size_t>(local_cell)][static_cast<std::size_t>(variable)],
                      component(other, variable));
       }
+      pressure_min[static_cast<std::size_t>(local_cell)] =
+          std::min(pressure_min[static_cast<std::size_t>(local_cell)], other.pressure);
+      pressure_max[static_cast<std::size_t>(local_cell)] =
+          std::max(pressure_max[static_cast<std::size_t>(local_cell)], other.pressure);
     }
   }
 
@@ -333,9 +341,17 @@ void FlowSolver::reconstruct_gradients_and_limit() {
   }
   for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
     const auto offset = static_cast<std::size_t>(local_cell) * 8U;
+    // A componentwise extrema limiter alone can leave a linear primitive
+    // reconstruction across a strong shock.  Suppress that reconstruction
+    // only in cells with a large neighboring pressure jump; smooth regions
+    // retain the second-order least-squares gradient unchanged.
+    const double pressure_ratio = pressure_max[static_cast<std::size_t>(local_cell)] /
+                                  std::max(pressure_min[static_cast<std::size_t>(local_cell)], kTiny);
+    const double shock_factor = std::clamp((1.25 - pressure_ratio) / 0.20, 0.0, 1.0);
     for (int variable = 0; variable < 4; ++variable) {
-      const double theta = std::clamp(limiter[static_cast<std::size_t>(local_cell)][static_cast<std::size_t>(variable)],
-                                      0.0, 1.0);
+      const double theta = std::min(
+          std::clamp(limiter[static_cast<std::size_t>(local_cell)][static_cast<std::size_t>(variable)], 0.0, 1.0),
+          shock_factor);
       raw[offset + static_cast<std::size_t>(2 * variable)] *= theta;
       raw[offset + static_cast<std::size_t>(2 * variable + 1)] *= theta;
     }
