@@ -1,0 +1,8 @@
+# OpenCodex proxy fallback config (Design B)
+# Root override that points Codex's built-in openai provider at the proxy on 127.0.0.1:10109.
+# Merge these root keys into ~/.codex/config.toml manually if auto-injection was removed.
+openai_base_url = "http://127.0.0.1:10109/v1"
+model_catalog_json = "/home/harry/.codex/opencodex-catalog.json"
+
+[features]
+fast_mode = true

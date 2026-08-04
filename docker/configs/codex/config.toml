@@ -1,0 +1,79 @@
+service_tier = "default"
+model_provider = "openai_vanilla"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "high"
+approvals_reviewer = "user"
+[mcp_servers.codegraph]
+command = "codegraph"
+args = ["serve", "--mcp"]
+
+[projects."/home/harry"]
+trust_level = "trusted"
+
+[projects."/home/harry/projects/aniFor_codex"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/CFD_discuss_ningbo2026"]
+trust_level = "trusted"
+
+[projects."/home/harry/.codex"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_dsv4_flash_01"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_glm52_01"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_gpt56_01"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_gpt56_02"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_glm52_02"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_dsv4_flash_02"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_kimik3_01"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_glm52_03"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_gpt56_03"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_gpt56_04"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/termux_style"]
+trust_level = "trusted"
+
+[tui]
+status_line = ["model-with-reasoning", "project-name", "git-branch", "permissions", "approval-mode", "context-remaining", "used-tokens", "total-input-tokens", "total-output-tokens", "fast-mode", "context-window-size"]
+status_line_use_colors = true
+session_picker_view = "comfortable"
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+"gpt-5.6-sol" = 4
+
+[features]
+memories = true
+multi_agent_v2 = { enabled = true, max_concurrent_threads_per_session = 4 }
+
+[memories]
+use_memories = false
+generate_memories = false
+
+[model_providers.openai_vanilla]
+name = "OpenAI Vanilla"
+base_url = "https://chatgpt.com/backend-api/codex"
+wire_api = "responses"
+requires_openai_auth = true

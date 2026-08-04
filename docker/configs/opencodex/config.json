@@ -1,0 +1,39 @@
+{
+  "port": 0,
+  "managementUsageMaxReadBytes": 67108864,
+  "appOwnedMemoryBudgetMb": 256,
+  "providers": {
+    "claude-se": {
+      "adapter": "anthropic",
+      "baseUrl": "https://example.test",
+      "retryOn429": {
+        "attempts": 1,
+        "intervalMs": 120,
+        "respectRetryAfter": false
+      },
+      "apiKey": "REDACTED",
+      "apiKeyPool": [
+        {
+          "id": "k1",
+          "key": "REDACTED",
+          "addedAt": 1
+        },
+        {
+          "id": "k2",
+          "key": "REDACTED",
+          "addedAt": 2
+        }
+      ]
+    }
+  },
+  "defaultProvider": "claude-se",
+  "subagentModels": [
+    "gpt-5.5",
+    "gpt-5.6-sol",
+    "gpt-5.6-terra",
+    "gpt-5.6-luna",
+    "gpt-5.4-mini"
+  ],
+  "openaiProviderTierVersion": 2,
+  "googleAntigravityStaticCatalogVersion": 1
+}
