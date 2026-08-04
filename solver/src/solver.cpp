@@ -962,7 +962,7 @@ RunSummary FlowSolver::solve() {
         // restore the outer state.  Recover it slowly only after sustained
         // improvement, so an isolated good step cannot re-excite a
         // high-Reynolds-number mode.
-        if (final_record.l2 < 0.98 * previous_outer_norm) {
+        if (final_record.l2 < previous_outer_norm) {
           ++floor_decline_streak;
           if (floor_decline_streak >= 5) {
             floor_relaxation = std::min(0.5, 1.25 * floor_relaxation);
