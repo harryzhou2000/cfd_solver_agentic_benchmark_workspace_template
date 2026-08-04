@@ -211,7 +211,8 @@ def percentiles(values: np.ndarray) -> tuple[float, float]:
     return float(low), float(high)
 
 
-def plot_field(field: Field, aliases: list[str], title: str, label: str, destination: Path) -> np.ndarray:
+def plot_field(field: Field, aliases: list[str], title: str, label: str, destination: Path,
+               limits: tuple[tuple[float, float], tuple[float, float]] | None = None) -> np.ndarray:
     values, location = field.scalar(aliases)
     tri = mtri.Triangulation(field.points[:, 0], field.points[:, 1], field.triangles)
     fig, axis = plt.subplots(figsize=(8.0, 4.8), constrained_layout=True)
@@ -228,6 +229,9 @@ def plot_field(field: Field, aliases: list[str], title: str, label: str, destina
     colorbar.set_label(label)
     axis.set(title=title, xlabel="$x$", ylabel="$y$")
     axis.set_aspect("equal", adjustable="box")
+    if limits is not None:
+        axis.set_xlim(*limits[0])
+        axis.set_ylim(*limits[1])
     axis.grid(alpha=0.2)
     fig.savefig(destination, dpi=220)
     plt.close(fig)
@@ -270,6 +274,20 @@ def plot_surface(rows: list[dict[str, float | str]], case_id: str, destination: 
     axis.legend()
     fig.savefig(destination, dpi=220)
     plt.close(fig)
+
+
+def body_view_limits(case: Case) -> tuple[tuple[float, float], tuple[float, float]]:
+    """Return an actual-surface-based near-body or cylinder-wake view window."""
+    x = numeric(case.surface, "x")
+    y = numeric(case.surface, "y")
+    xmin, xmax = float(np.min(x)), float(np.max(x))
+    ymin, ymax = float(np.min(y)), float(np.max(y))
+    scale = max(xmax - xmin, ymax - ymin, 1.0e-8)
+    if "cylinder" in case.case_id.lower():
+        return ((xmin - 1.5 * scale, xmax + 8.0 * scale),
+                ((ymin + ymax) * 0.5 - 3.0 * scale, (ymin + ymax) * 0.5 + 3.0 * scale))
+    return ((xmin - 0.15 * scale, xmax + 0.15 * scale),
+            ((ymin + ymax) * 0.5 - 0.65 * scale, (ymin + ymax) * 0.5 + 0.65 * scale))
 
 
 def tex(value: Any) -> str:
@@ -407,9 +425,16 @@ def main() -> None:
         mach_name = f"{stem}_mach.png"
         mach = plot_field(case.field, ["mach", "mach_number", "machnumber"], f"{case.case_id}: Mach number", "Mach number", figures_dir / mach_name)
         add_manifest(figures, mach_name, case.case_id, "field", "mach", case.field_path, "Filled Mach-number field")
+        limits = body_view_limits(case)
+        mach_zoom_name = f"{stem}_mach_body_or_wake.png"
+        plot_field(case.field, ["mach", "mach_number", "machnumber"], f"{case.case_id}: Mach number (body/wake view)", "Mach number", figures_dir / mach_zoom_name, limits)
+        add_manifest(figures, mach_zoom_name, case.case_id, "field_zoom", "mach", case.field_path, "Filled Mach-number body or wake view")
         pressure_name = f"{stem}_pressure.png"
         pressure = plot_field(case.field, ["pressure", "p"], f"{case.case_id}: pressure", "pressure", figures_dir / pressure_name)
         add_manifest(figures, pressure_name, case.case_id, "field", "pressure", case.field_path, "Filled pressure field")
+        pressure_zoom_name = f"{stem}_pressure_body_or_wake.png"
+        plot_field(case.field, ["pressure", "p"], f"{case.case_id}: pressure (body/wake view)", "pressure", figures_dir / pressure_zoom_name, limits)
+        add_manifest(figures, pressure_zoom_name, case.case_id, "field_zoom", "pressure", case.field_path, "Filled pressure body or wake view")
         # Verify required field components even though the report's mandatory
         # figures are Mach and pressure.
         case.field.velocity()
