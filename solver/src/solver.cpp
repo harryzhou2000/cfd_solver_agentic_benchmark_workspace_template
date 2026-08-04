@@ -957,7 +957,7 @@ RunResult run_solver(const CaseConfig& config, const LocalMesh& mesh, MPI_Comm c
       if (rank == 0 && options.progress_interval > 0 && (step == 1 || step % options.progress_interval == 0)) {
         observer.progress(progress_line(step, 0.0, evaluation, force, reduction, linear_iterations));
       }
-      if (reduction >= config.run.residual_reduction_target && forces_stable(result.force_history, 50, 1.0e-5)) {
+      if (reduction >= config.run.residual_reduction_target && forces_stable(result.force_history, 500, 1.0e-5)) {
         result.convergence_status = "converged";
         result.notes = "Residual target reached and terminal force window is stable.";
         break;
