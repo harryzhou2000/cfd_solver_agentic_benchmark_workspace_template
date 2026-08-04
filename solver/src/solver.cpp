@@ -933,12 +933,16 @@ RunSummary FlowSolver::solve() {
       // tolerance produced a low-Mach limit cycle: inner pseudo solves could
       // meet their relative target while the actual spatial residual wandered
       // upward from one outer state to the next.
-      if (inner_target_reached && final_record.l2 <= 0.98 * previous_outer_norm) {
+      if (inner_target_reached && final_record.l2 <= previous_outer_norm) {
         adaptive_cfl = std::min(config_.run.cfl_max, cfl * 1.05);
       } else if (!inner_target_reached || final_record.l2 > 1.02 * previous_outer_norm) {
         adaptive_cfl = std::max(steady_cfl_floor, cfl * 0.5);
       } else {
-        adaptive_cfl = std::max(steady_cfl_floor, cfl * 0.95);
+        // A small, bounded residual increase neither earns a CFL increase nor
+        // drives a monotone low-CFL solve into its floor.  A true increase is
+        // rejected above, so retaining CFL here does not recreate the former
+        // continuation overshoot.
+        adaptive_cfl = std::max(steady_cfl_floor, cfl);
       }
       previous_outer_norm = final_record.l2;
     }
