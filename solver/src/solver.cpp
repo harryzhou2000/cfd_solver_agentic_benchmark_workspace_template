@@ -489,20 +489,26 @@ ResidualRecord FlowSolver::global_residual_record(const int step, const double t
                                                   const std::vector<double>& residual) const {
   std::array<double, 4> local_squares{0.0, 0.0, 0.0, 0.0};
   double local_infinity = 0.0;
+  double local_volume = 0.0;
   for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
     const double area = mesh_.cells[static_cast<std::size_t>(local_cell)].area;
+    local_volume += area;
     const auto offset = static_cast<std::size_t>(local_cell) * 4U;
     for (int component_index = 0; component_index < 4; ++component_index) {
       const double normalized = residual[offset + static_cast<std::size_t>(component_index)] / area;
-      local_squares[static_cast<std::size_t>(component_index)] += normalized * normalized;
+      // Finite-volume residuals are cell-volume integrals.  Weighting their
+      // density by cell area gives the physical L2 norm and prevents a single
+      // vanishing-area sharp trailing-edge cell from dominating convergence.
+      local_squares[static_cast<std::size_t>(component_index)] += normalized * normalized * area;
       local_infinity = std::max(local_infinity, std::abs(normalized));
     }
   }
   std::array<double, 4> global_squares{};
   double global_infinity = 0.0;
+  double global_volume = 0.0;
   MPI_Allreduce(local_squares.data(), global_squares.data(), 4, MPI_DOUBLE, MPI_SUM, comm_);
   MPI_Allreduce(&local_infinity, &global_infinity, 1, MPI_DOUBLE, MPI_MAX, comm_);
-  const double global_cells = static_cast<double>(mesh_.global_cell_count);
+  MPI_Allreduce(&local_volume, &global_volume, 1, MPI_DOUBLE, MPI_SUM, comm_);
   ResidualRecord record;
   record.step = step;
   record.physical_time = time;
@@ -512,7 +518,7 @@ ResidualRecord FlowSolver::global_residual_record(const int step, const double t
   double combined = 0.0;
   for (int component_index = 0; component_index < 4; ++component_index) {
     record.components[static_cast<std::size_t>(component_index)] =
-        std::sqrt(global_squares[static_cast<std::size_t>(component_index)] / global_cells);
+        std::sqrt(global_squares[static_cast<std::size_t>(component_index)] / std::max(global_volume, kTiny));
     combined += record.components[static_cast<std::size_t>(component_index)] *
                 record.components[static_cast<std::size_t>(component_index)];
   }
