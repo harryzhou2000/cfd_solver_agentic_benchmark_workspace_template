@@ -848,8 +848,14 @@ RunSummary FlowSolver::solve() {
     // physical discretization.
     double floor_relaxation = 0.5;
     int floor_decline_streak = 0;
-    int floor_retry_count = 0;
-    double best_outer_norm = std::numeric_limits<double>::infinity();
+    constexpr double minimum_floor_relaxation = 0.0625;
+    // A steady nonlinear solve can make small, bounded residual excursions
+    // while still converging.  Keep the trust region local to the recent
+    // accepted trajectory: an all-time residual minimum turns a harmless
+    // trough into a permanent rejection threshold and repeatedly re-solves
+    // the same floor-CFL correction without changing the state.
+    std::vector<double> accepted_outer_norms;
+    accepted_outer_norms.reserve(static_cast<std::size_t>(config_.run.max_steps));
     double previous_outer_norm = std::numeric_limits<double>::infinity();
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
@@ -906,10 +912,18 @@ RunSummary FlowSolver::solve() {
       }
       const Assembly diagnostic = assemble_spatial_residual();
       final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+      const std::size_t rolling_count = std::min<std::size_t>(25U, accepted_outer_norms.size());
+      const double rolling_outer_norm = rolling_count == 0
+                                            ? std::numeric_limits<double>::infinity()
+                                            : *std::min_element(accepted_outer_norms.end() -
+                                                                    static_cast<std::ptrdiff_t>(rolling_count),
+                                                                accepted_outer_norms.end());
       const bool reject_high_cfl_correction =
-          !at_steady_cfl_floor && std::isfinite(best_outer_norm) && final_record.l2 > 1.02 * best_outer_norm;
+          !at_steady_cfl_floor && std::isfinite(rolling_outer_norm) &&
+          final_record.l2 > 1.10 * rolling_outer_norm;
       const bool reject_floor_correction =
-          at_steady_cfl_floor && std::isfinite(best_outer_norm) && final_record.l2 > 1.02 * best_outer_norm;
+          at_steady_cfl_floor && std::isfinite(rolling_outer_norm) &&
+          final_record.l2 > 1.10 * rolling_outer_norm;
       if (reject_high_cfl_correction) {
         // A growing correction away from the CFL floor is recoverable by
         // returning to the accepted outer state and retrying at lower CFL.
@@ -922,21 +936,24 @@ RunSummary FlowSolver::solve() {
         --step;
         continue;
       }
-      if (reject_floor_correction && floor_retry_count < 4) {
-        // Do not retain a growing nonlinear correction merely because the CFL
-        // controller has reached its floor.  Reuse the same outer state with a
-        // smaller correction, so the failed trial cannot contaminate the
-        // accepted residual/force history or the next nonlinear solve.
+      if (reject_floor_correction) {
+        // Reuse the same outer state with a smaller correction, so a failed
+        // trial cannot contaminate the accepted residual/force history.  At
+        // the minimum relaxation, retrying the same deterministic correction
+        // would only waste inner solves; report controlled non-convergence
+        // rather than advancing a rejected state.
         state_ = outer_state;
         synchronize_state();
-        floor_relaxation = std::max(0.0625, 0.5 * floor_relaxation);
+        if (floor_relaxation <= minimum_floor_relaxation * (1.0 + 1.0e-12)) {
+          summary_.diagnostic = "steady floor-CFL recovery exhausted its nonlinear relaxation trust region";
+          break;
+        }
+        floor_relaxation = std::max(minimum_floor_relaxation, 0.5 * floor_relaxation);
         floor_decline_streak = 0;
-        ++floor_retry_count;
         --step;
         continue;
       }
-      floor_retry_count = 0;
-      best_outer_norm = std::min(best_outer_norm, final_record.l2);
+      accepted_outer_norms.push_back(final_record.l2);
       summary_.residuals.push_back(final_record);
       const std::vector<double> dtau = local_time_steps(diagnostic.spectral_radius, cfl);
       double local_dt_sum = std::accumulate(dtau.begin(), dtau.end(), 0.0);
