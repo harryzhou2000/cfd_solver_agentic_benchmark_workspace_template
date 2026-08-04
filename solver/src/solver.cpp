@@ -905,6 +905,9 @@ RunSummary FlowSolver::solve() {
       }
       const Assembly diagnostic = assemble_spatial_residual();
       final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+      if (at_steady_cfl_floor && std::isfinite(previous_outer_norm)) {
+        floor_best_outer_norm = std::min(floor_best_outer_norm, previous_outer_norm);
+      }
       const bool reject_high_cfl_correction =
           !at_steady_cfl_floor && std::isfinite(previous_outer_norm) && final_record.l2 > 1.10 * previous_outer_norm;
       const bool reject_floor_correction =
