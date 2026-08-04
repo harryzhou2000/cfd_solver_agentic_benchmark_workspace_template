@@ -842,10 +842,6 @@ RunSummary FlowSolver::solve() {
     const double steady_cfl_floor = std::min(config_.run.cfl_initial, 0.2);
     double adaptive_cfl = config_.run.cfl_initial;
     double previous_outer_norm = std::numeric_limits<double>::infinity();
-    // Residual changes from one nonlinear state can be very small even while
-    // a sequence at the same CFL drifts upward.  Retain the last accepted
-    // envelope so the controller can reject that cumulative growth.
-    double cfl_reference_norm = std::numeric_limits<double>::infinity();
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
       const double cfl = std::min(requested_cfl, adaptive_cfl);
@@ -932,28 +928,12 @@ RunSummary FlowSolver::solve() {
         summary_.diagnostic = "global residual target reached by CFL-controlled block-Jacobi pseudo-time solve";
         break;
       }
-      // Treat an outer-residual increase as a nonlinear rejection rather than
-      // continuing to amplify the local pseudo-CFL.  The old broad 2--10%
-      // tolerance produced a low-Mach limit cycle: inner pseudo solves could
-      // meet their relative target while the actual spatial residual wandered
-      // upward from one outer state to the next.
-      if (inner_target_reached && final_record.l2 <= previous_outer_norm) {
-        adaptive_cfl = std::min(config_.run.cfl_max, cfl * 1.05);
-        cfl_reference_norm = std::min(cfl_reference_norm, final_record.l2);
-      } else if (!inner_target_reached || final_record.l2 > 1.02 * previous_outer_norm) {
+      if (inner_target_reached && final_record.l2 <= 1.02 * previous_outer_norm) {
+        adaptive_cfl = std::min(config_.run.cfl_max, cfl * 1.15);
+      } else if (!inner_target_reached || final_record.l2 > 1.10 * previous_outer_norm) {
         adaptive_cfl = std::max(steady_cfl_floor, cfl * 0.5);
-        cfl_reference_norm = final_record.l2;
       } else {
-        // A small, bounded residual increase neither earns a CFL increase nor
-        // drives a monotone low-CFL solve into its floor.  A true increase is
-        // rejected above, so retaining CFL here does not recreate the former
-        // continuation overshoot.
-        if (final_record.l2 > 1.02 * cfl_reference_norm) {
-          adaptive_cfl = std::max(steady_cfl_floor, cfl * 0.5);
-          cfl_reference_norm = final_record.l2;
-        } else {
-          adaptive_cfl = std::max(steady_cfl_floor, cfl);
-        }
+        adaptive_cfl = std::max(steady_cfl_floor, cfl * 0.9);
       }
       previous_outer_norm = final_record.l2;
     }
