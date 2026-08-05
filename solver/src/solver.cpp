@@ -931,6 +931,58 @@ RunSummary FlowSolver::solve() {
       }
       Assembly diagnostic = assemble_spatial_residual();
       final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+      // Once a strongly dissipative shock-continuation branch is established,
+      // test modest forward extrapolations of its fully implicit outer
+      // correction.  Keep one only when the *assembled nonlinear residual*
+      // improves, so this is a safeguarded nonlinear acceleration rather than
+      // a change to the finite-volume equations or an unchecked CFL increase.
+      const bool try_forward_outer_acceleration =
+          config_.freestream.mach >= 0.5 && config_.freestream.mach < 1.0 &&
+          config_.run.rusanov_dissipation_scale >= 8.0 && accepted_outer_norms.size() >= 100U;
+      if (try_forward_outer_acceleration && std::isfinite(final_record.l2)) {
+        const std::vector<double> full_correction_state = state_;
+        std::vector<double> best_state = state_;
+        double best_norm = final_record.l2;
+        bool accelerated = false;
+        for (const double factor : std::array<double, 4>{1.25, 1.5, 1.75, 2.0}) {
+          bool locally_physical = true;
+          for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+            const auto offset = static_cast<std::size_t>(local_cell) * 4U;
+            Conserved candidate{};
+            for (int component_index = 0; component_index < 4; ++component_index) {
+              const auto component = static_cast<std::size_t>(component_index);
+              candidate[component] = outer_state[offset + component] +
+                                     factor * (full_correction_state[offset + component] - outer_state[offset + component]);
+              state_[offset + component] = candidate[component];
+            }
+            locally_physical = locally_physical && gas_.physical(candidate);
+          }
+          int local_valid = locally_physical ? 1 : 0;
+          int global_valid = 0;
+          MPI_Allreduce(&local_valid, &global_valid, 1, MPI_INT, MPI_MIN, comm_);
+          if (global_valid == 0) {
+            continue;
+          }
+          synchronize_state();
+          Assembly candidate_diagnostic = assemble_spatial_residual();
+          const ResidualRecord candidate_record =
+              global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, candidate_diagnostic.residual);
+          if (std::isfinite(candidate_record.l2) && candidate_record.l2 < best_norm) {
+            best_norm = candidate_record.l2;
+            best_state = state_;
+            accelerated = true;
+          }
+        }
+        state_ = std::move(best_state);
+        synchronize_state();
+        if (accelerated) {
+          diagnostic = assemble_spatial_residual();
+          final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+        } else {
+          state_ = full_correction_state;
+          synchronize_state();
+        }
+      }
       const std::size_t rolling_count = std::min<std::size_t>(25U, accepted_outer_norms.size());
       const double rolling_outer_norm = rolling_count == 0
                                             ? std::numeric_limits<double>::infinity()
