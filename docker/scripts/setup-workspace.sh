@@ -29,6 +29,10 @@ cd "$WS"
 echo "== pinning benchmark submodule =="
 git submodule update --init --recursive
 
+echo "== setup: .sessions/ (bundled codex/opencode sessions, git-excluded) =="
+mkdir -p .sessions
+grep -qxF '.sessions/' .git/info/exclude 2>/dev/null || printf '.sessions/\n' >> .git/info/exclude
+
 echo "== setup: git remote rm origin =="
 git remote rm origin
 

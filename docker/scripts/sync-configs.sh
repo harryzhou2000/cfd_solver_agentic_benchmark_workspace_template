@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
 # Regenerate docker/configs from the live host environment, redacting secrets.
 # Run from the repo root. Never commit unredacted credentials.
+#
+# Optional --env-mode: instead of leaving apiKeys as REDACTED, rewrite opencode
+# config apiKeys to "{env:OPENCODE_API_KEY}" placeholders so the baked image
+# can be used by exporting OPENCODE_API_KEY at runtime. Codex/opencodex keys
+# stay mount-only (their configs have no env placeholder support).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
+
+ENV_MODE=0
+for arg in "$@"; do
+  case "$arg" in
+    --env-mode) ENV_MODE=1 ;;
+    *) echo "unknown option: $arg" >&2; exit 1 ;;
+  esac
+done
 
 D="$ROOT/docker/configs"
 OCONF="$HOME/.config/opencode"
@@ -40,6 +53,14 @@ find "$D" -type f \( -name '*.json' -o -name '*.jsonc' -o -name '*.toml' -o -nam
     -e 's#("key"[[:space:]]*:[[:space:]]*")[^"]*#\1REDACTED#g' \
     -e 's#(sk-[A-Za-z0-9_-]{16,})#sk-REDACTED#g' \
     {} +
+
+if [ "$ENV_MODE" = "1" ]; then
+  echo "== converting opencode apiKeys to {env:OPENCODE_API_KEY} placeholders =="
+  find "$D/opencode" -type f \( -name '*.json' -o -name '*.jsonc' \) \
+    -exec sed -i -E \
+      -e 's#("apiKey"[[:space:]]*:[[:space:]]*")REDACTED(")#\1{env:OPENCODE_API_KEY}\2#g' \
+      {} +
+fi
 
 echo "== verifying no secrets remain =="
 python3 - "$D" <<'EOF'
