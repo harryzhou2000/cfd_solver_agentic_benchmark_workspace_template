@@ -47,6 +47,12 @@ struct RunControl {
   double final_time{0.0};
   std::string time_integrator;
   double rusanov_dissipation_scale{1.0};
+  // Optional p-continuation control for diagnostics/restarts.  Production
+  // inputs leave this at one, retaining the full second-order reconstruction.
+  double reconstruction_gradient_scale{1.0};
+  // Diagnostic switch for a fully safeguarded matrix-free Newton sequence.
+  // Production inputs leave pseudo-time continuation as the main path.
+  bool steady_newton_only{false};
 };
 
 struct CaseConfig {

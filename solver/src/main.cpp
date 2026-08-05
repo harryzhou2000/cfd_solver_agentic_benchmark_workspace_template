@@ -25,11 +25,12 @@ struct CommandLine {
   std::filesystem::path output_directory;
   std::filesystem::path restart_file;
   std::string report_level{"brief"};
+  bool steady_newton_only{false};
 };
 
 std::string usage() {
   return "Usage: cfd_solver solve --case <case.json> --output <output-dir> "
-         "[--restart <restart_final.manifest.json>] [--report-level brief|full]";
+         "[--restart <restart_final.manifest.json>] [--report-level brief|full] [--steady-newton-only]";
 }
 
 CommandLine parse_command_line(const int argc, char** argv) {
@@ -53,6 +54,8 @@ CommandLine parse_command_line(const int argc, char** argv) {
       command.restart_file = require_value();
     } else if (argument == "--report-level") {
       command.report_level = require_value();
+    } else if (argument == "--steady-newton-only") {
+      command.steady_newton_only = true;
     } else if (argument == "--help" || argument == "-h") {
       throw std::runtime_error(usage());
     } else {
@@ -127,7 +130,14 @@ int main(int argc, char** argv) {
   int exit_code = 1;
   try {
     const CommandLine command = parse_command_line(argc, argv);
-    const cfd::CaseConfig config = cfd::load_case_config(command.case_file);
+    cfd::CaseConfig config = cfd::load_case_config(command.case_file);
+    if (command.steady_newton_only) {
+      if (config.run.type != cfd::RunType::Steady) {
+        throw std::runtime_error("--steady-newton-only is available only for steady cases");
+      }
+      config.run.steady_newton_only = true;
+      config.run.time_integrator = "steady_safeguarded_matrix_free_newton";
+    }
     cfd::LocalMesh mesh = cfd::read_partition_distribute(config.mesh_file.string(), config.boundary_conditions,
                                                           MPI_COMM_WORLD);
     cfd::OutputWriter writer(command.output_directory, MPI_COMM_WORLD);
@@ -163,7 +173,9 @@ int main(int argc, char** argv) {
                                 ? "unstructured_primitive_gradient_newtonian_fourier"
                                 : "disabled";
     metadata.inviscid_flux = "rusanov_local_lax_friedrichs";
-    metadata.implicit_solver = "multi_sweep_rank_local_lu_sgs_rusanov_preconditioner";
+    metadata.implicit_solver = config.run.steady_newton_only
+                                   ? "safeguarded_matrix_free_newton_with_block_lu_sgs_right_preconditioning"
+                                   : "multi_sweep_rank_local_lu_sgs_rusanov_preconditioner";
     metadata.true_bdf2_inner_loop = config.run.type == cfd::RunType::Transient;
     metadata.typical_inner_iterations = static_cast<int>(std::llround(summary.inner_statistics.mean));
     metadata.min_inner_iterations = config.run.min_inner_iterations;

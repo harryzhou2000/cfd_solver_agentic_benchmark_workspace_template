@@ -126,6 +126,11 @@ class FlowSolver {
                        const std::vector<double>& spectral,
                        const std::vector<double>& time_diagonal,
                        double relaxation);
+  /// Safeguarded Jacobian-free Newton correction used only for difficult
+  /// steady nonlinear plateaus.  The finite-volume residual remains the
+  /// convergence metric; this routine mutates state only when a line-search
+  /// candidate lowers that fully assembled residual.
+  [[nodiscard]] bool try_matrix_free_newton_step(const Assembly& baseline);
   [[nodiscard]] double cfl_for_step(int step) const;
   [[nodiscard]] double global_norm(const std::vector<double>& residual) const;
   [[nodiscard]] double local_viscosity() const;

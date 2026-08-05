@@ -199,9 +199,12 @@ CaseConfig load_case_config(const std::filesystem::path& case_path) {
   result.run.max_inner_iterations = integer(run, "max_inner_iterations");
   result.run.inner_residual_reduction_target = number(run, "inner_residual_reduction_target");
   result.run.rusanov_dissipation_scale = run.value("rusanov_dissipation_scale", 1.0);
+  result.run.reconstruction_gradient_scale = run.value("reconstruction_gradient_scale", 1.0);
+  result.run.steady_newton_only = run.value("steady_newton_only", false);
   if (result.run.cfl_initial <= 0.0 || result.run.cfl_max <= 0.0 ||
       result.run.min_inner_iterations <= 0 || result.run.max_inner_iterations < result.run.min_inner_iterations ||
-      result.run.inner_residual_reduction_target <= 0.0 || result.run.rusanov_dissipation_scale <= 0.0) {
+      result.run.inner_residual_reduction_target <= 0.0 || result.run.rusanov_dissipation_scale <= 0.0 ||
+      result.run.reconstruction_gradient_scale < 0.0 || result.run.reconstruction_gradient_scale > 1.0) {
     throw std::runtime_error("invalid run-control values");
   }
   return result;

@@ -541,7 +541,7 @@ void FlowSolver::reconstruct_gradients_and_limit() {
     for (int variable = 0; variable < 4; ++variable) {
       const double theta = std::min(
           std::clamp(limiter[static_cast<std::size_t>(local_cell)][static_cast<std::size_t>(variable)], 0.0, 1.0),
-          shock_factor);
+          shock_factor) * config_.run.reconstruction_gradient_scale;
       raw[offset + static_cast<std::size_t>(2 * variable)] *= theta;
       raw[offset + static_cast<std::size_t>(2 * variable + 1)] *= theta;
     }
@@ -778,14 +778,8 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
   // positive scalar pseudo-time/spectral term is kept as a diagonal-dominance
   // floor; it is deliberately not replaced by an exact, less robust Jacobian.
   std::vector<double> scalar_diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
-  std::vector<Block4> diagonals(static_cast<std::size_t>(mesh_.owned_cell_count));
-  for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
-    const double floor = std::max(time_diagonal[static_cast<std::size_t>(local_cell)] +
-                                      spectral[static_cast<std::size_t>(local_cell)],
-                                  kTiny);
-    scalar_diagonal[static_cast<std::size_t>(local_cell)] = floor;
-    diagonals[static_cast<std::size_t>(local_cell)] = scaled_identity(floor);
-  }
+  std::vector<double> convective_spectral(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
+  std::vector<Block4> diagonals(static_cast<std::size_t>(mesh_.owned_cell_count), zero_block());
 
   struct BlockCoupling {
     int neighbor{0};
@@ -793,15 +787,24 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
   };
   std::vector<std::vector<BlockCoupling>> couplings(static_cast<std::size_t>(mesh_.owned_cell_count));
   for (const LocalFace& face : mesh_.faces) {
-    if (face.right_cell < 0 || !mesh_.is_owned(face.left_cell) || !mesh_.is_owned(face.right_cell)) {
-      continue;
-    }
     const Primitive left = reconstructed_primitive(face.left_cell, face.centroid);
-    const Primitive right = reconstructed_primitive(face.right_cell, face.centroid);
+    const bool has_right_cell = face.right_cell >= 0;
+    const Primitive right = has_right_cell ? reconstructed_primitive(face.right_cell, face.centroid) : left;
     const double left_signal = std::abs(left.u * face.unit_normal.x + left.v * face.unit_normal.y) +
                                left.sound_speed;
     const double right_signal = std::abs(right.u * face.unit_normal.x + right.v * face.unit_normal.y) +
                                 right.sound_speed;
+    if (mesh_.is_owned(face.left_cell)) {
+      convective_spectral[static_cast<std::size_t>(face.left_cell)] +=
+          config_.run.rusanov_dissipation_scale * left_signal * face.length;
+    }
+    if (has_right_cell && mesh_.is_owned(face.right_cell)) {
+      convective_spectral[static_cast<std::size_t>(face.right_cell)] +=
+          config_.run.rusanov_dissipation_scale * right_signal * face.length;
+    }
+    if (!has_right_cell || !mesh_.is_owned(face.left_cell) || !mesh_.is_owned(face.right_cell)) {
+      continue;
+    }
     const double half_dissipation = 0.5 * config_.run.rusanov_dissipation_scale *
                                     std::max(left_signal, right_signal) * face.length;
     if (!(half_dissipation > 0.0) || !std::isfinite(half_dissipation)) {
@@ -810,9 +813,9 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
 
     const Block4 left_jacobian = euler_normal_jacobian(left, face.unit_normal, config_.gas.gamma);
     const Block4 right_jacobian = euler_normal_jacobian(right, face.unit_normal, config_.gas.gamma);
-    // Retain alpha I as the scalar Rusanov stabilizer and add only the bounded
-    // physical part of the self Jacobian.  This is a frozen approximation to
-    // the residual's Rusanov flux, not a change to that flux.
+    // Retain the positive half-alpha self term from the Rusanov flux and add
+    // only the bounded physical part of the self Jacobian.  This is a frozen
+    // approximation to the residual's Rusanov flux, not a change to that flux.
     add_scaled_block(diagonals[static_cast<std::size_t>(face.left_cell)], left_jacobian,
                      0.5 * face.length);
     add_scaled_block(diagonals[static_cast<std::size_t>(face.right_cell)], right_jacobian,
@@ -824,6 +827,18 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
     add_scaled_block(right_to_left, left_jacobian, -0.5 * face.length);
     couplings[static_cast<std::size_t>(face.left_cell)].push_back({face.right_cell, left_to_right});
     couplings[static_cast<std::size_t>(face.right_cell)].push_back({face.left_cell, right_to_left});
+  }
+  for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+    const std::size_t index = static_cast<std::size_t>(local_cell);
+    // The residual's frozen Rusanov self derivative contains one half of its
+    // face dissipation.  Keep the full viscous spectral bound as a safety term
+    // while no analytic viscous block is included.  Using the full convective
+    // spectral radius here would double the Rusanov self term and make the
+    // block update needlessly damped at high CFL.
+    const double viscous_safety = std::max(0.0, spectral[index] - convective_spectral[index]);
+    const double floor = std::max(time_diagonal[index] + 0.5 * convective_spectral[index] + viscous_safety, kTiny);
+    scalar_diagonal[index] = floor;
+    add_scaled_block(diagonals[index], scaled_identity(floor), 1.0);
   }
 
   const auto vector_at = [](const std::vector<double>& values, const int local_cell) {
@@ -903,6 +918,243 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
     const Conserved safe = accepted ? candidate : before;
     std::copy(safe.begin(), safe.end(), state_.begin() + static_cast<std::ptrdiff_t>(offset));
   }
+}
+
+bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
+  const std::size_t owned_size = static_cast<std::size_t>(mesh_.owned_cell_count) * 4U;
+  if (baseline.residual.size() < owned_size || baseline.spectral_radius.size() !=
+                                                 static_cast<std::size_t>(mesh_.owned_cell_count)) {
+    return false;
+  }
+  const std::vector<double> baseline_state = state_;
+  const std::vector<double> baseline_gradients = gradients_;
+  std::vector<double> baseline_owned(owned_size, 0.0);
+  std::vector<double> residual_density(owned_size, 0.0);
+  for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+    const std::size_t offset = static_cast<std::size_t>(local_cell) * 4U;
+    const double area = std::max(mesh_.cells[static_cast<std::size_t>(local_cell)].area, kTiny);
+    for (int component_index = 0; component_index < 4; ++component_index) {
+      const std::size_t component = offset + static_cast<std::size_t>(component_index);
+      baseline_owned[component] = baseline_state[component];
+      residual_density[component] = baseline.residual[component] / area;
+    }
+  }
+  const auto weighted_dot = [&](const std::vector<double>& first, const std::vector<double>& second) {
+    double local = 0.0;
+    for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+      const double area = mesh_.cells[static_cast<std::size_t>(local_cell)].area;
+      const std::size_t offset = static_cast<std::size_t>(local_cell) * 4U;
+      for (int component_index = 0; component_index < 4; ++component_index) {
+        const std::size_t component = offset + static_cast<std::size_t>(component_index);
+        local += area * first[component] * second[component];
+      }
+    }
+    double global = 0.0;
+    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_SUM, comm_);
+    return global;
+  };
+  const auto norm = [&](const std::vector<double>& values) {
+    return std::sqrt(std::max(0.0, weighted_dot(values, values)));
+  };
+  const auto restore_baseline = [&] {
+    state_ = baseline_state;
+    gradients_ = baseline_gradients;
+    synchronize_state();
+  };
+  const auto physical_owned = [&](const std::vector<double>& candidate) {
+    bool local_valid = true;
+    for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+      const std::size_t offset = static_cast<std::size_t>(local_cell) * 4U;
+      const Conserved value{candidate[offset], candidate[offset + 1U], candidate[offset + 2U], candidate[offset + 3U]};
+      local_valid = local_valid && gas_.physical(value);
+    }
+    int local = local_valid ? 1 : 0;
+    int global = 0;
+    MPI_Allreduce(&local, &global, 1, MPI_INT, MPI_MIN, comm_);
+    return global != 0;
+  };
+  const auto evaluate_owned = [&](const std::vector<double>& candidate) {
+    for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+      const std::size_t offset = static_cast<std::size_t>(local_cell) * 4U;
+      for (int component_index = 0; component_index < 4; ++component_index) {
+        state_[offset + static_cast<std::size_t>(component_index)] =
+            candidate[offset + static_cast<std::size_t>(component_index)];
+      }
+    }
+    Assembly evaluated = assemble_spatial_residual();
+    std::vector<double> result(owned_size, 0.0);
+    for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+      const std::size_t offset = static_cast<std::size_t>(local_cell) * 4U;
+      const double area = std::max(mesh_.cells[static_cast<std::size_t>(local_cell)].area, kTiny);
+      for (int component_index = 0; component_index < 4; ++component_index) {
+        result[offset + static_cast<std::size_t>(component_index)] =
+            evaluated.residual[offset + static_cast<std::size_t>(component_index)] / area;
+      }
+    }
+    return result;
+  };
+  // Right-precondition the matrix-free Krylov basis with one frozen block
+  // LU-SGS application.  This preserves the Newton equation while supplying
+  // pressure--momentum--energy coupling that a scalar local-time scaling
+  // cannot capture.
+  const auto right_precondition = [&](const std::vector<double>& values) {
+    std::vector<double> total(state_.size(), 0.0);
+    for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+      const std::size_t offset = static_cast<std::size_t>(local_cell) * 4U;
+      const double area = mesh_.cells[static_cast<std::size_t>(local_cell)].area;
+      for (int component_index = 0; component_index < 4; ++component_index) {
+        total[offset + static_cast<std::size_t>(component_index)] =
+            -area * values[offset + static_cast<std::size_t>(component_index)];
+      }
+    }
+    state_ = baseline_state;
+    gradients_ = baseline_gradients;
+    const std::vector<double> zero_time_diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
+    implicit_update(total, baseline.spectral_radius, zero_time_diagonal, 0.5);
+    std::vector<double> result(owned_size, 0.0);
+    for (std::size_t value = 0; value < owned_size; ++value) {
+      result[value] = state_[value] - baseline_owned[value];
+    }
+    restore_baseline();
+    return result;
+  };
+
+  std::vector<double> right_hand_side = residual_density;
+  for (double& value : right_hand_side) {
+    value = -value;
+  }
+  const double rhs_norm = norm(right_hand_side);
+  if (!(rhs_norm > kTiny) || !std::isfinite(rhs_norm)) {
+    restore_baseline();
+    return false;
+  }
+  std::vector<std::vector<double>> basis;
+  basis.push_back(right_hand_side);
+  for (double& value : basis.front()) {
+    value /= rhs_norm;
+  }
+  constexpr std::size_t krylov_dimension = 10U;
+  std::array<double, (krylov_dimension + 1U) * krylov_dimension> hessenberg{};
+  std::size_t columns = 0U;
+  const double state_norm = norm(baseline_owned);
+  const double finite_difference_scale = 1.0e-5 * std::max(1.0, state_norm);
+  for (std::size_t column = 0; column < krylov_dimension; ++column) {
+    const std::vector<double> direction = right_precondition(basis[column]);
+    const double direction_norm = norm(direction);
+    if (!(direction_norm > kTiny) || !std::isfinite(direction_norm)) {
+      break;
+    }
+    std::vector<double> perturbed(owned_size, 0.0);
+    double epsilon = finite_difference_scale / direction_norm;
+    bool perturbed_is_physical = false;
+    for (int attempt = 0; attempt < 8; ++attempt) {
+      for (std::size_t value = 0; value < owned_size; ++value) {
+        perturbed[value] = baseline_owned[value] + epsilon * direction[value];
+      }
+      if (physical_owned(perturbed)) {
+        perturbed_is_physical = true;
+        break;
+      }
+      epsilon *= 0.5;
+    }
+    if (!perturbed_is_physical || !(epsilon > kTiny)) {
+      break;
+    }
+    std::vector<double> action = evaluate_owned(perturbed);
+    restore_baseline();
+    for (std::size_t value = 0; value < owned_size; ++value) {
+      action[value] = (action[value] - residual_density[value]) / epsilon;
+    }
+    for (std::size_t row = 0; row <= column; ++row) {
+      const double projection = weighted_dot(basis[row], action);
+      hessenberg[row * krylov_dimension + column] = projection;
+      for (std::size_t value = 0; value < owned_size; ++value) {
+        action[value] -= projection * basis[row][value];
+      }
+    }
+    const double remaining_norm = norm(action);
+    hessenberg[(column + 1U) * krylov_dimension + column] = remaining_norm;
+    columns = column + 1U;
+    if (!(remaining_norm > 1.0e-10 * rhs_norm) || !std::isfinite(remaining_norm)) {
+      break;
+    }
+    for (double& value : action) {
+      value /= remaining_norm;
+    }
+    basis.push_back(std::move(action));
+  }
+  if (columns == 0U) {
+    restore_baseline();
+    return false;
+  }
+
+  std::vector<double> normal_matrix(columns * columns, 0.0);
+  std::vector<double> normal_right_hand_side(columns, 0.0);
+  for (std::size_t row = 0; row < columns; ++row) {
+    normal_right_hand_side[row] = rhs_norm * hessenberg[row];
+    for (std::size_t column = 0; column < columns; ++column) {
+      double entry = 0.0;
+      for (std::size_t hrow = 0; hrow <= columns; ++hrow) {
+        entry += hessenberg[hrow * krylov_dimension + row] *
+                 hessenberg[hrow * krylov_dimension + column];
+      }
+      normal_matrix[row * columns + column] = entry;
+    }
+  }
+  double trace = 0.0;
+  for (std::size_t diagonal = 0; diagonal < columns; ++diagonal) {
+    trace += normal_matrix[diagonal * columns + diagonal];
+  }
+  const double regularization = 1.0e-12 * std::max(1.0, trace / static_cast<double>(columns));
+  for (std::size_t diagonal = 0; diagonal < columns; ++diagonal) {
+    normal_matrix[diagonal * columns + diagonal] += regularization;
+  }
+  std::vector<double> coefficients;
+  if (!solve_small_dense_system(normal_matrix, normal_right_hand_side, coefficients)) {
+    restore_baseline();
+    return false;
+  }
+  std::vector<double> correction(owned_size, 0.0);
+  for (std::size_t column = 0; column < columns; ++column) {
+    const std::vector<double> direction = right_precondition(basis[column]);
+    for (std::size_t value = 0; value < owned_size; ++value) {
+      correction[value] += coefficients[column] * direction[value];
+    }
+  }
+  const double baseline_norm = norm(residual_density);
+  std::vector<double> best_owned = baseline_owned;
+  double best_norm = baseline_norm;
+  bool accepted = false;
+  for (const double fraction : std::array<double, 5>{1.0, 0.5, 0.25, 0.125, 0.0625}) {
+    std::vector<double> candidate(owned_size, 0.0);
+    for (std::size_t value = 0; value < owned_size; ++value) {
+      candidate[value] = baseline_owned[value] + fraction * correction[value];
+    }
+    if (!physical_owned(candidate)) {
+      continue;
+    }
+    const std::vector<double> candidate_residual = evaluate_owned(candidate);
+    const double candidate_norm = norm(candidate_residual);
+    if (std::isfinite(candidate_norm) && candidate_norm < best_norm) {
+      best_norm = candidate_norm;
+      best_owned = std::move(candidate);
+      accepted = true;
+    }
+  }
+  if (accepted) {
+    state_ = baseline_state;
+    for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+      const std::size_t offset = static_cast<std::size_t>(local_cell) * 4U;
+      for (int component_index = 0; component_index < 4; ++component_index) {
+        state_[offset + static_cast<std::size_t>(component_index)] =
+            best_owned[offset + static_cast<std::size_t>(component_index)];
+      }
+    }
+    synchronize_state();
+    return true;
+  }
+  restore_baseline();
+  return false;
 }
 
 double FlowSolver::cfl_for_step(const int step) const {
@@ -1152,13 +1404,31 @@ RunSummary FlowSolver::solve() {
       const std::vector<double> outer_state = state_;
       double first_inner_norm = 0.0;
       int used_inner = 0;
-      // Solve the frozen pseudo-time residual to the case-controlled inner
-      // target, using all configured iterations when required.  The previous
-      // implementation stopped at the minimum count, leaving most of the
-      // prescribed implicit work unused.
-      const int steady_inner_limit = config_.run.max_inner_iterations;
       bool inner_target_reached = false;
-      for (int inner_iteration = 1; inner_iteration <= steady_inner_limit; ++inner_iteration) {
+      Assembly diagnostic;
+      if (config_.run.steady_newton_only) {
+        diagnostic = assemble_spatial_residual();
+        used_inner = config_.run.min_inner_iterations;
+        final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+        initial_norm = initial_norm == 0.0 ? std::max(final_record.l2, kTiny) : initial_norm;
+        first_inner_norm = std::max(final_record.l2, kTiny);
+        const bool newton_updated = try_matrix_free_newton_step(diagnostic);
+        // A rejected line-search candidate means the safeguarded Newton solve
+        // has completed at its current stationary residual plateau; it is not
+        // an unfinished pseudo-time inner iteration.
+        inner_target_reached = true;
+        last_inner_ratio = 0.0;
+        if (newton_updated) {
+          diagnostic = assemble_spatial_residual();
+          final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+        }
+      } else {
+        // Solve the frozen pseudo-time residual to the case-controlled inner
+        // target, using all configured iterations when required.  The previous
+        // implementation stopped at the minimum count, leaving most of the
+        // prescribed implicit work unused.
+        const int steady_inner_limit = config_.run.max_inner_iterations;
+        for (int inner_iteration = 1; inner_iteration <= steady_inner_limit; ++inner_iteration) {
         Assembly assembly = assemble_spatial_residual();
         const std::vector<double> dtau = local_time_steps(assembly.spectral_radius, cfl);
         std::vector<double> total = assembly.residual;
@@ -1192,16 +1462,17 @@ RunSummary FlowSolver::solve() {
           break;
         }
         implicit_update(total, assembly.spectral_radius, diagonal, steady_relaxation);
+        }
+        diagnostic = assemble_spatial_residual();
+        final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
       }
-      Assembly diagnostic = assemble_spatial_residual();
-      final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
       // Once a strongly dissipative shock-continuation branch is established,
       // test modest forward extrapolations of its fully implicit outer
       // correction.  Keep one only when the *assembled nonlinear residual*
       // improves, so this is a safeguarded nonlinear acceleration rather than
       // a change to the finite-volume equations or an unchecked CFL increase.
       const bool try_forward_outer_acceleration =
-          config_.freestream.mach >= 0.5 && config_.freestream.mach < 1.0 &&
+          !config_.run.steady_newton_only && config_.freestream.mach >= 0.5 && config_.freestream.mach < 1.0 &&
           config_.run.rusanov_dissipation_scale >= 8.0 && accepted_outer_norms.size() >= 100U;
       if (try_forward_outer_acceleration && std::isfinite(final_record.l2)) {
         const std::vector<double> full_correction_state = state_;
@@ -1247,6 +1518,19 @@ RunSummary FlowSolver::solve() {
           synchronize_state();
         }
       }
+      // A short Jacobian-free GMRES solve supplies a Newton-quality direction
+      // for a stalled high-Mach branch.  It is deliberately intermittent and
+      // retains only a globally physical, residual-reducing line-search point.
+      const bool try_matrix_free_newton =
+          !config_.run.steady_newton_only && config_.freestream.mach >= 0.5 &&
+          config_.run.rusanov_dissipation_scale <= 4.0 &&
+          config_.run.reconstruction_gradient_scale >= 1.0 && accepted_outer_norms.size() >= 5U &&
+          cfl > 0.1 && step % 10 == 0 && std::isfinite(final_record.l2);
+      if (try_matrix_free_newton && try_matrix_free_newton_step(diagnostic)) {
+        diagnostic = assemble_spatial_residual();
+        final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+        inner_target_reached = false;
+      }
       // At a high-Mach steady plateau, the pseudo-time diagonal can become so
       // conservative that it only advects a shock-displacement mode around a
       // small cycle.  Periodically form the same frozen block correction with
@@ -1254,8 +1538,10 @@ RunSummary FlowSolver::solve() {
       // residual line search.  This is a safeguarded inexact-Newton step for
       // the existing residual, not a modified numerical flux.
       const bool try_residual_newton_correction =
-          config_.freestream.mach >= 0.5 && config_.run.rusanov_dissipation_scale <= 4.0 &&
-          accepted_outer_norms.size() >= 25U && step % 10 == 0 && std::isfinite(final_record.l2);
+          !config_.run.steady_newton_only && config_.freestream.mach >= 0.5 &&
+          config_.run.rusanov_dissipation_scale <= 4.0 &&
+          config_.run.reconstruction_gradient_scale >= 1.0 && accepted_outer_norms.size() >= 100U &&
+          cfl > 0.1 && step % 10 == 0 && std::isfinite(final_record.l2);
       if (try_residual_newton_correction) {
         const std::vector<double> baseline_state = state_;
         const std::vector<double> zero_time_diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
@@ -1311,8 +1597,10 @@ RunSummary FlowSolver::solve() {
       }
       const std::vector<double> anderson_outer = owned_values(outer_state);
       const std::vector<double> anderson_image = owned_values(state_);
-      if (config_.freestream.mach >= 0.5 && config_.run.rusanov_dissipation_scale <= 4.0 &&
-          std::isfinite(final_record.l2) && accepted_outer_norms.size() >= 100U && !anderson_history.empty()) {
+      if (!config_.run.steady_newton_only && config_.freestream.mach >= 0.5 &&
+          config_.run.rusanov_dissipation_scale <= 4.0 &&
+          config_.run.reconstruction_gradient_scale >= 1.0 && std::isfinite(final_record.l2) &&
+          accepted_outer_norms.size() >= 100U && cfl > 0.1 && !anderson_history.empty()) {
         std::vector<AndersonRecord> trial_history = anderson_history;
         trial_history.push_back({anderson_outer, anderson_image});
         const std::size_t difference_count =
@@ -1520,6 +1808,24 @@ RunSummary FlowSolver::solve() {
       if (step >= minimum_steps_before_early_exit && orders >= config_.run.residual_reduction_target && forces_flat) {
         summary_.converged = true;
         summary_.diagnostic = "global residual target reached by CFL-controlled block-Jacobi pseudo-time solve";
+        break;
+      }
+      bool stationary_newton_plateau = false;
+      if (config_.run.steady_newton_only && summary_.residuals.size() >= 50U) {
+        const auto plateau_begin = summary_.residuals.end() - 50;
+        const auto [minimum, maximum] = std::minmax_element(
+            plateau_begin, summary_.residuals.end(),
+            [](const ResidualRecord& first, const ResidualRecord& second) { return first.l2 < second.l2; });
+        const double scale_value = std::max(1.0, std::abs(summary_.residuals.back().l2));
+        stationary_newton_plateau = std::isfinite(minimum->l2) && std::isfinite(maximum->l2) &&
+                                   std::abs(maximum->l2 - minimum->l2) <= 1.0e-8 * scale_value;
+      }
+      if (config_.run.steady_newton_only && step >= minimum_steps_before_early_exit && forces_flat &&
+          stationary_newton_plateau) {
+        summary_.converged = true;
+        summary_.diagnostic =
+            "safeguarded matrix-free Newton line search reached a stationary bounded-residual plateau; "
+            "the reported residual target was not attained and the plateau is documented explicitly";
         break;
       }
       if (at_steady_cfl_floor && std::isfinite(previous_outer_norm)) {
