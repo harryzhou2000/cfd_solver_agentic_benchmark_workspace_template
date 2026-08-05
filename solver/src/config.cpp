@@ -180,7 +180,7 @@ CaseConfig load_case_config(const std::filesystem::path& case_path) {
     result.run.type = RunType::Steady;
     result.run.max_steps = integer(run, "max_steps");
     result.run.residual_reduction_target = number(run, "residual_reduction_target");
-    result.run.time_integrator = "steady_pseudo_time_block_jacobi";
+    result.run.time_integrator = "steady_local_pseudo_time_block_lu_sgs";
   } else if (type == "transient") {
     result.run.type = RunType::Transient;
     result.run.time_step = number(run, "time_step");
@@ -198,14 +198,24 @@ CaseConfig load_case_config(const std::filesystem::path& case_path) {
   result.run.min_inner_iterations = integer(run, "min_inner_iterations");
   result.run.max_inner_iterations = integer(run, "max_inner_iterations");
   result.run.inner_residual_reduction_target = number(run, "inner_residual_reduction_target");
+  result.run.inviscid_flux = run.value("inviscid_flux", std::string{"rusanov"});
   result.run.rusanov_dissipation_scale = run.value("rusanov_dissipation_scale", 1.0);
+  result.run.shock_sensor_dissipation = run.value("shock_sensor_dissipation", 0.0);
+  result.run.shock_sensor_threshold = run.value("shock_sensor_threshold", 0.08);
+  result.run.steady_relaxation = run.value("steady_relaxation", 0.8);
   result.run.reconstruction_gradient_scale = run.value("reconstruction_gradient_scale", 1.0);
   result.run.steady_newton_only = run.value("steady_newton_only", false);
   if (result.run.cfl_initial <= 0.0 || result.run.cfl_max <= 0.0 ||
       result.run.min_inner_iterations <= 0 || result.run.max_inner_iterations < result.run.min_inner_iterations ||
       result.run.inner_residual_reduction_target <= 0.0 || result.run.rusanov_dissipation_scale <= 0.0 ||
+      result.run.shock_sensor_dissipation < 0.0 || result.run.shock_sensor_threshold < 0.0 ||
+      result.run.shock_sensor_threshold >= 1.0 ||
+      result.run.steady_relaxation <= 0.0 || result.run.steady_relaxation > 1.0 ||
       result.run.reconstruction_gradient_scale < 0.0 || result.run.reconstruction_gradient_scale > 1.0) {
     throw std::runtime_error("invalid run-control values");
+  }
+  if (result.run.inviscid_flux != "rusanov" && result.run.inviscid_flux != "hllc") {
+    throw std::runtime_error("run_control.inviscid_flux must be rusanov or hllc");
   }
   return result;
 }

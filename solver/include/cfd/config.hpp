@@ -46,7 +46,16 @@ struct RunControl {
   double time_step{0.0};
   double final_time{0.0};
   std::string time_integrator;
+  std::string inviscid_flux{"rusanov"};
   double rusanov_dissipation_scale{1.0};
+  // Optional pressure-jump shock sensor.  It increases the Rusanov spectral
+  // radius only across detected discontinuities, leaving smooth cells at the
+  // configured base flux scale.
+  double shock_sensor_dissipation{0.0};
+  double shock_sensor_threshold{0.08};
+  // Outer pseudo-time correction relaxation.  Values below one are a
+  // conservative nonlinear stabilization, distinct from the local CFL.
+  double steady_relaxation{0.8};
   // Optional p-continuation control for diagnostics/restarts.  Production
   // inputs leave this at one, retaining the full second-order reconstruction.
   double reconstruction_gradient_scale{1.0};

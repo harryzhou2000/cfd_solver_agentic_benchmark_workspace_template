@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <numeric>
@@ -53,6 +54,47 @@ Vec2 add(const Vec2 first, const Vec2 second) { return {first.x + second.x, firs
 Vec2 subtract(const Vec2 first, const Vec2 second) { return {first.x - second.x, first.y - second.y}; }
 double inner(const Vec2 first, const Vec2 second) { return first.x * second.x + first.y * second.y; }
 Vec2 tangent(const Vec2 normal) { return {-normal.y, normal.x}; }
+
+// Build a velocity gradient whose linear trace at a no-slip wall is exactly
+// zero.  On a non-orthogonal cell, retaining the tangential derivative while
+// using only -u_c/d_n for the normal derivative leaves a spurious wall trace
+// g_t d_t.  Enforce u_c + grad(u) dot (x_f - x_c) = 0 instead, and use this
+// same construction in the residual, force, and surface-output paths.
+Vec2 no_slip_wall_gradient(const Vec2 center_gradient, const double center_value,
+                           const Vec2 cell_centroid, const Vec2 face_centroid,
+                           const Vec2 outward_normal) {
+  const Vec2 displacement = subtract(face_centroid, cell_centroid);
+  const Vec2 wall_tangent = tangent(outward_normal);
+  const double tangential_derivative = inner(center_gradient, wall_tangent);
+  const double tangential_offset = inner(displacement, wall_tangent);
+  double normal_offset = inner(displacement, outward_normal);
+  if (std::abs(normal_offset) < kTiny) {
+    normal_offset = normal_offset < 0.0 ? -kTiny : kTiny;
+  }
+  const double normal_derivative =
+      -(center_value + tangential_derivative * tangential_offset) / normal_offset;
+  return add(scale(wall_tangent, tangential_derivative), scale(outward_normal, normal_derivative));
+}
+
+// Correct a cell-gradient average with the adjacent cell-center difference in
+// the face-normal direction.  The correction is zero for a linear field, but
+// retains the resolved normal shear/thermal gradient across highly stretched
+// boundary-layer cells even when an inviscid limiter has suppressed their
+// reconstruction slopes.
+Vec2 corrected_interior_gradient(const Vec2 left_gradient, const Vec2 right_gradient,
+                                 const double left_value, const double right_value,
+                                 const Vec2 left_centroid, const Vec2 right_centroid,
+                                 const Vec2 left_to_right_normal) {
+  const Vec2 average = scale(add(left_gradient, right_gradient), 0.5);
+  const Vec2 center_delta = subtract(right_centroid, left_centroid);
+  const double normal_distance = inner(center_delta, left_to_right_normal);
+  if (std::abs(normal_distance) < kTiny) {
+    return average;
+  }
+  const double normal_correction =
+      (right_value - left_value - inner(average, center_delta)) / normal_distance;
+  return add(average, scale(left_to_right_normal, normal_correction));
+}
 
 // The nonlinear residual is assembled in conservative variables, so retain
 // the physical Euler coupling in the frozen implicit operator as well.  These
@@ -133,6 +175,20 @@ Block4 euler_normal_jacobian(const Primitive& state, const Vec2 normal, const do
   result[block_index(3, 1)] = dp_dmx * un + enthalpy * normal.x / rho;
   result[block_index(3, 2)] = dp_dmy * un + enthalpy * normal.y / rho;
   result[block_index(3, 3)] = gamma * un;
+  return result;
+}
+
+// Frozen two-point Newtonian-stress Jacobian in conservative momentum
+// variables.  For a normal velocity difference, tau*n is proportional to
+// [I + (1/3) n n^T] delta(u); density-column and viscous-work terms are
+// intentionally omitted from this preconditioner block.
+Block4 viscous_normal_momentum_block(const Vec2 normal, const double coefficient) {
+  Block4 result = zero_block();
+  const double normal_coefficient = coefficient / 3.0;
+  result[block_index(1, 1)] = coefficient + normal_coefficient * normal.x * normal.x;
+  result[block_index(1, 2)] = normal_coefficient * normal.x * normal.y;
+  result[block_index(2, 1)] = normal_coefficient * normal.y * normal.x;
+  result[block_index(2, 2)] = coefficient + normal_coefficient * normal.y * normal.y;
   return result;
 }
 
@@ -362,6 +418,7 @@ void FlowSolver::initialize() {
   }
   synchronize_state();
   gradients_.assign(mesh_.cells.size() * 8U, 0.0);
+  reconstruction_gradients_.assign(mesh_.cells.size() * 8U, 0.0);
   initialized_ = true;
 }
 
@@ -379,6 +436,7 @@ void FlowSolver::restore_owned_state(const std::vector<double>& owned_state) {
   }
   synchronize_state();
   gradients_.assign(mesh_.cells.size() * 8U, 0.0);
+  reconstruction_gradients_.assign(mesh_.cells.size() * 8U, 0.0);
   initialized_ = true;
 }
 
@@ -399,15 +457,17 @@ std::array<Vec2, 4> FlowSolver::primitive_gradients(const int local_cell) const 
 
 Primitive FlowSolver::reconstructed_primitive(const int local_cell, const Vec2 point) const {
   Primitive center = primitive_at(local_cell);
-  if (gradients_.empty()) {
+  if (reconstruction_gradients_.empty()) {
     return center;
   }
   const Vec2 delta = subtract(point, mesh_.cells[static_cast<std::size_t>(local_cell)].centroid);
-  const auto gradient = primitive_gradients(local_cell);
   Primitive reconstructed = center;
+  const auto offset = static_cast<std::size_t>(local_cell) * 8U;
   for (int variable = 0; variable < 4; ++variable) {
+    const Vec2 gradient{reconstruction_gradients_[offset + static_cast<std::size_t>(2 * variable)],
+                        reconstruction_gradients_[offset + static_cast<std::size_t>(2 * variable + 1)]};
     set_component(reconstructed, variable,
-                  component(center, variable) + inner(gradient[static_cast<std::size_t>(variable)], delta));
+                  component(center, variable) + inner(gradient, delta));
   }
   reconstructed.rho = std::max(reconstructed.rho, kDensityFloor);
   reconstructed.temperature = std::max(reconstructed.temperature, kPressureFloor / config_.gas.gas_constant);
@@ -450,7 +510,13 @@ void FlowSolver::reconstruct_gradients_and_limit() {
       }
     }
     const double determinant = xx * yy - xy * xy;
-    if (determinant <= kTiny * std::max(1.0, xx * yy)) {
+    // This is a conditioning test, not an absolute-area test.  Boundary-layer
+    // cells can have xx*yy far below one in the nondimensional mesh while
+    // still span two independent directions.  Comparing their determinant to
+    // kTiny * max(1, xx*yy) incorrectly erased every least-squares gradient
+    // in those stretched cells.  The normalized determinant detects only a
+    // genuinely collinear stencil.
+    if (!(xx > 0.0) || !(yy > 0.0) || determinant <= kTiny * xx * yy) {
       continue;
     }
     const auto offset = static_cast<std::size_t>(local_cell) * 8U;
@@ -496,6 +562,21 @@ void FlowSolver::reconstruct_gradients_and_limit() {
     }
   }
 
+  // A no-slip wall supplies the Dirichlet velocity state just as an interior
+  // neighbor supplies a cell-center state.  Without it, the componentwise
+  // extrema limiter sees the first fluid-layer velocity as its own minimum
+  // and zeroes any gradient that correctly decreases toward the wall.
+  for (const LocalFace& face : mesh_.faces) {
+    if (face.right_cell < 0 && face.boundary_type == BoundaryType::no_slip_adiabatic_wall &&
+        mesh_.is_owned(face.left_cell)) {
+      const auto cell = static_cast<std::size_t>(face.left_cell);
+      minima[cell][1] = std::min(minima[cell][1], 0.0);
+      maxima[cell][1] = std::max(maxima[cell][1], 0.0);
+      minima[cell][2] = std::min(minima[cell][2], 0.0);
+      maxima[cell][2] = std::max(maxima[cell][2], 0.0);
+    }
+  }
+
   std::vector<std::array<double, 4>> limiter(static_cast<std::size_t>(mesh_.owned_cell_count));
   for (auto& values : limiter) {
     values.fill(1.0);
@@ -529,6 +610,13 @@ void FlowSolver::reconstruct_gradients_and_limit() {
     limit_at_face(face.left_cell, face.centroid);
     limit_at_face(face.right_cell, face.centroid);
   }
+  // Preserve the limited primitive gradients for viscous fluxes, exactly as
+  // the production p=1 discretization did. Apply the optional continuation
+  // scale only to the independently stored inviscid face reconstruction, so
+  // a p=0 stage remains a first-order Navier--Stokes solve rather than
+  // accidentally removing viscosity and heat conduction.
+  gradients_.assign(local_count * 8U, 0.0);
+  reconstruction_gradients_.assign(local_count * 8U, 0.0);
   for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
     const auto offset = static_cast<std::size_t>(local_cell) * 8U;
     // A componentwise extrema limiter alone can leave a linear primitive
@@ -537,17 +625,23 @@ void FlowSolver::reconstruct_gradients_and_limit() {
     // retain the second-order least-squares gradient unchanged.
     const double pressure_ratio = pressure_max[static_cast<std::size_t>(local_cell)] /
                                   std::max(pressure_min[static_cast<std::size_t>(local_cell)], kTiny);
-    const double shock_factor = std::clamp((1.25 - pressure_ratio) / 0.20, 0.0, 1.0);
+    const double inviscid_shock_factor = std::clamp((1.25 - pressure_ratio) / 0.20, 0.0, 1.0);
     for (int variable = 0; variable < 4; ++variable) {
-      const double theta = std::min(
-          std::clamp(limiter[static_cast<std::size_t>(local_cell)][static_cast<std::size_t>(variable)], 0.0, 1.0),
-          shock_factor) * config_.run.reconstruction_gradient_scale;
-      raw[offset + static_cast<std::size_t>(2 * variable)] *= theta;
-      raw[offset + static_cast<std::size_t>(2 * variable + 1)] *= theta;
+      const double extrema_theta = std::clamp(
+          limiter[static_cast<std::size_t>(local_cell)][static_cast<std::size_t>(variable)], 0.0, 1.0);
+      const double inviscid_theta = std::min(extrema_theta, inviscid_shock_factor);
+      const double viscous_theta = inviscid_theta;
+      const double reconstruction_theta = inviscid_theta * config_.run.reconstruction_gradient_scale;
+      const auto x_index = offset + static_cast<std::size_t>(2 * variable);
+      const auto y_index = offset + static_cast<std::size_t>(2 * variable + 1);
+      gradients_[x_index] = raw[x_index] * viscous_theta;
+      gradients_[y_index] = raw[y_index] * viscous_theta;
+      reconstruction_gradients_[x_index] = raw[x_index] * reconstruction_theta;
+      reconstruction_gradients_[y_index] = raw[y_index] * reconstruction_theta;
     }
   }
-  gradients_ = std::move(raw);
   halo_.exchange(gradients_, 8);
+  halo_.exchange(reconstruction_gradients_, 8);
 }
 
 double FlowSolver::local_viscosity() const {
@@ -558,15 +652,50 @@ double FlowSolver::local_viscosity() const {
          config_.reynolds;
 }
 
+double FlowSolver::face_rusanov_dissipation(const Primitive& left, const Primitive& right) const {
+  const double base = config_.run.rusanov_dissipation_scale;
+  if (!(config_.run.shock_sensor_dissipation > 0.0)) {
+    return base;
+  }
+  const double pressure_sum = std::max(left.pressure + right.pressure, kTiny);
+  const double pressure_jump = std::abs(left.pressure - right.pressure) / pressure_sum;
+  // Keep ordinary compression and smooth boundary-layer gradients at the
+  // production flux scale.  The sensor becomes active only across an
+  // appreciable normalized pressure discontinuity and is bounded so it
+  // remains a local Rusanov stabilization, not a global flux change.
+  constexpr double activation_width = 0.20;
+  const double activation = std::clamp(
+      (pressure_jump - config_.run.shock_sensor_threshold) / activation_width, 0.0, 1.0);
+  return base * (1.0 + config_.run.shock_sensor_dissipation * activation * activation);
+}
+
 FlowSolver::Assembly FlowSolver::assemble_spatial_residual() {
   synchronize_state();
-  reconstruct_gradients_and_limit();
+  if (!freeze_gradients_for_jacobian_) {
+    reconstruct_gradients_and_limit();
+  }
   Assembly result;
   result.residual.assign(mesh_.cells.size() * 4U, 0.0);
   result.spectral_radius.assign(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
   const double viscosity = local_viscosity();
   const double conductivity = viscosity * gas_.cp() / config_.gas.prandtl;
   const Primitive farfield = gas_.primitive(gas_.freestream_state(config_.freestream));
+  int diagnostic_global_cell = -1;
+  if (const char* requested_cell = std::getenv("CFD_DIAG_RESIDUAL_CELL"); requested_cell != nullptr) {
+    char* end = nullptr;
+    const long parsed = std::strtol(requested_cell, &end, 10);
+    if (end != requested_cell && *end == '\0' && parsed >= 0 &&
+        parsed <= static_cast<long>(std::numeric_limits<int>::max())) {
+      diagnostic_global_cell = static_cast<int>(parsed);
+    }
+  }
+  // A nonlinear iteration can assemble the same diagnostic state many times
+  // while testing line-search fractions.  Keep an explicitly requested
+  // face-level trace readable by emitting the complete face stencil only for
+  // its first assembly in this process.
+  static bool diagnostic_stencil_reported = false;
+  const bool report_diagnostic_stencil =
+      diagnostic_global_cell >= 0 && !diagnostic_stencil_reported;
 
   for (const LocalFace& face : mesh_.faces) {
     const int left_index = face.left_cell;
@@ -608,14 +737,22 @@ FlowSolver::Assembly FlowSolver::assemble_spatial_residual() {
     // pressure traction.  For farfield boundaries, the characteristic helper
     // returns the boundary trace itself, so evaluate its physical Euler flux
     // directly rather than applying a second, reflective Rusanov interface.
+    const double face_dissipation = face_rusanov_dissipation(left, right);
+    const double face_signal = face_dissipation * std::max(
+        std::abs(left.u * face.unit_normal.x + left.v * face.unit_normal.y) + left.sound_speed,
+        std::abs(right.u * face.unit_normal.x + right.v * face.unit_normal.y) + right.sound_speed);
     const Conserved inviscid = impermeable_wall
                                    ? Conserved{0.0, left.pressure * face.unit_normal.x,
                                                left.pressure * face.unit_normal.y, 0.0}
                                    : characteristic_boundary
                                          ? euler_flux(gas_, right, face.unit_normal)
-                                         : rusanov_flux(gas_, left, right, face.unit_normal,
-                                                        config_.run.rusanov_dissipation_scale);
+                                         : config_.run.inviscid_flux == "hllc"
+                                               ? hllc_flux(gas_, left, right, face.unit_normal, face_dissipation)
+                                               : rusanov_flux(gas_, left, right, face.unit_normal, face_dissipation);
     std::array<double, 4> total = inviscid;
+    Vec2 viscous_grad_u{};
+    Vec2 viscous_grad_v{};
+    Vec2 viscous_grad_t{};
 
     if (viscosity > 0.0) {
       auto gradient_left = primitive_gradients(left_index);
@@ -625,6 +762,17 @@ FlowSolver::Assembly FlowSolver::assemble_spatial_residual() {
       Vec2 grad_t = scale(add(gradient_left[3], gradient_right[3]), 0.5);
       Primitive viscous_state = left;
       if (face.right_cell >= 0) {
+        const Primitive left_center = primitive_at(left_index);
+        const Primitive right_center = primitive_at(face.right_cell);
+        const Cell& left_cell = mesh_.cells[static_cast<std::size_t>(left_index)];
+        const Cell& right_cell = mesh_.cells[static_cast<std::size_t>(face.right_cell)];
+        grad_u = corrected_interior_gradient(gradient_left[1], gradient_right[1], left_center.u, right_center.u,
+                                             left_cell.centroid, right_cell.centroid, face.unit_normal);
+        grad_v = corrected_interior_gradient(gradient_left[2], gradient_right[2], left_center.v, right_center.v,
+                                             left_cell.centroid, right_cell.centroid, face.unit_normal);
+        grad_t = corrected_interior_gradient(gradient_left[3], gradient_right[3], left_center.temperature,
+                                             right_center.temperature, left_cell.centroid, right_cell.centroid,
+                                             face.unit_normal);
         viscous_state.rho = 0.5 * (left.rho + right.rho);
         viscous_state.u = 0.5 * (left.u + right.u);
         viscous_state.v = 0.5 * (left.v + right.v);
@@ -632,23 +780,20 @@ FlowSolver::Assembly FlowSolver::assemble_spatial_residual() {
         viscous_state.temperature = 0.5 * (left.temperature + right.temperature);
       } else if (no_slip_wall) {
         const Cell& left_cell = mesh_.cells[static_cast<std::size_t>(left_index)];
-        const double normal_distance =
-            std::max(std::abs(inner(subtract(face.centroid, left_cell.centroid), face.unit_normal)),
-                     0.15 * std::sqrt(left_cell.area));
         const Vec2 wall_tangent = tangent(face.unit_normal);
-        const auto wall_gradient = [&](const Vec2 center_gradient, const double center_value) {
-          const double tangential_derivative = inner(center_gradient, wall_tangent);
-          const double normal_derivative = -center_value / normal_distance;
-          return add(scale(wall_tangent, tangential_derivative), scale(face.unit_normal, normal_derivative));
-        };
-        grad_u = wall_gradient(gradient_left[1], primitive_at(left_index).u);
-        grad_v = wall_gradient(gradient_left[2], primitive_at(left_index).v);
+        grad_u = no_slip_wall_gradient(gradient_left[1], primitive_at(left_index).u,
+                                       left_cell.centroid, face.centroid, face.unit_normal);
+        grad_v = no_slip_wall_gradient(gradient_left[2], primitive_at(left_index).v,
+                                       left_cell.centroid, face.centroid, face.unit_normal);
         // Adiabatic wall: preserve the reconstructed tangential derivative but
         // impose dT/dn = 0 directly at the face.
         grad_t = scale(wall_tangent, inner(gradient_left[3], wall_tangent));
         viscous_state.u = 0.0;
         viscous_state.v = 0.0;
       }
+      viscous_grad_u = grad_u;
+      viscous_grad_v = grad_v;
+      viscous_grad_t = grad_t;
       const double divergence = grad_u.x + grad_v.y;
       const double tau_xx = 2.0 * viscosity * grad_u.x - (2.0 / 3.0) * viscosity * divergence;
       const double tau_yy = 2.0 * viscosity * grad_v.y - (2.0 / 3.0) * viscosity * divergence;
@@ -668,14 +813,59 @@ FlowSolver::Assembly FlowSolver::assemble_spatial_residual() {
     if (face.right_cell >= 0 && mesh_.is_owned(face.right_cell)) {
       add_scaled(result.residual, face.right_cell, total, -length);
     }
+    const auto report_face_contribution = [&](const int local_cell, const double sign) {
+      if (!report_diagnostic_stencil || !mesh_.is_owned(local_cell) ||
+          mesh_.local_to_global_cell[static_cast<std::size_t>(local_cell)] != diagnostic_global_cell) {
+        return;
+      }
+      const Primitive diagnostic_state = primitive_at(local_cell);
+      const auto diagnostic_gradients = primitive_gradients(local_cell);
+      const int neighbor = local_cell == face.left_cell ? face.right_cell : face.left_cell;
+      const int neighbor_global =
+          neighbor >= 0 ? mesh_.local_to_global_cell[static_cast<std::size_t>(neighbor)] : -1;
+      const Primitive neighbor_state = neighbor >= 0 ? primitive_at(neighbor) : Primitive{};
+      const Vec2 diagnostic_center = mesh_.cells[static_cast<std::size_t>(local_cell)].centroid;
+      const Vec2 neighbor_center =
+          neighbor >= 0 ? mesh_.cells[static_cast<std::size_t>(neighbor)].centroid : face.centroid;
+      std::cout << "residual_face rank=" << rank_ << " global_cell=" << diagnostic_global_cell
+                << " global_face=" << face.global_id << " boundary=" << boundary_type_name(face.boundary_type)
+                << " centroid=(" << face.centroid.x << ',' << face.centroid.y << ") normal=("
+                << face.unit_normal.x << ',' << face.unit_normal.y << ") length=" << length
+                << " neighbor_global=" << neighbor_global << " center_delta=("
+                << neighbor_center.x - diagnostic_center.x << ','
+                << neighbor_center.y - diagnostic_center.y << ")"
+                << " contribution=(" << sign * total[0] * length << ',' << sign * total[1] * length << ','
+                << sign * total[2] * length << ',' << sign * total[3] * length << ")"
+                << " energy_flux=(inviscid=" << inviscid[3] << ",viscous_correction="
+                << total[3] - inviscid[3] << ",total=" << total[3] << ")"
+                << " state=(rho=" << diagnostic_state.rho << ",u=" << diagnostic_state.u
+                << ",v=" << diagnostic_state.v << ",T=" << diagnostic_state.temperature << ")"
+                << " neighbor_state=(rho=" << neighbor_state.rho << ",u=" << neighbor_state.u
+                << ",v=" << neighbor_state.v << ",T=" << neighbor_state.temperature << ")"
+                << " face_state_left=(rho=" << left.rho << ",u=" << left.u << ",v=" << left.v
+                << ",T=" << left.temperature << ")"
+                << " face_state_right=(rho=" << right.rho << ",u=" << right.u << ",v=" << right.v
+                << ",T=" << right.temperature << ")"
+                << " gradients=(u=" << diagnostic_gradients[1].x << ',' << diagnostic_gradients[1].y
+                << ",v=" << diagnostic_gradients[2].x << ',' << diagnostic_gradients[2].y
+                << ",T=" << diagnostic_gradients[3].x << ',' << diagnostic_gradients[3].y << ")"
+                << " viscous_gradients=(u=" << viscous_grad_u.x << ',' << viscous_grad_u.y << ",v="
+                << viscous_grad_v.x << ',' << viscous_grad_v.y << ",T=" << viscous_grad_t.x << ','
+                << viscous_grad_t.y << ")\n" << std::flush;
+    };
+    report_face_contribution(left_index, 1.0);
+    if (face.right_cell >= 0) {
+      report_face_contribution(face.right_cell, -1.0);
+    }
 
     const auto add_spectral = [&](const int local_cell, const Primitive& state) {
       if (!mesh_.is_owned(local_cell)) {
         return;
       }
-      const double convective = config_.run.rusanov_dissipation_scale *
-                                (std::abs(state.u * face.unit_normal.x + state.v * face.unit_normal.y) +
-                                 state.sound_speed);
+      // LLF/Rusanov uses one face wave speed for both adjacent residual rows.
+      // Using each cell's own signal underestimates the pseudo-time/Jacobian
+      // bound on the weak side of a shock, where the neighbour controls alpha.
+      const double convective = face_signal;
       double normal_distance = 0.0;
       if (face.right_cell >= 0) {
         const int neighbor = local_cell == face.left_cell ? face.right_cell : face.left_cell;
@@ -688,8 +878,7 @@ FlowSolver::Assembly FlowSolver::assemble_spatial_residual() {
             subtract(face.centroid, mesh_.cells[static_cast<std::size_t>(local_cell)].centroid),
             face.unit_normal));
       }
-      normal_distance = std::max(
-          normal_distance, 0.15 * std::sqrt(mesh_.cells[static_cast<std::size_t>(local_cell)].area));
+      normal_distance = std::max(normal_distance, kTiny);
       // A diffusion Jacobian scales as mu * face_length / (rho * d_n).
       // Keeping the normal distance explicit gives it the same units as the
       // convective face spectral radius, including on stretched wall cells.
@@ -703,6 +892,9 @@ FlowSolver::Assembly FlowSolver::assemble_spatial_residual() {
     if (face.right_cell >= 0) {
       add_spectral(face.right_cell, right);
     }
+  }
+  if (report_diagnostic_stencil) {
+    diagnostic_stencil_reported = true;
   }
   return result;
 }
@@ -754,6 +946,57 @@ double FlowSolver::global_norm(const std::vector<double>& residual) const {
   return global_residual_record(0, 0.0, 0, 0.0, 0.0, residual).l2;
 }
 
+void FlowSolver::report_residual_peak(const std::vector<double>& residual) const {
+  if (residual.size() < static_cast<std::size_t>(mesh_.owned_cell_count) * 4U) {
+    throw std::invalid_argument("invalid residual array for peak diagnostic");
+  }
+  double local_magnitude = -std::numeric_limits<double>::infinity();
+  int local_component = -1;
+  int local_cell = -1;
+  double local_signed_value = 0.0;
+  for (int cell = 0; cell < mesh_.owned_cell_count; ++cell) {
+    const double area = std::max(mesh_.cells[static_cast<std::size_t>(cell)].area, kTiny);
+    const auto offset = static_cast<std::size_t>(cell) * 4U;
+    for (int component_index = 0; component_index < 4; ++component_index) {
+      const double normalized = residual[offset + static_cast<std::size_t>(component_index)] / area;
+      const double magnitude = std::abs(normalized);
+      if (std::isfinite(magnitude) && magnitude > local_magnitude) {
+        local_magnitude = magnitude;
+        local_signed_value = normalized;
+        local_component = component_index;
+        local_cell = cell;
+      }
+    }
+  }
+  struct {
+    double value;
+    int rank;
+  } local_peak{local_magnitude, rank_}, global_peak{};
+  MPI_Allreduce(&local_peak, &global_peak, 1, MPI_DOUBLE_INT, MPI_MAXLOC, comm_);
+  if (!(global_peak.value >= 0.0) || global_peak.rank < 0) {
+    if (rank_ == 0) {
+      std::cout << "residual_peak unavailable (no finite owned residual)\n" << std::flush;
+    }
+    return;
+  }
+
+  std::array<int, 2> labels{-1, -1};  // component, global cell id
+  std::array<double, 5> values{0.0, 0.0, 0.0, 0.0, 0.0};  // |R|/A, R/A, x, y, A
+  if (rank_ == global_peak.rank) {
+    const Cell& cell = mesh_.cells[static_cast<std::size_t>(local_cell)];
+    labels = {local_component, mesh_.local_to_global_cell[static_cast<std::size_t>(local_cell)]};
+    values = {local_magnitude, local_signed_value, cell.centroid.x, cell.centroid.y, cell.area};
+  }
+  MPI_Bcast(labels.data(), static_cast<int>(labels.size()), MPI_INT, global_peak.rank, comm_);
+  MPI_Bcast(values.data(), static_cast<int>(values.size()), MPI_DOUBLE, global_peak.rank, comm_);
+  if (rank_ == 0) {
+    std::cout << "residual_peak normalized_abs=" << values[0] << " normalized_signed=" << values[1]
+              << " component=" << labels[0] << " global_cell=" << labels[1]
+              << " centroid=(" << values[2] << ',' << values[3] << ") area=" << values[4]
+              << " owner_rank=" << global_peak.rank << '\n' << std::flush;
+  }
+}
+
 std::vector<double> FlowSolver::local_time_steps(const std::vector<double>& spectral, const double cfl) const {
   std::vector<double> result(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
   for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
@@ -767,19 +1010,35 @@ std::vector<double> FlowSolver::local_time_steps(const std::vector<double>& spec
 void FlowSolver::implicit_update(const std::vector<double>& total_residual,
                                  const std::vector<double>& spectral,
                                  const std::vector<double>& time_diagonal,
-                                 const double relaxation) {
+                                 const double relaxation,
+                                 const bool tensor_viscous_blocks) {
   if (total_residual.size() != state_.size() || spectral.size() != static_cast<std::size_t>(mesh_.owned_cell_count) ||
       time_diagonal.size() != static_cast<std::size_t>(mesh_.owned_cell_count)) {
     throw std::invalid_argument("invalid implicit update arrays");
   }
-  // This is a rank-local block LU-SGS update of a frozen nonlinear residual.
-  // MPI interfaces remain block-Jacobi (ghost corrections are lagged), while
-  // owned-owned faces retain the frozen Euler/Rusanov 4x4 coupling.  The
-  // positive scalar pseudo-time/spectral term is kept as a diagonal-dominance
-  // floor; it is deliberately not replaced by an exact, less robust Jacobian.
-  std::vector<double> scalar_diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
+  // This is a rank-local block SGS update of a frozen nonlinear residual.
+  // Coupled block rows are deliberately restricted to rank-local faces; an
+  // MPI-cut face remains represented by the scalar spectral bound. A
+  // rank-ordered distributed sweep was tested here but its communication cost
+  // outweighed its small nonlinear benefit. The positive scalar pseudo-time/
+  // spectral term remains a diagonal-dominance floor and is deliberately not
+  // replaced by an exact, less robust Jacobian.
+  std::vector<Vector4> fallback_diagonals(static_cast<std::size_t>(mesh_.owned_cell_count));
   std::vector<double> convective_spectral(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
+  // The scalar viscous spectral bound is deliberately conservative for the
+  // momentum rows, but it is not an energy Jacobian.  In particular, an
+  // adiabatic no-slip wall has a large momentum traction stiffness while its
+  // energy flux is exactly zero.  Track the E--E thermal stiffness separately
+  // so the Newton preconditioner does not freeze the first wall layer's
+  // temperature correction behind a fictitious wall heat-conduction term.
+  std::vector<double> thermal_energy_spectral(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
+  // When the JFNK path requests tensor stress blocks, track the conservative
+  // scalar bound they replace so MPI-cut/farfield faces can retain their
+  // robust unmodelled spectral safety.
+  std::vector<double> tensor_modelled_viscous_safety(
+      static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
   std::vector<Block4> diagonals(static_cast<std::size_t>(mesh_.owned_cell_count), zero_block());
+  const double viscosity = local_viscosity();
 
   struct BlockCoupling {
     int neighbor{0};
@@ -790,22 +1049,57 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
     const Primitive left = reconstructed_primitive(face.left_cell, face.centroid);
     const bool has_right_cell = face.right_cell >= 0;
     const Primitive right = has_right_cell ? reconstructed_primitive(face.right_cell, face.centroid) : left;
+    const double face_dissipation = face_rusanov_dissipation(left, right);
     const double left_signal = std::abs(left.u * face.unit_normal.x + left.v * face.unit_normal.y) +
                                left.sound_speed;
     const double right_signal = std::abs(right.u * face.unit_normal.x + right.v * face.unit_normal.y) +
                                 right.sound_speed;
+    const double face_signal = face_dissipation * std::max(left_signal, right_signal);
     if (mesh_.is_owned(face.left_cell)) {
       convective_spectral[static_cast<std::size_t>(face.left_cell)] +=
-          config_.run.rusanov_dissipation_scale * left_signal * face.length;
+          face_signal * face.length;
     }
     if (has_right_cell && mesh_.is_owned(face.right_cell)) {
       convective_spectral[static_cast<std::size_t>(face.right_cell)] +=
-          config_.run.rusanov_dissipation_scale * right_signal * face.length;
+          face_signal * face.length;
+    }
+    double left_thermal_coupling = 0.0;
+    double right_thermal_coupling = 0.0;
+    double center_distance = 0.0;
+    if (viscosity > 0.0 && has_right_cell) {
+      center_distance = std::max(
+          std::abs(inner(subtract(mesh_.cells[static_cast<std::size_t>(face.right_cell)].centroid,
+                                  mesh_.cells[static_cast<std::size_t>(face.left_cell)].centroid),
+                         face.unit_normal)),
+          kTiny);
+      // dT/d(rhoE)|rho,rhou,rhov = (gamma - 1)/(R rho), while
+      // k = mu cp / Pr.  Their product is mu gamma/(Pr rho).
+      left_thermal_coupling = viscosity * config_.gas.gamma * face.length /
+                              std::max(config_.gas.prandtl * left.rho * center_distance, kTiny);
+      right_thermal_coupling = viscosity * config_.gas.gamma * face.length /
+                               std::max(config_.gas.prandtl * right.rho * center_distance, kTiny);
+      if (mesh_.is_owned(face.left_cell)) {
+        thermal_energy_spectral[static_cast<std::size_t>(face.left_cell)] += left_thermal_coupling;
+      }
+      if (mesh_.is_owned(face.right_cell)) {
+        thermal_energy_spectral[static_cast<std::size_t>(face.right_cell)] += right_thermal_coupling;
+      }
+    }
+    if (tensor_viscous_blocks && viscosity > 0.0 && !has_right_cell &&
+        face.boundary_type == BoundaryType::no_slip_adiabatic_wall && mesh_.is_owned(face.left_cell)) {
+      const Cell& left_cell = mesh_.cells[static_cast<std::size_t>(face.left_cell)];
+      const double wall_distance = std::max(
+          std::abs(inner(subtract(face.centroid, left_cell.centroid), face.unit_normal)), kTiny);
+      const double left_coefficient =
+          viscosity * face.length / std::max(left.rho * wall_distance, kTiny);
+      add_scaled_block(diagonals[static_cast<std::size_t>(face.left_cell)],
+                       viscous_normal_momentum_block(face.unit_normal, left_coefficient), 1.0);
+      tensor_modelled_viscous_safety[static_cast<std::size_t>(face.left_cell)] += 4.0 * left_coefficient;
     }
     if (!has_right_cell || !mesh_.is_owned(face.left_cell) || !mesh_.is_owned(face.right_cell)) {
       continue;
     }
-    const double half_dissipation = 0.5 * config_.run.rusanov_dissipation_scale *
+    const double half_dissipation = 0.5 * face_dissipation *
                                     std::max(left_signal, right_signal) * face.length;
     if (!(half_dissipation > 0.0) || !std::isfinite(half_dissipation)) {
       continue;
@@ -816,29 +1110,87 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
     // Retain the positive half-alpha self term from the Rusanov flux and add
     // only the bounded physical part of the self Jacobian.  This is a frozen
     // approximation to the residual's Rusanov flux, not a change to that flux.
-    add_scaled_block(diagonals[static_cast<std::size_t>(face.left_cell)], left_jacobian,
-                     0.5 * face.length);
-    add_scaled_block(diagonals[static_cast<std::size_t>(face.right_cell)], right_jacobian,
-                     -0.5 * face.length);
+    if (mesh_.is_owned(face.left_cell)) {
+      add_scaled_block(diagonals[static_cast<std::size_t>(face.left_cell)], left_jacobian,
+                       0.5 * face.length);
+    }
+    if (mesh_.is_owned(face.right_cell)) {
+      add_scaled_block(diagonals[static_cast<std::size_t>(face.right_cell)], right_jacobian,
+                       -0.5 * face.length);
+    }
 
     Block4 left_to_right = scaled_identity(-half_dissipation);
     add_scaled_block(left_to_right, right_jacobian, 0.5 * face.length);
     Block4 right_to_left = scaled_identity(-half_dissipation);
     add_scaled_block(right_to_left, left_jacobian, -0.5 * face.length);
+    // Couple momentum and thermal-energy rows to their neighbouring state so
+    // LU--SGS can propagate thin-layer diffusion instead of treating it as a
+    // purely point-implicit sink. The ordinary pseudo-time path uses the
+    // established scalar viscous safety; JFNK can instead request the frozen
+    // normal-stress tensor block below. Neither changes the assembled
+    // Navier--Stokes residual.
+    if (viscosity > 0.0) {
+      const double left_viscous_coefficient =
+          viscosity * face.length / std::max(left.rho * center_distance, kTiny);
+      const double right_viscous_coefficient =
+          viscosity * face.length / std::max(right.rho * center_distance, kTiny);
+      if (tensor_viscous_blocks) {
+        const Block4 left_viscous_block =
+            viscous_normal_momentum_block(face.unit_normal, left_viscous_coefficient);
+        const Block4 right_viscous_block =
+            viscous_normal_momentum_block(face.unit_normal, right_viscous_coefficient);
+        add_scaled_block(diagonals[static_cast<std::size_t>(face.left_cell)], left_viscous_block, 1.0);
+        add_scaled_block(diagonals[static_cast<std::size_t>(face.right_cell)], right_viscous_block, 1.0);
+        add_scaled_block(left_to_right, right_viscous_block, -1.0);
+        add_scaled_block(right_to_left, left_viscous_block, -1.0);
+        tensor_modelled_viscous_safety[static_cast<std::size_t>(face.left_cell)] +=
+            4.0 * left_viscous_coefficient;
+        tensor_modelled_viscous_safety[static_cast<std::size_t>(face.right_cell)] +=
+            4.0 * right_viscous_coefficient;
+      } else {
+        const double left_viscous_coupling = 4.0 * left_viscous_coefficient;
+        const double right_viscous_coupling = 4.0 * right_viscous_coefficient;
+        for (const int component_index : std::array<int, 2>{1, 2}) {
+          left_to_right[block_index(component_index, component_index)] -= right_viscous_coupling;
+          right_to_left[block_index(component_index, component_index)] -= left_viscous_coupling;
+        }
+      }
+      // The column variable determines dT/d(rhoE), so the density belongs to
+      // the adjacent cell: L->R uses theta_R and R->L uses theta_L.
+      left_to_right[block_index(3, 3)] -= right_thermal_coupling;
+      right_to_left[block_index(3, 3)] -= left_thermal_coupling;
+    }
     couplings[static_cast<std::size_t>(face.left_cell)].push_back({face.right_cell, left_to_right});
     couplings[static_cast<std::size_t>(face.right_cell)].push_back({face.left_cell, right_to_left});
   }
   for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
     const std::size_t index = static_cast<std::size_t>(local_cell);
     // The residual's frozen Rusanov self derivative contains one half of its
-    // face dissipation.  Keep the full viscous spectral bound as a safety term
-    // while no analytic viscous block is included.  Using the full convective
-    // spectral radius here would double the Rusanov self term and make the
-    // block update needlessly damped at high CFL.
+    // face dissipation.  A Navier--Stokes viscous operator acts on momentum
+    // and energy, not on continuity: retaining a wall traction spectral term
+    // in the rho row artificially freezes the first wall-layer mass balance.
+    // Keep that safety term only on the momentum rows and use the separately
+    // assembled thermal E--E stiffness for energy.  A JFNK preconditioner can
+    // replace locally resolved portions of the scalar bound by the frozen
+    // normal-stress tensor, while retaining the bound at MPI cuts and other
+    // unmodelled faces. Using the full convective spectral radius here would
+    // double the Rusanov self term and make the block update needlessly damped
+    // at high CFL.
     const double viscous_safety = std::max(0.0, spectral[index] - convective_spectral[index]);
-    const double floor = std::max(time_diagonal[index] + 0.5 * convective_spectral[index] + viscous_safety, kTiny);
-    scalar_diagonal[index] = floor;
-    add_scaled_block(diagonals[index], scaled_identity(floor), 1.0);
+    const double remaining_viscous_safety = tensor_viscous_blocks
+                                                ? std::max(0.0, viscous_safety - tensor_modelled_viscous_safety[index])
+                                                : viscous_safety;
+    const double continuity_floor =
+        std::max(time_diagonal[index] + 0.5 * convective_spectral[index], kTiny);
+    const double momentum_floor = std::max(continuity_floor + remaining_viscous_safety, kTiny);
+    const double energy_floor = std::max(
+        time_diagonal[index] + 0.5 * convective_spectral[index] + thermal_energy_spectral[index], kTiny);
+    fallback_diagonals[index] =
+        Vector4{continuity_floor, momentum_floor, momentum_floor, energy_floor};
+    add_scaled_block(diagonals[index], scaled_identity(continuity_floor), 1.0);
+    diagonals[index][block_index(1, 1)] += momentum_floor - continuity_floor;
+    diagonals[index][block_index(2, 2)] += momentum_floor - continuity_floor;
+    diagonals[index][block_index(3, 3)] += energy_floor - continuity_floor;
   }
 
   const auto vector_at = [](const std::vector<double>& values, const int local_cell) {
@@ -856,67 +1208,85 @@ void FlowSolver::implicit_update(const std::vector<double>& total_residual,
     if (solve_block(diagonals[static_cast<std::size_t>(local_cell)], rhs, result)) {
       return result;
     }
-    // The scalar floor is always positive.  Preserve the original robust
-    // componentwise update should a pathological local block lose a pivot.
-    const double fallback = scalar_diagonal[static_cast<std::size_t>(local_cell)];
+    // Each row floor is positive. Preserve a row-consistent componentwise
+    // update should a pathological local block lose a pivot.
+    const Vector4& fallback = fallback_diagonals[static_cast<std::size_t>(local_cell)];
     for (int component_index = 0; component_index < 4; ++component_index) {
-      result[static_cast<std::size_t>(component_index)] = rhs[static_cast<std::size_t>(component_index)] / fallback;
+      result[static_cast<std::size_t>(component_index)] =
+          rhs[static_cast<std::size_t>(component_index)] / fallback[static_cast<std::size_t>(component_index)];
     }
     return result;
   };
 
-  std::vector<double> forward(static_cast<std::size_t>(mesh_.owned_cell_count) * 4U, 0.0);
-  std::vector<double> correction(static_cast<std::size_t>(mesh_.owned_cell_count) * 4U, 0.0);
-  for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+  std::vector<double> correction(mesh_.cells.size() * 4U, 0.0);
+  const auto relax_row = [&](const int local_cell) {
     Vector4 right_hand_side = vector_at(total_residual, local_cell);
     for (double& value : right_hand_side) {
       value = -value;
     }
     for (const BlockCoupling& coupling : couplings[static_cast<std::size_t>(local_cell)]) {
-      if (coupling.neighbor < local_cell) {
-        const Vector4 term = multiply_block(coupling.matrix, vector_at(forward, coupling.neighbor));
-        for (int component_index = 0; component_index < 4; ++component_index) {
-          right_hand_side[static_cast<std::size_t>(component_index)] -=
-              term[static_cast<std::size_t>(component_index)];
-        }
-      }
-    }
-    store_vector(forward, local_cell, solve_diagonal(local_cell, right_hand_side));
-  }
-  for (int local_cell = mesh_.owned_cell_count - 1; local_cell >= 0; --local_cell) {
-    Vector4 right_hand_side = multiply_block(diagonals[static_cast<std::size_t>(local_cell)],
-                                              vector_at(forward, local_cell));
-    for (const BlockCoupling& coupling : couplings[static_cast<std::size_t>(local_cell)]) {
-      if (coupling.neighbor > local_cell) {
-        const Vector4 term = multiply_block(coupling.matrix, vector_at(correction, coupling.neighbor));
-        for (int component_index = 0; component_index < 4; ++component_index) {
-          right_hand_side[static_cast<std::size_t>(component_index)] -=
-              term[static_cast<std::size_t>(component_index)];
-        }
+      const Vector4 term = multiply_block(coupling.matrix, vector_at(correction, coupling.neighbor));
+      for (int component_index = 0; component_index < 4; ++component_index) {
+        right_hand_side[static_cast<std::size_t>(component_index)] -=
+            term[static_cast<std::size_t>(component_index)];
       }
     }
     store_vector(correction, local_cell, solve_diagonal(local_cell, right_hand_side));
+  };
+  // Repeat symmetric block Gauss--Seidel sweeps on the frozen local system.
+  // This resolves the highly anisotropic wall-normal diffusion mode much more
+  // faithfully than a single LU--SGS factorization sweep.
+  constexpr int block_sgs_sweeps = 4;
+  for (int sweep = 0; sweep < block_sgs_sweeps; ++sweep) {
+    for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+      relax_row(local_cell);
+    }
+    for (int local_cell = mesh_.owned_cell_count - 1; local_cell >= 0; --local_cell) {
+      relax_row(local_cell);
+    }
   }
   for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
     const auto offset = static_cast<std::size_t>(local_cell) * 4U;
     const Conserved before = state_at(state_, local_cell);
-    double accepted_relaxation = relaxation;
-    Conserved candidate = before;
-    bool accepted = false;
-    for (int attempt = 0; attempt < 12; ++attempt) {
-      candidate = before;
+    const auto candidate_at = [&](const double fraction) {
+      Conserved candidate = before;
       for (int component_index = 0; component_index < 4; ++component_index) {
         candidate[static_cast<std::size_t>(component_index)] +=
-            accepted_relaxation * correction[offset + static_cast<std::size_t>(component_index)];
+            fraction * correction[offset + static_cast<std::size_t>(component_index)];
       }
-      if (gas_.physical(candidate)) {
-        accepted = true;
-        break;
+      return candidate;
+    };
+
+    // Conservative states with positive density and internal energy form a
+    // convex admissible set.  Consequently, when the requested correction
+    // leaves that set, the interval from the physical old state to its first
+    // boundary is admissible.  Find that boundary directly instead of trying
+    // a fixed number of halvings and silently freezing the cell.  Eighty
+    // bisections resolve the fraction to below double-precision significance
+    // relative to the requested relaxation; the lower endpoint is always a
+    // verified physical state.
+    Conserved candidate = candidate_at(relaxation);
+    if (!gas_.physical(candidate)) {
+      ++positivity_limited_updates_;
+      double lower = 0.0;
+      double upper = relaxation;
+      for (int iteration = 0; iteration < 80; ++iteration) {
+        const double middle = 0.5 * (lower + upper);
+        const Conserved trial = candidate_at(middle);
+        if (gas_.physical(trial)) {
+          lower = middle;
+          candidate = trial;
+        } else {
+          upper = middle;
+        }
       }
-      accepted_relaxation *= 0.5;
+      // A nonfinite correction has no admissible positive trial.  Retaining
+      // the known physical state is then the only defensible action.
+      if (!(lower > 0.0)) {
+        candidate = before;
+      }
     }
-    const Conserved safe = accepted ? candidate : before;
-    std::copy(safe.begin(), safe.end(), state_.begin() + static_cast<std::ptrdiff_t>(offset));
+    std::copy(candidate.begin(), candidate.end(), state_.begin() + static_cast<std::ptrdiff_t>(offset));
   }
 }
 
@@ -928,6 +1298,7 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
   }
   const std::vector<double> baseline_state = state_;
   const std::vector<double> baseline_gradients = gradients_;
+  const std::vector<double> baseline_reconstruction_gradients = reconstruction_gradients_;
   std::vector<double> baseline_owned(owned_size, 0.0);
   std::vector<double> residual_density(owned_size, 0.0);
   for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
@@ -959,6 +1330,7 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
   const auto restore_baseline = [&] {
     state_ = baseline_state;
     gradients_ = baseline_gradients;
+    reconstruction_gradients_ = baseline_reconstruction_gradients;
     synchronize_state();
   };
   const auto physical_owned = [&](const std::vector<double>& candidate) {
@@ -973,7 +1345,7 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
     MPI_Allreduce(&local, &global, 1, MPI_INT, MPI_MIN, comm_);
     return global != 0;
   };
-  const auto evaluate_owned = [&](const std::vector<double>& candidate) {
+  const auto evaluate_owned = [&](const std::vector<double>& candidate, const bool freeze_gradients) {
     for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
       const std::size_t offset = static_cast<std::size_t>(local_cell) * 4U;
       for (int component_index = 0; component_index < 4; ++component_index) {
@@ -981,7 +1353,16 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
             candidate[offset + static_cast<std::size_t>(component_index)];
       }
     }
-    Assembly evaluated = assemble_spatial_residual();
+    const bool prior_freeze_gradients = freeze_gradients_for_jacobian_;
+    freeze_gradients_for_jacobian_ = freeze_gradients;
+    Assembly evaluated;
+    try {
+      evaluated = assemble_spatial_residual();
+    } catch (...) {
+      freeze_gradients_for_jacobian_ = prior_freeze_gradients;
+      throw;
+    }
+    freeze_gradients_for_jacobian_ = prior_freeze_gradients;
     std::vector<double> result(owned_size, 0.0);
     for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
       const std::size_t offset = static_cast<std::size_t>(local_cell) * 4U;
@@ -1009,8 +1390,9 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
     }
     state_ = baseline_state;
     gradients_ = baseline_gradients;
+    reconstruction_gradients_ = baseline_reconstruction_gradients;
     const std::vector<double> zero_time_diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
-    implicit_update(total, baseline.spectral_radius, zero_time_diagonal, 0.5);
+    implicit_update(total, baseline.spectral_radius, zero_time_diagonal, 1.0, true);
     std::vector<double> result(owned_size, 0.0);
     for (std::size_t value = 0; value < owned_size; ++value) {
       result[value] = state_[value] - baseline_owned[value];
@@ -1033,11 +1415,26 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
   for (double& value : basis.front()) {
     value /= rhs_norm;
   }
-  constexpr std::size_t krylov_dimension = 10U;
+  // Shock-displacement and wall-layer modes are global enough that a short
+  // Krylov basis repeatedly stalled after one accepted correction.  A larger
+  // matrix-free subspace is still modest for these two-dimensional cases and
+  // resolves the coupled acoustic/viscous modes that a local block update
+  // cannot represent.
+  constexpr std::size_t krylov_dimension = 400U;
   std::array<double, (krylov_dimension + 1U) * krylov_dimension> hessenberg{};
+  std::array<double, krylov_dimension> givens_cosines{};
+  std::array<double, krylov_dimension> givens_sines{};
+  std::array<double, krylov_dimension + 1U> least_squares_rhs{};
+  least_squares_rhs[0] = rhs_norm;
   std::size_t columns = 0U;
+  double linear_residual = rhs_norm;
   const double state_norm = norm(baseline_owned);
-  const double finite_difference_scale = 1.0e-5 * std::max(1.0, state_norm);
+  // A weighted-global state perturbation is amplified in a localized tiny
+  // cell by roughly 1/sqrt(area).  The former 1e-5 scale therefore sampled an
+  // O(1) nonlinear limiter/wall-layer secant near the trailing edge instead
+  // of a Jacobian action.  This remains comfortably above roundoff while
+  // keeping those localized perturbations differential.
+  const double finite_difference_scale = 1.0e-7 * std::max(1.0, state_norm);
   for (std::size_t column = 0; column < krylov_dimension; ++column) {
     const std::vector<double> direction = right_precondition(basis[column]);
     const double direction_norm = norm(direction);
@@ -1060,7 +1457,10 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
     if (!perturbed_is_physical || !(epsilon > kTiny)) {
       break;
     }
-    std::vector<double> action = evaluate_owned(perturbed);
+    // Freeze the baseline reconstruction/viscous gradients only for this
+    // Arnoldi finite difference.  This is a Picard Jacobian approximation,
+    // deliberately avoiding nonsmooth limiter and shock-sensor switches.
+    std::vector<double> action = evaluate_owned(perturbed, true);
     restore_baseline();
     for (std::size_t value = 0; value < owned_size; ++value) {
       action[value] = (action[value] - residual_density[value]) / epsilon;
@@ -1073,9 +1473,41 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
       }
     }
     const double remaining_norm = norm(action);
+    if (!std::isfinite(remaining_norm)) {
+      break;
+    }
     hessenberg[(column + 1U) * krylov_dimension + column] = remaining_norm;
+    // Apply the existing plane rotations before introducing the rotation for
+    // this Arnoldi column.  Solving the GMRES least-squares problem through
+    // this QR factorization avoids the condition-number squaring of normal
+    // equations, which was particularly harmful for the stiff wall layer.
+    for (std::size_t previous = 0; previous < column; ++previous) {
+      const std::size_t upper = previous * krylov_dimension + column;
+      const std::size_t lower = (previous + 1U) * krylov_dimension + column;
+      const double first = hessenberg[upper];
+      const double second = hessenberg[lower];
+      hessenberg[upper] = givens_cosines[previous] * first + givens_sines[previous] * second;
+      hessenberg[lower] = -givens_sines[previous] * first + givens_cosines[previous] * second;
+    }
+    const std::size_t diagonal = column * krylov_dimension + column;
+    const std::size_t subdiagonal = (column + 1U) * krylov_dimension + column;
+    const double rotation_norm = std::hypot(hessenberg[diagonal], hessenberg[subdiagonal]);
+    if (!(rotation_norm > kTiny) || !std::isfinite(rotation_norm)) {
+      break;
+    }
+    givens_cosines[column] = hessenberg[diagonal] / rotation_norm;
+    givens_sines[column] = hessenberg[subdiagonal] / rotation_norm;
+    hessenberg[diagonal] = rotation_norm;
+    hessenberg[subdiagonal] = 0.0;
+    const double first_rhs = least_squares_rhs[column];
+    const double second_rhs = least_squares_rhs[column + 1U];
+    least_squares_rhs[column] =
+        givens_cosines[column] * first_rhs + givens_sines[column] * second_rhs;
+    least_squares_rhs[column + 1U] =
+        -givens_sines[column] * first_rhs + givens_cosines[column] * second_rhs;
+    linear_residual = std::abs(least_squares_rhs[column + 1U]);
     columns = column + 1U;
-    if (!(remaining_norm > 1.0e-10 * rhs_norm) || !std::isfinite(remaining_norm)) {
+    if (linear_residual <= 1.0e-8 * rhs_norm || remaining_norm <= 1.0e-10 * rhs_norm) {
       break;
     }
     for (double& value : action) {
@@ -1088,31 +1520,23 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
     return false;
   }
 
-  std::vector<double> normal_matrix(columns * columns, 0.0);
-  std::vector<double> normal_right_hand_side(columns, 0.0);
-  for (std::size_t row = 0; row < columns; ++row) {
-    normal_right_hand_side[row] = rhs_norm * hessenberg[row];
-    for (std::size_t column = 0; column < columns; ++column) {
-      double entry = 0.0;
-      for (std::size_t hrow = 0; hrow <= columns; ++hrow) {
-        entry += hessenberg[hrow * krylov_dimension + row] *
-                 hessenberg[hrow * krylov_dimension + column];
-      }
-      normal_matrix[row * columns + column] = entry;
+  std::vector<double> coefficients(columns, 0.0);
+  for (std::size_t reversed = 0; reversed < columns; ++reversed) {
+    const std::size_t row = columns - 1U - reversed;
+    double value = least_squares_rhs[row];
+    for (std::size_t column = row + 1U; column < columns; ++column) {
+      value -= hessenberg[row * krylov_dimension + column] * coefficients[column];
     }
-  }
-  double trace = 0.0;
-  for (std::size_t diagonal = 0; diagonal < columns; ++diagonal) {
-    trace += normal_matrix[diagonal * columns + diagonal];
-  }
-  const double regularization = 1.0e-12 * std::max(1.0, trace / static_cast<double>(columns));
-  for (std::size_t diagonal = 0; diagonal < columns; ++diagonal) {
-    normal_matrix[diagonal * columns + diagonal] += regularization;
-  }
-  std::vector<double> coefficients;
-  if (!solve_small_dense_system(normal_matrix, normal_right_hand_side, coefficients)) {
-    restore_baseline();
-    return false;
+    const double diagonal = hessenberg[row * krylov_dimension + row];
+    if (!(std::abs(diagonal) > kTiny) || !std::isfinite(diagonal)) {
+      restore_baseline();
+      return false;
+    }
+    coefficients[row] = value / diagonal;
+    if (!std::isfinite(coefficients[row])) {
+      restore_baseline();
+      return false;
+    }
   }
   std::vector<double> correction(owned_size, 0.0);
   for (std::size_t column = 0; column < columns; ++column) {
@@ -1125,21 +1549,38 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
   std::vector<double> best_owned = baseline_owned;
   double best_norm = baseline_norm;
   bool accepted = false;
-  for (const double fraction : std::array<double, 5>{1.0, 0.5, 0.25, 0.125, 0.0625}) {
-    std::vector<double> candidate(owned_size, 0.0);
-    for (std::size_t value = 0; value < owned_size; ++value) {
-      candidate[value] = baseline_owned[value] + fraction * correction[value];
+  double accepted_fraction = 0.0;
+  // Near a shock-displacement branch the Newton direction can be locally
+  // accurate but require substantially more damping than the usual five
+  // trial fractions.  Continue the physical residual line search through
+  // 2^-12; a candidate is still accepted only when it reduces the fully
+  // reassembled residual.
+  for (int line_search_step = 0; line_search_step <= 12; ++line_search_step) {
+    for (const double multiplier : std::array<double, 2>{1.0, 0.75}) {
+      const double fraction = multiplier * std::ldexp(1.0, -line_search_step);
+      std::vector<double> candidate(owned_size, 0.0);
+      for (std::size_t value = 0; value < owned_size; ++value) {
+        candidate[value] = baseline_owned[value] + fraction * correction[value];
+      }
+      if (!physical_owned(candidate)) {
+        continue;
+      }
+      // Nonlinear acceptance must use the actual, fully reconstructed
+      // residual; a frozen-gradient decrease is never sufficient.
+      const std::vector<double> candidate_residual = evaluate_owned(candidate, false);
+      const double candidate_norm = norm(candidate_residual);
+      if (std::isfinite(candidate_norm) && candidate_norm < best_norm) {
+        best_norm = candidate_norm;
+        best_owned = std::move(candidate);
+        accepted = true;
+        accepted_fraction = fraction;
+      }
     }
-    if (!physical_owned(candidate)) {
-      continue;
-    }
-    const std::vector<double> candidate_residual = evaluate_owned(candidate);
-    const double candidate_norm = norm(candidate_residual);
-    if (std::isfinite(candidate_norm) && candidate_norm < best_norm) {
-      best_norm = candidate_norm;
-      best_owned = std::move(candidate);
-      accepted = true;
-    }
+  }
+  if (std::getenv("CFD_DIAG_NEWTON") != nullptr && rank_ == 0) {
+    std::cout << "jfnk columns=" << columns << " baseline_norm=" << baseline_norm
+              << " linear_residual=" << linear_residual << " best_norm=" << best_norm << " accepted_fraction="
+              << accepted_fraction << '\n' << std::flush;
   }
   if (accepted) {
     state_ = baseline_state;
@@ -1155,6 +1596,85 @@ bool FlowSolver::try_matrix_free_newton_step(const Assembly& baseline) {
   }
   restore_baseline();
   return false;
+}
+
+bool FlowSolver::try_block_residual_step(const Assembly& baseline) {
+  const std::size_t owned_size = static_cast<std::size_t>(mesh_.owned_cell_count) * 4U;
+  if (baseline.residual.size() < owned_size ||
+      baseline.spectral_radius.size() != static_cast<std::size_t>(mesh_.owned_cell_count)) {
+    return false;
+  }
+  const std::vector<double> baseline_state = state_;
+  const std::vector<double> baseline_gradients = gradients_;
+  const std::vector<double> baseline_reconstruction_gradients = reconstruction_gradients_;
+  std::vector<double> baseline_owned(owned_size, 0.0);
+  for (std::size_t value = 0; value < owned_size; ++value) {
+    baseline_owned[value] = baseline_state[value];
+  }
+  const auto restore_baseline = [&] {
+    state_ = baseline_state;
+    gradients_ = baseline_gradients;
+    reconstruction_gradients_ = baseline_reconstruction_gradients;
+    synchronize_state();
+  };
+  const auto physical_owned = [&](const std::vector<double>& candidate) {
+    bool local_valid = true;
+    for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
+      const std::size_t offset = static_cast<std::size_t>(local_cell) * 4U;
+      const Conserved state{candidate[offset], candidate[offset + 1U], candidate[offset + 2U], candidate[offset + 3U]};
+      local_valid = local_valid && gas_.physical(state);
+    }
+    int local = local_valid ? 1 : 0;
+    int global = 0;
+    MPI_Allreduce(&local, &global, 1, MPI_INT, MPI_MIN, comm_);
+    return global != 0;
+  };
+  const std::vector<double> zero_time_diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
+  implicit_update(baseline.residual, baseline.spectral_radius, zero_time_diagonal, 1.0);
+  std::vector<double> correction(owned_size, 0.0);
+  for (std::size_t value = 0; value < owned_size; ++value) {
+    correction[value] = state_[value] - baseline_owned[value];
+  }
+  restore_baseline();
+
+  const double baseline_norm = global_norm(baseline.residual);
+  if (!(baseline_norm > kTiny) || !std::isfinite(baseline_norm)) {
+    return false;
+  }
+  std::vector<double> best_owned = baseline_owned;
+  double best_norm = baseline_norm;
+  bool accepted = false;
+  for (int line_search_step = 0; line_search_step <= 16; ++line_search_step) {
+    const double fraction = std::ldexp(1.0, -line_search_step);
+    std::vector<double> candidate(owned_size, 0.0);
+    for (std::size_t value = 0; value < owned_size; ++value) {
+      candidate[value] = baseline_owned[value] + fraction * correction[value];
+    }
+    if (!physical_owned(candidate)) {
+      continue;
+    }
+    for (std::size_t value = 0; value < owned_size; ++value) {
+      state_[value] = candidate[value];
+    }
+    synchronize_state();
+    const Assembly trial = assemble_spatial_residual();
+    const double trial_norm = global_norm(trial.residual);
+    if (std::isfinite(trial_norm) && trial_norm < best_norm) {
+      best_norm = trial_norm;
+      best_owned = std::move(candidate);
+      accepted = true;
+    }
+  }
+  if (!accepted) {
+    restore_baseline();
+    return false;
+  }
+  state_ = baseline_state;
+  for (std::size_t value = 0; value < owned_size; ++value) {
+    state_[value] = best_owned[value];
+  }
+  synchronize_state();
+  return true;
 }
 
 double FlowSolver::cfl_for_step(const int step) const {
@@ -1189,15 +1709,11 @@ ForceRecord FlowSolver::integrated_forces(const int step, const double time) con
     if (viscosity > 0.0) {
       const auto gradients = primitive_gradients(face.left_cell);
       const Cell& cell = mesh_.cells[static_cast<std::size_t>(face.left_cell)];
-      const double normal_distance =
-          std::max(std::abs(inner(subtract(face.centroid, cell.centroid), face.unit_normal)), 0.15 * std::sqrt(cell.area));
       const Vec2 wall_tangent = tangent(face.unit_normal);
-      const auto wall_gradient = [&](const Vec2 center_gradient, const double center_value) {
-        return add(scale(wall_tangent, inner(center_gradient, wall_tangent)),
-                   scale(face.unit_normal, -center_value / normal_distance));
-      };
-      const Vec2 grad_u = wall_gradient(gradients[1], primitive_at(face.left_cell).u);
-      const Vec2 grad_v = wall_gradient(gradients[2], primitive_at(face.left_cell).v);
+      const Vec2 grad_u = no_slip_wall_gradient(gradients[1], primitive_at(face.left_cell).u,
+                                                cell.centroid, face.centroid, face.unit_normal);
+      const Vec2 grad_v = no_slip_wall_gradient(gradients[2], primitive_at(face.left_cell).v,
+                                                cell.centroid, face.centroid, face.unit_normal);
       const double divergence = grad_u.x + grad_v.y;
       const double tau_xx = 2.0 * viscosity * grad_u.x - (2.0 / 3.0) * viscosity * divergence;
       const double tau_yy = 2.0 * viscosity * grad_v.y - (2.0 / 3.0) * viscosity * divergence;
@@ -1265,15 +1781,11 @@ std::vector<SurfaceRecord> FlowSolver::build_surface_records() const {
       if (viscosity > 0.0) {
         const auto gradients = primitive_gradients(face.left_cell);
         const Cell& cell = mesh_.cells[static_cast<std::size_t>(face.left_cell)];
-        const double distance = std::max(std::abs(inner(subtract(face.centroid, cell.centroid), face.unit_normal)),
-                                         0.15 * std::sqrt(cell.area));
         const Vec2 wall_tangent = tangent(face.unit_normal);
-        const auto wall_gradient = [&](const Vec2 center_gradient, const double center_value) {
-          return add(scale(wall_tangent, inner(center_gradient, wall_tangent)),
-                     scale(face.unit_normal, -center_value / distance));
-        };
-        const Vec2 gu = wall_gradient(gradients[1], primitive_at(face.left_cell).u);
-        const Vec2 gv = wall_gradient(gradients[2], primitive_at(face.left_cell).v);
+        const Vec2 gu = no_slip_wall_gradient(gradients[1], primitive_at(face.left_cell).u,
+                                              cell.centroid, face.centroid, face.unit_normal);
+        const Vec2 gv = no_slip_wall_gradient(gradients[2], primitive_at(face.left_cell).v,
+                                              cell.centroid, face.centroid, face.unit_normal);
         const double div = gu.x + gv.y;
         const double tx = 2.0 * viscosity * gu.x - (2.0 / 3.0) * viscosity * div;
         const double ty = 2.0 * viscosity * gv.y - (2.0 / 3.0) * viscosity * div;
@@ -1298,20 +1810,34 @@ bool FlowSolver::transient_force_is_periodic() const {
   if (summary_.forces.size() < 100) {
     return false;
   }
+  // Nonzero lift variation alone also accepts a growing transient.  Compare
+  // two consecutive trailing windows so the "statistically periodic" status
+  // requires both a nontrivial signal and stable mean/amplitude.
   const std::size_t begin = summary_.forces.size() * 3U / 4U;
-  double mean = 0.0;
-  for (std::size_t index = begin; index < summary_.forces.size(); ++index) {
-    mean += summary_.forces[index].cl;
-  }
-  const double count = static_cast<double>(summary_.forces.size() - begin);
-  mean /= count;
-  double variance = 0.0;
-  for (std::size_t index = begin; index < summary_.forces.size(); ++index) {
-    const double delta = summary_.forces[index].cl - mean;
-    variance += delta * delta;
-  }
-  const double amplitude = std::sqrt(variance / count);
-  return std::isfinite(amplitude) && amplitude > 1.0e-7;
+  const std::size_t middle = begin + (summary_.forces.size() - begin) / 2U;
+  const auto mean_and_rms = [&](const std::size_t first, const std::size_t last) {
+    const double count = static_cast<double>(last - first);
+    double mean = 0.0;
+    for (std::size_t index = first; index < last; ++index) {
+      mean += summary_.forces[index].cl;
+    }
+    mean /= count;
+    double square = 0.0;
+    for (std::size_t index = first; index < last; ++index) {
+      const double delta = summary_.forces[index].cl - mean;
+      square += delta * delta;
+    }
+    return std::array<double, 2>{mean, std::sqrt(square / count)};
+  };
+  const auto earlier = mean_and_rms(begin, middle);
+  const auto later = mean_and_rms(middle, summary_.forces.size());
+  const double amplitude_scale = std::max({earlier[1], later[1], 1.0e-7});
+  const double mean_tolerance = 0.10 * amplitude_scale;
+  const double amplitude_tolerance = 0.20 * amplitude_scale;
+  return std::isfinite(earlier[0]) && std::isfinite(earlier[1]) &&
+         std::isfinite(later[0]) && std::isfinite(later[1]) && later[1] > 1.0e-7 &&
+         std::abs(later[0] - earlier[0]) <= mean_tolerance &&
+         std::abs(later[1] - earlier[1]) <= amplitude_tolerance;
 }
 
 RunSummary FlowSolver::solve() {
@@ -1319,6 +1845,7 @@ RunSummary FlowSolver::solve() {
     initialize();
   }
   summary_ = RunSummary{};
+  positivity_limited_updates_ = 0;
   if (config_.run.type == RunType::Steady) {
     double initial_norm = 0.0;
     double pseudo_time = 0.0;
@@ -1336,16 +1863,16 @@ RunSummary FlowSolver::solve() {
     // off when the current implicit solve or outer residual rejects the next
     // increase; the actual local CFL is retained in residuals.csv.
     const double steady_cfl_floor = std::min(config_.run.cfl_initial, 0.05);
-    // Keep high-Re steady trials bounded, but allow a branch that has shown
-    // sustained accepted descent to accelerate beyond the conservative CFL-1
-    // startup regime.  Rejected trials restore the prior outer state.
-    const double steady_cfl_ceiling = std::min(config_.run.cfl_max, 3.0);
+    // Honor the case-supplied continuation cap.  Every proposed high-CFL
+    // correction still passes the fully assembled nonlinear residual trust
+    // test below, which restores the preceding physical state on rejection.
+    const double steady_cfl_ceiling = config_.run.cfl_max;
     double adaptive_cfl = config_.run.cfl_initial;
     // At the CFL floor, lowering CFL can no longer damp a nonlinear outer
     // oscillation.  Keep a separate correction relaxation that can back off
     // locally without changing the requested continuation schedule or the
     // physical discretization.
-    double floor_relaxation = 0.5;
+    double floor_relaxation = std::min(0.5, config_.run.steady_relaxation);
     int floor_decline_streak = 0;
     int floor_retry_count = 0;
     constexpr double minimum_floor_relaxation = 0.0625;
@@ -1390,7 +1917,6 @@ RunSummary FlowSolver::solve() {
         }
       }
     };
-    constexpr double residual_trust_factor = 1.25;
     double previous_outer_norm = std::numeric_limits<double>::infinity();
     for (int step = 1; step <= config_.run.max_steps; ++step) {
       const double requested_cfl = cfl_for_step(step);
@@ -1400,19 +1926,29 @@ RunSummary FlowSolver::solve() {
       // conservative implicit correction in that regime instead of allowing
       // a high-Reynolds-number steady solve to repeatedly amplify it.
       const bool at_steady_cfl_floor = cfl <= steady_cfl_floor * (1.0 + 1.0e-12);
-      const double steady_relaxation = at_steady_cfl_floor ? floor_relaxation : 0.8;
+      const double steady_relaxation =
+          at_steady_cfl_floor ? floor_relaxation : config_.run.steady_relaxation;
       const std::vector<double> outer_state = state_;
       double first_inner_norm = 0.0;
       int used_inner = 0;
       bool inner_target_reached = false;
       Assembly diagnostic;
+      double outer_physical_norm = std::numeric_limits<double>::quiet_NaN();
+      if (!config_.run.steady_newton_only) {
+        const Assembly outer_diagnostic = assemble_spatial_residual();
+        outer_physical_norm = global_norm(outer_diagnostic.residual);
+      }
       if (config_.run.steady_newton_only) {
         diagnostic = assemble_spatial_residual();
         used_inner = config_.run.min_inner_iterations;
         final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
         initial_norm = initial_norm == 0.0 ? std::max(final_record.l2, kTiny) : initial_norm;
         first_inner_norm = std::max(final_record.l2, kTiny);
-        const bool newton_updated = try_matrix_free_newton_step(diagnostic);
+        const bool block_only_diagnostic = std::getenv("CFD_DIAG_BLOCK_ONLY") != nullptr;
+        bool newton_updated = !block_only_diagnostic && try_matrix_free_newton_step(diagnostic);
+        if (!newton_updated) {
+          newton_updated = try_block_residual_step(diagnostic);
+        }
         // A rejected line-search candidate means the safeguarded Newton solve
         // has completed at its current stationary residual plateau; it is not
         // an unfinished pseudo-time inner iteration.
@@ -1471,9 +2007,7 @@ RunSummary FlowSolver::solve() {
       // correction.  Keep one only when the *assembled nonlinear residual*
       // improves, so this is a safeguarded nonlinear acceleration rather than
       // a change to the finite-volume equations or an unchecked CFL increase.
-      const bool try_forward_outer_acceleration =
-          !config_.run.steady_newton_only && config_.freestream.mach >= 0.5 && config_.freestream.mach < 1.0 &&
-          config_.run.rusanov_dissipation_scale >= 8.0 && accepted_outer_norms.size() >= 100U;
+      const bool try_forward_outer_acceleration = false;
       if (try_forward_outer_acceleration && std::isfinite(final_record.l2)) {
         const std::vector<double> full_correction_state = state_;
         std::vector<double> best_state = state_;
@@ -1521,11 +2055,7 @@ RunSummary FlowSolver::solve() {
       // A short Jacobian-free GMRES solve supplies a Newton-quality direction
       // for a stalled high-Mach branch.  It is deliberately intermittent and
       // retains only a globally physical, residual-reducing line-search point.
-      const bool try_matrix_free_newton =
-          !config_.run.steady_newton_only && config_.freestream.mach >= 0.5 &&
-          config_.run.rusanov_dissipation_scale <= 4.0 &&
-          config_.run.reconstruction_gradient_scale >= 1.0 && accepted_outer_norms.size() >= 5U &&
-          cfl > 0.1 && step % 10 == 0 && std::isfinite(final_record.l2);
+      const bool try_matrix_free_newton = false;
       if (try_matrix_free_newton && try_matrix_free_newton_step(diagnostic)) {
         diagnostic = assemble_spatial_residual();
         final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
@@ -1537,11 +2067,7 @@ RunSummary FlowSolver::solve() {
       // that pseudo-time term removed, then accept it only after a nonlinear
       // residual line search.  This is a safeguarded inexact-Newton step for
       // the existing residual, not a modified numerical flux.
-      const bool try_residual_newton_correction =
-          !config_.run.steady_newton_only && config_.freestream.mach >= 0.5 &&
-          config_.run.rusanov_dissipation_scale <= 4.0 &&
-          config_.run.reconstruction_gradient_scale >= 1.0 && accepted_outer_norms.size() >= 100U &&
-          cfl > 0.1 && step % 10 == 0 && std::isfinite(final_record.l2);
+      const bool try_residual_newton_correction = false;
       if (try_residual_newton_correction) {
         const std::vector<double> baseline_state = state_;
         const std::vector<double> zero_time_diagonal(static_cast<std::size_t>(mesh_.owned_cell_count), 0.0);
@@ -1597,7 +2123,7 @@ RunSummary FlowSolver::solve() {
       }
       const std::vector<double> anderson_outer = owned_values(outer_state);
       const std::vector<double> anderson_image = owned_values(state_);
-      if (!config_.run.steady_newton_only && config_.freestream.mach >= 0.5 &&
+      if (false && !config_.run.steady_newton_only && config_.freestream.mach >= 0.5 &&
           config_.run.rusanov_dissipation_scale <= 4.0 &&
           config_.run.reconstruction_gradient_scale >= 1.0 && std::isfinite(final_record.l2) &&
           accepted_outer_norms.size() >= 100U && cfl > 0.1 && !anderson_history.empty()) {
@@ -1691,81 +2217,106 @@ RunSummary FlowSolver::solve() {
           }
         }
       }
-      const std::size_t rolling_count = std::min<std::size_t>(25U, accepted_outer_norms.size());
-      const double rolling_outer_norm = rolling_count == 0
-                                            ? std::numeric_limits<double>::infinity()
-                                            : *std::min_element(accepted_outer_norms.end() -
-                                                                    static_cast<std::ptrdiff_t>(rolling_count),
-                                                                accepted_outer_norms.end());
-      const bool reject_high_cfl_correction =
-          !at_steady_cfl_floor && std::isfinite(rolling_outer_norm) &&
-          final_record.l2 > residual_trust_factor * rolling_outer_norm;
-      const bool reject_floor_correction =
-          at_steady_cfl_floor && std::isfinite(rolling_outer_norm) &&
-          final_record.l2 > residual_trust_factor * rolling_outer_norm;
-      bool accepted_by_outer_line_search = false;
-      if ((reject_high_cfl_correction || reject_floor_correction) && std::isfinite(rolling_outer_norm)) {
-        // The inner solve may produce a useful correction whose full nonlinear
-        // amplitude is outside the residual trust region.  Backtracking that
-        // outer correction is more direct than accepting a rebound after
-        // several identical floor-CFL re-solves.  Interpolate only owned
-        // cells, then refresh ghosts before measuring the trial.
+      // The outer pseudo-time solve is a nonlinear fixed-point map.  Retain
+      // only a physical state that lowers the fully reassembled spatial
+      // residual relative to its immediate starting iterate; a rolling
+      // history window can otherwise accept a large shock-mode rebound.
+      if (!config_.run.steady_newton_only && std::isfinite(outer_physical_norm) &&
+          !(std::isfinite(final_record.l2) && final_record.l2 < outer_physical_norm)) {
         const std::vector<double> full_correction_state = state_;
-        const double trust_limit = residual_trust_factor * rolling_outer_norm;
-        for (int line_search_step = 1; line_search_step <= 8; ++line_search_step) {
+        std::vector<double> best_state = outer_state;
+        double best_norm = outer_physical_norm;
+        bool accepted_descent = false;
+        for (int line_search_step = 1; line_search_step <= 10; ++line_search_step) {
           const double fraction = std::ldexp(1.0, -line_search_step);
+          bool locally_physical = true;
           for (int local_cell = 0; local_cell < mesh_.owned_cell_count; ++local_cell) {
             const auto offset = static_cast<std::size_t>(local_cell) * 4U;
+            Conserved candidate{};
             for (int component_index = 0; component_index < 4; ++component_index) {
               const auto component = static_cast<std::size_t>(component_index);
-              state_[offset + component] = outer_state[offset + component] +
-                                           fraction * (full_correction_state[offset + component] -
-                                                       outer_state[offset + component]);
+              candidate[component] = outer_state[offset + component] +
+                                     fraction * (full_correction_state[offset + component] - outer_state[offset + component]);
+              state_[offset + component] = candidate[component];
             }
+            locally_physical = locally_physical && gas_.physical(candidate);
+          }
+          int local_valid = locally_physical ? 1 : 0;
+          int global_valid = 0;
+          MPI_Allreduce(&local_valid, &global_valid, 1, MPI_INT, MPI_MIN, comm_);
+          if (global_valid == 0) {
+            continue;
           }
           synchronize_state();
+          const Assembly candidate_diagnostic = assemble_spatial_residual();
+          const ResidualRecord candidate_record =
+              global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, candidate_diagnostic.residual);
+          if (std::isfinite(candidate_record.l2) && candidate_record.l2 < best_norm) {
+            best_norm = candidate_record.l2;
+            best_state = state_;
+            accepted_descent = true;
+          }
+        }
+        if (accepted_descent) {
+          state_ = std::move(best_state);
+          synchronize_state();
+          // The final trial need not have been the best one.  Reassemble so
+          // state, residual, gradients, forces, and later surface output all
+          // refer to the same accepted iterate.
           diagnostic = assemble_spatial_residual();
-          const ResidualRecord line_record =
-              global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
-          if (std::isfinite(line_record.l2) && line_record.l2 <= trust_limit) {
-            final_record = line_record;
-            // A damped outer correction has not completed the requested
-            // implicit solve, so prevent the CFL controller from immediately
-            // increasing the next trial.
+          final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+          inner_target_reached = false;
+        } else {
+          // A block pseudo-time correction can be locally stationary even
+          // though the assembled nonlinear residual still has a descent
+          // direction.  At the exhausted CFL/relaxation floor, use the same
+          // safeguarded matrix-free Newton step as a recovery path.  It owns
+          // its physicality and fully assembled-residual line search, so it
+          // cannot turn a rejected fixed-point trial into an accepted state.
+          state_ = outer_state;
+          synchronize_state();
+          diagnostic = assemble_spatial_residual();
+          final_record = global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+          bool newton_recovered = false;
+          if (at_steady_cfl_floor && floor_retry_count >= 4 &&
+              try_matrix_free_newton_step(diagnostic)) {
+            diagnostic = assemble_spatial_residual();
+            final_record =
+                global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+            newton_recovered = std::isfinite(final_record.l2) && final_record.l2 < outer_physical_norm;
+          }
+          if (newton_recovered) {
             inner_target_reached = false;
-            accepted_by_outer_line_search = true;
+            floor_retry_count = 0;
+            floor_relaxation = std::min(0.5, config_.run.steady_relaxation);
+            // A Newton step has established a new physical iterate.  Retest
+            // the requested pseudo-CFL from it; any unstable correction still
+            // faces the ordinary strict descent line search on the next step.
+            adaptive_cfl = std::min(steady_cfl_ceiling,
+                                    std::max(steady_cfl_floor, config_.run.cfl_initial));
+          } else {
+            state_ = outer_state;
+            synchronize_state();
+            diagnostic = assemble_spatial_residual();
+            final_record =
+                global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, diagnostic.residual);
+          }
+          floor_decline_streak = 0;
+          if (!newton_recovered && (!at_steady_cfl_floor || floor_retry_count < 4)) {
+            adaptive_cfl = std::max(steady_cfl_floor, 0.5 * cfl);
+            if (at_steady_cfl_floor) {
+              floor_relaxation = std::max(minimum_floor_relaxation, 0.5 * floor_relaxation);
+              ++floor_retry_count;
+            }
+            --step;
+            continue;
+          }
+          if (!newton_recovered) {
+            summary_.diagnostic =
+                "steady nonlinear descent line search and safeguarded matrix-free Newton recovery found no physical residual-decreasing update at the CFL/relaxation floor";
             break;
           }
         }
-        if (!accepted_by_outer_line_search) {
-          state_ = outer_state;
-          synchronize_state();
-        }
-      }
-      if (reject_high_cfl_correction && !accepted_by_outer_line_search) {
-        // A growing correction away from the CFL floor is recoverable by
-        // returning to the accepted outer state and retrying at lower CFL.
-        // Do this before recording force/residual output so the controller
-        // never advances from a knowingly rejected nonlinear state.
-        state_ = outer_state;
-        synchronize_state();
-        adaptive_cfl = std::max(steady_cfl_floor, 0.5 * cfl);
-        floor_decline_streak = 0;
-        --step;
-        continue;
-      }
-      if (reject_floor_correction && !accepted_by_outer_line_search && floor_retry_count < 4) {
-        // Reuse the same outer state with a smaller correction, so a failed
-        // trial cannot contaminate the accepted residual/force history.  A
-        // bounded retry count avoids indefinitely re-solving an identical
-        // floor-CFL correction once the local relaxation reaches its limit.
-        state_ = outer_state;
-        synchronize_state();
-        floor_relaxation = std::max(minimum_floor_relaxation, 0.5 * floor_relaxation);
-        floor_decline_streak = 0;
-        ++floor_retry_count;
-        --step;
-        continue;
       }
       floor_retry_count = 0;
       anderson_history.push_back({anderson_outer, anderson_image});
@@ -1822,10 +2373,9 @@ RunSummary FlowSolver::solve() {
       }
       if (config_.run.steady_newton_only && step >= minimum_steps_before_early_exit && forces_flat &&
           stationary_newton_plateau) {
-        summary_.converged = true;
         summary_.diagnostic =
             "safeguarded matrix-free Newton line search reached a stationary bounded-residual plateau; "
-            "the reported residual target was not attained and the plateau is documented explicitly";
+            "the reported residual target was not attained";
         break;
       }
       if (at_steady_cfl_floor && std::isfinite(previous_outer_norm)) {
@@ -2043,6 +2593,16 @@ RunSummary FlowSolver::solve() {
   synchronize_state();
   reconstruct_gradients_and_limit();
   summary_.local_surface = build_surface_records();
+  const char* peak_diagnostic = std::getenv("CFD_DIAG_RESIDUAL_PEAK");
+  if (peak_diagnostic != nullptr && std::string(peak_diagnostic) == "1") {
+    report_residual_peak(assemble_spatial_residual().residual);
+  }
+  long long global_positivity_limited_updates = 0;
+  MPI_Allreduce(&positivity_limited_updates_, &global_positivity_limited_updates, 1,
+                MPI_LONG_LONG, MPI_SUM, comm_);
+  if (rank_ == 0) {
+    std::cout << "positivity_limited_updates=" << global_positivity_limited_updates << '\n' << std::flush;
+  }
   return summary_;
 }
 

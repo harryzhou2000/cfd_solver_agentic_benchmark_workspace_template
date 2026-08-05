@@ -44,6 +44,8 @@ struct OutputMetadata {
   double inner_residual_reduction_target = 0.0;
   int inner_target_misses = 0;
   double inner_target_converged_fraction = 1.0, last_inner_residual_ratio = 0.0;
+  double observed_cfl_min = 0.0, observed_cfl_max = 0.0;
+  std::string termination_reason;
   std::string start_time_utc, end_time_utc;
   bool completed = false;
   std::string convergence_status = "failed";
@@ -63,8 +65,10 @@ class OutputWriter {
   void write_surface(const std::vector<SurfaceRecord>& local_rows) const;
   void write_run_status(const CaseConfig& config, const RunStatus& status) const;
 
-  /// Writes field_rank<N>.vtu on every rank and field_final.pvtu on rank zero.
-  /// In serial field_final.vtu is also produced for tools requiring a VTU file.
+  /// Writes rank-local VTU pieces, a parallel PVTU index, and a rank-zero
+  /// multi-piece field_final.vtu.  The latter is a complete, standard VTK XML
+  /// UnstructuredGrid artifact for consumers that require the literal final
+  /// VTU filename in the output contract; gathering happens only at output.
   void write_field_final(const LocalMesh& mesh, const std::vector<double>& local_state,
                          const PerfectGas& gas) const;
 

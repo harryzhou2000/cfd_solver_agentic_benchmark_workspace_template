@@ -3,6 +3,7 @@
 #include "cfd/partition.hpp"
 #include "cfd/solver.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
@@ -172,7 +173,9 @@ int main(int argc, char** argv) {
     metadata.viscous_flux = config.physics_mode == cfd::PhysicsMode::Laminar
                                 ? "unstructured_primitive_gradient_newtonian_fourier"
                                 : "disabled";
-    metadata.inviscid_flux = "rusanov_local_lax_friedrichs";
+    metadata.inviscid_flux = config.run.inviscid_flux == "hllc"
+                                ? "hllc_with_rusanov_fallback"
+                                : "rusanov_local_lax_friedrichs";
     metadata.implicit_solver = config.run.steady_newton_only
                                    ? "safeguarded_matrix_free_newton_with_block_lu_sgs_right_preconditioning"
                                    : "multi_sweep_rank_local_lu_sgs_rusanov_preconditioner";
@@ -186,6 +189,29 @@ int main(int argc, char** argv) {
     metadata.inner_target_misses = summary.inner_statistics.target_misses;
     metadata.inner_target_converged_fraction = summary.inner_statistics.converged_fraction;
     metadata.last_inner_residual_ratio = summary.inner_statistics.last_ratio;
+    if (!summary.residuals.empty()) {
+      const auto [minimum_cfl, maximum_cfl] = std::minmax_element(
+          summary.residuals.begin(), summary.residuals.end(),
+          [](const cfd::ResidualRecord& first, const cfd::ResidualRecord& second) { return first.cfl < second.cfl; });
+      metadata.observed_cfl_min = minimum_cfl->cfl;
+      metadata.observed_cfl_max = maximum_cfl->cfl;
+    }
+    metadata.termination_reason = summary.diagnostic;
+    if (config.run.reconstruction_gradient_scale == 0.0) {
+      metadata.reconstruction = "piecewise_constant_first_order_continuation";
+      metadata.limiter = "not_applied_for_first_order_continuation";
+      metadata.spatial_order_claimed = 1;
+    } else if (config.run.reconstruction_gradient_scale < 1.0) {
+      metadata.reconstruction = "scaled_linear_least_squares_continuation_with_shock_local_first_order_fallback";
+      metadata.limiter = "barth_jespersen_with_pressure_ratio_shock_fallback";
+      // A gradient scale below one is an explicitly diagnostic p-continuation,
+      // not a completed second-order production discretization.
+      metadata.spatial_order_claimed = 1;
+    } else {
+      metadata.reconstruction = "linear_least_squares_with_pressure_ratio_shock_local_first_order_fallback";
+      metadata.limiter = "barth_jespersen_with_pressure_ratio_shock_fallback";
+      metadata.spatial_order_claimed = 2;
+    }
     metadata.start_time_utc = start_time;
     metadata.end_time_utc = end_time;
     metadata.completed = completed;

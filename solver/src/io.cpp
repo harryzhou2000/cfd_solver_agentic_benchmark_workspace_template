@@ -48,7 +48,7 @@ OutputWriter::OutputWriter(std::filesystem::path output_dir, MPI_Comm comm) : ou
 void OutputWriter::write_metadata(const CaseConfig& c, const LocalMesh& mesh, const OutputMetadata& m) const {
   if (rank_ != 0) return;
   std::ofstream out(output_dir_ / "metadata.json"); if (!out) throw std::runtime_error("cannot write metadata.json");
-  out << std::boolalpha << "{\n"
+  out << std::setprecision(17) << std::boolalpha << "{\n"
       << "  \"case_id\": \"" << esc(c.case_id) << "\",\n  \"solver_name\": \"" << esc(m.solver_name) << "\",\n  \"solver_version\": \"" << esc(m.solver_version) << "\",\n"
       << "  \"git_revision\": " << (m.git_revision.empty() ? "null" : "\"" + esc(m.git_revision) + "\"") << ",\n"
       << "  \"mpi_ranks\": " << size_ << ",\n  \"mesh_file\": \"" << esc(c.mesh_file.string()) << "\",\n  \"num_cells_global\": " << mesh.global_cell_count << ",\n  \"num_faces_global\": " << mesh.global_face_count << ",\n"
@@ -60,6 +60,43 @@ void OutputWriter::write_metadata(const CaseConfig& c, const LocalMesh& mesh, co
       << "  \"true_bdf2_inner_loop\": " << m.true_bdf2_inner_loop << ",\n  \"typical_inner_iterations\": " << m.typical_inner_iterations << ",\n  \"min_inner_iterations\": " << m.min_inner_iterations << ",\n  \"max_inner_iterations\": " << m.max_inner_iterations << ",\n"
       << "  \"observed_min_inner_iterations\": " << m.observed_min_inner_iterations << ",\n  \"observed_max_inner_iterations\": " << m.observed_max_inner_iterations << ",\n  \"inner_residual_reduction_target\": " << m.inner_residual_reduction_target << ",\n"
       << "  \"inner_target_misses\": " << m.inner_target_misses << ",\n  \"inner_target_converged_fraction\": " << m.inner_target_converged_fraction << ",\n  \"last_inner_residual_ratio\": " << m.last_inner_residual_ratio << ",\n"
+      << "  \"run_control\": {\n"
+      << "    \"type\": \"" << esc(to_string(c.run.type)) << "\",\n"
+      << "    \"max_steps\": " << c.run.max_steps << ",\n"
+      << "    \"residual_reduction_target\": " << c.run.residual_reduction_target << ",\n"
+      << "    \"cfl_initial\": " << c.run.cfl_initial << ",\n"
+      << "    \"cfl_max\": " << c.run.cfl_max << ",\n"
+      << "    \"pseudo_cfl_ramp_steps\": " << c.run.pseudo_cfl_ramp_steps << ",\n"
+      << "    \"min_inner_iterations\": " << c.run.min_inner_iterations << ",\n"
+      << "    \"max_inner_iterations\": " << c.run.max_inner_iterations << ",\n"
+      << "    \"inner_residual_reduction_target\": " << c.run.inner_residual_reduction_target << ",\n"
+      << "    \"time_step\": ";
+  if (c.run.type == RunType::Transient) {
+    out << c.run.time_step;
+  } else {
+    out << "null";
+  }
+  out << ",\n"
+      << "    \"final_time\": ";
+  if (c.run.type == RunType::Transient) {
+    out << c.run.final_time;
+  } else {
+    out << "null";
+  }
+  out << "\n"
+      << "  },\n"
+      << "  \"actual_controls\": {\n"
+      << "    \"inviscid_flux\": \"" << esc(c.run.inviscid_flux) << "\",\n"
+      << "    \"rusanov_dissipation_scale\": " << c.run.rusanov_dissipation_scale << ",\n"
+      << "    \"reconstruction_gradient_scale\": " << c.run.reconstruction_gradient_scale << ",\n"
+      << "    \"shock_sensor_dissipation\": " << c.run.shock_sensor_dissipation << ",\n"
+      << "    \"shock_sensor_threshold\": " << c.run.shock_sensor_threshold << ",\n"
+      << "    \"steady_relaxation\": " << c.run.steady_relaxation << ",\n"
+      << "    \"steady_newton_only\": " << c.run.steady_newton_only << ",\n"
+      << "    \"observed_cfl_min\": " << m.observed_cfl_min << ",\n"
+      << "    \"observed_cfl_max\": " << m.observed_cfl_max << ",\n"
+      << "    \"termination_reason\": \"" << esc(m.termination_reason) << "\"\n"
+      << "  },\n"
       << "  \"start_time_utc\": \"" << esc(m.start_time_utc) << "\",\n  \"end_time_utc\": \"" << esc(m.end_time_utc) << "\",\n  \"completed\": " << m.completed << ",\n  \"convergence_status\": \"" << esc(m.convergence_status) << "\"\n}\n";
 }
 
@@ -86,10 +123,111 @@ void OutputWriter::write_surface(const std::vector<SurfaceRecord>& rows) const {
 void OutputWriter::write_run_status(const CaseConfig& c, const RunStatus& s) const { if (rank_ != 0) return; std::ofstream out(output_dir_ / "run_status.json"); if (!out) throw std::runtime_error("cannot write run_status.json"); out << std::setprecision(17) << "{\n  \"case_id\": \"" << esc(c.case_id) << "\",\n  \"command\": \"" << esc(s.command) << "\",\n  \"mpi_ranks\": " << size_ << ",\n  \"wall_time_seconds\": " << s.wall_time_seconds << ",\n  \"final_step\": " << s.final_step << ",\n  \"final_physical_time\": " << s.final_physical_time << ",\n  \"convergence_status\": \"" << esc(s.convergence_status) << "\",\n  \"residual_reduction_orders\": " << s.residual_reduction_orders << ",\n  \"notes\": \"" << esc(s.notes) << "\"\n}\n"; }
 
 void OutputWriter::write_field_final(const LocalMesh& mesh, const std::vector<double>& state, const PerfectGas& gas) const {
-  require_local_state(mesh, state); const auto path = rank_path(output_dir_, "field", rank_, ".vtu"); std::ofstream out(path); if (!out) throw std::runtime_error("cannot write " + path.string()); out << std::setprecision(17) << "<?xml version=\"1.0\"?>\n<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n<UnstructuredGrid><Piece NumberOfPoints=\"" << mesh.nodes.size() << "\" NumberOfCells=\"" << mesh.owned_cell_count << "\">\n<Points><DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n"; for (const auto& p : mesh.nodes) out << p.x << ' ' << p.y << " 0 "; out << "\n</DataArray></Points>\n<Cells><DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n"; int offset = 0; for (int c = 0; c < mesh.owned_cell_count; ++c) for (int node : mesh.cells[c].nodes) out << node << ' '; out << "\n</DataArray><DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n"; for (int c = 0; c < mesh.owned_cell_count; ++c) { offset += static_cast<int>(mesh.cells[c].nodes.size()); out << offset << ' '; } out << "\n</DataArray><DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n"; for (int c=0;c<mesh.owned_cell_count;++c) out << (mesh.cells[c].type == CellType::triangle ? 5 : 9) << ' '; out << "\n</DataArray></Cells>\n<CellData>\n";
-  const auto array = [&](const char* name, auto value) { out << "<DataArray type=\"Float64\" Name=\"" << name << "\" format=\"ascii\">\n"; for (int c = 0; c < mesh.owned_cell_count; ++c) out << value(c) << ' '; out << "\n</DataArray>\n"; };
-  array("density", [&](int c) { return gas.primitive(state_at(state,c)).rho; }); array("u", [&](int c) { return gas.primitive(state_at(state,c)).u; }); array("v", [&](int c) { return gas.primitive(state_at(state,c)).v; }); array("pressure", [&](int c) { return gas.primitive(state_at(state,c)).pressure; }); array("mach", [&](int c) { const auto p=gas.primitive(state_at(state,c)); return std::sqrt(p.u*p.u+p.v*p.v)/p.sound_speed; }); array("total_energy", [&](int c) { return state_at(state,c)[3]; }); out << "<DataArray type=\"Int32\" Name=\"rank\" format=\"ascii\">\n"; for(int c=0;c<mesh.owned_cell_count;++c) out << rank_ << ' '; out << "\n</DataArray>\n</CellData></Piece></UnstructuredGrid></VTKFile>\n"; out.close();
-  MPI_Barrier(comm_); if (rank_ != 0) return; std::ofstream pvtu(output_dir_ / "field_final.pvtu"); if (!pvtu) throw std::runtime_error("cannot write field_final.pvtu"); pvtu << "<?xml version=\"1.0\"?><VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\"><PUnstructuredGrid GhostLevel=\"0\"><PPoints><PDataArray type=\"Float64\" NumberOfComponents=\"3\"/></PPoints><PCellData><PDataArray type=\"Float64\" Name=\"density\"/><PDataArray type=\"Float64\" Name=\"u\"/><PDataArray type=\"Float64\" Name=\"v\"/><PDataArray type=\"Float64\" Name=\"pressure\"/><PDataArray type=\"Float64\" Name=\"mach\"/><PDataArray type=\"Float64\" Name=\"total_energy\"/><PDataArray type=\"Int32\" Name=\"rank\"/></PCellData>"; for (int r=0;r<size_;++r) { const auto piece = rank_path(output_dir_, "field", r, ".vtu"); pvtu << "<Piece Source=\"" << xml(piece.filename().string()) << "\"/>"; } pvtu << "</PUnstructuredGrid></VTKFile>\n"; if (size_ == 1) std::filesystem::copy_file(path, output_dir_ / "field_final.vtu", std::filesystem::copy_options::overwrite_existing);
+  require_local_state(mesh, state);
+  std::ostringstream local_piece;
+  local_piece << std::setprecision(17)
+              << "<Piece NumberOfPoints=\"" << mesh.nodes.size() << "\" NumberOfCells=\""
+              << mesh.owned_cell_count << "\">\n"
+              << "<Points><DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n";
+  for (const auto& point : mesh.nodes) {
+    local_piece << point.x << ' ' << point.y << " 0 ";
+  }
+  local_piece << "\n</DataArray></Points>\n"
+              << "<Cells><DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
+  int offset = 0;
+  for (int cell = 0; cell < mesh.owned_cell_count; ++cell) {
+    for (const int node : mesh.cells[static_cast<std::size_t>(cell)].nodes) {
+      local_piece << node << ' ';
+    }
+  }
+  local_piece << "\n</DataArray><DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
+  for (int cell = 0; cell < mesh.owned_cell_count; ++cell) {
+    offset += static_cast<int>(mesh.cells[static_cast<std::size_t>(cell)].nodes.size());
+    local_piece << offset << ' ';
+  }
+  local_piece << "\n</DataArray><DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n";
+  for (int cell = 0; cell < mesh.owned_cell_count; ++cell) {
+    local_piece << (mesh.cells[static_cast<std::size_t>(cell)].type == CellType::triangle ? 5 : 9) << ' ';
+  }
+  local_piece << "\n</DataArray></Cells>\n<CellData>\n";
+  const auto array = [&](const char* name, const auto& value) {
+    local_piece << "<DataArray type=\"Float64\" Name=\"" << name << "\" format=\"ascii\">\n";
+    for (int cell = 0; cell < mesh.owned_cell_count; ++cell) {
+      local_piece << value(cell) << ' ';
+    }
+    local_piece << "\n</DataArray>\n";
+  };
+  array("density", [&](const int cell) { return gas.primitive(state_at(state, cell)).rho; });
+  array("u", [&](const int cell) { return gas.primitive(state_at(state, cell)).u; });
+  array("v", [&](const int cell) { return gas.primitive(state_at(state, cell)).v; });
+  array("pressure", [&](const int cell) { return gas.primitive(state_at(state, cell)).pressure; });
+  array("mach", [&](const int cell) {
+    const auto primitive = gas.primitive(state_at(state, cell));
+    return std::sqrt(primitive.u * primitive.u + primitive.v * primitive.v) / primitive.sound_speed;
+  });
+  array("total_energy", [&](const int cell) { return state_at(state, cell)[3]; });
+  local_piece << "<DataArray type=\"Int32\" Name=\"rank\" format=\"ascii\">\n";
+  for (int cell = 0; cell < mesh.owned_cell_count; ++cell) {
+    local_piece << rank_ << ' ';
+  }
+  local_piece << "\n</DataArray>\n</CellData></Piece>\n";
+
+  const std::string piece_text = local_piece.str();
+  const auto piece_path = rank_path(output_dir_, "field", rank_, ".vtu");
+  std::ofstream piece_file(piece_path);
+  if (!piece_file) {
+    throw std::runtime_error("cannot write " + piece_path.string());
+  }
+  piece_file << "<?xml version=\"1.0\"?>\n<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n"
+             << "<UnstructuredGrid>\n" << piece_text << "</UnstructuredGrid>\n</VTKFile>\n";
+  piece_file.close();
+
+  const int local_size = static_cast<int>(piece_text.size());
+  std::vector<int> sizes(static_cast<std::size_t>(size_), 0);
+  std::vector<int> offsets(static_cast<std::size_t>(size_), 0);
+  MPI_Gather(&local_size, 1, MPI_INT, sizes.data(), 1, MPI_INT, 0, comm_);
+  std::vector<char> gathered;
+  if (rank_ == 0) {
+    for (int rank = 1; rank < size_; ++rank) {
+      offsets[static_cast<std::size_t>(rank)] = offsets[static_cast<std::size_t>(rank - 1)] +
+                                                sizes[static_cast<std::size_t>(rank - 1)];
+    }
+    const int total_size = offsets.back() + sizes.back();
+    gathered.resize(static_cast<std::size_t>(total_size));
+  }
+  MPI_Gatherv(piece_text.data(), local_size, MPI_CHAR, gathered.data(), sizes.data(), offsets.data(), MPI_CHAR, 0,
+              comm_);
+  MPI_Barrier(comm_);
+  if (rank_ != 0) {
+    return;
+  }
+
+  std::ofstream final_vtu(output_dir_ / "field_final.vtu");
+  if (!final_vtu) {
+    throw std::runtime_error("cannot write field_final.vtu");
+  }
+  final_vtu << "<?xml version=\"1.0\"?>\n<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n"
+            << "<UnstructuredGrid>\n";
+  for (int rank = 0; rank < size_; ++rank) {
+    final_vtu.write(gathered.data() + offsets[static_cast<std::size_t>(rank)], sizes[static_cast<std::size_t>(rank)]);
+  }
+  final_vtu << "</UnstructuredGrid>\n</VTKFile>\n";
+
+  std::ofstream pvtu(output_dir_ / "field_final.pvtu");
+  if (!pvtu) {
+    throw std::runtime_error("cannot write field_final.pvtu");
+  }
+  pvtu << "<?xml version=\"1.0\"?><VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">"
+       << "<PUnstructuredGrid GhostLevel=\"0\"><PPoints><PDataArray type=\"Float64\" NumberOfComponents=\"3\"/>"
+       << "</PPoints><PCellData><PDataArray type=\"Float64\" Name=\"density\"/><PDataArray type=\"Float64\" Name=\"u\"/>"
+       << "<PDataArray type=\"Float64\" Name=\"v\"/><PDataArray type=\"Float64\" Name=\"pressure\"/>"
+       << "<PDataArray type=\"Float64\" Name=\"mach\"/><PDataArray type=\"Float64\" Name=\"total_energy\"/>"
+       << "<PDataArray type=\"Int32\" Name=\"rank\"/></PCellData>";
+  for (int rank = 0; rank < size_; ++rank) {
+    const auto piece = rank_path(output_dir_, "field", rank, ".vtu");
+    pvtu << "<Piece Source=\"" << xml(piece.filename().string()) << "\"/>";
+  }
+  pvtu << "</PUnstructuredGrid></VTKFile>\n";
 }
 
 void OutputWriter::write_restart_final(const LocalMesh& mesh, const std::vector<double>& state, int step, double time) const { require_local_state(mesh,state); const auto path=rank_path(output_dir_,"restart_final",rank_,".bin"); std::ofstream out(path,std::ios::binary); if(!out) throw std::runtime_error("cannot write restart"); out.write(kRestartMagic,sizeof(kRestartMagic)); const std::uint32_t version=1; const std::uint64_t count=mesh.owned_cell_count; write_pod(out,version); write_pod(out,step); write_pod(out,time); write_pod(out,count); for(int c=0;c<mesh.owned_cell_count;++c) { const int global=mesh.local_to_global_cell[c]; write_pod(out,global); for(double x:state_at(state,c)) write_pod(out,x); } out.close(); MPI_Barrier(comm_); if(rank_==0) { std::ofstream manifest(output_dir_/"restart_final.manifest.json"); manifest << "{\n  \"format\": \"cfd_rank_local_restart_v1\",\n  \"mpi_ranks\": " << size_ << ",\n  \"step\": " << step << ",\n  \"physical_time\": " << std::setprecision(17) << time << ",\n  \"state_layout\": \"owned_cells_only; global_cell_id plus rho,rhou,rhov,rhoE\"\n}\n"; } }

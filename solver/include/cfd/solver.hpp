@@ -105,8 +105,19 @@ class FlowSolver {
   PerfectGas gas_;
   HaloExchange halo_;
   std::vector<double> state_;       // [local cell][rho,rhou,rhov,rhoE]
+  // Boundary-aware, bounded least-squares primitive gradients for viscous
+  // fluxes and wall traction.  Viscous discretization must not disappear when
+  // an inviscid reconstruction continuation uses a zero face-gradient scale.
   std::vector<double> gradients_;   // [local cell][rho_x,rho_y,u_x,u_y,v_x,v_y,T_x,T_y]
+  // Independently limited/scaled gradients used only to reconstruct inviscid
+  // face states.  This is the array affected by reconstruction_gradient_scale.
+  std::vector<double> reconstruction_gradients_;
   RunSummary summary_;
+  long long positivity_limited_updates_{0};
+  // Set only while forming a finite-difference Arnoldi action.  The cached
+  // baseline gradients then define a frozen-gradient/Picard Jacobian; all
+  // nonlinear acceptance and reporting assemblies rebuild gradients.
+  bool freeze_gradients_for_jacobian_{false};
   bool initialized_{false};
 
   [[nodiscard]] Primitive primitive_at(int local_cell) const;
@@ -122,19 +133,27 @@ class FlowSolver {
   [[nodiscard]] std::vector<SurfaceRecord> build_surface_records() const;
   [[nodiscard]] std::vector<double> local_time_steps(const std::vector<double>& spectral,
                                                       double cfl) const;
+  [[nodiscard]] double face_rusanov_dissipation(const Primitive& left,
+                                                 const Primitive& right) const;
   void implicit_update(const std::vector<double>& total_residual,
                        const std::vector<double>& spectral,
                        const std::vector<double>& time_diagonal,
-                       double relaxation);
+                       double relaxation,
+                       bool tensor_viscous_blocks = false);
   /// Safeguarded Jacobian-free Newton correction used only for difficult
   /// steady nonlinear plateaus.  The finite-volume residual remains the
   /// convergence metric; this routine mutates state only when a line-search
   /// candidate lowers that fully assembled residual.
   [[nodiscard]] bool try_matrix_free_newton_step(const Assembly& baseline);
+  /// Fall back to one frozen block-Jacobian residual correction when the
+  /// matrix-free Krylov direction is rejected.  It shares the same global
+  /// physicality and residual-decrease acceptance tests.
+  [[nodiscard]] bool try_block_residual_step(const Assembly& baseline);
   [[nodiscard]] double cfl_for_step(int step) const;
   [[nodiscard]] double global_norm(const std::vector<double>& residual) const;
   [[nodiscard]] double local_viscosity() const;
   [[nodiscard]] bool transient_force_is_periodic() const;
+  void report_residual_peak(const std::vector<double>& residual) const;
   void validate_boundary_map() const;
 };
 
