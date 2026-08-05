@@ -440,6 +440,30 @@ void FlowSolver::restore_owned_state(const std::vector<double>& owned_state) {
   initialized_ = true;
 }
 
+void FlowSolver::set_steady_continuation_context(const int previous_step,
+                                                 const double previous_physical_time,
+                                                 const double residual_reference_l2) {
+  if (config_.run.type != RunType::Steady) {
+    throw std::invalid_argument("steady continuation context is valid only for steady runs");
+  }
+  if (previous_step < 0 || !std::isfinite(previous_physical_time) || previous_physical_time < 0.0 ||
+      !std::isfinite(residual_reference_l2) || residual_reference_l2 <= 0.0) {
+    throw std::invalid_argument("invalid steady restart provenance");
+  }
+  steady_step_offset_ = previous_step;
+  steady_pseudo_time_offset_ = previous_physical_time;
+  steady_residual_reference_l2_ = residual_reference_l2;
+}
+
+ResidualRecord FlowSolver::fully_assembled_spatial_residual_record(const int step,
+                                                                     const double physical_time) {
+  if (!initialized_) {
+    throw std::logic_error("cannot assemble a residual before solver initialization");
+  }
+  const Assembly assembly = assemble_spatial_residual();
+  return global_residual_record(step, physical_time, 0, 0.0, 0.0, assembly.residual);
+}
+
 Primitive FlowSolver::primitive_at(const int local_cell) const {
   return gas_.primitive(state_at(state_, local_cell));
 }
@@ -1847,9 +1871,12 @@ RunSummary FlowSolver::solve() {
   summary_ = RunSummary{};
   positivity_limited_updates_ = 0;
   if (config_.run.type == RunType::Steady) {
-    double initial_norm = 0.0;
-    double pseudo_time = 0.0;
+    double initial_norm = steady_residual_reference_l2_;
+    double pseudo_time = steady_pseudo_time_offset_;
     ResidualRecord final_record;
+    int completed_segment_steps = 0;
+    summary_.final_step = steady_step_offset_;
+    summary_.final_physical_time = pseudo_time;
     // A residual target reached after a sustained interval is a legitimate
     // convergence stop; otherwise we honor the full supplied maximum.  The
     // force history is also required to be flat over the trailing window.
@@ -1918,8 +1945,9 @@ RunSummary FlowSolver::solve() {
       }
     };
     double previous_outer_norm = std::numeric_limits<double>::infinity();
-    for (int step = 1; step <= config_.run.max_steps; ++step) {
-      const double requested_cfl = cfl_for_step(step);
+    for (int segment_step = 1; segment_step <= config_.run.max_steps; ++segment_step) {
+      const int step = steady_step_offset_ + segment_step;
+      const double requested_cfl = cfl_for_step(segment_step);
       const double cfl = std::min(requested_cfl, adaptive_cfl);
       // Once the controller has reached its permitted CFL floor, a further
       // CFL backoff cannot damp a nonlinear oscillation.  Use a more
@@ -2308,7 +2336,7 @@ RunSummary FlowSolver::solve() {
               floor_relaxation = std::max(minimum_floor_relaxation, 0.5 * floor_relaxation);
               ++floor_retry_count;
             }
-            --step;
+            --segment_step;
             continue;
           }
           if (!newton_recovered) {
@@ -2324,12 +2352,13 @@ RunSummary FlowSolver::solve() {
         anderson_history.erase(anderson_history.begin());
       }
       accepted_outer_norms.push_back(final_record.l2);
-      summary_.residuals.push_back(final_record);
       const std::vector<double> dtau = local_time_steps(diagnostic.spectral_radius, cfl);
       double local_dt_sum = std::accumulate(dtau.begin(), dtau.end(), 0.0);
       double global_dt_sum = 0.0;
       MPI_Allreduce(&local_dt_sum, &global_dt_sum, 1, MPI_DOUBLE, MPI_SUM, comm_);
       pseudo_time += global_dt_sum / static_cast<double>(mesh_.global_cell_count);
+      final_record.physical_time = pseudo_time;
+      summary_.residuals.push_back(final_record);
       summary_.forces.push_back(integrated_forces(step, pseudo_time));
       total_inner_iterations += used_inner;
       observed_min_inner = std::min(observed_min_inner, used_inner);
@@ -2339,6 +2368,7 @@ RunSummary FlowSolver::solve() {
       }
       summary_.final_step = step;
       summary_.final_physical_time = pseudo_time;
+      ++completed_segment_steps;
       const double orders = std::log10(initial_norm / std::max(final_record.l2, kTiny));
       summary_.residual_reduction_orders = orders;
       if (rank_ == 0 && (step % 25 == 0 || step == 1)) {
@@ -2409,13 +2439,14 @@ RunSummary FlowSolver::solve() {
     }
     summary_.inner_statistics.minimum = observed_min_inner == std::numeric_limits<int>::max() ? 0 : observed_min_inner;
     summary_.inner_statistics.maximum = observed_max_inner;
-    summary_.inner_statistics.mean = summary_.final_step > 0
-                                         ? static_cast<double>(total_inner_iterations) / static_cast<double>(summary_.final_step)
+    summary_.inner_statistics.mean = completed_segment_steps > 0
+                                         ? static_cast<double>(total_inner_iterations) /
+                                               static_cast<double>(completed_segment_steps)
                                          : 0.0;
     summary_.inner_statistics.target_misses = inner_target_misses;
-    summary_.inner_statistics.converged_fraction = summary_.final_step > 0
+    summary_.inner_statistics.converged_fraction = completed_segment_steps > 0
                                                         ? 1.0 - static_cast<double>(inner_target_misses) /
-                                                                    static_cast<double>(summary_.final_step)
+                                                                    static_cast<double>(completed_segment_steps)
                                                         : 0.0;
     summary_.inner_statistics.last_ratio = last_inner_ratio;
   } else {

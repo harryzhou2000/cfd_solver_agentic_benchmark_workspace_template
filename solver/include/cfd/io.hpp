@@ -13,6 +13,32 @@
 
 namespace cfd {
 
+/// Provenance attached to a rank-local restart and its output package.  The
+/// residual reference always denotes the fully assembled residual of the
+/// original fresh state; it is never reset to a checkpoint-local value.
+struct RestartProvenance {
+  bool restarted{false};
+  int chain_depth{0};
+  std::string parent_manifest;
+  std::string cumulative_residual_trace{"residuals.csv"};
+  std::string compatibility_signature;
+  int segment_start_step{0};
+  double segment_start_physical_time{0.0};
+  double residual_reference_l2{0.0};
+  double residual_reference_linf{0.0};
+  double segment_start_residual_l2{0.0};
+  double segment_start_residual_linf{0.0};
+  int checkpoint_step{0};
+  double checkpoint_physical_time{0.0};
+  double checkpoint_residual_l2{0.0};
+  double checkpoint_residual_linf{0.0};
+};
+
+/// Return a stable, human-readable signature of all physics and numerical
+/// controls that affect a restart state.  Segment length and residual target
+/// are deliberately excluded so a compatible run can extend a continuation.
+std::string restart_compatibility_signature(const CaseConfig& config, const LocalMesh& mesh);
+
 struct RunStatus {
   std::string command;
   double wall_time_seconds = 0.0;
@@ -20,6 +46,7 @@ struct RunStatus {
   double final_physical_time = 0.0;
   std::string convergence_status = "failed";
   double residual_reduction_orders = 0.0;
+  RestartProvenance restart;
   std::string notes;
 };
 
@@ -46,6 +73,7 @@ struct OutputMetadata {
   double inner_target_converged_fraction = 1.0, last_inner_residual_ratio = 0.0;
   double observed_cfl_min = 0.0, observed_cfl_max = 0.0;
   std::string termination_reason;
+  RestartProvenance restart;
   std::string start_time_utc, end_time_utc;
   bool completed = false;
   std::string convergence_status = "failed";
@@ -61,6 +89,13 @@ class OutputWriter {
                       const OutputMetadata& metadata) const;
   void write_partition_diagnostics(const LocalMesh& mesh) const;
   void append_residual(const ResidualRecord& row) const;
+  /// Write the traceable, cumulative residual history.  For a fresh run this
+  /// begins with ``initial_reference`` at step zero; for a restart it first
+  /// verifies and copies its parent trace before appending this segment.
+  void write_residual_trace(const std::filesystem::path& parent_trace,
+                            const ResidualRecord& initial_reference,
+                            const std::vector<ResidualRecord>& segment_rows,
+                            const RestartProvenance& provenance) const;
   void append_force(const ForceRecord& row) const;
   void write_surface(const std::vector<SurfaceRecord>& local_rows) const;
   void write_run_status(const CaseConfig& config, const RunStatus& status) const;
@@ -75,8 +110,15 @@ class OutputWriter {
   /// Writes restart_final.rank<N>.bin on every rank plus a rank-zero JSON
   /// manifest.  Files are deliberately partition-specific and cannot pretend
   /// to be a global replicated state.
-  void write_restart_final(const LocalMesh& mesh, const std::vector<double>& local_state,
-                           int step, double physical_time) const;
+  void write_restart_final(const CaseConfig& config, const LocalMesh& mesh,
+                           const std::vector<double>& local_state,
+                           const RestartProvenance& provenance) const;
+  /// Read and validate the v2 manifest before rank-local state is restored.
+  /// Legacy v1 manifests are intentionally rejected because they cannot make
+  /// a cumulative residual claim traceable.
+  [[nodiscard]] RestartProvenance read_restart_provenance(
+      const std::filesystem::path& manifest_path, const CaseConfig& config,
+      const LocalMesh& mesh) const;
   std::vector<double> read_restart_local(const LocalMesh& mesh, int& step,
                                          double& physical_time) const;
 

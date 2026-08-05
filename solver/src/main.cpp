@@ -102,9 +102,15 @@ std::string git_revision() {
   return value == nullptr ? std::string{} : std::string(value);
 }
 
+bool approximately_equal(const double first, const double second) {
+  return std::isfinite(first) && std::isfinite(second) &&
+         std::abs(first - second) <= 1.0e-10 * std::max({1.0, std::abs(first), std::abs(second)});
+}
+
 void write_stdout_log(const std::filesystem::path& directory, const cfd::CaseConfig& config,
                       const cfd::RunSummary& summary, const double wall_seconds,
-                      const std::string& command, const std::string& status) {
+                      const double residual_reduction_orders, const std::string& command,
+                      const std::string& status) {
   std::ofstream stream(directory / "stdout.log");
   if (!stream) {
     throw std::runtime_error("could not write stdout.log");
@@ -116,7 +122,7 @@ void write_stdout_log(const std::filesystem::path& directory, const cfd::CaseCon
          << "run_type: " << cfd::to_string(config.run.type) << "\n"
          << "final_step: " << summary.final_step << "\n"
          << "final_physical_time: " << summary.final_physical_time << "\n"
-         << "residual_reduction_orders: " << summary.residual_reduction_orders << "\n"
+         << "residual_reduction_orders: " << residual_reduction_orders << "\n"
          << "convergence_status: " << status << "\n"
          << "wall_time_seconds: " << wall_seconds << "\n"
          << "notes: " << summary.diagnostic << "\n";
@@ -144,18 +150,78 @@ int main(int argc, char** argv) {
     cfd::OutputWriter writer(command.output_directory, MPI_COMM_WORLD);
     cfd::FlowSolver solver(config, std::move(mesh), MPI_COMM_WORLD);
 
+    cfd::RestartProvenance restart;
+    cfd::ResidualRecord initial_reference;
+    std::filesystem::path parent_residual_trace;
     if (!command.restart_file.empty()) {
-      const std::filesystem::path restart_directory =
-          std::filesystem::is_directory(command.restart_file) ? command.restart_file : command.restart_file.parent_path();
-      cfd::OutputWriter restart_reader(restart_directory, MPI_COMM_WORLD);
+      if (config.run.type != cfd::RunType::Steady) {
+        throw std::runtime_error("restart is currently supported only for steady cases; transient BDF history is not stored");
+      }
+      const std::filesystem::path requested_manifest = std::filesystem::is_directory(command.restart_file)
+                                                            ? command.restart_file / "restart_final.manifest.json"
+                                                            : command.restart_file;
+      const std::filesystem::path manifest_path =
+          std::filesystem::absolute(requested_manifest).lexically_normal();
+      cfd::OutputWriter restart_reader(manifest_path.parent_path(), MPI_COMM_WORLD);
+      const cfd::RestartProvenance parent =
+          restart_reader.read_restart_provenance(manifest_path, config, solver.mesh());
       int restart_step = 0;
       double restart_time = 0.0;
-      solver.restore_owned_state(restart_reader.read_restart_local(solver.mesh(), restart_step, restart_time));
+      const std::vector<double> restart_state =
+          restart_reader.read_restart_local(solver.mesh(), restart_step, restart_time);
+      const int local_binary_matches_manifest =
+          restart_step == parent.checkpoint_step && approximately_equal(restart_time, parent.checkpoint_physical_time)
+              ? 1
+              : 0;
+      int binary_matches_manifest = 0;
+      MPI_Allreduce(&local_binary_matches_manifest, &binary_matches_manifest, 1, MPI_INT, MPI_MIN,
+                    MPI_COMM_WORLD);
+      if (binary_matches_manifest == 0) {
+        throw std::runtime_error("restart rank-local state does not match its validated manifest checkpoint");
+      }
+      solver.restore_owned_state(restart_state);
+      const cfd::ResidualRecord restored_checkpoint =
+          solver.fully_assembled_spatial_residual_record(restart_step, restart_time);
+      if (!approximately_equal(restored_checkpoint.l2, parent.checkpoint_residual_l2) ||
+          !approximately_equal(restored_checkpoint.linf, parent.checkpoint_residual_linf)) {
+        throw std::runtime_error("restored state does not reproduce the manifest's fully assembled residual checkpoint");
+      }
+      restart.restarted = true;
+      restart.chain_depth = parent.chain_depth + 1;
+      restart.parent_manifest = manifest_path.string();
+      restart.cumulative_residual_trace = config.run.type == cfd::RunType::Steady ? "residuals.csv" : "";
+      restart.compatibility_signature = cfd::restart_compatibility_signature(config, solver.mesh());
+      restart.segment_start_step = parent.checkpoint_step;
+      restart.segment_start_physical_time = parent.checkpoint_physical_time;
+      restart.residual_reference_l2 = parent.residual_reference_l2;
+      restart.residual_reference_linf = parent.residual_reference_linf;
+      restart.segment_start_residual_l2 = restored_checkpoint.l2;
+      restart.segment_start_residual_linf = restored_checkpoint.linf;
+      initial_reference = restored_checkpoint;
+      parent_residual_trace = manifest_path.parent_path() / parent.cumulative_residual_trace;
+      solver.set_steady_continuation_context(restart.segment_start_step,
+                                             restart.segment_start_physical_time,
+                                             restart.residual_reference_l2);
       if (rank == 0) {
-        std::cout << "Restarted owned conservative state from step " << restart_step << " at t=" << restart_time << '\n';
+        std::cout << "Restarted validated cumulative state from step " << restart_step << " at t=" << restart_time
+                  << " (chain depth " << restart.chain_depth << ")\n";
       }
     } else {
       solver.initialize();
+      initial_reference = solver.fully_assembled_spatial_residual_record(0, 0.0);
+      restart.restarted = false;
+      restart.chain_depth = 0;
+      restart.cumulative_residual_trace = config.run.type == cfd::RunType::Steady ? "residuals.csv" : "";
+      restart.compatibility_signature = cfd::restart_compatibility_signature(config, solver.mesh());
+      restart.segment_start_step = 0;
+      restart.segment_start_physical_time = 0.0;
+      restart.residual_reference_l2 = initial_reference.l2;
+      restart.residual_reference_linf = initial_reference.linf;
+      restart.segment_start_residual_l2 = initial_reference.l2;
+      restart.segment_start_residual_linf = initial_reference.linf;
+      if (config.run.type == cfd::RunType::Steady) {
+        solver.set_steady_continuation_context(0, 0.0, restart.residual_reference_l2);
+      }
     }
 
     const std::string start_time = utc_now();
@@ -163,6 +229,28 @@ int main(int argc, char** argv) {
     const cfd::RunSummary summary = solver.solve();
     const double wall_seconds = MPI_Wtime() - start_wall;
     const std::string end_time = utc_now();
+    const cfd::ResidualRecord final_checkpoint =
+        solver.fully_assembled_spatial_residual_record(summary.final_step, summary.final_physical_time);
+    if (!std::isfinite(final_checkpoint.l2) || final_checkpoint.l2 <= 0.0 ||
+        !std::isfinite(final_checkpoint.linf) || final_checkpoint.linf < 0.0) {
+      throw std::runtime_error("final fully assembled residual is not a valid restart checkpoint");
+    }
+    restart.checkpoint_step = summary.final_step;
+    restart.checkpoint_physical_time = summary.final_physical_time;
+    restart.checkpoint_residual_l2 = final_checkpoint.l2;
+    restart.checkpoint_residual_linf = final_checkpoint.linf;
+    std::vector<cfd::ResidualRecord> cumulative_segment_rows = summary.residuals;
+    if (config.run.type == cfd::RunType::Steady) {
+      if (!cumulative_segment_rows.empty() && cumulative_segment_rows.back().step == final_checkpoint.step) {
+        cumulative_segment_rows.back() = final_checkpoint;
+      } else {
+        cumulative_segment_rows.push_back(final_checkpoint);
+      }
+    }
+    const double cumulative_residual_reduction_orders =
+        config.run.type == cfd::RunType::Steady
+            ? std::log10(restart.residual_reference_l2 / final_checkpoint.l2)
+            : summary.residual_reduction_orders;
     const std::string status = summary.statistically_periodic ? "statistically_periodic"
                                : summary.converged            ? "converged"
                                                               : "failed";
@@ -216,17 +304,22 @@ int main(int argc, char** argv) {
     metadata.end_time_utc = end_time;
     metadata.completed = completed;
     metadata.convergence_status = status;
+    metadata.restart = restart;
 
     writer.write_partition_diagnostics(solver.mesh());
-    for (const cfd::ResidualRecord& record : summary.residuals) {
-      writer.append_residual(record);
+    if (config.run.type == cfd::RunType::Steady) {
+      writer.write_residual_trace(parent_residual_trace, initial_reference, cumulative_segment_rows, restart);
+    } else {
+      for (const cfd::ResidualRecord& record : summary.residuals) {
+        writer.append_residual(record);
+      }
     }
     for (const cfd::ForceRecord& record : summary.forces) {
       writer.append_force(record);
     }
     writer.write_surface(summary.local_surface);
     writer.write_field_final(solver.mesh(), solver.state(), solver.gas());
-    writer.write_restart_final(solver.mesh(), solver.state(), summary.final_step, summary.final_physical_time);
+    writer.write_restart_final(config, solver.mesh(), solver.state(), restart);
     writer.write_metadata(config, solver.mesh(), metadata);
     cfd::RunStatus run_status;
     run_status.command = join_command(argc, argv);
@@ -234,11 +327,13 @@ int main(int argc, char** argv) {
     run_status.final_step = summary.final_step;
     run_status.final_physical_time = summary.final_physical_time;
     run_status.convergence_status = status;
-    run_status.residual_reduction_orders = summary.residual_reduction_orders;
+    run_status.residual_reduction_orders = cumulative_residual_reduction_orders;
+    run_status.restart = restart;
     run_status.notes = summary.diagnostic;
     writer.write_run_status(config, run_status);
     if (rank == 0) {
-      write_stdout_log(writer.directory(), config, summary, wall_seconds, run_status.command, status);
+      write_stdout_log(writer.directory(), config, summary, wall_seconds,
+                       run_status.residual_reduction_orders, run_status.command, status);
       std::cout << "case " << config.case_id << " completed with status " << status
                 << " in " << wall_seconds << " seconds\n";
     }

@@ -83,6 +83,16 @@ class FlowSolver {
   /// Restore locally owned conservative values from a restart piece. Ghost
   /// values are rebuilt through the normal neighbor halo exchange.
   void restore_owned_state(const std::vector<double>& owned_state);
+  /// Set the cumulative steady-solve context carried by a validated restart.
+  /// ``residual_reference_l2`` is the fully assembled residual of the
+  /// original fresh state, not a checkpoint-local normalization.
+  void set_steady_continuation_context(int previous_step, double previous_physical_time,
+                                       double residual_reference_l2);
+  /// Assemble the physical spatial residual at the current state.  This is
+  /// deliberately public so restart provenance can record and verify a full
+  /// nonlinear residual rather than an inner pseudo-time defect.
+  [[nodiscard]] ResidualRecord fully_assembled_spatial_residual_record(
+      int step, double physical_time);
   RunSummary solve();
 
   [[nodiscard]] const CaseConfig& config() const noexcept { return config_; }
@@ -118,6 +128,9 @@ class FlowSolver {
   // baseline gradients then define a frozen-gradient/Picard Jacobian; all
   // nonlinear acceptance and reporting assemblies rebuild gradients.
   bool freeze_gradients_for_jacobian_{false};
+  int steady_step_offset_{0};
+  double steady_pseudo_time_offset_{0.0};
+  double steady_residual_reference_l2_{0.0};
   bool initialized_{false};
 
   [[nodiscard]] Primitive primitive_at(int local_cell) const;
