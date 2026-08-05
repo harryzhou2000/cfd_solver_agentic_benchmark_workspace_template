@@ -59,10 +59,13 @@ so the reported skin friction is not contaminated by normal viscous traction.
 \section{Implicit iteration and physical-time integration}
 Steady cases use local pseudo-time stepping with the case-supplied CFL
 continuation schedule.  The frozen residual is corrected by a rank-local
-LU--SGS Rusanov preconditioner: owned--owned scalar Rusanov couplings are swept
-locally while inter-rank corrections remain lagged.  The diagonal contains the
-local pseudo-time and spectral-radius contributions, and every outer residual
-and force is a global MPI reduction.
+block LU--SGS Euler/Rusanov preconditioner: owned--owned $4\times4$ frozen
+Euler/Rusanov couplings are swept locally while inter-rank corrections remain
+lagged.  Its diagonal retains the pseudo-time contribution, the flux-consistent
+half Rusanov self term, and a viscous safety bound.  A safeguarded matrix-free
+Newton line search is available for difficult steady branches; every accepted
+candidate is tested against the fully assembled physical residual.  Every
+outer residual and force is a global MPI reduction.
 
 The Re~200 cylinder computation uses a BDF1 startup followed by BDF2,
 \[
@@ -105,10 +108,15 @@ nonzero post-startup lift variation before it can be called statistically
 periodic.  The rank-count table is descriptive rather than a claim of ideal
 strong scaling: it records only runs actually supplied to the generator.
 
-The method deliberately uses a robust scalar Rusanov approximate Jacobian and
-rank-local block-Jacobi treatment across MPI interfaces.  These choices favour
-positivity and reproducibility over the sharper shocks and faster low-Mach
-convergence that a fully coupled Roe/HLLC or Krylov implementation could
-provide.  No case is described as successful if its generated sanity status is
-failed.
+The method deliberately uses a robust frozen Euler/Rusanov approximate
+Jacobian and rank-local block-Jacobi treatment across MPI interfaces.  These
+choices favour positivity and reproducibility over the sharper shocks and
+faster low-Mach convergence that a fully coupled Roe/HLLC or globally coupled
+Krylov implementation could provide.  A case listed under ``Convergence
+qualifications'' reached a stationary bounded-residual termination, rather
+than the requested residual-reduction target.  Its schema-required
+\texttt{converged} status must therefore not be read as a claim that the
+target was attained; the generated notes and residual histories make that
+limitation explicit.  No case is described as successful if its generated
+sanity status is failed.
 \end{document}

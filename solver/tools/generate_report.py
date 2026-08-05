@@ -350,7 +350,7 @@ def sanity(case: Case, density: np.ndarray, pressure: np.ndarray) -> dict[str, A
         "final_force_matches_status": int(numeric(forces, "step")[-1]) == int(float(case.status["final_step"])),
     }
     if "naca" in cid:
-        checks["zero_aoa_lift_near_zero"] = abs(numeric(forces, "cl")[-1]) < 5.0e-2
+        checks["zero_aoa_lift_near_zero"] = bool(abs(numeric(forces, "cl")[-1]) < 5.0e-2)
         checks["naca_not_trivial"] = bool(np.ptp(numeric(forces, "cd")) > 1.0e-12 or np.ptp(numeric(case.surface, "cp")) > 1.0e-8)
     if "cylinder" in cid:
         checks["positive_mean_drag_after_startup"] = float(np.mean(numeric(forces, "cd")[latter])) > 0.0
@@ -364,7 +364,11 @@ def sanity(case: Case, density: np.ndarray, pressure: np.ndarray) -> dict[str, A
         normal = numeric(case.surface, "u") * numeric(case.surface, "nx") + numeric(case.surface, "v") * numeric(case.surface, "ny")
         checks["slip_wall_normal_velocity"] = float(np.nanmax(np.abs(normal))) < 1.0e-5
         checks["negligible_viscous_force"] = max(abs(numeric(forces, "viscous_drag")[-1]), abs(numeric(forces, "viscous_lift")[-1])) < 1.0e-8
-    return {"case_id": case.case_id, "status": "pass" if all(checks.values()) else "failed", "checks": checks}
+    # NumPy scalar booleans are accepted by Python's ``all`` but are not JSON
+    # serializable on every supported Python version.  Normalize the report
+    # payload at this boundary so the generated sanity artifact is portable.
+    normalized_checks = {key: bool(value) for key, value in checks.items()}
+    return {"case_id": case.case_id, "status": "pass" if all(normalized_checks.values()) else "failed", "checks": normalized_checks}
 
 
 def write_tex(report: Path, cases: list[Case], figures: list[dict[str, str]], checks: list[dict[str, Any]]) -> None:
@@ -381,6 +385,16 @@ def write_tex(report: Path, cases: list[Case], figures: list[dict[str, str]], ch
     for item in checks:
         lines.append(f"\\item {tex(item['case_id'])}: {tex(item['status'])} (see \\texttt{{sanity\\_checks.json}}).")
     lines.append("\\end{itemize}")
+    qualifications = []
+    for case in cases:
+        note = str(case.status.get("notes", "")).strip()
+        if "plateau" in note.lower() or "target was not attained" in note.lower():
+            qualifications.append((case.case_id, note))
+    if qualifications:
+        lines += ["\\subsection{Convergence qualifications}", "\\begin{itemize}"]
+        for case_id, note in qualifications:
+            lines.append(f"\\item \\texttt{{{tex(case_id)}}}: {tex(note)}.")
+        lines.append("\\end{itemize}")
     rank_groups: dict[str, set[int]] = {}
     for case in cases:
         rank_groups.setdefault(case.case_id, set()).add(int(case.status.get("mpi_ranks", 0)))
@@ -389,7 +403,8 @@ def write_tex(report: Path, cases: list[Case], figures: list[dict[str, str]], ch
         lines.append(f"{tex(case_id)} & {', '.join(map(str, sorted(ranks)))}\\\\")
     lines += ["\\bottomrule", "\\end{tabular}", "\\end{center}", "\\subsection{Figures}"]
     for index, entry in enumerate(figures, 1):
-        lines += ["\\begin{figure}[H]", "\\centering", f"\\includegraphics[width=0.90\\linewidth]{{{tex(entry['figure_file'])}}}", f"\\caption{{{tex(entry['caption'])}. Source: \texttt{{{tex(entry['source_file'])}}}.}}", f"\\label{{fig:auto-{index}}}", "\\end{figure}"]
+        source_name = tex(Path(entry["source_file"]).name)
+        lines += ["\\begin{figure}[H]", "\\centering", f"\\includegraphics[width=0.90\\linewidth]{{{tex(entry['figure_file'])}}}", f"\\caption{{{tex(entry['caption'])}. Source: \\texttt{{{source_name}}} (see \\texttt{{figure\\_manifest.csv}}).}}", f"\\label{{fig:auto-{index}}}", "\\end{figure}"]
     (report / "generated_results.tex").write_text("\n".join(lines) + "\n")
 
 
