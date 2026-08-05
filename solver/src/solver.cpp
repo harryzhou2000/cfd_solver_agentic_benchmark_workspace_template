@@ -1908,6 +1908,11 @@ RunSummary FlowSolver::solve() {
     // isolated residual trough does not permanently block continuation.
     std::vector<double> accepted_outer_norms;
     accepted_outer_norms.reserve(static_cast<std::size_t>(config_.run.max_steps));
+    // A bounded trust envelope applies to the fully reassembled spatial
+    // residual, rather than requiring every nonlinear fixed-point iterate to
+    // decrease relative to its immediate predecessor.  The latter can stall a
+    // legitimate shock-displacement correction at the CFL floor.
+    constexpr double residual_trust_factor = 1.25;
     // Anderson mixing is used only as a safeguarded nonlinear accelerator for
     // the difficult compressible steady branches.  It stores the fixed-point
     // maps U -> G(U) produced by the existing implicit inner solve, then tests
@@ -2245,16 +2250,25 @@ RunSummary FlowSolver::solve() {
           }
         }
       }
-      // The outer pseudo-time solve is a nonlinear fixed-point map.  Retain
-      // only a physical state that lowers the fully reassembled spatial
-      // residual relative to its immediate starting iterate; a rolling
-      // history window can otherwise accept a large shock-mode rebound.
-      if (!config_.run.steady_newton_only && std::isfinite(outer_physical_norm) &&
-          !(std::isfinite(final_record.l2) && final_record.l2 < outer_physical_norm)) {
+      // The outer pseudo-time solve is a nonlinear fixed-point map.  A small
+      // non-monotone residual excursion is admissible when it remains inside
+      // a short rolling trust envelope, but candidates outside that envelope
+      // must be backtracked and fully reassembled before acceptance.
+      const std::size_t rolling_count = std::min<std::size_t>(25U, accepted_outer_norms.size());
+      const double rolling_outer_norm =
+          rolling_count == 0U
+              ? std::numeric_limits<double>::infinity()
+              : *std::min_element(accepted_outer_norms.end() - static_cast<std::ptrdiff_t>(rolling_count),
+                                  accepted_outer_norms.end());
+      const double residual_trust_limit = residual_trust_factor * rolling_outer_norm;
+      const bool outside_residual_trust = std::isfinite(rolling_outer_norm) &&
+                                          (!std::isfinite(final_record.l2) ||
+                                           final_record.l2 > residual_trust_limit);
+      if (!config_.run.steady_newton_only && outside_residual_trust) {
         const std::vector<double> full_correction_state = state_;
         std::vector<double> best_state = outer_state;
-        double best_norm = outer_physical_norm;
-        bool accepted_descent = false;
+        double best_norm = residual_trust_limit;
+        bool accepted_by_trust = false;
         for (int line_search_step = 1; line_search_step <= 10; ++line_search_step) {
           const double fraction = std::ldexp(1.0, -line_search_step);
           bool locally_physical = true;
@@ -2279,13 +2293,13 @@ RunSummary FlowSolver::solve() {
           const Assembly candidate_diagnostic = assemble_spatial_residual();
           const ResidualRecord candidate_record =
               global_residual_record(step, pseudo_time, used_inner, cfl, 0.0, candidate_diagnostic.residual);
-          if (std::isfinite(candidate_record.l2) && candidate_record.l2 < best_norm) {
+          if (std::isfinite(candidate_record.l2) && candidate_record.l2 <= best_norm) {
             best_norm = candidate_record.l2;
             best_state = state_;
-            accepted_descent = true;
+            accepted_by_trust = true;
           }
         }
-        if (accepted_descent) {
+        if (accepted_by_trust) {
           state_ = std::move(best_state);
           synchronize_state();
           // The final trial need not have been the best one.  Reassemble so
@@ -2319,7 +2333,8 @@ RunSummary FlowSolver::solve() {
             floor_relaxation = std::min(0.5, config_.run.steady_relaxation);
             // A Newton step has established a new physical iterate.  Retest
             // the requested pseudo-CFL from it; any unstable correction still
-            // faces the ordinary strict descent line search on the next step.
+            // faces the rolling fully assembled-residual trust filter on the
+            // next step.
             adaptive_cfl = std::min(steady_cfl_ceiling,
                                     std::max(steady_cfl_floor, config_.run.cfl_initial));
           } else {
