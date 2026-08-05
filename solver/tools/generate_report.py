@@ -312,6 +312,61 @@ class Case:
     field: Field
 
 
+def close_number(first: object, second: object) -> bool:
+    """Compare serialized residual values without masking material drift."""
+    try:
+        return math.isclose(float(first), float(second), rel_tol=1.0e-10, abs_tol=1.0e-12)
+    except (TypeError, ValueError):
+        return False
+
+
+def validate_steady_restart_provenance(directory: Path, metadata: dict[str, Any],
+                                       status: dict[str, Any],
+                                       residuals: list[dict[str, float | str]]) -> None:
+    """Reject a checkpoint-local steady residual claim before report generation."""
+    controls = metadata.get("run_control")
+    if not isinstance(controls, dict) or controls.get("type") != "steady":
+        return
+    case_id = str(metadata.get("case_id", directory.name))
+    provenance = status.get("restart_provenance")
+    if status.get("residual_reference_scope") != "cumulative_fully_assembled" or not isinstance(provenance, dict):
+        raise OutputError(f"{case_id}: steady output lacks cumulative fully assembled restart provenance")
+    if metadata.get("restart_provenance") != provenance:
+        raise OutputError(f"{case_id}: metadata and run_status restart provenance disagree")
+    manifest_path = directory / "restart_final.manifest.json"
+    if not manifest_path.is_file():
+        raise OutputError(f"{case_id}: steady output lacks restart_final.manifest.json")
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("format") != "cfd_rank_local_restart_v2" or manifest.get("provenance") != provenance:
+        raise OutputError(f"{case_id}: restart manifest is not the submitted cumulative provenance record")
+    required = ("chain_depth", "compatibility_signature", "cumulative_residual_trace",
+                "residual_reference_l2", "residual_reference_linf", "checkpoint_step",
+                "checkpoint_physical_time", "checkpoint_residual_l2", "checkpoint_residual_linf")
+    if any(key not in provenance for key in required):
+        raise OutputError(f"{case_id}: restart provenance is incomplete")
+    if provenance["cumulative_residual_trace"] != "residuals.csv" or not str(provenance["compatibility_signature"]):
+        raise OutputError(f"{case_id}: cumulative residual trace or compatibility signature is invalid")
+    if int(provenance["chain_depth"]) > 0 and not str(provenance.get("parent_manifest", "")):
+        raise OutputError(f"{case_id}: restarted output lacks a parent-manifest reference")
+    if int(float(residuals[0]["step"])) != 0 or not close_number(residuals[0]["residual_l2"], provenance["residual_reference_l2"]):
+        raise OutputError(f"{case_id}: residual history does not begin at its cumulative reference state")
+    if (int(float(residuals[-1]["step"])) != int(provenance["checkpoint_step"]) or
+            not close_number(residuals[-1]["physical_time"], provenance["checkpoint_physical_time"]) or
+            not close_number(residuals[-1]["residual_l2"], provenance["checkpoint_residual_l2"]) or
+            not close_number(residuals[-1]["residual_linf"], provenance["checkpoint_residual_linf"])):
+        raise OutputError(f"{case_id}: residual history does not end at its validated restart checkpoint")
+    if (int(float(status.get("final_step", -1))) != int(provenance["checkpoint_step"]) or
+            not close_number(status.get("final_physical_time"), provenance["checkpoint_physical_time"])):
+        raise OutputError(f"{case_id}: run status does not match its restart checkpoint")
+    reference = float(provenance["residual_reference_l2"])
+    checkpoint = float(provenance["checkpoint_residual_l2"])
+    if not math.isfinite(reference) or not math.isfinite(checkpoint) or reference <= 0.0 or checkpoint <= 0.0:
+        raise OutputError(f"{case_id}: cumulative residual reference is invalid")
+    orders = math.log10(reference / checkpoint)
+    if not close_number(status.get("residual_reduction_orders"), orders):
+        raise OutputError(f"{case_id}: reported residual orders are not traceable to the cumulative history")
+
+
 def load_case(directory: Path) -> Case:
     for required in ("metadata.json", "run_status.json", "restart_final"):
         if required == "restart_final":
@@ -329,6 +384,7 @@ def load_case(directory: Path) -> Case:
     if metadata.get("convergence_status") != status.get("convergence_status"):
         raise OutputError(f"{case_id}: metadata and run_status convergence_status disagree")
     residuals = read_csv(directory / "residuals.csv", RESIDUAL_COLUMNS)
+    validate_steady_restart_provenance(directory, metadata, status, residuals)
     forces = read_csv(directory / "forces.csv", FORCE_COLUMNS)
     surface = read_csv(directory / "surface.csv", SURFACE_COLUMNS)
     if int(numeric(forces, "step")[-1]) != int(float(status.get("final_step", -1))):
