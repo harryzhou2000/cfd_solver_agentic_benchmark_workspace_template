@@ -1,122 +1,114 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,hyperref,float}
+\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,hyperref,float,caption,longtable}
 \graphicspath{{figures/}}
+\hypersetup{hidelinks}
 \title{2-D Unstructured Compressible Navier--Stokes Solver Benchmark Report}
 \author{Solver team}
 \date{\today}
 \begin{document}
 \maketitle
 \begin{abstract}
-This report is generated from completed solver outputs. The generated tables,
-sanity checks, and figures are traceable through \texttt{run\_manifest.csv} and
-\texttt{figure\_manifest.csv}; no result values are entered by hand.
+This report is generated from completed solver output directories.  Tables,
+figures, and quantitative qualifications are traceable through the run and
+figure manifests; no force, residual, or field values are entered by hand.
 \end{abstract}
-\section{Governing equations and reference quantities}
-The solver advances the conservative two-dimensional compressible
-Navier--Stokes state
+\section{Introduction and cases}
+The benchmark covers inviscid and laminar NACA0012 cases, a steady cylinder
+case at Reynolds 20, and a physical-time cylinder calculation at Reynolds 200.
+The run-status table in the generated results identifies the actual submitted
+directory, MPI rank count, wall time, and completion qualification for each.
+\section{Governing equations and nondimensionalization}
+The conservative state is $\mathbf U=[\rho,\rho u,\rho v,\rho E]^T$ and the
+two-dimensional compressible Navier--Stokes equations are
 \[
-  \mathbf U=[\rho,\rho u,\rho v,\rho E]^T,
-  \qquad
-  \frac{\partial\mathbf U}{\partial t}+
-  \frac{\partial\mathbf F^i}{\partial x}+
-  \frac{\partial\mathbf G^i}{\partial y}=
-  \frac{\partial\mathbf F^v}{\partial x}+
-  \frac{\partial\mathbf G^v}{\partial y}.
+\partial_t\mathbf U+\partial_x\mathbf F^i+\partial_y\mathbf G^i=
+\partial_x\mathbf F^v+\partial_y\mathbf G^v.
 \]
-The inviscid fluxes are
+The inviscid fluxes are $\mathbf F^i=[\rho u,\rho u^2+p,\rho uv,u(\rho E+p)]^T$
+and $\mathbf G^i=[\rho v,\rho uv,\rho v^2+p,v(\rho E+p)]^T$.
+The closure is $p=(\gamma-1)\rho e$, $E=e+(u^2+v^2)/2$, and
+$a=\sqrt{\gamma p/\rho}$. Coefficients use the case-file reference dynamic
+pressure $q_\infty=\rho_\infty U_\infty^2/2$, length, and area. Laminar
+viscosity is $\mu=\rho_\infty U_\infty L_{Re}/Re$ and $k=\mu c_p/Pr$.
+The implemented Newtonian and Fourier terms are
 \[
- \mathbf F^i=[\rho u,\rho u^2+p,\rho uv,u(\rho E+p)]^T,\qquad
- \mathbf G^i=[\rho v,\rho uv,\rho v^2+p,v(\rho E+p)]^T.
+ \boldsymbol{\tau}=\mu\left(\nabla\boldsymbol{u}+\nabla\boldsymbol{u}^{T}
+ -\frac{2}{3}(\nabla\!\cdot\!\boldsymbol{u})\mathbf I\right),
+ \qquad \boldsymbol q=-k\nabla T,
 \]
-The calorically perfect gas closure is
-\(p=(\gamma-1)\rho e\), \(E=e+\tfrac12(u^2+v^2)\), and
-\(a=\sqrt{\gamma p/\rho}\).  Each case file provides the reference density,
-velocity, length, pressure, and force-reference area.  Force coefficients use
-\(q_\infty=\tfrac12\rho_\infty U_\infty^2\) and the supplied reference area.
-For laminar cases the constant viscosity is evaluated as
-\(\mu=\rho_\infty U_\infty L_{Re}/Re\), with
-\(k=\mu c_p/Pr\).
-
-\section{Spatial discretization and boundary conditions}
-The implementation is a cell-centred finite-volume method on the imported CGNS
-unstructured triangles and quadrilaterals.  Face residuals are assembled once
-with opposite signs on adjacent owned cells.  Least-squares primitive-variable
-gradients support linear face reconstruction, and an active Barth--Jespersen
-limiter bounds each reconstructed primitive component by its neighbouring
-values.  Density and temperature are floored at reconstructed faces; a
-positivity line search rejects nonphysical conservative updates.
-
-Inviscid faces use a local Lax--Friedrichs/Rusanov approximate Riemann flux.
-Laminar faces use the reconstructed velocity and temperature gradients to form
-the Newtonian stress tensor and Fourier heat flux.  The far field is evaluated
-from a characteristic trace.  Slip walls impose zero normal velocity and use
-the exact pressure traction; no-slip adiabatic walls impose zero reported wall
-velocity, a wall-normal velocity gradient, and zero wall-normal temperature
-gradient.  Pressure and tangential viscous forces are accumulated separately,
-so the reported skin friction is not contaminated by normal viscous traction.
-
-\section{Implicit iteration and physical-time integration}
-Steady cases use local pseudo-time stepping with the case-supplied CFL
-continuation schedule.  The frozen residual is corrected by a rank-local
-block LU--SGS Euler/Rusanov preconditioner: owned--owned $4\times4$ frozen
-Euler/Rusanov couplings are swept locally while inter-rank corrections remain
-lagged.  Its diagonal retains the pseudo-time contribution, the flux-consistent
-half Rusanov self term, and a viscous safety bound.  A safeguarded matrix-free
-Newton line search is available for difficult steady branches; every accepted
-candidate is tested against the fully assembled physical residual.  Every
-outer residual and force is a global MPI reduction.
-
-The Re~200 cylinder computation uses a BDF1 startup followed by BDF2,
+so the viscous face flux in the conservative-equation convention is
 \[
- \frac{A}{2\Delta t}\left(3U^{n+1}-4U^n+U^{n-1}\right)+R(U^{n+1})=0.
+ \mathbf F^v\!\cdot\!\boldsymbol n=
+ [0,(\boldsymbol\tau\boldsymbol n)_x,(\boldsymbol\tau\boldsymbol n)_y,
+ \boldsymbol u\!\cdot\!(\boldsymbol\tau\boldsymbol n)+k\nabla T\!\cdot\!\boldsymbol n]^T.
 \]
-For every physical step the two history states remain frozen during the inner
-solve.  A second-order extrapolation is used only as the initial nonlinear
-guess.  The accepted residual includes both the spatial residual and BDF term;
-an attempt that misses the configured reduction target is restored and retried
-at a reduced pseudo-CFL without advancing the history or emitting a force row.
-The reported inner statistics therefore refer only to accepted physical steps
-and explicit failed attempts.
-
+\section{Meshes, discretization, limiter, and boundary conditions}
+CGNS triangles and quadrilaterals are imported as a cell-centred unstructured
+mesh. With each face normal pointing out of an owned cell, assembly adds
+$[(\mathbf F^i-\mathbf F^v)\cdot\boldsymbol n]|S|$ to that cell residual
+and its negative to the other adjacent owned row. Ghost states are exchanged
+before reconstruction, so this sign convention is retained across partition
+cuts. Least-squares primitive gradients provide piecewise-linear
+reconstruction and a Barth--Jespersen limiter bounds inviscid reconstructed
+values by local neighbours. A pressure-ratio sensor locally reverts the
+\emph{inviscid face reconstruction} to first order across shocks. The current
+implementation stores viscous velocity/temperature gradients separately from
+the optional reconstruction-continuation scale, but the pressure-ratio sensor
+also limits those stored gradients in strong-compression cells. This coupling
+is retained in the submitted results and is stated as a limitation rather than
+claimed to be an independently second-order viscous shock treatment.
+Density/temperature floors and rejected-update recovery preserve physical
+primitive states.
+Rusanov/local-Lax--Friedrichs supplies the inviscid numerical flux. Farfield
+states use a characteristic trace, slip walls enforce zero normal velocity,
+and no-slip adiabatic walls impose $u_w=v_w=0$ and $\partial T/\partial n=0$;
+the wall-gradient construction enforces the zero velocity trace on
+non-orthogonal cells.
+\section{Implicit and transient integration}
+Steady cases use local pseudo-time continuation with the controls recorded in
+the submitted commands and metadata. The frozen residual is corrected by a
+rank-local LU--SGS/block-Jacobi Rusanov preconditioner; safeguarded
+matrix-free corrections are accepted only when a fully reassembled nonlinear
+residual decreases. Each reported outer residual and force is globally
+reduced. The Re 200 calculation uses BDF1
+startup followed by BDF2,
+\[
+ A(3U^{n+1}-4U^n+U^{n-1})/(2\Delta t)+R(U^{n+1})=0.
+\]
+Both BDF history states remain frozen while the inner physical-time residual
+is solved and advance only after the step is accepted. The generated Re 200
+statistics use the actual sampled force history, not pseudo-time iterations.
 \section{MPI decomposition, output, and reproducibility}
-The global cell adjacency graph is partitioned with METIS.  Each rank stores
-only owned cells, its one-ring ghosts, and neighbour-scoped send/receive maps.
-Halo exchange uses nonblocking neighbour point-to-point communication for
-states and gradients; full mesh and full conservative-state replication are
-not used during iterations.  Rank-local VTU pieces and a PVTU index preserve
-the distributed final field.  The report reader merges only those real pieces
-for rendering; it never constructs synthetic field data.
-
-Build with \texttt{cmake -S solver -B solver/build} followed by
-\texttt{cmake --build solver/build}, then run
-\texttt{mpirun -np <ranks> solver/build/cfd\_solver solve --case <case.json>
---output <directory>}.  The generated manifest records the exact command,
-rank count, wall time, and status for every submitted output, and the figure
-manifest links every plot below to its source CSV or field file.
-
-\section{Generated results and checks}
+METIS partitions the face-adjacent cell graph. Each rank owns cells plus a
+one-ring ghost layer and exchanges states and gradients only with neighbours
+using nonblocking point-to-point MPI. Full mesh and conservative-state
+replication are not used during iterations. Rank-local VTU pieces, a PVTU
+index, and a complete multi-piece VTU file preserve the final distributed
+field. A fresh checkout can reproduce the build and a representative run with
+\begin{verbatim}
+cmake -S solver -B solver/build
+cmake --build solver/build -j
+mpirun -np 8 solver/build/cfd_solver solve \
+  --case cfd_solver_agentic_benchmark/inputs/cases/naca0012_m080_inviscid.json \
+  --output solver/results/naca0012_m080_inviscid --report-level full
+python3 solver/tools/generate_report.py \
+  --report solver/report <submitted-output-directories>
+cd solver/report && pdflatex report.tex && pdflatex report.tex
+\end{verbatim}
+The exact command and output path for every submitted run are recorded in
+\texttt{run\_manifest.csv}; field and CSV provenance is recorded in
+\texttt{figure\_manifest.csv}.
+\section{Results, validation, and limitations}
 \input{generated_results.tex}
-
-\section{Interpretation and limitations}
-The generated residual, force, surface, Mach, and pressure figures are the
-evidence for each status in the following section.  At zero angle of attack,
-the NACA cases are checked for near-symmetric lift; viscous cases are checked
-for zero reported wall speed and nonzero skin friction.  Cylinder cases are
-checked for positive mean drag, and the Re~200 case additionally requires
-nonzero post-startup lift variation before it can be called statistically
-periodic.  The rank-count table is descriptive rather than a claim of ideal
-strong scaling: it records only runs actually supplied to the generator.
-
-The method deliberately uses a robust frozen Euler/Rusanov approximate
-Jacobian and rank-local block-Jacobi treatment across MPI interfaces.  These
-choices favour positivity and reproducibility over the sharper shocks and
-faster low-Mach convergence that a fully coupled Roe/HLLC or globally coupled
-Krylov implementation could provide.  A case listed under ``Convergence
-qualifications'' reached a stationary bounded-residual termination, rather
-than the requested residual-reduction target.  Its schema-required
-\texttt{converged} status must therefore not be read as a claim that the
-target was attained; the generated notes and residual histories make that
-limitation explicit.  No case is described as successful if its generated
-sanity status is failed.
+\section{Limitations}
+Any row qualified as a bounded-residual plateau is explicitly not evidence that
+the requested steady residual target was attained. Reported MPI comparisons are
+limited to actual paired runs and do not claim ideal scaling. The report makes
+no mesh-refinement, experimental-reference, turbulence-model, or formal
+discretization-error claim. In strong-compression cells, the pressure-ratio
+shock sensor also limits the viscous-gradient path; an inviscid-only-sensor
+ablation has not been submitted as part of this result set. The machine-readable
+sanity checks are a necessary positivity, wall-condition, and nontrivial-flow
+gate, not a substitute for independent physical validation.
 \end{document}
