@@ -40,3 +40,16 @@ vector).
 For scalar data at mesh vertices, the tool writes filled contours; for
 cell-centred data it writes filled unstructured-cell renderings. It does not
 fall back to a scatter plot.
+
+For a legacy MPI output that has rank-local `field.rank*.vtu` files plus
+`field_final.pvtu` but no assembled field, preserve the original rank `Piece`
+XML while producing a multi-piece VTU with:
+
+```bash
+python3 solver/tools/assemble_pvtu.py results/<case> \
+  --output /tmp/<case>-field_final.vtu
+```
+
+The utility validates every PVTU source path and rank VTU before writing. It
+will not overwrite an existing destination; omitting `--output` writes the
+missing `field_final.vtu` in that case directory.
