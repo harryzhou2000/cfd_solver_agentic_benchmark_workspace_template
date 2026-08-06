@@ -101,11 +101,12 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   OC_DATA_DIR="$SESS/opencode-data/opencode"
   mkdir -p "$CODEX_HOME_DIR" "$OC_DATA_DIR" "$SESS/opencodex"
 
-  echo "== snapshotting user configs into the workspace (.sessions) =="
+  echo "== snapshotting user configs into the workspace (.sessions; credentials are bind-mounted, never copied) =="
   # codex user-level config set as copies (not symlinks): this dir is mounted
   # at /home/harry/.codex inside the container, so it is both the per-workspace
   # record and the effective codex home. Sessions/state from earlier runs are
-  # left untouched.
+  # left untouched. auth.json is never copied — it is bind-mounted from the
+  # host so the workspace record stays credential-free.
   if [ -d "$HOME/.codex" ]; then
     rsync -a \
       --exclude 'sessions/' --exclude 'log/' --exclude 'tmp/' \
@@ -113,17 +114,46 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
       --exclude 'packages/' --exclude 'cache/' \
       --exclude '*.sqlite*' --exclude 'history.jsonl' \
       --exclude 'session_index.jsonl' --exclude '*.bak*' \
+      --exclude 'auth.json' --exclude 'rules/' \
       "$HOME/.codex/" "$CODEX_HOME_DIR/"
   fi
-  for f in auth.json account.json; do
-    [ -f "$HOME/.local/share/opencode/$f" ] \
-      && cp -a "$HOME/.local/share/opencode/$f" "$OC_DATA_DIR/"
-  done
-  [ -f "$HOME/.opencodex/config.json" ] \
-    && cp -a "$HOME/.opencodex/config.json" "$SESS/opencodex/config.json"
 
+  # The codex bundle mount must come before the auth file overlays: later
+  # mounts win at their destination, so the file mounts must land on top of
+  # the bundle dir mount (at /home/harry/.codex, where codex reads them).
   MOUNTS+=(-v "$CODEX_HOME_DIR:/home/harry/.codex")
   ENVS+=(-e CODEX_HOME=/home/harry/.codex -e XDG_DATA_HOME="$SESS/opencode-data")
+
+  if [ -f "$HOME/.codex/auth.json" ]; then
+    touch "$CODEX_HOME_DIR/auth.json"   # non-credential placeholder
+    MOUNTS+=(-v "$HOME/.codex/auth.json:/home/harry/.codex/auth.json")
+  fi
+  # exec-policy rules can embed API keys in allow-rule patterns: keep a
+  # redacted record copy and bind-mount the real rules for codex.
+  if [ -d "$HOME/.codex/rules" ]; then
+    mkdir -p "$CODEX_HOME_DIR/rules"
+    for rf in "$HOME"/.codex/rules/*; do
+      [ -f "$rf" ] \
+        && sed -E 's#(sk-[A-Za-z0-9_-]{12,})#sk-REDACTED#g' "$rf" \
+          > "$CODEX_HOME_DIR/rules/$(basename "$rf")"
+    done
+    MOUNTS+=(-v "$HOME/.codex/rules:/home/harry/.codex/rules")
+  fi
+  # opencode auth store: bind-mounted (never copied)
+  for f in auth.json account.json; do
+    if [ -f "$HOME/.local/share/opencode/$f" ]; then
+      touch "$OC_DATA_DIR/$f"           # non-credential placeholder
+      MOUNTS+=(-v "$HOME/.local/share/opencode/$f:$OC_DATA_DIR/$f")
+    fi
+  done
+
+  # opencodex config record: redacted copy only
+  if [ -f "$HOME/.opencodex/config.json" ]; then
+    sed -E \
+      -e 's#("(apiKey|key)"[[:space:]]*:[[:space:]]*")[^"]*#\1REDACTED#g' \
+      -e 's#(sk-[A-Za-z0-9_-]{12,})#sk-REDACTED#g' \
+      "$HOME/.opencodex/config.json" > "$SESS/opencodex/config.json"
+  fi
 
   # keep bundled sessions out of git (also covers pre-existing workspaces)
   if [ -d "$WS/.git" ]; then

@@ -83,10 +83,14 @@ time and are effective at their usual inside-docker-home paths.
    `/home/harry/.config/opencode` and `/home/harry/.local/share/opencode`
    (auth store only). Rebuild the image to refresh the mirror.
 2. **Per-workspace snapshot (runtime, `start.sh` default):** at launch the
-   same config set is copied (not symlinked) into `$WS/.sessions/` — the
-   codex config set into `.sessions/codex/`, the opencode auth store into
-   `.sessions/opencode-data/opencode/`, and the opencodex config into
-   `.sessions/opencodex/config.json` — as a per-workspace record.
+   config set is copied (not symlinked) into `$WS/.sessions/` as a
+   per-workspace record — the codex config set into `.sessions/codex/`, and a
+   **redacted** opencodex config into `.sessions/opencodex/config.json`.
+   Credential files (`~/.codex/auth.json`, the opencode auth store) are
+   **never copied**: they are bind-mounted from the host at runtime, so the
+   workspace record stays credential-free. Exec-policy `rules/` files may
+   embed API keys in allow-rule patterns; the record keeps a redacted copy
+   and the real rules are bind-mounted for codex.
 3. **Effective inside the container:** the codex snapshot is bind-mounted at
    `/home/harry/.codex` (with `CODEX_HOME=/home/harry/.codex`), so codex
    reads and writes at the inside-docker-home path while everything persists
@@ -95,17 +99,18 @@ time and are effective at their usual inside-docker-home paths.
 How each harness picks its config:
 
 - **opencode** — `~/.config/opencode/opencode.jsonc` (+ omo-slim plugin,
-  commands, skills from the same dir); auth from the baked data dir
-  (`~/.local/share/opencode/auth.json`) or the workspace snapshot when
-  `XDG_DATA_HOME` is redirected.
+  commands, skills from the same dir); auth from the data dir
+  (`$XDG_DATA_HOME/opencode/auth.json` — the host auth store bind-mounted
+  into the workspace bundle).
 - **codex** — `$CODEX_HOME/config.toml` (= `/home/harry/.codex`, the
   workspace snapshot), plus profiles next to it. The user-level **ocx
   profile** (`ocx.config.toml` — deepseek-v4-flash routed through the
   opencodex proxy at 127.0.0.1:10109) is part of every snapshot; launch
   `codex -p ocx`, or `start.sh --harness codex --codex-profile ocx`.
-- **opencodex** — `~/.opencodex/config.json` (baked, real). The entrypoint
-  starts the proxy on 10109 only when the port is free; with `--network host`
-  the host-side proxy (if running) is used as-is.
+- **opencodex** — `~/.opencodex/config.json` (baked, real; redacted copy in
+  the workspace record). The entrypoint starts the proxy on 10109 only when
+  the port is free; with `--network host` the host-side proxy (if running) is
+  used as-is.
 
 Note: codex **project-local** `.codex/config.toml` files cannot set provider
 routing — codex ignores `model_provider`, `model_providers` and
@@ -149,6 +154,9 @@ baked ones, for live-edit workflows without an image rebuild.
   redacted and `sync-configs.sh` verifies that.
 - **Per-workspace snapshot:** each `start.sh` launch copies the config set
   into `$WS/.sessions/` (record + effective codex home via the mount).
+  **Credentials are excluded from the snapshot**: `auth.json` files are
+  bind-mounted from the host at runtime and the opencodex record is
+  redacted, so the workspace never stores keys.
 - **Env vars (opencode + opencodex):** opencode config supports `{env:VAR}`
   placeholders; opencodex resolves `$VAR` / `${VAR}` provider apiKeys from the
   environment on every request (see `resolveEnvValue` in its config module).
@@ -167,11 +175,13 @@ contestant workspace itself:
 - `codex` → `$WS/.sessions/codex` mounted at `/home/harry/.codex` with
   `CODEX_HOME=/home/harry/.codex` (config snapshot + sessions, logs, sqlite
   DBs all persist in the workspace; the effective path is the
-  inside-docker-home one).
+  inside-docker-home one; `auth.json` is bind-mounted from `~/.codex`, never
+  stored in the snapshot; `rules/` likewise bind-mounted with a redacted
+  record copy).
 - `opencode` → `XDG_DATA_HOME=$WS/.sessions/opencode-data` (a fresh
-  `opencode.db`, logs, storage), with `auth.json`/`account.json` copied from
-  the host at launch.
-- `opencodex` → `$WS/.sessions/opencodex/config.json` (record copy; the
+  `opencode.db`, logs, storage), with `auth.json`/`account.json`
+  bind-mounted from `~/.local/share/opencode` (never copied).
+- `opencodex` → `$WS/.sessions/opencodex/config.json` (redacted record; the
   service itself reads the baked `~/.opencodex/config.json`).
 
 So a contestant run leaves its full session history on disk in the working
