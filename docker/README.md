@@ -25,11 +25,14 @@ docker/scripts/start.sh --workspace ../codex_gpt56_07
 #    - codex home is <workspace>/.sessions/codex mounted at /home/harry/.codex
 #    - the container is force-removed on exit (Ctrl-C, SIGTERM, closed terminal)
 
-# 4. Optional: verify a model round-trip without launching interactively
+# 4. Optional: verify a model round-trip without launching interactively.
+#    On this host the opencodex proxy listens on 10109, so the same port is
+#    forced inside the container (override with OCX_PORT if yours differs;
+#    when unset, the baked config's port is used, default 10100).
 #    (see "Verified end-to-end" below for the full commands)
 docker run --rm --network host --security-opt seccomp=unconfined \
   --security-opt apparmor=unconfined --user "$(id -u):$(id -g)" \
-  -e HOME="$HOME" -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
+  -e HOME="$HOME" -e OCX_PORT=10109 -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
   cfd-bench:latest opencode run --format json \
   -m deepseek/deepseek-v4-flash "Reply with exactly: PONG"
 ```
