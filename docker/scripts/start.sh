@@ -2,14 +2,27 @@
 # Interactive launcher for a benchmark contestant container.
 #
 # Usage:
-#   docker/scripts/start.sh [--workspace DIR] [--image-config] [--harness shell|codex|opencode] [-- cmd...]
+#   docker/scripts/start.sh [--workspace DIR] [--image-config]
+#     [--mount-host-configs] [--harness shell|codex|opencode]
+#     [--codex-profile ocx] [-- cmd...]
 #
-# Default mode mounts the live host config dirs (~/.codex, ~/.config/opencode,
-# ~/.local/share/opencode, ~/.opencodex, ~/.codegraph) at the same absolute
-# paths, so real credentials stay on the host and are never baked into the
-# image. Codex and opencode sessions are bundled inside the workspace under
-# .sessions/ (codex/ + opencode-data/), so a contestant run leaves persistent
-# sessions in the working directory itself.
+# The image is self-contained: build.sh mirrors the live host user configs
+# (~/.codex, ~/.opencodex, ~/.config/opencode, the opencode auth store) into
+# the image (gitignored staging, real keys), so opencode and opencodex read
+# their configs from the container home (~/.config/opencode, ~/.opencodex).
+#
+# Default mode additionally snapshots a per-workspace copy of the codex
+# config set into $WS/.sessions/codex and mounts that dir at
+# /home/harry/.codex: the effective codex home is the inside-docker-home path
+# AND sessions/logs/DBs persist in the workspace. opencode data goes to
+# $WS/.sessions/opencode-data (fresh DB + auth copy); the opencodex config is
+# recorded at $WS/.sessions/opencodex/config.json.
+#
+# --image-config: use the baked configs directly, no workspace session bundle
+# (sessions are ephemeral; for bare/CI runs).
+# --mount-host-configs: additionally bind-mount the live host config dirs
+# (~/.config/opencode, ~/.local/share/opencode, ~/.opencodex) over the baked
+# ones, for live-edit workflows without an image rebuild.
 #
 # The container runs with --rm plus an EXIT/INT/TERM/HUP trap that
 # force-removes it, so no bench-* container survives the launcher (Ctrl-C,
@@ -33,13 +46,17 @@ IMAGE="${IMAGE:-cfd-bench:latest}"
 BENCH_ROOT="${BENCH_ROOT:-/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark}"
 WS=""
 MOUNT_CONFIG=1
+MOUNT_HOST=0
 HARNESS="shell"
+CODEX_PROFILE=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --workspace) WS="$2"; shift 2 ;;
     --image-config) MOUNT_CONFIG=0; shift ;;
+    --mount-host-configs) MOUNT_HOST=1; shift ;;
     --harness) HARNESS="$2"; shift 2 ;;
+    --codex-profile) CODEX_PROFILE="$2"; shift 2 ;;
     --) shift; break ;;
     *) WS="${WS:-$1}"; shift ;;
   esac
@@ -57,57 +74,83 @@ case "$HARNESS" in
   opencode) CMD=("opencode") ;;
   *) echo "unknown --harness $HARNESS (shell|codex|opencode)" >&2; exit 1 ;;
 esac
+if [ "$HARNESS" = "codex" ] && [ -n "$CODEX_PROFILE" ] && [ $# -eq 0 ]; then
+  # Route codex through the user-level opencodex profile (e.g. -p ocx) so
+  # benchmark sessions go through the proxy; codex project config cannot set
+  # provider routing, so the profile is the mechanism.
+  CMD=("codex" "-p" "$CODEX_PROFILE")
+fi
 if [ $# -gt 0 ]; then CMD=("$@"); fi
 
 NAME="bench-$(basename "$WS" | tr -c 'A-Za-z0-9_.-' '_')"
 MOUNTS=(-v "$BENCH_ROOT:$BENCH_ROOT")
+# Mount the workspace itself so session paths work regardless of location
+# (real workspaces live under $BENCH_ROOT, but relative/absolute paths from
+# setup-workspace.sh may point anywhere).
+MOUNTS+=(-v "$WS:$WS")
 ENVS=(-e HOME="$HOME")
 SECURITY_OPTS=(--security-opt seccomp=unconfined --security-opt apparmor=unconfined)
 
-if [ "$MOUNT_CONFIG" = "1" ]; then
-  for d in .codex .config/opencode .local/share/opencode .opencodex .codegraph; do
-    mkdir -p "$HOME/$d"
-    MOUNTS+=(-v "$HOME/$d:$HOME/$d")
-  done
+# codegraph index cache (host) stays mounted in every mode.
+mkdir -p "$HOME/.codegraph"
+MOUNTS+=(-v "$HOME/.codegraph:$HOME/.codegraph")
 
-  # --- persistent sessions bundled in the workspace ---------------------
+if [ "$MOUNT_CONFIG" = "1" ]; then
   SESS="$WS/.sessions"
   CODEX_HOME_DIR="$SESS/codex"
   OC_DATA_DIR="$SESS/opencode-data/opencode"
-  mkdir -p "$CODEX_HOME_DIR" "$OC_DATA_DIR"
+  mkdir -p "$CODEX_HOME_DIR" "$OC_DATA_DIR" "$SESS/opencodex"
 
-  # codex: config/auth stay symlinked to the host, while sessions, logs and
-  # DBs are written into $WS/.sessions/codex.
-  for f in auth.json config.toml ocx.config.toml opencodex.config.toml \
-           opencodex-catalog.json AGENTS.md cloud-config-bundle-cache.json \
-           models_cache.json version.json; do
-    [ -e "$HOME/.codex/$f" ] && ln -sfn "$HOME/.codex/$f" "$CODEX_HOME_DIR/$f"
+  echo "== snapshotting user configs into the workspace (.sessions) =="
+  # codex user-level config set as copies (not symlinks): this dir is mounted
+  # at /home/harry/.codex inside the container, so it is both the per-workspace
+  # record and the effective codex home. Sessions/state from earlier runs are
+  # left untouched.
+  if [ -d "$HOME/.codex" ]; then
+    rsync -a \
+      --exclude 'sessions/' --exclude 'log/' --exclude 'tmp/' \
+      --exclude 'shell_snapshots/' --exclude 'memories/' \
+      --exclude 'packages/' --exclude 'cache/' \
+      --exclude '*.sqlite*' --exclude 'history.jsonl' \
+      --exclude 'session_index.jsonl' --exclude '*.bak*' \
+      "$HOME/.codex/" "$CODEX_HOME_DIR/"
+  fi
+  for f in auth.json account.json; do
+    [ -f "$HOME/.local/share/opencode/$f" ] \
+      && cp -a "$HOME/.local/share/opencode/$f" "$OC_DATA_DIR/"
   done
-  # opencode: auth store symlinked; opencode.db/logs/storage land in the
-  # workspace (the host DB is huge and shared with live opencode processes).
-  [ -e "$HOME/.local/share/opencode/auth.json" ] \
-    && ln -sfn "$HOME/.local/share/opencode/auth.json" "$OC_DATA_DIR/auth.json"
-  [ -e "$HOME/.local/share/opencode/account.json" ] \
-    && ln -sfn "$HOME/.local/share/opencode/account.json" "$OC_DATA_DIR/account.json"
+  [ -f "$HOME/.opencodex/config.json" ] \
+    && cp -a "$HOME/.opencodex/config.json" "$SESS/opencodex/config.json"
 
-  ENVS+=(-e CODEX_HOME="$CODEX_HOME_DIR" -e XDG_DATA_HOME="$SESS/opencode-data")
+  MOUNTS+=(-v "$CODEX_HOME_DIR:/home/harry/.codex")
+  ENVS+=(-e CODEX_HOME=/home/harry/.codex -e XDG_DATA_HOME="$SESS/opencode-data")
 
   # keep bundled sessions out of git (also covers pre-existing workspaces)
   if [ -d "$WS/.git" ]; then
     EXCLUDE="$WS/.git/info/exclude"
     grep -qxF '.sessions/' "$EXCLUDE" 2>/dev/null || printf '.sessions/\n' >> "$EXCLUDE"
+    grep -qxF '.opencode/' "$EXCLUDE" 2>/dev/null || printf '.opencode/\n' >> "$EXCLUDE"
   fi
 else
-  echo "using baked (redacted) configs instead of live host configs"
-  echo "  (no real credentials; sessions are not persisted to the workspace)"
+  echo "using baked image configs directly (no workspace session bundle; sessions are ephemeral)"
+fi
+
+if [ "$MOUNT_HOST" = "1" ]; then
+  echo "mounting live host config dirs over the baked ones"
+  for d in .config/opencode .local/share/opencode .opencodex; do
+    mkdir -p "$HOME/$d"
+    MOUNTS+=(-v "$HOME/$d:$HOME/$d")
+  done
 fi
 
 echo "== container =="
 echo "  image:     $IMAGE"
 echo "  workspace: $WS"
 echo "  harness:   $HARNESS"
+[ -n "$CODEX_PROFILE" ] && echo "  codex profile: -p $CODEX_PROFILE"
 if [ "$MOUNT_CONFIG" = "1" ]; then
-  echo "  sessions:  $WS/.sessions/codex (codex), $WS/.sessions/opencode-data (opencode)"
+  echo "  codex home:  $WS/.sessions/codex -> /home/harry/.codex"
+  echo "  opencode data: $WS/.sessions/opencode-data"
 fi
 echo "  mounts:    ${MOUNTS[*]}"
 echo

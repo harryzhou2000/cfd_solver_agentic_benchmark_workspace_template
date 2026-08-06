@@ -52,14 +52,16 @@ COPY ocx-relay /opt/ocx-relay
 COPY OpenCode-goal-plugin /opt/OpenCode-goal-plugin
 RUN cd /opt/OpenCode-goal-plugin && npm install --omit=dev --no-audit --no-fund
 
-# --- opencode user config (redacted snapshot; host dir mounted at runtime) --
-COPY docker/configs/opencode/ /home/harry/.config/opencode/
+# --- real user configs, mirrored from the host by build.sh ----------------
+# Source is docker/.context/configs (gitignored; real keys). The committed
+# docker/configs/ tree stays a redacted reference snapshot.
+COPY docker/.context/configs/opencode/ /home/harry/.config/opencode/
 RUN cd /home/harry/.config/opencode && npm ci --omit=dev --no-audit --no-fund
 COPY docker/.context/opencode-goal-plugin /home/harry/.local/share/opencode-goal-plugin
+COPY docker/.context/configs/opencode-data/ /home/harry/.local/share/opencode/
 
-# --- codex + opencodex configs (redacted snapshots) -------------------------
-COPY docker/configs/codex/ /home/harry/.codex/
-COPY docker/configs/opencodex/ /home/harry/.opencodex/
+COPY docker/.context/configs/codex/ /home/harry/.codex/
+COPY docker/.context/configs/opencodex/ /home/harry/.opencodex/
 
 # --- shared DNDSR externals (staged) ----------------------------------------
 COPY docker/.context/external /opt/external
