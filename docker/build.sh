@@ -36,6 +36,12 @@ if [ "$BUILD_PROXY" = "1" ]; then
     if [ -n "${!v:-}" ]; then BUILD_OPTS+=(--build-arg "$v=${!v}"); fi
   done
 fi
+if [ "${BUILD_NO_CACHE:-0}" = "1" ]; then
+  BUILD_OPTS+=(--no-cache)
+fi
+if [ -n "${BUILD_PROGRESS:-}" ]; then
+  BUILD_OPTS+=(--progress "$BUILD_PROGRESS")
+fi
 
 echo "== docker build =="
 docker build "${BUILD_OPTS[@]}" --build-arg "JOBS=${JOBS}" \

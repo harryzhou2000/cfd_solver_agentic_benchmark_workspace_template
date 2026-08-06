@@ -29,7 +29,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH=/opt/node/bin:/home/harry/.bun/bin:/home/harry/.local/bin:/home/harry/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # --- base toolchain (apt; Ubuntu 24.04 defaults = GCC 13, like the host) ----
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Cache mount: downloaded .debs persist across rebuilds in the BuildKit cache
+# store, so a changed package list re-downloads only the deltas.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc-13 g++-13 gfortran-13 cmake make ninja-build \
     git curl wget ca-certificates pkg-config file unzip zip zsh \
     python3 python3-pip python3-venv python3-dev \
@@ -92,8 +95,10 @@ RUN git init -q /opt/external/cfd_externals \
 # CC=mpicc CXX=mpicxx python cfd_externals_build.py. Build trees and source
 # clones are removed afterwards; the installed tree stays at
 # /opt/external/cfd_externals/install.
-RUN python3 -m venv /opt/cfd-venv \
-    && /opt/cfd-venv/bin/pip install -q --no-cache-dir \
+# Cache mount: pip downloads persist across rebuilds.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python3 -m venv /opt/cfd-venv \
+    && /opt/cfd-venv/bin/pip install -q \
         -r /opt/external/cfd_externals/requirements.txt \
     && cd /opt/external/cfd_externals \
     && CC=mpicc CXX=mpicxx JOBS="${JOBS}" \
@@ -111,7 +116,10 @@ RUN curl -fsSL https://opencode.ai/install | bash -s -- --version 1.18.11 --no-m
 # config (~/.config/opencode/opencode.jsonc) with the plugin array.
 COPY docker/opencode-plugins.json /opt/opencode-plugins.json
 COPY docker/scripts/install-opencode-plugins.sh /usr/local/bin/install-opencode-plugins
-RUN chmod +x /usr/local/bin/install-opencode-plugins \
+# Cache mount: opencode's plugin installer uses bun — its package cache
+# persists across rebuilds.
+RUN --mount=type=cache,target=/home/harry/.bun/install/cache \
+    chmod +x /usr/local/bin/install-opencode-plugins \
     && install-opencode-plugins --manifest /opt/opencode-plugins.json
 
 # --- codex-cli 0.146.0 (host version) — official standalone release ---------
@@ -123,10 +131,14 @@ RUN curl -fsSL -o /tmp/codex.tar.gz \
     && rm -f /tmp/codex.tar.gz
 
 # --- codegraph 1.2.0 (host version) — official npm package ------------------
-RUN npm install -g @colbymchenry/codegraph@1.2.0 --no-audit --no-fund
+# Cache mount: npm downloads persist across rebuilds.
+RUN --mount=type=cache,target=/root/.npm \
+    npm install -g @colbymchenry/codegraph@1.2.0 --no-audit --no-fund
 
 # --- opencodex proxy — official source install at the pinned commit ---------
-RUN git init -q /opt/opencodex \
+# Cache mount: bun's package cache persists across rebuilds.
+RUN --mount=type=cache,target=/home/harry/.bun/install/cache \
+    git init -q /opt/opencodex \
     && cd /opt/opencodex \
     && git remote add origin https://github.com/harryzhou2000/opencodex.git \
     && git fetch -q --depth 1 origin ea7f5a69748c666f739143142627f8ace1fcb271 \

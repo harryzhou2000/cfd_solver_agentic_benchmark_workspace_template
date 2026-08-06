@@ -163,7 +163,39 @@ user-level profile, not in contestant repos.
 docker/build.sh                    # docker build (fresh official installs, pinned versions)
 IMAGE=cfd-bench:test docker/build.sh
 JOBS=8 docker/build.sh             # more parallel build jobs (default 4)
+BUILD_NO_CACHE=1 docker/build.sh   # full rebuild, ignore the layer cache
+BUILD_PROGRESS=plain docker/build.sh  # verbose per-step output (shows CACHED)
 ```
+
+### Build caching
+
+Docker caches per layer automatically (BuildKit): each `RUN`/`COPY`
+instruction is a cache unit keyed on the instruction text + its inputs, and
+unchanged layers are reused ("CACHED"). The cache lives in the Docker daemon
+data root — `/var/lib/docker/buildkit/` here (`docker system df` reports it
+under "Build Cache"; `docker buildx du` for a per-image breakdown). Image
+layers themselves are content-addressed under `/var/lib/docker/overlay2/`.
+
+What keeps cache hits high in this image:
+
+- pinned URLs/commits/tags everywhere — the `curl`/`git fetch`/installer
+  layers are deterministic, so their instructions never change;
+- stable layer order — the heavy externals build sits below the harness
+  installs, so harness tweaks never invalidate it;
+- a small build context — `.dockerignore` excludes `.git`, `docker/.context`,
+  `docker/configs`, etc.
+
+What invalidates: editing a `RUN`/`COPY` line invalidates that layer and
+everything after it (e.g. changing the apt package list re-runs the apt
+layer and all later layers once; the base image and `ARG`/`ENV` layers stay
+cached). The heavy layers use BuildKit **cache mounts**
+(`/var/cache/apt`, `/root/.cache/pip`, `/home/harry/.bun/install/cache`,
+`/root/.npm`), so even when a layer must rebuild, the packages it downloads
+are reused from `/var/lib/docker/buildkit/cache/` instead of re-fetched.
+
+Housekeeping: `docker builder prune` removes dangling cache entries;
+`docker system df` shows what is reclaimable. To share the cache across
+machines/CI, push the image and build with `--cache-from <registry>/<image>`.
 
 ### Robustness on other machines
 
