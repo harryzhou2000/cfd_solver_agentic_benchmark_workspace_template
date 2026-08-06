@@ -537,7 +537,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--answers", default=None,
                     help="JSON file mapping question ids to user-provided answers "
                          "(evaluation agent asks the user for anything not extractable).")
-    eval_root = Path(__file__).resolve().parents[1]
+    eval_root = Path(__file__).resolve().parents[2]
     ap.add_argument("--out", default=None)
     args = ap.parse_args(argv)
 
@@ -702,7 +702,7 @@ def main(argv: list[str] | None = None) -> int:
             "config_facts": {},
             "codex_proxy_fallback_config": None,
         }
-        sub = Path(__file__).resolve().parents[1].parent / "opencodex"
+        sub = Path(__file__).resolve().parents[2] / "opencodex"
         opencodex["opencodex_submodule_pin"] = _run(
             ["git", "-C", str(sub), "describe", "--tags"]) if sub.exists() else None
         cfg = Path(args.ocx_config)

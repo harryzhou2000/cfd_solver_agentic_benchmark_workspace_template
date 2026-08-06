@@ -57,16 +57,56 @@ def row_for(folder: Path, summary: dict) -> dict:
     c = summary.get("contestant", {})
     me = summary.get("measurements", {})
     ws = md.get("workspace", {})
+    snap = summary.get("snapshot", {})
+    agent_scores = None
+    sessions = None
+    try:
+        if (folder / "agent_scores.json").exists():
+            agent_scores = json.loads((folder / "agent_scores.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        pass
+    try:
+        if (folder / "sessions.json").exists():
+            sessions = json.loads((folder / "sessions.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        pass
+    an = (sessions or {}).get("analysis", {})
+    ws_ = an.get("whole_session_stats", {})
+    agent_reviewed = bool(
+        (agent_scores or {}).get("rubric", {}).get("total_scored") is not None
+        or any(
+            (agent_scores or {}).get("scores", {}).get(area, {}).get("overall_score") is not None
+            for area in ("code_review", "cfd_review", "result_review")
+        )
+    )
+    wall = (ex.get("time_seconds") or {}).get("wall_time")
+    if not wall and an.get("window", {}).get("start") and an.get("window", {}).get("end"):
+        from datetime import datetime
+        try:
+            wall = round(
+                (datetime.fromisoformat(an["window"]["end"])
+                 - datetime.fromisoformat(an["window"]["start"])).total_seconds(), 1)
+        except (TypeError, ValueError):
+            pass
     return {
         "contestant": folder.name,
         "harness": md.get("harness", {}).get("harness"),
         "status": md.get("status"),
         "goal_time_s": (ex.get("time_seconds") or {}).get("goal_time"),
-        "wall_time_s": (ex.get("time_seconds") or {}).get("wall_time"),
+        "wall_time_s": wall,
+        "activity_time_s": (ex.get("time_seconds") or {}).get("activity_time_seconds"),
         "tokens": (ex.get("tokens") or {}).get("total"),
         "cost_usd": (ex.get("cost_estimate_usd") or {}).get("total"),
         "subagents": len(md.get("subagents", [])),
         "loc_lines": ((me.get("loc") or {}).get("file") or {}).get("lines"),
+        "code_score": (summary.get("code_review") or {}).get("overall_score"),
+        "cfd_score": (summary.get("cfd_review") or {}).get("overall_score"),
+        "result_score": (summary.get("result_review") or {}).get("overall_score"),
+        "rubric_total": ((agent_scores or {}).get("rubric") or {}).get("total_scored"),
+        "cache_hit": ws_.get("cache", {}).get("hit_ratio"),
+        "session_buckets": len(an.get("buckets", [])),
+        "env_captured": snap.get("env_snapshot_captured"),
+        "agent_reviewed": agent_reviewed,
         "agents_md_sha": (ws.get("agents_md") or {}).get("sha256"),
         "codegraph": (ws.get("codegraph") or {}).get("exists"),
         "submodule": ((ws.get("benchmark_submodule") or {}).get("commit") or "?")[:12],

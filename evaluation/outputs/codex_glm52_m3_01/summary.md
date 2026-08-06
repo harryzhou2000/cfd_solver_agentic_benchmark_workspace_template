@@ -6,6 +6,11 @@
 - Layout: standard (solver: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_glm52_m3_01/solver`, results: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_glm52_m3_01/solver/results`, report: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_glm52_m3_01/solver/report`)
 - Session window: 2026-08-01T20:12:51.919000+00:00 → 2026-08-01T21:36:57.469000+00:00
 
+## Snapshot
+
+- Configs captured: yes · sessions analyzed: yes · env snapshot: no (run before agent started) · agent report/scores: no
+- Session analysis: 2026-08-01T20:12:51.919000+00:00 → 2026-08-01T21:36:57.469000+00:00; 3×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 381,699 (cache hit 0.4419)
+
 ## Expenses
 
 - Goal time (codex): **4907 s**
@@ -47,7 +52,7 @@
 ### opencodex router (non-vanilla models: BLSC/GLM-5.2)
 
 - opencodex version: opencodex 2.8.0 (submodule None)
-- config facts: {"default_provider": "deepseek", "providers": ["BLSC", "deepseek", "openai", "opencode-free"], "multi_agent_mode": "v2", "subagent_models": ["gpt-5.6-terra", "gpt-5.6-luna", "BLSC/DeepSeek-V4-Flash", "BLSC/GLM-5.2", "BLSC/MiniMax-M3"], "disabled_models": ["BLSC/Baichuan-M2", "BLSC/Baichuan-M3", "BLSC/Baichuan-M2-128K", "BLSC/DeepSeek-R1", "BLSC/DeepSeek-V3-250324", "BLSC/DeepSeek-R1-0528", "BLSC/D
+- config facts: {"default_provider": "deepseek", "providers": ["BLSC", "deepseek", "openai", "opencode-free"], "multi_agent_mode": "v2", "subagent_models": ["gpt-5.6-terra", "gpt-5.6-luna", "BLSC/GLM-5.2", "BLSC/MiniMax-M3", "deepseek/deepseek-v4-flash"], "disabled_models": ["BLSC/Baichuan-M2", "BLSC/Baichuan-M3", "BLSC/Baichuan-M2-128K", "BLSC/DeepSeek-R1", "BLSC/DeepSeek-V3-250324", "BLSC/DeepSeek-R1-0528", "BL
 
 ### Prompts
 

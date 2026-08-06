@@ -28,6 +28,8 @@ def write_index(folder: Path, contestant: str, artifacts: dict[str, str],
         "artifacts": {},
     }
     for name, schema in sorted(artifacts.items()):
+        if name == "index.json":
+            continue  # never digest the manifest itself
         f = folder / name
         if f.exists():
             index["artifacts"][name] = {

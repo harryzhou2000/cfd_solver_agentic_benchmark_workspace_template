@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CFD Benchmark Evaluation</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a href="#/" class="brand" data-link>
+          <span class="brand-mark">CFD</span>
+          <span class="brand-text">Benchmark Evaluation</span>
+        </a>
+        <nav class="topnav">
+          <span id="topbar-status" class="topbar-status" aria-live="polite"></span>
+        </nav>
+      </div>
+    </header>
+
+    <main id="app" class="app">
+      <!-- View A: snapshot list -->
+      <section id="view-list" class="view view-list" hidden>
+        <div class="view-header">
+          <h1>Snapshots</h1>
+          <div class="view-tools">
+            <input
+              id="filter-input"
+              type="search"
+              placeholder="Filter contestant, harness, branch…"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="reload-btn" class="btn" type="button" title="Reload">&#x21bb; Reload</button>
+          </div>
+        </div>
+
+        <div id="legend" class="legend" aria-label="Legend">
+          <span class="legend-item"><span class="pill pill-status-complete">complete</span> finished without blocking</span>
+          <span class="legend-item"><span class="pill pill-status-blocked">blocked</span> blocked on permissions or user input</span>
+          <span class="legend-item"><span class="pill pill-status-paused">paused</span> paused / partial run</span>
+          <span class="legend-item"><span class="pill pill-status-needs_user_input">needs user input</span> awaiting agent question</span>
+          <span class="legend-item"><span class="pill pill-yes">yes</span> env captured / agent reviewed / codegraph present</span>
+          <span class="legend-item"><span class="pill pill-no">no</span> not captured / not yet reviewed / no codegraph</span>
+        </div>
+
+        <div id="banner" class="banner" hidden></div>
+
+        <div id="table-wrap" class="table-wrap" tabindex="0">
+          <table id="snapshots-table" class="snapshots">
+            <thead>
+              <tr id="snapshots-thead-row"></tr>
+            </thead>
+            <tbody id="snapshots-tbody"></tbody>
+          </table>
+        </div>
+
+        <div id="empty-state" class="empty-state" hidden>
+          <p>No snapshots yet &mdash; run <code>summarize.py</code> to generate evaluation folders under <code>evaluation/outputs/</code>.</p>
+        </div>
+      </section>
+
+      <!-- View B: detail -->
+      <section id="view-detail" class="view view-detail" hidden>
+        <div class="detail-header">
+          <button id="back-btn" class="btn btn-ghost" type="button">&larr; Back to snapshots</button>
+          <div class="detail-title">
+            <h1 id="detail-name">&hellip;</h1>
+            <div id="detail-subtitle" class="detail-subtitle"></div>
+          </div>
+          <div class="detail-actions">
+            <span id="detail-status" class="pill"></span>
+          </div>
+        </div>
+
+        <div id="detail-banner" class="banner" hidden></div>
+
+        <section id="metrics-cards" class="metrics-cards" aria-label="Key metrics"></section>
+
+        <nav class="tabs" role="tablist">
+          <button class="tab is-active" data-tab="summary" role="tab" aria-selected="true">Summary</button>
+          <button class="tab" data-tab="report" role="tab" aria-selected="false">Agent report</button>
+          <button class="tab" data-tab="reviews" role="tab" aria-selected="false">Reviews</button>
+          <button class="tab" data-tab="sessions" role="tab" aria-selected="false">Sessions</button>
+          <button class="tab" data-tab="metadata" role="tab" aria-selected="false">Metadata</button>
+          <button class="tab" data-tab="configs" role="tab" aria-selected="false">Configs</button>
+          <button class="tab" data-tab="env" role="tab" aria-selected="false">Env snapshot</button>
+        </nav>
+
+        <section id="tab-panels" class="tab-panels">
+          <article id="panel-summary" class="panel is-active" data-tab-panel="summary">
+            <div class="panel-loading">Loading&hellip;</div>
+          </article>
+          <article id="panel-report" class="panel" data-tab-panel="report" hidden>
+            <div class="panel-loading">Loading&hellip;</div>
+          </article>
+          <article id="panel-reviews" class="panel" data-tab-panel="reviews" hidden>
+            <div class="panel-loading">Loading&hellip;</div>
+          </article>
+          <article id="panel-sessions" class="panel" data-tab-panel="sessions" hidden>
+            <div class="panel-loading">Loading&hellip;</div>
+          </article>
+          <article id="panel-metadata" class="panel" data-tab-panel="metadata" hidden>
+            <div class="panel-loading">Loading&hellip;</div>
+          </article>
+          <article id="panel-configs" class="panel" data-tab-panel="configs" hidden>
+            <div class="panel-loading">Loading&hellip;</div>
+          </article>
+          <article id="panel-env" class="panel" data-tab-panel="env" hidden>
+            <div class="panel-loading">Loading&hellip;</div>
+          </article>
+        </section>
+      </section>
+
+      <div id="spinner" class="spinner-overlay" hidden>
+        <div class="spinner" aria-label="Loading"></div>
+      </div>
+    </main>
+
+    <template id="tpl-pill">
+      <span class="pill"></span>
+    </template>
+
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>

@@ -6,6 +6,11 @@
 - Layout: standard (solver: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/omo_slim_dsv4_01/solver`, results: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/omo_slim_dsv4_01/solver/results`, report: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/omo_slim_dsv4_01/solver/report`)
 - Session window: 2026-08-01T21:45:03.554000+00:00 → 2026-08-02T08:57:26.006000+00:00
 
+## Snapshot
+
+- Configs captured: yes · sessions analyzed: yes · env snapshot: no (run before agent started) · agent report/scores: no
+- Session analysis: 2026-08-01T21:45:03.647000+00:00 → 2026-08-02T08:57:25.674000+00:00; 23×1800s buckets; idle 9 gaps / 10786s excluded; permission-wait candidates 0; tokens 164,977,906 (cache hit 0.91)
+
 ## Expenses
 
 - Goal time (codex): **0 s**

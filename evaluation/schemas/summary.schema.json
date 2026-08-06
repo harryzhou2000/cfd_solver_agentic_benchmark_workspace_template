@@ -200,6 +200,17 @@
         "status": { "enum": ["complete", "needs_user_input"] }
       }
     },
+    "snapshot": {
+      "type": "object",
+      "description": "Which snapshot artifacts were captured for this run",
+      "properties": {
+        "configs_captured": { "type": "boolean" },
+        "sessions_analyzed": { "type": "boolean" },
+        "env_snapshot_captured": { "type": "boolean" },
+        "agent_report": { "type": "boolean" },
+        "agent_scores": { "type": "boolean" }
+      }
+    },
     "provenance": {
       "type": "object",
       "properties": {

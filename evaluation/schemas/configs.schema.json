@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Captured configuration stack for a contestant run",
+  "type": "object",
+  "required": ["captured_at", "sources", "configs"],
+  "properties": {
+    "captured_at": { "type": "string" },
+    "capture_host": { "type": "string" },
+    "sources": {
+      "type": "object",
+      "properties": {
+        "workspace": { "type": "string" },
+        "codex_home": { "type": "string" },
+        "opencode_config_dir": { "type": "string" },
+        "opencodex_config_dir": { "type": "string" }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "properties": {
+        "policy": { "type": "string" },
+        "total_hits": { "type": "integer" },
+        "marker": { "type": "string" }
+      }
+    },
+    "configs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["role", "path", "exists", "content_included"],
+        "properties": {
+          "role": { "type": "string" },
+          "kind": { "type": "string" },
+          "path": { "type": "string" },
+          "exists": { "type": "boolean" },
+          "sha256": { "type": ["string", "null"] },
+          "bytes": { "type": ["integer", "null"] },
+          "content": { "type": ["string", "null"] },
+          "content_included": { "type": "boolean" },
+          "redacted": { "type": "boolean" },
+          "redaction_hits": { "type": "integer" },
+          "truncated": { "type": "boolean" },
+          "notes": { "type": "array", "items": { "type": "string" } },
+          "plugin": {
+            "type": ["object", "null"],
+            "properties": {
+              "source": { "type": "string" },
+              "name": { "type": "string" },
+              "version": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

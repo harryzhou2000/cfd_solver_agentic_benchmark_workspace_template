@@ -51,6 +51,7 @@ echo "== setup: .sessions/ (bundled codex/opencode sessions, git-excluded) =="
 mkdir -p .sessions
 grep -qxF '.sessions/' .git/info/exclude 2>/dev/null || printf '.sessions/\n' >> .git/info/exclude
 grep -qxF '.opencode/' .git/info/exclude 2>/dev/null || printf '.opencode/\n' >> .git/info/exclude
+grep -qxF '.eval/' .git/info/exclude 2>/dev/null || printf '.eval/\n' >> .git/info/exclude
 
 echo "== setup: git remote rm origin =="
 git remote rm origin
@@ -68,6 +69,23 @@ if [ -d "$EXTERNAL_SRC" ] || [ "$EXTERNAL_SRC" = "/opt/external" ]; then
   [ -d "$EXTERNAL_SRC" ] || echo "  (image-built externals; /opt/external resolves inside the container)"
 else
   echo "warning: external source $EXTERNAL_SRC not found; create the symlink manually" >&2
+fi
+
+echo "== setup: environment snapshot (optional; captured before the agent runs) =="
+if command -v python3 >/dev/null 2>&1; then
+  ENV_SNAP="$ROOT/evaluation/tools/env_snapshot.py"
+  if [ -f "$ENV_SNAP" ]; then
+    if python3 "$ENV_SNAP" --workspace "$WS" --probe-proxy; then
+      echo "  (env snapshot written to $WS/.eval/env_snapshot.json; the evaluation"
+      echo "   pipeline copies it into the result snapshot as env_snapshot.json)"
+    else
+      echo "  (env snapshot failed; the run continues without it — it is optional)"
+    fi
+  else
+    echo "  (env_snapshot.py not found in this template revision — skipping)"
+  fi
+else
+  echo "  (python3 not found — env snapshot skipped; it is optional)"
 fi
 
 echo

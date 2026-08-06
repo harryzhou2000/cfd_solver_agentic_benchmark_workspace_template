@@ -190,6 +190,14 @@ def main(argv: list[str] | None = None) -> int:
         help="JSON file mapping metadata question ids to user-provided answers "
              "(for metadata the evaluator could not extract).",
     )
+    ap.add_argument("--session-source", choices=("system", "project", "all"),
+                    default="system",
+                    help="which session class to analyze (system = ~/.codex and "
+                         "~/.local/share/opencode; project = workspace-bundled "
+                         ".sessions copies)")
+    ap.add_argument("--session-answers", default=None,
+                    help="JSON answers for session-discovery questions "
+                         "(e.g. {\"session_source\": \"system\"})")
     ap.add_argument("--out", default=None)
     ap.add_argument(
         "--roots",
@@ -208,15 +216,18 @@ def main(argv: list[str] | None = None) -> int:
     def _base_cmd(tool: str, out_file: str):
         cmd = [sys.executable, str(ROOT / "tools" / tool),
                "--workspace", str(ws), "--out", str(out_dir / out_file),
-               "--state-db", args.state_db]
+               ]
         if tool == "extract_expenses.py":
-            cmd += ["--goals-db", args.goals_db, "--logs-db", args.logs_db,
+            cmd += ["--state-db", args.state_db,
+                    "--goals-db", args.goals_db, "--logs-db", args.logs_db,
                     "--sessions-root", args.sessions_root,
                     "--cost-metadata", args.cost_metadata]
         elif tool == "extract_measurements.py":
-            cmd += ["--logs-db", args.logs_db, "--sessions-root", args.sessions_root]
+            cmd += ["--state-db", args.state_db,
+                    "--logs-db", args.logs_db, "--sessions-root", args.sessions_root]
         elif tool == "extract_metadata.py":
-            cmd += ["--goals-db", args.goals_db, "--logs-db", args.logs_db,
+            cmd += ["--state-db", args.state_db,
+                    "--goals-db", args.goals_db, "--logs-db", args.logs_db,
                     "--sessions-root", args.sessions_root,
                     "--history", args.history, "--ocx-config", args.ocx_config,
                     "--ocx-catalog", args.ocx_catalog,
@@ -224,13 +235,32 @@ def main(argv: list[str] | None = None) -> int:
                     "--idle-gap-seconds", str(args.idle_gap_seconds)]
             if args.answers:
                 cmd += ["--answers", args.answers]
+        elif tool == "extract_sessions.py":
+            cmd += ["--state-db", args.state_db,
+                    "--sessions-root", args.sessions_root,
+                    "--session-source", args.session_source,
+                    "--idle-gap-seconds", str(args.idle_gap_seconds),
+                    "--opencode-db",
+                    str(Path.home() / ".local" / "share" / "opencode" / "opencode.db")]
+            if args.session_answers:
+                cmd += ["--session-answers", args.session_answers]
         if args.roots:
             cmd += ["--roots", args.roots]
         return cmd
 
     subprocess.run(_base_cmd("extract_metadata.py", "metadata.json"), check=True)
+    subprocess.run(_base_cmd("extract_configs.py", "configs.json"), check=True)
+    subprocess.run(_base_cmd("extract_sessions.py", "sessions.json"), check=True)
     subprocess.run([sys.executable, str(ROOT / "tools" / "generate_review_forms.py"),
                     "--out", str(out_dir)], check=True)
+
+    # env snapshot captured by setup-workspace.sh before the agent ran
+    # (optional: older runs do not have it)
+    env_snap_src = ws / ".eval" / "env_snapshot.json"
+    env_snap_captured = False
+    if env_snap_src.exists():
+        (out_dir / "env_snapshot.json").write_bytes(env_snap_src.read_bytes())
+        env_snap_captured = True
 
     metadata = json.loads((out_dir / "metadata.json").read_text())
     harness = metadata.get("harness", {}).get("harness")
@@ -342,6 +372,13 @@ def main(argv: list[str] | None = None) -> int:
         "result_review": result_review_area,
         "measurements": measurements,
         "metadata": metadata,
+        "snapshot": {
+            "configs_captured": (out_dir / "configs.json").exists(),
+            "sessions_analyzed": (out_dir / "sessions.json").exists(),
+            "env_snapshot_captured": env_snap_captured,
+            "agent_report": (out_dir / "agent_report.md").exists(),
+            "agent_scores": (out_dir / "agent_scores.json").exists(),
+        },
         "provenance": {
             "state_db": args.state_db,
             "goals_db": args.goals_db,
@@ -349,7 +386,8 @@ def main(argv: list[str] | None = None) -> int:
             "sessions_root": args.sessions_root,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "tools": ["extract_expenses.py", "extract_measurements.py",
-                      "extract_metadata.py", "generate_review_forms.py",
+                      "extract_metadata.py", "extract_configs.py",
+                      "extract_sessions.py", "generate_review_forms.py",
                       "summarize.py"],
         },
     }
@@ -367,7 +405,7 @@ def main(argv: list[str] | None = None) -> int:
     recording.write_index(
         out_dir,
         ws.name,
-        artifacts={
+        artifacts={n: s for n, s in {
             "index.json": "index.schema.json",
             "summary.json": "summary.schema.json",
             "metadata.json": "metadata.schema.json",
@@ -376,9 +414,14 @@ def main(argv: list[str] | None = None) -> int:
             "review_code.json": "review.schema.json",
             "review_cfd.json": "review.schema.json",
             "review_results.json": "review.schema.json",
-        },
+            "configs.json": "configs.schema.json",
+            "sessions.json": "sessions.schema.json",
+            "env_snapshot.json": "env_snapshot.schema.json",
+            "agent_scores.json": "agent_scores.schema.json",
+        }.items() if (out_dir / n).exists()},
         tools=["cfdeval", "summarize.py", "extract_expenses.py",
                "extract_measurements.py", "extract_metadata.py",
+               "extract_configs.py", "extract_sessions.py",
                "generate_review_forms.py"],
         schema_dir=ROOT / "schemas",
     )
@@ -404,6 +447,39 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
         f"- Layout: {c['layout']} (solver: `{c['solver_dir']}`, results: `{c['results_dir']}`, report: `{c['report_dir']}`)",
         f"- Session window: {c.get('session_window', {}).get('start')} → "
         f"{c.get('session_window', {}).get('end')}",
+        "",
+        "## Snapshot",
+        "",
+    ]
+    snap = s.get("snapshot", {})
+    lines.append(
+        f"- Configs captured: {'yes' if snap.get('configs_captured') else 'no'} · "
+        f"sessions analyzed: {'yes' if snap.get('sessions_analyzed') else 'no'} · "
+        f"env snapshot: {'yes' if snap.get('env_snapshot_captured') else 'no (run before agent started)'} · "
+        f"agent report/scores: {'yes' if snap.get('agent_report') else 'no'}"
+        f"{' / yes' if snap.get('agent_scores') else ''}"
+    )
+    sessions_path = out_dir / "sessions.json"
+    if sessions_path.exists():
+        try:
+            sj = json.loads(sessions_path.read_text())
+            an = sj.get("analysis", {})
+            ws_ = an.get("whole_session_stats", {})
+            ix = an.get("idle_exclusion", {})
+            pw = an.get("permission_waits", {})
+            lines.append(
+                f"- Session analysis: {an.get('window', {}).get('start')} → "
+                f"{an.get('window', {}).get('end')}; "
+                f"{len(an.get('buckets', []))}×{an.get('bucket_seconds', 1800)}s buckets; "
+                f"idle {ix.get('gap_count', 0)} gaps / "
+                f"{ix.get('idle_seconds_total', 0):.0f}s excluded; "
+                f"permission-wait candidates {pw.get('candidate_count', 0)}; "
+                f"tokens {ws_.get('tokens', {}).get('total', 0):,} "
+                f"(cache hit {ws_.get('cache', {}).get('hit_ratio')})"
+            )
+        except (OSError, json.JSONDecodeError):
+            pass
+    lines += [
         "",
         "## Expenses",
         "",

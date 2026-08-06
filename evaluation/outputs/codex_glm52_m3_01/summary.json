@@ -21,32 +21,32 @@
       "started_at": "2026-08-01T20:12:51.919000+00:00",
       "ended_at": "2026-08-01T21:36:57.469000+00:00",
       "by_root_thread": {
-        "019fbef6-8a0e-71f0-8642-db5302a41979": {
-          "status": "complete",
-          "time_used_seconds": 4885,
-          "tokens_used": 714758
-        },
         "019fbef4-a59e-7ec0-9455-8c961d3b1cbf": {
           "status": "paused",
           "time_used_seconds": 22,
           "tokens_used": 23143
+        },
+        "019fbef6-8a0e-71f0-8642-db5302a41979": {
+          "status": "complete",
+          "time_used_seconds": 4885,
+          "tokens_used": 714758
         }
       },
       "by_root_tree": {
-        "019fbef6-8a0e-71f0-8642-db5302a41979": {
-          "status": "complete",
-          "goal_time_seconds": 4885,
-          "goal_tokens": 714758,
-          "threads": 1,
-          "tokens_used": 40557801,
-          "model": "BLSC/GLM-5.2"
-        },
         "019fbef4-a59e-7ec0-9455-8c961d3b1cbf": {
           "status": "paused",
           "goal_time_seconds": 22,
           "goal_tokens": 23143,
           "threads": 1,
           "tokens_used": 78119,
+          "model": "BLSC/GLM-5.2"
+        },
+        "019fbef6-8a0e-71f0-8642-db5302a41979": {
+          "status": "complete",
+          "goal_time_seconds": 4885,
+          "goal_tokens": 714758,
+          "threads": 1,
+          "tokens_used": 40557801,
           "model": "BLSC/GLM-5.2"
         }
       }
@@ -125,7 +125,7 @@
       "goals_db": "/home/harry/.codex/goals_1.sqlite",
       "logs_db": "/home/harry/.codex/logs_2.sqlite",
       "sessions_root": "/home/harry/.codex/sessions",
-      "fetched_at": "2026-08-02T09:33:04.352445+00:00",
+      "fetched_at": "2026-08-06T20:16:13.651498+00:00",
       "num_threads": 2,
       "num_roots": 2
     }
@@ -1064,7 +1064,7 @@
     "provenance": {
       "state_db": "/home/harry/.codex/state_5.sqlite",
       "sessions_root": "/home/harry/.codex/sessions",
-      "generated_at": "2026-08-02T09:33:04.667875+00:00",
+      "generated_at": "2026-08-06T20:16:13.983344+00:00",
       "num_threads": 2
     }
   },
@@ -1226,9 +1226,9 @@
         "subagent_models": [
           "gpt-5.6-terra",
           "gpt-5.6-luna",
-          "BLSC/DeepSeek-V4-Flash",
           "BLSC/GLM-5.2",
-          "BLSC/MiniMax-M3"
+          "BLSC/MiniMax-M3",
+          "deepseek/deepseek-v4-flash"
         ],
         "disabled_models": [
           "BLSC/Baichuan-M2",
@@ -1444,23 +1444,32 @@
       "ocx_config": "/home/harry/.opencodex/config.json",
       "ocx_catalog": "/home/harry/.codex/opencodex-catalog.json",
       "plugins_root": "/home/harry/.codex/plugins",
-      "generated_at": "2026-08-02T09:33:04.159856+00:00",
+      "generated_at": "2026-08-06T20:16:10.527521+00:00",
       "num_threads": 2
     },
     "questions": [],
     "user_answers": {},
     "status": "complete"
   },
+  "snapshot": {
+    "configs_captured": true,
+    "sessions_analyzed": true,
+    "env_snapshot_captured": false,
+    "agent_report": false,
+    "agent_scores": false
+  },
   "provenance": {
     "state_db": "/home/harry/.codex/state_5.sqlite",
     "goals_db": "/home/harry/.codex/goals_1.sqlite",
     "logs_db": "/home/harry/.codex/logs_2.sqlite",
     "sessions_root": "/home/harry/.codex/sessions",
-    "generated_at": "2026-08-02T09:33:04.961087+00:00",
+    "generated_at": "2026-08-06T20:16:14.268715+00:00",
     "tools": [
       "extract_expenses.py",
       "extract_measurements.py",
       "extract_metadata.py",
+      "extract_configs.py",
+      "extract_sessions.py",
       "generate_review_forms.py",
       "summarize.py"
     ]

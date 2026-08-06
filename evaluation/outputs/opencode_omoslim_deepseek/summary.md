@@ -6,6 +6,11 @@
 - Layout: non_standard (solver: `None`, results: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/opencode_omoslim_deepseek/cfd_solver/results`, report: `None`)
 - Session window: 2026-07-04T17:53:04.401000+00:00 → 2026-07-19T10:27:09.717000+00:00
 
+## Snapshot
+
+- Configs captured: yes · sessions analyzed: yes · env snapshot: no (run before agent started) · agent report/scores: no
+- Session analysis: 2026-07-04T17:53:04.526000+00:00 → 2026-07-19T10:27:08.435000+00:00; 706×1800s buckets; idle 114 gaps / 1250851s excluded; permission-wait candidates 3; tokens 165,049,326 (cache hit 0.9679)
+
 ## Expenses
 
 - Goal time (codex): **0 s**
@@ -34,7 +39,7 @@
 - AGENTS.md: MISSING (question raised for user)
 - CodeGraph: absent
 - Benchmark submodule: a29ae3e02d84 (clean)
-- opencode: v1.18.11, 1 root / 12 subagent sessions
+- opencode: v1.18.11, 1 root / 12 subagent sessions; activity 5.5h (idle 547.8h excluded, gap threshold 600s)
 
 | Model | Effort(s) | Context window | Max context used | Threads |
 |-------|-----------|---------------:|-----------------:|--------:|

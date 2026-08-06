@@ -64,7 +64,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--goals-db", default=str(defaults["goals_db"]))
     ap.add_argument("--logs-db", default=str(defaults["logs_db"]))
     ap.add_argument("--sessions-root", default=str(defaults["sessions_root"]))
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[2]
     ap.add_argument("--cost-metadata", default=str(root / "config" / "cost_metadata.json"))
     ap.add_argument("--out", default=None)
     ap.add_argument(
@@ -77,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     workspace = str(Path(args.workspace).resolve())
-    eval_root = Path(__file__).resolve().parents[1]
+    eval_root = Path(__file__).resolve().parents[2]
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / Path(workspace).name / "expenses.json"
     )

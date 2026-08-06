@@ -18,6 +18,15 @@ metadata.json           # harness, models, context, subagents, router, prompts,
                         # workspace state (AGENTS.md, codegraph, submodule)
 expenses.json           # time, tokens, cost estimate
 measurements.json       # tool usage, LOC, rule violations
+configs.json            # verbose redacted config stack (codex/opencode/opencodex,
+                        # plugins, shell init, workspace-local, benchmark task/rubric)
+sessions.json           # session discovery (system + project-isolated) and
+                        # 30-min-bucketed analysis (cache history, tokens,
+                        # tool categories, idle exclusion, permission waits)
+env_snapshot.json       # environment snapshot captured before the agent ran
+                        # (optional; older runs omit it)
+agent_scores.json       # agent-driven evaluation scores (review areas + rubric)
+agent_report.md         # agent-driven evaluation report (narrative + evidence)
 review_code.json|md     # code review scorecard
 review_cfd.json|md      # CFD methods review scorecard
 review_results.json|md  # result review scorecard (+ structural evidence)
@@ -41,6 +50,23 @@ review_results.json|md  # result review scorecard (+ structural evidence)
 5. **Unextractable metadata is recorded as questions**, not guesses
    (`metadata.questions` + `status: needs_user_input`); user answers are
    merged via `--answers` and persisted in `metadata.user_answers`.
+6. **Configs are captured verbosely but redacted** (`configs.json`): every
+   user-level config that governed the run (codex/opencode/opencodex, plugin
+   manifests, shell init, workspace-local, benchmark task/rubric) is recorded
+   with content where safe. Credential files (`auth.json`,
+   `codex-accounts.json`, `admin-api-token`) are presence + sha256 only;
+   secret-like values are replaced with `***REDACTED***`.
+7. **Session analysis is bucketed and idle-excluded** (`sessions.json`):
+   discovery covers system-level telemetry (`~/.codex`,
+   `~/.local/share/opencode`) and project-isolated copies
+   (`<workspace>/.sessions/`); statistics are reported in 30-minute buckets
+   (cache-hit history, tokens, shell-call categories, tool stats) with idle
+   periods excluded and whole-length stats preserved. Permission-blocked
+   idle is recognized heuristically and reported with its limitations.
+8. **Agent-driven evaluation is part of the snapshot**: the evaluating agent
+   fills `agent_scores.json` (review-area scores + 100-point rubric +
+   disqualification flags + metadata answers + session selection) and writes
+   `agent_report.md`; `record_agent_results.py` validates and re-indexes.
 
 ## Fill, check, query
 

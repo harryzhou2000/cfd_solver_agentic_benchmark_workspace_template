@@ -18,6 +18,10 @@ all inputs are read-only and outputs land under `evaluation/outputs/`.
 | 4. Result review (outputs, visualizations, report) | [specs/result_review_spec.md](specs/result_review_spec.md) | [config/review_points_results.json](config/review_points_results.json) |
 | 5. Other measurements: tool usage, LOC, rule violations | [specs/measurements_spec.md](specs/measurements_spec.md) | session rollouts, git, filesystem scan |
 | 6. Execution metadata: harness, models/effort, context, subagent types, opencodex router, prompts, AGENTS.md/codegraph/submodule state | [specs/metadata_spec.md](specs/metadata_spec.md) | codex state/history, opencodex config + catalog, plugins, workspace git |
+| 7. Verbose config snapshot: codex/opencode/opencodex configs, plugin manifests, shell init, workspace-local configs (redacted) | [specs/configs_spec.md](specs/configs_spec.md) | `~/.codex`, `~/.config/opencode`, `~/.opencodex`, workspace |
+| 8. Session discovery + 30-min-bucketed analysis: cache history, tokens, tool categories, idle exclusion, permission waits | [specs/sessions_spec.md](specs/sessions_spec.md) | system `~/.codex` + opencode db, project `.sessions/` copies |
+| 9. Environment snapshot captured before the agent runs (optional) | [specs/env_snapshot_spec.md](specs/env_snapshot_spec.md) | host/container, tool versions, proxy env, workspace git state |
+| 10. Agent-driven evaluation report + scores stored in the snapshot | [specs/agent_evaluation_spec.md](specs/agent_evaluation_spec.md) | `agent_report.md`, `agent_scores.json` |
 
 Root spec: [specs/summary_spec.md](specs/summary_spec.md). Output schema:
 [schemas/summary.schema.json](schemas/summary.schema.json).
@@ -59,6 +63,14 @@ This runs the whole pipeline and writes
 - `summary.json` — machine-readable final summary (schema-checked keys);
 - `summary.md` — human-readable report;
 - `expenses.json`, `measurements.json`, `metadata.json` — detail per area;
+- `configs.json` — verbose redacted config stack (see
+  [specs/configs_spec.md](specs/configs_spec.md));
+- `sessions.json` — session discovery + bucketed analysis (see
+  [specs/sessions_spec.md](specs/sessions_spec.md));
+- `env_snapshot.json` — environment snapshot (only when the workspace has
+  `.eval/env_snapshot.json`; see [specs/env_snapshot_spec.md](specs/env_snapshot_spec.md));
+- `agent_scores.json` + `agent_report.md` — agent-driven evaluation (see
+  [specs/agent_evaluation_spec.md](specs/agent_evaluation_spec.md));
 - `review_code.md|json`, `review_cfd.md|json`, `review_results.md|json` —
   blank scorecards for reviewers.
 
@@ -68,8 +80,65 @@ Individual steps:
 python3 evaluation/tools/extract_expenses.py --workspace ../codex_gpt56_01
 python3 evaluation/tools/extract_measurements.py --workspace ../codex_gpt56_01
 python3 evaluation/tools/extract_metadata.py --workspace ../codex_gpt56_01
+python3 evaluation/tools/extract_configs.py --workspace ../codex_gpt56_01
+python3 evaluation/tools/extract_sessions.py --workspace ../codex_gpt56_01
 python3 evaluation/tools/generate_review_forms.py --out evaluation/outputs/codex_gpt56_01
 ```
+
+`extract_sessions.py` also has a `--session-source system|project|all` switch
+for workspace-bundled `.sessions/` copies and a `--session-answers` file for
+agent-answered discovery questions.
+
+## Environment snapshot (before the agent runs)
+
+Capture the real environment before starting a contestant agent (vendored
+into `docker/scripts/setup-workspace.sh`, so new workspaces get it
+automatically; optional for older runs):
+
+```bash
+python3 evaluation/tools/env_snapshot.py --workspace ../omo_slim_dsv4_01 --probe-proxy
+```
+
+Writes `<workspace>/.eval/env_snapshot.json` (git-excluded). The pipeline
+copies it into the snapshot as `env_snapshot.json`; runs without it record
+`env_snapshot.captured: false`.
+
+## Session analysis (bucketed)
+
+`sessions.json` merges the main session/thread with all subagents and reports
+**30-minute buckets** of cache-hit history, token usage, shell-call
+categories, and tool statistics, with idle periods (no events in any
+thread/session beyond the gap threshold) excluded. Whole-length statistics
+remain in `whole_session_stats`. Permission-blocked idle is recognized
+heuristically (ask-tools, approval-aware settings) with explicit limitations —
+see [specs/sessions_spec.md](specs/sessions_spec.md).
+
+## Agent-driven evaluation
+
+The evaluation agent fills reports and scores inside the snapshot:
+
+```bash
+python3 evaluation/tools/generate_agent_report.py \
+  --out evaluation/outputs/codex_gpt56_01 --workspace ../codex_gpt56_01 \
+  --run-validator --agent gpt-5.6-terra
+# ... agent fills agent_scores.json + agent_report.md ...
+python3 evaluation/tools/record_agent_results.py \
+  --folder evaluation/outputs/codex_gpt56_01
+```
+
+See [specs/agent_evaluation_spec.md](specs/agent_evaluation_spec.md).
+
+## GUI
+
+Local web GUI listing snapshots with key results and interactive detail views
+(summary, agent report, reviews, bucketed sessions, metadata, configs, env):
+
+```bash
+python3 evaluation/gui/server.py --port 8787
+# open http://127.0.0.1:8787
+```
+
+Read-only; stdlib only.
 
 ## Session selection
 

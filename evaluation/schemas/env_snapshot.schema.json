@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Environment snapshot captured before a contestant run",
+  "type": "object",
+  "required": ["schema", "version", "captured_at", "host", "tools", "environment", "workspace"],
+  "properties": {
+    "schema": { "enum": ["env_snapshot"] },
+    "version": { "type": "string" },
+    "captured_at": { "type": "string" },
+    "local_time": { "type": "string" },
+    "host": {
+      "type": "object",
+      "properties": {
+        "hostname": { "type": "string" },
+        "os": { "type": "string" },
+        "machine": { "type": "string" },
+        "python": { "type": "string" },
+        "cpus": { "type": ["integer", "null"] },
+        "memory_gb": { "type": ["number", "null"] },
+        "loadavg_1_5_15": { "type": ["array", "null"], "items": { "type": "string" } },
+        "in_docker": { "type": "boolean" },
+        "docker": { "type": ["object", "null"] }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "installed": { "type": "boolean" },
+          "path": { "type": ["string", "null"] },
+          "version": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "count": { "type": "integer" },
+        "vars": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "set": { "type": "boolean" },
+              "value": { "type": "string" },
+              "credential": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "network": {
+      "type": "object",
+      "properties": {
+        "proxy_env": { "type": "array", "items": { "type": "object" } },
+        "note": { "type": "string" }
+      }
+    },
+    "workspace": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "branch": { "type": ["string", "null"] },
+        "commit": { "type": ["string", "null"] },
+        "git_dirty": { "type": "boolean" },
+        "dirty_files": { "type": "integer" },
+        "agents_md_sha256": { "type": ["string", "null"] },
+        "codegraph": { "type": "boolean" },
+        "done_marker": { "type": "boolean" },
+        "external_symlink": { "type": ["string", "null"] },
+        "benchmark_submodule": {
+          "type": "object",
+          "properties": {
+            "exists": { "type": "boolean" },
+            "commit": { "type": ["string", "null"] },
+            "branch": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "script": { "type": "string" },
+        "script_version": { "type": "string" }
+      }
+    }
+  }
+}

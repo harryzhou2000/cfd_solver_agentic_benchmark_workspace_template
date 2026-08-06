@@ -1,0 +1,159 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Session discovery and bucketed analysis for a contestant run",
+  "type": "object",
+  "required": ["workspace", "sources", "selection", "analysis"],
+  "properties": {
+    "workspace": { "type": "string" },
+    "discovered_at": { "type": "string" },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "harness", "reachable", "sessions_found"],
+        "properties": {
+          "id": { "type": "string" },
+          "kind": { "enum": ["system", "project"] },
+          "harness": { "enum": ["codex", "opencode"] },
+          "root": { "type": "string" },
+          "reachable": { "type": "boolean" },
+          "sessions_found": { "type": "integer" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "selected_source": { "enum": ["system", "project", "all"] },
+    "selection": {
+      "type": "object",
+      "properties": {
+        "method": { "type": "string" },
+        "roots": { "type": ["array", "null"], "items": { "type": "string" } },
+        "questions": { "type": "array", "items": { "type": "object" } },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "codex": {
+      "type": "object",
+      "properties": {
+        "present": { "type": "boolean" },
+        "source": { "type": ["string", "null"] },
+        "source_db": { "type": "string" },
+        "thread_count": { "type": "integer" },
+        "subagent_count": { "type": "integer" },
+        "root_count": { "type": "integer" },
+        "roots": { "type": "array", "items": { "type": "object" } },
+        "rollout_bytes_total": { "type": "integer" },
+        "missing_rollouts": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "opencode": {
+      "type": "object",
+      "properties": {
+        "present": { "type": "boolean" },
+        "source": { "type": ["string", "null"] },
+        "source_db": { "type": "string" },
+        "session_count": { "type": "integer" },
+        "root_session_count": { "type": "integer" },
+        "subagent_session_count": { "type": "integer" },
+        "sessions": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "required": ["bucket_seconds", "window", "idle_exclusion", "permission_waits", "buckets", "whole_session_stats"],
+      "properties": {
+        "bucket_seconds": { "type": "integer" },
+        "idle_gap_seconds": { "type": "integer" },
+        "window": {
+          "type": "object",
+          "properties": {
+            "start": { "type": ["string", "null"] },
+            "end": { "type": ["string", "null"] }
+          }
+        },
+        "idle_exclusion": {
+          "type": "object",
+          "properties": {
+            "method": { "type": "string" },
+            "gap_count": { "type": "integer" },
+            "gaps": { "type": "array", "items": { "type": "object" } },
+            "idle_seconds_total": { "type": "number" }
+          }
+        },
+        "permission_waits": {
+          "type": "object",
+          "properties": {
+            "method": { "type": "string" },
+            "explicit_approval_events_found": { "type": "boolean" },
+            "candidate_gaps": { "type": "array", "items": { "type": "object" } },
+            "candidate_count": { "type": "integer" },
+            "policy_observed": { "type": "array", "items": { "type": "string" } },
+            "limitations": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "buckets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["bucket_index", "start", "end", "active_seconds", "idle_seconds", "tokens", "cache", "tools"],
+            "properties": {
+              "bucket_index": { "type": "integer" },
+              "start": { "type": "string" },
+              "end": { "type": "string" },
+              "active_seconds": { "type": "number" },
+              "idle_seconds": { "type": "number" },
+              "active": { "type": "boolean" },
+              "tokens": { "type": "object" },
+              "cache": {
+                "type": "object",
+                "properties": {
+                  "cached_tokens": { "type": "integer" },
+                  "input_tokens": { "type": "integer" },
+                  "hit_ratio": { "type": ["number", "null"] }
+                }
+              },
+              "tools": {
+                "type": "object",
+                "properties": {
+                  "total": { "type": "integer" },
+                  "by_tool": { "type": "object" },
+                  "by_category": { "type": "object" }
+                }
+              },
+              "turns": { "type": "object" },
+              "active_entities": { "type": "array", "items": { "type": "string" } },
+              "active_entity_count": { "type": "integer" }
+            }
+          }
+        },
+        "whole_session_stats": {
+          "type": "object",
+          "properties": {
+            "tokens": { "type": "object" },
+            "cache": {
+              "type": "object",
+              "properties": {
+                "cached_tokens": { "type": "integer" },
+                "input_tokens": { "type": "integer" },
+                "hit_ratio": { "type": ["number", "null"] }
+              }
+            },
+            "tools": { "type": "object" },
+            "turns": { "type": "object" },
+            "activity": { "type": "object" },
+            "per_entity": { "type": "object" }
+          }
+        }
+      }
+    },
+    "env_snapshot": {
+      "type": "object",
+      "properties": {
+        "captured": { "type": "boolean" },
+        "path": { "type": ["string", "null"] },
+        "sha256": { "type": ["string", "null"] }
+      }
+    },
+    "provenance": { "type": "object" }
+  }
+}

@@ -6,6 +6,11 @@
 - Layout: non_standard (solver: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_gpt56_01/cfd_solver_agentic_benchmark/src`, results: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_gpt56_01/cfd_solver_agentic_benchmark/results`, report: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_gpt56_01/cfd_solver_agentic_benchmark/report`)
 - Session window: 2026-07-31T20:12:24.744000+00:00 → 2026-08-01T02:17:10.168000+00:00
 
+## Snapshot
+
+- Configs captured: yes · sessions analyzed: yes · env snapshot: no (run before agent started) · agent report/scores: yes / yes
+- Session analysis: 2026-07-31T20:12:24.744000+00:00 → 2026-08-01T02:17:10.168000+00:00; 13×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 11,829,410 (cache hit 0.5143)
+
 ## Expenses
 
 - Goal time (codex): **20978 s**

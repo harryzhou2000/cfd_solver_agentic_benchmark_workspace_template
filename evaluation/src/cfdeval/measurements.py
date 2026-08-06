@@ -258,7 +258,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     workspace = Path(args.workspace).resolve()
-    eval_root = Path(__file__).resolve().parents[1]
+    eval_root = Path(__file__).resolve().parents[2]
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / workspace.name / "measurements.json"
     )
