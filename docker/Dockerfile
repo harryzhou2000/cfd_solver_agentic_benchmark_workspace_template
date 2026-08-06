@@ -145,11 +145,13 @@ RUN --mount=type=cache,target=/home/cfd_agent/.bun/install/cache \
     && install-opencode-plugins --manifest /opt/opencode-plugins.json
 
 # --- codex-cli (host version) — official standalone release -----------------
+# The standalone tarball extracts a single binary at the top level (no
+# bin/ subdirectory).
 RUN curl -fsSL -o /tmp/codex.tar.gz \
         "https://github.com/openai/codex/releases/download/rust-v${CODEX_VERSION}/codex-x86_64-unknown-linux-musl.tar.gz" \
     && mkdir -p /opt/codex-standalone \
     && tar -xzf /tmp/codex.tar.gz -C /opt/codex-standalone \
-    && ln -sf /opt/codex-standalone/codex-x86_64-unknown-linux-musl/bin/codex /usr/local/bin/codex \
+    && ln -sf /opt/codex-standalone/codex-x86_64-unknown-linux-musl /usr/local/bin/codex \
     && rm -f /tmp/codex.tar.gz
 
 # --- codegraph 1.2.0 (host version) — official npm package ------------------
