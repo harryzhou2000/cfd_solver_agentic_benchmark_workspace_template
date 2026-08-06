@@ -10,17 +10,12 @@ IMAGE="${IMAGE:-cfd-bench:latest}"
 C="$ROOT/docker/.context"
 mkdir -p "$C"
 
-# Proxy for the build itself (apt/npm/bun): source ~/.setproxy.sh when present.
-# Proxy vars are forwarded to the build only when the proxy is on the host
-# loopback (build containers cannot reach the host's 127.0.0.1 without
-# --network host). LAN proxies are usually unnecessary — direct connectivity
-# works and avoids flaky apt/npm failures through the proxy; force them with
-# BUILD_PROXY=1.
-PROXY_SCRIPT="${PROXY_SCRIPT:-$HOME/.setproxy.sh}"
-if [ -f "$PROXY_SCRIPT" ]; then
-  . "$PROXY_SCRIPT" || true
-  echo "sourced proxy env from $PROXY_SCRIPT (used by docker build)"
-fi
+# Proxy for the build itself (apt/npm/bun): only existing env vars are used
+# (HTTP_PROXY etc. — no proxy script is sourced). Proxy vars are forwarded to
+# the build only when the proxy is on the host loopback (build containers
+# cannot reach the host's 127.0.0.1 without --network host). LAN proxies are
+# usually unnecessary — direct connectivity works and avoids flaky apt/npm
+# failures through the proxy; force them with BUILD_PROXY=1.
 BUILD_PROXY="${BUILD_PROXY:-0}"
 case "${HTTP_PROXY:-}${http_proxy:-}" in
   *127.0.0.1*|*localhost*) BUILD_PROXY=1 ;;

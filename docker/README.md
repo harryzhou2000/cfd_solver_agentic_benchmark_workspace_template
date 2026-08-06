@@ -140,8 +140,9 @@ IMAGE=cfd-bench:test docker/build.sh
   workspace snapshot and falls back to the baked image configs (the image is
   self-contained); codex sessions are then ephemeral. `--mount-host-configs`
   only mounts host dirs that actually exist.
-- **No proxy on the host:** both scripts only source `~/.setproxy.sh` when it
-  exists; everything works with direct connectivity too.
+- **No proxy on the host:** both scripts only use the already-exported proxy
+  env vars (`HTTP_PROXY` etc., no proxy script is sourced); everything works
+  with direct connectivity too.
 
 ## Run (manual interactive launch)
 
@@ -171,11 +172,12 @@ to the baked configs automatically (sessions become ephemeral).
   stack; LAN **and loopback** proxy endpoints are reachable as-is — the
   container's `127.0.0.1` is the host's loopback, so a proxy bound to
   `127.0.0.1:PORT` on the host works without changes (verified live).
-- `start.sh` and `build.sh` source `~/.setproxy.sh` when present (override
-  with `PROXY_SCRIPT=/path`). `start.sh` forwards `HTTP_PROXY` /
-  `HTTPS_PROXY` / `ALL_PROXY` / `NO_PROXY` (upper- and lowercase) into the
-  container. `localhost`, `127.0.0.1` and `::1` are appended to `NO_PROXY` so
-  the opencodex proxy on 127.0.0.1:10109 is never proxied.
+- `start.sh` and `build.sh` use the already-exported proxy env vars only —
+  no `~/.setproxy.sh` (or any other proxy script) is sourced. `start.sh`
+  forwards `HTTP_PROXY` / `HTTPS_PROXY` / `ALL_PROXY` / `NO_PROXY`
+  (upper- and lowercase) into the container. `localhost`, `127.0.0.1` and
+  `::1` are appended to `NO_PROXY` so the opencodex proxy on 127.0.0.1:10109
+  is never proxied.
 - Docker does not inherit the shell environment, which is why the scripts
   forward the variables explicitly. For a manual `docker run`, pass
   `-e HTTP_PROXY=... -e HTTPS_PROXY=...` yourself.

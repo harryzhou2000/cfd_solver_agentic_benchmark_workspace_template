@@ -91,15 +91,10 @@ MOUNTS+=(-v "$WS:$WS")
 ENVS=(-e HOME="$HOME")
 SECURITY_OPTS=(--security-opt seccomp=unconfined --security-opt apparmor=unconfined)
 
-# Proxy: source ~/.setproxy.sh when present and forward the proxy env into
-# the container. With --network host the proxy endpoints (LAN IPs, loopback)
-# are reachable from inside the container; loopback stays out of NO_PROXY so
-# the opencodex proxy on 127.0.0.1:10109 is never proxied.
-PROXY_SCRIPT="${PROXY_SCRIPT:-$HOME/.setproxy.sh}"
-if [ -f "$PROXY_SCRIPT" ]; then
-  . "$PROXY_SCRIPT" || true
-  echo "sourced proxy env from $PROXY_SCRIPT"
-fi
+# Proxy: forward the existing proxy env into the container. With --network
+# host the proxy endpoints (LAN IPs, loopback) are reachable from inside the
+# container; loopback stays out of NO_PROXY so the opencodex proxy on
+# 127.0.0.1:10109 is never proxied.
 for host in localhost 127.0.0.1 ::1; do
   case ",${NO_PROXY:-}," in *",$host,"*) ;; *) NO_PROXY="${NO_PROXY:+$NO_PROXY,}$host" ;; esac
 done
