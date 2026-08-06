@@ -20,7 +20,10 @@ WS_ARG="${1:?usage: setup-workspace.sh <path> [branch]}"
 BRANCH="${2:-main}"
 BENCH_ROOT="${BENCH_ROOT:-/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark}"
 TEMPLATE_URL="${TEMPLATE_URL:-https://github.com/harryzhou2000/cfd_solver_agentic_benchmark_workspace_template.git}"
-EXTERNAL_SRC="${EXTERNAL_SRC:-$BENCH_ROOT/opencode_omoslim_deepseek/external}"
+# The externals are built into the benchmark image (/opt/external) via the
+# DNDSR process — no host binary tree is needed. Override EXTERNAL_SRC for a
+# custom source (e.g. a local checkout on this host).
+EXTERNAL_SRC="${EXTERNAL_SRC:-/opt/external}"
 
 case "$WS_ARG" in
   /*) WS="$WS_ARG" ;;
@@ -58,8 +61,9 @@ else
 fi
 
 echo "== setup: ln -s $EXTERNAL_SRC . =="
-if [ -d "$EXTERNAL_SRC" ]; then
+if [ -d "$EXTERNAL_SRC" ] || [ "$EXTERNAL_SRC" = "/opt/external" ]; then
   ln -s "$EXTERNAL_SRC" external
+  [ -d "$EXTERNAL_SRC" ] || echo "  (image-built externals; /opt/external resolves inside the container)"
 else
   echo "warning: external source $EXTERNAL_SRC not found; create the symlink manually" >&2
 fi

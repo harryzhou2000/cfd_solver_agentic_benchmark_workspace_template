@@ -76,6 +76,42 @@ RUN curl -fsSL -o /tmp/openmpi.tar.bz2 \
     && make install \
     && rm -rf /tmp/openmpi-src /tmp/openmpi.tar.bz2
 
+# --- shared DNDSR externals, built from source (DNDSR recipe) ---------------
+# Installed BEFORE the harnesses (after build stack + uv + OpenMPI): the
+# cfd_externals build needs mpicc/mpicxx, and the heavy source build should
+# sit on a stable layer below the harness installs.
+#
+# Header-only libraries (Eigen, Boost, CGAL, fmt, pybind11, ...): official
+# release tarball of the DNDSR externals bundle, pinned tag v0.1.0.
+RUN mkdir -p /opt/external \
+    && curl -fsSL -o /tmp/external_headeronlys.tar.gz \
+        https://github.com/harryzhou2000/cfd_externals_headeronlys/releases/download/v0.1.0/external_headeronlys.tar.gz \
+    && tar -xzf /tmp/external_headeronlys.tar.gz -C /opt/external \
+    && rm -f /tmp/external_headeronlys.tar.gz
+
+# cfd_externals (zlib/HDF5/CGNS/ParMETIS/Cantera): source at the pinned
+# commit, submodules at their pinned revisions.
+RUN git init -q /opt/external/cfd_externals \
+    && cd /opt/external/cfd_externals \
+    && git remote add origin https://github.com/harryzhou2000/cfd_externals.git \
+    && git fetch -q --depth 1 origin 942cf6700c2089669b66181b66de04a3ddaf7d54 \
+    && git checkout -q FETCH_HEAD \
+    && git submodule update --init --recursive --depth 1
+
+# Build the binary externals from source (zlib, hdf5, cgns, parmetis_fix,
+# cantera) exactly like ~/projects/DNDSR does: pip requirements first, then
+# CC=mpicc CXX=mpicxx python cfd_externals_build.py. Build trees and source
+# clones are removed afterwards; the installed tree stays at
+# /opt/external/cfd_externals/install.
+RUN python3 -m venv /opt/cfd-venv \
+    && /opt/cfd-venv/bin/pip install -q --no-cache-dir \
+        -r /opt/external/cfd_externals/requirements.txt \
+    && cd /opt/external/cfd_externals \
+    && CC=mpicc CXX=mpicxx JOBS="${JOBS}" \
+        /opt/cfd-venv/bin/python cfd_externals_build.py \
+    && rm -rf build_* repos \
+    && chown -R harry:harry /opt/external
+
 # --- opencode 1.18.11 (host version) — official installer, version-pinned ---
 RUN curl -fsSL https://opencode.ai/install | bash -s -- --version 1.18.11 --no-modify-path
 
@@ -115,36 +151,6 @@ RUN git init -q /opt/ocx-relay \
     && git remote add origin https://github.com/harryzhou2000/ocx-relay.git \
     && git fetch -q --depth 1 origin 886298b384738b4dc7f5c8fe03ad63ea1beba567 \
     && git checkout -q FETCH_HEAD
-
-# --- shared DNDSR externals, built from source (DNDSR recipe) ---------------
-# Header-only libraries (Eigen, Boost, CGAL, fmt, pybind11, ...): official
-# release tarball of the DNDSR externals bundle, pinned tag v0.1.0.
-RUN mkdir -p /opt/external \
-    && curl -fsSL -o /tmp/external_headeronlys.tar.gz \
-        https://github.com/harryzhou2000/cfd_externals_headeronlys/releases/download/v0.1.0/external_headeronlys.tar.gz \
-    && tar -xzf /tmp/external_headeronlys.tar.gz -C /opt/external \
-    && rm -f /tmp/external_headeronlys.tar.gz
-
-# cfd_externals (zlib/HDF5/CGNS/ParMETIS/Cantera): source at the pinned
-# commit, submodules at their pinned revisions.
-RUN git init -q /opt/external/cfd_externals \
-    && cd /opt/external/cfd_externals \
-    && git remote add origin https://github.com/harryzhou2000/cfd_externals.git \
-    && git fetch -q --depth 1 origin 942cf6700c2089669b66181b66de04a3ddaf7d54 \
-    && git checkout -q FETCH_HEAD \
-    && git submodule update --init --recursive --depth 1
-
-# Build the binary externals from source (zlib, hdf5, cgns, parmetis_fix,
-# cantera). Build trees and source clones are removed afterwards; the
-# installed tree stays at /opt/external/cfd_externals/install.
-RUN python3 -m venv /opt/cfd-venv \
-    && /opt/cfd-venv/bin/pip install -q --no-cache-dir \
-        -r /opt/external/cfd_externals/requirements.txt \
-    && cd /opt/external/cfd_externals \
-    && CC=mpicc CXX=mpicxx JOBS="${JOBS}" \
-        /opt/cfd-venv/bin/python cfd_externals_build.py \
-    && rm -rf build_* repos \
-    && chown -R harry:harry /opt/external
 
 # --- container entrypoint (opencodex autostart probe) -----------------------
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh

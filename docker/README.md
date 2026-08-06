@@ -87,9 +87,12 @@ bundling, container lifecycle and the redaction policy.
   - `opencodex/` — proxy `config.json` (apiKeys redacted).
   - Regenerate with `scripts/sync-configs.sh`; the script refuses to leave
     unredacted secrets behind.
-- `external/` — pointer for the shared DNDSR externals; the real tree is
+- `external/` — pointer for the shared DNDSR externals. The real tree is
   built inside the image at `/opt/external` (header-onlys + cfd_externals
-  from source, per the DNDSR recipe).
+  from source, per the DNDSR recipe — before the harnesses, right after the
+  build stack + uv + OpenMPI), and `setup-workspace.sh` symlinks every
+  contestant workspace's `external/` to `/opt/external`. No host binary tree
+  is staged or referenced.
 - `entrypoint.sh` — starts the opencodex proxy when its config is present and
   the port is free, then execs the requested command. The probe port comes
   from `$OCX_PORT` (also passed to `ocx start --port`), else `config.json`
@@ -189,7 +192,8 @@ docker/scripts/start.sh --workspace ../omo_slim_dsv4_01
 Default mode mounts:
 
 - the benchmark root (parent of all contestant workspaces, so
-  `../opencode_omoslim_deepseek/external` resolves),
+  workspace-relative paths like `../opencode_omoslim_deepseek/external`
+  resolve),
 - the vendored config stack (default `<repo>/docker/configs`, override with
   `CONFIG_STACK=/path/to/stack`), copied into `$WS/.sessions/` and mounted
   at the inside-docker-home paths,
