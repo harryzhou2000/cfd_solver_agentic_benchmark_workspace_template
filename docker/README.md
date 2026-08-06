@@ -22,12 +22,12 @@ are injected at container start (see below).
 docker/build.sh
 
 # 2. Create a fresh contestant workspace from an init branch
-docker/scripts/setup-workspace.sh ../codex_gpt56_07 codex/gpt56/init
-#    (the workspace path is used as-is: absolute, or relative to the cwd you
-#    run the script from; it is not prefixed with $BENCH_ROOT)
+docker/scripts/setup-workspace.sh codex/gpt56/08 codex/gpt56/init
+#    (relative paths resolve under <repo>/workspace/ — git-ignored; absolute
+#    paths are used as-is. workspace/codex/gpt56/08 is created here)
 
 # 3. Launch the container interactively
-docker/scripts/start.sh --workspace ../codex_gpt56_07
+docker/scripts/start.sh --workspace workspace/codex/gpt56/08
 #    - the vendored config stack (docker/configs/) is installed at start,
 #      with per-workspace copies in <workspace>/.sessions/:
 #        bash      .sessions/bash            -> ~/.bashrc/.profile/... (default Ubuntu setup)
@@ -78,8 +78,7 @@ leaked to the terminal.
 | `--mount-host-configs` | off | bind-mount live host config dirs over the stack (non-reproducible escape hatch) |
 | `CONFIG_STACK=/path` | `<repo>/docker/configs` | vendored config stack installed into `$WS/.sessions` at start |
 | `IMAGE=name` | `cfd-bench:latest` | image to run |
-| `BENCH_ROOT=/path` | `/mnt/ssd-SATARAID5/.../cfd_agentic_benchmark` | host root mounted into the container |
-| `WORKSPACE=/path` | the `--workspace` dir | the entrypoint `cd`s into it before exec; together with docker `-w` the shell always starts in the contestant workspace |
+| `WORKSPACE=/path` | `/workspace` | the in-container workspace path: `start.sh` mounts the workspace there and the entrypoint `cd`s into it before exec (docker `-w` too); no host path is ever mounted |
 | `OCX_PORT=10109` | stack config's `.port`, else `10100` | opencodex probe/start port inside the container; if something already listens on it (e.g. a host-side ocx under `--network host`), the container skips starting its own proxy |
 | `OPENCODEX_AUTOSTART=0` | `1` | disable the opencodex autostart probe entirely |
 | `OPENCODE_API_KEY_*`, `OPENCODEX_*` | – | credential env refs the vendored stack expects; export them or use `--host-credentials` |
@@ -93,7 +92,7 @@ mounted host dirs work unchanged. Example with everything explicit:
 ```bash
 CPUS=8 OCX_PORT=10109 \
 docker/scripts/start.sh \
-  --workspace ../codex_gpt56_07 \
+  --workspace workspace/codex/gpt56/08 \
   --harness codex --codex-profile ocx \
   --name gpt56-07 --cpus 8 \
   --host-credentials
@@ -290,20 +289,23 @@ docker/scripts/start.sh --workspace ../omo_slim_dsv4_01
 
 Default mode mounts:
 
-- the benchmark root, mounted **read-only** (parent of all contestant
-  workspaces, so sibling externals/repos stay readable, but nothing outside
-  the workspace can be written: the workspace itself is the only rw mount),
+- the contestant workspace, mounted **rw at the container-internal path
+  `/workspace`** — the host parent and every other host path are NOT
+  mounted, so nothing outside the workspace is visible or writable,
 - the vendored config stack (default `<repo>/docker/configs`, override with
   `CONFIG_STACK=/path/to/stack`), copied into `$WS/.sessions/` and mounted
-  at the inside-docker-home paths,
-- `$WS/.sessions/codex` → `/home/cfd_agent/.codex`,
-- `$WS/.sessions/opencode-config` → `/home/cfd_agent/.config/opencode`,
-- `$WS/.sessions/opencodex` → `/home/cfd_agent/.opencodex`,
-- `$WS/.sessions/bash` → `~/.bashrc`/`~/.profile`/`~/.bash_logout` +
+  at the inside-docker-home paths (the bundle is visible at
+  `/workspace/.sessions/` inside the container),
+- `/workspace/.sessions/codex` → `/home/cfd_agent/.codex`,
+- `/workspace/.sessions/opencode-config` → `/home/cfd_agent/.config/opencode`,
+- `/workspace/.sessions/opencodex` → `/home/cfd_agent/.opencodex`,
+- `/workspace/.sessions/bash` → `~/.bashrc`/`~/.profile`/`~/.bash_logout` +
   persistent `~/.bash_history`,
-- `$WS/.sessions/opencode-data` → the opencode data dir
-  (`XDG_DATA_HOME`; fresh DB; auth via env or `--host-credentials`),
-- `~/.codegraph` (index cache).
+- `/workspace/.sessions/opencode-data` → the opencode data dir
+  (`XDG_DATA_HOME=/workspace/.sessions/opencode-data`; fresh DB; auth via
+  env or `--host-credentials`),
+- the host codegraph index cache at `/home/cfd_agent/.codegraph` (container
+  user's own cache path; no host path exposed).
 
 Credentials are **never** part of the stack. Two modes at start:
 
@@ -394,7 +396,7 @@ contestant workspace itself:
   `CODEX_HOME=/home/cfd_agent/.codex` (vendored config copy + sessions, logs,
   sqlite DBs all persist in the workspace; with `--host-credentials`,
   `auth.json` is bind-mounted from `~/.codex`, never stored).
-- `opencode` → `XDG_DATA_HOME=$WS/.sessions/opencode-data` (a fresh
+- `opencode` → `XDG_DATA_HOME=/workspace/.sessions/opencode-data` (a fresh
   `opencode.db`, logs, storage), with `auth.json`/`account.json` optionally
   bind-mounted from `~/.local/share/opencode` (`--host-credentials`; never
   copied).
@@ -496,8 +498,8 @@ the image.
 ## Fresh contestant workspace
 
 ```bash
-docker/scripts/setup-workspace.sh ../codex_gpt56_07 codex/gpt56/init
-docker/scripts/start.sh --workspace ../codex_gpt56_07
+docker/scripts/setup-workspace.sh codex/gpt56/08 codex/gpt56/init
+docker/scripts/start.sh --workspace workspace/codex/gpt56/08
 ```
 
 Inside the container, contestants work interactively: `codex`, `opencode`

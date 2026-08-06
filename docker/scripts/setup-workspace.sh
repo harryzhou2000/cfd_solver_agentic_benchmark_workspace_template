@@ -5,19 +5,20 @@
 #
 # Usage:
 #   docker/scripts/setup-workspace.sh <path> [branch]
-# <path> is used as-is: absolute, or relative to the directory the script is
-# invoked from (no $BENCH_ROOT prefixing). From the benchmark root:
-#   docker/scripts/setup-workspace.sh ../codex_gpt56_07 codex/gpt56/init
+# <path> is used as-is when absolute; relative paths resolve under the
+# manager repo's workspace/ directory (override with WS_ROOT):
+#   docker/scripts/setup-workspace.sh codex/gpt56/08 codex/gpt56/init
+#   -> <repo>/workspace/codex/gpt56/08
 #   docker/scripts/setup-workspace.sh /abs/path/omo_slim_dsv4_06 omo_slim/dsv4/init
-# (branch defaults to main)
+# (branch defaults to main; workspace/ is git-ignored)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-INVOKE_CWD="$PWD"
 cd "$ROOT"
 
 WS_ARG="${1:?usage: setup-workspace.sh <path> [branch]}"
 BRANCH="${2:-main}"
+WS_ROOT="${WS_ROOT:-$ROOT/workspace}"
 BENCH_ROOT="${BENCH_ROOT:-/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark}"
 TEMPLATE_URL="${TEMPLATE_URL:-https://github.com/harryzhou2000/cfd_solver_agentic_benchmark_workspace_template.git}"
 # The externals are built into the benchmark image (/opt/external) via the
@@ -29,7 +30,7 @@ case "$WS_ARG" in
   /*) WS="$WS_ARG" ;;
   ~)  WS="$HOME" ;;
   ~/*) WS="$HOME/${WS_ARG#\~}" ;;
-  *)  WS="$INVOKE_CWD/$WS_ARG" ;;
+  *)  WS="$WS_ROOT/$WS_ARG" ;;
 esac
 WS="$(realpath -m "$WS")"
 
@@ -39,6 +40,7 @@ if [ -e "$WS" ]; then
 fi
 
 echo "== cloning template branch $BRANCH -> $WS =="
+mkdir -p "$(dirname "$WS")"
 git clone --branch "$BRANCH" --single-branch "$TEMPLATE_URL" "$WS"
 cd "$WS"
 

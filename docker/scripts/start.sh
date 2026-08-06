@@ -67,8 +67,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
 IMAGE="${IMAGE:-cfd-bench:latest}"
-BENCH_ROOT="${BENCH_ROOT:-/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark}"
 IMG_HOME="/home/cfd_agent"
+CTR_WS="/workspace"   # in-container path of the contestant workspace
 WS=""
 MOUNT_CONFIG=1
 MOUNT_HOST=0
@@ -119,19 +119,15 @@ fi
 if [ $# -gt 0 ]; then CMD=("$@"); fi
 
 NAME="${NAME_ARG:-bench-$(basename "$WS" | tr -c 'A-Za-z0-9_.-' '_')}"
-# The benchmark root (parent of all contestant workspaces) is mounted
-# READ-ONLY: the container may read sibling externals/repos, but must never
-# write outside the contestant workspace (the workspace itself is mounted rw
-# below and shadows this for its own subtree).
-MOUNTS=(-v "$BENCH_ROOT:$BENCH_ROOT:ro")
-# Mount the workspace itself so session paths work regardless of location
-# (real workspaces live under $BENCH_ROOT, but relative/absolute paths from
-# setup-workspace.sh may point anywhere).
-MOUNTS+=(-v "$WS:$WS")
+# The workspace is mounted at the container-internal path /workspace; the
+# host parent (and any other host path) is NOT mounted, so the contestant
+# can neither see nor write outside its workspace. The image's own
+# /workspace dir is shadowed by this mount.
+MOUNTS=(-v "$WS:$CTR_WS")
 # WORKSPACE tells the entrypoint to start the shell in the contestant
 # workspace (also set as the docker working dir via -w below).
 ENVS=(-e HOME="$IMG_HOME" -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
-      -e WORKSPACE="$WS")
+      -e WORKSPACE="$CTR_WS")
 SECURITY_OPTS=(--security-opt seccomp=unconfined --security-opt apparmor=unconfined)
 
 # Proxy: forward the existing proxy env into the container. With --network
@@ -145,9 +141,10 @@ for v in HTTP_PROXY HTTPS_PROXY ALL_PROXY NO_PROXY http_proxy https_proxy all_pr
   if [ -n "${!v:-}" ]; then ENVS+=(-e "$v=${!v}"); fi
 done
 
-# codegraph index cache (host) stays mounted in every mode.
+# codegraph index cache (host) stays mounted in every mode, at the
+# container user's own cache path (no host paths are exposed).
 mkdir -p "$HOME/.codegraph"
-MOUNTS+=(-v "$HOME/.codegraph:$HOME/.codegraph")
+MOUNTS+=(-v "$HOME/.codegraph:$IMG_HOME/.codegraph")
 
 if [ "$MOUNT_CONFIG" = "1" ]; then
   # The config stack installed at start: the repo's vendored configs by
@@ -162,7 +159,8 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
     exit 1
   fi
 
-  SESS="$WS/.sessions"
+  SESS="$WS/.sessions"              # host-side session bundle
+  SESS_CTR="$CTR_WS/.sessions"      # same bundle as seen inside the container
   CODEX_HOME_DIR="$SESS/codex"
   OC_CONFIG_DIR="$SESS/opencode-config"
   OC_DATA_DIR="$SESS/opencode-data/opencode"
@@ -184,7 +182,7 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   mkdir -p "$OC_CONFIG_DIR" "$OC_DATA_DIR"
   rsync -a --no-owner --no-group "$CONFIG_STACK/opencode/" "$OC_CONFIG_DIR/"
   MOUNTS+=(-v "$OC_CONFIG_DIR:$IMG_HOME/.config/opencode")
-  ENVS+=(-e XDG_CONFIG_HOME="$IMG_HOME/.config" -e XDG_DATA_HOME="$SESS/opencode-data")
+  ENVS+=(-e XDG_CONFIG_HOME="$IMG_HOME/.config" -e XDG_DATA_HOME="$SESS_CTR/opencode-data")
 
   # opencodex: vendored config dir mounted at the service's home path;
   # runtime state (usage, artifacts, sqlite) persists in the workspace.
@@ -304,11 +302,11 @@ PYEOF
     fi
     for f in auth.json account.json; do
       if [ -f "$HOME/.local/share/opencode/$f" ]; then
-        touch "$OC_DATA_DIR/$f"           # non-credential placeholder; real file mounts over it
+        touch "$OC_DATA_DIR/$f"           # host-side placeholder; the ro mount covers it
         # opencode reads provider keys from auth.json (and account info from
         # account.json); mounted read-only so the container can never modify
         # the host credentials.
-        MOUNTS+=(-v "$HOME/.local/share/opencode/$f:$OC_DATA_DIR/$f:ro")
+        MOUNTS+=(-v "$HOME/.local/share/opencode/$f:$SESS_CTR/opencode-data/opencode/$f:ro")
       fi
     done
   fi
@@ -377,7 +375,7 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   echo "  bash:         $WS/.sessions/bash (default Ubuntu .bashrc/.profile + persistent history)"
   echo "  codex:        $WS/.sessions/codex -> $IMG_HOME/.codex"
   echo "  opencode:     $WS/.sessions/opencode-config -> $IMG_HOME/.config/opencode"
-  echo "  opencode data:$WS/.sessions/opencode-data (XDG_DATA_HOME)"
+  echo "  opencode data:$SESS_CTR/opencode-data (XDG_DATA_HOME)"
   echo "  opencodex:    $WS/.sessions/opencodex -> $IMG_HOME/.opencodex"
   [ "$HOST_CRED" = "1" ] && echo "  credentials:  host-credentials mode (live keys via env/binds)"
   [ "$MOUNT_HOST" = "1" ] && echo "  credentials/configs: live host dirs mounted over the stack"
@@ -399,7 +397,7 @@ docker rm -f "$NAME" >/dev/null 2>&1 || true
 docker run -it --rm --network host --name "$NAME" \
   --user root:root \
   --cpus "$CPUS" \
-  -w "$WS" \
+  -w "$CTR_WS" \
   "${SECURITY_OPTS[@]}" \
   "${ENVS[@]}" \
   "${MOUNTS[@]}" \
