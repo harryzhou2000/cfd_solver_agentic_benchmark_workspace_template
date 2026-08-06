@@ -23,7 +23,7 @@ ARG no_proxy
 ARG JOBS=4
 
 # --- pinned versions / commits (override with --build-arg to switch) --------
-ARG OPENCODE_VERSION=1.18.11
+ARG OPENCODE_VERSION=1.18.14
 ARG CODEX_VERSION=0.146.0
 ARG OPENCODEX_REPO=https://github.com/harryzhou2000/opencodex.git
 ARG OPENCODEX_COMMIT=ea7f5a69748c666f739143142627f8ace1fcb271
@@ -178,6 +178,10 @@ RUN git init -q /opt/ocx-relay \
 # --- container entrypoint (opencodex autostart probe) -----------------------
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh \
+    # ubuntu:24.04 base ships a stock user/group at uid/gid 1000 ("ubuntu");
+    # drop it first so the generic cfd_agent user cleanly owns 1000:1000.
+    && U0="$(getent passwd 1000 | cut -d: -f1)"; [ -z "$U0" ] || userdel -r "$U0" \
+    && G0="$(getent group 1000 | cut -d: -f1)"; [ -z "$G0" ] || { groupdel "$G0" || true; } \
     && groupadd -g 1000 cfd_agent \
     && useradd -m -u 1000 -g 1000 -s /bin/zsh cfd_agent \
     && chown -R cfd_agent:cfd_agent /home/cfd_agent
