@@ -10,7 +10,9 @@ background-task result messages), and interrupted otherwise healthy goals.
 - Fork: https://github.com/harryzhou2000/OpenCode-goal-plugin
   (forked 2026-08-05; `main` stays clean at upstream v0.7.0).
 - Patch branch: `feat/no-interrupt-user-message` (commits `03c493c` +
-  `223cc87`).
+  `223cc87` + `0cfe9bb`). The owner (willytop8) added `0cfe9bb` themselves:
+  a CI-only retarget of the mutation contract anchor for the widened
+  replay-safe set (runtime unchanged).
 - PR: https://github.com/willytop8/OpenCode-goal-plugin/pull/53
 
 ## The patch (minimal)
@@ -48,7 +50,7 @@ added in test/goal-plugin.test.js and test/opencode-session-api.test.js
 ## Local checkout
 
 Submodule in the manager workspace: `OpenCode-goal-plugin/` pointing at the
-fork, pinned at `223cc87` (parent commit updated alongside). Remote `origin` is SSH
+fork, pinned at `0cfe9bb` (parent commit updated alongside). Remote `origin` is SSH
 (`git@github.com:harryzhou2000/OpenCode-goal-plugin.git`); `.gitmodules` uses
 the HTTPS URL per repo convention.
 
