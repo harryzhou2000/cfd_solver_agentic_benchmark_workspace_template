@@ -30,6 +30,7 @@ docker/scripts/setup-workspace.sh ../codex_gpt56_07 codex/gpt56/init
 docker/scripts/start.sh --workspace ../codex_gpt56_07
 #    - the vendored config stack (docker/configs/) is installed at start,
 #      with per-workspace copies in <workspace>/.sessions/:
+#        bash      .sessions/bash            -> ~/.bashrc/.profile/... (default Ubuntu setup)
 #        codex     .sessions/codex           -> /home/cfd_agent/.codex
 #        opencode  .sessions/opencode-config -> /home/cfd_agent/.config/opencode
 #        opencodex .sessions/opencodex       -> /home/cfd_agent/.opencodex
@@ -68,7 +69,7 @@ leaked to the terminal.
 | flag / env | default | effect |
 |---|---|---|
 | `--workspace DIR` (or first positional) | cwd | contestant workspace; must exist. Absolute or relative (used as-is, no prefix) |
-| `--harness shell\|codex\|opencode` | `shell` | command to exec: interactive zsh, `codex`, or `opencode` |
+| `--harness shell\|codex\|opencode` | `shell` | command to exec: interactive bash, `codex`, or `opencode` |
 | `--codex-profile ocx` | – | run codex as `codex -p ocx` (route through the opencodex proxy) |
 | `--name NAME` / `-n` | `bench-<workspace basename>` | container name, so `docker ps` is readable |
 | `--cpus N` | `4` | CPU quota via docker `--cpus` (N cores' worth of time); env `CPUS` also works |
@@ -178,6 +179,11 @@ persistent session storage) and mounted at the inside-docker-home paths:
    `/home/cfd_agent/.opencodex`: config.json (apiKeys as
    `$OPENCODEX_<PROVIDER>_API_KEY` references). Runtime state (usage,
    artifacts, sqlite) persists in the workspace copy.
+4. **bash** — `configs/bash/` → `$WS/.sessions/bash/` → `~/.bashrc`,
+   `~/.profile`, `~/.bash_logout` (default Ubuntu system template; override
+   with `CONFIG_STACK/bash`), plus a persistent `~/.bash_history`. The image
+   shell is Ubuntu's default bash (`/bin/bash`), so this is what every
+   interactive container starts with.
 
 The live host config stack is **never** used as the config source (no
 fallback). Credentials are supplied separately: export the referenced env
@@ -288,6 +294,8 @@ Default mode mounts:
 - `$WS/.sessions/codex` → `/home/cfd_agent/.codex`,
 - `$WS/.sessions/opencode-config` → `/home/cfd_agent/.config/opencode`,
 - `$WS/.sessions/opencodex` → `/home/cfd_agent/.opencodex`,
+- `$WS/.sessions/bash` → `~/.bashrc`/`~/.profile`/`~/.bash_logout` +
+  persistent `~/.bash_history`,
 - `$WS/.sessions/opencode-data` → the opencode data dir
   (`XDG_DATA_HOME`; fresh DB; auth via env or `--host-credentials`),
 - `~/.codegraph` (index cache).

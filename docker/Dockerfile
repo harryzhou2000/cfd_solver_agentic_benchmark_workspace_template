@@ -213,7 +213,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh \
     && U0="$(getent passwd 1000 | cut -d: -f1)"; [ -z "$U0" ] || userdel -r "$U0" \
     && G0="$(getent group 1000 | cut -d: -f1)"; [ -z "$G0" ] || { groupdel "$G0" || true; } \
     && groupadd -g 1000 cfd_agent \
-    && useradd -m -u 1000 -g 1000 -s /bin/zsh cfd_agent \
+    && useradd -m -u 1000 -g 1000 -s /bin/bash cfd_agent \
     # Keep the image home minimal: every tool is installed system-wide and
     # the opencode stores live under /opt (XDG_*), so the start-time uid
     # remap never needs a recursive home chown. Drop any leftover per-user
@@ -226,4 +226,4 @@ RUN chmod +x /usr/local/bin/entrypoint.sh \
 USER root
 WORKDIR /workspace
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["/bin/zsh"]
+CMD ["/bin/bash"]

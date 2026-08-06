@@ -18,6 +18,20 @@
 set -e
 
 IMG_USER="cfd_agent"
+
+# Seed the default Ubuntu bash setup (system template) into the image home
+# when absent — bare `docker run` and --image-config mode get a normal bash
+# environment (no zsh-newuser-style wizard, no missing dotfiles). start.sh
+# bind-mounts a per-workspace copy over these, so interactive containers use
+# the persistent version.
+if [ -d /etc/skel ]; then
+  for f in /etc/skel/.[!.]*; do
+    [ -f "$f" ] || continue
+    base="$(basename "$f")"
+    [ -e "/home/$IMG_USER/$base" ] || cp "$f" "/home/$IMG_USER/$base"
+  done
+fi
+
 if [ "$(id -u)" = "0" ] && [ -n "${HOST_UID:-}" ] && [ -n "${HOST_GID:-}" ]; then
   if [ "$HOST_UID" != "$(id -u "$IMG_USER")" ] || [ "$HOST_GID" != "$(id -g "$IMG_USER")" ]; then
     echo "[entrypoint] mapping $IMG_USER -> uid=$HOST_UID gid=$HOST_GID"

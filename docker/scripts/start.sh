@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+# Must run under bash (arrays, ${!var}, ${var+x} ...). If this message ever
+# appears instead of a run, the script was invoked with a non-bash shell:
+#   bash docker/scripts/start.sh ...
+if [ -z "${BASH_VERSION:-}" ]; then
+  echo "start.sh must be run with bash, not ${0##*/}: bash docker/scripts/start.sh ..." >&2
+  exit 2
+fi
+
 # Interactive launcher for a benchmark contestant container.
 #
 # Usage:
@@ -17,6 +25,7 @@
 #   - codex      -> $WS/.sessions/codex            mounted at /home/cfd_agent/.codex
 #   - opencode   -> $WS/.sessions/opencode-config  mounted at /home/cfd_agent/.config/opencode
 #   - opencodex  -> $WS/.sessions/opencodex        mounted at /home/cfd_agent/.opencodex
+#   - bash       -> $WS/.sessions/bash             mounted at ~/.bashrc/.profile/... (default Ubuntu setup)
 # Sessions/logs/DBs persist in $WS/.sessions for all three harnesses.
 # The stack's apiKeys are env references: export the vars on this host, or
 # pass --host-credentials to export the real keys from the live host configs
@@ -96,7 +105,7 @@ if [ ! -d "$WS" ]; then
 fi
 
 case "$HARNESS" in
-  shell) CMD=("/bin/zsh") ;;
+  shell) CMD=("/bin/bash") ;;
   codex) CMD=("codex") ;;
   opencode) CMD=("opencode") ;;
   *) echo "unknown --harness $HARNESS (shell|codex|opencode)" >&2; exit 1 ;;
@@ -175,6 +184,24 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   mkdir -p "$OCX_DIR"
   rsync -a --no-owner --no-group "$CONFIG_STACK/opencodex/" "$OCX_DIR/"
   MOUNTS+=(-v "$OCX_DIR:$IMG_HOME/.opencodex")
+
+  # bash: default Ubuntu bash setup (system template vendored under
+  # docker/configs/bash; override with CONFIG_STACK/bash). Seeded into the
+  # session bundle at start, then mounted at the home dotfiles so every
+  # workspace gets a writable, persistent ~/.bashrc and shell history.
+  BASH_DIR="$SESS/bash"
+  BASH_TEMPLATE="$CONFIG_STACK/bash"
+  [ -d "$BASH_TEMPLATE" ] || BASH_TEMPLATE="$ROOT/docker/configs/bash"
+  mkdir -p "$BASH_DIR"
+  for f in .bashrc .profile .bash_logout; do
+    if [ ! -f "$BASH_DIR/$f" ] && [ -f "$BASH_TEMPLATE/$f" ]; then
+      cp "$BASH_TEMPLATE/$f" "$BASH_DIR/$f"
+    fi
+  done
+  touch "$BASH_DIR/.bash_history"
+  for f in .bashrc .profile .bash_logout .bash_history; do
+    MOUNTS+=(-v "$BASH_DIR/$f:$IMG_HOME/$f")
+  done
 
   # Forward credential env vars already exported on this host (the stack's
   # env references). Nothing is read from host config files unless
@@ -332,6 +359,7 @@ echo "  cpus:      $CPUS"
 [ -n "$CODEX_PROFILE" ] && echo "  codex profile: -p $CODEX_PROFILE"
 if [ "$MOUNT_CONFIG" = "1" ]; then
   echo "  config stack: $CONFIG_STACK"
+  echo "  bash:         $WS/.sessions/bash (default Ubuntu .bashrc/.profile + persistent history)"
   echo "  codex:        $WS/.sessions/codex -> $IMG_HOME/.codex"
   echo "  opencode:     $WS/.sessions/opencode-config -> $IMG_HOME/.config/opencode"
   echo "  opencode data:$WS/.sessions/opencode-data (XDG_DATA_HOME)"
