@@ -7,6 +7,37 @@ codex, the opencodex provider proxy and ocx-relay, codegraph, the CFD build
 toolchain (GCC 13, CMake, Ninja, OpenMPI 5.0.9), and the shared DNDSR
 externals.
 
+## Startup guide
+
+```bash
+# 1. Build the runtime image once (stages host binaries/toolchain; ~5-15 min)
+docker/scripts/build.sh
+
+# 2. Create a fresh contestant workspace from an init branch
+docker/scripts/setup-workspace.sh codex_gpt56_07 codex/gpt56/init
+
+# 3. Launch the container interactively
+docker/scripts/start.sh --workspace ../codex_gpt56_07
+#    - live host credentials are mounted, never baked into the image
+#    - codex/opencode sessions persist in <workspace>/.sessions/
+#    - the container is force-removed on exit (Ctrl-C, SIGTERM, closed terminal)
+
+# 4. Optional: verify a model round-trip without launching interactively
+#    (see "Verified end-to-end" below for the full commands)
+docker run --rm --network host --security-opt seccomp=unconfined \
+  --security-opt apparmor=unconfined --user "$(id -u):$(id -g)" \
+  -e HOME="$HOME" -v "$BENCH_ROOT:$BENCH_ROOT" \
+  -v "$HOME/.codex:$HOME/.codex" \
+  -v "$HOME/.config/opencode:$HOME/.config/opencode" \
+  -v "$HOME/.local/share/opencode:$HOME/.local/share/opencode" \
+  -v "$HOME/.opencodex:$HOME/.opencodex" -w "$WS" \
+  cfd-bench:latest opencode run --format json \
+  -m deepseek/deepseek-v4-flash "Reply with exactly: PONG"
+```
+
+The rest of this file documents the layout, credentials strategy, session
+bundling, container lifecycle and the redaction policy.
+
 ## Layout
 
 - `Dockerfile` — the image (build context is the repo root).
@@ -59,8 +90,9 @@ paths keep working):
 - `~/.codegraph` (index cache).
 
 `--image-config` skips mounting the live config dirs and uses the baked
-redacted snapshots instead (layout testing only — no credentials, so model
-calls will not work).
+redacted snapshots instead (layout testing only). With `--env-mode` snapshots
+plus exported env vars, opencode/opencodex calls can authenticate; codex still
+needs its `auth.json` (file-based auth).
 
 ### Credentials (safe by construction)
 
@@ -68,12 +100,17 @@ calls will not work).
   the repo or the image; they are read from `~/.codex/auth.json`,
   `~/.config/opencode/*` and `~/.local/share/opencode/auth.json` via bind
   mounts at runtime. This is what `start.sh` does.
-- **Env vars (opencode only):** opencode config supports `{env:VAR}`
-  placeholders. `sync-configs.sh --env-mode` rewrites opencode `apiKey`s to
-  `{env:OPENCODE_API_KEY}`; export that variable when launching the image.
+- **Env vars (opencode + opencodex):** opencode config supports `{env:VAR}`
+  placeholders; opencodex resolves `$VAR` / `${VAR}` provider apiKeys from the
+  environment on every request (see `resolveEnvValue` in its config module).
+  `sync-configs.sh --env-mode` rewrites baked snapshots to env references:
+  opencode → `{env:OPENCODE_API_KEY}`, opencodex → per-provider
+  `$OPENCODEX_<PROVIDER>_API_KEY` (including `apiKeyPool` entries). Export the
+  variables when launching the image.
 - **Baked snapshots:** `docker/configs/` is always redacted (`REDACTED`,
-  never real keys — `sync-configs.sh` verifies this). Codex/opencodex
-  credentials have no env-placeholder mechanism, so those remain mount-only.
+  never real keys — `sync-configs.sh` verifies this). Codex credentials have
+  no env-placeholder mechanism: auth stays in `auth.json` (mounted) or in a
+  custom provider's `env_key`.
 
 ### Persistent sessions, bundled with the workspace
 

@@ -2,10 +2,13 @@
 # Regenerate docker/configs from the live host environment, redacting secrets.
 # Run from the repo root. Never commit unredacted credentials.
 #
-# Optional --env-mode: instead of leaving apiKeys as REDACTED, rewrite opencode
-# config apiKeys to "{env:OPENCODE_API_KEY}" placeholders so the baked image
-# can be used by exporting OPENCODE_API_KEY at runtime. Codex/opencodex keys
-# stay mount-only (their configs have no env placeholder support).
+# Optional --env-mode: instead of leaving apiKeys as REDACTED, rewrite them to
+# environment-variable references so the baked image can authenticate when the
+# vars are exported at runtime:
+#   - opencode  : "{env:OPENCODE_API_KEY}" (opencode's native placeholder)
+#   - opencodex : "$OPENCODEX_<PROVIDER>_API_KEY" (opencodex resolves $VAR /
+#                 ${VAR} apiKeys from the environment on every request)
+# Codex auth remains file-based (auth.json) or a custom provider's env_key.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -60,6 +63,46 @@ if [ "$ENV_MODE" = "1" ]; then
     -exec sed -i -E \
       -e 's#("apiKey"[[:space:]]*:[[:space:]]*")REDACTED(")#\1{env:OPENCODE_API_KEY}\2#g' \
       {} +
+
+  echo "== converting opencodex provider apiKeys to env references =="
+  python3 - "$D/opencodex/config.json" <<'EOF'
+import json, re, sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+cfg = json.loads(path.read_text())
+changed = []
+
+def env_ref(provider_id):
+    stem = re.sub(r"[^A-Za-z0-9]+", "_", provider_id).strip("_").upper()
+    return f"$OPENCODEX_{stem}_API_KEY"
+
+def rewrite(value, provider_id):
+    if isinstance(value, str) and value in ("REDACTED", "sk-REDACTED"):
+        return env_ref(provider_id)
+    return value
+
+for pid, prov in (cfg.get("providers") or {}).items():
+    if not isinstance(prov, dict):
+        continue
+    if "apiKey" in prov:
+        nv = rewrite(prov["apiKey"], pid)
+        if nv != prov["apiKey"]:
+            prov["apiKey"] = nv
+            changed.append(f"{pid}.apiKey")
+    for i, entry in enumerate(prov.get("apiKeyPool") or []):
+        if isinstance(entry, dict) and "key" in entry:
+            nv = rewrite(entry["key"], pid)
+            if nv != entry["key"]:
+                entry["key"] = nv
+                changed.append(f"{pid}.apiKeyPool[{i}]")
+
+if changed:
+    path.write_text(json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
+    print("  rewrote:", ", ".join(changed))
+else:
+    print("  (no provider apiKeys to rewrite)")
+EOF
 fi
 
 echo "== verifying no secrets remain =="
@@ -81,12 +124,12 @@ for p in root.rglob("*"):
         bad.append(f"{p}: sk- key: {m.group(0)[:24]}...")
     for m in api.finditer(text):
         val = text[m.end():].split('"', 1)[0]
-        if val != "REDACTED" and not val.startswith("{env:"):
+        if val != "REDACTED" and not (val.startswith("{env:") or val.startswith("$")):
             bad.append(f"{p}: apiKey={val[:24]}...")
     if "opencodex" in p.parts:
         for m in key.finditer(text):
             val = text[m.end():].split('"', 1)[0]
-            if val != "REDACTED" and not val.startswith("{env:"):
+            if val != "REDACTED" and not (val.startswith("{env:") or val.startswith("$")):
                 bad.append(f"{p}: key={val[:24]}...")
 
 if bad:
