@@ -42,6 +42,14 @@ fi
 if [ -n "${BUILD_PROGRESS:-}" ]; then
   BUILD_OPTS+=(--progress "$BUILD_PROGRESS")
 fi
+# Forward version/commit overrides (defaults live in the Dockerfile ARGs).
+for v in OPENCODE_VERSION CODEX_VERSION \
+         OPENCODEX_REPO OPENCODEX_COMMIT \
+         OCX_RELAY_REPO OCX_RELAY_COMMIT \
+         EXTERNAL_HEADERONLYS_REPO EXTERNAL_HEADERONLYS_TAG \
+         CFD_EXTERNALS_REPO CFD_EXTERNALS_COMMIT; do
+  if [ -n "${!v:-}" ]; then BUILD_OPTS+=(--build-arg "$v=${!v}"); fi
+done
 
 echo "== docker build =="
 docker build "${BUILD_OPTS[@]}" --build-arg "JOBS=${JOBS}" \

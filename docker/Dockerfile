@@ -22,6 +22,18 @@ ARG no_proxy
 
 ARG JOBS=4
 
+# --- pinned versions / commits (override with --build-arg to switch) --------
+ARG OPENCODE_VERSION=1.18.11
+ARG CODEX_VERSION=0.146.0
+ARG OPENCODEX_REPO=https://github.com/harryzhou2000/opencodex.git
+ARG OPENCODEX_COMMIT=ea7f5a69748c666f739143142627f8ace1fcb271
+ARG OCX_RELAY_REPO=https://github.com/harryzhou2000/ocx-relay.git
+ARG OCX_RELAY_COMMIT=886298b384738b4dc7f5c8fe03ad63ea1beba567
+ARG EXTERNAL_HEADERONLYS_REPO=https://github.com/harryzhou2000/cfd_externals_headeronlys
+ARG EXTERNAL_HEADERONLYS_TAG=v0.1.0
+ARG CFD_EXTERNALS_REPO=https://github.com/harryzhou2000/cfd_externals.git
+ARG CFD_EXTERNALS_COMMIT=942cf6700c2089669b66181b66de04a3ddaf7d54
+
 # The image is user-agnostic: it ships one generic user (cfd_agent, uid/gid
 # 1000). At container start the entrypoint remaps that user to the invoking
 # host user's uid/gid (enroot-style), so mounted host dirs are owned by the
@@ -69,6 +81,11 @@ RUN curl -fsSL -o /tmp/uv.tar.gz \
     && chmod +x /home/cfd_agent/.local/bin/uv /home/cfd_agent/.local/bin/uvx \
     && rm -f /tmp/uv.tar.gz
 
+# --- doxygen (just before the externals build) -------------------------------
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends doxygen \
+    && rm -rf /var/lib/apt/lists/*
+
 # --- shared DNDSR externals, built from source (DNDSR recipe) ---------------
 # OpenMPI comes from apt (openmpi-bin + libopenmpi-dev, incl. mpifort), so
 # mpicc/mpicxx are already on PATH. Installed BEFORE the harnesses (after the
@@ -76,10 +93,11 @@ RUN curl -fsSL -o /tmp/uv.tar.gz \
 # stable layer below the harness installs.
 #
 # Header-only libraries (Eigen, Boost, CGAL, fmt, pybind11, ...): official
-# release tarball of the DNDSR externals bundle, pinned tag v0.1.0.
+# release tarball of the DNDSR externals bundle, pinned tag
+# (EXTERNAL_HEADERONLYS_TAG, default v0.1.0).
 RUN mkdir -p /opt/external \
     && curl -fsSL -o /tmp/external_headeronlys.tar.gz \
-        https://github.com/harryzhou2000/cfd_externals_headeronlys/releases/download/v0.1.0/external_headeronlys.tar.gz \
+        "${EXTERNAL_HEADERONLYS_REPO}/releases/download/${EXTERNAL_HEADERONLYS_TAG}/external_headeronlys.tar.gz" \
     && tar -xzf /tmp/external_headeronlys.tar.gz -C /opt/external \
     && rm -f /tmp/external_headeronlys.tar.gz
 
@@ -87,8 +105,8 @@ RUN mkdir -p /opt/external \
 # commit, submodules at their pinned revisions.
 RUN git init -q /opt/external/cfd_externals \
     && cd /opt/external/cfd_externals \
-    && git remote add origin https://github.com/harryzhou2000/cfd_externals.git \
-    && git fetch -q --depth 1 origin 942cf6700c2089669b66181b66de04a3ddaf7d54 \
+    && git remote add origin "${CFD_EXTERNALS_REPO}" \
+    && git fetch -q --depth 1 origin "${CFD_EXTERNALS_COMMIT}" \
     && git checkout -q FETCH_HEAD \
     && git submodule update --init --recursive --depth 1
 
@@ -110,8 +128,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         /opt/cfd-venv/bin/python cfd_externals_build.py \
     && rm -rf build_* repos
 
-# --- opencode 1.18.11 (host version) — official installer, version-pinned ---
-RUN curl -fsSL https://opencode.ai/install | bash -s -- --version 1.18.11 --no-modify-path
+# --- opencode (host version) — official installer, version-pinned ------------
+RUN curl -fsSL https://opencode.ai/install | bash -s -- --version "${OPENCODE_VERSION}" --no-modify-path
 
 # --- opencode plugins — official `opencode plugin -g`, pinned ---------------
 # Manifest docker/opencode-plugins.json: opencode-goal-plugin at the fork's
@@ -126,9 +144,9 @@ RUN --mount=type=cache,target=/home/cfd_agent/.bun/install/cache \
     chmod +x /usr/local/bin/install-opencode-plugins \
     && install-opencode-plugins --manifest /opt/opencode-plugins.json
 
-# --- codex-cli 0.146.0 (host version) — official standalone release ---------
+# --- codex-cli (host version) — official standalone release -----------------
 RUN curl -fsSL -o /tmp/codex.tar.gz \
-        https://github.com/openai/codex/releases/download/rust-v0.146.0/codex-x86_64-unknown-linux-musl.tar.gz \
+        "https://github.com/openai/codex/releases/download/rust-v${CODEX_VERSION}/codex-x86_64-unknown-linux-musl.tar.gz" \
     && mkdir -p /opt/codex-standalone \
     && tar -xzf /tmp/codex.tar.gz -C /opt/codex-standalone \
     && ln -sf /opt/codex-standalone/codex-x86_64-unknown-linux-musl/bin/codex /usr/local/bin/codex \
@@ -144,8 +162,8 @@ RUN --mount=type=cache,target=/root/.npm \
 RUN --mount=type=cache,target=/home/cfd_agent/.bun/install/cache \
     git init -q /opt/opencodex \
     && cd /opt/opencodex \
-    && git remote add origin https://github.com/harryzhou2000/opencodex.git \
-    && git fetch -q --depth 1 origin ea7f5a69748c666f739143142627f8ace1fcb271 \
+    && git remote add origin "${OPENCODEX_REPO}" \
+    && git fetch -q --depth 1 origin "${OPENCODEX_COMMIT}" \
     && git checkout -q FETCH_HEAD \
     && /home/cfd_agent/.bun/bin/bun install --frozen-lockfile \
     && ln -sf /opt/opencodex/bin/ocx.mjs /usr/local/bin/ocx
@@ -153,8 +171,8 @@ RUN --mount=type=cache,target=/home/cfd_agent/.bun/install/cache \
 # --- ocx-relay — pinned commit (plain node scripts, no build) ---------------
 RUN git init -q /opt/ocx-relay \
     && cd /opt/ocx-relay \
-    && git remote add origin https://github.com/harryzhou2000/ocx-relay.git \
-    && git fetch -q --depth 1 origin 886298b384738b4dc7f5c8fe03ad63ea1beba567 \
+    && git remote add origin "${OCX_RELAY_REPO}" \
+    && git fetch -q --depth 1 origin "${OCX_RELAY_COMMIT}" \
     && git checkout -q FETCH_HEAD
 
 # --- container entrypoint (opencodex autostart probe) -----------------------

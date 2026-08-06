@@ -166,9 +166,16 @@ user-level profile, not in contestant repos.
 docker/build.sh                    # docker build (fresh official installs, pinned versions)
 IMAGE=cfd-bench:test docker/build.sh
 JOBS=8 docker/build.sh             # more parallel build jobs (default 4)
+OPENCODE_VERSION=1.19.0 docker/build.sh   # switch a pinned version (see Dockerfile ARGs)
 BUILD_NO_CACHE=1 docker/build.sh   # full rebuild, ignore the layer cache
 BUILD_PROGRESS=plain docker/build.sh  # verbose per-step output (shows CACHED)
 ```
+
+All pinned versions/commits are `ARG`s at the top of the Dockerfile
+(opencode, codex, opencodex, ocx-relay, cfd_externals, the header-only
+bundle); `build.sh` forwards them from the environment when set, so e.g.
+`CFD_EXTERNALS_COMMIT=<sha> docker/build.sh` switches just that pin. doxygen
+is installed from apt right before the externals build.
 
 ### Build caching
 
