@@ -1,16 +1,24 @@
 # Benchmark contestant runtime (Docker)
 
-A reproducible, interactive runtime for benchmark contestants. The image
-records the current host environment so every contestant runs inside the same
-steady container: opencode (with omo-slim + goal plugin + rate-limit-retry),
-codex, the opencodex provider proxy and ocx-relay, codegraph, the CFD build
-toolchain (GCC 13, CMake, Ninja, OpenMPI 5.0.9), and the shared DNDSR
-externals.
+A reproducible, interactive runtime for benchmark contestants. Every tool is
+installed fresh in the image from its official source at a version pinned to
+this machine — never copied from the host (the host could be malformed):
+opencode 1.18.11, codex-cli 0.146.0, the opencodex provider proxy and
+ocx-relay (pinned commits), codegraph 1.2.0, Node 24.18.0, bun 1.3.14, uv
+0.12.1, the CFD build toolchain (GCC 13, CMake, Ninja, OpenMPI 5.0.9 built
+from the official source tarball), and the shared DNDSR externals (header-only
+bundle at the pinned release tag, plus cfd_externals built from source).
+opencode ships with the two pinned plugins installed via opencode's official
+installer: the goal plugin (at the fork's PR-tip commit) and
+oh-my-opencode-slim@2.2.10. User configs are never baked into the image; they
+are injected at container start (see below).
 
 ## Startup guide
 
 ```bash
-# 1. Build the runtime image once (stages host binaries/toolchain; ~5-15 min)
+# 1. Build the runtime image once (fresh official installs, pinned versions;
+#    ~10-60 min depending on network and JOBS; only the proxy env vars are
+#    forwarded — nothing is copied from the host)
 docker/build.sh
 
 # 2. Create a fresh contestant workspace from an init branch
@@ -20,19 +28,29 @@ docker/scripts/setup-workspace.sh ../codex_gpt56_07 codex/gpt56/init
 
 # 3. Launch the container interactively
 docker/scripts/start.sh --workspace ../codex_gpt56_07
-#    - configs come from the image (built by build.sh from your live ~/*
-#      configs), with a per-workspace snapshot in <workspace>/.sessions/
-#    - codex home is <workspace>/.sessions/codex mounted at /home/harry/.codex
+#    - the vendored config stack (docker/configs/) is installed at start,
+#      with per-workspace copies in <workspace>/.sessions/:
+#        codex     .sessions/codex           -> /home/harry/.codex
+#        opencode  .sessions/opencode-config -> /home/harry/.config/opencode
+#        opencodex .sessions/opencodex       -> /home/harry/.opencodex
+#    - credentials: export the stack's env vars, or pass --host-credentials
 #    - the container is force-removed on exit (Ctrl-C, SIGTERM, closed terminal)
 
 # 4. Optional: verify a model round-trip without launching interactively.
 #    On this host the opencodex proxy listens on 10109, so the same port is
 #    forced inside the container (override with OCX_PORT if yours differs;
-#    when unset, the baked config's port is used, default 10100).
+#    when unset, the stack config's port is used, default 10100).
+#    Bare `docker run` has no configs — mount the vendored stack (see
+#    "Verified end-to-end" below for the full commands).
 #    (see "Verified end-to-end" below for the full commands)
 docker run --rm --network host --security-opt seccomp=unconfined \
   --security-opt apparmor=unconfined --user "$(id -u):$(id -g)" \
-  -e HOME="$HOME" -e OCX_PORT=10109 -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
+  -e HOME="$HOME" -e OCX_PORT=10109 \
+  -v "$(pwd)/docker/configs/codex:/home/harry/.codex" \
+  -v "$(pwd)/docker/configs/opencode:/home/harry/.config/opencode" \
+  -v "$(pwd)/docker/configs/opencodex:/home/harry/.opencodex" \
+  -e OPENCODE_API_KEY_DEEPSEEK="${OPENCODE_API_KEY_DEEPSEEK:?export the referenced env vars}" \
+  -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
   cfd-bench:latest opencode run --format json \
   -m deepseek/deepseek-v4-flash "Reply with exactly: PONG"
 ```
@@ -42,21 +60,25 @@ bundling, container lifecycle and the redaction policy.
 
 ## Layout
 
-- `Dockerfile` — the image (build context is the repo root).
-- `build.sh` — stages host artifacts (opencode/codex/codegraph binaries,
-  OpenMPI, externals) **and the live user configs** into `docker/.context/`
-  (gitignored) and builds the image. Staging uses hardlinks when possible, so
-  it does not duplicate disk space. The config mirror lands in
-  `docker/.context/configs/`:
-  - `codex/` — `~/.codex` minus runtime state (config.toml, ocx profile,
-    auth.json, catalog, skills/plugins/rules, caches);
-  - `opencodex/` — `~/.opencodex` minus logs/state (config.json, auth.json,
-    codex accounts, admin token);
-  - `opencode/` — `~/.config/opencode` minus node_modules/logs/backups;
-  - `opencode-data/` — the opencode auth store (`auth.json`, `account.json`;
-    never the 33 GB session DB).
+- `Dockerfile` — the image (build context is the repo root). Installs every
+  tool fresh from its official source, pinned to this machine's versions:
+  Node 24.18.0 (nodejs.org), bun 1.3.14 (bun.sh installer), uv 0.12.1
+  (astral release), OpenMPI 5.0.9 (open-mpi.org source tarball, built with
+  usempif08), opencode 1.18.11 (`opencode.ai/install --version 1.18.11`),
+  codex-cli 0.146.0 (openai/codex release tarball), codegraph 1.2.0 (npm),
+  opencodex + ocx-relay (fresh clones at pinned commits), and the DNDSR
+  externals (header-only release tarball + cfd_externals built from source).
+- `build.sh` — thin build wrapper: `docker build` plus proxy build-args.
+  There is **no staging** anymore: nothing is copied from the host into the
+  build (the old `docker/.context/` staging area is obsolete; the local dir
+  can be deleted).
+- `opencode-plugins.json` — pinned plugin manifest: the goal plugin at the
+  fork's PR-tip commit and `oh-my-opencode-slim@2.2.10`.
+- `scripts/install-opencode-plugins.sh` — installs the manifest into the
+  image with opencode's official `opencode plugin -g` command (fetches from
+  npm/GitHub only; never from the host).
 - `configs/` — committed, **secrets-redacted** reference snapshots of the
-  same environment:
+  host environment (documentation only; NOT used by the image):
   - `opencode/` — `opencode.jsonc` (apiKeys redacted), `oh-my-opencode-slim.json`,
     plugin `package.json`/lockfile, `.oh-my-opencode-slim/`, plus the agent
     packs, commands, MCP, rules, skills, themes and tui config mirrored from
@@ -64,10 +86,10 @@ bundling, container lifecycle and the redaction policy.
   - `codex/` — `config.toml`, opencodex/ocx configs, model catalog, AGENTS.md.
   - `opencodex/` — proxy `config.json` (apiKeys redacted).
   - Regenerate with `scripts/sync-configs.sh`; the script refuses to leave
-    unredacted secrets behind. These are *not* baked into the image — the
-    image uses the real `docker/.context/configs/` mirror.
+    unredacted secrets behind.
 - `external/` — pointer for the shared DNDSR externals; the real tree is
-  staged by `build.sh` and baked into the image at `/opt/external`.
+  built inside the image at `/opt/external` (header-onlys + cfd_externals
+  from source, per the DNDSR recipe).
 - `entrypoint.sh` — starts the opencodex proxy when its config is present and
   the port is free, then execs the requested command. The probe port comes
   from `$OCX_PORT` (also passed to `ocx start --port`), else `config.json`
@@ -79,42 +101,52 @@ bundling, container lifecycle and the redaction policy.
 
 ### Config layering inside the container
 
-The image is self-contained: your user-level configs are mirrored at build
-time and are effective at their usual inside-docker-home paths.
+The image carries **no user configs** — only a pristine global opencode
+config written by the plugin installer (`~/.config/opencode/opencode.jsonc`
+with the two pinned plugins), whose packages live in the image's plugin store
+(`~/.cache/opencode/packages`).
 
-1. **Baked (build time):** `build.sh` mirrors the live host configs into
-   `docker/.context/configs/` (gitignored, real keys) and the `Dockerfile`
-   `COPY`s them to `/home/harry/.codex`, `/home/harry/.opencodex`,
-   `/home/harry/.config/opencode` and `/home/harry/.local/share/opencode`
-   (auth store only). Rebuild the image to refresh the mirror.
-2. **Per-workspace snapshot (runtime, `start.sh` default):** at launch the
-   config set is copied (not symlinked) into `$WS/.sessions/` as a
-   per-workspace record — the codex config set into `.sessions/codex/`, and a
-   **redacted** opencodex config into `.sessions/opencodex/config.json`.
-   Credential files (`~/.codex/auth.json`, the opencode auth store) are
-   **never copied**: they are bind-mounted from the host at runtime, so the
-   workspace record stays credential-free. Exec-policy `rules/` files may
-   embed API keys in allow-rule patterns; the record keeps a redacted copy
-   and the real rules are bind-mounted for codex.
-3. **Effective inside the container:** the codex snapshot is bind-mounted at
-   `/home/harry/.codex` (with `CODEX_HOME=/home/harry/.codex`), so codex
-   reads and writes at the inside-docker-home path while everything persists
-   in the workspace. opencode/opencodex use the baked configs directly.
+The **vendored config stack** — `<repo>/docker/configs/`, gathered from the
+current host with `sync-configs.sh` and committed credential-free — is the
+config source at container start (`start.sh` default). Override the location
+with `CONFIG_STACK=/path/to/stack` (an equivalent user-configured directory).
+At start the stack is copied into `$WS/.sessions/` (per-workspace record +
+persistent session storage) and mounted at the inside-docker-home paths:
+
+1. **codex** — `configs/codex/` → `$WS/.sessions/codex/` →
+   `/home/harry/.codex` (`CODEX_HOME=/home/harry/.codex`): config.toml, the
+   ocx profiles, catalog, AGENTS.md. Sessions/logs/DBs persist in the
+   workspace copy.
+2. **opencode** — `configs/opencode/` → `$WS/.sessions/opencode-config/` →
+   `/home/harry/.config/opencode`: opencode.jsonc (apiKeys as
+   `{env:OPENCODE_API_KEY_<PROVIDER>}` references), agents, commands, skills,
+   MCP, themes. The data dir (`XDG_DATA_HOME=$WS/.sessions/opencode-data`)
+   holds sessions/DB and the auth store (fresh or bind-mounted).
+3. **opencodex** — `configs/opencodex/` → `$WS/.sessions/opencodex/` →
+   `/home/harry/.opencodex`: config.json (apiKeys as
+   `$OPENCODEX_<PROVIDER>_API_KEY` references). Runtime state (usage,
+   artifacts, sqlite) persists in the workspace copy.
+
+The live host config stack is **never** used as the config source (no
+fallback). Credentials are supplied separately: export the referenced env
+vars on this host (forwarded into the container), or pass
+`--host-credentials` to export the real keys from the live host configs
+read-only. `--mount-host-configs` is the explicit, non-reproducible escape
+hatch that mounts the live host dirs instead.
 
 How each harness picks its config:
 
-- **opencode** — `~/.config/opencode/opencode.jsonc` (+ omo-slim plugin,
-  commands, skills from the same dir); auth from the data dir
-  (`$XDG_DATA_HOME/opencode/auth.json` — the host auth store bind-mounted
-  into the workspace bundle).
+- **opencode** — the vendored `opencode.jsonc` at
+  `/home/harry/.config/opencode` (+ omo-slim plugin, commands, skills from
+  the same dir); auth from the data dir (`$XDG_DATA_HOME/opencode/`).
 - **codex** — `$CODEX_HOME/config.toml` (= `/home/harry/.codex`, the
-  workspace snapshot), plus profiles next to it. The user-level **ocx
+  vendored stack copy), plus profiles next to it. The user-level **ocx
   profile** (`ocx.config.toml` — deepseek-v4-flash routed through the
-  opencodex proxy at 127.0.0.1:10109) is part of every snapshot; launch
+  opencodex proxy at 127.0.0.1:10109) is part of the stack; launch
   `codex -p ocx`, or `start.sh --harness codex --codex-profile ocx`.
-- **opencodex** — `~/.opencodex/config.json` (baked, real; redacted copy in
-  the workspace record). The entrypoint starts the proxy on 10109 only when
-  the port is free; with `--network host` the host-side proxy (if running) is
+- **opencodex** — the vendored `~/.opencodex/config.json`. The entrypoint
+  starts the proxy on the config's port (10109 on this host) only when the
+  port is free; with `--network host` the host-side proxy (if running) is
   used as-is.
 
 Note: codex **project-local** `.codex/config.toml` files cannot set provider
@@ -125,24 +157,25 @@ user-level profile, not in contestant repos.
 ## Build
 
 ```bash
-docker/build.sh                    # stages host artifacts + live configs, then docker build
+docker/build.sh                    # docker build (fresh official installs, pinned versions)
 IMAGE=cfd-bench:test docker/build.sh
+JOBS=8 docker/build.sh             # more parallel build jobs (default 4)
 ```
 
 ### Robustness on other machines
 
-- **Missing host tools:** `build.sh` auto-discovers opencode/codex/codegraph
-  (default paths first, then `PATH`). Anything still missing is staged as an
-  empty placeholder, so the image build always succeeds — the image just ends
-  up without that tool (a warning is printed).
-- **Missing submodules:** the build fails fast with a clear
-  `git submodule update --init --recursive` hint instead of a cryptic COPY
-  error.
-- **Missing user configs:** `start.sh` detects whether the host has
-  `~/.codex` configs and the opencode auth store. When absent, it skips the
-  workspace snapshot and falls back to the baked image configs (the image is
-  self-contained); codex sessions are then ephemeral. `--mount-host-configs`
-  only mounts host dirs that actually exist.
+- **Missing host tools:** not applicable — the image installs every tool
+  fresh from its official source (npm/GitHub/nodejs.org/open-mpi.org), so a
+  host without codex/opencode/opencodex builds the same image. The build
+  needs network access (and a proxy, if the host requires one — see below).
+- **Missing pinned artifacts:** pinned commits/tags are resolved via the
+  GitHub API check at fetch time; if a pinned ref is ever removed, the build
+  fails loudly at the `git fetch`/`curl` step instead of silently using a
+  different version.
+- **Missing vendored configs:** `start.sh` requires the config stack
+  (`<repo>/docker/configs`, or `CONFIG_STACK=`); if it is missing/incomplete
+  it fails with a hint to run `sync-configs.sh --env-mode`. There is no
+  fallback to the live host configs and no fallback to the image.
 - **No proxy on the host:** both scripts only use the already-exported proxy
   env vars (`HTTP_PROXY` etc., no proxy script is sourced); everything works
   with direct connectivity too.
@@ -157,17 +190,37 @@ Default mode mounts:
 
 - the benchmark root (parent of all contestant workspaces, so
   `../opencode_omoslim_deepseek/external` resolves),
-- `$WS/.sessions/codex` → `/home/harry/.codex` (the per-workspace codex home:
-  config snapshot + persistent sessions),
+- the vendored config stack (default `<repo>/docker/configs`, override with
+  `CONFIG_STACK=/path/to/stack`), copied into `$WS/.sessions/` and mounted
+  at the inside-docker-home paths,
+- `$WS/.sessions/codex` → `/home/harry/.codex`,
+- `$WS/.sessions/opencode-config` → `/home/harry/.config/opencode`,
+- `$WS/.sessions/opencodex` → `/home/harry/.opencodex`,
+- `$WS/.sessions/opencode-data` → the opencode data dir
+  (`XDG_DATA_HOME`; fresh DB; auth via env or `--host-credentials`),
 - `~/.codegraph` (index cache).
 
-`--image-config` skips the workspace session bundle entirely and uses the
-baked configs directly (sessions are ephemeral; for bare/CI runs).
-`--mount-host-configs` additionally bind-mounts the live host
-`~/.config/opencode`, `~/.local/share/opencode` and `~/.opencodex` over the
-baked ones, for live-edit workflows without an image rebuild.
-If the host has no `~/.codex` or opencode auth store, `start.sh` falls back
-to the baked configs automatically (sessions become ephemeral).
+Credentials are **never** part of the stack. Two modes at start:
+
+- **Env as credentials (default):** export the vars the stack references —
+  `OPENCODE_API_KEY_<PROVIDER>` for opencode, `OPENCODEX_<PROVIDER>_API_KEY`
+  for opencodex — and `start.sh` forwards any exported `OPENCODE_*` /
+  `OPENCODEX_*` vars into the container. Codex auth stays file-based:
+  `auth.json` (via `--host-credentials`) or `codex login` inside the
+  container.
+- **Extract credentials (`--host-credentials`):** `start.sh` reads THIS
+  host's live configs read-only and turns their real keys into the
+  container env under exactly the referenced names (opencode:
+  `OPENCODE_API_KEY_<PROVIDER>`; opencodex: `OPENCODEX_<PROVIDER>_API_KEY`),
+  and bind-mounts `~/.codex/auth.json` + the opencode auth store. Nothing is
+  written to the workspace; the keys only exist in the container env.
+
+`--image-config` skips the config-stack injection and the workspace session
+bundle entirely, using the image's pristine state (sessions are ephemeral;
+for bare/CI runs). `--mount-host-configs` bind-mounts the live host config
+dirs (`~/.codex`, `~/.config/opencode`, `~/.local/share/opencode`,
+`~/.opencodex`) over the stack — the explicit non-reproducible escape hatch
+for live-edit workflows.
 
 ### Network / proxy
 
@@ -196,26 +249,26 @@ to the baked configs automatically (sessions become ephemeral).
 
 ### Credentials (safe by construction)
 
-- **Baked mirror (default):** `build.sh` stages the real host configs
-  (including `auth.json`, opencodex `config.json`, opencode apiKeys) into
-  gitignored `docker/.context/configs/` and the image bakes them into the
-  container home. The image is a personal artifact — rebuild it to refresh
-  credentials. Nothing real is ever committed: `docker/configs/` stays
-  redacted and `sync-configs.sh` verifies that.
-- **Per-workspace snapshot:** each `start.sh` launch copies the config set
-  into `$WS/.sessions/` (record + effective codex home via the mount).
-  **Credentials are excluded from the snapshot**: `auth.json` files are
-  bind-mounted from the host at runtime and the opencodex record is
-  redacted, so the workspace never stores keys.
-- **Env vars (opencode + opencodex):** opencode config supports `{env:VAR}`
-  placeholders; opencodex resolves `$VAR` / `${VAR}` provider apiKeys from the
-  environment on every request (see `resolveEnvValue` in its config module).
-  `sync-configs.sh --env-mode` rewrites baked snapshots to env references:
-  opencode → `{env:OPENCODE_API_KEY}`, opencodex → per-provider
-  `$OPENCODEX_<PROVIDER>_API_KEY` (including `apiKeyPool` entries). Export the
-  variables when launching the image.
+- **Vendored stack is credential-free by construction:** `sync-configs.sh`
+  redacts every secret and the verifier refuses to commit unredacted keys.
+  With `--env-mode` the apiKeys become env references instead of
+  `REDACTED`: opencode → per-provider `{env:OPENCODE_API_KEY_<PROVIDER>}`
+  (opencode's native placeholder), opencodex → per-provider
+  `$OPENCODEX_<PROVIDER>_API_KEY` (opencodex resolves `$VAR` / `${VAR}`
+  apiKeys on every request, including `apiKeyPool` entries).
+- **Env as credentials (default):** export the referenced vars and
+  `start.sh` forwards them into the container (`-e VAR`). Nothing is ever
+  written to the workspace.
+- **Extract credentials (`--host-credentials`):** `start.sh` reads the live
+  host configs (`~/.config/opencode/opencode.jsonc`,
+  `~/.opencodex/config.json`) read-only, exports the real keys into the
+  container env under the same names the stack references, and bind-mounts
+  `~/.codex/auth.json` plus the opencode auth store
+  (`~/.local/share/opencode/{auth,account}.json`). The keys exist only in
+  the container env / mount — never in the workspace record.
 - Codex credentials have no env-placeholder mechanism: auth stays in
-  `auth.json` (baked/snapshotted) or in a custom provider's `env_key`.
+  `auth.json` (bind-mounted with `--host-credentials`, or `codex login`
+  inside the container) or in a custom provider's `env_key`.
 
 ### Persistent sessions, bundled with the workspace
 
@@ -223,16 +276,15 @@ to the baked configs automatically (sessions become ephemeral).
 contestant workspace itself:
 
 - `codex` → `$WS/.sessions/codex` mounted at `/home/harry/.codex` with
-  `CODEX_HOME=/home/harry/.codex` (config snapshot + sessions, logs, sqlite
-  DBs all persist in the workspace; the effective path is the
-  inside-docker-home one; `auth.json` is bind-mounted from `~/.codex`, never
-  stored in the snapshot; `rules/` likewise bind-mounted with a redacted
-  record copy).
+  `CODEX_HOME=/home/harry/.codex` (vendored config copy + sessions, logs,
+  sqlite DBs all persist in the workspace; with `--host-credentials`,
+  `auth.json` is bind-mounted from `~/.codex`, never stored).
 - `opencode` → `XDG_DATA_HOME=$WS/.sessions/opencode-data` (a fresh
-  `opencode.db`, logs, storage), with `auth.json`/`account.json`
-  bind-mounted from `~/.local/share/opencode` (never copied).
-- `opencodex` → `$WS/.sessions/opencodex/config.json` (redacted record; the
-  service itself reads the baked `~/.opencodex/config.json`).
+  `opencode.db`, logs, storage), with `auth.json`/`account.json` optionally
+  bind-mounted from `~/.local/share/opencode` (`--host-credentials`; never
+  copied).
+- `opencodex` → `$WS/.sessions/opencodex` mounted at `/home/harry/.opencodex`
+  (vendored config copy + runtime state).
 
 So a contestant run leaves its full session history on disk in the working
 directory. `.sessions/` is added to the workspace's `.git/info/exclude`
@@ -254,26 +306,49 @@ only relax layers inside it.
 
 ## Verified end-to-end (non-interactive)
 
-With the baked configs (and the host opencodex proxy on 10109 when codex
-routes through it):
+With the vendored config stack mounted and the credential env vars set (and
+the host opencodex proxy on 10109 when codex routes through it):
 
 ```bash
+REPO="$(pwd)"   # the manager repo (holds the vendored config stack)
+# Mount the stack from a temp copy (start.sh copies it into $WS/.sessions/;
+# here we only need it read-write for codex's auth.json placeholder).
+CFG="$(mktemp -d)" && cp -a "$REPO/docker/configs/." "$CFG/"
+touch "$CFG/codex/auth.json"   # non-credential placeholder; real file mounts over it
+
 docker run --rm --network host --security-opt seccomp=unconfined \
   --security-opt apparmor=unconfined --user "$(id -u):$(id -g)" \
-  -e HOME="$HOME" -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
+  -e HOME="$HOME" \
+  -v "$CFG/codex:/home/harry/.codex" \
+  -v "$CFG/opencode:/home/harry/.config/opencode" \
+  -v "$CFG/opencodex:/home/harry/.opencodex" \
+  -v "$HOME/.codex/auth.json:/home/harry/.codex/auth.json" \
+  -e OPENCODE_API_KEY_DEEPSEEK="${OPENCODE_API_KEY_DEEPSEEK:?export the referenced env vars}" \
+  -e OPENCODEX_DEEPSEEK_API_KEY="${OPENCODEX_DEEPSEEK_API_KEY:?}" \
+  -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
   cfd-bench:latest codex exec --json -p ocx --skip-git-repo-check \
     "Reply with exactly: PONG"
 
 docker run --rm --network host --security-opt seccomp=unconfined \
   --security-opt apparmor=unconfined --user "$(id -u):$(id -g)" \
-  -e HOME="$HOME" -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
+  -e HOME="$HOME" \
+  -v "$CFG/codex:/home/harry/.codex" \
+  -v "$CFG/opencode:/home/harry/.config/opencode" \
+  -v "$CFG/opencodex:/home/harry/.opencodex" \
+  -e OPENCODE_API_KEY_DEEPSEEK="${OPENCODE_API_KEY_DEEPSEEK:?export the referenced env vars}" \
+  -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
   cfd-bench:latest opencode run --format json \
   -m deepseek/deepseek-v4-flash "Reply with exactly: PONG"
 ```
 
-Both return `PONG` through the real provider stack; codex sandboxed tool
-execution (`echo codex-e2e-ok`) also succeeds with the security opts above.
-Verified with codex-cli 0.146.0 + opencode 1.18.11 in the image.
+The commands mirror what `start.sh` does in its default mode (vendored stack
+at the inside-docker-home paths + credential env vars + the real codex
+auth.json mounted over a placeholder). `start.sh` copies the stack into
+`$WS/.sessions/` instead of a temp dir, so contestant runs persist everything
+in the workspace. Both return `PONG` through the real provider stack; codex
+sandboxed tool execution (`echo codex-e2e-ok`) also succeeds with the
+security opts above. Verified with codex-cli 0.146.0 + opencode 1.18.11 in
+the image.
 
 ### Known noise / tuning
 
@@ -303,7 +378,10 @@ For codex-through-opencodex, launch `codex -p ocx` or use
 ## Redaction
 
 Never commit real credentials: `apiKey`/`sk-*` values are replaced with
-`REDACTED` in the committed `configs/`. The build-time mirror
-(`docker/.context/configs/`) contains the real keys and is gitignored; it is
-only ever used to build the local image. Session databases and logs are never
-mirrored.
+`REDACTED` (or env references with `--env-mode`) in the committed
+`configs/`; `sync-configs.sh` verifies no unredacted key survives. The image
+is built without any host configs, so there is no build-time key mirror at
+all (the old `docker/.context/` staging area is obsolete and can be
+deleted). Real keys enter a container only at start time, via exported env
+vars or `--host-credentials` binds, and are never written to the workspace.
+Session databases and logs are never vendored.

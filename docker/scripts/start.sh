@@ -2,27 +2,34 @@
 # Interactive launcher for a benchmark contestant container.
 #
 # Usage:
-#   docker/scripts/start.sh [--workspace DIR] [--image-config]
-#     [--mount-host-configs] [--harness shell|codex|opencode]
-#     [--codex-profile ocx] [-- cmd...]
+#   docker/scripts/start.sh [--workspace DIR] [--host-credentials]
+#     [--image-config] [--mount-host-configs]
+#     [--harness shell|codex|opencode] [--codex-profile ocx] [-- cmd...]
+#   CONFIG_STACK=/path/to/stack docker/scripts/start.sh --workspace DIR
 #
-# The image is self-contained: build.sh mirrors the live host user configs
-# (~/.codex, ~/.opencodex, ~/.config/opencode, the opencode auth store) into
-# the image (gitignored staging, real keys), so opencode and opencodex read
-# their configs from the container home (~/.config/opencode, ~/.opencodex).
+# The image is built from fresh official installs only (see docker/Dockerfile
+# + docker/opencode-plugins.json) — user configs are NEVER baked into it.
+# This launcher installs the VENDORED config stack at container start
+# (default: <repo>/docker/configs, gathered from the current host with
+# sync-configs.sh and committed credential-free; override with CONFIG_STACK):
+#   - codex      -> $WS/.sessions/codex            mounted at /home/harry/.codex
+#   - opencode   -> $WS/.sessions/opencode-config  mounted at /home/harry/.config/opencode
+#   - opencodex  -> $WS/.sessions/opencodex        mounted at /home/harry/.opencodex
+# Sessions/logs/DBs persist in $WS/.sessions for all three harnesses.
+# The stack's apiKeys are env references: export the vars on this host, or
+# pass --host-credentials to export the real keys from the live host configs
+# (read-only; never written to the workspace). The live host config stack is
+# never used as the config source.
 #
-# Default mode additionally snapshots a per-workspace copy of the codex
-# config set into $WS/.sessions/codex and mounts that dir at
-# /home/harry/.codex: the effective codex home is the inside-docker-home path
-# AND sessions/logs/DBs persist in the workspace. opencode data goes to
-# $WS/.sessions/opencode-data (fresh DB + auth copy); the opencodex config is
-# recorded at $WS/.sessions/opencodex/config.json.
-#
-# --image-config: use the baked configs directly, no workspace session bundle
-# (sessions are ephemeral; for bare/CI runs).
-# --mount-host-configs: additionally bind-mount the live host config dirs
-# (~/.config/opencode, ~/.local/share/opencode, ~/.opencodex) over the baked
-# ones, for live-edit workflows without an image rebuild.
+# --host-credentials: read real apiKeys/auth from THIS host's live configs
+# and pass them to the container as env vars / auth-file binds (read-only;
+# the config stack itself is still the vendored one).
+# --image-config: use the image's pristine state directly (no config stack,
+# no workspace session bundle; sessions are ephemeral; for bare/CI runs).
+# --mount-host-configs: bind-mount the live host config dirs
+# (~/.codex, ~/.config/opencode, ~/.local/share/opencode, ~/.opencodex) over
+# the installed stack, for live-edit workflows without a rebuild
+# (non-reproducible escape hatch).
 #
 # The container runs with --rm plus an EXIT/INT/TERM/HUP trap that
 # force-removes it, so no bench-* container survives the launcher (Ctrl-C,
@@ -47,6 +54,7 @@ BENCH_ROOT="${BENCH_ROOT:-/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmar
 WS=""
 MOUNT_CONFIG=1
 MOUNT_HOST=0
+HOST_CRED=0
 HARNESS="shell"
 CODEX_PROFILE=""
 
@@ -55,6 +63,7 @@ while [ $# -gt 0 ]; do
     --workspace) WS="$2"; shift 2 ;;
     --image-config) MOUNT_CONFIG=0; shift ;;
     --mount-host-configs) MOUNT_HOST=1; shift ;;
+    --host-credentials) HOST_CRED=1; shift ;;
     --harness) HARNESS="$2"; shift 2 ;;
     --codex-profile) CODEX_PROFILE="$2"; shift 2 ;;
     --) shift; break ;;
@@ -107,86 +116,142 @@ mkdir -p "$HOME/.codegraph"
 MOUNTS+=(-v "$HOME/.codegraph:$HOME/.codegraph")
 
 if [ "$MOUNT_CONFIG" = "1" ]; then
-  # Detect whether this host has user-level configs at all. If not, fall back
-  # to the baked image configs (self-contained), which is the robust behavior
-  # for a machine that never ran codex/opencode/opencodex.
-  HOST_CODEX=0
-  [ -f "$HOME/.codex/config.toml" ] && HOST_CODEX=1
-  [ -f "$HOME/.codex/auth.json" ] && HOST_CODEX=1
-  HOST_OC_AUTH=0
-  [ -f "$HOME/.local/share/opencode/auth.json" ] && HOST_OC_AUTH=1
+  # The config stack installed at start: the repo's vendored configs by
+  # default (gathered from the current host with sync-configs.sh, redacted /
+  # env-referenced, committed); override with CONFIG_STACK=/path/to/stack.
+  CONFIG_STACK="${CONFIG_STACK:-$ROOT/docker/configs}"
+  if [ ! -f "$CONFIG_STACK/opencode/opencode.jsonc" ] \
+     || [ ! -d "$CONFIG_STACK/codex" ] \
+     || [ ! -d "$CONFIG_STACK/opencodex" ]; then
+    echo "ERROR: config stack incomplete at $CONFIG_STACK" >&2
+    echo "       regenerate it with: docker/scripts/sync-configs.sh --env-mode" >&2
+    exit 1
+  fi
 
   SESS="$WS/.sessions"
   CODEX_HOME_DIR="$SESS/codex"
+  OC_CONFIG_DIR="$SESS/opencode-config"
   OC_DATA_DIR="$SESS/opencode-data/opencode"
-  mkdir -p "$SESS/opencodex"
+  OCX_DIR="$SESS/opencodex"
 
-  if [ "$HOST_CODEX" = "1" ]; then
-    mkdir -p "$CODEX_HOME_DIR"
+  echo "== installing vendored config stack ($CONFIG_STACK) into $SESS =="
+  echo "  (credential-free: apiKeys are env references; supply them via"
+  echo "   exported env vars or --host-credentials)"
 
-    echo "== snapshotting user configs into the workspace (.sessions; credentials are bind-mounted, never copied) =="
-    # codex user-level config set as copies (not symlinks): this dir is mounted
-    # at /home/harry/.codex inside the container, so it is both the per-workspace
-    # record and the effective codex home. Sessions/state from earlier runs are
-    # left untouched. auth.json is never copied — it is bind-mounted from the
-    # host so the workspace record stays credential-free.
-    rsync -a \
-      --exclude 'sessions/' --exclude 'log/' --exclude 'tmp/' \
-      --exclude 'shell_snapshots/' --exclude 'memories/' \
-      --exclude 'packages/' --exclude 'cache/' \
-      --exclude '*.sqlite*' --exclude 'history.jsonl' \
-      --exclude 'session_index.jsonl' --exclude '*.bak*' \
-      --exclude 'auth.json' --exclude 'rules/' \
-      "$HOME/.codex/" "$CODEX_HOME_DIR/"
+  # codex: copy of the vendored codex config set, mounted as the effective
+  # codex home; sessions/logs/DBs persist in the workspace copy.
+  mkdir -p "$CODEX_HOME_DIR"
+  rsync -a "$CONFIG_STACK/codex/" "$CODEX_HOME_DIR/"
+  MOUNTS+=(-v "$CODEX_HOME_DIR:/home/harry/.codex")
+  ENVS+=(-e CODEX_HOME=/home/harry/.codex)
 
-    # The codex bundle mount must come before the auth file overlays: later
-    # mounts win at their destination, so the file mounts must land on top of
-    # the bundle dir mount (at /home/harry/.codex, where codex reads them).
-    MOUNTS+=(-v "$CODEX_HOME_DIR:/home/harry/.codex")
-    ENVS+=(-e CODEX_HOME=/home/harry/.codex)
+  # opencode: vendored config dir mounted at the global config path; data
+  # dir (sessions, DB, auth) is bundled fresh in the workspace.
+  mkdir -p "$OC_CONFIG_DIR" "$OC_DATA_DIR"
+  rsync -a "$CONFIG_STACK/opencode/" "$OC_CONFIG_DIR/"
+  MOUNTS+=(-v "$OC_CONFIG_DIR:/home/harry/.config/opencode")
+  ENVS+=(-e XDG_CONFIG_HOME=/home/harry/.config -e XDG_DATA_HOME="$SESS/opencode-data")
 
+  # opencodex: vendored config dir mounted at the service's home path;
+  # runtime state (usage, artifacts, sqlite) persists in the workspace.
+  mkdir -p "$OCX_DIR"
+  rsync -a "$CONFIG_STACK/opencodex/" "$OCX_DIR/"
+  MOUNTS+=(-v "$OCX_DIR:/home/harry/.opencodex")
+
+  # Forward credential env vars already exported on this host (the stack's
+  # env references). Nothing is read from host config files unless
+  # --host-credentials is given.
+  for v in $(env | sed -n 's/^\(OPENCODE_[A-Z0-9_]*\)=.*/\1/p'); do
+    ENVS+=(-e "$v")
+  done
+  for v in $(env | sed -n 's/^\(OPENCODEX_[A-Z0-9_]*\)=.*/\1/p'); do
+    ENVS+=(-e "$v")
+  done
+
+  if [ "$HOST_CRED" = "1" ]; then
+    echo "== --host-credentials: exporting real apiKeys from this host's live configs into the container env (read-only; never written to the workspace) =="
+    if [ -f "$HOME/.config/opencode/opencode.jsonc" ]; then
+      while IFS= read -r kv; do
+        [ -n "$kv" ] && ENVS+=(-e "$kv")
+      done < <(python3 - "$HOME/.config/opencode/opencode.jsonc" <<'PYEOF'
+import re, sys
+from pathlib import Path
+
+KEY = re.compile(r"^(\s*\")([A-Za-z0-9_.-]+)(\"\s*:\s*\{)")
+APIKEY = re.compile(r"^(\s*\"apiKey\"\s*:\s*\")([^\"]+)")
+
+def stem(name):
+    return re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_").upper()
+
+depth = 0
+in_providers = False
+provider_depth = 0
+provider = None
+for line in Path(sys.argv[1]).read_text().splitlines():
+    stripped = line.lstrip()
+    if stripped.startswith("//"):
+        continue
+    m = KEY.match(line)
+    if m:
+        name = m.group(2)
+        if in_providers and depth == provider_depth:
+            provider = name
+        if not in_providers and depth == 1 and name in ("provider", "providers"):
+            in_providers = True
+            provider_depth = depth + line.count("{") - line.count("}")
+        depth += line.count("{") - line.count("}")
+        if in_providers and depth < provider_depth:
+            in_providers = False
+            provider = None
+        continue
+    m = APIKEY.match(line)
+    if m and provider:
+        key = m.group(2)
+        if key.startswith("sk-"):
+            print(f"OPENCODE_API_KEY_{stem(provider)}={key}")
+    depth += line.count("{") - line.count("}")
+    if in_providers and depth < provider_depth:
+        in_providers = False
+        provider = None
+PYEOF
+)
+    fi
+    if [ -f "$HOME/.opencodex/config.json" ]; then
+      while IFS= read -r kv; do
+        [ -n "$kv" ] && ENVS+=(-e "$kv")
+      done < <(python3 - "$HOME/.opencodex/config.json" <<'PYEOF'
+import json, re, sys
+
+cfg = json.load(open(sys.argv[1]))
+
+def stem(name):
+    return re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_").upper()
+
+for pid, prov in (cfg.get("providers") or {}).items():
+    if not isinstance(prov, dict):
+        continue
+    name = f"OPENCODEX_{stem(pid)}_API_KEY"
+    if isinstance(prov.get("apiKey"), str) and prov["apiKey"].startswith("sk-"):
+        print(f"{name}={prov['apiKey']}")
+    elif isinstance(prov.get("apiKeyPool"), list):
+        for entry in prov["apiKeyPool"]:
+            if isinstance(entry, dict) and isinstance(entry.get("key"), str) \
+               and entry["key"].startswith("sk-"):
+                print(f"{name}={entry['key']}")
+                break
+PYEOF
+)
+    fi
     if [ -f "$HOME/.codex/auth.json" ]; then
-      touch "$CODEX_HOME_DIR/auth.json"   # non-credential placeholder
+      touch "$CODEX_HOME_DIR/auth.json"   # non-credential placeholder; real file mounts over it
       MOUNTS+=(-v "$HOME/.codex/auth.json:/home/harry/.codex/auth.json")
     fi
-    # exec-policy rules can embed API keys in allow-rule patterns: keep a
-    # redacted record copy and bind-mount the real rules for codex.
-    if [ -d "$HOME/.codex/rules" ]; then
-      mkdir -p "$CODEX_HOME_DIR/rules"
-      for rf in "$HOME"/.codex/rules/*; do
-        [ -f "$rf" ] \
-          && sed -E 's#(sk-[A-Za-z0-9_-]{12,})#sk-REDACTED#g' "$rf" \
-            > "$CODEX_HOME_DIR/rules/$(basename "$rf")"
-      done
-      MOUNTS+=(-v "$HOME/.codex/rules:/home/harry/.codex/rules")
-    fi
-  else
-    echo "no host ~/.codex configs found; using the baked image codex config (sessions will be ephemeral)"
-    ENVS+=(-e CODEX_HOME=/home/harry/.codex)
-  fi
-
-  # opencode: bundle the data dir only when this host has an auth store;
-  # otherwise use the baked data dir (auth baked in, sessions ephemeral).
-  if [ "$HOST_OC_AUTH" = "1" ]; then
-    mkdir -p "$OC_DATA_DIR"
-    ENVS+=(-e XDG_DATA_HOME="$SESS/opencode-data")
     for f in auth.json account.json; do
       if [ -f "$HOME/.local/share/opencode/$f" ]; then
-        touch "$OC_DATA_DIR/$f"           # non-credential placeholder
+        touch "$OC_DATA_DIR/$f"           # non-credential placeholder; real file mounts over it
         MOUNTS+=(-v "$HOME/.local/share/opencode/$f:$OC_DATA_DIR/$f")
       fi
     done
-  else
-    echo "no host opencode auth store found; using the baked image auth (data will be ephemeral)"
-    ENVS+=(-e XDG_CONFIG_HOME=/home/harry/.config -e XDG_DATA_HOME=/home/harry/.local/share)
-  fi
-
-  # opencodex config record: redacted copy only
-  if [ -f "$HOME/.opencodex/config.json" ]; then
-    sed -E \
-      -e 's#("(apiKey|key)"[[:space:]]*:[[:space:]]*")[^"]*#\1REDACTED#g' \
-      -e 's#(sk-[A-Za-z0-9_-]{12,})#sk-REDACTED#g' \
-      "$HOME/.opencodex/config.json" > "$SESS/opencodex/config.json"
   fi
 
   # keep bundled sessions out of git (also covers pre-existing workspaces)
@@ -196,12 +261,12 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
     grep -qxF '.opencode/' "$EXCLUDE" 2>/dev/null || printf '.opencode/\n' >> "$EXCLUDE"
   fi
 else
-  echo "using baked image configs directly (no workspace session bundle; sessions are ephemeral)"
+  echo "using the image's pristine state directly (no config stack, no workspace session bundle; sessions are ephemeral)"
 fi
 
 if [ "$MOUNT_HOST" = "1" ]; then
-  echo "mounting live host config dirs over the baked ones"
-  for d in .config/opencode .local/share/opencode .opencodex; do
+  echo "WARNING: --mount-host-configs mounts the live host config dirs over the vendored stack (non-reproducible escape hatch)"
+  for d in .codex .config/opencode .local/share/opencode .opencodex; do
     if [ -d "$HOME/$d" ]; then
       MOUNTS+=(-v "$HOME/$d:$HOME/$d")
     else
@@ -216,16 +281,13 @@ echo "  workspace: $WS"
 echo "  harness:   $HARNESS"
 [ -n "$CODEX_PROFILE" ] && echo "  codex profile: -p $CODEX_PROFILE"
 if [ "$MOUNT_CONFIG" = "1" ]; then
-  if [ "$HOST_CODEX" = "1" ]; then
-    echo "  codex home:  $WS/.sessions/codex -> /home/harry/.codex"
-  else
-    echo "  codex:       baked image config (no host ~/.codex; sessions ephemeral)"
-  fi
-  if [ "$HOST_OC_AUTH" = "1" ]; then
-    echo "  opencode data: $WS/.sessions/opencode-data"
-  else
-    echo "  opencode:    baked image auth (no host auth store; data ephemeral)"
-  fi
+  echo "  config stack: $CONFIG_STACK"
+  echo "  codex:        $WS/.sessions/codex -> /home/harry/.codex"
+  echo "  opencode:     $WS/.sessions/opencode-config -> /home/harry/.config/opencode"
+  echo "  opencode data:$WS/.sessions/opencode-data (XDG_DATA_HOME)"
+  echo "  opencodex:    $WS/.sessions/opencodex -> /home/harry/.opencodex"
+  [ "$HOST_CRED" = "1" ] && echo "  credentials:  host-credentials mode (live keys via env/binds)"
+  [ "$MOUNT_HOST" = "1" ] && echo "  credentials/configs: live host dirs mounted over the stack"
 fi
 echo "  mounts:    ${MOUNTS[*]}"
 echo

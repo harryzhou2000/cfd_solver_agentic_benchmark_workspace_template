@@ -1,89 +1,152 @@
 # syntax=docker/dockerfile:1
 # Benchmark contestant runtime.
-# Build context = repo root (see build.sh; it stages host artifacts into
-# docker/.context first).
+#
+# Everything in the image is installed FRESH from official sources at
+# versions pinned to this machine (see the comments); nothing is staged or
+# copied from the host. The only host-derived inputs are:
+#   - the proxy env vars, forwarded by build.sh as build args when needed;
+#   - the user configs, injected at container start by scripts/start.sh
+#     (never baked into the image).
 
 FROM ubuntu:24.04
 
+# Proxy build args (predefined Docker args): passed by build.sh only when the
+# proxy is on the host loopback (or forced with BUILD_PROXY=1). Declared so
+# RUN steps (curl/git/apt) inherit them.
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+ARG http_proxy
+ARG https_proxy
+ARG no_proxy
+
 ARG UID=1004
 ARG GID=1004
+ARG JOBS=4
 
 ENV DEBIAN_FRONTEND=noninteractive \
     HOME=/home/harry \
-    PATH=/opt/openmpi/bin:/home/harry/.bun/bin:/home/harry/.local/bin:/opt/codex-standalone/bin:/opt/codex-standalone:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    PATH=/opt/openmpi/bin:/opt/node/bin:/home/harry/.bun/bin:/home/harry/.local/bin:/home/harry/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LD_LIBRARY_PATH=/opt/openmpi/lib
 
-# --- base toolchain ---------------------------------------------------------
+# --- base toolchain (apt; Ubuntu 24.04 defaults = GCC 13, like the host) ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc-13 g++-13 gfortran-13 cmake make ninja-build \
     git curl wget ca-certificates pkg-config file unzip zip zsh \
     python3 python3-pip python3-venv python3-dev \
-    nodejs npm ripgrep jq \
+    ripgrep jq bubblewrap \
     libssl-dev libcurl4-openssl-dev zlib1g-dev libgomp1 libstdc++-13-dev \
-    libevent-2.1-7t64 libhwloc15 libnl-3-200 libnl-route-3-200 \
+    libblas-dev liblapack-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g ${GID} harry \
     && useradd -m -u ${UID} -g ${GID} -s /bin/zsh harry \
-    && mkdir -p /home/harry/.local/share/opencode /home/harry/.local/bin \
+    && mkdir -p /home/harry/.local/bin /home/harry/.opencode/bin /home/harry/.bun \
     && chown -R harry:harry /home/harry
 
-# --- OpenMPI 5.0.9 (staged from host install tree) --------------------------
-COPY docker/.context/openmpi /opt/openmpi
+# --- Node.js 24.18.0 (host version) — official nodejs.org tarball ----------
+RUN curl -fsSL -o /tmp/node.tar.xz \
+        https://nodejs.org/dist/v24.18.0/node-v24.18.0-linux-x64.tar.xz \
+    && mkdir -p /opt/node \
+    && tar -xJf /tmp/node.tar.xz -C /opt/node --strip-components=1 \
+    && ln -sf /opt/node/bin/node /usr/local/bin/node \
+    && ln -sf /opt/node/bin/npm /usr/local/bin/npm \
+    && ln -sf /opt/node/bin/npx /usr/local/bin/npx \
+    && rm -f /tmp/node.tar.xz
 
-# --- runtimes: bun 1.3.14, uv ----------------------------------------------
+# --- bun 1.3.14 (host version) — official installer, version-pinned ---------
 RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.14"
-RUN curl -LsSf https://astral.sh/uv/install.sh \
-    | env UV_INSTALL_DIR=/home/harry/.local/bin sh
 
-# --- harnesses (exact host binaries, staged) --------------------------------
-COPY docker/.context/opencode /usr/local/bin/opencode
-COPY docker/.context/codex-release /opt/codex-standalone
-COPY docker/.context/codegraph /opt/codegraph
-RUN chmod +x /usr/local/bin/opencode \
-    && ln -sf /opt/codex-standalone/bin/codex /usr/local/bin/codex \
-    && ln -sf /opt/codegraph/bin/codegraph /usr/local/bin/codegraph
+# --- uv 0.12.1 (host version) — official release tarball --------------------
+RUN curl -fsSL -o /tmp/uv.tar.gz \
+        https://github.com/astral-sh/uv/releases/download/0.12.1/uv-x86_64-unknown-linux-gnu.tar.gz \
+    && tar -xzf /tmp/uv.tar.gz -C /home/harry/.local/bin --strip-components=1 \
+    && chmod +x /home/harry/.local/bin/uv /home/harry/.local/bin/uvx \
+    && rm -f /tmp/uv.tar.gz
 
-# --- opencodex proxy + ocx-relay + goal plugin (repo submodules) ------------
-COPY opencodex /opt/opencodex
-RUN cd /opt/opencodex \
-    && if [ -f package.json ]; then \
-         /home/harry/.bun/bin/bun install --frozen-lockfile \
-         && ln -sf /opt/opencodex/bin/ocx.mjs /usr/local/bin/ocx; \
-       else echo "opencodex submodule missing; skipping"; fi
-COPY ocx-relay /opt/ocx-relay
-COPY OpenCode-goal-plugin /opt/OpenCode-goal-plugin
-RUN cd /opt/OpenCode-goal-plugin \
-    && if [ -f package.json ]; then npm install --omit=dev --no-audit --no-fund; \
-       else echo "goal plugin submodule missing; skipping"; fi
+# --- OpenMPI 5.0.9 (host version) — official source tarball, built fresh ----
+# Fortran bindings (usempif08) are enabled to match the host build.
+RUN curl -fsSL -o /tmp/openmpi.tar.bz2 \
+        https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.9.tar.bz2 \
+    && mkdir -p /tmp/openmpi-src \
+    && tar -xjf /tmp/openmpi.tar.bz2 -C /tmp/openmpi-src --strip-components=1 \
+    && cd /tmp/openmpi-src \
+    && ./configure --prefix=/opt/openmpi --enable-mpi-fortran=usempif08 \
+    && make -j"${JOBS}" \
+    && make install \
+    && rm -rf /tmp/openmpi-src /tmp/openmpi.tar.bz2
 
-# --- real user configs, mirrored from the host by build.sh ----------------
-# Source is docker/.context/configs (gitignored; real keys). The committed
-# docker/configs/ tree stays a redacted reference snapshot.
-COPY docker/.context/configs/opencode/ /home/harry/.config/opencode/
-RUN cd /home/harry/.config/opencode \
-    && if [ -f package.json ]; then npm ci --omit=dev --no-audit --no-fund; \
-       else echo "no opencode config staged; skipping npm ci"; fi
-COPY docker/.context/opencode-goal-plugin /home/harry/.local/share/opencode-goal-plugin
-COPY docker/.context/configs/opencode-data/ /home/harry/.local/share/opencode/
+# --- opencode 1.18.11 (host version) — official installer, version-pinned ---
+RUN curl -fsSL https://opencode.ai/install | bash -s -- --version 1.18.11 --no-modify-path
 
-COPY docker/.context/configs/codex/ /home/harry/.codex/
-COPY docker/.context/configs/opencodex/ /home/harry/.opencodex/
+# --- opencode plugins — official `opencode plugin -g`, pinned ---------------
+# Manifest docker/opencode-plugins.json: opencode-goal-plugin at the fork's
+# PR-tip commit, oh-my-opencode-slim@2.2.10. Installs from npm/GitHub only,
+# never from the host; also writes the image's pristine global opencode
+# config (~/.config/opencode/opencode.jsonc) with the plugin array.
+COPY docker/opencode-plugins.json /opt/opencode-plugins.json
+COPY docker/scripts/install-opencode-plugins.sh /usr/local/bin/install-opencode-plugins
+RUN chmod +x /usr/local/bin/install-opencode-plugins \
+    && install-opencode-plugins --manifest /opt/opencode-plugins.json
 
-# --- shared DNDSR externals (staged) ----------------------------------------
-COPY docker/.context/external /opt/external
+# --- codex-cli 0.146.0 (host version) — official standalone release ---------
+RUN curl -fsSL -o /tmp/codex.tar.gz \
+        https://github.com/openai/codex/releases/download/rust-v0.146.0/codex-x86_64-unknown-linux-musl.tar.gz \
+    && mkdir -p /opt/codex-standalone \
+    && tar -xzf /tmp/codex.tar.gz -C /opt/codex-standalone \
+    && ln -sf /opt/codex-standalone/codex-x86_64-unknown-linux-musl/bin/codex /usr/local/bin/codex \
+    && rm -f /tmp/codex.tar.gz
 
-# OpenMPI runtime needs libevent_core/libevent_pthreads (separate packages).
-# Kept as its own layer so toolchain iterations stay incremental.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libevent-core-2.1-7t64 libevent-pthreads-2.1-7t64 \
-    && rm -rf /var/lib/apt/lists/*
+# --- codegraph 1.2.0 (host version) — official npm package ------------------
+RUN npm install -g @colbymchenry/codegraph@1.2.0 --no-audit --no-fund
 
-# OpenMPI wrapper scripts (mpicc/mpirun) embed the original install prefix and
-# resolve share files/libs relative to it; mirror the tree there.
-RUN mkdir -p /mnt/ssd-SATARAID5/harry/tools/openmpi-5.0.9 \
-    && cp -a /opt/openmpi /mnt/ssd-SATARAID5/harry/tools/openmpi-5.0.9/install
+# --- opencodex proxy — official source install at the pinned commit ---------
+RUN git init -q /opt/opencodex \
+    && cd /opt/opencodex \
+    && git remote add origin https://github.com/harryzhou2000/opencodex.git \
+    && git fetch -q --depth 1 origin ea7f5a69748c666f739143142627f8ace1fcb271 \
+    && git checkout -q FETCH_HEAD \
+    && /home/harry/.bun/bin/bun install --frozen-lockfile \
+    && ln -sf /opt/opencodex/bin/ocx.mjs /usr/local/bin/ocx
 
+# --- ocx-relay — pinned commit (plain node scripts, no build) ---------------
+RUN git init -q /opt/ocx-relay \
+    && cd /opt/ocx-relay \
+    && git remote add origin https://github.com/harryzhou2000/ocx-relay.git \
+    && git fetch -q --depth 1 origin 886298b384738b4dc7f5c8fe03ad63ea1beba567 \
+    && git checkout -q FETCH_HEAD
+
+# --- shared DNDSR externals, built from source (DNDSR recipe) ---------------
+# Header-only libraries (Eigen, Boost, CGAL, fmt, pybind11, ...): official
+# release tarball of the DNDSR externals bundle, pinned tag v0.1.0.
+RUN mkdir -p /opt/external \
+    && curl -fsSL -o /tmp/external_headeronlys.tar.gz \
+        https://github.com/harryzhou2000/cfd_externals_headeronlys/releases/download/v0.1.0/external_headeronlys.tar.gz \
+    && tar -xzf /tmp/external_headeronlys.tar.gz -C /opt/external \
+    && rm -f /tmp/external_headeronlys.tar.gz
+
+# cfd_externals (zlib/HDF5/CGNS/ParMETIS/Cantera): source at the pinned
+# commit, submodules at their pinned revisions.
+RUN git init -q /opt/external/cfd_externals \
+    && cd /opt/external/cfd_externals \
+    && git remote add origin https://github.com/harryzhou2000/cfd_externals.git \
+    && git fetch -q --depth 1 origin 942cf6700c2089669b66181b66de04a3ddaf7d54 \
+    && git checkout -q FETCH_HEAD \
+    && git submodule update --init --recursive --depth 1
+
+# Build the binary externals from source (zlib, hdf5, cgns, parmetis_fix,
+# cantera). Build trees and source clones are removed afterwards; the
+# installed tree stays at /opt/external/cfd_externals/install.
+RUN python3 -m venv /opt/cfd-venv \
+    && /opt/cfd-venv/bin/pip install -q --no-cache-dir \
+        -r /opt/external/cfd_externals/requirements.txt \
+    && cd /opt/external/cfd_externals \
+    && CC=mpicc CXX=mpicxx JOBS="${JOBS}" \
+        /opt/cfd-venv/bin/python cfd_externals_build.py \
+    && rm -rf build_* repos \
+    && chown -R harry:harry /opt/external
+
+# --- container entrypoint (opencodex autostart probe) -----------------------
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh \
     && chown -R harry:harry /home/harry

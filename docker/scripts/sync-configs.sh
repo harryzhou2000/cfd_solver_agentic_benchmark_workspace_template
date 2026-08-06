@@ -3,9 +3,10 @@
 # Run from the repo root. Never commit unredacted credentials.
 #
 # Optional --env-mode: instead of leaving apiKeys as REDACTED, rewrite them to
-# environment-variable references so the baked image can authenticate when the
-# vars are exported at runtime:
-#   - opencode  : "{env:OPENCODE_API_KEY}" (opencode's native placeholder)
+# environment-variable references so the vendored stack can authenticate when
+# the vars are exported at runtime (or supplied by start.sh --host-credentials):
+#   - opencode  : "{env:OPENCODE_API_KEY_<PROVIDER>}" (opencode's native
+#                 placeholder, per provider — e.g. OPENCODE_API_KEY_DEEPSEEK)
 #   - opencodex : "$OPENCODEX_<PROVIDER>_API_KEY" (opencodex resolves $VAR /
 #                 ${VAR} apiKeys from the environment on every request)
 # Codex auth remains file-based (auth.json) or a custom provider's env_key.
@@ -58,11 +59,64 @@ find "$D" -type f \( -name '*.json' -o -name '*.jsonc' -o -name '*.toml' -o -nam
     {} +
 
 if [ "$ENV_MODE" = "1" ]; then
-  echo "== converting opencode apiKeys to {env:OPENCODE_API_KEY} placeholders =="
+  echo "== converting opencode apiKeys to per-provider {env:OPENCODE_API_KEY_<PROVIDER>} placeholders =="
   find "$D/opencode" -type f \( -name '*.json' -o -name '*.jsonc' \) \
-    -exec sed -i -E \
-      -e 's#("apiKey"[[:space:]]*:[[:space:]]*")REDACTED(")#\1{env:OPENCODE_API_KEY}\2#g' \
-      {} +
+    -exec python3 -c '
+import re, sys
+from pathlib import Path
+
+KEY = re.compile(r"^(\s*\")([A-Za-z0-9_.-]+)(\"\s*:\s*\{)")
+APIKEY = re.compile(r"^(\s*\"apiKey\"\s*:\s*\")REDACTED(\")")
+
+def stem(name):
+    return re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_").upper()
+
+for arg in sys.argv[1:]:
+    path = Path(arg)
+    src = path.read_text()
+    depth = 0
+    in_providers = False
+    provider_depth = 0
+    provider = None
+    out = []
+    changed = []
+    for line in src.splitlines(keepends=True):
+        stripped = line.lstrip()
+        if stripped.startswith("//"):
+            out.append(line)
+            continue
+        m = KEY.match(line)
+        if m:
+            name = m.group(2)
+            if in_providers and depth == provider_depth:
+                provider = name
+            if not in_providers and depth == 1 and name in ("provider", "providers"):
+                in_providers = True
+                provider_depth = depth + line.count("{") - line.count("}")
+            out.append(line)
+            depth += line.count("{") - line.count("}")
+            if in_providers and depth < provider_depth:
+                in_providers = False
+                provider = None
+            continue
+        m = APIKEY.match(line)
+        if m and provider:
+            env = "OPENCODE_API_KEY_" + stem(provider)
+            line = line[:m.end(1)] + "{env:" + env + "}" + line[m.end(2):]
+            changed.append(f"{provider}.apiKey -> {env}")
+        out.append(line)
+        depth += line.count("{") - line.count("}")
+        if in_providers and depth < provider_depth:
+            in_providers = False
+            provider = None
+    path.write_text("".join(out))
+    if changed:
+        try:
+            rel = path.relative_to(Path.cwd())
+        except ValueError:
+            rel = path
+        print(f"  {rel}: " + ", ".join(changed))
+' {} +
 
   echo "== converting opencodex provider apiKeys to env references =="
   python3 - "$D/opencodex/config.json" <<'EOF'
