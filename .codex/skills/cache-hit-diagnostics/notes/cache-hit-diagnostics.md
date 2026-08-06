@@ -291,3 +291,24 @@ message.
 - Same guidance for any plugin hook that renders mutable state into the
   system prompt: omo-slim's background-job board and running-task placeholder
   rewrites are the same failure family when active.
+
+## BLSC backend identity (probed 2026-08-07)
+
+BLSC (`https://llmapi.blsc.cn/v1`, openai-compatible) is a **LiteLLM proxy**
+in front of **vLLM**:
+
+- Invalid key error literally names LiteLLM's token table:
+  "Unable to find token in cache or `LiteLLM_VerificationTokenTable`" with
+  `"type":"token_not_found_in_db"` (LiteLLM's virtual-key error type).
+- Malformed/missing key: "Authentication Error, Malformed API Key passed in.
+  Ensure Key has `Bearer ` prefix." (LiteLLM proxy auth text).
+- Model access denied: `"type":"team_model_access_denied"` with a
+  team-scoped model allow-list (LiteLLM proxy team model access). Error
+  envelope is LiteLLM's `{"error":{message,type,param,code}}`.
+- Successful completion carries `"system_fingerprint":"vllm-0.21.0-dp16-ep-..."`
+  and `provider_specific_fields` (routed_experts/stop_reason/token_ids) —
+  upstream is vLLM 0.21.0 (dp16 = 16-way data parallel, ep = expert parallel).
+- HTTP layer: `server: istio-envoy` on the 401 path (Istio mesh in front).
+
+Implication for cache probes: LiteLLM relays upstream usage accounting; the
+cached-token numbers come from the vLLM/DeepSeek upstream, not the proxy.
