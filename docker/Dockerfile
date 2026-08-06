@@ -98,12 +98,15 @@ RUN git init -q /opt/external/cfd_externals \
 # clones are removed afterwards; the installed tree stays at
 # /opt/external/cfd_externals/install.
 # Cache mount: pip downloads persist across rebuilds.
+# The venv's bin/ goes on PATH for this step: cfd_externals_build.py invokes
+# bare `scons`/`patchelf` (via shutil.which / run_or_die), which must resolve
+# to the venv installs — the system python has no scons.
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m venv /opt/cfd-venv \
-    && /opt/cfd-venv/bin/pip install -q \
+    && /opt/cfd-venv/bin/pip install \
         -r /opt/external/cfd_externals/requirements.txt \
     && cd /opt/external/cfd_externals \
-    && CC=mpicc CXX=mpicxx JOBS="${JOBS}" \
+    && CC=mpicc CXX=mpicxx PATH="/opt/cfd-venv/bin:$PATH" JOBS="${JOBS}" \
         /opt/cfd-venv/bin/python cfd_externals_build.py \
     && rm -rf build_* repos
 
