@@ -27,7 +27,30 @@ D="$ROOT/docker/configs"
 OCONF="$HOME/.config/opencode"
 TOOLS="/mnt/ssd-SATARAID5/harry/tools/opencode_config/opencode"
 
-mkdir -p "$D/opencode" "$D/codex" "$D/opencodex"
+mkdir -p "$D/opencode" "$D/codex" "$D/opencodex" "$D/bash"
+
+echo "== copying bash setup =="
+# The container shell is Ubuntu's default bash. The vendored stack carries
+# the manager host's bashrc settings (history, prompt, aliases, completion)
+# so interactive containers feel like the host, plus a friendly .inputrc.
+# Files the host bashrc sources (~/.alias, ~/.envset, ~/.bash_profile) are
+# vendored too; host-absolute `source ~/...` lines are guarded afterwards so
+# missing files stay silent in the container.
+[ -e "$HOME/.bashrc" ] && cp -a "$HOME/.bashrc" "$D/bash/.bashrc"
+[ -e "$HOME/.bash_profile" ] && cp -a "$HOME/.bash_profile" "$D/bash/.bash_profile"
+[ -e "$HOME/.inputrc" ] && cp -a "$HOME/.inputrc" "$D/bash/.inputrc"
+[ -e "$HOME/.alias" ] && cp -a "$HOME/.alias" "$D/bash/.alias"
+[ -e "$HOME/.envset" ] && cp -a "$HOME/.envset" "$D/bash/.envset"
+[ -e "$HOME/.profile" ] && cp -a "$HOME/.profile" "$D/bash/.profile"
+
+# Friendly readline defaults (kept separate from the host file so a
+# regeneration is idempotent).
+if [ -f "$D/bash/.inputrc" ]; then
+  grep -qF "benchmark container additions" "$D/bash/.inputrc" || \
+    printf '\n# --- benchmark container additions ---\nset completion-ignore-case on\nset colored-stats on\nset visible-stats on\nset show-all-if-ambiguous on\nset skip-completed-text on\nset mark-symlinked-directories on\nset bell-style none\n' >> "$D/bash/.inputrc"
+else
+  printf '$include /etc/inputrc\n\n# --- benchmark container additions ---\nset completion-ignore-case on\nset colored-stats on\nset visible-stats on\nset show-all-if-ambiguous on\nset skip-completed-text on\nset mark-symlinked-directories on\nset bell-style none\n' > "$D/bash/.inputrc"
+fi
 
 echo "== copying opencode configs =="
 cp "$OCONF/opencode.jsonc"          "$D/opencode/opencode.jsonc"
@@ -51,11 +74,20 @@ echo "== copying opencodex config =="
 [ -e "$HOME/.opencodex/config.json" ] && cp -a "$HOME/.opencodex/config.json" "$D/opencodex/"
 
 echo "== redacting secrets =="
-find "$D" -type f \( -name '*.json' -o -name '*.jsonc' -o -name '*.toml' -o -name '*.md' -o -name '*.txt' \) \
+find "$D" -type f \( -name '*.json' -o -name '*.jsonc' -o -name '*.toml' -o -name '*.md' -o -name '*.txt' \
+  -o -name '.bashrc' -o -name '.bash_profile' -o -name '.profile' -o -name '.inputrc' -o -name '.alias' -o -name '.envset' \) \
   -exec sed -i -E \
     -e 's#("apiKey"[[:space:]]*:[[:space:]]*")[^"]*#\1REDACTED#g' \
     -e 's#("key"[[:space:]]*:[[:space:]]*")[^"]*#\1REDACTED#g' \
     -e 's#(sk-[A-Za-z0-9_-]{16,})#sk-REDACTED#g' \
+    {} +
+
+# Guard host-absolute `source ~/...` / `. ~/...` lines in the vendored bash
+# files: in the container the referenced files may not exist, and an
+# unconditional source would print errors on every shell start.
+find "$D/bash" -maxdepth 1 -type f \
+  -exec sed -i -E \
+    -e 's#^([[:space:]]*)(source|\.)[[:space:]]+(~/[^[:space:]]+)(.*)$#\1[ -f \3 ] \&\& \2 \3\4#' \
     {} +
 
 if [ "$ENV_MODE" = "1" ]; then

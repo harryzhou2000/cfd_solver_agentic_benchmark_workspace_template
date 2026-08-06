@@ -124,7 +124,10 @@ MOUNTS=(-v "$BENCH_ROOT:$BENCH_ROOT")
 # (real workspaces live under $BENCH_ROOT, but relative/absolute paths from
 # setup-workspace.sh may point anywhere).
 MOUNTS+=(-v "$WS:$WS")
-ENVS=(-e HOME="$IMG_HOME" -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)")
+# WORKSPACE tells the entrypoint to start the shell in the contestant
+# workspace (also set as the docker working dir via -w below).
+ENVS=(-e HOME="$IMG_HOME" -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
+      -e WORKSPACE="$WS")
 SECURITY_OPTS=(--security-opt seccomp=unconfined --security-opt apparmor=unconfined)
 
 # Proxy: forward the existing proxy env into the container. With --network
@@ -186,20 +189,21 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   MOUNTS+=(-v "$OCX_DIR:$IMG_HOME/.opencodex")
 
   # bash: default Ubuntu bash setup (system template vendored under
-  # docker/configs/bash; override with CONFIG_STACK/bash). Seeded into the
-  # session bundle at start, then mounted at the home dotfiles so every
-  # workspace gets a writable, persistent ~/.bashrc and shell history.
+  # docker/configs/bash — the manager host's bashrc settings + friendly
+  # .inputrc; override with CONFIG_STACK/bash. Seeded into the session
+  # bundle at start, then mounted at the home dotfiles so every workspace
+  # gets a writable, persistent ~/.bashrc, readline config and history.
   BASH_DIR="$SESS/bash"
   BASH_TEMPLATE="$CONFIG_STACK/bash"
   [ -d "$BASH_TEMPLATE" ] || BASH_TEMPLATE="$ROOT/docker/configs/bash"
   mkdir -p "$BASH_DIR"
-  for f in .bashrc .profile .bash_logout; do
+  for f in .bashrc .bash_profile .profile .bash_logout .inputrc .alias .envset; do
     if [ ! -f "$BASH_DIR/$f" ] && [ -f "$BASH_TEMPLATE/$f" ]; then
       cp "$BASH_TEMPLATE/$f" "$BASH_DIR/$f"
     fi
   done
   touch "$BASH_DIR/.bash_history"
-  for f in .bashrc .profile .bash_logout .bash_history; do
+  for f in .bashrc .bash_profile .profile .bash_logout .inputrc .alias .envset .bash_history; do
     MOUNTS+=(-v "$BASH_DIR/$f:$IMG_HOME/$f")
   done
 
@@ -356,6 +360,7 @@ echo "  workspace: $WS"
 echo "  harness:   $HARNESS"
 echo "  name:      $NAME"
 echo "  cpus:      $CPUS"
+echo "  start dir: $WS (entrypoint cd + docker -w)"
 [ -n "$CODEX_PROFILE" ] && echo "  codex profile: -p $CODEX_PROFILE"
 if [ "$MOUNT_CONFIG" = "1" ]; then
   echo "  config stack: $CONFIG_STACK"
@@ -384,10 +389,10 @@ docker rm -f "$NAME" >/dev/null 2>&1 || true
 docker run -it --rm --network host --name "$NAME" \
   --user root:root \
   --cpus "$CPUS" \
+  -w "$WS" \
   "${SECURITY_OPTS[@]}" \
   "${ENVS[@]}" \
   "${MOUNTS[@]}" \
-  -w "$WS" \
   "$IMAGE" "${CMD[@]}" <&0 &
 RUN_PID=$!
 wait "$RUN_PID"

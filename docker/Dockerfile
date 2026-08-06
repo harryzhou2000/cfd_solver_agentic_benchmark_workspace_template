@@ -205,6 +205,11 @@ RUN git init -q /opt/ocx-relay \
     && git fetch -q --depth 1 origin "${OCX_RELAY_COMMIT}" \
     && git checkout -q FETCH_HEAD
 
+# Friendly readline config for bare runs: the entrypoint seeds /etc/skel
+# dotfiles into an empty home, so a .inputrc here means `docker run`
+# (without the start.sh config stack) also gets a friendly command line.
+COPY docker/configs/bash/.inputrc /etc/skel/.inputrc
+
 # --- container entrypoint (opencodex autostart probe) -----------------------
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh \

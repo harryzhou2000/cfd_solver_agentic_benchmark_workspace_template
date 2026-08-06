@@ -79,6 +79,7 @@ leaked to the terminal.
 | `CONFIG_STACK=/path` | `<repo>/docker/configs` | vendored config stack installed into `$WS/.sessions` at start |
 | `IMAGE=name` | `cfd-bench:latest` | image to run |
 | `BENCH_ROOT=/path` | `/mnt/ssd-SATARAID5/.../cfd_agentic_benchmark` | host root mounted into the container |
+| `WORKSPACE=/path` | the `--workspace` dir | the entrypoint `cd`s into it before exec; together with docker `-w` the shell always starts in the contestant workspace |
 | `OCX_PORT=10109` | stack config's `.port`, else `10100` | opencodex probe/start port inside the container; if something already listens on it (e.g. a host-side ocx under `--network host`), the container skips starting its own proxy |
 | `OPENCODEX_AUTOSTART=0` | `1` | disable the opencodex autostart probe entirely |
 | `OPENCODE_API_KEY_*`, `OPENCODEX_*` | – | credential env refs the vendored stack expects; export them or use `--host-credentials` |
@@ -180,10 +181,14 @@ persistent session storage) and mounted at the inside-docker-home paths:
    `$OPENCODEX_<PROVIDER>_API_KEY` references). Runtime state (usage,
    artifacts, sqlite) persists in the workspace copy.
 4. **bash** — `configs/bash/` → `$WS/.sessions/bash/` → `~/.bashrc`,
-   `~/.profile`, `~/.bash_logout` (default Ubuntu system template; override
-   with `CONFIG_STACK/bash`), plus a persistent `~/.bash_history`. The image
-   shell is Ubuntu's default bash (`/bin/bash`), so this is what every
-   interactive container starts with.
+   `~/.bash_profile`, `~/.profile`, `~/.bash_logout` (the manager host's
+   bashrc settings with host-specific `source ~/...` lines guarded so
+   missing files stay silent), a friendly `~/.inputrc` (host bindings +
+   case-insensitive completion, colored/visible completion stats, no bell),
+   the host's `~/.alias`/`~/.envset`, and a persistent `~/.bash_history`.
+   Override the whole set with `CONFIG_STACK/bash`. The image shell is
+   Ubuntu's default bash (`/bin/bash`), and the shell starts in the
+   contestant workspace (`WORKSPACE` env + docker `-w`).
 
 The live host config stack is **never** used as the config source (no
 fallback). Credentials are supplied separately: export the referenced env

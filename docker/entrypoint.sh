@@ -19,6 +19,12 @@ set -e
 
 IMG_USER="cfd_agent"
 
+# Default working directory: the mounted contestant workspace (start.sh
+# passes WORKSPACE=<workspace path>); fall back to the image WORKDIR.
+if [ -n "${WORKSPACE:-}" ] && [ -d "$WORKSPACE" ]; then
+  cd "$WORKSPACE" || true
+fi
+
 # Seed the default Ubuntu bash setup (system template) into the image home
 # when absent — bare `docker run` and --image-config mode get a normal bash
 # environment (no zsh-newuser-style wizard, no missing dotfiles). start.sh

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+export PATH=~/.local/bin:$PATH
+
+# it seems to induce more bugs in opencode
+# export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+
+export PATH=$HOME/.bun/bin:$PATH
+
+export CCACHE_DIR=/mnt/ssd-SATARAID5/harry/.ccache
+export HF_ENDPOINT=https://hf-mirror.com
+export OMPI_CC=gcc-13
+export OMPI_CXX=g++-13
+export THTJ1_DNDSR=thtj1:/fs2/home/advance/zhy/DNDSR
+
+export CUDA_HOME=/usr/local/cuda-13.2
+export PATH=$CUDA_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+export CUDA_CXX=$CUDA_HOME/bin/nvcc
+
+export MPI_HOME=/mnt/ssd-SATARAID5/harry/tools/openmpi-5.0.9/install
+export MPI_BIN=$MPI_HOME/bin
+export MPI_INC=$MPI_HOME/include
+export MPI_LIB=$MPI_HOME/lib
+
+export PATH=$MPI_BIN:$PATH
+export LD_LIBRARY_PATH=$MPI_LIB:$LD_LIBRARY_PATH
+
+
+export PATH=/mnt/ssd-SATARAID5/harry/tools/clangd_21.1.0/bin:$PATH
+
+[ -f ~/.opencode_port_dict_rc.sh ] && source ~/.opencode_port_dict_rc.sh
