@@ -312,3 +312,24 @@ in front of **vLLM**:
 
 Implication for cache probes: LiteLLM relays upstream usage accounting; the
 cached-token numbers come from the vLLM/DeepSeek upstream, not the proxy.
+
+## BLSC Kimi-K3: no prompt caching (probed 2026-08-07)
+
+Identical-request probes against `llmapi.blsc.cn/v1` show **Kimi-K3 caches at
+0%** while DeepSeek models on the same proxy cache at ~98%:
+
+- `probe_model_cache.js --targets blsc-k3 --count 8` (1577-token prompt,
+  reasoning_effort=max): cached=0 on all 8 requests; input stays 1577 every
+  request (no prefix reuse); outputs real (88-256), so not stub accounting.
+- Longer prompt (6130 tokens, 3 identical): cached=0 on all 3; latency stays
+  ~8-13s/request.
+- Streaming (stream_options include_usage): usage is reported truthfully
+  (prompt_tokens 1325, completion 32) with `prompt_tokens_details.cached_tokens`
+  = 0 — genuine miss, not a `cached=0, out=1` stub.
+- Control `DeepSeek-V4-Flash` (6011-token prompt, same proxy/request shape):
+  req1 miss, req2+ cached=5888 (98.0%), latency 13.5s -> 0.8s.
+
+Conclusion: BLSC's Kimi-K3 route does not expose/leverage upstream context
+caching. Sessions on Kimi-K3 via BLSC pay full input every request; prefer
+DeepSeek models on BLSC or a Kimi route that caches (e.g. the oc_goal-kimik3
+session that showed 98.5% used a different provider route).
