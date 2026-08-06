@@ -290,9 +290,9 @@ docker/scripts/start.sh --workspace ../omo_slim_dsv4_01
 
 Default mode mounts:
 
-- the benchmark root (parent of all contestant workspaces, so
-  workspace-relative paths like `../opencode_omoslim_deepseek/external`
-  resolve),
+- the benchmark root, mounted **read-only** (parent of all contestant
+  workspaces, so sibling externals/repos stay readable, but nothing outside
+  the workspace can be written: the workspace itself is the only rw mount),
 - the vendored config stack (default `<repo>/docker/configs`, override with
   `CONFIG_STACK=/path/to/stack`), copied into `$WS/.sessions/` and mounted
   at the inside-docker-home paths,
@@ -317,8 +317,14 @@ Credentials are **never** part of the stack. Two modes at start:
   host's live configs read-only and turns their real keys into the
   container env under exactly the referenced names (opencode:
   `OPENCODE_API_KEY_<PROVIDER>`; opencodex: `OPENCODEX_<PROVIDER>_API_KEY`),
-  and bind-mounts `~/.codex/auth.json` + the opencode auth store. Nothing is
-  written to the workspace; the keys only exist in the container env.
+  and bind-mounts (read-only) the harness credential stores: codex's openai
+  credentials (`~/.codex/auth.json` — the ChatGPT-backend tokens; `codex
+  login status` inside the container shows the account), opencode's auth
+  store (`~/.local/share/opencode/{auth,account}.json` — every auth'd
+  provider, including non-`sk-` keys like zai), while opencodex stays
+  env-only (`OPENCODEX_*_API_KEY`; its config.json is already in the stack
+  with `$VAR` references). Nothing is written to the workspace; the keys
+  exist only in the container env / ro mounts.
 
 `--image-config` skips the config-stack injection and the workspace session
 bundle entirely, using the image's pristine state (sessions are ephemeral;
@@ -368,9 +374,13 @@ for live-edit workflows.
   host configs (`~/.config/opencode/opencode.jsonc`,
   `~/.opencodex/config.json`) read-only, exports the real keys into the
   container env under the same names the stack references, and bind-mounts
-  `~/.codex/auth.json` plus the opencode auth store
-  (`~/.local/share/opencode/{auth,account}.json`). The keys exist only in
-  the container env / mount — never in the workspace record.
+  (read-only) the credential stores of all three harnesses: codex's openai
+  credentials (`~/.codex/auth.json` — ChatGPT-backend tokens), opencode's
+  auth store (`~/.local/share/opencode/{auth,account}.json` — all auth'd
+  providers, not just the config's `sk-` apiKeys), and opencodex via
+  `OPENCODEX_*_API_KEY` env (its config already lives in the stack). The
+  keys exist only in the container env / ro mounts — never in the workspace
+  record.
 - Codex credentials have no env-placeholder mechanism: auth stays in
   `auth.json` (bind-mounted with `--host-credentials`, or `codex login`
   inside the container) or in a custom provider's `env_key`.

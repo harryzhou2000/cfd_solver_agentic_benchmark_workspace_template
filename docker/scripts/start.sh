@@ -119,7 +119,11 @@ fi
 if [ $# -gt 0 ]; then CMD=("$@"); fi
 
 NAME="${NAME_ARG:-bench-$(basename "$WS" | tr -c 'A-Za-z0-9_.-' '_')}"
-MOUNTS=(-v "$BENCH_ROOT:$BENCH_ROOT")
+# The benchmark root (parent of all contestant workspaces) is mounted
+# READ-ONLY: the container may read sibling externals/repos, but must never
+# write outside the contestant workspace (the workspace itself is mounted rw
+# below and shadows this for its own subtree).
+MOUNTS=(-v "$BENCH_ROOT:$BENCH_ROOT:ro")
 # Mount the workspace itself so session paths work regardless of location
 # (real workspaces live under $BENCH_ROOT, but relative/absolute paths from
 # setup-workspace.sh may point anywhere).
@@ -256,7 +260,10 @@ for line in Path(sys.argv[1]).read_text().splitlines():
     m = APIKEY.match(line)
     if m and provider:
         key = m.group(2)
-        if key.startswith("sk-"):
+        # Export every apiKey (not only sk-...): providers like zai use
+        # non-sk- keys, and the vendored config references them via
+        # {env:OPENCODE_API_KEY_<PROVIDER>}.
+        if key:
             print(f"OPENCODE_API_KEY_{stem(provider)}={key}")
     depth += line.count("{") - line.count("}")
     if in_providers and depth < provider_depth:
@@ -280,12 +287,12 @@ for pid, prov in (cfg.get("providers") or {}).items():
     if not isinstance(prov, dict):
         continue
     name = f"OPENCODEX_{stem(pid)}_API_KEY"
-    if isinstance(prov.get("apiKey"), str) and prov["apiKey"].startswith("sk-"):
+    if isinstance(prov.get("apiKey"), str) and prov["apiKey"]:
         print(f"{name}={prov['apiKey']}")
     elif isinstance(prov.get("apiKeyPool"), list):
         for entry in prov["apiKeyPool"]:
             if isinstance(entry, dict) and isinstance(entry.get("key"), str) \
-               and entry["key"].startswith("sk-"):
+               and entry["key"]:
                 print(f"{name}={entry['key']}")
                 break
 PYEOF
@@ -293,12 +300,15 @@ PYEOF
     fi
     if [ -f "$HOME/.codex/auth.json" ]; then
       touch "$CODEX_HOME_DIR/auth.json"   # non-credential placeholder; real file mounts over it
-      MOUNTS+=(-v "$HOME/.codex/auth.json:$IMG_HOME/.codex/auth.json")
+      MOUNTS+=(-v "$HOME/.codex/auth.json:$IMG_HOME/.codex/auth.json:ro")
     fi
     for f in auth.json account.json; do
       if [ -f "$HOME/.local/share/opencode/$f" ]; then
         touch "$OC_DATA_DIR/$f"           # non-credential placeholder; real file mounts over it
-        MOUNTS+=(-v "$HOME/.local/share/opencode/$f:$OC_DATA_DIR/$f")
+        # opencode reads provider keys from auth.json (and account info from
+        # account.json); mounted read-only so the container can never modify
+        # the host credentials.
+        MOUNTS+=(-v "$HOME/.local/share/opencode/$f:$OC_DATA_DIR/$f:ro")
       fi
     done
   fi
