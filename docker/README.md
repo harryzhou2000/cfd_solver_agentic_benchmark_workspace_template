@@ -124,6 +124,23 @@ docker/build.sh                    # stages host artifacts + live configs, then 
 IMAGE=cfd-bench:test docker/build.sh
 ```
 
+### Robustness on other machines
+
+- **Missing host tools:** `build.sh` auto-discovers opencode/codex/codegraph
+  (default paths first, then `PATH`). Anything still missing is staged as an
+  empty placeholder, so the image build always succeeds — the image just ends
+  up without that tool (a warning is printed).
+- **Missing submodules:** the build fails fast with a clear
+  `git submodule update --init --recursive` hint instead of a cryptic COPY
+  error.
+- **Missing user configs:** `start.sh` detects whether the host has
+  `~/.codex` configs and the opencode auth store. When absent, it skips the
+  workspace snapshot and falls back to the baked image configs (the image is
+  self-contained); codex sessions are then ephemeral. `--mount-host-configs`
+  only mounts host dirs that actually exist.
+- **No proxy on the host:** both scripts only source `~/.setproxy.sh` when it
+  exists; everything works with direct connectivity too.
+
 ## Run (manual interactive launch)
 
 ```bash
@@ -143,6 +160,22 @@ baked configs directly (sessions are ephemeral; for bare/CI runs).
 `--mount-host-configs` additionally bind-mounts the live host
 `~/.config/opencode`, `~/.local/share/opencode` and `~/.opencodex` over the
 baked ones, for live-edit workflows without an image rebuild.
+If the host has no `~/.codex` or opencode auth store, `start.sh` falls back
+to the baked configs automatically (sessions become ephemeral).
+
+### Network / proxy
+
+- The container runs with `--network host`, so it shares the host's network
+  stack; LAN and loopback proxy endpoints are reachable as-is.
+- `start.sh` and `build.sh` source `~/.setproxy.sh` when present (override
+  with `PROXY_SCRIPT=/path`) and forward `HTTP_PROXY` / `HTTPS_PROXY` /
+  `ALL_PROXY` / `NO_PROXY` (upper- and lowercase) into the container,
+  respectively as `docker build --build-arg`s. `localhost`, `127.0.0.1` and
+  `::1` are appended to `NO_PROXY` so the opencodex proxy on
+  127.0.0.1:10109 is never proxied.
+- Docker does not inherit the shell environment, which is why the scripts
+  forward the variables explicitly. For a manual `docker run`, pass
+  `-e HTTP_PROXY=... -e HTTPS_PROXY=...` yourself.
 
 ### Credentials (safe by construction)
 

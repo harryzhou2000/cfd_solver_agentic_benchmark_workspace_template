@@ -10,6 +10,33 @@ IMAGE="${IMAGE:-cfd-bench:latest}"
 C="$ROOT/docker/.context"
 mkdir -p "$C"
 
+# Proxy for the build itself (apt/npm/bun): source ~/.setproxy.sh when present
+# and forward the standard proxy vars as docker build args.
+PROXY_SCRIPT="${PROXY_SCRIPT:-$HOME/.setproxy.sh}"
+if [ -f "$PROXY_SCRIPT" ]; then
+  . "$PROXY_SCRIPT" || true
+  echo "sourced proxy env from $PROXY_SCRIPT (used by docker build)"
+fi
+BUILD_ARGS=()
+for v in HTTP_PROXY HTTPS_PROXY NO_PROXY http_proxy https_proxy no_proxy; do
+  if [ -n "${!v:-}" ]; then BUILD_ARGS+=(--build-arg "$v=${!v}"); fi
+done
+
+echo "== checking submodules =="
+for sm in opencodex ocx-relay OpenCode-goal-plugin; do
+  case "$sm" in
+    opencodex) marker="bin/ocx.mjs" ;;
+    ocx-relay) marker="deepseek-relay.mjs" ;;
+    *) marker="package.json" ;;
+  esac
+  if [ ! -e "$ROOT/$sm/$marker" ]; then
+    echo "ERROR: submodule $sm is not initialized (missing $sm/$marker)." >&2
+    echo "       Run: git submodule update --init --recursive" >&2
+    exit 1
+  fi
+done
+echo "  submodules OK"
+
 stage() {
   local src="$1" dst="$2"
   if [ -e "$src" ]; then
@@ -34,12 +61,44 @@ stage() {
 }
 
 echo "== staging host artifacts =="
-stage "$HOME/.opencode/bin/opencode"                       "$C/opencode"
-stage "$HOME/.codex/packages/standalone/releases/0.146.0-x86_64-unknown-linux-musl" "$C/codex-release"
-stage "$HOME/.codegraph/versions/v1.2.0"                   "$C/codegraph"
-stage "/mnt/ssd-SATARAID5/harry/tools/openmpi-5.0.9/install" "$C/openmpi"
-stage "$ROOT/../opencode_omoslim_deepseek/external"        "$C/external"
-stage "$HOME/.local/share/opencode-goal-plugin"            "$C/opencode-goal-plugin"
+OPENCODE_BIN="${OPENCODE_BIN:-$HOME/.opencode/bin/opencode}"
+if [ ! -e "$OPENCODE_BIN" ] && command -v opencode >/dev/null 2>&1; then
+  OPENCODE_BIN="$(command -v opencode)"
+  echo "  (opencode not at default path; using $OPENCODE_BIN)"
+fi
+stage "$OPENCODE_BIN" "$C/opencode"
+
+CODEX_RELEASE="${CODEX_RELEASE:-$(ls -d "$HOME"/.codex/packages/standalone/releases/*/ 2>/dev/null | sort -V | tail -1)}"
+if [ -z "$CODEX_RELEASE" ] && command -v codex >/dev/null 2>&1; then
+  echo "  (no standalone codex release under ~/.codex/packages; staging PATH codex binary)"
+  mkdir -p "$C/codex-release/bin"
+  cp -aL "$(command -v codex)" "$C/codex-release/bin/codex"
+else
+  stage "$CODEX_RELEASE" "$C/codex-release"
+fi
+
+CODEGRAPH_SRC="${CODEGRAPH_SRC:-$HOME/.codegraph/versions/v1.2.0}"
+if [ ! -e "$CODEGRAPH_SRC" ] && command -v codegraph >/dev/null 2>&1; then
+  echo "  (codegraph not at default path; staging PATH binary into bin/)"
+  mkdir -p "$C/codegraph/bin"
+  cp -aL "$(command -v codegraph)" "$C/codegraph/bin/codegraph"
+else
+  stage "$CODEGRAPH_SRC" "$C/codegraph"
+fi
+
+OPENMPI_PREFIX="${OPENMPI_PREFIX:-/mnt/ssd-SATARAID5/harry/tools/openmpi-5.0.9/install}"
+stage "$OPENMPI_PREFIX" "$C/openmpi"
+EXTERNAL_SRC="${EXTERNAL_SRC:-$ROOT/../opencode_omoslim_deepseek/external}"
+stage "$EXTERNAL_SRC" "$C/external"
+GOAL_PLUGIN_SRC="${GOAL_PLUGIN_SRC:-$HOME/.local/share/opencode-goal-plugin}"
+stage "$GOAL_PLUGIN_SRC" "$C/opencode-goal-plugin"
+
+# Placeholders so docker build never fails on a missing staged artifact (the
+# image just ends up without that tool).
+for t in codex-release codegraph openmpi external opencode-goal-plugin; do
+  [ -e "$C/$t" ] || mkdir -p "$C/$t"
+done
+[ -e "$C/opencode" ] || : > "$C/opencode"
 
 echo "== staging live user configs (real, gitignored) =="
 CC="$C/configs"
@@ -89,5 +148,5 @@ done
 echo "staged configs: $(du -sh "$CC" | cut -f1)  $CC"
 
 echo "== docker build =="
-docker build -f docker/Dockerfile -t "$IMAGE" .
+docker build "${BUILD_ARGS[@]}" -f docker/Dockerfile -t "$IMAGE" .
 echo "built $IMAGE"

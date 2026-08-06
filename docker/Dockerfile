@@ -46,17 +46,24 @@ RUN chmod +x /usr/local/bin/opencode \
 
 # --- opencodex proxy + ocx-relay + goal plugin (repo submodules) ------------
 COPY opencodex /opt/opencodex
-RUN cd /opt/opencodex && /home/harry/.bun/bin/bun install --frozen-lockfile \
-    && ln -sf /opt/opencodex/bin/ocx.mjs /usr/local/bin/ocx
+RUN cd /opt/opencodex \
+    && if [ -f package.json ]; then \
+         /home/harry/.bun/bin/bun install --frozen-lockfile \
+         && ln -sf /opt/opencodex/bin/ocx.mjs /usr/local/bin/ocx; \
+       else echo "opencodex submodule missing; skipping"; fi
 COPY ocx-relay /opt/ocx-relay
 COPY OpenCode-goal-plugin /opt/OpenCode-goal-plugin
-RUN cd /opt/OpenCode-goal-plugin && npm install --omit=dev --no-audit --no-fund
+RUN cd /opt/OpenCode-goal-plugin \
+    && if [ -f package.json ]; then npm install --omit=dev --no-audit --no-fund; \
+       else echo "goal plugin submodule missing; skipping"; fi
 
 # --- real user configs, mirrored from the host by build.sh ----------------
 # Source is docker/.context/configs (gitignored; real keys). The committed
 # docker/configs/ tree stays a redacted reference snapshot.
 COPY docker/.context/configs/opencode/ /home/harry/.config/opencode/
-RUN cd /home/harry/.config/opencode && npm ci --omit=dev --no-audit --no-fund
+RUN cd /home/harry/.config/opencode \
+    && if [ -f package.json ]; then npm ci --omit=dev --no-audit --no-fund; \
+       else echo "no opencode config staged; skipping npm ci"; fi
 COPY docker/.context/opencode-goal-plugin /home/harry/.local/share/opencode-goal-plugin
 COPY docker/.context/configs/opencode-data/ /home/harry/.local/share/opencode/
 
