@@ -65,8 +65,10 @@ bundling, container lifecycle and the redaction policy.
     image uses the real `docker/.context/configs/` mirror.
 - `external/` — pointer for the shared DNDSR externals; the real tree is
   staged by `build.sh` and baked into the image at `/opt/external`.
-- `entrypoint.sh` — starts the opencodex proxy on 10109 when its config is
-  present and the port is free, then execs the requested command.
+- `entrypoint.sh` — starts the opencodex proxy when its config is present and
+  the port is free, then execs the requested command. The probe port comes
+  from `$OCX_PORT` (also passed to `ocx start --port`), else `config.json`
+  `.port`, else 10100 (the opencodex default).
 - `scripts/` — `start.sh` (interactive launcher with workspace-bundled
   sessions and guaranteed container cleanup) and `setup-workspace.sh` (fresh
   contestant workspace from a path: `.sessions/` git-exclusion, `git remote
@@ -170,17 +172,22 @@ to the baked configs automatically (sessions become ephemeral).
   container's `127.0.0.1` is the host's loopback, so a proxy bound to
   `127.0.0.1:PORT` on the host works without changes (verified live).
 - `start.sh` and `build.sh` source `~/.setproxy.sh` when present (override
-  with `PROXY_SCRIPT=/path`) and forward `HTTP_PROXY` / `HTTPS_PROXY` /
-  `ALL_PROXY` / `NO_PROXY` (upper- and lowercase) into the container,
-  respectively as `docker build --build-arg`s. `localhost`, `127.0.0.1` and
-  `::1` are appended to `NO_PROXY` so the opencodex proxy on
-  127.0.0.1:10109 is never proxied.
+  with `PROXY_SCRIPT=/path`). `start.sh` forwards `HTTP_PROXY` /
+  `HTTPS_PROXY` / `ALL_PROXY` / `NO_PROXY` (upper- and lowercase) into the
+  container. `localhost`, `127.0.0.1` and `::1` are appended to `NO_PROXY` so
+  the opencodex proxy on 127.0.0.1:10109 is never proxied.
 - Docker does not inherit the shell environment, which is why the scripts
   forward the variables explicitly. For a manual `docker run`, pass
   `-e HTTP_PROXY=... -e HTTPS_PROXY=...` yourself.
-- Image builds use `docker build --network host`: build steps run in isolated
-  build containers where `127.0.0.1` is not the host, so loopback proxies
-  would otherwise fail during the apt/npm/bun layers.
+- Image builds pass proxy build-args and `--network host` **only when the
+  proxy is on the host loopback** (build containers cannot reach the host's
+  `127.0.0.1` otherwise). LAN proxies are skipped by default — direct
+  connectivity avoids flaky apt/npm failures through the proxy — force them
+  with `BUILD_PROXY=1`.
+- opencodex autostart is skipped when the port is already occupied — e.g.
+  with `--network host` and a host-side daemon on the same port. Override the
+  probe/service port with `OCX_PORT` (default: `config.json` `.port` or
+  10100).
 
 ### Credentials (safe by construction)
 

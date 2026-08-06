@@ -10,17 +10,28 @@ IMAGE="${IMAGE:-cfd-bench:latest}"
 C="$ROOT/docker/.context"
 mkdir -p "$C"
 
-# Proxy for the build itself (apt/npm/bun): source ~/.setproxy.sh when present
-# and forward the standard proxy vars as docker build args.
+# Proxy for the build itself (apt/npm/bun): source ~/.setproxy.sh when present.
+# Proxy vars are forwarded to the build only when the proxy is on the host
+# loopback (build containers cannot reach the host's 127.0.0.1 without
+# --network host). LAN proxies are usually unnecessary — direct connectivity
+# works and avoids flaky apt/npm failures through the proxy; force them with
+# BUILD_PROXY=1.
 PROXY_SCRIPT="${PROXY_SCRIPT:-$HOME/.setproxy.sh}"
 if [ -f "$PROXY_SCRIPT" ]; then
   . "$PROXY_SCRIPT" || true
   echo "sourced proxy env from $PROXY_SCRIPT (used by docker build)"
 fi
-BUILD_ARGS=()
-for v in HTTP_PROXY HTTPS_PROXY NO_PROXY http_proxy https_proxy no_proxy; do
-  if [ -n "${!v:-}" ]; then BUILD_ARGS+=(--build-arg "$v=${!v}"); fi
-done
+BUILD_PROXY="${BUILD_PROXY:-0}"
+case "${HTTP_PROXY:-}${http_proxy:-}" in
+  *127.0.0.1*|*localhost*) BUILD_PROXY=1 ;;
+esac
+BUILD_OPTS=()
+if [ "$BUILD_PROXY" = "1" ]; then
+  BUILD_OPTS+=(--network host)
+  for v in HTTP_PROXY HTTPS_PROXY NO_PROXY http_proxy https_proxy no_proxy; do
+    if [ -n "${!v:-}" ]; then BUILD_OPTS+=(--build-arg "$v=${!v}"); fi
+  done
+fi
 
 echo "== checking submodules =="
 for sm in opencodex ocx-relay OpenCode-goal-plugin; do
@@ -148,8 +159,5 @@ done
 echo "staged configs: $(du -sh "$CC" | cut -f1)  $CC"
 
 echo "== docker build =="
-# --network host: build steps (apt/npm/bun) run in isolated build containers
-# where 127.0.0.1 is NOT the host — required when the proxy sits on the
-# host's loopback (and harmless for LAN proxies).
-docker build --network host "${BUILD_ARGS[@]}" -f docker/Dockerfile -t "$IMAGE" .
+docker build "${BUILD_OPTS[@]}" -f docker/Dockerfile -t "$IMAGE" .
 echo "built $IMAGE"
