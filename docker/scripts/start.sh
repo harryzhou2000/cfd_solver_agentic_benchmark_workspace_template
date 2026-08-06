@@ -12,14 +12,20 @@
 # This launcher installs the VENDORED config stack at container start
 # (default: <repo>/docker/configs, gathered from the current host with
 # sync-configs.sh and committed credential-free; override with CONFIG_STACK):
-#   - codex      -> $WS/.sessions/codex            mounted at /home/harry/.codex
-#   - opencode   -> $WS/.sessions/opencode-config  mounted at /home/harry/.config/opencode
-#   - opencodex  -> $WS/.sessions/opencodex        mounted at /home/harry/.opencodex
+#   - codex      -> $WS/.sessions/codex            mounted at /home/cfd_agent/.codex
+#   - opencode   -> $WS/.sessions/opencode-config  mounted at /home/cfd_agent/.config/opencode
+#   - opencodex  -> $WS/.sessions/opencodex        mounted at /home/cfd_agent/.opencodex
 # Sessions/logs/DBs persist in $WS/.sessions for all three harnesses.
 # The stack's apiKeys are env references: export the vars on this host, or
 # pass --host-credentials to export the real keys from the live host configs
 # (read-only; never written to the workspace). The live host config stack is
 # never used as the config source.
+#
+# User mapping (enroot-style): the image ships one generic user (cfd_agent).
+# The entrypoint remaps it to this host's uid/gid at start (HOST_UID/HOST_GID
+# env), so files created in the container are owned by the invoking user and
+# the mounted host dirs work unchanged. The container is entered as root and
+# the entrypoint drops privileges before exec'ing the command.
 #
 # --host-credentials: read real apiKeys/auth from THIS host's live configs
 # and pass them to the container as env vars / auth-file binds (read-only;
@@ -51,6 +57,7 @@ cd "$ROOT"
 
 IMAGE="${IMAGE:-cfd-bench:latest}"
 BENCH_ROOT="${BENCH_ROOT:-/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark}"
+IMG_HOME="/home/cfd_agent"
 WS=""
 MOUNT_CONFIG=1
 MOUNT_HOST=0
@@ -97,7 +104,7 @@ MOUNTS=(-v "$BENCH_ROOT:$BENCH_ROOT")
 # (real workspaces live under $BENCH_ROOT, but relative/absolute paths from
 # setup-workspace.sh may point anywhere).
 MOUNTS+=(-v "$WS:$WS")
-ENVS=(-e HOME="$HOME")
+ENVS=(-e HOME="$IMG_HOME" -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)")
 SECURITY_OPTS=(--security-opt seccomp=unconfined --security-opt apparmor=unconfined)
 
 # Proxy: forward the existing proxy env into the container. With --network
@@ -142,21 +149,21 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   # codex home; sessions/logs/DBs persist in the workspace copy.
   mkdir -p "$CODEX_HOME_DIR"
   rsync -a "$CONFIG_STACK/codex/" "$CODEX_HOME_DIR/"
-  MOUNTS+=(-v "$CODEX_HOME_DIR:/home/harry/.codex")
-  ENVS+=(-e CODEX_HOME=/home/harry/.codex)
+  MOUNTS+=(-v "$CODEX_HOME_DIR:$IMG_HOME/.codex")
+  ENVS+=(-e CODEX_HOME="$IMG_HOME/.codex")
 
   # opencode: vendored config dir mounted at the global config path; data
   # dir (sessions, DB, auth) is bundled fresh in the workspace.
   mkdir -p "$OC_CONFIG_DIR" "$OC_DATA_DIR"
   rsync -a "$CONFIG_STACK/opencode/" "$OC_CONFIG_DIR/"
-  MOUNTS+=(-v "$OC_CONFIG_DIR:/home/harry/.config/opencode")
-  ENVS+=(-e XDG_CONFIG_HOME=/home/harry/.config -e XDG_DATA_HOME="$SESS/opencode-data")
+  MOUNTS+=(-v "$OC_CONFIG_DIR:$IMG_HOME/.config/opencode")
+  ENVS+=(-e XDG_CONFIG_HOME="$IMG_HOME/.config" -e XDG_DATA_HOME="$SESS/opencode-data")
 
   # opencodex: vendored config dir mounted at the service's home path;
   # runtime state (usage, artifacts, sqlite) persists in the workspace.
   mkdir -p "$OCX_DIR"
   rsync -a "$CONFIG_STACK/opencodex/" "$OCX_DIR/"
-  MOUNTS+=(-v "$OCX_DIR:/home/harry/.opencodex")
+  MOUNTS+=(-v "$OCX_DIR:$IMG_HOME/.opencodex")
 
   # Forward credential env vars already exported on this host (the stack's
   # env references). Nothing is read from host config files unless
@@ -244,7 +251,7 @@ PYEOF
     fi
     if [ -f "$HOME/.codex/auth.json" ]; then
       touch "$CODEX_HOME_DIR/auth.json"   # non-credential placeholder; real file mounts over it
-      MOUNTS+=(-v "$HOME/.codex/auth.json:/home/harry/.codex/auth.json")
+      MOUNTS+=(-v "$HOME/.codex/auth.json:$IMG_HOME/.codex/auth.json")
     fi
     for f in auth.json account.json; do
       if [ -f "$HOME/.local/share/opencode/$f" ]; then
@@ -268,7 +275,7 @@ if [ "$MOUNT_HOST" = "1" ]; then
   echo "WARNING: --mount-host-configs mounts the live host config dirs over the vendored stack (non-reproducible escape hatch)"
   for d in .codex .config/opencode .local/share/opencode .opencodex; do
     if [ -d "$HOME/$d" ]; then
-      MOUNTS+=(-v "$HOME/$d:$HOME/$d")
+      MOUNTS+=(-v "$HOME/$d:$IMG_HOME/$d")
     else
       echo "  (skip: $HOME/$d does not exist on this host)"
     fi
@@ -282,10 +289,10 @@ echo "  harness:   $HARNESS"
 [ -n "$CODEX_PROFILE" ] && echo "  codex profile: -p $CODEX_PROFILE"
 if [ "$MOUNT_CONFIG" = "1" ]; then
   echo "  config stack: $CONFIG_STACK"
-  echo "  codex:        $WS/.sessions/codex -> /home/harry/.codex"
-  echo "  opencode:     $WS/.sessions/opencode-config -> /home/harry/.config/opencode"
+  echo "  codex:        $WS/.sessions/codex -> $IMG_HOME/.codex"
+  echo "  opencode:     $WS/.sessions/opencode-config -> $IMG_HOME/.config/opencode"
   echo "  opencode data:$WS/.sessions/opencode-data (XDG_DATA_HOME)"
-  echo "  opencodex:    $WS/.sessions/opencodex -> /home/harry/.opencodex"
+  echo "  opencodex:    $WS/.sessions/opencodex -> $IMG_HOME/.opencodex"
   [ "$HOST_CRED" = "1" ] && echo "  credentials:  host-credentials mode (live keys via env/binds)"
   [ "$MOUNT_HOST" = "1" ] && echo "  credentials/configs: live host dirs mounted over the stack"
 fi
@@ -304,7 +311,7 @@ trap cleanup EXIT INT TERM HUP
 docker rm -f "$NAME" >/dev/null 2>&1 || true
 
 docker run -it --rm --network host --name "$NAME" \
-  --user "$(id -u):$(id -g)" \
+  --user root:root \
   "${SECURITY_OPTS[@]}" \
   "${ENVS[@]}" \
   "${MOUNTS[@]}" \

@@ -30,9 +30,9 @@ docker/scripts/setup-workspace.sh ../codex_gpt56_07 codex/gpt56/init
 docker/scripts/start.sh --workspace ../codex_gpt56_07
 #    - the vendored config stack (docker/configs/) is installed at start,
 #      with per-workspace copies in <workspace>/.sessions/:
-#        codex     .sessions/codex           -> /home/harry/.codex
-#        opencode  .sessions/opencode-config -> /home/harry/.config/opencode
-#        opencodex .sessions/opencodex       -> /home/harry/.opencodex
+#        codex     .sessions/codex           -> /home/cfd_agent/.codex
+#        opencode  .sessions/opencode-config -> /home/cfd_agent/.config/opencode
+#        opencodex .sessions/opencodex       -> /home/cfd_agent/.opencodex
 #    - credentials: export the stack's env vars, or pass --host-credentials
 #    - the container is force-removed on exit (Ctrl-C, SIGTERM, closed terminal)
 
@@ -44,11 +44,12 @@ docker/scripts/start.sh --workspace ../codex_gpt56_07
 #    "Verified end-to-end" below for the full commands).
 #    (see "Verified end-to-end" below for the full commands)
 docker run --rm --network host --security-opt seccomp=unconfined \
-  --security-opt apparmor=unconfined --user "$(id -u):$(id -g)" \
-  -e HOME="$HOME" -e OCX_PORT=10109 \
-  -v "$(pwd)/docker/configs/codex:/home/harry/.codex" \
-  -v "$(pwd)/docker/configs/opencode:/home/harry/.config/opencode" \
-  -v "$(pwd)/docker/configs/opencodex:/home/harry/.opencodex" \
+  --security-opt apparmor=unconfined --user root:root \
+  -e HOME=/home/cfd_agent -e OCX_PORT=10109 \
+  -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
+  -v "$(pwd)/docker/configs/codex:/home/cfd_agent/.codex" \
+  -v "$(pwd)/docker/configs/opencode:/home/cfd_agent/.config/opencode" \
+  -v "$(pwd)/docker/configs/opencodex:/home/cfd_agent/.opencodex" \
   -e OPENCODE_API_KEY_DEEPSEEK="${OPENCODE_API_KEY_DEEPSEEK:?export the referenced env vars}" \
   -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
   cfd-bench:latest opencode run --format json \
@@ -93,10 +94,12 @@ bundling, container lifecycle and the redaction policy.
   build stack (incl. OpenMPI) and uv), and `setup-workspace.sh` symlinks every
   contestant workspace's `external/` to `/opt/external`. No host binary tree
   is staged or referenced.
-- `entrypoint.sh` — starts the opencodex proxy when its config is present and
-  the port is free, then execs the requested command. The probe port comes
-  from `$OCX_PORT` (also passed to `ocx start --port`), else `config.json`
-  `.port`, else 10100 (the opencodex default).
+- `entrypoint.sh` — (1) remaps the generic image user (`cfd_agent`) to the
+  invoking host user's uid/gid (`HOST_UID`/`HOST_GID`, enroot-style); (2)
+  starts the opencodex proxy when its config is present and the port is free;
+  (3) execs the requested command. The probe port comes from `$OCX_PORT`
+  (also passed to `ocx start --port`), else `config.json` `.port`, else
+  10100 (the opencodex default).
 - `scripts/` — `start.sh` (interactive launcher with workspace-bundled
   sessions and guaranteed container cleanup) and `setup-workspace.sh` (fresh
   contestant workspace from a path: `.sessions/` git-exclusion, `git remote
@@ -117,16 +120,16 @@ At start the stack is copied into `$WS/.sessions/` (per-workspace record +
 persistent session storage) and mounted at the inside-docker-home paths:
 
 1. **codex** — `configs/codex/` → `$WS/.sessions/codex/` →
-   `/home/harry/.codex` (`CODEX_HOME=/home/harry/.codex`): config.toml, the
+   `/home/cfd_agent/.codex` (`CODEX_HOME=/home/cfd_agent/.codex`): config.toml, the
    ocx profiles, catalog, AGENTS.md. Sessions/logs/DBs persist in the
    workspace copy.
 2. **opencode** — `configs/opencode/` → `$WS/.sessions/opencode-config/` →
-   `/home/harry/.config/opencode`: opencode.jsonc (apiKeys as
+   `/home/cfd_agent/.config/opencode`: opencode.jsonc (apiKeys as
    `{env:OPENCODE_API_KEY_<PROVIDER>}` references), agents, commands, skills,
    MCP, themes. The data dir (`XDG_DATA_HOME=$WS/.sessions/opencode-data`)
    holds sessions/DB and the auth store (fresh or bind-mounted).
 3. **opencodex** — `configs/opencodex/` → `$WS/.sessions/opencodex/` →
-   `/home/harry/.opencodex`: config.json (apiKeys as
+   `/home/cfd_agent/.opencodex`: config.json (apiKeys as
    `$OPENCODEX_<PROVIDER>_API_KEY` references). Runtime state (usage,
    artifacts, sqlite) persists in the workspace copy.
 
@@ -140,9 +143,9 @@ hatch that mounts the live host dirs instead.
 How each harness picks its config:
 
 - **opencode** — the vendored `opencode.jsonc` at
-  `/home/harry/.config/opencode` (+ omo-slim plugin, commands, skills from
+  `/home/cfd_agent/.config/opencode` (+ omo-slim plugin, commands, skills from
   the same dir); auth from the data dir (`$XDG_DATA_HOME/opencode/`).
-- **codex** — `$CODEX_HOME/config.toml` (= `/home/harry/.codex`, the
+- **codex** — `$CODEX_HOME/config.toml` (= `/home/cfd_agent/.codex`, the
   vendored stack copy), plus profiles next to it. The user-level **ocx
   profile** (`ocx.config.toml` — deepseek-v4-flash routed through the
   opencodex proxy at 127.0.0.1:10109) is part of the stack; launch
@@ -189,7 +192,7 @@ What invalidates: editing a `RUN`/`COPY` line invalidates that layer and
 everything after it (e.g. changing the apt package list re-runs the apt
 layer and all later layers once; the base image and `ARG`/`ENV` layers stay
 cached). The heavy layers use BuildKit **cache mounts**
-(`/var/cache/apt`, `/root/.cache/pip`, `/home/harry/.bun/install/cache`,
+(`/var/cache/apt`, `/root/.cache/pip`, `/home/cfd_agent/.bun/install/cache`,
 `/root/.npm`), so even when a layer must rebuild, the packages it downloads
 are reused from `/var/lib/docker/buildkit/cache/` instead of re-fetched.
 
@@ -229,9 +232,9 @@ Default mode mounts:
 - the vendored config stack (default `<repo>/docker/configs`, override with
   `CONFIG_STACK=/path/to/stack`), copied into `$WS/.sessions/` and mounted
   at the inside-docker-home paths,
-- `$WS/.sessions/codex` → `/home/harry/.codex`,
-- `$WS/.sessions/opencode-config` → `/home/harry/.config/opencode`,
-- `$WS/.sessions/opencodex` → `/home/harry/.opencodex`,
+- `$WS/.sessions/codex` → `/home/cfd_agent/.codex`,
+- `$WS/.sessions/opencode-config` → `/home/cfd_agent/.config/opencode`,
+- `$WS/.sessions/opencodex` → `/home/cfd_agent/.opencodex`,
 - `$WS/.sessions/opencode-data` → the opencode data dir
   (`XDG_DATA_HOME`; fresh DB; auth via env or `--host-credentials`),
 - `~/.codegraph` (index cache).
@@ -311,15 +314,15 @@ for live-edit workflows.
 `start.sh` (default mode) points each harness at `$WS/.sessions/` inside the
 contestant workspace itself:
 
-- `codex` → `$WS/.sessions/codex` mounted at `/home/harry/.codex` with
-  `CODEX_HOME=/home/harry/.codex` (vendored config copy + sessions, logs,
+- `codex` → `$WS/.sessions/codex` mounted at `/home/cfd_agent/.codex` with
+  `CODEX_HOME=/home/cfd_agent/.codex` (vendored config copy + sessions, logs,
   sqlite DBs all persist in the workspace; with `--host-credentials`,
   `auth.json` is bind-mounted from `~/.codex`, never stored).
 - `opencode` → `XDG_DATA_HOME=$WS/.sessions/opencode-data` (a fresh
   `opencode.db`, logs, storage), with `auth.json`/`account.json` optionally
   bind-mounted from `~/.local/share/opencode` (`--host-credentials`; never
   copied).
-- `opencodex` → `$WS/.sessions/opencodex` mounted at `/home/harry/.opencodex`
+- `opencodex` → `$WS/.sessions/opencodex` mounted at `/home/cfd_agent/.opencodex`
   (vendored config copy + runtime state).
 
 So a contestant run leaves its full session history on disk in the working
@@ -332,6 +335,19 @@ workspaces).
 The container is always launched with `--rm`, and `start.sh` additionally
 traps EXIT/INT/TERM and force-removes the named container, so no `bench-*`
 instance survives the launcher even when the client is killed.
+
+### User mapping (enroot-style)
+
+The image is **user-agnostic**: it ships one generic user (`cfd_agent`, uid/
+gid 1000) and bakes in nothing about the build machine's user. At container
+start, `start.sh` passes `HOST_UID`/`HOST_GID`; the entrypoint (entered as
+root) remaps `cfd_agent` to those ids (`groupmod`/`usermod`), chowns the
+container home, then drops privileges with `setpriv` before exec'ing the
+command. The process therefore owns the same uid/gid as the invoking host
+user, so the mounted host dirs (workspace, configs, `~/.codegraph`) and any
+files created in the container belong to the right user — no rebuild needed
+on any machine. A bare `docker run` without `HOST_UID`/`HOST_GID` runs as
+root inside the container.
 
 `start.sh` also passes `--security-opt seccomp=unconfined
 --security-opt apparmor=unconfined`: codex's bundled bubblewrap sandbox needs
@@ -353,12 +369,13 @@ CFG="$(mktemp -d)" && cp -a "$REPO/docker/configs/." "$CFG/"
 touch "$CFG/codex/auth.json"   # non-credential placeholder; real file mounts over it
 
 docker run --rm --network host --security-opt seccomp=unconfined \
-  --security-opt apparmor=unconfined --user "$(id -u):$(id -g)" \
-  -e HOME="$HOME" \
-  -v "$CFG/codex:/home/harry/.codex" \
-  -v "$CFG/opencode:/home/harry/.config/opencode" \
-  -v "$CFG/opencodex:/home/harry/.opencodex" \
-  -v "$HOME/.codex/auth.json:/home/harry/.codex/auth.json" \
+  --security-opt apparmor=unconfined --user root:root \
+  -e HOME=/home/cfd_agent \
+  -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
+  -v "$CFG/codex:/home/cfd_agent/.codex" \
+  -v "$CFG/opencode:/home/cfd_agent/.config/opencode" \
+  -v "$CFG/opencodex:/home/cfd_agent/.opencodex" \
+  -v "$HOME/.codex/auth.json:/home/cfd_agent/.codex/auth.json" \
   -e OPENCODE_API_KEY_DEEPSEEK="${OPENCODE_API_KEY_DEEPSEEK:?export the referenced env vars}" \
   -e OPENCODEX_DEEPSEEK_API_KEY="${OPENCODEX_DEEPSEEK_API_KEY:?}" \
   -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
@@ -366,11 +383,12 @@ docker run --rm --network host --security-opt seccomp=unconfined \
     "Reply with exactly: PONG"
 
 docker run --rm --network host --security-opt seccomp=unconfined \
-  --security-opt apparmor=unconfined --user "$(id -u):$(id -g)" \
-  -e HOME="$HOME" \
-  -v "$CFG/codex:/home/harry/.codex" \
-  -v "$CFG/opencode:/home/harry/.config/opencode" \
-  -v "$CFG/opencodex:/home/harry/.opencodex" \
+  --security-opt apparmor=unconfined --user root:root \
+  -e HOME=/home/cfd_agent \
+  -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
+  -v "$CFG/codex:/home/cfd_agent/.codex" \
+  -v "$CFG/opencode:/home/cfd_agent/.config/opencode" \
+  -v "$CFG/opencodex:/home/cfd_agent/.opencodex" \
   -e OPENCODE_API_KEY_DEEPSEEK="${OPENCODE_API_KEY_DEEPSEEK:?export the referenced env vars}" \
   -v "$BENCH_ROOT:$BENCH_ROOT" -w "$WS" \
   cfd-bench:latest opencode run --format json \

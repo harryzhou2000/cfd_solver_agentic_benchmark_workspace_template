@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
-# Container entrypoint: optionally start the opencodex proxy, then exec the
-# requested command (default: interactive shell).
+# Container entrypoint: (1) enroot-style user mapping — remap the generic
+# image user (cfd_agent) to the invoking host user's uid/gid so mounted host
+# dirs (workspace, configs, .codegraph) are owned by the process; (2)
+# optionally start the opencodex proxy; (3) exec the requested command
+# (default: interactive shell).
+#
+# The image is user-agnostic: pass HOST_UID/HOST_GID to match any host user.
+# Without them (bare runs) the command runs as root.
 #
 # Probe port resolution, in order of precedence:
 #   1. $OCX_PORT env override (also passed to `ocx start --port`)
@@ -10,6 +16,17 @@
 # daemon when running with --network host), the container skips starting its
 # own proxy.
 set -e
+
+IMG_USER="cfd_agent"
+if [ "$(id -u)" = "0" ] && [ -n "${HOST_UID:-}" ] && [ -n "${HOST_GID:-}" ]; then
+  if [ "$HOST_UID" != "$(id -u "$IMG_USER")" ] || [ "$HOST_GID" != "$(id -g "$IMG_USER")" ]; then
+    echo "[entrypoint] mapping $IMG_USER -> uid=$HOST_UID gid=$HOST_GID"
+    groupmod -o -g "$HOST_GID" "$IMG_USER"
+    usermod -o -u "$HOST_UID" -g "$HOST_GID" "$IMG_USER"
+    chown -R "$HOST_UID:$HOST_GID" "/home/$IMG_USER"
+  fi
+  exec setpriv --reuid "$HOST_UID" --regid "$HOST_GID" --init-groups "$0" "$@"
+fi
 
 if [[ "${OPENCODEX_AUTOSTART:-1}" == "1" && -f "$HOME/.opencodex/config.json" ]]; then
   OCX_PORT="${OCX_PORT:-}"

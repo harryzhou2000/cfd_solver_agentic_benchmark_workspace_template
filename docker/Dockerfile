@@ -20,13 +20,15 @@ ARG http_proxy
 ARG https_proxy
 ARG no_proxy
 
-ARG UID=1004
-ARG GID=1004
 ARG JOBS=4
 
+# The image is user-agnostic: it ships one generic user (cfd_agent, uid/gid
+# 1000). At container start the entrypoint remaps that user to the invoking
+# host user's uid/gid (enroot-style), so mounted host dirs are owned by the
+# process. Nothing about the build user is baked in.
 ENV DEBIAN_FRONTEND=noninteractive \
-    HOME=/home/harry \
-    PATH=/opt/node/bin:/home/harry/.bun/bin:/home/harry/.local/bin:/home/harry/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    HOME=/home/cfd_agent \
+    PATH=/opt/node/bin:/home/cfd_agent/.bun/bin:/home/cfd_agent/.local/bin:/home/cfd_agent/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # --- base toolchain (apt; Ubuntu 24.04 defaults = GCC 13, like the host) ----
 # Cache mount: downloaded .debs persist across rebuilds in the BuildKit cache
@@ -42,10 +44,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     openmpi-bin libopenmpi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -g ${GID} harry \
-    && useradd -m -u ${UID} -g ${GID} -s /bin/zsh harry \
-    && mkdir -p /home/harry/.local/bin /home/harry/.opencode/bin /home/harry/.bun \
-    && chown -R harry:harry /home/harry
+# Home dirs are created root-owned; the generic user is created at the END of
+# the build and everything is chowned to it there (installs above run as root
+# and land in $HOME).
+RUN mkdir -p /home/cfd_agent/.local/bin /home/cfd_agent/.opencode/bin /home/cfd_agent/.bun
 
 # --- Node.js 24.18.0 (host version) — official nodejs.org tarball ----------
 RUN curl -fsSL -o /tmp/node.tar.xz \
@@ -63,8 +65,8 @@ RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.14"
 # --- uv 0.12.1 (host version) — official release tarball --------------------
 RUN curl -fsSL -o /tmp/uv.tar.gz \
         https://github.com/astral-sh/uv/releases/download/0.12.1/uv-x86_64-unknown-linux-gnu.tar.gz \
-    && tar -xzf /tmp/uv.tar.gz -C /home/harry/.local/bin --strip-components=1 \
-    && chmod +x /home/harry/.local/bin/uv /home/harry/.local/bin/uvx \
+    && tar -xzf /tmp/uv.tar.gz -C /home/cfd_agent/.local/bin --strip-components=1 \
+    && chmod +x /home/cfd_agent/.local/bin/uv /home/cfd_agent/.local/bin/uvx \
     && rm -f /tmp/uv.tar.gz
 
 # --- shared DNDSR externals, built from source (DNDSR recipe) ---------------
@@ -103,8 +105,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     && cd /opt/external/cfd_externals \
     && CC=mpicc CXX=mpicxx JOBS="${JOBS}" \
         /opt/cfd-venv/bin/python cfd_externals_build.py \
-    && rm -rf build_* repos \
-    && chown -R harry:harry /opt/external
+    && rm -rf build_* repos
 
 # --- opencode 1.18.11 (host version) — official installer, version-pinned ---
 RUN curl -fsSL https://opencode.ai/install | bash -s -- --version 1.18.11 --no-modify-path
@@ -118,7 +119,7 @@ COPY docker/opencode-plugins.json /opt/opencode-plugins.json
 COPY docker/scripts/install-opencode-plugins.sh /usr/local/bin/install-opencode-plugins
 # Cache mount: opencode's plugin installer uses bun — its package cache
 # persists across rebuilds.
-RUN --mount=type=cache,target=/home/harry/.bun/install/cache \
+RUN --mount=type=cache,target=/home/cfd_agent/.bun/install/cache \
     chmod +x /usr/local/bin/install-opencode-plugins \
     && install-opencode-plugins --manifest /opt/opencode-plugins.json
 
@@ -137,13 +138,13 @@ RUN --mount=type=cache,target=/root/.npm \
 
 # --- opencodex proxy — official source install at the pinned commit ---------
 # Cache mount: bun's package cache persists across rebuilds.
-RUN --mount=type=cache,target=/home/harry/.bun/install/cache \
+RUN --mount=type=cache,target=/home/cfd_agent/.bun/install/cache \
     git init -q /opt/opencodex \
     && cd /opt/opencodex \
     && git remote add origin https://github.com/harryzhou2000/opencodex.git \
     && git fetch -q --depth 1 origin ea7f5a69748c666f739143142627f8ace1fcb271 \
     && git checkout -q FETCH_HEAD \
-    && /home/harry/.bun/bin/bun install --frozen-lockfile \
+    && /home/cfd_agent/.bun/bin/bun install --frozen-lockfile \
     && ln -sf /opt/opencodex/bin/ocx.mjs /usr/local/bin/ocx
 
 # --- ocx-relay — pinned commit (plain node scripts, no build) ---------------
@@ -156,9 +157,13 @@ RUN git init -q /opt/ocx-relay \
 # --- container entrypoint (opencodex autostart probe) -----------------------
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh \
-    && chown -R harry:harry /home/harry
+    && groupadd -g 1000 cfd_agent \
+    && useradd -m -u 1000 -g 1000 -s /bin/zsh cfd_agent \
+    && chown -R cfd_agent:cfd_agent /home/cfd_agent
 
-USER harry
+# Runs as root so the entrypoint can remap cfd_agent to the host uid/gid; it
+# immediately drops privileges via setpriv before exec'ing the command.
+USER root
 WORKDIR /workspace
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/bin/zsh"]
