@@ -4,8 +4,10 @@
 # Usage:
 #   docker/scripts/start.sh [--workspace DIR] [--host-credentials]
 #     [--image-config] [--mount-host-configs]
-#     [--harness shell|codex|opencode] [--codex-profile ocx] [-- cmd...]
-#   CONFIG_STACK=/path/to/stack docker/scripts/start.sh --workspace DIR
+#     [--harness shell|codex|opencode] [--codex-profile ocx]
+#     [--name NAME] [--cpus N] [-- cmd...]
+#   CONFIG_STACK=/path/to/stack CPUS=8 OCX_PORT=10109 \
+#     docker/scripts/start.sh --workspace DIR
 #
 # The image is built from fresh official installs only (see docker/Dockerfile
 # + docker/opencode-plugins.json) — user configs are NEVER baked into it.
@@ -64,6 +66,9 @@ MOUNT_HOST=0
 HOST_CRED=0
 HARNESS="shell"
 CODEX_PROFILE=""
+NAME_ARG=""
+CPUS="${CPUS:-4}"   # --cpus quota: how many CPU cores worth of time the
+                     # container may use (docker's --cpus, not cpuset pins)
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -73,10 +78,16 @@ while [ $# -gt 0 ]; do
     --host-credentials) HOST_CRED=1; shift ;;
     --harness) HARNESS="$2"; shift 2 ;;
     --codex-profile) CODEX_PROFILE="$2"; shift 2 ;;
+    --name|-n) NAME_ARG="$2"; shift 2 ;;
+    --cpus) CPUS="$2"; shift 2 ;;
     --) shift; break ;;
     *) WS="${WS:-$1}"; shift ;;
   esac
 done
+
+case "$CPUS" in
+  ''|*[!0-9.]*) echo "invalid --cpus '$CPUS' (expected a number, e.g. 4)" >&2; exit 1 ;;
+esac
 
 WS="$(realpath "${WS:-$PWD}")"
 if [ ! -d "$WS" ]; then
@@ -98,7 +109,7 @@ if [ "$HARNESS" = "codex" ] && [ -n "$CODEX_PROFILE" ] && [ $# -eq 0 ]; then
 fi
 if [ $# -gt 0 ]; then CMD=("$@"); fi
 
-NAME="bench-$(basename "$WS" | tr -c 'A-Za-z0-9_.-' '_')"
+NAME="${NAME_ARG:-bench-$(basename "$WS" | tr -c 'A-Za-z0-9_.-' '_')}"
 MOUNTS=(-v "$BENCH_ROOT:$BENCH_ROOT")
 # Mount the workspace itself so session paths work regardless of location
 # (real workspaces live under $BENCH_ROOT, but relative/absolute paths from
@@ -148,21 +159,21 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   # codex: copy of the vendored codex config set, mounted as the effective
   # codex home; sessions/logs/DBs persist in the workspace copy.
   mkdir -p "$CODEX_HOME_DIR"
-  rsync -a "$CONFIG_STACK/codex/" "$CODEX_HOME_DIR/"
+  rsync -a --no-owner --no-group "$CONFIG_STACK/codex/" "$CODEX_HOME_DIR/"
   MOUNTS+=(-v "$CODEX_HOME_DIR:$IMG_HOME/.codex")
   ENVS+=(-e CODEX_HOME="$IMG_HOME/.codex")
 
   # opencode: vendored config dir mounted at the global config path; data
   # dir (sessions, DB, auth) is bundled fresh in the workspace.
   mkdir -p "$OC_CONFIG_DIR" "$OC_DATA_DIR"
-  rsync -a "$CONFIG_STACK/opencode/" "$OC_CONFIG_DIR/"
+  rsync -a --no-owner --no-group "$CONFIG_STACK/opencode/" "$OC_CONFIG_DIR/"
   MOUNTS+=(-v "$OC_CONFIG_DIR:$IMG_HOME/.config/opencode")
   ENVS+=(-e XDG_CONFIG_HOME="$IMG_HOME/.config" -e XDG_DATA_HOME="$SESS/opencode-data")
 
   # opencodex: vendored config dir mounted at the service's home path;
   # runtime state (usage, artifacts, sqlite) persists in the workspace.
   mkdir -p "$OCX_DIR"
-  rsync -a "$CONFIG_STACK/opencodex/" "$OCX_DIR/"
+  rsync -a --no-owner --no-group "$CONFIG_STACK/opencodex/" "$OCX_DIR/"
   MOUNTS+=(-v "$OCX_DIR:$IMG_HOME/.opencodex")
 
   # Forward credential env vars already exported on this host (the stack's
@@ -282,10 +293,42 @@ if [ "$MOUNT_HOST" = "1" ]; then
   done
 fi
 
+# Announce every env var passed to the container. Values never print fully:
+# long values are masked to head+tail so credential keys stay usable for
+# identification without leaking (--host-credentials mode exports real keys
+# into these vars).
+mask_val() {
+  local v="$1" n="${#1}"
+  if [ "$n" -le 16 ]; then
+    printf '%s' "$v"
+  else
+    printf '%s…%s' "${v:0:6}" "${v: -4}"
+  fi
+}
+echo "== environment ($((${#ENVS[@]} / 2)) vars) =="
+# ENVS alternates `-e` markers and NAME[=value] entries (docker -e pairs).
+for e in "${ENVS[@]}"; do
+  case "$e" in
+    -e) continue ;;   # marker element; the actual entry follows
+    *=*)
+      name="${e%%=*}"; val="${e#*=}"
+      printf '  %-44s %s\n' "$name" "$(mask_val "$val")" ;;
+    *)
+      name="$e"
+      if [ -n "${!name+x}" ]; then
+        printf '  %-44s %s (inherited)\n' "$name" "$(mask_val "${!name}")"
+      else
+        printf '  %-44s (unset)\n' "$name"
+      fi ;;
+  esac
+done
+
 echo "== container =="
 echo "  image:     $IMAGE"
 echo "  workspace: $WS"
 echo "  harness:   $HARNESS"
+echo "  name:      $NAME"
+echo "  cpus:      $CPUS"
 [ -n "$CODEX_PROFILE" ] && echo "  codex profile: -p $CODEX_PROFILE"
 if [ "$MOUNT_CONFIG" = "1" ]; then
   echo "  config stack: $CONFIG_STACK"
@@ -312,6 +355,7 @@ docker rm -f "$NAME" >/dev/null 2>&1 || true
 
 docker run -it --rm --network host --name "$NAME" \
   --user root:root \
+  --cpus "$CPUS" \
   "${SECURITY_OPTS[@]}" \
   "${ENVS[@]}" \
   "${MOUNTS[@]}" \

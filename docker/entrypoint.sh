@@ -21,9 +21,25 @@ IMG_USER="cfd_agent"
 if [ "$(id -u)" = "0" ] && [ -n "${HOST_UID:-}" ] && [ -n "${HOST_GID:-}" ]; then
   if [ "$HOST_UID" != "$(id -u "$IMG_USER")" ] || [ "$HOST_GID" != "$(id -g "$IMG_USER")" ]; then
     echo "[entrypoint] mapping $IMG_USER -> uid=$HOST_UID gid=$HOST_GID"
-    groupmod -o -g "$HOST_GID" "$IMG_USER"
-    usermod -o -u "$HOST_UID" -g "$HOST_GID" "$IMG_USER"
-    chown -R "$HOST_UID:$HOST_GID" "/home/$IMG_USER"
+    # Direct passwd/group rewrite instead of usermod/groupmod: `usermod -u`
+    # recursively re-owns the user's home directory, which on overlayfs
+    # copy-up every file and stalls container start for minutes. The image
+    # home is deliberately kept empty (see Dockerfile), and setpriv only
+    # needs the passwd/group entries to resolve uid/gid + initgroups.
+    sed -i "s/^\(${IMG_USER}:x:\)[0-9]*:[0-9]*:/\1${HOST_UID}:${HOST_GID}:/" /etc/passwd
+    sed -i "s/^\(${IMG_USER}:x:\)[0-9]*:/\1${HOST_GID}:/" /etc/group
+    if [ "$(id -u "$IMG_USER")" != "$HOST_UID" ] \
+       || [ "$(id -g "$IMG_USER")" != "$HOST_GID" ]; then
+      echo "[entrypoint] ERROR: failed to remap $IMG_USER to $HOST_UID:$HOST_GID" >&2
+      exit 1
+    fi
+    # Shallow chown only: the image home content is baked world-writable
+    # / (almost) empty, so only the home root + top-level entries need to
+    # follow the new uid; a recursive chown would copy up the home on
+    # overlayfs every start.
+    chown "$HOST_UID:$HOST_GID" "/home/$IMG_USER"
+    find "/home/$IMG_USER" -mindepth 1 -maxdepth 1 \
+      -exec chown "$HOST_UID:$HOST_GID" {} +
   fi
   exec setpriv --reuid "$HOST_UID" --regid "$HOST_GID" --init-groups "$0" "$@"
 fi

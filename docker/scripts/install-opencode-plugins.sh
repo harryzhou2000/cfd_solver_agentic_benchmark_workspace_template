@@ -44,8 +44,9 @@ done
 # opencode's plugin CLI can exit 0 without persisting the plugin (observed
 # with npm specs on a flaky first build). Verify every spec is recorded in
 # the global config and fail loudly if any is missing, so a partial install
-# can never be baked into a cached layer.
-CONFIG_FILE="$HOME/.config/opencode/opencode.jsonc"
+# can never be baked into a cached layer. The global config lives under
+# $XDG_CONFIG_HOME/opencode (the image bakes XDG_CONFIG_HOME=/opt/opencode-config).
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode.jsonc"
 echo "== verifying plugins recorded in $CONFIG_FILE =="
 MISSING=0
 for spec in "${SPECS[@]}"; do

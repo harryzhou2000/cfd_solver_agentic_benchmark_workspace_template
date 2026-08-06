@@ -102,7 +102,10 @@ for arg in sys.argv[1:]:
         m = APIKEY.match(line)
         if m and provider:
             env = "OPENCODE_API_KEY_" + stem(provider)
-            line = line[:m.end(1)] + "{env:" + env + "}" + line[m.end(2):]
+            # m.end(2) points PAST the closing quote (group 2 is the quote
+            # itself); keep it, or the rewritten line loses its terminator
+            # and the config becomes invalid JSON(C).
+            line = line[:m.end(1)] + "{env:" + env + "}" + line[m.end(2) - 1:]
             changed.append(f"{provider}.apiKey -> {env}")
         out.append(line)
         depth += line.count("{") - line.count("}")
@@ -158,6 +161,13 @@ else:
     print("  (no provider apiKeys to rewrite)")
 EOF
 fi
+
+# The vendored stack must work inside the container as-is. Host-absolute
+# paths are rewritten to the image layout: codex configs may point at
+# $HOME/.codex (e.g. model_catalog_json for the `-p ocx` profile), but inside
+# the container CODEX_HOME is /home/cfd_agent/.codex.
+echo "== rewriting host paths to container paths =="
+sed -i "s#${HOME}/.codex#/home/cfd_agent/.codex#g" "$D"/codex/*.toml 2>/dev/null || true
 
 echo "== verifying no secrets remain =="
 python3 - "$D" <<'EOF'

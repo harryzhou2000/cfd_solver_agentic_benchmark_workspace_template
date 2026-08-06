@@ -56,9 +56,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     openmpi-bin libopenmpi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Home dirs are created root-owned; the generic user is created at the END of
-# the build and everything is chowned to it there (installs above run as root
-# and land in $HOME).
+# Kept byte-identical to the pre-system-install image so the following
+# layers (node/doxygen/externals build) stay cached. The dirs themselves are
+# leftovers from the old per-user layout and are removed in the final layer.
 RUN mkdir -p /home/cfd_agent/.local/bin /home/cfd_agent/.opencode/bin /home/cfd_agent/.bun
 
 # --- Node.js 24.18.0 (host version) — official nodejs.org tarball ----------
@@ -70,16 +70,6 @@ RUN curl -fsSL -o /tmp/node.tar.xz \
     && ln -sf /opt/node/bin/npm /usr/local/bin/npm \
     && ln -sf /opt/node/bin/npx /usr/local/bin/npx \
     && rm -f /tmp/node.tar.xz
-
-# --- bun 1.3.14 (host version) — official installer, version-pinned ---------
-RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.14"
-
-# --- uv 0.12.1 (host version) — official release tarball --------------------
-RUN curl -fsSL -o /tmp/uv.tar.gz \
-        https://github.com/astral-sh/uv/releases/download/0.12.1/uv-x86_64-unknown-linux-gnu.tar.gz \
-    && tar -xzf /tmp/uv.tar.gz -C /home/cfd_agent/.local/bin --strip-components=1 \
-    && chmod +x /home/cfd_agent/.local/bin/uv /home/cfd_agent/.local/bin/uvx \
-    && rm -f /tmp/uv.tar.gz
 
 # --- doxygen (just before the externals build) -------------------------------
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -128,8 +118,42 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         /opt/cfd-venv/bin/python cfd_externals_build.py \
     && rm -rf build_* repos
 
-# --- opencode (host version) — official installer, version-pinned ------------
-RUN curl -fsSL https://opencode.ai/install | bash -s -- --version "${OPENCODE_VERSION}" --no-modify-path
+# --- user-space tools: SYSTEM installs only, /opt stores, empty $HOME --------
+# Everything below is installed into system prefixes (/usr/local/bin, /opt)
+# and opencode's runtime stores are pinned to /opt via XDG_*. The image home
+# therefore stays (almost) empty, so the start-time uid/gid remap (see
+# entrypoint.sh) never needs to chown a large tree — `usermod -u` and a
+# recursive home chown would copy up ~1.3G on overlayfs at EVERY start.
+ENV XDG_CONFIG_HOME=/opt/opencode-config \
+    XDG_CACHE_HOME=/opt/opencode-cache \
+    PATH=/opt/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# --- bun 1.3.14 (host version) — official installer, pinned, SYSTEM install --
+# The installer honors $BUN_INSTALL: install to /opt/bun so the runtime stays
+# out of the image home.
+RUN mkdir -p /opt/bun \
+    && curl -fsSL https://bun.sh/install | BUN_INSTALL=/opt/bun bash -s "bun-v1.3.14" \
+    && ln -sf /opt/bun/bin/bun /usr/local/bin/bun
+
+# --- uv 0.12.1 (host version) — official release tarball --------------------
+RUN curl -fsSL -o /tmp/uv.tar.gz \
+        https://github.com/astral-sh/uv/releases/download/0.12.1/uv-x86_64-unknown-linux-gnu.tar.gz \
+    && tar -xzf /tmp/uv.tar.gz -C /usr/local/bin --strip-components=1 \
+    && rm -f /tmp/uv.tar.gz
+
+# --- opencode (host version) — official installer, pinned, SYSTEM install ----
+# The official installer hardcodes INSTALL_DIR=$HOME/.opencode/bin, so run it
+# with a throwaway HOME and move the standalone binary to /usr/local/bin.
+# (npm's opencode-ai package works, but npm 11 blocks postinstall scripts by
+# default and leaves a lazy first-run download wrapper; the installer's
+# standalone binary is deterministic.)
+RUN mkdir -p /opt/opencode-install-home \
+    && HOME=/opt/opencode-install-home \
+       curl -fsSL https://opencode.ai/install \
+       | HOME=/opt/opencode-install-home bash -s -- --version "${OPENCODE_VERSION}" --no-modify-path \
+    && mv /opt/opencode-install-home/.opencode/bin/opencode /usr/local/bin/opencode \
+    && chmod 755 /usr/local/bin/opencode \
+    && rm -rf /opt/opencode-install-home
 
 # --- opencode plugins — official `opencode plugin -g`, pinned ---------------
 # Manifest docker/opencode-plugins.json: opencode-goal-plugin at the fork's
@@ -138,11 +162,14 @@ RUN curl -fsSL https://opencode.ai/install | bash -s -- --version "${OPENCODE_VE
 # config (~/.config/opencode/opencode.jsonc) with the plugin array.
 COPY docker/opencode-plugins.json /opt/opencode-plugins.json
 COPY docker/scripts/install-opencode-plugins.sh /usr/local/bin/install-opencode-plugins
-# Cache mount: opencode's plugin installer uses bun — its package cache
-# persists across rebuilds.
-RUN --mount=type=cache,target=/home/cfd_agent/.bun/install/cache \
-    chmod +x /usr/local/bin/install-opencode-plugins \
-    && install-opencode-plugins --manifest /opt/opencode-plugins.json
+# The plugin store + pristine global config land under /opt (XDG_CACHE_HOME /
+# XDG_CONFIG_HOME). chmod happens in THIS layer (no overlay copy-up): the
+# remapped container user (arbitrary uid) must be able to refresh models.json,
+# fetch provider binaries into .cache/opencode/bin and install plugins at
+# runtime.
+RUN chmod +x /usr/local/bin/install-opencode-plugins \
+    && install-opencode-plugins --manifest /opt/opencode-plugins.json \
+    && chmod -R a+rwX /opt/opencode-config /opt/opencode-cache
 
 # --- codex-cli (host version) — official standalone release -----------------
 # The standalone tarball extracts a single binary at the top level (no
@@ -155,19 +182,20 @@ RUN curl -fsSL -o /tmp/codex.tar.gz \
     && rm -f /tmp/codex.tar.gz
 
 # --- codegraph 1.2.0 (host version) — official npm package ------------------
-# Cache mount: npm downloads persist across rebuilds.
+# npm global installs land in /opt/node (system prefix). The npm cache is
+# redirected to the cache mount so ~/.npm never appears in the image home.
 RUN --mount=type=cache,target=/root/.npm \
+    npm_config_cache=/root/.npm \
     npm install -g @colbymchenry/codegraph@1.2.0 --no-audit --no-fund
 
 # --- opencodex proxy — official source install at the pinned commit ---------
-# Cache mount: bun's package cache persists across rebuilds.
-RUN --mount=type=cache,target=/home/cfd_agent/.bun/install/cache \
+RUN --mount=type=cache,target=/root/.bun-cache \
     git init -q /opt/opencodex \
     && cd /opt/opencodex \
     && git remote add origin "${OPENCODEX_REPO}" \
     && git fetch -q --depth 1 origin "${OPENCODEX_COMMIT}" \
     && git checkout -q FETCH_HEAD \
-    && /home/cfd_agent/.bun/bin/bun install --frozen-lockfile \
+    && BUN_INSTALL_CACHE_DIR=/root/.bun-cache bun install --frozen-lockfile \
     && ln -sf /opt/opencodex/bin/ocx.mjs /usr/local/bin/ocx
 
 # --- ocx-relay — pinned commit (plain node scripts, no build) ---------------
@@ -186,7 +214,12 @@ RUN chmod +x /usr/local/bin/entrypoint.sh \
     && G0="$(getent group 1000 | cut -d: -f1)"; [ -z "$G0" ] || { groupdel "$G0" || true; } \
     && groupadd -g 1000 cfd_agent \
     && useradd -m -u 1000 -g 1000 -s /bin/zsh cfd_agent \
-    && chown -R cfd_agent:cfd_agent /home/cfd_agent
+    # Keep the image home minimal: every tool is installed system-wide and
+    # the opencode stores live under /opt (XDG_*), so the start-time uid
+    # remap never needs a recursive home chown. Drop any leftover per-user
+    # state here (same layer, no overlay copy-up).
+    && find /home/cfd_agent -mindepth 1 -delete \
+    && chown cfd_agent:cfd_agent /home/cfd_agent
 
 # Runs as root so the entrypoint can remap cfd_agent to the host uid/gid; it
 # immediately drops privileges via setpriv before exec'ing the command.

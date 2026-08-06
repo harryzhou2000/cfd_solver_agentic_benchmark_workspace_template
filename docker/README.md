@@ -3,7 +3,7 @@
 A reproducible, interactive runtime for benchmark contestants. Every tool is
 installed fresh in the image from its official source at a version pinned to
 this machine — never copied from the host (the host could be malformed):
-opencode 1.18.11, codex-cli 0.146.0, the opencodex provider proxy and
+opencode 1.18.14, codex-cli 0.146.0, the opencodex provider proxy and
 ocx-relay (pinned commits), codegraph 1.2.0, Node 24.18.0, bun 1.3.14, uv
 0.12.1, the CFD build toolchain (GCC 13, CMake, Ninja, OpenMPI 4.1.6 from
 apt), and the shared DNDSR externals (header-only
@@ -56,6 +56,47 @@ docker run --rm --network host --security-opt seccomp=unconfined \
   -m deepseek/deepseek-v4-flash "Reply with exactly: PONG"
 ```
 
+### start.sh parameters and environment
+
+Everything below is documented here so a run is reproducible from the
+command line alone. `start.sh` prints the full effective configuration
+(container name, cpus, mounts) and announces **every env var** it passes into
+the container before launching — values are masked to head+tail (e.g.
+`sk-abc…wxyz`), so exported credential keys are identifiable without being
+leaked to the terminal.
+
+| flag / env | default | effect |
+|---|---|---|
+| `--workspace DIR` (or first positional) | cwd | contestant workspace; must exist. Absolute or relative (used as-is, no prefix) |
+| `--harness shell\|codex\|opencode` | `shell` | command to exec: interactive zsh, `codex`, or `opencode` |
+| `--codex-profile ocx` | – | run codex as `codex -p ocx` (route through the opencodex proxy) |
+| `--name NAME` / `-n` | `bench-<workspace basename>` | container name, so `docker ps` is readable |
+| `--cpus N` | `4` | CPU quota via docker `--cpus` (N cores' worth of time); env `CPUS` also works |
+| `--host-credentials` | off | read real apiKeys from the live host configs (read-only) and pass them as env vars / auth-file binds |
+| `--image-config` | off | skip the config stack entirely (pristine image state, ephemeral sessions) |
+| `--mount-host-configs` | off | bind-mount live host config dirs over the stack (non-reproducible escape hatch) |
+| `CONFIG_STACK=/path` | `<repo>/docker/configs` | vendored config stack installed into `$WS/.sessions` at start |
+| `IMAGE=name` | `cfd-bench:latest` | image to run |
+| `BENCH_ROOT=/path` | `/mnt/ssd-SATARAID5/.../cfd_agentic_benchmark` | host root mounted into the container |
+| `OCX_PORT=10109` | stack config's `.port`, else `10100` | opencodex probe/start port inside the container; if something already listens on it (e.g. a host-side ocx under `--network host`), the container skips starting its own proxy |
+| `OPENCODEX_AUTOSTART=0` | `1` | disable the opencodex autostart probe entirely |
+| `OPENCODE_API_KEY_*`, `OPENCODEX_*` | – | credential env refs the vendored stack expects; export them or use `--host-credentials` |
+| `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`/`NO_PROXY` (+lowercase) | – | forwarded into the container when already exported on the host |
+
+`HOST_UID`/`HOST_GID` are always derived from the invoking user (`id -u` /
+`id -g`): the entrypoint remaps the image's generic `cfd_agent` user to them
+(enroot-style), so files created in the container are owned by you and the
+mounted host dirs work unchanged. Example with everything explicit:
+
+```bash
+CPUS=8 OCX_PORT=10109 \
+docker/scripts/start.sh \
+  --workspace ../codex_gpt56_07 \
+  --harness codex --codex-profile ocx \
+  --name gpt56-07 --cpus 8 \
+  --host-credentials
+```
+
 The rest of this file documents the layout, credentials strategy, session
 bundling, container lifecycle and the redaction policy.
 
@@ -65,10 +106,15 @@ bundling, container lifecycle and the redaction policy.
   tool fresh from its official source, pinned to this machine's versions:
   Node 24.18.0 (nodejs.org), bun 1.3.14 (bun.sh installer), uv 0.12.1
   (astral release), OpenMPI 4.1.6 (apt: `openmpi-bin` + `libopenmpi-dev`),
-  opencode 1.18.11 (`opencode.ai/install --version 1.18.11`),
+  opencode 1.18.14 (`opencode.ai/install --version 1.18.14`),
   codex-cli 0.146.0 (openai/codex release tarball), codegraph 1.2.0 (npm),
   opencodex + ocx-relay (fresh clones at pinned commits), and the DNDSR
   externals (header-only release tarball + cfd_externals built from source).
+  All executables install into system prefixes (`/usr/local/bin`, `/opt`);
+  opencode's runtime stores live at `/opt/opencode-cache` and
+  `/opt/opencode-config` (`XDG_CACHE_HOME`/`XDG_CONFIG_HOME` baked in), and
+  the image home stays empty — the start-time uid/gid remap never chowns a
+  large tree (no `usermod`, no recursive home chown, ~1s container start).
 - `build.sh` — thin build wrapper: `docker build` plus proxy build-args.
   There is **no staging** anymore: nothing is copied from the host into the
   build (the old `docker/.context/` staging area is obsolete; the local dir
@@ -199,9 +245,9 @@ What invalidates: editing a `RUN`/`COPY` line invalidates that layer and
 everything after it (e.g. changing the apt package list re-runs the apt
 layer and all later layers once; the base image and `ARG`/`ENV` layers stay
 cached). The heavy layers use BuildKit **cache mounts**
-(`/var/cache/apt`, `/root/.cache/pip`, `/home/cfd_agent/.bun/install/cache`,
-`/root/.npm`), so even when a layer must rebuild, the packages it downloads
-are reused from `/var/lib/docker/buildkit/cache/` instead of re-fetched.
+(`/var/cache/apt`, `/root/.cache/pip`, `/root/.npm`, `/root/.bun-cache`), so
+even when a layer must rebuild, the packages it downloads are reused from
+`/var/lib/docker/buildkit/cache/` instead of re-fetched.
 
 Housekeeping: `docker builder prune` removes dangling cache entries;
 `docker system df` shows what is reclaimable. To share the cache across
