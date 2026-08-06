@@ -148,5 +148,8 @@ done
 echo "staged configs: $(du -sh "$CC" | cut -f1)  $CC"
 
 echo "== docker build =="
-docker build "${BUILD_ARGS[@]}" -f docker/Dockerfile -t "$IMAGE" .
+# --network host: build steps (apt/npm/bun) run in isolated build containers
+# where 127.0.0.1 is NOT the host — required when the proxy sits on the
+# host's loopback (and harmless for LAN proxies).
+docker build --network host "${BUILD_ARGS[@]}" -f docker/Dockerfile -t "$IMAGE" .
 echo "built $IMAGE"

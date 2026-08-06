@@ -166,7 +166,9 @@ to the baked configs automatically (sessions become ephemeral).
 ### Network / proxy
 
 - The container runs with `--network host`, so it shares the host's network
-  stack; LAN and loopback proxy endpoints are reachable as-is.
+  stack; LAN **and loopback** proxy endpoints are reachable as-is — the
+  container's `127.0.0.1` is the host's loopback, so a proxy bound to
+  `127.0.0.1:PORT` on the host works without changes (verified live).
 - `start.sh` and `build.sh` source `~/.setproxy.sh` when present (override
   with `PROXY_SCRIPT=/path`) and forward `HTTP_PROXY` / `HTTPS_PROXY` /
   `ALL_PROXY` / `NO_PROXY` (upper- and lowercase) into the container,
@@ -176,6 +178,9 @@ to the baked configs automatically (sessions become ephemeral).
 - Docker does not inherit the shell environment, which is why the scripts
   forward the variables explicitly. For a manual `docker run`, pass
   `-e HTTP_PROXY=... -e HTTPS_PROXY=...` yourself.
+- Image builds use `docker build --network host`: build steps run in isolated
+  build containers where `127.0.0.1` is not the host, so loopback proxies
+  would otherwise fail during the apt/npm/bun layers.
 
 ### Credentials (safe by construction)
 
