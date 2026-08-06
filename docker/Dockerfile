@@ -26,8 +26,7 @@ ARG JOBS=4
 
 ENV DEBIAN_FRONTEND=noninteractive \
     HOME=/home/harry \
-    PATH=/opt/openmpi/bin:/opt/node/bin:/home/harry/.bun/bin:/home/harry/.local/bin:/home/harry/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    LD_LIBRARY_PATH=/opt/openmpi/lib
+    PATH=/opt/node/bin:/home/harry/.bun/bin:/home/harry/.local/bin:/home/harry/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # --- base toolchain (apt; Ubuntu 24.04 defaults = GCC 13, like the host) ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -37,6 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ripgrep jq bubblewrap \
     libssl-dev libcurl4-openssl-dev zlib1g-dev libgomp1 libstdc++-13-dev \
     libblas-dev liblapack-dev \
+    openmpi-bin libopenmpi-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g ${GID} harry \
@@ -64,22 +64,11 @@ RUN curl -fsSL -o /tmp/uv.tar.gz \
     && chmod +x /home/harry/.local/bin/uv /home/harry/.local/bin/uvx \
     && rm -f /tmp/uv.tar.gz
 
-# --- OpenMPI 5.0.9 (host version) — official source tarball, built fresh ----
-# Fortran bindings (usempif08) are enabled to match the host build.
-RUN curl -fsSL -o /tmp/openmpi.tar.bz2 \
-        https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.9.tar.bz2 \
-    && mkdir -p /tmp/openmpi-src \
-    && tar -xjf /tmp/openmpi.tar.bz2 -C /tmp/openmpi-src --strip-components=1 \
-    && cd /tmp/openmpi-src \
-    && ./configure --prefix=/opt/openmpi --enable-mpi-fortran=usempif08 \
-    && make -j"${JOBS}" \
-    && make install \
-    && rm -rf /tmp/openmpi-src /tmp/openmpi.tar.bz2
-
 # --- shared DNDSR externals, built from source (DNDSR recipe) ---------------
-# Installed BEFORE the harnesses (after build stack + uv + OpenMPI): the
-# cfd_externals build needs mpicc/mpicxx, and the heavy source build should
-# sit on a stable layer below the harness installs.
+# OpenMPI comes from apt (openmpi-bin + libopenmpi-dev, incl. mpifort), so
+# mpicc/mpicxx are already on PATH. Installed BEFORE the harnesses (after the
+# build stack and uv): the heavy cfd_externals source build should sit on a
+# stable layer below the harness installs.
 #
 # Header-only libraries (Eigen, Boost, CGAL, fmt, pybind11, ...): official
 # release tarball of the DNDSR externals bundle, pinned tag v0.1.0.

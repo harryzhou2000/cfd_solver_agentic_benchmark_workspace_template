@@ -5,8 +5,8 @@ installed fresh in the image from its official source at a version pinned to
 this machine — never copied from the host (the host could be malformed):
 opencode 1.18.11, codex-cli 0.146.0, the opencodex provider proxy and
 ocx-relay (pinned commits), codegraph 1.2.0, Node 24.18.0, bun 1.3.14, uv
-0.12.1, the CFD build toolchain (GCC 13, CMake, Ninja, OpenMPI 5.0.9 built
-from the official source tarball), and the shared DNDSR externals (header-only
+0.12.1, the CFD build toolchain (GCC 13, CMake, Ninja, OpenMPI 4.1.6 from
+apt), and the shared DNDSR externals (header-only
 bundle at the pinned release tag, plus cfd_externals built from source).
 opencode ships with the two pinned plugins installed via opencode's official
 installer: the goal plugin (at the fork's PR-tip commit) and
@@ -63,8 +63,8 @@ bundling, container lifecycle and the redaction policy.
 - `Dockerfile` — the image (build context is the repo root). Installs every
   tool fresh from its official source, pinned to this machine's versions:
   Node 24.18.0 (nodejs.org), bun 1.3.14 (bun.sh installer), uv 0.12.1
-  (astral release), OpenMPI 5.0.9 (open-mpi.org source tarball, built with
-  usempif08), opencode 1.18.11 (`opencode.ai/install --version 1.18.11`),
+  (astral release), OpenMPI 4.1.6 (apt: `openmpi-bin` + `libopenmpi-dev`),
+  opencode 1.18.11 (`opencode.ai/install --version 1.18.11`),
   codex-cli 0.146.0 (openai/codex release tarball), codegraph 1.2.0 (npm),
   opencodex + ocx-relay (fresh clones at pinned commits), and the DNDSR
   externals (header-only release tarball + cfd_externals built from source).
@@ -90,7 +90,7 @@ bundling, container lifecycle and the redaction policy.
 - `external/` — pointer for the shared DNDSR externals. The real tree is
   built inside the image at `/opt/external` (header-onlys + cfd_externals
   from source, per the DNDSR recipe — before the harnesses, right after the
-  build stack + uv + OpenMPI), and `setup-workspace.sh` symlinks every
+  build stack (incl. OpenMPI) and uv), and `setup-workspace.sh` symlinks every
   contestant workspace's `external/` to `/opt/external`. No host binary tree
   is staged or referenced.
 - `entrypoint.sh` — starts the opencodex proxy when its config is present and
@@ -168,7 +168,7 @@ JOBS=8 docker/build.sh             # more parallel build jobs (default 4)
 ### Robustness on other machines
 
 - **Missing host tools:** not applicable — the image installs every tool
-  fresh from its official source (npm/GitHub/nodejs.org/open-mpi.org), so a
+  fresh from its official source (apt/npm/GitHub/nodejs.org), so a
   host without codex/opencode/opencodex builds the same image. The build
   needs network access (and a proxy, if the host requires one — see below).
 - **Missing pinned artifacts:** pinned commits/tags are resolved via the
