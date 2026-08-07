@@ -333,3 +333,22 @@ Conclusion: BLSC's Kimi-K3 route does not expose/leverage upstream context
 caching. Sessions on Kimi-K3 via BLSC pay full input every request; prefer
 DeepSeek models on BLSC or a Kimi route that caches (e.g. the oc_goal-kimik3
 session that showed 98.5% used a different provider route).
+
+### Kimi-K3 re-probe 2026-08-08: caching now partially engages
+
+Same endpoint, `probe_model_cache.js --targets blsc-k3 --count 6 --effort low`
+(identical requests, reasoning shape):
+
+```
+#1-#4  cached=0 (miss)
+#5     cached=1280 (95% of the 1342-token prompt)
+#6     cached=1280
+=> 2/6 cached>0  overall 31.8%
+```
+
+So the route now warms up, but only after several misses — consistent with
+multiple backend replicas each warming its own cache (requests hit a warmed
+replica only after enough samples). Expect low head rates that improve as a
+session reuses the same replica. Endpoint latency is highly variable today
+(single `max_tokens=8` request: 5s; an `effort=max` probe did not complete
+request #1 within 300s), so budget probe timeouts generously.
