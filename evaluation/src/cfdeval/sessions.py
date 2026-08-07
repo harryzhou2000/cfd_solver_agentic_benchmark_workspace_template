@@ -93,9 +93,8 @@ class CodexThreadEvents:
     def __init__(self, thread_id: str, rollout_path: str | None):
         self.thread_id = thread_id
         self.rollout_path = rollout_path
-        self._prev_last: dict = {}
-        self.cumulative_final: int | None = None   # final total_token_usage (subtree-inclusive)
-        self.own_final: int | None = None           # final last_token_usage (own usage)
+        self._prev_tot: dict = {}
+        self.cumulative_final: int | None = None   # final total_token_usage (thread total)
         self.events: list[tuple[datetime, str, dict]] = []  # (ts, kind, info)
         self.token_events: list[tuple[datetime, dict]] = []
         self.tool_events: list[tuple[datetime, str]] = []
@@ -129,28 +128,31 @@ class CodexThreadEvents:
             if rtype == "event_msg":
                 etype = payload.get("type")
                 if etype == "token_count":
-                    last = payload.get("info", {}).get("last_token_usage") or {}
-                    if last:
-                        # `last_token_usage` is the thread's OWN cumulative
-                        # usage counter (monotonic); `total_token_usage` is
-                        # the subtree-inclusive cumulative (== threads.tokens_
-                        # used at session end). Per-submission usage is the
-                        # delta between consecutive last_token_usage readings;
-                        # on a counter reset (compaction), start from the new
-                        # reading so each epoch is counted once.
+                    tot = payload.get("info", {}).get("total_token_usage") or {}
+                    if tot:
+                        # `total_token_usage` is the thread's cumulative usage
+                        # counter (== threads.tokens_used at session end);
+                        # `last_token_usage` is the usage of the most recent
+                        # submission. Per-event usage = delta between
+                        # consecutive total_token_usage readings: this is
+                        # identical to last_token_usage for real submissions,
+                        # but naturally drops duplicate ticks (streaming /
+                        # periodic re-reports) and survives counter resets.
                         fields = ("input_tokens", "cached_input_tokens",
                                   "cache_write_input_tokens", "output_tokens",
                                   "reasoning_output_tokens", "total_tokens")
-                        cur = {k: max(last.get(k, 0), 0) for k in fields}
-                        if cur["total_tokens"] < self._prev_last.get("total_tokens", 0):
-                            self._prev_last = {k: 0 for k in fields}
-                        delta = {k: cur[k] - self._prev_last.get(k, 0)
-                                 for k in fields}
-                        self.token_events.append((ts, delta))
-                        self._prev_last = cur
-                        self.own_final = cur["total_tokens"]
-                        total = payload.get("info", {}).get("total_token_usage", {})
-                        self.cumulative_final = total.get("total_tokens") or self.cumulative_final
+                        cur = {k: max(tot.get(k, 0), 0) for k in fields}
+                        if cur["total_tokens"] < self._prev_tot.get("total_tokens", 0):
+                            # counter reset (compaction): count the new epoch
+                            # once from its own base.
+                            delta = cur
+                        else:
+                            delta = {k: cur[k] - self._prev_tot.get(k, 0)
+                                     for k in fields}
+                        if delta["total_tokens"] > 0:
+                            self.token_events.append((ts, delta))
+                        self._prev_tot = cur
+                        self.cumulative_final = cur["total_tokens"]
                     self.add(ts, "token_count", {"info": payload.get("info", {})})
                 elif etype in ("task_started", "task_complete", "turn_aborted",
                                "context_compacted", "sub_agent_activity",
@@ -739,7 +741,6 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
                     "is_subagent": tid in children,
                     "events": len(s.events),
                     "tokens_total_subtree": s.cumulative_final,
-                    "tokens_own_final": s.own_final,
                     "tools": dict(Counter(n for _ts, n in s.tool_events)),
                     "first_event": s.first_ts.isoformat() if s.first_ts else None,
                     "last_event": s.last_ts.isoformat() if s.last_ts else None,
@@ -826,8 +827,9 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
             "codex: total_token_usage / threads.tokens_used are subtree-"
             "inclusive per thread; summing all threads overcounts nested "
             "trees, so total_from_root_trees sums each root tree's final "
-            "cumulative counter once. Bucket totals are per-submission "
-            "last_token_usage sums (cache-hit history is per submission).")
+            "cumulative counter once. Bucket totals are per-event "
+            "total_token_usage deltas (cache-hit history is per submission; "
+            "duplicate streaming ticks are excluded).")
 
     timeline = merged_timeline(all_events)
     intervals, gaps = active_intervals(timeline, idle_gap_seconds)
