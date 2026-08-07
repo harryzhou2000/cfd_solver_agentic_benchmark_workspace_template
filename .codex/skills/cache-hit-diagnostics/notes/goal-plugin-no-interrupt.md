@@ -9,11 +9,14 @@ background-task result messages), and interrupted otherwise healthy goals.
 - Upstream: https://github.com/willytop8/OpenCode-goal-plugin (v0.7.0, main).
 - Fork: https://github.com/harryzhou2000/OpenCode-goal-plugin
   (forked 2026-08-05; `main` stays clean at upstream v0.7.0).
-- Patch branch: `feat/no-interrupt-user-message` (commits `03c493c` +
-  `223cc87` + `0cfe9bb`). The owner (willytop8) added `0cfe9bb` themselves:
-  a CI-only retarget of the mutation contract anchor for the widened
-  replay-safe set (runtime unchanged).
-- PR: https://github.com/willytop8/OpenCode-goal-plugin/pull/53
+- PR #53 (both options) **merged** 2026-08-06 → released as **v0.8.0**
+  (`2a0b9bb`); owner also hardened the children gate in PR #54. Fork `main`
+  tracks upstream.
+- PR #58 (`fix/auto-continue-after-compaction`, commit `aa1f366`): goal loop
+  stalled after session compaction — a pre-compaction continuation claim
+  matched the still-visible tail assistant after compaction, suppressing the
+  post-compaction continuation. Fix: invalidate `goal.continuationClaim` in
+  the `session.compacted` handler.
 
 ## The patch (minimal)
 
@@ -50,13 +53,15 @@ added in test/goal-plugin.test.js and test/opencode-session-api.test.js
 ## Local checkout
 
 Submodule in the manager workspace: `OpenCode-goal-plugin/` pointing at the
-fork, pinned at `0cfe9bb` (parent commit updated alongside). Remote `origin` is SSH
+fork, pinned at `aa1f366` (branch `fix/auto-continue-after-compaction`).
+Remote `origin` is SSH
 (`git@github.com:harryzhou2000/OpenCode-goal-plugin.git`); `.gitmodules` uses
 the HTTPS URL per repo convention.
 
 ## Checks
 
-- `npm run check` — 356/356 pass on official Node 18/20/22/24 (final commit).
+- `npm run check` — 385/385 pass on official Node 22 at the compaction-fix
+  commit (356/356 on the earlier matrix).
 - `npm run smoke` and `npm run type:check` — pass.
 - Pre-existing, unrelated failures on pristine main in this environment:
   `test/persistence-lease.test.js` hangs; `test/session-concurrency.test.js`
