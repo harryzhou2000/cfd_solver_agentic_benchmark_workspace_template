@@ -5,11 +5,16 @@
 #   ./terminal-bench-2-1/run.sh [config] [extra harbor flags...]
 #
 # Examples:
-#   ./terminal-bench-2-1/run.sh                                    # default config
-#   ./terminal-bench-2-1/run.sh configs/deepseek-v4-flash-max.yaml
-#   ./terminal-bench-2-1/run.sh configs/deepseek-v4-flash-max.yaml --job-name run2
-#   ./terminal-bench-2-1/run.sh -l 5 --print-config                 # flags use default config
-#   ./terminal-bench-2-1/run.sh job.example.yaml -l 5 --print-config   # dry-run
+#   ./terminal-bench-2-1/run.sh                                     # default config
+#   ./terminal-bench-2-1/run.sh terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml
+#   ./terminal-bench-2-1/run.sh terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml --job-name run2
+#   ./terminal-bench-2-1/run.sh -l 5 --print-config                  # flags use default config
+#   ./terminal-bench-2-1/run.sh terminal-bench-2-1/job.example.yaml -l 5 --print-config
+#
+# The config path (including the default) is resolved relative to the current
+# working directory — the same base harbor uses for the YAML's internal
+# relative paths (jobs_dir, download_dir), so launch from the repo root.
+# From inside terminal-bench-2-1/ use ./run.sh configs/deepseek-v4-flash-max.yaml.
 #
 # Extra CLI flags merge over the YAML (kwargs via --ak, retries via -r, task
 # filters via -i/-l, timeouts, job dir via -o/--job-name). Note: -m is only
@@ -18,23 +23,17 @@
 
 set -euo pipefail
 
-DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ $# -eq 0 ] || [[ "$1" == -* ]]; then
-  CFG="configs/deepseek-v4-flash-max.yaml"
+  CFG="terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml"
 else
   CFG="$1"
   shift
 fi
 
-case "$CFG" in
-  /*) ;;
-  *) CFG="$DIR/$CFG" ;;
-esac
-
 if [ ! -f "$CFG" ]; then
-  echo "config not found: $CFG" >&2
+  echo "config not found (resolved relative to cwd $PWD): $CFG" >&2
   echo "vendored configs:" >&2
-  ls "$DIR"/configs/*.yaml "$DIR"/*.yaml 2>/dev/null >&2
+  ls ./terminal-bench-2-1/configs/*.yaml ./configs/*.yaml ./terminal-bench-2-1/*.yaml 2>/dev/null >&2 || true
   exit 1
 fi
 
