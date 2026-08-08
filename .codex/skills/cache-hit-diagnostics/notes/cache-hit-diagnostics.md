@@ -373,3 +373,82 @@ repeat x3 (exact re-send): in=11504 cached=8832 (76.8%) every time
 - Net effect: K3 sessions on BLSC see ~80% early, decaying as context grows;
   only the system prefix is ever cached. DeepSeek models on the same proxy
   cache the full prefix (~98%) — prefer them for long agentic sessions.
+
+## BLSC backend fingerprints: LiteLLM model groups (probed 2026-08-08)
+
+BLSC is a **LiteLLM router**: each model name is a model *group* with one or
+more upstream entries. The per-request `x-litellm-model-id` header identifies
+which entry served a call, and the router can switch entries between requests
+(load balancing / fallbacks). **Probe repeatedly and key observations by
+model-id** — a single capture can hit a different upstream.
+`scripts/probe_backend_fingerprint.js --samples N --tool --surfaces` automates
+the sampling.
+
+Observed entries (all on `llmapi.blsc.cn`, 2026-08-08):
+
+`Kimi-K3` — entry `d285d5d7` (stable across 7/7 requests):
+- id `chatcmpl-<ULID26>` (Crockford base32; first 10 chars decode to the
+  request timestamp), `llm_provider-x-request-id` = same ULID,
+  `llm_provider-x-trace-id` = same value undashed.
+- No `system_fingerprint`, no `llm_provider-server` header.
+- usage: `prompt_tokens_details.{audio_tokens, cached_tokens}` +
+  `completion_tokens_details.{audio_tokens, reasoning_tokens}`.
+- message `provider_specific_fields`: `{refusal}` on plain answers,
+  `{reasoning, refusal, reasoning_content}` on tool calls.
+- tool-call ids: `chatcmpl-tool-<16hex>`.
+- Upstream 400 for bad effort: `invalid request: Kimi K3 reasoning_effort must
+  be one of high, low, max; got '...' (request id: <ULID>)` with `type: null`.
+
+`DeepSeek-V4-Flash` — group rotates between ≥3 entries:
+- `cc7b25a9` (current; 6/6 in one window): id bare uuid4 (= x-request-id),
+  no fingerprint, usage `prompt_tokens_details.{cached_tokens}` +
+  `completion_tokens_details.{reasoning_tokens}`, message
+  `provider_specific_fields: {refusal, reasoning_content}`, tool ids
+  `call_00_<22 chars>`.
+- `81a86146` (1 hit): vLLM 0.21.0 — id `chatcmpl-<uuid4-dashed>`,
+  `system_fingerprint: vllm-0.21.0-dp16-ep-...`, `llm_provider-server: uvicorn`,
+  message psf `{reasoning, refusal}`, choice psf
+  `{routed_experts, stop_reason, token_ids}`.
+- `f54a497e` (error path): pydantic-style `'reasoning_effort' must be one of:
+  'low', 'medium', 'high', 'xhigh', 'max'`, `type: invalid_request_error`.
+
+API surfaces: Anthropic-compatible `/v1/messages` and OpenAI Responses
+`/v1/responses` are both exposed for these models, and the per-entry id
+fingerprint passes through all of them (K3 message ids stay
+`chatcmpl-<ULID>`, DS ids stay bare uuid4 — including the Responses
+`output[].message.id`). DS Anthropic responses contain a `thinking` block with
+`signature: null` (LiteLLM conversion).
+
+### vs official docs
+
+Kimi official (`api.moonshot.cn/v1`; docs source `lyhmoonshot/mintlify_ai`,
+rendered at platform.kimi.com/docs):
+- Docs examples use `id: cmpl-<32hex>` (2023-era example, `created`
+  1698999496) and flat `usage.cached_tokens` — no details objects, no
+  `audio_tokens`, no `provider_specific_fields` documented.
+- K3: `reasoning_effort` low/high/max (default max), always-reasoning,
+  `max_completion_tokens` default 131072 / max 1048576, `response_format` +
+  `strict`.
+- Errors: OpenAI-style `{"error":{message,type,param,code}}` with
+  `invalid_request_error`; message family `Invalid request: ...` and
+  `invalid <param>: only <value> is allowed for this model`; `request_id`
+  referenced when contacting support.
+
+DeepSeek official (`api-docs.deepseek.com/api/create-chat-completion`):
+- Non-stream example id `930c60df-...` (bare uuid4); stream example id 32-hex;
+  `system_fingerprint: fp_...`.
+- Usage: flat `prompt_cache_hit_tokens` / `prompt_cache_miss_tokens` plus
+  `completion_tokens_details.{reasoning_tokens}`.
+
+Reading the observed envelopes against those: the DS `cc7b25a9` entry shares
+the official DeepSeek bare-uuid id style and reasoning usage, but reports
+`prompt_tokens_details.cached_tokens` instead of flat
+`prompt_cache_hit_tokens` and no fingerprint (LiteLLM deepseek usage mapping).
+The K3 entry matches **no** documented envelope exactly (ULID ids,
+`audio_tokens` usage details, `chatcmpl-tool-` ids, custom validation text) —
+it is a Kimi-compatible gateway distinct from both the documented Moonshot API
+and the vLLM/DeepSeek stack; treat the docs' `cmpl-<32hex>` example as stale.
+
+Caching consequence: the fixed ~8.8k-token cacheable prefix observed on
+Kimi-K3 belongs to entry `d285d5d7`; the DS group's rotating entries each
+carry their own cache state, so sessions that switch entries pay re-warmup.

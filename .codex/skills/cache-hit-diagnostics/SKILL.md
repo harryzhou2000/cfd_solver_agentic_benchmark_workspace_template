@@ -53,6 +53,12 @@ usage accounting can be trusted. Never interpret session numbers before this
 step — a provider with stub accounting makes every session look like a cache
 miss.
 
+If the endpoint is a LiteLLM router (look for `x-litellm-*` response headers),
+remember each model name is a *group* that can switch upstream entries
+between requests (`x-litellm-model-id` changes). Fingerprint the group first
+with `scripts/probe_backend_fingerprint.js` and key every observation by
+model-id; see `notes/cache-hit-diagnostics.md` "BLSC backend fingerprints".
+
 - `scripts/probe_model_cache.js` — N identical requests; expect request 1 miss,
   then `cached ≈ input`.
 - `scripts/probe_real_turns.js` — growing conversation reusing real assistant
@@ -165,6 +171,10 @@ nothing logged.
 - `scripts/probe_model_cache.js` — identical-request cache probe.
 - `scripts/probe_real_turns.js` — growing-conversation cache probe.
 - `scripts/probe_tool_turns.js` — tool-turn + streaming probe (stub detection).
+- `scripts/probe_backend_fingerprint.js` — repeated per-request envelope
+  sampling keyed by `x-litellm-model-id` (id style, fingerprint, usage dicts,
+  tool-call id format), plus Anthropic `/v1/messages` and Responses
+  `/v1/responses` surface checks.
 - `scripts/session_cache_stats.mjs` — session↔usage correlation and head/tail
   cache statistics.
 - `scripts/opencode_session_cache_stats.mjs` — opencode session cache stats
