@@ -452,3 +452,26 @@ and the vLLM/DeepSeek stack; treat the docs' `cmpl-<32hex>` example as stale.
 Caching consequence: the fixed ~8.8k-token cacheable prefix observed on
 Kimi-K3 belongs to entry `d285d5d7`; the DS group's rotating entries each
 carry their own cache state, so sessions that switch entries pay re-warmup.
+
+### Responses API notes (probed 2026-08-08, DeepSeek-V4-Flash)
+
+`/v1/responses` works for DS-V4-Flash (non-stream, `stream: true`, and tools),
+but treat it as a **conversion layer, not a cache-measurement surface**:
+
+- Non-stream usage keeps details (`input_tokens_details.cached_tokens` etc.),
+  but exact re-sends reported `cached_tokens: 0` every time — even on entry
+  `cc7b25a9`, which caches in chat completions. Streaming usage is bare
+  (`{input_tokens, output_tokens, total_tokens}`, no details at all).
+- The route rotates the same LiteLLM entries as chat completions (observed
+  `81a86146`, `cc7b25a9`, plus a fourth entry `5da5edaa`), so per-request
+  envelopes vary.
+- Tool calls come back as a `function_call` output item with
+  `call_id: chatcmpl-tool-<16hex>` regardless of entry — the conversion layer
+  normalizes ids (chat completions show per-entry formats like `call_00_...`).
+- Outer response id is `resp_<449 chars>` (a long encoded blob, not OpenAI's
+  short `resp_` ids); reasoning arrives as a `reasoning` output item and, in
+  streaming, as `response.reasoning_summary_text.delta` events.
+- Envelope defaults differ: `temperature: 0.0`, `parallel_tool_calls: false`,
+  `max_output_tokens: null` in the returned object.
+
+For cache diagnostics, always measure via `/v1/chat/completions`.
