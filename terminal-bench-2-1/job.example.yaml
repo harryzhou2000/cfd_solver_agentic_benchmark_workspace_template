@@ -1,0 +1,26 @@
+# Terminal-Bench 2.1, terminus-2 harness, model calls routed through the
+# local opencodex proxy (loopback, no auth). Run from the repo root:
+#
+#   harbor run -c terminal-bench-2-1/job.example.yaml -y
+
+job_name: tb21-terminus2-glm52
+jobs_dir: terminal-bench-2-1/jobs
+n_attempts: 1
+n_concurrent_trials: 4
+
+agents:
+  - name: terminus-2
+    model_name: openai/BLSC/GLM-5.2
+    kwargs:
+      api_base: http://127.0.0.1:10109/v1
+      # litellm requires a non-empty api_key for the openai/ provider even on a
+      # loopback bind; opencodex does not validate it there.
+      llm_kwargs:
+        api_key: ocx-loopback
+      # reasoning_effort: high
+      # max_turns: 200
+
+datasets:
+  - name: terminal-bench/terminal-bench-2-1
+    download_dir: terminal-bench-2-1/.cache/tasks
+    n_tasks: 5
