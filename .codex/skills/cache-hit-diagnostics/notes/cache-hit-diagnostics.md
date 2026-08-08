@@ -456,12 +456,20 @@ carry their own cache state, so sessions that switch entries pay re-warmup.
 ### Responses API notes (probed 2026-08-08, DeepSeek-V4-Flash)
 
 `/v1/responses` works for DS-V4-Flash (non-stream, `stream: true`, and tools),
-but treat it as a **conversion layer, not a cache-measurement surface**:
+but treat it as a conversion layer with caveats:
 
-- Non-stream usage keeps details (`input_tokens_details.cached_tokens` etc.),
-  but exact re-sends reported `cached_tokens: 0` every time — even on entry
-  `cc7b25a9`, which caches in chat completions. Streaming usage is bare
-  (`{input_tokens, output_tokens, total_tokens}`, no details at all).
+- **Non-streaming cache accounting is truthful and cross-surface.** Paired
+  test with a ~5400-token identical prompt on entry `cc7b25a9`: chat
+  completions warmed on request 2 (`cached=5376`), and the *first* responses
+  request with the same string input already reported `cached=5376` —
+  LiteLLM's responses->chat conversion produces byte-identical upstream
+  prompts and propagates the cached count. (An earlier tiny-prompt probe
+  reported `cached=0` on both surfaces — 89-token prompts sit below the
+  backend's cacheable prefix, and chat showed the same zeros; the claim that
+  responses "never caches" was wrong.)
+- **Streaming responses usage is bare** (`{input_tokens, output_tokens,
+  total_tokens}`, no details), so measure cache via non-streaming responses
+  (or chat completions).
 - The route rotates the same LiteLLM entries as chat completions (observed
   `81a86146`, `cc7b25a9`, plus a fourth entry `5da5edaa`), so per-request
   envelopes vary.
@@ -473,8 +481,6 @@ but treat it as a **conversion layer, not a cache-measurement surface**:
   streaming, as `response.reasoning_summary_text.delta` events.
 - Envelope defaults differ: `temperature: 0.0`, `parallel_tool_calls: false`,
   `max_output_tokens: null` in the returned object.
-
-For cache diagnostics, always measure via `/v1/chat/completions`.
 
 ### Session stickiness (LiteLLM router affinity)
 
