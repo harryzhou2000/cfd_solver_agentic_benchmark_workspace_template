@@ -509,6 +509,31 @@ counts and cache accounting). Official usage carries both
 `prompt_tokens_details.cached_tokens` and flat `prompt_cache_hit_tokens` /
 `prompt_cache_miss_tokens`; BLSC's LiteLLM layer surfaces only the details.
 
+### Official DeepSeek tool-turn comparison (probed 2026-08-08)
+
+Same `probe_tool_turns.js` shape (get_current_time tool, ~15k system block,
+effort low) against `api.deepseek.com` `deepseek-v4-flash`:
+
+```
+                official deepseek-v4-flash      BLSC DS-V4-Flash (cc7b25a9)
+non-stream t1A  11094 in / 11008 cached (99.2%)  11095 / 11008 (99.2%)
+non-stream t1B  11170 / 11008 (98.5%)            11169 / 11008 (98.6%)
+non-stream rpt  11282 / 11264 (99.8%)            (responses rpt: 91.4%)
+streamed  t1A  11094 / 11008 (99.2%)            11094 / 11008 (99.2%)
+streamed  t2A  11204 / 11136 (99.4%)            (responses t2A: 11008)
+streamed  rpt  11260 / 11136 (98.9%)            11163 / 11008 (98.6%)
+```
+
+- Official DeepSeek reports truthful `cached_tokens` on **both** streamed and
+  non-streamed chat paths (no stub usage).
+- Counts match BLSC's `cc7b25a9` within ±1 token (LiteLLM adds one token),
+  re-confirming the official-DeepSeek upstream fingerprint with the
+  tool-call shape.
+- Difference: official's cached prefix **grows** across turns (11008 ->
+  11136, absorbing the tool round-trip) and exact repeats reach 99.8%
+  (non-stream) / 98.9% (streamed); BLSC's Responses conversion showed weaker
+  tail caching (91.4% repeats).
+
 ### Session stickiness (LiteLLM router affinity)
 
 LiteLLM has `DeploymentAffinityCheck` (`litellm/router_utils/pre_call_checks/
