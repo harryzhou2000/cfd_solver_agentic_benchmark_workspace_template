@@ -15,6 +15,7 @@ shells).
 | `--name NAME` / `-n` | Container name (default `bench-<workspace-basename>`) |
 | `--cpus N` | CPU quota (default 4) |
 | `--detach` | Detached run; survives terminal close; stop with `docker stop <name>` |
+| `--force-remove` | Interactive-only: launcher trap force-removes the container on EXIT/INT/TERM/HUP (default: signals pass through) |
 | `--host-credentials` | Read real keys from this host's live configs into container env + ro auth binds |
 | `--image-config` | No config stack/session bundle; bare image state |
 | `--mount-host-configs` | Mount live host config dirs over the stack (escape hatch; non-reproducible) |
@@ -40,9 +41,12 @@ shells).
   host-side ocx service.
 - seccomp/apparmor are relaxed (`--security-opt ...=unconfined`) so codex's
   bundled bwrap sandbox works.
-- Interactive mode runs `--rm` with an EXIT/INT/TERM/HUP trap that
-  force-removes the container; `--detach` runs `docker run -dit --rm` with no
-  trap — only `docker stop` ends it.
+- Interactive mode runs foreground `docker run -it --rm` and does not
+  intercept signals: Ctrl-C / SIGTERM / SIGHUP pass through to the container
+  (docker --sig-proxy), which decides how to exit; `--rm` removes it once it
+  exits. `--force-remove` opts back into the launcher trap (EXIT/INT/TERM/HUP
+  + `docker rm -f`). `--detach` runs `docker run -dit --rm` with no trap —
+  only `docker stop` ends it.
 
 ### Entrypoint (`docker/entrypoint.sh`)
 
@@ -87,8 +91,10 @@ shells).
 - `[entrypoint] mapping cfd_agent -> uid=...` stall: the passwd rewrite +
   shallow chown is intentional (no recursive chown); check mounted host dirs
   are owned by the invoking user.
-- Container died when the terminal closed: interactive mode force-removes on
-  signal; rerun with `--detach`.
+- Container still running after the terminal closed: interactive mode no
+  longer force-removes on signal, so the container survives; reattach with
+  `docker attach <name>` or stop it with `docker stop <name>` (rerun with
+  `--detach` or `--force-remove` to avoid this next time).
 - `WARNING: nothing listening on 127.0.0.1:<port>`: start the host-side ocx
   (`ocx start --port 10109`) or set `OCX_PORT`/`OPENCODEX_AUTOSTART=1`.
 - See `notes/2026-08-08-docker-force-removal-incident.md` for the signal

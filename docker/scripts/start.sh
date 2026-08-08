@@ -13,7 +13,7 @@ fi
 #   docker/scripts/start.sh [--workspace DIR] [--host-credentials]
 #     [--image-config] [--mount-host-configs]
 #     [--harness shell|codex|opencode] [--codex-profile ocx]
-#     [--name NAME] [--cpus N] [--detach] [-- cmd...]
+#     [--name NAME] [--cpus N] [--detach] [--force-remove] [-- cmd...]
 #   CONFIG_STACK=/path/to/stack CPUS=8 OCX_PORT=10109 \
 #     docker/scripts/start.sh --workspace DIR
 #
@@ -48,12 +48,14 @@ fi
 # the installed stack, for live-edit workflows without a rebuild
 # (non-reproducible escape hatch).
 #
-# The container runs with --rm plus an EXIT/INT/TERM/HUP trap that
-# force-removes it, so no bench-* container survives the launcher (Ctrl-C,
-# SIGTERM, or a closed terminal). docker run runs in the background and the
-# launcher waits on it: bash only executes traps immediately while blocked in
-# the wait builtin — a plain foreground `docker run` defers traps until the
-# container exits on its own.
+# Interactive mode does NOT intercept signals by default: `docker run -it
+# --rm` runs in the foreground, so Ctrl-C / SIGTERM / SIGHUP pass straight
+# through to the container (docker --sig-proxy) and the container decides how
+# to exit; --rm removes it once it exits on its own. Pass --force-remove to
+# opt back into the old launcher trap (EXIT/INT/TERM/HUP + docker rm -f, so
+# no bench-* container survives Ctrl-C or a closed terminal); in that mode
+# docker run is backgrounded and waited on because bash only executes traps
+# immediately while blocked in the wait builtin.
 #
 # --detach: long benchmark runs should NOT be tied to a terminal. With
 # --detach the launcher starts the container with `docker run -dit --rm`
@@ -88,6 +90,7 @@ NAME_ARG=""
 CPUS="${CPUS:-4}"   # --cpus quota: how many CPU cores worth of time the
                      # container may use (docker's --cpus, not cpuset pins)
 DETACH=0
+FORCE_REMOVE=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -100,6 +103,7 @@ while [ $# -gt 0 ]; do
     --name|-n) NAME_ARG="$2"; shift 2 ;;
     --cpus) CPUS="$2"; shift 2 ;;
     --detach) DETACH=1; shift ;;
+    --force-remove) FORCE_REMOVE=1; shift ;;
     --) shift; break ;;
     *) WS="${WS:-$1}"; shift ;;
   esac
@@ -385,9 +389,16 @@ echo "  workspace: $WS"
 echo "  harness:   $HARNESS"
 echo "  name:      $NAME"
 echo "  cpus:      $CPUS"
-echo "  mode:      $([ "$DETACH" = 1 ] && echo 'detach (survives terminal close)' || echo 'interactive (killed on terminal close)')"
+echo "  mode:      $([ "$DETACH" = 1 ] && echo 'detach (survives terminal close)' || echo 'interactive (signals pass through to the container)')"
 echo "  start dir: $WS (entrypoint cd + docker -w)"
 [ -n "$CODEX_PROFILE" ] && echo "  codex profile: -p $CODEX_PROFILE"
+if [ "$DETACH" = "0" ]; then
+  if [ "$FORCE_REMOVE" = "1" ]; then
+    echo "  signals:   launcher force-removes container on EXIT/INT/TERM/HUP (--force-remove)"
+  else
+    echo "  signals:   not intercepted; Ctrl-C/SIGTERM pass through to the container (--force-remove to opt in)"
+  fi
+fi
 if [ "$MOUNT_CONFIG" = "1" ]; then
   echo "  config stack: $CONFIG_STACK"
   echo "  bash:         $WS/.sessions/bash (default Ubuntu .bashrc/.profile + persistent history)"
@@ -411,9 +422,9 @@ cleanup() {
 if [ "$DETACH" = "1" ]; then
   # Detached mode: the container is decoupled from this launcher's lifetime.
   # `--rm` stays (it only removes the container after it exits on its own —
-  # it never kills a running container), and the trap above is NOT installed
-  # in this branch, so a terminal close / SSH drop / Ctrl-C on the logs tail
-  # cannot force-remove the container.
+  # it never kills a running container), and no signal trap is installed, so
+  # a terminal close / SSH drop / Ctrl-C on the logs tail cannot force-remove
+  # the container.
   echo "== starting detached: docker stop $NAME when done =="
   docker run -dit --rm --network host --name "$NAME" \
     --user root:root \
@@ -429,19 +440,37 @@ if [ "$DETACH" = "1" ]; then
 fi
 
 # Interactive mode: the container's life is tied to this launcher terminal.
-trap cleanup EXIT INT TERM HUP
-
-# Remove a container orphaned by a previous SIGKILLed session (SIGKILL cannot
-# be trapped; the name is deterministic per workspace).
+# Remove a container left over from a previous session (a SIGKILLed launcher,
+# or a closed terminal while the container kept running; the name is
+# deterministic per workspace, and a stale one would block `docker run`).
 docker rm -f "$NAME" >/dev/null 2>&1 || true
 
-docker run -it --rm --network host --name "$NAME" \
-  --user root:root \
-  --cpus "$CPUS" \
-  -w "$CTR_WS" \
-  "${SECURITY_OPTS[@]}" \
-  "${ENVS[@]}" \
-  "${MOUNTS[@]}" \
-  "$IMAGE" "${CMD[@]}" <&0 &
-RUN_PID=$!
-wait "$RUN_PID"
+if [ "$FORCE_REMOVE" = "1" ]; then
+  # Opt-in launcher trap: force-remove on EXIT/INT/TERM/HUP so no bench-*
+  # container survives Ctrl-C or a closed terminal. docker run must run in
+  # the background and be waited on for the trap to fire immediately.
+  trap cleanup EXIT INT TERM HUP
+  docker run -it --rm --network host --name "$NAME" \
+    --user root:root \
+    --cpus "$CPUS" \
+    -w "$CTR_WS" \
+    "${SECURITY_OPTS[@]}" \
+    "${ENVS[@]}" \
+    "${MOUNTS[@]}" \
+    "$IMAGE" "${CMD[@]}" <&0 &
+  RUN_PID=$!
+  wait "$RUN_PID"
+else
+  # Default: no signal interception. Ctrl-C / SIGTERM / SIGHUP reach the
+  # docker client and are proxied into the container (--sig-proxy); the
+  # container decides how to exit and --rm removes it afterwards. Foreground
+  # so the launcher's exit status mirrors `docker run`.
+  docker run -it --rm --network host --name "$NAME" \
+    --user root:root \
+    --cpus "$CPUS" \
+    -w "$CTR_WS" \
+    "${SECURITY_OPTS[@]}" \
+    "${ENVS[@]}" \
+    "${MOUNTS[@]}" \
+    "$IMAGE" "${CMD[@]}"
+fi

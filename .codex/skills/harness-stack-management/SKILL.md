@@ -43,8 +43,9 @@ external, and capture an optional env snapshot. Relative paths land under
 ### Launch a container
 Run `bash docker/scripts/start.sh --workspace DIR --harness codex [--detach]`.
 It installs the vendored stack into `DIR/.sessions/` and mounts them into the
-container at `/workspace`. Use `--detach` for runs that outlive a terminal:
-interactive mode force-removes the container when the terminal closes. See
+container at `/workspace`. Use `--detach` for runs that outlive a terminal;
+interactive mode passes signals through to the container (no force-remove
+unless `--force-remove`). See
 [references/launch-and-workspace.md](references/launch-and-workspace.md) for
 the full flag/env reference and troubleshooting.
 
@@ -55,8 +56,9 @@ the full flag/env reference and troubleshooting.
   container start.
 - Never commit credentials into `docker/configs/`; always regenerate with
   `sync-configs.sh` and check its verification output.
-- Long agent runs must use `--detach`; interactive containers are
-  force-removed on terminal close (see
+- Long agent runs must use `--detach`; interactive mode does not intercept
+  signals by default — pass `--force-remove` to restore the launcher
+  force-remove trap (see
   `notes/2026-08-08-docker-force-removal-incident.md`).
 - opencodex is a router, not a harness: the container defaults to a
   host-hosted ocx service (`OPENCODEX_AUTOSTART=0`); do not enable the
