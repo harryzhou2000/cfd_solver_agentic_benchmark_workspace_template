@@ -475,3 +475,25 @@ but treat it as a **conversion layer, not a cache-measurement surface**:
   `max_output_tokens: null` in the returned object.
 
 For cache diagnostics, always measure via `/v1/chat/completions`.
+
+### Session stickiness (LiteLLM router affinity)
+
+LiteLLM has `DeploymentAffinityCheck` (`litellm/router_utils/pre_call_checks/
+deployment_affinity_check.py`): a **Router-only** pre-call check, enabled in
+code via `Router(optional_pre_call_checks=["session_affinity", ...])` — not a
+proxy `config.yaml` knob (no proxy wiring found). It keeps a TTL-bounded cache
+mapping `(model group, session id | API-key hash) -> deployment model id`;
+the read path (`async_filter_deployments`) applies to **chat completions too**,
+the write path runs pre-call, and the request side passes
+`litellm_metadata={"session_id": ...}`. Flags: `session_affinity`,
+`deployment_affinity` (keyed on the proxy-side `user_api_key_hash`, not the
+OpenAI `user` param), `responses_api_deployment_check` (`previous_response_id`
+continuity, Responses API only), `encrypted_content_affinity`; per-group
+override via `model_group_affinity_config`.
+
+Probed on BLSC (2026-08-08): sending `metadata.session_id` on DS-V4-Flash
+chat completions does **not** pin — the same session id across 6 requests
+still rotated (`81a86146` once, then `cc7b25a9`), identical to the no-session
+control. BLSC has not enabled the affinity check (or does not forward client
+metadata into routing kwargs). Kimi-K3's group looks naturally pinned because
+it has a single upstream entry (`d285d5d7`).
