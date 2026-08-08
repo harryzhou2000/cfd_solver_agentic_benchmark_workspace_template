@@ -104,17 +104,69 @@ Cheap first run: `-m openai/deepseek/deepseek-v4-flash`.
 harbor run -c terminal-bench-2-1/job.example.yaml -y
 ```
 
-[run.sh](./run.sh) is the convenience wrapper around this pattern: it generates
-a job YAML under `terminal-bench-2-1/.cache/` (model and task count baked in,
-jobs/download paths pointed at this directory) and runs `harbor run -c <yaml>`.
-Extra CLI flags still merge over the YAML, e.g.
-`./terminal-bench-2-1/run.sh openai/BLSC/GLM-5.2 5 --ak reasoning_effort=high -r 2`.
-Use `--print-config` as a dry run to see the merged JobConfig before spending
-API quota:
+Model-specific configs are vendored under
+[configs/](./configs/deepseek-v4-flash-max.yaml), and [run.sh](./run.sh) just
+dispatches one of them:
 
 ```bash
-./terminal-bench-2-1/run.sh openai/BLSC/GLM-5.2 3 --print-config
+./terminal-bench-2-1/run.sh                                  # configs/deepseek-v4-flash-max.yaml
+./terminal-bench-2-1/run.sh configs/deepseek-v4-flash-max.yaml
+./terminal-bench-2-1/run.sh job.example.yaml -l 5 --print-config   # dry-run
 ```
+
+The default config (`configs/deepseek-v4-flash-max.yaml`) runs all 89 tasks
+with terminus-2 on `deepseek/deepseek-v4-flash`, `reasoning_effort: max`, and
+5 trial retries.
+
+### Overriding a config from the CLI
+
+Everything you pass after the config name is merged over the YAML by harbor:
+
+- `--ak key=value` — merge extra agent kwargs, e.g. `--ak reasoning_effort=xhigh`.
+- `-r N` — trial retries; `--agent-timeout-multiplier 1.5` — scale task
+  timeouts.
+- `-o <dir>` / `--job-name <name>` — see next section.
+
+Task filters are the exception: harbor only accepts `-l N` / `-i '<glob>'`
+when `-d` is also on the CLI (they replace the YAML's dataset entry, so the
+vendored `download_dir` is lost in that case):
+
+```bash
+./terminal-bench-2-1/run.sh configs/deepseek-v4-flash-max.yaml \
+  -d terminal-bench/terminal-bench-2-1 -l 10 -i 'terminal-bench/write-*'
+```
+
+Swapping the model is the one thing CLI flags do *not* do cleanly: harbor only
+honors `-m` together with `-a`, and that path rebuilds the agent config from
+scratch, dropping the YAML's `api_base`/`llm_kwargs`. For another model, either
+vendor another YAML in `configs/` (recommended) or spell out the endpoint again:
+
+```bash
+./terminal-bench-2-1/run.sh -a terminus-2 -m openai/BLSC/GLM-5.2 \
+  --ak api_base=http://127.0.0.1:10109/v1 \
+  --ak 'llm_kwargs={"api_key":"ocx-loopback"}' \
+  --ak reasoning_effort=high -d terminal-bench/terminal-bench-2-1 -l 10
+```
+
+Verify before spending quota: `./terminal-bench-2-1/run.sh <config> --print-config`.
+
+### Job directory
+
+Harbor writes each run into `<jobs_dir>/<job_name>/`. `jobs_dir` is the parent
+you set in the YAML (or `-o <dir>`); `job_name` defaults to a timestamp, so
+runs never collide. The vendored configs leave `job_name` unset on purpose —
+every launch creates a fresh `terminal-bench-2-1/jobs/<timestamp>/` with its
+own `result.json`, `job.log`, and per-trial directories. If you want a
+reusable name (or per-model separation), either set `job_name` in the YAML or
+override per run:
+
+```bash
+./terminal-bench-2-1/run.sh configs/deepseek-v4-flash-max.yaml --job-name flash-max-01
+./terminal-bench-2-1/run.sh configs/deepseek-v4-flash-max.yaml -o terminal-bench-2-1/jobs/flash-max
+```
+
+Note: relative paths in the YAML resolve against the directory you launch
+harbor from, so run these from the repo root.
 
 ## Results
 

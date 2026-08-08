@@ -1,0 +1,31 @@
+# Terminal-Bench 2.1 — terminus-2 on deepseek/deepseek-v4-flash at max effort,
+# 5 trial retries, all tasks in the dataset (no task limit).
+#
+# Run:  ./terminal-bench-2-1/run.sh
+#   or: harbor run -c terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml -y
+#
+# job_name is intentionally unset: each run gets a fresh timestamped
+# directory under jobs_dir (override with --job-name <name>).
+
+jobs_dir: terminal-bench-2-1/jobs
+n_attempts: 1
+n_concurrent_trials: 4
+
+retry:
+  max_retries: 5
+
+agents:
+  - name: terminus-2
+    model_name: openai/deepseek/deepseek-v4-flash
+    kwargs:
+      api_base: http://127.0.0.1:10109/v1
+      # litellm requires a non-empty api_key for the openai/ provider even on a
+      # loopback bind; opencodex does not validate it there.
+      llm_kwargs:
+        api_key: ocx-loopback
+      reasoning_effort: max
+
+datasets:
+  - name: terminal-bench/terminal-bench-2-1
+    download_dir: terminal-bench-2-1/.cache/tasks
+
