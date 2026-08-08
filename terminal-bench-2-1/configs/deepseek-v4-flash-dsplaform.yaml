@@ -22,6 +22,16 @@ agents:
       api_base: https://api.deepseek.com
       use_responses_api: true
       reasoning_effort: max
+      # Override litellm's stale built-in max_output_tokens (8192) with the
+      # official DeepSeek limit (384K) so Responses calls carry
+      # max_output_tokens: 384000.
+      model_info:
+        max_input_tokens: 1000000
+        max_output_tokens: 384000
+      # Stream Responses API calls (harbor fork tb21-responses-streaming).
+      # DeepSeek's non-streaming Responses path stalls ~90s and returns 502.
+      llm_call_kwargs:
+        stream: true
       # replay reasoning_content into chat history on subsequent turns
       interleaved_thinking: true
 

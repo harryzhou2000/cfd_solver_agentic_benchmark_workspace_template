@@ -13,7 +13,7 @@ n_concurrent_trials: 2
 timeout_multiplier: 2.0
 
 retry:
-  max_retries: 0
+  max_retries: 2
 
 agents:
   - name: terminus-2
@@ -24,11 +24,19 @@ agents:
       # loopback bind; opencodex does not validate it there.
       llm_kwargs:
         api_key: ocx-loopback
+      # Stream Responses API calls (harbor fork tb21-responses-streaming).
+      llm_call_kwargs:
+        stream: true
       # Responses API: terminus-2 <-> opencodex speak /v1/responses, so ocx
       # keeps server-side conversation state (previous_response_id chaining)
       # and reasoning_effort is sent via the native reasoning.effort field.
       use_responses_api: true
       reasoning_effort: max
+      # Register the model with litellm so every Responses call carries
+      # max_output_tokens (DeepSeek-V4-Flash official output limit: 384K).
+      model_info:
+        max_input_tokens: 1000000
+        max_output_tokens: 384000
       # Replay reasoning_content into chat history on subsequent turns.
       # Note: on this stack opencodex strips reasoning_content from inbound
       # chat messages; tool-round reasoning continuity is handled by ocx
