@@ -31,8 +31,11 @@ agents:
       llm_call_kwargs:
         extra_body:
           reasoning_effort: max
-      # replay reasoning_content into the chat history on subsequent turns
-      interleaved_thinking: true
+      # Note: reasoning-continuation for DeepSeek thinking mode is handled by
+      # opencodex itself (it records generated reasoning and re-attaches
+      # reasoning_content on tool-call continuations). terminus-2's
+      # interleaved_thinking flag would be a no-op here: opencodex drops
+      # reasoning_content from inbound chat-completions messages.
 
 datasets:
   - name: terminal-bench/terminal-bench-2-1
