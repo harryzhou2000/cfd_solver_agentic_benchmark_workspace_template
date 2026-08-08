@@ -116,7 +116,8 @@ dispatches one of them:
 
 The default config (`configs/deepseek-v4-flash-max.yaml`) runs all 89 tasks
 with terminus-2 on `deepseek/deepseek-v4-flash`, `reasoning_effort: max`, and
-5 trial retries.
+no trial retries, and a 2x timeout multiplier (task timeouts are doubled, e.g.
+the 900s agent budget becomes 1800s).
 
 ### Overriding a config from the CLI
 

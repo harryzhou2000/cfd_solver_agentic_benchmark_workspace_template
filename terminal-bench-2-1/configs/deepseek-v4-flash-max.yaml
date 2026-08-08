@@ -1,5 +1,5 @@
 # Terminal-Bench 2.1 — terminus-2 on deepseek/deepseek-v4-flash at max effort,
-# 5 trial retries, all tasks in the dataset (no task limit).
+# no trial retries, 2x timeout multiplier, all tasks in the dataset (no limit).
 #
 # Run:  ./terminal-bench-2-1/run.sh
 #   or: harbor run -c terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml -y
@@ -7,12 +7,13 @@
 # job_name is intentionally unset: each run gets a fresh timestamped
 # directory under jobs_dir (override with --job-name <name>).
 
-jobs_dir: terminal-bench-2-1/jobs
-n_attempts: 1
-n_concurrent_trials: 4
+jobs_dir: terminal-bench-2-1/jobs/deepseek-v4-flash-max
+n_attempts: 5
+n_concurrent_trials: 5
+timeout_multiplier: 2.0
 
 retry:
-  max_retries: 5
+  max_retries: 0
 
 agents:
   - name: terminus-2
@@ -28,4 +29,3 @@ agents:
 datasets:
   - name: terminal-bench/terminal-bench-2-1
     download_dir: terminal-bench-2-1/.cache/tasks
-
