@@ -24,7 +24,15 @@ agents:
       # loopback bind; opencodex does not validate it there.
       llm_kwargs:
         api_key: ocx-loopback
+      # litellm drops the reasoning_effort kwarg for custom openai/ models
+      # (not in its supported-params list, drop_params=True), so it never
+      # reached opencodex. extra_body is sent verbatim and is what ocx reads.
       reasoning_effort: max
+      llm_call_kwargs:
+        extra_body:
+          reasoning_effort: max
+      # replay reasoning_content into the chat history on subsequent turns
+      interleaved_thinking: true
 
 datasets:
   - name: terminal-bench/terminal-bench-2-1
