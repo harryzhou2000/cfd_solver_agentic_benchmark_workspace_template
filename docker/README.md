@@ -38,9 +38,10 @@ docker/scripts/start.sh --workspace workspace/codex/gpt56/08
 #    - the container is force-removed on exit (Ctrl-C, SIGTERM, closed terminal)
 
 # 4. Optional: verify a model round-trip without launching interactively.
-#    On this host the opencodex proxy listens on 10109, so the same port is
-#    forced inside the container (override with OCX_PORT if yours differs;
-#    when unset, the stack config's port is used, default 10100).
+#    opencodex is a router/proxy, not a harness: by default the container
+#    does NOT start one and relies on the host-hosted ocx service
+#    (--network host reaches it on 127.0.0.1:10109 on this host; OCX_PORT
+#    only matters when OPENCODEX_AUTOSTART=1 starts a container-local proxy).
 #    Bare `docker run` has no configs — mount the vendored stack (see
 #    "Verified end-to-end" below for the full commands).
 #    (see "Verified end-to-end" below for the full commands)
@@ -79,8 +80,8 @@ leaked to the terminal.
 | `CONFIG_STACK=/path` | `<repo>/docker/configs` | vendored config stack installed into `$WS/.sessions` at start |
 | `IMAGE=name` | `cfd-bench:latest` | image to run |
 | `WORKSPACE=/path` | `/workspace` | the in-container workspace path: `start.sh` mounts the workspace there and the entrypoint `cd`s into it before exec (docker `-w` too); no host path is ever mounted |
-| `OCX_PORT=10109` | stack config's `.port`, else `10100` | opencodex probe/start port inside the container; if something already listens on it (e.g. a host-side ocx under `--network host`), the container skips starting its own proxy |
-| `OPENCODEX_AUTOSTART=0` | `1` | disable the opencodex autostart probe entirely |
+| `OCX_PORT=10109` | stack config's `.port`, else `10100` | opencodex service port the container relies on; with the default host-hosted setup it must match the host-side ocx (e.g. 10109). Also the port used when `OPENCODEX_AUTOSTART=1` starts a container-local proxy |
+| `OPENCODEX_AUTOSTART=1` | `0` | opt into starting a container-local opencodex proxy; the default is to rely on the host-hosted ocx service (opencodex is a router/proxy, not a harness) |
 | `OPENCODE_API_KEY_*`, `OPENCODEX_*` | – | credential env refs the vendored stack expects; export them or use `--host-credentials` |
 | `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`/`NO_PROXY` (+lowercase) | – | forwarded into the container when already exported on the host |
 
@@ -142,11 +143,12 @@ bundling, container lifecycle and the redaction policy.
   contestant workspace's `external/` to `/opt/external`. No host binary tree
   is staged or referenced.
 - `entrypoint.sh` — (1) remaps the generic image user (`cfd_agent`) to the
-  invoking host user's uid/gid (`HOST_UID`/`HOST_GID`, enroot-style); (2)
-  starts the opencodex proxy when its config is present and the port is free;
-  (3) execs the requested command. The probe port comes from `$OCX_PORT`
-  (also passed to `ocx start --port`), else `config.json` `.port`, else
-  10100 (the opencodex default).
+  invoking host user's uid/gid (`HOST_UID`/`HOST_GID`, enroot-style); (2) by
+  default does NOT start opencodex — containers rely on the host-hosted ocx
+  service via `--network host` (the workspace still snapshots the ocx config
+  for record); (3) execs the requested command. Set `OPENCODEX_AUTOSTART=1`
+  to start a container-local proxy (probe/start port from `$OCX_PORT`, else
+  `config.json` `.port`, else 10100).
 - `scripts/` — `start.sh` (interactive launcher with workspace-bundled
   sessions and guaranteed container cleanup) and `setup-workspace.sh` (fresh
   contestant workspace from a path: `.sessions/` git-exclusion, `git remote
@@ -206,10 +208,13 @@ How each harness picks its config:
   profile** (`ocx.config.toml` — deepseek-v4-flash routed through the
   opencodex proxy at 127.0.0.1:10109) is part of the stack; launch
   `codex -p ocx`, or `start.sh --harness codex --codex-profile ocx`.
-- **opencodex** — the vendored `~/.opencodex/config.json`. The entrypoint
-  starts the proxy on the config's port (10109 on this host) only when the
-  port is free; with `--network host` the host-side proxy (if running) is
-  used as-is.
+- **opencodex** — the vendored `~/.opencodex/config.json`, snapshotted into
+  the workspace for record/metadata. The container does NOT start a proxy by
+  default: it relies on the host-hosted ocx service (with `--network host`,
+  `127.0.0.1:10109` on this host is the host's daemon). Set
+  `OPENCODEX_AUTOSTART=1` to opt into a container-local proxy (started on
+  `$OCX_PORT`, else the config's port, else 10100, only when the port is
+  free).
 
 Note: codex **project-local** `.codex/config.toml` files cannot set provider
 routing — codex ignores `model_provider`, `model_providers` and
@@ -355,10 +360,12 @@ for live-edit workflows.
   `127.0.0.1` otherwise). LAN proxies are skipped by default — direct
   connectivity avoids flaky apt/npm failures through the proxy — force them
   with `BUILD_PROXY=1`.
-- opencodex autostart is skipped when the port is already occupied — e.g.
-  with `--network host` and a host-side daemon on the same port. Override the
-  probe/service port with `OCX_PORT` (default: `config.json` `.port` or
-  10100).
+- opencodex is an LLM router/proxy, not a harness: by default the container
+  does not start one and relies on the host-hosted ocx (e.g. the user-level
+  `ocx start --port 10109`). Set `OPENCODEX_AUTOSTART=1` to opt into a
+  container-local proxy; when enabled, autostart is skipped if the port is
+  already occupied. Port resolution: `OCX_PORT`, else `config.json` `.port`,
+  else 10100.
 
 ### Credentials (safe by construction)
 

@@ -64,16 +64,23 @@ if [ "$(id -u)" = "0" ] && [ -n "${HOST_UID:-}" ] && [ -n "${HOST_GID:-}" ]; the
   exec setpriv --reuid "$HOST_UID" --regid "$HOST_GID" --init-groups "$0" "$@"
 fi
 
-if [[ "${OPENCODEX_AUTOSTART:-1}" == "1" && -f "$HOME/.opencodex/config.json" ]]; then
-  OCX_PORT="${OCX_PORT:-}"
-  OCX_PORT_OVERRIDE=0
-  if [ -z "$OCX_PORT" ]; then
-    OCX_PORT="$(jq -r '.port // 10100' "$HOME/.opencodex/config.json" 2>/dev/null || true)"
-    OCX_PORT="${OCX_PORT:-10100}"
-  else
-    OCX_PORT_OVERRIDE=1
-  fi
+# opencodex is an LLM router/proxy, not a harness: by default the container
+# does NOT start one. Containers run with --network host, so the agent talks
+# to a host-hosted opencodex on 127.0.0.1:$OCX_PORT (e.g. the user-level
+# `ocx start --port 10109` service). The workspace still snapshots the ocx
+# config (~/.opencodex) for record/metadata. Set OPENCODEX_AUTOSTART=1 to opt
+# into a container-local proxy instead.
+OCX_PORT="${OCX_PORT:-}"
+OCX_PORT_OVERRIDE=0
+if [ -n "$OCX_PORT" ]; then
+  OCX_PORT_OVERRIDE=1
+fi
+if [ -z "$OCX_PORT" ] && [ -f "$HOME/.opencodex/config.json" ]; then
+  OCX_PORT="$(jq -r '.port // 10100' "$HOME/.opencodex/config.json" 2>/dev/null || true)"
+fi
+OCX_PORT="${OCX_PORT:-10100}"
 
+if [[ "${OPENCODEX_AUTOSTART:-0}" == "1" && -f "$HOME/.opencodex/config.json" ]]; then
   if ! (exec 3<>"/dev/tcp/127.0.0.1/$OCX_PORT") 2>/dev/null; then
     echo "[entrypoint] starting opencodex (ocx start) on 127.0.0.1:$OCX_PORT ..."
     START_ARGS=()
@@ -89,6 +96,13 @@ if [[ "${OPENCODEX_AUTOSTART:-1}" == "1" && -f "$HOME/.opencodex/config.json" ]]
     done
   else
     echo "[entrypoint] opencodex already listening on $OCX_PORT (host-side service?)"
+  fi
+elif [ -f "$HOME/.opencodex/config.json" ]; then
+  echo "[entrypoint] opencodex autostart disabled: relying on host-hosted ocx at 127.0.0.1:$OCX_PORT"
+  if (exec 3<>"/dev/tcp/127.0.0.1/$OCX_PORT") 2>/dev/null; then
+    echo "[entrypoint] opencodex reachable on $OCX_PORT (host service ok)"
+  else
+    echo "[entrypoint] WARNING: nothing listening on 127.0.0.1:$OCX_PORT - agents will not reach the LLM router"
   fi
 fi
 

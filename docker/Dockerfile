@@ -210,7 +210,7 @@ RUN git init -q /opt/ocx-relay \
 # (without the start.sh config stack) also gets a friendly command line.
 COPY docker/configs/bash/.inputrc /etc/skel/.inputrc
 
-# --- container entrypoint (opencodex autostart probe) -----------------------
+# --- container entrypoint (user remap; optional opencodex autostart) -------
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh \
     # ubuntu:24.04 base ships a stock user/group at uid/gid 1000 ("ubuntu");

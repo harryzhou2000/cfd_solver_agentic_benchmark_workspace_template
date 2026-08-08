@@ -152,6 +152,12 @@ for v in HTTP_PROXY HTTPS_PROXY ALL_PROXY NO_PROXY http_proxy https_proxy all_pr
   if [ -n "${!v:-}" ]; then ENVS+=(-e "$v=${!v}"); fi
 done
 
+# opencodex is an LLM router/proxy, not a harness: default to the host-hosted
+# ocx service (--network host reaches 127.0.0.1:$OCX_PORT on the host). The
+# container does NOT start its own proxy unless OPENCODEX_AUTOSTART=1.
+ENVS+=(-e OPENCODEX_AUTOSTART="${OPENCODEX_AUTOSTART:-0}")
+[ -n "${OCX_PORT:-}" ] && ENVS+=(-e OCX_PORT="$OCX_PORT")
+
 # codegraph index cache (host) stays mounted in every mode, at the
 # container user's own cache path (no host paths are exposed).
 mkdir -p "$HOME/.codegraph"
@@ -389,6 +395,7 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   echo "  opencode:     $WS/.sessions/opencode-config -> $IMG_HOME/.config/opencode"
   echo "  opencode data:$SESS_CTR/opencode-data (XDG_DATA_HOME)"
   echo "  opencodex:    $WS/.sessions/opencodex -> $IMG_HOME/.opencodex"
+  echo "  ocx service:  host-hosted by default (no in-container ocx; OPENCODEX_AUTOSTART=1 to opt in)"
   [ "$HOST_CRED" = "1" ] && echo "  credentials:  host-credentials mode (live keys via env/binds)"
   [ "$MOUNT_HOST" = "1" ] && echo "  credentials/configs: live host dirs mounted over the stack"
 fi
