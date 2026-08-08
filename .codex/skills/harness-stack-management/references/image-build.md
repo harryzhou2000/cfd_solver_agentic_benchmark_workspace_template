@@ -29,6 +29,7 @@
 | ocx-relay | commit 886298b38... |
 | external_headeronlys | tag v0.1.0 |
 | cfd_externals | commit 942cf6700... |
+| TeX Live | 2023 (Ubuntu 24.04 apt: texlive-full + biber + latexmk) |
 
 Everything is installed fresh from official sources; nothing is staged or
 copied from the host. Version bumps go through the Dockerfile ARGs, not
@@ -41,6 +42,9 @@ edits inside RUN steps.
 - Order matters: build stack + uv + openmpi (apt) → doxygen → externals
   (heavy source build) → harnesses. Keep heavy layers below frequently
   changing ones.
+- texlive-full is installed after the harness binaries (current layout),
+  so this rebuild reused the cached harness layers; future harness version
+  bumps will also rebuild the texlive layer.
 - The image is user-agnostic: one generic `cfd_agent` (uid/gid 1000), home
   kept empty, opencode stores under `/opt` (XDG_*), entrypoint remaps at
   start.

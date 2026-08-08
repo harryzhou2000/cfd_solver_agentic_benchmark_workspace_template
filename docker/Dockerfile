@@ -205,6 +205,16 @@ RUN git init -q /opt/ocx-relay \
     && git fetch -q --depth 1 origin "${OCX_RELAY_COMMIT}" \
     && git checkout -q FETCH_HEAD
 
+# --- TeX Live (full) — apt texlive-full, after the harness binaries --------
+# Full LaTeX toolchain for compiling reports/papers (pdflatex/xelatex/lualatex,
+# latexmk, biber). Ubuntu 24.04 ships TeX Live 2023. Kept after the harness
+# installs so this rebuild reuses the cached layers above; the texlive debs
+# persist in the shared /var/cache/apt BuildKit cache for future rebuilds.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
+    texlive-full biber latexmk \
+    && rm -rf /var/lib/apt/lists/*
+
 # Friendly readline config for bare runs: the entrypoint seeds /etc/skel
 # dotfiles into an empty home, so a .inputrc here means `docker run`
 # (without the start.sh config stack) also gets a friendly command line.
