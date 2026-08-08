@@ -208,3 +208,44 @@ host side, no harbor changes):
 
 Until that is set up, terminus-2 (and other harbor-native agents such as
 `dspy-rlm`) are the ones that can route through opencodex with zero config.
+
+## Installing the patched harbor (fork) — install notes
+
+Local harbor is installed from a fork that adds Responses-API streaming for
+terminus-2. Streaming is what avoids DeepSeek's ~90s non-streaming stall that
+surfaces as `502 upstream JSON response stalled before completing`.
+
+- Fork: `harryzhou2000/harbor`, branch `tb21-responses-streaming`
+  (submodule at repo root `harbor/`)
+- Install command (use exactly this when reinstalling):
+
+```bash
+uv tool install --force \
+  --with "fastapi>=0.136.3,<0.140.7" \
+  --with orjson --with pydantic-settings --with backoff \
+  git+https://github.com/harryzhou2000/harbor.git@tb21-responses-streaming
+```
+
+Why the pins:
+
+- `fastapi<0.140.7` — fastapi 0.140.7 removed `get_flat_dependant`, which
+  litellm 1.95.0 still imports in
+  `litellm/proxy/management_endpoints/management_v1/common.py`. litellm has no
+  fixed release yet (its `main` branch still uses the removed import), so the
+  pin is the fix. 0.140.6 is the last fastapi release with the helper.
+- `orjson`, `pydantic-settings`, `backoff` — required by litellm's proxy
+  import chain. `uv tool install --with "litellm[proxy]"` is rejected by the
+  resolver (version conflict with harbor's `litellm` pin), so the needed
+  modules are added explicitly.
+
+Plain `uv tool install --force` (without the `--with` flags) drops both the
+pin and the extra modules, breaking litellm's proxy imports again. Keep the
+flags in the command.
+
+The vendored configs in `configs/` already set `llm_call_kwargs.stream: true`
+so terminus-2 uses the streaming Responses path.
+
+Known cosmetic warning: litellm's Responses usage serialization emits a
+pydantic `UserWarning` (`PydanticSerializationUnexpectedValue`, expected
+`ResponseAPIUsage`) on every call. It is harmless — content and usage are
+still returned correctly — and can be ignored.
