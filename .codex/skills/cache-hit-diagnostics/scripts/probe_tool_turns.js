@@ -27,6 +27,7 @@ const path = require("node:path");
 
 const TARGETS = {
   "blsc-flash": { provider: "BLSC", model: "DeepSeek-V4-Flash" },
+  "blsc-k3": { provider: "BLSC", model: "Kimi-K3" },
   "deepseek-flash": { provider: "deepseek", model: "deepseek-v4-flash" },
   "deepseek-pro": { provider: "deepseek", model: "deepseek-v4-pro" },
 };

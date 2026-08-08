@@ -352,3 +352,24 @@ replica only after enough samples). Expect low head rates that improve as a
 session reuses the same replica. Endpoint latency is highly variable today
 (single `max_tokens=8` request: 5s; an `effort=max` probe did not complete
 request #1 within 300s), so budget probe timeouts generously.
+
+### Kimi-K3 streamed probe 2026-08-08 (tool-turn shape, ~15k system block)
+
+`probe_tool_turns.js --targets blsc-k3 --stream --system --steps 3 --repeat 3
+--effort low`:
+
+```
+turn 1 A: in=11006 cached=8832 (80.2%)   turn 1 B: in=11107 cached=8832 (79.5%)
+turn 2 A: in=11230 cached=8832 (78.6%)   turn 2 B: in=11326 cached=8832 (78.0%)
+turn 3 A: in=11414 cached=8832 (77.4%)   turn 3 B: in=11504 cached=8832 (76.8%)
+repeat x3 (exact re-send): in=11504 cached=8832 (76.8%) every time
+```
+
+- Streaming usage is truthful for Kimi-K3 (real cached + real output tokens;
+  NOT the `cached=0, out=1` stub signature).
+- The cache covers a **fixed ~8.8k-token prefix** (the stable system block)
+  and nothing else: `cached` is constant while `in` grows, and even exact
+  re-sends of the final request do not cache the conversation/tool tail.
+- Net effect: K3 sessions on BLSC see ~80% early, decaying as context grows;
+  only the system prefix is ever cached. DeepSeek models on the same proxy
+  cache the full prefix (~98%) — prefer them for long agentic sessions.
