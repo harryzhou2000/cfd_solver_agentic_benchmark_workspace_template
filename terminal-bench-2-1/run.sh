@@ -37,7 +37,18 @@ if [ ! -f "$CFG" ]; then
   exit 1
 fi
 
+ENV_FILE=""
+if [ -f "./.env" ]; then
+  ENV_FILE="./.env"
+elif [ -f "../.env" ]; then
+  ENV_FILE="../.env"
+fi
+
 # This shell exports ALL_PROXY=socks5://... which harbor's httpx client cannot
 # use (socksio is not installed in the uv tool venv). HTTP(S)_PROXY is kept —
 # harbor reaches GitHub/registry through it fine.
-exec env -u ALL_PROXY -u all_proxy harbor run -c "$CFG" -y "$@"
+if [ -n "$ENV_FILE" ]; then
+  exec env -u ALL_PROXY -u all_proxy harbor run -c "$CFG" -y --env-file "$ENV_FILE" "$@"
+else
+  exec env -u ALL_PROXY -u all_proxy harbor run -c "$CFG" -y "$@"
+fi

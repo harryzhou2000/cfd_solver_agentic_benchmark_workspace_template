@@ -1,0 +1,30 @@
+# Terminal-Bench 2.1 — terminus-2 on deepseek/deepseek-v4-flash at max effort,
+# Responses API, no trial retries, 2x timeout multiplier, all tasks (no limit).
+#
+# Uses the DeepSeek endpoint DIRECTLY (api.deepseek.com) rather than through
+# the local opencodex proxy. The API key is read from DEEPSEEK_API_KEY in the
+# environment (run.sh loads the project-root .env via --env-file).
+#
+# Run:  ./terminal-bench-2-1/run.sh terminal-bench-2-1/configs/deepseek-v4-flash-dsplaform.yaml
+
+jobs_dir: terminal-bench-2-1/jobs/deepseek-v4-flash-dsplaform
+n_attempts: 5
+n_concurrent_trials: 2
+timeout_multiplier: 2.0
+
+retry:
+  max_retries: 2
+
+agents:
+  - name: terminus-2
+    model_name: deepseek/deepseek-v4-flash
+    kwargs:
+      api_base: https://api.deepseek.com
+      use_responses_api: true
+      reasoning_effort: max
+      # replay reasoning_content into chat history on subsequent turns
+      interleaved_thinking: true
+
+datasets:
+  - name: terminal-bench/terminal-bench-2-1
+    download_dir: terminal-bench-2-1/.cache/tasks

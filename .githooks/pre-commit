@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Pre-commit secret guard (repo-local, installed via core.hooksPath).
+# Blocks .env files and high-signal secret literals from being committed.
+
+set -u
+
+fail=0
+
+# 1) Never stage .env files (defense in depth on top of .gitignore).
+blocked_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '(^|/)\.env$' || true)
+if [ -n "$blocked_files" ]; then
+  echo "pre-commit: refusing .env file(s):" >&2
+  printf '%s\n' "$blocked_files" | sed 's/^/  /' >&2
+  fail=1
+fi
+
+# 2) High-signal secret literals in the staged diff.
+#    Deliberately does NOT match "api_key: ocx-loopback" or "${VAR}" references.
+#    The hook's own source is excluded, since its regex definitions contain the
+#    same literal patterns and would otherwise flag themselves.
+secret_hits=$(git diff --cached -U0 --diff-filter=ACM -- . ':(exclude).githooks/pre-commit' | grep -nE '^\+.*(sk-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|DEEPSEEK_API_KEY=[^$]|OPENAI_API_KEY=[^$]|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY)' || true)
+if [ -n "$secret_hits" ]; then
+  echo "pre-commit: staged diff contains a likely secret literal:" >&2
+  printf '%s\n' "$secret_hits" | sed 's/^/  /' >&2
+  fail=1
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo "pre-commit: commit blocked. Use --no-verify only if you are certain." >&2
+  exit 1
+fi
+exit 0
