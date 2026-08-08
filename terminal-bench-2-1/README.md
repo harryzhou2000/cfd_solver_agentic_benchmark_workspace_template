@@ -104,6 +104,18 @@ Cheap first run: `-m openai/deepseek/deepseek-v4-flash`.
 harbor run -c terminal-bench-2-1/job.example.yaml -y
 ```
 
+[run.sh](./run.sh) is the convenience wrapper around this pattern: it generates
+a job YAML under `terminal-bench-2-1/.cache/` (model and task count baked in,
+jobs/download paths pointed at this directory) and runs `harbor run -c <yaml>`.
+Extra CLI flags still merge over the YAML, e.g.
+`./terminal-bench-2-1/run.sh openai/BLSC/GLM-5.2 5 --ak reasoning_effort=high -r 2`.
+Use `--print-config` as a dry run to see the merged JobConfig before spending
+API quota:
+
+```bash
+./terminal-bench-2-1/run.sh openai/BLSC/GLM-5.2 3 --print-config
+```
+
 ## Results
 
 Each run creates a timestamped job dir under `terminal-bench-2-1/jobs/` with
