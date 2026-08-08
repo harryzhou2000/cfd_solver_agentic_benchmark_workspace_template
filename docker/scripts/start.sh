@@ -13,7 +13,7 @@ fi
 #   docker/scripts/start.sh [--workspace DIR] [--host-credentials]
 #     [--image-config] [--mount-host-configs]
 #     [--harness shell|codex|opencode] [--codex-profile ocx]
-#     [--name NAME] [--cpus N] [-- cmd...]
+#     [--name NAME] [--cpus N] [--detach] [-- cmd...]
 #   CONFIG_STACK=/path/to/stack CPUS=8 OCX_PORT=10109 \
 #     docker/scripts/start.sh --workspace DIR
 #
@@ -55,6 +55,15 @@ fi
 # the wait builtin — a plain foreground `docker run` defers traps until the
 # container exits on its own.
 #
+# --detach: long benchmark runs should NOT be tied to a terminal. With
+# --detach the launcher starts the container with `docker run -dit --rm`
+# (detached; --rm is kept and only removes the container after it exits on
+# its own; removal errors are tolerated) and then tails its logs. The
+# container keeps running after this script exits, an SSH drop, or a closed
+# terminal. Stop it explicitly with `docker stop <name>` (or docker attach
+# for an interactive TUI). This is the recommended mode for agent runs that
+# can take hours.
+#
 # --security-opt seccomp=unconfined,apparmor=unconfined: codex's bundled
 # bubblewrap sandbox needs user namespaces and mount operations inside the
 # container, which Docker's default seccomp/apparmor profiles block. The
@@ -78,6 +87,7 @@ CODEX_PROFILE=""
 NAME_ARG=""
 CPUS="${CPUS:-4}"   # --cpus quota: how many CPU cores worth of time the
                      # container may use (docker's --cpus, not cpuset pins)
+DETACH=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -89,6 +99,7 @@ while [ $# -gt 0 ]; do
     --codex-profile) CODEX_PROFILE="$2"; shift 2 ;;
     --name|-n) NAME_ARG="$2"; shift 2 ;;
     --cpus) CPUS="$2"; shift 2 ;;
+    --detach) DETACH=1; shift ;;
     --) shift; break ;;
     *) WS="${WS:-$1}"; shift ;;
   esac
@@ -368,6 +379,7 @@ echo "  workspace: $WS"
 echo "  harness:   $HARNESS"
 echo "  name:      $NAME"
 echo "  cpus:      $CPUS"
+echo "  mode:      $([ "$DETACH" = 1 ] && echo 'detach (survives terminal close)' || echo 'interactive (killed on terminal close)')"
 echo "  start dir: $WS (entrypoint cd + docker -w)"
 [ -n "$CODEX_PROFILE" ] && echo "  codex profile: -p $CODEX_PROFILE"
 if [ "$MOUNT_CONFIG" = "1" ]; then
@@ -388,6 +400,28 @@ cleanup() {
   # kill / terminal close, and is a no-op once the container is gone.
   docker rm -f "$NAME" >/dev/null 2>&1 || true
 }
+
+if [ "$DETACH" = "1" ]; then
+  # Detached mode: the container is decoupled from this launcher's lifetime.
+  # `--rm` stays (it only removes the container after it exits on its own —
+  # it never kills a running container), and the trap above is NOT installed
+  # in this branch, so a terminal close / SSH drop / Ctrl-C on the logs tail
+  # cannot force-remove the container.
+  echo "== starting detached: docker stop $NAME when done =="
+  docker run -dit --rm --network host --name "$NAME" \
+    --user root:root \
+    --cpus "$CPUS" \
+    -w "$CTR_WS" \
+    "${SECURITY_OPTS[@]}" \
+    "${ENVS[@]}" \
+    "${MOUNTS[@]}" \
+    "$IMAGE" "${CMD[@]}"
+  echo "container $NAME is running; tailing logs (ctrl-c only stops the tail):"
+  docker logs -f --tail 100 "$NAME"
+  exit 0
+fi
+
+# Interactive mode: the container's life is tied to this launcher terminal.
 trap cleanup EXIT INT TERM HUP
 
 # Remove a container orphaned by a previous SIGKILLed session (SIGKILL cannot
