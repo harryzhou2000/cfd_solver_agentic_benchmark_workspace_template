@@ -31,6 +31,7 @@ printed):
 # 1. Probe: does the provider cache, and does it report truthfully?
 node scripts/probe_model_cache.js --targets blsc-flash,deepseek-flash
 node scripts/probe_tool_turns.js --steps 5 --stream --system --repeat 3
+node scripts/probe_tool_turns.js --surface responses --steps 2 --repeat 2 --system
 
 # 2. Session: what did a real codex session pay?
 node scripts/session_cache_stats.mjs --cwd codex_dsv4_flash_03

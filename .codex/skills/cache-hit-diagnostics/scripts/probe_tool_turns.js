@@ -14,7 +14,7 @@
  *
  * Usage:
  *   node scripts/probe_tool_turns.js [--steps 5] [--effort max] [--repeat N]
- *       [--targets blsc-flash,deepseek-flash]
+ *       [--targets blsc-flash,deepseek-flash] [--surface chat|responses]
  *
  * After the last turn, the final request body is resent --repeat times
  * (default 3; 0 disables) to measure the exact-match cache rate.
@@ -81,6 +81,11 @@ Options
   --stream         Use the streaming (SSE) path, like production agents do
   --system         Prepend a ~15k-token system message to approximate a coding
                    agent's system/developer block
+  --surface NAME   API surface to probe: chat (chat/completions, default) or
+                   responses (/v1/responses). Responses converts the same
+                   tool-turn conversation into input items; note its
+                   streaming usage is bare (no cached_tokens details), so use
+                   non-streaming for cache numbers.
   --targets LIST   Providers to test, comma-separated: blsc-flash, deepseek-flash
                    (default: both)
   -h, --help       Show this help
@@ -118,7 +123,7 @@ Example output (real capture, BLSC flash, --steps 1 --repeat 1 --stream):
 }
 
 function parseArgs(argv) {
-  const args = { steps: 5, effort: "max", repeat: 3, stream: false, system: false, targets: Object.keys(TARGETS) };
+  const args = { steps: 5, effort: "max", repeat: 3, stream: false, system: false, surface: "chat", targets: Object.keys(TARGETS) };
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     const next = () => argv[++i];
@@ -127,6 +132,7 @@ function parseArgs(argv) {
     else if (a === "--repeat") args.repeat = Number.parseInt(next(), 10);
     else if (a === "--stream") args.stream = true;
     else if (a === "--system") args.system = true;
+    else if (a === "--surface") args.surface = next();
     else if (a === "--targets") args.targets = next().split(",").map(s => s.trim()).filter(Boolean);
     else if (a === "--help" || a === "-h") {
       printHelp();
@@ -134,6 +140,7 @@ function parseArgs(argv) {
     } else throw new Error(`unknown argument "${a}"`);
   }
   for (const t of args.targets) if (!TARGETS[t]) throw new Error(`unknown target "${t}"`);
+  if (!["chat", "responses"].includes(args.surface)) throw new Error(`unknown surface "${args.surface}"`);
   return args;
 }
 
@@ -179,16 +186,19 @@ function curlOnce(url, key, body) {
 
 function parseResponse(text) {
   // SSE streaming: accumulate deltas (content, reasoning_content, tool_calls)
-  // and take usage from the tail chunk.
+  // and take usage from the tail chunk. Responses-API SSE events carry the
+  // full response object on `response.completed`; use it as the fallback.
   if (text.includes("data:")) {
     let content = "", reasoning = "", finish = null, usage = null;
     const toolCalls = {};
+    let completedResponse = null;
     for (const line of text.split("\n")) {
       if (!line.startsWith("data:")) continue;
       const payload = line.slice(5).trim();
       if (payload === "[DONE]") continue;
       let j;
       try { j = JSON.parse(payload); } catch { continue; }
+      if (j.type === "response.completed" && j.response) completedResponse = j.response;
       if (j.usage) usage = j.usage;
       const delta = j.choices?.[0]?.delta;
       if (delta) {
@@ -206,11 +216,19 @@ function parseResponse(text) {
         }
       }
     }
+    if (completedResponse) {
+      const parsed = parseResponsesJson(completedResponse);
+      if (!content) content = parsed.content;
+      if (!reasoning) reasoning = parsed.reasoning;
+      if (!Object.keys(toolCalls).length) Object.assign(toolCalls, parsed.toolCallsMap || {});
+      if (!usage) usage = completedResponse.usage;
+      if (!finish) finish = completedResponse.status;
+    }
     if (usage) {
-      const details = usage.prompt_tokens_details || {};
+      const details = usage.prompt_tokens_details || usage.input_tokens_details || {};
       return {
         input: usage.prompt_tokens,
-        cached: details.cached_tokens ?? usage.cached_tokens ?? 0,
+        cached: details.cached_tokens ?? usage.cached_tokens ?? (usage.input_tokens_details ? 0 : null),
         output: usage.completion_tokens,
         content,
         reasoning,
@@ -223,6 +241,7 @@ function parseResponse(text) {
   try {
     const json = JSON.parse(text);
     if (json.error) return { error: json.error.message };
+    if (json.object === "response" || Array.isArray(json.output)) return parseResponsesJson(json);
     const usage = json.usage || {};
     const details = usage.prompt_tokens_details || {};
     const msg = json.choices?.[0]?.message || {};
@@ -240,14 +259,72 @@ function parseResponse(text) {
   }
 }
 
-function bodyFor(model, history, effort, tail, stream, system) {
+function parseResponsesJson(json) {
+  // OpenAI Responses API non-streaming object: usage.input_tokens_details,
+  // output items (message / reasoning / function_call).
+  const usage = json.usage || {};
+  const details = usage.input_tokens_details || {};
+  let content = "", reasoning = "";
+  const toolCalls = [];
+  for (const item of json.output || []) {
+    if (item.type === "message") {
+      for (const part of item.content || []) {
+        if (typeof part.text === "string") content += part.text;
+      }
+    } else if (item.type === "reasoning") {
+      for (const part of item.content || []) {
+        if (typeof part.text === "string") reasoning += part.text;
+      }
+    } else if (item.type === "function_call") {
+      toolCalls.push({
+        id: item.call_id || item.id,
+        type: "function",
+        function: { name: item.name || "", arguments: item.arguments || "" },
+      });
+    }
+  }
+  const toolCallsMap = {};
+  toolCalls.forEach((t, i) => { toolCallsMap[i] = t; });
+  return {
+    input: usage.input_tokens,
+    cached: details.cached_tokens ?? usage.cached_tokens ?? null,
+    output: usage.output_tokens,
+    content,
+    reasoning,
+    toolCalls,
+    toolCallsMap,
+    finish: json.status,
+  };
+}
+
+function bodyFor(model, history, effort, tail, stream, system, surface) {
   // history: array of already-serialized message objects.
   // tail: array of message objects for the current turn (e.g. [U] or [U, A_tool, tool_result]).
   const messages = [...history, ...tail];
   if (system) messages.unshift({ role: "system", content: SYSTEM_BLOCK });
   const body = { model, messages, tools: TOOLS, stream: !!stream };
-  if (stream) body.stream_options = { include_usage: true };
+  if (stream && surface !== "responses") body.stream_options = { include_usage: true };
   if (effort) body.reasoning_effort = effort;
+  if (surface === "responses") {
+    delete body.messages;
+    // Responses API tool format: name/description/parameters at top level
+    // (no chat-style `function` wrapper).
+    body.tools = TOOLS.map(t => ({
+      type: "function",
+      name: t.function.name,
+      description: t.function.description,
+      parameters: t.function.parameters,
+    }));
+    body.input = messages.map(m => {
+      if (m.role === "tool") {
+        return { type: "function_call_output", call_id: m.tool_call_id, output: m.content };
+      }
+      const item = { role: m.role, content: m.content ?? "" };
+      if (m.tool_calls) item.tool_calls = m.tool_calls;
+      if (m.reasoning_content) item.reasoning_content = m.reasoning_content;
+      return item;
+    });
+  }
   return JSON.stringify(body);
 }
 
@@ -255,15 +332,16 @@ function runTarget(target, args) {
   const config = loadOcxConfig();
   const provider = config.providers?.[target.provider] || {};
   const base = provider.baseUrl || (target.provider === "BLSC" ? "https://llmapi.blsc.cn" : "https://api.deepseek.com");
-  const url = `${base.replace(/\/+$/, "")}/chat/completions`;
+  const surface = args.surface === "responses" ? "responses" : "chat/completions";
+  const url = `${base.replace(/\/+$/, "")}/${surface}`;
   const keys = providerKeys(config, target.provider);
-  console.log(`\n== ${target.provider} ${target.model}  (${url}) — ${args.steps} tool turns, effort=${args.effort}, stream=${args.stream}, system=${args.system} ==`);
+  console.log(`\n== ${target.provider} ${target.model}  (${url}) — ${args.steps} tool turns, effort=${args.effort}, stream=${args.stream}, system=${args.system}, surface=${args.surface} ==`);
 
   const history = [];
   let usedKey = null;
   for (const key of keys) {
     let ok = true;
-    const probe = bodyFor(target.model, [], args.effort, [{ role: "user", content: U }], args.stream, args.system);
+    const probe = bodyFor(target.model, [], args.effort, [{ role: "user", content: U }], args.stream, args.system, args.surface);
     const { http } = curlOnce(url, key, probe);
     if (http === "401") { ok = false; console.log(`  key ${key.slice(0, 8)}… rejected (401)`); }
     if (ok) { usedKey = key; break; }
@@ -273,12 +351,12 @@ function runTarget(target, args) {
   let lastBody = null;
   for (let step = 1; step <= args.steps; step += 1) {
     // req A: model must emit the tool call
-    const bodyA = bodyFor(target.model, history, args.effort, [{ role: "user", content: U }], args.stream, args.system);
+    const bodyA = bodyFor(target.model, history, args.effort, [{ role: "user", content: U }], args.stream, args.system, args.surface);
     const { http: httpA, text: textA } = curlOnce(url, usedKey, bodyA);
     const a = parseResponse(textA);
     if (a.error || a.raw) { console.log(`  turn ${step} reqA: HTTP ${httpA} ${a.error ?? a.raw}`); return; }
-    const pctA = a.input ? (100 * a.cached / a.input).toFixed(1) : "0.0";
-    console.log(`  turn ${step} A(tool): in=${a.input} cached=${a.cached} (${pctA}%) out=${a.output} | calls=${a.toolCalls.map(c => c.function?.name).join(",") || "NONE"}`);
+    const pctA = a.input ? (a.cached == null ? "n/a" : (100 * a.cached / a.input).toFixed(1)) : "0.0";
+    console.log(`  turn ${step} A(tool): in=${a.input} cached=${a.cached ?? "n/a"} (${pctA}%) out=${a.output} | calls=${a.toolCalls.map(c => c.function?.name).join(",") || "NONE"}`);
 
     const toolCall = a.toolCalls[0] || { id: "call_fallback", function: { name: "get_current_time", arguments: "{}" } };
     const toolResult = { role: "tool", tool_call_id: toolCall.id, content: new Date().toISOString() };
@@ -288,14 +366,14 @@ function runTarget(target, args) {
 
     // req B: model must report the time
     const tailB = [{ role: "user", content: U }, asstToolMsg, toolResult];
-    const bodyB = bodyFor(target.model, history, args.effort, tailB, args.stream, args.system);
+    const bodyB = bodyFor(target.model, history, args.effort, tailB, args.stream, args.system, args.surface);
     lastBody = bodyB;
     const { http: httpB, text: textB } = curlOnce(url, usedKey, bodyB);
     const b = parseResponse(textB);
     if (b.error || b.raw) { console.log(`  turn ${step} reqB: HTTP ${httpB} ${b.error ?? b.raw}`); return; }
-    const pctB = b.input ? (100 * b.cached / b.input).toFixed(1) : "0.0";
+    const pctB = b.input ? (b.cached == null ? "n/a" : (100 * b.cached / b.input).toFixed(1)) : "0.0";
     const report = b.content.replace(/\s+/g, " ").trim().slice(0, 60) || "(empty)";
-    console.log(`  turn ${step} B(report): in=${b.input} cached=${b.cached} (${pctB}%) out=${b.output} | "${report}"`);
+    console.log(`  turn ${step} B(report): in=${b.input} cached=${b.cached ?? "n/a"} (${pctB}%) out=${b.output} | "${report}"`);
 
     history.push(
       { role: "user", content: U },
@@ -310,8 +388,8 @@ function runTarget(target, args) {
     const { http, text } = curlOnce(url, usedKey, lastBody);
     const r = parseResponse(text);
     if (r.error || r.raw) { console.log(`  repeat #${k}: HTTP ${http} ${r.error ?? r.raw}`); return; }
-    const pct = r.input ? (100 * r.cached / r.input).toFixed(1) : "0.0";
-    console.log(`  repeat #${k}: in=${r.input} cached=${r.cached} (${pct}%) out=${r.output} [${r.finish}]`);
+    const pct = r.input ? (r.cached == null ? "n/a" : (100 * r.cached / r.input).toFixed(1)) : "0.0";
+    console.log(`  repeat #${k}: in=${r.input} cached=${r.cached ?? "n/a"} (${pct}%) out=${r.output} [${r.finish}]`);
   }
 }
 

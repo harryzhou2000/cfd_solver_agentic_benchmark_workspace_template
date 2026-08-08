@@ -482,6 +482,33 @@ but treat it as a conversion layer with caveats:
 - Envelope defaults differ: `temperature: 0.0`, `parallel_tool_calls: false`,
   `max_output_tokens: null` in the returned object.
 
+### Responses API tool-call shape (`probe_tool_turns.js --surface responses`)
+
+The tool-turn probe now supports `/v1/responses` (chat-style messages are
+converted to `input` items; Responses-style tools need `name`/`parameters` at
+top level, not a chat-style `function` wrapper). DS-V4-Flash with the ~15k
+system block:
+
+- Non-stream: turn 1 A `cached=11008/11095 (99.2%)` — identical to the chat
+  completions run on the same entry (same upstream prompt bytes); later turns
+  92-99%; exact repeats 91.4%.
+- Streamed: tool calls work and content parses, but usage is bare (no
+  `cached_tokens` details) — for cache numbers use non-streaming.
+
+### Tiny prompts don't cache on official DeepSeek either (probed 2026-08-08)
+
+The 89-token `Reply with exactly: PONG` body that reports `cached=0` on BLSC
+was tested verbatim against the official DeepSeek API (`api.deepseek.com`,
+`deepseek-v4-flash`): all 5 identical requests reported `cached_tokens=0`.
+Same for the first request of a 5400-token prompt; requests #2/#3 cached
+**5376 of 5400 tokens — exactly the numbers BLSC entry `cc7b25a9` reports**
+(5400 in, 5376 cached, 24 miss). So the tiny zero-hit behavior is a
+DeepSeek-side minimum-prefix policy, not a BLSC artifact — and `cc7b25a9`
+fingerprints as the official DeepSeek API upstream (identical tokenizer
+counts and cache accounting). Official usage carries both
+`prompt_tokens_details.cached_tokens` and flat `prompt_cache_hit_tokens` /
+`prompt_cache_miss_tokens`; BLSC's LiteLLM layer surfaces only the details.
+
 ### Session stickiness (LiteLLM router affinity)
 
 LiteLLM has `DeploymentAffinityCheck` (`litellm/router_utils/pre_call_checks/
