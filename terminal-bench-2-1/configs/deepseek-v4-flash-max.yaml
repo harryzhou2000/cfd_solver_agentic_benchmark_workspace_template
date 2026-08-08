@@ -24,18 +24,15 @@ agents:
       # loopback bind; opencodex does not validate it there.
       llm_kwargs:
         api_key: ocx-loopback
-      # litellm drops the reasoning_effort kwarg for custom openai/ models
-      # (not in its supported-params list, drop_params=True), so it never
-      # reached opencodex. extra_body is sent verbatim and is what ocx reads.
+      # Responses API: terminus-2 <-> opencodex speak /v1/responses, so ocx
+      # keeps server-side conversation state (previous_response_id chaining)
+      # and reasoning_effort is sent via the native reasoning.effort field.
+      use_responses_api: true
       reasoning_effort: max
-      llm_call_kwargs:
-        extra_body:
-          reasoning_effort: max
       # Replay reasoning_content into chat history on subsequent turns.
       # Note: on this stack opencodex strips reasoning_content from inbound
-      # chat messages, and tool-round reasoning continuity is instead handled
-      # by ocx itself (replay cache keyed on echoed tool-call ids) — keeping
-      # the flag is harmless and matters if ocx is bypassed.
+      # chat messages; tool-round reasoning continuity is handled by ocx
+      # itself — keeping the flag is harmless and matters if ocx is bypassed.
       interleaved_thinking: true
 
 datasets:
