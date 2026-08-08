@@ -18,16 +18,13 @@ against the provider API, and real codex/opencodex session accounting.
 
 ## Quick start
 
-This skill is self-contained: all scripts and notes live **inside this skill
-directory** (`.codex/skills/cache-hit-diagnostics/scripts/` and
-`.../notes/`), and every path in this file is relative to the skill directory.
-Run them from the skill directory (they read keys from
+The probe/session scripts live in the **repo-root `scripts/` directory** and
+the notes live in this skill's `notes/` folder. Run the commands from the repo
+root (they read keys from
 `~/.opencodex/config.json` or `BLSC_KEY`/`DEEPSEEK_KEY` env; keys are never
 printed):
 
 ```bash
-# cd .codex/skills/cache-hit-diagnostics
-
 # 1. Probe: does the provider cache, and does it report truthfully?
 node scripts/probe_model_cache.js --targets blsc-flash,deepseek-flash
 node scripts/probe_tool_turns.js --steps 5 --stream --system --repeat 3

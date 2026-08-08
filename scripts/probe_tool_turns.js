@@ -171,7 +171,7 @@ function providerKeys(config, providerName) {
 function curlOnce(url, key, body) {
   const out = execFileSync(
     "bash",
-    ["-c", 'curl -s -w "\\n%{http_code}" -X POST "$PROBE_URL" -H "Authorization: Bearer $PROBE_KEY" -H "Content-Type: application/json" -d @-'],
+    ["-c", 'curl -s -w "\\n__HTTP__%{http_code}\\n__HDRS__%{header_json}" -X POST "$PROBE_URL" -H "Authorization: Bearer $PROBE_KEY" -H "Content-Type: application/json" -d @-'],
     {
       input: body,
       env: { ...process.env, PROBE_URL: url, PROBE_KEY: key },
@@ -180,8 +180,13 @@ function curlOnce(url, key, body) {
       stdio: ["pipe", "pipe", "ignore"],
     },
   );
-  const sep = out.lastIndexOf("\n");
-  return { http: out.slice(sep + 1).trim(), text: out.slice(0, sep) };
+  const httpMark = out.indexOf("\n__HTTP__");
+  const hdrsMark = out.indexOf("\n__HDRS__");
+  const http = httpMark >= 0 ? out.slice(httpMark + 9, hdrsMark).trim() : "";
+  let headers = {};
+  try { headers = JSON.parse(out.slice(hdrsMark + 9).trim()); } catch { /* keep {} */ }
+  const mid = String(headers["x-litellm-model-id"] || "").slice(0, 8);
+  return { http, text: httpMark >= 0 ? out.slice(0, httpMark) : "", mid };
 }
 
 function parseResponse(text) {
@@ -192,12 +197,14 @@ function parseResponse(text) {
     let content = "", reasoning = "", finish = null, usage = null;
     const toolCalls = {};
     let completedResponse = null;
+    let lastId = null;
     for (const line of text.split("\n")) {
       if (!line.startsWith("data:")) continue;
       const payload = line.slice(5).trim();
       if (payload === "[DONE]") continue;
       let j;
       try { j = JSON.parse(payload); } catch { continue; }
+      if (j.id) lastId = j.id;
       if (j.type === "response.completed" && j.response) completedResponse = j.response;
       if (j.usage) usage = j.usage;
       const delta = j.choices?.[0]?.delta;
@@ -223,13 +230,16 @@ function parseResponse(text) {
       if (!Object.keys(toolCalls).length) Object.assign(toolCalls, parsed.toolCallsMap || {});
       if (!usage) usage = completedResponse.usage;
       if (!finish) finish = completedResponse.status;
+      if (!lastId) lastId = completedResponse.id;
     }
     if (usage) {
       const details = usage.prompt_tokens_details || usage.input_tokens_details || {};
       return {
-        input: usage.prompt_tokens,
+        id: lastId,
+        items: completedResponse ? (completedResponse.output || []).map(o => o.type).join(",") : null,
+        input: usage.prompt_tokens ?? usage.input_tokens,
         cached: details.cached_tokens ?? usage.cached_tokens ?? (usage.input_tokens_details ? 0 : null),
-        output: usage.completion_tokens,
+        output: usage.completion_tokens ?? usage.output_tokens,
         content,
         reasoning,
         toolCalls: Object.values(toolCalls).filter(t => t.function.name),
@@ -246,6 +256,7 @@ function parseResponse(text) {
     const details = usage.prompt_tokens_details || {};
     const msg = json.choices?.[0]?.message || {};
     return {
+      id: json.id,
       input: usage.prompt_tokens,
       cached: details.cached_tokens ?? usage.cached_tokens ?? 0,
       output: usage.completion_tokens,
@@ -286,6 +297,8 @@ function parseResponsesJson(json) {
   const toolCallsMap = {};
   toolCalls.forEach((t, i) => { toolCallsMap[i] = t; });
   return {
+    id: json.id,
+    items: (json.output || []).map(o => o.type).join(","),
     input: usage.input_tokens,
     cached: details.cached_tokens ?? usage.cached_tokens ?? null,
     output: usage.output_tokens,
@@ -315,14 +328,23 @@ function bodyFor(model, history, effort, tail, stream, system, surface) {
       description: t.function.description,
       parameters: t.function.parameters,
     }));
-    body.input = messages.map(m => {
+    body.input = messages.flatMap(m => {
       if (m.role === "tool") {
-        return { type: "function_call_output", call_id: m.tool_call_id, output: m.content };
+        return [{ type: "function_call_output", call_id: m.tool_call_id, output: m.content }];
+      }
+      if (m.role === "assistant" && Array.isArray(m.tool_calls) && m.tool_calls.length) {
+        // Responses-native history: official DeepSeek rejects chat-style
+        // assistant tool_calls (400 "No tool call found for tool output").
+        return m.tool_calls.map(tc => ({
+          type: "function_call",
+          call_id: tc.id,
+          name: tc.function?.name,
+          arguments: tc.function?.arguments,
+        }));
       }
       const item = { role: m.role, content: m.content ?? "" };
-      if (m.tool_calls) item.tool_calls = m.tool_calls;
       if (m.reasoning_content) item.reasoning_content = m.reasoning_content;
-      return item;
+      return [item];
     });
   }
   return JSON.stringify(body);
@@ -352,11 +374,11 @@ function runTarget(target, args) {
   for (let step = 1; step <= args.steps; step += 1) {
     // req A: model must emit the tool call
     const bodyA = bodyFor(target.model, history, args.effort, [{ role: "user", content: U }], args.stream, args.system, args.surface);
-    const { http: httpA, text: textA } = curlOnce(url, usedKey, bodyA);
+    const { http: httpA, text: textA, mid: midA } = curlOnce(url, usedKey, bodyA);
     const a = parseResponse(textA);
     if (a.error || a.raw) { console.log(`  turn ${step} reqA: HTTP ${httpA} ${a.error ?? a.raw}`); return; }
     const pctA = a.input ? (a.cached == null ? "n/a" : (100 * a.cached / a.input).toFixed(1)) : "0.0";
-    console.log(`  turn ${step} A(tool): in=${a.input} cached=${a.cached ?? "n/a"} (${pctA}%) out=${a.output} | calls=${a.toolCalls.map(c => c.function?.name).join(",") || "NONE"}`);
+    console.log(`  turn ${step} A(tool): mid=${midA || "-"} id=${(a.id || "").slice(0, 22) || "-"}${a.items ? ` items=[${a.items}]` : ""} in=${a.input} cached=${a.cached ?? "n/a"} (${pctA}%) out=${a.output} | calls=${a.toolCalls.map(c => c.function?.name).join(",") || "NONE"}`);
 
     const toolCall = a.toolCalls[0] || { id: "call_fallback", function: { name: "get_current_time", arguments: "{}" } };
     const toolResult = { role: "tool", tool_call_id: toolCall.id, content: new Date().toISOString() };
@@ -368,12 +390,12 @@ function runTarget(target, args) {
     const tailB = [{ role: "user", content: U }, asstToolMsg, toolResult];
     const bodyB = bodyFor(target.model, history, args.effort, tailB, args.stream, args.system, args.surface);
     lastBody = bodyB;
-    const { http: httpB, text: textB } = curlOnce(url, usedKey, bodyB);
+    const { http: httpB, text: textB, mid: midB } = curlOnce(url, usedKey, bodyB);
     const b = parseResponse(textB);
     if (b.error || b.raw) { console.log(`  turn ${step} reqB: HTTP ${httpB} ${b.error ?? b.raw}`); return; }
     const pctB = b.input ? (b.cached == null ? "n/a" : (100 * b.cached / b.input).toFixed(1)) : "0.0";
     const report = b.content.replace(/\s+/g, " ").trim().slice(0, 60) || "(empty)";
-    console.log(`  turn ${step} B(report): in=${b.input} cached=${b.cached ?? "n/a"} (${pctB}%) out=${b.output} | "${report}"`);
+    console.log(`  turn ${step} B(report): mid=${midB || "-"} id=${(b.id || "").slice(0, 22) || "-"}${b.items ? ` items=[${b.items}]` : ""} in=${b.input} cached=${b.cached ?? "n/a"} (${pctB}%) out=${b.output} | "${report}"`);
 
     history.push(
       { role: "user", content: U },
@@ -385,11 +407,11 @@ function runTarget(target, args) {
 
   // exact resends of the final req-B body
   for (let k = 1; k <= args.repeat; k += 1) {
-    const { http, text } = curlOnce(url, usedKey, lastBody);
+    const { http, text, mid } = curlOnce(url, usedKey, lastBody);
     const r = parseResponse(text);
     if (r.error || r.raw) { console.log(`  repeat #${k}: HTTP ${http} ${r.error ?? r.raw}`); return; }
     const pct = r.input ? (r.cached == null ? "n/a" : (100 * r.cached / r.input).toFixed(1)) : "0.0";
-    console.log(`  repeat #${k}: in=${r.input} cached=${r.cached ?? "n/a"} (${pct}%) out=${r.output} [${r.finish}]`);
+    console.log(`  repeat #${k}: mid=${mid || "-"} id=${(r.id || "").slice(0, 22) || "-"}${r.items ? ` items=[${r.items}]` : ""} in=${r.input} cached=${r.cached ?? "n/a"} (${pct}%) out=${r.output} [${r.finish}]`);
   }
 }
 
