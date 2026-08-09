@@ -1,9 +1,46 @@
 # Terminal-Bench 2.1 — terminus-2 on deepseek-v4-flash (official DeepSeek,
 # routed through the local litellm proxy) at max effort, chat-completions SSE,
-# no trial retries, 2x timeout multiplier, all tasks in the dataset (no limit).
+# no trial retries, 3x timeout multiplier, 3 attempts per trial, all tasks in
+# the dataset (no limit).
 #
 # Run:  ./terminal-bench-2-1/run.sh
 #   or: harbor run -c terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml -y
+#
+# ---------------------------------------------------------------------------
+# Responses API configuration (also the shape ocx/opencodex expects)
+# ---------------------------------------------------------------------------
+# NOTE: the ACTIVE path below is CHAT COMPLETIONS (/v1/chat/completions with
+# stream=true), which is the working path for terminus-2 through litellm:
+# harbor drains the SSE into one LLMResponse and interleaved_thinking replays
+# reasoning_content client-side, so no server-side conversation state is
+# needed. The Responses API notes are kept here as reference / ocx usage.
+#
+# terminus-2 can talk to the litellm proxy with the OpenAI Responses API
+# (/v1/responses) using:
+#
+#   use_responses_api: true        # harbor -> litellm endpoint
+#   llm_call_kwargs:
+#     stream: true                 # SSE stream; harbor drains it into one LLMResponse
+#   reasoning_effort: max          # sent natively as {"reasoning": {"effort": "max"}}
+#   model_info:
+#     max_output_tokens: 384000    # official deepseek-v4-flash output budget
+#   interleaved_thinking: true     # replay reasoning_content into later turns
+#
+# The same three knobs apply when running ocx/opencodex through litellm:
+# ocx natively speaks the Responses API, so it sends reasoning.effort in the
+# request body and expects reasoning content back on the wire — no chat-SSE
+# extra_body workaround is needed. ocx does NOT use previous_response_id
+# chaining for DeepSeek (its Responses API is stateless); every turn must
+# carry the full accumulated input.
+#
+# IMPORTANT (stateless Responses): litellm's chat-completions bridge can
+# collapse context when a client chains turns via previous_response_id (it
+# only re-sends the new user prompt). DeepSeek's Responses API is stateless,
+# so clients must always send the complete input. See the observed failure in
+# jobs/deepseek-v4-flash-max/2026-08-09__22-08-19: prompt tokens went
+# 1022 -> 4766 -> 76 -> 36 after the third turn, and the model started replying
+# "No task was specified in the request".
+# ---------------------------------------------------------------------------
 #
 # job_name is intentionally unset: each run gets a fresh timestamped
 # directory under jobs_dir (override with --job-name <name>).
@@ -13,9 +50,9 @@
 # calling harbor, so no key ever lands in this vendored file.
 
 jobs_dir: terminal-bench-2-1/jobs/deepseek-v4-flash-max
-n_attempts: 5
+n_attempts: 3
 n_concurrent_trials: 2
-timeout_multiplier: 2.0
+timeout_multiplier: 3.0
 
 # Relay the host's HTTP(S) proxy into task containers. Harbor does NOT pass
 # host proxy vars into containers automatically; without this, verifier/agent
@@ -36,7 +73,7 @@ environment:
     no_proxy: "localhost,127.0.0.1,::1"
 
 retry:
-  max_retries: 0
+  max_retries: 5
 
 agents:
   - name: terminus-2
@@ -62,8 +99,8 @@ agents:
           reasoning_effort: max
       use_responses_api: false
       reasoning_effort: max
-      # Register the model with litellm so every Responses call carries
-      # max_output_tokens (sent as max_tokens on the streamed chat call).
+      # Register the model with litellm so every call carries max_output_tokens
+      # (sent as max_tokens on the streamed chat call).
       # Official DeepSeek limit for deepseek-v4-flash is 384K output tokens;
       # the litellm client's built-in entry is stale.
       model_info:
@@ -74,5 +111,8 @@ agents:
       interleaved_thinking: true
 
 datasets:
-  - name: terminal-bench/terminal-bench-2-1
+  # Fork of harbor-framework/terminal-bench-2-1 with durable fixes:
+  # vendored POV-Ray archives, cmake in mcmc-sampling-stan, longer mailman
+  # announcement wait, and planarity==0.6 for build-cython-ext.
+  - repo: harryzhou2000/terminal-bench-2-1@tb21-fixes
     download_dir: terminal-bench-2-1/.cache/tasks

@@ -24,5 +24,11 @@ agents:
   - name: oracle
 
 datasets:
-  - name: terminal-bench/terminal-bench-2-1
+  # Fork of harbor-framework/terminal-bench-2-1 with durable fixes.
+  - repo: harryzhou2000/terminal-bench-2-1@tb21-fixes
     download_dir: terminal-bench-2-1/.cache/tasks
+    task_names:
+      - build-pov-ray
+      - mcmc-sampling-stan
+      - mailman
+      - build-cython-ext
