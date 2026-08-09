@@ -273,6 +273,11 @@ Note: bind mode keeps the SIF rootfs read-only, so the image must already
 ship `/usr/bin/python3` (and ideally tmux/asciinema); bootstrap cannot
 apt-get install them without a writable system area. `write-compressor` is a
 Rust/C image without python3 and will fail at server bootstrap in bind mode.
+Verifiers that apt-install tools (many terminal-bench test.sh scripts install
+`curl` and `uvx` at runtime) will also fail on the read-only rootfs — e.g. the
+`break-filter-js-from-html` oracle run boots, solves, and invokes the verifier
+but scores 0 because `curl`/`uvx` cannot be installed. Tasks whose verifiers
+only use tools already baked into the image are fine.
 
 The vendored configs in `configs/` already set `llm_call_kwargs.stream: true`
 so terminus-2 uses the streaming Responses path.
