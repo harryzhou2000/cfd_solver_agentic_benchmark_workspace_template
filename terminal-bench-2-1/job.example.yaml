@@ -1,9 +1,12 @@
 # Terminal-Bench 2.1, terminus-2 harness, model calls routed through the
-# local opencodex proxy (loopback, no auth). Run from the repo root:
+# local litellm proxy (http://127.0.0.1:4000/v1). Run from the repo root:
 #
 #   harbor run -c terminal-bench-2-1/job.example.yaml -y
+#
+# LITELLM_API_KEY comes from the project-root .env; run.sh renders the
+# placeholder into a throwaway config under .cache before calling harbor.
 
-job_name: tb21-terminus2-glm52
+job_name: tb21-litellm-example
 jobs_dir: terminal-bench-2-1/jobs
 n_attempts: 1
 n_concurrent_trials: 4
@@ -13,13 +16,16 @@ environment:
 
 agents:
   - name: terminus-2
+    # openai/ selects litellm's OpenAI-compatible client; the proxy receives
+    # model "BLSC/GLM-5.2".
     model_name: openai/BLSC/GLM-5.2
     kwargs:
-      api_base: http://127.0.0.1:10109/v1
-      # litellm requires a non-empty api_key for the openai/ provider even on a
-      # loopback bind; opencodex does not validate it there.
+      api_base: http://127.0.0.1:4000/v1
       llm_kwargs:
-        api_key: ocx-loopback
+        api_key: ${LITELLM_API_KEY}
+      use_responses_api: false
+      llm_call_kwargs:
+        stream: true
       # reasoning_effort: high
       # max_turns: 200
 

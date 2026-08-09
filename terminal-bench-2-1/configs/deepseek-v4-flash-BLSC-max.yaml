@@ -1,11 +1,16 @@
-# Terminal-Bench 2.1 — terminus-2 on BLSC/DeepSeek-V4-Flash at max effort,
-# no trial retries, 2x timeout multiplier, all tasks in the dataset (no limit),
+# Terminal-Bench 2.1 — terminus-2 on BLSC/DeepSeek-V4-Flash (routed through
+# the local litellm proxy) at max effort, chat-completions SSE, no trial
+# retries, 2x timeout multiplier, all tasks in the dataset (no limit),
 # concurrency capped at 2.
 #
 # Run:  ./terminal-bench-2-1/run.sh terminal-bench-2-1/configs/deepseek-v4-flash-BLSC-max.yaml
 #
 # job_name is intentionally unset: each run gets a fresh timestamped
 # directory under jobs_dir (override with --job-name <name>).
+#
+# The API key is read from LITELLM_API_KEY in the project-root .env: run.sh
+# renders "${LITELLM_API_KEY}" into a throwaway config under .cache before
+# calling harbor, so no key ever lands in this vendored file.
 
 jobs_dir: terminal-bench-2-1/jobs/deepseek-v4-flash-BLSC-max
 n_attempts: 5
@@ -31,34 +36,34 @@ environment:
     no_proxy: "localhost,127.0.0.1,::1"
 
 retry:
-  max_retries: 2
+  max_retries: 0
 
 agents:
   - name: terminus-2
+    # The openai/ prefix selects litellm's OpenAI-compatible client; the proxy
+    # still receives model "BLSC/DeepSeek-V4-Flash" (its BLSC route).
     model_name: openai/BLSC/DeepSeek-V4-Flash
     kwargs:
-      api_base: http://127.0.0.1:10109/v1
-      # litellm requires a non-empty api_key for the openai/ provider even on a
-      # loopback bind; opencodex does not validate it there.
+      api_base: http://127.0.0.1:4000/v1
       llm_kwargs:
-        api_key: ocx-loopback
-      # Stream Responses API calls (harbor fork tb21-responses-streaming).
+        api_key: ${LITELLM_API_KEY}
+      # Chat-completions SSE (harbor fork tb21-responses-streaming):
+      # terminus-2 <-> litellm speak /v1/chat/completions with stream=true.
+      # The patched harbor drains the SSE into one LLMResponse, and
+      # reasoning_content is replayed client-side via interleaved_thinking,
+      # so no server-side conversation state is needed.
       llm_call_kwargs:
         stream: true
-      # Responses API: terminus-2 <-> opencodex speak /v1/responses, so ocx
-      # keeps server-side conversation state (previous_response_id chaining)
-      # and reasoning_effort is sent via the native reasoning.effort field.
-      use_responses_api: true
+      use_responses_api: false
       reasoning_effort: max
       # Register the model with litellm so every Responses call carries
-      # max_output_tokens (DeepSeek-V4-Flash official output limit: 384K).
+      # max_output_tokens (sent as max_tokens on the streamed chat call;
+      # BLSC's declared limit in the proxy config: 128K).
       model_info:
         max_input_tokens: 1000000
-        max_output_tokens: 384000
-      # Replay reasoning_content into chat history on subsequent turns.
-      # Note: on this stack opencodex strips reasoning_content from inbound
-      # chat messages; tool-round reasoning continuity is handled by ocx
-      # itself — keeping the flag is harmless and matters if ocx is bypassed.
+        max_output_tokens: 128000
+      # Replay reasoning_content into chat history on subsequent turns so the
+      # model keeps its full reasoning context client-side.
       interleaved_thinking: true
 
 datasets:

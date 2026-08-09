@@ -16,6 +16,10 @@
 # relative paths (jobs_dir, download_dir), so launch from the repo root.
 # From inside terminal-bench-2-1/ use ./run.sh configs/deepseek-v4-flash-max.yaml.
 #
+# If the config contains "${LITELLM_API_KEY}", run.sh renders a throwaway
+# copy under terminal-bench-2-1/.cache/rendered-configs/ with the value from
+# the project-root .env, so vendored configs stay key-free.
+#
 # Extra CLI flags merge over the YAML (kwargs via --ak, retries via -r, task
 # filters via -i/-l, timeouts, job dir via -o/--job-name). Note: -m is only
 # honored together with -a, which rebuilds the agent and drops the YAML
@@ -42,6 +46,26 @@ if [ -f "./.env" ]; then
   ENV_FILE="./.env"
 elif [ -f "../.env" ]; then
   ENV_FILE="../.env"
+fi
+
+# Render ${LITELLM_API_KEY} from .env into a throwaway config when referenced.
+if grep -qF '${LITELLM_API_KEY}' "$CFG"; then
+  if [ -z "$ENV_FILE" ]; then
+    echo "config references \${LITELLM_API_KEY} but no .env was found (looked in ./ and ../)" >&2
+    exit 1
+  fi
+  LITELLM_KEY="$(sed -n 's/^LITELLM_API_KEY=//p' "$ENV_FILE" | tail -1)"
+  if [ -z "$LITELLM_KEY" ]; then
+    echo "LITELLM_API_KEY is missing from $ENV_FILE" >&2
+    exit 1
+  fi
+  RENDER_DIR="terminal-bench-2-1/.cache/rendered-configs"
+  mkdir -p "$RENDER_DIR"
+  RENDERED_CFG="$RENDER_DIR/$(basename "$CFG").rendered.yaml"
+  LITELLM_KEY_SED="$(printf '%s' "$LITELLM_KEY" | sed 's/[&\\/]/\\&/g')"
+  sed "s|\${LITELLM_API_KEY}|$LITELLM_KEY_SED|g" "$CFG" > "$RENDERED_CFG"
+  echo "rendered $CFG -> $RENDERED_CFG (LITELLM_API_KEY injected from $ENV_FILE)" >&2
+  CFG="$RENDERED_CFG"
 fi
 
 # This shell exports ALL_PROXY=socks5://... which harbor's httpx client cannot
