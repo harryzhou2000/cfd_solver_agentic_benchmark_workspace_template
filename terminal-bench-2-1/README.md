@@ -242,6 +242,29 @@ Plain `uv tool install --force` (without the `--with` flags) drops both the
 pin and the extra modules, breaking litellm's proxy imports again. Keep the
 flags in the command.
 
+### Viewer frontend (`harbor view`)
+
+`harbor view` serves a React frontend that is **not** packaged into the wheel
+(the build lives in `harbor/apps/viewer/build/client`). After every
+`uv tool install --force`, reinstall the frontend or the viewer 404s on the
+UI routes:
+
+```bash
+./terminal-bench-2-1/scripts/rebuild-harbor-viewer.sh
+```
+
+The script runs `bun install && bun run build` in `harbor/apps/viewer` and
+copies `build/client` into the installed package's `harbor/viewer/static/`.
+
+### Singularity/Apptainer (experimental)
+
+The singularity backend can avoid `--writable-tmpfs` entirely by binding a
+host workspace into the container. Set `singularity_writable_workdir` (host
+base dir) in `environment.kwargs`; harbor then bind-mounts the workdir, server
+venv, `/tmp`, `/root`, `/tests`, `/solution`, and `/logs` from per-environment
+host dirs and pre-seeds the workdir with the image's baked-in contents. This
+avoids the fuse-overlayfs metadata hang on unprivileged Apptainer.
+
 The vendored configs in `configs/` already set `llm_call_kwargs.stream: true`
 so terminus-2 uses the streaming Responses path.
 
@@ -258,7 +281,7 @@ and intermittently time out. Two constraints:
 - `ALL_PROXY` is deliberately not relayed — it is socks5 and `run.sh` strips it
   for harbor's own httpx egress.
 
-Known cosmetic warning: litellm's Responses usage serialization emits a
+Known cosmetic warning: litellm's Responses usage serialization used to emit a
 pydantic `UserWarning` (`PydanticSerializationUnexpectedValue`, expected
-`ResponseAPIUsage`) on every call. It is harmless — content and usage are
-still returned correctly — and can be ignored.
+`ResponseAPIUsage`) on every call. The fork now suppresses that exact warning
+inside `LiteLLM._call_responses`; content and usage are unaffected.
