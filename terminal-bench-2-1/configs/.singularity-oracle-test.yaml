@@ -1,0 +1,36 @@
+# TEMPORARY oracle smoke test — validates singularity container start +
+# reference solution execution + verifier download/run, using the loopback
+# host proxy (127.0.0.1:20181) which singularity reaches via the shared
+# host network namespace. No LLM calls; cheap way to test the verifier path.
+
+jobs_dir: terminal-bench-2-1/jobs/singularity-oracle-test
+n_attempts: 1
+n_concurrent_trials: 1
+timeout_multiplier: 2.0
+
+environment:
+  type: singularity
+  env:
+    HTTP_PROXY: "http://127.0.0.1:20181"
+    HTTPS_PROXY: "http://127.0.0.1:20181"
+    http_proxy: "http://127.0.0.1:20181"
+    https_proxy: "http://127.0.0.1:20181"
+    NO_PROXY: "localhost,127.0.0.1,::1"
+    no_proxy: "localhost,127.0.0.1,::1"
+  mounts:
+    - type: bind
+      source: /mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/terminal-bench-2-1/.cache/pip-host
+      target: /root/.cache/pip
+  kwargs:
+    singularity_image_cache_dir: terminal-bench-2-1/.cache/sif
+
+retry:
+  max_retries: 0
+
+agents:
+  - name: oracle
+
+datasets:
+  # Fork of harbor-framework/terminal-bench-2-1 with durable fixes.
+  - repo: harryzhou2000/terminal-bench-2-1@tb21-fixes
+    download_dir: terminal-bench-2-1/.cache/tasks

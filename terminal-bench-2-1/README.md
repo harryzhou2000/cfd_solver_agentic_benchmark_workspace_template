@@ -36,10 +36,10 @@ That is a future point — see "CLI harnesses later" below.
 ## 1. Smoke test (dataset + containers, no model cost)
 
 Run the oracle (precomputed) solutions on the first five tasks. This downloads
-the dataset from the Harbor registry and builds/start the task containers:
+the dataset from the vendored fork and builds/starts the task containers:
 
 ```bash
-harbor run -d terminal-bench/terminal-bench-2-1 -a oracle -l 5 \
+harbor run --repo harryzhou2000/terminal-bench-2-1@tb21-fixes -a oracle -l 5 \
   -o terminal-bench-2-1/jobs -y
 ```
 
@@ -47,16 +47,29 @@ Note: this shell exports `ALL_PROXY=socks5://…`, which harbor's httpx client
 cannot use (`socksio` is missing from the uv tool venv). Strip it for harbor:
 
 ```bash
-env -u ALL_PROXY -u all_proxy harbor run -d terminal-bench/terminal-bench-2-1 \
+env -u ALL_PROXY -u all_proxy harbor run --repo harryzhou2000/terminal-bench-2-1@tb21-fixes \
   -a oracle -l 5 -o terminal-bench-2-1/jobs -y
 ```
 
 The HTTP(S)_PROXY vars are fine and are what the dataset fetch uses.
 
+### Easy agent smoke test (default)
+
+`log-summary-date-ranges` is the fast, reliable agent smoke test — the model
+parses a few log files into `/app/summary.csv` and typically scores 1.0 in a
+couple of minutes:
+
+```bash
+./terminal-bench-2-1/run.sh terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml \
+  --repo harryzhou2000/terminal-bench-2-1@tb21-fixes \
+  -i terminal-bench/log-summary-date-ranges \
+  -l 1 -k 1 -r 0
+```
+
 ## 2. Run terminus-2 through opencodex
 
 ```bash
-env -u ALL_PROXY -u all_proxy harbor run -d terminal-bench/terminal-bench-2-1 \
+env -u ALL_PROXY -u all_proxy harbor run --repo harryzhou2000/terminal-bench-2-1@tb21-fixes \
   -a terminus-2 \
   -m openai/BLSC/GLM-5.2 \
   --ak api_base=http://127.0.0.1:10109/v1 \
@@ -134,15 +147,17 @@ Everything you pass after the config name is merged over the YAML by harbor:
 - `-o <dir>` / `--job-name <name>` — see next section.
 
 Task filters are the exception: harbor only accepts `-l N` / `-i '<glob>'`
-when `-d` is also on the CLI (they replace the YAML's dataset entry, so the
-vendored `download_dir` is lost in that case):
+when a dataset selector (`--repo`, `-d`, or `--path`) is also on the CLI (they
+replace the YAML's dataset entry, so the vendored `download_dir` is lost in
+that case):
 
 ```bash
 ./terminal-bench-2-1/run.sh configs/deepseek-v4-flash-max.yaml \
-  -d terminal-bench/terminal-bench-2-1 -l 10 -i 'terminal-bench/write-*'
+  --repo harryzhou2000/terminal-bench-2-1@tb21-fixes \
+  -l 10 -i 'terminal-bench/write-*'
 ```
 
-(i.e. `./terminal-bench-2-1/run.sh terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml -d …`
+(i.e. `./terminal-bench-2-1/run.sh terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml --repo …`
 from the repo root.)
 
 Swapping the model is the one thing CLI flags do *not* do cleanly: harbor only
@@ -154,7 +169,8 @@ vendor another YAML in `configs/` (recommended) or spell out the endpoint again:
 ./terminal-bench-2-1/run.sh -a terminus-2 -m openai/BLSC/GLM-5.2 \
   --ak api_base=http://127.0.0.1:10109/v1 \
   --ak 'llm_kwargs={"api_key":"ocx-loopback"}' \
-  --ak reasoning_effort=high -d terminal-bench/terminal-bench-2-1 -l 10
+  --ak reasoning_effort=high \
+  --repo harryzhou2000/terminal-bench-2-1@tb21-fixes -l 10
 ```
 
 Verify before spending quota: `./terminal-bench-2-1/run.sh <config> --print-config`.

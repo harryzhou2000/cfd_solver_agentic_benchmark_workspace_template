@@ -1,0 +1,48 @@
+# TEMPORARY singularity smoke test — do not use for real runs.
+# Based on deepseek-v4-flash-max.yaml; replace the real configs only after
+# this passes image build, agent endpoint, and verifier download checks.
+
+jobs_dir: terminal-bench-2-1/jobs/singularity-test
+n_attempts: 1
+n_concurrent_trials: 1
+timeout_multiplier: 2.0
+
+environment:
+  type: singularity
+  env:
+    HTTP_PROXY: "http://192.168.31.65:20181"
+    HTTPS_PROXY: "http://192.168.31.65:20181"
+    http_proxy: "http://192.168.31.65:20181"
+    https_proxy: "http://192.168.31.65:20181"
+    NO_PROXY: "localhost,127.0.0.1,::1"
+    no_proxy: "localhost,127.0.0.1,::1"
+  mounts:
+    - type: bind
+      source: /mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/terminal-bench-2-1/.cache/pip-host
+      target: /root/.cache/pip
+  kwargs:
+    singularity_image_cache_dir: terminal-bench-2-1/.cache/sif
+
+retry:
+  max_retries: 0
+
+agents:
+  - name: terminus-2
+    model_name: openai/deepseek/deepseek-v4-flash
+    kwargs:
+      api_base: http://127.0.0.1:10109/v1
+      llm_kwargs:
+        api_key: ocx-loopback
+      llm_call_kwargs:
+        stream: true
+      use_responses_api: true
+      reasoning_effort: max
+      model_info:
+        max_input_tokens: 1000000
+        max_output_tokens: 384000
+      interleaved_thinking: true
+
+datasets:
+  # Fork of harbor-framework/terminal-bench-2-1 with durable fixes.
+  - repo: harryzhou2000/terminal-bench-2-1@tb21-fixes
+    download_dir: terminal-bench-2-1/.cache/tasks
