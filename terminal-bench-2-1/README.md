@@ -36,10 +36,10 @@ That is a future point — see "CLI harnesses later" below.
 ## 1. Smoke test (dataset + containers, no model cost)
 
 Run the oracle (precomputed) solutions on the first five tasks. This downloads
-the dataset from the vendored fork and builds/starts the task containers:
+the official upstream dataset and builds/starts the task containers:
 
 ```bash
-harbor run --repo harryzhou2000/terminal-bench-2-1@tb21-fixes -a oracle -l 5 \
+harbor run -d terminal-bench/terminal-bench-2-1 -a oracle -l 5 \
   -o terminal-bench-2-1/jobs -y
 ```
 
@@ -47,7 +47,7 @@ Note: this shell exports `ALL_PROXY=socks5://…`, which harbor's httpx client
 cannot use (`socksio` is missing from the uv tool venv). Strip it for harbor:
 
 ```bash
-env -u ALL_PROXY -u all_proxy harbor run --repo harryzhou2000/terminal-bench-2-1@tb21-fixes \
+env -u ALL_PROXY -u all_proxy harbor run -d terminal-bench/terminal-bench-2-1 \
   -a oracle -l 5 -o terminal-bench-2-1/jobs -y
 ```
 
@@ -61,7 +61,7 @@ couple of minutes:
 
 ```bash
 ./terminal-bench-2-1/run.sh terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml \
-  --repo harryzhou2000/terminal-bench-2-1@tb21-fixes \
+  -d terminal-bench/terminal-bench-2-1 \
   -i terminal-bench/log-summary-date-ranges \
   -l 1 -k 1 -r 0
 ```
@@ -69,7 +69,7 @@ couple of minutes:
 ## 2. Run terminus-2 through opencodex
 
 ```bash
-env -u ALL_PROXY -u all_proxy harbor run --repo harryzhou2000/terminal-bench-2-1@tb21-fixes \
+env -u ALL_PROXY -u all_proxy harbor run -d terminal-bench/terminal-bench-2-1 \
   -a terminus-2 \
   -m openai/BLSC/GLM-5.2 \
   --ak api_base=http://127.0.0.1:10109/v1 \
@@ -153,11 +153,11 @@ that case):
 
 ```bash
 ./terminal-bench-2-1/run.sh configs/deepseek-v4-flash-max.yaml \
-  --repo harryzhou2000/terminal-bench-2-1@tb21-fixes \
+  -d terminal-bench/terminal-bench-2-1 \
   -l 10 -i 'terminal-bench/write-*'
 ```
 
-(i.e. `./terminal-bench-2-1/run.sh terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml --repo …`
+(i.e. `./terminal-bench-2-1/run.sh terminal-bench-2-1/configs/deepseek-v4-flash-max.yaml -d …`
 from the repo root.)
 
 Swapping the model is the one thing CLI flags do *not* do cleanly: harbor only
@@ -170,7 +170,7 @@ vendor another YAML in `configs/` (recommended) or spell out the endpoint again:
   --ak api_base=http://127.0.0.1:10109/v1 \
   --ak 'llm_kwargs={"api_key":"ocx-loopback"}' \
   --ak reasoning_effort=high \
-  --repo harryzhou2000/terminal-bench-2-1@tb21-fixes -l 10
+  -d terminal-bench/terminal-bench-2-1 -l 10
 ```
 
 Verify before spending quota: `./terminal-bench-2-1/run.sh <config> --print-config`.
