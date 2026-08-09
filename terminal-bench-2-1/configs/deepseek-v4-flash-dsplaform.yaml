@@ -15,17 +15,19 @@ timeout_multiplier: 2.0
 # Relay the host's HTTP(S) proxy into task containers. Harbor does NOT pass
 # host proxy vars into containers automatically; without this, verifier/agent
 # downloads (e.g. uv from github.com) go direct and intermittently time out.
-# Values resolve from the harbor process env at runtime (${VAR:-default}
-# syntax). Do NOT relay ALL_PROXY here: run.sh strips the socks5 proxy because
-# harbor's httpx cannot use it, and socks would also break in-container tooling.
+# IMPORTANT: job-level environment.env is passed VERBATIM (harbor does not
+# resolve ${VAR} templates here — only task-level [environment].env does), so
+# these must be literal values, not "${HTTP_PROXY}" placeholders. Adjust to
+# your host's proxy address if it differs. Do NOT relay ALL_PROXY: run.sh
+# strips the socks5 proxy because harbor's httpx cannot use it.
 environment:
   env:
-    HTTP_PROXY: "${HTTP_PROXY}"
-    HTTPS_PROXY: "${HTTPS_PROXY}"
-    http_proxy: "${http_proxy}"
-    https_proxy: "${https_proxy}"
-    NO_PROXY: "${NO_PROXY:-localhost,127.0.0.1,::1}"
-    no_proxy: "${no_proxy:-localhost,127.0.0.1,::1}"
+    HTTP_PROXY: "http://192.168.31.65:20181"
+    HTTPS_PROXY: "http://192.168.31.65:20181"
+    http_proxy: "http://192.168.31.65:20181"
+    https_proxy: "http://192.168.31.65:20181"
+    NO_PROXY: "localhost,127.0.0.1,::1"
+    no_proxy: "localhost,127.0.0.1,::1"
 
 retry:
   max_retries: 2

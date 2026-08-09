@@ -245,12 +245,18 @@ flags in the command.
 The vendored configs in `configs/` already set `llm_call_kwargs.stream: true`
 so terminus-2 uses the streaming Responses path.
 
-Proxy relay: the same configs carry an `environment.env` block that forwards
-the host's `HTTP_PROXY`/`HTTPS_PROXY` (and lowercase variants, plus `NO_PROXY`)
-into the task containers. Harbor does not pass host proxy vars into containers
-by itself; without this, verifier downloads (e.g. `uv` from github.com) go
-direct and intermittently time out. `ALL_PROXY` is deliberately not relayed —
-it is socks5 and `run.sh` strips it for harbor's own httpx egress.
+Proxy relay: the same configs carry an `environment.env` block that injects
+`HTTP_PROXY`/`HTTPS_PROXY` (and lowercase variants, plus `NO_PROXY`) into the
+task containers. Harbor does not pass host proxy vars into containers by
+itself; without this, verifier downloads (e.g. `uv` from github.com) go direct
+and intermittently time out. Two constraints:
+
+- Job-level `environment.env` is passed **verbatim** — harbor does not resolve
+  `${VAR}` templates there (only task-level `[environment].env` is templated),
+  so the values in the vendored configs are literal `http://192.168.31.65:20181`
+  strings. Update them if your proxy address changes.
+- `ALL_PROXY` is deliberately not relayed — it is socks5 and `run.sh` strips it
+  for harbor's own httpx egress.
 
 Known cosmetic warning: litellm's Responses usage serialization emits a
 pydantic `UserWarning` (`PydanticSerializationUnexpectedValue`, expected
