@@ -223,8 +223,14 @@ surfaces as `502 upstream JSON response stalled before completing`.
 uv tool install --force \
   --with "fastapi>=0.136.3,<0.140.7" \
   --with orjson --with pydantic-settings --with backoff \
-  git+https://github.com/harryzhou2000/harbor.git@tb21-responses-streaming
+  /mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/harbor
 ```
+
+Use the local checkout path, not the GitHub URL: the feature branch is ahead
+of `origin` locally (pydantic-warning fix on `8cace588`), so installing from
+the remote URL would silently install the older commit without that fix.
+After the install, rebuild the viewer frontend (see below) — the wheel does
+not ship it.
 
 Why the pins:
 
