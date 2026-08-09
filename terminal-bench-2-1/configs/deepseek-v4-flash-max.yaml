@@ -54,6 +54,12 @@ agents:
       # so no server-side conversation state is needed.
       llm_call_kwargs:
         stream: true
+        # litellm's OpenAI-compatible client drops top-level reasoning_effort
+        # for openai/<proxy-model> names; extra_body puts it on the wire so the
+        # proxy's custom provider (deepseekgw, allowed_openai_params) forwards
+        # reasoning_effort: max to api.deepseek.com.
+        extra_body:
+          reasoning_effort: max
       use_responses_api: false
       reasoning_effort: max
       # Register the model with litellm so every Responses call carries
