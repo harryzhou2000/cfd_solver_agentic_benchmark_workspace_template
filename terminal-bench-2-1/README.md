@@ -244,13 +244,10 @@ flags in the command.
 
 ### Viewer frontend (`harbor view`)
 
-The feature branch now vendors the built React frontend into
-`src/harbor/viewer/static`, so `uv tool install` from
-`tb21-responses-streaming` ships it directly — no extra step needed after
-`uv tool install --force`.
-
-If you install from an older commit (or run harbor from a source checkout),
-rebuild and copy the frontend with:
+`harbor view` serves a React frontend that is **not** packaged into the wheel
+(the build lives in `harbor/apps/viewer/build/client`). After every
+`uv tool install --force`, reinstall the frontend or the viewer 404s on the
+UI routes:
 
 ```bash
 ./terminal-bench-2-1/scripts/rebuild-harbor-viewer.sh
@@ -258,26 +255,15 @@ rebuild and copy the frontend with:
 
 The script runs `bun install && bun run build` in `harbor/apps/viewer` and
 copies `build/client` into the installed package's `harbor/viewer/static/`.
-This is also how to refresh the frontend after changing the viewer app.
 
-### Singularity/Apptainer (experimental)
+### Singularity/Apptainer (abandoned)
 
-The singularity backend can avoid `--writable-tmpfs` entirely by binding a
-host workspace into the container. Set `singularity_writable_workdir` (host
-base dir) in `environment.kwargs`; harbor then bind-mounts the workdir, server
-venv, `/tmp`, `/root`, `/tests`, `/solution`, and `/logs` from per-environment
-host dirs and pre-seeds the workdir with the image's baked-in contents. This
-avoids the fuse-overlayfs metadata hang on unprivileged Apptainer.
-
-Note: bind mode keeps the SIF rootfs read-only, so the image must already
-ship `/usr/bin/python3` (and ideally tmux/asciinema); bootstrap cannot
-apt-get install them without a writable system area. `write-compressor` is a
-Rust/C image without python3 and will fail at server bootstrap in bind mode.
-Verifiers that apt-install tools (many terminal-bench test.sh scripts install
-`curl` and `uvx` at runtime) will also fail on the read-only rootfs — e.g. the
-`break-filter-js-from-html` oracle run boots, solves, and invokes the verifier
-but scores 0 because `curl`/`uvx` cannot be installed. Tasks whose verifiers
-only use tools already baked into the image are fine.
+The bind-workdir idea (avoiding `--writable-tmpfs` by binding a host
+workspace) was implemented and tested, then abandoned: the SIF rootfs is
+read-only, and terminal-bench verifiers almost always apt-install tools
+(`curl`, `uvx`, ...) at runtime, so bind mode scores 0 even when the oracle
+solution runs. The attempt is preserved on the harbor branch
+`tb21-singularity-bind-attempt`.
 
 The vendored configs in `configs/` already set `llm_call_kwargs.stream: true`
 so terminus-2 uses the streaming Responses path.
