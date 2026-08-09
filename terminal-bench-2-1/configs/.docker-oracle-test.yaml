@@ -1,0 +1,28 @@
+# TEMPORARY docker oracle smoke test — validates container start + reference
+# solution execution + verifier download/run with the proxy relayed into the
+# task container (verifier installs curl/uvx from the proxy).
+
+jobs_dir: terminal-bench-2-1/jobs/docker-oracle-test
+n_attempts: 1
+n_concurrent_trials: 1
+timeout_multiplier: 3.0
+
+environment:
+  type: docker
+  env:
+    HTTP_PROXY: "http://192.168.31.65:20181"
+    HTTPS_PROXY: "http://192.168.31.65:20181"
+    http_proxy: "http://192.168.31.65:20181"
+    https_proxy: "http://192.168.31.65:20181"
+    NO_PROXY: "localhost,127.0.0.1,::1"
+    no_proxy: "localhost,127.0.0.1,::1"
+
+retry:
+  max_retries: 0
+
+agents:
+  - name: oracle
+
+datasets:
+  - name: terminal-bench/terminal-bench-2-1
+    download_dir: terminal-bench-2-1/.cache/tasks
