@@ -19,6 +19,13 @@ record.
   infer identity from models found in sessions or telemetry.
 - Require the operator to supply the run number. Preserve it byte-for-byte,
   including leading zeros; never auto-increment or normalize it.
+- Prove the exact result branch is absent from the configured upstream before
+  creating it. A failed or unavailable remote check is a blocker, not evidence
+  that the number is free.
+- Commit only reproducible code/report material. Never commit raw solver data,
+  logs, restarts, field files, or visualization working files. Permit curated
+  PNGs only under the report's figure directory so the report builds directly
+  from the repository.
 - Keep structural validation separate from source, physics, MPI, and report
   judgment. A passing validator is necessary, not sufficient.
 - Use `null` plus a limitation for anything not verified. Do not turn missing
@@ -76,27 +83,28 @@ The canonical run ID is:
 ```
 
 The state hash is the first six lowercase hex characters of SHA-256 over
-canonical UTF-8 lines containing the full initial commit object ID and each
-selected path-qualified artifact SHA-256. Artifact SHA-256 values are computed
-from blob bytes read from the immutable result commit, never from filesystem
-files. Paths are relative to the repository and sorted. Thus identical content
-at different artifact paths does not alias, while checkout metadata, mtimes,
-file ownership, line-ending conversion, and later worktree edits cannot change
-the run ID.
+canonical UTF-8 lines containing the full initial commit object ID, the full
+submission commit object ID, and each selected path-qualified artifact
+SHA-256. Artifact SHA-256 values are computed from blob bytes read from the
+immutable result commit, never from filesystem files. Paths are relative to
+the repository and sorted. Thus identical content at different artifact paths
+does not alias, while checkout metadata, mtimes, file ownership, line-ending
+conversion, and later worktree edits cannot change the run ID.
 
-The submission commit SHA is provenance and an immutable lookup boundary; it
-is deliberately **not** an input line in the state hash. Commit message,
-author, committer, timestamp, parent topology, and unrelated files therefore
-do not change the run ID when the initial commit and selected path/content
-pairs are identical. A different submission commit changes the run ID only if
-one of the selected artifact blobs or paths changes.
+The full submission commit object ID is also an input line in the state hash.
+This binds the run ID to the exact curated submission commit, including all
+committed solver/report changes rather than only the 1–3 sampled artifacts.
+The sampled artifact hashes remain independent, human-auditable state
+evidence. Rewriting the submission commit creates a different run ID even when
+the sampled files are unchanged; the same immutable commit always reproduces
+the same run ID.
 
 By default the helper selects up to three stable, tracked submission files in
 this priority order:
 
 1. `solver/CMakeLists.txt` or top-level `CMakeLists.txt`;
-2. `report/report.tex` (including documented standard alternate locations);
-3. `report/run_manifest.csv`, falling back to `report/run_manifest.md`.
+2. a primary tracked solver source file from documented standard locations;
+3. `report/report.tex` (including documented standard alternate locations).
 
 Use repeatable `--artifact RELPATH` to select explicit stable files when the
 layout is non-standard. The helper requires all selected paths to be regular
@@ -110,8 +118,10 @@ artifact entries). Absolute diagnostic paths such as `workspace` and
 `env_snapshot` may differ across equivalent checkouts and are not hash inputs.
 For verification, pass the recorded artifact paths back as explicit repeated
 `--artifact` options; do not redo default selection, because a later skill
-version may adopt different defaults. Honor `canonicalization_version: 1` for
-existing identities.
+version may adopt different defaults. New identities use
+`canonicalization_version: 2`, which includes both initial and submission
+commit IDs. Preserve version 1 records only as legacy identities; never
+silently reinterpret them as version 2.
 Copy the final record to
 `evaluation/outputs/<run-id>/run_identity.json` after `summarize.py` creates
 the snapshot. Identical immutable identity inputs must produce the same
@@ -124,8 +134,23 @@ Use the pre-run snapshot's `initial_branch` and `initial_commit` to determine
 the result branch. Before changing branches, record the current branch, HEAD,
 status, and submodule state in the evaluation notes.
 
-Then create or switch to the exact result branch and commit the complete
-submission:
+Before creating or switching to the branch, check the exact upstream ref:
+
+```bash
+python3 .codex/skills/cfd-benchmark-evaluation/scripts/check_upstream_branch.py \
+  --workspace <workspace> --number 08
+```
+
+The helper derives the branch from the pre-run initial branch and runs an
+exact `git ls-remote --heads` query against the manager repository's `origin`
+URL. Continue only when it reports `available: true`. Verify the printed URL
+is the canonical workspace-template upstream. An explicit `--upstream` is an
+operator-approved override, not an evaluator convenience. Refuse a remote
+collision even if the branch is absent locally. Refuse any local branch
+collision; result branches are single-use and never reused. Never choose
+another number automatically; return to the operator.
+
+Then create the exact new result branch and commit the complete submission:
 
 ```text
 <initial branch without /init>/<operator number>
@@ -135,16 +160,31 @@ For example, use `codex/gpt56/08`, not `results/codex-gpt56-08`.
 
 Requirements:
 
-- Refuse an existing target branch unless its intended reuse is explicitly
-  confirmed and its history is compatible with the recorded initial commit.
-- Stage the complete contestant submission, including solver, results, report,
-  `done`, and relevant tracked submodule pointers.
+- Refuse any existing target branch locally or upstream. Never switch to or
+  reuse it for another evaluation.
+- Stage the curated contestant submission: solver source, build/config files,
+  reproducibility scripts, report TeX/bibliography sources, curated report
+  PNGs, `done`, and relevant tracked submodule pointers. Embed small report
+  tables in report source; do not commit raw tabular data files.
 - First derive the canonical submission set from the task/output contract and
-  the contestant's documented final paths. Separate final results from probes,
-  tuning experiments, debug histories, object files, and abandoned outputs.
+  the contestant's documented final paths. Keep all run data in the workspace
+  for evaluation but out of Git. Separate final results from probes, tuning
+  experiments, debug histories, object files, and abandoned outputs.
   If that distinction is not evident from committed documentation and final
   manifests, stop and ask the operator; do not guess which artifacts are
   canonical.
+- Never stage result directories; residual/force/surface/partition CSV or JSON;
+  run metadata/status files; stdout/stderr or other logs; restart/checkpoint
+  files; CGNS/VTK/VTU/HDF5/binary field data; visualization exports or working
+  files; raw CSV, NumPy, Parquet, Feather, MATLAB, pickle, or database data;
+  generated report PDF; executables, libraries, objects, or build/cache trees.
+  Existing immutable benchmark inputs inherited from the initial commit need
+  not be removed, but the result commit must not add or modify such data.
+- Permit `.png` files only below a report `figures/` directory, and only when
+  they are curated figures referenced by the committed `report.tex`. Do not
+  commit PNGs from probes, debug runs, or general result/visualization
+  directories. Build the report from the committed tree after the audit; a
+  textual reference check does not prove that the report compiles.
 - Do not stage ignored session/config telemetry, credentials, build trees, the
   `external` symlink target, or `.eval` scratch data.
 - Never use blind `git add -A` in a dirty workspace. Stage the audited
@@ -158,7 +198,18 @@ Requirements:
   aside from explicitly documented ignored or excluded material.
 - Do not push unless the user separately authorizes pushing.
 
-After committing, call the helper with the full submission commit SHA. Verify
+After committing, audit the immutable delta against the initial commit:
+
+```bash
+python3 .codex/skills/cfd-benchmark-evaluation/scripts/audit_submission_commit.py \
+  --workspace <workspace> --submission-commit <result-commit-sha>
+```
+
+Do not evaluate or publish if the audit reports a prohibited changed path.
+Review the audit's allowed path list too; pattern checks supplement rather than
+replace evaluator judgment.
+
+Then call the run-ID helper with the full submission commit SHA. Verify
 that both the initial and submission revisions resolve to local Git commit
 objects and that the submission commit is the exact tip of the intended result
 branch. The run ID describes immutable blobs in that committed submission,
@@ -190,6 +241,11 @@ the snapshot:
 
 The snapshot is independent of the contestant workspace. Do not rely on the
 workspace remaining available after recording.
+
+The manager snapshot stores metadata, scores, comments, commands, summarized
+evidence, integrity records, and evaluation reports. It is not a second raw
+data archive: do not copy solver logs, restart/field files, visualization
+working data, or bulk result directories into `evaluation/outputs/<run-id>`.
 
 `run_identity.json` is the authoritative identity/provenance sidecar even in
 manager revisions whose `index.json` schema does not yet enumerate it. Record

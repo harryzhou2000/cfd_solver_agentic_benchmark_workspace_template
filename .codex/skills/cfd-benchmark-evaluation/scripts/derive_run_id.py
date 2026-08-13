@@ -18,18 +18,17 @@ OBJECT_ID_RE = re.compile(r"^[0-9a-f]+$")
 DEFAULT_ARTIFACT_GROUPS = (
     ("solver/CMakeLists.txt", "CMakeLists.txt"),
     (
+        "solver/src/main.cpp",
+        "solver/main.cpp",
+        "solver/src/solver.cpp",
+        "src/main.cpp",
+        "main.cpp",
+    ),
+    (
         "report/report.tex",
         "cfd_solver_agentic_benchmark/report/report.tex",
         "solver/report/report.tex",
         "cfd_solver_agentic_benchmark/solver/report/report.tex",
-    ),
-    (
-        "report/run_manifest.csv",
-        "report/run_manifest.md",
-        "cfd_solver_agentic_benchmark/report/run_manifest.csv",
-        "cfd_solver_agentic_benchmark/report/run_manifest.md",
-        "solver/report/run_manifest.csv",
-        "solver/report/run_manifest.md",
     ),
 )
 
@@ -195,7 +194,10 @@ def main() -> int:
             {"path": rel, "sha256": sha256, "git_blob_object_id": blob_object_id}
         )
 
-    canonical_lines = [f"initial_commit\t{initial_commit}"]
+    canonical_lines = [
+        f"initial_commit\t{initial_commit}",
+        f"submission_commit\t{submission_commit}",
+    ]
     canonical_lines.extend(
         f"artifact\t{item['path']}\t{item['sha256']}" for item in artifacts
     )
@@ -203,7 +205,7 @@ def main() -> int:
     full_state_hash = hashlib.sha256(canonical_record.encode("utf-8")).hexdigest()
     run_id = f"{run_id_base}_{full_state_hash[:6]}"
     result = {
-        "canonicalization_version": 1,
+        "canonicalization_version": 2,
         "run_id": run_id,
         "run_id_base": run_id_base,
         "operator_number": args.number,
