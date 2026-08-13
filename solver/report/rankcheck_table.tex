@@ -1,0 +1,22 @@
+% Rank-count validation: force coefficients at the common final step
+\begin{table}[ht]
+\centering
+\caption{Rank-count validation: final force coefficients at a common pseudo-time step for np=1, 2, 4, 8.}
+\label{tab:rankcheck}
+\begin{tabular}{lrrrrr}
+\toprule
+Case & Ranks & Steps & $C_D$ & $C_L$ & Time \\
+\midrule
+naca0012\_m015\_inviscid & 1 & 8414 & -0.013954 & -0.004307 & 277 s \\
+naca0012\_m015\_inviscid & 2 & 8414 & -0.013972 & -0.004290 & 146 s \\
+naca0012\_m015\_inviscid & 4 & 8414 & -0.013963 & -0.004306 & 74 s \\
+naca0012\_m015\_inviscid & 8 & 8414 & -0.013984 & -0.004242 & 38 s \\
+\multicolumn{6}{l}{\em max deviation vs np=8: $\Delta C_D=3.02e-05$, $\Delta C_L=6.45e-05$} \\
+cylinder\_m010\_laminar\_re20 & 1 & 15637 & 2.278241 & -1.228255 & 139 s \\
+cylinder\_m010\_laminar\_re20 & 2 & 15637 & 2.278200 & -1.228244 & 70 s \\
+cylinder\_m010\_laminar\_re20 & 4 & 15637 & 2.278280 & -1.228271 & 37 s \\
+cylinder\_m010\_laminar\_re20 & 8 & 15637 & 2.278210 & -1.228307 & 19 s \\
+\multicolumn{6}{l}{\em max deviation vs np=8: $\Delta C_D=7.00e-05$, $\Delta C_L=6.26e-05$} \\
+\bottomrule
+\end{tabular}
+\end{table}
