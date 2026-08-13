@@ -148,6 +148,18 @@ int main(int argc, char** argv) {
             return 0;
         }
 
+        // Final runs redirect the rank-0 console stream into the case output
+        // directory so `stdout.log` is part of the reproducible output
+        // contract without requiring a wrapper script.
+        if (rank == 0) {
+            fs::create_directories(opt.output_dir);
+            const std::string log_path = opt.output_dir + "/stdout.log";
+            if (!std::freopen(log_path.c_str(), "w", stdout))
+                throw std::runtime_error("cannot open stdout.log for writing");
+            if (!std::freopen(log_path.c_str(), "a", stderr))
+                throw std::runtime_error("cannot open stdout.log for stderr");
+        }
+
         // Serial preprocessing on rank 0: read + partition.
         cfd::GlobalMesh global;
         cfd::PartitionResult partition;

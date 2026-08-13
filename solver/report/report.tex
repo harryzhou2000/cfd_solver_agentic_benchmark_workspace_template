@@ -1,0 +1,280 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,subcaption,hyperref}
+\usepackage{cleveref}
+\usepackage{microtype}
+\title{2-D Unstructured Compressible Navier--Stokes Solver Benchmark Report}
+\author{cfd-fv2d solver team}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report describes \texttt{cfd-fv2d}, an original C++17/MPI cell-centered
+finite-volume solver for the two-dimensional compressible Navier--Stokes
+equations of a calorically perfect gas, written for the
+\texttt{cfd\_solver\_agentic\_benchmark}. The solver reads the supplied CGNS
+meshes, partitions the cell adjacency graph with METIS, integrates the
+conservative equations with a second-order reconstructed Roe/Rusanov
+discretization and a Venkatakrishnan limiter, and advances the implicit
+dual-time system with a distributed symmetric Gauss--Seidel relaxation
+(a matrix-free preconditioned GMRES variant is also implemented). All eight
+benchmark cases are reported: six NACA0012 configurations and two laminar
+cylinder configurations, including the Reynolds 200 vortex-street transient.
+Convergence status, force coefficients, MPI rank-count comparisons,
+visualizations, and known limitations are summarized below and traceable to
+the submitted CSV, field, and JSON files.
+\end{abstract}
+
+\section{Introduction}
+The benchmark requires an end-to-end unstructured CFD solver: mesh import,
+METIS partitioning, MPI halo communication, a conservative second-order
+finite-volume residual, an implicit nonlinear solver, a true BDF2 transient
+loop for the cylinder Reynolds 200 case, complete machine-readable outputs,
+visualizations, and an academic-style report. This document connects the
+numerical choices in the source to the measured residuals, forces, fields,
+and parallel behavior for the eight required cases
+(Table~\ref{tab:cases}).
+
+\section{Governing Equations and Nondimensionalization}
+The conservative state is
+\[
+\mathbf{U}=[\rho,\rho u,\rho v,\rho E]^T,
+\]
+and the 2-D compressible Navier--Stokes equations are written as
+\[
+\frac{\partial \mathbf{U}}{\partial t}
++\frac{\partial \mathbf{F}^i}{\partial x}
++\frac{\partial \mathbf{G}^i}{\partial y}
+=\frac{\partial \mathbf{F}^v}{\partial x}
++\frac{\partial \mathbf{G}^v}{\partial y}.
+\]
+The inviscid fluxes are
+\[
+\mathbf{F}^i=\begin{bmatrix}\rho u\\ \rho u^2+p\\ \rho uv\\ u(\rho E+p)\end{bmatrix},
+\qquad
+\mathbf{G}^i=\begin{bmatrix}\rho v\\ \rho uv\\ \rho v^2+p\\ v(\rho E+p)\end{bmatrix},
+\]
+with the calorically perfect gas closure
+\[
+p=(\gamma-1)\rho e,\qquad E=e+\tfrac12(u^2+v^2),\qquad a=\sqrt{\gamma p/\rho}.
+\]
+For viscous cases the Newtonian stress tensor is
+\[
+\tau_{xx}=2\mu u_x-\frac{2}{3}\mu(u_x+v_y),\quad
+\tau_{yy}=2\mu v_y-\frac{2}{3}\mu(u_x+v_y),\quad
+\tau_{xy}=\mu(u_y+v_x),
+\]
+and the Fourier heat flux is $\mathbf{q}=-k\nabla T$ with
+$k=\mu c_p/\mathrm{Pr}$. The constant viscosity is
+\[
+\mu=\frac{\rho_\infty U_\infty L_{\mathrm{ref}}}{\mathrm{Re}},
+\]
+matching each case Reynolds number.
+
+The case files use $\rho_\infty=1$, $U_\infty=1$,
+$L_{\mathrm{ref}}=1$, $\mathrm{Pr}=0.72$, $R=1$, and
+$p_\infty=1/(\gamma M_\infty^2)$. Force coefficients are
+\[
+C_D=\frac{D}{q_\infty A_{\mathrm{ref}}},\qquad
+C_L=\frac{L}{q_\infty A_{\mathrm{ref}}},\qquad
+q_\infty=\tfrac12\rho_\infty U_\infty^2,
+\]
+with $A_{\mathrm{ref}}=1$ for both geometries.
+
+\section{Meshes, Boundary Tags, and Case Inputs}
+The two CGNS files are imported through the benchmark CGNS/HDF5 library:
+\texttt{NACA0012\_H2.cgns} (20,816 mixed TRI/QUAD cells, 36,498 faces,
+484 boundary faces) and the two-zone \texttt{CylinderB1.cgns} (10,185 cells,
+20,180 faces, 120 boundary faces). Zone interfaces are matched by
+bitwise-equal node coordinates, and boundary sections are mapped from the
+mesh family names to farfield, inviscid slip wall, and no-slip adiabatic wall
+conditions through the JSON boundary map; no boundary name is hard-coded.
+Cell volumes use the closed polygon formula, face areas are edge lengths, and
+face normals are oriented left-to-right (outward on boundary faces).
+Table~\ref{tab:cases} lists the eight required cases.
+
+\begin{table}[h]
+\centering
+\caption{Required benchmark cases.}
+\label{tab:cases}
+\begin{tabular}{llll}
+\toprule
+Case & Mode & Mesh & Run type \\
+\midrule
+\texttt{naca0012\_m015\_inviscid} & inviscid $M=0.15$ & NACA0012 H2 & steady \\
+\texttt{naca0012\_m080\_inviscid} & inviscid $M=0.80$ & NACA0012 H2 & steady \\
+\texttt{naca0012\_m200\_inviscid} & inviscid $M=2.00$ & NACA0012 H2 & steady \\
+\texttt{naca0012\_m015\_laminar\_re5000} & laminar $M=0.15$, $\mathrm{Re}=5000$ & NACA0012 H2 & steady \\
+\texttt{naca0012\_m080\_laminar\_re5000} & laminar $M=0.80$, $\mathrm{Re}=5000$ & NACA0012 H2 & steady \\
+\texttt{naca0012\_m200\_laminar\_re5000} & laminar $M=2.00$, $\mathrm{Re}=5000$ & NACA0012 H2 & steady \\
+\texttt{cylinder\_m010\_laminar\_re20} & laminar $M=0.10$, $\mathrm{Re}=20$ & CylinderB1 & steady \\
+\texttt{cylinder\_m010\_laminar\_re200} & laminar $M=0.10$, $\mathrm{Re}=200$ & CylinderB1 & transient \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Spatial Discretization}
+\subsection{Finite-volume residual}
+For an owned cell $c$,
+\[
+\frac{d\mathbf{U}_c}{dt}V_c=-\sum_{f\in\partial c}\bigl(\mathbf{F}_f^i-\mathbf{F}_f^v\bigr)\cdot\mathbf{n}_f A_f,
+\]
+where $\mathbf{n}_f$ is the unit normal from the left cell to the right cell.
+The interior flux is assembled once per face and added with opposite sign to
+its two cells, so the scheme is exactly conservative.
+
+\subsection{Second-order reconstruction}
+Primitive gradients of $[\rho,u,v,p]$ are computed with an inverse-distance
+weighted least-squares fit over face neighbors,
+\[
+A=\sum_j w_j\,\mathbf{d}_j\mathbf{d}_j^T,\qquad
+\mathbf{b}_q=\sum_j w_j\,\mathbf{d}_j(q_j-q_c),\qquad
+\nabla q=A^{-1}\mathbf{b}_q,\qquad w_j=|\mathbf{d}_j|^{-2}.
+\]
+Left and right face states are then
+\[
+q_L=q_c+\phi_c\nabla q_c\cdot(\mathbf{x}_f-\mathbf{x}_c)
+\]
+and the corresponding reconstruction for the right cell. Reconstruction and
+limiting are active in every production run; a first-order state is used only
+as a per-cell positivity fallback when a reconstructed density or pressure is
+nonpositive.
+
+\subsection{Limiter and positivity}
+The Venkatakrishnan limiter is applied separately to each primitive variable:
+\[
+\phi=\frac{(\Delta_+^2+\epsilon^2)\Delta_-+2\Delta_-^2\Delta_+}
+{\Delta_-\bigl(\Delta_+^2+2\Delta_-^2+\Delta_-\Delta_++\epsilon^2\bigr)},
+\qquad
+\epsilon^2=(K\sqrt{V_c})^3,
+\]
+with $K=0.3$. If any reconstructed face state has $\rho\le0$ or $p\le0$,
+the face reverts to the cell-center state; the nonlinear updates additionally
+halve a proposed step until density and pressure remain positive.
+
+\subsection{Inviscid and viscous fluxes}
+Inviscid cases use Roe's flux with a Harten--Yee entropy fix
+($\delta=0.1(|u_n|+a)$); laminar cases use Rusanov/LLF with the case-supplied
+dissipation scale. The viscous face flux uses averaged velocity and
+temperature gradients corrected in the face-normal direction,
+$g=g_{\mathrm{avg}}-(g_{\mathrm{avg}}\cdot\mathbf{d}-\Delta q)\mathbf{d}/|\mathbf{d}|^2$,
+to form the Newtonian stress and Fourier heat flux above. Wall pressure forces
+and tangential wall shear are accumulated separately, so
+\texttt{pressure\_drag} and \texttt{viscous\_drag} are never mixed.
+
+\section{Boundary Conditions}
+The farfield uses one-dimensional characteristic states ($R^+$ from the
+interior, $R^-$ from freestream, entropy and tangential velocity selected by
+inflow/outflow direction, with explicit supersonic branches). The inviscid
+slip wall applies the reconstructed wall pressure with zero normal velocity;
+the no-slip adiabatic wall sets $\mathbf{u}_{\mathrm{wall}}=0$ and zero heat
+flux, and enforces the wall-normal velocity derivative
+$\partial u_n/\partial n=-u_c/d_c$. The surface CSV reports boundary-state
+values, not adjacent cell centers: no-slip rows have
+$u=v=\mathrm{Mach}=0$, and slip-wall rows keep tangential velocity while the
+normal velocity is zero.
+
+\section{Implicit and Transient Time Integration}
+Steady cases use local pseudo-time continuation with the supplied CFL ramp
+and per-cell spectral radius
+\[
+\frac{V_c}{\Delta\tau_c}=\frac{\lambda_c+4\lambda_v}{\mathrm{CFL}},
+\qquad
+\lambda_c=\sum_f A_f(|u_n|+a),\qquad
+\lambda_v=\mu_{\mathrm{eff}}\sum_f A_f^2/(\rho V_c).
+\]
+Each nonlinear step performs the supplied 3--80 (3--100 for the $M=2$
+laminar case) inner relaxations, stopping early when the total residual ratio
+meets the case target. The inner solve is a symmetric flux-split
+Gauss--Seidel/LU-SGS iteration with the upwind Jacobian
+$A^\pm=\tfrac12(A_n\pm\rho I)$, area-scaled consistently with the residual.
+For MPI runs the sweeps follow a flow-aligned rank ordering and exchange
+corrections across halo edges each sweep; a matrix-free, right-preconditioned
+GMRES path is also available in source.
+
+For the Reynolds 200 transient the outer loop uses BDF2,
+\[
+\left(\frac{V}{\Delta\tau}+\frac{3V}{2\Delta t}\right)\delta\mathbf{U}
+=-\mathbf{R}-\frac{3\mathbf{U}^{n+1}-4\mathbf{U}^n+\mathbf{U}^{n-1}}{2\Delta t}V,
+\]
+with $\Delta t=0.01$ and fixed $\mathrm{CFL}=1.0$. $\mathbf{U}^n$ and
+$\mathbf{U}^{n-1}$ are frozen during every inner iteration of a physical step
+and updated only after that step is accepted. The inner convergence target is
+$10^{-3}$ on the total spatial-plus-physical-time residual.
+
+\section{MPI Parallelization and METIS Partitioning}
+Rank 0 reads the mesh and calls METIS \texttt{k-way} partitioning on the
+cell-adjacency graph. Every rank then receives only its owned cells, its one
+layer of ghost cells, and the faces of its owned cells; the full mesh and
+full state are never replicated during iterations. Halo data (conservative
+states and primitive gradients) is exchanged with neighbor ranks through
+nonblocking \texttt{MPI\_Isend}/\texttt{MPI\_Irecv} using symmetric rank-pair
+tags. Residual and force norms use \texttt{MPI\_Allreduce}; the implicit
+solver exchanges correction vectors across halo edges each sweep. Partition
+diagnostics (owned/ghost counts, boundary faces, neighbor lists, send/receive
+counts, edge cut, and load balance) are written to every case directory.
+
+\section{Output, Reproducibility, and Sanity Checks}
+The build and run commands are documented in \texttt{README.md}. Every case
+directory contains \texttt{metadata.json}, partition diagnostics,
+\texttt{residuals.csv}, \texttt{forces.csv}, \texttt{surface.csv},
+\texttt{field\_final.vtu}, \texttt{restart\_final.*}, \texttt{stdout.log},
+and \texttt{run\_status.json}. Figures are regenerated from those files with
+\texttt{tools/plot\_histories.py}, \texttt{tools/plot\_surface.py}, and
+\texttt{tools/plot\_fields.py}; \texttt{tools/make\_sanity\_checks.py} and
+\texttt{tools/make\_manifests.py} regenerate the sanity-check and manifest
+artifacts. Sanity checks include finite positive density/pressure, near-zero
+lift for symmetric NACA runs, positive cylinder drag, nonzero unsteady lift
+for Reynolds 200, wall-velocity and skin-friction checks, and figure-variable
+name checks.
+
+\section{Results}
+\subsection{Summary tables}
+Table~\ref{tab:status} summarizes the runs; Table~\ref{tab:forces} reports
+final or statistically averaged coefficients.
+
+\begin{table}[h]
+\centering
+\caption{Run status summary. Values are read from the submitted
+\texttt{run\_status.json} files.}
+\label{tab:status}
+%%STATUS_TABLE%%
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Force coefficients. For Reynolds 200, $C_D$ and $C_L$ are
+post-transient statistics.}
+\label{tab:forces}
+%%FORCE_TABLE%%
+\end{table}
+
+\subsection{NACA0012 cases}
+Residual, force, wall-$C_p$ (and $C_f$ for laminar runs), Mach, and pressure
+figures are provided for every NACA case in \texttt{report/figures/}. The
+figures are referenced and discussed here after the final case runs;
+%%NACA_DISCUSSION%%
+
+\subsection{Cylinder Reynolds 20}
+%%CYL20_DISCUSSION%%
+
+\subsection{Cylinder Reynolds 200 vortex street}
+%%CYL200_DISCUSSION%%
+
+\section{Parallel Validation}
+%%MPI_DISCUSSION%%
+
+\section{Visualization and Plot Style Requirements}
+All figures were produced by the submitted plotting scripts from the submitted
+VTU/CSV files. Field figures are filled Gouraud-shaded contours on the actual
+triangulated unstructured cells with visible colorbars and clipped percentile
+ranges where outliers would otherwise compress the scale; near-body and wake
+zooms are included. Filenames match plotted variables and are mapped in
+\texttt{figure\_manifest.csv}.
+
+\section{Limitations and Failure Analysis}
+%%LIMITATIONS%%
+
+\end{document}
