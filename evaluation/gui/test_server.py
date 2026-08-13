@@ -98,6 +98,10 @@ class SnapshotProtocolTests(unittest.TestCase):
             self.assertTrue(row["disqualified"])
             self.assertEqual(row["env_capture_phase"], "post_run")
 
+    def test_hidden_attribute_beats_component_display_rules(self):
+        css = (Path(__file__).parent / "static" / "styles.css").read_text()
+        self.assertIn("[hidden] { display: none !important; }", css)
+
 
 if __name__ == "__main__":
     unittest.main()
