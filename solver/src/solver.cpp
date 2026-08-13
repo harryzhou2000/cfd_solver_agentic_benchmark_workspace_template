@@ -22,6 +22,69 @@ namespace cfd {
 
 namespace {
 
+// Rank-pair tag for the directional dU pipeline. Each (lo, hi) rank pair gets
+// a unique tag so receive/send pairing does not depend on local neighbor-list
+// order.
+int dU_pipeline_tag(const DistributedMesh& mesh, int other) {
+    const int lo = std::min(mesh.rank, other);
+    const int hi = std::max(mesh.rank, other);
+    return 50000 + lo * mesh.nranks + hi;
+}
+
+// Exchange one per-cell vector (width entries) across halo edges. The owning
+// rank sends its owned entries and every rank receives the entries for its
+// ghost cells. This is the same neighbor-scoped topology as the state halo,
+// so no cell sends data that it does not own and no full-state collectives
+// are used.
+void exchange_halo_vector(DistributedMesh& mesh, MPI_Comm comm,
+                          std::vector<double>& x, int width) {
+    const int nn = static_cast<int>(mesh.halo.neighbor_ranks.size());
+    const auto halo_tag = [&](int other) {
+        const int lo = std::min(mesh.rank, other);
+        const int hi = std::max(mesh.rank, other);
+        return 40000 + lo * mesh.nranks + hi;
+    };
+    std::vector<std::vector<double>> send_buf(nn), recv_buf(nn);
+    std::vector<MPI_Request> recv_requests(nn, MPI_REQUEST_NULL);
+    std::vector<MPI_Request> send_requests(nn, MPI_REQUEST_NULL);
+    for (int nb = 0; nb < nn; ++nb) {
+        recv_buf[nb].resize(mesh.halo.recv_cells[nb].size() * width);
+        if (!recv_buf[nb].empty()) {
+            MPI_Irecv(recv_buf[nb].data(),
+                      static_cast<int>(recv_buf[nb].size()), MPI_DOUBLE,
+                      mesh.halo.neighbor_ranks[nb],
+                      halo_tag(mesh.halo.neighbor_ranks[nb]), comm,
+                      &recv_requests[nb]);
+        }
+    }
+    for (int nb = 0; nb < nn; ++nb) {
+        send_buf[nb].resize(mesh.halo.send_cells[nb].size() * width);
+        for (size_t j = 0; j < mesh.halo.send_cells[nb].size(); ++j) {
+            const int cell = mesh.halo.send_cells[nb][j];
+            for (int w = 0; w < width; ++w)
+                send_buf[nb][j * width + w] = x[cell * width + w];
+        }
+        if (!send_buf[nb].empty()) {
+            MPI_Isend(send_buf[nb].data(),
+                      static_cast<int>(send_buf[nb].size()), MPI_DOUBLE,
+                      mesh.halo.neighbor_ranks[nb],
+                      halo_tag(mesh.halo.neighbor_ranks[nb]), comm,
+                      &send_requests[nb]);
+        }
+    }
+    if (nn > 0) {
+        MPI_Waitall(nn, recv_requests.data(), MPI_STATUSES_IGNORE);
+        MPI_Waitall(nn, send_requests.data(), MPI_STATUSES_IGNORE);
+    }
+    for (int nb = 0; nb < nn; ++nb) {
+        for (size_t j = 0; j < mesh.halo.recv_cells[nb].size(); ++j) {
+            const int cell = mesh.halo.recv_cells[nb][j];
+            for (int w = 0; w < width; ++w)
+                x[cell * width + w] = recv_buf[nb][j * width + w];
+        }
+    }
+}
+
 // 2-D inviscid flux Jacobian in the face normal direction:
 // A_n = d(F . n)/dU. Implemented from the primitive conservative variables.
 MatN inviscid_jacobian_normal(const Primitive& q, const Vec2& n,
@@ -135,8 +198,14 @@ void Solver::init_state() {
     for (int c = 0; c < mesh_.n_local; ++c) {
         for (int i = 0; i < kNC; ++i) U_[c * kNC + i] = uinf[i];
     }
-    std::fill(U_prev_.begin(), U_prev_.end(), 0.0);
-    std::fill(U_prev2_.begin(), U_prev2_.end(), 0.0);
+    // BDF2 histories start at the freestream state so the first physical-time
+    // source is a small second-order term, not a vacuum-driving spike.
+    for (int c = 0; c < mesh_.n_owned; ++c) {
+        for (int i = 0; i < kNC; ++i) {
+            U_prev_[c * kNC + i] = uinf[i];
+            U_prev2_[c * kNC + i] = uinf[i];
+        }
+    }
 }
 
 void Solver::compute_gradients() {
@@ -281,7 +350,6 @@ void Solver::inner_iteration_gmres(double cfl, double physical_dt,
                         0.5 * (sgn * A[i][j] + (i == j ? rho : 0.0));
         }
     }
-
     // Assemble the flux residual at the current state using frozen gradients.
     const auto flux_residual = [&](const std::vector<double>& U,
                                    std::vector<double>& out) {
@@ -575,6 +643,326 @@ void Solver::inner_iteration_gmres(double cfl, double physical_dt,
     }
 }
 
+void Solver::inner_iteration_krylov(double cfl, double physical_dt,
+                                    std::vector<double>& total_residual,
+                                    const std::vector<double>& grad_frozen,
+                                    const std::vector<double>& limiter_frozen) {
+    // Distributed right-preconditioned matrix-free GMRES for
+    //   M dU = -R_total,  M = (V/dt_tau + 3V/(2 dt_phys)) I + dR_flux/dU.
+    // The flux Jacobian is applied as a finite-difference directional
+    // derivative with the step gradients/limiters frozen. The pseudo-time and
+    // BDF2 terms are linear and applied exactly. The right preconditioner is
+    // the 4x4 block-diagonal part of the upwind flux-split Jacobian, which is
+    // rank-local and therefore ordering-independent. Arnoldi inner products
+    // use MPI reductions so the same Krylov space is built for any rank
+    // count.
+    const double inv_dt_bdf = physical_dt > 0.0 ? 1.5 / physical_dt : 0.0;
+    const int ncells = mesh_.n_owned;
+    const int n = ncells * kNC;
+
+    std::vector<double> lambda_c, lambda_v;
+    compute_spectral_radii(lambda_c, lambda_v);
+    std::vector<double> diag_lin(ncells);
+    for (int c = 0; c < ncells; ++c)
+        diag_lin[c] =
+            (lambda_c[c] + 4.0 * lambda_v[c]) / std::max(cfl, 1e-12) +
+            inv_dt_bdf * mesh_.cell_volume[c];
+
+    // Block-diagonal upwind preconditioner, area-scaled like the residual.
+    std::vector<MatN> P(ncells);
+    for (int c = 0; c < ncells; ++c)
+        for (int i = 0; i < kNC; ++i) P[c][i][i] = diag_lin[c];
+    for (const auto& lf : mesh_.faces) {
+        const int L = lf.left;
+        const int R = lf.right;
+        const auto state = [&](int c) {
+            return VecN{U_[c * kNC], U_[c * kNC + 1], U_[c * kNC + 2],
+                        U_[c * kNC + 3]};
+        };
+        const Primitive qL = cons_to_prim(state(L), numerics_.gas);
+        const Primitive qR = (R >= 0) ? cons_to_prim(state(R), numerics_.gas)
+                                      : qL;
+        Primitive qavg;
+        qavg.rho = 0.5 * (qL.rho + qR.rho);
+        qavg.u = 0.5 * (qL.u + qR.u);
+        qavg.v = 0.5 * (qL.v + qR.v);
+        qavg.p = 0.5 * (qL.p + qR.p);
+        const double a = sound_speed(qavg, numerics_.gas);
+        const double un = qavg.u * lf.n.x + qavg.v * lf.n.y;
+        const double rho_A = (std::fabs(un) + a) * lf.area;
+        double visc_diag = 0.0;
+        if (numerics_.viscosity > 0.0 && R >= 0) {
+            visc_diag =
+                2.0 * numerics_.viscosity * lf.area * lf.area /
+                (std::max(qavg.rho, 1e-300) *
+                 std::max(mesh_.cell_volume[L], 1e-300));
+        }
+        MatN A = inviscid_jacobian_normal(qavg, lf.n, numerics_.gas);
+        for (int i = 0; i < kNC; ++i)
+            for (int j = 0; j < kNC; ++j) A[i][j] *= lf.area;
+        for (int side = 0; side < 2; ++side) {
+            const int c = side == 0 ? L : R;
+            if (c < 0 || c >= ncells) continue;
+            const double sgn = side == 0 ? 1.0 : -1.0;
+            for (int i = 0; i < kNC; ++i)
+                for (int j = 0; j < kNC; ++j)
+                    P[c][i][j] +=
+                        0.5 * (sgn * A[i][j] +
+                               (i == j ? rho_A + 2.0 * visc_diag : 0.0));
+        }
+    }
+    if (std::getenv("CFD_DUMP_P")) {
+        std::ofstream f("p_dump_r" + std::to_string(rank_) + ".txt");
+        for (int c = 0; c < ncells; ++c) {
+            f << mesh_.global_cell_id[c];
+            for (int i = 0; i < kNC; ++i)
+                for (int j = 0; j < kNC; ++j)
+                    f << ' ' << P[c][i][j];
+            f << '\n';
+        }
+    }
+
+    const auto flux_residual = [&](const std::vector<double>& U,
+                                   std::vector<double>& out) {
+        cfd::assemble_residual(mesh_, U, grad_frozen, limiter_frozen,
+                               numerics_, case_.freestream, out);
+    };
+    const auto global_dot = [&](const std::vector<double>& x,
+                                const std::vector<double>& y) {
+        double local = 0.0;
+        for (int i = 0; i < n; ++i) local += x[i] * y[i];
+        double global = 0.0;
+        MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_SUM, comm_);
+        return global;
+    };
+
+    std::vector<double> R0(n, 0.0);
+    flux_residual(U_, R0);
+    std::vector<double> b(n);
+    for (int c = 0; c < ncells; ++c)
+        for (int i = 0; i < kNC; ++i) {
+            double r = R0[c * kNC + i];
+            if (physical_dt > 0.0) {
+                const double src =
+                    (3.0 * U_[c * kNC + i] - 4.0 * U_prev_[c * kNC + i] +
+                     U_prev2_[c * kNC + i]) /
+                    (2.0 * physical_dt);
+                r += src * mesh_.cell_volume[c];
+            }
+            total_residual[c * kNC + i] = r;
+            b[c * kNC + i] = -r;
+        }
+    const double bnorm = std::sqrt(std::max(global_dot(b, b), 0.0));
+    if (!(bnorm > 0.0)) return;
+    if (std::getenv("CFD_DUMP_B")) {
+        std::ofstream f("b_dump_r" + std::to_string(rank_) + ".txt");
+        for (int c = 0; c < ncells; ++c)
+            f << mesh_.global_cell_id[c] << ' ' << b[c * kNC] << ' '
+              << b[c * kNC + 1] << ' ' << b[c * kNC + 2] << ' '
+              << b[c * kNC + 3] << '\n';
+    }
+
+    const int max_m = std::getenv("CFD_GMRES_M")
+                          ? std::max(1, std::atoi(std::getenv("CFD_GMRES_M")))
+                          : 20;
+    std::vector<std::vector<double>> V(max_m + 1, std::vector<double>(n, 0.0));
+    std::vector<std::vector<double>> Z(max_m, std::vector<double>(n, 0.0));
+    for (int i = 0; i < n; ++i) V[0][i] = b[i] / bnorm;
+    std::vector<double> g(max_m + 1, 0.0);
+    g[0] = bnorm;
+    std::vector<double> cs(max_m, 0.0), sn(max_m, 0.0);
+    std::vector<std::vector<double>> H(max_m + 1,
+                                       std::vector<double>(max_m, 0.0));
+
+    int done = 0;
+    for (int it = 0; it < max_m; ++it) {
+        std::vector<double> zloc(mesh_.n_local * kNC, 0.0);
+        for (int c = 0; c < ncells; ++c) {
+            VecN vc;
+            for (int i = 0; i < kNC; ++i) vc[i] = V[it][c * kNC + i];
+            const VecN zc = P[c].solve(vc);
+            for (int i = 0; i < kNC; ++i)
+                zloc[c * kNC + i] = zc[i];
+        }
+        // Ghost entries of the search direction must be synchronized before
+        // the finite-difference application; otherwise the cross-partition
+        // columns of the Jacobian are silently dropped.
+        exchange_halo_vector(mesh_, comm_, zloc, kNC);
+        if (std::getenv("CFD_DUMP_Z") && it == 0) {
+            std::ofstream f("z_dump_r" + std::to_string(rank_) + ".txt");
+            for (int c = 0; c < mesh_.n_local; ++c)
+                f << mesh_.global_cell_id[c] << ' ' << zloc[c * kNC] << ' '
+                  << zloc[c * kNC + 1] << ' ' << zloc[c * kNC + 2] << ' '
+                  << zloc[c * kNC + 3] << '\n';
+        }
+        std::vector<double>& z = Z[it];
+        for (int i = 0; i < n; ++i) z[i] = zloc[i];
+        const double unorm = std::sqrt(std::max(global_dot(z, z), 0.0));
+        if (!(unorm > 0.0)) {
+            done = it;
+            break;
+        }
+        const double eps =
+            std::sqrt(std::numeric_limits<double>::epsilon()) *
+            (1.0 + bnorm) / unorm;
+        std::vector<double> Up(mesh_.n_local * kNC);
+        std::copy(U_.begin(), U_.end(), Up.begin());
+        for (int i = 0; i < mesh_.n_local * kNC; ++i) Up[i] += eps * zloc[i];
+        std::vector<double> Rp(n, 0.0);
+        flux_residual(Up, Rp);
+        std::vector<double> w(n);
+        for (int i = 0; i < n; ++i)
+            w[i] = (Rp[i] - R0[i]) / eps + diag_lin[i / kNC] * z[i];
+        if (std::getenv("CFD_DUMP_W") && it == 0) {
+            std::ofstream f("w_dump_r" + std::to_string(rank_) + ".txt");
+            for (int c = 0; c < ncells; ++c)
+                f << mesh_.global_cell_id[c] << ' ' << w[c * kNC] << ' '
+                  << w[c * kNC + 1] << ' ' << w[c * kNC + 2] << ' '
+                  << w[c * kNC + 3] << '\n';
+        }
+        for (int j = 0; j <= it; ++j) {
+            const double hij = global_dot(w, V[j]);
+            H[j][it] = hij;
+            for (int i = 0; i < n; ++i) w[i] -= hij * V[j][i];
+        }
+        if (std::getenv("CFD_DEBUG_GMRES") && it == 0) {
+            const double wnorm2 = global_dot(w, w);
+            if (rank_ == 0)
+                std::fprintf(stderr,
+                             "[kry] it=0 H00=%.17g wnorm2=%.17g "
+                             "bnorm=%.17g\n",
+                             H[0][0], wnorm2, bnorm);
+        }
+        const double wnorm = std::sqrt(std::max(global_dot(w, w), 0.0));
+        H[it + 1][it] = wnorm;
+        if (wnorm > 0.0)
+            for (int i = 0; i < n; ++i) V[it + 1][i] = w[i] / wnorm;
+        for (int j = 0; j < it; ++j) {
+            const double h1 = H[j][it];
+            const double h2 = H[j + 1][it];
+            H[j][it] = cs[j] * h1 + sn[j] * h2;
+            H[j + 1][it] = -sn[j] * h1 + cs[j] * h2;
+        }
+        const double h1 = H[it][it];
+        const double h2 = H[it + 1][it];
+        const double denom = std::sqrt(h1 * h1 + h2 * h2);
+        if (denom > 0.0) {
+            cs[it] = h1 / denom;
+            sn[it] = h2 / denom;
+        } else {
+            cs[it] = 1.0;
+            sn[it] = 0.0;
+        }
+        H[it][it] = cs[it] * h1 + sn[it] * h2;
+        H[it + 1][it] = 0.0;
+        g[it + 1] = -sn[it] * g[it];
+        g[it] = cs[it] * g[it];
+        done = it + 1;
+        if (std::fabs(g[it + 1]) / bnorm < 1e-12) break;
+    }
+
+    std::vector<double> y(max_m, 0.0);
+    for (int j = done - 1; j >= 0; --j) {
+        double s = g[j];
+        for (int k = j + 1; k < done; ++k) s -= H[j][k] * y[k];
+        y[j] = (H[j][j] != 0.0) ? s / H[j][j] : 0.0;
+    }
+    std::vector<double> dU(n, 0.0);
+    for (int j = 0; j < done; ++j)
+        for (int i = 0; i < n; ++i) dU[i] += y[j] * Z[j][i];
+
+    // Backtracking acceptance of the Newton-like update, with a per-cell
+    // positivity safeguard.
+    double r0_sum2 = 0.0;
+    for (int i = 0; i < n; ++i) r0_sum2 += b[i] * b[i];
+    double r0_global = 0.0;
+    MPI_Allreduce(&r0_sum2, &r0_global, 1, MPI_DOUBLE, MPI_SUM, comm_);
+    r0_global = std::sqrt(r0_global);
+    std::vector<double> U_save(mesh_.n_owned * kNC);
+    std::copy(U_.begin(), U_.begin() + mesh_.n_owned * kNC, U_save.begin());
+    if (std::getenv("CFD_NO_BACKTRACK")) {
+        for (int c = 0; c < ncells; ++c) {
+            VecN unew;
+            VecN ucur{U_[c * kNC], U_[c * kNC + 1], U_[c * kNC + 2],
+                      U_[c * kNC + 3]};
+            for (int i = 0; i < kNC; ++i)
+                unew[i] = ucur[i] + dU[c * kNC + i];
+            double pf = 1.0;
+            while (!positive_state(unew, numerics_.gas) && pf > 1.0 / 16.0) {
+                pf *= 0.5;
+                for (int i = 0; i < kNC; ++i)
+                    unew[i] = ucur[i] + pf * dU[c * kNC + i];
+            }
+            if (!positive_state(unew, numerics_.gas)) unew = ucur;
+            for (int i = 0; i < kNC; ++i) U_[c * kNC + i] = unew[i];
+        }
+        halo_exchange();
+        flux_residual(U_, total_residual);
+        for (int c = 0; c < ncells; ++c)
+            for (int i = 0; i < kNC; ++i)
+                if (physical_dt > 0.0) {
+                    const double src =
+                        (3.0 * U_[c * kNC + i] -
+                         4.0 * U_prev_[c * kNC + i] +
+                         U_prev2_[c * kNC + i]) /
+                        (2.0 * physical_dt);
+                    total_residual[c * kNC + i] +=
+                        src * mesh_.cell_volume[c];
+                }
+        return;
+    }
+    for (int trial = 0; trial < 8; ++trial) {
+        const double fac = std::ldexp(1.0, -trial);
+        for (int c = 0; c < ncells; ++c) {
+            VecN unew;
+            VecN ucur{U_[c * kNC], U_[c * kNC + 1], U_[c * kNC + 2],
+                      U_[c * kNC + 3]};
+            for (int i = 0; i < kNC; ++i)
+                unew[i] = ucur[i] + fac * dU[c * kNC + i];
+            double pf = 1.0;
+            while (!positive_state(unew, numerics_.gas) && pf > 1.0 / 16.0) {
+                pf *= 0.5;
+                for (int i = 0; i < kNC; ++i)
+                    unew[i] = ucur[i] + fac * pf * dU[c * kNC + i];
+            }
+            if (!positive_state(unew, numerics_.gas)) unew = ucur;
+            for (int i = 0; i < kNC; ++i) U_[c * kNC + i] = unew[i];
+        }
+        halo_exchange();
+        flux_residual(U_, total_residual);
+        for (int c = 0; c < ncells; ++c)
+            for (int i = 0; i < kNC; ++i)
+                if (physical_dt > 0.0) {
+                    const double src =
+                        (3.0 * U_[c * kNC + i] -
+                         4.0 * U_prev_[c * kNC + i] +
+                         U_prev2_[c * kNC + i]) /
+                        (2.0 * physical_dt);
+                    total_residual[c * kNC + i] +=
+                        src * mesh_.cell_volume[c];
+                }
+        double r_sum2 = 0.0;
+        for (int i = 0; i < n; ++i)
+            r_sum2 += total_residual[i] * total_residual[i];
+        double r_global = 0.0;
+        MPI_Allreduce(&r_sum2, &r_global, 1, MPI_DOUBLE, MPI_SUM, comm_);
+        r_global = std::sqrt(r_global);
+        if (r_global <= r0_global * 1.000001 || trial == 7) break;
+        std::copy(U_save.begin(), U_save.end(), U_.begin());
+    }
+    halo_exchange();
+    flux_residual(U_, total_residual);
+    for (int c = 0; c < ncells; ++c)
+        for (int i = 0; i < kNC; ++i)
+            if (physical_dt > 0.0) {
+                const double src =
+                    (3.0 * U_[c * kNC + i] - 4.0 * U_prev_[c * kNC + i] +
+                     U_prev2_[c * kNC + i]) /
+                    (2.0 * physical_dt);
+                total_residual[c * kNC + i] += src * mesh_.cell_volume[c];
+            }
+}
+
 void Solver::inner_iteration(double cfl, double physical_dt,
                              std::vector<double>& total_residual,
                              const std::vector<double>& grad_frozen,
@@ -588,6 +976,14 @@ void Solver::inner_iteration(double cfl, double physical_dt,
     const double inv_dt_bdf = physical_dt > 0.0 ? 1.5 / physical_dt : 0.0;
     const double relax =
         std::getenv("CFD_RELAX") ? std::atof(std::getenv("CFD_RELAX")) : 1.0;
+    const bool jacobi_only = std::getenv("CFD_JACOBI") != nullptr;
+    const double diag_face_factor =
+        std::getenv("CFD_DIAG_FACTOR") ? std::atof(std::getenv("CFD_DIAG_FACTOR"))
+                                      : 1.0;
+    const double interface_factor =
+        std::getenv("CFD_INTERFACE_FACTOR")
+            ? std::atof(std::getenv("CFD_INTERFACE_FACTOR"))
+            : 1.0;
 
     std::vector<double> lambda_c, lambda_v;
     compute_spectral_radii(lambda_c, lambda_v);
@@ -639,82 +1035,272 @@ void Solver::inner_iteration(double cfl, double physical_dt,
         qavg.p = 0.5 * (qL.p + qR.p);
         const double a = sound_speed(qavg, numerics_.gas);
         const double un = qavg.u * lf.n.x + qavg.v * lf.n.y;
-        double rho = std::fabs(un) + a;
+        // Convective spectral radius (velocity units); the viscous part below
+        // already carries L^2/t units in 2-D.
+        const double rho_conv = std::fabs(un) + a;
+        double visc_spectral = 0.0;
         if (numerics_.viscosity > 0.0 && R >= 0) {
-            rho += 2.0 * numerics_.viscosity * lf.area * lf.area /
-                   (std::max(qavg.rho, 1e-300) *
-                    std::max(mesh_.cell_volume[L], 1e-300));
+            visc_spectral =
+                2.0 * numerics_.viscosity * lf.area * lf.area /
+                (std::max(qavg.rho, 1e-300) *
+                 std::max(mesh_.cell_volume[L], 1e-300));
         }
-        fj[f] = {inviscid_jacobian_normal(qavg, lf.n, numerics_.gas), rho};
+        // Scale the Jacobian block and its spectral radius by the face area so
+        // the implicit operator has the same L^2/t scaling as V/dt and the
+        // area-weighted residual.
+        MatN A = inviscid_jacobian_normal(qavg, lf.n, numerics_.gas);
+        for (int i = 0; i < kNC; ++i)
+            for (int j = 0; j < kNC; ++j) A[i][j] *= lf.area;
+        const double rho_A = rho_conv * lf.area;
+        fj[f] = {A, rho_A};
         for (int side = 0; side < 2; ++side) {
             const int c = side == 0 ? L : R;
             if (c < 0 || c >= mesh_.n_owned) continue;
-            diag[c] += rho;
+            diag[c] += diag_face_factor * (rho_A + visc_spectral);
         }
     }
 
-    std::vector<double> dU(mesh_.n_owned * kNC, 0.0);
-    // Forward sweep.
-    for (int c = 0; c < mesh_.n_owned; ++c) {
-        VecN rhs_c;
-        for (int i = 0; i < kNC; ++i)
-            rhs_c[i] = -total_residual[c * kNC + i];
-        for (int f : mesh_.cell_faces[c]) {
-            const LocalFace& lf = mesh_.faces[f];
-            const int j = (lf.left == c) ? lf.right : lf.left;
-            if (j < 0 || j >= c || j >= mesh_.n_owned) continue;
-            const double sgn = (lf.left == c) ? 1.0 : -1.0;
-            const FaceJac& jf = fj[f];
-            VecN contrib;
-            for (int i = 0; i < kNC; ++i) {
-                double s = 0.0;
-                for (int k = 0; k < kNC; ++k)
-                    s += (sgn * jf.A[i][k] - (i == k ? jf.rho : 0.0)) *
-                         dU[j * kNC + k];
-                contrib[i] = 0.5 * s;
-            }
-            rhs_c = rhs_c - contrib;
-        }
-        const double inv_d = 1.0 / std::max(diag[c], 1e-300);
-        for (int i = 0; i < kNC; ++i) dU[c * kNC + i] = rhs_c[i] * inv_d * relax;
-    }
-    // Backward sweep (same A^- coupling).
-    for (int c = mesh_.n_owned - 1; c >= 0; --c) {
-        VecN corr;
-        for (int f : mesh_.cell_faces[c]) {
-            const LocalFace& lf = mesh_.faces[f];
-            const int j = (lf.left == c) ? lf.right : lf.left;
-            if (j < 0 || j <= c || j >= mesh_.n_owned) continue;
-            const double sgn = (lf.left == c) ? 1.0 : -1.0;
-            const FaceJac& jf = fj[f];
-            VecN contrib;
-            for (int i = 0; i < kNC; ++i) {
-                double s = 0.0;
-                for (int k = 0; k < kNC; ++k)
-                    s += (sgn * jf.A[i][k] - (i == k ? jf.rho : 0.0)) *
-                         dU[j * kNC + k];
-                contrib[i] = 0.5 * s;
-            }
-            corr = corr + contrib;
-        }
-        const double inv_d = 1.0 / std::max(diag[c], 1e-300);
-        for (int i = 0; i < kNC; ++i) dU[c * kNC + i] -= corr[i] * inv_d * relax;
-    }
-
-    // Update with a positivity safeguard.
-    for (int c = 0; c < mesh_.n_owned; ++c) {
-        VecN unew;
-        VecN ucur{U_[c * kNC], U_[c * kNC + 1], U_[c * kNC + 2],
-                  U_[c * kNC + 3]};
-        for (int i = 0; i < kNC; ++i) unew[i] = ucur[i] + dU[c * kNC + i];
-        double factor = 1.0;
-        while (!positive_state(unew, numerics_.gas) && factor > 1.0 / 16.0) {
-            factor *= 0.5;
+    std::vector<double> dU(mesh_.n_local * kNC, 0.0);
+    if (jacobi_only) {
+        for (int c = 0; c < mesh_.n_owned; ++c) {
+            const double inv_d = 1.0 / std::max(diag[c], 1e-300);
             for (int i = 0; i < kNC; ++i)
-                unew[i] = ucur[i] + factor * dU[c * kNC + i];
+                dU[c * kNC + i] =
+                    -total_residual[c * kNC + i] * inv_d * relax;
         }
-        if (!positive_state(unew, numerics_.gas)) unew = ucur;
-        for (int i = 0; i < kNC; ++i) U_[c * kNC + i] = unew[i];
+    } else {
+        // Domain-decomposed symmetric Gauss-Seidel with a rank-major global
+        // ordering. The forward phase runs ranks low-to-high: each rank first
+        // receives corrections from lower-ranked neighbors, sweeps its owned
+        // cells in x-major order, then forwards its updated corrections to
+        // higher-ranked neighbors. The backward phase reverses the pipeline.
+        // This reproduces a well-defined global Gauss-Seidel ordering rather
+        // than a rank-local ordering with an inconsistent interface.
+        const int nn =
+            static_cast<int>(mesh_.halo.neighbor_ranks.size());
+        const auto tag = [&](int other) {
+            return dU_pipeline_tag(mesh_, other);
+        };
+        const auto pack = [&](int nb, std::vector<double>& buf) {
+            buf.assign(mesh_.halo.send_cells[nb].size() * kNC, 0.0);
+            for (size_t j = 0; j < mesh_.halo.send_cells[nb].size(); ++j) {
+                const int cell = mesh_.halo.send_cells[nb][j];
+                for (int w = 0; w < kNC; ++w)
+                    buf[j * kNC + w] = dU[cell * kNC + w];
+            }
+        };
+        const auto unpack = [&](int nb, const std::vector<double>& buf) {
+            for (size_t j = 0; j < mesh_.halo.recv_cells[nb].size(); ++j) {
+                const int cell = mesh_.halo.recv_cells[nb][j];
+                for (int w = 0; w < kNC; ++w)
+                    dU[cell * kNC + w] = buf[j * kNC + w];
+            }
+        };
+
+        // Forward phase: receive from lower-ranked neighbors.
+        for (int nb = 0; nb < nn; ++nb) {
+            const int q = mesh_.halo.neighbor_ranks[nb];
+            if (mesh_.sweep_rank_of[q] >= mesh_.sweep_rank) continue;
+            std::vector<double> buf(mesh_.halo.recv_cells[nb].size() * kNC);
+            MPI_Recv(buf.data(), static_cast<int>(buf.size()), MPI_DOUBLE, q,
+                     tag(q), comm_, MPI_STATUS_IGNORE);
+            unpack(nb, buf);
+            if (std::getenv("CFD_DEBUG_PIPE")) {
+                double s = 0.0;
+                for (double v : buf) s += std::fabs(v);
+                std::fprintf(stderr, "[pipe-fwd] rank=%d recv from %d sum=%g\n",
+                             rank_, q, s);
+            }
+        }
+        for (int c = 0; c < mesh_.n_owned; ++c) {
+            VecN rhs_c;
+            for (int i = 0; i < kNC; ++i)
+                rhs_c[i] = -total_residual[c * kNC + i];
+            for (int f : mesh_.cell_faces[c]) {
+                const LocalFace& lf = mesh_.faces[f];
+                const int j = (lf.left == c) ? lf.right : lf.left;
+                if (j < 0) continue;
+                if (j < mesh_.n_owned) {
+                    if (j >= c) continue;
+                } else if (mesh_.sweep_rank_of[mesh_.owner_rank[j]] >
+                           mesh_.sweep_rank) {
+                    continue;  // upper-ranked ghosts arrive in the backward
+                }
+                const double sgn = (lf.left == c) ? 1.0 : -1.0;
+                const FaceJac& jf = fj[f];
+                const double fac =
+                    (j >= mesh_.n_owned) ? interface_factor : 1.0;
+                VecN contrib;
+                for (int i = 0; i < kNC; ++i) {
+                    double s = 0.0;
+                    for (int k = 0; k < kNC; ++k)
+                        s += (sgn * jf.A[i][k] - (i == k ? jf.rho : 0.0)) *
+                             dU[j * kNC + k];
+                    contrib[i] = 0.5 * fac * s;
+                }
+                rhs_c = rhs_c - contrib;
+            }
+            const double inv_d = 1.0 / std::max(diag[c], 1e-300);
+            for (int i = 0; i < kNC; ++i)
+                dU[c * kNC + i] = rhs_c[i] * inv_d * relax;
+        }
+        for (int nb = 0; nb < nn; ++nb) {
+            const int q = mesh_.halo.neighbor_ranks[nb];
+            if (mesh_.sweep_rank_of[q] <= mesh_.sweep_rank) continue;
+            std::vector<double> buf;
+            pack(nb, buf);
+            MPI_Send(buf.data(), static_cast<int>(buf.size()), MPI_DOUBLE, q,
+                     tag(q), comm_);
+        }
+
+        // Backward phase: receive from higher-ranked neighbors, sweep in
+        // reverse order, then forward the result to lower-ranked neighbors.
+        for (int nb = 0; nb < nn; ++nb) {
+            const int q = mesh_.halo.neighbor_ranks[nb];
+            if (mesh_.sweep_rank_of[q] <= mesh_.sweep_rank) continue;
+            std::vector<double> buf(mesh_.halo.recv_cells[nb].size() * kNC);
+            MPI_Recv(buf.data(), static_cast<int>(buf.size()), MPI_DOUBLE, q,
+                     tag(q), comm_, MPI_STATUS_IGNORE);
+            unpack(nb, buf);
+        }
+        for (int c = mesh_.n_owned - 1; c >= 0; --c) {
+            VecN corr;
+            for (int f : mesh_.cell_faces[c]) {
+                const LocalFace& lf = mesh_.faces[f];
+                const int j = (lf.left == c) ? lf.right : lf.left;
+                if (j < 0) continue;
+                if (j < mesh_.n_owned) {
+                    if (j <= c) continue;
+                } else if (mesh_.sweep_rank_of[mesh_.owner_rank[j]] <
+                           mesh_.sweep_rank) {
+                    continue;  // lower-ranked ghosts were used in forward
+                }
+                const double sgn = (lf.left == c) ? 1.0 : -1.0;
+                const FaceJac& jf = fj[f];
+                const double fac =
+                    (j >= mesh_.n_owned) ? interface_factor : 1.0;
+                VecN contrib;
+                for (int i = 0; i < kNC; ++i) {
+                    double s = 0.0;
+                    for (int k = 0; k < kNC; ++k)
+                        s += (sgn * jf.A[i][k] - (i == k ? jf.rho : 0.0)) *
+                             dU[j * kNC + k];
+                    contrib[i] = 0.5 * fac * s;
+                }
+                corr = corr + contrib;
+            }
+            const double inv_d = 1.0 / std::max(diag[c], 1e-300);
+            for (int i = 0; i < kNC; ++i)
+                dU[c * kNC + i] -= corr[i] * inv_d * relax;
+        }
+        for (int nb = 0; nb < nn; ++nb) {
+            const int q = mesh_.halo.neighbor_ranks[nb];
+            if (mesh_.sweep_rank_of[q] >= mesh_.sweep_rank) continue;
+            std::vector<double> buf;
+            pack(nb, buf);
+            MPI_Send(buf.data(), static_cast<int>(buf.size()), MPI_DOUBLE, q,
+                     tag(q), comm_);
+        }
+    }
+
+    // Accept the update with a residual-based backtracking line search. The
+    // first-order Jacobian used by the sweeps is only a preconditioner for the
+    // second-order nonlinear residual, so a full Newton step can transiently
+    // increase the norm, especially at partition interfaces. Halving the step
+    // until the frozen-stencil residual decreases keeps the outer march
+    // bounded without changing its converged solution.
+    double r0_sum2 = 0.0;
+    for (int c = 0; c < mesh_.n_owned; ++c)
+        for (int i = 0; i < kNC; ++i) {
+            const double v = total_residual[c * kNC + i];
+            r0_sum2 += v * v;
+        }
+    double r0_global = 0.0;
+    MPI_Allreduce(&r0_sum2, &r0_global, 1, MPI_DOUBLE, MPI_SUM, comm_);
+    r0_global = std::sqrt(r0_global);
+
+    std::vector<double> U_save(mesh_.n_owned * kNC);
+    std::copy(U_.begin(), U_.begin() + mesh_.n_owned * kNC, U_save.begin());
+    const int max_trials = 8;
+    bool accepted = false;
+    for (int trial = 0; trial < max_trials; ++trial) {
+        const double fac = std::ldexp(1.0, -trial);
+        for (int c = 0; c < mesh_.n_owned; ++c) {
+            VecN unew;
+            VecN ucur{U_[c * kNC], U_[c * kNC + 1], U_[c * kNC + 2],
+                      U_[c * kNC + 3]};
+            for (int i = 0; i < kNC; ++i)
+                unew[i] = ucur[i] + fac * dU[c * kNC + i];
+            double pf = 1.0;
+            while (!positive_state(unew, numerics_.gas) && pf > 1.0 / 16.0) {
+                pf *= 0.5;
+                for (int i = 0; i < kNC; ++i)
+                    unew[i] = ucur[i] + fac * pf * dU[c * kNC + i];
+            }
+            if (!positive_state(unew, numerics_.gas)) unew = ucur;
+            for (int i = 0; i < kNC; ++i) U_[c * kNC + i] = unew[i];
+        }
+        halo_exchange();
+        cfd::assemble_residual(mesh_, U_, grad_frozen, limiter_frozen,
+                               numerics_, case_.freestream, total_residual);
+        for (int c = 0; c < mesh_.n_owned; ++c)
+            for (int i = 0; i < kNC; ++i)
+                if (physical_dt > 0.0) {
+                    const double src =
+                        (3.0 * U_[c * kNC + i] -
+                         4.0 * U_prev_[c * kNC + i] +
+                         U_prev2_[c * kNC + i]) /
+                        (2.0 * physical_dt);
+                    total_residual[c * kNC + i] +=
+                        src * mesh_.cell_volume[c];
+                }
+        double r_sum2 = 0.0;
+        for (int c = 0; c < mesh_.n_owned; ++c)
+            for (int i = 0; i < kNC; ++i) {
+                const double v = total_residual[c * kNC + i];
+                r_sum2 += v * v;
+            }
+        double r_global = 0.0;
+        MPI_Allreduce(&r_sum2, &r_global, 1, MPI_DOUBLE, MPI_SUM, comm_);
+        r_global = std::sqrt(r_global);
+        if (r_global <= r0_global * 1.000001 || trial == max_trials - 1) {
+            accepted = true;
+            break;
+        }
+        std::copy(U_save.begin(), U_save.end(), U_.begin());
+    }
+    (void)accepted;
+    halo_exchange();
+    if (std::getenv("CFD_DEBUG_STEP")) {
+        double umax = 0.0, dumax = 0.0;
+        int c_dumax = -1;
+        for (int c = 0; c < mesh_.n_owned; ++c) {
+            for (int i = 0; i < kNC; ++i) {
+                umax = std::max(umax, std::fabs(U_[c * kNC + i]));
+                if (std::fabs(dU[c * kNC + i]) > dumax) {
+                    dumax = std::fabs(dU[c * kNC + i]);
+                    c_dumax = c;
+                }
+            }
+        }
+        double gumax = 0.0, gdumax = 0.0;
+        MPI_Allreduce(&umax, &gumax, 1, MPI_DOUBLE, MPI_MAX, comm_);
+        MPI_Allreduce(&dumax, &gdumax, 1, MPI_DOUBLE, MPI_MAX, comm_);
+        if (rank_ == 0)
+            std::fprintf(stderr, "[debug] max|U|=%.6e max|dU|=%.6e\n", gumax,
+                         gdumax);
+        if (rank_ == 0 && c_dumax >= 0)
+            std::fprintf(stderr,
+                         "[dUcell] gid=%lld center=(%.4f,%.4f) vol=%.4e "
+                         "diag=%.4e R=[%.3e %.3e %.3e %.3e]\n",
+                         static_cast<long long>(mesh_.global_cell_id[c_dumax]),
+                         mesh_.cell_center[c_dumax].x,
+                         mesh_.cell_center[c_dumax].y,
+                         mesh_.cell_volume[c_dumax], diag[c_dumax],
+                         total_residual[c_dumax * kNC],
+                         total_residual[c_dumax * kNC + 1],
+                         total_residual[c_dumax * kNC + 2],
+                         total_residual[c_dumax * kNC + 3]);
     }
 
     // Refresh the total residual at the accepted state.
@@ -949,8 +1535,13 @@ RunStats Solver::run(const std::string& output_dir) {
             inner_min = std::min(inner_min, inner_max);
         }
         for (int it = 0; it < inner_max; ++it) {
-            inner_iteration(cfl, transient ? dt_phys : 0.0, total_residual,
-                            grad_, limiter_);
+            if (std::getenv("CFD_SGS")) {
+                inner_iteration(cfl, transient ? dt_phys : 0.0,
+                                total_residual, grad_, limiter_);
+            } else {
+                inner_iteration_krylov(cfl, transient ? dt_phys : 0.0,
+                                       total_residual, grad_, limiter_);
+            }
             ++inner;
             double nl2 = 0.0, nlinf = 0.0;
             double comp[4], cinf[4];
@@ -1280,7 +1871,7 @@ void Solver::write_field_vtu(const std::string& dir, double time,
         const double E = q.p / ((numerics_.gas.gamma - 1.0) * q.rho) +
                          0.5 * (q.u * q.u + q.v * q.v);
         // vorticity (z component)
-        const double vort = grad_[c * 8 + 3] - grad_[c * 8 + 2];
+        const double vort = grad_[c * 8 + 4] - grad_[c * 8 + 3];
         co.data[0] = q.rho;
         co.data[1] = q.u;
         co.data[2] = q.v;
@@ -1433,8 +2024,9 @@ void Solver::write_partition_diagnostics(const std::string& dir) {
     int64_t send = 0, recv = 0;
     for (const auto& s : mesh_.halo.send_cells) send += s.size();
     for (const auto& r : mesh_.halo.recv_cells) recv += r.size();
-    std::vector<int64_t> all_owned(nranks_), all_ghost(nranks_),
-        all_nbnd(nranks_), all_send(nranks_), all_recv(nranks_);
+    std::vector<int> all_owned(nranks_), all_ghost(nranks_);
+    std::vector<int64_t> all_nbnd(nranks_), all_send(nranks_),
+        all_recv(nranks_);
     std::vector<int> all_nnb(nranks_);
     MPI_Gather(&owned, 1, MPI_INT, all_owned.data(), 1, MPI_INT, 0, comm_);
     MPI_Gather(&ghost, 1, MPI_INT, all_ghost.data(), 1, MPI_INT, 0, comm_);
@@ -1462,8 +2054,8 @@ void Solver::write_partition_diagnostics(const std::string& dir) {
     std::ofstream f(dir + "/partition_diagnostics.csv");
     f << "rank,num_cells_owned,num_cells_ghost,num_boundary_faces,"
          "num_neighbor_ranks,neighbor_ranks,send_cells,recv_cells\n";
-    int64_t min_o = *std::min_element(all_owned.begin(), all_owned.end());
-    int64_t max_o = *std::max_element(all_owned.begin(), all_owned.end());
+    int min_o = *std::min_element(all_owned.begin(), all_owned.end());
+    int max_o = *std::max_element(all_owned.begin(), all_owned.end());
     for (int r = 0; r < nranks_; ++r) {
         std::string nbs = "[";
         for (int k = 0; k < rcounts[r]; ++k) {

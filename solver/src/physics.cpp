@@ -305,7 +305,10 @@ VecN viscous_face_flux(const DistributedMesh& mesh, const LocalFace& face,
         const double T = side == 0 ? TL : TR;
         const Vec2 grho{grad[gid(c, 0)], grad[gid(c, 0) + 1]};
         const Vec2 gp{grad[gid(c, 3)], grad[gid(c, 3) + 1]};
-        gT[side] = (gp - grho * T) / std::max(rho, kTiny);
+        // T = p/(rho R)  =>  grad T = (grad p - T R grad rho)/(rho R).
+        const double Rinv = 1.0 / std::max(gas.R, kTiny);
+        gT[side] = ((gp - grho * (T * gas.R)) * Rinv) /
+                   std::max(rho, kTiny);
     }
 
     Vec2 gu_face{0.0, 0.0}, gv_face{0.0, 0.0}, gT_face{0.0, 0.0};

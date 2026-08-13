@@ -39,6 +39,14 @@ struct HaloPlan {
 struct DistributedMesh {
     int rank = 0;
     int nranks = 1;
+    // Position of this rank when all ranks are ordered by the mean x of their
+    // owned cells. Used only for the directional Gauss-Seidel pipeline so the
+    // global sweep follows the flow-aligned x order even with an arbitrary
+    // METIS rank numbering.
+    int sweep_rank = 0;
+    // For each physical rank r, sweep_rank_of[r] is its position in the
+    // flow-aligned rank ordering.
+    std::vector<int> sweep_rank_of;
 
     int n_owned = 0;   // cells 0..n_owned-1
     int n_local = 0;   // includes ghost cells

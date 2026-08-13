@@ -88,6 +88,14 @@ class Solver {
                                std::vector<double>& total_residual,
                                const std::vector<double>& grad_frozen,
                                const std::vector<double>& limiter_frozen);
+    // Main implicit path: distributed, right-preconditioned matrix-free
+    // GMRES for the frozen-stencil dual-time system. Unlike sweep smoothers,
+    // Krylov convergence does not depend on a rank-local cell ordering, so
+    // MPI results are consistent across rank counts.
+    void inner_iteration_krylov(double cfl, double physical_dt,
+                                std::vector<double>& total_residual,
+                                const std::vector<double>& grad_frozen,
+                                const std::vector<double>& limiter_frozen);
 
     void halo_exchange();
     void compute_residual_norms(const std::vector<double>& r, double& l2,

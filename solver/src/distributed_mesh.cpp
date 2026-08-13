@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <fstream>
 #include <map>
 #include <numeric>
 #include <stdexcept>
@@ -37,6 +38,8 @@ DistributedMesh build_distributed_mesh(const GlobalMesh& global,
     DistributedMesh mesh;
     mesh.rank = rank;
     mesh.nranks = nranks;
+    mesh.sweep_rank = rank;
+    mesh.sweep_rank_of.assign(nranks, 0);
     mesh.n_cells_global = global.num_cells();
     mesh.n_faces_global = global.num_faces();
     mesh.n_boundary_faces_global = global.num_boundary_faces();
@@ -422,7 +425,12 @@ DistributedMesh build_distributed_mesh(const GlobalMesh& global,
     mesh.halo.recv_buf.assign(neighbors.size(), {});
 
     std::unordered_map<int64_t, int> owned_index;
-    for (int i = 0; i < mesh.n_owned; ++i) owned_index[owned[i]] = i;
+    // `owned` still lists the original pre-reorder ordering, but local cell
+    // indices were just permuted by the centroid sort. Build the lookup from
+    // the post-reorder global-id array so halo send lists address the cells
+    // that actually hold each requested state.
+    for (int i = 0; i < mesh.n_owned; ++i)
+        owned_index[mesh.global_cell_id[i]] = i;
     for (size_t nb = 0; nb < neighbors.size(); ++nb) {
         const int neighbor = neighbors[nb];
         for (int i = 0; i < mesh.n_ghost; ++i) {
@@ -484,13 +492,48 @@ DistributedMesh build_distributed_mesh(const GlobalMesh& global,
     for (const auto& f : mesh.faces)
         if (f.bc != BcType::Interior) ++mesh.num_boundary_faces_local;
 
+    if (std::getenv("CFD_DUMP_HALO")) {
+        std::ofstream f("halo_dump_r" + std::to_string(rank) + ".txt");
+        for (size_t nb = 0; nb < mesh.halo.neighbor_ranks.size(); ++nb) {
+            f << "neighbor " << mesh.halo.neighbor_ranks[nb] << " send";
+            for (int id : mesh.halo.send_cells[nb])
+                f << ' ' << mesh.global_cell_id[id];
+            f << " recv";
+            for (int id : mesh.halo.recv_cells[nb])
+                f << ' ' << mesh.global_cell_id[id];
+            f << '\n';
+        }
+    }
+
+    // Rank ordering for the implicit-solver pipeline: process ranks from left
+    // to right so the distributed Gauss-Seidel order approximates the
+    // flow-aligned x order used by the single-rank solver.
+    {
+        double mean_x = 0.0;
+        for (int c = 0; c < mesh.n_owned; ++c)
+            mean_x += mesh.cell_center[c].x;
+        if (mesh.n_owned > 0) mean_x /= mesh.n_owned;
+        std::vector<double> all_mean(nranks, 0.0);
+        MPI_Allgather(&mean_x, 1, MPI_DOUBLE, all_mean.data(), 1, MPI_DOUBLE,
+                      comm);
+        std::vector<int> order(nranks);
+        std::iota(order.begin(), order.end(), 0);
+        std::stable_sort(order.begin(), order.end(), [&](int a, int b) {
+            if (all_mean[a] != all_mean[b]) return all_mean[a] < all_mean[b];
+            return a < b;
+        });
+        for (int r = 0; r < nranks; ++r)
+            mesh.sweep_rank_of[order[r]] = r;
+        mesh.sweep_rank = mesh.sweep_rank_of[rank];
+    }
+
     return mesh;
 }
 
 void begin_halo_exchange(DistributedMesh& mesh, const std::vector<double>& U,
                          const std::vector<double>& grad) {
     const int n_neighbors = static_cast<int>(mesh.halo.neighbor_ranks.size());
-    mesh.halo.requests.assign(n_neighbors, MPI_REQUEST_NULL);
+    mesh.halo.requests.assign(2 * n_neighbors, MPI_REQUEST_NULL);
     // Symmetric message tags: both sides of a halo edge derive the tag from
     // the (min,max) rank pair so Irecv/Isend match regardless of the local
     // ordering of neighbor lists.
@@ -518,7 +561,7 @@ void begin_halo_exchange(DistributedMesh& mesh, const std::vector<double>& U,
             MPI_Isend(buf.data(), static_cast<int>(buf.size()), MPI_DOUBLE,
                       mesh.halo.neighbor_ranks[nb],
                       halo_tag(mesh.halo.neighbor_ranks[nb]), MPI_COMM_WORLD,
-                      &mesh.halo.requests[nb]);
+                      &mesh.halo.requests[n_neighbors + nb]);
         }
     }
 }
@@ -527,7 +570,8 @@ void end_halo_exchange(DistributedMesh& mesh, std::vector<double>& U,
                        std::vector<double>& grad) {
     const int n_neighbors = static_cast<int>(mesh.halo.neighbor_ranks.size());
     if (n_neighbors > 0) {
-        MPI_Waitall(n_neighbors, mesh.halo.requests.data(), MPI_STATUSES_IGNORE);
+        MPI_Waitall(2 * n_neighbors, mesh.halo.requests.data(),
+                    MPI_STATUSES_IGNORE);
     }
     for (int nb = 0; nb < n_neighbors; ++nb) {
         const auto& buf = mesh.halo.recv_buf[nb];
