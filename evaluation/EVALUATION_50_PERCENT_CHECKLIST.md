@@ -38,7 +38,7 @@ canonical evaluations count toward the quota and must not be repeated.
 
 - [x] 01 — `codex_dsv4_flash_01_0c1996`
 - [ ] 02 — BLOCKED: provenance reconstructed (`codex/dsv4_flash/init` @ `6d76717d83cb1884055101a2bbeada962bdb8107`), but exact canonical-upstream collision query timed out twice with proxy bypassed on 2026-08-13; result branch must not be created until availability is established.
-- [ ] 03
+- [x] 03 — `codex_dsv4_flash_03_294b64`; 87/100; DQ no; submission `9772c16083472abe27089e17fe87bb5329e68f4d`; manager `b9cae66`; all eight cases plus report validator OK. Limitation: report PNGs referenced only through an included TeX file were excluded by strict direct-reference audit, so curated report is not self-contained; Re200 does not shed.
 - [ ] 04
 - [ ] 06
 
