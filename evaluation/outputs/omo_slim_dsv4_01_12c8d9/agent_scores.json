@@ -1,0 +1,320 @@
+{
+  "schema": "agent_scores",
+  "contestant": "omo_slim_dsv4_01_12c8d9",
+  "evaluated_at": "2026-08-13T15:31:10.261471+00:00",
+  "evaluator": {
+    "agent": "Codex",
+    "session_id": null,
+    "harness": "opencode",
+    "notes": "Legacy OpenCode evaluation; direct project SQLite extraction superseded the initial local-DB discovery. No evaluator rerun or redraw was needed."
+  },
+  "metadata_answers": {
+    "legacy_provenance": "Operator-approved post-run reconstruction: initial branch omo_slim/dsv4/init at bdc21ecad96ac517204fddca9ff9751498d65aca; original execution environment is unavailable.",
+    "opencode_sessions": "Selected project DB root ses_040b656bdffeVJcS8XFIqGFGTw and its 13 direct subagent sessions after manual SQLite inspection."
+  },
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "ses_040b656bdffeVJcS8XFIqGFGTw"
+    ],
+    "execution_date": "2026-08-01",
+    "started_at": "2026-08-01T21:45:03.554000+00:00",
+    "ended_at": "2026-08-02T08:57:26.006000+00:00",
+    "time_basis": "UTC date of selected root session time_created in the read-only project OpenCode DB.",
+    "rationale": "The sole root is titled Complete CFD solver agentic benchmark, uses the legacy workspace path, spans implementation through report production, and has 13 direct fixer/oracle descendants. Its final completed assistant message msg_fc1b10981001PMeB0ANUdBCsVs is the extracted terminal response."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "CMake source is complete and final eight output directories plus report pass structural validation; clean rebuild not repeated because the migrated external symlink is historical/broken."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Source implements documented solve CLI and argument validation; no new executable invocation."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 5,
+          "notes": "Clear separated mesh, partition, halo, physics, solver, output, and report tooling modules."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": null,
+          "notes": "Trust policy: no external similarity investigation."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "JSON case reader and CGNS path input; no case-filename-only branch identified."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "METIS partitioning, neighbor isend/irecv halo exchange, and MPI reductions are implemented; rank-count evidence is absent."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "All final outputs validate and the report honestly notes no Re200 vortex street, but M0.8 inviscid has appreciable inner target misses."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Complete submitted result set and session-side validation claim agree with evaluator structural validation."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4,
+          "notes": "Readable modular C++ and report tooling; legacy absolute paths remain in uncommitted manifests only."
+        }
+      ],
+      "overall_score": 4.24,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 5,
+          "notes": "Conservative compressible perfect-gas formulation is stated and implemented."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "CGNS unstructured mixed-cell geometry and boundary-family handling are present."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 5,
+          "notes": "Face residual assembly and global residual reductions are explicit in solver.cpp."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Rusanov flux is the documented and implemented approximate Riemann flux; no entropy fix is claimed."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Farfield, slip wall, and no-slip adiabatic wall paths are present."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 5,
+          "notes": "Least-squares reconstruction with production Venkatakrishnan limiting is documented and implemented."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Positivity clamping and CFL-halving fallback are documented and present."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Gradient-based Newtonian/Fourier path and tangential viscous-force split are present; no independent rerun."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Matrix-free LU-SGS/local-CFL steady march implemented and contestant outputs converge."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "BDF2 outer physical loop and actual inner statistics present; Re200 reaches t=300 but fails the required vortex-shedding behavior."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS and neighbor point-to-point halo exchange with global reductions are directly evidenced; no rank-count comparison."
+        }
+      ],
+      "overall_score": 4.53,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "All eight final directories pass explicit validator with the report."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Explicit evaluator validation: 8/8 case directories and report OK."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 4,
+          "notes": "Seven steady cases converge; Re200 reaches t=300 statistically_periodic but lacks the requested shedding."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Fields are readable and finite by validator; Re200 terminal lift is near zero and no vortex street is observed."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Committed report references 32 curated figures with residual, force, surface, Mach, and pressure views."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Technically detailed LaTex report openly discloses Re200 no-shedding and absent MPI scaling."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 4,
+          "notes": "Report-figure references are committed and source-side manifests/results are readable but raw results were correctly excluded from Git."
+        }
+      ],
+      "overall_score": 4.45,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 85,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 9,
+        "notes": "CMake/CLI source and complete structural outputs verified; clean build was not rerun."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 10,
+        "notes": "CGNS mixed unstructured mesh and graph assembly source reviewed."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 14,
+        "notes": "Conservative residual, Rusanov flux, and all required wall/farfield paths present."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 10,
+        "notes": "Least-squares reconstruction, Venkatakrishnan limiter, and positivity fallback are active."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Gradient-based viscous flux and tangential skin-friction split are implemented; no independent rerun."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 12,
+        "notes": "LU-SGS and BDF2 inner-loop implementation verified; Re200 does not produce vortex shedding."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 7,
+        "notes": "METIS, halo exchange, reductions, and rank-local output present; required np=8 NACA/cylinder comparison absent."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 5,
+        "notes": "Steady cases are structurally complete and visualizable; Re200 reaches t=300 without a vortex street and no MPI comparison credit."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Committed report is detailed, well-illustrated, traceable, and honest about limitations."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Modular interfaces leave plausible room for future extensions."
+      }
+    ]
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "Pre-run provenance is a post-run operator-approved reconstruction; original harness/container and runtime environment are unavailable.",
+    "The historical external symlink is broken after migration. No clean build or solver rerun was needed for decisive evidence, so it was not repaired.",
+    "run_identity.json and contestant_final_response.md are authoritative sidecars but are not indexed by the current cfdeval index contract."
+  ]
+}
