@@ -9,35 +9,31 @@
 ## Snapshot
 
 - Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: no
-- Session analysis: 2026-07-31T20:12:24.744000+00:00 → 2026-08-01T02:17:10.168000+00:00; 13×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 954,987,938 (cache hit 0.9794)
+- Session analysis: 2026-07-31T20:37:34.058000+00:00 → 2026-08-01T02:17:10.168000+00:00; 12×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 946,579,960 (cache hit 0.9805)
 
 ## Expenses
 
-- Goal time (codex): **20978 s**
-- Wall time: **21885 s**
-- Tokens: **954,987,938** (main 141,947,209 / subagents 813,040,729)
+- Goal time (codex): **20354 s**
+- Wall time: **20376 s**
+- Tokens: **946,579,960** (main 140,579,327 / subagents 806,000,633)
 
 ### Per root session
 
 | Root | Status | Model | Threads | Tokens | Goal time (s) |
 |------|--------|-------|--------:|-------:|--------------:|
 | `019fb9e3` | complete | gpt-5.6-sol | 22 | 946,579,960 | 20354 |
-| `019fb9cd` | paused | gpt-5.6-sol | 13 | 6,799,649 | 381 |
-| `019fb9df` | blocked | gpt-5.6-sol | 4 | 1,010,966 | 135 |
-| `019fb9d5` | paused | gpt-5.6-sol | 7 | 597,363 | 108 |
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| gpt-5.6-luna | 0 | 0 | 0 | 3,413,672 |
-| gpt-5.6-sol | 0 | 0 | 0 | 302,688,612 |
-| gpt-5.6-terra | 0 | 0 | 0 | 648,885,654 |
+| gpt-5.6-sol | 300,580,609 | 294,131,456 | 740,121 | 301,320,730 |
+| gpt-5.6-terra | 643,078,165 | 631,114,496 | 2,181,065 | 645,259,230 |
 
-- Cost estimate: **$3710.59** (estimate; unpriced tokens: 0)
+- Cost estimate: **$427.58** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
-- Tool calls: **2,166**; top tools: exec=1681, wait=250, send_message=91, wait_agent=54, spawn_agent=44, followup_task=26
-- Subagent spawns: 42
+- Tool calls: **1,937**; top tools: exec=1499, wait=250, send_message=78, wait_agent=48, followup_task=26, spawn_agent=22
+- Subagent spawns: 21
 - LOC (file scan): 19,318 lines / 69 files
 - LOC (git tracked): 19,318 lines
 
@@ -50,44 +46,13 @@
 
 | Model | Effort(s) | Context window | Max context used | Threads |
 |-------|-----------|---------------:|-----------------:|--------:|
-| gpt-5.6-luna | high, xhigh | ? | n/a | 9 |
-| gpt-5.6-sol | ultra, high | ? | n/a | 6 |
-| gpt-5.6-terra | high, xhigh, max, ultra | ? | n/a | 31 |
-
-### Metadata questions for user (unextractable fields)
-
-| Question | Reason | Suggested source | Answer |
-|----------|--------|------------------|--------|
-| context_window_gpt-5.6-sol: What is the context window (max tokens) of model `gpt-5.6-sol`? | model is not listed in the model catalog | provider docs or model card |  |
-| context_window_gpt-5.6-terra: What is the context window (max tokens) of model `gpt-5.6-terra`? | model is not listed in the model catalog | provider docs or model card |  |
-| context_window_gpt-5.6-luna: What is the context window (max tokens) of model `gpt-5.6-luna`? | model is not listed in the model catalog | provider docs or model card |  |
-Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`; status then flips to complete.
+| gpt-5.6-sol | ultra, high | 258400 | 225,037 | 3 |
+| gpt-5.6-terra | ultra, high, max | 258400 | 222,162 | 19 |
 
 ### Subagent threads
 
 | Thread | Parent | Nickname | Type | Model | Effort | Tokens |
 |--------|--------|----------|------|-------|--------|-------:|
-| `019fb9ce` | `019fb9cd` | Lagrange | requirements_audit | gpt-5.6-terra | high | 138,614 |
-| `019fb9cf` | `019fb9cd` | Linnaeus | validator_audit | gpt-5.6-terra | xhigh | 206,292 |
-| `019fb9cf` | `019fb9cd` | Halley | dependency_audit | gpt-5.6-luna | high | 190,259 |
-| `019fb9cf` | `019fb9cd` | Kant | solver_design | gpt-5.6-terra | max | 84,593 |
-| `019fb9cf` | `019fb9cd` | Turing | mesh_analysis | gpt-5.6-luna | xhigh | 126,937 |
-| `019fb9d2` | `019fb9cd` | Huygens | mesh_forensics | gpt-5.6-terra | high | 496,428 |
-| `019fb9d2` | `019fb9cd` | Ohm | validator_deep | gpt-5.6-terra | high | 218,102 |
-| `019fb9d2` | `019fb9cd` | Sagan | numerical_architecture | gpt-5.6-terra | max | 997,830 |
-| `019fb9d2` | `019fb9cd` | Avicenna | dependency_probe | gpt-5.6-luna | high | 448,422 |
-| `019fb9d3` | `019fb9cd` | Rawls | output_report_design | gpt-5.6-luna | high | 916,615 |
-| `019fb9d3` | `019fb9cd` | Franklin | runtime_strategy | gpt-5.6-terra | max | 758,686 |
-| `019fb9d3` | `019fb9cd` | Gibbs | test_design | gpt-5.6-luna | high | 1,374,108 |
-| `019fb9d6` | `019fb9d5` | Kepler | requirements_audit | gpt-5.6-terra | high | 139,055 |
-| `019fb9d6` | `019fb9d5` | Euclid | validator_audit | gpt-5.6-terra | high | 64,658 |
-| `019fb9d6` | `019fb9d5` | Hubble | numerics_audit | gpt-5.6-terra | max | 85,326 |
-| `019fb9d6` | `019fb9d5` | Zeno | report_audit | gpt-5.6-luna | high | 89,377 |
-| `019fb9d6` | `019fb9d5` | Raman | runtime_assets | gpt-5.6-luna | high | 36,489 |
-| `019fb9d6` | `019fb9d5` | Lorentz | mesh_inspection | gpt-5.6-luna | high | 0 |
-| `019fb9e0` | `019fb9df` | Halley | requirements_audit | gpt-5.6-terra | high | 309,991 |
-| `019fb9e0` | `019fb9df` | Copernicus | validator_audit | gpt-5.6-luna | high | 231,465 |
-| `019fb9e0` | `019fb9df` | Faraday | environment_strategy | gpt-5.6-terra | high | 126,849 |
 | `019fb9e5` | `019fb9e3` | Bernoulli | spec_requirements | gpt-5.6-terra | ultra, high | 3,230,410 |
 | `019fb9e5` | `019fb9e3` | Herschel | validation_requirements | gpt-5.6-terra | ultra, high | 3,724,209 |
 | `019fb9e5` | `019fb9e3` | Hume | state_audit | gpt-5.6-terra | ultra, high | 2,715,005 |
@@ -97,13 +62,21 @@ Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`
 | `019fba0e` | `019fb9e3` | Helmholtz | contract_audit | gpt-5.6-terra | ultra, high | 15,771,564 |
 | `019fba34` | `019fb9e3` | Planck | readme_rewrite | gpt-5.6-terra | ultra, high | 35,580,142 |
 | `019fba34` | `019fb9e3` | James | postprocess_qc | gpt-5.6-terra | ultra, high | 36,430,562 |
-| ... | 12 more | | | | | |
+| `019fba34` | `019fb9e3` | Euclid | report_audit_fix | gpt-5.6-terra | ultra, high | 36,993,891 |
+| `019fba4a` | `019fb9e3` | Boole | live_results_audit | gpt-5.6-terra | high | 1,590,094 |
+| `019fba4a` | `019fb9e3` | Laplace | final_requirements_audit | gpt-5.6-terra | ultra, high | 52,575,517 |
+| `019fba4c` | `019fb9e3` | Faraday | report_compliance_patch | gpt-5.6-sol | ultra, high | 79,299,696 |
+| `019fba5b` | `019fb9e3` | Schrodinger | m2_convergence_diagnosis | gpt-5.6-terra | ultra, max | 64,220,554 |
+| `019fba64` | `019fb9e3` | Anscombe | recovery_patch_review | gpt-5.6-terra | high | 432,234 |
+| `019fba69` | `019fb9e3` | Goodall | force_figure_quality | gpt-5.6-terra | ultra, high | 61,174,347 |
+| `019fba6f` | `019fb9e3` | Volta | cylinder_re20_diagnosis | gpt-5.6-terra | ultra, max | 66,520,550 |
+| `019fba8b` | `019fb9e3` | Bacon | corrected_laminar_audit | gpt-5.6-terra | ultra, high | 80,212,300 |
+| `019fba8b` | `019fb9e3` | Avicenna | re200_gate_audit | gpt-5.6-sol | ultra, high | 81,441,707 |
+| `019fba8f` | `019fb9e3` | Ramanujan | fft_robustness | gpt-5.6-terra | ultra, high | 86,978,829 |
+| `019fbad7` | `019fba4c` | Banach | report_patch_review | gpt-5.6-terra | ultra, high | 62,143,189 |
 
 ### Prompts
 
-- `019fb9cd` goal: complete the work defined cfd_solver_agentic_benchmark/.
-- `019fb9d5` goal: complete the work defined cfd_solver_agentic_benchmark/.
-- `019fb9df` goal: complete the work defined cfd_solver_agentic_benchmark/.
 - `019fb9e3` goal: complete the work defined cfd_solver_agentic_benchmark/.
 
 ### Rule-violation candidates
