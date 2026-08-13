@@ -1,0 +1,1582 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage[T1]{fontenc}
+
+\usepackage{lmodern}
+
+\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,xurl}
+
+\usepackage[hidelinks]{hyperref}
+
+\usepackage[nameinlink,capitalise]{cleveref}
+
+\graphicspath{{figures/}}
+
+\sisetup{detect-all}
+
+\title{2-D Unstructured Compressible Navier--Stokes Solver Benchmark Report}
+
+\author{Generated from submitted solver artifacts}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+AeroFV is a C++20/MPI cell-centred finite-volume solver for the two-dimensional compressible Navier--Stokes equations. Rank zero reads the supplied unstructured CGNS mesh, a METIS cell graph is distributed as owned cells plus one-ring ghosts, and iterations use neighbour-scoped halos. Production spatial discretization uses weighted least-squares reconstruction, Barth--Jespersen limiting, positivity protection, Rusanov inviscid fluxes, and corrected primitive-gradient viscous fluxes; the Re200 case uses a frozen-history dual-time BDF2 loop. All eight required primary cases completed successfully according to their agreeing submitted status/metadata and sanity artifacts: the seven steady cases are converged, the Re200 case is statistically periodic, every metadata completion flag is true, and the aggregate sanity gate passes. Across the submitted NACA cases, final $C_D$ spans 5.5414e-04--0.13766 and the largest $|C_L|$ is 0.0015056. The Re20 tail mean is $\overline C_D=2.0469$; for Re200 the submitted tail mean is $\overline C_D=1.1356$ with lift amplitude 0.32513, dominant frequency 0.16667, and $St=0.16667$. These coefficients are artifact values, not external reference validation. Principal limitations are Rusanov diffusion, one supplied grid per geometry, no independent grid/reference study, clipped Re200 vorticity visualization, and MPI timings without a compute/communication split.
+
+\end{abstract}
+
+\section{Introduction}
+
+The benchmark exercises a cell-centred, distributed, two-dimensional compressible Navier--Stokes workflow on six NACA0012 and two circular-cylinder cases. The required cases are \nolinkurl{naca0012_m015_inviscid}, \nolinkurl{naca0012_m080_inviscid}, \nolinkurl{naca0012_m200_inviscid}, \nolinkurl{naca0012_m015_laminar_re5000}, \nolinkurl{naca0012_m080_laminar_re5000}, \nolinkurl{naca0012_m200_laminar_re5000}, \nolinkurl{cylinder_m010_laminar_re20}, \nolinkurl{cylinder_m010_laminar_re200}. Status words in this report are copied from submitted status artifacts; a missing or failed result is not called converged.
+
+\section{Software Architecture and Extension Seams}
+
+The implementation separates validated JSON case parsing, CGNS geometry, METIS partitioning, halo exchange, gas/flux physics, reconstruction/limiting, nonlinear integration, and output into distinct modules. Solver behavior is selected from physics, boundary, numerical, and run-control fields rather than from a branch on a supplied case identifier. This leaves explicit replacement seams: three-dimensional work would generalize \texttt{Vec2}, face geometry, and tensor operations; a general equation of state would replace the thermodynamic conversion/sound-speed service used by fluxes; and RANS or multispecies extensions would enlarge the state and add closure, diffusion, and source-term modules while reusing partition/halo/output infrastructure. The present implementation is nevertheless fixed to two dimensions, four conservative components, a calorically perfect gas, and inviscid/laminar modes; these are documented current limits, not claims that the future models already exist.
+
+\section{Governing Equations and Nondimensionalization}
+
+The conservative state is $\mathbf{U}=[\rho,\rho u,\rho v,\rho E]^T$. The solved equation set declared by the case files is
+
+\begin{equation}\frac{\partial\mathbf U}{\partial t}+\frac{\partial\mathbf F^i}{\partial x}+\frac{\partial\mathbf G^i}{\partial y}=\frac{\partial\mathbf F^v}{\partial x}+\frac{\partial\mathbf G^v}{\partial y}.\label{eq:ns}\end{equation}
+
+The inviscid fluxes are $\mathbf F^i=[\rho u,\rho u^2+p,\rho uv,u(\rho E+p)]^T$ and $\mathbf G^i=[\rho v,\rho uv,\rho v^2+p,v(\rho E+p)]^T$. For the calorically perfect gas specified in every case input, $p=(\gamma-1)\rho e$, $E=e+\tfrac12(u^2+v^2)$, and $a=\sqrt{\gamma p/\rho}$. The input files set $\gamma=1.4$, $R=1$, and $Pr=0.72$. They use $\rho_\infty=1$, $U_\infty=1$, and reference length and area equal to one. The nondimensional pressure reference is $p_{ref}=\rho_\infty U_\infty^2$ and the dynamic pressure is $q_\infty=p_{ref}/2=\tfrac12\rho_\infty U_\infty^2$; hence $C_D=F_D/(q_\infty A_{ref})$, $C_L=F_L/(q_\infty A_{ref})$, and $C_m=M_z/(q_\infty A_{ref}L_{ref})$.
+
+For laminar cases the specified constant-viscosity relation is $\mu=\rho_\infty U_\infty L_{ref}/Re$. The Newtonian/Fourier model is $\tau_{xx}=2\mu u_x-\frac23\mu(u_x+v_y)$, $\tau_{yy}=2\mu v_y-\frac23\mu(u_x+v_y)$, $\tau_{xy}=\mu(u_y+v_x)$, $\mathbf q=-k\nabla T$, and $k=\mu c_p/Pr$. Inviscid case inputs explicitly disable viscous fluxes.
+
+\section{Meshes, Boundary Tags, and Case Inputs}
+
+Rank zero opens the CGNS file, requires a two-dimensional unstructured base, reads every zone's coordinates, and consumes TRI\_3/QUAD\_4 volume sections plus BAR\_2 boundary sections. Vertices coincident across zones are welded within the reader tolerance. BAR\_2 section names become mesh boundary-family tags; the case JSON maps those names to farfield, slip-wall, or no-slip adiabatic conditions, and solver construction rejects any physical face whose family is absent from that mapping.
+
+Cell vertices are reversed when necessary to obtain counter-clockwise polygons. The shoelace formula supplies positive area $|\Omega_i|$ and the area-weighted polygon formula supplies the centroid (including quadrilaterals). Each unique cell edge becomes a face with midpoint, Euclidean length $|S_f|$, and unit normal $(\Delta y,-\Delta x)/|S_f|$ directed out of its stored left cell toward the stored right cell or exterior; a boundary face's edge length is also its wall-integration length. Topology validation rejects nonpositive areas or lengths, non-unit normals, nonmanifold edges, and untagged physical boundaries. The report generator reads case paths/mappings directly, while mesh counts and actual partition data come only from submitted metadata and diagnostics.
+
+\begin{center}
+
+\begingroup
+
+\small
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.18\linewidth}p{0.17\linewidth}p{0.31\linewidth}p{0.25\linewidth}}
+
+\toprule
+
+case & flow/model & supplied control & boundary mapping \\
+
+\midrule
+
+NACA .15 inv. & M=0.15, inviscid & max 20000; CFL 1--100; ramp 2000; inner 3--50; target 0.01 & bc-2: farfield, bc-4: slip wall \\
+
+NACA .80 inv. & M=0.8, inviscid & max 30000; CFL 1--100; ramp 3000; inner 3--50; target 0.01 & bc-2: farfield, bc-4: slip wall \\
+
+NACA 2.0 inv. & M=2, inviscid & max 40000; CFL 0.2--50; ramp 5000; inner 3--80; target 0.01 & bc-2: farfield, bc-4: slip wall \\
+
+NACA .15 Re5k & M=0.15, laminar, Re=5000 & max 40000; CFL 1--100; ramp 5000; inner 3--80; target 0.01 & bc-2: farfield, bc-4: no slip adiabatic wall \\
+
+NACA .80 Re5k & M=0.8, laminar, Re=5000 & max 40000; CFL 0.5--80; ramp 5000; inner 3--80; target 0.01 & bc-2: farfield, bc-4: no slip adiabatic wall \\
+
+NACA 2.0 Re5k & M=2, laminar, Re=5000 & max 50000; CFL 0.2--50; ramp 7000; inner 3--100; target 0.01 & bc-2: farfield, bc-4: no slip adiabatic wall \\
+
+Cylinder Re20 & M=0.1, laminar, Re=20 & max 30000; CFL 1--100; ramp 3000; inner 3--80; target 0.01 & WALL: no slip adiabatic wall, FAR: farfield \\
+
+Cylinder Re200 & M=0.1, laminar, Re=200 & dt=0.01; tf=300; inner 5--1000; target 0.001; pseudo CFL 1; Rusanov scale 1 & WALL: no slip adiabatic wall, FAR: farfield \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\begin{center}
+
+\begingroup
+
+\small
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.23\linewidth}p{0.28\linewidth}r r r}
+
+\toprule
+
+case & mesh & global cells & global faces & primary np \\
+
+\midrule
+
+NACA .15 inv. & \texttt{NACA0012\_H2.cgns} & 20816 & 36498 & 8 \\
+
+NACA .80 inv. & \texttt{NACA0012\_H2.cgns} & 20816 & 36498 & 8 \\
+
+NACA 2.0 inv. & \texttt{NACA0012\_H2.cgns} & 20816 & 36498 & 8 \\
+
+NACA .15 Re5k & \texttt{NACA0012\_H2.cgns} & 20816 & 36498 & 8 \\
+
+NACA .80 Re5k & \texttt{NACA0012\_H2.cgns} & 20816 & 36498 & 8 \\
+
+NACA 2.0 Re5k & \texttt{NACA0012\_H2.cgns} & 20816 & 36498 & 8 \\
+
+Cylinder Re20 & \texttt{CylinderB1.cgns} & 10185 & 20180 & 8 \\
+
+Cylinder Re200 & \texttt{CylinderB1.cgns} & 10185 & 20180 & 8 \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\section{Spatial Discretization}
+
+For each owned control volume $\Omega_i$, the semi-discrete finite-volume balance is $|\Omega_i|\,d\mathbf U_i/dt+\mathbf R_i=0$, where $\mathbf R_i=\sum_{f\subset\partial\Omega_i}(\widehat{\mathbf F}^{i}_f-\widehat{\mathbf F}^{v}_f)|S_f|$. A stored face normal points outward from its stored left cell; the stored right cell receives the equal and opposite contribution, so either side can be the rank-owned cell after partitioning. Boundary faces use the condition mapped from the mesh family in the case input.
+
+\subsection{Second-Order Reconstruction, Limiter, and Positivity}
+
+For each primitive component, the cell gradient minimizes $\sum_j |\mathbf d_{ij}|^{-2}[q_j-q_i-\nabla q_i\cdot\mathbf d_{ij}]^2$ over adjacent cells or boundary virtual neighbours. The reconstructed face value is $q_f=q_i+\phi_i\nabla q_i\cdot(\mathbf x_f-\mathbf x_i)$. The componentwise Barth--Jespersen factor starts at one and, over all incident faces, is reduced to keep every increment within the local neighbour extrema: for a positive increment the candidate ratio is $(q_{max}-q_i)/\Delta q_f$, with the analogous $(q_{min}-q_i)/\Delta q_f$ for a negative increment, clipped to $[0,1]$.
+
+Candidate reconstructed states are then scaled toward the valid cell-centre state until density and pressure satisfy their floors; cell updates use a local fraction-to-boundary safeguard. For steady runs, the actual production sequence is first-order during the supplied CFL ramp, then a 500-pseudo-step blend to the full weighted-least-squares piecewise-linear reconstruction; acceptance requires at least 200 subsequent full-second-order iterations. The per-run metadata table is retained as the primary artifact evidence, rather than treating a nominal spatial-order input as proof of activation.
+
+\begin{center}
+
+\begingroup
+
+\small
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.20\linewidth}p{0.23\linewidth}p{0.18\linewidth}p{0.23\linewidth}r}
+
+\toprule
+
+case & reconstruction & limiter & positivity control & order \\
+
+\midrule
+
+NACA .15 inv. & 1st-order ramp $\to$ WLS & Barth--Jespersen & face + cell scaling & 2 \\
+
+NACA .80 inv. & 1st-order ramp $\to$ WLS & Barth--Jespersen & face + cell scaling & 2 \\
+
+NACA 2.0 inv. & 1st-order ramp $\to$ WLS & Barth--Jespersen & face + cell scaling & 2 \\
+
+NACA .15 Re5k & 1st-order ramp $\to$ WLS & Barth--Jespersen & face + cell scaling & 2 \\
+
+NACA .80 Re5k & 1st-order ramp $\to$ WLS & Barth--Jespersen & face + cell scaling & 2 \\
+
+NACA 2.0 Re5k & 1st-order ramp $\to$ WLS & Barth--Jespersen & face + cell scaling & 2 \\
+
+Cylinder Re20 & 1st-order ramp $\to$ WLS & Barth--Jespersen & face + cell scaling & 2 \\
+
+Cylinder Re200 & steady base $\to$ WLS & Barth--Jespersen & face + cell scaling & 2 \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\subsection{Inviscid and Viscous Fluxes}
+
+Production inviscid interior and farfield faces use local Lax--Friedrichs/Rusanov: $\widehat{\mathbf F}=\tfrac12(\mathbf F_L+\mathbf F_R)-\tfrac12\lambda_{max}(\mathbf U_R-\mathbf U_L)$, where $\lambda_{max}=\max(|u_{n,L}|+a_L,|u_{n,R}|+a_R)$. No HLLC production-flux or entropy-fix claim is made. The recorded per-run selection is shown in the next table.
+
+For a viscous face, let $\overline{\nabla q}=\tfrac12(\nabla q_L+\nabla q_R)$, $\mathbf d=\mathbf x_R-\mathbf x_L$, and let $\mathbf n$ be the unit face normal. The implemented non-orthogonal correction preserves the averaged tangential gradient and replaces its normal component by the endpoint difference: $\nabla q_f=\overline{\nabla q}+\mathbf n[(q_R-q_L)/(\mathbf d\!\cdot\!\mathbf n)-\overline{\nabla q}\!\cdot\!\mathbf n]$. This is applied to primitive density, velocity, and pressure; the temperature gradient follows from $T=p/(\rho R)$ before Newtonian stress and Fourier heat flux are evaluated.
+
+At a boundary, the right endpoint is the mirrored virtual-cell centre $\mathbf x_R=2\mathbf x_f-\mathbf x_L$. A no-slip adiabatic ghost reverses both velocity components while retaining density and pressure: the midpoint wall velocity is zero, the temperature endpoint difference is zero, and the corrected wall-normal velocity gradient retains finite shear. Pressure traction and the tangent-projected body viscous traction are integrated separately, so the reported pressure and viscous drag/lift columns preserve their physical split and $C_f$ is tangential shear rather than full normal traction.
+
+\begin{center}
+
+\begingroup
+
+\small
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.21\linewidth}p{0.20\linewidth}p{0.18\linewidth}p{0.28\linewidth}}
+
+\toprule
+
+case & inviscid flux & entropy fix & viscous flux \\
+
+\midrule
+
+NACA .15 inv. & Rusanov & not reported & disabled \\
+
+NACA .80 inv. & Rusanov & not reported & disabled \\
+
+NACA 2.0 inv. & Rusanov & not reported & disabled \\
+
+NACA .15 Re5k & Rusanov & not reported & corrected central \\
+
+NACA .80 Re5k & Rusanov & not reported & corrected central \\
+
+NACA 2.0 Re5k & Rusanov & not reported & corrected central \\
+
+Cylinder Re20 & Rusanov & not reported & corrected central \\
+
+Cylinder Re200 & Rusanov & not reported & corrected central \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\section{Boundary Conditions}
+
+The farfield ghost uses characteristic subsonic inflow/outflow invariants, with freestream data for supersonic inflow and interior data for supersonic outflow. At an inviscid slip or viscous no-slip impermeable wall, the convective residual uses the exact stationary-wall flux $[0,pn_x,pn_y,0]^T$, rather than a Rusanov penalty on iteration-level normal-velocity error. Slip-wall ghosts reflect normal velocity and retain tangential motion; no-slip adiabatic ghosts mirror velocity and copy density/pressure, while the reported boundary state has $u=v=0$. The zero-normal-temperature-gradient treatment is applied at this gradient level. Surface rows are boundary values, as recorded by \texttt{wall\_boundary\_output\_semantics}; the sanity record checks normal velocity for slip walls and speed for no-slip walls.
+
+\section{Implicit and Transient Time Integration}
+
+Steady cases use a CFL-controlled local pseudo-time march. For face $f$, the actual stability estimates are $\lambda_{c,f}=|S_f|\max(|u_{n,L}|+a_L,|u_{n,R}|+a_R)$ and, in laminar mode, $\lambda_{v,f}=(4/3+\gamma/Pr)(\mu/\rho_L)|S_f|/d_{n,f}$ with $d_{n,f}=|(\mathbf x_R-\mathbf x_L)\cdot\mathbf n_f|$. Thus $\Delta\tau_i=\mathrm{CFL}\,|\Omega_i|/\sum_f(\lambda_{c,f}+\lambda_{v,f})$ (equivalently the Newton pseudo-mass diagonal is the spectral sum divided by CFL). CFL grows geometrically from the case-file initial value to its cap over the supplied ramp length.
+
+At each outer pseudo-time step, a matrix-free, diagonally left-preconditioned GMRES solve approximates $(J+M/\Delta\tau)\delta U=-R$; Jacobian-vector products are finite differences of the assembled residual and the limiter switches are frozen within each linear solve. The case-control table records the exact supplied maximum steps, CFL initial/cap/ramp, inner-iteration bounds, and inner target, while the actual inner statistics and solver name are copied from each output metadata file below.
+
+A steady result reaches the normal acceptance path only after reconstruction is fully second order for at least 200 further iterations, the global residual has fallen by the case-file target number of decades, and $(C_{max}-C_{min})/\max(1,|\overline C|)<2\times10^{-4}$ for both $C_D$ and $C_L$ over a 200-sample window. At \texttt{max\_steps}, a separately documented plateau is accepted only if the reduction is at least $\max(2,\mathrm{target}-0.5)$ decades, the same force test passes, and the 200-sample residual envelope has $R_{max}/R_{min}<1.08$; otherwise the solver fails instead of writing a completed result. The status notes distinguish target convergence from this plateau path.
+
+\begin{center}
+
+\begingroup
+
+\small
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.20\linewidth}p{0.18\linewidth}p{0.23\linewidth}r r r}
+
+\toprule
+
+case & integrator & inner method & typical & observed range & inner target \\
+
+\midrule
+
+NACA .15 inv. & local pseudo-time & matrix-free GMRES & 20 & 3--50 & 0.01 \\
+
+NACA .80 inv. & local pseudo-time & matrix-free GMRES & 18 & 3--50 & 0.01 \\
+
+NACA 2.0 inv. & local pseudo-time & matrix-free GMRES & 16 & 3--80 & 0.01 \\
+
+NACA .15 Re5k & local pseudo-time & matrix-free GMRES & 30 & 3--80 & 0.01 \\
+
+NACA .80 Re5k & local pseudo-time & matrix-free GMRES & 19 & 3--80 & 0.01 \\
+
+NACA 2.0 Re5k & local pseudo-time & matrix-free GMRES & 14 & 3--82 & 0.01 \\
+
+Cylinder Re20 & local pseudo-time & matrix-free GMRES & 31 & 3--80 & 0.01 \\
+
+Cylinder Re200 & BDF2 dual-time & matrix-free GMRES & 26 & 16--1000 & 0.001 \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\paragraph{Steady nonlinear recovery evidence.} This conservative, latched full-order safeguard is dormant unless a fully second-order solve has sustained max-inner-iteration target misses, a residual rebound greater than three times the best full-order value, and an unavailable or unstable force-history window. Once activated, it leaves the requested CFL schedule unchanged but caps the effective pseudo-CFL and nonlinear relaxation for the remaining steady iterations. It is therefore a conservative equivalent-CFL continuation measure, not a change to the requested case control or a return to first order.
+
+No submitted primary metadata marks the steady nonlinear-recovery safeguard as activated.
+
+The Re200 metadata affirms a true BDF2 inner loop. During an attempted $U^{n+1}$ solve, $U^n$ and $U^{n-1}$ remain frozen throughout the inner iterations; history is updated only after acceptance of that physical step.
+
+For Re200 without a restart, the solver first obtains a steady base flow (1,000 first-order pseudo steps followed by a 500-step reconstruction blend) before applying its documented generic transverse perturbation. The first physical step uses backward Euler. Later physical steps use the second-order predictor $2U^n-U^{n-1}$ and solve BDF2 with $U^n$ and $U^{n-1}$ frozen for every nonlinear/linear inner iteration; only accepted physical steps update the history.
+
+\paragraph{Re200 observed inner-solve evidence.} The following values are copied from the submitted Re200 metadata, not inferred from the requested controls. A target miss means an accepted physical-step inner solve whose reported residual ratio did not reach the configured reduction target.
+
+\begin{center}
+
+\begingroup
+
+\small
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{r r r r r r}
+
+\toprule
+
+observed inner range & observed mean & target ratio & target misses & converged fraction & last ratio \\
+
+\midrule
+
+16--1000 & 25.944 & 0.001 & 87 & 0.9971 & 8.9688e-04 \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\section{MPI Parallelization and METIS Partitioning}
+
+The cell graph places one undirected adjacency edge across every interior mesh face and METIS K-way assigns cell owners. Rank zero alone reads the complete CGNS mesh, constructs and partitions this graph, serializes one compact LocalMesh payload per destination, and releases the global mesh immediately after distribution. Each local mesh retains owned cells, the one-ring off-rank ghosts required by face/reconstruction stencils, incident faces/vertices, global identifiers, and per-neighbour send-owned/receive-ghost lists.
+
+Conservative states, primitive gradients, limiter factors, and Krylov increments are synchronized with nonblocking \texttt{MPI\_Isend/Irecv} calls only to listed neighbour ranks; global residual, force, and Krylov scalar products use reductions. Solver iterations replicate neither the full mesh nor the full conservative state. The following submitted metadata and diagnostics expose the partitioner, exchange method, edge cut, rank-local counts, and load balance for every primary run.
+
+\begin{center}
+
+\begingroup
+
+\scriptsize
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.17\linewidth}r p{0.13\linewidth}p{0.20\linewidth}p{0.09\linewidth}p{0.09\linewidth}r}
+
+\toprule
+
+case & np & partitioner & halo exchange & full mesh? & full state? & edge cut \\
+
+\midrule
+
+NACA .15 inv. & 8 & METIS K-way & neighbour Isend/Irecv & no & no & 388 \\
+
+NACA .80 inv. & 8 & METIS K-way & neighbour Isend/Irecv & no & no & 388 \\
+
+NACA 2.0 inv. & 8 & METIS K-way & neighbour Isend/Irecv & no & no & 388 \\
+
+NACA .15 Re5k & 8 & METIS K-way & neighbour Isend/Irecv & no & no & 388 \\
+
+NACA .80 Re5k & 8 & METIS K-way & neighbour Isend/Irecv & no & no & 388 \\
+
+NACA 2.0 Re5k & 8 & METIS K-way & neighbour Isend/Irecv & no & no & 388 \\
+
+Cylinder Re20 & 8 & METIS K-way & neighbour Isend/Irecv & no & no & 522 \\
+
+Cylinder Re200 & 8 & METIS K-way & neighbour Isend/Irecv & no & no & 522 \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\paragraph{Owned-cell load balance.} The ratio is the submitted primary-run maximum owned-cell count divided by the minimum owned-cell count across ranks; it is an explicit load-balance measure, not a proxy inferred from wall time.
+
+\begin{center}
+
+\begingroup
+
+\small
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.38\linewidth}r r r}
+
+\toprule
+
+case & min owned & max owned & max/min owned \\
+
+\midrule
+
+NACA .15 inv. & 2569 & 2640 & 1.027637 \\
+
+NACA .80 inv. & 2569 & 2640 & 1.027637 \\
+
+NACA 2.0 inv. & 2569 & 2640 & 1.027637 \\
+
+NACA .15 Re5k & 2569 & 2640 & 1.027637 \\
+
+NACA .80 Re5k & 2569 & 2640 & 1.027637 \\
+
+NACA 2.0 Re5k & 2569 & 2640 & 1.027637 \\
+
+Cylinder Re20 & 1265 & 1284 & 1.01502 \\
+
+Cylinder Re200 & 1265 & 1284 & 1.01502 \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\paragraph{Partition diagnostics.} Compact extrema are shown here so every primary case remains legible; the complete per-rank rows remain in each submitted \texttt{partition\_diagnostics.csv}.
+
+\begin{center}
+
+\begingroup
+
+\scriptsize
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.18\linewidth}r r r r r r}
+
+\toprule
+
+case & ranks & owned min--max & max ghost & max neighbours & max send & max receive \\
+
+\midrule
+
+NACA .15 inv. & 8 & 2569--2640 & 184 & 7 & 184 & 184 \\
+
+NACA .80 inv. & 8 & 2569--2640 & 184 & 7 & 184 & 184 \\
+
+NACA 2.0 inv. & 8 & 2569--2640 & 184 & 7 & 184 & 184 \\
+
+NACA .15 Re5k & 8 & 2569--2640 & 184 & 7 & 184 & 184 \\
+
+NACA .80 Re5k & 8 & 2569--2640 & 184 & 7 & 184 & 184 \\
+
+NACA 2.0 Re5k & 8 & 2569--2640 & 184 & 7 & 184 & 184 \\
+
+Cylinder Re20 & 8 & 1265--1284 & 148 & 6 & 140 & 148 \\
+
+Cylinder Re200 & 8 & 1265--1284 & 148 & 6 & 140 & 148 \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\section{Output, Reproducibility, and Sanity Checks}
+
+The build requires CMake 3.20+, a C++20 compiler, MPI, CGNS, METIS, and Boost PropertyTree headers. System dependencies may be found through \texttt{CMAKE\_PREFIX\_PATH}; the benchmark dependency prefix is configurable as \nolinkurl{-DCFD_EXTERNALS_ROOT=/path/to/external/cfd_externals/install}, whose \texttt{include/}, \texttt{lib/}, and CMake package directories are searched. Python 3.10+, NumPy, and Matplotlib are installed from \texttt{requirements.txt}; report compilation additionally needs \texttt{latexmk}.
+
+\paragraph{Exact campaign commands.} From the repository root, the documented production sequence is:
+
+\begin{verbatim}
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCFD_EXTERNALS_ROOT=/path/to/external/cfd_externals/install
+cmake --build build --parallel
+.venv/bin/python tools/run_cases.py --executable build/aerofv \
+  --results results --ranks 8 --concurrent 1 --rank-comparisons \
+  --comparison-ranks 1 2 4
+.venv/bin/python tools/postprocess.py --results results --report report
+.venv/bin/python tools/generate_report.py --strict
+./tools/build_report.sh
+\end{verbatim}
+
+The runner's \texttt{report/run\_manifest.csv} is authoritative for every exact expanded \texttt{mpirun} command, MPI rank count, wall-clock time, status, and output directory; the results summary below lists rank count and wall time per required primary case, while the parallel section lists the comparison runs. No command is reconstructed from a figure filename.
+
+Each completed case directory contains \nolinkurl{metadata.json}, \nolinkurl{run_status.json}, \nolinkurl{partition_diagnostics.csv}, \nolinkurl{residuals.csv}, \nolinkurl{forces.csv}, \nolinkurl{surface.csv}, \nolinkurl{field_final.vtu}, \nolinkurl{restart_final.bin}, and \nolinkurl{stdout.log}, plus requested transient \nolinkurl{field_t*.vtu} snapshots. The postprocessor regenerates \nolinkurl{report/figures/}, \nolinkurl{figure_manifest.csv}, \nolinkurl{result_statistics.json}, and \nolinkurl{sanity_checks.json} directly from those CSV/VTU files; this generator writes \nolinkurl{report.tex}, and \nolinkurl{tools/build_report.sh} creates the PDF when LaTeX is available.
+
+The submitted aggregate sanity result is \texttt{True}. Per-case checks require finite history, field, and surface rows, positive density and pressure in field and surface data, nontrivial pressure/Mach ranges, final force/status/field alignment, positive cylinder drag, near-zero slip-wall normal speed or no-slip wall speed, and finite/nonzero skin friction where applicable. The figure manifest separately names every plotted variable and source file, preventing Mach/pressure filename substitution; individual failures remain visible in the audit below.
+
+\begin{center}
+
+\begingroup
+
+\small
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.27\linewidth}p{0.12\linewidth}p{0.52\linewidth}}
+
+\toprule
+
+case & passed & failed or unreported checks \\
+
+\midrule
+
+NACA .15 inv. & True & none reported \\
+
+NACA .80 inv. & True & none reported \\
+
+NACA 2.0 inv. & True & none reported \\
+
+NACA .15 Re5k & True & none reported \\
+
+NACA .80 Re5k & True & none reported \\
+
+NACA 2.0 Re5k & True & none reported \\
+
+Cylinder Re20 & True & none reported \\
+
+Cylinder Re200 & True & none reported \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\section{Results}
+
+\subsection{Summary Tables}
+
+\begin{center}
+
+\begingroup
+
+\scriptsize
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.20\linewidth}r r r r r p{0.13\linewidth}}
+
+\toprule
+
+case & np & steps & $t$ & res. orders & wall s & status \\
+
+\midrule
+
+NACA .15 inv. & 8 & 2785 & 0 & 4.2164 & 95.382 & converged \\
+
+NACA .80 inv. & 8 & 3944 & 0 & 4.7621 & 103.73 & converged \\
+
+NACA 2.0 inv. & 8 & 5712 & 0 & 4.6787 & 142.34 & converged \\
+
+NACA .15 Re5k & 8 & 6261 & 0 & 7.2492 & 281.74 & converged \\
+
+NACA .80 Re5k & 8 & 6185 & 0 & 5.1692 & 283.89 & converged \\
+
+NACA 2.0 Re5k & 8 & 8597 & 0 & 5.3859 & 268.1 & converged \\
+
+Cylinder Re20 & 8 & 4186 & 0 & 7.4556 & 137.21 & converged \\
+
+Cylinder Re200 & 8 & 30000 & 300 & 3.8927 & 4367.9 & stat. periodic \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\begin{center}
+
+\begingroup
+
+\scriptsize
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.17\linewidth}p{0.08\linewidth}r r r r r p{0.11\linewidth}}
+
+\toprule
+
+case & basis & $C_D$ & $C_L$ & $C_m$ & $C_{D,p}$ & $C_{D,v}$ & status \\
+
+\midrule
+
+NACA .15 inv. & final & 5.5414e-04 & -4.2909e-05 & 4.9258e-05 & 5.5414e-04 & 0 & converged \\
+
+NACA .80 inv. & final & 0.0082617 & 0.0015056 & 2.6620e-04 & 0.0082617 & 0 & converged \\
+
+NACA 2.0 inv. & final & 0.092152 & 5.9463e-04 & 4.7252e-05 & 0.092152 & 0 & converged \\
+
+NACA .15 Re5k & final & 0.064757 & 1.6464e-04 & -2.6640e-04 & 0.019522 & 0.045235 & converged \\
+
+NACA .80 Re5k & final & 0.079945 & 5.3211e-04 & 1.4956e-05 & 0.052107 & 0.027837 & converged \\
+
+NACA 2.0 Re5k & final & 0.13766 & -4.1999e-04 & -3.3562e-04 & 0.09313 & 0.044525 & converged \\
+
+Cylinder Re20 & final & 2.0467 & -0.0022051 & 2.6418e-05 & 1.2345 & 0.81228 & converged \\
+
+Cylinder Re200 & tail mean & 1.1356 & -0.001273 & -3.4528e-05 & 0.89924 & 0.23639 & stat. periodic \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+The force table reads the final force row for steady cases and the post-60\% mean for Re200 directly from each submitted \texttt{forces.csv}; it exposes the pressure/viscous drag split. Values marked ``not reported'' were not fabricated. The raw history also retains pressure/viscous lift columns for traceability.
+
+\subsection{NACA0012 Cases}
+
+Each NACA case below introduces all figure-manifest entries for its case. At zero angle of attack, symmetry is assessed only through the submitted force/sanity artifacts; no symmetry or shock conclusion is asserted where those artifacts are missing.
+
+\subsubsection{\texttt{naca0012\_m015\_inviscid}}
+
+Submitted status: \texttt{converged}; final $C_D=5.5414e-04$ and $C_L=-4.2909e-05$. The submitted figure set is introduced in \cref{fig:naca0012-m015-inviscid-residual-naca0012-m015-inviscid-residual-history-png}, \cref{fig:naca0012-m015-inviscid-force-naca0012-m015-inviscid-force-history-png}, \cref{fig:naca0012-m015-inviscid-surface-naca0012-m015-inviscid-surface-cp-png}, \cref{fig:naca0012-m015-inviscid-mach-naca0012-m015-inviscid-mach-png}, \cref{fig:naca0012-m015-inviscid-pressure-naca0012-m015-inviscid-pressure-png}.
+
+Symmetry evidence at the supplied zero incidence is the final force coefficient $C_L=-4.2909e-05$; the submitted force-based near-symmetric-lift check is \texttt{True}. This is a numerical symmetry indicator, not a pointwise proof of upper/lower surface equality.
+
+The submitted chordwise surface-$C_p$ distribution has range 2.5604; the final field has relative Mach span 0.17109 and relative pressure span 0.039473. The $C_p$ figure therefore documents the pressure-loading distribution and the contours document compressibility variation. The postprocessor does not extract upper/lower branch mismatch, extrema location, shock position, or pressure jump, so none of those quantities is asserted.
+
+At the supplied low-subsonic Mach number $M=0.15$, the pressure and Mach plots are assessed for smooth, symmetric loading; the reported spans and $C_p$ range are numerical evidence, not an incompressible-reference comparison.
+
+With viscous flux disabled, the final-row drag level $C_D=5.5414e-04$ is the submitted pressure-drag value $C_{D,p}=5.5414e-04$ and $C_{D,v}=0$. Its magnitude may include physical compressibility/wave effects and Rusanov/mesh diffusion; no external reference or grid study is used to label it accurate.
+
+\noindent\Cref{fig:naca0012-m015-inviscid-residual-naca0012-m015-inviscid-residual-history-png} is the declared \texttt{residual\_l2} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_inviscid_residual_history.png}}
+
+\caption{Global MPI-reduced conservative residual history. Source: \texttt{results/naca0012\_m015\_inviscid/residuals.csv}; variable: \texttt{residual\_l2}.}
+
+\label{fig:naca0012-m015-inviscid-residual-naca0012-m015-inviscid-residual-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m015-inviscid-force-naca0012-m015-inviscid-force-history-png} is the declared \texttt{cl, cd} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_inviscid_force_history.png}}
+
+\caption{Full lift and drag coefficient history (left) and the terminal 200-sample convergence window (right). Source: \texttt{results/naca0012\_m015\_inviscid/forces.csv}; variable: \texttt{cl, cd}.}
+
+\label{fig:naca0012-m015-inviscid-force-naca0012-m015-inviscid-force-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m015-inviscid-surface-naca0012-m015-inviscid-surface-cp-png} is the declared \texttt{cp} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_inviscid_surface_cp.png}}
+
+\caption{Computed wall pressure-coefficient distribution. Source: \texttt{results/naca0012\_m015\_inviscid/surface.csv}; variable: \texttt{cp}.}
+
+\label{fig:naca0012-m015-inviscid-surface-naca0012-m015-inviscid-surface-cp-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m015-inviscid-mach-naca0012-m015-inviscid-mach-png} is the declared \texttt{mach} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_inviscid_mach.png}}
+
+\caption{Near-body computed Mach number, $M$; displayed range [0.042945, 0.17615]. Source: \texttt{results/naca0012\_m015\_inviscid/field\_final.vtu}; variable: \texttt{mach}.}
+
+\label{fig:naca0012-m015-inviscid-mach-naca0012-m015-inviscid-mach-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m015-inviscid-pressure-naca0012-m015-inviscid-pressure-png} is the declared \texttt{pressure} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_inviscid_pressure.png}}
+
+\caption{Near-body computed Nondimensional pressure, $p$; displayed range [31.538, 32.202]. Source: \texttt{results/naca0012\_m015\_inviscid/field\_final.vtu}; variable: \texttt{pressure}.}
+
+\label{fig:naca0012-m015-inviscid-pressure-naca0012-m015-inviscid-pressure-png}
+
+\end{figure}
+
+\subsubsection{\texttt{naca0012\_m080\_inviscid}}
+
+Submitted status: \texttt{converged}; final $C_D=0.0082617$ and $C_L=0.0015056$. The submitted figure set is introduced in \cref{fig:naca0012-m080-inviscid-residual-naca0012-m080-inviscid-residual-history-png}, \cref{fig:naca0012-m080-inviscid-force-naca0012-m080-inviscid-force-history-png}, \cref{fig:naca0012-m080-inviscid-surface-naca0012-m080-inviscid-surface-cp-png}, \cref{fig:naca0012-m080-inviscid-mach-naca0012-m080-inviscid-mach-png}, \cref{fig:naca0012-m080-inviscid-pressure-naca0012-m080-inviscid-pressure-png}.
+
+Symmetry evidence at the supplied zero incidence is the final force coefficient $C_L=0.0015056$; the submitted force-based near-symmetric-lift check is \texttt{True}. This is a numerical symmetry indicator, not a pointwise proof of upper/lower surface equality.
+
+The submitted chordwise surface-$C_p$ distribution has range 2.105; the final field has relative Mach span 0.98123 and relative pressure span 0.61877. The $C_p$ figure therefore documents the pressure-loading distribution and the contours document compressibility variation. The postprocessor does not extract upper/lower branch mismatch, extrema location, shock position, or pressure jump, so none of those quantities is asserted.
+
+At the supplied transonic Mach number $M=0.8$ the near-body Mach, pressure, and $C_p$ plots are inspected for localized compression or shock-like gradients. Because no shock detector or jump metric is submitted, the report makes only this qualitative contour-based assessment and does not claim a shock location or strength.
+
+With viscous flux disabled, the final-row drag level $C_D=0.0082617$ is the submitted pressure-drag value $C_{D,p}=0.0082617$ and $C_{D,v}=0$. Its magnitude may include physical compressibility/wave effects and Rusanov/mesh diffusion; no external reference or grid study is used to label it accurate.
+
+\noindent\Cref{fig:naca0012-m080-inviscid-residual-naca0012-m080-inviscid-residual-history-png} is the declared \texttt{residual\_l2} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_inviscid_residual_history.png}}
+
+\caption{Global MPI-reduced conservative residual history. Source: \texttt{results/naca0012\_m080\_inviscid/residuals.csv}; variable: \texttt{residual\_l2}.}
+
+\label{fig:naca0012-m080-inviscid-residual-naca0012-m080-inviscid-residual-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m080-inviscid-force-naca0012-m080-inviscid-force-history-png} is the declared \texttt{cl, cd} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_inviscid_force_history.png}}
+
+\caption{Full lift and drag coefficient history (left) and the terminal 200-sample convergence window (right). Source: \texttt{results/naca0012\_m080\_inviscid/forces.csv}; variable: \texttt{cl, cd}.}
+
+\label{fig:naca0012-m080-inviscid-force-naca0012-m080-inviscid-force-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m080-inviscid-surface-naca0012-m080-inviscid-surface-cp-png} is the declared \texttt{cp} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_inviscid_surface_cp.png}}
+
+\caption{Computed wall pressure-coefficient distribution. Source: \texttt{results/naca0012\_m080\_inviscid/surface.csv}; variable: \texttt{cp}.}
+
+\label{fig:naca0012-m080-inviscid-surface-naca0012-m080-inviscid-surface-cp-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m080-inviscid-mach-naca0012-m080-inviscid-mach-png} is the declared \texttt{mach} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_inviscid_mach.png}}
+
+\caption{Near-body computed Mach number, $M$; displayed range [0.17224, 1.2425]. Source: \texttt{results/naca0012\_m080\_inviscid/field\_final.vtu}; variable: \texttt{mach}.}
+
+\label{fig:naca0012-m080-inviscid-mach-naca0012-m080-inviscid-mach-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m080-inviscid-pressure-naca0012-m080-inviscid-pressure-png} is the declared \texttt{pressure} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_inviscid_pressure.png}}
+
+\caption{Near-body computed Nondimensional pressure, $p$; displayed range [0.65485, 1.6644]. Source: \texttt{results/naca0012\_m080\_inviscid/field\_final.vtu}; variable: \texttt{pressure}.}
+
+\label{fig:naca0012-m080-inviscid-pressure-naca0012-m080-inviscid-pressure-png}
+
+\end{figure}
+
+\subsubsection{\texttt{naca0012\_m200\_inviscid}}
+
+Submitted status: \texttt{converged}; final $C_D=0.092152$ and $C_L=5.9463e-04$. The submitted figure set is introduced in \cref{fig:naca0012-m200-inviscid-residual-naca0012-m200-inviscid-residual-history-png}, \cref{fig:naca0012-m200-inviscid-force-naca0012-m200-inviscid-force-history-png}, \cref{fig:naca0012-m200-inviscid-surface-naca0012-m200-inviscid-surface-cp-png}, \cref{fig:naca0012-m200-inviscid-mach-naca0012-m200-inviscid-mach-png}, \cref{fig:naca0012-m200-inviscid-pressure-naca0012-m200-inviscid-pressure-png}.
+
+Symmetry evidence at the supplied zero incidence is the final force coefficient $C_L=5.9463e-04$; the submitted force-based near-symmetric-lift check is \texttt{True}. This is a numerical symmetry indicator, not a pointwise proof of upper/lower surface equality.
+
+The submitted chordwise surface-$C_p$ distribution has range 1.9829; the final field has relative Mach span 0.99654 and relative pressure span 0.99144. The $C_p$ figure therefore documents the pressure-loading distribution and the contours document compressibility variation. The postprocessor does not extract upper/lower branch mismatch, extrema location, shock position, or pressure jump, so none of those quantities is asserted.
+
+At the supplied supersonic Mach number $M=2$ the near-body Mach, pressure, and $C_p$ plots provide qualitative compression/shock evidence. The absence of a fitted discontinuity or jump metric prevents a quantitative shock-location or robustness claim.
+
+With viscous flux disabled, the final-row drag level $C_D=0.092152$ is the submitted pressure-drag value $C_{D,p}=0.092152$ and $C_{D,v}=0$. Its magnitude may include physical compressibility/wave effects and Rusanov/mesh diffusion; no external reference or grid study is used to label it accurate.
+
+\noindent\Cref{fig:naca0012-m200-inviscid-residual-naca0012-m200-inviscid-residual-history-png} is the declared \texttt{residual\_l2} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_inviscid_residual_history.png}}
+
+\caption{Global MPI-reduced conservative residual history. Source: \texttt{results/naca0012\_m200\_inviscid/residuals.csv}; variable: \texttt{residual\_l2}.}
+
+\label{fig:naca0012-m200-inviscid-residual-naca0012-m200-inviscid-residual-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m200-inviscid-force-naca0012-m200-inviscid-force-history-png} is the declared \texttt{cl, cd} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_inviscid_force_history.png}}
+
+\caption{Full lift and drag coefficient history (left) and the terminal 200-sample convergence window (right). Source: \texttt{results/naca0012\_m200\_inviscid/forces.csv}; variable: \texttt{cl, cd}.}
+
+\label{fig:naca0012-m200-inviscid-force-naca0012-m200-inviscid-force-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m200-inviscid-surface-naca0012-m200-inviscid-surface-cp-png} is the declared \texttt{cp} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_inviscid_surface_cp.png}}
+
+\caption{Computed wall pressure-coefficient distribution. Source: \texttt{results/naca0012\_m200\_inviscid/surface.csv}; variable: \texttt{cp}.}
+
+\label{fig:naca0012-m200-inviscid-surface-naca0012-m200-inviscid-surface-cp-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m200-inviscid-mach-naca0012-m200-inviscid-mach-png} is the declared \texttt{mach} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_inviscid_mach.png}}
+
+\caption{Near-body computed Mach number, $M$; displayed range [0.21657, 2.0826]. Source: \texttt{results/naca0012\_m200\_inviscid/field\_final.vtu}; variable: \texttt{mach}.}
+
+\label{fig:naca0012-m200-inviscid-mach-naca0012-m200-inviscid-mach-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m200-inviscid-pressure-naca0012-m200-inviscid-pressure-png} is the declared \texttt{pressure} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_inviscid_pressure.png}}
+
+\caption{Near-body computed Nondimensional pressure, $p$; displayed range [0.11572, 0.96897]. Source: \texttt{results/naca0012\_m200\_inviscid/field\_final.vtu}; variable: \texttt{pressure}.}
+
+\label{fig:naca0012-m200-inviscid-pressure-naca0012-m200-inviscid-pressure-png}
+
+\end{figure}
+
+\subsubsection{\texttt{naca0012\_m015\_laminar\_re5000}}
+
+Submitted status: \texttt{converged}; final $C_D=0.064757$ and $C_L=1.6464e-04$. The submitted figure set is introduced in \cref{fig:naca0012-m015-laminar-re5000-residual-naca0012-m015-laminar-re5000-residual-history-png}, \cref{fig:naca0012-m015-laminar-re5000-force-naca0012-m015-laminar-re5000-force-history-png}, \cref{fig:naca0012-m015-laminar-re5000-surface-naca0012-m015-laminar-re5000-surface-cp-png}, \cref{fig:naca0012-m015-laminar-re5000-cf-naca0012-m015-laminar-re5000-surface-cf-png}, \cref{fig:naca0012-m015-laminar-re5000-mach-naca0012-m015-laminar-re5000-mach-png}, \cref{fig:naca0012-m015-laminar-re5000-pressure-naca0012-m015-laminar-re5000-pressure-png}.
+
+Symmetry evidence at the supplied zero incidence is the final force coefficient $C_L=1.6464e-04$; the submitted force-based near-symmetric-lift check is \texttt{True}. This is a numerical symmetry indicator, not a pointwise proof of upper/lower surface equality.
+
+The submitted chordwise surface-$C_p$ distribution has range 1.4126; the final field has relative Mach span 0.17646 and relative pressure span 0.021895. The $C_p$ figure therefore documents the pressure-loading distribution and the contours document compressibility variation. The postprocessor does not extract upper/lower branch mismatch, extrema location, shock position, or pressure jump, so none of those quantities is asserted.
+
+At the supplied low-subsonic Mach number $M=0.15$, the pressure and Mach plots are assessed for smooth, symmetric loading; the reported spans and $C_p$ range are numerical evidence, not an incompressible-reference comparison.
+
+The final-row drag level is $C_D=0.064757$, split into pressure $C_{D,p}=0.019522$ and viscous $C_{D,v}=0.045235$. This exposes the wall-friction contribution but, without a grid/reference study, does not establish drag accuracy.
+
+Viscous-wall evidence from the submitted sanity metrics is maximum wall speed 0 and maximum absolute skin-friction coefficient 0.14899; the no-slip and finite/nonzero skin-friction checks are \texttt{True}/\texttt{True}/\texttt{True}. These values document boundary-output behavior without asserting a reference drag accuracy.
+
+\noindent\Cref{fig:naca0012-m015-laminar-re5000-residual-naca0012-m015-laminar-re5000-residual-history-png} is the declared \texttt{residual\_l2} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_residual_history.png}}
+
+\caption{Global MPI-reduced conservative residual history. Source: \texttt{results/naca0012\_m015\_laminar\_re5000/residuals.csv}; variable: \texttt{residual\_l2}.}
+
+\label{fig:naca0012-m015-laminar-re5000-residual-naca0012-m015-laminar-re5000-residual-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m015-laminar-re5000-force-naca0012-m015-laminar-re5000-force-history-png} is the declared \texttt{cl, cd} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_force_history.png}}
+
+\caption{Full lift and drag coefficient history (left) and the terminal 200-sample convergence window (right). Source: \texttt{results/naca0012\_m015\_laminar\_re5000/forces.csv}; variable: \texttt{cl, cd}.}
+
+\label{fig:naca0012-m015-laminar-re5000-force-naca0012-m015-laminar-re5000-force-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m015-laminar-re5000-surface-naca0012-m015-laminar-re5000-surface-cp-png} is the declared \texttt{cp} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_surface_cp.png}}
+
+\caption{Computed wall pressure-coefficient distribution. Source: \texttt{results/naca0012\_m015\_laminar\_re5000/surface.csv}; variable: \texttt{cp}.}
+
+\label{fig:naca0012-m015-laminar-re5000-surface-naca0012-m015-laminar-re5000-surface-cp-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m015-laminar-re5000-cf-naca0012-m015-laminar-re5000-surface-cf-png} is the declared \texttt{cf} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_surface_cf.png}}
+
+\caption{Computed tangential wall skin-friction-coefficient distribution. Source: \texttt{results/naca0012\_m015\_laminar\_re5000/surface.csv}; variable: \texttt{cf}.}
+
+\label{fig:naca0012-m015-laminar-re5000-cf-naca0012-m015-laminar-re5000-surface-cf-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m015-laminar-re5000-mach-naca0012-m015-laminar-re5000-mach-png} is the declared \texttt{mach} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_mach.png}}
+
+\caption{Near-body computed Mach number, $M$; displayed range [4.7959e-06, 0.1727]. Source: \texttt{results/naca0012\_m015\_laminar\_re5000/field\_final.vtu}; variable: \texttt{mach}.}
+
+\label{fig:naca0012-m015-laminar-re5000-mach-naca0012-m015-laminar-re5000-mach-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m015-laminar-re5000-pressure-naca0012-m015-laminar-re5000-pressure-png} is the declared \texttt{pressure} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_pressure.png}}
+
+\caption{Near-body computed Nondimensional pressure, $p$; displayed range [31.554, 32.217]. Source: \texttt{results/naca0012\_m015\_laminar\_re5000/field\_final.vtu}; variable: \texttt{pressure}.}
+
+\label{fig:naca0012-m015-laminar-re5000-pressure-naca0012-m015-laminar-re5000-pressure-png}
+
+\end{figure}
+
+\subsubsection{\texttt{naca0012\_m080\_laminar\_re5000}}
+
+Submitted status: \texttt{converged}; final $C_D=0.079945$ and $C_L=5.3211e-04$. The submitted figure set is introduced in \cref{fig:naca0012-m080-laminar-re5000-residual-naca0012-m080-laminar-re5000-residual-history-png}, \cref{fig:naca0012-m080-laminar-re5000-force-naca0012-m080-laminar-re5000-force-history-png}, \cref{fig:naca0012-m080-laminar-re5000-surface-naca0012-m080-laminar-re5000-surface-cp-png}, \cref{fig:naca0012-m080-laminar-re5000-cf-naca0012-m080-laminar-re5000-surface-cf-png}, \cref{fig:naca0012-m080-laminar-re5000-mach-naca0012-m080-laminar-re5000-mach-png}, \cref{fig:naca0012-m080-laminar-re5000-pressure-naca0012-m080-laminar-re5000-pressure-png}.
+
+Symmetry evidence at the supplied zero incidence is the final force coefficient $C_L=5.3211e-04$; the submitted force-based near-symmetric-lift check is \texttt{True}. This is a numerical symmetry indicator, not a pointwise proof of upper/lower surface equality.
+
+The submitted chordwise surface-$C_p$ distribution has range 1.7562; the final field has relative Mach span 0.99999 and relative pressure span 0.5311. The $C_p$ figure therefore documents the pressure-loading distribution and the contours document compressibility variation. The postprocessor does not extract upper/lower branch mismatch, extrema location, shock position, or pressure jump, so none of those quantities is asserted.
+
+At the supplied transonic Mach number $M=0.8$ the near-body Mach, pressure, and $C_p$ plots are inspected for localized compression or shock-like gradients. Because no shock detector or jump metric is submitted, the report makes only this qualitative contour-based assessment and does not claim a shock location or strength.
+
+The final-row drag level is $C_D=0.079945$, split into pressure $C_{D,p}=0.052107$ and viscous $C_{D,v}=0.027837$. This exposes the wall-friction contribution but, without a grid/reference study, does not establish drag accuracy.
+
+Viscous-wall evidence from the submitted sanity metrics is maximum wall speed 0 and maximum absolute skin-friction coefficient 0.12868; the no-slip and finite/nonzero skin-friction checks are \texttt{True}/\texttt{True}/\texttt{True}. These values document boundary-output behavior without asserting a reference drag accuracy.
+
+\noindent\Cref{fig:naca0012-m080-laminar-re5000-residual-naca0012-m080-laminar-re5000-residual-history-png} is the declared \texttt{residual\_l2} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_residual_history.png}}
+
+\caption{Global MPI-reduced conservative residual history. Source: \texttt{results/naca0012\_m080\_laminar\_re5000/residuals.csv}; variable: \texttt{residual\_l2}.}
+
+\label{fig:naca0012-m080-laminar-re5000-residual-naca0012-m080-laminar-re5000-residual-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m080-laminar-re5000-force-naca0012-m080-laminar-re5000-force-history-png} is the declared \texttt{cl, cd} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_force_history.png}}
+
+\caption{Full lift and drag coefficient history (left) and the terminal 200-sample convergence window (right). Source: \texttt{results/naca0012\_m080\_laminar\_re5000/forces.csv}; variable: \texttt{cl, cd}.}
+
+\label{fig:naca0012-m080-laminar-re5000-force-naca0012-m080-laminar-re5000-force-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m080-laminar-re5000-surface-naca0012-m080-laminar-re5000-surface-cp-png} is the declared \texttt{cp} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_surface_cp.png}}
+
+\caption{Computed wall pressure-coefficient distribution. Source: \texttt{results/naca0012\_m080\_laminar\_re5000/surface.csv}; variable: \texttt{cp}.}
+
+\label{fig:naca0012-m080-laminar-re5000-surface-naca0012-m080-laminar-re5000-surface-cp-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m080-laminar-re5000-cf-naca0012-m080-laminar-re5000-surface-cf-png} is the declared \texttt{cf} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_surface_cf.png}}
+
+\caption{Computed tangential wall skin-friction-coefficient distribution. Source: \texttt{results/naca0012\_m080\_laminar\_re5000/surface.csv}; variable: \texttt{cf}.}
+
+\label{fig:naca0012-m080-laminar-re5000-cf-naca0012-m080-laminar-re5000-surface-cf-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m080-laminar-re5000-mach-naca0012-m080-laminar-re5000-mach-png} is the declared \texttt{mach} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_mach.png}}
+
+\caption{Near-body computed Mach number, $M$; displayed range [2.9406e-05, 1.0547]. Source: \texttt{results/naca0012\_m080\_laminar\_re5000/field\_final.vtu}; variable: \texttt{mach}.}
+
+\label{fig:naca0012-m080-laminar-re5000-mach-naca0012-m080-laminar-re5000-mach-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m080-laminar-re5000-pressure-naca0012-m080-laminar-re5000-pressure-png} is the declared \texttt{pressure} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_pressure.png}}
+
+\caption{Near-body computed Nondimensional pressure, $p$; displayed range [0.80461, 1.6772]. Source: \texttt{results/naca0012\_m080\_laminar\_re5000/field\_final.vtu}; variable: \texttt{pressure}.}
+
+\label{fig:naca0012-m080-laminar-re5000-pressure-naca0012-m080-laminar-re5000-pressure-png}
+
+\end{figure}
+
+\subsubsection{\texttt{naca0012\_m200\_laminar\_re5000}}
+
+Submitted status: \texttt{converged}; final $C_D=0.13766$ and $C_L=-4.1999e-04$. The submitted figure set is introduced in \cref{fig:naca0012-m200-laminar-re5000-residual-naca0012-m200-laminar-re5000-residual-history-png}, \cref{fig:naca0012-m200-laminar-re5000-force-naca0012-m200-laminar-re5000-force-history-png}, \cref{fig:naca0012-m200-laminar-re5000-surface-naca0012-m200-laminar-re5000-surface-cp-png}, \cref{fig:naca0012-m200-laminar-re5000-cf-naca0012-m200-laminar-re5000-surface-cf-png}, \cref{fig:naca0012-m200-laminar-re5000-mach-naca0012-m200-laminar-re5000-mach-png}, \cref{fig:naca0012-m200-laminar-re5000-pressure-naca0012-m200-laminar-re5000-pressure-png}.
+
+Symmetry evidence at the supplied zero incidence is the final force coefficient $C_L=-4.1999e-04$; the submitted force-based near-symmetric-lift check is \texttt{True}. This is a numerical symmetry indicator, not a pointwise proof of upper/lower surface equality.
+
+The submitted chordwise surface-$C_p$ distribution has range 1.7744; the final field has relative Mach span 0.99999 and relative pressure span 0.87582. The $C_p$ figure therefore documents the pressure-loading distribution and the contours document compressibility variation. The postprocessor does not extract upper/lower branch mismatch, extrema location, shock position, or pressure jump, so none of those quantities is asserted.
+
+At the supplied supersonic Mach number $M=2$ the near-body Mach, pressure, and $C_p$ plots provide qualitative compression/shock evidence. The absence of a fitted discontinuity or jump metric prevents a quantitative shock-location or robustness claim.
+
+The final-row drag level is $C_D=0.13766$, split into pressure $C_{D,p}=0.09313$ and viscous $C_{D,v}=0.044525$. This exposes the wall-friction contribution but, without a grid/reference study, does not establish drag accuracy.
+
+Viscous-wall evidence from the submitted sanity metrics is maximum wall speed 0 and maximum absolute skin-friction coefficient 0.091539; the no-slip and finite/nonzero skin-friction checks are \texttt{True}/\texttt{True}/\texttt{True}. These values document boundary-output behavior without asserting a reference drag accuracy.
+
+\noindent\Cref{fig:naca0012-m200-laminar-re5000-residual-naca0012-m200-laminar-re5000-residual-history-png} is the declared \texttt{residual\_l2} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_residual_history.png}}
+
+\caption{Global MPI-reduced conservative residual history. Source: \texttt{results/naca0012\_m200\_laminar\_re5000/residuals.csv}; variable: \texttt{residual\_l2}.}
+
+\label{fig:naca0012-m200-laminar-re5000-residual-naca0012-m200-laminar-re5000-residual-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m200-laminar-re5000-force-naca0012-m200-laminar-re5000-force-history-png} is the declared \texttt{cl, cd} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_force_history.png}}
+
+\caption{Full lift and drag coefficient history (left) and the terminal 200-sample convergence window (right). Source: \texttt{results/naca0012\_m200\_laminar\_re5000/forces.csv}; variable: \texttt{cl, cd}.}
+
+\label{fig:naca0012-m200-laminar-re5000-force-naca0012-m200-laminar-re5000-force-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m200-laminar-re5000-surface-naca0012-m200-laminar-re5000-surface-cp-png} is the declared \texttt{cp} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_surface_cp.png}}
+
+\caption{Computed wall pressure-coefficient distribution. Source: \texttt{results/naca0012\_m200\_laminar\_re5000/surface.csv}; variable: \texttt{cp}.}
+
+\label{fig:naca0012-m200-laminar-re5000-surface-naca0012-m200-laminar-re5000-surface-cp-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m200-laminar-re5000-cf-naca0012-m200-laminar-re5000-surface-cf-png} is the declared \texttt{cf} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_surface_cf.png}}
+
+\caption{Computed tangential wall skin-friction-coefficient distribution. Source: \texttt{results/naca0012\_m200\_laminar\_re5000/surface.csv}; variable: \texttt{cf}.}
+
+\label{fig:naca0012-m200-laminar-re5000-cf-naca0012-m200-laminar-re5000-surface-cf-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m200-laminar-re5000-mach-naca0012-m200-laminar-re5000-mach-png} is the declared \texttt{mach} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_mach.png}}
+
+\caption{Near-body computed Mach number, $M$; displayed range [0.00023358, 2]. Source: \texttt{results/naca0012\_m200\_laminar\_re5000/field\_final.vtu}; variable: \texttt{mach}.}
+
+\label{fig:naca0012-m200-laminar-re5000-mach-naca0012-m200-laminar-re5000-mach-png}
+
+\end{figure}
+
+\noindent\Cref{fig:naca0012-m200-laminar-re5000-pressure-naca0012-m200-laminar-re5000-pressure-png} is the declared \texttt{pressure} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_pressure.png}}
+
+\caption{Near-body computed Nondimensional pressure, $p$; displayed range [0.1354, 0.9817]. Source: \texttt{results/naca0012\_m200\_laminar\_re5000/field\_final.vtu}; variable: \texttt{pressure}.}
+
+\label{fig:naca0012-m200-laminar-re5000-pressure-naca0012-m200-laminar-re5000-pressure-png}
+
+\end{figure}
+
+\subsection{Cylinder Reynolds 20}
+
+Submitted status: \texttt{converged}; final $C_D=2.0467$ and tail mean $\overline C_D=2.0469$. The submitted contour/window interpretation is in the figure captions.
+
+The Re20 submitted field has relative Mach span 0.11452 and relative pressure span 0.015785, while its tail mean drag is 2.0469. Together with the required velocity-magnitude wake figure, these are evidence of a nonuniform downstream solution. No recirculation length or separation location is extracted, so neither is quantified here. The positive-drag and no-slip-wall checks are \texttt{True}/\texttt{True} (maximum reported wall speed 0).
+
+The converged submitted status and positive-tail-drag check support a steady, positive-drag wake under the solver's residual/force criteria. This is an internal plausibility assessment only; no external Re20 coefficient or grid-refinement result is available to establish quantitative drag accuracy.
+
+\noindent\Cref{fig:cylinder-m010-laminar-re20-residual-cylinder-m010-laminar-re20-residual-history-png} is the declared \texttt{residual\_l2} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_residual_history.png}}
+
+\caption{Global MPI-reduced conservative residual history. Source: \texttt{results/cylinder\_m010\_laminar\_re20/residuals.csv}; variable: \texttt{residual\_l2}.}
+
+\label{fig:cylinder-m010-laminar-re20-residual-cylinder-m010-laminar-re20-residual-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re20-force-cylinder-m010-laminar-re20-force-history-png} is the declared \texttt{cl, cd} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_force_history.png}}
+
+\caption{Full lift and drag coefficient history (left) and the terminal 200-sample convergence window (right). Source: \texttt{results/cylinder\_m010\_laminar\_re20/forces.csv}; variable: \texttt{cl, cd}.}
+
+\label{fig:cylinder-m010-laminar-re20-force-cylinder-m010-laminar-re20-force-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re20-surface-cylinder-m010-laminar-re20-surface-cp-png} is the declared \texttt{cp} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_surface_cp.png}}
+
+\caption{Computed wall pressure-coefficient distribution. Source: \texttt{results/cylinder\_m010\_laminar\_re20/surface.csv}; variable: \texttt{cp}.}
+
+\label{fig:cylinder-m010-laminar-re20-surface-cylinder-m010-laminar-re20-surface-cp-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re20-cf-cylinder-m010-laminar-re20-surface-cf-png} is the declared \texttt{cf} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_surface_cf.png}}
+
+\caption{Computed tangential wall skin-friction-coefficient distribution. Source: \texttt{results/cylinder\_m010\_laminar\_re20/surface.csv}; variable: \texttt{cf}.}
+
+\label{fig:cylinder-m010-laminar-re20-cf-cylinder-m010-laminar-re20-surface-cf-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re20-mach-cylinder-m010-laminar-re20-mach-png} is the declared \texttt{mach} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_mach.png}}
+
+\caption{Near-body computed Mach number, $M$; displayed range [6.8522e-05, 0.11352]. Source: \texttt{results/cylinder\_m010\_laminar\_re20/field\_final.vtu}; variable: \texttt{mach}.}
+
+\label{fig:cylinder-m010-laminar-re20-mach-cylinder-m010-laminar-re20-mach-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re20-pressure-cylinder-m010-laminar-re20-pressure-png} is the declared \texttt{pressure} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_pressure.png}}
+
+\caption{Near-body computed Nondimensional pressure, $p$; displayed range [70.943, 72.008]. Source: \texttt{results/cylinder\_m010\_laminar\_re20/field\_final.vtu}; variable: \texttt{pressure}.}
+
+\label{fig:cylinder-m010-laminar-re20-pressure-cylinder-m010-laminar-re20-pressure-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re20-velocity-magnitude-cylinder-m010-laminar-re20-velocity-magnitude-png} is the declared \texttt{velocity\_magnitude} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_velocity_magnitude.png}}
+
+\caption{Near-body computed Velocity magnitude, $|\mathbf{u}|/U_\infty$; displayed range [0.00068575, 1.135]. Source: \texttt{results/cylinder\_m010\_laminar\_re20/field\_final.vtu}; variable: \texttt{velocity\_magnitude}.}
+
+\label{fig:cylinder-m010-laminar-re20-velocity-magnitude-cylinder-m010-laminar-re20-velocity-magnitude-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re20-vorticity-cylinder-m010-laminar-re20-vorticity-png} is the declared \texttt{vorticity} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_vorticity.png}}
+
+\caption{Near-body computed Nondimensional vorticity, $\omega_z L/U_\infty$; displayed range [-6.9089, 6.9128]. Source: \texttt{results/cylinder\_m010\_laminar\_re20/field\_final.vtu}; variable: \texttt{vorticity}.}
+
+\label{fig:cylinder-m010-laminar-re20-vorticity-cylinder-m010-laminar-re20-vorticity-png}
+
+\end{figure}
+
+\subsection{Cylinder Reynolds 200 Vortex Street}
+
+Submitted status: \texttt{statistically\_periodic}; tail mean $\overline C_D=1.1356$; lift amplitude $=0.32513$; dominant frequency $=0.16667$; and $St=0.16667$. These quantities are reported only when the submitted statistics contain an accepted, resolved post-transient frequency estimate. A vorticity figure uses its manifest/source caption; the standard postprocessor applies a $[-5,5]$ nondimensional vorticity clip for Re200 when vorticity is available.
+
+The standard frequency estimator removes a least-squares linear trend from the tail lift signal, applies a Hann window, and computes a one-sided FFT. The submitted method field is \texttt{linear\_detrend\_hann\_window\_fft}; validity/reason are \texttt{True}/\texttt{accepted}. Eligible peaks must resolve at least three cycles in the tail; the accepted peak must contain at least 10\% of eligible-band power and be at least five times the median lower-power eligible-bin background.
+
+\begin{center}
+
+\begingroup
+
+\small
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.12\linewidth}r r r r r}
+
+\toprule
+
+valid & $f$ & resolved cycles & peak power fraction & peak prominence & $St$ \\
+
+\midrule
+
+\texttt{True} & 0.16667 & 19.998 & 0.60244 & 4.1463e+15 & 0.16667 \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+The reported Strouhal conversion uses $St=fL_{ref}/U_\infty$ with $L_{ref}=1$ and $U_\infty=1$; scale provenance is \texttt{input\_case\_config}. Peak power fraction is relative to total eligible-band power, and peak prominence is relative to the median lower-power eligible-bin background.
+
+The Re200 shedding interpretation is limited to submitted evidence: a post-transient lift amplitude of 0.32513, dominant lift frequency 0.16667, 19.998 resolved cycles, peak power fraction 0.60244, peak prominence 4.1463e+15, and tail sampling window 119.99 provide a resolved force-history signature of periodic shedding when the status is statistically periodic. The vorticity figure supplies the spatial visualization; no independent vortex-identification metric is reported.
+
+\noindent\Cref{fig:cylinder-m010-laminar-re200-residual-cylinder-m010-laminar-re200-residual-history-png} is the declared \texttt{residual\_l2} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_residual_history.png}}
+
+\caption{Global MPI-reduced conservative residual history. Source: \texttt{results/cylinder\_m010\_laminar\_re200/residuals.csv}; variable: \texttt{residual\_l2}.}
+
+\label{fig:cylinder-m010-laminar-re200-residual-cylinder-m010-laminar-re200-residual-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re200-force-cylinder-m010-laminar-re200-force-history-png} is the declared \texttt{cl, cd} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_force_history.png}}
+
+\caption{Physical-time lift and drag coefficient history. Source: \texttt{results/cylinder\_m010\_laminar\_re200/forces.csv}; variable: \texttt{cl, cd}.}
+
+\label{fig:cylinder-m010-laminar-re200-force-cylinder-m010-laminar-re200-force-history-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re200-surface-cylinder-m010-laminar-re200-surface-cp-png} is the declared \texttt{cp} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_surface_cp.png}}
+
+\caption{Computed wall pressure-coefficient distribution. Source: \texttt{results/cylinder\_m010\_laminar\_re200/surface.csv}; variable: \texttt{cp}.}
+
+\label{fig:cylinder-m010-laminar-re200-surface-cylinder-m010-laminar-re200-surface-cp-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re200-cf-cylinder-m010-laminar-re200-surface-cf-png} is the declared \texttt{cf} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_surface_cf.png}}
+
+\caption{Computed tangential wall skin-friction-coefficient distribution. Source: \texttt{results/cylinder\_m010\_laminar\_re200/surface.csv}; variable: \texttt{cf}.}
+
+\label{fig:cylinder-m010-laminar-re200-cf-cylinder-m010-laminar-re200-surface-cf-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re200-mach-cylinder-m010-laminar-re200-mach-png} is the declared \texttt{mach} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_mach.png}}
+
+\caption{Near-body computed Mach number, $M$; displayed range [0.00037153, 0.13037]. Source: \texttt{results/cylinder\_m010\_laminar\_re200/field\_final.vtu}; variable: \texttt{mach}.}
+
+\label{fig:cylinder-m010-laminar-re200-mach-cylinder-m010-laminar-re200-mach-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re200-pressure-cylinder-m010-laminar-re200-pressure-png} is the declared \texttt{pressure} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_pressure.png}}
+
+\caption{Near-body computed Nondimensional pressure, $p$; displayed range [70.788, 71.914]. Source: \texttt{results/cylinder\_m010\_laminar\_re200/field\_final.vtu}; variable: \texttt{pressure}.}
+
+\label{fig:cylinder-m010-laminar-re200-pressure-cylinder-m010-laminar-re200-pressure-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re200-velocity-magnitude-cylinder-m010-laminar-re200-velocity-magnitude-png} is the declared \texttt{velocity\_magnitude} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_velocity_magnitude.png}}
+
+\caption{Near-body computed Velocity magnitude, $|\mathbf{u}|/U_\infty$; displayed range [0.0037182, 1.3028]. Source: \texttt{results/cylinder\_m010\_laminar\_re200/field\_final.vtu}; variable: \texttt{velocity\_magnitude}.}
+
+\label{fig:cylinder-m010-laminar-re200-velocity-magnitude-cylinder-m010-laminar-re200-velocity-magnitude-png}
+
+\end{figure}
+
+\noindent\Cref{fig:cylinder-m010-laminar-re200-vorticity-cylinder-m010-laminar-re200-vorticity-png} is the declared \texttt{vorticity} visualization for this case.
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_vorticity.png}}
+
+\caption{Near-body computed Nondimensional vorticity, $\omega_z L/U_\infty$; displayed range [-5, 5]. Source: \texttt{results/cylinder\_m010\_laminar\_re200/field\_final.vtu}; variable: \texttt{vorticity}.}
+
+\label{fig:cylinder-m010-laminar-re200-vorticity-cylinder-m010-laminar-re200-vorticity-png}
+
+\end{figure}
+
+\clearpage
+
+\section{Parallel Validation}
+
+Each row below is read from the manifest-named completed output directory: wall time and status are from \texttt{run\_status.json}, residual orders are recalculated from its \texttt{residuals.csv}, force values are the final steady \texttt{forces.csv} row, and partition counts are from \texttt{partition\_diagnostics.csv}. The $np=8$ row is the reference. Residual difference is the absolute difference in end-to-end $\log_{10}(R_0/R_f)$ reduction, not a pointwise comparison between histories of different length; force differences are absolute coefficient differences, $\Delta t$ is signed wall-time difference in seconds, and $t/t_8$ is the wall-time ratio.
+
+\begin{center}
+
+\begingroup
+
+\scriptsize
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.20\linewidth}r r r r r p{0.13\linewidth}}
+
+\toprule
+
+case & np & wall s & res. orders & $C_D$ & $C_L$ & status \\
+
+\midrule
+
+NACA .15 inv. & 1 & 740.11 & 4.2164 & 5.5415e-04 & -4.2907e-05 & converged \\
+
+NACA .15 inv. & 2 & 372.08 & 4.2164 & 5.5415e-04 & -4.2910e-05 & converged \\
+
+NACA .15 inv. & 4 & 190.34 & 4.2164 & 5.5415e-04 & -4.2909e-05 & converged \\
+
+NACA .15 inv. & 8 & 95.382 & 4.2164 & 5.5414e-04 & -4.2909e-05 & converged \\
+
+Cylinder Re20 & 1 & 980.1 & 7.4556 & 2.0467 & -0.0022051 & converged \\
+
+Cylinder Re20 & 2 & 499.96 & 7.4556 & 2.0467 & -0.0022051 & converged \\
+
+Cylinder Re20 & 4 & 260.9 & 7.4556 & 2.0467 & -0.0022051 & converged \\
+
+Cylinder Re20 & 8 & 137.21 & 7.4556 & 2.0467 & -0.0022051 & converged \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\begin{center}
+
+\begingroup
+
+\small
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.27\linewidth}r r r r}
+
+\toprule
+
+case & np & $|\Delta\log_{10}(R_0/R_f)|_8$ & $|\Delta C_D|_8$ & $|\Delta C_L|_8$ \\
+
+\midrule
+
+NACA .15 inv. & 1 & 6.9053e-07 & 1.6833e-09 & 1.9800e-09 \\
+
+NACA .15 inv. & 2 & 5.1498e-07 & 1.4619e-09 & 1.4210e-09 \\
+
+NACA .15 inv. & 4 & 6.9378e-07 & 1.7297e-09 & 3.0378e-10 \\
+
+NACA .15 inv. & 8 & 0 & 0 & 0 \\
+
+Cylinder Re20 & 1 & 2.3256e-07 & 7.8648e-13 & 2.4016e-10 \\
+
+Cylinder Re20 & 2 & 1.1565e-06 & 1.9035e-10 & 1.1740e-10 \\
+
+Cylinder Re20 & 4 & 2.3531e-07 & 4.8898e-11 & 3.4972e-10 \\
+
+Cylinder Re20 & 8 & 0 & 0 & 0 \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+\begin{center}
+
+\begingroup
+
+\scriptsize
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{p{0.20\linewidth}r r r r r r}
+
+\toprule
+
+case & np & $\Delta t_8$ s & $t/t_8$ & owned max/min & recv/owned & max neighbours \\
+
+\midrule
+
+NACA .15 inv. & 1 & 644.73 & 7.7594 & 1 & 0 & 0 \\
+
+NACA .15 inv. & 2 & 276.69 & 3.9009 & 1.0006 & 0.011434 & 1 \\
+
+NACA .15 inv. & 4 & 94.958 & 1.9956 & 1.0062 & 0.023395 & 3 \\
+
+NACA .15 inv. & 8 & 0 & 1 & 1.0276 & 0.037039 & 7 \\
+
+Cylinder Re20 & 1 & 842.89 & 7.1429 & 1 & 0 & 0 \\
+
+Cylinder Re20 & 2 & 362.75 & 3.6437 & 1.0002 & 0.018557 & 1 \\
+
+Cylinder Re20 & 4 & 123.68 & 1.9014 & 1.0071 & 0.053019 & 3 \\
+
+Cylinder Re20 & 8 & 0 & 1 & 1.015 & 0.095042 & 6 \\
+
+\bottomrule
+
+\end{tabular}
+
+\endgroup
+
+\end{center}
+
+Submitted rank-count evidence for \texttt{naca0012\_m015\_inviscid}: \texttt{1, 2, 4, 8}. Relative to the submitted $np=8$ reference, the maximum residual-reduction difference is $|\Delta\log_{10}(R_0/R_f)|=6.9378e-07$ and the maximum absolute force differences are $|\Delta C_D|=1.7297e-09$ and $|\Delta C_L|=1.9800e-09$; wall times span 95.382--740.11 s. The fastest submitted row is $np=8$ and the $np=8$ time divided by that fastest time is 1. Owned-cell max/min ratios span 1--1.0276, while summed receive-cell count divided by summed owned cells spans 0--0.037039. Submitted statuses across ranks are \texttt{converged}. These expose rank-dependent residual/force/status behavior and a count-based halo surface-to-volume proxy. Wall time still combines local work, halo traffic, global reductions, process placement, and system noise; no MPI profiler isolates communication overhead, so the measurements are run-specific consistency/timing observations rather than a hardware-independent scaling or communication-cost claim.
+
+Submitted rank-count evidence for \texttt{cylinder\_m010\_laminar\_re20}: \texttt{1, 2, 4, 8}. Relative to the submitted $np=8$ reference, the maximum residual-reduction difference is $|\Delta\log_{10}(R_0/R_f)|=1.1565e-06$ and the maximum absolute force differences are $|\Delta C_D|=1.9035e-10$ and $|\Delta C_L|=3.4972e-10$; wall times span 137.21--980.1 s. The fastest submitted row is $np=8$ and the $np=8$ time divided by that fastest time is 1. Owned-cell max/min ratios span 1--1.015, while summed receive-cell count divided by summed owned cells spans 0--0.095042. Submitted statuses across ranks are \texttt{converged}. These expose rank-dependent residual/force/status behavior and a count-based halo surface-to-volume proxy. Wall time still combines local work, halo traffic, global reductions, process placement, and system noise; no MPI profiler isolates communication overhead, so the measurements are run-specific consistency/timing observations rather than a hardware-independent scaling or communication-cost claim.
+
+\section{Visualization and Plot Style}
+
+Figure captions are copied from the figure manifest, including source file and plotted variable. The expected post-processing figures are publication-style line histories and filled unstructured-field contours with labelled colorbars. The generator verifies that each manifest filename exists before including it; it does not rename a field figure or infer its variable from the filename.
+
+\section{Limitations and Failure Analysis}
+
+Completed status and passing structural checks establish reproducible submitted results, not independent physical validation. The principal unresolved numerical and evidence limitations are:
+
+\begin{itemize}
+
+\item Rusanov/local Lax--Friedrichs is robust but diffusive. It can smear shocks, wake structures, and contact/shear features and can contribute to computed inviscid drag; no less-diffusive production flux or entropy-fix comparison is submitted.
+
+\item Each geometry is evaluated on one supplied mesh. There is no grid-convergence, $y^+$, boundary-layer-resolution, or wall-gradient sensitivity study, so skin friction, viscous drag, separation, and shock thickness retain spatial-discretization uncertainty.
+
+\item No external reference solution, experimental coefficient, or independently computed shock or separation metric is used. Surface-$C_p$ ranges and field contours support qualitative interpretation but do not validate shock location, jump strength, recirculation length, or drag accuracy.
+
+\item Re200 permits occasional physical-step inner-target misses provided the aggregate settlement gate passes. Submitted metadata reports 87 misses, converged-step fraction 0.9971, and last total-residual ratio 8.9688e-04; these values are exposed rather than implying every inner solve met its target.
+
+\item The Re200 vorticity rendering is clipped to $[-5,5]$ to expose the wake. Values outside that interval saturate in the visualization, so the image is unsuitable for reading peak vorticity magnitude.
+
+\item MPI evidence covers two cases and reports end-to-end wall time, owned/ghost balance, and message-cell counts. It has no profiler-based compute/halo/reduction decomposition; communication overhead and hardware-independent scaling therefore remain unquantified.
+
+\item Extension seams are modular, but the current state, geometry, gas closure, and model enum remain fixed to 2-D four-equation perfect-gas inviscid/laminar flow. Three-dimensional, general-EOS, RANS, and multispecies capability requires the interface generalizations described earlier.
+
+\end{itemize}
+
+With additional time, the highest-value improvements would be a mesh-refinement/reference campaign, automated shock and wake metrics, boundary-layer resolution diagnostics, a less-diffusive shock-capable flux comparison, and MPI phase/halo timing instrumentation. Missing metadata, status records, diagnostics, statistics, figures, or sanity checks remain listed below and must be resolved before any final completion claim.
+
+\section{Evidence Audit}
+
+The following items were missing or malformed while generating this report. An empty list means that the generator did not encounter an input-format or named-file problem; it does not by itself prove physical accuracy or that all numerical requirements passed.
+
+No missing or malformed report inputs were detected by this generator.
+
+\end{document}
+
