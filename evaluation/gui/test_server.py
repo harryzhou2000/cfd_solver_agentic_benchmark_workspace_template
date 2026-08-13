@@ -185,6 +185,8 @@ class SnapshotProtocolTests(unittest.TestCase):
         self.assertIn('route();\n    if (initial.view === "list") loadSnapshots();', app)
         self.assertIn('{ key: "disqualified",   label: "DQ",           type: "dq"', app)
         self.assertIn('pill pill-status-blocked">yes</span>', app)
+        self.assertIn('/static/app.js?v=', html)
+        self.assertIn('/static/styles.css?v=', html)
 
 
 class RolloutUsageTests(unittest.TestCase):
