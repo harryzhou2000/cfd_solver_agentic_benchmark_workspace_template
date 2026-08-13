@@ -28,6 +28,14 @@ record.
   from the repository.
 - Keep structural validation separate from source, physics, MPI, and report
   judgment. A passing validator is necessary, not sufficient.
+- Trust that submitted code and artifacts are the contestant's work. Do not
+  perform internet-copy, authorship, or plagiarism investigation. Still check
+  that claims match the submitted source and that the solver actually runs.
+- Separate report craftsmanship, submitted-result completeness, and solver
+  functionality. Evaluator-generated plots or reruns may clarify solver
+  behavior but never repair the contestant's report or missing deliverables.
+- Never rerun the Re 200 unsteady case. Judge its completeness and credibility
+  only from readable contestant deliverables.
 - Use `null` plus a limitation for anything not verified. Do not turn missing
   evidence into a favorable or unfavorable guess.
 - Treat failed, aborted, or partial histories as such. Do not call them
@@ -278,9 +286,121 @@ Also perform the manual examiner workflow:
 - traceability of claims and figures to submitted data;
 - all disqualification triggers.
 
+For the copied/open-source-core trigger, apply the trust policy: do not search
+the internet or external codebases for similarity. Record only direct internal
+evidence such as invoking an existing external solver executable or a wrapper
+that is plainly present in the submitted tree.
+
 Capture exact commands, return codes, relevant output, file paths, and line
 references. Distinguish a validator failure, numerical failure, infrastructure
 failure, timeout, and evaluator interruption.
+
+### Evidence escalation and rerun policy
+
+Assess each case using the least invasive sufficient evidence. Follow this
+order and stop as soon as the evidence is decisive:
+
+1. Read the contestant's report, manifests, result files, and stated
+   limitations. If the report is already good, explicitly admits a bad or
+   incomplete result, or readable submitted results conclusively show failure,
+   trust that evidence. Do not rerun merely to reproduce a clear conclusion.
+2. If the underlying result files are readable and potentially useful but the
+   report figures are missing, poor, misleading, or technically hard to read,
+   create evaluator-only plots from those existing files. Use the submitted
+   plotting scripts when suitable; otherwise use a small independent plotting
+   command. Do not edit `report.tex`, replace report PNGs, or commit generated
+   plots. Record what source files and variables were visualized.
+3. Only when evidence required to judge solver functionality is genuinely
+   missing, consider rerunning a **steady** case. First confirm the source
+   builds and identify the exact submitted case/config/mesh and documented
+   command. Prefer the cheapest representative missing case and minimum rank
+   count sufficient to answer the unresolved question. Do not rerun merely to
+   improve presentation or rescue a result already confirmed bad.
+4. Never rerun an unsteady case. In particular, never rerun cylinder Re 200,
+   shorten it, resume it, or substitute a cheaper transient. Re 200
+   completeness, periodicity, controls, and result credit depend exclusively
+   on readable contestant deliverables.
+
+Perform evaluator redraws and permitted steady reruns in an isolated scratch
+checkout/worktree at the immutable submission commit, with outputs under a
+temporary or ignored evaluator directory. Keep the canonical contestant
+workspace and committed report unchanged. Do not commit or copy raw rerun
+outputs, logs, restarts, fields, or evaluator visualization files into either
+the result branch or manager snapshot. Preserve only commands, return codes,
+small numeric summaries, and evidence-backed conclusions in the evaluation
+report.
+
+Treat contestant build, solver, and plotting commands as untrusted execution.
+Run them in the benchmark container or equivalent sandbox with network access
+disabled, only the scratch checkout and required immutable benchmark
+inputs/externals mounted, and explicit CPU, memory, process-count, and wall-time
+limits. Do not expose host credentials, user configuration, manager-repository
+write access, or unrelated host paths.
+
+For reruns, use the immutable submitted source without edits, patches,
+parameter tuning, extra convergence aids, or case-file repair. Use the exact
+submitted input and documented production command where available. Allow at
+most one normal attempt per missing steady case; retry once only for a clearly
+identified infrastructure failure that did not exercise the solver. Stop when
+the unresolved functionality question is answered. Record timeout and resource
+limits. If meaningful verification would exceed the configured evaluation
+budget, leave it unverified and state the limitation rather than launching an
+open-ended run.
+
+Label every piece of evidence as one of:
+
+- `contestant_report` — submitted prose/figures;
+- `contestant_result` — readable submitted run artifact;
+- `evaluator_redraw` — evaluator visualization of contestant result data;
+- `evaluator_rerun` — new steady run produced by the evaluator.
+
+Never present evaluator-generated evidence as contestant-delivered evidence.
+
+### Independent scoring dimensions
+
+Score these dimensions independently:
+
+- **Report and visualization quality:** judge only the contestant's committed
+  report, figures, clarity, traceability, and honest limitations. Evaluator
+  redraws do not add report points and do not overwrite an explicitly poor
+  report assessment.
+- **Submitted-result completeness and case-results credit:** judge readable
+  contestant deliverables. An evaluator rerun does not retroactively make a
+  missing submitted result complete. Re 200 uses this evidence class only.
+- **Solver implementation and functionality:** use source inspection,
+  contestant results, evaluator redraws, and permitted steady reruns as
+  appropriately labeled evidence. A poor report alone must not imply a broken
+  solver; conversely, attractive report figures must not substitute for solver
+  evidence.
+
+When the report and solver disagree, state separate conclusions, for example:
+"solver functionality verified by evaluator steady rerun; contestant result
+missing and report receives no completion/visualization credit." Do not hide
+this distinction inside a single blended comment.
+
+Use `0` for a criterion when evidence affirmatively establishes that its
+required deliverable, behavior, or result is missing, failed, or noncompliant.
+Use `null` only when the criterion cannot be verified from available evidence
+and no decisive failure is established. A structurally complete divergent
+case may retain purely structural output-contract credit while receiving zero
+for its physical completion/result criterion.
+
+For Re 200, source inspection may support only implementation-level findings
+that a second-order transient method and inner-control machinery exist. It
+cannot establish that the contestant ran the production controls, reached the
+required horizon, converged inner solves, or obtained periodic shedding. Those
+execution/completeness/result findings depend exclusively on readable
+contestant deliverables; missing or incomplete deliverables receive zero for
+the affected Re 200 result criteria and are never replaced by a rerun.
+
+Apply a missing case independently to each rubric criterion whose own wording
+is unmet: output-contract completeness, physical case-result completion, and
+report coverage may each be affected. Explain each deduction with that
+criterion's evidence; do not apply an extra blanket penalty or reuse one
+failure as justification for unrelated method/source deductions. When a rubric
+bucket aggregates several cases and prescribes no per-case formula, use a
+transparent proportional starting point within that bucket, adjust only for
+documented qualitative differences, and state the allocation explicitly.
 
 ## 5. Score and comment
 
