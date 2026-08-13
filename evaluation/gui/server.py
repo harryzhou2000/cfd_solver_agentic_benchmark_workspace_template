@@ -10,6 +10,7 @@ Endpoints:
   GET /api/snapshots              table rows (same shape as `cfdeval query table --json`)
   GET /api/snapshot/<contestant>   full detail payload
   GET /api/snapshot/<contestant>/file/<artifact>   raw artifact (md/json)
+  GET /api/snapshot/<contestant>/report-pdf       report PDF from matching workspace
   GET /                           static GUI (index.html)
 
 The GUI is intentionally read-only: it never writes to snapshots or workspaces.
@@ -19,12 +20,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+MANAGER_ROOT = ROOT.parent
+WORKSPACE_ROOT = MANAGER_ROOT / "workspace"
 sys.path.insert(0, str(ROOT / "src"))
 from cfdeval import query  # noqa: E402
 
@@ -35,7 +39,64 @@ SAFE_ARTIFACTS = (
     "env_snapshot.json", "agent_scores.json", "agent_report.md",
     "review_code.md", "review_code.json", "review_cfd.md", "review_cfd.json",
     "review_results.md", "review_results.json", "index.json",
+    "run_identity.json", "contestant_final_response.md",
 )
+
+
+def _inside(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except (OSError, ValueError):
+        return False
+
+
+def workspace_for_snapshot(run_identity: dict | None) -> Path | None:
+    """Resolve a contestant repo without allowing arbitrary filesystem access."""
+    identity = run_identity or {}
+    candidates = []
+    recorded = identity.get("workspace")
+    if isinstance(recorded, str):
+        candidates.append(Path(recorded))
+    branch, number = identity.get("initial_branch"), identity.get("operator_number")
+    if isinstance(branch, str) and isinstance(number, str):
+        parts = branch.split("/")
+        if len(parts) == 3 and parts[-1] == "init":
+            candidates.append(WORKSPACE_ROOT / parts[0] / parts[1] / number)
+    for candidate in candidates:
+        if _inside(candidate, WORKSPACE_ROOT) and candidate.resolve().is_dir():
+            return candidate.resolve()
+    return None
+
+
+def find_report_pdf(workspace: Path | None) -> dict | None:
+    """Find one likely report PDF, skipping telemetry, environments, and builds."""
+    if workspace is None:
+        return None
+    skip = {".git", ".sessions", ".eval", ".venv", "build", "build-debug", "build-release"}
+    found = []
+    for root, dirs, files in os.walk(workspace, followlinks=False):
+        dirs[:] = sorted(d for d in dirs if d not in skip and not d.startswith("cmake-build"))
+        root_path = Path(root)
+        for name in sorted(files):
+            if not name.lower().endswith(".pdf"):
+                continue
+            path = root_path / name
+            if path.is_symlink() or not _inside(path, workspace):
+                continue
+            try:
+                size = path.stat().st_size
+            except OSError:
+                continue
+            rel = path.relative_to(workspace).as_posix()
+            parts = [p.lower() for p in path.relative_to(workspace).parts]
+            score = (0 if name.lower() == "report.pdf" else 1,
+                     0 if "report" in parts[:-1] else 1, len(parts), rel)
+            found.append((score, path, rel, size))
+    if not found:
+        return None
+    _, path, rel, size = min(found, key=lambda item: item[0])
+    return {"path": path, "relative_path": rel, "bytes": size}
 
 
 def snapshot_detail(folder: Path) -> dict:
@@ -54,8 +115,10 @@ def snapshot_detail(folder: Path) -> dict:
     agent_scores = _load("agent_scores.json")
     configs = _load("configs.json")
     env_snap = _load("env_snapshot.json")
+    run_identity = _load("run_identity.json")
+    report_pdf = find_report_pdf(workspace_for_snapshot(run_identity))
     md_files = {}
-    for name in ("summary.md", "agent_report.md",
+    for name in ("summary.md", "agent_report.md", "contestant_final_response.md",
                  "review_code.md", "review_cfd.md", "review_results.md"):
         p = folder / name
         if p.exists():
@@ -75,11 +138,17 @@ def snapshot_detail(folder: Path) -> dict:
             "files": [
                 {"role": c.get("role"), "path": c.get("path"), "exists": c.get("exists"),
                  "content_included": c.get("content_included"),
-                 "redacted": c.get("redacted"), "bytes": c.get("bytes")}
+                 "redacted": c.get("redacted"), "bytes": c.get("bytes"),
+                 "content": c.get("content")}
                 for c in (configs or {}).get("configs", [])
             ],
         },
         "env_snapshot": env_snap,
+        "run_identity": run_identity,
+        "report_pdf": ({"relative_path": report_pdf["relative_path"],
+                        "bytes": report_pdf["bytes"],
+                        "url": f"/api/snapshot/{urllib.parse.quote(folder.name, safe='')}/report-pdf"}
+                       if report_pdf else None),
         "markdown": md_files,
         "artifacts": sorted(
             p.name for p in folder.iterdir() if p.is_file() and p.name in SAFE_ARTIFACTS),
@@ -128,7 +197,8 @@ class Handler(BaseHTTPRequestHandler):
                 rest = path[len("/api/snapshot/"):].split("/")
                 if len(rest) == 1:
                     folder = (self.outputs_root / rest[0]).resolve()
-                    if not folder.is_dir() or not (folder / "index.json").exists():
+                    if (not _inside(folder, self.outputs_root) or not folder.is_dir()
+                            or not (folder / "index.json").exists()):
                         return self._not_found(f"snapshot {rest[0]}")
                     return self._json(snapshot_detail(folder))
                 if len(rest) == 3 and rest[1] == "file":
@@ -136,12 +206,25 @@ class Handler(BaseHTTPRequestHandler):
                     if artifact not in SAFE_ARTIFACTS:
                         return self._not_found("artifact not allowed")
                     fp = (self.outputs_root / rest[0] / artifact).resolve()
-                    if not fp.is_file():
+                    if not _inside(fp, self.outputs_root) or not fp.is_file():
                         return self._not_found("artifact missing")
                     ctype = ("text/markdown; charset=utf-8"
                              if artifact.endswith(".md") else
                              "application/json; charset=utf-8")
                     return self._file(fp, ctype)
+                if len(rest) == 2 and rest[1] == "report-pdf":
+                    folder = (self.outputs_root / rest[0]).resolve()
+                    if (not _inside(folder, self.outputs_root) or not folder.is_dir()
+                            or not (folder / "index.json").exists()):
+                        return self._not_found(f"snapshot {rest[0]}")
+                    try:
+                        identity = json.loads((folder / "run_identity.json").read_text())
+                    except (OSError, json.JSONDecodeError):
+                        identity = None
+                    report = find_report_pdf(workspace_for_snapshot(identity))
+                    if not report:
+                        return self._not_found("workspace report PDF")
+                    return self._file(report["path"], "application/pdf")
             if path in ("/", "/index.html"):
                 static = Path(__file__).resolve().parent / "static" / "index.html"
                 if not static.exists():
@@ -169,12 +252,16 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main(argv: list[str] | None = None) -> int:
+    global WORKSPACE_ROOT
     ap = argparse.ArgumentParser(description="Evaluation snapshot GUI server")
     ap.add_argument("--port", type=int, default=8787)
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--outputs", default=str(ROOT / "outputs"))
+    ap.add_argument("--workspace-root", default=str(WORKSPACE_ROOT),
+                    help="root containing workspace/<harness>/<model>/<number> repos")
     args = ap.parse_args(argv)
     Handler.outputs_root = Path(args.outputs).resolve()
+    WORKSPACE_ROOT = Path(args.workspace_root).resolve()
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"evaluation GUI on http://{args.host}:{args.port} "
           f"(snapshots: {Handler.outputs_root})")

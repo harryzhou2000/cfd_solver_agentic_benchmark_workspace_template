@@ -23,10 +23,12 @@ configs.json            # verbose redacted config stack (codex/opencode/opencode
 sessions.json           # session discovery (system + project-isolated) and
                         # 30-min-bucketed analysis (cache history, tokens,
                         # tool categories, idle exclusion, permission waits)
-env_snapshot.json       # environment snapshot captured before the agent ran
-                        # (optional; older runs omit it)
+env_snapshot.json       # pre-run environment evidence, or explicit post-run
+                        # legacy provenance reconstruction
 agent_scores.json       # agent-driven evaluation scores (review areas + rubric)
 agent_report.md         # agent-driven evaluation report (narrative + evidence)
+run_identity.json       # canonical run ID and immutable Git identity sidecar
+contestant_final_response.md # exact attributed terminal response sidecar
 review_code.json|md     # code review scorecard
 review_cfd.json|md      # CFD methods review scorecard
 review_results.json|md  # result review scorecard (+ structural evidence)

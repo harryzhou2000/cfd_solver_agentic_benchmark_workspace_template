@@ -10,7 +10,7 @@
    * Constants & helpers
    * ---------------------------------------------------------------- */
   const TABLE_COLUMNS = [
-    { key: "contestant",     label: "Contestant",   type: "text",  sortType: "str" },
+    { key: "run_id",         label: "Run ID",       type: "text",  sortType: "str" },
     { key: "harness",        label: "Harness",      type: "text",  sortType: "str" },
     { key: "status",         label: "Status",       type: "pill-status", sortType: "status" },
     { key: "goal_time_s",    label: "Goal time",    type: "duration", sortType: "num" },
@@ -23,9 +23,11 @@
     { key: "cfd_score",      label: "CFD",          type: "score",   sortType: "num" },
     { key: "result_score",   label: "Results",      type: "score",   sortType: "num" },
     { key: "rubric_total",   label: "Rubric",       type: "int",     sortType: "num" },
+    { key: "disqualified",   label: "DQ",           type: "bool",    sortType: "bool" },
+    { key: "execution_date", label: "Execution",    type: "text",    sortType: "str" },
     { key: "cache_hit",      label: "Cache hit",    type: "pct",     sortType: "num" },
     { key: "session_buckets",label: "Buckets",      type: "int",     sortType: "num" },
-    { key: "env_captured",   label: "Env",          type: "bool",    sortType: "bool" },
+    { key: "env_capture_phase", label: "Env",       type: "text",    sortType: "str" },
     { key: "agent_reviewed", label: "Reviewed",     type: "bool",    sortType: "bool" },
     { key: "codegraph",      label: "Codegraph",    type: "bool",    sortType: "bool" },
     { key: "submodule",      label: "Submodule",    type: "text",    sortType: "str" },
@@ -157,7 +159,7 @@
    * ---------------------------------------------------------------- */
   const state = {
     snapshots: [],
-    sortKey: "contestant",
+    sortKey: "run_id",
     sortDir: "asc",
     filter: "",
     currentName: null,
@@ -387,6 +389,10 @@
     if (har.harness || har.version) {
       subtitleBits.push(`<span class="kv"><span class="k">harness</span><span class="v">${escapeHtml(har.harness || emDash)}${har.version ? " " + escapeHtml(har.version) : ""}</span></span>`);
     }
+    const identity = detail.run_identity || {};
+    if (identity.result_branch || identity.submission_commit) {
+      subtitleBits.push(`<span class="kv"><span class="k">result</span><span class="v">${escapeHtml(identity.result_branch || emDash)}${identity.submission_commit ? " @ " + escapeHtml(identity.submission_commit.slice(0, 10)) : ""}</span></span>`);
+    }
     $("#detail-subtitle").innerHTML = subtitleBits.join("");
 
     // metrics cards
@@ -443,19 +449,30 @@
       value: ((sum.metadata && sum.metadata.subagents) || []).length || 0,
       sub: "metadata.subagents",
     });
-    const cr = sum.code_review || {}, cfd = sum.cfd_review || {}, rr = sum.result_review || {};
+    const scoreAreas = (detail.agent_scores || {}).scores || {};
+    const cr = scoreAreas.code_review || sum.code_review || {};
+    const cfd = scoreAreas.cfd_review || sum.cfd_review || {};
+    const rr = scoreAreas.result_review || sum.result_review || {};
     cards.push({ label: "Code score",    value: fmtScore(cr.overall_score) });
     cards.push({ label: "CFD score",     value: fmtScore(cfd.overall_score) });
     cards.push({ label: "Result score",  value: fmtScore(rr.overall_score) });
     const rubric = (detail.agent_scores || {}).rubric || {};
     cards.push({ label: "Rubric total",  value: rubric.total_scored == null ? emDash : `${rubric.total_scored}/${rubric.total_possible ?? emDash}` });
+    const dq = (detail.agent_scores || {}).disqualification || {};
+    cards.push({ label: "Disqualified", value: dq.triggered === true ? "yes" : dq.triggered === false ? "no" : emDash, cls: dq.triggered ? "is-err" : "" });
+    const selection = (detail.agent_scores || {}).session_selection || {};
+    cards.push({ label: "Execution date", value: selection.execution_date || emDash, sub: "UTC primary-session start" });
+    const env = detail.env_snapshot || {};
     const envCap = detail.env_captured === true;
+    const legacyPostRun = env.provenance && (env.provenance.pre_run_authority === false || String(env.provenance.capture_kind || "").toLowerCase().includes("post-run"));
+    const envPhase = env.capture_phase || (legacyPostRun ? "post_run" : envCap ? "pre_run" : null);
     cards.push({
-      label: "Env captured",
-      value: envCap ? "yes" : "no",
-      cls: envCap ? "" : "is-warn",
+      label: "Environment provenance",
+      value: envPhase || "missing",
+      sub: env.run_environment_available === false ? "runtime unavailable" : "",
+      cls: envPhase === "post_run" || !envCap ? "is-warn" : "",
     });
-    const reviewed = !!(detail.agent_scores && detail.agent_scores.evaluated_at);
+    const reviewed = rubric.total_scored != null || [cr, cfd, rr].some(area => area.overall_score != null);
     cards.push({
       label: "Agent reviewed",
       value: reviewed ? "yes" : "no",
@@ -500,7 +517,10 @@
     if (!detail) return;
     switch (name) {
       case "summary":  renderSummaryTab(detail); break;
+      case "evaluation": renderEvaluationTab(detail); break;
       case "report":   renderReportTab(detail);  break;
+      case "contestant": renderContestantTab(detail); break;
+      case "pdf":      renderPdfTab(detail); break;
       case "reviews":  renderReviewsTab(detail); break;
       case "sessions": renderSessionsTab(detail);break;
       case "metadata": renderMetadataTab(detail);break;
@@ -698,6 +718,49 @@
     bindCopyButtons(panel);
   }
 
+  function renderEvaluationTab(detail) {
+    const panel = $("#panel-evaluation");
+    const scores = detail.agent_scores;
+    const identity = detail.run_identity || {};
+    if (!scores) {
+      panel.innerHTML = `<p class="muted">No agent_scores.json is available for this snapshot.</p>`;
+      return;
+    }
+    const dq = scores.disqualification || {};
+    const found = (dq.flags || []).filter(f => f.found === true);
+    const rubric = scores.rubric || {};
+    const sections = rubric.sections || [];
+    const idRows = [
+      ["run ID", identity.run_id || detail.name],
+      ["initial", identity.initial_branch && `${identity.initial_branch} @ ${(identity.initial_commit || "").slice(0, 12)}`],
+      ["result", identity.result_branch && `${identity.result_branch} @ ${(identity.submission_commit || "").slice(0, 12)}`],
+      ["operator number", identity.operator_number],
+      ["execution date", (scores.session_selection || {}).execution_date],
+      ["evaluated at", scores.evaluated_at],
+    ];
+    let html = `<div class="evaluation-grid">
+      <div class="env-card"><h3>Identity and dates</h3>${kvTable(idRows)}</div>
+      <div class="env-card"><h3>Verdict</h3>${kvTable([
+        ["rubric", rubric.total_scored == null ? emDash : `${rubric.total_scored}/${rubric.total_possible ?? emDash}`],
+        ["disqualified", dq.triggered === true ? "yes" : dq.triggered === false ? "no" : emDash],
+        ["evaluator", (scores.evaluator || {}).agent],
+      ])}</div></div>`;
+    if (found.length) {
+      html += `<div class="banner"><strong>Disqualification triggered</strong><ul>${found.map(f => `<li><strong>${escapeHtml(String(f.id ?? ""))}: ${escapeHtml(f.text || "")}</strong>${f.evidence ? `<br>${escapeHtml(f.evidence)}` : ""}</li>`).join("")}</ul></div>`;
+    }
+    if (sections.length) {
+      html += `<h2>100-point rubric</h2><div class="rubric-table-wrap"><table class="md-table"><thead><tr><th>Section</th><th>Score</th><th>Notes</th></tr></thead><tbody>${sections.map(s => `<tr><td>${escapeHtml(s.title || s.id)}</td><td class="mono">${escapeHtml(s.score == null ? emDash : `${s.score}/${s.max_points}`)}</td><td>${escapeHtml(s.notes || emDash)}</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    if ((scores.limitations || []).length) {
+      html += `<h2>Limitations</h2><ul>${scores.limitations.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>`;
+    }
+    panel.innerHTML = html;
+
+    function kvTable(pairs) {
+      return `<table><tbody>${pairs.filter(([,v]) => v != null && v !== "").map(([k,v]) => `<tr><th>${escapeHtml(k)}</th><td class="mono">${escapeHtml(v)}</td></tr>`).join("")}</tbody></table>`;
+    }
+  }
+
   function renderReportTab(detail) {
     const panel = $("#panel-report");
     if (detail.has_agent_report) {
@@ -707,10 +770,35 @@
       panel.innerHTML = `<div class="env-notice">
         <strong>Not yet evaluated.</strong>
         <p>The evaluation agent hasn't produced <code>agent_report.md</code> for this snapshot.</p>
-        <p>Run the agent (e.g. <code>summarize.py --contestant ${escapeHtml(detail.name)}</code> with evaluation step) to populate this view.</p>
+        <p>Run <code>generate_agent_report.py --out &lt;snapshot&gt; --workspace &lt;workspace&gt;</code>, complete the evaluation, then record it.</p>
       </div>`;
     }
     bindCopyButtons(panel);
+  }
+
+  function renderContestantTab(detail) {
+    const panel = $("#panel-contestant");
+    const md = (detail.markdown || {})["contestant_final_response.md"];
+    panel.innerHTML = md
+      ? renderMarkdown(md)
+      : `<p class="muted">No attributed final response is available for this snapshot.</p>`;
+    bindCopyButtons(panel);
+  }
+
+  function renderPdfTab(detail) {
+    const panel = $("#panel-pdf");
+    const pdf = detail.report_pdf;
+    if (!pdf) {
+      panel.innerHTML = `<div class="env-notice"><strong>No workspace report PDF found.</strong>
+        <p>The dashboard searched the matching contestant workspace for a report PDF. PDFs are viewed in place and are not copied into the evaluation snapshot.</p></div>`;
+      return;
+    }
+    panel.innerHTML = `<div class="pdf-toolbar">
+        <span class="mono">${escapeHtml(pdf.relative_path)}</span>
+        <span class="muted">${escapeHtml(fmtBytes(pdf.bytes))}</span>
+        <a class="btn" href="${escapeHtml(pdf.url)}" target="_blank" rel="noopener">Open PDF</a>
+      </div>
+      <iframe class="pdf-viewport" src="${escapeHtml(pdf.url)}#view=FitH" title="Contestant report PDF"></iframe>`;
   }
 
   function renderReviewsTab(detail) {
@@ -931,7 +1019,7 @@
     if (!detail.env_captured) {
       panel.innerHTML = `<div class="env-notice">
         <strong>Env snapshot not captured.</strong>
-        <p>Run <code>capture_env.py</code> before the agent starts (optional for old runs).</p>
+        <p>Run <code>env_snapshot.py</code> before the agent starts. Legacy runs may instead carry an explicitly reconstructed post-run snapshot.</p>
       </div>`;
       return;
     }
@@ -941,6 +1029,11 @@
     const ws = env.workspace || {};
     const net = env.network || {};
     const cap = env.captured_at;
+    const legacyPostRun = env.provenance && (env.provenance.pre_run_authority === false || String(env.provenance.capture_kind || "").toLowerCase().includes("post-run"));
+    const capturePhase = env.capture_phase || (legacyPostRun ? "post_run" : "pre_run");
+    const warning = capturePhase === "post_run" || env.run_environment_available === false
+      ? `<div class="banner warn"><strong>Post-run provenance reconstruction.</strong> Original execution-time harness, container, host, tools, and environment are unavailable. Capture-time values below are diagnostics only.</div>`
+      : "";
 
     const cards = [];
     cards.push(envCard("Host", [
@@ -972,9 +1065,11 @@
       ["captured_at", fmtDate(cap || env.captured_at)],
       ["schema",      env.schema],
       ["version",     env.version],
+      ["capture_phase", capturePhase],
+      ["run environment", capturePhase === "post_run" || env.run_environment_available === false ? "unavailable" : "captured"],
     ]));
 
-    panel.innerHTML = `<div class="env-grid">${cards.join("")}</div>`;
+    panel.innerHTML = warning + `<div class="env-grid">${cards.join("")}</div>`;
   }
 
   function envCard(title, pairs) {

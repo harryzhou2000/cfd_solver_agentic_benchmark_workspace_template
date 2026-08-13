@@ -131,14 +131,19 @@ See [specs/agent_evaluation_spec.md](specs/agent_evaluation_spec.md).
 ## GUI
 
 Local web GUI listing snapshots with key results and interactive detail views
-(summary, agent report, reviews, bucketed sessions, metadata, configs, env):
+(identity, scores/DQ, execution date, summary, evaluator and contestant reports,
+bucketed sessions, metadata, configs, env). It can display a report PDF found
+in the matching `workspace/` repo in place; it does not serve PNGs or CFD field
+artifacts:
 
 ```bash
 python3 evaluation/gui/server.py --port 8787
 # open http://127.0.0.1:8787
 ```
 
-Read-only; stdlib only.
+Read-only; stdlib only. Override workspace discovery with
+`--workspace-root <path>` when the manager's `workspace/` directory is
+elsewhere. The PDF endpoint is deliberately constrained to that root.
 
 ## Session selection
 
