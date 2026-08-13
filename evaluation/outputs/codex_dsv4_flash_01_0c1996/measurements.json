@@ -1,0 +1,102 @@
+{
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01",
+  "tool_usage": {
+    "total": 556,
+    "by_tool": {
+      "exec_command": 433,
+      "write_stdin": 81,
+      "apply_patch": 36,
+      "update_plan": 5,
+      "updatemp_plan": 1
+    },
+    "by_thread": {
+      "019fb926-a333-7b03-b02b-37e86d1dd2e3": {
+        "exec_command": 433,
+        "apply_patch": 36,
+        "write_stdin": 81,
+        "updatemp_plan": 1,
+        "update_plan": 5
+      }
+    },
+    "subagent_spawns": 0,
+    "risk_context": [
+      {
+        "thread_id": "019fb926-a333-7b03-b02b-37e86d1dd2e3",
+        "approval_policy": "never",
+        "sandbox": "danger-full-access",
+        "network_access": null
+      }
+    ]
+  },
+  "loc": {
+    "method": "git+file",
+    "git": {
+      "method": "git",
+      "repos": {
+        "workspace": {
+          "branch": "codex/dsv4_flash/01",
+          "commit": "f6d8a1839a70c98d83a1e5baff9e2d6e111f7e2f",
+          "tracked_source_files": 19,
+          "tracked_source_lines": 3285,
+          "by_extension": {
+            "cmake": 81,
+            "cpp": 2325,
+            "hpp": 424,
+            "py": 455
+          },
+          "diff_vs_base": {
+            "added": 3487,
+            "deleted": 0,
+            "base": "b41b8393db18740b1b1568c0bef78491eb89297d"
+          }
+        },
+        "cfd_solver_agentic_benchmark": {
+          "branch": "HEAD",
+          "commit": "ffc314f7dd886d03e5c8172f44272f2f58f9c7cc",
+          "tracked_source_files": 1,
+          "tracked_source_lines": 324,
+          "by_extension": {
+            "py": 324
+          },
+          "diff_vs_base": null
+        }
+      },
+      "lines_total": 3609
+    },
+    "file": {
+      "method": "file",
+      "files": 20,
+      "lines": 3609,
+      "by_extension": {
+        "cmake": 81,
+        "cpp": 2325,
+        "hpp": 424,
+        "py": 779
+      }
+    }
+  },
+  "rule_violations": [
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "019fb926-a333-7b03-b02b-37e86d1dd2e3",
+      "timestamp": "2026-07-31T17:37:30.019Z",
+      "tool": "exec_command",
+      "evidence": "kill -9 2074358 2074359 2074347 2074343 2>/dev/null; sleep 1; ps -eo pid,etime,args | grep -E \"cfd_solver solve.*np2\" | grep -v "
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "019fb926-a333-7b03-b02b-37e86d1dd2e3",
+      "timestamp": "2026-07-31T17:51:53.894Z",
+      "tool": "exec_command",
+      "evidence": "kill -9 2158741 2158742 2158734 2158732 2>/dev/null; sleep 1; ps -eo pid,args | grep -E \"np2_short_test\" | grep -v grep; echo \"c"
+    }
+  ],
+  "provenance": {
+    "state_db": "/tmp/dsv4-flash-selected-state.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/sessions",
+    "generated_at": "2026-08-13T11:47:00.922126+00:00",
+    "num_threads": 1
+  }
+}

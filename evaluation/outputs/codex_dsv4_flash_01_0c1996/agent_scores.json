@@ -1,0 +1,327 @@
+{
+  "schema": "agent_scores",
+  "contestant": "codex_dsv4_flash_01_0c1996",
+  "evaluated_at": "2026-08-13T11:50:00+00:00",
+  "evaluator": {
+    "agent": "Codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": "Legacy evaluation authorized after the run; no solver rerun or redraw."
+  },
+  "metadata_answers": {
+    "legacy_provenance": "Operator authorized a post-run reconstruction. Initial branch/commit are evidence-supported but original pre-run environment fields remain unavailable/null."
+  },
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "019fb926-a333-7b03-b02b-37e86d1dd2e3"
+    ],
+    "execution_date": "2026-07-31",
+    "started_at": "2026-07-31T16:28:03.347Z",
+    "ended_at": "2026-07-31T19:35:56.498Z",
+    "time_basis": "execution date derives from the orphan primary root's first session_meta; selected extractable continuation starts 2026-07-31T17:09:05.035Z.",
+    "rationale": "Primary root 019fb900-dcf6-7673-860a-d91822679d89 is a bundled orphan rollout with sustained implementation and terminal claim. Its MPI-validation continuation 019fb926-a333-7b03-b02b-37e86d1dd2e3 is the extractable selected tree. Probes and aborted attempts were excluded; see agent_report.md."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "CMake and a prior build artifact exist; no clean build rerun."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "CLI parser/source documented; malformed-input execution not rerun."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Separated mesh, partition, solver, implicit, transient, output modules."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": null,
+          "notes": "Trust policy: no external similarity investigation."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "JSON case parsing and CGNS mesh path input; no two-filename-only branch found."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "METIS and neighbor exchange/reductions present; output limitation acknowledged."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 2,
+          "notes": "Divergent and nonphysical viscous cases show poor robustness."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "Some MPI evidence; final results fail and no clean evaluator run."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 3,
+          "notes": "Reasonably modular source; helper has absolute legacy paths."
+        }
+      ],
+      "overall_score": 3.2,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Compressible conservative state and perfect-gas formulation present."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS unstructured mesh and graph assembly source present."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Face residual accumulation and global norms are implemented."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 2,
+          "notes": "Rusanov exists, but Roe function returns Rusanov; contradicts report."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Farfield, slip, and no-slip branches present."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "Least-squares reconstructed face states present."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Barth--Jespersen limiter and positivity paths present."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "Viscous path exists but results show nonphysical force behavior."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "LU-SGS/Jacobi pseudo-time source present but stability is limited."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "BDF2-style two-loop code exists; submitted Re200 controls/results do not meet production evidence."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS and point-to-point halo exchange/source reductions present."
+        }
+      ],
+      "overall_score": 3.34,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 2,
+          "notes": "All directories are readable but two designated finals explicitly fail."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "Explicit eight-directory validation is 6 pass/2 fail (RC 1)."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 1,
+          "notes": "Re20 and NACA M0.15 failed; Re200 shedding unsupported."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 1,
+          "notes": "Re20 divergence and nonphysical laminar forces; only partial MPI consistency evidence."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "Figures exist but are uncommitted and report does not reference them; no credit for repair."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 1,
+          "notes": "Readable but materially inaccurate claims about validation, convergence, and Roe."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 1,
+          "notes": "Manifest paths exist outside commit, but figures not referenced by report.tex."
+        }
+      ],
+      "overall_score": 1.35,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 58,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 5,
+        "notes": "Documented source/CLI; clean build and all final contract outputs not verified."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 8,
+        "notes": "CGNS/unstructured geometry and adjacency source support substantial credit."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 10,
+        "notes": "Conservative residual/BC source present; numerical behavior limits credit."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Least-squares reconstruction, limiter, positivity paths are present."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 4,
+        "notes": "Implementation path exists but force results are noncredible."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 7,
+        "notes": "Implicit/BDF2 code exists; Re200 controls and convergence evidence are noncompliant."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 8,
+        "notes": "METIS, neighbor exchange, reductions, and limited np8 evidence."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 2,
+        "notes": "Multiple failed/nonphysical cases; Re200 shedding not demonstrated."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 2,
+        "notes": "Report is readable but inaccurate; figures unreferenced by TeX."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Modular C++ organization supports future extension."
+      }
+    ]
+  },
+  "disqualification": {
+    "triggered": true,
+    "flags": [
+      {
+        "id": 6,
+        "text": "Report claims algorithms that cannot be found in source.",
+        "evidence": "report.tex claims Roe with Harten--Yee entropy fix; src/solver.cpp roe_flux returns rusanov_flux directly.",
+        "found": true
+      }
+    ]
+  },
+  "limitations": [
+    "The original pre-run snapshot was unavailable; provenance was reconstructed post-run and explicitly labelled non-authoritative for environment facts.",
+    "The primary root is an orphan bundled rollout, so primary-to-continuation ancestry is evidence-based rather than DB-verifiable.",
+    "No clean build, solver rerun, MPI rerun, or evaluator redraw was performed under the authorized no-rerun/no-redraw decision.",
+    "Current index schema does not enumerate run_identity.json or contestant_final_response.md."
+  ]
+}
