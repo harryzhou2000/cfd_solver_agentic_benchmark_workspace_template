@@ -950,17 +950,6 @@ void Solver::inner_iteration_krylov(double cfl, double physical_dt,
         if (r_global <= r0_global * 1.000001 || trial == 7) break;
         std::copy(U_save.begin(), U_save.end(), U_.begin());
     }
-    halo_exchange();
-    flux_residual(U_, total_residual);
-    for (int c = 0; c < ncells; ++c)
-        for (int i = 0; i < kNC; ++i)
-            if (physical_dt > 0.0) {
-                const double src =
-                    (3.0 * U_[c * kNC + i] - 4.0 * U_prev_[c * kNC + i] +
-                     U_prev2_[c * kNC + i]) /
-                    (2.0 * physical_dt);
-                total_residual[c * kNC + i] += src * mesh_.cell_volume[c];
-            }
 }
 
 void Solver::inner_iteration(double cfl, double physical_dt,
@@ -987,24 +976,6 @@ void Solver::inner_iteration(double cfl, double physical_dt,
 
     std::vector<double> lambda_c, lambda_v;
     compute_spectral_radii(lambda_c, lambda_v);
-
-    std::vector<double> R0(mesh_.n_owned * kNC, 0.0);
-    cfd::assemble_residual(mesh_, U_, grad_frozen, limiter_frozen, numerics_,
-                           case_.freestream, R0);
-    total_residual.assign(mesh_.n_owned * kNC, 0.0);
-    for (int c = 0; c < mesh_.n_owned; ++c) {
-        for (int i = 0; i < kNC; ++i) {
-            double r = R0[c * kNC + i];
-            if (physical_dt > 0.0) {
-                const double src =
-                    (3.0 * U_[c * kNC + i] - 4.0 * U_prev_[c * kNC + i] +
-                     U_prev2_[c * kNC + i]) /
-                    (2.0 * physical_dt);
-                r += src * mesh_.cell_volume[c];
-            }
-            total_residual[c * kNC + i] = r;
-        }
-    }
 
     std::vector<double> diag(mesh_.n_owned);
     for (int c = 0; c < mesh_.n_owned; ++c) {
@@ -1270,7 +1241,6 @@ void Solver::inner_iteration(double cfl, double physical_dt,
         std::copy(U_save.begin(), U_save.end(), U_.begin());
     }
     (void)accepted;
-    halo_exchange();
     if (std::getenv("CFD_DEBUG_STEP")) {
         double umax = 0.0, dumax = 0.0;
         int c_dumax = -1;
@@ -1303,21 +1273,6 @@ void Solver::inner_iteration(double cfl, double physical_dt,
                          total_residual[c_dumax * kNC + 3]);
     }
 
-    // Refresh the total residual at the accepted state.
-    cfd::assemble_residual(mesh_, U_, grad_frozen, limiter_frozen, numerics_,
-                           case_.freestream, total_residual);
-    for (int c = 0; c < mesh_.n_owned; ++c) {
-        for (int i = 0; i < kNC; ++i) {
-            if (physical_dt > 0.0) {
-                const double src =
-                    (3.0 * U_[c * kNC + i] - 4.0 * U_prev_[c * kNC + i] +
-                     U_prev2_[c * kNC + i]) /
-                    (2.0 * physical_dt);
-                total_residual[c * kNC + i] +=
-                    src * mesh_.cell_volume[c];
-            }
-        }
-    }
 }
 
 void Solver::compute_residual_norms(const std::vector<double>& r, double& l2,
@@ -1535,12 +1490,12 @@ RunStats Solver::run(const std::string& output_dir) {
             inner_min = std::min(inner_min, inner_max);
         }
         for (int it = 0; it < inner_max; ++it) {
-            if (std::getenv("CFD_SGS")) {
-                inner_iteration(cfl, transient ? dt_phys : 0.0,
-                                total_residual, grad_, limiter_);
-            } else {
+            if (std::getenv("CFD_GMRES")) {
                 inner_iteration_krylov(cfl, transient ? dt_phys : 0.0,
                                        total_residual, grad_, limiter_);
+            } else {
+                inner_iteration(cfl, transient ? dt_phys : 0.0,
+                                total_residual, grad_, limiter_);
             }
             ++inner;
             double nl2 = 0.0, nlinf = 0.0;
