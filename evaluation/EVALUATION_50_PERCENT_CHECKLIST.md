@@ -37,7 +37,7 @@ canonical evaluations count toward the quota and must not be repeated.
 ### `codex/dsv4_flash` — 10 done, quota 5
 
 - [x] 01 — `codex_dsv4_flash_01_0c1996`
-- [ ] 02
+- [ ] 02 — BLOCKED: provenance reconstructed (`codex/dsv4_flash/init` @ `6d76717d83cb1884055101a2bbeada962bdb8107`), but exact canonical-upstream collision query timed out twice with proxy bypassed on 2026-08-13; result branch must not be created until availability is established.
 - [ ] 03
 - [ ] 04
 - [ ] 06
