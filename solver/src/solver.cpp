@@ -221,70 +221,34 @@ void Solver::halo_exchange() {
     end_halo_exchange(mesh_, U_, grad_);
 }
 
-void Solver::inner_iteration(double cfl, double physical_dt,
-                             std::vector<double>& total_residual) {
-    // 1. Refresh local gradients and limiters from the current owned states
-    //    (ghost states and gradients are frozen for this nonlinear step).
-    compute_gradients();
-    compute_limiters();
-    assemble_residual();
-
+void Solver::inner_iteration_gmres(double cfl, double physical_dt,
+                                   std::vector<double>& total_residual,
+                                   const std::vector<double>& grad_frozen,
+                                   const std::vector<double>& limiter_frozen) {
+    // Matrix-free GMRES for the dual-time system
+    //   M dU = -R_total,  M = V/dt_tau I + 3V/(2 dt_phys) I + dR_flux/dU.
+    // The flux Jacobian is applied by a finite-difference directional
+    // derivative with the step's gradients/limiters frozen; the
+    // pseudo-time/BDF2 terms are linear and applied exactly. The right
+    // preconditioner is the block-Jacobi upwind diagonal.
+    const double inv_dt_bdf = physical_dt > 0.0 ? 1.5 / physical_dt : 0.0;
     std::vector<double> lambda_c, lambda_v;
     compute_spectral_radii(lambda_c, lambda_v);
 
-    const double inv_dt_bdf =
-        physical_dt > 0.0 ? 1.5 / physical_dt : 0.0;
-    const double diag_rho_factor =
-        std::getenv("CFD_DIAG_RHO_FACTOR")
-            ? std::atof(std::getenv("CFD_DIAG_RHO_FACTOR"))
-            : 0.5;
-    const double relax =
-        std::getenv("CFD_RELAX") ? std::atof(std::getenv("CFD_RELAX")) : 1.0;
-    const double bc_rho_factor =
-        std::getenv("CFD_BC_RHO_FACTOR")
-            ? std::atof(std::getenv("CFD_BC_RHO_FACTOR"))
-            : 1.0;
-
-    // Total residual including the frozen BDF2 physical-time source.
-    total_residual.assign(mesh_.n_owned * kNC, 0.0);
+    // Linear diagonal coefficients.
+    std::vector<double> diag_lin(mesh_.n_owned);
     for (int c = 0; c < mesh_.n_owned; ++c) {
-        for (int i = 0; i < kNC; ++i) {
-            double r = residual_[c * kNC + i];
-            if (physical_dt > 0.0) {
-                const double src =
-                    (3.0 * U_[c * kNC + i] - 4.0 * U_prev_[c * kNC + i] +
-                     U_prev2_[c * kNC + i]) /
-                    (2.0 * physical_dt);
-                r += src * mesh_.cell_volume[c];
-            }
-            total_residual[c * kNC + i] = r;
-        }
+        diag_lin[c] =
+            (lambda_c[c] + 4.0 * lambda_v[c]) / std::max(cfl, 1e-12) +
+            inv_dt_bdf * mesh_.cell_volume[c];
     }
 
-    // 2. Classical unstructured LU-SGS. The diagonal is the local pseudo-time
-    //    term plus the spectral part of the flux Jacobian:
-    //    D_i = (V/dt + 3V/(2 dt_phys) + 0.5 sum_j rho_j) I.
-    //    The lower sweep uses A^- = 0.5(A - rho I) and the upper sweep uses
-    //    A^+ = 0.5(A + rho I), with A oriented outward from the cell.
-    std::vector<double> diag_scale(mesh_.n_owned);
+    // Block-Jacobi preconditioner from the upwind flux-split diagonal.
+    std::vector<MatN> P(mesh_.n_owned);
     for (int c = 0; c < mesh_.n_owned; ++c) {
-        // V/dt_i = (lambda_c + 4 lambda_v) / cfl  (the local pseudo time step
-        // is dt_i = cfl * V / lambda_total).
-        const double dtau_inv =
-            (lambda_c[c] + 4.0 * lambda_v[c]) / std::max(cfl, 1e-12);
-        const double scale = dtau_inv + inv_dt_bdf * mesh_.cell_volume[c];
-        diag_scale[c] = scale;
+        for (int i = 0; i < kNC; ++i) P[c][i][i] = diag_lin[c];
     }
-    std::vector<MatN> bj_diag(mesh_.n_owned);
-
-    // Face Jacobians (average primitive state) and spectral radii.
-    struct FaceJac {
-        MatN A;
-        double rho = 0.0;
-    };
-    std::vector<FaceJac> fj(mesh_.faces.size());
-    for (size_t f = 0; f < mesh_.faces.size(); ++f) {
-        const LocalFace& lf = mesh_.faces[f];
+    for (const auto& lf : mesh_.faces) {
         const int L = lf.left;
         const int R = lf.right;
         const auto state = [&](int c) {
@@ -306,106 +270,168 @@ void Solver::inner_iteration(double cfl, double physical_dt,
                    (std::max(qavg.rho, 1e-300) *
                     std::max(mesh_.cell_volume[L], 1e-300));
         }
-        MatN A = inviscid_jacobian_normal(qavg, lf.n, numerics_.gas);
-        fj[f] = {A, rho};
+        const MatN A = inviscid_jacobian_normal(qavg, lf.n, numerics_.gas);
         for (int side = 0; side < 2; ++side) {
             const int c = side == 0 ? L : R;
             if (c < 0 || c >= mesh_.n_owned) continue;
-            const double fac =
-                lf.bc == BcType::Interior ? diag_rho_factor : bc_rho_factor;
-            diag_scale[c] += fac * rho;
-            if (std::getenv("CFD_INNER_BJ")) {
-                // Point-implicit block-Jacobi: add the full upwind diagonal
-                // block (0.5(A + rho I)) for interior faces.
-                if (lf.bc == BcType::Interior) {
-                    const double sgn = side == 0 ? 1.0 : -1.0;
-                    for (int i = 0; i < kNC; ++i)
-                        for (int j = 0; j < kNC; ++j)
-                            bj_diag[c][i][j] +=
-                                0.5 * (sgn * A[i][j] + (i == j ? rho : 0.0));
-                }
-            }
+            const double sgn = side == 0 ? 1.0 : -1.0;
+            for (int i = 0; i < kNC; ++i)
+                for (int j = 0; j < kNC; ++j)
+                    P[c][i][j] +=
+                        0.5 * (sgn * A[i][j] + (i == j ? rho : 0.0));
         }
     }
 
-    std::vector<double> dU(mesh_.n_owned * kNC, 0.0);
-    if (std::getenv("CFD_INNER_BJ")) {
-        for (int c = 0; c < mesh_.n_owned; ++c) {
-            MatN d = bj_diag[c];
-            for (int i = 0; i < kNC; ++i)
-                d[i][i] += diag_scale[c];
-            VecN rhs_c;
-            for (int i = 0; i < kNC; ++i)
-                rhs_c[i] = -total_residual[c * kNC + i] * relax;
-            const VecN dc = d.solve(rhs_c);
-            for (int i = 0; i < kNC; ++i) dU[c * kNC + i] = dc[i];
-        }
-    } else {
-        // 3. Forward sweep (lower neighbors use A^- = 0.5(A - rho I)).
-        std::vector<double> rhs(mesh_.n_owned * kNC, 0.0);
-        for (int c = 0; c < mesh_.n_owned; ++c) {
-            for (int i = 0; i < kNC; ++i)
-                rhs[c * kNC + i] = -total_residual[c * kNC + i];
-        }
-        for (int c = 0; c < mesh_.n_owned; ++c) {
-            VecN rhs_c;
-            for (int i = 0; i < kNC; ++i) rhs_c[i] = rhs[c * kNC + i];
-            for (int f : mesh_.cell_faces[c]) {
-                const LocalFace& lf = mesh_.faces[f];
-                const FaceJac& jf = fj[f];
-                const int j = (lf.left == c) ? lf.right : lf.left;
-                if (j < 0 || j >= c || j >= mesh_.n_owned)
-                    continue;  // lower owned neighbors only (ghost corr. 0)
-                const double sgn = (lf.left == c) ? 1.0 : -1.0;
-                VecN dUj;
-                for (int i = 0; i < kNC; ++i) dUj[i] = dU[j * kNC + i];
-                VecN contrib;
-                for (int i = 0; i < kNC; ++i) {
-                    double s = 0.0;
-                    for (int k = 0; k < kNC; ++k)
-                        s += (sgn * jf.A[i][k] - (i == k ? jf.rho : 0.0)) *
-                             dUj[k];
-                    contrib[i] = 0.5 * s;
-                }
-                rhs_c = rhs_c - contrib;
+    // Assemble the flux residual at the current state using frozen gradients.
+    const auto flux_residual = [&](const std::vector<double>& U,
+                                   std::vector<double>& out) {
+        cfd::assemble_residual(mesh_, U, grad_frozen, limiter_frozen, numerics_,
+                               case_.freestream, out);
+    };
+    std::vector<double> R0(mesh_.n_owned * kNC, 0.0);
+    flux_residual(U_, R0);
+    for (int c = 0; c < mesh_.n_owned; ++c) {
+        for (int i = 0; i < kNC; ++i) {
+            double r = R0[c * kNC + i];
+            if (physical_dt > 0.0) {
+                const double src =
+                    (3.0 * U_[c * kNC + i] - 4.0 * U_prev_[c * kNC + i] +
+                     U_prev2_[c * kNC + i]) /
+                    (2.0 * physical_dt);
+                r += src * mesh_.cell_volume[c];
             }
-            VecN dU_c;
-            const double inv_d = 1.0 / std::max(diag_scale[c], 1e-300);
-            for (int i = 0; i < kNC; ++i) dU_c[i] = rhs_c[i] * inv_d * relax;
-            for (int i = 0; i < kNC; ++i) dU[c * kNC + i] = dU_c[i];
-        }
-
-        // 4. Backward sweep with A^+ = 0.5(A + rho I) (classical LU-SGS).
-        for (int c = mesh_.n_owned - 1; c >= 0; --c) {
-            VecN corr;
-            for (int f : mesh_.cell_faces[c]) {
-                const LocalFace& lf = mesh_.faces[f];
-                const FaceJac& jf = fj[f];
-                const int j = (lf.left == c) ? lf.right : lf.left;
-                if (j < 0 || j <= c || j >= mesh_.n_owned)
-                    continue;  // owned upper neighbors only
-                const double sgn = (lf.left == c) ? 1.0 : -1.0;
-                VecN dUj;
-                for (int i = 0; i < kNC; ++i) dUj[i] = dU[j * kNC + i];
-                VecN contrib;
-                for (int i = 0; i < kNC; ++i) {
-                    double s = 0.0;
-                    for (int k = 0; k < kNC; ++k)
-                        s += (sgn * jf.A[i][k] + (i == k ? jf.rho : 0.0)) *
-                             dUj[k];
-                    contrib[i] = 0.5 * s;
-                }
-                corr = corr + contrib;
-            }
-            VecN dU_c;
-            for (int i = 0; i < kNC; ++i) dU_c[i] = dU[c * kNC + i];
-            const double inv_d = 1.0 / std::max(diag_scale[c], 1e-300);
-            for (int i = 0; i < kNC; ++i) dU_c[i] -= corr[i] * inv_d * relax;
-            for (int i = 0; i < kNC; ++i) dU[c * kNC + i] = dU_c[i];
+            total_residual[c * kNC + i] = r;
         }
     }
 
-    // 5. Update with a positivity safeguard.
+    const int n = mesh_.n_owned;
+    const int max_m = std::getenv("CFD_GMRES_M")
+                          ? std::atoi(std::getenv("CFD_GMRES_M"))
+                          : 12;  // Krylov search space per dual-time step
+    std::vector<double> b(n * kNC);
+    for (int i = 0; i < n * kNC; ++i) b[i] = -total_residual[i];
+    const double bnorm = std::sqrt(
+        std::inner_product(b.begin(), b.end(), b.begin(), 0.0));
+    if (std::getenv("CFD_DEBUG_GMRES") && rank_ == 0)
+        std::fprintf(stderr, "[gmres] rank=%d bnorm=%.6e m=%d\n", rank_, bnorm,
+                     max_m);
+    if (!(bnorm > 0.0)) return;
+
+    // Arnoldi storage: V vectors and Z (preconditioned) vectors, Hessenberg.
+    std::vector<std::vector<double>> V(max_m + 1,
+                                       std::vector<double>(n * kNC, 0.0));
+    std::vector<std::vector<double>> Z(max_m,
+                                       std::vector<double>(n * kNC, 0.0));
+    for (int i = 0; i < n * kNC; ++i) V[0][i] = b[i] / bnorm;
+    std::vector<double> g(max_m + 1, 0.0);
+    g[0] = bnorm;
+    std::vector<double> cs(max_m, 0.0), sn(max_m, 0.0);
+    std::vector<std::vector<double>> H(max_m + 1,
+                                       std::vector<double>(max_m, 0.0));
+
+    int it = 0;
+    int done = 0;
+    for (; it < max_m; ++it) {
+        // z = P^{-1} v.
+        std::vector<double>& z = Z[it];
+        for (int c = 0; c < n; ++c) {
+            VecN vc;
+            for (int i = 0; i < kNC; ++i) vc[i] = V[it][c * kNC + i];
+            const VecN zc = P[c].solve(vc);
+            for (int i = 0; i < kNC; ++i) z[c * kNC + i] = zc[i];
+        }
+        // w = J z: finite-difference flux derivative + linear diagonal.
+        double eps = std::sqrt(std::numeric_limits<double>::epsilon());
+        double unorm = 0.0;
+        for (double v : z) unorm += v * v;
+        unorm = std::sqrt(unorm);
+        if (std::getenv("CFD_DEBUG_GMRES") && rank_ == 0)
+            std::fprintf(stderr, "[gmres] it=%d unorm=%.6e\n", it, unorm);
+        if (unorm <= 0.0) {
+            done = it;
+            break;
+        }
+        eps = eps * (1.0 + bnorm) / std::max(unorm, 1e-300);
+        std::vector<double> Up(mesh_.n_local * kNC);
+        std::copy(U_.begin(), U_.end(), Up.begin());
+        for (int i = 0; i < n * kNC; ++i)
+            Up[i] += eps * z[i];
+        std::vector<double> Rp(n * kNC, 0.0);
+        flux_residual(Up, Rp);
+        if (std::getenv("CFD_DEBUG_GMRES")) {
+            for (int i = 0; i < n * kNC; ++i) {
+                if (!std::isfinite(Rp[i])) {
+                    std::fprintf(stderr,
+                                 "[gmres] NaN in Rp on rank=%d idx=%d cell=%d "
+                                 "Up=[%.6e %.6e %.6e %.6e] z=[%.6e]\n",
+                                 rank_, i, i / kNC, Up[(i / kNC) * kNC],
+                                 Up[(i / kNC) * kNC + 1],
+                                 Up[(i / kNC) * kNC + 2],
+                                 Up[(i / kNC) * kNC + 3], z[i]);
+                    break;
+                }
+            }
+        }
+        std::vector<double> w(n * kNC);
+        for (int i = 0; i < n * kNC; ++i)
+            w[i] = (Rp[i] - R0[i]) / eps + diag_lin[i / kNC] * z[i];
+        // Modified Gram-Schmidt.
+        for (int j = 0; j <= it; ++j) {
+            double hij = 0.0;
+            for (int i = 0; i < n * kNC; ++i) hij += w[i] * V[j][i];
+            H[j][it] = hij;
+            for (int i = 0; i < n * kNC; ++i) w[i] -= hij * V[j][i];
+        }
+        double wnorm = 0.0;
+        for (double v : w) wnorm += v * v;
+        wnorm = std::sqrt(wnorm);
+        H[it + 1][it] = wnorm;
+        if (std::getenv("CFD_DEBUG_GMRES") && rank_ == 0)
+            std::fprintf(stderr, "[gmres] it=%d H00=%.6e wnorm=%.6e\n", it,
+                         H[0][it], wnorm);
+        if (wnorm > 0.0)
+            for (int i = 0; i < n * kNC; ++i) V[it + 1][i] = w[i] / wnorm;
+        // Apply previous Givens rotations to the new H column.
+        for (int j = 0; j < it; ++j) {
+            const double h1 = H[j][it];
+            const double h2 = H[j + 1][it];
+            H[j][it] = cs[j] * h1 + sn[j] * h2;
+            H[j + 1][it] = -sn[j] * h1 + cs[j] * h2;
+        }
+        const double h1 = H[it][it];
+        const double h2 = H[it + 1][it];
+        const double denom = std::sqrt(h1 * h1 + h2 * h2);
+        if (denom > 0.0) {
+            cs[it] = h1 / denom;
+            sn[it] = h2 / denom;
+        } else {
+            cs[it] = 1.0;
+            sn[it] = 0.0;
+        }
+        H[it][it] = cs[it] * h1 + sn[it] * h2;
+        H[it + 1][it] = 0.0;
+        g[it + 1] = -sn[it] * g[it];
+        g[it] = cs[it] * g[it];
+        done = it + 1;
+        if (std::getenv("CFD_DEBUG_GMRES") && rank_ == 0)
+            std::fprintf(stderr, "[gmres] it=%d gnext=%.6e\n", it, g[it + 1]);
+        if (std::fabs(g[it + 1]) / std::max(bnorm, 1e-300) < 1e-12) break;
+    }
+    if (std::getenv("CFD_DEBUG_GMRES") && rank_ == 0)
+        std::fprintf(stderr, "[gmres] rank=%d iters=%d\n", rank_, done);
+
+    // Back-substitute for the GMRES coefficients.
+    std::vector<double> y(max_m, 0.0);
+    for (int j = done - 1; j >= 0; --j) {
+        double s = g[j];
+        for (int k = j + 1; k < done; ++k) s -= H[j][k] * y[k];
+        y[j] = (H[j][j] != 0.0) ? s / H[j][j] : 0.0;
+    }
+    std::vector<double> dU(n * kNC, 0.0);
+    for (int j = 0; j < done; ++j)
+        for (int i = 0; i < n * kNC; ++i) dU[i] += y[j] * Z[j][i];
+
+    // Update with a positivity safeguard.
     for (int c = 0; c < mesh_.n_owned; ++c) {
         VecN unew;
         VecN ucur{U_[c * kNC], U_[c * kNC + 1], U_[c * kNC + 2],
@@ -421,6 +447,22 @@ void Solver::inner_iteration(double cfl, double physical_dt,
         for (int i = 0; i < kNC; ++i) U_[c * kNC + i] = unew[i];
     }
 
+    // Refresh the total residual at the accepted state so the caller's
+    // convergence check measures the state that was just written.
+    flux_residual(U_, total_residual);
+    for (int c = 0; c < mesh_.n_owned; ++c) {
+        for (int i = 0; i < kNC; ++i) {
+            if (physical_dt > 0.0) {
+                const double src =
+                    (3.0 * U_[c * kNC + i] - 4.0 * U_prev_[c * kNC + i] +
+                     U_prev2_[c * kNC + i]) /
+                    (2.0 * physical_dt);
+                total_residual[c * kNC + i] +=
+                    src * mesh_.cell_volume[c];
+            }
+        }
+    }
+
     if (const char* env = std::getenv("CFD_WATCH_CELL")) {
         const int64_t want = std::atoll(env);
         for (int c = 0; c < mesh_.n_owned; ++c) {
@@ -434,7 +476,7 @@ void Solver::inner_iteration(double cfl, double physical_dt,
                              dU[c * kNC], dU[c * kNC + 1], dU[c * kNC + 2],
                              dU[c * kNC + 3], residual_[c * kNC],
                              residual_[c * kNC + 1], residual_[c * kNC + 2],
-                             residual_[c * kNC + 3], diag_scale[c]);
+                             residual_[c * kNC + 3], diag_lin[c]);
                 for (int f : mesh_.cell_faces[c]) {
                     const LocalFace& lf = mesh_.faces[f];
                     const int j = (lf.left == c) ? lf.right : lf.left;
@@ -480,7 +522,7 @@ void Solver::inner_iteration(double cfl, double physical_dt,
                          static_cast<long long>(mesh_.global_cell_id[c_dumax]),
                          mesh_.cell_center[c_dumax].x,
                          mesh_.cell_center[c_dumax].y,
-                         mesh_.cell_volume[c_dumax], diag_scale[c_dumax],
+                         mesh_.cell_volume[c_dumax], diag_lin[c_dumax],
                          lambda_c[c_dumax], lambda_v[c_dumax],
                          residual_[c_dumax * kNC], residual_[c_dumax * kNC + 1],
                          residual_[c_dumax * kNC + 2],
@@ -500,11 +542,11 @@ void Solver::inner_iteration(double cfl, double physical_dt,
                 rmax = rc;
                 cell_r = c;
             }
-            if (diag_scale[c] < dmin) {
-                dmin = diag_scale[c];
+            if (diag_lin[c] < dmin) {
+                dmin = diag_lin[c];
                 cell_dmin = c;
             }
-            dmax = std::max(dmax, diag_scale[c]);
+            dmax = std::max(dmax, diag_lin[c]);
         }
         double gr, gdmin, gdmax, gt;
         MPI_Allreduce(&rmax, &gr, 1, MPI_DOUBLE, MPI_MAX, comm_);
@@ -530,6 +572,165 @@ void Solver::inner_iteration(double cfl, double physical_dt,
                          mesh_.cell_volume[cell_r], mesh_.cell_center[cell_r].x,
                          mesh_.cell_center[cell_r].y, lambda_c[cell_r],
                          lambda_v[cell_r]);
+    }
+}
+
+void Solver::inner_iteration(double cfl, double physical_dt,
+                             std::vector<double>& total_residual,
+                             const std::vector<double>& grad_frozen,
+                             const std::vector<double>& limiter_frozen) {
+    // Symmetric flux-split Gauss-Seidel relaxation for the dual-time system
+    //   (V/dt + 3V/(2 dt_phys)) dU + L dU + U dU = -R_total.
+    // The diagonal is scalar: V/dt + sum_j rho_j. Both sweeps use
+    // A^- = 0.5(A - rho I) couplings, making the operator symmetric under
+    // reversal of the cell index order (no directional bias for symmetric
+    // flow problems).
+    const double inv_dt_bdf = physical_dt > 0.0 ? 1.5 / physical_dt : 0.0;
+    const double relax =
+        std::getenv("CFD_RELAX") ? std::atof(std::getenv("CFD_RELAX")) : 1.0;
+
+    std::vector<double> lambda_c, lambda_v;
+    compute_spectral_radii(lambda_c, lambda_v);
+
+    std::vector<double> R0(mesh_.n_owned * kNC, 0.0);
+    cfd::assemble_residual(mesh_, U_, grad_frozen, limiter_frozen, numerics_,
+                           case_.freestream, R0);
+    total_residual.assign(mesh_.n_owned * kNC, 0.0);
+    for (int c = 0; c < mesh_.n_owned; ++c) {
+        for (int i = 0; i < kNC; ++i) {
+            double r = R0[c * kNC + i];
+            if (physical_dt > 0.0) {
+                const double src =
+                    (3.0 * U_[c * kNC + i] - 4.0 * U_prev_[c * kNC + i] +
+                     U_prev2_[c * kNC + i]) /
+                    (2.0 * physical_dt);
+                r += src * mesh_.cell_volume[c];
+            }
+            total_residual[c * kNC + i] = r;
+        }
+    }
+
+    std::vector<double> diag(mesh_.n_owned);
+    for (int c = 0; c < mesh_.n_owned; ++c) {
+        diag[c] =
+            (lambda_c[c] + 4.0 * lambda_v[c]) / std::max(cfl, 1e-12) +
+            inv_dt_bdf * mesh_.cell_volume[c];
+    }
+
+    struct FaceJac {
+        MatN A;
+        double rho = 0.0;
+    };
+    std::vector<FaceJac> fj(mesh_.faces.size());
+    for (size_t f = 0; f < mesh_.faces.size(); ++f) {
+        const LocalFace& lf = mesh_.faces[f];
+        const int L = lf.left;
+        const int R = lf.right;
+        const auto state = [&](int c) {
+            return VecN{U_[c * kNC], U_[c * kNC + 1], U_[c * kNC + 2],
+                        U_[c * kNC + 3]};
+        };
+        Primitive qL = cons_to_prim(state(L), numerics_.gas);
+        Primitive qR = (R >= 0) ? cons_to_prim(state(R), numerics_.gas) : qL;
+        Primitive qavg;
+        qavg.rho = 0.5 * (qL.rho + qR.rho);
+        qavg.u = 0.5 * (qL.u + qR.u);
+        qavg.v = 0.5 * (qL.v + qR.v);
+        qavg.p = 0.5 * (qL.p + qR.p);
+        const double a = sound_speed(qavg, numerics_.gas);
+        const double un = qavg.u * lf.n.x + qavg.v * lf.n.y;
+        double rho = std::fabs(un) + a;
+        if (numerics_.viscosity > 0.0 && R >= 0) {
+            rho += 2.0 * numerics_.viscosity * lf.area * lf.area /
+                   (std::max(qavg.rho, 1e-300) *
+                    std::max(mesh_.cell_volume[L], 1e-300));
+        }
+        fj[f] = {inviscid_jacobian_normal(qavg, lf.n, numerics_.gas), rho};
+        for (int side = 0; side < 2; ++side) {
+            const int c = side == 0 ? L : R;
+            if (c < 0 || c >= mesh_.n_owned) continue;
+            diag[c] += rho;
+        }
+    }
+
+    std::vector<double> dU(mesh_.n_owned * kNC, 0.0);
+    // Forward sweep.
+    for (int c = 0; c < mesh_.n_owned; ++c) {
+        VecN rhs_c;
+        for (int i = 0; i < kNC; ++i)
+            rhs_c[i] = -total_residual[c * kNC + i];
+        for (int f : mesh_.cell_faces[c]) {
+            const LocalFace& lf = mesh_.faces[f];
+            const int j = (lf.left == c) ? lf.right : lf.left;
+            if (j < 0 || j >= c || j >= mesh_.n_owned) continue;
+            const double sgn = (lf.left == c) ? 1.0 : -1.0;
+            const FaceJac& jf = fj[f];
+            VecN contrib;
+            for (int i = 0; i < kNC; ++i) {
+                double s = 0.0;
+                for (int k = 0; k < kNC; ++k)
+                    s += (sgn * jf.A[i][k] - (i == k ? jf.rho : 0.0)) *
+                         dU[j * kNC + k];
+                contrib[i] = 0.5 * s;
+            }
+            rhs_c = rhs_c - contrib;
+        }
+        const double inv_d = 1.0 / std::max(diag[c], 1e-300);
+        for (int i = 0; i < kNC; ++i) dU[c * kNC + i] = rhs_c[i] * inv_d * relax;
+    }
+    // Backward sweep (same A^- coupling).
+    for (int c = mesh_.n_owned - 1; c >= 0; --c) {
+        VecN corr;
+        for (int f : mesh_.cell_faces[c]) {
+            const LocalFace& lf = mesh_.faces[f];
+            const int j = (lf.left == c) ? lf.right : lf.left;
+            if (j < 0 || j <= c || j >= mesh_.n_owned) continue;
+            const double sgn = (lf.left == c) ? 1.0 : -1.0;
+            const FaceJac& jf = fj[f];
+            VecN contrib;
+            for (int i = 0; i < kNC; ++i) {
+                double s = 0.0;
+                for (int k = 0; k < kNC; ++k)
+                    s += (sgn * jf.A[i][k] - (i == k ? jf.rho : 0.0)) *
+                         dU[j * kNC + k];
+                contrib[i] = 0.5 * s;
+            }
+            corr = corr + contrib;
+        }
+        const double inv_d = 1.0 / std::max(diag[c], 1e-300);
+        for (int i = 0; i < kNC; ++i) dU[c * kNC + i] -= corr[i] * inv_d * relax;
+    }
+
+    // Update with a positivity safeguard.
+    for (int c = 0; c < mesh_.n_owned; ++c) {
+        VecN unew;
+        VecN ucur{U_[c * kNC], U_[c * kNC + 1], U_[c * kNC + 2],
+                  U_[c * kNC + 3]};
+        for (int i = 0; i < kNC; ++i) unew[i] = ucur[i] + dU[c * kNC + i];
+        double factor = 1.0;
+        while (!positive_state(unew, numerics_.gas) && factor > 1.0 / 16.0) {
+            factor *= 0.5;
+            for (int i = 0; i < kNC; ++i)
+                unew[i] = ucur[i] + factor * dU[c * kNC + i];
+        }
+        if (!positive_state(unew, numerics_.gas)) unew = ucur;
+        for (int i = 0; i < kNC; ++i) U_[c * kNC + i] = unew[i];
+    }
+
+    // Refresh the total residual at the accepted state.
+    cfd::assemble_residual(mesh_, U_, grad_frozen, limiter_frozen, numerics_,
+                           case_.freestream, total_residual);
+    for (int c = 0; c < mesh_.n_owned; ++c) {
+        for (int i = 0; i < kNC; ++i) {
+            if (physical_dt > 0.0) {
+                const double src =
+                    (3.0 * U_[c * kNC + i] - 4.0 * U_prev_[c * kNC + i] +
+                     U_prev2_[c * kNC + i]) /
+                    (2.0 * physical_dt);
+                total_residual[c * kNC + i] +=
+                    src * mesh_.cell_volume[c];
+            }
+        }
     }
 }
 
@@ -702,6 +903,8 @@ RunStats Solver::run(const std::string& output_dir) {
         if (const char* env = std::getenv("CFD_CFL_MAX")) {
             cfl = std::min(cfl, std::atof(env));
         }
+        if (case_.run_control.cfl_cap > 0.0)
+            cfl = std::min(cfl, case_.run_control.cfl_cap);
         return cfl;
     };
 
@@ -746,7 +949,8 @@ RunStats Solver::run(const std::string& output_dir) {
             inner_min = std::min(inner_min, inner_max);
         }
         for (int it = 0; it < inner_max; ++it) {
-            inner_iteration(cfl, transient ? dt_phys : 0.0, total_residual);
+            inner_iteration(cfl, transient ? dt_phys : 0.0, total_residual,
+                            grad_, limiter_);
             ++inner;
             double nl2 = 0.0, nlinf = 0.0;
             double comp[4], cinf[4];
@@ -766,6 +970,27 @@ RunStats Solver::run(const std::string& output_dir) {
                 : std::min(stats.min_inner_iterations, inner);
         stats.max_inner_iterations = std::max(stats.max_inner_iterations, inner);
         if (ratio > inner_target) ++stats.inner_target_misses;
+
+        // Recompute gradients and the residual at the accepted state so the
+        // recorded residual row corresponds exactly to the state used for the
+        // force row, surface row, and final field.
+        compute_gradients();
+        compute_limiters();
+        assemble_residual();
+        for (int c = 0; c < mesh_.n_owned; ++c) {
+            for (int i = 0; i < kNC; ++i) {
+                double r = residual_[c * kNC + i];
+                if (transient) {
+                    const double src =
+                        (3.0 * U_[c * kNC + i] -
+                         4.0 * U_prev_[c * kNC + i] +
+                         U_prev2_[c * kNC + i]) /
+                        (2.0 * dt_phys);
+                    r += src * mesh_.cell_volume[c];
+                }
+                total_residual[c * kNC + i] = r;
+            }
+        }
 
         // Final residual/forces for this step.
         double nl2 = 0.0, nlinf = 0.0;

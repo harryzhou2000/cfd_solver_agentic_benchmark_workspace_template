@@ -32,6 +32,7 @@ struct RunControl {
     int max_steps_override = -1;
     double final_time_override = -1.0;
     double time_step_override = -1.0;
+    double cfl_cap = -1.0;  // documented conservative CFL ceiling (>=0)
 };
 
 struct OutputControl {

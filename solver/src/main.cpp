@@ -27,6 +27,7 @@ struct CliOptions {
     int max_steps = -1;       // diagnostic override
     double final_time = -1.0; // diagnostic override
     double time_step = -1.0;  // diagnostic override
+    double cfl_cap = -1.0;
     bool inspect_mesh = false;
 };
 
@@ -35,7 +36,8 @@ void print_usage(const char* argv0) {
         "usage: %s solve --case <case.json> --output <dir> "
         "[--restart <file>] [--report-level brief|full]\n"
         "       %s inspect-mesh --case <case.json>\n"
-        "diagnostic options: --max-steps N --final-time T --time-step DT\n",
+        "diagnostic options: --max-steps N --final-time T --time-step DT "
+        "--cfl-cap C\n",
         argv0, argv0);
 }
 
@@ -70,6 +72,8 @@ CliOptions parse_args(int argc, char** argv) {
             opt.final_time = std::atof(next("--final-time").c_str());
         } else if (a == "--time-step") {
             opt.time_step = std::atof(next("--time-step").c_str());
+        } else if (a == "--cfl-cap") {
+            opt.cfl_cap = std::atof(next("--cfl-cap").c_str());
         } else {
             std::fprintf(stderr, "error: unknown option '%s'\n", a.c_str());
             std::exit(2);
@@ -123,6 +127,7 @@ int main(int argc, char** argv) {
             opt.final_time;
         if (opt.time_step > 0.0) case_input.run_control.time_step_override =
             opt.time_step;
+        if (opt.cfl_cap > 0.0) case_input.run_control.cfl_cap = opt.cfl_cap;
 
         if (opt.command == "inspect-mesh") {
             if (rank == 0) {

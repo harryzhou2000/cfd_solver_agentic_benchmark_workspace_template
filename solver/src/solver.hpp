@@ -80,7 +80,14 @@ class Solver {
     // frozen BDF2 source (3U - 4U^n + U^{n-1})/(2 dt) to the total residual
     // for transient steps; for steady steps it is zero.
     void inner_iteration(double cfl, double physical_dt,
-                         std::vector<double>& total_residual);
+                         std::vector<double>& total_residual,
+                         const std::vector<double>& grad_frozen,
+                         const std::vector<double>& limiter_frozen);
+    // Matrix-free GMRES variant retained as an experimental path.
+    void inner_iteration_gmres(double cfl, double physical_dt,
+                               std::vector<double>& total_residual,
+                               const std::vector<double>& grad_frozen,
+                               const std::vector<double>& limiter_frozen);
 
     void halo_exchange();
     void compute_residual_norms(const std::vector<double>& r, double& l2,

@@ -81,29 +81,34 @@ void compute_limiters(const DistributedMesh& mesh,
                      3.0);
         double phi = 1.0;
         const double qv[4] = {qc.rho, qc.u, qc.v, qc.p};
+        // One pass over the stencil to get the min/max neighbor value per
+        // primitive variable.
+        double qmax[4] = {-1e300, -1e300, -1e300, -1e300};
+        double qmin[4] = {1e300, 1e300, 1e300, 1e300};
+        for (int f2 : mesh.cell_faces[c]) {
+            const LocalFace& lf2 = mesh.faces[f2];
+            const int j2 = (lf2.left == c) ? lf2.right : lf2.left;
+            if (j2 < 0 || j2 == c) continue;
+            const Primitive q2 = cons_to_prim(
+                VecN{U[j2 * kNC], U[j2 * kNC + 1], U[j2 * kNC + 2],
+                     U[j2 * kNC + 3]},
+                num.gas);
+            const double qv2[4] = {q2.rho, q2.u, q2.v, q2.p};
+            for (int v = 0; v < 4; ++v) {
+                qmax[v] = std::max(qmax[v], qv2[v]);
+                qmin[v] = std::min(qmin[v], qv2[v]);
+            }
+        }
         for (int f : mesh.cell_faces[c]) {
             const LocalFace& lf = mesh.faces[f];
             const int j = (lf.left == c) ? lf.right : lf.left;
             if (j < 0 || j == c) continue;
             for (int v = 0; v < 4; ++v) {
-                double qmax = -1e300, qmin = 1e300;
-                for (int f2 : mesh.cell_faces[c]) {
-                    const LocalFace& lf2 = mesh.faces[f2];
-                    const int j2 = (lf2.left == c) ? lf2.right : lf2.left;
-                    if (j2 < 0 || j2 == c) continue;
-                    const Primitive q2 = cons_to_prim(
-                        VecN{U[j2 * kNC], U[j2 * kNC + 1], U[j2 * kNC + 2],
-                             U[j2 * kNC + 3]},
-                        num.gas);
-                    const double qv2[4] = {q2.rho, q2.u, q2.v, q2.p};
-                    qmax = std::max(qmax, qv2[v]);
-                    qmin = std::min(qmin, qv2[v]);
-                }
                 const Vec2 d = mesh.cell_center[j] - mesh.cell_center[c];
                 const double delta =
                     grad[gid(c, v)] * d.x + grad[gid(c, v) + 1] * d.y;
                 if (delta > 1e-300) {
-                    const double dplus = qmax - qv[v];
+                    const double dplus = qmax[v] - qv[v];
                     const double num =
                         (dplus * dplus + eps2) * delta + 2.0 * delta * delta * dplus;
                     const double den =
@@ -112,7 +117,7 @@ void compute_limiters(const DistributedMesh& mesh,
                         den > 0.0 ? num / (den * std::max(delta, 1e-300)) : 1.0;
                     phi = std::min(phi, ph);
                 } else if (delta < -1e-300) {
-                    const double dminus = qmin - qv[v];
+                    const double dminus = qmin[v] - qv[v];
                     const double num = (dminus * dminus + eps2) * delta +
                                        2.0 * delta * delta * dminus;
                     const double den = dminus * dminus + 2.0 * delta * delta +
@@ -490,6 +495,20 @@ void assemble_residual(const DistributedMesh& mesh,
                 flux = bf.inviscid - bf.viscous;
             }
             for (int i = 0; i < kNC; ++i) r[i] += flux[i] * lf.area;
+            if (std::getenv("CFD_TRACE_NAN")) {
+                bool bad = false;
+                for (int i = 0; i < kNC; ++i)
+                    if (!std::isfinite(flux[i])) bad = true;
+                if (bad) {
+                    std::fprintf(stderr,
+                                 "[trace] NaN flux at cell=%d face L=%d R=%d "
+                                 "bc=%s n=(%.3f,%.3f) UL=[%.6e %.6e %.6e %.6e] "
+                                 "UR=[%.6e %.6e %.6e %.6e]\n",
+                                 c, lf.left, lf.right, bc_to_string(lf.bc),
+                                 lf.n.x, lf.n.y, UL[0], UL[1], UL[2], UL[3],
+                                 UR[0], UR[1], UR[2], UR[3]);
+                }
+            }
         }
         for (int i = 0; i < kNC; ++i)
             residual[c * kNC + i] = r[i];
@@ -515,7 +534,8 @@ ForceSum accumulate_wall_forces(const DistributedMesh& mesh,
             continue;
         WallFaceData wd;
         boundary_face_flux(mesh, face, U, grad, num, freestream, &wd);
-        const Vec2 f_p = wd.n_b * wd.pressure;
+        // Traction on the body is sigma . n_b = -p n_b + tau . n_b.
+        const Vec2 f_p = wd.n_b * (-wd.pressure);
         const Vec2 f_v = wd.tau_n;
         const Vec2 f_total = f_p + f_v;
         sum.pressure_drag += f_p.dot(ddir) * face.area;
