@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import server
-from cfdeval import codex_data
+from cfdeval import codex_data, query
 from cfdeval.sessions import CodexThreadEvents
 
 
@@ -44,6 +44,36 @@ class ReportPdfDiscoveryTests(unittest.TestCase):
 
 
 class SnapshotProtocolTests(unittest.TestCase):
+    def test_discovery_only_includes_canonical_hashed_run_ids(self):
+        with tempfile.TemporaryDirectory() as raw:
+            outputs = Path(raw)
+            names = (
+                "codex_gpt56_01_cb349f",
+                "codex_dsv4_flash_01_0c1996",
+                "codex_gpt56_01",
+                "codex_gpt56_01_CB349F",
+                "codex_gpt56_01_cb349",
+                "codex_gpt56_01_cb349ff",
+            )
+            for name in names:
+                folder = outputs / name
+                folder.mkdir()
+                (folder / "index.json").write_text("{}")
+
+            discovered = [folder.name for folder in query.result_folders(outputs)]
+
+            self.assertEqual(discovered, [
+                "codex_dsv4_flash_01_0c1996",
+                "codex_gpt56_01_cb349f",
+            ])
+
+    def test_discovery_still_requires_index_manifest(self):
+        with tempfile.TemporaryDirectory() as raw:
+            outputs = Path(raw)
+            (outputs / "codex_gpt56_01_cb349f").mkdir()
+
+            self.assertEqual(query.result_folders(outputs), [])
+
     def test_detail_exposes_identity_final_response_and_pdf_metadata(self):
         with tempfile.TemporaryDirectory() as raw:
             base = Path(raw)

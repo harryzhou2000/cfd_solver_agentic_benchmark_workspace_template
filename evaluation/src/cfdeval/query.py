@@ -5,8 +5,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
+
+
+CANONICAL_RUN_ID_RE = re.compile(r"^.+_[0-9a-f]{6}$")
 
 
 def outputs_root() -> Path:
@@ -18,7 +22,9 @@ def result_folders(root: Path | None = None) -> list[Path]:
     if not root.is_dir():
         return []
     return sorted(p for p in root.iterdir()
-                  if p.is_dir() and (p / "index.json").exists())
+                  if (p.is_dir()
+                      and CANONICAL_RUN_ID_RE.fullmatch(p.name)
+                      and (p / "index.json").exists()))
 
 
 def load(folder: Path) -> dict:
