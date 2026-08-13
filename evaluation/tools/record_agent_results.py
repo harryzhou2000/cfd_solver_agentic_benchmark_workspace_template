@@ -137,6 +137,12 @@ def main(argv: list[str] | None = None) -> int:
             review = json.loads(
                 (folder / f"review_{area_config_names[area]}.json").read_text())
             summary[area] = review
+        # Sidecars are authoritative and may have been regenerated after the
+        # initial summary (for example, legacy session-accounting repairs).
+        for key in ("metadata", "expenses", "measurements"):
+            sidecar = folder / f"{key}.json"
+            if sidecar.exists():
+                summary[key] = json.loads(sidecar.read_text())
         (summary_path).write_text(json.dumps(summary, indent=2) + "\n")
         mod.render_md(folder / "summary.md", summary, folder)
         print(f"refreshed {summary_path} and summary.md with recorded scores")

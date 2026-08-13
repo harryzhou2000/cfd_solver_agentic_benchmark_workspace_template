@@ -172,6 +172,35 @@ def iter_session_records(rollout_path):
                 continue
 
 
+def rollout_usage_facts(rollout_path: str) -> dict:
+    """Latest cumulative usage, persisted context size, and prompt statistics."""
+    final = {f: 0 for f in TOKEN_FIELDS}
+    context_windows = []
+    prompt_inputs = []
+    for rec in iter_session_records(rollout_path):
+        payload = rec.get("payload") or {}
+        if rec.get("type") != "event_msg" or payload.get("type") != "token_count":
+            continue
+        info = payload.get("info") or {}
+        total = info.get("total_token_usage") or {}
+        if total and total.get("total_tokens", 0) >= final["total_tokens"]:
+            final = {f: max(int(total.get(f, 0) or 0), 0) for f in TOKEN_FIELDS}
+            final["non_cached_input_tokens"] = max(
+                final["input_tokens"] - final["cached_input_tokens"], 0)
+        cw = info.get("model_context_window")
+        if isinstance(cw, int) and cw > 0:
+            context_windows.append(cw)
+        last_input = (info.get("last_token_usage") or {}).get("input_tokens")
+        if isinstance(last_input, int) and last_input >= 0:
+            prompt_inputs.append(last_input)
+    return {
+        **final,
+        "model_context_window": max(context_windows) if context_windows else None,
+        "max_prompt_input_tokens": max(prompt_inputs) if prompt_inputs else None,
+        "mean_prompt_input_tokens": (
+            sum(prompt_inputs) / len(prompt_inputs) if prompt_inputs else None
+        ),
+    }
 def parse_iso(ts: str | None) -> datetime | None:
     if not ts:
         return None

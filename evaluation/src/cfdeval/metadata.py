@@ -614,8 +614,12 @@ def main(argv: list[str] | None = None) -> int:
             continue
         recs = usage.get(tid, [])
         efforts = thread_efforts(t["rollout_path"], recs)
+        rollout_facts = cd.rollout_usage_facts(t["rollout_path"])
         max_input = max((r["input_tokens"] for r in recs), default=None)
         mean_input = (sum(r["input_tokens"] for r in recs) / len(recs)) if recs else None
+        if max_input is None:
+            max_input = rollout_facts["max_prompt_input_tokens"]
+            mean_input = rollout_facts["mean_prompt_input_tokens"]
         is_sub = tid in children
         entry = {
             "thread_id": tid,
@@ -632,6 +636,7 @@ def main(argv: list[str] | None = None) -> int:
             "ended_at": None,
             "context_used_max_input": max_input,
             "context_used_mean_input": round(mean_input, 1) if mean_input is not None else None,
+            "model_context_window_recorded": rollout_facts["model_context_window"],
         }
         s, e = cd.session_window(t["rollout_path"])
         entry["started_at"] = (
@@ -670,6 +675,8 @@ def main(argv: list[str] | None = None) -> int:
             "max_context_used": 0,
             "threads": 0,
         })
+        if models[m]["catalog"]["context_window"] is None and rollout_facts["model_context_window"]:
+            models[m]["catalog"]["context_window"] = rollout_facts["model_context_window"]
         for e in efforts or []:
             if e not in models[m]["reasoning_efforts_seen"]:
                 models[m]["reasoning_efforts_seen"].append(e)
@@ -679,6 +686,7 @@ def main(argv: list[str] | None = None) -> int:
         context["by_thread"][tid] = {
             "model": m, "max_input_tokens": max_input,
             "mean_input_tokens": round(mean_input, 1) if mean_input is not None else None,
+            "model_context_window_recorded": rollout_facts["model_context_window"],
         }
     for m, info in models.items():
         context["by_model"][m] = {

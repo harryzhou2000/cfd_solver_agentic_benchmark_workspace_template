@@ -53,6 +53,11 @@ def get_path(obj, dotpath: str):
 
 def row_for(folder: Path, summary: dict) -> dict:
     md = summary.get("metadata", {})
+    try:
+        if (folder / "metadata.json").exists():
+            md = json.loads((folder / "metadata.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        pass
     ex = summary.get("expenses", {})
     c = summary.get("contestant", {})
     me = summary.get("measurements", {})
@@ -84,6 +89,16 @@ def row_for(folder: Path, summary: dict) -> dict:
         pass
     an = (sessions or {}).get("analysis", {})
     ws_ = an.get("whole_session_stats", {})
+    selected_roots = ((agent_scores or {}).get("session_selection") or {}).get("roots") or []
+    primary_thread = (md.get("threads") or {}).get(selected_roots[0], {}) if selected_roots else {}
+    efforts = primary_thread.get("reasoning_effort") or []
+    if isinstance(efforts, str):
+        efforts = [efforts]
+    primary_model = primary_thread.get("model")
+    primary_model_effort = " ".join(
+        x for x in (primary_model, efforts[0] if efforts else None) if x
+    ) or None
+    session_tokens = ws_.get("tokens") or {}
     agent_reviewed = bool(
         (agent_scores or {}).get("rubric", {}).get("total_scored") is not None
         or any(
@@ -113,11 +128,17 @@ def row_for(folder: Path, summary: dict) -> dict:
         "contestant": folder.name,
         "run_id": (run_identity or {}).get("run_id") or folder.name,
         "harness": md.get("harness", {}).get("harness"),
+        "primary_model": primary_model,
+        "primary_effort": efforts[0] if efforts else None,
+        "primary_model_effort": primary_model_effort,
         "status": md.get("status"),
         "goal_time_s": (ex.get("time_seconds") or {}).get("goal_time"),
         "wall_time_s": wall,
         "activity_time_s": (ex.get("time_seconds") or {}).get("activity_time_seconds"),
-        "tokens": (ex.get("tokens") or {}).get("total"),
+        "tokens": session_tokens.get("total", (ex.get("tokens") or {}).get("total")),
+        "input_tokens": session_tokens.get("input"),
+        "cached_input_tokens": session_tokens.get("cached_input"),
+        "output_tokens": session_tokens.get("output"),
         "cost_usd": (ex.get("cost_estimate_usd") or {}).get("total"),
         "subagents": len(md.get("subagents", [])),
         "loc_lines": ((me.get("loc") or {}).get("file") or {}).get("lines"),

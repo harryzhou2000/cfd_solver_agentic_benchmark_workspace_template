@@ -39,13 +39,18 @@ directory can accumulate failed first attempts. To keep them separable:
 
 Authoritative source, in priority order:
 
-1. **Per-turn usage logs** (`logs_2.sqlite`, `feedback_log_body` containing
+1. **Terminal rollout token event** (`event_msg` with `type: token_count`):
+   the final cumulative `total_token_usage` for each selected thread supplies
+   exact `input_tokens`, `cached_input_tokens`, `non_cached_input_tokens`,
+   `output_tokens`, `reasoning_output_tokens`, and `total_tokens`. Count every
+   selected root and subagent thread once.
+2. **Per-turn usage logs** (`logs_2.sqlite`, `feedback_log_body` containing
    `codex.turn.token_usage.*`): exact `input_tokens`, `cached_input_tokens`,
    `non_cached_input_tokens`, `output_tokens`, `reasoning_output_tokens`, and
    `total_tokens` per thread+model, keyed by `turn.id`. Records are grouped by
    `(thread_id, turn.id)` and summed (each logged submission consumed tokens).
-2. **Thread totals** (`state_5.sqlite` `threads.tokens_used`): used for
-   threads with no usage-log records; reported with
+3. **Thread totals** (`state_5.sqlite` `threads.tokens_used`): used for
+   threads with neither rollout counters nor usage-log records; reported with
    `"source": "threads_fallback"` and no input/output split.
 
 Token accounting:
@@ -54,8 +59,9 @@ Token accounting:
   subagent threads are linked through `thread_spawn_edges` and reported
   separately (`is_subagent`) and in the aggregate.
 - Totals are reported per model, per thread, and as main-vs-subagent split.
-- `total_tokens` from logs is cross-checked against `threads.tokens_used`;
-  discrepancies are recorded, not silently resolved.
+- Rollout or log totals are cross-checked against `threads.tokens_used`;
+  discrepancies and any scaling needed to reconcile a split to that terminal
+  total are recorded, not silently hidden.
 
 ## 3. Cost estimate
 

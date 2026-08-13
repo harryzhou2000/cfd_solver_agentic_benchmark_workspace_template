@@ -5,6 +5,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import server
+from cfdeval import codex_data
+from cfdeval.sessions import CodexThreadEvents
 
 
 class ReportPdfDiscoveryTests(unittest.TestCase):
@@ -52,6 +54,7 @@ class SnapshotProtocolTests(unittest.TestCase):
             folder = base / "outputs" / "codex_model_01_deadbe"
             folder.mkdir(parents=True)
             (folder / "summary.json").write_text(json.dumps({"contestant": {}}))
+            (folder / "metadata.json").write_text(json.dumps({"models": {}}))
             (folder / "index.json").write_text("{}")
             identity = {
                 "run_id": folder.name,
@@ -64,6 +67,7 @@ class SnapshotProtocolTests(unittest.TestCase):
             with patch.object(server, "WORKSPACE_ROOT", workspace_root):
                 detail = server.snapshot_detail(folder)
             self.assertEqual(detail["run_identity"]["run_id"], folder.name)
+            self.assertEqual(detail["metadata"], {"models": {}})
             self.assertEqual(detail["markdown"]["contestant_final_response.md"], "final prose\n")
             self.assertEqual(detail["report_pdf"]["relative_path"], "report/report.pdf")
 
@@ -101,6 +105,40 @@ class SnapshotProtocolTests(unittest.TestCase):
     def test_hidden_attribute_beats_component_display_rules(self):
         css = (Path(__file__).parent / "static" / "styles.css").read_text()
         self.assertIn("[hidden] { display: none !important; }", css)
+
+
+class RolloutUsageTests(unittest.TestCase):
+    def test_rollout_usage_and_context_window_are_persisted(self):
+        with tempfile.TemporaryDirectory() as raw:
+            rollout = Path(raw) / "rollout.jsonl"
+            rows = [
+                {"timestamp": "2026-01-01T00:00:00Z", "type": "event_msg", "payload": {
+                    "type": "token_count", "info": {
+                        "total_token_usage": {"input_tokens": 100, "cached_input_tokens": 80,
+                            "output_tokens": 10, "reasoning_output_tokens": 4, "total_tokens": 110},
+                        "last_token_usage": {"input_tokens": 100},
+                        "model_context_window": 258400,
+                    }}},
+                {"timestamp": "2026-01-01T00:01:00Z", "type": "event_msg", "payload": {
+                    "type": "token_count", "info": {
+                        "total_token_usage": {"input_tokens": 160, "cached_input_tokens": 128,
+                            "output_tokens": 20, "reasoning_output_tokens": 6, "total_tokens": 180},
+                        "last_token_usage": {"input_tokens": 60},
+                        "model_context_window": 258400,
+                    }}},
+            ]
+            rollout.write_text("\n".join(json.dumps(row) for row in rows) + "\n")
+            facts = codex_data.rollout_usage_facts(str(rollout))
+            self.assertEqual(facts["input_tokens"], 160)
+            self.assertEqual(facts["cached_input_tokens"], 128)
+            self.assertEqual(facts["non_cached_input_tokens"], 32)
+            self.assertEqual(facts["output_tokens"], 20)
+            self.assertEqual(facts["model_context_window"], 258400)
+            self.assertEqual(facts["max_prompt_input_tokens"], 100)
+            stream = CodexThreadEvents("root", str(rollout))
+            stream.load()
+            self.assertEqual(stream.cumulative_usage["total_tokens"], 180)
+            self.assertEqual(stream.model_context_window, 258400)
 
 
 if __name__ == "__main__":

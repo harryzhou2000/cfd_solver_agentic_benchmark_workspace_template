@@ -11,12 +11,16 @@
    * ---------------------------------------------------------------- */
   const TABLE_COLUMNS = [
     { key: "run_id",         label: "Run ID",       type: "text",  sortType: "str" },
+    { key: "primary_model_effort", label: "Primary model", type: "text", sortType: "str" },
     { key: "harness",        label: "Harness",      type: "text",  sortType: "str" },
     { key: "status",         label: "Status",       type: "pill-status", sortType: "status" },
     { key: "goal_time_s",    label: "Goal time",    type: "duration", sortType: "num" },
     { key: "wall_time_s",    label: "Wall time",    type: "duration", sortType: "num" },
     { key: "activity_time_s",label: "Activity",     type: "duration", sortType: "num" },
-    { key: "tokens",         label: "Tokens",       type: "tokens",  sortType: "num" },
+    { key: "input_tokens",   label: "Input",        type: "tokens",  sortType: "num" },
+    { key: "cached_input_tokens", label: "Cached",  type: "tokens",  sortType: "num" },
+    { key: "output_tokens",  label: "Output",       type: "tokens",  sortType: "num" },
+    { key: "tokens",         label: "Total",        type: "tokens",  sortType: "num" },
     { key: "cost_usd",       label: "Cost",         type: "money",   sortType: "num" },
     { key: "subagents",      label: "Subagents",    type: "int",     sortType: "num" },
     { key: "code_score",     label: "Code",         type: "score",   sortType: "num" },
@@ -371,7 +375,7 @@
     const sum = detail.summary || {};
     const snap = sum.snapshot || {};
     const c = sum.contestant || {};
-    const md = sum.metadata || {};
+    const md = detail.metadata || sum.metadata || {};
     const har = md.harness || {};
     const status = md.status || (detail.name ? "unknown" : null);
     $("#detail-status").outerHTML = `<span id="detail-status" class="${status ? "pill " + statusPillClass(status) : "pill pill-status-other"}">${escapeHtml(status || emDash)}</span>`;
@@ -417,8 +421,18 @@
   function renderMetricsCards(sum, detail) {
     const ex = sum.expenses || {};
     const ts = ex.time_seconds || {};
+    const sessionTokens = (((detail.sessions || {}).analysis || {}).whole_session_stats || {}).tokens || {};
+    const selection = (detail.agent_scores || {}).session_selection || {};
+    const primaryId = (selection.roots || [])[0];
+    const primary = ((detail.metadata || {}).threads || {})[primaryId] || {};
+    const efforts = Array.isArray(primary.reasoning_effort) ? primary.reasoning_effort : (primary.reasoning_effort ? [primary.reasoning_effort] : []);
     const cards = [
-      { label: "Total tokens",  value: fmtTokens(ex.tokens?.total),         sub: fmtInt(ex.tokens?.by_model && Object.keys(ex.tokens.by_model).length) + " models", cls: "is-strong" },
+      { label: "Primary model", value: [primary.model, efforts[0]].filter(Boolean).join(" ") || emDash, sub: primaryId ? primaryId.slice(0, 13) : "" },
+      { label: "Context window", value: fmtTokens(primary.model_context_window_recorded), sub: primary.context_used_max_input == null ? "usage unavailable" : `${fmtTokens(primary.context_used_max_input)} max observed input` },
+      { label: "Total tokens",  value: fmtTokens(sessionTokens.total ?? ex.tokens?.total), sub: "selected root tree", cls: "is-strong" },
+      { label: "Input", value: fmtTokens(sessionTokens.input), sub: `${fmtTokens(sessionTokens.non_cached_input)} non-cached` },
+      { label: "Cached input", value: fmtTokens(sessionTokens.cached_input), sub: fmtPct(sessionTokens.input ? sessionTokens.cached_input / sessionTokens.input : null) },
+      { label: "Output", value: fmtTokens(sessionTokens.output), sub: `${fmtTokens(sessionTokens.reasoning_output)} reasoning` },
       { label: "Cost",          value: fmtMoney(ex.cost_estimate_usd?.total), sub: ex.cost_estimate_usd?.estimate ? "estimate" : "" },
       { label: "Goal time",     value: fmtDuration(ts.goal_time),    sub: ts.started_at ? "started " + fmtDate(ts.started_at).slice(0,16) : "" },
       { label: "Wall time",     value: fmtDuration(ts.wall_time),    sub: ts.ended_at   ? "ended "   + fmtDate(ts.ended_at).slice(0,16)   : "" },
@@ -446,7 +460,7 @@
     }
     cards.push({
       label: "Subagents",
-      value: ((sum.metadata && sum.metadata.subagents) || []).length || 0,
+      value: ((detail.metadata && detail.metadata.subagents) || (sum.metadata && sum.metadata.subagents) || []).length || 0,
       sub: "metadata.subagents",
     });
     const scoreAreas = (detail.agent_scores || {}).scores || {};
@@ -460,7 +474,6 @@
     cards.push({ label: "Rubric total",  value: rubric.total_scored == null ? emDash : `${rubric.total_scored}/${rubric.total_possible ?? emDash}` });
     const dq = (detail.agent_scores || {}).disqualification || {};
     cards.push({ label: "Disqualified", value: dq.triggered === true ? "yes" : dq.triggered === false ? "no" : emDash, cls: dq.triggered ? "is-err" : "" });
-    const selection = (detail.agent_scores || {}).session_selection || {};
     cards.push({ label: "Execution date", value: selection.execution_date || emDash, sub: "UTC primary-session start" });
     const env = detail.env_snapshot || {};
     const envCap = detail.env_captured === true;
@@ -923,7 +936,7 @@
 
   function renderMetadataTab(detail) {
     const panel = $("#panel-metadata");
-    const md = (detail.summary && detail.summary.metadata) || null;
+    const md = detail.metadata || (detail.summary && detail.summary.metadata) || null;
     if (!md || Object.keys(md).length === 0) {
       panel.innerHTML = `<p class="muted">No metadata.json.</p>`;
       return;

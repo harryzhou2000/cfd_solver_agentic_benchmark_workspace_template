@@ -95,6 +95,12 @@ class CodexThreadEvents:
         self.rollout_path = rollout_path
         self._prev_tot: dict = {}
         self.cumulative_final: int | None = None   # final total_token_usage (thread total)
+        self.cumulative_usage: dict[str, int] = {
+            "input_tokens": 0, "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0, "output_tokens": 0,
+            "reasoning_output_tokens": 0, "total_tokens": 0,
+        }
+        self.model_context_window: int | None = None
         self.events: list[tuple[datetime, str, dict]] = []  # (ts, kind, info)
         self.token_events: list[tuple[datetime, dict]] = []
         self.tool_events: list[tuple[datetime, str]] = []
@@ -154,8 +160,13 @@ class CodexThreadEvents:
                                      for k in fields}
                         if delta["total_tokens"] > 0:
                             self.token_events.append((ts, delta))
+                            for key in fields:
+                                self.cumulative_usage[key] += delta[key]
                         self._prev_tot = cur
                         self.cumulative_final = cur["total_tokens"]
+                        context_window = info.get("model_context_window")
+                        if isinstance(context_window, int) and context_window > 0:
+                            self.model_context_window = context_window
                     self.add(ts, "token_count", {"info": payload.get("info", {})})
                 elif etype in ("task_started", "task_complete", "turn_aborted",
                                "context_compacted", "sub_agent_activity",
@@ -729,8 +740,7 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
             codex_docs.append(doc)
             codex_children |= children
             for tid, s in streams.items():
-                if tid in {r["thread_id"] for r in doc.get("roots", [])}:
-                    codex_run_total += s.cumulative_final or 0
+                codex_run_total += s.cumulative_final or 0
             all_events.extend(events)
             for tid, s in streams.items():
                 token_events.extend(
@@ -760,8 +770,7 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
                 codex_docs.append(doc)
                 codex_children |= children
                 for tid, s in streams.items():
-                    if tid in {r["thread_id"] for r in doc.get("roots", [])}:
-                        codex_run_total += s.cumulative_final or 0
+                    codex_run_total += s.cumulative_final or 0
                 all_events.extend(events)
                 for tid, s in streams.items():
                     token_events.extend(
@@ -827,10 +836,9 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
             "their own sessions); total_from_all_sessions sums them")
     if codex_doc.get("present"):
         accounting_notes.append(
-            "codex: total_token_usage / threads.tokens_used are subtree-"
-            "inclusive per thread; summing all threads overcounts nested "
-            "trees, so total_from_root_trees sums each root tree's final "
-            "cumulative counter once. Bucket totals are per-event "
+            "codex: each selected thread has its own cumulative usage counter; "
+            "run totals sum the selected root and its subagent threads. Bucket "
+            "totals are per-event "
             "total_token_usage deltas (cache-hit history is per submission; "
             "duplicate streaming ticks are excluded).")
 

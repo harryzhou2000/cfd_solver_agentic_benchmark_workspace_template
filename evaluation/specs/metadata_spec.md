@@ -38,13 +38,19 @@ For every thread (root and subagent) in the contestant's session set:
 - Catalog metadata per model from the opencodex catalog
   (`opencodex-catalog.json`): `display_name`, `context_window`,
   `max_context_window`, supported reasoning levels, when the model is listed.
+- Codex rollout token events may persist `model_context_window`; retain this
+  recorded value per thread and use it when catalog metadata is unavailable.
 
 ## 3. Context window used
 
-- `context_window` per model: the advertised window from the catalog.
+- `context_window` per model: the advertised window from the catalog, falling
+  back to a positive persisted `model_context_window` from the selected
+  thread's rollout when the model is absent from the catalog.
 - `context_used`: observed context per thread and per model — the maximum
-  `input_tokens` across turns (usage logs), i.e. the largest context actually
-  fed to the model, and the mean input tokens per turn.
+  `input_tokens` across turns, i.e. the largest context actually fed to the
+  model, and the mean input tokens per turn. Prefer usage-log rows; when those
+  are unavailable, derive both values from rollout token events'
+  `last_token_usage.input_tokens`.
 
 ## 4. Subagent calls / threads
 

@@ -65,10 +65,12 @@ which sessions belong to the run and answers any ambiguity:
 
 `whole_session_stats` keeps the entire-window aggregates (tokens, cache,
 tools, turns, activity wall/active/idle, per-entity summaries). Token totals
-carry accounting notes: codex `threads.tokens_used` / `total_token_usage` are
-subtree-inclusive, so `total_from_root_trees` sums each root tree once, while
-bucket totals are per-submission sums; opencode sums its session columns in
-`total_from_all_sessions`.
+carry accounting notes. Each selected Codex thread, including the primary root
+and every selected subagent thread, has its own cumulative usage counter and is
+counted exactly once in the run total. Bucket totals are reconstructed from
+successive `total_token_usage` deltas within each thread; this retains
+per-submission cache history without double-counting repeated streaming ticks.
+OpenCode sums its selected session columns in `total_from_all_sessions`.
 
 ## Permission-blocked idle
 

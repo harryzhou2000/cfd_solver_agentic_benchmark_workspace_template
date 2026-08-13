@@ -125,6 +125,13 @@ def main(argv: list[str] | None = None) -> int:
     usage = cd.load_turn_usage(args.logs_db, all_ids)
     meta = json.loads(Path(args.cost_metadata).read_text())
 
+    # Rollouts retain exact cached/input/output splits even when legacy
+    # logs_2.sqlite lacks per-turn usage rows.
+    cumulative = {
+        tid: cd.rollout_usage_facts((full_threads.get(tid) or {}).get("rollout_path"))
+        for tid in all_ids if full_threads.get(tid)
+    }
+
     # ---- tokens ----------------------------------------------------------
     by_thread = {}
     by_model = {}
@@ -139,7 +146,29 @@ def main(argv: list[str] | None = None) -> int:
             continue
         is_sub = tid in children
         recs = usage.get(tid, [])
-        if recs:
+        rollout_rec = cumulative.get(tid) or {}
+        if rollout_rec.get("total_tokens", 0):
+            thread_model = t["model"]
+            declared = t["tokens_used"]
+            observed = rollout_rec["total_tokens"]
+            scale = declared / observed if declared and observed else 1.0
+            per_model = {thread_model: {
+                "input": int(round(rollout_rec["input_tokens"] * scale)),
+                "cached": int(round(rollout_rec["cached_input_tokens"] * scale)),
+                "non_cached": int(round(rollout_rec["non_cached_input_tokens"] * scale)),
+                "output": int(round(rollout_rec["output_tokens"] * scale)),
+                "reasoning_output": int(round(rollout_rec["reasoning_output_tokens"] * scale)),
+                "total": declared or observed,
+            }}
+            total = declared or observed
+            thread_entry = {
+                "model": thread_model,
+                "is_subagent": is_sub,
+                "source": "rollout_cumulative" if scale == 1.0 else "rollout_scaled_to_threads",
+                "tokens": per_model,
+                "total": total,
+            }
+        elif recs:
             thread_model = t["model"]
             per_model_log = {}
             log_total = 0
@@ -289,6 +318,11 @@ def main(argv: list[str] | None = None) -> int:
             "main_vs_subagent": {"main": main_tokens, "subagent": sub_tokens},
             "fallback_tokens": fallback_tokens_total,
             "discrepancy_notes": discrepancy_notes,
+            "accounting_note": (
+                "Cached/input/output splits come from each selected thread's "
+                "terminal rollout counter and are scaled only when needed to "
+                "match state_5.sqlite threads.tokens_used."
+            ),
         },
         "cost_estimate_usd": {
             "total": round(total_cost, 4),

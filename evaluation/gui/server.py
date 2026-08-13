@@ -112,6 +112,7 @@ def snapshot_detail(folder: Path) -> dict:
 
     summary = _load("summary.json") or {}
     sessions = _load("sessions.json")
+    metadata = _load("metadata.json")
     agent_scores = _load("agent_scores.json")
     configs = _load("configs.json")
     env_snap = _load("env_snapshot.json")
@@ -129,6 +130,7 @@ def snapshot_detail(folder: Path) -> dict:
         "snapshot": summary.get("snapshot", {}),
         "summary": summary,
         "sessions": sessions,
+        "metadata": metadata,
         "agent_scores": agent_scores,
         "configs": {
             "captured_at": (configs or {}).get("captured_at"),
