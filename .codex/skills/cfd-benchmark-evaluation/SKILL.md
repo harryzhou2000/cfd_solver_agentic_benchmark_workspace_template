@@ -1,6 +1,6 @@
 ---
 name: cfd-benchmark-evaluation
-description: Evaluate CFD benchmark contestant workspaces from the manager repository. Use for pre-evaluation result-branch commits, canonical run-ID derivation, manager-side evidence snapshots, structural validator runs, source and numerical review, 100-point rubric scoring, review comments, disqualification assessment, result recording, integrity checks, and cross-contestant comparison.
+description: Evaluate CFD benchmark contestant workspaces from the manager repository. Use for pre-evaluation result-branch commits, canonical run-ID derivation, manual primary-session classification, manager-side evidence snapshots, structural validator runs, source and numerical review, 100-point rubric scoring, review comments, disqualification assessment, result recording, integrity checks, and cross-contestant comparison.
 ---
 
 # CFD Benchmark Evaluation
@@ -195,6 +195,10 @@ Requirements:
   textual reference check does not prove that the report compiles.
 - Do not stage ignored session/config telemetry, credentials, build trees, the
   `external` symlink target, or `.eval` scratch data.
+- Treat `.sessions/` as a hard exclusion even if an older workspace failed to
+  ignore it. Never commit its databases, rollout JSONL, auth/config state,
+  shell history, proxy state, or any other contents on the contestant result
+  branch.
 - Never use blind `git add -A` in a dirty workspace. Stage the audited
   canonical paths explicitly, then use `git status --short --untracked-files=all`
   to account for every remaining untracked path as excluded or unexpectedly
@@ -243,6 +247,7 @@ the snapshot:
 - selected artifact paths and SHA-256 values;
 - benchmark submodule commit;
 - session selection and rationale;
+- selected main session's final assistant response as contestant-side evidence;
 - metadata questions and operator answers;
 - configs and environment with secrets redacted;
 - scores, comments, evidence, limitations, and disqualification findings.
@@ -254,16 +259,195 @@ The manager snapshot stores metadata, scores, comments, commands, summarized
 evidence, integrity records, and evaluation reports. It is not a second raw
 data archive: do not copy solver logs, restart/field files, visualization
 working data, or bulk result directories into `evaluation/outputs/<run-id>`.
+Never copy or commit `.sessions/`, session SQLite databases, rollout JSONL,
+auth/config state, or raw trajectories into the manager repository. Only
+small derived session metadata, documented excerpts required as evidence, and
+the contestant final-response sidecar belong in the snapshot.
 
 `run_identity.json` is the authoritative identity/provenance sidecar even in
 manager revisions whose `index.json` schema does not yet enumerate it. Record
 its SHA-256 in `agent_report.md` and flag the indexing limitation explicitly;
 do not imply that `cfdeval check` validated an unindexed sidecar.
 
+### Manually select the primary run session
+
+For Docker-isolated runs created by this manager, distinguish host paths from
+paths recorded inside the container:
+
+```text
+host contestant repo:  <manager>/workspace/<harness>/<model>/<number>
+container project cwd: /workspace
+
+Codex host DB:         <repo>/.sessions/codex/state_5.sqlite
+Codex host rollouts:   <repo>/.sessions/codex/sessions/**/rollout-*.jsonl
+Codex container home:  /home/cfd_agent/.codex
+
+OpenCode host DB:      <repo>/.sessions/opencode-data/opencode/opencode.db
+OpenCode container DB: /workspace/.sessions/opencode-data/opencode/opencode.db
+OpenCode data root:    /workspace/.sessions/opencode-data/opencode
+```
+
+Here `<repo>` means the host contestant repository, not the manager repo.
+Codex thread rows and rollout metadata from isolated runs normally record cwd
+`/workspace` and rollout paths below `/home/cfd_agent/.codex`; OpenCode session
+rows may instead record the resolved host repo path. Map these recorded paths
+to the host-side `.sessions/` bundle explicitly. Do not reject a valid Docker
+session merely because its recorded container path differs from the host path.
+
+The current evaluator default for the project OpenCode DB omits the nested
+`opencode/` component, and `summarize.py` does not currently forward explicit
+project session paths. Generate the snapshot, manually establish the harness,
+then replace its session extraction with the applicable supported command.
+For a Codex run, query using the cwd recorded inside the container:
+
+```bash
+python3 evaluation/tools/extract_sessions.py \
+  --workspace /workspace \
+  --session-source project \
+  --project-codex-root <host-contestant-repo>/.sessions/codex \
+  --roots <confirmed-root-id[,continuation-root-id...]> \
+  --out evaluation/outputs/<run-id>/sessions.json
+```
+
+For an OpenCode run whose database rows record the resolved host path, use:
+
+```bash
+python3 evaluation/tools/extract_sessions.py \
+  --workspace <host-contestant-repo> \
+  --session-source project \
+  --project-opencode-db \
+    <host-contestant-repo>/.sessions/opencode-data/opencode/opencode.db \
+  --out evaluation/outputs/<run-id>/sessions.json
+```
+
+Verify the actual stored cwd before choosing either command. Do not try to
+merge the two cwd namespaces in one extraction; the non-primary harness is not
+part of the run. The Codex command's `workspace` field will be `/workspace`, so
+record the separately verified host repository path alongside it in the
+session-selection provenance.
+
+Rebuild or refresh any summary/report fields derived from `sessions.json`, and
+record that the direct project-session extraction superseded the initial
+`summarize.py` session artifact. Do not claim the snapshot is internally
+consistent until dependent fields and the index digest have been refreshed.
+
+Because automatic cwd matching may compare the host path to recorded
+`/workspace`, an empty project-Codex candidate set is not proof that no Codex
+session exists. Inspect the project `state_5.sqlite` and rollout tree directly,
+apply the `/workspace` mapping, then select and verify the primary root. Record
+both the host repository path and recorded container cwd in session provenance.
+
+Treat automatic cwd/session discovery as a candidate inventory, never as the
+answer. `system|project|all` selects a storage class, not a harness. Multiple
+attempts, harnesses, test chats, and evaluator sessions may share a workspace
+path. Do not select a session because it is newest, longest, highest-token, or
+merely cwd-matched.
+
+Inspect candidate Codex root threads and OpenCode root sessions manually.
+Identify the primary run from the harness actually used, initial prompt and
+benchmark objective, workspace identity, timing relative to workspace creation
+and run activity, continuity across implementation/build/run/report work,
+terminal outcome, and parent/subagent ancestry. Exclude setup probes,
+abandoned attempts, unrelated resumptions, evaluator sessions, and candidates
+from another harness.
+
+Obtain this evidence from the original read-only stores, not only the
+aggregate `sessions.json`: inspect Codex root rollout JSONL files and their
+recorded spawn ancestry, or OpenCode's SQLite session/message/part rows opened
+read-only. Do not edit or vacuum either store. Preserve the candidate IDs,
+source paths/database path, and the message IDs or timestamps used for the
+decision in the report. The initial branch remains authoritative for run
+identity, but it does not by itself prove which telemetry harness or session
+performed the work.
+
+For Codex, pass the confirmed root thread ID or IDs via `summarize.py --roots`;
+this includes their spawned subagent trees. Distinguish the original primary
+root from any genuine continuation roots. After extraction, verify every
+requested root was accepted, belongs to the exact contestant workspace, and
+has only the intended descendants; an unknown, silently dropped, or
+wrong-workspace root invalidates the extraction. Avoid `--session-source all`
+when system and project stores duplicate the same threads; if both are needed,
+prove their IDs are disjoint or treat merged aggregates as contaminated.
+
+For OpenCode, inspect root IDs, titles, initial prompts, message tails, and
+complete parent chains. Check for a selected session whose parent lies outside
+the cwd-filtered candidate set. If the current extractor cannot filter
+OpenCode roots or exclude the other harness, record the exact intended tree
+and all unrelated included IDs. Mark every derived merged field as
+contaminated, including time window, active/idle buckets, tokens/cost, tools,
+turns, and permission-wait analysis. Do not use these fields as primary-run
+measurements; report them as qualified or `null`, and retain the raw aggregate
+only as an explicitly non-attributable diagnostic. Do not manually invent
+corrected totals unless they are reproducibly computed from the selected tree
+and clearly stored as evaluator-derived values. Avoid `all` when it duplicates
+system and project OpenCode records.
+
+Record in `agent_scores.json.session_selection` and the report:
+
+- harness and source class (`system`, `project`, or `all`);
+- primary root/session ID and any continuation roots;
+- included subagent descendants;
+- excluded candidate IDs with reasons;
+- evidence and rationale for the classification;
+- ambiguity, extractor limitations, and aggregate contamination.
+
+After selecting the primary tree, extract the final assistant response from
+its main root session and save its user-visible prose exactly as
+`evaluation/outputs/<run-id>/contestant_final_response.md`. Treat this as the
+contestant's session-side report: read it before validation or scoring and
+check its claimed completion, paths, commands, results, and limitations
+against the immutable submission and other contestant evidence. Do not replace
+the response with a summary, and do not copy hidden reasoning, tool traffic,
+logs, commentary/status updates, or the rest of the trajectory.
+
+Use a deterministic terminal-message rule. For Codex, choose the chronologically
+last completed assistant `response_item` message in the root rollout whose
+channel is `final`, concatenating its text content blocks in stored order. For
+OpenCode, choose the chronologically last completed assistant message in the
+selected root whose ordered text parts represent the terminal answer, excluding
+reasoning and tool parts; use the database part order. Do not substitute a last
+commentary/update after an interruption. If channel/completion metadata is
+missing or more than one record could be the terminal answer, mark extraction
+ambiguous and ask the operator rather than applying a heuristic.
+
+Record the harness, root/session ID, message ID or timestamp, read-only source,
+original stored-message SHA-256, extracted file SHA-256, and ordered part count
+in `session_selection` and `agent_report.md`. If the primary work genuinely
+ends in a continuation root, identify that root and extract its terminal
+response. If no final response exists, record that absence; if session
+attribution is ambiguous, do not attribute prose until the operator resolves
+it.
+
+Exact text is canonical unless it contains a credential. In that case replace
+only each credential span with the fixed marker `[REDACTED_CREDENTIAL]`, never
+store the secret elsewhere, and record that the file is redacted plus the
+redaction count and credential category. Preserve the original stored-message
+hash so provenance remains auditable without retaining the secret.
+
+Until the manager index contract explicitly includes Markdown sidecars,
+`contestant_final_response.md` is unindexed. Record its SHA-256 in
+`agent_report.md` and explicitly state that `cfdeval check` did not validate it;
+do not imply the whole snapshot, including this sidecar, was index-verified.
+
+If the primary run cannot be established confidently, ask the operator or
+leave affected telemetry qualified or `null`; never guess.
+
+For the operator-confirmed legacy sibling inventory predating the sandboxed
+pipeline, a root `done` file is the authoritative reviewed-normal terminal
+marker. Its absence means that legacy run was reviewed as crashed/non-normal.
+Artifact richness or apparent completeness must not relabel its terminal
+status. The selected session's terminal outcome should agree with the marker;
+a mismatch requires manual investigation, not reinterpretation of the marker.
+This marker is not by itself a disqualification or blanket zero: independently
+score readable deliverables and solver evidence under the rubric while
+retaining the crashed/non-normal terminal label. Missing pre-run provenance in
+a legacy workspace still requires the explicit operator decision from step 1.
+
 ## 4. Validate and inspect
 
 Read these authorities before scoring:
 
+- `evaluation/outputs/<run-id>/contestant_final_response.md`, when present;
 - `cfd_solver_agentic_benchmark/TASK.md`;
 - `cfd_solver_agentic_benchmark/OUTPUT_CONTRACT.md`;
 - `cfd_solver_agentic_benchmark/examiner/README_EXAMINER.md`;
