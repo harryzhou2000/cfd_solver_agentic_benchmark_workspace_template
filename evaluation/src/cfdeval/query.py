@@ -4,6 +4,7 @@ evaluation result folders."""
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -11,6 +12,7 @@ from pathlib import Path
 
 
 CANONICAL_RUN_ID_RE = re.compile(r"^.+_[0-9a-f]{6}$")
+COST_METADATA = Path(__file__).resolve().parents[2] / "config" / "cost_metadata.json"
 
 
 def outputs_root() -> Path:
@@ -31,6 +33,37 @@ def load(folder: Path) -> dict:
     index = json.loads((folder / "index.json").read_text())
     summary = json.loads((folder / "summary.json").read_text())
     return {"index": index, "summary": summary}
+
+
+def current_cost_estimate(expenses: dict) -> dict | None:
+    """Reprice snapshot token facts against the manager's current price table."""
+    by_model = (expenses.get("tokens") or {}).get("by_model") or {}
+    if not by_model:
+        return None
+    try:
+        raw = COST_METADATA.read_bytes()
+        meta = json.loads(raw)
+    except (OSError, json.JSONDecodeError):
+        return None
+    from cfdeval.expenses import estimate_by_model
+    estimate = estimate_by_model(meta, by_model)
+    estimate.update({
+        "metadata": str(COST_METADATA),
+        "metadata_sha256": hashlib.sha256(raw).hexdigest(),
+        "dashboard_current": True,
+    })
+    return estimate
+
+
+def effective_metadata_status(metadata: dict) -> str | None:
+    """Do not surface a stale prompt status after all questions were resolved."""
+    status = metadata.get("status")
+    questions = metadata.get("questions")
+    if status == "needs_user_input" and isinstance(questions, list):
+        unanswered = [q for q in questions if not q.get("answer")]
+        if not unanswered:
+            return "complete"
+    return status
 
 
 def get_path(obj, dotpath: str):
@@ -106,6 +139,7 @@ def row_for(folder: Path, summary: dict) -> dict:
         x for x in (primary_model, primary_effort) if x
     ) or None
     session_tokens = ws_.get("tokens") or {}
+    dashboard_cost = current_cost_estimate(ex)
     agent_reviewed = bool(
         (agent_scores or {}).get("rubric", {}).get("total_scored") is not None
         or any(
@@ -138,7 +172,7 @@ def row_for(folder: Path, summary: dict) -> dict:
         "primary_model": primary_model,
         "primary_effort": primary_effort,
         "primary_model_effort": primary_model_effort,
-        "status": md.get("status"),
+        "status": effective_metadata_status(md),
         "goal_time_s": (ex.get("time_seconds") or {}).get("goal_time"),
         "wall_time_s": wall,
         "activity_time_s": (ex.get("time_seconds") or {}).get("activity_time_seconds"),
@@ -146,7 +180,8 @@ def row_for(folder: Path, summary: dict) -> dict:
         "input_tokens": session_tokens.get("input"),
         "cached_input_tokens": session_tokens.get("cached_input"),
         "output_tokens": session_tokens.get("output"),
-        "cost_usd": (ex.get("cost_estimate_usd") or {}).get("total"),
+        "cost_usd": (dashboard_cost or ex.get("cost_estimate_usd") or {}).get("total"),
+        "cost_metadata_sha256": (dashboard_cost or {}).get("metadata_sha256"),
         "subagents": len(md.get("subagents", [])),
         "loc_lines": ((me.get("loc") or {}).get("file") or {}).get("lines"),
         "code_score": ((agent_scores or {}).get("scores", {}).get("code_review", {}) or {}).get(

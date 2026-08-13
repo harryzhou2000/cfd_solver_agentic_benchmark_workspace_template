@@ -56,6 +56,36 @@ def cost_for(price: dict, *, input_t=None, cached_t=None, output_t=None, total_t
     ) / 1e6
 
 
+def estimate_by_model(meta: dict, by_model: dict) -> dict:
+    """Price immutable token aggregates using the supplied current metadata."""
+    estimates = {}
+    total_cost = 0.0
+    unpriced_tokens = 0
+    for model, agg in by_model.items():
+        price, used_defaults = model_cost(meta, model)
+        if used_defaults and meta.get("models", {}).get(model.lower()) is None:
+            unpriced_tokens += agg.get("total", 0)
+        cost = cost_for(
+            price,
+            input_t=agg.get("input") or None,
+            cached_t=agg.get("cached_input") or None,
+            output_t=agg.get("output") or None,
+            total_t=agg.get("total") if not agg.get("input") and not agg.get("output") else None,
+        )
+        estimates[model] = {
+            "usd": round(cost, 4),
+            "tokens": agg.get("total", 0),
+            "pricing": "defaults" if used_defaults else "metadata",
+        }
+        total_cost += cost
+    return {
+        "total": round(total_cost, 4),
+        "by_model": estimates,
+        "unpriced_tokens": unpriced_tokens,
+        "estimate": True,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Extract codex contestant expenses")
     ap.add_argument("--workspace", required=True)
@@ -253,26 +283,7 @@ def main(argv: list[str] | None = None) -> int:
     total_tokens = sum(b["total"] for b in by_model.values())
 
     # ---- cost ------------------------------------------------------------
-    by_model_cost = {}
-    unpriced_tokens = 0
-    total_cost = 0.0
-    for m, agg in by_model.items():
-        price, used_defaults = model_cost(meta, m)
-        if used_defaults and meta.get("models", {}).get(m.lower()) is None:
-            unpriced_tokens += agg["total"]
-        cost = cost_for(
-            price,
-            input_t=agg["input"] or None,
-            cached_t=agg["cached_input"] or None,
-            output_t=agg["output"] or None,
-            total_t=agg["total"] if not agg["input"] and not agg["output"] else None,
-        )
-        by_model_cost[m] = {
-            "usd": round(cost, 4),
-            "tokens": agg["total"],
-            "pricing": "defaults" if used_defaults else "metadata",
-        }
-        total_cost += cost
+    current_cost = estimate_by_model(meta, by_model)
 
     # ---- time ------------------------------------------------------------
     goal_by_root = {}
@@ -325,10 +336,7 @@ def main(argv: list[str] | None = None) -> int:
             ),
         },
         "cost_estimate_usd": {
-            "total": round(total_cost, 4),
-            "by_model": by_model_cost,
-            "unpriced_tokens": unpriced_tokens,
-            "estimate": True,
+            **current_cost,
             "metadata": args.cost_metadata,
         },
         "provenance": {

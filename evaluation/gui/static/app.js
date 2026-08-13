@@ -27,7 +27,7 @@
     { key: "cfd_score",      label: "CFD",          type: "score",   sortType: "num" },
     { key: "result_score",   label: "Results",      type: "score",   sortType: "num" },
     { key: "rubric_total",   label: "Rubric",       type: "int",     sortType: "num" },
-    { key: "disqualified",   label: "DQ",           type: "bool",    sortType: "bool" },
+    { key: "disqualified",   label: "DQ",           type: "dq",      sortType: "bool" },
     { key: "execution_date", label: "Execution",    type: "text",    sortType: "str" },
     { key: "cache_hit",      label: "Cache hit",    type: "pct",     sortType: "num" },
     { key: "session_buckets",label: "Buckets",      type: "int",     sortType: "num" },
@@ -142,6 +142,12 @@
     return `<span class="pill pill-status-other">${emDash}</span>`;
   }
 
+  function dqPill(v) {
+    if (v === true)  return `<span class="pill pill-status-blocked">yes</span>`;
+    if (v === false) return `<span class="pill pill-no">no</span>`;
+    return `<span class="pill pill-status-other">${emDash}</span>`;
+  }
+
   function cellRenderer(col, row) {
     const v = row[col.key];
     switch (col.type) {
@@ -153,6 +159,7 @@
       case "score":       return fmtScore(v);
       case "pct":         return fmtPct(v);
       case "bool":        return boolPill(v);
+      case "dq":          return dqPill(v);
       case "pill-status": return statusPill(v);
       default:            return escapeHtml(v ?? emDash);
     }
@@ -433,7 +440,7 @@
       { label: "Input", value: fmtTokens(sessionTokens.input), sub: `${fmtTokens(sessionTokens.non_cached_input)} non-cached` },
       { label: "Cached input", value: fmtTokens(sessionTokens.cached_input), sub: fmtPct(sessionTokens.input ? sessionTokens.cached_input / sessionTokens.input : null) },
       { label: "Output", value: fmtTokens(sessionTokens.output), sub: `${fmtTokens(sessionTokens.reasoning_output)} reasoning` },
-      { label: "Cost",          value: fmtMoney(ex.cost_estimate_usd?.total), sub: ex.cost_estimate_usd?.estimate ? "estimate" : "" },
+      { label: "Cost",          value: fmtMoney((detail.current_cost_estimate || ex.cost_estimate_usd || {}).total), sub: detail.current_cost_estimate ? "latest price metadata" : (ex.cost_estimate_usd?.estimate ? "snapshot estimate" : "") },
       { label: "Goal time",     value: fmtDuration(ts.goal_time),    sub: ts.started_at ? "started " + fmtDate(ts.started_at).slice(0,16) : "" },
       { label: "Wall time",     value: fmtDuration(ts.wall_time),    sub: ts.ended_at   ? "ended "   + fmtDate(ts.ended_at).slice(0,16)   : "" },
       { label: "Activity time", value: fmtDuration(ex.time_seconds?.activity_time_seconds) },
@@ -1176,12 +1183,11 @@
   document.addEventListener("DOMContentLoaded", () => {
     wireListView();
     wireDetailView();
-    // First-time route → either list or detail.
-    if ((location.hash || "").startsWith("#/detail/")) {
-      route();
-    } else {
-      location.hash = "#/";
-      loadSnapshots();
-    }
+    // Always apply the initial route. Assigning an already-current "#/" hash
+    // does not emit hashchange, which previously left both views hidden.
+    const initial = parseHash();
+    if (!location.hash) history.replaceState(null, "", "#/");
+    route();
+    if (initial.view === "list") loadSnapshots();
   });
 })();

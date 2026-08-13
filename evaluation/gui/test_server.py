@@ -45,6 +45,33 @@ class ReportPdfDiscoveryTests(unittest.TestCase):
 
 
 class SnapshotProtocolTests(unittest.TestCase):
+    def test_stale_needs_input_status_is_complete_when_no_questions_remain(self):
+        self.assertEqual(query.effective_metadata_status({
+            "status": "needs_user_input", "questions": []}), "complete")
+        self.assertEqual(query.effective_metadata_status({
+            "status": "needs_user_input", "questions": [{"answer": None}]}),
+            "needs_user_input")
+
+    def test_dashboard_reprices_snapshot_tokens_with_current_metadata(self):
+        with tempfile.TemporaryDirectory() as raw:
+            price_file = Path(raw) / "prices.json"
+            price_file.write_text(json.dumps({
+                "defaults": {"input_per_mtok": 1, "cached_input_per_mtok": 0.25,
+                             "output_per_mtok": 4, "input_share": 0.75},
+                "models": {"model-a": {"input_per_mtok": 2,
+                                         "cached_input_per_mtok": 0.5,
+                                         "output_per_mtok": 8}},
+            }))
+            expenses = {"tokens": {"by_model": {"model-a": {
+                "input": 1_000_000, "cached_input": 800_000,
+                "output": 100_000, "total": 1_100_000,
+            }}}}
+            with patch.object(query, "COST_METADATA", price_file):
+                estimate = query.current_cost_estimate(expenses)
+            self.assertEqual(estimate["total"], 1.6)
+            self.assertTrue(estimate["dashboard_current"])
+            self.assertEqual(len(estimate["metadata_sha256"]), 64)
+
     def test_json_responses_disable_browser_cache(self):
         handler = object.__new__(server.Handler)
         handler.wfile = io.BytesIO()
@@ -148,6 +175,16 @@ class SnapshotProtocolTests(unittest.TestCase):
     def test_hidden_attribute_beats_component_display_rules(self):
         css = (Path(__file__).parent / "static" / "styles.css").read_text()
         self.assertIn("[hidden] { display: none !important; }", css)
+
+    def test_list_view_is_visible_before_and_during_initial_routing(self):
+        static = Path(server.__file__).resolve().parent / "static"
+        html = (static / "index.html").read_text()
+        app = (static / "app.js").read_text()
+        self.assertIn('<section id="view-list" class="view view-list">', html)
+        self.assertIn('const initial = parseHash();', app)
+        self.assertIn('route();\n    if (initial.view === "list") loadSnapshots();', app)
+        self.assertIn('{ key: "disqualified",   label: "DQ",           type: "dq"', app)
+        self.assertIn('pill pill-status-blocked">yes</span>', app)
 
 
 class RolloutUsageTests(unittest.TestCase):

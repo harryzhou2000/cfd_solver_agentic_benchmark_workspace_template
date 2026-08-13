@@ -113,11 +113,19 @@ def snapshot_detail(folder: Path) -> dict:
     summary = _load("summary.json") or {}
     sessions = _load("sessions.json")
     metadata = _load("metadata.json")
+    if metadata:
+        metadata = dict(metadata)
+        normalized_status = query.effective_metadata_status(metadata)
+        if normalized_status is not None:
+            metadata["status"] = normalized_status
+    expenses = _load("expenses.json")
     agent_scores = _load("agent_scores.json")
     configs = _load("configs.json")
     env_snap = _load("env_snapshot.json")
     run_identity = _load("run_identity.json")
     report_pdf = find_report_pdf(workspace_for_snapshot(run_identity))
+    current_cost_estimate = query.current_cost_estimate(
+        expenses or summary.get("expenses") or {})
     md_files = {}
     for name in ("summary.md", "agent_report.md", "contestant_final_response.md",
                  "review_code.md", "review_cfd.md", "review_results.md"):
@@ -129,6 +137,7 @@ def snapshot_detail(folder: Path) -> dict:
         "contestant": summary.get("contestant"),
         "snapshot": summary.get("snapshot", {}),
         "summary": summary,
+        "current_cost_estimate": current_cost_estimate,
         "sessions": sessions,
         "metadata": metadata,
         "agent_scores": agent_scores,
