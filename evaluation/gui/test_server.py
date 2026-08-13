@@ -1,4 +1,5 @@
 import json
+import io
 import tempfile
 import unittest
 from pathlib import Path
@@ -44,6 +45,18 @@ class ReportPdfDiscoveryTests(unittest.TestCase):
 
 
 class SnapshotProtocolTests(unittest.TestCase):
+    def test_json_responses_disable_browser_cache(self):
+        handler = object.__new__(server.Handler)
+        handler.wfile = io.BytesIO()
+        headers = []
+        handler.send_response = lambda status: None
+        handler.send_header = lambda name, value: headers.append((name, value))
+        handler.end_headers = lambda: None
+
+        handler._json({"status": "complete"})
+
+        self.assertIn(("Cache-Control", "no-store"), headers)
+
     def test_discovery_only_includes_canonical_hashed_run_ids(self):
         with tempfile.TemporaryDirectory() as raw:
             outputs = Path(raw)
