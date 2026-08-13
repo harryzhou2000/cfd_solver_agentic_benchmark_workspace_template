@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """Environment snapshot for a benchmark run.
 
-Run this BEFORE starting the agent inside the real environment (host or
-container) so the evaluation can later prove what env the run saw:
+Normally run this BEFORE starting the agent inside the real environment (host
+or container) so the evaluation can later prove what env the run saw:
 host/container facts, tool versions, proxy/network env (redacted), and the
 workspace git state.
 
 Usage:
   python3 evaluation/tools/env_snapshot.py --workspace <contestant-workspace>
     [--out <path>] [--probe-proxy]
+
+For an operator-approved legacy run that was not snapshotted before execution:
+  python3 evaluation/tools/env_snapshot.py --workspace <contestant-workspace> \
+    --capture-phase post_run --initial-branch <harness>/<model>/init \
+    --initial-commit <full-sha> --reconstruction-source <description>
 
 Default output: <workspace>/.eval/env_snapshot.json (git-excluded; vendored
 into docker/scripts/setup-workspace.sh). The evaluation pipeline copies it
@@ -35,7 +40,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-VERSION = "1.0"
+VERSION = "1.1"
 
 REDACT_MARK = "***REDACTED***"
 _SK_KEY = re.compile(r"\bsk-[A-Za-z0-9_\-]{8,}")
@@ -220,15 +225,32 @@ def workspace_section(ws: Path) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="Capture an environment snapshot before a run")
+    ap = argparse.ArgumentParser(description="Capture a benchmark environment snapshot")
     ap.add_argument("--workspace", required=True)
     ap.add_argument("--out", default=None)
     ap.add_argument("--probe-proxy", action="store_true",
                     help="TCP-probe configured proxy endpoints")
+    ap.add_argument("--capture-phase", choices=("pre_run", "post_run"),
+                    default="pre_run")
+    ap.add_argument("--initial-branch",
+                    help="operator-approved reconstructed initial branch (post_run only)")
+    ap.add_argument("--initial-commit",
+                    help="operator-approved reconstructed full initial commit (post_run only)")
+    ap.add_argument("--reconstruction-source", action="append", default=[],
+                    help="evidence used to reconstruct legacy provenance; repeatable")
     args = ap.parse_args(argv)
 
     ws = Path(args.workspace).resolve()
     out_path = Path(args.out) if args.out else ws / ".eval" / "env_snapshot.json"
+
+    if args.capture_phase == "pre_run" and (
+        args.initial_branch or args.initial_commit or args.reconstruction_source
+    ):
+        ap.error("reconstruction options require --capture-phase post_run")
+    if args.capture_phase == "post_run" and not (
+        args.initial_branch and args.initial_commit and args.reconstruction_source
+    ):
+        ap.error("post_run requires --initial-branch, --initial-commit, and --reconstruction-source")
 
     env = env_section()
     proxies = []
@@ -238,19 +260,44 @@ def main(argv: list[str] | None = None) -> int:
             if os.environ.get(name):
                 proxies.append({**probe_proxy(os.environ[name]), "env": name})
 
+    captured_workspace = workspace_section(ws)
+    authoritative_workspace = dict(captured_workspace)
+    limitations = []
+    if args.capture_phase == "post_run":
+        authoritative_workspace["branch"] = args.initial_branch
+        authoritative_workspace["commit"] = args.initial_commit
+        authoritative_workspace["state_timing"] = "initial_reconstructed_post_run"
+        limitations = [
+            "No pre-run environment snapshot exists for this legacy run.",
+            "Host, tool, environment, and network values below describe post-run capture time, not the contestant execution environment.",
+            "Original harness version and container image identity are unavailable.",
+        ]
+    else:
+        authoritative_workspace["state_timing"] = "initial_observed_pre_run"
+
     doc = {
         "schema": "env_snapshot",
         "version": VERSION,
+        "capture_phase": args.capture_phase,
+        "run_environment_available": args.capture_phase == "pre_run",
+        "runtime_at_run": {
+            "availability": "captured" if args.capture_phase == "pre_run" else "unavailable",
+            "harness_version": None if args.capture_phase == "post_run" else "see tools and provenance",
+            "container_image": None if args.capture_phase == "post_run" else captured_workspace.get("container_image"),
+        },
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "local_time": datetime.now().astimezone().isoformat(timespec="seconds"),
         "host": host_section(),
         "tools": tools_section(),
         "environment": env,
         "network": {"proxy_env": proxies, "note": "only local TCP probes, no external requests"},
-        "workspace": workspace_section(ws),
+        "workspace": authoritative_workspace,
         "provenance": {
             "script": str(Path(__file__).resolve()),
             "script_version": VERSION,
+            "reconstruction_sources": args.reconstruction_source,
+            "captured_workspace_state": captured_workspace if args.capture_phase == "post_run" else None,
+            "limitations": limitations,
         },
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)

@@ -71,6 +71,15 @@ If the pre-run snapshot is absent or lacks branch/commit, stop and ask the
 operator for an explicit provenance decision. Do not silently use the current
 branch or current commit as the initial state.
 
+For an operator-approved legacy recovery, create a post-run snapshot with
+`evaluation/tools/env_snapshot.py --capture-phase post_run`, the explicitly
+reconstructed initial branch and full initial commit, and one or more
+`--reconstruction-source` descriptions. Verify the commit object and every
+stated evidence source first. The snapshot must say
+`run_environment_available: false`; capture-time host/tool/environment values
+are diagnostics only, and original harness/container versions remain
+unavailable. Never relabel this artifact as a pre-run snapshot.
+
 Do not finalize a run ID from working-tree or index bytes. First create the
 result commit as described in step 2. Then run `scripts/derive_run_id.py`
 against that immutable commit. It selects 1–3 stable submission artifacts from

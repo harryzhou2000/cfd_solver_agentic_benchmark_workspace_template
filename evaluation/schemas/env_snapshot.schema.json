@@ -1,11 +1,22 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Environment snapshot captured before a contestant run",
+  "title": "Environment snapshot for a contestant run",
   "type": "object",
   "required": ["schema", "version", "captured_at", "host", "tools", "environment", "workspace"],
   "properties": {
     "schema": { "enum": ["env_snapshot"] },
     "version": { "type": "string" },
+    "capture_phase": { "enum": ["pre_run", "post_run"] },
+    "run_environment_available": { "type": "boolean" },
+    "runtime_at_run": {
+      "type": "object",
+      "required": ["availability", "harness_version", "container_image"],
+      "properties": {
+        "availability": { "enum": ["captured", "unavailable"] },
+        "harness_version": { "type": ["string", "null"] },
+        "container_image": { "type": ["string", "null"] }
+      }
+    },
     "captured_at": { "type": "string" },
     "local_time": { "type": "string" },
     "host": {
@@ -77,15 +88,38 @@
             "commit": { "type": ["string", "null"] },
             "branch": { "type": ["string", "null"] }
           }
-        }
+        },
+        "state_timing": { "enum": ["initial_observed_pre_run", "initial_reconstructed_post_run"] }
       }
     },
     "provenance": {
       "type": "object",
       "properties": {
         "script": { "type": "string" },
-        "script_version": { "type": "string" }
+        "script_version": { "type": "string" },
+        "reconstruction_sources": { "type": "array", "items": { "type": "string" } },
+        "captured_workspace_state": { "type": ["object", "null"] },
+        "limitations": { "type": "array", "items": { "type": "string" } }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "capture_phase": { "const": "post_run" } }, "required": ["capture_phase"] },
+      "then": {
+        "properties": {
+          "run_environment_available": { "const": false },
+          "runtime_at_run": {
+            "properties": {
+              "availability": { "const": "unavailable" },
+              "harness_version": { "type": "null" },
+              "container_image": { "type": "null" }
+            }
+          },
+          "workspace": { "properties": { "state_timing": { "const": "initial_reconstructed_post_run" } } }
+        },
+        "required": ["run_environment_available", "runtime_at_run"]
+      }
+    }
+  ]
 }
