@@ -255,6 +255,10 @@ def main(argv: list[str] | None = None) -> int:
         "session_selection": {
             "source": (sessions or {}).get("selected_source", "unknown"),
             "roots": (sessions or {}).get("selection", {}).get("roots"),
+            "execution_date": None,
+            "started_at": None,
+            "ended_at": None,
+            "time_basis": None,
             "rationale": "",
         },
         "scores": {

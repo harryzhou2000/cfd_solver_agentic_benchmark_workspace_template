@@ -14,7 +14,8 @@ live **inside the snapshot folder**, so every snapshot is self-contained.
 - `agent_scores.json` (schema: `evaluation/schemas/agent_scores.schema.json`):
   - `metadata_answers`: answers to `metadata.json.questions`;
   - `session_selection`: source + roots chosen from `sessions.json`
-    discovery, with rationale;
+    discovery, with rationale, selected-run start/end timestamps, and the UTC
+    execution date derived from the selected primary run's start;
   - `scores.{code_review,cfd_review,result_review}`: per-point 0-5 scores and
     notes (point ids/weights from `evaluation/config/review_points_*.json`);
   - `rubric`: the 10 sections of the benchmark's `SCORING_RUBRIC.md`

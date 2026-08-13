@@ -386,10 +386,19 @@ Record in `agent_scores.json.session_selection` and the report:
 
 - harness and source class (`system`, `project`, or `all`);
 - primary root/session ID and any continuation roots;
+- selected primary run's start and end timestamps, their evidence source, and
+  `execution_date` as the UTC `YYYY-MM-DD` date of that start timestamp;
 - included subagent descendants;
 - excluded candidate IDs with reasons;
 - evidence and rationale for the classification;
 - ambiguity, extractor limitations, and aggregate contamination.
+
+Never derive `execution_date` from the earliest timestamp across an
+unclassified cwd-matched candidate set. Setup probes, abandoned attempts, and
+later evaluation/resumption sessions can shift that aggregate window. Leave
+the date `null` until the primary run is selected; then derive it
+deterministically from that root's first persisted run event and record the
+time basis.
 
 After selecting the primary tree, extract the final assistant response from
 its main root session and save its user-visible prose exactly as

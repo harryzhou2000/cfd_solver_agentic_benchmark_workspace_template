@@ -128,7 +128,10 @@ class CodexThreadEvents:
             if rtype == "event_msg":
                 etype = payload.get("type")
                 if etype == "token_count":
-                    tot = payload.get("info", {}).get("total_token_usage") or {}
+                    # Legacy rollouts may emit a rate-limit-only token_count
+                    # event with an explicit JSON null for `info`.
+                    info = payload.get("info") or {}
+                    tot = info.get("total_token_usage") or {}
                     if tot:
                         # `total_token_usage` is the thread's cumulative usage
                         # counter (== threads.tokens_used at session end);
