@@ -292,7 +292,10 @@
                      col.type === "score" || col.type === "pct" ||
                      col.type === "int")
                      ? " class=\"num\"" : "";
-        return `<td${cls}>${cellRenderer(col, row)}</td>`;
+        const statusTitle = col.key === "status"
+          ? ` title="${escapeHtml(`${row.run_id || row.contestant}: ${row.status || emDash}`)}"`
+          : "";
+        return `<td${cls}${statusTitle}>${cellRenderer(col, row)}</td>`;
       }).join("");
       return `<tr data-name="${escapeHtml(row.contestant)}">${cells}</tr>`;
     }).join("");

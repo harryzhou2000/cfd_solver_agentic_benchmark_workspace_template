@@ -187,6 +187,8 @@ class SnapshotProtocolTests(unittest.TestCase):
         self.assertIn('pill pill-status-blocked">yes</span>', app)
         self.assertIn('/static/app.js?v=', html)
         self.assertIn('/static/styles.css?v=', html)
+        self.assertNotIn('pill-status-needs_user_input">needs user input</span>', html)
+        self.assertIn('Status badges in the table apply only to their own run row.', html)
 
 
 class RolloutUsageTests(unittest.TestCase):
