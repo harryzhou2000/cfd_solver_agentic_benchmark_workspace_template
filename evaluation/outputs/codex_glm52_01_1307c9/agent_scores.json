@@ -1,0 +1,347 @@
+{
+  "schema": "agent_scores",
+  "contestant": "codex_glm52_01_1307c9",
+  "evaluated_at": "2026-08-13T12:28:00+00:00",
+  "evaluator": {
+    "agent": "Codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": "Read-only historical results from f9b3d2d86be7691191d72b8b323de4c503a2597a; Re200 was not rerun."
+  },
+  "metadata_answers": {
+    "legacy_provenance": "Operator-authorized post-run reconstruction. Initial codex/glm52/init / 838ec1ddee2568f72541f73edafac7497c170495 verified; original runtime unavailable.",
+    "context_window_BLSC_GLM-5.2": null
+  },
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "019fb902-4a31-7af3-89ec-063a8039a580"
+    ],
+    "execution_date": "2026-07-31",
+    "started_at": "2026-07-31T16:29:22.874Z",
+    "ended_at": "2026-07-31T19:01:52.878Z",
+    "time_basis": "UTC session_meta start and root terminal final response.",
+    "rationale": "Main root sustained solver implementation, production runs and terminal completion. Included descendants are plotting 019fb92d-6399-7732-a8b6-657d3a073ce5 and report 019fb92d-9bec-7b12-aa98-32a5cc9697e2. Excluded 019fb8bb setup/attempt, 019fb8d0 preliminary attempt, and 019fb8e4 unrelated Slurm chat."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "CMake and historical binary evidence; no clean evaluator build."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Case-driven solve CLI present."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Modular mesh/flux/partition/solver/output source."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": null,
+          "notes": "Trust policy; no external similarity investigation."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "JSON case paths are parsed; no two-filename-only branch found."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "METIS and neighbor nonblocking halos/reductions present."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 2,
+          "notes": "High-Mach laminar report results are nonphysical."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Historical validator/scaling artifacts, no clean evaluator rerun."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 3,
+          "notes": "Readable but debug sources/build products existed only in historical raw tree."
+        }
+      ],
+      "overall_score": 3.46,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Conservative perfect-gas formulation present."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS mixed/multizone geometry code."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "FV face residual plus MPI global norms."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Roe/Harten-Yee and Rusanov fallback source present."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Farfield/slip/no-slip code."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "Green-Gauss reconstruction present."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Barth-Jespersen and positivity paths present."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "Viscous code exists but high-Mach laminar output is nonphysical."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Point-implicit diagonal LU-SGS approximation."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "BDF2 source exists, but Re200 uses fixed 15 inner iterations and strict target is miscounted."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS, Isend/Irecv, reductions, np1/np8 artifacts."
+        }
+      ],
+      "overall_score": 3.43,
+      "disqualification_flags": [
+        {
+          "id": 4,
+          "text": "Re200 reaches final time but misses inner target on most steps",
+          "evidence": "Source increments misses only at ratio>=1.0 rather than >=1e-3; metadata last ratio .928 and report presents periodic."
+        }
+      ]
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 3,
+          "notes": "Historical eight dirs are structurally rich, but curated report references seven absent report figures."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Historical terminal claim says validator passes; fresh explicit replay was not retained as reliable output."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 1,
+          "notes": "Re200 transient solve noncompliant; high-Mach laminar report output nonphysical."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 1,
+          "notes": "Report gives billion-scale forces for M0.8/M2 laminar and negative residual-reduction entries."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "Many historical plots, but seven figures report.tex requires are absent from its committed tree."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 1,
+          "notes": "Claims all eight complete/vortex shedding conflict with Re200 statistics and stale/nonphysical table values."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 1,
+          "notes": "Figure/claim traceability is broken by absent referenced figures and stale report table."
+        }
+      ],
+      "overall_score": 1.85,
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "text": "metadata marks failed transient inner solves as statistically periodic",
+          "evidence": "Re200 strict target 1e-3, source records misses only ratio>=1.0; last ratio .928 while completed/periodic."
+        }
+      ]
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 58,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 7,
+        "notes": "Source/CLI and historical outputs; no clean evaluator build."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 8,
+        "notes": "CGNS and graph geometry source."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 12,
+        "notes": "FV/Roe/BC source."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 8,
+        "notes": "GG/Barth/positivity source."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 4,
+        "notes": "Nonphysical high-Mach laminar results."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 6,
+        "notes": "Point-implicit steady; Re200 inner convergence noncompliant."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Actual METIS and neighbor MPI source; np artifacts."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 1,
+        "notes": "Re200 failed strict inner criterion and high-Mach laminar output nonphysical."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 0,
+        "notes": "Report materially contradicts deliverables and has absent referenced figures."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 3,
+        "notes": "Modular but compact concrete implementation."
+      }
+    ]
+  },
+  "disqualification": {
+    "triggered": true,
+    "flags": [
+      {
+        "id": 4,
+        "text": "Re200 reaches final time but misses inner target on most steps while presented as periodic",
+        "found": true,
+        "evidence": "solver.cpp caps maxInner at 15 and counts miss only ratio>=1.0. Metadata requires 1e-3, last ratio .928488, marks completed/statistically_periodic."
+      },
+      {
+        "id": 8,
+        "text": "Report figures do not correspond to submitted deliverables",
+        "found": true,
+        "evidence": "report.tex requires 13 flattened figures; historical commit contains only six of these exact paths, leaving seven Figure pending placeholders in curated report."
+      }
+    ]
+  },
+  "limitations": [
+    "Post-run env snapshot is non-authoritative for original runtime.",
+    "No evaluator clean build or solver rerun; Re200 never rerun.",
+    "Raw historical artifacts were read from f9b3d2d and excluded from result commit 17a5ef3.",
+    "run_identity and final-response Markdown are unindexed sidecars.",
+    "BLSC context window unknown from bundle."
+  ]
+}

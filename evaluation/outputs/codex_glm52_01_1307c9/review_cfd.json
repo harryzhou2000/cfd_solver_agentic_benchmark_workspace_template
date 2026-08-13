@@ -1,0 +1,91 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 4,
+      "notes": "Conservative perfect-gas formulation present."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "CGNS mixed/multizone geometry code."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "FV face residual plus MPI global norms."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Roe/Harten-Yee and Rusanov fallback source present."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Farfield/slip/no-slip code."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "Green-Gauss reconstruction present."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Barth-Jespersen and positivity paths present."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 2,
+      "notes": "Viscous code exists but high-Mach laminar output is nonphysical."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Point-implicit diagonal LU-SGS approximation."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 1,
+      "notes": "BDF2 source exists, but Re200 uses fixed 15 inner iterations and strict target is miscounted."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "METIS, Isend/Irecv, reductions, np1/np8 artifacts."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "id": 4,
+      "text": "Re200 reaches final time but misses inner target on most steps",
+      "evidence": "Source increments misses only at ratio>=1.0 rather than >=1e-3; metadata last ratio .928 and report presents periodic."
+    }
+  ],
+  "overall_score": 3.43
+}

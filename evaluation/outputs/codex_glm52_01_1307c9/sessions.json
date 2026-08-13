@@ -1,0 +1,432 @@
+{
+  "codex": {
+    "present": true,
+    "source_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex/sessions",
+    "thread_count": 3,
+    "subagent_count": 2,
+    "root_count": 1,
+    "roots": [
+      {
+        "thread_id": "019fb902-4a31-7af3-89ec-063a8039a580",
+        "model": "BLSC/GLM-5.2",
+        "thread_count": 3,
+        "started_at": "2026-07-31T16:30:04.065000+00:00",
+        "ended_at": "2026-07-31T19:01:52.944000+00:00",
+        "rollout_bytes": 5564146
+      }
+    ],
+    "rollout_bytes_total": 5564146,
+    "missing_rollouts": [],
+    "source": "project"
+  },
+  "opencode": {
+    "present": false,
+    "session_count": 0
+  },
+  "analysis": {
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "window": {
+      "start": "2026-07-31T16:30:04.065000+00:00",
+      "end": "2026-07-31T19:01:52.944000+00:00"
+    },
+    "idle_exclusion": {
+      "method": "merged timeline over main thread/session and all subagents; gaps with no events anywhere exceed the threshold and are excluded",
+      "gap_count": 0,
+      "gaps": [],
+      "idle_seconds_total": 0
+    },
+    "permission_waits": {
+      "method": "heuristic",
+      "explicit_approval_events_found": false,
+      "ask_tool_events_found": 0,
+      "candidate_gaps": [],
+      "candidate_count": 0,
+      "policy_observed": [
+        "never",
+        "reviewer=user"
+      ],
+      "limitations": [
+        "codex rollouts contain no explicit approval-request/response event types (verified by scanning all local sessions); permission-blocked idle cannot be distinguished from user-away time with certainty",
+        "candidates are gaps > idle threshold between a tool/turn boundary and a user message / new turn in approval-aware threads; expect false positives when the user stepped away"
+      ]
+    },
+    "buckets": [
+      {
+        "bucket_index": 0,
+        "start": "2026-07-31T16:30:04.065000+00:00",
+        "end": "2026-07-31T17:00:04.065000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 11187412,
+          "cached_input": 11045824,
+          "non_cached_input": 141588,
+          "output": 86991,
+          "reasoning_output": 14926,
+          "total": 11274403
+        },
+        "cache": {
+          "cached_tokens": 11045824,
+          "input_tokens": 11187412,
+          "hit_ratio": 0.9873
+        },
+        "tools": {
+          "total": 123,
+          "by_tool": {
+            "exec_command": 104,
+            "apply_patch": 18,
+            "update_plan": 1
+          },
+          "by_category": {
+            "shell": 104,
+            "editing": 18,
+            "planning": 1
+          }
+        },
+        "turns": {
+          "thread_goal_updated": 1,
+          "task_started": 1,
+          "agent_message": 73
+        },
+        "active_entities": [
+          "019fb902-4a31-7af3-89ec-063a8039a580"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 1,
+        "start": "2026-07-31T17:00:04.065000+00:00",
+        "end": "2026-07-31T17:30:04.065000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 29572007,
+          "cached_input": 29028352,
+          "non_cached_input": 543655,
+          "output": 108541,
+          "reasoning_output": 53566,
+          "total": 29680548
+        },
+        "cache": {
+          "cached_tokens": 29028352,
+          "input_tokens": 29572007,
+          "hit_ratio": 0.9816
+        },
+        "tools": {
+          "total": 208,
+          "by_tool": {
+            "exec_command": 174,
+            "apply_patch": 22,
+            "view_image": 5,
+            "update_plan": 4,
+            "spawn_agent": 2,
+            "list_agents": 1
+          },
+          "by_category": {
+            "shell": 174,
+            "editing": 22,
+            "files": 5,
+            "planning": 4,
+            "collaboration": 3
+          }
+        },
+        "turns": {
+          "agent_message": 122,
+          "sub_agent_activity": 2,
+          "task_started": 2,
+          "task_complete": 1
+        },
+        "active_entities": [
+          "019fb902-4a31-7af3-89ec-063a8039a580",
+          "019fb92d-6399-7732-a8b6-657d3a073ce5",
+          "019fb92d-9bec-7b12-aa98-32a5cc9697e2"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 2,
+        "start": "2026-07-31T17:30:04.065000+00:00",
+        "end": "2026-07-31T18:00:04.065000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 27235504,
+          "cached_input": 27188352,
+          "non_cached_input": 47152,
+          "output": 25676,
+          "reasoning_output": 1994,
+          "total": 27261180
+        },
+        "cache": {
+          "cached_tokens": 27188352,
+          "input_tokens": 27235504,
+          "hit_ratio": 0.9983
+        },
+        "tools": {
+          "total": 117,
+          "by_tool": {
+            "exec_command": 109,
+            "apply_patch": 8
+          },
+          "by_category": {
+            "shell": 109,
+            "editing": 8
+          }
+        },
+        "turns": {
+          "agent_message": 65,
+          "task_complete": 1
+        },
+        "active_entities": [
+          "019fb902-4a31-7af3-89ec-063a8039a580",
+          "019fb92d-9bec-7b12-aa98-32a5cc9697e2"
+        ],
+        "active_entity_count": 2
+      },
+      {
+        "bucket_index": 3,
+        "start": "2026-07-31T18:00:04.065000+00:00",
+        "end": "2026-07-31T18:30:04.065000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 31243390,
+          "cached_input": 31201536,
+          "non_cached_input": 41854,
+          "output": 22737,
+          "reasoning_output": 0,
+          "total": 31266127
+        },
+        "cache": {
+          "cached_tokens": 31201536,
+          "input_tokens": 31243390,
+          "hit_ratio": 0.9987
+        },
+        "tools": {
+          "total": 114,
+          "by_tool": {
+            "exec_command": 110,
+            "apply_patch": 4
+          },
+          "by_category": {
+            "shell": 110,
+            "editing": 4
+          }
+        },
+        "turns": {
+          "agent_message": 74
+        },
+        "active_entities": [
+          "019fb902-4a31-7af3-89ec-063a8039a580"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 4,
+        "start": "2026-07-31T18:30:04.065000+00:00",
+        "end": "2026-07-31T19:00:04.065000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 33138710,
+          "cached_input": 33100864,
+          "non_cached_input": 37846,
+          "output": 20031,
+          "reasoning_output": 0,
+          "total": 33158741
+        },
+        "cache": {
+          "cached_tokens": 33100864,
+          "input_tokens": 33138710,
+          "hit_ratio": 0.9989
+        },
+        "tools": {
+          "total": 104,
+          "by_tool": {
+            "exec_command": 94,
+            "apply_patch": 9,
+            "update_plan": 1
+          },
+          "by_category": {
+            "shell": 94,
+            "editing": 9,
+            "planning": 1
+          }
+        },
+        "turns": {
+          "agent_message": 60
+        },
+        "active_entities": [
+          "019fb902-4a31-7af3-89ec-063a8039a580"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 5,
+        "start": "2026-07-31T19:00:04.065000+00:00",
+        "end": "2026-07-31T19:01:52.944000+00:00",
+        "active_seconds": 108.9,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 3657331,
+          "cached_input": 3651712,
+          "non_cached_input": 5619,
+          "output": 2941,
+          "reasoning_output": 0,
+          "total": 3660272
+        },
+        "cache": {
+          "cached_tokens": 3651712,
+          "input_tokens": 3657331,
+          "hit_ratio": 0.9985
+        },
+        "tools": {
+          "total": 10,
+          "by_tool": {
+            "exec_command": 7,
+            "update_plan": 1,
+            "get_goal": 1,
+            "update_goal": 1
+          },
+          "by_category": {
+            "shell": 7,
+            "planning": 3
+          }
+        },
+        "turns": {
+          "agent_message": 9
+        },
+        "active_entities": [
+          "019fb902-4a31-7af3-89ec-063a8039a580"
+        ],
+        "active_entity_count": 1
+      }
+    ],
+    "whole_session_stats": {
+      "tokens": {
+        "input": 136034354,
+        "cached_input": 135216640,
+        "non_cached_input": 817714,
+        "output": 266917,
+        "reasoning_output": 70486,
+        "total": 136301271,
+        "total_from_root_trees": 130530375,
+        "total_from_all_sessions": null
+      },
+      "cache": {
+        "cached_tokens": 135216640,
+        "input_tokens": 136034354,
+        "hit_ratio": 0.994
+      },
+      "tools": {
+        "total": 676,
+        "by_tool": {
+          "exec_command": 598,
+          "apply_patch": 61,
+          "update_plan": 7,
+          "view_image": 5,
+          "spawn_agent": 2,
+          "list_agents": 1,
+          "get_goal": 1,
+          "update_goal": 1
+        },
+        "by_category": {
+          "shell": 598,
+          "editing": 61,
+          "planning": 9,
+          "files": 5,
+          "collaboration": 3
+        }
+      },
+      "turns": {
+        "thread_goal_updated": 1,
+        "task_started": 3,
+        "agent_message": 403,
+        "sub_agent_activity": 2,
+        "task_complete": 3
+      },
+      "activity": {
+        "active_seconds": 9108.9,
+        "wall_seconds": 9108.9,
+        "idle_seconds": 0.0
+      },
+      "per_entity": {},
+      "accounting_notes": [
+        "codex: total_token_usage / threads.tokens_used are subtree-inclusive per thread; summing all threads overcounts nested trees, so total_from_root_trees sums each root tree's final cumulative counter once. Bucket totals are per-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
+      ]
+    }
+  },
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01",
+  "discovered_at": "2026-08-13T12:26:42.998892+00:00",
+  "sources": [
+    {
+      "id": "system_codex",
+      "kind": "system",
+      "harness": "codex",
+      "root": "/home/harry/.codex/state_5.sqlite",
+      "reachable": true,
+      "sessions_found": 0,
+      "note": "user-level ~/.codex telemetry"
+    },
+    {
+      "id": "system_opencode",
+      "kind": "system",
+      "harness": "opencode",
+      "root": "/home/harry/.local/share/opencode/opencode.db",
+      "reachable": true,
+      "sessions_found": 0,
+      "note": "user-level ~/.local/share/opencode/opencode.db"
+    },
+    {
+      "id": "project_codex",
+      "kind": "project",
+      "harness": "codex",
+      "root": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex",
+      "reachable": true,
+      "sessions_found": 6,
+      "note": "workspace-bundled .sessions/codex copy"
+    },
+    {
+      "id": "project_opencode",
+      "kind": "project",
+      "harness": "opencode",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/opencode-data/opencode.db",
+      "reachable": false,
+      "sessions_found": 0,
+      "note": "workspace-bundled .sessions/opencode-data copy"
+    }
+  ],
+  "selected_source": "project",
+  "selection": {
+    "method": "script_discovery + agent classification",
+    "roots": [
+      "019fb902-4a31-7af3-89ec-063a8039a580"
+    ],
+    "questions": [],
+    "notes": [
+      "the evaluation agent classifies which sessions belong to the contestant run; unextractable choices are surfaced as questions"
+    ]
+  },
+  "env_snapshot": {
+    "captured": true,
+    "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.eval/env_snapshot.json",
+    "sha256": "dab1a3b191859880a5380d732b50a86f4f76e9bd05e4575937844e1b73d824fc"
+  },
+  "provenance": {
+    "state_db": "/home/harry/.codex/state_5.sqlite",
+    "sessions_root": "/home/harry/.codex/sessions",
+    "opencode_db": "/home/harry/.local/share/opencode/opencode.db",
+    "session_source": "project",
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "generated_at": "2026-08-13T12:26:42.998910+00:00"
+  }
+}

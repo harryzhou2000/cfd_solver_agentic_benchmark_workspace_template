@@ -1,0 +1,158 @@
+{
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01",
+  "tool_usage": {
+    "total": 676,
+    "by_tool": {
+      "exec_command": 598,
+      "apply_patch": 61,
+      "update_plan": 7,
+      "view_image": 5,
+      "spawn_agent": 2,
+      "list_agents": 1,
+      "get_goal": 1,
+      "update_goal": 1
+    },
+    "by_thread": {
+      "019fb902-4a31-7af3-89ec-063a8039a580": {
+        "exec_command": 533,
+        "update_plan": 4,
+        "apply_patch": 58,
+        "spawn_agent": 2,
+        "list_agents": 1,
+        "get_goal": 1,
+        "update_goal": 1
+      },
+      "019fb92d-6399-7732-a8b6-657d3a073ce5": {
+        "exec_command": 22,
+        "update_plan": 3,
+        "apply_patch": 1,
+        "view_image": 5
+      },
+      "019fb92d-9bec-7b12-aa98-32a5cc9697e2": {
+        "exec_command": 43,
+        "apply_patch": 2
+      }
+    },
+    "subagent_spawns": 2,
+    "risk_context": [
+      {
+        "thread_id": "019fb902-4a31-7af3-89ec-063a8039a580",
+        "approval_policy": "never",
+        "permission_profile": ":danger-full-access"
+      },
+      {
+        "thread_id": "019fb902-4a31-7af3-89ec-063a8039a580",
+        "approval_policy": "never",
+        "sandbox": "danger-full-access",
+        "network_access": null
+      },
+      {
+        "thread_id": "019fb92d-6399-7732-a8b6-657d3a073ce5",
+        "approval_policy": "never",
+        "sandbox": "danger-full-access",
+        "network_access": null
+      },
+      {
+        "thread_id": "019fb92d-9bec-7b12-aa98-32a5cc9697e2",
+        "approval_policy": "never",
+        "sandbox": "danger-full-access",
+        "network_access": null
+      }
+    ]
+  },
+  "loc": {
+    "method": "git+file",
+    "git": {
+      "method": "git",
+      "repos": {
+        "workspace": {
+          "branch": "codex/glm52/01",
+          "commit": "17a5ef3c78cda02d6707e1f94858184060318216",
+          "tracked_source_files": 17,
+          "tracked_source_lines": 5956,
+          "by_extension": {
+            "cmake": 108,
+            "cpp": 3051,
+            "hpp": 434,
+            "py": 2363
+          },
+          "diff_vs_base": {
+            "added": 7036,
+            "deleted": 0,
+            "base": "838ec1ddee2568f72541f73edafac7497c170495"
+          }
+        },
+        "cfd_solver_agentic_benchmark": {
+          "branch": "HEAD",
+          "commit": "ffc314f7dd886d03e5c8172f44272f2f58f9c7cc",
+          "tracked_source_files": 1,
+          "tracked_source_lines": 324,
+          "by_extension": {
+            "py": 324
+          },
+          "diff_vs_base": null
+        }
+      },
+      "lines_total": 6280
+    },
+    "file": {
+      "method": "file",
+      "files": 18,
+      "lines": 6280,
+      "by_extension": {
+        "cmake": 108,
+        "cpp": 3051,
+        "hpp": 434,
+        "py": 2687
+      }
+    }
+  },
+  "rule_violations": [
+    {
+      "category": "destructive_commands",
+      "severity": "high",
+      "thread_id": "019fb902-4a31-7af3-89ec-063a8039a580",
+      "timestamp": "2026-07-31T17:36:40.667Z",
+      "tool": "exec_command",
+      "evidence": "AID5/harry/projects/cfd_agentic_benchmark/codex_glm52_01 && git checkout -- cfd_solver_agentic_benchmark/inputs/cases/ 2>/dev/null; find cfd_solver_agentic_benchmark/inputs/cases/ -name \"test_*.js"
+    },
+    {
+      "category": "destructive_commands",
+      "severity": "high",
+      "thread_id": "019fb902-4a31-7af3-89ec-063a8039a580",
+      "timestamp": "2026-07-31T18:25:49.616Z",
+      "tool": "exec_command",
+      "evidence": "AID5/harry/projects/cfd_agentic_benchmark/codex_glm52_01 && git checkout -- cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re200.json && cat cfd_solver_agentic_benchmark/inputs/ca"
+    },
+    {
+      "category": "destructive_commands",
+      "severity": "high",
+      "thread_id": "019fb902-4a31-7af3-89ec-063a8039a580",
+      "timestamp": "2026-07-31T18:25:58.106Z",
+      "tool": "exec_command",
+      "evidence": "ic_benchmark/codex_glm52_01/cfd_solver_agentic_benchmark && git checkout -- inputs/cases/cylinder_m010_laminar_re200.json && cat inputs/cases/cylinder_m010_laminar_re200.json | python3 -c \"import "
+    },
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "019fb902-4a31-7af3-89ec-063a8039a580",
+      "timestamp": "2026-07-31T17:54:25.887Z",
+      "tool": "exec_command",
+      "evidence": "ent ```bash python3 -m venv .venv source .venv/bin/activate pip install numpy matplotlib h5py ```  ## Dependencies - C++17 compiler (g++ 13+) - MPI (OpenMPI 5.0+) - CMake 3.16+ - CGNS, HDF5, "
+    },
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "019fb902-4a31-7af3-89ec-063a8039a580",
+      "timestamp": "2026-07-31T18:22:59.546Z",
+      "tool": "exec_command",
+      "evidence": "/projects/cfd_agentic_benchmark/codex_glm52_01 && .venv/bin/pip install scipy -q 2>&1 | tail -2 && for d in naca0012_m015_inviscid naca0012_m080_inviscid naca0012_m200_inviscid naca0012_m015_"
+    }
+  ],
+  "provenance": {
+    "state_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex/sessions",
+    "generated_at": "2026-08-13T12:26:43.551012+00:00",
+    "num_threads": 3
+  }
+}
