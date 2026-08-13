@@ -201,6 +201,22 @@ def rollout_usage_facts(rollout_path: str) -> dict:
             sum(prompt_inputs) / len(prompt_inputs) if prompt_inputs else None
         ),
     }
+
+
+def rollout_entry_settings(rollout_path: str) -> dict:
+    """Model and effort applied when a Codex thread first entered the run."""
+    for rec in iter_session_records(rollout_path):
+        payload = rec.get("payload") or {}
+        if rec.get("type") != "event_msg" or payload.get("type") != "thread_settings_applied":
+            continue
+        settings = payload.get("thread_settings") or {}
+        return {
+            "model": settings.get("model"),
+            "reasoning_effort": settings.get("reasoning_effort"),
+        }
+    return {"model": None, "reasoning_effort": None}
+
+
 def parse_iso(ts: str | None) -> datetime | None:
     if not ts:
         return None

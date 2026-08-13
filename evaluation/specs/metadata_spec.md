@@ -30,6 +30,9 @@ From each root session's `session_meta` record plus the local codex install:
 For every thread (root and subagent) in the contestant's session set:
 
 - `model` (as recorded by codex, e.g. `gpt-5.6-sol`, `BLSC/GLM-5.2`).
+- `entry_model` and `entry_reasoning_effort`: the first persisted
+  `thread_settings_applied` values. Dashboard primary-model identity uses
+  these entry values and does not change if a thread later switches model.
 - `reasoning_effort`: codex-recorded effort/mode for the thread, from
   `turn_context` records and `codex.turn.reasoning_effort` usage-log lines
   (e.g. `ultra`, `high`). For router-managed models (BLSC/DeepSeek routed via

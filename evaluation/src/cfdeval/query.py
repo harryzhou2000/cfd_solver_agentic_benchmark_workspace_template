@@ -94,9 +94,10 @@ def row_for(folder: Path, summary: dict) -> dict:
     efforts = primary_thread.get("reasoning_effort") or []
     if isinstance(efforts, str):
         efforts = [efforts]
-    primary_model = primary_thread.get("model")
+    primary_model = primary_thread.get("entry_model") or primary_thread.get("model")
+    primary_effort = primary_thread.get("entry_reasoning_effort") or (efforts[0] if efforts else None)
     primary_model_effort = " ".join(
-        x for x in (primary_model, efforts[0] if efforts else None) if x
+        x for x in (primary_model, primary_effort) if x
     ) or None
     session_tokens = ws_.get("tokens") or {}
     agent_reviewed = bool(
@@ -129,7 +130,7 @@ def row_for(folder: Path, summary: dict) -> dict:
         "run_id": (run_identity or {}).get("run_id") or folder.name,
         "harness": md.get("harness", {}).get("harness"),
         "primary_model": primary_model,
-        "primary_effort": efforts[0] if efforts else None,
+        "primary_effort": primary_effort,
         "primary_model_effort": primary_model_effort,
         "status": md.get("status"),
         "goal_time_s": (ex.get("time_seconds") or {}).get("goal_time"),

@@ -140,6 +140,19 @@ class RolloutUsageTests(unittest.TestCase):
             self.assertEqual(stream.cumulative_usage["total_tokens"], 180)
             self.assertEqual(stream.model_context_window, 258400)
 
+    def test_entry_settings_use_first_applied_thread_settings(self):
+        with tempfile.TemporaryDirectory() as raw:
+            rollout = Path(raw) / "rollout.jsonl"
+            rows = [
+                {"type": "event_msg", "payload": {"type": "thread_settings_applied",
+                    "thread_settings": {"model": "gpt-5.6-sol", "reasoning_effort": "ultra"}}},
+                {"type": "event_msg", "payload": {"type": "thread_settings_applied",
+                    "thread_settings": {"model": "gpt-5.6-terra", "reasoning_effort": "medium"}}},
+            ]
+            rollout.write_text("\n".join(json.dumps(row) for row in rows) + "\n")
+            self.assertEqual(codex_data.rollout_entry_settings(str(rollout)), {
+                "model": "gpt-5.6-sol", "reasoning_effort": "ultra"})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -615,6 +615,7 @@ def main(argv: list[str] | None = None) -> int:
         recs = usage.get(tid, [])
         efforts = thread_efforts(t["rollout_path"], recs)
         rollout_facts = cd.rollout_usage_facts(t["rollout_path"])
+        entry_settings = cd.rollout_entry_settings(t["rollout_path"])
         max_input = max((r["input_tokens"] for r in recs), default=None)
         mean_input = (sum(r["input_tokens"] for r in recs) / len(recs)) if recs else None
         if max_input is None:
@@ -625,8 +626,10 @@ def main(argv: list[str] | None = None) -> int:
             "thread_id": tid,
             "is_subagent": is_sub,
             "model": t["model"],
+            "entry_model": entry_settings["model"] or t["model"],
             "model_provider": t["model_provider"],
             "reasoning_effort": efforts or None,
+            "entry_reasoning_effort": entry_settings["reasoning_effort"],
             "tokens_used": t["tokens_used"],
             "cwd": t["cwd"],
             "git_branch": t["git_branch"],
