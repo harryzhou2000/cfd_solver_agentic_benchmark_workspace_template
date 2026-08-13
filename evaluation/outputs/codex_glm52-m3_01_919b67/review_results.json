@@ -1,0 +1,83 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 5,
+      "notes": "All eight historical final directories and report pass explicit validator invocation (RC 0)."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 5,
+      "notes": "Explicit eight-directory historical validation passed (RC 0)."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 2,
+      "notes": "Structural completion is present, but laminar and Re20 residuals grow/plateau after 2,000 steps; Re200 has a noncompliant final inner solve."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Finite fields and short np4/np8 comparisons exist; steady laminar/Re20 convergence is not credible enough for full credit."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "56 historical manifest-traced figures include Mach/pressure and Re200 vorticity; result commit excludes them because report.tex does not include figures."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Clear formulas and limitations, but it calls all runs converged/periodic despite weak steady convergence and metadata says Roe while source uses Rusanov."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 4,
+      "notes": "Historical figure_manifest.csv maps 56 figures to CSV/VTU sources; spot checks were read-only."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report figures do not correspond to submitted field/CSV outputs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete or failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Debug outputs presented as final case results",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.67
+}

@@ -1,0 +1,116 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 4,
+      "notes": "Conservative perfect-gas formulation and report equations are present."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "CGNS read, geometry and cell-face graph code are present."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "Face accumulation plus global norm reduction is implemented."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "Rusanov is the actual interior-face flux. Roe implementation exists but solver.cpp calls Rusanov; metadata claiming Roe/Harten-Yee is inaccurate."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Farfield, slip and no-slip branches plus boundary-value output semantics are implemented."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "Green-Gauss linear reconstruction is active after startup; partition-face fallback is disclosed."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Barth-Jespersen and density/pressure fallback paths are present."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Newtonian/Fourier code exists, but underdeveloped steady laminar results limit validation."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "LU-SGS-like pseudo-time path exists, yet currentCFL is forced to at least 10 and 2,000-step finals do not meet supplied steady controls."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "True BDF2 outer/inner source structure exists and results reach t=300, but ten fixed inner iterations and final ratio 0.156 miss requested 0.001."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "METIS PartGraphKway, point-to-point halos and global reductions are directly evidenced; np8 artifacts exist."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Solver uses explicit time stepping only",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Normal viscous traction mislabeled as skin friction",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.65
+}
