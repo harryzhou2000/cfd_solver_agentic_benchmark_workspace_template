@@ -56,13 +56,16 @@ If the pre-run snapshot is absent or lacks branch/commit, stop and ask the
 operator for an explicit provenance decision. Do not silently use the current
 branch or current commit as the initial state.
 
-Run `scripts/derive_run_id.py` before committing. It selects 1–3 stable
-submission artifacts, hashes them, and writes the exact identity record to a
-temporary file:
+Do not finalize a run ID from working-tree or index bytes. First create the
+result commit as described in step 2. Then run `scripts/derive_run_id.py`
+against that immutable commit. It selects 1–3 stable submission artifacts from
+the commit tree, hashes their Git blob bytes, and writes the exact identity
+record:
 
 ```bash
 python3 .codex/skills/cfd-benchmark-evaluation/scripts/derive_run_id.py \
   --workspace <workspace> --number 08 \
+  --submission-commit <result-commit-sha> \
   --out /tmp/cfd-run-identity.json
 ```
 
@@ -73,9 +76,20 @@ The canonical run ID is:
 ```
 
 The state hash is the first six lowercase hex characters of SHA-256 over
-canonical UTF-8 lines containing the initial commit and each selected
-path-qualified artifact SHA-256. Paths are relative to the workspace and
-sorted. Thus identical content at different artifact paths does not alias.
+canonical UTF-8 lines containing the full initial commit object ID and each
+selected path-qualified artifact SHA-256. Artifact SHA-256 values are computed
+from blob bytes read from the immutable result commit, never from filesystem
+files. Paths are relative to the repository and sorted. Thus identical content
+at different artifact paths does not alias, while checkout metadata, mtimes,
+file ownership, line-ending conversion, and later worktree edits cannot change
+the run ID.
+
+The submission commit SHA is provenance and an immutable lookup boundary; it
+is deliberately **not** an input line in the state hash. Commit message,
+author, committer, timestamp, parent topology, and unrelated files therefore
+do not change the run ID when the initial commit and selected path/content
+pairs are identical. A different submission commit changes the run ID only if
+one of the selected artifact blobs or paths changes.
 
 By default the helper selects up to three stable, tracked submission files in
 this priority order:
@@ -85,21 +99,30 @@ this priority order:
 3. `report/run_manifest.csv`, falling back to `report/run_manifest.md`.
 
 Use repeatable `--artifact RELPATH` to select explicit stable files when the
-layout is non-standard. The helper requires all selected files to be Git
-tracked. Require 1–3 regular files inside the workspace. Never use logs,
+layout is non-standard. The helper requires all selected paths to be regular
+file blobs in the result commit. Require 1–3 files. Never use logs,
 timestamps, generated result files, build products, session databases,
 `.eval`, `.sessions`, `done`, or the current Git commit as an artifact input.
 
-After the result commit, rerun the helper against the unchanged artifacts and
-compare the complete JSON record. Copy the final record to
+Rerun the helper with the full recorded result commit SHA and compare the
+identity-bearing fields (`canonical_record`, state hash, run ID, commits, and
+artifact entries). Absolute diagnostic paths such as `workspace` and
+`env_snapshot` may differ across equivalent checkouts and are not hash inputs.
+For verification, pass the recorded artifact paths back as explicit repeated
+`--artifact` options; do not redo default selection, because a later skill
+version may adopt different defaults. Honor `canonicalization_version: 1` for
+existing identities.
+Copy the final record to
 `evaluation/outputs/<run-id>/run_identity.json` after `summarize.py` creates
-the snapshot. Treat a mismatch as a state change that requires a new run ID.
+the snapshot. Identical immutable identity inputs must produce the same
+canonical record and hash. Treat a mismatch as an integrity failure; do not
+silently issue another ID for the same commit.
 
 ## 2. Commit the contestant submission before evaluation
 
-Use the helper's `result_branch`, `run_id`, `initial_branch`, and
-`initial_commit`. Before changing branches, record the current branch, HEAD,
-status, submodule state, and selected artifact hashes in the evaluation notes.
+Use the pre-run snapshot's `initial_branch` and `initial_commit` to determine
+the result branch. Before changing branches, record the current branch, HEAD,
+status, and submodule state in the evaluation notes.
 
 Then create or switch to the exact result branch and commit the complete
 submission:
@@ -135,10 +158,11 @@ Requirements:
   aside from explicitly documented ignored or excluded material.
 - Do not push unless the user separately authorizes pushing.
 
-If selected artifact content changes between run-ID derivation and the commit,
-recompute the run ID and use the recomputed value. The run ID describes the
-committed submission state, while `initial_commit` preserves the starting
-template state.
+After committing, call the helper with the full submission commit SHA. Verify
+that both the initial and submission revisions resolve to local Git commit
+objects and that the submission commit is the exact tip of the intended result
+branch. The run ID describes immutable blobs in that committed submission,
+while `initial_commit` preserves the starting template state.
 
 ## 3. Create the manager-side snapshot
 
