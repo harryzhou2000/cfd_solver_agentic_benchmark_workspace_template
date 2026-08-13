@@ -45,18 +45,9 @@
 
 | Model | Effort(s) | Context window | Max context used | Threads |
 |-------|-----------|---------------:|-----------------:|--------:|
-| BLSC/GLM-5.2 | ultra, medium | ? | n/a | 5 |
-| opencode-free/deepseek-v4-flash-free | xhigh | ? | n/a | 1 |
+| BLSC/GLM-5.2 | ultra, medium | 522500 | 334,492 | 3 |
 
-### Metadata questions for user (unextractable fields)
-
-| Question | Reason | Suggested source | Answer |
-|----------|--------|------------------|--------|
-| context_window_BLSC_GLM-5.2: What is the context window (max tokens) of model `BLSC/GLM-5.2`? | model is not listed in the model catalog | provider docs or model card |  |
-| context_window_opencode-free_deepseek-v4-flash-free: What is the context window (max tokens) of model `opencode-free/deepseek-v4-flash-free`? | model is not listed in the model catalog | provider docs or model card |  |
-Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`; status then flips to complete.
-
-### opencodex router (non-vanilla models: BLSC/GLM-5.2, opencode-free/deepseek-v4-flash-free)
+### opencodex router (non-vanilla models: BLSC/GLM-5.2)
 
 - opencodex version: opencodex 2.14.0 (submodule None)
 - config facts: {}
@@ -70,25 +61,6 @@ Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`
 
 ### Prompts
 
-- `019fb8bb` goal: complete the work defined cfd_solver_agentic_benchmark/.
-  - initial: <user_shell_command>
-<command>
-ls
-</command>
-<result>
-Exit code: 0
-Duration: 0.0619 seconds
-Output:
-AGENTS.md
-cfd_solver_agentic_benchmark
-external
-
-</result>
-</user_shell_command>
-- `019fb8d0` goal: complete the work defined cfd_solver_agentic_benchmark/.
-- `019fb8e4` goal: none
-  - initial: Check status of `ssh thtj1`, and see the slurm policies there. How can I set slurm to use more continuous segments of nodes?
-  - resume: In sbatch submission, I mean.
 - `019fb902` goal: complete the work defined cfd_solver_agentic_benchmark/.
 
 ### Rule-violation candidates

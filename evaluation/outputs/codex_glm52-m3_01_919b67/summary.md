@@ -46,14 +46,7 @@
 
 | Model | Effort(s) | Context window | Max context used | Threads |
 |-------|-----------|---------------:|-----------------:|--------:|
-| BLSC/GLM-5.2 | max | ? | n/a | 2 |
-
-### Metadata questions for user (unextractable fields)
-
-| Question | Reason | Suggested source | Answer |
-|----------|--------|------------------|--------|
-| context_window_BLSC_GLM-5.2: What is the context window (max tokens) of model `BLSC/GLM-5.2`? | model is not listed in the model catalog | provider docs or model card |  |
-Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`; status then flips to complete.
+| BLSC/GLM-5.2 | max | 522500 | 267,608 | 1 |
 
 ### opencodex router (non-vanilla models: BLSC/GLM-5.2)
 
@@ -62,7 +55,6 @@ Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`
 
 ### Prompts
 
-- `019fbef4` goal: complete the work defined cfd_solver_agentic_benchmark/.
 - `019fbef6` goal: complete the work defined cfd_solver_agentic_benchmark/.
   - initial: <user_shell_command>
 <command>

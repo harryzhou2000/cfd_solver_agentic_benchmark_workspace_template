@@ -16,67 +16,45 @@
     "BLSC/GLM-5.2": {
       "catalog": {
         "display_name": null,
-        "context_window": null,
+        "context_window": 522500,
         "max_context_window": null,
         "supported_reasoning_levels": null
       },
       "reasoning_efforts_seen": [
         "max"
       ],
-      "max_context_used": 0,
-      "threads": 2
+      "max_context_used": 267608,
+      "threads": 1
     }
   },
   "context": {
     "by_model": {
       "BLSC/GLM-5.2": {
-        "context_window": null,
-        "max_context_used": 0
+        "context_window": 522500,
+        "max_context_used": 267608
       }
     },
     "by_thread": {
-      "019fbef4-a59e-7ec0-9455-8c961d3b1cbf": {
-        "model": "BLSC/GLM-5.2",
-        "max_input_tokens": null,
-        "mean_input_tokens": null
-      },
       "019fbef6-8a0e-71f0-8642-db5302a41979": {
         "model": "BLSC/GLM-5.2",
-        "max_input_tokens": null,
-        "mean_input_tokens": null
+        "max_input_tokens": 267608,
+        "mean_input_tokens": 173180.7,
+        "model_context_window_recorded": 522500
       }
     },
-    "notes": [
-      "no per-turn usage logs for BLSC/GLM-5.2; observed context window unknown"
-    ]
+    "notes": []
   },
   "threads": {
-    "019fbef4-a59e-7ec0-9455-8c961d3b1cbf": {
-      "thread_id": "019fbef4-a59e-7ec0-9455-8c961d3b1cbf",
-      "is_subagent": false,
-      "model": "BLSC/GLM-5.2",
-      "model_provider": "openai",
-      "reasoning_effort": [
-        "max"
-      ],
-      "tokens_used": 78119,
-      "cwd": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01",
-      "git_branch": "codex/glm52-m3/init",
-      "created_at": 1785615132,
-      "updated_at": 1785615194,
-      "started_at": "2026-08-01T20:12:51.919000+00:00",
-      "ended_at": "2026-08-01T20:13:14.667000+00:00",
-      "context_used_max_input": null,
-      "context_used_mean_input": null
-    },
     "019fbef6-8a0e-71f0-8642-db5302a41979": {
       "thread_id": "019fbef6-8a0e-71f0-8642-db5302a41979",
       "is_subagent": false,
       "model": "BLSC/GLM-5.2",
+      "entry_model": "BLSC/GLM-5.2",
       "model_provider": "openai",
       "reasoning_effort": [
         "max"
       ],
+      "entry_reasoning_effort": "max",
       "tokens_used": 40557801,
       "cwd": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01",
       "git_branch": "codex/glm52-m3/init",
@@ -84,8 +62,9 @@
       "updated_at": 1785620217,
       "started_at": "2026-08-01T20:14:30.524000+00:00",
       "ended_at": "2026-08-01T21:36:57.469000+00:00",
-      "context_used_max_input": null,
-      "context_used_mean_input": null
+      "context_used_max_input": 267608,
+      "context_used_mean_input": 173180.7,
+      "model_context_window_recorded": 522500
     }
   },
   "subagents": [],
@@ -101,13 +80,6 @@
   },
   "prompts": {
     "by_root_thread": {
-      "019fbef4-a59e-7ec0-9455-8c961d3b1cbf": {
-        "goal_objective": "complete the work defined cfd_solver_agentic_benchmark/.",
-        "goal_status": "paused",
-        "initial_user_prompt": null,
-        "resume_prompts": [],
-        "source": "session_rollout"
-      },
       "019fbef6-8a0e-71f0-8642-db5302a41979": {
         "goal_objective": "complete the work defined cfd_solver_agentic_benchmark/.",
         "goal_status": "complete",
@@ -146,30 +118,22 @@
     }
   },
   "session_window": {
-    "started_at": "2026-08-01T20:12:51.919000+00:00",
+    "started_at": "2026-08-01T20:14:30.524000+00:00",
     "ended_at": "2026-08-01T21:36:57.469000+00:00"
   },
   "provenance": {
-    "state_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/state_5.sqlite",
-    "goals_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/goals_1.sqlite",
-    "logs_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/logs_2.sqlite",
-    "sessions_root": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/sessions",
+    "state_db": "workspace/codex/glm52-m3/01/.sessions/codex/state_5.sqlite",
+    "goals_db": "workspace/codex/glm52-m3/01/.sessions/codex/goals_1.sqlite",
+    "logs_db": "workspace/codex/glm52-m3/01/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "workspace/codex/glm52-m3/01/.sessions/codex/sessions",
     "history": "/tmp/no-history",
     "ocx_config": "/tmp/no-ocx-config",
     "ocx_catalog": "/tmp/no-ocx-catalog",
     "plugins_root": "/tmp/no-plugins",
-    "generated_at": "2026-08-13T11:58:37.445960+00:00",
-    "num_threads": 2
+    "generated_at": "2026-08-13T15:19:16.646859+00:00",
+    "num_threads": 1
   },
-  "questions": [
-    {
-      "id": "context_window_BLSC_GLM-5.2",
-      "question": "What is the context window (max tokens) of model `BLSC/GLM-5.2`?",
-      "reason": "model is not listed in the model catalog",
-      "suggested_source": "provider docs or model card",
-      "answer": null
-    }
-  ],
+  "questions": [],
   "user_answers": {},
-  "status": "needs_user_input"
+  "status": "complete"
 }
