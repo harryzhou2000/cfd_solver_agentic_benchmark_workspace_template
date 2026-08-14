@@ -1,0 +1,448 @@
+{
+  "schema": "agent_scores",
+  "contestant": "omo_slim_dsv4_03_2fbbe7",
+  "evaluated_at": "2026-08-14T08:40:00+00:00",
+  "evaluator": {
+    "agent": "Codex",
+    "session_id": null,
+    "harness": "opencode",
+    "notes": "Read-only evaluation of immutable source-only submission 72c27c36c8d01db85d8730cda1373cdb46f44751; no solver was built or rerun."
+  },
+  "metadata_answers": {
+    "context_window_deepseek-v4-flash@default": "Unavailable in the bundled immutable telemetry; no home, provider, or internet source was queried.",
+    "context_window_deepseek-v4-pro@max": "Unavailable in the bundled immutable telemetry; no home, provider, or internet source was queried."
+  },
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "ses_038139b85ffehS9M4UEnGezyvb"
+    ],
+    "included_descendants": [
+      "ses_03811d3ebffe3UJgZoawpqixqU"
+    ],
+    "execution_date": "2026-08-03",
+    "started_at": "2026-08-03T13:59:46.043000+00:00",
+    "ended_at": "2026-08-04T00:36:22.073000+00:00",
+    "time_basis": "UTC timestamps from the bundled project OpenCode DB.",
+    "contestant_final_response_status": "present",
+    "contestant_final_response_absence_reason": null,
+    "rationale": "The project-local OpenCode DB has one root, titled CFD solver agentic benchmark deepwork, and one explorer descendant. Its prompt targets this benchmark and its resume record explicitly admits that all eight cases, figures, and report remain unfinished. The terminal completed assistant message is msg_fca33227d001vf8WE7dnGuZg0m.",
+    "terminal_message": {
+      "id": "msg_fca33227d001vf8WE7dnGuZg0m",
+      "completed_at": "2026-08-04T00:36:21.788000+00:00",
+      "source": "workspace/.sessions/opencode-data/opencode/opencode.db",
+      "stored_message_sha256": "dab77d47720503bffef40e975631b445808532d20ed8e371302695ecc6c4c805",
+      "extracted_text_sha256": "8354f8d24e009759283bbdfdcd519589f7f424a29ea4f4e1d92affb15c79c9a0",
+      "text_part_count": 1,
+      "unindexed_sidecar": true
+    }
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "CMake identifies MPI, CGNS, HDF5, METIS, and Eigen, but no clean build was submitted or performed and no README/reproducible completed-case material is committed."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "main.cpp parses solve, --case, --output, --restart, and --report-level and rejects missing or unknown arguments."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 3,
+          "notes": "Mesh, partition, residual, output, and time-step modules are separated, but several advertised modules are placeholders or unconnected."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "No internal external-solver invocation is evident. Trust policy precludes external similarity investigation."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "The submitted CLI consumes JSON case configuration and batch script enumerates case JSON files rather than branching only on benchmark mesh names."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 1,
+          "notes": "MPI/METIS scaffolding exists, but halo exchange deliberately sends zeros and leaks buffers; no submitted MPI execution or rank comparison establishes correctness."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 1,
+          "notes": "halo_exchange.cpp explicitly leaks receive/send buffers and sends placeholder zero data; there is no credible runtime robustness evidence."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "No committed tests, validator output, or completed case artifacts exist. The session-side goal record says the eight cases remain unrun."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 2,
+          "notes": "The source is compact and named coherently, but contains TODOs, unused interfaces, explicit placeholders, and no report/documentation."
+        }
+      ],
+      "overall_score": 2.45,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Conservative perfect-gas state conversion and Euler-state calculations are identifiable in common/gas_model.hpp."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "A CGNS reader, mesh structures, and geometry routines are submitted, but no build or production mesh result verifies them."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 2,
+          "notes": "A first-order face residual loop exists, but it uses local-index checks against global face indices and is not validated by a delivered case."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Rusanov flux is called in residual.cpp; no separate entropy-fix implementation or result validation is evident."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Farfield, slip-wall, and no-slip adiabatic branches appear in residual.cpp, without output evidence of correct boundary behavior."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 0,
+          "notes": "reconstruct_faces is entirely no-op and compute_residual uses first-order face states."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 0,
+          "notes": "apply_limiter is entirely no-op; only an ad hoc state reset/check appears in the point update."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "viscous_flux returns an all-zero state and is not integrated into the residual, so laminar viscous capability is not implemented."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "steady_march contains a CFL-ramped point-implicit/diagonal update, but no completed steady result verifies convergence or correctness."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 0,
+          "notes": "main.cpp prints that the transient solver is not implemented; no BDF2 outer loop is committed."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 1,
+          "notes": "METIS distribution and nonblocking MPI scaffolding exist, but neighbor data are placeholders and no scalability evidence was submitted."
+        }
+      ],
+      "overall_score": 1.75,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 0,
+          "notes": "The immutable submission contains no results directory, case package, manifest, field, history, or report."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 0,
+          "notes": "There are no eight final case directories or report to validate; no validator pass was submitted."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 0,
+          "notes": "All eight required result packages are absent. The selected session explicitly says the eight cases remain unrun."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 0,
+          "notes": "No delivered numerical output, field data, or rank-count comparison exists."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 0,
+          "notes": "No committed report or curated figures are present."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 0,
+          "notes": "No report source or PDF is committed; session-side text honestly states the report and visualizations remain unfinished."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 0,
+          "notes": "No submitted results, figure manifest, figures, or report claims exist to trace."
+        }
+      ],
+      "overall_score": 0.0,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 27,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 4,
+        "notes": "CMake and basic CLI are present; no build evidence and no output-contract deliverables."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 4,
+        "notes": "CGNS/geometry source exists but is unverified and incomplete."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 7,
+        "notes": "First-order Rusanov residual and BC branches exist, with unresolved local/global indexing correctness."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 0,
+        "notes": "Reconstruction and limiter are no-op."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 1,
+        "notes": "Viscous-flux function returns zero and is not part of the residual."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 5,
+        "notes": "Point-implicit steady update is present; transient/BDF2 implementation is explicitly absent."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 1,
+        "notes": "MPI/METIS scaffolding is incomplete: halo messages are zeros and no MPI run is delivered."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 0,
+        "notes": "All eight immutable result packages are absent."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 0,
+        "notes": "No report or curated visualizations are submitted."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 5,
+        "notes": "The source is divided into reasonably reusable C++ modules and JSON case configuration, despite major unimplemented numerical features."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 0,
+      "notes": "No immutable final result package or case-specific evidence was submitted."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 0,
+      "notes": "No immutable final result package or case-specific evidence was submitted."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 0,
+      "notes": "No immutable final result package or case-specific evidence was submitted."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 0,
+      "notes": "No immutable final result package or case-specific evidence was submitted."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 0,
+      "notes": "No immutable final result package or case-specific evidence was submitted."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 0,
+      "notes": "No immutable final result package or case-specific evidence was submitted."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 0,
+      "notes": "No immutable final result package or case-specific evidence was submitted."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 0,
+      "notes": "No immutable final result package or case-specific evidence was submitted; source also explicitly lacks transient BDF2."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": [
+      {
+        "id": 1,
+        "text": "Existing solver executable is called internally",
+        "found": false,
+        "evidence": "No direct internal external-solver invocation is present in the submitted source."
+      },
+      {
+        "id": 2,
+        "text": "Force or residual files are generated without solving",
+        "found": false,
+        "evidence": "No scored output files are submitted; source writer routines alone do not establish generation without solving."
+      },
+      {
+        "id": 3,
+        "text": "Hard-coded benchmark mesh branches",
+        "found": false,
+        "evidence": "JSON case parsing and generic batch enumeration are present; no two-mesh-only branch was found."
+      },
+      {
+        "id": 4,
+        "text": "Order-one steady MPI mismatch",
+        "found": false,
+        "evidence": "No steady rank-comparison outputs exist, so an order-one mismatch cannot be established."
+      },
+      {
+        "id": 5,
+        "text": "Explicit-only solver",
+        "found": false,
+        "evidence": "A point-implicit steady update is implemented, although it is not sufficiently verified."
+      },
+      {
+        "id": 6,
+        "text": "Claimed method absent from source",
+        "found": false,
+        "evidence": "No committed report or result metadata makes a contrary claimed-method assertion."
+      },
+      {
+        "id": 7,
+        "text": "Incomplete run reported successful",
+        "found": false,
+        "evidence": "No submitted metadata claims successful case completion; the session record instead acknowledges unfinished cases."
+      },
+      {
+        "id": 8,
+        "text": "Figures do not correspond to results",
+        "found": false,
+        "evidence": "No figures or results were submitted, so no specific mismatch is established."
+      },
+      {
+        "id": 9,
+        "text": "Claimed METIS but geometric/serial implementation",
+        "found": false,
+        "evidence": "METIS partitioner source is present, but no metadata/report claim or completed output establishes a contradictory production implementation."
+      },
+      {
+        "id": 10,
+        "text": "Claimed reconstruction/limiter disabled",
+        "found": false,
+        "evidence": "The source has no active reconstruction/limiter, but no report or metadata claims it was active in production."
+      },
+      {
+        "id": 11,
+        "text": "Misrepresented no-slip surface velocity",
+        "found": false,
+        "evidence": "No surface outputs or metadata were submitted to establish this misrepresentation."
+      },
+      {
+        "id": 12,
+        "text": "Misnamed figures",
+        "found": false,
+        "evidence": "No figures were submitted."
+      },
+      {
+        "id": 13,
+        "text": "Copied solver core",
+        "found": false,
+        "evidence": "No direct internal evidence; trust policy forbids external-copy investigation."
+      }
+    ]
+  },
+  "limitations": [
+    "This is a source-only submission: results/, report/, field files, histories, manifests, and validator evidence are absent. No solver was built or rerun; Re200 was never rerun.",
+    "Selected telemetry is restricted to the project-local OpenCode DB root ses_038139b85ffehS9M4UEnGezyvb and explorer descendant ses_03811d3ebffe3UJgZoawpqixqU.",
+    "contestant_final_response.md is an unindexed sidecar: terminal message msg_fca33227d001vf8WE7dnGuZg0m, one text part, stored-message SHA-256 dab77d47720503bffef40e975631b445808532d20ed8e371302695ecc6c4c805, extracted SHA-256 8354f8d24e009759283bbdfdcd519589f7f424a29ea4f4e1d92affb15c79c9a0.",
+    "run_identity.json SHA-256 is f8092735b947fbad56b8ceee75a6fb3dbc23a710b06919ed5ca36bbf56f98f22; it is an unindexed sidecar and is not validated by cfdeval check."
+  ]
+}

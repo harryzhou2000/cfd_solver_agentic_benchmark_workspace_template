@@ -154,7 +154,11 @@ Reserve `[x]` for a snapshot that passes both gates.
       provenance, index, and both completion gates without rewriting the
       immutable contestant submission.
 - [ ] 02
-- [ ] 03
+- [x] 03 — `omo_slim_dsv4_03_2fbbe7`; 27/100; DQ no. Curated source-only
+      submission `72c27c36c8d01db85d8730cda1373cdb46f44751`; all eight immutable
+      final result packages and report artifacts are absent, so cases score 0.
+      Project-OpenCode root/descendant and terminal response are recorded; all
+      score layers, index, and both completion gates pass.
 - [ ] 04
 
 ## Legacy/session notes
