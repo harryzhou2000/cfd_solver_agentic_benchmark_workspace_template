@@ -1,0 +1,83 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 0,
+      "notes": "Immutable submission contains no required canonical solver/results case directory; all eight required result packages are absent."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 0,
+      "notes": "Eight canonical paths are absent, so an explicit validator pass cannot be credited; summary inventory finds only four noncanonical uncommitted test directories."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 0,
+      "notes": "No submitted final result package supports completion, convergence, or statistically-periodic claims for any required case."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 0,
+      "notes": "No committed residual/force/surface/field data or rank comparison exists to inspect."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 1,
+      "notes": "Nine committed report PNGs are referenced by report.tex, but their input data and required all-case coverage are absent; they cannot substantiate result credit."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 1,
+      "notes": "LaTeX has methods and figures, but asserts all eight runs and complete output while none is committed; tables/figures lack submitted trace data."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 0,
+      "notes": "No submitted figure_manifest, run_manifest, sanity_checks, result CSV, or field files connect report claims to immutable outputs."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report figures do not correspond to submitted field/CSV outputs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete or failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Debug outputs presented as final case results",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 0.3
+}

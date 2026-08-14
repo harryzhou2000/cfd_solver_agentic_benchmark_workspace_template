@@ -94,9 +94,10 @@ Reserve `[x]` for a snapshot that passes both gates.
 - [x] 01 — `codex_glm52-m3_01_919b67`; 72/100; DQ no; manager pending.
       Direct originality evidence and weighted reviews 3.60/3.62/3.60 refreshed;
       index and both gates pass.
-- [ ] 02 — PENDING: provenance reconstructed (`codex/glm52-m3/init` @
-      `746ef39`). Restore the verified manager canonical origin and run the
-      normal exact collision gate; missing origin alone is not a blocker.
+- [x] 02 — `codex_glm52-m3_02_ca46e4`; 60/100; DQ no;
+      submission `6148b7b8525000945d5591faceda30aeb1bc1180`; manager pending.
+      Audit-clean source/report submission; all eight immutable required result
+      packages absent and score 0; both gates pass.
 - [ ] 03 — PENDING: provenance reconstructed (`codex/glm52-m3/init` @
       `a14f203babe6794ad032aea760aed8e302e62b5a`). Restore the verified manager
       canonical origin and run the normal exact collision gate.
