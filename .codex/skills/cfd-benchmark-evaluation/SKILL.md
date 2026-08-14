@@ -330,6 +330,47 @@ python3 evaluation/tools/extract_sessions.py \
   --out evaluation/outputs/<run-id>/sessions.json
 ```
 
+The session replacement is not sufficient by itself. For a migrated or
+Docker-isolated Codex run, regenerate **all four telemetry sidecars** from the
+same project Codex bundle and the same confirmed roots:
+
+```bash
+python3 evaluation/tools/extract_metadata.py \
+  --workspace <host-contestant-repo> \
+  --state-db <repo>/.sessions/codex/state_5.sqlite \
+  --goals-db <repo>/.sessions/codex/goals_1.sqlite \
+  --logs-db <repo>/.sessions/codex/logs_2.sqlite \
+  --sessions-root <repo>/.sessions/codex/sessions \
+  --roots <confirmed-root-id[,continuation-root-id...]> \
+  --out evaluation/outputs/<run-id>/metadata.json
+
+python3 evaluation/tools/extract_expenses.py \
+  --workspace <host-contestant-repo> \
+  --state-db <repo>/.sessions/codex/state_5.sqlite \
+  --goals-db <repo>/.sessions/codex/goals_1.sqlite \
+  --logs-db <repo>/.sessions/codex/logs_2.sqlite \
+  --sessions-root <repo>/.sessions/codex/sessions \
+  --roots <confirmed-root-id[,continuation-root-id...]> \
+  --out evaluation/outputs/<run-id>/expenses.json
+
+python3 evaluation/tools/extract_measurements.py \
+  --workspace <host-contestant-repo> \
+  --state-db <repo>/.sessions/codex/state_5.sqlite \
+  --logs-db <repo>/.sessions/codex/logs_2.sqlite \
+  --sessions-root <repo>/.sessions/codex/sessions \
+  --roots <confirmed-root-id[,continuation-root-id...]> \
+  --out evaluation/outputs/<run-id>/measurements.json
+```
+
+Use the actual cwd stored in the project database when an extractor's
+workspace selection depends on cwd; after migration this is normally the host
+contestant path, while Docker-native rows may record `/workspace`. Never let a
+default host OpenCode database determine `metadata.harness` for a confirmed
+project Codex run. If `sessions.json` says Codex but `metadata.json` says
+OpenCode, or if Codex session tokens are nonzero while expenses/measurements
+are zero, treat the snapshot as internally invalid and repair it before
+scoring or committing.
+
 For an OpenCode run whose database rows record the resolved host path, use:
 
 ```bash
@@ -347,10 +388,12 @@ part of the run. The Codex command's `workspace` field will be `/workspace`, so
 record the separately verified host repository path alongside it in the
 session-selection provenance.
 
-Rebuild or refresh any summary/report fields derived from `sessions.json`, and
-record that the direct project-session extraction superseded the initial
-`summarize.py` session artifact. Do not claim the snapshot is internally
-consistent until dependent fields and the index digest have been refreshed.
+Rebuild or refresh every summary/report field derived from the four telemetry
+sidecars, and record that direct project extraction superseded the initial
+`summarize.py` artifacts. Rerun `record_agent_results.py`, inspect the refreshed
+agent report/summary, and regenerate the index. Do not claim the snapshot is
+internally consistent until harness, roots, time, tokens, costs, tools, LOC,
+questions, dependent prose, and index digests agree.
 
 Because automatic cwd matching may compare the host path to recorded
 `/workspace`, an empty project-Codex candidate set is not proof that no Codex

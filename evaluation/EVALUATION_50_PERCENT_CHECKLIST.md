@@ -26,6 +26,10 @@ canonical evaluations count toward the quota and must not be repeated.
 - [ ] Manually select the primary Codex/OpenCode root and complete descendant
       tree from the self-contained `.sessions` bundle; extract the exact final
       response before evaluation.
+- [ ] For project Codex runs, regenerate metadata, expenses, measurements, and
+      sessions from the same project DB/rollout paths and confirmed roots.
+      Reject any snapshot where sessions say Codex but metadata says OpenCode,
+      or where nonzero Codex usage is paired with zero expenses/measurements.
 - [ ] Evaluate all rubric sections, validate all eight submitted cases and the
       report, record comments and DQ evidence, index/check the snapshot, and
       commit the manager snapshot separately. Do not push.
