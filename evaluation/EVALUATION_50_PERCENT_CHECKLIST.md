@@ -66,10 +66,10 @@ Reserve `[x]` for a snapshot that passes both gates.
       hashes refreshed; Code/CFD/Results 4.02/3.70/1.95; both gates pass.
       Eight case directories validate; curated report lacks excluded raw
       `run_manifest.csv`.
-- [ ] 03 — REPAIR `codex_dsv4_flash_03_294b64`; 87/100; DQ no;
-      submission `9772c16083472abe27089e17fe87bb5329e68f4d`; latest dashboard
-      repair `154f3ff`. Case scores/index now exist, but all three review
-      scorecards and report sidecar provenance remain incomplete.
+- [x] 03 — `codex_dsv4_flash_03_294b64`; 87/100; DQ no;
+      submission `9772c16083472abe27089e17fe87bb5329e68f4d`; manager pending.
+      Review scorecards/evidence and sidecar hashes refreshed; Code/CFD/Results
+      4.77/4.62/3.85; both gates pass. Re200 shedding remains unverified.
 - [ ] 04 — REPAIR `codex_dsv4_flash_04_755869`; 48/100 before DQ;
       DQ yes; submission `1b16448613a82d29f7f8f033b9216d5248a7db05`;
       manager `612a300`. All three review scorecards remain incomplete.

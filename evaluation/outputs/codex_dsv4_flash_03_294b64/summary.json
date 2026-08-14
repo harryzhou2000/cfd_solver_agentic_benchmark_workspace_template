@@ -108,64 +108,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Terminal response reports complete build and explicit validator passed all cases/report."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Submitted CLI is part of the completed build/validation workflow reported by the selected root."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Source review records separate mesh, residual/time-integration, and MPI components."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
-        "score": null,
-        "notes": ""
+        "score": 4,
+        "notes": "No direct internal wrapper evidence found; trust policy excludes external similarity investigation."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "No hard-coded two-mesh-only logic was found in submitted source review."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "METIS partitioning and neighbor MPI communication were source reviewed and rank checks reported."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": null,
-        "notes": ""
+        "score": 4,
+        "notes": "Validated outputs and completed workflow support strong robustness, with retained result limitations."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Selected root reports build, validation, and MPI rank checks."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Submitted source organization is strong; report PNG packaging limitation is separately recorded."
       }
     ],
     "disqualification_flags": [
@@ -210,7 +210,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.6
+    "overall_score": 4.77
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -220,78 +220,78 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Source review found governing-flow implementation."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Source review found CGNS mesh handling."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Source review found finite-volume residual implementation."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
-        "score": null,
-        "notes": ""
+        "score": 4,
+        "notes": "Flux implementation was source reviewed; retained plateau limitation prevents full result confidence."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Boundary-condition source implementation was reviewed."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Second-order source path was reviewed."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Limiter/robustness source path was reviewed."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": null,
-        "notes": ""
+        "score": 4,
+        "notes": "Viscous source path exists; laminar-result limitations remain."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Implicit steady capability is source reviewed."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": null,
-        "notes": ""
+        "score": 3,
+        "notes": "Re200 reached horizon but does not demonstrate vortex shedding; it was not rerun."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "METIS and neighbor MPI communication were source reviewed."
       }
     ],
     "disqualification_flags": [
@@ -326,7 +326,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.5
+    "overall_score": 4.62
   },
   "result_review": {
     "review_area": "result_review",
@@ -336,50 +336,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": null,
-        "notes": ""
+        "score": 4,
+        "notes": "Explicit validator returned OK for all eight results and report."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": null,
-        "notes": ""
+        "score": 5,
+        "notes": "Explicit structural validator passed all required outputs."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": null,
-        "notes": ""
+        "score": 3,
+        "notes": "Re200 lacks demonstrated vortex shedding; other structural cases validate."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": null,
-        "notes": ""
+        "score": 4,
+        "notes": "Reported limitations retain reduced confidence in plateau/transient physical evidence."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": null,
-        "notes": ""
+        "score": 4,
+        "notes": "Report coverage exists, but committed PNG figures are not self-contained."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": null,
-        "notes": ""
+        "score": 4,
+        "notes": "Terminal response honestly reports Re200 and laminar limitations."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": null,
-        "notes": ""
+        "score": 3,
+        "notes": "Strict audit excluded included-TeX PNG references, limiting curated-report traceability."
       }
     ],
     "disqualification_flags": [
@@ -409,7 +409,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.3
+    "overall_score": 3.85
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03",

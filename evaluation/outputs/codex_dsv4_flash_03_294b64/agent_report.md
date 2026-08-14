@@ -56,7 +56,7 @@ The migration manifest is authoritative session inventory: one Codex root and no
 
 ## Limitations
 
-The initial environment is reconstructed post-run. The report's figures are referenced through an included TeX file, not directly by `report.tex`; strict immutable audit excluded the PNGs, so this committed report is not self-contained. Re200 reached the horizon but did not demonstrate vortex shedding. No evaluator rerun was needed or performed.
+The initial environment is reconstructed post-run. The report's figures are referenced through an included TeX file, not directly by `report.tex`; strict immutable audit excluded the PNGs, so this committed report is not self-contained. Re200 reached the horizon but did not demonstrate vortex shedding. No evaluator rerun was needed or performed. `run_identity.json` SHA-256 is `fa21fee5e832be6e8679a61f4a065d2b06f147bfd98848fd5474d2b0bfc7d546`; `contestant_final_response.md` SHA-256 is `5f534388dfa7fc777b3f9c2af03aae1edf214501372ba3fab8d50e871f22892d`. These unindexed sidecars are not validated by `cfdeval check`.
 
 ## Verdict
 
