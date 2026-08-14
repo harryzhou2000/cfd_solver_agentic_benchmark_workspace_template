@@ -158,8 +158,8 @@ def completion_errors(folder: Path) -> list[str]:
     for case_id in expected_cases:
         item = case_scores.get(case_id) or {}
         value = item.get("score")
-        if value is not None and (not _number(value) or not 0 <= value <= 5):
-            errors.append(f"case_scores.{case_id}: score must be null or within 0-5")
+        if not _number(value) or not 0 <= value <= 5:
+            errors.append(f"case_scores.{case_id}: score must be complete and within 0-5")
         if not str(item.get("notes") or "").strip():
             errors.append(f"case_scores.{case_id}: evidence/limitation note is empty")
 

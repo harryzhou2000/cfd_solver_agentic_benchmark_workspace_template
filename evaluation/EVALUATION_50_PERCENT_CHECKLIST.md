@@ -35,8 +35,9 @@ canonical evaluations count toward the quota and must not be repeated.
       weighted review overalls, all ten rubric sections, all eight case-score
       entries, and an explicit DQ verdict.
 - [ ] Run both `cfdeval check` and `cfdeval check-complete`. Do not mark the
-      item complete if either fails. A case-score `null` requires an explicit
-      evidence-unavailable note; review point scores may not be null.
+      item complete if either fails. Every case score and review point score
+      must be numeric on the 0-5 scale; missing case evidence receives 0 with
+      a case-specific note.
 - [ ] Index/check the snapshot and commit the manager snapshot separately. Do
       not push. This checklist is shared evaluator state: inspect status/log and
       coordinate ownership before editing it; preserve concurrent evaluator
@@ -77,7 +78,8 @@ Reserve `[x]` for a snapshot that passes both gates.
 - [x] 06 — `codex_dsv4_flash_06_5b6b08`; 63/100; DQ no;
       curated submission `e998060` supersedes recovery `8c757a9`; manager pending.
       Source-only reviews 3.72/3.90/0.00, sidecar hashes, index, and both gates
-      complete. Eight case scores remain intentional nulls with unavailable-evidence notes.
+      complete. All eight missing canonical case results score 0 with
+      case-specific unavailable-evidence notes.
 
 ### `codex/glm52` — 3 done, quota 2
 

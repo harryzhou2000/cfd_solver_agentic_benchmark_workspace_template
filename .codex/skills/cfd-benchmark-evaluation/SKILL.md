@@ -717,8 +717,10 @@ Before calling an evaluation complete, fill every Code/CFD/Results review
 point with a 0-5 score and a non-empty evidence note. The three review-area
 overalls are weighted results of those points; they are not aliases for or
 manual projections of the 100-point rubric. Fill all ten rubric sections with
-scores and evidence notes. Fill all eight case-score entries; an intentional
-`null` is complete only when its note explains why the evidence is unavailable.
+scores and evidence notes. Fill all eight case-score entries with a numeric
+score from 0 to 5. Case scores are never `null`: use `0` with a case-specific
+note when the required result is missing, unreadable, confirmed failed, or has
+no credible case-result evidence.
 Record an explicit true/false DQ verdict and evidence for every triggered flag.
 
 ## 6. Record, validate, and hand off
@@ -735,7 +737,7 @@ uv run cfdeval check-complete outputs/<run-id>
 `cfdeval check` validates artifact schemas and index hashes.
 `cfdeval check-complete` is the mandatory semantic completion gate. It verifies
 the three review scorecards and evidence notes, weighted overalls, all rubric
-sections, all case-score entries, DQ verdict, answered metadata questions,
+sections, eight numeric 0-5 case-score entries, DQ verdict, answered metadata questions,
 identity/report/final-response sidecars, and required indexed artifacts.
 `record_agent_results.py` runs this gate and exits nonzero when anything is
 incomplete. Do not bypass it, do not commit a snapshot as complete after it

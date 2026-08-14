@@ -56,6 +56,23 @@ class CompletionGateTests(unittest.TestCase):
             recorded = json.loads(path.read_text())
             self.assertIsNone(recorded["rubric"]["total_scored"])
 
+    def test_null_case_score_fails_even_with_a_limitation_note(self):
+        with tempfile.TemporaryDirectory() as raw:
+            target = self.copy_complete_snapshot(raw)
+            path = target / "agent_scores.json"
+            scores = json.loads(path.read_text())
+            case_id = next(iter(scores["case_scores"]))
+            scores["case_scores"][case_id] = {
+                "score": None,
+                "notes": "Evidence is unavailable.",
+            }
+            path.write_text(json.dumps(scores, indent=2) + "\n")
+            errors = completion.completion_errors(target)
+            self.assertTrue(any(
+                f"case_scores.{case_id}: score must be complete and within 0-5" in e
+                for e in errors
+            ))
+
 
 if __name__ == "__main__":
     unittest.main()
