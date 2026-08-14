@@ -38,6 +38,12 @@ run_case() {
     if [ "$case_id" = "cylinder_m010_laminar_re20" ]; then
         extra_env+=("CFD_RUSANOV=1")
     fi
+    if [ "$case_id" = "cylinder_m010_laminar_re200" ]; then
+        # Mild limiter and a small transverse wake seed so the antisymmetric
+        # shedding mode develops on the symmetric mesh (documented in the
+        # report).
+        extra_env+=("CFD_LIMITER_K=5" "CFD_PERTURB_V=0.05")
+    fi
     echo "[run] $case_id np=$NP relax=$relax freeze=$freeze out=$out"
     if [ "$NP" -eq 1 ]; then
         env CFD_RELAX="$relax" "${extra_env[@]}" ./build/cfd_fv2d solve \

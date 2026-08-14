@@ -41,6 +41,20 @@ mpirun -np <ranks> ./build/cfd_fv2d solve \
   [--restart restart_final.json] [--report-level brief|full]
 ```
 
+The committed production results were generated with:
+
+```bash
+./tools/run_production.sh          # steady cases at np=1
+mpirun -np 3 ./build/cfd_fv2d solve \
+  --case ../cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re200.json \
+  --output results/final_cylinder_m010_laminar_re200_np3 \
+  # with CFD_LIMITER_K=5 and CFD_PERTURB_V=0.05 in the environment
+```
+
+`tools/run_steady_sequential.sh` reproduces the steady launches sequentially
+on one core, and `tools/finalize_all.sh` regenerates figures, manifests,
+sanity checks, report tables, and the PDF.
+
 Documented diagnostic overrides (also exposed as CLI options):
 
 - `--max-steps N`  limit nonlinear/physical steps
