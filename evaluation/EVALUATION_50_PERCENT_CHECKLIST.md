@@ -60,12 +60,12 @@ Reserve `[x]` for a snapshot that passes both gates.
       submission `f6d8a1839a70c98d83a1e5baff9e2d6e111f7e2f`; manager pending.
       Completed originality from direct internal evidence and recomputed
       Code/CFD/Results overalls (3.32/3.34/1.35); both gates pass.
-- [ ] 02 — REPAIR `codex_dsv4_flash_02_3447d3`; **73/100** before
-      DQ; DQ yes. Curated submission `93e8729` passes audit and supersedes
-      recovery `2376b11`; manager `956cfd2`. All three review scorecards and
-      their evidence notes are incomplete; report sidecar provenance also needs
-      repair. Eight case directories validate; curated report lacks excluded
-      raw `run_manifest.csv`.
+- [x] 02 — `codex_dsv4_flash_02_3447d3`; 73/100 before DQ; DQ yes.
+      Curated submission `93e8729` passes audit and supersedes recovery
+      `2376b11`; manager pending. All review scorecards/evidence and sidecar
+      hashes refreshed; Code/CFD/Results 4.02/3.70/1.95; both gates pass.
+      Eight case directories validate; curated report lacks excluded raw
+      `run_manifest.csv`.
 - [ ] 03 — REPAIR `codex_dsv4_flash_03_294b64`; 87/100; DQ no;
       submission `9772c16083472abe27089e17fe87bb5329e68f4d`; latest dashboard
       repair `154f3ff`. Case scores/index now exist, but all three review
