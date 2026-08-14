@@ -19,7 +19,6 @@ import hashlib
 import json
 import os
 import re
-import shutil
 import sqlite3
 import subprocess
 import sys
@@ -239,7 +238,7 @@ def extract_opencode(args, workspace: str) -> dict:
     idle_gap = getattr(args, "idle_gap_seconds", 600)
     harness = {
         "harness": "opencode",
-        "version": _run([shutil.which("opencode") or "opencode", "--version"]),
+        "version": None,
         "config_dir": args.opencode_config_dir,
         "config_entries": None,
         "model_provider": None,
@@ -266,10 +265,14 @@ def extract_opencode(args, workspace: str) -> dict:
             "id": "opencode_db",
             "question": "Where is the opencode session database/log for this run?",
             "reason": f"opencode session database is unavailable: {exc}",
-            "suggested_source": "~/.local/share/opencode/opencode.db or opencode export",
+            "suggested_source": "workspace .sessions OpenCode DB or an operator-approved "
+                                "migration into that bundle",
             "answer": None,
         })
         rows = []
+
+    versions = sorted({str(r[12]) for r in rows if r[12]})
+    harness["version"] = ", ".join(versions) if versions else None
 
     for r in rows:
         m = json.loads(r[5]) if r[5] else {}
@@ -513,27 +516,25 @@ def finalize(metadata: dict, questions: list[dict], answers_path: str | None) ->
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Extract contestant run metadata")
     ap.add_argument("--workspace", required=True)
-    defaults = cd.default_paths()
-    home = Path.home()
-    ap.add_argument("--state-db", default=str(defaults["state_db"]))
-    ap.add_argument("--goals-db", default=str(defaults["goals_db"]))
-    ap.add_argument("--logs-db", default=str(defaults["logs_db"]))
-    ap.add_argument("--sessions-root", default=str(defaults["sessions_root"]))
-    ap.add_argument("--history", default=str(cd.codex_home() / "history.jsonl"))
-    ap.add_argument("--ocx-config", default=str(home / ".opencodex" / "config.json"))
-    ap.add_argument("--ocx-catalog",
-                    default=str(cd.codex_home() / "opencodex-catalog.json"))
-    ap.add_argument("--plugins-root", default=str(cd.codex_home() / "plugins"))
+    ap.add_argument("--state-db", default=None)
+    ap.add_argument("--goals-db", default=None)
+    ap.add_argument("--logs-db", default=None)
+    ap.add_argument("--sessions-root", default=None)
+    ap.add_argument("--history", default=None)
+    ap.add_argument("--ocx-config", default=None)
+    ap.add_argument("--ocx-catalog", default=None)
+    ap.add_argument("--plugins-root", default=None)
     ap.add_argument("--roots", default=None)
+    ap.add_argument("--harness", choices=("auto", "codex", "opencode"),
+                    default="auto",
+                    help="manual harness classification; auto never uses a host store")
     ap.add_argument(
         "--idle-gap-seconds", type=int, default=600,
         help="opencode: gaps between session-history events longer than this "
              "many seconds count as interrupted idle time (default 600)",
     )
-    ap.add_argument("--opencode-db",
-                    default=str(Path.home() / ".local" / "share" / "opencode" / "opencode.db"))
-    ap.add_argument("--opencode-config-dir",
-                    default=str(Path.home() / ".config" / "opencode"))
+    ap.add_argument("--opencode-db", default=None)
+    ap.add_argument("--opencode-config-dir", default=None)
     ap.add_argument("--answers", default=None,
                     help="JSON file mapping question ids to user-provided answers "
                          "(evaluation agent asks the user for anything not extractable).")
@@ -542,17 +543,31 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     workspace = str(Path(args.workspace).resolve())
+    paths = cd.local_telemetry_paths(
+        workspace, state_db=args.state_db, goals_db=args.goals_db,
+        logs_db=args.logs_db, sessions_root=args.sessions_root,
+        history=args.history, ocx_config=args.ocx_config,
+        ocx_catalog=args.ocx_catalog, plugins_root=args.plugins_root,
+        opencode_db=args.opencode_db,
+        opencode_config_dir=args.opencode_config_dir)
+    for key in ("state_db", "goals_db", "logs_db", "sessions_root", "history",
+                "ocx_config", "ocx_catalog", "plugins_root", "opencode_db",
+                "opencode_config_dir"):
+        setattr(args, key, str(paths[key]))
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / Path(workspace).name / "metadata.json"
     )
-    threads = cd.load_threads(args.state_db)
-    edges = cd.load_spawn_edges(args.state_db)
-    goals = cd.load_goals(args.goals_db)
+    threads = cd.load_threads(args.state_db) if Path(args.state_db).is_file() else {}
+    edges = cd.load_spawn_edges(args.state_db) if threads else []
+    goals = cd.load_goals(args.goals_db) if Path(args.goals_db).is_file() else {}
+    cd.rebase_rollout_paths(threads, args.sessions_root)
     selected = cd.select_threads(threads, workspace)
     roots, all_ids = cd.thread_trees(selected, edges)
     children = {c for _, c in edges}
     requested = cd.parse_roots(args.roots)
-    if not all_ids and requested is None:
+    if args.harness == "opencode" or (
+            args.harness == "auto" and not all_ids and requested is None
+            and not Path(args.state_db).is_file()):
         metadata = extract_opencode(args, workspace)
         metadata = finalize(metadata, metadata.get("questions", []), args.answers)
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -562,6 +577,11 @@ def main(argv: list[str] | None = None) -> int:
               f"version={metadata['harness'].get('version')} "
               f"status={metadata['status']} questions={len(metadata['questions'])}")
         return 0
+    if not all_ids and requested is None:
+        print("ERROR: no matching project Codex threads; select the harness "
+              "manually and pass confirmed Codex --roots when Docker cwd "
+              "mapping prevents automatic selection", file=sys.stderr)
+        return 2
     if requested is not None:
         missing = [r for r in requested if r not in threads]
         if missing:
@@ -574,7 +594,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         roots = [r for r in roots if r not in children]
 
-    usage = cd.load_turn_usage(args.logs_db, all_ids)
+    usage = cd.load_turn_usage(args.logs_db, all_ids) if Path(args.logs_db).is_file() else {}
     catalog = load_catalog(args.ocx_catalog)
     history = load_history(args.history)
     plugins = load_plugins(args.plugins_root)
@@ -596,7 +616,7 @@ def main(argv: list[str] | None = None) -> int:
         "codex_runtime_version": None,
         "plugins": plugins,
     }
-    rt = cd.codex_home() / "codex-runtime.json"
+    rt = Path(args.sessions_root).parent / "codex-runtime.json"
     if rt.exists():
         try:
             harness["codex_runtime_version"] = json.loads(rt.read_text()).get("selectedVersion")
@@ -708,7 +728,7 @@ def main(argv: list[str] | None = None) -> int:
         opencodex = {
             "trigger": "non_vanilla_models",
             "non_vanilla_models": non_vanilla,
-            "opencodex_version": _run([shutil.which("opencodex") or "opencodex", "--version"]),
+            "opencodex_version": None,
             "opencodex_submodule_pin": None,
             "config_facts": {},
             "codex_proxy_fallback_config": None,
@@ -717,6 +737,14 @@ def main(argv: list[str] | None = None) -> int:
         opencodex["opencodex_submodule_pin"] = _run(
             ["git", "-C", str(sub), "describe", "--tags"]) if sub.exists() else None
         cfg = Path(args.ocx_config)
+        version_file = cfg.parent / "version.json"
+        if version_file.is_file():
+            try:
+                version_doc = json.loads(version_file.read_text())
+                opencodex["opencodex_version"] = (
+                    version_doc.get("version") or version_doc.get("selectedVersion"))
+            except (OSError, json.JSONDecodeError):
+                pass
         if cfg.exists():
             try:
                 c = json.loads(cfg.read_text())
@@ -740,7 +768,7 @@ def main(argv: list[str] | None = None) -> int:
                         or p.get("modelDefaultReasoningEfforts"))
                 },
             }
-        fallback = cd.codex_home() / "opencodex.config.toml"
+        fallback = Path(args.sessions_root).parent / "opencodex.config.toml"
         if fallback.exists():
             opencodex["codex_proxy_fallback_config"] = str(fallback)
 
@@ -771,8 +799,8 @@ def main(argv: list[str] | None = None) -> int:
                 "question": f"Which reasoning effort/mode was used for model `{m}`?",
                 "reason": "codex does not record reasoning effort for router-managed "
                           "(non-vanilla) models",
-                "suggested_source": "ocx-relay logs (/tmp/ocx-relay*.log) or "
-                                    "~/.opencodex/config.json effort map",
+                "suggested_source": "bundled .sessions OpenCodex config effort map "
+                                    "or persisted rollout settings",
                 "answer": None,
             })
 

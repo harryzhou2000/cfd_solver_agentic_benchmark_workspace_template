@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Discover every session that belongs to a contestant run — at the **system
-level** and in **project-isolated** copies — and produce 30-minute-bucketed
+Discover every session that belongs to a contestant run from its
+**project-isolated `.sessions/` bundle** and produce 30-minute-bucketed
 statistics over the merged timeline of the main thread/session and all
 subagents: cache-hit history, token usage, shell-call categories, and tool-call
 statistics. Whole-length statistics remain available. Idle periods (no events
@@ -21,19 +21,27 @@ which sessions belong to the run and answers any ambiguity:
 
 | Source | Location | Harness |
 |---|---|---|
-| `system_codex` | `~/.codex/state_5.sqlite` + `~/.codex/sessions/**/rollout-*.jsonl` | codex |
-| `system_opencode` | `~/.local/share/opencode/opencode.db` | opencode |
 | `project_codex` | `<workspace>/.sessions/codex/` (state_5.sqlite + sessions/) | codex |
-| `project_opencode` | `<workspace>/.sessions/opencode-data/opencode.db` | opencode |
+| `project_opencode` | `<workspace>/.sessions/opencode-data/opencode/opencode.db` | opencode |
 
-- `--session-source system|project|all` selects the class (default `system`).
-- When both harnesses have sessions for the workspace (or both classes do)
-  and no choice is recorded, `sessions.json.selection.questions` surfaces a
-  structured question; the agent answers via `--session-answers <json>`
-  (`{"session_source": "system"}`), which `summarize.py --session-answers`
-  forwards.
+- No evaluator-account store is searched and no external telemetry path is
+  accepted. Missing project-local evidence is unavailable; discovery fails
+  closed rather than falling back.
+- The agent manually classifies the primary run, then passes
+  `--harness codex|opencode`. When both bundled harness stores contain
+  candidates and no choice is recorded, `sessions.json.selection.questions`
+  surfaces a structured question; `--session-answers <json>` records the
+  answer and `summarize.py --session-answers` forwards it.
 - Codex roots are scoped with `--roots <thread-id,...>` (each root plus its
   spawn tree), matching the expenses/measurements extractors.
+- Docker rows may record cwd `/workspace` although `--workspace` names the host
+  contestant directory. This mismatch must be handled explicitly with the
+  confirmed `--harness` and `--roots`; cwd matching is only candidate evidence.
+- Codex SQLite `rollout_path` values are locators, not authority. Rebase each
+  selected row to the matching bundled
+  `<workspace>/.sessions/codex/sessions/**/rollout-*.jsonl`; never follow an
+  absolute path outside `.sessions/`. A missing or ambiguous match is
+  unavailable evidence.
 
 ## Merged timeline and idle exclusion
 

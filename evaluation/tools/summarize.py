@@ -173,16 +173,18 @@ def required_cases(ws: Path) -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Generate contestant final result summary")
     ap.add_argument("--workspace", required=True)
-    defaults = cd.default_paths()
-    ap.add_argument("--state-db", default=str(defaults["state_db"]))
-    ap.add_argument("--goals-db", default=str(defaults["goals_db"]))
-    ap.add_argument("--logs-db", default=str(defaults["logs_db"]))
-    ap.add_argument("--sessions-root", default=str(defaults["sessions_root"]))
+    ap.add_argument("--state-db", default=None)
+    ap.add_argument("--goals-db", default=None)
+    ap.add_argument("--logs-db", default=None)
+    ap.add_argument("--sessions-root", default=None)
     ap.add_argument("--cost-metadata", default=str(ROOT / "config" / "cost_metadata.json"))
-    ap.add_argument("--history", default=str(cd.codex_home() / "history.jsonl"))
-    ap.add_argument("--ocx-config", default=str(Path.home() / ".opencodex" / "config.json"))
-    ap.add_argument("--ocx-catalog", default=str(cd.codex_home() / "opencodex-catalog.json"))
-    ap.add_argument("--plugins-root", default=str(cd.codex_home() / "plugins"))
+    ap.add_argument("--history", default=None)
+    ap.add_argument("--ocx-config", default=None)
+    ap.add_argument("--ocx-catalog", default=None)
+    ap.add_argument("--plugins-root", default=None)
+    ap.add_argument("--harness", choices=("auto", "codex", "opencode"),
+                    default="auto",
+                    help="manual primary harness classification")
     ap.add_argument("--idle-gap-seconds", type=int, default=600,
                     help="opencode: gaps longer than this count as interrupted idle")
     ap.add_argument(
@@ -190,14 +192,11 @@ def main(argv: list[str] | None = None) -> int:
         help="JSON file mapping metadata question ids to user-provided answers "
              "(for metadata the evaluator could not extract).",
     )
-    ap.add_argument("--session-source", choices=("system", "project", "all"),
-                    default="system",
-                    help="which session class to analyze (system = ~/.codex and "
-                         "~/.local/share/opencode; project = workspace-bundled "
-                         ".sessions copies)")
+    ap.add_argument("--session-source", choices=("project",), default="project",
+                    help="retained for compatibility; only project is permitted")
     ap.add_argument("--session-answers", default=None,
                     help="JSON answers for session-discovery questions "
-                         "(e.g. {\"session_source\": \"system\"})")
+                         "(e.g. {\"harness\": \"codex\"})")
     ap.add_argument("--out", default=None)
     ap.add_argument(
         "--roots",
@@ -209,6 +208,14 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     ws = Path(args.workspace).resolve()
+    paths = cd.local_telemetry_paths(
+        ws, state_db=args.state_db, goals_db=args.goals_db,
+        logs_db=args.logs_db, sessions_root=args.sessions_root,
+        history=args.history, ocx_config=args.ocx_config,
+        ocx_catalog=args.ocx_catalog, plugins_root=args.plugins_root)
+    for key in ("state_db", "goals_db", "logs_db", "sessions_root", "history",
+                "ocx_config", "ocx_catalog", "plugins_root"):
+        setattr(args, key, str(paths[key]))
     out_dir = Path(args.out) if args.out else ROOT / "outputs" / ws.name
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -232,6 +239,7 @@ def main(argv: list[str] | None = None) -> int:
                     "--history", args.history, "--ocx-config", args.ocx_config,
                     "--ocx-catalog", args.ocx_catalog,
                     "--plugins-root", args.plugins_root,
+                    "--harness", args.harness,
                     "--idle-gap-seconds", str(args.idle_gap_seconds)]
             if args.answers:
                 cmd += ["--answers", args.answers]
@@ -239,17 +247,25 @@ def main(argv: list[str] | None = None) -> int:
             cmd += ["--state-db", args.state_db,
                     "--sessions-root", args.sessions_root,
                     "--session-source", args.session_source,
+                    "--harness", args.harness,
                     "--idle-gap-seconds", str(args.idle_gap_seconds),
-                    "--opencode-db",
-                    str(Path.home() / ".local" / "share" / "opencode" / "opencode.db")]
+                    "--project-codex-root", str(paths["codex_root"]),
+                    "--opencode-db", str(paths["opencode_db"]),
+                    "--project-opencode-db", str(paths["opencode_db"])]
             if args.session_answers:
                 cmd += ["--session-answers", args.session_answers]
-        if args.roots:
+        if args.roots and tool in {
+                "extract_metadata.py", "extract_expenses.py",
+                "extract_measurements.py", "extract_sessions.py"}:
             cmd += ["--roots", args.roots]
         return cmd
 
     subprocess.run(_base_cmd("extract_metadata.py", "metadata.json"), check=True)
-    subprocess.run(_base_cmd("extract_configs.py", "configs.json"), check=True)
+    subprocess.run(_base_cmd("extract_configs.py", "configs.json") + [
+        "--codex-home", str(paths["codex_root"]),
+        "--opencode-config-dir", str(paths["opencode_config_dir"]),
+        "--opencodex-config-dir", str(paths["opencodex_config_dir"]),
+    ], check=True)
     subprocess.run(_base_cmd("extract_sessions.py", "sessions.json"), check=True)
     subprocess.run([sys.executable, str(ROOT / "tools" / "generate_review_forms.py"),
                     "--out", str(out_dir)], check=True)

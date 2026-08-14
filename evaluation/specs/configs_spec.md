@@ -2,10 +2,9 @@
 
 ## Purpose
 
-Each run may have a slightly different config stack (per-branch `AGENTS.md`,
-user-level codex/opencode/opencodex configs, plugin versions, shell init,
-proxy settings). The snapshot must contain those configs **as much as
-possible** so a run is reproducible and auditable.
+Each run may have a slightly different config stack. The snapshot captures
+only the run-time configs bundled under `<workspace>/.sessions/`, so it remains
+independent of the evaluator account and reproducible.
 
 Produced by `evaluation/tools/extract_configs.py` (cfdeval package:
 `cfdeval.configs`), embedded as `configs.json` (schema:
@@ -15,13 +14,19 @@ Produced by `evaluation/tools/extract_configs.py` (cfdeval package:
 
 | Role | Files |
 |---|---|
-| `codex` | `~/.codex/config.toml`, `ocx.config.toml`, `opencodex.config.toml`, `AGENTS.md`, `version.json`, `codex-runtime.json`, `opencodex-catalog.json`, `models_cache.json`, `rules/*.md` |
-| `plugin_manifest` | `~/.codex/plugins/cache/*/<name>/<version>/.codex-plugin/plugin.json` and `.app.json` |
-| `opencode` | `~/.config/opencode/opencode.jsonc`, `tui.json`, `agents.json`, `agent/**`, `command/**`, `rules/**` |
-| `opencodex` | `~/.opencodex/config.json`, `version.json`, `codex-runtime.json`, `responses-state.json`, `codex-quota-cache.json`, `catalog-backup*.json` |
-| `shell` | `~/.bashrc`, `~/.zshrc`, `~/.profile`, `~/.setproxy.sh` |
-| `workspace` | `<workspace>/AGENTS.md`, `.codex/config.toml`, `.opencode/opencode.jsonc`, `.opencodex/config.json`, `.gitmodules`, `external` symlink target |
-| `benchmark` | submodule `TASK.md`, `examiner/SCORING_RUBRIC.md`, `README_EXAMINER.md` |
+| `codex` | captured `config.toml`, `ocx.config.toml`, `opencodex.config.toml`, `AGENTS.md`, version/runtime files, catalogs, and rules beneath `.sessions/codex/` |
+| `plugin_manifest` | captured plugin manifests beneath `.sessions/codex/plugins/`, when bundled |
+| `opencode` | captured config files beneath `.sessions/opencode-config/`, when bundled |
+| `opencodex` | captured config/version/catalog files beneath the applicable `.sessions/` config root, when bundled |
+
+Repository evidence such as the submitted `AGENTS.md`, `.gitmodules`, and
+benchmark rubric is recorded by the workspace/benchmark metadata collectors;
+it is not a fallback execution-config source.
+
+The extractor must reject every config root or file outside the resolved
+`<workspace>/.sessions/` boundary. It never reads shell startup files or any
+evaluator-account config. Missing bundled config is reported as unavailable,
+not silently replaced from another location.
 
 ## Redaction policy
 

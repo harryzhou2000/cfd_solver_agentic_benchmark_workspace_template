@@ -16,24 +16,27 @@ workspace.
 | Input | Source | Used for |
 |---|---|---|
 | Contestant workspace | directory path | layout discovery, artifacts, LOC |
-| Codex threads + subagent edges | `~/.codex/state_5.sqlite` (`threads`, `thread_spawn_edges`) | token totals, model per thread, session tree |
-| Codex goals | `~/.codex/goals_1.sqlite` (`thread_goals`) | goal time directly (`time_used_seconds`), goal tokens |
-| Codex per-turn usage logs | `~/.codex/logs_2.sqlite` (`logs`) | exact input/cached/output token splits per thread+model |
-| Codex session history | `~/.codex/sessions/**/rollout-*.jsonl` | timestamps, tool usage, subagent messages, rule-violation evidence |
+| Codex threads + subagent edges | `<workspace>/.sessions/codex/state_5.sqlite` (`threads`, `thread_spawn_edges`) | token totals, model per thread, session tree |
+| Codex goals | `<workspace>/.sessions/codex/goals_1.sqlite` (`thread_goals`) | goal time directly (`time_used_seconds`), goal tokens |
+| Codex per-turn usage logs | `<workspace>/.sessions/codex/logs_2.sqlite` (`logs`) | exact input/cached/output token splits per thread+model |
+| Codex session history | `<workspace>/.sessions/codex/sessions/**/rollout-*.jsonl` | timestamps, tool usage, subagent messages, rule-violation evidence |
+| OpenCode sessions | `<workspace>/.sessions/opencode-data/opencode/opencode.db` | session tree, messages, tokens, prompts, activity |
 | Cost metadata | `evaluation/config/cost_metadata.json` | cost estimation |
 | Review points | `evaluation/config/review_points_{code,cfd,results}.json` | scorecard generation |
-| Execution metadata | `~/.codex/history.jsonl`, `~/.opencodex/config.json`, model catalog, plugins dir | metadata record (see `metadata_spec.md`) |
+| Execution metadata/config | captured files beneath `<workspace>/.sessions/` | metadata record (see `metadata_spec.md`) |
 
-All codex paths are overridable via CLI flags so the utilities also work on a
-copied snapshot of another machine's `~/.codex`.
+The workspace `.sessions/` boundary is exclusive. External telemetry/config
+overrides are rejected, evaluator-account state is never queried, and missing
+local sources remain unavailable. Codex database rollout paths are rebased to
+the bundled rollout JSONLs rather than followed as original absolute paths.
 
 ## Session selection
 
-By default **every** codex session whose `cwd` is inside the contestant
-workspace is included in expenses and measurements — including botched,
-abandoned, `paused`, `blocked`, or still-`active` runs, not only the latest
-main thread. This is deliberate: a workspace directory can accumulate failed
-first attempts, and they must not be silently dropped.
+Discovery inventories every bundled candidate, including botched, abandoned,
+`paused`, `blocked`, or still-`active` runs. The evaluator must manually
+classify the primary harness and root/session tree; newest, largest, or
+cwd-matched is not sufficient. For Docker cwd mismatches, pass the confirmed
+`--harness` and Codex `--roots` explicitly.
 
 The generated summary keeps them separable:
 

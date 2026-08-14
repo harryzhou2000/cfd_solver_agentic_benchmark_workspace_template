@@ -243,10 +243,9 @@ def git_loc(workspace: Path) -> dict | None:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Extract contestant measurements")
     ap.add_argument("--workspace", required=True)
-    defaults = cd.default_paths()
-    ap.add_argument("--state-db", default=str(defaults["state_db"]))
-    ap.add_argument("--logs-db", default=str(defaults["logs_db"]))
-    ap.add_argument("--sessions-root", default=str(defaults["sessions_root"]))
+    ap.add_argument("--state-db", default=None)
+    ap.add_argument("--logs-db", default=None)
+    ap.add_argument("--sessions-root", default=None)
     ap.add_argument("--out", default=None)
     ap.add_argument(
         "--roots",
@@ -258,11 +257,17 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     workspace = Path(args.workspace).resolve()
+    paths = cd.local_telemetry_paths(
+        workspace, state_db=args.state_db, logs_db=args.logs_db,
+        sessions_root=args.sessions_root)
+    for key in ("state_db", "logs_db", "sessions_root"):
+        setattr(args, key, str(paths[key]))
     eval_root = Path(__file__).resolve().parents[2]
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / workspace.name / "measurements.json"
     )
     threads = cd.load_threads(args.state_db)
+    cd.rebase_rollout_paths(threads, args.sessions_root)
     edges = cd.load_spawn_edges(args.state_db)
     selected = cd.select_threads(threads, str(workspace))
     _, all_ids = cd.thread_trees(selected, edges)

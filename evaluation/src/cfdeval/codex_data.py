@@ -1,29 +1,80 @@
-"""Shared access to codex telemetry: threads, spawn edges, goals, usage logs,
-and session rollouts. Stdlib only; all codex paths overridable so a snapshot
-of another machine's ~/.codex can be used."""
+"""Shared access to Codex telemetry stored in a workspace ``.sessions`` bundle."""
 
 from __future__ import annotations
 
 import json
-import os
 import re
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
 
-def codex_home() -> Path:
-    return Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
-
-
-def default_paths():
-    home = codex_home()
+def project_paths(workspace: str | Path) -> dict[str, Path]:
+    """Return the only telemetry/config paths permitted during evaluation."""
+    root = Path(workspace).resolve() / ".sessions"
+    codex = root / "codex"
     return {
-        "state_db": home / "state_5.sqlite",
-        "goals_db": home / "goals_1.sqlite",
-        "logs_db": home / "logs_2.sqlite",
-        "sessions_root": home / "sessions",
+        "sessions_bundle": root,
+        "codex_root": codex,
+        "state_db": codex / "state_5.sqlite",
+        "goals_db": codex / "goals_1.sqlite",
+        "logs_db": codex / "logs_2.sqlite",
+        "sessions_root": codex / "sessions",
+        "history": codex / "history.jsonl",
+        "ocx_config": root / "opencodex" / "config.json",
+        "ocx_catalog": codex / "opencodex-catalog.json",
+        "plugins_root": codex / "plugins",
+        "opencode_db": root / "opencode-data" / "opencode" / "opencode.db",
+        "opencode_config_dir": root / "opencode-config",
+        "opencodex_config_dir": root / "opencodex",
     }
+
+
+def require_project_path(workspace: str | Path, path: str | Path,
+                         label: str) -> Path:
+    """Reject any evaluator telemetry/config input outside ``.sessions``."""
+    bundle = (Path(workspace).resolve() / ".sessions").resolve()
+    candidate = Path(path).expanduser().resolve()
+    try:
+        candidate.relative_to(bundle)
+    except ValueError as exc:
+        raise ValueError(
+            f"{label} must be inside the contestant workspace .sessions bundle: "
+            f"{candidate} is outside {bundle}"
+        ) from exc
+    return candidate
+
+
+def local_telemetry_paths(workspace: str | Path, **overrides) -> dict[str, Path]:
+    """Resolve optional CLI overrides while enforcing the project boundary."""
+    paths = project_paths(workspace)
+    for key, value in overrides.items():
+        if value is not None:
+            paths[key] = require_project_path(workspace, value, key.replace("_", "-"))
+    return paths
+
+
+def rebase_rollout_paths(threads: dict[str, dict], sessions_root: str | Path) -> None:
+    """Point DB rollout references at immutable bundled files, never host paths.
+
+    Migrated DB rows commonly retain an original ``~/.codex/sessions`` path.
+    Match by rollout filename within the local bundle and set an absent or
+    ambiguous match to ``None`` so callers fail closed.
+    """
+    root = Path(sessions_root)
+    by_name: dict[str, list[Path]] = {}
+    if root.is_dir():
+        for path in root.rglob("rollout-*.jsonl"):
+            if path.is_file():
+                by_name.setdefault(path.name, []).append(path.resolve())
+    all_rollouts = [p for matches in by_name.values() for p in matches]
+    for thread_id, thread in threads.items():
+        raw = thread.get("rollout_path")
+        name = Path(raw).name if raw else ""
+        matches = by_name.get(name, [])
+        if not matches:
+            matches = [p for p in all_rollouts if thread_id in p.name]
+        thread["rollout_path"] = str(matches[0]) if len(matches) == 1 else None
 
 
 def _ro_connect(path):
@@ -158,6 +209,8 @@ def load_turn_usage(logs_db, thread_ids: set[str]) -> dict[str, list[dict]]:
 
 def iter_session_records(rollout_path):
     """Yield parsed JSON records from a codex session rollout file."""
+    if not rollout_path:
+        return
     p = Path(rollout_path)
     if not p.exists():
         return

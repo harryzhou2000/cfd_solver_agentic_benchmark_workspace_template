@@ -40,6 +40,12 @@ record.
   evidence into a favorable or unfavorable guess.
 - Treat failed, aborted, or partial histories as such. Do not call them
   converged results.
+- Treat `<workspace>/.sessions/` as the exclusive source of execution
+  telemetry and captured run-time configuration. Never inspect or fall back to
+  the evaluator account's Codex, OpenCode, or OpenCodex state. Reject explicit
+  telemetry/config path overrides outside the workspace `.sessions/` boundary;
+  if required bundled evidence is absent, record it as unavailable and fail
+  closed.
 
 ## 1. Resolve immutable run identity
 
@@ -301,7 +307,6 @@ container project cwd: /workspace
 
 Codex host DB:         <repo>/.sessions/codex/state_5.sqlite
 Codex host rollouts:   <repo>/.sessions/codex/sessions/**/rollout-*.jsonl
-Codex container home:  /home/cfd_agent/.codex
 
 OpenCode host DB:      <repo>/.sessions/opencode-data/opencode/opencode.db
 OpenCode container DB: /workspace/.sessions/opencode-data/opencode/opencode.db
@@ -310,25 +315,34 @@ OpenCode data root:    /workspace/.sessions/opencode-data/opencode
 
 Here `<repo>` means the host contestant repository, not the manager repo.
 Codex thread rows and rollout metadata from isolated runs normally record cwd
-`/workspace` and rollout paths below `/home/cfd_agent/.codex`; OpenCode session
-rows may instead record the resolved host repo path. Map these recorded paths
-to the host-side `.sessions/` bundle explicitly. Do not reject a valid Docker
-session merely because its recorded container path differs from the host path.
+`/workspace` and rollout paths outside the project; OpenCode session rows may
+instead record the resolved host repo path. Treat those paths only as
+historical locators and map them to the host-side `.sessions/` bundle
+explicitly. Never open the recorded external path or substitute an
+evaluator-account path. Do not reject a valid Docker session merely because
+its recorded container path differs from the host path.
 
-The current evaluator default for the project OpenCode DB omits the nested
-`opencode/` component, and `summarize.py` does not currently forward explicit
-project session paths. Generate the snapshot, manually establish the harness,
-then replace its session extraction with the applicable supported command.
-For a Codex run, query using the cwd recorded inside the container:
+All telemetry paths are resolved beneath the contestant workspace's
+`.sessions/` directory. External overrides are rejected. Generate the
+snapshot only after manually establishing the primary harness and root/session
+tree. For a Codex run whose database records the container cwd, supply that
+harness and the confirmed root explicitly:
 
 ```bash
 python3 evaluation/tools/extract_sessions.py \
-  --workspace /workspace \
-  --session-source project \
-  --project-codex-root <host-contestant-repo>/.sessions/codex \
+  --workspace <host-contestant-repo> \
+  --harness codex \
   --roots <confirmed-root-id[,continuation-root-id...]> \
   --out evaluation/outputs/<run-id>/sessions.json
 ```
+
+Explicit roots bypass unreliable cwd-only selection for the confirmed tree.
+SQLite `rollout_path` values may retain container or original-host
+paths; rebase them to the matching bundled
+`<repo>/.sessions/codex/sessions/**/rollout-*.jsonl`. Never follow the stored
+absolute path or use it to search outside `.sessions/`. A missing or ambiguous
+bundled rollout is unavailable evidence and invalidates attribution until it
+is resolved.
 
 The session replacement is not sufficient by itself. For a migrated or
 Docker-isolated Codex run, regenerate **all four telemetry sidecars** from the
@@ -337,36 +351,25 @@ same project Codex bundle and the same confirmed roots:
 ```bash
 python3 evaluation/tools/extract_metadata.py \
   --workspace <host-contestant-repo> \
-  --state-db <repo>/.sessions/codex/state_5.sqlite \
-  --goals-db <repo>/.sessions/codex/goals_1.sqlite \
-  --logs-db <repo>/.sessions/codex/logs_2.sqlite \
-  --sessions-root <repo>/.sessions/codex/sessions \
+  --harness codex \
   --roots <confirmed-root-id[,continuation-root-id...]> \
   --out evaluation/outputs/<run-id>/metadata.json
 
 python3 evaluation/tools/extract_expenses.py \
   --workspace <host-contestant-repo> \
-  --state-db <repo>/.sessions/codex/state_5.sqlite \
-  --goals-db <repo>/.sessions/codex/goals_1.sqlite \
-  --logs-db <repo>/.sessions/codex/logs_2.sqlite \
-  --sessions-root <repo>/.sessions/codex/sessions \
   --roots <confirmed-root-id[,continuation-root-id...]> \
   --out evaluation/outputs/<run-id>/expenses.json
 
 python3 evaluation/tools/extract_measurements.py \
   --workspace <host-contestant-repo> \
-  --state-db <repo>/.sessions/codex/state_5.sqlite \
-  --logs-db <repo>/.sessions/codex/logs_2.sqlite \
-  --sessions-root <repo>/.sessions/codex/sessions \
   --roots <confirmed-root-id[,continuation-root-id...]> \
   --out evaluation/outputs/<run-id>/measurements.json
 ```
 
-Use the actual cwd stored in the project database when an extractor's
-workspace selection depends on cwd; after migration this is normally the host
-contestant path, while Docker-native rows may record `/workspace`. Never let a
-default host OpenCode database determine `metadata.harness` for a confirmed
-project Codex run. If `sessions.json` says Codex but `metadata.json` says
+After migration the stored cwd is normally the host contestant path, while
+Docker-native rows may record `/workspace`; explicit root selection must
+resolve this mismatch without querying another store. If `sessions.json`
+says Codex but `metadata.json` says
 OpenCode, or if Codex session tokens are nonzero while expenses/measurements
 are zero, treat the snapshot as internally invalid and repair it before
 scoring or committing.
@@ -376,17 +379,14 @@ For an OpenCode run whose database rows record the resolved host path, use:
 ```bash
 python3 evaluation/tools/extract_sessions.py \
   --workspace <host-contestant-repo> \
-  --session-source project \
-  --project-opencode-db \
-    <host-contestant-repo>/.sessions/opencode-data/opencode/opencode.db \
+  --harness opencode \
   --out evaluation/outputs/<run-id>/sessions.json
 ```
 
 Verify the actual stored cwd before choosing either command. Do not try to
 merge the two cwd namespaces in one extraction; the non-primary harness is not
-part of the run. The Codex command's `workspace` field will be `/workspace`, so
-record the separately verified host repository path alongside it in the
-session-selection provenance.
+part of the run. Record the database's container cwd separately from the host
+repository path in session-selection provenance.
 
 Rebuild or refresh every summary/report field derived from the four telemetry
 sidecars, and record that direct project extraction superseded the initial
@@ -401,11 +401,11 @@ session exists. Inspect the project `state_5.sqlite` and rollout tree directly,
 apply the `/workspace` mapping, then select and verify the primary root. Record
 both the host repository path and recorded container cwd in session provenance.
 
-Treat automatic cwd/session discovery as a candidate inventory, never as the
-answer. `system|project|all` selects a storage class, not a harness. Multiple
-attempts, harnesses, test chats, and evaluator sessions may share a workspace
-path. Do not select a session because it is newest, longest, highest-token, or
-merely cwd-matched.
+Treat automatic cwd/session discovery within `.sessions/` as a candidate
+inventory, never as the answer. `--harness` identifies the manually confirmed
+harness; it does not choose the primary root. Multiple attempts, harnesses,
+test chats, and evaluator sessions may share a workspace path. Do not select a
+session because it is newest, longest, highest-token, or merely cwd-matched.
 
 Inspect candidate Codex root threads and OpenCode root sessions manually.
 Identify the primary run from the harness actually used, initial prompt and
@@ -415,23 +415,23 @@ terminal outcome, and parent/subagent ancestry. Exclude setup probes,
 abandoned attempts, unrelated resumptions, evaluator sessions, and candidates
 from another harness.
 
-Obtain this evidence from the original read-only stores, not only the
+Obtain this evidence from the bundled read-only stores, not only the
 aggregate `sessions.json`: inspect Codex root rollout JSONL files and their
 recorded spawn ancestry, or OpenCode's SQLite session/message/part rows opened
-read-only. Do not edit or vacuum either store. Preserve the candidate IDs,
+read-only. Do not edit or vacuum either store, and never consult an
+evaluator-account session store. Preserve the candidate IDs,
 source paths/database path, and the message IDs or timestamps used for the
 decision in the report. The initial branch remains authoritative for run
 identity, but it does not by itself prove which telemetry harness or session
 performed the work.
 
-For Codex, pass the confirmed root thread ID or IDs via `summarize.py --roots`;
+For Codex, pass `--harness codex` and the confirmed root thread ID or IDs via
+`summarize.py --roots`;
 this includes their spawned subagent trees. Distinguish the original primary
 root from any genuine continuation roots. After extraction, verify every
 requested root was accepted, belongs to the exact contestant workspace, and
 has only the intended descendants; an unknown, silently dropped, or
-wrong-workspace root invalidates the extraction. Avoid `--session-source all`
-when system and project stores duplicate the same threads; if both are needed,
-prove their IDs are disjoint or treat merged aggregates as contaminated.
+wrong-workspace root invalidates the extraction.
 
 For OpenCode, inspect root IDs, titles, initial prompts, message tails, and
 complete parent chains. Check for a selected session whose parent lies outside
@@ -443,12 +443,13 @@ turns, and permission-wait analysis. Do not use these fields as primary-run
 measurements; report them as qualified or `null`, and retain the raw aggregate
 only as an explicitly non-attributable diagnostic. Do not manually invent
 corrected totals unless they are reproducibly computed from the selected tree
-and clearly stored as evaluator-derived values. Avoid `all` when it duplicates
-system and project OpenCode records.
+and clearly stored as evaluator-derived values. Do not supplement it with any
+OpenCode database outside the canonical bundled
+`.sessions/opencode-data/opencode/opencode.db`.
 
 Record in `agent_scores.json.session_selection` and the report:
 
-- harness and source class (`system`, `project`, or `all`);
+- harness and the project-local `.sessions` source paths;
 - primary root/session ID and any continuation roots;
 - selected primary run's start and end timestamps, their evidence source, and
   `execution_date` as the UTC `YYYY-MM-DD` date of that start timestamp;

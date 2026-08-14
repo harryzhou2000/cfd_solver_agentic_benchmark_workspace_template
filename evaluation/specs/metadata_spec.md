@@ -13,17 +13,25 @@ The metadata is collected by the evaluation agent via
 `evaluation/tools/extract_metadata.py` and embedded in `summary.json` under
 `metadata` (schema: `evaluation/schemas/summary.schema.json`).
 
+All execution metadata and captured run-time configuration comes exclusively
+from `<workspace>/.sessions/`. External path overrides are rejected and the
+evaluator account's state is never queried. A missing local database, rollout,
+history, catalog, or config is recorded as unavailable; it never triggers a
+fallback. The evaluator manually confirms `--harness` and, for Codex, the
+primary `--roots`, including Docker runs whose recorded cwd is `/workspace`.
+
 ## 1. Harness metadata
 
-From each root session's `session_meta` record plus the local codex install:
+From each root session's bundled `session_meta` record plus captured files
+beneath `.sessions/codex/`:
 
 - `cli_version` (e.g. `0.146.0`), `originator` (`codex-tui`, `codex-exec`,
   `app-server`, ...), `source`, `thread_source`, `multi_agent_version`,
   `history_mode`, `memory_mode`, `model_provider`.
-- `codex_runtime_version`: the selected codex version recorded by the local
-  runtime (`~/.codex/codex-runtime.json` / `version.json`).
-- `plugins`: installed codex plugins (name + version) discovered under
-  `~/.codex/plugins/cache/*/<name>/<version>`.
+- `codex_runtime_version`: the selected codex version recorded in bundled
+  `codex-runtime.json` / `version.json`, when present.
+- `plugins`: captured plugin manifests beneath the bundled Codex config root,
+  when present.
 
 ## 2. Model metadata (including subagents)
 
@@ -72,13 +80,13 @@ Included when any thread model is **not** in the vanilla codex model set
 
 - `opencodex_version` (installed CLI) and `opencodex_submodule_pin`
   (the `opencodex/` submodule version in this repo).
-- Proxy/routing config facts from `~/.opencodex/config.json`:
+- Proxy/routing config facts from the bundled OpenCodex config:
   `defaultProvider`, provider names, `multiAgentMode`, `subagentModels`,
   `disabledModels`, `contextCapValue`, and per-provider reasoning-effort
   maps. **Credentials are never extracted** — only the whitelisted fields
   above.
-- Codex-side proxy fallback config presence
-  (`~/.codex/opencodex.config.toml`, `model_catalog_json` path).
+- Codex-side bundled proxy fallback config presence
+  (`opencodex.config.toml`, `model_catalog_json` path).
 
 ## 6. Initial prompt and resume prompts
 
@@ -96,7 +104,13 @@ user-role messages in the session rollout are used, with harness-injected
 blocks (`<codex_internal_context>`, `<environment_context>`, AGENTS.md
 wrappers) excluded.
 
-## 7. Missing metadata → query the user
+Both history and rollout inputs must be bundled beneath `.sessions/`. SQLite
+`rollout_path` values from migrated or Docker runs must be rebased to the
+matching `.sessions/codex/sessions/**/rollout-*.jsonl`; never follow an
+original absolute path. Missing or ambiguous bundled matches remain
+unavailable.
+
+## 7. Missing metadata and classification questions
 
 If a required metadata field cannot be extracted, the evaluation agent does
 **not** guess. The extractor:
@@ -107,24 +121,31 @@ If a required metadata field cannot be extracted, the evaluation agent does
 2. sets `metadata.status` to `needs_user_input`;
 3. surfaces the questions in `summary.md` under "Metadata questions for user".
 
-The evaluation agent then asks the user, records the answers as
+The evaluation agent may ask the operator to resolve primary-harness/root
+classification or to document a limitation, records the answers as
 `{"<question_id>": "<answer>"}` in a JSON file, and re-runs with
-`--answers <file>` (accepted by `extract_metadata.py` and `summarize.py`).
-Answered questions flip `metadata.status` to `complete`.
+`--answers <file>` (accepted by `extract_metadata.py` and `summarize.py`). An
+answer does not replace missing `.sessions` evidence or authorize another data
+source. `metadata.status` becomes `complete` only when all required evidence
+is present locally and classification is resolved; otherwise the affected
+fields remain unavailable and status remains incomplete.
 
 Known situations that produce questions:
 
-- **opencode harness**: when the opencode session database is unavailable or
+- **opencode harness**: when the canonical bundled database
+  `.sessions/opencode-data/opencode/opencode.db` is unavailable or
   contains no sessions for the workspace (harness version, session list,
   models, prompts).
 - **Router-managed models (codex)**: per-turn reasoning effort is not
   recorded by codex for non-vanilla models when the usage logs lack it; the
-  suggested source is the ocx-relay capture or the ocx effort map.
+  value remains unavailable unless the corresponding capture or effort map is
+  bundled beneath `.sessions/`.
 - **Uncataloged models**: a model absent from the local model catalog has no
-  context-window figure; the user supplies it from provider docs.
+  context-window figure; record it as unavailable rather than consulting an
+  external catalog.
 - **Unreadable prompt content**: session message bodies that cannot be read
-  from the local data store (`opencode export <sessionID> --sanitize` is the
-  suggested source).
+  from the bundled local data store. The extractor reports this as
+  unavailable; it does not invoke an external export or search another store.
 
 ## 8. Workspace repository state (AGENTS.md, CodeGraph, benchmark submodule)
 

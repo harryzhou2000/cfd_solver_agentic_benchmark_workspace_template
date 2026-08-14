@@ -17,9 +17,9 @@ all inputs are read-only and outputs land under `evaluation/outputs/`.
 | 3. CFD methods & algorithm review points | [specs/cfd_review_spec.md](specs/cfd_review_spec.md) | [config/review_points_cfd.json](config/review_points_cfd.json) |
 | 4. Result review (outputs, visualizations, report) | [specs/result_review_spec.md](specs/result_review_spec.md) | [config/review_points_results.json](config/review_points_results.json) |
 | 5. Other measurements: tool usage, LOC, rule violations | [specs/measurements_spec.md](specs/measurements_spec.md) | session rollouts, git, filesystem scan |
-| 6. Execution metadata: harness, models/effort, context, subagent types, opencodex router, prompts, AGENTS.md/codegraph/submodule state | [specs/metadata_spec.md](specs/metadata_spec.md) | codex state/history, opencodex config + catalog, plugins, workspace git |
-| 7. Verbose config snapshot: codex/opencode/opencodex configs, plugin manifests, shell init, workspace-local configs (redacted) | [specs/configs_spec.md](specs/configs_spec.md) | `~/.codex`, `~/.config/opencode`, `~/.opencodex`, workspace |
-| 8. Session discovery + 30-min-bucketed analysis: cache history, tokens, tool categories, idle exclusion, permission waits | [specs/sessions_spec.md](specs/sessions_spec.md) | system `~/.codex` + opencode db, project `.sessions/` copies |
+| 6. Execution metadata: harness, models/effort, context, subagent types, opencodex router, prompts, AGENTS.md/codegraph/submodule state | [specs/metadata_spec.md](specs/metadata_spec.md) | workspace `.sessions/` telemetry/config bundle and workspace git |
+| 7. Verbose config snapshot: captured codex/opencode/opencodex configs and plugin manifests (redacted) | [specs/configs_spec.md](specs/configs_spec.md) | workspace `.sessions/` config bundle only |
+| 8. Session discovery + 30-min-bucketed analysis: cache history, tokens, tool categories, idle exclusion, permission waits | [specs/sessions_spec.md](specs/sessions_spec.md) | workspace `.sessions/codex/` or `.sessions/opencode-data/opencode/opencode.db` |
 | 9. Environment snapshot captured before the agent runs (optional) | [specs/env_snapshot_spec.md](specs/env_snapshot_spec.md) | host/container, tool versions, proxy env, workspace git state |
 | 10. Agent-driven evaluation report + scores stored in the snapshot | [specs/agent_evaluation_spec.md](specs/agent_evaluation_spec.md) | `agent_report.md`, `agent_scores.json` |
 
@@ -85,9 +85,13 @@ python3 evaluation/tools/extract_sessions.py --workspace ../codex_gpt56_01
 python3 evaluation/tools/generate_review_forms.py --out evaluation/outputs/codex_gpt56_01
 ```
 
-`extract_sessions.py` also has a `--session-source system|project|all` switch
-for workspace-bundled `.sessions/` copies and a `--session-answers` file for
-agent-answered discovery questions.
+All telemetry and captured run-time configuration is read exclusively from
+`<workspace>/.sessions/`. The pipeline never consults the evaluator account's
+session/config state and rejects path overrides outside that boundary. Missing
+local evidence is reported as unavailable rather than filled from a fallback.
+Use `--harness codex|opencode` after manual classification, `--roots` for the
+confirmed Codex root tree, and `--session-answers` only for recorded
+classification answers.
 
 ## Environment snapshot (before the agent runs)
 
@@ -147,26 +151,36 @@ elsewhere. The PDF endpoint is deliberately constrained to that root.
 
 ## Session selection
 
-By default, **all** codex sessions whose `cwd` is the contestant workspace are
-included — including botched/abandoned/paused runs, not just the latest main
-thread. `summary.json`/`expenses.json` report a per-root-session breakdown
+Candidate discovery is limited to the workspace `.sessions/` bundle. The
+evaluator must manually identify the primary harness and root/session tree;
+cwd matching alone is insufficient. `summary.json`/`expenses.json` report a
+per-root-session breakdown
 (`time_seconds.by_root_tree`: status, model, thread count, tokens, goal time),
 and `--roots <thread-id,...>` scopes the whole pipeline to the chosen root
 session(s) and their subagent trees, e.g.:
 
 ```bash
 python3 evaluation/tools/summarize.py --workspace ../codex_gpt56_01 \
+  --harness codex \
   --roots 019fb9e3-ba6e-7e40-99d3-84d723942dc8
 ```
 
-## Missing metadata → query the user
+For Docker-isolated runs, `--workspace` is the host contestant repository even
+when database rows record `/workspace`. The extractor rebases Codex SQLite
+`rollout_path` values onto bundled `.sessions/codex/sessions/**/rollout-*.jsonl`;
+it never follows an original absolute path. OpenCode always uses
+`.sessions/opencode-data/opencode/opencode.db`.
+
+## Missing metadata and classification questions
 
 `extract_metadata.py` never guesses. When a metadata field cannot be extracted
 (e.g. opencode session data is unavailable, a model is missing from the
 catalog, or reasoning effort is not recorded for a router-managed model), it
 emits a structured `questions` entry, sets `status: needs_user_input`, and
-lists the questions in `summary.md`. The evaluation agent asks the user,
-records answers (`{"<question_id>": "..."}`), and re-runs with `--answers`:
+lists the questions in `summary.md`. Operator answers may resolve manual
+harness/root classification or document a limitation, but they do not replace
+missing `.sessions` telemetry or authorize another data source. Record answers
+(`{"<question_id>": "..."}`) and re-run with `--answers` when appropriate:
 
 ```bash
 python3 evaluation/tools/summarize.py --workspace ../opencode_omoslim_deepseek \
@@ -176,7 +190,8 @@ python3 evaluation/tools/summarize.py --workspace ../opencode_omoslim_deepseek \
 For opencode contestants the pipeline extracts harness/version, sessions
 (roots + subagents, model + reasoning variant), tokens/cost per session, and
 prompts from the opencode database; codex-only expense/measurement extractors
-are skipped for those runs.
+are skipped for those runs. If the canonical bundled OpenCode database is
+absent, these fields remain unavailable and extraction fails closed.
 
 ### Session activity time (opencode)
 
@@ -197,10 +212,9 @@ python3 evaluation/tools/summarize.py --workspace ../omo_slim_dsv4_01 \
   --idle-gap-seconds 300
 ```
 
-All codex data paths (`~/.codex/state_5.sqlite`, `goals_1.sqlite`,
-`logs_2.sqlite`, `sessions/`) are overridable via `--state-db`, `--goals-db`,
-`--logs-db`, `--sessions-root`, so the same tools work against a snapshot of
-another machine's `~/.codex`.
+Codex data paths are fixed beneath `<workspace>/.sessions/codex/`; explicit
+external overrides are rejected. If a database or bundled rollout is absent,
+the corresponding metadata is unavailable and the pipeline fails closed.
 
 ## Publishing a contestant's results
 

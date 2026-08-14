@@ -53,15 +53,14 @@ review_results.json|md  # result review scorecard (+ structural evidence)
    (`metadata.questions` + `status: needs_user_input`); user answers are
    merged via `--answers` and persisted in `metadata.user_answers`.
 6. **Configs are captured verbosely but redacted** (`configs.json`): every
-   user-level config that governed the run (codex/opencode/opencodex, plugin
-   manifests, shell init, workspace-local, benchmark task/rubric) is recorded
+   bundled config that governed the run (codex/opencode/opencodex, plugin
+   manifests, workspace-local, benchmark task/rubric) is recorded
    with content where safe. Credential files (`auth.json`,
    `codex-accounts.json`, `admin-api-token`) are presence + sha256 only;
    secret-like values are replaced with `***REDACTED***`.
 7. **Session analysis is bucketed and idle-excluded** (`sessions.json`):
-   discovery covers system-level telemetry (`~/.codex`,
-   `~/.local/share/opencode`) and project-isolated copies
-   (`<workspace>/.sessions/`); statistics are reported in 30-minute buckets
+   discovery covers only telemetry bundled below the contestant workspace's
+   `.sessions/` directory; statistics are reported in 30-minute buckets
    (cache-hit history, tokens, shell-call categories, tool stats) with idle
    periods excluded and whole-length stats preserved. Permission-blocked
    idle is recognized heuristically and reported with its limitations.

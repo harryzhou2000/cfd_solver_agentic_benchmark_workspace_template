@@ -89,11 +89,10 @@ def estimate_by_model(meta: dict, by_model: dict) -> dict:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Extract codex contestant expenses")
     ap.add_argument("--workspace", required=True)
-    defaults = cd.default_paths()
-    ap.add_argument("--state-db", default=str(defaults["state_db"]))
-    ap.add_argument("--goals-db", default=str(defaults["goals_db"]))
-    ap.add_argument("--logs-db", default=str(defaults["logs_db"]))
-    ap.add_argument("--sessions-root", default=str(defaults["sessions_root"]))
+    ap.add_argument("--state-db", default=None)
+    ap.add_argument("--goals-db", default=None)
+    ap.add_argument("--logs-db", default=None)
+    ap.add_argument("--sessions-root", default=None)
     root = Path(__file__).resolve().parents[2]
     ap.add_argument("--cost-metadata", default=str(root / "config" / "cost_metadata.json"))
     ap.add_argument("--out", default=None)
@@ -107,14 +106,20 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     workspace = str(Path(args.workspace).resolve())
+    paths = cd.local_telemetry_paths(
+        workspace, state_db=args.state_db, goals_db=args.goals_db,
+        logs_db=args.logs_db, sessions_root=args.sessions_root)
+    for key in ("state_db", "goals_db", "logs_db", "sessions_root"):
+        setattr(args, key, str(paths[key]))
     eval_root = Path(__file__).resolve().parents[2]
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / Path(workspace).name / "expenses.json"
     )
 
     threads = cd.load_threads(args.state_db)
+    cd.rebase_rollout_paths(threads, args.sessions_root)
     edges = cd.load_spawn_edges(args.state_db)
-    goals = cd.load_goals(args.goals_db)
+    goals = cd.load_goals(args.goals_db) if Path(args.goals_db).is_file() else {}
     selected = cd.select_threads(threads, workspace)
     roots, all_ids = cd.thread_trees(selected, edges)
     children = {c for _, c in edges}
@@ -152,7 +157,7 @@ def main(argv: list[str] | None = None) -> int:
             "model": (full_threads.get(rid) or {}).get("model"),
         }
 
-    usage = cd.load_turn_usage(args.logs_db, all_ids)
+    usage = cd.load_turn_usage(args.logs_db, all_ids) if Path(args.logs_db).is_file() else {}
     meta = json.loads(Path(args.cost_metadata).read_text())
 
     # Rollouts retain exact cached/input/output splits even when legacy
@@ -355,7 +360,7 @@ def main(argv: list[str] | None = None) -> int:
     print(
         f"threads={len(all_ids)} roots={len(roots)} tokens={total_tokens:,} "
         f"goal_time={goal_time:.0f}s wall_time={wall_time:.0f}s "
-        f"cost≈${total_cost:.2f}"
+        f"cost≈${current_cost['total']:.2f}"
     )
     for rid, info in by_root_tree.items():
         print(

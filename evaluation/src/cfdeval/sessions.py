@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
-"""Session discovery and bucketed session analysis for a contestant run.
-
-Two classes of sessions are discovered:
-
-1. **System-level**: codex sessions in `~/.codex` (state_5.sqlite + rollouts)
-   and opencode sessions in `~/.local/share/opencode/opencode.db`, filtered to
-   the contestant workspace.
-2. **Project-isolated**: a copy bundled inside the workspace, conventionally
-   under `<workspace>/.sessions/codex/` (state_5.sqlite + sessions/) and
-   `<workspace>/.sessions/opencode-data/` (opencode.db). The workspace setup
-   script creates `.sessions/` for exactly this purpose.
+"""Analyze only the session telemetry bundled in a contestant ``.sessions``.
 
 The script discovers and analyzes; the evaluation agent classifies/selects
 (roots, source) when the discovery is ambiguous, answering via
@@ -25,7 +15,7 @@ limitation note.
 Usage:
   python3 evaluation/tools/extract_sessions.py --workspace <contestant-workspace>
     [--out PATH] [--state-db PATH] [--sessions-root PATH] [--opencode-db PATH]
-    [--session-source system|project|all] [--session-answers FILE]
+    [--session-source project] [--harness codex|opencode] [--session-answers FILE]
     [--bucket-seconds 1800] [--idle-gap-seconds 600] [--roots IDS]
 """
 
@@ -210,6 +200,7 @@ def analyze_codex(workspace: str, state_db: str, sessions_root: str,
     """Discover codex threads for the workspace and return per-thread event
     streams plus root trees. Returns (doc_section, thread_events, children)."""
     threads = cd.load_threads(state_db)
+    cd.rebase_rollout_paths(threads, sessions_root)
     edges = cd.load_spawn_edges(state_db)
     selected = cd.select_threads(threads, workspace)
     root_ids, all_ids = cd.thread_trees(selected, edges)
@@ -712,8 +703,11 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
             opencode_db: str, bucket_seconds: int, idle_gap_seconds: int,
             session_source: str, roots: list[str] | None,
             project_codex_root: Path | None,
-            project_opencode_db: Path | None) -> dict:
+            project_opencode_db: Path | None,
+            harness: str = "auto") -> dict:
     """Main analysis entry: discover sources, merge timelines, bucket."""
+    if session_source != "project":
+        raise ValueError("only workspace-local project sessions are permitted")
     codex_docs = []
     oc_docs = []
     all_events: list = []
@@ -727,38 +721,9 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
     streams: dict[str, CodexThreadEvents] = {}
     codex_run_total = 0
 
-    use_system_codex = session_source in ("system", "all")
-    use_project_codex = session_source in ("project", "all")
-    use_system_oc = session_source in ("system", "all")
-    use_project_oc = session_source in ("project", "all")
+    use_project_codex = harness in ("auto", "codex")
+    use_project_oc = harness in ("auto", "opencode")
 
-    if use_system_codex:
-        doc, streams, events, children = analyze_codex(
-            workspace, state_db, sessions_root, roots)
-        if doc["present"]:
-            doc["source"] = "system"
-            codex_docs.append(doc)
-            codex_children |= children
-            for tid, s in streams.items():
-                codex_run_total += s.cumulative_final or 0
-            all_events.extend(events)
-            for tid, s in streams.items():
-                token_events.extend(
-                    (ts, _norm_codex_usage(u), tid) for ts, u in s.token_events)
-                tool_events.extend((ts, name, tid) for ts, name in s.tool_events)
-                turn_events.extend((ts, kind) for ts, kind in s.turn_events)
-                entity_events.extend((ts, tid) for ts, _k, _i in s.events)
-                streams_settings[tid] = s.settings
-                per_entity[tid] = {
-                    "kind": "codex_thread",
-                    "is_subagent": tid in children,
-                    "events": len(s.events),
-                    "tokens_total_subtree": s.cumulative_final,
-                    "tools": dict(Counter(n for _ts, n in s.tool_events)),
-                    "first_event": s.first_ts.isoformat() if s.first_ts else None,
-                    "last_event": s.last_ts.isoformat() if s.last_ts else None,
-                    "rollout_bytes": s.bytes,
-                }
     if use_project_codex and project_codex_root and project_codex_root.exists():
         pstate = project_codex_root / "state_5.sqlite"
         psessions = project_codex_root / "sessions"
@@ -779,31 +744,16 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
                     turn_events.extend((ts, kind) for ts, kind in s.turn_events)
                     entity_events.extend((ts, tid) for ts, _k, _i in s.events)
                     streams_settings[tid] = s.settings
-    if use_system_oc and opencode_db and Path(opencode_db).exists():
-        doc, events, toks, tools_ = analyze_opencode(opencode_db, workspace)
-        if doc["present"]:
-            doc["source"] = "system"
-            oc_docs.append(doc)
-            all_events.extend(events)
-            token_events.extend(toks)
-            tool_events.extend(tools_)
-            entity_events.extend(
-                (ts, eid) for ts, _h, eid, _k, _i in events)
-            for s in doc["sessions"]:
-                sid = s["session_id"]
-                per_entity[sid] = {
-                    "kind": "opencode_session",
-                    "is_subagent": bool(s.get("parent_id")),
-                    "agent": s.get("agent"),
-                    "model": s.get("model"),
-                    "variant": s.get("variant"),
-                    "tokens_input": s.get("tokens_input", 0),
-                    "tokens_total_session": (
-                        s.get("tokens_input", 0) + s.get("tokens_cache_read", 0)
-                        + s.get("tokens_output", 0) + s.get("tokens_reasoning", 0)),
-                    "started_at": s.get("started_at"),
-                    "ended_at": s.get("ended_at"),
-                }
+                    per_entity[tid] = {
+                        "kind": "codex_thread",
+                        "is_subagent": tid in children,
+                        "events": len(s.events),
+                        "tokens_total_subtree": s.cumulative_final,
+                        "tools": dict(Counter(n for _ts, n in s.tool_events)),
+                        "first_event": s.first_ts.isoformat() if s.first_ts else None,
+                        "last_event": s.last_ts.isoformat() if s.last_ts else None,
+                        "rollout_bytes": s.bytes,
+                    }
     if use_project_oc and project_opencode_db and project_opencode_db.exists():
         doc, events, toks, tools_ = analyze_opencode(
             str(project_opencode_db), workspace)
@@ -815,6 +765,23 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
             tool_events.extend(tools_)
             entity_events.extend(
                 (ts, eid) for ts, _h, eid, _k, _i in events)
+            for session in doc["sessions"]:
+                sid = session["session_id"]
+                per_entity[sid] = {
+                    "kind": "opencode_session",
+                    "is_subagent": bool(session.get("parent_id")),
+                    "agent": session.get("agent"),
+                    "model": session.get("model"),
+                    "variant": session.get("variant"),
+                    "tokens_input": session.get("tokens_input", 0),
+                    "tokens_total_session": (
+                        session.get("tokens_input", 0)
+                        + session.get("tokens_cache_read", 0)
+                        + session.get("tokens_output", 0)
+                        + session.get("tokens_reasoning", 0)),
+                    "started_at": session.get("started_at"),
+                    "ended_at": session.get("ended_at"),
+                }
 
     codex_doc = codex_docs[0] if codex_docs else {"present": False,
                                                    "thread_count": 0}
@@ -880,10 +847,9 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
     }
 
 
-def discover(workspace: str, state_db: str, sessions_root: str,
-             opencode_db: str, project_codex_root: Path,
+def discover(workspace: str, project_codex_root: Path,
              project_opencode_db: Path) -> dict:
-    """List candidate session sources (system vs project-isolated)."""
+    """List candidate harnesses in the workspace-local session bundle."""
     def _count_codex(db, sroot):
         if not Path(db).exists():
             return 0
@@ -902,14 +868,6 @@ def discover(workspace: str, state_db: str, sessions_root: str,
             return 0
 
     sources = [
-        {"id": "system_codex", "kind": "system", "harness": "codex",
-         "root": state_db, "reachable": Path(state_db).exists(),
-         "sessions_found": _count_codex(state_db, sessions_root),
-         "note": "user-level ~/.codex telemetry"},
-        {"id": "system_opencode", "kind": "system", "harness": "opencode",
-         "root": opencode_db, "reachable": Path(opencode_db).exists(),
-         "sessions_found": _count_opencode(opencode_db),
-         "note": "user-level ~/.local/share/opencode/opencode.db"},
         {"id": "project_codex", "kind": "project", "harness": "codex",
          "root": str(project_codex_root), "reachable": project_codex_root.exists(),
          "sessions_found": _count_codex(
@@ -919,7 +877,7 @@ def discover(workspace: str, state_db: str, sessions_root: str,
         {"id": "project_opencode", "kind": "project", "harness": "opencode",
          "root": str(project_opencode_db), "reachable": project_opencode_db.exists(),
          "sessions_found": _count_opencode(project_opencode_db),
-         "note": "workspace-bundled .sessions/opencode-data copy"},
+         "note": "workspace-bundled .sessions/opencode-data/opencode DB"},
     ]
     return {"sources": sources}
 
@@ -927,23 +885,20 @@ def discover(workspace: str, state_db: str, sessions_root: str,
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Discover + analyze sessions for a run")
     ap.add_argument("--workspace", required=True)
-    defaults = cd.default_paths()
-    home = Path.home()
-    ap.add_argument("--state-db", default=str(defaults["state_db"]))
-    ap.add_argument("--sessions-root", default=str(defaults["sessions_root"]))
-    ap.add_argument("--opencode-db",
-                    default=str(home / ".local" / "share" / "opencode" / "opencode.db"))
+    ap.add_argument("--state-db", default=None)
+    ap.add_argument("--sessions-root", default=None)
+    ap.add_argument("--opencode-db", default=None)
     ap.add_argument("--project-codex-root", default=None,
                     help="<workspace>/.sessions/codex by default")
     ap.add_argument("--project-opencode-db", default=None,
-                    help="<workspace>/.sessions/opencode-data/opencode.db by default")
-    ap.add_argument("--session-source", choices=("system", "project", "all"),
-                    default="system",
-                    help="which session class to analyze (default system; "
-                         "project = workspace-bundled .sessions copies)")
+                    help="<workspace>/.sessions/opencode-data/opencode/opencode.db by default")
+    ap.add_argument("--session-source", choices=("project",), default="project",
+                    help="retained for compatibility; only project is permitted")
+    ap.add_argument("--harness", choices=("auto", "codex", "opencode"),
+                    default="auto", help="manually selected primary harness")
     ap.add_argument("--session-answers", default=None,
                     help="JSON answers from the evaluation agent for discovery "
-                         "questions (e.g. {\"session_source\": \"system\"})")
+                         "questions (e.g. {\"harness\": \"codex\"})")
     ap.add_argument("--bucket-seconds", type=int, default=DEFAULT_BUCKET_SECONDS)
     ap.add_argument("--idle-gap-seconds", type=int, default=600)
     ap.add_argument("--roots", default=None)
@@ -954,29 +909,36 @@ def main(argv: list[str] | None = None) -> int:
     eval_root = Path(__file__).resolve().parents[2]
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / ws.name / "sessions.json")
-    project_codex_root = Path(args.project_codex_root) if args.project_codex_root \
-        else ws / ".sessions" / "codex"
-    project_opencode_db = Path(args.project_opencode_db) if args.project_opencode_db \
-        else ws / ".sessions" / "opencode-data" / "opencode.db"
+    paths = cd.local_telemetry_paths(
+        ws, state_db=args.state_db, sessions_root=args.sessions_root,
+        opencode_db=args.opencode_db, codex_root=args.project_codex_root)
+    project_codex_root = paths["codex_root"]
+    project_opencode_db = (
+        cd.require_project_path(ws, args.project_opencode_db, "project-opencode-db")
+        if args.project_opencode_db else paths["opencode_db"])
+    state_db = paths["state_db"]
+    sessions_root = paths["sessions_root"]
+    opencode_db = paths["opencode_db"]
 
-    disc = discover(str(ws), args.state_db, args.sessions_root,
-                    args.opencode_db, project_codex_root, project_opencode_db)
+    disc = discover(str(ws), project_codex_root, project_opencode_db)
     questions = []
     source_choice = args.session_source
+    harness_choice = args.harness
     if args.session_answers and Path(args.session_answers).exists():
         try:
             answers = json.loads(Path(args.session_answers).read_text())
-            if isinstance(answers, dict) and answers.get("session_source") in (
-                    "system", "project", "all"):
+            if isinstance(answers, dict) and answers.get("session_source") == "project":
                 source_choice = answers["session_source"]
+            if (isinstance(answers, dict) and harness_choice == "auto"
+                    and answers.get("harness") in ("codex", "opencode")):
+                harness_choice = answers["harness"]
         except (OSError, json.JSONDecodeError):
             pass
-    both_have = [s for s in disc["sources"]
-                 if s["sessions_found"] and s["kind"] == "system"]
-    if args.session_source == "system" and len(both_have) > 1 and not args.session_answers:
+    both_have = [s for s in disc["sources"] if s["sessions_found"]]
+    if len(both_have) > 1 and harness_choice == "auto":
         questions.append({
-            "id": "session_source",
-            "question": "Both codex and opencode system-level sessions exist "
+            "id": "harness",
+            "question": "Both Codex and OpenCode project-local sessions exist "
                         "for this workspace. Which harness ran the contestant?",
             "reason": "session discovery found multiple harnesses; the agent "
                       "must classify the run",
@@ -993,11 +955,11 @@ def main(argv: list[str] | None = None) -> int:
         if env_path.exists() else None,
     }
 
-    result = analyze(str(ws), args.state_db, args.sessions_root,
-                     args.opencode_db, args.bucket_seconds,
+    result = analyze(str(ws), str(state_db), str(sessions_root),
+                     str(opencode_db), args.bucket_seconds,
                      args.idle_gap_seconds, source_choice,
                      cd.parse_roots(args.roots),
-                     project_codex_root, project_opencode_db)
+                     project_codex_root, project_opencode_db, harness_choice)
     result["workspace"] = str(ws)
     result["discovered_at"] = datetime.now(timezone.utc).isoformat()
     result["sources"] = disc["sources"]
@@ -1005,6 +967,7 @@ def main(argv: list[str] | None = None) -> int:
     result["selection"] = {
         "method": "script_discovery + agent classification",
         "roots": cd.parse_roots(args.roots),
+        "harness": harness_choice,
         "questions": questions,
         "notes": [
             "the evaluation agent classifies which sessions belong to the "
@@ -1013,10 +976,11 @@ def main(argv: list[str] | None = None) -> int:
     }
     result["env_snapshot"] = env_doc
     result["provenance"] = {
-        "state_db": args.state_db,
-        "sessions_root": args.sessions_root,
-        "opencode_db": args.opencode_db,
+        "state_db": str(state_db),
+        "sessions_root": str(sessions_root),
+        "opencode_db": str(opencode_db),
         "session_source": source_choice,
+        "harness": harness_choice,
         "bucket_seconds": args.bucket_seconds,
         "idle_gap_seconds": args.idle_gap_seconds,
         "generated_at": datetime.now(timezone.utc).isoformat(),

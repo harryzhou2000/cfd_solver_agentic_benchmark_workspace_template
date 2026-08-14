@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Capture a verbose, redacted copy of the config stack that governed a
-contestant run: codex / opencode / opencodex user-level configs, plugin
-manifests, shell init files, workspace-local configs, and the benchmark
-task/rubric files pinned by the submodule.
+"""Capture the bundled, redacted config stack that governed a contestant run.
 
 Credentials-bearing files (auth.json, codex-accounts.json, ...) are recorded
 as presence + sha256 only — their content is never embedded.
@@ -23,6 +20,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+from cfdeval import codex_data as cd
 from cfdeval import redact
 
 
@@ -153,7 +151,7 @@ def capture(workspace: Path, codex_home: Path, opencode_config_dir: Path,
     entries.extend(capture_dir_files(oc / "agent", "opencode_agent", caps))
     entries.extend(capture_dir_files(oc / "command", "opencode_command", caps))
     entries.extend(capture_dir_files(oc / "rules", "opencode_rules", caps))
-    oc_data = Path.home() / ".local" / "share" / "opencode"
+    oc_data = ws / ".sessions" / "opencode-data" / "opencode"
     entries.append(capture_file(oc_data / "auth.json", "opencode", caps))
 
     # opencodex user-level config
@@ -165,11 +163,6 @@ def capture(workspace: Path, codex_home: Path, opencode_config_dir: Path,
         entries.append(capture_file(ox / name, "opencodex", caps))
     for cand in sorted(ox.glob("catalog-backup*.json")):
         entries.append(capture_file(cand, "opencodex", caps))
-
-    # shell init (may carry proxy/credential-adjacent settings)
-    home = Path.home()
-    for name in (".bashrc", ".zshrc", ".profile", ".setproxy.sh"):
-        entries.append(capture_file(home / name, "shell", caps))
 
     # workspace-local configs
     entries.append(capture_file(ws / "AGENTS.md", "workspace", caps))
@@ -231,24 +224,26 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Capture verbose redacted configs for a run")
     ap.add_argument("--workspace", required=True)
     ap.add_argument("--out", default=None)
-    ap.add_argument("--codex-home", default=str(Path.home() / ".codex"))
-    ap.add_argument("--opencode-config-dir",
-                    default=str(Path.home() / ".config" / "opencode"))
-    ap.add_argument("--opencodex-config-dir",
-                    default=str(Path.home() / ".opencodex"))
+    ap.add_argument("--codex-home", default=None)
+    ap.add_argument("--opencode-config-dir", default=None)
+    ap.add_argument("--opencodex-config-dir", default=None)
     ap.add_argument("--max-bytes", type=int, default=None,
                     help="override the default per-file content cap (bytes)")
     args = ap.parse_args(argv)
 
     ws = Path(args.workspace).resolve()
+    paths = cd.local_telemetry_paths(
+        ws, codex_root=args.codex_home,
+        opencode_config_dir=args.opencode_config_dir,
+        opencodex_config_dir=args.opencodex_config_dir)
     eval_root = Path(__file__).resolve().parents[2]
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / ws.name / "configs.json")
     caps = dict(DEFAULT_CAPS)
     if args.max_bytes:
         caps["default"] = args.max_bytes
-    doc = capture(ws, Path(args.codex_home), Path(args.opencode_config_dir),
-                  Path(args.opencodex_config_dir), caps)
+    doc = capture(ws, paths["codex_root"], paths["opencode_config_dir"],
+                  paths["opencodex_config_dir"], caps)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(doc, indent=2) + "\n")
     n = len(doc["configs"])
