@@ -1,19 +1,61 @@
 {
   "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03",
   "time_seconds": {
-    "goal_time": 0.0,
-    "wall_time": 0.0,
-    "started_at": null,
-    "ended_at": null,
-    "by_root_thread": {},
-    "by_root_tree": {}
+    "goal_time": 90863.0,
+    "wall_time": 90877.4,
+    "started_at": "2026-08-02T13:48:57.708000+00:00",
+    "ended_at": "2026-08-03T15:03:35.090000+00:00",
+    "by_root_thread": {
+      "019fc2bb-3f78-7202-a0de-cfa25e061493": {
+        "status": "complete",
+        "time_used_seconds": 90863,
+        "tokens_used": 3140268
+      }
+    },
+    "by_root_tree": {
+      "019fc2bb-3f78-7202-a0de-cfa25e061493": {
+        "status": "complete",
+        "goal_time_seconds": 90863,
+        "goal_tokens": 3140268,
+        "threads": 1,
+        "tokens_used": 503136423,
+        "model": "deepseek/deepseek-v4-flash"
+      }
+    }
   },
   "tokens": {
-    "total": 0,
-    "by_model": {},
-    "by_thread": {},
+    "total": 503136423,
+    "by_model": {
+      "deepseek/deepseek-v4-flash": {
+        "input": 501896996,
+        "cached_input": 499995008,
+        "non_cached_input": 1901988,
+        "output": 1239427,
+        "reasoning_output": 784431,
+        "total": 503136423,
+        "fallback_tokens": 0
+      }
+    },
+    "by_thread": {
+      "019fc2bb-3f78-7202-a0de-cfa25e061493": {
+        "model": "deepseek/deepseek-v4-flash",
+        "is_subagent": false,
+        "source": "rollout_cumulative",
+        "tokens": {
+          "deepseek/deepseek-v4-flash": {
+            "input": 501896996,
+            "cached": 499995008,
+            "non_cached": 1901988,
+            "output": 1239427,
+            "reasoning_output": 784431,
+            "total": 503136423
+          }
+        },
+        "total": 503136423
+      }
+    },
     "main_vs_subagent": {
-      "main": 0,
+      "main": 503136423,
       "subagent": 0
     },
     "fallback_tokens": 0,
@@ -21,19 +63,25 @@
     "accounting_note": "Cached/input/output splits come from each selected thread's terminal rollout counter and are scaled only when needed to match state_5.sqlite threads.tokens_used."
   },
   "cost_estimate_usd": {
-    "total": 0.0,
-    "by_model": {},
+    "total": 15.053,
+    "by_model": {
+      "deepseek/deepseek-v4-flash": {
+        "usd": 15.053,
+        "tokens": 503136423,
+        "pricing": "metadata"
+      }
+    },
     "unpriced_tokens": 0,
     "estimate": true,
     "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
   },
   "provenance": {
-    "state_db": "/home/harry/.codex/state_5.sqlite",
-    "goals_db": "/home/harry/.codex/goals_1.sqlite",
-    "logs_db": "/home/harry/.codex/logs_2.sqlite",
-    "sessions_root": "/home/harry/.codex/sessions",
-    "fetched_at": "2026-08-13T15:58:26.476055+00:00",
-    "num_threads": 0,
-    "num_roots": 0
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex/sessions",
+    "fetched_at": "2026-08-14T04:46:27.712848+00:00",
+    "num_threads": 1,
+    "num_roots": 1
   }
 }

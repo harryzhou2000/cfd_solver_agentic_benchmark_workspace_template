@@ -1,8 +1,8 @@
 {
   "codex": {
     "present": true,
-    "source_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex/state_5.sqlite",
-    "sessions_root": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex/sessions",
+    "source_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex/sessions",
     "thread_count": 1,
     "subagent_count": 0,
     "root_count": 1,
@@ -2151,50 +2151,51 @@
         "wall_seconds": 90877.4,
         "idle_seconds": 0.0
       },
-      "per_entity": {},
+      "per_entity": {
+        "019fc2bb-3f78-7202-a0de-cfa25e061493": {
+          "kind": "codex_thread",
+          "is_subagent": false,
+          "events": 7431,
+          "tokens_total_subtree": 503136423,
+          "tools": {
+            "exec_command": 1132,
+            "update_plan": 9,
+            "apply_patch": 259,
+            "write_stdin": 440,
+            "view_image": 11,
+            "interrupt_agent": 1,
+            "update_goal": 1
+          },
+          "first_event": "2026-08-02T13:48:57.708000+00:00",
+          "last_event": "2026-08-03T15:03:35.090000+00:00",
+          "rollout_bytes": 12312285
+        }
+      },
       "accounting_notes": [
         "codex: each selected thread has its own cumulative usage counter; run totals sum the selected root and its subagent threads. Bucket totals are per-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
       ]
     }
   },
-  "workspace": "/workspace",
-  "discovered_at": "2026-08-13T15:58:26.794564+00:00",
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03",
+  "discovered_at": "2026-08-14T04:46:27.451808+00:00",
   "sources": [
-    {
-      "id": "system_codex",
-      "kind": "system",
-      "harness": "codex",
-      "root": "/home/harry/.codex/state_5.sqlite",
-      "reachable": true,
-      "sessions_found": 0,
-      "note": "user-level ~/.codex telemetry"
-    },
-    {
-      "id": "system_opencode",
-      "kind": "system",
-      "harness": "opencode",
-      "root": "/home/harry/.local/share/opencode/opencode.db",
-      "reachable": true,
-      "sessions_found": 0,
-      "note": "user-level ~/.local/share/opencode/opencode.db"
-    },
     {
       "id": "project_codex",
       "kind": "project",
       "harness": "codex",
-      "root": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex",
       "reachable": true,
-      "sessions_found": 0,
+      "sessions_found": 1,
       "note": "workspace-bundled .sessions/codex copy"
     },
     {
       "id": "project_opencode",
       "kind": "project",
       "harness": "opencode",
-      "root": "/workspace/.sessions/opencode-data/opencode.db",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/opencode-data/opencode/opencode.db",
       "reachable": false,
       "sessions_found": 0,
-      "note": "workspace-bundled .sessions/opencode-data copy"
+      "note": "workspace-bundled .sessions/opencode-data/opencode DB"
     }
   ],
   "selected_source": "project",
@@ -2203,23 +2204,25 @@
     "roots": [
       "019fc2bb-3f78-7202-a0de-cfa25e061493"
     ],
+    "harness": "auto",
     "questions": [],
     "notes": [
       "the evaluation agent classifies which sessions belong to the contestant run; unextractable choices are surfaced as questions"
     ]
   },
   "env_snapshot": {
-    "captured": false,
-    "path": null,
-    "sha256": null
+    "captured": true,
+    "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.eval/env_snapshot.json",
+    "sha256": "b00f8573a1f8c3a1223c9e12243daca8452557c5f12958212c6f81b3fd72b68d"
   },
   "provenance": {
-    "state_db": "/home/harry/.codex/state_5.sqlite",
-    "sessions_root": "/home/harry/.codex/sessions",
-    "opencode_db": "/home/harry/.local/share/opencode/opencode.db",
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/codex/sessions",
+    "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/03/.sessions/opencode-data/opencode/opencode.db",
     "session_source": "project",
+    "harness": "auto",
     "bucket_seconds": 1800,
     "idle_gap_seconds": 600,
-    "generated_at": "2026-08-13T15:58:26.794583+00:00"
+    "generated_at": "2026-08-14T04:46:27.451827+00:00"
   }
 }
