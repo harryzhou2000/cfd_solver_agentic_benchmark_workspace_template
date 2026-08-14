@@ -55,8 +55,10 @@ mpirun -np 8 solver/build/cfd_solver solve \
 - Conservative state: `[rho, rho*u, rho*v, rho*E]` for a calorically perfect
   gas with case-configured gamma, `R`, and Prandtl number.
 - Cell-centred mixed-triangle/quad finite volume with least-squares primitive
-  gradients, active Barth--Jespersen limiting, and face-state positivity
-  fallback.
+  gradients, active Barth--Jespersen limiting of inviscid face reconstruction,
+  and face-state positivity fallback. Viscous gradients are retained during
+  any diagnostic reconstruction continuation, so a first-order face-state
+  continuation does not silently change the laminar equations.
 - Rusanov approximate Riemann flux; Newtonian stress/Fourier heat conduction
   for laminar cases with viscosity calculated from the requested Reynolds
   number.
@@ -73,12 +75,13 @@ mpirun -np 8 solver/build/cfd_solver solve \
 
 ## Outputs and report generation
 
-Each successful `solve` writes the CSV/JSON contract, distributed VTU/PVTU
-field output, partition-specific restart pieces, and `stdout.log` to its output
-directory. The root field manifest is `field_final.pvtu`; rank-local VTU pieces
-are referenced by it and are readable in ParaView. MeshIO does not directly
-open PVTU indices, so the included report tool reads and merges the referenced
-rank-local VTU pieces without changing their field values.
+Each successful `solve` writes the CSV/JSON contract, rank-local VTU pieces,
+a `field_final.pvtu` distributed index, and a complete multi-piece
+`field_final.vtu` artifact for tools that require the literal final VTU name.
+The root-only multi-piece assembly occurs after the distributed solve, so it
+does not replicate mesh or solution state during iterations. MeshIO does not
+directly open PVTU indices, so the included report tool reads and merges the
+referenced rank-local VTU pieces without changing their field values.
 
 Create the required local Python environment before generating figures and the
 LaTeX report:

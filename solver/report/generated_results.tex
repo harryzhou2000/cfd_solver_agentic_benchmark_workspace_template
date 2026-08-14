@@ -1,0 +1,706 @@
+\subsection{Run status and residual evidence}
+Table~\ref{tab:run-status} is generated directly from \texttt{run\_manifest.csv}; residual orders are recomputed from the first and final global $L_2$ rows, not copied from status text. For each steady case, generation also rejects a history below the residual target in the immutable input named by the recorded command.
+\begin{center}\scriptsize
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lllrrrrrl}
+\toprule Ref. & Run & Case & ranks & steps & time & residual orders & wall s & status\\
+\midrule
+R1 & naca0012\_m015\_inviscid\_np8 & naca0012\_m015\_inviscid & 8 & 2495 & 172.41 & 4.574 & 7321.4 & converged\\
+R2 & naca0012\_m080\_inviscid\_np8 & naca0012\_m080\_inviscid & 8 & 1164 & 411.11 & 4.001 & 1278.2 & converged\\
+R3 & naca0012\_m200\_inviscid\_np8 & naca0012\_m200\_inviscid & 8 & 704 & 155.72 & 3.337 & 3603.9 & converged\\
+R4 & naca0012\_m015\_laminar\_re5000\_np8 & naca0012\_m015\_laminar\_re5000 & 8 & 3966 & 291.39 & 4.06 & 12031 & converged\\
+R5 & naca0012\_m080\_laminar\_re5000\_np8 & naca0012\_m080\_laminar\_re5000 & 8 & 645 & 36.583 & 5.511 & 5125.7 & converged\\
+R6 & naca0012\_m200\_laminar\_re5000\_np8 & naca0012\_m200\_laminar\_re5000 & 8 & 787 & 143.46 & 3.642 & 801.41 & converged\\
+R7 & cylinder\_m010\_laminar\_re20\_np8 & cylinder\_m010\_laminar\_re20 & 8 & 2621 & 306.51 & 5.842 & 6835.4 & converged\\
+R8 & cylinder\_m010\_laminar\_re200\_np16 & cylinder\_m010\_laminar\_re200 & 16 & 30000 & 300 & 3.979 & 19322 & statistically\_periodic\\
+R9 & naca0012\_m015\_inviscid\_np2 & naca0012\_m015\_inviscid & 2 & 2741 & 181.89 & 4.485 & 7850.8 & converged\\
+R10 & cylinder\_m010\_laminar\_re20\_np2 & cylinder\_m010\_laminar\_re20 & 2 & 2675 & 311.94 & 5.824 & 6992.1 & converged\\
+\bottomrule
+\end{tabular}}
+\captionof{table}{Run status and global residual reduction from submitted histories.}
+\label{tab:run-status}
+\end{center}
+\subsection{Input-case, mesh, and boundary provenance}
+For every output, the generator parses \texttt{run\_status.command} with Python \texttt{shlex}, resolves its unique \texttt{--case} and \texttt{--output} arguments, and rejects a command whose output path or JSON case identifier does not match the submitted directory. The mesh basename is also checked against submitted metadata. Thus the tags below are evidence from the immutable command-selected input, rather than post-processed metadata. The exact JSON path remains in each manifest command; R-codes map to Table~\ref{tab:run-status}.
+\begin{center}\small
+\begin{tabular}{lllrrp{4.3cm}}
+\toprule Ref. & mesh & physics & cells & faces & boundary-tag mapping\\
+\midrule
+R1 & NACA0012\_H2.cgns & inviscid, M=0.15 & 20816 & 36498 & bc-2 $\rightarrow$ farfield; bc-4 $\rightarrow$ slip wall\\
+R2 & NACA0012\_H2.cgns & inviscid, M=0.8 & 20816 & 36498 & bc-2 $\rightarrow$ farfield; bc-4 $\rightarrow$ slip wall\\
+R3 & NACA0012\_H2.cgns & inviscid, M=2 & 20816 & 36498 & bc-2 $\rightarrow$ farfield; bc-4 $\rightarrow$ slip wall\\
+R4 & NACA0012\_H2.cgns & laminar, M=0.15, Re=5000 & 20816 & 36498 & bc-2 $\rightarrow$ farfield; bc-4 $\rightarrow$ no-slip adiabatic wall\\
+R5 & NACA0012\_H2.cgns & laminar, M=0.8, Re=5000 & 20816 & 36498 & bc-2 $\rightarrow$ farfield; bc-4 $\rightarrow$ no-slip adiabatic wall\\
+R6 & NACA0012\_H2.cgns & laminar, M=2, Re=5000 & 20816 & 36498 & bc-2 $\rightarrow$ farfield; bc-4 $\rightarrow$ no-slip adiabatic wall\\
+R7 & CylinderB1.cgns & laminar, M=0.1, Re=20 & 10185 & 20180 & WALL $\rightarrow$ no-slip adiabatic wall; FAR $\rightarrow$ farfield\\
+R8 & CylinderB1.cgns & laminar, M=0.1, Re=200 & 10185 & 20180 & WALL $\rightarrow$ no-slip adiabatic wall; FAR $\rightarrow$ farfield\\
+R9 & NACA0012\_H2.cgns & inviscid, M=0.15 & 20816 & 36498 & bc-2 $\rightarrow$ farfield; bc-4 $\rightarrow$ slip wall\\
+R10 & CylinderB1.cgns & laminar, M=0.1, Re=20 & 10185 & 20180 & WALL $\rightarrow$ no-slip adiabatic wall; FAR $\rightarrow$ farfield\\
+\bottomrule
+\end{tabular}
+\captionof{table}{Case, mesh, and boundary-tag evidence from the exact JSON named by each submitted command.}
+\label{tab:case-mesh-boundaries}
+\end{center}
+\subsection{Recorded numerical controls}
+Control cells are deliberately source-marked: [M] is a submitted top-level metadata field, [A] an applied-control field, [R] a serialized submitted \texttt{run\_control}, and [I] the immutable input JSON named by \texttt{--case}. The [I] fallback is used only when a legacy output omitted that control; no value is inferred from a plot, defaulted silently, or written back into metadata. [--] means that neither source specifies the field.
+\begin{center}\small
+\begin{tabular}{llp{4.0cm}lp{3.4cm}}
+\toprule Ref. & sources & integrator & type & horizon\\
+\midrule
+R1 & M+I & steady pseudo-time block-Jacobi [M] & steady [I] & max steps=20000 [I]\\
+R2 & M+A+R & steady local pseudo-time block LU--SGS [M] & steady [R] & max steps=30000 [R]\\
+R3 & M+I & steady pseudo-time block-Jacobi [M] & steady [I] & max steps=40000 [I]\\
+R4 & M+I & steady pseudo-time block-Jacobi [M] & steady [I] & max steps=40000 [I]\\
+R5 & M+A+R & steady local pseudo-time block LU--SGS [M] & steady [R] & max steps=40000 [R]\\
+R6 & M+A+R & steady local pseudo-time block LU--SGS [M] & steady [R] & max steps=50000 [R]\\
+R7 & M+I & steady pseudo-time block-Jacobi [M] & steady [I] & max steps=30000 [I]\\
+R8 & M+I & BDF2 or trapezoidal [M] & transient [I] & dt=0.01 [I]; tf=300 [I]\\
+R9 & M+I & steady pseudo-time block-Jacobi [M] & steady [I] & max steps=20000 [I]\\
+R10 & M+I & steady pseudo-time block-Jacobi [M] & steady [I] & max steps=30000 [I]\\
+\bottomrule
+\end{tabular}
+\captionof{table}{Integration and horizon controls with their serialized provenance.}
+\label{tab:controls}
+\end{center}
+\begin{center}\small
+\begin{tabular}{lrrrrr}
+\toprule Ref. & CFL initial & CFL max & outer target & inner target & Rusanov scale\\
+\midrule
+R1 & 1 [I] & 100 [I] & 4 [I] & 0.01 [M] & not specified [--]\\
+R2 & 1 [R] & 100 [R] & 4 [R] & 0.01 [M] & 1 [A]\\
+R3 & 0.2 [I] & 50 [I] & 3 [I] & 0.01 [M] & not specified [--]\\
+R4 & 1 [I] & 100 [I] & 4 [I] & 0.01 [M] & not specified [--]\\
+R5 & 0.5 [R] & 80 [R] & 4 [R] & 0.01 [M] & 1 [A]\\
+R6 & 0.2 [R] & 50 [R] & 3 [R] & 0.01 [M] & 1 [A]\\
+R7 & 1 [I] & 100 [I] & 5 [I] & 0.01 [M] & not specified [--]\\
+R8 & 1 [I] & 1 [I] & not specified [--] & 0.001 [M] & 1 [I]\\
+R9 & 1 [I] & 100 [I] & 4 [I] & 0.01 [M] & not specified [--]\\
+R10 & 1 [I] & 100 [I] & 5 [I] & 0.01 [M] & not specified [--]\\
+\bottomrule
+\end{tabular}
+\captionof{table}{CFL, residual-target, and dissipation controls with per-cell provenance markers.}
+\label{tab:control-thresholds}
+\end{center}
+\subsection{Forces and convergence qualification}
+The final-state force values below are read from the final row of each submitted \texttt{forces.csv}; pressure and viscous contributions remain separate. A steady row is admitted only after the residual history reaches the target specified in its command-selected input JSON.
+\begin{center}\small
+\begin{tabular}{lrrrrrr}
+\toprule Ref. & $C_D$ & $C_L$ & $C_m$ & $C_{D,p}$ & $C_{D,v}$ & qualification\\
+\midrule
+R1 & 0.0021014 & -0.00016132 & 3.296e-05 & 0.0021014 & 0 & steady target met\\
+R2 & 0.008572 & 0.00091907 & 8.594e-05 & 0.008572 & 0 & steady target met\\
+R3 & 0.092006 & 0.00053819 & 0.0003313 & 0.092006 & 0 & steady target met\\
+R4 & 0.075121 & -0.00045793 & -0.000327 & 0.022457 & 0.052664 & steady target met\\
+R5 & 0.078843 & -0.0034961 & -0.0009781 & 0.044125 & 0.034718 & steady target met\\
+R6 & 0.044548 & 6.1989e-05 & -1.64e-05 & 0.018123 & 0.026425 & steady target met\\
+R7 & 2.0372 & -0.0003392 & -1.038e-05 & 1.2387 & 0.79853 & steady target met\\
+R8 & 1.1524 & -0.087456 & -0.002553 & 0.88761 & 0.26475 & statistically periodic\\
+R9 & 0.001209 & 8.3203e-05 & 4.77e-05 & 0.001209 & 0 & steady target met\\
+R10 & 2.037 & -0.00032495 & -9.729e-06 & 1.2386 & 0.79842 & steady target met\\
+\bottomrule
+\end{tabular}
+\captionof{table}{Final force coefficients and convergence qualification; R-codes map to Table~\ref{tab:run-status}.}
+\label{tab:forces}
+\end{center}
+\subsection{Case-by-case interpretation}
+Each paragraph below refers to the corresponding submitted histories and final field. These plots support qualitative flow interpretation, not an unperformed grid-convergence or experimental-validation claim.
+\paragraph{naca0012\_m015\_inviscid\_np8.} This inviscid, M=0.15 submitted run is classified converged with 4.574 orders of visible $L_2$ reduction. Its final coefficients are $C_D=0.00210136$ and $C_L=-0.000161318$. Figure~\ref{fig:naca0012_m015_inviscid_np8_residuals} and Figure~\ref{fig:naca0012_m015_inviscid_np8_forces} show the convergence/force history; Figure~\ref{fig:naca0012_m015_inviscid_np8_surface_pressure_coefficient} and Figure~\ref{fig:naca0012_m015_inviscid_np8_mach_body_or_wake} and Figure~\ref{fig:naca0012_m015_inviscid_np8_pressure_body_or_wake} show the wall-pressure and near-body/wake field evidence. The low-Mach result is reported with the same field and surface evidence, without extrapolating it to an incompressible reference solution.
+\paragraph{naca0012\_m080\_inviscid\_np8.} This inviscid, M=0.8 submitted run is classified converged with 4.001 orders of visible $L_2$ reduction. Its final coefficients are $C_D=0.00857203$ and $C_L=0.000919066$. Figure~\ref{fig:naca0012_m080_inviscid_np8_residuals} and Figure~\ref{fig:naca0012_m080_inviscid_np8_forces} show the convergence/force history; Figure~\ref{fig:naca0012_m080_inviscid_np8_surface_pressure_coefficient} and Figure~\ref{fig:naca0012_m080_inviscid_np8_mach_body_or_wake} and Figure~\ref{fig:naca0012_m080_inviscid_np8_pressure_body_or_wake} show the wall-pressure and near-body/wake field evidence. The finite-Mach field panels make the compression and expansion structure inspectable without treating the contour itself as an external validation result.
+\paragraph{naca0012\_m200\_inviscid\_np8.} This inviscid, M=2 submitted run is classified converged with 3.337 orders of visible $L_2$ reduction. Its final coefficients are $C_D=0.0920059$ and $C_L=0.000538188$. Figure~\ref{fig:naca0012_m200_inviscid_np8_residuals} and Figure~\ref{fig:naca0012_m200_inviscid_np8_forces} show the convergence/force history; Figure~\ref{fig:naca0012_m200_inviscid_np8_surface_pressure_coefficient} and Figure~\ref{fig:naca0012_m200_inviscid_np8_mach_body_or_wake} and Figure~\ref{fig:naca0012_m200_inviscid_np8_pressure_body_or_wake} show the wall-pressure and near-body/wake field evidence. The supplied Mach and pressure fields are the direct evidence used for the shock/expansion-dominated finite-Mach pattern; no reference-data error or mesh-refinement uncertainty is asserted.
+\paragraph{naca0012\_m015\_laminar\_re5000\_np8.} This laminar, M=0.15, Re=5000 submitted run is classified converged with 4.06 orders of visible $L_2$ reduction. Its final coefficients are $C_D=0.0751211$ and $C_L=-0.000457933$. Figure~\ref{fig:naca0012_m015_laminar_re5000_np8_residuals} and Figure~\ref{fig:naca0012_m015_laminar_re5000_np8_forces} show the convergence/force history; Figure~\ref{fig:naca0012_m015_laminar_re5000_np8_surface_pressure_coefficient} and Figure~\ref{fig:naca0012_m015_laminar_re5000_np8_mach_body_or_wake} and Figure~\ref{fig:naca0012_m015_laminar_re5000_np8_pressure_body_or_wake} show the wall-pressure and near-body/wake field evidence. The low-Mach result is reported with the same field and surface evidence, without extrapolating it to an incompressible reference solution. The reported tangential wall stress is plotted in Figure~\ref{fig:naca0012_m015_laminar_re5000_np8_skin_friction}.
+\paragraph{naca0012\_m080\_laminar\_re5000\_np8.} This laminar, M=0.8, Re=5000 submitted run is classified converged with 5.511 orders of visible $L_2$ reduction. Its final coefficients are $C_D=0.0788425$ and $C_L=-0.00349607$. Figure~\ref{fig:naca0012_m080_laminar_re5000_np8_residuals} and Figure~\ref{fig:naca0012_m080_laminar_re5000_np8_forces} show the convergence/force history; Figure~\ref{fig:naca0012_m080_laminar_re5000_np8_surface_pressure_coefficient} and Figure~\ref{fig:naca0012_m080_laminar_re5000_np8_mach_body_or_wake} and Figure~\ref{fig:naca0012_m080_laminar_re5000_np8_pressure_body_or_wake} show the wall-pressure and near-body/wake field evidence. The finite-Mach field panels make the compression and expansion structure inspectable without treating the contour itself as an external validation result. The reported tangential wall stress is plotted in Figure~\ref{fig:naca0012_m080_laminar_re5000_np8_skin_friction}.
+\paragraph{naca0012\_m200\_laminar\_re5000\_np8.} This laminar, M=2, Re=5000 submitted run is classified converged with 3.642 orders of visible $L_2$ reduction. Its final coefficients are $C_D=0.0445481$ and $C_L=6.19888e-05$. Figure~\ref{fig:naca0012_m200_laminar_re5000_np8_residuals} and Figure~\ref{fig:naca0012_m200_laminar_re5000_np8_forces} show the convergence/force history; Figure~\ref{fig:naca0012_m200_laminar_re5000_np8_surface_pressure_coefficient} and Figure~\ref{fig:naca0012_m200_laminar_re5000_np8_mach_body_or_wake} and Figure~\ref{fig:naca0012_m200_laminar_re5000_np8_pressure_body_or_wake} show the wall-pressure and near-body/wake field evidence. The supplied Mach and pressure fields are the direct evidence used for the shock/expansion-dominated finite-Mach pattern; no reference-data error or mesh-refinement uncertainty is asserted. The reported tangential wall stress is plotted in Figure~\ref{fig:naca0012_m200_laminar_re5000_np8_skin_friction}.
+\paragraph{cylinder\_m010\_laminar\_re20\_np8.} This laminar, M=0.1, Re=20 submitted run is classified converged with 5.842 orders of visible $L_2$ reduction. Its final coefficients are $C_D=2.03721$ and $C_L=-0.000339201$. Figure~\ref{fig:cylinder_m010_laminar_re20_np8_residuals} and Figure~\ref{fig:cylinder_m010_laminar_re20_np8_forces} show the convergence/force history; Figure~\ref{fig:cylinder_m010_laminar_re20_np8_surface_pressure_coefficient} and Figure~\ref{fig:cylinder_m010_laminar_re20_np8_mach_body_or_wake} and Figure~\ref{fig:cylinder_m010_laminar_re20_np8_pressure_body_or_wake} show the wall-pressure and near-body/wake field evidence. The reported tangential wall stress is plotted in Figure~\ref{fig:cylinder_m010_laminar_re20_np8_skin_friction}. Its low-Re wake assessment is based on the final submitted field and the settled force history.
+\paragraph{cylinder\_m010\_laminar\_re200\_np16.} This laminar, M=0.1, Re=200 submitted run is classified statistically\_periodic with 3.979 orders of visible $L_2$ reduction. Its final coefficients are $C_D=1.15235$ and $C_L=-0.0874561$. Figure~\ref{fig:cylinder_m010_laminar_re200_np16_residuals} and Figure~\ref{fig:cylinder_m010_laminar_re200_np16_forces} show the convergence/force history; Figure~\ref{fig:cylinder_m010_laminar_re200_np16_surface_pressure_coefficient} and Figure~\ref{fig:cylinder_m010_laminar_re200_np16_mach_body_or_wake} and Figure~\ref{fig:cylinder_m010_laminar_re200_np16_pressure_body_or_wake} show the wall-pressure and near-body/wake field evidence. The reported tangential wall stress is plotted in Figure~\ref{fig:cylinder_m010_laminar_re200_np16_skin_friction}. The post-transient wake diagnostic is Figure~\ref{fig:cylinder_m010_laminar_re200_np16_velocity_magnitude}.
+\paragraph{naca0012\_m015\_inviscid\_np2.} This inviscid, M=0.15 submitted run is classified converged with 4.485 orders of visible $L_2$ reduction. Its final coefficients are $C_D=0.00120899$ and $C_L=8.32032e-05$. Figure~\ref{fig:naca0012_m015_inviscid_np2_residuals} and Figure~\ref{fig:naca0012_m015_inviscid_np2_forces} show the convergence/force history; Figure~\ref{fig:naca0012_m015_inviscid_np2_surface_pressure_coefficient} and Figure~\ref{fig:naca0012_m015_inviscid_np2_mach_body_or_wake} and Figure~\ref{fig:naca0012_m015_inviscid_np2_pressure_body_or_wake} show the wall-pressure and near-body/wake field evidence. The low-Mach result is reported with the same field and surface evidence, without extrapolating it to an incompressible reference solution.
+\paragraph{cylinder\_m010\_laminar\_re20\_np2.} This laminar, M=0.1, Re=20 submitted run is classified converged with 5.824 orders of visible $L_2$ reduction. Its final coefficients are $C_D=2.03699$ and $C_L=-0.000324947$. Figure~\ref{fig:cylinder_m010_laminar_re20_np2_residuals} and Figure~\ref{fig:cylinder_m010_laminar_re20_np2_forces} show the convergence/force history; Figure~\ref{fig:cylinder_m010_laminar_re20_np2_surface_pressure_coefficient} and Figure~\ref{fig:cylinder_m010_laminar_re20_np2_mach_body_or_wake} and Figure~\ref{fig:cylinder_m010_laminar_re20_np2_pressure_body_or_wake} show the wall-pressure and near-body/wake field evidence. The reported tangential wall stress is plotted in Figure~\ref{fig:cylinder_m010_laminar_re20_np2_skin_friction}. Its low-Re wake assessment is based on the final submitted field and the settled force history.
+\subsection{Partition diagnostics and MPI comparison}
+The first table summarizes the actual per-rank diagnostics written by the solver. The following long table retains every owned/ghost count, boundary-face count, neighbour count, and summed send/receive cell count rather than collapsing communication evidence to an average. `Neighbour graph edges' is half the directed neighbour count in the submitted partition diagnostics. In the detailed table, R1, R2, and so on identify the corresponding row order in Table~\ref{tab:run-status}.
+\begin{center}\small
+\begin{tabular}{lrrrrrrr}
+\toprule Ref. & owned min--max & ghost min--max & balance & avg. neigh. & edges & sent & received\\
+\midrule
+R1 & 2550--2627 & 47--201 & 1.0096 & 3 & 12 & 831 & 831\\
+R2 & 2550--2627 & 47--201 & 1.0096 & 3 & 12 & 831 & 831\\
+R3 & 2550--2627 & 47--201 & 1.0096 & 3 & 12 & 831 & 831\\
+R4 & 2550--2627 & 47--201 & 1.0096 & 3 & 12 & 831 & 831\\
+R5 & 2550--2627 & 47--201 & 1.0096 & 3 & 12 & 831 & 831\\
+R6 & 2550--2627 & 47--201 & 1.0096 & 3 & 12 & 831 & 831\\
+R7 & 1262--1281 & 99--122 & 1.0062 & 4.25 & 17 & 915 & 915\\
+R8 & 625--651 & 68--111 & 1.0227 & 5 & 40 & 1383 & 1383\\
+R9 & 10405--10411 & 119--120 & 1.0003 & 1 & 1 & 239 & 239\\
+R10 & 5090--5095 & 100--104 & 1.0005 & 1 & 1 & 204 & 204\\
+\bottomrule
+\end{tabular}
+\captionof{table}{METIS partition balance, ghost-layer, neighbour, and communication totals; R-codes map to Table~\ref{tab:run-status}.}
+\label{tab:partition-summary}
+\end{center}
+\begingroup\scriptsize
+\begin{longtable}{lrrrrrrr}
+\caption{Per-rank partition diagnostics as emitted by the submitted solver.}\label{tab:partition-detail}\\
+\toprule run ref. & rank & owned & ghost & boundary faces & neighbours & send cells & receive cells\\
+\midrule
+\endfirsthead
+\toprule run ref. & rank & owned & ghost & boundary faces & neighbours & send cells & receive cells\\
+\midrule
+\endhead
+R1 & 0 & 2550 & 88 & 70 & 2 & 88 & 88\\
+R1 & 1 & 2627 & 91 & 63 & 3 & 91 & 91\\
+R1 & 2 & 2623 & 108 & 56 & 3 & 109 & 108\\
+R1 & 3 & 2610 & 92 & 64 & 3 & 91 & 92\\
+R1 & 4 & 2557 & 47 & 80 & 1 & 47 & 47\\
+R1 & 5 & 2613 & 201 & 20 & 7 & 201 & 201\\
+R1 & 6 & 2612 & 96 & 60 & 2 & 96 & 96\\
+R1 & 7 & 2624 & 108 & 71 & 3 & 108 & 108\\
+R2 & 0 & 2550 & 88 & 70 & 2 & 88 & 88\\
+R2 & 1 & 2627 & 91 & 63 & 3 & 91 & 91\\
+R2 & 2 & 2623 & 108 & 56 & 3 & 109 & 108\\
+R2 & 3 & 2610 & 92 & 64 & 3 & 91 & 92\\
+R2 & 4 & 2557 & 47 & 80 & 1 & 47 & 47\\
+R2 & 5 & 2613 & 201 & 20 & 7 & 201 & 201\\
+R2 & 6 & 2612 & 96 & 60 & 2 & 96 & 96\\
+R2 & 7 & 2624 & 108 & 71 & 3 & 108 & 108\\
+R3 & 0 & 2550 & 88 & 70 & 2 & 88 & 88\\
+R3 & 1 & 2627 & 91 & 63 & 3 & 91 & 91\\
+R3 & 2 & 2623 & 108 & 56 & 3 & 109 & 108\\
+R3 & 3 & 2610 & 92 & 64 & 3 & 91 & 92\\
+R3 & 4 & 2557 & 47 & 80 & 1 & 47 & 47\\
+R3 & 5 & 2613 & 201 & 20 & 7 & 201 & 201\\
+R3 & 6 & 2612 & 96 & 60 & 2 & 96 & 96\\
+R3 & 7 & 2624 & 108 & 71 & 3 & 108 & 108\\
+R4 & 0 & 2550 & 88 & 70 & 2 & 88 & 88\\
+R4 & 1 & 2627 & 91 & 63 & 3 & 91 & 91\\
+R4 & 2 & 2623 & 108 & 56 & 3 & 109 & 108\\
+R4 & 3 & 2610 & 92 & 64 & 3 & 91 & 92\\
+R4 & 4 & 2557 & 47 & 80 & 1 & 47 & 47\\
+R4 & 5 & 2613 & 201 & 20 & 7 & 201 & 201\\
+R4 & 6 & 2612 & 96 & 60 & 2 & 96 & 96\\
+R4 & 7 & 2624 & 108 & 71 & 3 & 108 & 108\\
+R5 & 0 & 2550 & 88 & 70 & 2 & 88 & 88\\
+R5 & 1 & 2627 & 91 & 63 & 3 & 91 & 91\\
+R5 & 2 & 2623 & 108 & 56 & 3 & 109 & 108\\
+R5 & 3 & 2610 & 92 & 64 & 3 & 91 & 92\\
+R5 & 4 & 2557 & 47 & 80 & 1 & 47 & 47\\
+R5 & 5 & 2613 & 201 & 20 & 7 & 201 & 201\\
+R5 & 6 & 2612 & 96 & 60 & 2 & 96 & 96\\
+R5 & 7 & 2624 & 108 & 71 & 3 & 108 & 108\\
+R6 & 0 & 2550 & 88 & 70 & 2 & 88 & 88\\
+R6 & 1 & 2627 & 91 & 63 & 3 & 91 & 91\\
+R6 & 2 & 2623 & 108 & 56 & 3 & 109 & 108\\
+R6 & 3 & 2610 & 92 & 64 & 3 & 91 & 92\\
+R6 & 4 & 2557 & 47 & 80 & 1 & 47 & 47\\
+R6 & 5 & 2613 & 201 & 20 & 7 & 201 & 201\\
+R6 & 6 & 2612 & 96 & 60 & 2 & 96 & 96\\
+R6 & 7 & 2624 & 108 & 71 & 3 & 108 & 108\\
+R7 & 0 & 1281 & 120 & 23 & 5 & 120 & 120\\
+R7 & 1 & 1262 & 104 & 25 & 3 & 103 & 104\\
+R7 & 2 & 1275 & 113 & 23 & 4 & 112 & 113\\
+R7 & 3 & 1273 & 118 & 29 & 3 & 118 & 118\\
+R7 & 4 & 1269 & 99 & 0 & 3 & 98 & 99\\
+R7 & 5 & 1276 & 118 & 20 & 6 & 120 & 118\\
+R7 & 6 & 1273 & 121 & 0 & 4 & 122 & 121\\
+R7 & 7 & 1276 & 122 & 0 & 6 & 122 & 122\\
+R8 & 0 & 635 & 87 & 0 & 4 & 88 & 87\\
+R8 & 1 & 646 & 75 & 0 & 5 & 76 & 75\\
+R8 & 2 & 634 & 111 & 0 & 6 & 106 & 111\\
+R8 & 3 & 635 & 81 & 20 & 6 & 82 & 81\\
+R8 & 4 & 637 & 84 & 0 & 4 & 84 & 84\\
+R8 & 5 & 638 & 91 & 0 & 6 & 93 & 91\\
+R8 & 6 & 636 & 110 & 0 & 6 & 111 & 110\\
+R8 & 7 & 634 & 84 & 0 & 5 & 84 & 84\\
+R8 & 8 & 632 & 89 & 0 & 5 & 87 & 89\\
+R8 & 9 & 636 & 75 & 28 & 4 & 77 & 75\\
+R8 & 10 & 639 & 68 & 29 & 4 & 70 & 68\\
+R8 & 11 & 625 & 90 & 0 & 6 & 89 & 90\\
+R8 & 12 & 651 & 82 & 0 & 7 & 81 & 82\\
+R8 & 13 & 634 & 72 & 26 & 3 & 72 & 72\\
+R8 & 14 & 637 & 97 & 17 & 4 & 97 & 97\\
+R8 & 15 & 636 & 87 & 0 & 5 & 86 & 87\\
+R9 & 0 & 10405 & 120 & 253 & 1 & 119 & 120\\
+R9 & 1 & 10411 & 119 & 231 & 1 & 120 & 119\\
+R10 & 0 & 5095 & 100 & 100 & 1 & 104 & 100\\
+R10 & 1 & 5090 & 104 & 20 & 1 & 100 & 104\\
+\bottomrule
+\end{longtable}
+\endgroup
+For naca0012\_m015\_inviscid, the submitted np=2 and np=8 runs give final $C_D=0.00120899$ and $0.00210136$, a 73.81\% difference relative to the lower-rank value; their residual reductions are 4.48 and 4.57, and wall times 7850.83 s and 7321.43 s. This is an actual parallel consistency record, not a strong-scaling claim; material differences are reported without rounding them away.
+For cylinder\_m010\_laminar\_re20, the submitted np=2 and np=8 runs give final $C_D=2.03699$ and $2.03721$, a 0.01081\% difference relative to the lower-rank value; their residual reductions are 5.82 and 5.84, and wall times 6992.14 s and 6835.38 s. This is an actual parallel consistency record, not a strong-scaling claim; material differences are reported without rounding them away.
+\subsection{Cylinder Re 200 vortex-street analysis}
+Over the latter half of the sampled physical-time history ($t \in [150.01, 300]$), the mean drag is $1.15175$, mean lift is $-0.00449455$, lift RMS is $0.236634$, and lift half-range amplitude is $0.336351$. Linear interpolation of 24 upward lift zero crossings gives dominant frequency $0.16333$ and Strouhal number $0.16333$, using the supplied unit reference length and velocity. Figure~\ref{fig:cylinder_m010_laminar_re200_np16_velocity_magnitude} is the submitted-field velocity-magnitude wake view; Figures~\ref{fig:cylinder_m010_laminar_re200_np16_forces} and \ref{fig:cylinder_m010_laminar_re200_np16_pressure_body_or_wake} provide the force history and pressure wake context.
+\subsection{Figure guide and sanity checks}
+Every figure below is generated from the source named in its caption and recorded one-to-one in \texttt{figure\_manifest.csv}. Mach and pressure contours use the actual unstructured field cells; the body/wake panels provide the prescribed near-body views. The machine-readable checks are in \texttt{sanity\_checks.json}.
+\begin{itemize}
+\item naca0012\_m015\_inviscid: pass.
+\item naca0012\_m080\_inviscid: pass.
+\item naca0012\_m200\_inviscid: pass.
+\item naca0012\_m015\_laminar\_re5000: pass.
+\item naca0012\_m080\_laminar\_re5000: pass.
+\item naca0012\_m200\_laminar\_re5000: pass.
+\item cylinder\_m010\_laminar\_re20: pass.
+\item cylinder\_m010\_laminar\_re200: pass.
+\item naca0012\_m015\_inviscid: pass.
+\item cylinder\_m010\_laminar\_re20: pass.
+\end{itemize}
+\subsection{Figures}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np8\_residuals.png}
+\caption{Global residual history. Source: \texttt{residuals.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np8_residuals}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np8\_forces.png}
+\caption{Force-coefficient history. Source: \texttt{forces.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np8_forces}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np8\_surface\_pressure\_coefficient.png}
+\caption{Wall pressure coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np8_surface_pressure_coefficient}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np8\_mach.png}
+\caption{Filled Mach-number field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np8_mach}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np8\_mach\_body\_or\_wake.png}
+\caption{Filled Mach-number body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np8_mach_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np8\_pressure.png}
+\caption{Filled pressure field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np8_pressure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np8\_pressure\_body\_or\_wake.png}
+\caption{Filled pressure body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np8_pressure_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_inviscid\_np8\_residuals.png}
+\caption{Global residual history. Source: \texttt{residuals.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_inviscid_np8_residuals}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_inviscid\_np8\_forces.png}
+\caption{Force-coefficient history. Source: \texttt{forces.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_inviscid_np8_forces}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_inviscid\_np8\_surface\_pressure\_coefficient.png}
+\caption{Wall pressure coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_inviscid_np8_surface_pressure_coefficient}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_inviscid\_np8\_mach.png}
+\caption{Filled Mach-number field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_inviscid_np8_mach}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_inviscid\_np8\_mach\_body\_or\_wake.png}
+\caption{Filled Mach-number body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_inviscid_np8_mach_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_inviscid\_np8\_pressure.png}
+\caption{Filled pressure field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_inviscid_np8_pressure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_inviscid\_np8\_pressure\_body\_or\_wake.png}
+\caption{Filled pressure body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_inviscid_np8_pressure_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_inviscid\_np8\_residuals.png}
+\caption{Global residual history. Source: \texttt{residuals.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_inviscid_np8_residuals}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_inviscid\_np8\_forces.png}
+\caption{Force-coefficient history. Source: \texttt{forces.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_inviscid_np8_forces}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_inviscid\_np8\_surface\_pressure\_coefficient.png}
+\caption{Wall pressure coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_inviscid_np8_surface_pressure_coefficient}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_inviscid\_np8\_mach.png}
+\caption{Filled Mach-number field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_inviscid_np8_mach}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_inviscid\_np8\_mach\_body\_or\_wake.png}
+\caption{Filled Mach-number body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_inviscid_np8_mach_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_inviscid\_np8\_pressure.png}
+\caption{Filled pressure field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_inviscid_np8_pressure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_inviscid\_np8\_pressure\_body\_or\_wake.png}
+\caption{Filled pressure body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_inviscid_np8_pressure_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_laminar\_re5000\_np8\_residuals.png}
+\caption{Global residual history. Source: \texttt{residuals.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_laminar_re5000_np8_residuals}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_laminar\_re5000\_np8\_forces.png}
+\caption{Force-coefficient history. Source: \texttt{forces.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_laminar_re5000_np8_forces}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_laminar\_re5000\_np8\_surface\_pressure\_coefficient.png}
+\caption{Wall pressure coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_laminar_re5000_np8_surface_pressure_coefficient}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_laminar\_re5000\_np8\_skin\_friction.png}
+\caption{Wall skin-friction coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_laminar_re5000_np8_skin_friction}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_laminar\_re5000\_np8\_mach.png}
+\caption{Filled Mach-number field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_laminar_re5000_np8_mach}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_laminar\_re5000\_np8\_mach\_body\_or\_wake.png}
+\caption{Filled Mach-number body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_laminar_re5000_np8_mach_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_laminar\_re5000\_np8\_pressure.png}
+\caption{Filled pressure field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_laminar_re5000_np8_pressure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_laminar\_re5000\_np8\_pressure\_body\_or\_wake.png}
+\caption{Filled pressure body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_laminar_re5000_np8_pressure_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_laminar\_re5000\_np8\_residuals.png}
+\caption{Global residual history. Source: \texttt{residuals.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_laminar_re5000_np8_residuals}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_laminar\_re5000\_np8\_forces.png}
+\caption{Force-coefficient history. Source: \texttt{forces.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_laminar_re5000_np8_forces}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_laminar\_re5000\_np8\_surface\_pressure\_coefficient.png}
+\caption{Wall pressure coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_laminar_re5000_np8_surface_pressure_coefficient}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_laminar\_re5000\_np8\_skin\_friction.png}
+\caption{Wall skin-friction coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_laminar_re5000_np8_skin_friction}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_laminar\_re5000\_np8\_mach.png}
+\caption{Filled Mach-number field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_laminar_re5000_np8_mach}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_laminar\_re5000\_np8\_mach\_body\_or\_wake.png}
+\caption{Filled Mach-number body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_laminar_re5000_np8_mach_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_laminar\_re5000\_np8\_pressure.png}
+\caption{Filled pressure field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_laminar_re5000_np8_pressure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m080\_laminar\_re5000\_np8\_pressure\_body\_or\_wake.png}
+\caption{Filled pressure body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m080_laminar_re5000_np8_pressure_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_laminar\_re5000\_np8\_residuals.png}
+\caption{Global residual history. Source: \texttt{residuals.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_laminar_re5000_np8_residuals}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_laminar\_re5000\_np8\_forces.png}
+\caption{Force-coefficient history. Source: \texttt{forces.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_laminar_re5000_np8_forces}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_laminar\_re5000\_np8\_surface\_pressure\_coefficient.png}
+\caption{Wall pressure coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_laminar_re5000_np8_surface_pressure_coefficient}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_laminar\_re5000\_np8\_skin\_friction.png}
+\caption{Wall skin-friction coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_laminar_re5000_np8_skin_friction}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_laminar\_re5000\_np8\_mach.png}
+\caption{Filled Mach-number field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_laminar_re5000_np8_mach}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_laminar\_re5000\_np8\_mach\_body\_or\_wake.png}
+\caption{Filled Mach-number body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_laminar_re5000_np8_mach_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_laminar\_re5000\_np8\_pressure.png}
+\caption{Filled pressure field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_laminar_re5000_np8_pressure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m200\_laminar\_re5000\_np8\_pressure\_body\_or\_wake.png}
+\caption{Filled pressure body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m200_laminar_re5000_np8_pressure_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np8\_residuals.png}
+\caption{Global residual history. Source: \texttt{residuals.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np8_residuals}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np8\_forces.png}
+\caption{Force-coefficient history. Source: \texttt{forces.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np8_forces}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np8\_surface\_pressure\_coefficient.png}
+\caption{Wall pressure coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np8_surface_pressure_coefficient}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np8\_skin\_friction.png}
+\caption{Wall skin-friction coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np8_skin_friction}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np8\_mach.png}
+\caption{Filled Mach-number field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np8_mach}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np8\_mach\_body\_or\_wake.png}
+\caption{Filled Mach-number body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np8_mach_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np8\_pressure.png}
+\caption{Filled pressure field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np8_pressure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np8\_pressure\_body\_or\_wake.png}
+\caption{Filled pressure body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np8_pressure_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re200\_np16\_residuals.png}
+\caption{Global residual history. Source: \texttt{residuals.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re200_np16_residuals}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re200\_np16\_forces.png}
+\caption{Force-coefficient history. Source: \texttt{forces.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re200_np16_forces}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re200\_np16\_surface\_pressure\_coefficient.png}
+\caption{Wall pressure coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re200_np16_surface_pressure_coefficient}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re200\_np16\_skin\_friction.png}
+\caption{Wall skin-friction coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re200_np16_skin_friction}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re200\_np16\_mach.png}
+\caption{Filled Mach-number field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re200_np16_mach}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re200\_np16\_mach\_body\_or\_wake.png}
+\caption{Filled Mach-number body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re200_np16_mach_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re200\_np16\_pressure.png}
+\caption{Filled pressure field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re200_np16_pressure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re200\_np16\_pressure\_body\_or\_wake.png}
+\caption{Filled pressure body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re200_np16_pressure_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re200\_np16\_velocity\_magnitude.png}
+\caption{Post-transient wake visualization. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re200_np16_velocity_magnitude}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np2\_residuals.png}
+\caption{Global residual history. Source: \texttt{residuals.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np2_residuals}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np2\_forces.png}
+\caption{Force-coefficient history. Source: \texttt{forces.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np2_forces}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np2\_surface\_pressure\_coefficient.png}
+\caption{Wall pressure coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np2_surface_pressure_coefficient}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np2\_mach.png}
+\caption{Filled Mach-number field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np2_mach}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np2\_mach\_body\_or\_wake.png}
+\caption{Filled Mach-number body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np2_mach_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np2\_pressure.png}
+\caption{Filled pressure field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np2_pressure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{naca0012\_m015\_inviscid\_np2\_pressure\_body\_or\_wake.png}
+\caption{Filled pressure body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:naca0012_m015_inviscid_np2_pressure_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np2\_residuals.png}
+\caption{Global residual history. Source: \texttt{residuals.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np2_residuals}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np2\_forces.png}
+\caption{Force-coefficient history. Source: \texttt{forces.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np2_forces}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np2\_surface\_pressure\_coefficient.png}
+\caption{Wall pressure coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np2_surface_pressure_coefficient}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np2\_skin\_friction.png}
+\caption{Wall skin-friction coefficient. Source: \texttt{surface.csv}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np2_skin_friction}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np2\_mach.png}
+\caption{Filled Mach-number field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np2_mach}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np2\_mach\_body\_or\_wake.png}
+\caption{Filled Mach-number body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np2_mach_body_or_wake}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np2\_pressure.png}
+\caption{Filled pressure field. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np2_pressure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{cylinder\_m010\_laminar\_re20\_np2\_pressure\_body\_or\_wake.png}
+\caption{Filled pressure body or wake view. Source: \texttt{field\_final.pvtu}; provenance: \texttt{figure\_manifest.csv}.}
+\label{fig:cylinder_m010_laminar_re20_np2_pressure_body_or_wake}
+\end{figure}
