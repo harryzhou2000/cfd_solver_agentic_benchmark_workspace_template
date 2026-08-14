@@ -91,8 +91,9 @@ Reserve `[x]` for a snapshot that passes both gates.
 
 ### `codex/glm52-m3` — 5 done, quota 3
 
-- [ ] 01 — REPAIR `codex_glm52-m3_01_919b67`; rubric/cases recorded,
-      but originality and weighted-overall consistency are incomplete.
+- [x] 01 — `codex_glm52-m3_01_919b67`; 72/100; DQ no; manager pending.
+      Direct originality evidence and weighted reviews 3.60/3.62/3.60 refreshed;
+      index and both gates pass.
 - [ ] 02 — PENDING: provenance reconstructed (`codex/glm52-m3/init` @
       `746ef39`). Restore the verified manager canonical origin and run the
       normal exact collision gate; missing origin alone is not a blocker.
