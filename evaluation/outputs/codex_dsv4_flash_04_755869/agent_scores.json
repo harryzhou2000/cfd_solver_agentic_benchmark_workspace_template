@@ -29,67 +29,67 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": null,
-          "notes": ""
+          "score": 3,
+          "notes": "CMake source exists; no evaluator build rerun was needed for DQ evidence."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": null,
-          "notes": ""
+          "score": 3,
+          "notes": "Input CLI source is present; malformed-input behavior was not separately rerun."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
-          "score": null,
-          "notes": ""
+          "score": 4,
+          "notes": "Retained source review records modular CFD components."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
-          "score": null,
-          "notes": ""
+          "score": 4,
+          "notes": "No direct internal wrapper evidence; trust policy precludes external comparison."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
-          "score": null,
-          "notes": ""
+          "score": 4,
+          "notes": "No hard-coded two-mesh-only source finding was recorded."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": null,
-          "notes": ""
+          "score": 3,
+          "notes": "MPI source exists, but final-result provenance is invalid."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": null,
-          "notes": ""
+          "score": 2,
+          "notes": "Sibling-result reuse prevents end-to-end robustness credit."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": null,
-          "notes": ""
+          "score": 2,
+          "notes": "No evaluator rerun; the submitted final artifacts are disqualified."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": null,
-          "notes": ""
+          "score": 3,
+          "notes": "Source is organized, with material result-provenance limitation."
         }
       ],
-      "overall_score": 2.8,
+      "overall_score": 3.17,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -98,81 +98,81 @@
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": null,
-          "notes": ""
+          "score": 4,
+          "notes": "Governing-flow source exists per retained review."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
-          "score": null,
-          "notes": ""
+          "score": 4,
+          "notes": "CGNS and distributed geometry source exists."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": null,
-          "notes": ""
+          "score": 3,
+          "notes": "Residual and BC source exists; provenance limits result credit."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
-          "score": null,
-          "notes": ""
+          "score": 3,
+          "notes": "Flux source exists; no independent physical rerun was performed."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": null,
-          "notes": ""
+          "score": 4,
+          "notes": "Boundary-condition implementation is present in source."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": null,
-          "notes": ""
+          "score": 4,
+          "notes": "Reconstruction source exists."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": null,
-          "notes": ""
+          "score": 4,
+          "notes": "Limiter source exists."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": null,
-          "notes": ""
+          "score": 3,
+          "notes": "Viscous source exists; no valid self-produced case evidence."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": null,
-          "notes": ""
+          "score": 3,
+          "notes": "Implicit steady source exists; no independent verification run."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": null,
-          "notes": ""
+          "score": 2,
+          "notes": "BDF2 source exists but no valid submitted Re200 evidence; never rerun."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": null,
-          "notes": ""
+          "score": 3,
+          "notes": "MPI source exists but result provenance is invalid."
         }
       ],
-      "overall_score": 3.2,
+      "overall_score": 3.31,
       "disqualification_flags": []
     },
     "result_review": {
@@ -181,53 +181,53 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": null,
-          "notes": ""
+          "score": 0,
+          "notes": "Terminal answer admits sibling workspace results completed the final case matrix."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": null,
-          "notes": ""
+          "score": 5,
+          "notes": "Explicit validator structurally passed all eight directories and report."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": null,
-          "notes": ""
+          "score": 0,
+          "notes": "Admitted sibling-result reuse invalidates submitted completion evidence."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": null,
-          "notes": ""
+          "score": 0,
+          "notes": "Invalid result provenance prevents physical-plausibility credit."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": null,
-          "notes": ""
+          "score": 0,
+          "notes": "Report omits 29 of 41 manifest figures, histories, Cp, and Re200 wake."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": null,
-          "notes": ""
+          "score": 0,
+          "notes": "Blank force table and admitted provenance failure make report presentation non-credible."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": null,
-          "notes": ""
+          "score": 0,
+          "notes": "Missing manifest figures and sibling reuse break final-result traceability."
         }
       ],
-      "overall_score": 1.5,
+      "overall_score": 0.5,
       "disqualification_flags": []
     }
   },

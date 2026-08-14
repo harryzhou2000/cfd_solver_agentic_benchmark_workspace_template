@@ -73,7 +73,7 @@ The refreshed telemetry was extracted exclusively from the workspace-local Codex
 
 ## Limitations
 
-Pre-run environment is reconstructed post-run. No solver rerun/redraw was required to establish the disqualification. The report validator is structural only: it passes although the PDF includes only 12 of 41 manifested figures, omits all residual/force/Cp histories and Re200 wake view, and leaves force-table entries blank.
+Pre-run environment is reconstructed post-run. No solver rerun/redraw was required to establish the disqualification. The report validator is structural only: it passes although the PDF includes only 12 of 41 manifested figures, omits all residual/force/Cp histories and Re200 wake view, and leaves force-table entries blank. `run_identity.json` SHA-256 is `9babc3fcb31c392d9dd00c05538349e57fcd5121dd2c6de5575006d2d0cafbeb`; `contestant_final_response.md` SHA-256 is `4b59a6a6d715091b9d20c69fde69f85f72b82b1d7093484499e1524e37a415bb`. These unindexed sidecars are not validated by `cfdeval check`.
 
 ## Verdict
 

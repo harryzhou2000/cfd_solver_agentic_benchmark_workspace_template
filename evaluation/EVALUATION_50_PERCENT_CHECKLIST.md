@@ -70,9 +70,10 @@ Reserve `[x]` for a snapshot that passes both gates.
       submission `9772c16083472abe27089e17fe87bb5329e68f4d`; manager pending.
       Review scorecards/evidence and sidecar hashes refreshed; Code/CFD/Results
       4.77/4.62/3.85; both gates pass. Re200 shedding remains unverified.
-- [ ] 04 — REPAIR `codex_dsv4_flash_04_755869`; 48/100 before DQ;
-      DQ yes; submission `1b16448613a82d29f7f8f033b9216d5248a7db05`;
-      manager `612a300`. All three review scorecards remain incomplete.
+- [x] 04 — `codex_dsv4_flash_04_755869`; 48/100 before DQ; DQ yes;
+      submission `1b16448613a82d29f7f8f033b9216d5248a7db05`; manager pending.
+      Direct sibling-result-reuse evidence retained; reviews 3.17/3.31/0.50,
+      sidecar provenance, index, and both gates are complete.
 - [ ] 06 — REPAIR `codex_dsv4_flash_06_5b6b08`; 63/100; DQ no;
       curated submission `e998060` supersedes recovery `8c757a9`; manager
       `ce57f3b`. All three review scorecards and report sidecar provenance are
