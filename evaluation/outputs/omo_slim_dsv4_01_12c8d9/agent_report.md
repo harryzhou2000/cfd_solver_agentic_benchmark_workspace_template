@@ -8,20 +8,12 @@
 
 - Workspace: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/01` branch `omo_slim/dsv4/01` commit `51d1a785f4a25b3cff7e79294459ed22579addb7`
 - Benchmark submodule: 1bc6580b84825037bbeac097ede1b2226d8185d1
-- Time: goal 0s, wall 0s
-- Tokens: 0 (main 0 / subagents 0); cost est. $0.00
-
-### Metadata questions requiring user answers
-
-| Question | Reason | Suggested source |
-|----------|--------|------------------|
-| opencode_sessions: Which opencode sessions belong to this contestant run? | no opencode sessions found for the workspace in the local database | opencode session list / opencode export <sessionID> |
-
-Record the user's answers in `agent_scores.json` under `metadata_answers`, then re-run summarize with `--answers`.
+- Time: 29,556s active after idle exclusion, 40,942s wall
+- Tokens: 164,977,906; 1,204 tools
 
 ### Session analysis (auto)
 
-- Source: project — codex 0 threads / opencode 14 sessions
+- Source: project-local bundled OpenCode DB — codex 0 threads / opencode 14 sessions
 - Window: 2026-08-01T21:45:03.647000+00:00 → 2026-08-02T08:57:25.674000+00:00
 - Idle excluded: 9 gaps, 10786s (threshold 600s, merged main+subagents)
 - Permission-wait candidates: 0 (method: heuristic; ask-tool events: 0)
@@ -83,7 +75,7 @@ Not disqualified. No submitted source calls an external solver; solver source im
 
 ## Metadata answers & session selection
 
-The initial automatic summary used the wrong local OpenCode DB, so it raised an `opencode_sessions` question. Direct project-DB extraction supersedes it. Selected primary root: `ses_040b656bdffeVJcS8XFIqGFGTw`; source class `project`; root start/end: 2026-08-01T21:45:03.554Z to 2026-08-02T08:57:26.006Z; execution date: 2026-08-01 UTC. All 13 listed child sessions are included as its implementation/review tree. No unrelated roots exist in that project DB.
+The initial automatic summary used the wrong local OpenCode DB, so it raised an `opencode_sessions` question. Direct project-DB extraction supersedes it. Selected primary root: `ses_040b656bdffeVJcS8XFIqGFGTw`; source class `project`; root start/end: 2026-08-01T21:45:03.554Z to 2026-08-02T08:57:26.006Z; execution date: 2026-08-01 UTC. All 13 listed child sessions are included as its implementation/review tree. No unrelated roots or Codex alternate exist in that project bundle. The context windows for DeepSeek V4 Flash and Pro are unavailable in bundled immutable telemetry; no home, provider, or internet source was queried.
 
 ## Limitations
 
