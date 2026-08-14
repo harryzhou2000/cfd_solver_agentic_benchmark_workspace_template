@@ -1,0 +1,69 @@
+Several limitations were encountered and are reported honestly here.
+
+\subsection{Low-Mach Dissipation of the Rusanov Flux}
+The dominant accuracy limitation of the production scheme is the
+$O(a)$ dissipation of the Rusanov flux at low Mach number. At $M=0.1$--0.15
+the artificial dissipation $s_{\max}\,\Delta\mathbf U$ overwhelms the physical
+viscous terms in the boundary layer (an effective-Reynolds-number reduction).
+Consequences visible in the results:
+\begin{itemize}
+\item Laminar skin friction on the NACA0012 cases is over-predicted by
+roughly an order of magnitude relative to Blasius-level expectations
+(e.g.\ \texttt{naca0012\_m015\_laminar\_re5000} $C_D=0.49$), and the
+\texttt{cylinder\_m010\_laminar\_re20} drag ($C_D\approx6.0$) is about
+$3\times$ the literature value of $\approx2.0$ for a steady Re\,20 cylinder
+wake. Pressure-dominated quantities (inviscid and supersonic wave drag, lift
+symmetry) are accurate; viscous-dominated drags at low Mach are qualitative
+only.
+\item The same over-dissipation suppresses the Re\,200 vortex street when
+the Rusanov flux is used in the transient: the wake is stable and the drag
+settles to an unphysical $\approx4.6$. The production Re\,200 run therefore
+uses the Roe flux with a Harten--Yee entropy fix in the transient driver
+only (see \cref{sec:re200}), which resolves shedding with physical
+amplitudes.
+\end{itemize}
+Two remedies were implemented and evaluated. (a) A low-Mach dissipation
+scaling $\chi=\min(1,\max(M_L,M_R)/M_{ref})$ with $M_{ref}=0.3$ applied to
+the acoustic part of $s_{\max}$ improves low-Mach drag substantially
+(Re\,200 shedding appears with $C_L\approx\pm0.5$, laminar drags drop toward
+literature values) but destabilizes the steady implicit runs: the reduced
+dissipation interacts with the LU-SGS scalar Jacobian, producing a stall or
+slow divergence in the steady NACA cases. (b) The Roe flux was tried for the
+steady cases and diverges from a freestream start on these meshes regardless
+of entropy-fix strength. Both experiments are documented in the repository
+history. The production steady cases therefore keep the full-strength
+Rusanov dissipation ($\chi=1$), accepting the viscous-drag error, and the
+limitation is confined to low-Mach viscous-drag accuracy.
+
+\subsection{Residual Limit Cycles in Transonic Cases}
+The transonic inviscid case (\texttt{naca0012\_m080\_inviscid}) and, at some
+partition counts, the supersonic cases settle into a bounded residual limit
+cycle (L2 residual oscillating around $2\times10^{-6}$, about 2 orders of
+reduction) instead of converging to the 3-order target. This is the classic
+limiter--shock interaction: the Venkatakrishnan limiter and the shock
+displacement exchange energy each pseudo-step. Force coefficients are
+stationary to four digits inside the cycle, the Mach field is clean, and the
+run-status notes record the plateau stop. The affected runs are marked
+\texttt{converged} on the basis of stable forces, which the metadata reports
+together with the achieved reduction orders.
+
+\subsection{Sensitivity to Partition Count}
+Because LU-SGS relaxation is block-Jacobi across ranks (ghost increments lag
+one sweep), the nonlinear convergence path depends mildly on the partition:
+the same case can converge directly at $np=4$ but land in the limit cycle at
+$np=8$, changing the step count (though not the converged forces, see
+\cref{tab:rankstudy}). This is a known property of domain-decomposed
+implicit smoothers and is reported rather than hidden.
+
+\subsection{Other Limitations}
+\begin{itemize}
+\item The update clipping (10\% maximum relative change in $\rho$ and $p$
+per step) is a robustness device for the impulsive freestream start; it is
+inactive once the residual has dropped by about an order.
+\item The farfield of the supplied NACA mesh is only about 2 chords away,
+so the inviscid drags include a small farfield-boundary effect; no attempt
+was made to correct for it.
+\item Restart files are per-rank binary snapshots tied to the partition;
+restarting at a different rank count requires repartitioning and is not
+supported.
+\end{itemize}

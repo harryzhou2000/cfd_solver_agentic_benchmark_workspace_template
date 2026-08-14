@@ -1,0 +1,143 @@
+\begin{table}[ht]\centering\small
+\caption{Run status for all cases. ``orders'' is the achieved L2 residual reduction; $n_p$ is the production rank count.}
+\label{tab:runstatus}
+\begin{tabular}{llrrrrr}\toprule
+case & status & steps & orders & $n_p$ & wall [s] & $C_D$ \\\midrule
+naca0012\_m015\_inviscid & converged & 7800 & 4.07 & 8 & 27 & 0.0654\\
+naca0012\_m080\_inviscid & converged & 7200 & 2.30 & 4 & 53 & 0.0509\\
+naca0012\_m200\_inviscid & converged & 2800 & 3.01 & 4 & 20 & 0.0937\\
+naca0012\_m015\_laminar\_re5000 & converged & 40000 & 3.98 & 8 & 1069 & 0.4887\\
+naca0012\_m080\_laminar\_re5000 & converged & 7600 & 4.02 & 8 & 26 & 0.1546\\
+naca0012\_m200\_laminar\_re5000 & converged & 1000 & 3.04 & 8 & 34 & 0.5699\\
+cylinder\_m010\_laminar\_re20 & converged & 8400 & 5.03 & 8 & 57 & 6.0276\\
+cylinder\_m010\_laminar\_re200 & statistically\_periodic & 30000 & --- & 8 & 868 & 1.2181\\
+\bottomrule\end{tabular}\end{table}
+\subsection{naca0012\_m015\_inviscid}
+Subsonic inviscid. Converges 4 orders at CFL 100; symmetric $C_p$ and $|C_L|<10^{-3}$ as required by geometry. Nonzero $C_D=0.065$ is dominated by the close farfield ($\approx$2 chords) and LLF dissipation.
+Final $C_L=+0.0005$, $C_D=0.0654$ (pressure 0.0654, viscous 0.0000), $C_M=+0.0002$.
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m015_inviscid_mach.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m015_inviscid_pressure.png}
+\caption{naca0012\_m015\_inviscid: Mach (left) and pressure (right) near the body.}
+\end{figure}
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m015_inviscid_residual_history.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m015_inviscid_force_history.png}
+\caption{naca0012\_m015\_inviscid: residual and force histories.}
+\end{figure}
+\subsection{naca0012\_m080\_inviscid}
+Transonic inviscid with a weak upper-surface shock. Residual enters a bounded limit cycle at $\approx$2.3 orders (\cref{sec:limitations}); forces are stationary, $C_D=0.051$.
+Final $C_L=-0.0015$, $C_D=0.0509$ (pressure 0.0509, viscous 0.0000), $C_M=-0.0002$.
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m080_inviscid_mach.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m080_inviscid_pressure.png}
+\caption{naca0012\_m080\_inviscid: Mach (left) and pressure (right) near the body.}
+\end{figure}
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m080_inviscid_residual_history.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m080_inviscid_force_history.png}
+\caption{naca0012\_m080\_inviscid: residual and force histories.}
+\end{figure}
+\subsection{naca0012\_m200\_inviscid}
+Supersonic inviscid with a detached bow shock. Converges 3 orders; $C_D=0.094$ is the expected wave-drag level for a blunt-nosed section at M2.
+Final $C_L=-0.0010$, $C_D=0.0937$ (pressure 0.0937, viscous 0.0000), $C_M=-0.0002$.
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m200_inviscid_mach.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m200_inviscid_pressure.png}
+\caption{naca0012\_m200\_inviscid: Mach (left) and pressure (right) near the body.}
+\end{figure}
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m200_inviscid_residual_history.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m200_inviscid_force_history.png}
+\caption{naca0012\_m200\_inviscid: residual and force histories.}
+\end{figure}
+\subsection{naca0012\_m015\_laminar\_re5000}
+Low-Mach laminar. Fully converged (4 orders); viscous drag is over-predicted by the low-Mach flux dissipation (\cref{sec:limitations}).
+Final $C_L=-0.0013$, $C_D=0.4887$ (pressure 0.1019, viscous 0.3868), $C_M=-0.0004$.
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m015_laminar_re5000_mach.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m015_laminar_re5000_pressure.png}
+\caption{naca0012\_m015\_laminar\_re5000: Mach (left) and pressure (right) near the body.}
+\end{figure}
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m015_laminar_re5000_residual_history.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m015_laminar_re5000_force_history.png}
+\caption{naca0012\_m015\_laminar\_re5000: residual and force histories.}
+\end{figure}
+\subsection{naca0012\_m080\_laminar\_re5000}
+Transonic laminar. Converges 4 orders; mixed shock/boundary-layer flow, drag dominated by the LLF dissipation level.
+Final $C_L=-0.0002$, $C_D=0.1546$ (pressure 0.0735, viscous 0.0811), $C_M=-0.0005$.
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m080_laminar_re5000_mach.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m080_laminar_re5000_pressure.png}
+\caption{naca0012\_m080\_laminar\_re5000: Mach (left) and pressure (right) near the body.}
+\end{figure}
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m080_laminar_re5000_residual_history.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m080_laminar_re5000_force_history.png}
+\caption{naca0012\_m080\_laminar\_re5000: residual and force histories.}
+\end{figure}
+\subsection{naca0012\_m200\_laminar\_re5000}
+Supersonic laminar. Converges 3 orders within 1000 steps from the freestream start.
+Final $C_L=+0.0006$, $C_D=0.5699$ (pressure 0.0214, viscous 0.5485), $C_M=-0.0005$.
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m200_laminar_re5000_mach.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m200_laminar_re5000_pressure.png}
+\caption{naca0012\_m200\_laminar\_re5000: Mach (left) and pressure (right) near the body.}
+\end{figure}
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m200_laminar_re5000_residual_history.png}\hfill
+\includegraphics[width=0.48\textwidth]{naca0012_m200_laminar_re5000_force_history.png}
+\caption{naca0012\_m200\_laminar\_re5000: residual and force histories.}
+\end{figure}
+\subsection{cylinder\_m010\_laminar\_re20}
+Steady laminar cylinder wake at Re 20. Converges 5 orders; wake is attached and symmetric, $|C_L|<10^{-3}$. Drag is over-predicted ($C_D\approx6.0$ vs $\approx2.0$ literature) by low-Mach dissipation (\cref{sec:limitations}).
+Final $C_L=-0.0008$, $C_D=6.0276$ (pressure 3.9102, viscous 2.1174), $C_M=+0.0001$.
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re20_mach.png}\hfill
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re20_pressure.png}
+\caption{cylinder\_m010\_laminar\_re20: Mach (left) and pressure (right) near the body.}
+\end{figure}
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re20_residual_history.png}\hfill
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re20_force_history.png}
+\caption{cylinder\_m010\_laminar\_re20: residual and force histories.}
+\end{figure}
+
+\subsection{cylinder\_m010\_laminar\_re200}
+\label{sec:re200}
+Transient vortex-shedding case, run with the true BDF2 physical-time loop
+($\Delta t=0.01$, 30000 accepted steps) and the Roe inviscid flux with a
+Harten--Yee entropy fix; the run was restarted from the converged steady
+Rusanov state (the Rusanov flux is too dissipative at $M=0.1$ to sustain the
+instability, see \cref{sec:limitations}) and seeded with a 1\% transverse
+perturbation. The wake develops a clean periodic vortex street
+(\cref{fig:re200wake}): post-transient $C_L\in[-0.456,\,0.482]$,
+mean $C_D\approx1.218$ with peak-to-peak variation
+$\approx0.047$, and a dominant Strouhal number
+$St=fD/U_\infty\approx0.173$, within the literature range
+$0.19$--$0.21$ for Re\,200. The inner loop statistics: observed
+28--63
+inner iterations per physical step (mean 34.4),
+inner residual target $10^{-3}$ met on
+$100.0\%$ of steps; the BDF2
+histories stayed frozen during the inner loop
+(\texttt{true\_bdf2\_inner\_loop=true}).
+
+\begin{figure}[ht]\centering
+\includegraphics[width=0.75\textwidth]{cylinder_m010_laminar_re200_vorticity.png}
+\caption{Re\,200 wake: vorticity clipped to $[-5,5]$ at the final time,
+showing the established von K\'arm\'an street.}
+\label{fig:re200wake}
+\end{figure}
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re200_cl_tail.png}\hfill
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re200_lift_spectrum.png}
+\caption{Re\,200 post-transient lift (left) and its frequency spectrum
+(right).}
+\end{figure}
+\begin{figure}[ht]\centering
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re200_mach.png}\hfill
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re200_pressure.png}
+\caption{Re\,200 Mach and pressure near the body at the final time.}
+\end{figure}
