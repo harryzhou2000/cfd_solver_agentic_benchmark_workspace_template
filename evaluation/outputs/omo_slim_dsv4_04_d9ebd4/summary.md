@@ -15,7 +15,7 @@
 
 - Goal time (codex): **0 s**
 - Wall time: **0 s**
-- Tokens: **0** (main 0 / subagents 0)
+- Tokens: **121,468,863** (main 13,080,857 / subagents 108,388,006)
 
 ### Per root session
 
@@ -24,8 +24,10 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
+| deepseek/deepseek-v4-flash | 107,489,768 | 106,629,376 | 331,544 | 108,388,006 |
+| deepseek/deepseek-v4-pro | 12,982,255 | 12,442,112 | 77,416 | 13,080,857 |
 
-- Cost estimate: **$0.00** (estimate; unpriced tokens: 0)
+- Cost estimate: **$4.77** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
@@ -50,28 +52,28 @@
 
 | Question | Reason | Suggested source | Answer |
 |----------|--------|------------------|--------|
-| context_window_deepseek-v4-flash@max: What is the context window (max tokens) of model `deepseek-v4-flash`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried. |
-| context_window_deepseek-v4-pro@max: What is the context window (max tokens) of model `deepseek-v4-pro`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried. |
+| context_window_deepseek-v4-flash@max: What is the context window (max tokens) of model `deepseek-v4-flash`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in bundled project telemetry; no external source queried. |
+| context_window_deepseek-v4-pro@max: What is the context window (max tokens) of model `deepseek-v4-pro`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in bundled project telemetry; no external source queried. |
 Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`; status then flips to complete.
 
 ### Subagent threads
 
 | Thread | Parent | Nickname | Type | Model | Effort | Tokens |
 |--------|--------|----------|------|-------|--------|-------:|
-| `ses_0367` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 173,146 |
-| `ses_036f` | `ses_037e` |  | oracle | deepseek-v4-flash@max | max | 65,549 |
-| `ses_0379` | `ses_037e` |  | oracle | deepseek-v4-flash@max | max | 62,502 |
-| `ses_037a` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 532,013 |
-| `ses_037a` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 24,461 |
-| `ses_037a` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 113,366 |
-| `ses_037a` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 133,056 |
-| `ses_037b` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 59,624 |
-| `ses_037b` | `ses_037e` |  | oracle | deepseek-v4-flash@max | max | 39,864 |
-| `ses_037d` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 66,900 |
-| `ses_037d` | `ses_037e` |  | oracle | deepseek-v4-flash@max | max | 41,708 |
-| `ses_037e` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 288,908 |
-| `ses_037e` | `ses_037e` |  | librarian | deepseek-v4-flash@max | max | 51,126 |
-| `ses_037e` | `ses_037e` |  | librarian | deepseek-v4-flash@max | max | 106,407 |
+| `ses_0367` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 13,783,898 |
+| `ses_036f` | `ses_037e` |  | oracle | deepseek-v4-flash@max | max | 581,005 |
+| `ses_0379` | `ses_037e` |  | oracle | deepseek-v4-flash@max | max | 304,678 |
+| `ses_037a` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 62,940,717 |
+| `ses_037a` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 405,389 |
+| `ses_037a` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 3,096,150 |
+| `ses_037a` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 4,393,152 |
+| `ses_037b` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 1,428,584 |
+| `ses_037b` | `ses_037e` |  | oracle | deepseek-v4-flash@max | max | 126,008 |
+| `ses_037d` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 234,452 |
+| `ses_037d` | `ses_037e` |  | oracle | deepseek-v4-flash@max | max | 220,012 |
+| `ses_037e` | `ses_037e` |  | fixer | deepseek-v4-flash@max | max | 16,075,148 |
+| `ses_037e` | `ses_037e` |  | librarian | deepseek-v4-flash@max | max | 1,070,902 |
+| `ses_037e` | `ses_037e` |  | librarian | deepseek-v4-flash@max | max | 3,727,911 |
 
 ### Prompts
 

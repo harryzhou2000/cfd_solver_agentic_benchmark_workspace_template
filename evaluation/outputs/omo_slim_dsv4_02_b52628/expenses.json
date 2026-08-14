@@ -1,5 +1,5 @@
 {
-  "note": "opencode harness: codex expenses extraction not applicable",
+  "note": "OpenCode selected-session-tree token facts; current manager price estimate is separate from provider-reported cost",
   "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/02",
   "time_seconds": {
     "goal_time": 0,
@@ -11,19 +11,63 @@
     "ended_at": "2026-08-02T10:18:34.601000+00:00"
   },
   "tokens": {
-    "total": 0,
-    "by_model": {},
-    "by_thread": {},
+    "total": 21231664,
+    "by_model": {
+      "deepseek/deepseek-v4-pro": {
+        "input": 21143002,
+        "cached_input": 1435264,
+        "non_cached_input": 19707738,
+        "output": 67379,
+        "reasoning_output": 21283,
+        "total": 21231664,
+        "reasoning_is_output_subset": false
+      }
+    },
+    "by_thread": {
+      "ses_03e6cdbcaffefVyMLw9N6OIQGR": {
+        "model": "deepseek-v4-pro",
+        "provider": "deepseek",
+        "variant": "max",
+        "is_subagent": false,
+        "source": "opencode_session",
+        "tokens": {
+          "deepseek/deepseek-v4-pro": {
+            "input": 21143002,
+            "cached_input": 1435264,
+            "non_cached_input": 19707738,
+            "output": 67379,
+            "reasoning_output": 21283,
+            "reasoning_is_output_subset": false,
+            "total": 21231664
+          }
+        },
+        "total": 21231664
+      }
+    },
     "main_vs_subagent": {
-      "main": 0,
+      "main": 21231664,
       "subagent": 0
     }
   },
   "cost_estimate_usd": {
-    "total": 0.0,
-    "by_model": {},
+    "total": 11.2657,
+    "by_model": {
+      "deepseek/deepseek-v4-pro": {
+        "usd": 11.2657,
+        "tokens": 21231664,
+        "pricing": "metadata"
+      }
+    },
     "unpriced_tokens": 0,
-    "estimate": false,
-    "metadata": "opencode.db cost column"
+    "estimate": true,
+    "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json",
+    "provider_reported_total": 8.655205
+  },
+  "provenance": {
+    "source": "workspace-local OpenCode metadata selected session tree",
+    "selected_roots": [
+      "ses_03e6cdbcaffefVyMLw9N6OIQGR"
+    ],
+    "provider_reported_total": 8.655205
   }
 }

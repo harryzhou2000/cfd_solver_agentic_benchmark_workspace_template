@@ -15,7 +15,7 @@
 
 - Goal time (codex): **0 s**
 - Wall time: **0 s**
-- Tokens: **0** (main 0 / subagents 0)
+- Tokens: **21,231,664** (main 21,231,664 / subagents 0)
 
 ### Per root session
 
@@ -24,8 +24,9 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
+| deepseek/deepseek-v4-pro | 21,143,002 | 1,435,264 | 67,379 | 21,231,664 |
 
-- Cost estimate: **$0.00** (estimate; unpriced tokens: 0)
+- Cost estimate: **$11.27** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
@@ -49,7 +50,7 @@
 
 | Question | Reason | Suggested source | Answer |
 |----------|--------|------------------|--------|
-| context_window_deepseek-v4-pro@max: What is the context window (max tokens) of model `deepseek-v4-pro`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried. |
+| context_window_deepseek-v4-pro@max: What is the context window (max tokens) of model `deepseek-v4-pro`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in bundled immutable telemetry; no home, provider, or internet source was queried. |
 Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`; status then flips to complete.
 
 ### Prompts

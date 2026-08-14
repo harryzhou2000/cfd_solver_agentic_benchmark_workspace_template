@@ -14,7 +14,7 @@
     }
   },
   "expenses": {
-    "note": "opencode harness: codex expenses extraction not applicable",
+    "note": "OpenCode selected-session-tree token facts; current manager price estimate is separate from provider-reported cost",
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/03",
     "time_seconds": {
       "goal_time": 0,
@@ -26,20 +26,97 @@
       "ended_at": "2026-08-04T00:36:22.073000+00:00"
     },
     "tokens": {
-      "total": 0,
-      "by_model": {},
-      "by_thread": {},
+      "total": 27743062,
+      "by_model": {
+        "deepseek/deepseek-v4-flash": {
+          "input": 88561,
+          "cached_input": 73216,
+          "non_cached_input": 15345,
+          "output": 3479,
+          "reasoning_output": 1803,
+          "total": 93843,
+          "reasoning_is_output_subset": false
+        },
+        "deepseek/deepseek-v4-pro": {
+          "input": 27536139,
+          "cached_input": 26552448,
+          "non_cached_input": 983691,
+          "output": 86511,
+          "reasoning_output": 26569,
+          "total": 27649219,
+          "reasoning_is_output_subset": false
+        }
+      },
+      "by_thread": {
+        "ses_03811d3ebffe3UJgZoawpqixqU": {
+          "model": "deepseek-v4-flash",
+          "provider": "deepseek",
+          "variant": "default",
+          "is_subagent": true,
+          "source": "opencode_session",
+          "tokens": {
+            "deepseek/deepseek-v4-flash": {
+              "input": 88561,
+              "cached_input": 73216,
+              "non_cached_input": 15345,
+              "output": 3479,
+              "reasoning_output": 1803,
+              "reasoning_is_output_subset": false,
+              "total": 93843
+            }
+          },
+          "total": 93843
+        },
+        "ses_038139b85ffehS9M4UEnGezyvb": {
+          "model": "deepseek-v4-pro",
+          "provider": "deepseek",
+          "variant": "max",
+          "is_subagent": false,
+          "source": "opencode_session",
+          "tokens": {
+            "deepseek/deepseek-v4-pro": {
+              "input": 27536139,
+              "cached_input": 26552448,
+              "non_cached_input": 983691,
+              "output": 86511,
+              "reasoning_output": 26569,
+              "reasoning_is_output_subset": false,
+              "total": 27649219
+            }
+          },
+          "total": 27649219
+        }
+      },
       "main_vs_subagent": {
-        "main": 0,
-        "subagent": 0
+        "main": 27649219,
+        "subagent": 93843
       }
     },
     "cost_estimate_usd": {
-      "total": 0.0,
-      "by_model": {},
+      "total": 2.2363,
+      "by_model": {
+        "deepseek/deepseek-v4-flash": {
+          "usd": 0.0086,
+          "tokens": 93843,
+          "pricing": "metadata"
+        },
+        "deepseek/deepseek-v4-pro": {
+          "usd": 2.2278,
+          "tokens": 27649219,
+          "pricing": "metadata"
+        }
+      },
       "unpriced_tokens": 0,
-      "estimate": false,
-      "metadata": "opencode.db cost column"
+      "estimate": true,
+      "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json",
+      "provider_reported_total": 0.62637
+    },
+    "provenance": {
+      "source": "workspace-local OpenCode metadata selected session tree",
+      "selected_roots": [
+        "ses_038139b85ffehS9M4UEnGezyvb"
+      ],
+      "provider_reported_total": 0.62637
     }
   },
   "code_review": {
@@ -399,6 +476,8 @@
         "tokens_input": 15345,
         "tokens_output": 3479,
         "tokens_reasoning": 1803,
+        "tokens_cache_read": 73216,
+        "tokens_cache_write": 0,
         "cost": 0.0038322648
       },
       "deepseek-v4-pro@max": {
@@ -417,6 +496,8 @@
         "tokens_input": 983691,
         "tokens_output": 86511,
         "tokens_reasoning": 26569,
+        "tokens_cache_read": 26552448,
+        "tokens_cache_write": 0,
         "cost": 0.6225378089999999
       }
     },
@@ -453,7 +534,7 @@
         "type": "explorer",
         "model": "deepseek-v4-flash",
         "variant": "default",
-        "tokens_used": 20627,
+        "tokens_used": 93843,
         "cost": 0.0038322648
       }
     ],
@@ -463,6 +544,7 @@
         {
           "session_id": "ses_03811d3ebffe3UJgZoawpqixqU",
           "parent_id": "ses_038139b85ffehS9M4UEnGezyvb",
+          "directory": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/03",
           "title": "Survey external library layout (@explorer subagent)",
           "agent": "explorer",
           "model": "deepseek-v4-flash",
@@ -471,6 +553,8 @@
           "tokens_input": 15345,
           "tokens_output": 3479,
           "tokens_reasoning": 1803,
+          "tokens_cache_read": 73216,
+          "tokens_cache_write": 0,
           "cost": 0.0038322648,
           "time_created": 1785765702676,
           "time_updated": 1785765746180,
@@ -488,6 +572,7 @@
         {
           "session_id": "ses_038139b85ffehS9M4UEnGezyvb",
           "parent_id": null,
+          "directory": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/03",
           "title": "CFD solver agentic benchmark deepwork",
           "agent": "orchestrator",
           "model": "deepseek-v4-pro",
@@ -496,11 +581,14 @@
           "tokens_input": 983691,
           "tokens_output": 86511,
           "tokens_reasoning": 26569,
+          "tokens_cache_read": 26552448,
+          "tokens_cache_write": 0,
           "cost": 0.6225378089999999,
           "time_created": 1785765586043,
           "time_updated": 1785803782073,
           "started_at": "2026-08-03T13:59:46.043000+00:00",
           "ended_at": "2026-08-04T00:36:22.073000+00:00",
+          "original_parent_id": null,
           "activity": {
             "activity_time_seconds": 2859.9,
             "wall_time_seconds": 37545.2,
@@ -575,26 +663,33 @@
         "question": "What is the context window (max tokens) of model `deepseek-v4-flash`?",
         "reason": "model is not listed in the local model catalog",
         "suggested_source": "provider docs or model card",
-        "answer": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried."
+        "answer": "Unavailable in the bundled immutable telemetry; no home, provider, or internet source was queried."
       },
       {
         "id": "context_window_deepseek-v4-pro@max",
         "question": "What is the context window (max tokens) of model `deepseek-v4-pro`?",
         "reason": "model is not listed in the local model catalog",
         "suggested_source": "provider docs or model card",
-        "answer": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried."
+        "answer": "Unavailable in the bundled immutable telemetry; no home, provider, or internet source was queried."
       }
     ],
     "user_answers": {
-      "context_window_deepseek-v4-flash@default": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried.",
-      "context_window_deepseek-v4-pro@max": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried."
+      "context_window_deepseek-v4-flash@default": "Unavailable in the bundled immutable telemetry; no home, provider, or internet source was queried.",
+      "context_window_deepseek-v4-pro@max": "Unavailable in the bundled immutable telemetry; no home, provider, or internet source was queried."
     },
     "status": "complete",
     "provenance": {
       "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/03/.sessions/opencode-data/opencode/opencode.db",
       "opencode_config_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/03/.sessions/opencode-config",
-      "generated_at": "2026-08-14T09:02:46.311575+00:00",
-      "num_sessions": 2
+      "generated_at": "2026-08-14T15:29:23.657687+00:00",
+      "num_sessions": 2,
+      "selected_roots": [
+        "ses_038139b85ffehS9M4UEnGezyvb"
+      ],
+      "host_workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/03",
+      "recorded_directories": [
+        "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/03"
+      ]
     }
   },
   "snapshot": {

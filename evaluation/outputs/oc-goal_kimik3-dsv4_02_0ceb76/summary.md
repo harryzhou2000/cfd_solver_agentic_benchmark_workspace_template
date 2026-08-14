@@ -9,13 +9,13 @@
 ## Snapshot
 
 - Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: no
-- Session analysis: 2026-08-04T17:41:04.976000+00:00 → 2026-08-13T09:17:42.429000+00:00; 416×1800s buckets; idle 26 gaps / 709379s excluded; permission-wait candidates 0; tokens 134,602,211 (cache hit 0.976)
+- Session analysis: 2026-08-04T19:27:42.751000+00:00 → 2026-08-13T09:17:42.429000+00:00; 412×1800s buckets; idle 24 gaps / 703390s excluded; permission-wait candidates 0; tokens 133,990,176 (cache hit 0.9762)
 
 ## Expenses
 
 - Goal time (codex): **0 s**
 - Wall time: **0 s**
-- Tokens: **0** (main 0 / subagents 0)
+- Tokens: **133,990,176** (main 133,990,176 / subagents 0)
 
 ### Per root session
 
@@ -24,8 +24,9 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
+| kimi-for-coding/k3 | 133,611,325 | 130,430,282 | 378,851 | 133,990,176 |
 
-- Cost estimate: **$0.00** (estimate; unpriced tokens: 0)
+- Cost estimate: **$54.35** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
@@ -39,11 +40,11 @@
 - AGENTS.md: sha256 6f67a229e3d8 (matches HEAD)
 - CodeGraph: present
 - Benchmark submodule: 1bc6580b8482 (clean)
-- opencode: v1.18.11, 2 root / 0 subagent sessions; activity 10.1h (idle 196.6h excluded, gap threshold 600s)
+- opencode: v1.18.11, 1 root / 0 subagent sessions; activity 10.0h (idle 195.8h excluded, gap threshold 600s)
 
 | Model | Effort(s) | Context window | Max context used | Threads |
 |-------|-----------|---------------:|-----------------:|--------:|
-| k3 | n/a | ? | 3,181,043 | 2 |
+| k3 | n/a | ? | 3,181,043 | 1 |
 
 ### Metadata questions for user (unextractable fields)
 

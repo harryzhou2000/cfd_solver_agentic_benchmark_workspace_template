@@ -15,7 +15,7 @@
 
 - Goal time (codex): **0 s**
 - Wall time: **0 s**
-- Tokens: **0** (main 0 / subagents 0)
+- Tokens: **27,743,062** (main 27,649,219 / subagents 93,843)
 
 ### Per root session
 
@@ -24,8 +24,10 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
+| deepseek/deepseek-v4-flash | 88,561 | 73,216 | 3,479 | 93,843 |
+| deepseek/deepseek-v4-pro | 27,536,139 | 26,552,448 | 86,511 | 27,649,219 |
 
-- Cost estimate: **$0.00** (estimate; unpriced tokens: 0)
+- Cost estimate: **$2.24** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
@@ -50,15 +52,15 @@
 
 | Question | Reason | Suggested source | Answer |
 |----------|--------|------------------|--------|
-| context_window_deepseek-v4-flash@default: What is the context window (max tokens) of model `deepseek-v4-flash`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried. |
-| context_window_deepseek-v4-pro@max: What is the context window (max tokens) of model `deepseek-v4-pro`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried. |
+| context_window_deepseek-v4-flash@default: What is the context window (max tokens) of model `deepseek-v4-flash`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in the bundled immutable telemetry; no home, provider, or internet source was queried. |
+| context_window_deepseek-v4-pro@max: What is the context window (max tokens) of model `deepseek-v4-pro`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in the bundled immutable telemetry; no home, provider, or internet source was queried. |
 Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`; status then flips to complete.
 
 ### Subagent threads
 
 | Thread | Parent | Nickname | Type | Model | Effort | Tokens |
 |--------|--------|----------|------|-------|--------|-------:|
-| `ses_0381` | `ses_0381` |  | explorer | deepseek-v4-flash@default | default | 20,627 |
+| `ses_0381` | `ses_0381` |  | explorer | deepseek-v4-flash@default | default | 93,843 |
 
 ### Prompts
 

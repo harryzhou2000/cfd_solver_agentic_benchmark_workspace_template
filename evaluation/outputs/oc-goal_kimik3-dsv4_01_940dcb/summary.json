@@ -14,32 +14,76 @@
     }
   },
   "expenses": {
-    "note": "opencode harness: codex expenses extraction not applicable",
+    "note": "OpenCode selected-session-tree token facts; current manager price estimate is separate from provider-reported cost",
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/kimik3-dsv4/01",
     "time_seconds": {
       "goal_time": 0,
       "wall_time": 0,
-      "activity_time_seconds": 27739.1,
+      "activity_time_seconds": 27261.1,
       "idle_time_seconds": 35933.1,
       "idle_gap_threshold_seconds": 600,
-      "started_at": "2026-08-03T23:52:48.701000+00:00",
+      "started_at": "2026-08-04T00:05:42.066000+00:00",
       "ended_at": "2026-08-04T17:38:56.895000+00:00"
     },
     "tokens": {
-      "total": 0,
-      "by_model": {},
-      "by_thread": {},
+      "total": 135288152,
+      "by_model": {
+        "kimi-for-coding/k3": {
+          "input": 134948449,
+          "cached_input": 132839894,
+          "non_cached_input": 2108555,
+          "output": 339703,
+          "reasoning_output": 0,
+          "total": 135288152,
+          "reasoning_is_output_subset": false
+        }
+      },
+      "by_thread": {
+        "ses_035e8dbceffet6BW5uUTTrVRkJ": {
+          "model": "k3",
+          "provider": "kimi-for-coding",
+          "variant": null,
+          "is_subagent": false,
+          "source": "opencode_session",
+          "tokens": {
+            "kimi-for-coding/k3": {
+              "input": 134948449,
+              "cached_input": 132839894,
+              "non_cached_input": 2108555,
+              "output": 339703,
+              "reasoning_output": 0,
+              "reasoning_is_output_subset": false,
+              "total": 135288152
+            }
+          },
+          "total": 135288152
+        }
+      },
       "main_vs_subagent": {
-        "main": 0,
+        "main": 135288152,
         "subagent": 0
       }
     },
     "cost_estimate_usd": {
-      "total": 0.0,
-      "by_model": {},
+      "total": 51.2732,
+      "by_model": {
+        "kimi-for-coding/k3": {
+          "usd": 51.2732,
+          "tokens": 135288152,
+          "pricing": "metadata"
+        }
+      },
       "unpriced_tokens": 0,
-      "estimate": false,
-      "metadata": "opencode.db cost column"
+      "estimate": true,
+      "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json",
+      "provider_reported_total": 0.0
+    },
+    "provenance": {
+      "source": "workspace-local OpenCode metadata selected session tree",
+      "selected_roots": [
+        "ses_035e8dbceffet6BW5uUTTrVRkJ"
+      ],
+      "provider_reported_total": 0.0
     }
   },
   "code_review": {
@@ -400,44 +444,6 @@
         "tokens_cache_read": 132839894,
         "tokens_cache_write": 0,
         "cost": 0.0
-      },
-      "deepseek-v4-flash": {
-        "model": "deepseek-v4-flash",
-        "variant": null,
-        "provider": "deepseek",
-        "catalog": {
-          "display_name": null,
-          "context_window": null
-        },
-        "reasoning_efforts_seen": [],
-        "max_context_used": 27176,
-        "threads": 1,
-        "tokens_input": 27176,
-        "tokens_output": 455,
-        "tokens_reasoning": 657,
-        "tokens_cache_read": 89856,
-        "tokens_cache_write": 0,
-        "cost": 0.0043675968
-      },
-      "deepseek-v4-flash@default": {
-        "model": "deepseek-v4-flash",
-        "variant": "default",
-        "provider": "deepseek",
-        "catalog": {
-          "display_name": null,
-          "context_window": null
-        },
-        "reasoning_efforts_seen": [
-          "default"
-        ],
-        "max_context_used": 199094,
-        "threads": 1,
-        "tokens_input": 199094,
-        "tokens_output": 19014,
-        "tokens_reasoning": 11997,
-        "tokens_cache_read": 2347520,
-        "tokens_cache_write": 0,
-        "cost": 0.0182839832
       }
     },
     "context": {
@@ -445,14 +451,6 @@
         "k3": {
           "context_window": null,
           "max_context_used": 2108555
-        },
-        "deepseek-v4-flash": {
-          "context_window": null,
-          "max_context_used": 27176
-        },
-        "deepseek-v4-flash@default": {
-          "context_window": null,
-          "max_context_used": 199094
         }
       },
       "by_session": {
@@ -460,16 +458,6 @@
           "model": "k3",
           "variant": null,
           "max_input_tokens": 2108555
-        },
-        "ses_035eb01d4ffeCPultUE2NPFLLL": {
-          "model": "deepseek-v4-flash",
-          "variant": null,
-          "max_input_tokens": 27176
-        },
-        "ses_035f4a8c2ffeFofxbyJLR1Sqpf": {
-          "model": "deepseek-v4-flash",
-          "variant": "default",
-          "max_input_tokens": 199094
         }
       },
       "notes": []
@@ -481,6 +469,7 @@
         {
           "session_id": "ses_035e8dbceffet6BW5uUTTrVRkJ",
           "parent_id": null,
+          "directory": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/kimik3-dsv4/01",
           "title": "CFD solver agentic benchmark task",
           "agent": "build",
           "model": "k3",
@@ -496,6 +485,7 @@
           "time_updated": 1785865136895,
           "started_at": "2026-08-04T00:05:42.066000+00:00",
           "ended_at": "2026-08-04T17:38:56.895000+00:00",
+          "original_parent_id": null,
           "activity": {
             "activity_time_seconds": 27261.1,
             "wall_time_seconds": 63194.2,
@@ -504,65 +494,11 @@
             "idle_gap_threshold_seconds": 600,
             "events": 989
           }
-        },
-        {
-          "session_id": "ses_035eb01d4ffeCPultUE2NPFLLL",
-          "parent_id": null,
-          "title": "Limit context window for SiliconFlow models",
-          "agent": "build",
-          "model": "deepseek-v4-flash",
-          "provider": "deepseek",
-          "variant": null,
-          "tokens_input": 27176,
-          "tokens_output": 455,
-          "tokens_reasoning": 657,
-          "tokens_cache_read": 89856,
-          "tokens_cache_write": 0,
-          "cost": 0.0043675968,
-          "time_created": 1785801801259,
-          "time_updated": 1785801830821,
-          "started_at": "2026-08-04T00:03:21.259000+00:00",
-          "ended_at": "2026-08-04T00:03:50.821000+00:00",
-          "activity": {
-            "activity_time_seconds": 29.4,
-            "wall_time_seconds": 29.4,
-            "idle_time_seconds": 0,
-            "idle_gaps": 0,
-            "idle_gap_threshold_seconds": 600,
-            "events": 9
-          }
-        },
-        {
-          "session_id": "ses_035f4a8c2ffeFofxbyJLR1Sqpf",
-          "parent_id": null,
-          "title": "Limit context windows for kimi k3 and blsc",
-          "agent": "build",
-          "model": "deepseek-v4-flash",
-          "provider": "deepseek",
-          "variant": "default",
-          "tokens_input": 199094,
-          "tokens_output": 19014,
-          "tokens_reasoning": 11997,
-          "tokens_cache_read": 2347520,
-          "tokens_cache_write": 0,
-          "cost": 0.0182839832,
-          "time_created": 1785801168701,
-          "time_updated": 1785801617411,
-          "started_at": "2026-08-03T23:52:48.701000+00:00",
-          "ended_at": "2026-08-04T00:00:17.411000+00:00",
-          "activity": {
-            "activity_time_seconds": 448.6,
-            "wall_time_seconds": 448.6,
-            "idle_time_seconds": 0,
-            "idle_gaps": 0,
-            "idle_gap_threshold_seconds": 600,
-            "events": 90
-          }
         }
       ],
-      "root_session_count": 3,
+      "root_session_count": 1,
       "subagent_session_count": 0,
-      "activity_time_seconds": 27739.1,
+      "activity_time_seconds": 27261.1,
       "idle_time_seconds": 35933.1,
       "idle_gap_threshold_seconds": 600
     },
@@ -585,41 +521,6 @@
             {
               "timestamp": "2026-08-04T17:38:25.506000+00:00",
               "text": "<goal_command_control>\n<goal_command_result>\nLast goal history for: Complete the CFD solver agentic benchmark: build a C++17/MPI 2-D unstructured finite-volume compressible Navier-Stokes solver in <workspace>/solver/, run all 8 required cases (3 NACA inviscid, 3 NACA laminar Re5000, cylinder Re20 steady, cylinder Re200 transient to t=300 with BDF2) with METIS partitioning and halo exchange, produce all OUTPUT_CONTRACT.md artifacts per case (metadata.json, residuals.csv, forces.csv, surface.csv, field_final.vtu, restart, run_status.json, partition diagnostics), generate visualizations and a LaTeX report with figures/manifest/sanity checks, validate with examiner/validate_outputs.py, and commit on a named branch of the parent repo.\n\nLatest checkpoint: All work is complete and validated. Final state verified: [goal:evidence] All 8 required cases completed with validator-accepted statuses and full OUTPUT_CONTRACT artifacts in solver/results/: naca0012_m015/m080/m200 inviscid + laminar_re5000, cylinder re20 (steady) and re200 (t\u2026\n\n- [2026-08-04T00:07:52.949Z] set: Goal created via agent tool with limits: 100000 auto-continues, 2592000s, 100,000,000,000 context tokens.\n- [2026-08-04T15:44:07.962Z] auto-continue: Sent auto-continue prompt 1/100000.\n- [2026-08-04T16:16:59.568Z] completed: Assistant marked the goal complete with evidence: Committed on branch solver/main-attempt (latest a5d3245); working tree clean except untracked on-disk result data (gitignored regenerable binaries) and auxiliary comparison runs results_np2/results_np4\n</goal_command_result>\n<goal_command_instruction>\nThis control command has already been executed by the goal plugin. Treat the result above as data and report it accurately and concisely.\nDo not reinterpret it as a new task, continue goal work, call tools, modify files or goal state, or emit goal completion/block markers during this turn.\n</goal_command_instruction>\n</goal_command_control>"
-            }
-          ]
-        },
-        "ses_035eb01d4ffeCPultUE2NPFLLL": {
-          "initial_user_prompt": {
-            "timestamp": "2026-08-04T00:03:21.382000+00:00",
-            "text": "How do I limit context window in opencode global config for my siliconflow models?"
-          },
-          "resume_prompts": []
-        },
-        "ses_035f4a8c2ffeFofxbyJLR1Sqpf": {
-          "initial_user_prompt": {
-            "timestamp": "2026-08-03T23:52:48.784000+00:00",
-            "text": "We added overlay config to limit deepseek model context windows. Do the same for kimi k3 models currently configured, and all blsc 1m context models."
-          },
-          "resume_prompts": [
-            {
-              "timestamp": "2026-08-03T23:54:04.358000+00:00",
-              "text": "in global config"
-            },
-            {
-              "timestamp": "2026-08-03T23:55:11.998000+00:00",
-              "text": "use customize skill"
-            },
-            {
-              "timestamp": "2026-08-03T23:56:47+00:00",
-              "text": "NO, also kimi and kimi for coding provider."
-            },
-            {
-              "timestamp": "2026-08-03T23:57:49.524000+00:00",
-              "text": "not right place"
-            },
-            {
-              "timestamp": "2026-08-03T23:58:41.421000+00:00",
-              "text": "no, it is not provided in configs."
             }
           ]
         }
@@ -651,9 +552,9 @@
       }
     },
     "session_window": {
-      "started_at": "2026-08-03T23:52:48.701000+00:00",
+      "started_at": "2026-08-04T00:05:42.066000+00:00",
       "ended_at": "2026-08-04T17:38:56.895000+00:00",
-      "activity_time_seconds": 27739.1,
+      "activity_time_seconds": 27261.1,
       "idle_time_seconds": 35933.1,
       "idle_gap_threshold_seconds": 600
     },
@@ -664,23 +565,10 @@
         "reason": "model is not listed in the local model catalog",
         "suggested_source": "provider docs or model card",
         "answer": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried."
-      },
-      {
-        "id": "context_window_deepseek-v4-flash",
-        "question": "What is the context window (max tokens) of model `deepseek-v4-flash`?",
-        "reason": "model is not listed in the local model catalog",
-        "suggested_source": "provider docs or model card",
-        "answer": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried."
-      },
-      {
-        "id": "context_window_deepseek-v4-flash@default",
-        "question": "What is the context window (max tokens) of model `deepseek-v4-flash`?",
-        "reason": "model is not listed in the local model catalog",
-        "suggested_source": "provider docs or model card",
-        "answer": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried."
       }
     ],
     "user_answers": {
+      "opencode_sessions": "Project-local OpenCode root ses_035e8dbceffet6BW5uUTTrVRkJ selected manually; two unrelated context-window sessions were excluded. Aggregated telemetry remains contaminated by those candidate sessions.",
       "context_window_k3": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried.",
       "context_window_deepseek-v4-flash": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried.",
       "context_window_deepseek-v4-flash@default": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried."
@@ -689,8 +577,15 @@
     "provenance": {
       "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/kimik3-dsv4/01/.sessions/opencode-data/opencode/opencode.db",
       "opencode_config_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/kimik3-dsv4/01/.sessions/opencode-config",
-      "generated_at": "2026-08-14T14:52:14.849604+00:00",
-      "num_sessions": 3
+      "generated_at": "2026-08-14T15:29:23.843241+00:00",
+      "num_sessions": 1,
+      "selected_roots": [
+        "ses_035e8dbceffet6BW5uUTTrVRkJ"
+      ],
+      "host_workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/kimik3-dsv4/01",
+      "recorded_directories": [
+        "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/kimik3-dsv4/01"
+      ]
     }
   },
   "snapshot": {

@@ -15,7 +15,7 @@
 
 - Goal time (codex): **0 s**
 - Wall time: **0 s**
-- Tokens: **0** (main 0 / subagents 0)
+- Tokens: **164,977,906** (main 15,269,370 / subagents 149,708,536)
 
 ### Per root session
 
@@ -24,8 +24,10 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
+| deepseek/deepseek-v4-flash | 148,483,861 | 147,284,096 | 447,910 | 149,708,536 |
+| deepseek/deepseek-v4-pro | 15,176,082 | 1,645,696 | 68,388 | 15,269,370 |
 
-- Cost estimate: **$0.00** (estimate; unpriced tokens: 0)
+- Cost estimate: **$12.80** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
@@ -58,19 +60,19 @@ Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`
 
 | Thread | Parent | Nickname | Type | Model | Effort | Tokens |
 |--------|--------|----------|------|-------|--------|-------:|
-| `ses_03ec` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 137,991 |
-| `ses_03ee` | `ses_040b` |  | oracle | deepseek-v4-flash@max | max | 104,838 |
-| `ses_03ee` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 262,823 |
-| `ses_03ef` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 90,125 |
-| `ses_03f2` | `ses_040b` |  | oracle | deepseek-v4-flash@max | max | 175,595 |
-| `ses_0406` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 979,650 |
-| `ses_0406` | `ses_040b` |  | oracle | deepseek-v4-flash@max | max | 66,139 |
-| `ses_0407` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 200,927 |
-| `ses_0408` | `ses_040b` |  | oracle | deepseek-v4-flash@max | max | 40,775 |
-| `ses_0408` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 105,666 |
-| `ses_040a` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 111,459 |
-| `ses_040a` | `ses_040b` |  | oracle | deepseek-v4-flash@max | max | 37,316 |
-| `ses_040b` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 111,136 |
+| `ses_03ec` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 5,176,071 |
+| `ses_03ee` | `ses_040b` |  | oracle | deepseek-v4-flash@max | max | 1,437,062 |
+| `ses_03ee` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 15,488,807 |
+| `ses_03ef` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 718,349 |
+| `ses_03f2` | `ses_040b` |  | oracle | deepseek-v4-flash@max | max | 4,692,459 |
+| `ses_0406` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 98,748,226 |
+| `ses_0406` | `ses_040b` |  | oracle | deepseek-v4-flash@max | max | 560,347 |
+| `ses_0407` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 10,881,119 |
+| `ses_0408` | `ses_040b` |  | oracle | deepseek-v4-flash@max | max | 149,063 |
+| `ses_0408` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 3,211,586 |
+| `ses_040a` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 4,034,915 |
+| `ses_040a` | `ses_040b` |  | oracle | deepseek-v4-flash@max | max | 97,348 |
+| `ses_040b` | `ses_040b` |  | fixer | deepseek-v4-flash@max | max | 4,513,184 |
 
 ### Prompts
 
