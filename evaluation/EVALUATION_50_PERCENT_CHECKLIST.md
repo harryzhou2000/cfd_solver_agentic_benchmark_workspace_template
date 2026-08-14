@@ -14,7 +14,9 @@ canonical evaluations count toward the quota and must not be repeated.
       migration evidence, verify the commit object, and create the documented
       post-run snapshot before branch creation.
 - [ ] Check the exact result branch locally and against the canonical upstream;
-      never reuse a branch or choose another number.
+      never reuse a branch or choose another number. Delivered workspaces are
+      expected to lack `origin`: restore the exact manager-repository canonical
+      origin first, verify it, and record that local configuration repair.
 - [ ] Curate and commit the contestant submission. Never commit `.sessions`,
       `.eval`, results, logs, restarts, field/visualization working data,
       generated PDFs, credentials, or build products. Only report-referenced
@@ -51,7 +53,7 @@ canonical evaluations count toward the quota and must not be repeated.
 
 - [x] 01 — `codex_glm52-m3_01_919b67`
 - [ ] 02 — BLOCKED: provenance reconstructed (`codex/glm52-m3/init` @ `746ef39`), but workspace has no configured origin remote; canonical-upstream collision cannot be proven.
-- [ ] 03
+- [ ] 03 — BLOCKED: provenance reconstructed (`codex/glm52-m3/init` @ `a14f203babe6794ad032aea760aed8e302e62b5a`), but no configured origin remote prevents required canonical-upstream collision proof.
 
 ### `codex/gpt56` — 8 done, quota 4
 
@@ -96,3 +98,7 @@ canonical evaluations count toward the quota and must not be repeated.
   stores, determine the actual harness manually, and reconstruct provenance.
 - Existing canonical completed snapshots and result branches are immutable;
   do not regenerate them as part of this batch.
+- A missing workspace `origin` is expected delivery state, not a blocker. Use
+  the manager repository's verified canonical `origin`, add that exact URL as
+  the workspace `origin`, and rerun the exact collision helper. Never overwrite
+  a different existing remote silently, and never commit local remote config.
