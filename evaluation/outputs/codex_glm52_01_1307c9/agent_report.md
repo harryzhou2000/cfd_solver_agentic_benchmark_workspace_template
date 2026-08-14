@@ -28,4 +28,4 @@ Rubric: build/output 7, mesh 8, residual/BC 12, second order 8, viscous 4, impli
 
 ## Limitations
 
-The environment snapshot is post-run only. No clean evaluator build, steady rerun, or redraw was needed to establish these decisive artifact/source contradictions. `run_identity.json` and `contestant_final_response.md` are unindexed, so structural checking does not validate those sidecars.
+The environment snapshot is post-run only. No clean evaluator build, steady rerun, or redraw was needed to establish these decisive artifact/source contradictions. `run_identity.json` and `contestant_final_response.md` are unindexed, so `cfdeval check` does not validate those sidecars.
