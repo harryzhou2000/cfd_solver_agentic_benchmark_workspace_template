@@ -7,7 +7,7 @@
 
 ## Evidence
 
-All telemetry/configuration was extracted only from the workspace-local `.sessions/codex` bundle. The selected root’s terminal response is `msg_0c7b34814af56050016a70ee14ad1c819993364090a1c0a372` at 2026-08-03T19:38:04.045Z; the extracted response SHA-256 is `8d8333a199a6eb7b1c040b4f418bb2c77457b51521a5f208ac03e9370a8ee2b5`.
+All telemetry/configuration was extracted only from the workspace-local `.sessions/codex` bundle. The selected root’s terminal response is `msg_0c7b34814af56050016a70ee14ad1c819993364090a1c0a372` at 2026-08-03T19:38:04.045Z; the extracted response SHA-256 is `8d8333a199a6eb7b1c040b4f418bb2c77457b51521a5f208ac03e9370a8ee2b5`. The immutable `run_identity.json` SHA-256 is `f6d537c708686d699e7ad42db24f1738d3ea10301c5c82a8304b8ef44dfa32ee`.
 
 Explicit `validate_outputs.py --report` passed all eight production case directories and the report. No evaluator solver rerun occurred, and Re200 was not rerun. Submitted Re200 metadata/report evidence records 30,000 steps to t=300, inner ratio 0.00098623, and shedding St 0.18333. Submitted rank evidence covers NACA and cylinder np1/np8 comparisons.
 

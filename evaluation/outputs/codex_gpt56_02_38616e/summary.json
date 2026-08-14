@@ -697,63 +697,63 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 5,
-        "notes": ""
+        "notes": "Documented CMake/MPI build, CLI, and test workflow; validator passed all final cases."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 5,
-        "notes": ""
+        "notes": "Submitted input-driven command path and documented failure handling support the score."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 5,
-        "notes": ""
+        "notes": "Reviewed submission separates solver components and benchmark configuration paths."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": ""
+        "notes": "No direct internal wrapper or external-solver executable evidence; trust policy limits this finding."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 5,
-        "notes": ""
+        "notes": "Case behavior is driven by submitted configurations rather than case-specific hard-coded output logic."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 5,
-        "notes": ""
+        "notes": "Submitted MPI diagnostics and np1/np8 comparisons support real distributed execution."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 5,
-        "notes": ""
+        "notes": "Documented checks and successful final output validation provide robustness evidence."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 5,
-        "notes": ""
+        "notes": "Documented test workflow plus explicit eight-case validator pass support the score."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 5,
-        "notes": ""
+        "notes": "Curated source/report submission is readable; packaging limitation is scored separately in traceability."
       }
     ],
     "disqualification_flags": [
@@ -798,7 +798,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.8
+    "overall_score": 4.85
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -809,77 +809,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 5,
-        "notes": ""
+        "notes": "Submitted source/report document the compressible governing equations and nondimensional case setup."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 5,
-        "notes": ""
+        "notes": "Submitted results validate across the required unstructured NACA and cylinder case meshes."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 5,
-        "notes": ""
+        "notes": "Source-level review recorded conservative finite-volume residual implementation."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": ""
+        "notes": "Source review records the approximate flux path; no evidence requires a larger deduction."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 5,
-        "notes": ""
+        "notes": "Boundary-condition paths are documented in the submitted solver and validated output set."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 5,
-        "notes": ""
+        "notes": "Source-level review recorded second-order reconstruction in the submitted solver."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 5,
-        "notes": ""
+        "notes": "Submitted source/report documents limiting and positivity safeguards."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 5,
-        "notes": ""
+        "notes": "Source-level review recorded viscous treatment for the Re5000 cases."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 5,
-        "notes": ""
+        "notes": "Submitted solver source documents the steady implicit-march path."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 5,
-        "notes": ""
+        "notes": "Submitted Re200 deliverables record 30000 steps to t=300 and inner ratio 0.00098623; not rerun."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 5,
-        "notes": ""
+        "notes": "Submitted rank evidence covers NACA and cylinder np1/np8 comparisons."
       }
     ],
     "disqualification_flags": [
@@ -914,7 +914,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.86
+    "overall_score": 4.92
   },
   "result_review": {
     "review_area": "result_review",
@@ -925,49 +925,49 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 5,
-        "notes": ""
+        "notes": "Explicit validator passed all eight required production-case directories and report."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 5,
-        "notes": ""
+        "notes": "Evaluator ran validate_outputs.py explicitly and it passed for every required output."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 4,
-        "notes": ""
+        "notes": "Two NACA M0.80 cases have only 0.569/0.856 and 0.371/0.350 residual orders; other delivered cases are stronger."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 4,
-        "notes": ""
+        "notes": "Delivered force/residual evidence is credible overall, with the two low-reduction M0.80 limitations retained."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
         "score": 5,
-        "notes": ""
+        "notes": "Submitted report/manifest describes the required visual result coverage."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 5,
-        "notes": ""
+        "notes": "Submitted report documents methods, cases, results, and limitations; no evaluator redraw adds credit."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 3,
-        "notes": ""
+        "notes": "Strict audit excluded TeX-escaped PNG references, so committed report source is not fully self-contained despite available contestant artifacts."
       }
     ],
     "disqualification_flags": [
@@ -997,7 +997,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.7
+    "overall_score": 4.55
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/02",

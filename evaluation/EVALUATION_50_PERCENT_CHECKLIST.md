@@ -103,11 +103,10 @@ Reserve `[x]` for a snapshot that passes both gates.
 - [ ] 01 — REPAIR `codex_gpt56_01_cb349f`; rubric/cases recorded, but
       `code.originality`, the Code overall, and final-response provenance in the
       report are incomplete.
-- [ ] 02 — REPAIR `codex_gpt56_02_38616e`; 92/100; DQ no;
-      submission `6183dc8fc067cd7dc4a4a2949ca53bd4f2b42820`; original manager
-      `7f4fe0f`, review-number repair `9d7ed10`. All 27 review evidence notes,
-      weighted-overall consistency, and identity-sidecar provenance remain
-      incomplete.
+- [x] 02 — `codex_gpt56_02_38616e`; 92/100; DQ no;
+      submission `6183dc8fc067cd7dc4a4a2949ca53bd4f2b42820`; manager pending.
+      All 27 evidence notes, weighted overalls (4.85/4.92/4.55), and
+      identity/report sidecar provenance were refreshed; both completion gates pass.
 - [x] 03 — `codex_gpt56_03_93b257`; 98/100; DQ no;
       submission `f06ea3fa63acbdbfce71ecd4debf603c355f751a`; manager pending.
       Recomputed Code/CFD/Results weighted overalls (4.85/4.92/4.95); both
