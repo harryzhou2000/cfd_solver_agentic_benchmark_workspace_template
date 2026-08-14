@@ -8,7 +8,7 @@
 
 Project Codex root `019fb9e3-ba6e-7e40-99d3-84d723942dc8` was selected, including its 21 recorded descendants. Its first persisted run event is `2026-07-31T20:37:34.058000+00:00` and terminal root final response is `2026-08-01T02:17:09.958Z`; execution date is therefore `2026-07-31`. The project SQLite records the host workspace while the root extraction used its container cwd `/workspace`. Earlier roots `019fb9cd`, `019fb9d5`, and `019fb9df` are excluded as setup/audit attempts. Root rollout SHA-256: `cb2c2ab87b31ace33a14f5890c1eec83585ad35d3f53b05448741bec48b85f75`. The extractor accepted the root but its aggregate timeline includes early excluded threads, so session-window/bucket aggregates in `sessions.json` are contaminated and not used as primary measurements; `expenses.json` and `measurements.json` were regenerated root-scoped.
 
-The final response was extracted exactly to `contestant_final_response.md` from message `msg_08abbf587d5f95fa016a6d5720778c819e93619edaaeed5484`, one ordered text part, no redactions; extracted SHA-256 is recorded by the manager when committing this snapshot. It is an unindexed sidecar, so `cfdeval check` does not validate it.
+The final response was extracted exactly to `contestant_final_response.md` from message `msg_08abbf587d5f95fa016a6d5720778c819e93619edaaeed5484`, one ordered text part, no redactions; SHA-256 is `40ef89590dc771cd627cb5b423cac16232fe50a80799a956a672a772921c1fa4`. `run_identity.json` SHA-256 is `223aeee53f7005b41451ae2bb37be17db4e3b7d60267c6b98f1a1b7e86c84680`. Both are unindexed sidecars, so `cfdeval check` does not validate them.
 
 ## Evidence and validation
 

@@ -107,9 +107,9 @@ Reserve `[x]` for a snapshot that passes both gates.
 
 ### `codex/gpt56` — 8 done, quota 4
 
-- [ ] 01 — REPAIR `codex_gpt56_01_cb349f`; rubric/cases recorded, but
-      `code.originality`, the Code overall, and final-response provenance in the
-      report are incomplete.
+- [x] 01 — `codex_gpt56_01_cb349f`; 97/100; DQ no; manager pending.
+      Originality/direct-evidence finding, weighted reviews 4.20/4.92/4.85,
+      final-response/identity hashes, index, and both gates complete.
 - [x] 02 — `codex_gpt56_02_38616e`; 92/100; DQ no;
       submission `6183dc8fc067cd7dc4a4a2949ca53bd4f2b42820`; manager pending.
       All 27 evidence notes, weighted overalls (4.85/4.92/4.55), and
