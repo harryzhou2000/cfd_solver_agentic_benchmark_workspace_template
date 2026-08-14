@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
 import numpy as np
 
-from cfd_io import parse_vtu, split_cells_to_tris, clip_percentiles
+from cfd_io import parse_vtu, read_json, split_cells_to_tris, clip_percentiles
 
 
 def render_field(case_id: str, data: dict, field: str, out: Path,
@@ -54,7 +54,8 @@ def main() -> None:
     field_path = case_dir / args.field
     figdir = (args.figdir or case_dir / ".." / ".." / "report" / "figures").resolve()
     figdir.mkdir(parents=True, exist_ok=True)
-    case_id = case_dir.name
+    case_id = read_json(case_dir / "metadata.json").get("case_id",
+                                                        case_dir.name)
     data = parse_vtu(field_path)
 
     window = (-args.zoom, args.zoom) if args.zoom else None

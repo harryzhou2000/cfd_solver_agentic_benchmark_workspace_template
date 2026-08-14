@@ -1,10 +1,15 @@
 #include <mpi.h>
 
+#include <nlohmann/json.hpp>
+
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <numeric>
 #include <string>
 #include <vector>
 
@@ -28,6 +33,7 @@ struct CliOptions {
     double final_time = -1.0; // diagnostic override
     double time_step = -1.0;  // diagnostic override
     double cfl_cap = -1.0;
+    int start_step = -1;  // resume step for transient checkpoints
     bool inspect_mesh = false;
 };
 
@@ -37,7 +43,7 @@ void print_usage(const char* argv0) {
         "[--restart <file>] [--report-level brief|full]\n"
         "       %s inspect-mesh --case <case.json>\n"
         "diagnostic options: --max-steps N --final-time T --time-step DT "
-        "--cfl-cap C\n",
+        "--cfl-cap C --start-step N\n",
         argv0, argv0);
 }
 
@@ -74,6 +80,8 @@ CliOptions parse_args(int argc, char** argv) {
             opt.time_step = std::atof(next("--time-step").c_str());
         } else if (a == "--cfl-cap") {
             opt.cfl_cap = std::atof(next("--cfl-cap").c_str());
+        } else if (a == "--start-step") {
+            opt.start_step = std::atoi(next("--start-step").c_str());
         } else {
             std::fprintf(stderr, "error: unknown option '%s'\n", a.c_str());
             std::exit(2);
@@ -128,6 +136,8 @@ int main(int argc, char** argv) {
         if (opt.time_step > 0.0) case_input.run_control.time_step_override =
             opt.time_step;
         if (opt.cfl_cap > 0.0) case_input.run_control.cfl_cap = opt.cfl_cap;
+        if (opt.start_step >= 0)
+            case_input.run_control.start_step_override = opt.start_step;
 
         if (opt.command == "inspect-mesh") {
             if (rank == 0) {
@@ -178,6 +188,80 @@ int main(int argc, char** argv) {
 
         cfd::Solver solver(std::move(case_input), std::move(dmesh),
                            MPI_COMM_WORLD);
+        if (!opt.restart_file.empty()) {
+            // Restart format: a small JSON descriptor plus a binary sibling
+            // containing all conservative states in global cell id order.
+            std::vector<double> local_restart;
+            std::vector<int> counts(nranks, 0);
+            std::vector<int> displs(nranks, 0);
+            std::vector<double> sendbuf;
+            if (rank == 0) {
+                fs::path json_path(opt.restart_file);
+                std::ifstream jf(json_path);
+                if (!jf)
+                    throw std::runtime_error("cannot open restart descriptor: " +
+                                             json_path.string());
+                nlohmann::json desc;
+                try {
+                    jf >> desc;
+                } catch (const std::exception& e) {
+                    throw std::runtime_error(
+                        "invalid restart descriptor " + json_path.string() +
+                        ": " + e.what());
+                }
+                const int64_t ncells =
+                    desc.value("n_cells_global", static_cast<int64_t>(-1));
+                if (ncells != global.num_cells())
+                    throw std::runtime_error(
+                        "restart cell count does not match the case mesh");
+                fs::path bin_path = json_path;
+                bin_path.replace_extension(".bin");
+                std::ifstream bf(bin_path, std::ios::binary);
+                if (!bf)
+                    throw std::runtime_error("cannot open restart state: " +
+                                             bin_path.string());
+                std::vector<double> all(ncells * cfd::kNC);
+                bf.read(reinterpret_cast<char*>(all.data()),
+                        static_cast<std::streamsize>(all.size() *
+                                                     sizeof(double)));
+                if (bf.gcount() != static_cast<std::streamsize>(
+                                      all.size() * sizeof(double)))
+                    throw std::runtime_error("truncated restart state file: " +
+                                             bin_path.string());
+
+                std::vector<std::vector<double>> bufs(nranks);
+                for (int r = 0; r < nranks; ++r)
+                    bufs[r].reserve(partition.cell_part.size() / nranks * 4 +
+                                    nranks * 4);
+                for (int g = 0; g < global.num_cells(); ++g) {
+                    const int r = partition.cell_part[g];
+                    ++counts[r];
+                    for (int v = 0; v < cfd::kNC; ++v)
+                        bufs[r].push_back(all[g * cfd::kNC + v]);
+                }
+                sendbuf.reserve(static_cast<size_t>(ncells) * cfd::kNC);
+                for (int r = 0; r < nranks; ++r) {
+                    displs[r] = static_cast<int>(sendbuf.size());
+                    sendbuf.insert(sendbuf.end(), bufs[r].begin(),
+                                   bufs[r].end());
+                }
+            }
+            MPI_Bcast(counts.data(), nranks, MPI_INT, 0, MPI_COMM_WORLD);
+            MPI_Bcast(displs.data(), nranks, MPI_INT, 0, MPI_COMM_WORLD);
+            local_restart.resize(counts[rank] * cfd::kNC);
+            std::vector<int> rcounts(nranks), rdispls(nranks, 0);
+            for (int r = 0; r < nranks; ++r)
+                rcounts[r] = counts[r] * cfd::kNC;
+            for (int r = 1; r < nranks; ++r)
+                rdispls[r] = rdispls[r - 1] + rcounts[r - 1];
+            MPI_Scatterv(sendbuf.data(), rcounts.data(), rdispls.data(),
+                         MPI_DOUBLE, local_restart.data(), rcounts[rank],
+                         MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+            // The binary arrives in ascending global cell id order. Map it
+            // back to the rank-local ordering.
+            solver.set_restart_state_global_order(local_restart);
+        }
         const cfd::RunStats stats = solver.run(opt.output_dir);
         solver.write_run_status(opt.output_dir, stats, command_line);
 

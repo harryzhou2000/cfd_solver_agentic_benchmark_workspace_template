@@ -83,9 +83,24 @@ double polygon_area(const std::vector<Vec2>& p) {
 }
 
 Vec2 polygon_center(const std::vector<Vec2>& p) {
+    // Area-weighted centroid via triangle fan decomposition. This is the
+    // standard centroid for straight-edged polygons and is exact for
+    // triangles; the vertex average is not a centroid for general polygons.
+    double area2 = 0.0;
     Vec2 c{0.0, 0.0};
-    for (const auto& v : p) c += v;
-    return c / static_cast<double>(p.size());
+    for (size_t i = 1; i + 1 < p.size(); ++i) {
+        const Vec2 a = p[0], b = p[i], d = p[i + 1];
+        const double tri2 = (b - a).cross(d - a);  // 2 * triangle area
+        area2 += tri2;
+        c += (a + b + d) * (tri2 / 3.0);
+    }
+    if (std::fabs(area2) < 1e-300) {
+        c = Vec2{0.0, 0.0};
+        for (const auto& v : p) c += v;
+        c = c / static_cast<double>(p.size());
+        return c;
+    }
+    return c / area2;
 }
 
 }  // namespace

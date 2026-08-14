@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 
 namespace cfd {
 
@@ -104,7 +105,7 @@ void compute_limiters(const DistributedMesh& mesh,
             const int j = (lf.left == c) ? lf.right : lf.left;
             if (j < 0 || j == c) continue;
             for (int v = 0; v < 4; ++v) {
-                const Vec2 d = mesh.cell_center[j] - mesh.cell_center[c];
+                const Vec2 d = lf.center - mesh.cell_center[c];
                 const double delta =
                     grad[gid(c, v)] * d.x + grad[gid(c, v) + 1] * d.y;
                 if (delta > 1e-300) {
@@ -143,7 +144,7 @@ bool reconstruct_face(const DistributedMesh& mesh, const LocalFace& face,
         return VecN{U[c * kNC], U[c * kNC + 1], U[c * kNC + 2], U[c * kNC + 3]};
     };
     const auto rebuild = [&](int c, const VecN& u, VecN& out) {
-        if (std::getenv("CFD_FIRST_ORDER")) {
+        if (num.first_order) {
             out = u;
             return true;
         }
@@ -248,7 +249,13 @@ VecN inviscid_face_flux(const VecN& UL, const VecN& UR, const Vec2& n,
         return 0.5 * (lam * lam + delta * delta) / delta;
     };
     const double l1 = psi(lam1);
-    const double l2 = psi(lam2);
+    // The Harten-Yee fix is applied only to the acoustic waves |u_n +- a|.
+    // Applying it to the contact/shear eigenvalue |u_n| replaces a small
+    // shear speed with delta/2 ~ 0.1*(|u_n|+a)/2, i.e. a sound-speed-scale
+    // artificial viscosity in every low-speed region. At M=0.1 this is the
+    // dominant damping in the near wake and suppresses vortex shedding, so
+    // the contact wave keeps its physical |u_n| dissipation.
+    const double l2 = std::fabs(lam2);
     const double l4 = psi(lam4);
 
     VecN FL = inviscid_flux_normal(qL, n, gas);
@@ -367,7 +374,7 @@ FaceFluxResult boundary_face_flux(const DistributedMesh& mesh,
 
     if (face.bc == BcType::Farfield) {
         const Primitive& qinf = freestream;
-        if (std::getenv("CFD_SIMPLE_FF")) {
+        if (num.simple_ff) {
             const VecN Uc = VecN{U[c * kNC], U[c * kNC + 1], U[c * kNC + 2],
                                  U[c * kNC + 3]};
             const VecN Ub = prim_to_cons(qinf, gas);
@@ -424,7 +431,10 @@ FaceFluxResult boundary_face_flux(const DistributedMesh& mesh,
     const Vec2 nb = -n;
     Vec2 tb{nb.y, -nb.x};
     const double p_recon = qc.p + grad[gid(c, 3)] * d.x + grad[gid(c, 3) + 1] * d.y;
-    const double p_wall = p_recon > 0.0 ? p_recon : qc.p;
+    const double p_wall =
+        num.wall_p_cell
+            ? qc.p
+            : (p_recon > 0.0 ? p_recon : qc.p);
     res.inviscid = VecN{0.0, p_wall * n.x, p_wall * n.y, 0.0};
 
     if (wall_data) {

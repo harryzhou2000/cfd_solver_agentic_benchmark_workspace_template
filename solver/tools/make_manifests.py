@@ -27,6 +27,8 @@ def main() -> None:
                  "residual orders | status | command |\n")
         md.write("|---|---|---|---|---|---|---|---|\n")
         for case_dir in sorted(results_dir.iterdir()):
+            if not case_dir.name.startswith("final_"):
+                continue
             status_path = case_dir / "run_status.json"
             if not status_path.exists():
                 continue
@@ -41,9 +43,12 @@ def main() -> None:
 
     figures = []
     for case_dir in sorted(results_dir.iterdir()):
+        if not case_dir.name.startswith("final_"):
+            continue
         if not (case_dir / "run_status.json").exists():
             continue
-        case_id = case_dir.name
+        metadata = read_json(case_dir / "metadata.json")
+        case_id = metadata.get("case_id", case_dir.name)
         for name, var, src in [
             (f"{case_id}_mach.png", "mach", "field_final.vtu"),
             (f"{case_id}_pressure.png", "pressure", "field_final.vtu"),
@@ -57,7 +62,7 @@ def main() -> None:
             )
         if (report_dir / "figures" / f"{case_id}_vorticity.png").exists():
             figures.append(
-                [f"{case_id}_vorticity.png", case_id, "field", "vort",
+                [f"{case_id}_vorticity.png", case_id, "field", "vorticity",
                  "field_final.vtu", ""]
             )
         if (report_dir / "figures" / f"{case_id}_cf.png").exists():

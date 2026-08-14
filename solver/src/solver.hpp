@@ -30,6 +30,8 @@ struct RunStats {
     double final_physical_time = 0.0;
     std::string convergence_status = "failed";
     bool completed = false;
+    std::string start_time_utc;
+    std::string end_time_utc;
 };
 
 class Solver {
@@ -53,9 +55,24 @@ class Solver {
     std::vector<double> limiter_;  // n_local
     std::vector<double> residual_; // n_owned * 4
 
+    // Frozen per-step SGS preconditioner data. The flux Jacobian and
+    // spectral radii are rebuilt once per outer step and reused by every
+    // inner relaxation sweep.
+    struct FaceJac {
+        MatN A;
+        double rho = 0.0;
+    };
+    std::vector<double> pc_lambda_c_;
+    std::vector<double> pc_lambda_v_;
+    std::vector<double> pc_diag_;
+    std::vector<MatN> pc_diag_block_;
+    std::vector<FaceJac> pc_fj_;
+    bool pc_ready_ = false;
+
     // BDF2 histories (owned cells only).
     std::vector<double> U_prev_;
     std::vector<double> U_prev2_;
+    bool restart_ = false;
 
     // Precomputed LSQ stencils.
     struct LsqNeighbor {
@@ -75,6 +92,7 @@ class Solver {
     // Per-cell convective + viscous spectral radii from the current state.
     void compute_spectral_radii(std::vector<double>& lambda_c,
                                 std::vector<double>& lambda_v) const;
+    void build_preconditioner(double cfl, double physical_dt);
 
     // One dual-time inner iteration at the given CFL. `physical_term` adds the
     // frozen BDF2 source (3U - 4U^n + U^{n-1})/(2 dt) to the total residual
@@ -103,6 +121,13 @@ class Solver {
                                 double linf_components[4]);
     ForceSum compute_forces();
 
+   public:
+    // Install a rank-local restart state for the owned cells. The input is
+    // ordered by ascending global cell id, one [rho,rhou,rhov,rhoE] block per
+    // cell. Used by --restart.
+    void set_restart_state_global_order(const std::vector<double>& owned_U);
+
+   private:
     void write_csv_headers(const std::string& dir);
     void append_residual_row(const std::string& dir, int step, double time,
                              int inner_iter, double cfl, double dt,

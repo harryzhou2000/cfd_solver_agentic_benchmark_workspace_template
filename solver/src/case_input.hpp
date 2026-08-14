@@ -33,6 +33,7 @@ struct RunControl {
     double final_time_override = -1.0;
     double time_step_override = -1.0;
     double cfl_cap = -1.0;  // documented conservative CFL ceiling (>=0)
+    int start_step_override = -1;  // resume step for transient checkpoints
 };
 
 struct OutputControl {

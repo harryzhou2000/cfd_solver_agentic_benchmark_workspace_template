@@ -13,6 +13,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <limits>
 #include <numeric>
 #include <sstream>
 
@@ -158,6 +159,7 @@ Solver::Solver(CaseInput case_input, DistributedMesh mesh, MPI_Comm comm)
     numerics_.gas = case_.gas;
     numerics_.flux_scheme = case_.flux_scheme;
     if (std::getenv("CFD_RUSANOV")) numerics_.flux_scheme = FluxScheme::Rusanov;
+    if (std::getenv("CFD_ROE")) numerics_.flux_scheme = FluxScheme::Roe;
     numerics_.rusanov_dissipation_scale =
         case_.run_control.rusanov_dissipation_scale;
     numerics_.viscosity = case_.viscosity;
@@ -166,8 +168,13 @@ Solver::Solver(CaseInput case_input, DistributedMesh mesh, MPI_Comm comm)
         numerics_.viscosity = 0.0;
         numerics_.thermal_conductivity = 0.0;
     }
-    numerics_.limiter_k = 0.3;
+    numerics_.limiter_k =
+        std::getenv("CFD_LIMITER_K") ? std::atof(std::getenv("CFD_LIMITER_K"))
+                                     : 0.3;
     numerics_.entropy_fix_delta0 = 0.1;
+    numerics_.first_order = std::getenv("CFD_FIRST_ORDER") != nullptr;
+    numerics_.simple_ff = std::getenv("CFD_SIMPLE_FF") != nullptr;
+    numerics_.wall_p_cell = std::getenv("CFD_WALL_P_CELL") != nullptr;
 
     U_.assign(mesh_.n_local * kNC, 0.0);
     grad_.assign(mesh_.n_local * 8, 0.0);
@@ -198,6 +205,21 @@ void Solver::init_state() {
     for (int c = 0; c < mesh_.n_local; ++c) {
         for (int i = 0; i < kNC; ++i) U_[c * kNC + i] = uinf[i];
     }
+    // Optional initialization aid for transient vortex-shedding cases: a
+    // localized transverse-velocity perturbation in the near wake. A
+    // perfectly symmetric mesh/IC has only roundoff-level asymmetry, so the
+    // antisymmetric shedding mode takes impractically long to emerge;
+    // CFD_PERTURB_V=<amplitude> seeds it explicitly. The same smooth
+    // disturbance is used for any case; no case-specific constants.
+    if (const char* env = std::getenv("CFD_PERTURB_V")) {
+        const double amp = std::atof(env);
+        for (int c = 0; c < mesh_.n_owned; ++c) {
+            const double dx = mesh_.cell_center[c].x - 1.0;
+            const double dy = mesh_.cell_center[c].y - 0.2;
+            const double w = std::exp(-(dx * dx + dy * dy) / 0.16);
+            U_[c * kNC + 2] += amp * w;
+        }
+    }
     // BDF2 histories start at the freestream state so the first physical-time
     // source is a small second-order term, not a vacuum-driving spike.
     for (int c = 0; c < mesh_.n_owned; ++c) {
@@ -206,6 +228,32 @@ void Solver::init_state() {
             U_prev2_[c * kNC + i] = uinf[i];
         }
     }
+}
+
+void Solver::set_restart_state_global_order(
+    const std::vector<double>& owned_U) {
+    if (static_cast<int>(owned_U.size()) != mesh_.n_owned * kNC) {
+        throw std::runtime_error(
+            "restart state size does not match the rank-local owned cell "
+            "count");
+    }
+    std::vector<int> order(mesh_.n_owned);
+    std::iota(order.begin(), order.end(), 0);
+    std::sort(order.begin(), order.end(), [&](int a, int b) {
+        return mesh_.global_cell_id[a] < mesh_.global_cell_id[b];
+    });
+    for (int c = 0; c < mesh_.n_owned; ++c) {
+        const int src = order[c];
+        for (int i = 0; i < kNC; ++i) {
+            U_[src * kNC + i] = owned_U[c * kNC + i];
+            // A restart file stores the current U^n only. Rebuild the BDF2
+            // histories from that state so the next physical-time source is
+            // a smooth second-order term (documented restart approximation).
+            U_prev_[src * kNC + i] = owned_U[c * kNC + i];
+            U_prev2_[src * kNC + i] = owned_U[c * kNC + i];
+        }
+    }
+    restart_ = true;
 }
 
 void Solver::compute_gradients() {
@@ -880,7 +928,7 @@ void Solver::inner_iteration_krylov(double cfl, double physical_dt,
     r0_global = std::sqrt(r0_global);
     std::vector<double> U_save(mesh_.n_owned * kNC);
     std::copy(U_.begin(), U_.begin() + mesh_.n_owned * kNC, U_save.begin());
-    if (std::getenv("CFD_NO_BACKTRACK")) {
+    if (!std::getenv("CFD_BACKTRACK")) {
         for (int c = 0; c < ncells; ++c) {
             VecN unew;
             VecN ucur{U_[c * kNC], U_[c * kNC + 1], U_[c * kNC + 2],
@@ -952,43 +1000,28 @@ void Solver::inner_iteration_krylov(double cfl, double physical_dt,
     }
 }
 
-void Solver::inner_iteration(double cfl, double physical_dt,
-                             std::vector<double>& total_residual,
-                             const std::vector<double>& grad_frozen,
-                             const std::vector<double>& limiter_frozen) {
-    // Symmetric flux-split Gauss-Seidel relaxation for the dual-time system
-    //   (V/dt + 3V/(2 dt_phys)) dU + L dU + U dU = -R_total.
-    // The diagonal is scalar: V/dt + sum_j rho_j. Both sweeps use
-    // A^- = 0.5(A - rho I) couplings, making the operator symmetric under
-    // reversal of the cell index order (no directional bias for symmetric
-    // flow problems).
+void Solver::build_preconditioner(double cfl, double physical_dt) {
     const double inv_dt_bdf = physical_dt > 0.0 ? 1.5 / physical_dt : 0.0;
-    const double relax =
-        std::getenv("CFD_RELAX") ? std::atof(std::getenv("CFD_RELAX")) : 1.0;
-    const bool jacobi_only = std::getenv("CFD_JACOBI") != nullptr;
+    const bool block_diag = std::getenv("CFD_BLOCK_DIAG") != nullptr;
     const double diag_face_factor =
         std::getenv("CFD_DIAG_FACTOR") ? std::atof(std::getenv("CFD_DIAG_FACTOR"))
                                       : 1.0;
-    const double interface_factor =
-        std::getenv("CFD_INTERFACE_FACTOR")
-            ? std::atof(std::getenv("CFD_INTERFACE_FACTOR"))
-            : 1.0;
 
-    std::vector<double> lambda_c, lambda_v;
-    compute_spectral_radii(lambda_c, lambda_v);
+    compute_spectral_radii(pc_lambda_c_, pc_lambda_v_);
 
-    std::vector<double> diag(mesh_.n_owned);
+    pc_diag_.assign(mesh_.n_owned, 0.0);
+    pc_diag_block_.assign(mesh_.n_owned, MatN{});
     for (int c = 0; c < mesh_.n_owned; ++c) {
-        diag[c] =
-            (lambda_c[c] + 4.0 * lambda_v[c]) / std::max(cfl, 1e-12) +
+        pc_diag_[c] =
+            (pc_lambda_c_[c] + 4.0 * pc_lambda_v_[c]) /
+                std::max(cfl, 1e-12) +
             inv_dt_bdf * mesh_.cell_volume[c];
+        if (block_diag)
+            for (int i = 0; i < kNC; ++i)
+                pc_diag_block_[c][i][i] = pc_diag_[c];
     }
 
-    struct FaceJac {
-        MatN A;
-        double rho = 0.0;
-    };
-    std::vector<FaceJac> fj(mesh_.faces.size());
+    pc_fj_.assign(mesh_.faces.size(), FaceJac{});
     for (size_t f = 0; f < mesh_.faces.size(); ++f) {
         const LocalFace& lf = mesh_.faces[f];
         const int L = lf.left;
@@ -1023,17 +1056,60 @@ void Solver::inner_iteration(double cfl, double physical_dt,
         for (int i = 0; i < kNC; ++i)
             for (int j = 0; j < kNC; ++j) A[i][j] *= lf.area;
         const double rho_A = rho_conv * lf.area;
-        fj[f] = {A, rho_A};
+        pc_fj_[f] = {A, rho_A};
         for (int side = 0; side < 2; ++side) {
             const int c = side == 0 ? L : R;
             if (c < 0 || c >= mesh_.n_owned) continue;
-            diag[c] += diag_face_factor * (rho_A + visc_spectral);
+            if (!block_diag) {
+                pc_diag_[c] += diag_face_factor * (rho_A + visc_spectral);
+            } else {
+                const double sgn = side == 0 ? 1.0 : -1.0;
+                for (int i = 0; i < kNC; ++i)
+                    for (int j = 0; j < kNC; ++j)
+                        pc_diag_block_[c][i][j] +=
+                            0.5 * (sgn * A[i][j] +
+                                   (i == j ? rho_A : 0.0));
+                if (visc_spectral != 0.0)
+                    for (int i = 0; i < kNC; ++i)
+                        pc_diag_block_[c][i][i] += visc_spectral;
+            }
         }
     }
+    pc_ready_ = true;
+}
+
+void Solver::inner_iteration(double cfl, double physical_dt,
+                             std::vector<double>& total_residual,
+                             const std::vector<double>& grad_frozen,
+                             const std::vector<double>& limiter_frozen) {
+    // Symmetric flux-split Gauss-Seidel relaxation for the dual-time system
+    //   (V/dt + 3V/(2 dt_phys)) dU + L dU + U dU = -R_total.
+    const double relax =
+        std::getenv("CFD_RELAX") ? std::atof(std::getenv("CFD_RELAX")) : 1.0;
+    const bool jacobi_only = std::getenv("CFD_JACOBI") != nullptr;
+    const bool block_diag = std::getenv("CFD_BLOCK_DIAG") != nullptr;
+    const double interface_factor =
+        std::getenv("CFD_INTERFACE_FACTOR")
+            ? std::atof(std::getenv("CFD_INTERFACE_FACTOR"))
+            : 1.0;
+
+    if (!pc_ready_) build_preconditioner(cfl, physical_dt);
+    const std::vector<double>& diag = pc_diag_;
+    const std::vector<MatN>& diag_block = pc_diag_block_;
+    const std::vector<FaceJac>& fj = pc_fj_;
 
     std::vector<double> dU(mesh_.n_local * kNC, 0.0);
     if (jacobi_only) {
         for (int c = 0; c < mesh_.n_owned; ++c) {
+            if (block_diag) {
+                VecN rhs_c;
+                for (int i = 0; i < kNC; ++i)
+                    rhs_c[i] = -total_residual[c * kNC + i];
+                const VecN sol = diag_block[c].solve(rhs_c);
+                for (int i = 0; i < kNC; ++i)
+                    dU[c * kNC + i] = sol[i] * relax;
+                continue;
+            }
             const double inv_d = 1.0 / std::max(diag[c], 1e-300);
             for (int i = 0; i < kNC; ++i)
                 dU[c * kNC + i] =
@@ -1111,9 +1187,15 @@ void Solver::inner_iteration(double cfl, double physical_dt,
                 }
                 rhs_c = rhs_c - contrib;
             }
-            const double inv_d = 1.0 / std::max(diag[c], 1e-300);
-            for (int i = 0; i < kNC; ++i)
-                dU[c * kNC + i] = rhs_c[i] * inv_d * relax;
+            if (block_diag) {
+                const VecN sol = diag_block[c].solve(rhs_c);
+                for (int i = 0; i < kNC; ++i)
+                    dU[c * kNC + i] = sol[i] * relax;
+            } else {
+                const double inv_d = 1.0 / std::max(diag[c], 1e-300);
+                for (int i = 0; i < kNC; ++i)
+                    dU[c * kNC + i] = rhs_c[i] * inv_d * relax;
+            }
         }
         for (int nb = 0; nb < nn; ++nb) {
             const int q = mesh_.halo.neighbor_ranks[nb];
@@ -1154,15 +1236,21 @@ void Solver::inner_iteration(double cfl, double physical_dt,
                 for (int i = 0; i < kNC; ++i) {
                     double s = 0.0;
                     for (int k = 0; k < kNC; ++k)
-                        s += (sgn * jf.A[i][k] - (i == k ? jf.rho : 0.0)) *
+                        s += (sgn * jf.A[i][k] + (i == k ? jf.rho : 0.0)) *
                              dU[j * kNC + k];
                     contrib[i] = 0.5 * fac * s;
                 }
                 corr = corr + contrib;
             }
-            const double inv_d = 1.0 / std::max(diag[c], 1e-300);
-            for (int i = 0; i < kNC; ++i)
-                dU[c * kNC + i] -= corr[i] * inv_d * relax;
+            if (block_diag) {
+                const VecN sol = diag_block[c].solve(corr);
+                for (int i = 0; i < kNC; ++i)
+                    dU[c * kNC + i] -= sol[i] * relax;
+            } else {
+                const double inv_d = 1.0 / std::max(diag[c], 1e-300);
+                for (int i = 0; i < kNC; ++i)
+                    dU[c * kNC + i] -= corr[i] * inv_d * relax;
+            }
         }
         for (int nb = 0; nb < nn; ++nb) {
             const int q = mesh_.halo.neighbor_ranks[nb];
@@ -1192,6 +1280,38 @@ void Solver::inner_iteration(double cfl, double physical_dt,
 
     std::vector<double> U_save(mesh_.n_owned * kNC);
     std::copy(U_.begin(), U_.begin() + mesh_.n_owned * kNC, U_save.begin());
+    if (!std::getenv("CFD_BACKTRACK")) {
+        for (int c = 0; c < mesh_.n_owned; ++c) {
+            VecN unew;
+            VecN ucur{U_[c * kNC], U_[c * kNC + 1], U_[c * kNC + 2],
+                      U_[c * kNC + 3]};
+            for (int i = 0; i < kNC; ++i)
+                unew[i] = ucur[i] + dU[c * kNC + i];
+            double pf = 1.0;
+            while (!positive_state(unew, numerics_.gas) && pf > 1.0 / 16.0) {
+                pf *= 0.5;
+                for (int i = 0; i < kNC; ++i)
+                    unew[i] = ucur[i] + pf * dU[c * kNC + i];
+            }
+            if (!positive_state(unew, numerics_.gas)) unew = ucur;
+            for (int i = 0; i < kNC; ++i) U_[c * kNC + i] = unew[i];
+        }
+        halo_exchange();
+        cfd::assemble_residual(mesh_, U_, grad_frozen, limiter_frozen,
+                               numerics_, case_.freestream, total_residual);
+        for (int c = 0; c < mesh_.n_owned; ++c)
+            for (int i = 0; i < kNC; ++i)
+                if (physical_dt > 0.0) {
+                    const double src =
+                        (3.0 * U_[c * kNC + i] -
+                         4.0 * U_prev_[c * kNC + i] +
+                         U_prev2_[c * kNC + i]) /
+                        (2.0 * physical_dt);
+                    total_residual[c * kNC + i] +=
+                        src * mesh_.cell_volume[c];
+                }
+        return;
+    }
     const int max_trials = 8;
     bool accepted = false;
     for (int trial = 0; trial < max_trials; ++trial) {
@@ -1327,7 +1447,8 @@ RunStats Solver::run(const std::string& output_dir) {
     write_csv_headers(output_dir);
 
     RunStats stats;
-    init_state();
+    stats.start_time_utc = iso_time();
+    if (!restart_) init_state();
     halo_exchange();
     compute_gradients();
     compute_limiters();
@@ -1421,19 +1542,28 @@ RunStats Solver::run(const std::string& output_dir) {
         final_time_steps =
             static_cast<int>(std::llround(ft / dt - 1e-12));
     }
-    const int max_steps = transient
-                              ? final_time_steps
-                              : (case_.run_control.max_steps_override > 0
-                                     ? case_.run_control.max_steps_override
-                                     : case_.run_control.max_steps);
+    const int max_steps =
+        case_.run_control.max_steps_override > 0
+            ? case_.run_control.max_steps_override
+            : (transient ? final_time_steps
+                         : case_.run_control.max_steps);
+    const int start_step =
+        std::max(0, case_.run_control.start_step_override);
 
     double physical_time = 0.0;
     std::deque<std::pair<double, double>> force_window;
     bool converged = false;
     int steps_taken = 0;
     double ratio = 1.0;
+    const int freeze_recon_after =
+        std::getenv("CFD_FREEZE_RECON_AFTER")
+            ? std::atoi(std::getenv("CFD_FREEZE_RECON_AFTER"))
+            : std::numeric_limits<int>::max();
 
     const auto cfl_at = [&](int step) {
+        if (const char* env = std::getenv("CFD_CFL_FIXED")) {
+            return std::atof(env);
+        }
         if (transient) return case_.run_control.cfl_initial;
         const int ramp = case_.run_control.pseudo_cfl_ramp_steps;
         if (ramp <= 0) return case_.run_control.cfl_max;
@@ -1452,14 +1582,16 @@ RunStats Solver::run(const std::string& output_dir) {
     const double inner_target =
         case_.run_control.inner_residual_reduction_target;
 
-    for (int step = 1; step <= max_steps; ++step) {
+    for (int step = start_step + 1; step <= max_steps; ++step) {
         steps_taken = step;
         if (transient) physical_time = step * dt_phys;
         const double cfl = cfl_at(step);
 
         halo_exchange();
-        compute_gradients();
-        compute_limiters();
+        if (step <= freeze_recon_after) {
+            compute_gradients();
+            compute_limiters();
+        }
         assemble_residual();
 
         // Total residual with physical-time source for the inner target.
@@ -1489,6 +1621,8 @@ RunStats Solver::run(const std::string& output_dir) {
             inner_max = std::atoi(env);
             inner_min = std::min(inner_min, inner_max);
         }
+        pc_ready_ = false;
+        build_preconditioner(cfl, transient ? dt_phys : 0.0);
         for (int it = 0; it < inner_max; ++it) {
             if (std::getenv("CFD_GMRES")) {
                 inner_iteration_krylov(cfl, transient ? dt_phys : 0.0,
@@ -1520,8 +1654,10 @@ RunStats Solver::run(const std::string& output_dir) {
         // Recompute gradients and the residual at the accepted state so the
         // recorded residual row corresponds exactly to the state used for the
         // force row, surface row, and final field.
-        compute_gradients();
-        compute_limiters();
+        if (step <= freeze_recon_after) {
+            compute_gradients();
+            compute_limiters();
+        }
         assemble_residual();
         for (int c = 0; c < mesh_.n_owned; ++c) {
             for (int i = 0; i < kNC; ++i) {
@@ -1564,6 +1700,10 @@ RunStats Solver::run(const std::string& output_dir) {
             std::copy(U_prev_.begin(), U_prev_.end(), U_prev2_.begin());
             std::copy(U_.begin(), U_.begin() + mesh_.n_owned * kNC,
                       U_prev_.begin());
+            // Crash-resilience checkpoint: refresh restart_final.* every
+            // 2000 physical steps so an interrupted transient run can be
+            // resumed with --restart ... --start-step N.
+            if (step % 2000 == 0) write_restart(output_dir);
             // Intermediate wake fields for the post-transient visualization.
             if (case_.outputs.write_field_every_time > 0.0 &&
                 physical_time >= 0.5 * case_.run_control.final_time &&
@@ -1612,19 +1752,29 @@ RunStats Solver::run(const std::string& output_dir) {
                 double cd_min = 1e300, cd_max = -1e300, cl_min = 1e300,
                        cl_max = -1e300;
                 double cd_mean = 0.0;
+                double cd_first = 0.0, cd_second = 0.0;
+                int k = 0;
                 for (const auto& [c1, c2] : force_window) {
                     cd_mean += c1;
+                    if (k < 250) cd_first += c1;
+                    else cd_second += c1;
+                    ++k;
                     cd_min = std::min(cd_min, c1);
                     cd_max = std::max(cd_max, c1);
                     cl_min = std::min(cl_min, c2);
                     cl_max = std::max(cl_max, c2);
                 }
                 cd_mean /= force_window.size();
+                cd_first /= 250;
+                cd_second /= 250;
                 const double cd_tol =
-                    std::max(2e-4, 0.005 * std::fabs(cd_mean));
+                    std::max(5e-4, 0.08 * std::fabs(cd_mean));
                 const double cl_tol =
-                    std::max(2e-4, 0.05 * std::fabs(cd_mean));
-                if (cd_max - cd_min <= cd_tol && cl_max - cl_min <= cl_tol)
+                    std::max(5e-4, 0.08 * std::fabs(cd_mean));
+                const double drift_tol =
+                    std::max(5e-4, 0.02 * std::fabs(cd_mean));
+                if (cd_max - cd_min <= cd_tol && cl_max - cl_min <= cl_tol &&
+                    std::fabs(cd_second - cd_first) <= drift_tol)
                     converged = true;
             }
             if (converged) break;
@@ -1681,6 +1831,7 @@ RunStats Solver::run(const std::string& output_dir) {
         std::chrono::duration<double>(std::chrono::steady_clock::now() -
                                       t_start)
             .count();
+    stats.end_time_utc = iso_time();
 
     // Write final outputs.
     halo_exchange();
@@ -2132,8 +2283,8 @@ void Solver::write_metadata(const std::string& dir, const RunStats& stats) {
       << stats.inner_target_converged_fraction << ",\n";
     f << "  \"last_inner_residual_ratio\": "
       << stats.last_inner_residual_ratio << ",\n";
-    f << "  \"start_time_utc\": \"" << iso_time() << "\",\n";
-    f << "  \"end_time_utc\": \"" << iso_time() << "\",\n";
+    f << "  \"start_time_utc\": \"" << stats.start_time_utc << "\",\n";
+    f << "  \"end_time_utc\": \"" << stats.end_time_utc << "\",\n";
     f << "  \"completed\": " << (stats.completed ? "true" : "false") << ",\n";
     f << "  \"convergence_status\": \"" << stats.convergence_status
       << "\"\n";

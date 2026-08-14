@@ -25,6 +25,8 @@ def main() -> None:
 
     checks = {}
     for case_dir in sorted(results_dir.iterdir()):
+        if not case_dir.name.startswith("final_"):
+            continue
         if not (case_dir / "run_status.json").exists():
             continue
         case_id = case_dir.name

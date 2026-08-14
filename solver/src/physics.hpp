@@ -15,6 +15,11 @@ struct Numerics {
     double limiter_k = 0.3;  // Venkatakrishnan K parameter
     double viscosity = 0.0;  // 0 => inviscid
     double thermal_conductivity = 0.0;
+    // Diagnostic overrides, resolved once at construction instead of by
+    // getenv() inside the per-face flux kernels.
+    bool first_order = false;
+    bool simple_ff = false;
+    bool wall_p_cell = false;
 };
 
 struct FaceFluxResult {

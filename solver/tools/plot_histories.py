@@ -12,7 +12,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from cfd_io import read_csv
+from cfd_io import read_csv, read_json
 
 
 def main() -> None:
@@ -23,7 +23,8 @@ def main() -> None:
     case_dir = args.case_dir.resolve()
     figdir = (args.figdir or case_dir / ".." / ".." / "report" / "figures").resolve()
     figdir.mkdir(parents=True, exist_ok=True)
-    case_id = case_dir.name
+    case_id = read_json(case_dir / "metadata.json").get("case_id",
+                                                        case_dir.name)
 
     res = read_csv(case_dir / "residuals.csv")
     force = read_csv(case_dir / "forces.csv")

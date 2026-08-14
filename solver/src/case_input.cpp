@@ -257,14 +257,13 @@ CaseInput parse_case(const std::string& case_path) {
         c.thermal_conductivity = c.viscosity * c.gas.cp() / c.gas.prandtl;
     }
 
-    // Flux selection: Roe with an entropy fix for inviscid transonic /
-    // supersonic cases; Rusanov for laminar cases, honoring the supplied
-    // dissipation scale (1.0 for the Re 200 production case).
-    if (c.mode == "inviscid") {
-        c.flux_scheme = FluxScheme::Roe;
-    } else {
-        c.flux_scheme = FluxScheme::Rusanov;
-    }
+    // Roe with the Harten-Yee entropy fix is used for both modes. At the low
+    // Mach numbers of the laminar cases Rusanov's (|u_n| + a) dissipation is
+    // dominated by the sound speed and smears the boundary layer, inflating
+    // skin friction; the Roe/entropy-fix dissipation stays proportional to
+    // the local wave speeds. CFD_RUSANOV=1 restores the Rusanov diagnostic
+    // path at run time.
+    c.flux_scheme = FluxScheme::Roe;
 
     return c;
 }
