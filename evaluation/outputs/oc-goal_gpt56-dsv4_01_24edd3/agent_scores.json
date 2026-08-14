@@ -5,22 +5,24 @@
   "evaluator": {
     "agent": "codex-evaluator",
     "session_id": null,
-    "harness": "unknown",
+    "harness": "opencode",
     "notes": "Legacy post-run reconstruction; immutable submission 332ca95ef31bc8f694e699554f257729657f5d37."
   },
   "metadata_answers": {
-    "opencode_sessions": "Unavailable: the workspace-bundled .sessions inventory contains no attributable OpenCode/Codex database rows or rollout JSONL; no external store was consulted."
+    "context_window_us_azure_openai_eccn-gpt-5.6-sol@high": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried."
   },
   "session_selection": {
-    "source": "unknown",
-    "roots": null,
-    "execution_date": null,
-    "started_at": null,
-    "ended_at": null,
-    "time_basis": "Unavailable: no bundled telemetry database or rollout provides an attributable primary-run event.",
-    "contestant_final_response_status": "absent",
-    "contestant_final_response_absence_reason": "The contestant workspace .sessions bundle contains no telemetry DB/rollout JSONL, so no attributable terminal assistant response can be established.",
-    "rationale": "Fail-closed telemetry classification. Only the contestant workspace .sessions tree was inspected; no home, evaluator, or external session store was queried."
+    "source": "project",
+    "roots": [
+      "ses_027517d00ffenObonZzRSKHwwh"
+    ],
+    "execution_date": "2026-08-06",
+    "started_at": "2026-08-06T20:05:43.295000+00:00",
+    "ended_at": "2026-08-10T07:01:44.847000+00:00",
+    "time_basis": "Selected root session's project-local OpenCode timestamps; session table records Docker cwd /workspace, mapped only to this contestant workspace bundle.",
+    "contestant_final_response_status": "present",
+    "contestant_final_response_message_id": "msg_fea79e6af00121ZNMwpgazPUYC",
+    "rationale": "Selected sole root ses_027517d00ffenObonZzRSKHwwh by its benchmark-completion prompt, 2026-08-06 to 2026-08-10 implementation/build/run/report continuity, and all 38 direct project-local descendant sessions. The terminal completed assistant message has one ordered text part and is preserved in contestant_final_response.md; no external store was queried."
   },
   "scores": {
     "code_review": {
@@ -425,10 +427,10 @@
     ]
   },
   "limitations": [
-    "Telemetry unavailable: workspace .sessions has no attributable DB/rollout JSONL; model, costs, timestamps, roots and final response cannot be established.",
-    "Only contestant workspace evidence was used for telemetry; no home or external session store was queried.",
+    "Telemetry is derived only from the contestant workspace's project-local OpenCode database; Docker cwd /workspace is mapped to this host workspace bundle and no external store was queried.",
+    "The context window for us/azure/openai/eccn-gpt-5.6-sol is unavailable from bundled telemetry; no provider or internet lookup was used.",
     "No Re200 rerun was performed.",
     "Read-only raw results were evaluated outside the curated immutable commit; report TeX is not self-contained because required PDFs were excluded.",
-    "run_identity.json and the absent-final-response status are unindexed sidecars; cfdeval check does not validate them."
+    "run_identity.json and contestant_final_response.md are unindexed sidecars; cfdeval check does not validate them."
   ]
 }

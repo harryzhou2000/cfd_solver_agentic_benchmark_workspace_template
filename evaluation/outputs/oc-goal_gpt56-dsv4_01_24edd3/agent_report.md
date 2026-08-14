@@ -6,7 +6,7 @@
 
 ## Telemetry and final response
 
-Telemetry is unavailable, fail closed. The contestant workspace's `.sessions/` bundle contains no attributable Codex/OpenCode database rows or rollout JSONL, so no root, model, cost, timestamps, or terminal contestant response can be established. No home, evaluator, or external session store was queried. Consequently `contestant_final_response.md` is absent. The identity sidecar and this absent-final-response status are unindexed sidecars and are not validated by `cfdeval check`.
+Project-local OpenCode telemetry is attributable: the sole root `ses_027517d00ffenObonZzRSKHwwh` spans 2026-08-06T20:05:43.295Z–2026-08-10T07:01:44.847Z and has 38 direct descendants covering implementation, builds, production runs, rank checks, figures, and report work. All 39 database sessions record Docker cwd `/workspace`; it is mapped only to this contestant workspace's bundled `.sessions` database. The selected tree reports 430,551,708 aggregate tokens (406,617,211 cached input, 213,406 non-cached input, 1,082,984 output) and $264.460781204 database cost. Its 36 main/subagent sessions use `us/azure/openai/eccn-gpt-5.6-sol` through `internal_openai_eccn`; two descendants use `deepseek-v4-flash` and one uses `MiniMax-M3`. The deterministic terminal completed root message is `msg_fea79e6af00121ZNMwpgazPUYC`, with one text part; its exact extracted prose is `contestant_final_response.md` (SHA-256 `12d6858a278cf64665f6ea386885223c77b96949c59aa09de43fb533b2e8e91b`). No home, evaluator, or external session store was queried. `run_identity.json` and `contestant_final_response.md` are unindexed sidecars and are not validated by `cfdeval check`.
 
 ## Evidence and validation
 
@@ -22,4 +22,4 @@ Score: **95/100**. Deductions: two points for independent clean-build/self-conta
 
 ## Limitations
 
-Raw results were read only from the original workspace and are deliberately outside the curated submission commit. Telemetry attribution is unavailable, and no Re200 rerun occurred.
+Raw results were read only from the original workspace and are deliberately outside the curated submission commit. The project-local OpenCode database records container cwd `/workspace`, so its mapping to this host workspace is documented rather than inferred from any external path. No Re200 rerun occurred.
