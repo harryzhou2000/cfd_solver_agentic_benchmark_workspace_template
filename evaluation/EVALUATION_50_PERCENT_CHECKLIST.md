@@ -118,7 +118,9 @@ Reserve `[x]` for a snapshot that passes both gates.
       submission `f06ea3fa63acbdbfce71ecd4debf603c355f751a`; manager pending.
       Recomputed Code/CFD/Results weighted overalls (4.85/4.92/4.95); both
       current structural and semantic completion gates pass.
-- [ ] 04
+- [x] 04 — `codex_gpt56_04_1e36f2`; 86/100 before DQ; DQ yes.
+      Submission `fe320b995caf44acceee26f893cbc4dd355737b8`; manager pending.
+      NACA M0.15 steady Cd changes 73.81% between np2/np8; both gates pass.
 
 ### `codex/kimik3` — 1 done, quota 1
 

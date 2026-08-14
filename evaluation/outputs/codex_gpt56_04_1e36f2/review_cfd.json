@@ -1,0 +1,116 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 5,
+      "notes": "Report and physics source specify conservative perfect-gas NS equations, coefficients, Newtonian stress and Fourier heat flux."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 5,
+      "notes": "CGNS mixed-cell geometry, boundary families and cell-face topology are implemented."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 5,
+      "notes": "Face-oriented cell-centred FV residual and global residual norms are source-supported."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Rusanov/LLF flux is implemented and described; it is deliberately diffusive rather than an entropy-fixed Roe method."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 5,
+      "notes": "Characteristic farfield, slip and no-slip adiabatic paths are documented and implemented."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "Least-squares linear reconstruction is active; the report candidly states pressure-sensor first-order face fallback and viscous-gradient coupling."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Barth-Jespersen limiter, sensor and positivity/rejected-update safeguards are source-supported."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "Separate velocity/temperature gradients, Newtonian/Fourier terms and tangential skin-friction reporting are present; shock-gradient coupling limits formal confidence."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 5,
+      "notes": "Local pseudo-time, rank-local LU-SGS/block-Jacobi Rusanov preconditioning and fully reassembled acceptance are implemented."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 5,
+      "notes": "BDF1 startup/BDF2 frozen-history physical-time path and t=300 report evidence are present; Re200 was not rerun."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 2,
+      "notes": "METIS and neighbour halos are source-supported, but the reported NACA M0.15 np2/np8 order-one force mismatch makes the delivered MPI result invalid."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Solver uses explicit time stepping only",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Normal viscous traction mislabeled as skin friction",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 4.38
+}

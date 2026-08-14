@@ -1,0 +1,83 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 5,
+      "notes": "Read-only workspace has all eight canonical output directories and the generated report records completed statuses; raw packages are intentionally excluded from the immutable commit."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "Generated report marks each required package pass; a fresh explicit validator invocation is not recorded in this scorecard."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 5,
+      "notes": "Seven steady cases are reported converged and Re200 statistically periodic at t=300, with readable package evidence; no Re200 rerun."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Force/residual and Re200 late-window evidence are plausible, but the np2/np8 NACA M0.15 Cd discrepancy is order-one."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 5,
+      "notes": "Committed report figures cover residual/force/surface/Mach/pressure for the final cases and a Re200 wake velocity view."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "Detailed equations, methods, qualifications and MPI discrepancy disclosure; it requires generated_results.tex and its raw provenance sources are not self-contained in the commit."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 3,
+      "notes": "Generated report cites manifests and raw files in the workspace, but those source packages/manifests are excluded from the immutable result commit."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report figures do not correspond to submitted field/CSV outputs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete or failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Debug outputs presented as final case results",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 4.35
+}
