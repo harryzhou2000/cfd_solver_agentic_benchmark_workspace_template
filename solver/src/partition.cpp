@@ -42,6 +42,7 @@ struct RankMeshData {
     std::vector<Vec2> face_normals;
     std::vector<double> face_areas;
     std::vector<Vec2> face_centroids;
+    std::vector<Vec2> face_nodes;  // two edge vertices per face, flattened
     std::vector<int> face_bc_type;  // local family index or -1
 
     std::vector<BCFamily> bc_families;  // face_ids are LOCAL face indices
@@ -123,6 +124,7 @@ RankMeshData build_rank_mesh(const Mesh& mesh,
         d.face_normals.push_back(f.normal);
         d.face_areas.push_back(f.area);
         d.face_centroids.push_back(f.centroid);
+        for (const Vec2& node : f.nodes) d.face_nodes.push_back(node);
         d.face_bc_type.push_back(f.bc_type);  // global family index for now
     }
 
@@ -339,6 +341,7 @@ void send_rank_mesh(MPI_Comm comm, int dest, const RankMeshData& d) {
     send_doubles(comm, dest, tag, flatten_vec2(d.face_normals));
     send_doubles(comm, dest, tag, d.face_areas);
     send_doubles(comm, dest, tag, flatten_vec2(d.face_centroids));
+    send_doubles(comm, dest, tag, flatten_vec2(d.face_nodes));
     send_ints(comm, dest, tag, d.face_bc_type);
     {
         std::vector<std::string> names;
@@ -422,6 +425,7 @@ RankMeshData recv_rank_mesh(MPI_Comm comm, int src) {
     d.face_normals = unflatten_vec2(recv_doubles(comm, src, tag));
     d.face_areas = recv_doubles(comm, src, tag);
     d.face_centroids = unflatten_vec2(recv_doubles(comm, src, tag));
+    d.face_nodes = unflatten_vec2(recv_doubles(comm, src, tag));
     d.face_bc_type = recv_ints(comm, src, tag);
     {
         const std::vector<std::string> names = recv_strings(comm, src, tag);
@@ -541,6 +545,7 @@ DistributedMesh assemble_distributed(const RankMeshData& d, int rank,
         dm.local_faces[i].normal = d.face_normals[i];
         dm.local_faces[i].area = d.face_areas[i];
         dm.local_faces[i].centroid = d.face_centroids[i];
+        dm.local_faces[i].nodes = {d.face_nodes[2 * i], d.face_nodes[2 * i + 1]};
         dm.local_faces[i].bc_type = d.face_bc_type[i];
     }
 

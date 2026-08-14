@@ -4,6 +4,10 @@
 #include "solver/adjacency.hpp"
 #include "solver/partition.hpp"
 #include "solver/partition_types.hpp"
+#include "solver/boundary.hpp"
+#include "solver/residual.hpp"
+#include "solver/time_integrator.hpp"
+#include "solver/output_writer.hpp"
 #include <mpi.h>
 #include <fmt/core.h>
 #include <iostream>
@@ -66,6 +70,22 @@ int main(int argc, char* argv[]) {
     if (rank == 0) mkdir(output_dir.c_str(), 0755);
     MPI_Barrier(MPI_COMM_WORLD);
 
+    // Redirect stdout to stdout.log (rank 0) / /dev/null (other ranks).
+    if (rank == 0) {
+        FILE* log = freopen((output_dir + "/stdout.log").c_str(), "w", stdout);
+        (void)log;
+    } else {
+        FILE* nul = freopen("/dev/null", "w", stdout);
+        (void)nul;
+    }
+
+    // Reconstruct the command line for run_status.json.
+    std::string command = "cfd_solver";
+    for (int i = 1; i < argc; ++i) {
+        command += " ";
+        command += argv[i];
+    }
+
     // Rank-0 preprocessing: case parsing, mesh reading and partitioning.
     // If any step throws, broadcast an error flag so the other ranks exit
     // instead of hanging at the MPI_Bcast/MPI_Recv calls below.
@@ -74,14 +94,36 @@ int main(int argc, char* argv[]) {
     solver::CaseConfig config;
     solver::Mesh global_mesh;
     int num_global_cells = 0;
+    int edge_cut = -1;
     std::vector<int> partition;
+
+    // Parse case config on all ranks (shared filesystem — no MPI broadcast needed)
     if (rank == 0) {
         try {
             config = solver::parse_case_config(case_file);
-            fmt::print("=== Case: {} ({})\n", config.case_id, config.description);
-            fmt::print("=== MPI ranks: {}\n", nranks);
-            fmt::print("=== Mode: {}, Mach: {}\n", config.physics.mode,
-                       config.freestream.mach);
+        } catch (const std::exception& e) {
+            ok = false;
+            err_msg = e.what();
+        }
+    }
+    MPI_Bcast(&ok, 1, MPI_CXX_BOOL, 0, MPI_COMM_WORLD);
+    if (!ok) {
+        if (rank == 0) fmt::print(stderr, "Error: {}\n", err_msg);
+        MPI_Finalize();
+        return 1;
+    }
+    // All ranks parse the same file (shared filesystem)
+    if (rank != 0) config = solver::parse_case_config(case_file);
+
+    if (rank == 0) {
+        fmt::print("=== Case: {} ({})\n", config.case_id, config.description);
+        fmt::print("=== MPI ranks: {}\n", nranks);
+        fmt::print("=== Mode: {}, Mach: {}\n", config.physics.mode,
+                   config.freestream.mach);
+    }
+
+    if (rank == 0) {
+        try {
 
             // Read and process mesh on rank 0
             global_mesh = solver::read_cgns_mesh(config.mesh.file, config);
@@ -96,6 +138,7 @@ int main(int argc, char* argv[]) {
             solver::PartitionResult pres =
                 solver::partition_mesh(graph, num_global_cells, nranks);
             partition = pres.assignment;
+            edge_cut = pres.edge_cut;
             fmt::print("[Rank 0] METIS edge cut: {}\n", pres.edge_cut);
 
             // Count cells per rank
@@ -152,6 +195,67 @@ int main(int argc, char* argv[]) {
         int total_owned = std::accumulate(all_owned.begin(), all_owned.end(), 0);
         fmt::print("Total owned: {} (expected: {})\n", total_owned, num_global_cells);
     }
+
+    // Phase 5: partition diagnostics output (one row per rank).
+    solver::write_partition_diagnostics(dist, output_dir, MPI_COMM_WORLD, rank);
+
+    // --- Phase 4/5: implicit time integration with per-step output ---
+    std::vector<double> state;
+    solver::set_freestream_state(dist, state, config);
+
+    std::string flux_type = "rusanov";
+    if (config.freestream.mach > 1.5) flux_type = "roe";  // Roe for supersonic
+
+    const std::string start_utc = solver::iso8601_utc_now();
+    solver::SolverStats stats;
+    if (config.run_control.type == "transient") {
+        stats = solver::run_transient_solve(dist, state, config, flux_type,
+                                            output_dir);
+    } else {
+        stats = solver::run_steady_solve(dist, state, config, flux_type,
+                                         output_dir);
+    }
+    const std::string end_utc = solver::iso8601_utc_now();
+
+    // compute_forces is collective (MPI reductions); every rank must call it.
+    auto forces = solver::compute_forces(dist, state, config);
+    if (rank == 0) {
+        fmt::print("\n=== Final results ===\n");
+        fmt::print("Steps: {}, Status: {}\n", stats.total_steps,
+                   stats.convergence_status);
+        fmt::print("Final residual: L2 = {:.6e}, Linf = {:.6e}\n",
+                   stats.final_residual_l2, stats.final_residual_linf);
+        fmt::print("Residual reduction: {:.2f} orders\n",
+                   stats.residual_reduction_orders);
+        fmt::print("Inner its: min={}, max={}, mean={:.1f}, misses={}, "
+                   "converged fraction={:.2f}, last ratio={:.3e}\n",
+                   stats.min_inner_its, stats.max_inner_its,
+                   stats.mean_inner_its, stats.inner_target_misses,
+                   stats.converged_fraction, stats.last_inner_residual_ratio);
+        fmt::print("Forces: CL = {:.6f}, CD = {:.6f}, CMz = {:.6f}\n",
+                   forces.cl, forces.cd, forces.cmz);
+        fmt::print("Wall time: {:.2f}s\n", stats.wall_time_seconds);
+    }
+
+    // Phase 5: final output files (surface, field, restart, metadata, status).
+    solver::write_surface_csv(dist, state, config, output_dir, MPI_COMM_WORLD,
+                              rank);
+    solver::write_field_vtu(dist, state, config, output_dir, MPI_COMM_WORLD,
+                            rank);
+    solver::write_restart(dist, state, output_dir, MPI_COMM_WORLD, rank);
+    solver::write_metadata_json(dist, config, stats, flux_type, output_dir,
+                                num_global_cells, global_mesh.num_faces,
+                                edge_cut, start_utc, end_utc);
+    // run_status final_step must match the last row of forces.csv: rows are
+    // 1-based per executed step; a converged steady run stops before the
+    // step that detected convergence.
+    const bool steady_converged =
+        (config.run_control.type != "transient") &&
+        (stats.convergence_status == "converged");
+    const int final_step =
+        steady_converged ? stats.total_steps - 1 : stats.total_steps;
+    solver::write_run_status_json(config, stats, final_step, command,
+                                  output_dir, nranks);
 
     MPI_Finalize();
     return 0;

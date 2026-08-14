@@ -81,6 +81,13 @@ add_executable(cfd_solver
   src/adjacency.cpp
   src/partition.cpp
   src/halo_exchange.cpp
+  src/flux.cpp
+  src/boundary.cpp
+  src/reconstruction.cpp
+  src/limiter.cpp
+  src/residual.cpp
+  src/time_integrator.cpp
+  src/output_writer.cpp
 )
 
 target_include_directories(cfd_solver PRIVATE

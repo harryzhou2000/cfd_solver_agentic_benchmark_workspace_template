@@ -217,6 +217,11 @@ std::vector<int> build_topology(Mesh& mesh,
         }
     }
 
+    // Remove dropped faces (orphan boundary edges matching no cell edge)
+    mesh.faces.erase(std::remove_if(mesh.faces.begin(), mesh.faces.end(),
+        [](const Face& f) { return f.cell_ids[1] == -2; }),
+        mesh.faces.end());
+
     mesh.num_cells = num_cells;
     mesh.num_faces = static_cast<int>(mesh.faces.size());
     mesh.num_bnd_faces = 0;
