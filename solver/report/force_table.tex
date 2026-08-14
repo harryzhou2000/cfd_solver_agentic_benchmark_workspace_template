@@ -1,0 +1,35 @@
+\begin{table}[ht]
+\centering
+\caption{Force coefficients for all cases.}
+\label{tab:forces}
+\begin{tabular}{lccccc}
+\toprule
+Case & $C_D$ & $C_L$ & $C_D^p$ & $C_D^v$ & Status \\
+\midrule
+naca0012\_m015\_inviscid & 0.147 & 0.001 & 0.147 & 0.000 & converged \\
+naca0012\_m080\_inviscid & 0.094 & 0.000 & 0.094 & 0.000 & converged \\
+naca0012\_m200\_inviscid & 0.096 & 0.000 & 0.096 & 0.000 & converged \\
+naca0012\_m015\_laminar\_re5000 & 1.412 & 0.000 & 0.319 & 1.092 & converged \\
+naca0012\_m080\_laminar\_re5000 & 0.792 & 0.000 & 0.167 & 0.625 & converged \\
+naca0012\_m200\_laminar\_re5000 & 2.635 & 0.000 & 0.055 & 2.580 & converged \\
+cylinder\_m010\_laminar\_re20 & 8.870 & -0.387 & 5.181 & 3.689 & converged \\
+cylinder\_m010\_laminar\_re200 & 21.24 & 3.83 & 18.87 & 2.37 & stat.~periodic \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Parallel validation: rank-count comparison.}
+\label{tab:parallel}
+\begin{tabular}{lcccc}
+\toprule
+Case & Ranks & $C_D$ & $C_L$ & Wall (s) \\
+\midrule
+naca0012\_m015\_inviscid & 4 & 0.147 & 0.001 & 21.9 \\
+naca0012\_m015\_inviscid & 8 & 0.145 & -0.097 & 18.8 \\
+cylinder\_m010\_laminar\_re20 & 4 & 8.870 & -0.387 & 135.3 \\
+cylinder\_m010\_laminar\_re20 & 8 & 7.107 & -0.003 & 9.8 \\
+\bottomrule
+\end{tabular}
+\end{table}

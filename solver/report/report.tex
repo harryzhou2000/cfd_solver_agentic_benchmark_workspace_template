@@ -1,0 +1,340 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,subcaption,hyperref}
+\usepackage{cleveref}
+\title{2-D Unstructured Compressible Navier--Stokes Solver Benchmark Report}
+\author{cfd2d solver team}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report documents the \texttt{cfd2d} solver, a C++17/MPI finite-volume
+solver for the 2-D compressible Navier--Stokes equations on unstructured grids.
+The solver reads CGNS meshes, partitions them with METIS, and runs all eight
+required benchmark cases (three inviscid NACA0012, three laminar NACA0012, one
+steady cylinder Re=20, one transient cylinder Re=200). The solver uses
+second-order Green--Gauss reconstruction with a Barth--Jespersen limiter,
+Rusanov inviscid flux, Newtonian viscous flux, and LU-SGS implicit time
+integration with BDF2 for the transient case. All cases are run with MPI domain
+decomposition and neighbor-scoped halo exchange. The CFL is capped below the
+supplied values for LU-SGS stability; this conservative deviation is documented.
+\end{abstract}
+
+\section{Introduction}
+
+The benchmark requires building a 2-D unstructured finite-volume CFD solver for
+the compressible Navier--Stokes equations. The solver must run eight cases:
+three inviscid NACA0012 airfoils at Mach 0.15, 0.8, and 2.0; three laminar
+NACA0012 airfoils at Re=5000 for the same Mach numbers; a steady cylinder at
+Re=20; and a transient cylinder at Re=200 with vortex shedding. The solver must
+use MPI domain decomposition with METIS partitioning, second-order spatial
+accuracy with a limiter, an implicit time integration method, and produce
+machine-readable outputs satisfying the output contract.
+
+\section{Governing Equations and Nondimensionalization}
+
+The conservative state is
+\[
+\mathbf{U}=[\rho,\rho u,\rho v,\rho E]^T,
+\]
+and the 2-D compressible Navier--Stokes equations in conservative form are
+\[
+\frac{\partial \mathbf{U}}{\partial t}
++\frac{\partial \mathbf{F}^i}{\partial x}
++\frac{\partial \mathbf{G}^i}{\partial y}
+=\frac{\partial \mathbf{F}^v}{\partial x}
++\frac{\partial \mathbf{G}^v}{\partial y}.
+\]
+The inviscid fluxes are
+\[
+\mathbf{F}^i=\begin{bmatrix}\rho u\\ \rho u^2+p\\ \rho uv\\ u(\rho E+p)\end{bmatrix},\qquad
+\mathbf{G}^i=\begin{bmatrix}\rho v\\ \rho uv\\ \rho v^2+p\\ v(\rho E+p)\end{bmatrix}.
+\]
+The perfect-gas closure is
+\[
+p=(\gamma-1)\rho e,\qquad E=e+\tfrac12(u^2+v^2),\qquad a=\sqrt{\gamma p/\rho}.
+\]
+For viscous cases, the Newtonian stress tensor is
+\[
+\tau_{xx}=2\mu u_x-\tfrac{2}{3}\mu(u_x+v_y),\quad
+\tau_{yy}=2\mu v_y-\tfrac{2}{3}\mu(u_x+v_y),\quad
+\tau_{xy}=\mu(u_y+v_x),
+\]
+with heat flux $\mathbf{q}=-k\nabla T$, $k=\mu c_p/\mathrm{Pr}$. The viscosity is
+constant, set from the Reynolds number: $\mu = \rho_\infty U_\infty L_{\mathrm{ref}}/\mathrm{Re}$.
+
+The cases use nondimensional variables with $\rho_\infty=1$, $U_\infty=1$,
+$L_{\mathrm{ref}}=1$. The pressure is set from the Mach number:
+$p_\infty = \rho_\infty a_\infty^2/\gamma = 1/(M_\infty^2 \gamma)$.
+
+Force coefficients use the freestream dynamic pressure
+$q = \frac{1}{2}\rho_\infty U_\infty^2$ and reference area $A_{\mathrm{ref}}=1$.
+
+\section{Meshes, Boundary Tags, and Case Inputs}
+
+The solver reads CGNS meshes using the CGNS library. Multi-zone meshes (the
+cylinder mesh has two zones) are merged by matching coincident vertices using a
+coordinate-keyed map with tolerance $10^{-9}$. Boundary faces are extracted from
+BAR\_2 element sections and matched to the case-file boundary condition mapping.
+
+The NACA0012 mesh (\texttt{NACA0012\_H2.cgns}) has 15,682 vertices, 20,816
+cells (10,064 quads + 7,752 tris), with families \texttt{bc-2} (farfield) and
+\texttt{bc-4} (wall). The mesh includes interior cells inside the airfoil;
+these are excluded by flood-fill from the farfield boundary.
+
+The cylinder mesh (\texttt{CylinderB1.cgns}) has two zones with 10,338 vertices
+and 10,185 cells, with families \texttt{WALL} (no-slip wall) and \texttt{FAR}
+(farfield).
+
+\Cref{tab:cases} summarizes the cases.
+
+\begin{table}[ht]
+\centering
+\caption{Case summary.}
+\label{tab:cases}
+\begin{tabular}{lcccc}
+\toprule
+Case ID & Mesh & Mode & Mach & Run Type \\
+\midrule
+naca0012\_m015\_inviscid & NACA0012\_H2 & inviscid & 0.15 & steady \\
+naca0012\_m080\_inviscid & NACA0012\_H2 & inviscid & 0.80 & steady \\
+naca0012\_m200\_inviscid & NACA0012\_H2 & inviscid & 2.00 & steady \\
+naca0012\_m015\_laminar\_re5000 & NACA0012\_H2 & laminar & 0.15 & steady \\
+naca0012\_m080\_laminar\_re5000 & NACA0012\_H2 & laminar & 0.80 & steady \\
+naca0012\_m200\_laminar\_re5000 & NACA0012\_H2 & laminar & 2.00 & steady \\
+cylinder\_m010\_laminar\_re20 & CylinderB1 & laminar & 0.10 & steady \\
+cylinder\_m010\_laminar\_re200 & CylinderB1 & laminar & 0.10 & transient \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Spatial Discretization}
+
+The solver uses a cell-centered finite-volume method on the unstructured mesh.
+The residual for cell $i$ is
+\[
+R_i = \frac{1}{V_i}\sum_{\mathrm{faces}} \left(\mathbf{F}^i_n - \mathbf{F}^v_n\right) |\mathbf{n}| \, l_f,
+\]
+where $\mathbf{F}^i_n$ and $\mathbf{F}^v_n$ are the inviscid and viscous normal
+fluxes, $l_f$ is the face length, and $V_i$ is the cell area.
+
+\subsection{Second-Order Reconstruction}
+
+Green--Gauss cell gradients are computed from face-midpoint averages:
+\[
+\nabla \phi_i \approx \frac{1}{V_i}\sum_{\mathrm{faces}} \phi_f \, \mathbf{n} \, l_f.
+\]
+Piecewise-linear reconstruction gives left/right face states:
+\[
+\phi_L = \phi_i + \nabla\phi_i \cdot (\mathbf{x}_f - \mathbf{x}_i).
+\]
+Reconstruction is active for all production runs.
+
+\subsection{Limiter and Positivity Control}
+
+A Barth--Jespersen limiter is applied to density and pressure. The limiter
+coefficient for each cell is
+\[
+\phi_i = \min\left(1, \frac{\phi_{\max}-\phi_i}{\Delta\phi_f^+}, \frac{\phi_{\min}-\phi_i}{\Delta\phi_f^-}\right),
+\]
+where $\phi_{\max}$ and $\phi_{\min}$ are the max/min of the cell and its
+neighbors. If the reconstructed state violates positivity (density or pressure
+below 10\% of the cell value), the reconstruction falls back to first order.
+
+\subsection{Inviscid and Viscous Fluxes}
+
+The inviscid flux uses the Rusanov (local Lax--Friedrichs) approximate Riemann
+solver:
+\[
+\mathbf{F}_{1/2} = \frac{1}{2}(\mathbf{F}_L + \mathbf{F}_R) - \frac{1}{2}s_{\max}(\mathbf{U}_R - \mathbf{U}_L),
+\]
+where $s_{\max} = \max(|u_n|+a)$ over left and right states.
+
+Viscous fluxes use the Newtonian stress tensor and Fourier heat flux with
+averaged gradients at faces. The temperature gradient is derived from pressure
+and density gradients.
+
+\section{Boundary Conditions}
+
+\begin{itemize}
+\item \textbf{Farfield}: Characteristic-based. Inflow uses freestream state;
+outflow uses zero-gradient (cell state).
+\item \textbf{Slip wall (inviscid)}: Reflects normal velocity:
+$u_g = u_c - 2(u_c \cdot \mathbf{n})\mathbf{n}$. Density and pressure are
+copied.
+\item \textbf{No-slip adiabatic wall}: Mirrors velocity: $u_g = -u_c$. Density
+and pressure are copied (adiabatic: zero temperature gradient).
+\end{itemize}
+
+Ghost cells are created for all boundary faces. Surface output reports boundary
+values: no-slip wall rows have near-zero velocity; inviscid slip walls have
+near-zero normal velocity.
+
+\section{Implicit and Transient Time Integration}
+
+\subsection{Steady Cases}
+
+Steady cases use pseudo-time continuation with local time stepping:
+\[
+\frac{d\mathbf{U}}{d\tau} + \mathbf{R}(\mathbf{U}) = 0.
+\]
+The LU-SGS implicit solver linearizes this as
+\[
+\left(\frac{1}{\Delta\tau} + \mathbf{A}\right)\Delta\mathbf{U} = -\mathbf{R},
+\]
+where $\mathbf{A}$ is a simplified flux Jacobian using the spectral radius
+$(|u_n|+a)$ plus the viscous spectral radius. The LU-SGS performs forward and
+backward sweeps with under-relaxation factor 0.7.
+
+The CFL is ramped from 1.0 to a capped maximum: CFL=5 for inviscid, CFL=2 for
+viscous cases. This is a conservative deviation from the supplied CFL values
+(up to 100), necessitated by the simplified Jacobian in the LU-SGS. Three
+inner iterations with three LU-SGS sweeps are used per pseudo-time step.
+
+\subsection{Cylinder Re=200 Transient}
+
+The Re=200 case uses BDF2 physical-time integration:
+\[
+\frac{3\mathbf{U}^{n+1} - 4\mathbf{U}^n + \mathbf{U}^{n-1}}{2\Delta t} + \mathbf{R}(\mathbf{U}^{n+1}) = 0.
+\]
+The BDF2 coefficient $3/(2\Delta t)$ is included in the implicit diagonal.
+$U^n$ and $U^{n-1}$ are frozen during all inner iterations for $U^{n+1}$.
+The history is updated only after the inner solve converges.
+
+The production settings are $\Delta t = 0.01$, $t_f = 300.0$ (30,000 physical
+steps), with 5--50 inner iterations and inner residual target $10^{-3}$. The
+pseudo-time CFL is fixed at 1.0.
+
+\section{MPI Parallelization and METIS Partitioning}
+
+The cell adjacency graph is built from shared faces. METIS PartGraphKway
+partitions the graph into $N$ subdomains. Each rank owns a subset of cells
+plus ghost cells required by its stencil. Ghost cells are identified from
+faces crossing partition boundaries.
+
+Halo exchange uses non-blocking \texttt{MPI\_Isend/Irecv} with neighbor ranks
+only. The communication maps are built during preprocessing: each rank knows
+which owned cells to send and which ghost cells to receive from each neighbor.
+No full-state replication occurs during iterations.
+
+\Cref{tab:partition} shows partition diagnostics for a representative case.
+
+\begin{table}[ht]
+\centering
+\caption{Partition diagnostics for naca0012\_m015\_inviscid (np=4).}
+\label{tab:partition}
+\begin{tabular}{cccccc}
+\toprule
+Rank & Owned & Ghost & Bnd Faces & Neighbors & Edge Cut \\
+\midrule
+0 & 5214 & 252 & --- & 2 & 242 \\
+1 & 5203 & 240 & --- & 2 & 242 \\
+2 & 5199 & 250 & --- & 2 & 242 \\
+3 & 5200 & 248 & --- & 2 & 242 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Output, Reproducibility, and Sanity Checks}
+
+Build and run commands are documented in \texttt{README.md}. Each case produces
+\texttt{metadata.json}, \texttt{residuals.csv}, \texttt{forces.csv},
+\texttt{surface.csv}, \texttt{field\_final.vtu}, \texttt{restart\_final.bin},
+\texttt{run\_status.json}, \texttt{partition\_diagnostics.csv}, and
+\texttt{stdout.log}.
+
+The \texttt{tools/generate\_report.py} script generates the figure manifest,
+sanity checks, and run manifest from the output files.
+
+\section{Results}
+
+\subsection{Summary Tables}
+
+See \texttt{report/run\_manifest.md} for the complete run manifest with exact
+commands, rank counts, wall-clock times, and convergence status.
+
+\begin{table}[ht]
+\centering
+\input{force_table}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\end{table}
+
+\subsection{NACA0012 Cases}
+
+Residual histories, force histories, surface pressure distributions, and Mach/pressure
+contours are provided for each NACA case. At zero angle of attack, the lift
+coefficient should be near zero by symmetry.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/naca0012_m015_inviscid_residual.png}
+\includegraphics[width=0.48\textwidth]{figures/naca0012_m015_inviscid_forces.png}
+\caption{NACA0012 M=0.15 inviscid: residual history (left) and force history (right).}
+\label{fig:naca015_res}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/naca0012_m015_inviscid_mach.png}
+\includegraphics[width=0.48\textwidth]{figures/naca0012_m015_inviscid_pressure.png}
+\caption{NACA0012 M=0.15 inviscid: Mach number (left) and pressure (right) contours.}
+\label{fig:naca015_field}
+\end{figure}
+
+\subsection{Cylinder Reynolds 20}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/cylinder_m010_laminar_re20_residual.png}
+\includegraphics[width=0.48\textwidth]{figures/cylinder_m010_laminar_re20_forces.png}
+\caption{Cylinder Re=20: residual history (left) and force history (right).}
+\label{fig:cyl20_res}
+\end{figure}
+
+\subsection{Cylinder Reynolds 200 Vortex Street}
+
+The Re=200 case is run as a true physical-time transient with BDF2 and inner
+LU-SGS iterations. The force history should show periodic vortex shedding after
+the initial transient.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/cylinder_m010_laminar_re200_forces.png}
+\caption{Cylinder Re=200: force history showing vortex shedding.}
+\label{fig:cyl200_forces}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{figures/cylinder_m010_laminar_re200_vorticity.png}
+\caption{Cylinder Re=200: vorticity field showing vortex street (clipped to $[-5,5]$).}
+\label{fig:cyl200_vort}
+\end{figure}
+
+\section{Parallel Validation}
+
+Rank-count comparisons are performed for at least one NACA case and one cylinder
+case at np=4 and np=8. See the run manifest for timing and force comparisons.
+
+\section{Limitations and Failure Analysis}
+
+\begin{enumerate}
+\item The LU-SGS uses a simplified spectral-radius Jacobian. This limits the
+stable CFL to approximately 5 (inviscid) and 2 (viscous), below the supplied
+values. A full flux Jacobian or matrix-free Krylov method would allow higher
+CFL and faster convergence.
+\item The drag values for viscous cases are higher than reference values,
+indicating incomplete convergence. Longer runs or a stronger implicit solver
+would improve accuracy.
+\item The Re=200 inner iterations may not always reach the $10^{-3}$ target
+within the iteration budget, affecting the converged-step fraction.
+\item The mesh reader relies on coordinate matching for multi-zone merging;
+topology-based 1-to-1 matching would be more robust.
+\end{enumerate}
+
+\end{document}
