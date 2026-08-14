@@ -117,6 +117,34 @@ class SnapshotProtocolTests(unittest.TestCase):
         self.assertEqual(result["rows"][0]["key"], "model-a + mixed(high,ultra)")
         self.assertIn("split unavailable", result["rows"][0]["attribution_basis"])
 
+    def test_legacy_total_only_model_decomposition_uses_blended_price(self):
+        with tempfile.TemporaryDirectory() as raw:
+            price_file = Path(raw) / "prices.json"
+            price_file.write_text(json.dumps({
+                "defaults": {"input_per_mtok": 1, "cached_input_per_mtok": 0.25,
+                             "output_per_mtok": 4, "input_share": 0.75},
+                "models": {"model-a": {"input_per_mtok": 2,
+                                         "cached_input_per_mtok": 0.5,
+                                         "output_per_mtok": 8}},
+            }))
+            expenses = {"tokens": {"by_thread": {"t": {
+                "source": "threads_fallback",
+                "tokens": {"model-a": {"input": 0, "cached": 0, "output": 0,
+                                          "reasoning_output": 0, "total": 1_000_000}},
+            }}}}
+            metadata = {"harness": {"harness": "codex"}, "threads": {"t": {
+                "reasoning_effort": ["medium"],
+            }}}
+            with patch.object(query, "COST_METADATA", price_file):
+                result = query.current_model_decomposition(expenses, metadata)
+            row = result["rows"][0]
+            self.assertEqual(row["total"], 1_000_000)
+            self.assertEqual(row["current_cost_usd"], 3.5)
+            self.assertIsNone(row["input"])
+            self.assertIsNone(row["cached_input"])
+            self.assertFalse(row["token_split_available"])
+            self.assertIn("total-only token fallback", row["attribution_basis"])
+
     def test_opencode_model_decomposition_filters_selected_tree(self):
         with tempfile.TemporaryDirectory() as raw:
             price_file = Path(raw) / "prices.json"

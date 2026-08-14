@@ -85,7 +85,8 @@ def current_model_decomposition(expenses: dict, metadata: dict,
     buckets: dict[tuple[str, str], dict] = {}
 
     def add(model: str, effort: str, tokens: dict, *, provider=None,
-            persisted_cost=None, basis: str, mixed=None) -> None:
+            persisted_cost=None, basis: str, mixed=None,
+            token_split_available: bool = True) -> None:
         key = (model or "unknown", effort or "unknown")
         row = buckets.setdefault(key, {
             "model": key[0], "reasoning": key[1], "provider": provider,
@@ -94,7 +95,10 @@ def current_model_decomposition(expenses: dict, metadata: dict,
             "persisted_cost_usd": 0.0, "has_persisted_cost": False,
             "attribution_basis": basis, "mixed_efforts_seen": set(),
             "reasoning_is_output_subset": harness == "codex",
+            "token_split_available": token_split_available,
         })
+        row["token_split_available"] = (
+            row["token_split_available"] and token_split_available)
         row["provider"] = row["provider"] or provider
         row["input"] += int(tokens.get("input", 0) or 0)
         row["cached_input"] += int(
@@ -121,10 +125,13 @@ def current_model_decomposition(expenses: dict, metadata: dict,
                       f'mixed({",".join(sorted(set(efforts)))})' if efforts else "unknown")
             basis = ("single observed thread setting" if len(efforts) == 1 else
                      "thread aggregate; per-setting token split unavailable")
+            if token_info.get("source") == "threads_fallback":
+                basis += "; total-only token fallback"
             for model, token_bundle in (token_info.get("tokens") or {}).items():
                 add(model, effort, token_bundle,
                     provider=thread.get("model_provider"), basis=basis,
-                    mixed=efforts if len(efforts) > 1 else [])
+                    mixed=efforts if len(efforts) > 1 else [],
+                    token_split_available=token_info.get("source") != "threads_fallback")
     elif harness == "opencode" and (metadata.get("opencode") or {}).get("sessions"):
         oc_sessions = metadata["opencode"]["sessions"]
         by_id = {s.get("session_id"): s for s in oc_sessions if s.get("session_id")}
@@ -174,10 +181,13 @@ def current_model_decomposition(expenses: dict, metadata: dict,
             price_key = next((c for c in candidates
                               if c.lower() in (price_meta.get("models") or {})), candidates[-1])
             price, defaults = model_cost(price_meta, price_key)
-            current_cost = round(cost_for(
-                price, input_t=row["input"], cached_t=row["cached_input"],
-                output_t=(row["output"] if row["reasoning_is_output_subset"]
-                          else row["output"] + row["reasoning_output"])), 4)
+            if row["token_split_available"]:
+                current_cost = round(cost_for(
+                    price, input_t=row["input"], cached_t=row["cached_input"],
+                    output_t=(row["output"] if row["reasoning_is_output_subset"]
+                              else row["output"] + row["reasoning_output"])), 4)
+            else:
+                current_cost = round(cost_for(price, total_t=row["total"]), 4)
             pricing = "defaults" if defaults else "metadata"
             total_current += current_cost
         persisted = (round(row["persisted_cost_usd"], 6)
@@ -186,14 +196,20 @@ def current_model_decomposition(expenses: dict, metadata: dict,
             total_persisted += persisted
         mixed = sorted(row.pop("mixed_efforts_seen"))
         row.pop("reasoning_is_output_subset")
+        split_available = row.pop("token_split_available")
         row.update({
             "key": f'{row["model"]} + {row["reasoning"]}',
-            "non_cached_input": max(row["input"] - row["cached_input"], 0),
+            "non_cached_input": (max(row["input"] - row["cached_input"], 0)
+                                 if split_available else None),
             "current_cost_usd": current_cost,
             "persisted_cost_usd": persisted,
             "pricing": pricing,
             "mixed_efforts_seen": mixed,
+            "token_split_available": split_available,
         })
+        if not split_available:
+            for field in ("input", "cached_input", "output", "reasoning_output"):
+                row[field] = None
         rows.append(row)
     total_tokens = sum(r["total"] for r in rows)
     for row in rows:
