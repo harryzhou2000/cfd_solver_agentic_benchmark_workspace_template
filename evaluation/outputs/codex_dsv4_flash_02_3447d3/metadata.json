@@ -1,0 +1,136 @@
+{
+  "harness": {
+    "harness": "codex",
+    "cli_version": "0.146.0",
+    "originator": "codex-tui",
+    "source": "cli",
+    "thread_source": "user",
+    "multi_agent_version": "v2",
+    "history_mode": "legacy",
+    "memory_mode": "disabled",
+    "model_provider": "openai",
+    "codex_runtime_version": null,
+    "plugins": []
+  },
+  "models": {
+    "BLSC/DeepSeek-V4-Flash": {
+      "catalog": {
+        "display_name": null,
+        "context_window": 522500,
+        "max_context_window": null,
+        "supported_reasoning_levels": null
+      },
+      "reasoning_efforts_seen": [
+        "max"
+      ],
+      "max_context_used": 641806,
+      "threads": 1
+    }
+  },
+  "context": {
+    "by_model": {
+      "BLSC/DeepSeek-V4-Flash": {
+        "context_window": 522500,
+        "max_context_used": 641806
+      }
+    },
+    "by_thread": {
+      "019fbd32-24d8-71e3-ae8f-cdb70fb1d494": {
+        "model": "BLSC/DeepSeek-V4-Flash",
+        "max_input_tokens": 641806,
+        "mean_input_tokens": 265847.7,
+        "model_context_window_recorded": 522500
+      }
+    },
+    "notes": []
+  },
+  "threads": {
+    "019fbd32-24d8-71e3-ae8f-cdb70fb1d494": {
+      "thread_id": "019fbd32-24d8-71e3-ae8f-cdb70fb1d494",
+      "is_subagent": false,
+      "model": "BLSC/DeepSeek-V4-Flash",
+      "entry_model": "BLSC/DeepSeek-V4-Flash",
+      "model_provider": "openai",
+      "reasoning_effort": [
+        "max"
+      ],
+      "entry_reasoning_effort": "max",
+      "tokens_used": 749747672,
+      "cwd": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02",
+      "git_branch": "codex/dsv4_flash/init",
+      "created_at": 1785585607,
+      "updated_at": 1785758274,
+      "started_at": "2026-08-01T12:00:23.598000+00:00",
+      "ended_at": "2026-08-03T11:57:54.504000+00:00",
+      "context_used_max_input": 641806,
+      "context_used_mean_input": 265847.7,
+      "model_context_window_recorded": 522500
+    }
+  },
+  "subagents": [],
+  "opencodex": {
+    "trigger": "non_vanilla_models",
+    "non_vanilla_models": [
+      "BLSC/DeepSeek-V4-Flash"
+    ],
+    "opencodex_version": null,
+    "opencodex_submodule_pin": null,
+    "config_facts": {},
+    "codex_proxy_fallback_config": null
+  },
+  "prompts": {
+    "by_root_thread": {
+      "019fbd32-24d8-71e3-ae8f-cdb70fb1d494": {
+        "goal_objective": "complete the work defined cfd_solver_agentic_benchmark/.",
+        "goal_status": "complete",
+        "initial_user_prompt": null,
+        "resume_prompts": [],
+        "source": "session_rollout"
+      }
+    }
+  },
+  "workspace": {
+    "git": {
+      "branch": "codex/dsv4_flash/02",
+      "commit": "93e872925fc54bef2ae17292afbaa59d64bc7c88"
+    },
+    "agents_md": {
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/AGENTS.md",
+      "exists": true,
+      "sha256": "7bcbffcafddfa208e8d5c8b7cb43e35122814902b3b218e67138130feaef724e",
+      "content": "# AGENTS.md\n\nProject instructions for coding agents working in this repository.\n\n## 1. Git Discipline\n\n- Do NOT run `git pull`, `git push`, or switch branches without explicit user\n  authorization. Unauthorized remote or branch mutations are prohibited.\n- Do use `git commit` (and `git stash` when needed) freely as code checkpoints:\n  commit or stash working progress regularly so partial work can be resumed or\n  rolled back. Local checkpoint commits do not require approval; only pushing\n  and branch/remote mutations require it.\n\n## 2. Subagents\n\n- Delegating independent subtasks to subagents is encouraged.\n- Subagent model policy: the ONLY allowed subagent model is\n  `BLSC/DeepSeek-V4-Flash` (passed as the `model` override to `spawn_agent`).\n  Do not spawn subagents with any other model.\n\n## 3. Persistence\n\n- Once the user has started a task, do not stop until the specified task is\n  accomplished to a level of satisfaction: completed results, validated\n  artifacts, and an honest report. Work through blockers with safe in-scope\n  checks and alternatives; only stop early when genuinely blocked or explicitly\n  told to stop.\n",
+      "matches_git_head": true
+    },
+    "codegraph": {
+      "exists": true,
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/.codegraph"
+    },
+    "benchmark_submodule": {
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/cfd_solver_agentic_benchmark",
+      "exists": true,
+      "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+      "branch": "HEAD",
+      "dirty": false,
+      "origin_url": "https://github.com/harryzhou2000/cfd_solver_agentic_benchmark"
+    }
+  },
+  "session_window": {
+    "started_at": "2026-08-01T12:00:23.598000+00:00",
+    "ended_at": "2026-08-03T11:57:54.504000+00:00"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/.sessions/codex/sessions",
+    "history": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/.sessions/codex/history.jsonl",
+    "ocx_config": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/.sessions/opencodex/config.json",
+    "ocx_catalog": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/.sessions/codex/opencodex-catalog.json",
+    "plugins_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/02/.sessions/codex/plugins",
+    "generated_at": "2026-08-14T04:10:23.579183+00:00",
+    "num_threads": 1
+  },
+  "questions": [],
+  "user_answers": {},
+  "status": "complete"
+}

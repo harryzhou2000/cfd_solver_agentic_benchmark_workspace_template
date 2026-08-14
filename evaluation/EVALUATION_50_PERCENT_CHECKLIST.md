@@ -43,7 +43,7 @@ canonical evaluations count toward the quota and must not be repeated.
 ### `codex/dsv4_flash` — 10 done, quota 5
 
 - [x] 01 — `codex_dsv4_flash_01_0c1996`
-- [ ] 02 — BLOCKED: provenance reconstructed (`codex/dsv4_flash/init` @ `6d76717d83cb1884055101a2bbeada962bdb8107`), but exact canonical-upstream collision query timed out twice with proxy bypassed on 2026-08-13; result branch must not be created until availability is established.
+- [x] 02 — `codex_dsv4_flash_02_3447d3`; 75/100 before DQ; DQ yes (terminal response admits Re200 strict inner-target failure while production metadata accepts it successful). Curated submission `93e8729` passes audit; supersedes recovery commit `2376b11`, which failed audit due non-curated artifacts. Eight case directories validate; curated report lacks excluded raw run_manifest.csv.
 - [x] 03 — `codex_dsv4_flash_03_294b64`; 87/100; DQ no; submission `9772c16083472abe27089e17fe87bb5329e68f4d`; manager `b9cae66`; all eight cases plus report validator OK. Limitation: report PNGs referenced only through an included TeX file were excluded by strict direct-reference audit, so curated report is not self-contained; Re200 does not shed.
 - [x] 04 — `codex_dsv4_flash_04_755869`; 48/100 before DQ; DQ yes (terminal response admits sibling workspace results used to complete case matrix); submission `1b16448613a82d29f7f8f033b9216d5248a7db05`; manager `612a300`; all eight cases plus report validator OK, but validator is structural and report includes only 12/41 manifested figures.
 - [ ] 06 — BLOCKED: provenance reconstructed (`codex/dsv4_flash/init` @ `ab943567cd55e707e760531ed7f2c914d09a0537`), but canonical-upstream exact-ref query timed out (15-second proxy-bypassed direct check) on 2026-08-14. No result branch created.
