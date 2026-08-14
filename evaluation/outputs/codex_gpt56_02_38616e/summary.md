@@ -103,6 +103,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_gpt56_02_38616e/review_code.md` (overall: None)
-- CFD methods review: `codex_gpt56_02_38616e/review_cfd.md` (overall: None)
-- Result review: `codex_gpt56_02_38616e/review_results.md` (overall: None)
+- Code review scorecard: `codex_gpt56_02_38616e/review_code.md` (overall: 4.8)
+- CFD methods review: `codex_gpt56_02_38616e/review_cfd.md` (overall: 4.86)
+- Result review: `codex_gpt56_02_38616e/review_results.md` (overall: 4.7)
