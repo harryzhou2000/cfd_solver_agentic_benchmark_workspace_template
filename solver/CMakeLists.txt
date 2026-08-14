@@ -1,0 +1,61 @@
+cmake_minimum_required(VERSION 3.16)
+project(cfd_solver CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG -funroll-loops")
+
+if(NOT CFD_EXTERNALS_ROOT)
+  set(CFD_EXTERNALS_ROOT "$ENV{CFD_EXTERNALS_ROOT}")
+endif()
+if(NOT EXTERNAL_HEADER_ROOT)
+  set(EXTERNAL_HEADER_ROOT "$ENV{EXTERNAL_HEADER_ROOT}")
+  if(NOT EXTERNAL_HEADER_ROOT)
+    set(EXTERNAL_HEADER_ROOT "${CMAKE_SOURCE_DIR}/../external")
+  endif()
+endif()
+
+message(STATUS "CFD_EXTERNALS_ROOT = ${CFD_EXTERNALS_ROOT}")
+message(STATUS "EXTERNAL_HEADER_ROOT = ${EXTERNAL_HEADER_ROOT}")
+
+find_package(MPI REQUIRED)
+
+set(CGNS_INCLUDE_DIR "${CFD_EXTERNALS_ROOT}/include")
+set(CGNS_LIBRARY "${CFD_EXTERNALS_ROOT}/lib/libcgns.so")
+set(HDF5_LIBRARY "${CFD_EXTERNALS_ROOT}/lib/libhdf5.so")
+set(ZLIB_LIBRARY "${CFD_EXTERNALS_ROOT}/lib/libz.so")
+set(METIS_INCLUDE_DIR "${CFD_EXTERNALS_ROOT}/include")
+set(METIS_LIBRARY "${CFD_EXTERNALS_ROOT}/lib/libmetis.so")
+
+set(EIGEN_INCLUDE_DIR "${EXTERNAL_HEADER_ROOT}/eigen")
+set(FMT_INCLUDE_DIR "${EXTERNAL_HEADER_ROOT}/fmt/include")
+set(NLOHMANN_INCLUDE_DIR "${EXTERNAL_HEADER_ROOT}/nlohmann")
+
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src
+  ${CGNS_INCLUDE_DIR}
+  ${METIS_INCLUDE_DIR}
+  ${EIGEN_INCLUDE_DIR}
+  ${FMT_INCLUDE_DIR}
+  ${NLOHMANN_INCLUDE_DIR}
+)
+
+add_executable(cfd_solver src/main.cpp)
+target_link_libraries(cfd_solver
+  ${CGNS_LIBRARY}
+  ${HDF5_LIBRARY}
+  ${ZLIB_LIBRARY}
+  ${METIS_LIBRARY}
+  MPI::MPI_CXX
+  rt
+)
+target_link_directories(cfd_solver PRIVATE ${CFD_EXTERNALS_ROOT}/lib)
+set_target_properties(cfd_solver PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
