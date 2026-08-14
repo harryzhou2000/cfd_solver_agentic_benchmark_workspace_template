@@ -1,0 +1,83 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 2,
+      "notes": "Eight directories have readable basic files, but each lacks stdout.log and submitted outputs conflict with the source that purportedly produced them."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 1,
+      "notes": "Individual case directories pass structural checks, but --report fails because the Re200 wake visualization is absent from the manifest."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 0,
+      "notes": "Completion statuses are not credible: Re200 is labeled statistically periodic/BDF2 despite source and run_status documenting a steady nontransient solve."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 0,
+      "notes": "No result credit: the source cannot generate the asserted METIS/MPI/transient evidence, so force/field histories are not trustworthy solver evidence."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Readable Mach/pressure/history figures exist, but no required Re200 wake visualization is manifested and result provenance fails."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Report candidly says first order and BDF2 pending, but its broad successful-result framing conflicts with Re200 metadata and output claims."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 1,
+      "notes": "Manifest links many figures to files, but the manifest is incomplete for Re200 wake and the underlying result/source mismatch defeats traceability."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report figures do not correspond to submitted field/CSV outputs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete or failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Debug outputs presented as final case results",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 1.45
+}

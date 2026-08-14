@@ -1,0 +1,437 @@
+{
+  "schema": "agent_scores",
+  "contestant": "omo_slim_dsv4_02_b52628",
+  "evaluated_at": "2026-08-14T08:30:00+00:00",
+  "evaluator": {
+    "agent": "Codex",
+    "session_id": null,
+    "harness": "opencode",
+    "notes": "Read-only evaluation of immutable submission e272cd3f195e4d7cf490acd9be3578c7893056e0; no solver was rerun."
+  },
+  "metadata_answers": {
+    "legacy_provenance": "Operator-approved post-run reconstruction: initial branch omo_slim/dsv4/init at bdc21ecad96ac517204fddca9ff9751498d65aca; original execution environment is unavailable.",
+    "opencode_sessions": "Selected the only project-local OpenCode root ses_03e6cdbcaffefVyMLw9N6OIQGR.",
+    "context_window_deepseek-v4-pro@max": "Unavailable in bundled immutable telemetry; no home, provider, or internet source was queried."
+  },
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "ses_03e6cdbcaffefVyMLw9N6OIQGR"
+    ],
+    "execution_date": "2026-08-02",
+    "started_at": "2026-08-02T08:24:33.589000+00:00",
+    "ended_at": "2026-08-02T10:18:34.601000+00:00",
+    "time_basis": "UTC timestamps from the bundled project OpenCode DB.",
+    "contestant_final_response_status": "present",
+    "contestant_final_response_absence_reason": null,
+    "rationale": "The bundled project DB has exactly one root and no subagents or Codex alternate. It is titled CFD solver agentic benchmark and spans the implementation/report activity. The terminal completed assistant message is msg_fc1fb50d2001kBVLJGcQ2TwMxo."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "CMake and README exist, but no clean rebuild was performed and the submitted source cannot reproduce the claimed MPI/transient outputs."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "main.cpp parses solve, --case and --output and rejects unknown/missing arguments."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 3,
+          "notes": "Reader, mesh, solver, and plotting files are separated, but the production path is serial-only and incomplete."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "No internal executable wrapper was found; trust policy precludes external similarity investigation."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "CaseReader consumes JSON rather than branching solely on the two benchmark mesh names."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 0,
+          "notes": "main.cpp invokes mesh read and FVMSolver::solve only on rank 0; no partition/halo/reduction solve path exists."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 1,
+          "notes": "Geometry contains placeholder cell-volume handling and VTK connectivity is explicitly placeholder; no credible parallel robustness evidence."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "No tests or reproducible rank comparison were submitted; report validation fails on the Re200 wake manifest requirement."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 2,
+          "notes": "Readable short C++ modules, but tracked source contains explicit placeholder paths and stale claims."
+        }
+      ],
+      "overall_score": 2.3,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Conservative perfect-gas variables and Rusanov/viscous formulas are present, though numerical credibility is limited."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "CGNS reader and face geometry exist, but placeholder volume handling prevents full credit."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 3,
+          "notes": "A cell residual loop exists, but it is serial and first-order face states are used."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Rusanov/LLF flux is identifiable in submitted source."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Farfield/slip/no-slip branches exist; no credible final-output verification can be credited."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 0,
+          "notes": "compute_residual explicitly uses first-order states; no reconstruction implementation is active."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 1,
+          "notes": "There is an update freestream reset, but no active Barth-Jespersen or reconstructed-state limiter."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Laminar viscous-flux routine exists, but wall/gradient fidelity is not established."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "A point-Jacobi-like local pseudo-time update and CFL ramp are present."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 0,
+          "notes": "solve always calls steady_solve; report states BDF2 is pending."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 0,
+          "notes": "No METIS, neighbor MPI, or global reduction call exists in the submitted solver path."
+        }
+      ],
+      "overall_score": 2.14,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 2,
+          "notes": "Eight directories have readable basic files, but each lacks stdout.log and submitted outputs conflict with the source that purportedly produced them."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "Individual case directories pass structural checks, but --report fails because the Re200 wake visualization is absent from the manifest."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 0,
+          "notes": "Completion statuses are not credible: Re200 is labeled statistically periodic/BDF2 despite source and run_status documenting a steady nontransient solve."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 0,
+          "notes": "No result credit: the source cannot generate the asserted METIS/MPI/transient evidence, so force/field histories are not trustworthy solver evidence."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Readable Mach/pressure/history figures exist, but no required Re200 wake visualization is manifested and result provenance fails."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Report candidly says first order and BDF2 pending, but its broad successful-result framing conflicts with Re200 metadata and output claims."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 1,
+          "notes": "Manifest links many figures to files, but the manifest is incomplete for Re200 wake and the underlying result/source mismatch defeats traceability."
+        }
+      ],
+      "overall_score": 1.45,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 36,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 5,
+        "notes": "Source has a CMake/CLI skeleton, but no clean build evidence and output provenance/contract are deficient."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 5,
+        "notes": "CGNS and geometry infrastructure exists; placeholders preclude correctness credit."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 9,
+        "notes": "Serial residual, Rusanov flux, and BC paths are present but limited and not credibly validated."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 0,
+        "notes": "Source explicitly uses first-order interior states; no active reconstruction/limiter."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 4,
+        "notes": "A laminar viscous routine exists, without sufficient evidence of correct wall treatment."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 6,
+        "notes": "Point-implicit steady/CFL elements exist; BDF2 two-loop Re200 method is absent."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 0,
+        "notes": "Only rank 0 solves; claimed METIS/halo metadata is contradicted by source."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 1,
+        "notes": "Files are readable, but source/output contradictions make them unusable as solver-result evidence."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 3,
+        "notes": "Figures and limitations are useful, but Re200 wake manifest is missing and claims conflict with metadata."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 3,
+        "notes": "Some module boundaries and JSON configuration are reusable, despite incomplete solver capabilities."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 0,
+      "notes": "Readable artifacts, but no credible source-to-result provenance after the MPI/output contradiction."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 0,
+      "notes": "Readable artifacts, but no credible source-to-result provenance after the MPI/output contradiction."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 0,
+      "notes": "Readable artifacts, but no credible source-to-result provenance after the MPI/output contradiction."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 0,
+      "notes": "Readable artifacts, but no credible source-to-result provenance after the MPI/output contradiction."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 0,
+      "notes": "Readable artifacts, but no credible source-to-result provenance after the MPI/output contradiction."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 0,
+      "notes": "Readable artifacts, but no credible source-to-result provenance after the MPI/output contradiction."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 0,
+      "notes": "Readable artifacts, but no credible source-to-result provenance after the MPI/output contradiction."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 0,
+      "notes": "Source is steady-only while metadata claims BDF2/statistical periodicity; required wake visualization is also absent from manifest."
+    }
+  },
+  "disqualification": {
+    "triggered": true,
+    "flags": [
+      {
+        "id": 1,
+        "text": "Existing solver executable is called internally",
+        "found": false,
+        "evidence": "No internal external-solver call found in submitted source."
+      },
+      {
+        "id": 2,
+        "text": "Force or residual files are generated without solving",
+        "found": true,
+        "evidence": "Submitted histories cannot be produced by the committed source: its solve path is serial steady_solve, while submitted artifacts assert unavailable transient/MPI behavior."
+      },
+      {
+        "id": 3,
+        "text": "Hard-coded benchmark mesh branches",
+        "found": false,
+        "evidence": "JSON case reader is not limited to the two mesh filenames."
+      },
+      {
+        "id": 4,
+        "text": "Order-one steady MPI mismatch",
+        "found": false,
+        "evidence": "No rank-comparison output was submitted; no mismatch can be established."
+      },
+      {
+        "id": 5,
+        "text": "Explicit-only solver",
+        "found": false,
+        "evidence": "Source contains a point-implicit steady update, though it is limited."
+      },
+      {
+        "id": 6,
+        "text": "Claimed method absent from source",
+        "found": false,
+        "evidence": "Report itself discloses first-order/steady limitations; decisive misrepresentation is recorded under flags 7 and 9."
+      },
+      {
+        "id": 7,
+        "text": "Incomplete run reported successful",
+        "found": true,
+        "evidence": "Re200 metadata reports completed/statistically_periodic, BDF2, true inner loop, and t=300, while run_status/report/source say BDF2 is pending and the calculation is steady."
+      },
+      {
+        "id": 8,
+        "text": "Figures do not correspond to results",
+        "found": false,
+        "evidence": "No specific mislabelled figure/data mismatch was established; manifest incompleteness is recorded separately."
+      },
+      {
+        "id": 9,
+        "text": "Claimed METIS but geometric/serial implementation",
+        "found": true,
+        "evidence": "metadata claims metis_kway and neighbor_isend_irecv; main.cpp calls solve only on rank 0 and source has no METIS or MPI halo/reduction solve path."
+      },
+      {
+        "id": 10,
+        "text": "Claimed reconstruction/limiter disabled",
+        "found": false,
+        "evidence": "Metadata accurately identifies first_order; no report claim of active second-order production reconstruction was found."
+      },
+      {
+        "id": 11,
+        "text": "Misrepresented no-slip surface velocity",
+        "found": false,
+        "evidence": "Metadata documents cell_center semantics; no separate failed surface check established."
+      },
+      {
+        "id": 12,
+        "text": "Misnamed figures",
+        "found": false,
+        "evidence": "No demonstrated Mach/pressure filename swap."
+      },
+      {
+        "id": 13,
+        "text": "Copied solver core",
+        "found": false,
+        "evidence": "No direct internal evidence; trust policy forbids external-copy investigation."
+      }
+    ]
+  },
+  "limitations": [
+    "Pre-run provenance is an operator-approved post-run reconstruction; original runtime environment is unavailable.",
+    "No evaluator build or solver rerun was performed; Re200 was never rerun.",
+    "The terminal OpenCode response is in project-local SQLite: message msg_fc1fb50d2001kBVLJGcQ2TwMxo, completed 2026-08-02T10:18:34.345Z, 4 parts; stored-message SHA-256 8ef69cfa3273eb4e8ee583c92e89fb25faa6ff4ae14751519f9f51ee0b290c80 and extracted text SHA-256 898a47098f67c298b64ea0e8cd850987b542cd4ebb03dc5ea1082bb4c7bd48e0. contestant_final_response.md remains an unindexed sidecar.",
+    "run_identity.json SHA-256 is 24d60d0b9ff887a881138ef1ef7d87763d3baf473976e8031ab5af0c183e8f3d."
+  ]
+}

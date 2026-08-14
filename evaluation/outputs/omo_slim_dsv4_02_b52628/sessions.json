@@ -1,0 +1,333 @@
+{
+  "codex": {
+    "present": false,
+    "thread_count": 0
+  },
+  "opencode": {
+    "present": true,
+    "source_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/02/.sessions/opencode-data/opencode/opencode.db",
+    "session_count": 1,
+    "root_session_count": 1,
+    "subagent_session_count": 0,
+    "sessions": [
+      {
+        "session_id": "ses_03e6cdbcaffefVyMLw9N6OIQGR",
+        "parent_id": null,
+        "agent": "orchestrator",
+        "model": "deepseek-v4-pro",
+        "variant": "max",
+        "title": "CFD solver agentic benchmark task",
+        "tokens_input": 19707738,
+        "tokens_output": 67379,
+        "tokens_cache_read": 1435264,
+        "started_at": "2026-08-02T08:24:33.589000+00:00",
+        "ended_at": "2026-08-02T10:18:34.601000+00:00"
+      }
+    ],
+    "source": "project"
+  },
+  "analysis": {
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "window": {
+      "start": "2026-08-02T08:24:33.667000+00:00",
+      "end": "2026-08-02T10:18:34.345000+00:00"
+    },
+    "idle_exclusion": {
+      "method": "merged timeline over main thread/session and all subagents; gaps with no events anywhere exceed the threshold and are excluded",
+      "gap_count": 1,
+      "gaps": [
+        {
+          "start": "2026-08-02T08:44:47.818000+00:00",
+          "end": "2026-08-02T09:29:32.886000+00:00",
+          "seconds": 2685.1,
+          "spanning_entities": [
+            "ses_03e6cdbcaffefVyMLw9N6OIQGR"
+          ]
+        }
+      ],
+      "idle_seconds_total": 2685.1
+    },
+    "permission_waits": {
+      "method": "heuristic",
+      "explicit_approval_events_found": false,
+      "ask_tool_events_found": 0,
+      "candidate_gaps": [],
+      "candidate_count": 0,
+      "policy_observed": [],
+      "limitations": [
+        "codex rollouts contain no explicit approval-request/response event types (verified by scanning all local sessions); permission-blocked idle cannot be distinguished from user-away time with certainty",
+        "candidates are gaps > idle threshold between a tool/turn boundary and a user message / new turn in approval-aware threads; expect false positives when the user stepped away"
+      ]
+    },
+    "buckets": [
+      {
+        "bucket_index": 0,
+        "start": "2026-08-02T08:24:33.667000+00:00",
+        "end": "2026-08-02T08:54:33.667000+00:00",
+        "active_seconds": 1214.2,
+        "idle_seconds": 585.8,
+        "active": true,
+        "tokens": {
+          "input": 6336201,
+          "cached_input": 667904,
+          "non_cached_input": 5668297,
+          "output": 36038,
+          "reasoning_output": 10401,
+          "total": 6382640
+        },
+        "cache": {
+          "cached_tokens": 667904,
+          "input_tokens": 6336201,
+          "hit_ratio": 0.1054
+        },
+        "tools": {
+          "total": 90,
+          "by_tool": {
+            "bash": 41,
+            "edit": 21,
+            "write": 13,
+            "read": 12,
+            "todowrite": 2,
+            "create_goal": 1
+          },
+          "by_category": {
+            "shell": 41,
+            "editing": 34,
+            "files": 12,
+            "other": 2,
+            "planning": 1
+          }
+        },
+        "turns": {},
+        "active_entities": [
+          "ses_03e6cdbcaffefVyMLw9N6OIQGR"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 1,
+        "start": "2026-08-02T08:54:33.667000+00:00",
+        "end": "2026-08-02T09:24:33.667000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 2,
+        "start": "2026-08-02T09:24:33.667000+00:00",
+        "end": "2026-08-02T09:54:33.667000+00:00",
+        "active_seconds": 1500.8,
+        "idle_seconds": 299.2,
+        "active": true,
+        "tokens": {
+          "input": 6066066,
+          "cached_input": 340992,
+          "non_cached_input": 5725074,
+          "output": 13250,
+          "reasoning_output": 7144,
+          "total": 6086460
+        },
+        "cache": {
+          "cached_tokens": 340992,
+          "input_tokens": 6066066,
+          "hit_ratio": 0.0562
+        },
+        "tools": {
+          "total": 37,
+          "by_tool": {
+            "bash": 16,
+            "edit": 12,
+            "write": 3,
+            "read": 3,
+            "todowrite": 2,
+            "task": 1
+          },
+          "by_category": {
+            "shell": 16,
+            "editing": 15,
+            "other": 3,
+            "files": 3
+          }
+        },
+        "turns": {},
+        "active_entities": [
+          "ses_03e6cdbcaffefVyMLw9N6OIQGR"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 3,
+        "start": "2026-08-02T09:54:33.667000+00:00",
+        "end": "2026-08-02T10:18:34.345000+00:00",
+        "active_seconds": 1440.7,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 8740735,
+          "cached_input": 426368,
+          "non_cached_input": 8314367,
+          "output": 18091,
+          "reasoning_output": 3738,
+          "total": 8762564
+        },
+        "cache": {
+          "cached_tokens": 426368,
+          "input_tokens": 8740735,
+          "hit_ratio": 0.0488
+        },
+        "tools": {
+          "total": 42,
+          "by_tool": {
+            "bash": 33,
+            "todowrite": 3,
+            "write": 3,
+            "cancel_task": 1,
+            "read": 1,
+            "update_goal": 1
+          },
+          "by_category": {
+            "shell": 33,
+            "other": 4,
+            "editing": 3,
+            "files": 1,
+            "planning": 1
+          }
+        },
+        "turns": {},
+        "active_entities": [
+          "ses_03e6cdbcaffefVyMLw9N6OIQGR"
+        ],
+        "active_entity_count": 1
+      }
+    ],
+    "whole_session_stats": {
+      "tokens": {
+        "input": 21143002,
+        "cached_input": 1435264,
+        "non_cached_input": 19707738,
+        "output": 67379,
+        "reasoning_output": 21283,
+        "total": 21231664,
+        "total_from_root_trees": null,
+        "total_from_all_sessions": 21210381
+      },
+      "cache": {
+        "cached_tokens": 1435264,
+        "input_tokens": 21143002,
+        "hit_ratio": 0.0679
+      },
+      "tools": {
+        "total": 169,
+        "by_tool": {
+          "bash": 90,
+          "edit": 33,
+          "write": 19,
+          "read": 16,
+          "todowrite": 7,
+          "create_goal": 1,
+          "task": 1,
+          "cancel_task": 1,
+          "update_goal": 1
+        },
+        "by_category": {
+          "shell": 90,
+          "editing": 52,
+          "files": 16,
+          "other": 9,
+          "planning": 2
+        }
+      },
+      "turns": {},
+      "activity": {
+        "active_seconds": 4155.6,
+        "wall_seconds": 6840.7,
+        "idle_seconds": 2685.1
+      },
+      "per_entity": {
+        "ses_03e6cdbcaffefVyMLw9N6OIQGR": {
+          "kind": "opencode_session",
+          "is_subagent": false,
+          "agent": "orchestrator",
+          "model": "deepseek-v4-pro",
+          "variant": "max",
+          "tokens_input": 19707738,
+          "tokens_total_session": 21210381,
+          "started_at": "2026-08-02T08:24:33.589000+00:00",
+          "ended_at": "2026-08-02T10:18:34.601000+00:00"
+        }
+      },
+      "accounting_notes": [
+        "opencode: session token columns are per-session (subagents have their own sessions); total_from_all_sessions sums them"
+      ]
+    }
+  },
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/02",
+  "discovered_at": "2026-08-14T08:15:56.196827+00:00",
+  "sources": [
+    {
+      "id": "project_codex",
+      "kind": "project",
+      "harness": "codex",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/02/.sessions/codex",
+      "reachable": false,
+      "sessions_found": 0,
+      "note": "workspace-bundled .sessions/codex copy"
+    },
+    {
+      "id": "project_opencode",
+      "kind": "project",
+      "harness": "opencode",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/02/.sessions/opencode-data/opencode/opencode.db",
+      "reachable": true,
+      "sessions_found": 1,
+      "note": "workspace-bundled .sessions/opencode-data/opencode DB"
+    }
+  ],
+  "selected_source": "project",
+  "selection": {
+    "method": "script_discovery + agent classification",
+    "roots": null,
+    "harness": "auto",
+    "questions": [],
+    "notes": [
+      "the evaluation agent classifies which sessions belong to the contestant run; unextractable choices are surfaced as questions"
+    ]
+  },
+  "env_snapshot": {
+    "captured": true,
+    "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/02/.eval/env_snapshot.json",
+    "sha256": "b3fc17d0117c1acae8b47e59ba11aba1ea74a7fa3ceaea0acdbb33275d036cbf"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/02/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/02/.sessions/codex/sessions",
+    "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/02/.sessions/opencode-data/opencode/opencode.db",
+    "session_source": "project",
+    "harness": "auto",
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "generated_at": "2026-08-14T08:15:56.196835+00:00"
+  }
+}
