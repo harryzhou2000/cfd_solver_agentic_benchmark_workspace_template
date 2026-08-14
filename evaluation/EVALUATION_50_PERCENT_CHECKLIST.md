@@ -142,9 +142,11 @@ Reserve `[x]` for a snapshot that passes both gates.
 
 ### `omo-slim/dsv4` — 8 done, quota 4
 
-- [ ] 01 — REPAIR `omo_slim_dsv4_01_12c8d9`; rubric/cases recorded,
-      but `code.originality`, the Code overall, and identity-sidecar provenance
-      are incomplete.
+- [x] 01 — `omo_slim_dsv4_01_12c8d9`; 85/100; DQ no. Repaired numeric
+      originality/Code-overall evidence, OpenCode selected-tree provenance and
+      model/expense/measurement consistency, identity/final-response sidecar
+      provenance, index, and both completion gates without rewriting the
+      immutable contestant submission.
 - [ ] 02
 - [ ] 03
 - [ ] 04

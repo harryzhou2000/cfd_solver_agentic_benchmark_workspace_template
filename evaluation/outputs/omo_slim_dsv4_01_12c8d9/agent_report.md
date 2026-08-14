@@ -1,6 +1,6 @@
 # Agent Evaluation Report — 01
 
-- Evaluated at: 2026-08-13T15:31:10.261471+00:00
+- Evaluated at: 2026-08-14T08:30:00+00:00
 - Evaluating agent: Codex
 - Harness: opencode
 
@@ -43,6 +43,10 @@
 Provenance was reconstructed from the operator-approved post-run snapshot: `omo_slim/dsv4/init` at `bdc21ecad96ac517204fddca9ff9751498d65aca`. The curated immutable result commit is `51d1a785f4a25b3cff7e79294459ed22579addb7`, and `run_identity.json` derives canonical ID `omo_slim_dsv4_01_12c8d9` from immutable blobs.
 
 I manually inspected the read-only project OpenCode database. Its sole root, `ses_040b656bdffeVJcS8XFIqGFGTw`, is titled “Complete CFD solver agentic benchmark,” uses the legacy workspace path, spans the full implementation/report timeline, and owns 13 fixer/oracle sessions. The terminal completed assistant message is `msg_fc1b10981001PMeB0ANUdBCsVs`; its exact text is retained in `contestant_final_response.md` (stored-message SHA-256 `5be118a9829f4523bf0c4cea93e476a78e65d8b7d2418527f7a564a16c846c2d`; extracted-file SHA-256 `0ba50a27d9e00bdaf63411b32dccf6277a111010f46c5fc753cf0156ea3487e0`).
+
+The telemetry is internally consistent: the selected harness is OpenCode in `sessions.json` and `metadata.json`; the selected tree contains one DeepSeek V4 Pro orchestrator and thirteen DeepSeek V4 Flash subagents, with nonzero OpenCode-derived expenses and measurements. The initial automatic home-store discovery was superseded and is not used.
+
+The immutable `run_identity.json` SHA-256 is `faea8d6f34f61211a2d6703c665d97b70324f5382cb0105cb537d0a3348f7b6a`.
 
 I read the submitted CMake, solver, partition, halo, output, and report sources; inspected final Re200 forces and metadata; and ran the explicit eight-case validator with `--report`. It returned `OK` for every case and the report. I did not rerun Re200. I also did not rebuild or rerun a steady case: submitted readable evidence already decisively supports structural completeness, while the broken migrated `external` link would otherwise require an environment-only repair.
 

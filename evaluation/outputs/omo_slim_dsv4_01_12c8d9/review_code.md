@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-08-14T02:16:55.397351+00:00
+Generated: 2026-08-14T08:11:04.521705+00:00
 
-**Overall score: 4.24**
+**Overall score: 4.2**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -18,7 +18,7 @@ Generated: 2026-08-14T02:16:55.397351+00:00
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 5 | Clear separated mesh, partition, halo, physics, solver, output, and report tooling modules. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 |  | Trust policy: no external similarity investigation. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | No direct internal wrapper/executable or copied-core evidence was found. Trust policy forbids external similarity investigation. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 5 | JSON case reader and CGNS path input; no case-filename-only branch identified. |
@@ -50,7 +50,7 @@ Generated: 2026-08-14T02:16:55.397351+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.24
+- Overall score (0-5): 4.2
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
