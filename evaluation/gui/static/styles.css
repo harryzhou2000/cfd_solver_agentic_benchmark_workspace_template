@@ -185,6 +185,24 @@ table.snapshots thead th .sort-ind {
 table.snapshots thead th.is-sorted { color: var(--accent); }
 table.snapshots thead th.is-sorted .sort-ind { color: var(--accent); }
 
+table.snapshots th.case-col,
+table.snapshots td.case-col {
+  width: 68px; min-width: 68px; max-width: 68px;
+  box-sizing: border-box; text-align: center;
+  padding-left: 5px; padding-right: 5px;
+}
+.case-head { display: inline-grid; justify-items: center; gap: 2px; line-height: 1.05; vertical-align: middle; }
+.case-head-tag { color: var(--text-mute); font-size: 9px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.case-head-label { font-size: 10.5px; white-space: nowrap; }
+table.snapshots th.case-col .sort-ind { margin-left: 2px; }
+.case-score { display: inline-grid; place-items: center; min-width: 29px; padding: 2px 5px; border: 1px solid transparent; border-radius: 5px; font-weight: 750; }
+.case-score-0 { color: #ffb3b3; background: rgba(196,45,45,.34); border-color: rgba(255,107,107,.42); }
+.case-score-1 { color: #ffc19e; background: rgba(193,76,25,.32); border-color: rgba(255,139,78,.40); }
+.case-score-2 { color: #ffda85; background: rgba(177,118,13,.30); border-color: rgba(240,180,41,.40); }
+.case-score-3 { color: #f1e6a5; background: rgba(152,139,48,.27); border-color: rgba(221,207,103,.34); }
+.case-score-4 { color: #a9e8c9; background: rgba(34,139,99,.29); border-color: rgba(77,195,146,.38); }
+.case-score-5 { color: #8ff0bd; background: rgba(29,156,99,.36); border-color: rgba(62,207,142,.48); }
+
 table.snapshots tbody td {
   padding: 7px 10px; border-bottom: 1px solid var(--border);
   vertical-align: middle;
@@ -211,6 +229,31 @@ td.branch-cell { font-family: var(--mono); color: var(--text-dim); font-size: 12
 .empty-state code {
   background: var(--bg-3); padding: 1px 5px; border-radius: 3px; color: var(--text);
 }
+
+/* --- readable question and model decomposition tabs --- */
+.questions-list { display: grid; gap: 12px; max-width: 1050px; }
+.question-card { background: var(--bg-1); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: var(--radius); padding: 14px 16px; }
+.question-card.is-answered { border-left-color: var(--green); }
+.question-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.question-card h3 { margin: 10px 0 8px; font-size: 15px; }
+.question-card p, .question-answer { margin: 7px 0 0; color: var(--text-dim); line-height: 1.5; }
+.question-label { display: block; margin-bottom: 2px; color: var(--text-mute); font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.question-answer { background: var(--bg-2); border-radius: 5px; padding: 9px 11px; color: var(--text); }
+.model-decomp-summary { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.model-decomp-summary > div { min-width: 170px; background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; }
+.model-decomp-summary strong, .model-decomp-summary span { display: block; }
+.model-decomp-summary strong { font-family: var(--mono); font-size: 17px; }
+.model-decomp-summary span { margin-top: 3px; color: var(--text-mute); font-size: 11px; }
+.model-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.model-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.model-table th, .model-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; font-family: var(--mono); }
+.model-table thead th { color: var(--text-mute); background: var(--bg-elev); font-size: 10.5px; }
+.model-table th:first-child, .model-table td:last-child { text-align: left; }
+.model-table tbody tr:last-child th, .model-table tbody tr:last-child td { border-bottom: 0; }
+.model-key, .model-provider { display: block; }
+.model-key { color: var(--text); font-size: 12px; }
+.model-provider, .model-basis, .model-note { color: var(--text-mute); font-size: 10.5px; }
+.model-note { margin-top: 10px; line-height: 1.45; }
 
 /* --- spinner --- */
 .spinner-overlay {

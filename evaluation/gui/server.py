@@ -126,6 +126,9 @@ def snapshot_detail(folder: Path) -> dict:
     report_pdf = find_report_pdf(workspace_for_snapshot(run_identity))
     current_cost_estimate = query.current_cost_estimate(
         expenses or summary.get("expenses") or {})
+    model_decomposition = query.current_model_decomposition(
+        expenses or summary.get("expenses") or {}, metadata or summary.get("metadata") or {},
+        agent_scores)
     md_files = {}
     for name in ("summary.md", "agent_report.md", "contestant_final_response.md",
                  "review_code.md", "review_cfd.md", "review_results.md"):
@@ -138,6 +141,7 @@ def snapshot_detail(folder: Path) -> dict:
         "snapshot": summary.get("snapshot", {}),
         "summary": summary,
         "current_cost_estimate": current_cost_estimate,
+        "model_decomposition": model_decomposition,
         "sessions": sessions,
         "metadata": metadata,
         "agent_scores": agent_scores,

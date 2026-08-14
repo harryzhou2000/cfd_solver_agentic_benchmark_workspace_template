@@ -36,14 +36,14 @@
     { key: "codegraph",      label: "Codegraph",    type: "bool",    sortType: "bool" },
     { key: "submodule",      label: "Submodule",    type: "text",    sortType: "str" },
     { key: "branch",         label: "Branch",       type: "text",    sortType: "str" },
-    { key: "case_m015_inv",  label: "M.15 Inv",     type: "case-score", sortType: "num" },
-    { key: "case_m080_inv",  label: "M.80 Inv",     type: "case-score", sortType: "num" },
-    { key: "case_m200_inv",  label: "M2 Inv",       type: "case-score", sortType: "num" },
-    { key: "case_m015_re5k", label: "M.15 Re5k",    type: "case-score", sortType: "num" },
-    { key: "case_m080_re5k", label: "M.80 Re5k",    type: "case-score", sortType: "num" },
-    { key: "case_m200_re5k", label: "M2 Re5k",      type: "case-score", sortType: "num" },
-    { key: "case_cyl_re20",  label: "Cyl Re20",     type: "case-score", sortType: "num" },
-    { key: "case_cyl_re200", label: "Cyl Re200",    type: "case-score", sortType: "num" },
+    { key: "case_m015_inv",  label: "0012 M.15 Inv",  caseTag: "0012", caseLabel: "M.15 Inv",  type: "case-score", sortType: "num" },
+    { key: "case_m080_inv",  label: "0012 M.80 Inv",  caseTag: "0012", caseLabel: "M.80 Inv",  type: "case-score", sortType: "num" },
+    { key: "case_m200_inv",  label: "0012 M2 Inv",    caseTag: "0012", caseLabel: "M2 Inv",    type: "case-score", sortType: "num" },
+    { key: "case_m015_re5k", label: "0012 M.15 Re5k", caseTag: "0012", caseLabel: "M.15 Re5k", type: "case-score", sortType: "num" },
+    { key: "case_m080_re5k", label: "0012 M.80 Re5k", caseTag: "0012", caseLabel: "M.80 Re5k", type: "case-score", sortType: "num" },
+    { key: "case_m200_re5k", label: "0012 M2 Re5k",   caseTag: "0012", caseLabel: "M2 Re5k",   type: "case-score", sortType: "num" },
+    { key: "case_cyl_re20",  label: "Cyl Re20",       caseTag: "Cyl",  caseLabel: "Re20",      type: "case-score", sortType: "num" },
+    { key: "case_cyl_re200", label: "Cyl Re200",      caseTag: "Cyl",  caseLabel: "Re200",     type: "case-score", sortType: "num" },
   ];
 
   const $  = (sel, root = document) => root.querySelector(sel);
@@ -94,6 +94,14 @@
     const v = Number(n);
     if (!Number.isFinite(v)) return emDash;
     return Number.isInteger(v) ? String(v) : v.toFixed(1).replace(/\.0$/, "");
+  }
+
+  function caseScoreCell(n) {
+    if (isNullish(n)) return emDash;
+    const v = Number(n);
+    if (!Number.isFinite(v)) return emDash;
+    const bucket = Math.max(0, Math.min(5, Math.round(v)));
+    return `<span class="case-score case-score-${bucket}" title="${escapeHtml(v)} out of 5">${escapeHtml(fmtCaseScore(v))}</span>`;
   }
 
   function fmtPct(n) {
@@ -172,7 +180,7 @@
       case "tokens":      return fmtTokens(v);
       case "money":       return fmtMoney(v);
       case "score":       return fmtScore(v);
-      case "case-score":  return fmtCaseScore(v);
+      case "case-score":  return caseScoreCell(v);
       case "pct":         return fmtPct(v);
       case "bool":        return boolPill(v);
       case "dq":          return dqPill(v);
@@ -234,8 +242,13 @@
     tr.innerHTML = TABLE_COLUMNS.map(col => {
       const sorted = state.sortKey === col.key;
       const arrow = sorted ? (state.sortDir === "asc" ? "\u25B2" : "\u25BC") : "\u00A0";
-      return `<th class="${sorted ? "is-sorted" : ""}" data-key="${col.key}">` +
-        `<span>${escapeHtml(col.label)}</span>` +
+      const isCase = col.type === "case-score";
+      const classes = [sorted ? "is-sorted" : "", isCase ? "case-col" : ""].filter(Boolean).join(" ");
+      const label = isCase
+        ? `<span class="case-head"><span class="case-head-tag">${escapeHtml(col.caseTag)}</span><span class="case-head-label">${escapeHtml(col.caseLabel)}</span></span>`
+        : `<span>${escapeHtml(col.label)}</span>`;
+      return `<th class="${classes}" data-key="${col.key}" title="${escapeHtml(col.label)}">` +
+        label +
         `<span class="sort-ind">${arrow}</span></th>`;
     }).join("");
     $$("#snapshots-thead-row th").forEach(th => {
@@ -303,12 +316,14 @@
     $("#table-wrap").hidden = false;
     tbody.innerHTML = rows.map((row, i) => {
       const cells = TABLE_COLUMNS.map(col => {
-        const cls = (col.type === "num" || col.type === "duration" ||
+        const classes = [];
+        if (col.type === "num" || col.type === "duration" ||
                      col.type === "tokens" || col.type === "money" ||
                      col.type === "score" || col.type === "pct" ||
                      col.type === "case-score" ||
-                     col.type === "int")
-                     ? " class=\"num\"" : "";
+                     col.type === "int") classes.push("num");
+        if (col.type === "case-score") classes.push("case-col");
+        const cls = classes.length ? ` class="${classes.join(" ")}"` : "";
         const statusTitle = col.key === "status"
           ? ` title="${escapeHtml(`${row.run_id || row.contestant}: ${row.status || emDash}`)}"`
           : "";
@@ -563,6 +578,8 @@
       case "pdf":      renderPdfTab(detail); break;
       case "reviews":  renderReviewsTab(detail); break;
       case "sessions": renderSessionsTab(detail);break;
+      case "questions": renderQuestionsTab(detail);break;
+      case "models":   renderModelsTab(detail);  break;
       case "metadata": renderMetadataTab(detail);break;
       case "configs":  renderConfigsTab(detail); break;
       case "env":      renderEnvTab(detail);     break;
@@ -961,6 +978,56 @@
     }
   }
 
+  function renderQuestionsTab(detail) {
+    const panel = $("#panel-questions");
+    const md = detail.metadata || (detail.summary && detail.summary.metadata) || {};
+    const scoreAnswers = (detail.agent_scores || {}).metadata_answers || {};
+    const userAnswers = md.user_answers || {};
+    const questions = Array.isArray(md.questions) ? md.questions : [];
+    const knownIds = new Set(questions.map(q => String(q.id || "")));
+    const additional = Object.entries(scoreAnswers).filter(([id, answer]) =>
+      !knownIds.has(String(id)) && answer !== null && answer !== undefined && String(answer).trim() !== "");
+    if (!questions.length && !additional.length) {
+      panel.innerHTML = `<div class="env-notice"><strong>No metadata questions.</strong><p>This snapshot has no recorded operator questions.</p></div>`;
+      return;
+    }
+    panel.innerHTML = `<div class="questions-list">${questions.map(q => {
+      const id = String(q.id || "");
+      const answer = q.answer ?? scoreAnswers[id] ?? userAnswers[id] ?? null;
+      const answered = answer !== null && answer !== undefined && String(answer).trim() !== "";
+      return `<article class="question-card ${answered ? "is-answered" : "is-open"}">
+        <div class="question-card-head"><code>${escapeHtml(id || emDash)}</code><span class="pill ${answered ? "pill-status-complete" : "pill-status-needs_user_input"}">${answered ? "answered" : "needs answer"}</span></div>
+        <h3>${escapeHtml(q.question || emDash)}</h3>
+        ${q.reason ? `<p><span class="question-label">Why asked</span>${escapeHtml(q.reason)}</p>` : ""}
+        ${q.suggested_source ? `<p><span class="question-label">Suggested source</span>${escapeHtml(q.suggested_source)}</p>` : ""}
+        <div class="question-answer"><span class="question-label">Answer</span>${answered ? escapeHtml(answer) : `<span class="muted">${emDash}</span>`}</div>
+      </article>`;
+    }).join("")}</div>${additional.length ? `<h2>Additional metadata answers</h2><div class="questions-list">${additional.map(([id, answer]) => `<article class="question-card is-answered"><div class="question-card-head"><code>${escapeHtml(id)}</code><span class="pill pill-status-complete">recorded</span></div><div class="question-answer"><span class="question-label">Answer</span>${escapeHtml(answer)}</div></article>`).join("")}</div>` : ""}`;
+  }
+
+  function renderModelsTab(detail) {
+    const panel = $("#panel-models");
+    const data = detail.model_decomposition || {};
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+    if (!rows.length) {
+      panel.innerHTML = `<div class="env-notice"><strong>No model decomposition available.</strong><p>The snapshot does not contain attributable per-model token facts.</p></div>`;
+      return;
+    }
+    panel.innerHTML = `<div class="model-decomp-summary">
+        <div><strong>${escapeHtml(fmtTokens(data.total_tokens))}</strong><span>attributed tokens</span></div>
+        <div><strong>${escapeHtml(fmtMoney(data.total_current_cost_usd))}</strong><span>latest-price estimate</span></div>
+        <div><strong>${escapeHtml(fmtMoney(data.total_persisted_cost_usd))}</strong><span>persisted provider cost</span></div>
+      </div>
+      <div class="model-table-wrap"><table class="model-table"><thead><tr>
+        <th>Model + reasoning</th><th>Input</th><th>Cached</th><th>Output</th><th>Reasoning</th><th>Total</th><th>Token share</th><th>Latest price</th><th>Price share</th><th>Persisted</th><th>Basis</th>
+      </tr></thead><tbody>${rows.map(r => `<tr>
+        <th><span class="model-key">${escapeHtml(r.key || emDash)}</span>${r.provider ? `<span class="model-provider">${escapeHtml(r.provider)}</span>` : ""}</th>
+        <td>${fmtTokens(r.input)}</td><td>${fmtTokens(r.cached_input)}</td><td>${fmtTokens(r.output)}</td><td>${fmtTokens(r.reasoning_output)}</td><td>${fmtTokens(r.total)}</td>
+        <td>${fmtPct(r.token_share)}</td><td>${fmtMoney(r.current_cost_usd)}</td><td>${fmtPct(r.current_cost_share)}</td><td>${fmtMoney(r.persisted_cost_usd)}</td><td class="model-basis">${escapeHtml(r.attribution_basis || emDash)}</td>
+      </tr>`).join("")}</tbody></table></div>
+      <p class="model-note">Latest-price estimates use the manager's current cost metadata (${escapeHtml(data.cost_metadata_sha256 ? data.cost_metadata_sha256.slice(0, 12) : "unavailable")}). Reasoning attribution is shown at the finest level supported by the immutable snapshot.${(data.limitations || []).length ? " " + escapeHtml(data.limitations.join(" ")) : ""}</p>`;
+  }
+
   function renderMetadataTab(detail) {
     const panel = $("#panel-metadata");
     const md = detail.metadata || (detail.summary && detail.summary.metadata) || null;
@@ -969,18 +1036,16 @@
       return;
     }
     const sections = [
-      { key: "models",      pick: () => md.models,          label: "Models" },
       { key: "context",     pick: () => md.context,         label: "Context" },
       { key: "subagents",   pick: () => md.subagents,       label: "Subagents" },
       { key: "prompts",     pick: () => md.prompts,         label: "Prompts" },
       { key: "workspace",   pick: () => md.workspace,       label: "Workspace" },
       { key: "opencodex",   pick: () => md.opencodex,       label: "Opencodex" },
-      { key: "questions",   pick: () => md.questions,       label: "Questions" },
       { key: "harness",     pick: () => md.harness,         label: "Harness" },
       { key: "session_window", pick: () => md.session_window, label: "Session window" },
       { key: "provenance",  pick: () => md.provenance,      label: "Provenance" },
       { key: "other",       pick: () => {
-          const known = new Set(["models","context","subagents","prompts","workspace","opencodex","questions","harness","session_window","provenance","status"]);
+          const known = new Set(["models","context","subagents","prompts","workspace","opencodex","questions","user_answers","harness","session_window","provenance","status"]);
           const rest = {};
           for (const k of Object.keys(md)) if (!known.has(k)) rest[k] = md[k];
           return Object.keys(rest).length ? rest : null;

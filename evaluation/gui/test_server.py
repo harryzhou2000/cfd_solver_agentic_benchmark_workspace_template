@@ -75,6 +75,81 @@ class SnapshotProtocolTests(unittest.TestCase):
             self.assertTrue(estimate["dashboard_current"])
             self.assertEqual(len(estimate["metadata_sha256"]), 64)
 
+    def test_codex_model_decomposition_keys_model_plus_single_observed_effort(self):
+        with tempfile.TemporaryDirectory() as raw:
+            price_file = Path(raw) / "prices.json"
+            price_file.write_text(json.dumps({
+                "defaults": {"input_per_mtok": 1, "cached_input_per_mtok": 0.25,
+                             "output_per_mtok": 4, "input_share": 0.75},
+                "models": {"model-a": {"input_per_mtok": 2,
+                                         "cached_input_per_mtok": 0.5,
+                                         "output_per_mtok": 8}},
+            }))
+            expenses = {"tokens": {"by_thread": {
+                "t1": {"tokens": {"model-a": {"input": 1_000_000,
+                    "cached": 800_000, "output": 100_000,
+                    "reasoning_output": 40_000, "total": 1_100_000}}},
+                "t2": {"tokens": {"model-a": {"input": 500_000,
+                    "cached": 0, "output": 50_000,
+                    "reasoning_output": 10_000, "total": 550_000}}},
+            }}}
+            metadata = {"harness": {"harness": "codex"}, "threads": {
+                "t1": {"entry_reasoning_effort": "ultra", "reasoning_effort": ["ultra"]},
+                "t2": {"entry_reasoning_effort": "medium", "reasoning_effort": ["medium"]},
+            }}
+            with patch.object(query, "COST_METADATA", price_file):
+                result = query.current_model_decomposition(expenses, metadata)
+            self.assertEqual([r["key"] for r in result["rows"]],
+                             ["model-a + medium", "model-a + ultra"])
+            self.assertEqual(result["total_tokens"], 1_650_000)
+            ultra = next(r for r in result["rows"] if r["reasoning"] == "ultra")
+            self.assertEqual(ultra["current_cost_usd"], 1.6)
+            self.assertIsNone(ultra["persisted_cost_usd"])
+
+    def test_codex_model_decomposition_does_not_assign_mixed_thread_to_entry_effort(self):
+        expenses = {"tokens": {"by_thread": {"t": {"tokens": {"model-a": {
+            "input": 10, "output": 2, "reasoning_output": 1, "total": 12,
+        }}}}}}
+        metadata = {"harness": {"harness": "codex"}, "threads": {"t": {
+            "entry_reasoning_effort": "ultra", "reasoning_effort": ["ultra", "high"],
+        }}}
+        result = query.current_model_decomposition(expenses, metadata)
+        self.assertEqual(result["rows"][0]["key"], "model-a + mixed(high,ultra)")
+        self.assertIn("split unavailable", result["rows"][0]["attribution_basis"])
+
+    def test_opencode_model_decomposition_filters_selected_tree(self):
+        with tempfile.TemporaryDirectory() as raw:
+            price_file = Path(raw) / "prices.json"
+            price_file.write_text(json.dumps({
+                "defaults": {"input_per_mtok": 1, "cached_input_per_mtok": 0.25,
+                             "output_per_mtok": 4, "input_share": 0.75},
+                "models": {"deepseek/model-a": {"input_per_mtok": 2,
+                                                  "cached_input_per_mtok": 0.5,
+                                                  "output_per_mtok": 8}},
+            }))
+            sessions = [
+                {"session_id": "root", "parent_id": None, "model": "model-a",
+                 "provider": "deepseek", "variant": "max", "tokens_input": 100,
+                 "tokens_output": 20, "tokens_reasoning": 5, "cost": 1.0},
+                {"session_id": "child", "parent_id": "root", "model": "model-a",
+                 "provider": "deepseek", "variant": "max", "tokens_input": 50,
+                 "tokens_output": 10, "tokens_reasoning": 2, "cost": 0.5},
+                {"session_id": "other", "parent_id": None, "model": "model-a",
+                 "provider": "deepseek", "variant": "max", "tokens_input": 999,
+                 "tokens_output": 999, "tokens_reasoning": 999, "cost": 99},
+            ]
+            metadata = {"harness": {"harness": "opencode"},
+                        "opencode": {"sessions": sessions}}
+            scores = {"session_selection": {"roots": ["root"]}}
+            with patch.object(query, "COST_METADATA", price_file):
+                result = query.current_model_decomposition({}, metadata, scores)
+            self.assertEqual(len(result["rows"]), 1)
+            row = result["rows"][0]
+            self.assertEqual(row["key"], "model-a + max")
+            self.assertEqual((row["input"], row["output"], row["reasoning_output"], row["total"]),
+                             (150, 30, 7, 187))
+            self.assertEqual(row["persisted_cost_usd"], 1.5)
+
     def test_json_responses_disable_browser_cache(self):
         handler = object.__new__(server.Handler)
         handler.wfile = io.BytesIO()
@@ -141,6 +216,7 @@ class SnapshotProtocolTests(unittest.TestCase):
                 detail = server.snapshot_detail(folder)
             self.assertEqual(detail["run_identity"]["run_id"], folder.name)
             self.assertEqual(detail["metadata"], {"models": {}})
+            self.assertEqual(detail["model_decomposition"]["rows"], [])
             self.assertEqual(detail["markdown"]["contestant_final_response.md"], "final prose\n")
             self.assertEqual(detail["report_pdf"]["relative_path"], "report/report.pdf")
 
@@ -307,7 +383,20 @@ class SnapshotProtocolTests(unittest.TestCase):
             "case_m015_re5k", "case_m080_re5k", "case_m200_re5k",
             "case_cyl_re20", "case_cyl_re200",
         ])
-        self.assertIn('case "case-score":  return fmtCaseScore(v);', app)
+        self.assertIn('case "case-score":  return caseScoreCell(v);', app)
+        self.assertIn('caseTag: "0012"', app)
+        self.assertIn('caseTag: "Cyl"', app)
+        self.assertIn('class="case-head"', app)
+        self.assertIn('class="case-score case-score-${bucket}"', app)
+        self.assertIn('data-tab="questions"', html)
+        self.assertIn('data-tab="models"', html)
+        self.assertIn('function renderQuestionsTab(detail)', app)
+        self.assertIn('function renderModelsTab(detail)', app)
+        css = (static / "styles.css").read_text()
+        self.assertIn('table.snapshots th.case-col', css)
+        self.assertIn('width: 68px; min-width: 68px; max-width: 68px;', css)
+        for score in range(6):
+            self.assertIn(f'.case-score-{score}', css)
         self.assertIn('pill pill-status-blocked">yes</span>', app)
         self.assertIn('/static/app.js?v=', html)
         self.assertIn('/static/styles.css?v=', html)

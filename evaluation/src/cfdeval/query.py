@@ -66,6 +66,157 @@ def current_cost_estimate(expenses: dict) -> dict | None:
     return estimate
 
 
+def current_model_decomposition(expenses: dict, metadata: dict,
+                                agent_scores: dict | None = None) -> dict:
+    """Build readable model + reasoning rows from immutable snapshot facts.
+
+    Codex token facts are attributable per thread, while reasoning changes are
+    only persisted as the set of settings seen. A multi-setting thread is
+    therefore grouped under an explicit ``mixed(...)`` key rather than falsely
+    assigning all tokens to its entry setting. OpenCode persists exact
+    model+variant aggregates. The attribution_basis exposes that distinction.
+    """
+    try:
+        raw = COST_METADATA.read_bytes()
+        price_meta = json.loads(raw)
+    except (OSError, json.JSONDecodeError):
+        raw, price_meta = b"", None
+
+    buckets: dict[tuple[str, str], dict] = {}
+
+    def add(model: str, effort: str, tokens: dict, *, provider=None,
+            persisted_cost=None, basis: str, mixed=None) -> None:
+        key = (model or "unknown", effort or "unknown")
+        row = buckets.setdefault(key, {
+            "model": key[0], "reasoning": key[1], "provider": provider,
+            "input": 0, "cached_input": 0, "output": 0,
+            "reasoning_output": 0, "total": 0,
+            "persisted_cost_usd": 0.0, "has_persisted_cost": False,
+            "attribution_basis": basis, "mixed_efforts_seen": set(),
+            "reasoning_is_output_subset": harness == "codex",
+        })
+        row["provider"] = row["provider"] or provider
+        row["input"] += int(tokens.get("input", 0) or 0)
+        row["cached_input"] += int(
+            tokens.get("cached_input", tokens.get("cached", 0)) or 0)
+        row["output"] += int(tokens.get("output", 0) or 0)
+        row["reasoning_output"] += int(
+            tokens.get("reasoning_output", tokens.get("reasoning", 0)) or 0)
+        row["total"] += int(tokens.get("total", 0) or 0)
+        if persisted_cost is not None:
+            row["persisted_cost_usd"] += float(persisted_cost or 0)
+            row["has_persisted_cost"] = True
+        row["mixed_efforts_seen"].update(mixed or [])
+
+    harness = (metadata.get("harness") or {}).get("harness")
+    by_thread = ((expenses.get("tokens") or {}).get("by_thread") or {})
+    threads = metadata.get("threads") or {}
+    if harness == "codex" and by_thread:
+        for thread_id, token_info in by_thread.items():
+            thread = threads.get(thread_id) or {}
+            efforts = thread.get("reasoning_effort") or []
+            if isinstance(efforts, str):
+                efforts = [efforts]
+            effort = (efforts[0] if len(efforts) == 1 else
+                      f'mixed({",".join(sorted(set(efforts)))})' if efforts else "unknown")
+            basis = ("single observed thread setting" if len(efforts) == 1 else
+                     "thread aggregate; per-setting token split unavailable")
+            for model, token_bundle in (token_info.get("tokens") or {}).items():
+                add(model, effort, token_bundle,
+                    provider=thread.get("model_provider"), basis=basis,
+                    mixed=efforts if len(efforts) > 1 else [])
+    elif harness == "opencode" and (metadata.get("opencode") or {}).get("sessions"):
+        oc_sessions = metadata["opencode"]["sessions"]
+        by_id = {s.get("session_id"): s for s in oc_sessions if s.get("session_id")}
+        roots = ((agent_scores or {}).get("session_selection") or {}).get("roots") or []
+        selected = set()
+        for session_id in by_id:
+            current, seen = session_id, set()
+            while current and current not in seen:
+                seen.add(current)
+                if not roots or current in roots:
+                    selected.add(session_id)
+                    break
+                current = (by_id.get(current) or {}).get("parent_id")
+        for session_id in sorted(selected):
+            info = by_id[session_id]
+            model = info.get("model") or "unknown"
+            effort = info.get("variant") or "unknown"
+            output = int(info.get("tokens_output", 0) or 0)
+            reasoning = int(info.get("tokens_reasoning", 0) or 0)
+            input_t = int(info.get("tokens_input", 0) or 0)
+            add(model, effort, {
+                "input": input_t, "output": output,
+                "reasoning_output": reasoning,
+                "total": input_t + output + reasoning,
+            }, provider=info.get("provider"), persisted_cost=info.get("cost"),
+                basis="exact OpenCode model + variant aggregate")
+    else:
+        for model, token_bundle in ((expenses.get("tokens") or {}).get("by_model") or {}).items():
+            model_info = (metadata.get("models") or {}).get(model) or {}
+            efforts = model_info.get("reasoning_efforts_seen") or []
+            effort = efforts[0] if len(efforts) == 1 else ("mixed" if efforts else "unknown")
+            add(model, effort, token_bundle, basis="model aggregate; no per-thread split",
+                mixed=efforts if len(efforts) > 1 else [])
+
+    rows = []
+    total_current = 0.0
+    total_persisted = 0.0
+    for (_model, _effort), row in sorted(buckets.items()):
+        current_cost = None
+        pricing = "unavailable"
+        if price_meta is not None:
+            from cfdeval.expenses import cost_for, model_cost
+            candidates = []
+            if row["provider"]:
+                candidates.append(f'{row["provider"]}/{row["model"]}')
+            candidates.append(row["model"])
+            price_key = next((c for c in candidates
+                              if c.lower() in (price_meta.get("models") or {})), candidates[-1])
+            price, defaults = model_cost(price_meta, price_key)
+            current_cost = round(cost_for(
+                price, input_t=row["input"], cached_t=row["cached_input"],
+                output_t=(row["output"] if row["reasoning_is_output_subset"]
+                          else row["output"] + row["reasoning_output"])), 4)
+            pricing = "defaults" if defaults else "metadata"
+            total_current += current_cost
+        persisted = (round(row["persisted_cost_usd"], 6)
+                     if row.pop("has_persisted_cost") else None)
+        if persisted is not None:
+            total_persisted += persisted
+        mixed = sorted(row.pop("mixed_efforts_seen"))
+        row.pop("reasoning_is_output_subset")
+        row.update({
+            "key": f'{row["model"]} + {row["reasoning"]}',
+            "non_cached_input": max(row["input"] - row["cached_input"], 0),
+            "current_cost_usd": current_cost,
+            "persisted_cost_usd": persisted,
+            "pricing": pricing,
+            "mixed_efforts_seen": mixed,
+        })
+        rows.append(row)
+    total_tokens = sum(r["total"] for r in rows)
+    for row in rows:
+        row["token_share"] = row["total"] / total_tokens if total_tokens else None
+        row["current_cost_share"] = (
+            row["current_cost_usd"] / total_current
+            if row["current_cost_usd"] is not None and total_current else None)
+        row["persisted_cost_share"] = (
+            row["persisted_cost_usd"] / total_persisted
+            if row["persisted_cost_usd"] is not None and total_persisted else None)
+    return {
+        "rows": rows,
+        "total_tokens": total_tokens,
+        "total_current_cost_usd": round(total_current, 4) if price_meta is not None else None,
+        "total_persisted_cost_usd": round(total_persisted, 6)
+            if any(r["persisted_cost_usd"] is not None for r in rows) else None,
+        "cost_metadata": str(COST_METADATA) if price_meta is not None else None,
+        "cost_metadata_sha256": hashlib.sha256(raw).hexdigest() if raw else None,
+        "limitations": (["OpenCode current-price estimates have no cached-input split in metadata.json."]
+                        if harness == "opencode" and rows else []),
+    }
+
+
 def effective_metadata_status(metadata: dict) -> str | None:
     """Do not surface a stale prompt status after all questions were resolved."""
     status = metadata.get("status")
