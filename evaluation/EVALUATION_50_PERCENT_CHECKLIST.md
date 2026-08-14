@@ -45,7 +45,7 @@ canonical evaluations count toward the quota and must not be repeated.
 ### `codex/glm52` — 3 done, quota 2
 
 - [x] 01 — `codex_glm52_01_1307c9`
-- [ ] 02
+- [ ] 02 — BLOCKED: provenance reconstructed (`codex/glm52/init` @ `de4960b`), but workspace has no usable `origin` remote (`git ls-remote origin` rc=128); canonical-upstream collision cannot be proven without an operator-approved remote repair/override.
 
 ### `codex/glm52-m3` — 5 done, quota 3
 
