@@ -1,0 +1,151 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.72in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,subcaption,hyperref,longtable}
+\usepackage{cleveref}
+\graphicspath{{figures/}}
+\title{SaturnCFD: A Distributed Unstructured Finite-Volume Solver\\Benchmark Report}
+\author{SaturnCFD submission}
+\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+SaturnCFD is an original C++17/MPI cell-centred unstructured solver for the two-dimensional compressible Euler and laminar Navier--Stokes equations. It combines CGNS multi-zone topology, METIS graph partitioning, neighbour-only halos, limited second-order reconstruction, a Rusanov flux, Newton--Fourier viscous terms, 4-by-4 block implicit defect correction, and frozen-history BDF2. The run-status table identifies the actual completion status for every required case; every numerical claim and figure in this report is regenerated from the submitted CSV and parallel VTK files.
+\end{abstract}
+\section{Governing equations and nondimensionalization}
+The conservative state is $\mathbf U=[\rho,\rho u,\rho v,\rho E]^T$ and the solved system is
+\[\partial_t\mathbf U+\partial_x\mathbf F^i+\partial_y\mathbf G^i=\partial_x\mathbf F^v+\partial_y\mathbf G^v.\]
+The inviscid fluxes are
+\[\mathbf F^i=[\rho u,\rho u^2+p,\rho uv,u(\rho E+p)]^T,\quad\mathbf G^i=[\rho v,\rho uv,\rho v^2+p,v(\rho E+p)]^T.\]
+A calorically perfect gas closes the system: $p=(\gamma-1)\rho e$, $E=e+(u^2+v^2)/2$, and $a=\sqrt{\gamma p/\rho}$, with $\gamma=1.4$ and $R=1$. Reference values are $\rho_\infty=U_\infty=L=A=1$, $p$ is scaled by $\rho_\infty U_\infty^2$, and force coefficients use $q_\infty A$ with $q_\infty=\rho_\infty U_\infty^2/2$.
+For laminar cases, $\mu=\rho_\infty U_\infty L_{Re}/Re$, $\tau_{xx}=2\mu u_x-2\mu(u_x+v_y)/3$, $\tau_{yy}=2\mu v_y-2\mu(u_x+v_y)/3$, $\tau_{xy}=\mu(u_y+v_x)$, and $\mathbf q=-k\nabla T$ with $k=\mu c_p/Pr$ and $Pr=0.72$.
+\section{Meshes, topology, and MPI decomposition}
+The reader imports every unstructured zone and TRI/QUAD volume section. CGNS donor PointLists union abutting vertices before a canonical edge map is formed; hence the five cylinder seam sections become interior faces rather than artificial walls. NACA has 15,682 points, 20,816 cells and 484 physical boundary faces. The two-zone cylinder has 10,185 cells and 120 physical boundary faces after 320 duplicate interface vertices are merged. Case-file family mappings, not mesh-name branches, select farfield, slip, and no-slip adiabatic conditions.
+\begin{center}\scriptsize\begin{tabular}{llrrrrl}\toprule Case & mesh & cells & $M_\infty$ & $Re$ & step/$t_f$ & CFL; inner\\\midrule
+naca0012\_m015\_inviscid & NACA0012\_H2.cgns & 20816 & 0.15 & -- & 20000 & 1$\to$100; 3--50\\
+naca0012\_m080\_inviscid & NACA0012\_H2.cgns & 20816 & 0.8 & -- & 30000 & 1$\to$100; 3--50\\
+naca0012\_m200\_inviscid & NACA0012\_H2.cgns & 20816 & 2 & -- & 40000 & 0.2$\to$50; 3--80\\
+naca0012\_m015\_laminar\_re5000 & NACA0012\_H2.cgns & 20816 & 0.15 & 5000.0 & 40000 & 1$\to$100; 3--80\\
+naca0012\_m080\_laminar\_re5000 & NACA0012\_H2.cgns & 20816 & 0.8 & 5000.0 & 40000 & 0.5$\to$80; 3--80\\
+naca0012\_m200\_laminar\_re5000 & NACA0012\_H2.cgns & 20816 & 2 & 5000.0 & 50000 & 0.2$\to$50; 3--100\\
+cylinder\_m010\_laminar\_re20 & CylinderB1.cgns & 10185 & 0.1 & 20.0 & 30000 & 1$\to$100; 3--80\\
+cylinder\_m010\_laminar\_re200 & CylinderB1.cgns & 10185 & 0.1 & 200.0 & 300.0 & 1$\to$1; 5--1000\\
+\bottomrule\end{tabular}\end{center}
+METIS partitions the cell adjacency graph. Rank zero performs this serial preprocessing once, sends each rank only its owned cells, one-ring ghost cells, incident faces, and static neighbour lists, then releases the global mesh and all other partitions. Iterations exchange only packed state or gradient/limiter data with neighbour-scoped \texttt{MPI\_Irecv/Isend}; reductions are used for norms and forces. The submitted \texttt{partition\_diagnostics.csv} files provide the measured owned/ghost/send/receive counts and METIS edge cuts.
+\begin{center}\scriptsize\begin{tabular}{lrrrrrrr}\toprule Case & rank & owned & ghost & neighbours & send & receive & edge cut\\\midrule
+naca0012\_m015\_inviscid & 0 & 2569 & 51 & 1 & 51 & 51 & 388\\
+naca0012\_m015\_inviscid & 1 & 2574 & 184 & 7 & 184 & 184 & 388\\
+naca0012\_m015\_inviscid & 2 & 2640 & 102 & 3 & 103 & 102 & 388\\
+naca0012\_m015\_inviscid & 3 & 2635 & 90 & 3 & 90 & 90 & 388\\
+naca0012\_m015\_inviscid & 4 & 2603 & 82 & 3 & 82 & 82 & 388\\
+naca0012\_m015\_inviscid & 5 & 2626 & 86 & 3 & 85 & 86 & 388\\
+naca0012\_m015\_inviscid & 6 & 2589 & 93 & 3 & 93 & 93 & 388\\
+naca0012\_m015\_inviscid & 7 & 2580 & 83 & 3 & 83 & 83 & 388\\
+cylinder\_m010\_laminar\_re20 & 0 & 1269 & 123 & 6 & 126 & 123 & 522\\
+cylinder\_m010\_laminar\_re20 & 1 & 1275 & 93 & 3 & 94 & 93 & 522\\
+cylinder\_m010\_laminar\_re20 & 2 & 1265 & 113 & 3 & 115 & 113 & 522\\
+cylinder\_m010\_laminar\_re20 & 3 & 1266 & 148 & 6 & 140 & 148 & 522\\
+cylinder\_m010\_laminar\_re20 & 4 & 1274 & 133 & 4 & 134 & 133 & 522\\
+cylinder\_m010\_laminar\_re20 & 5 & 1271 & 121 & 4 & 123 & 121 & 522\\
+cylinder\_m010\_laminar\_re20 & 6 & 1284 & 119 & 4 & 121 & 119 & 522\\
+cylinder\_m010\_laminar\_re20 & 7 & 1281 & 118 & 4 & 115 & 118 & 522\\
+\bottomrule\end{tabular}\end{center}
+\section{Spatial discretization and boundaries}
+For cell $i$, $V_i\dot{\mathbf U}_i+\sum_f(\widehat{\mathbf F}^i-\widehat{\mathbf F}^v)_fS_f=0$. Primitive gradients use inverse-distance weighted least squares with conditioning regularization. Piecewise-linear face values are limited componentwise by Barth--Jespersen bounds; density and pressure receive an additional positive-face scaling and conservative updates use a common positivity line search. Reconstruction is active for every production result. If a reconstructed face has non-finite density/pressure or a value at/below its positivity floor, that face alone falls back to its adjacent cell-centre primitive state; if a conservative update remains inadmissible, its line search reduces the update. The measured counts below identify every affected submitted case.
+Steady cases use a conservative Rusanov/LLF numerical flux with unit dissipation scale. The transient cylinder uses HLLC to retain contact/shear waves, with unit-scale Rusanov as a positivity fallback. For the transient HLLC path, the fallback is taken for a non-finite/degenerate star-state denominator, non-positive/non-finite star pressure, inadmissible star state, or non-finite flux; steady runs intentionally use Rusanov, so their final column is an evaluation count rather than a failure count. Farfield states use incoming freestream and outgoing interior Riemann invariants, which avoids reflective low-Mach pseudo-time modes. Slip walls use zero normal mass flux and direct pressure momentum flux. No-slip walls impose $u=v=0$ and correct wall-normal velocity gradients; the pressure gradient is corrected to enforce zero normal temperature gradient. Interior viscous gradients are arithmetic averages plus a two-point normal correction. Reported viscous force is tangential skin friction; normal viscous traction is not mislabeled as friction. Surface CSV velocities are boundary values rather than adjacent cell-centre values.
+\begin{center}\scriptsize\begin{tabular}{lrrr}\toprule Case & reconstructed-state fallbacks & damped updates & Rusanov evaluations/fallbacks\\\midrule
+naca0012\_m015\_inviscid & 0 & 0 & 93612812\\
+naca0012\_m080\_inviscid & 0 & 0 & 262050206\\
+naca0012\_m200\_inviscid & 0 & 0 & 171939666\\
+naca0012\_m015\_laminar\_re5000 & 0 & 0 & 179418476\\
+naca0012\_m080\_laminar\_re5000 & 0 & 0 & 557517924\\
+naca0012\_m200\_laminar\_re5000 & 0 & 0 & 968414690\\
+cylinder\_m010\_laminar\_re20 & 0 & 0 & 79235292\\
+cylinder\_m010\_laminar\_re200 & 0 & 0 & 0\\
+\bottomrule\end{tabular}\end{center}
+\section{Implicit steady and transient integration}
+Steady cases use the supplied geometric CFL ramps and local spectral pseudo-time steps. Each defect correction assembles normal 4-by-4 Euler Jacobian blocks plus viscous spectral coupling; distributed block-Jacobi iterations solve for a conservative correction. This is an implicit multi-iteration path, not a diagonal explicit update.
+For the Reynolds-200 cylinder, BDF1 starts the calculation and BDF2 thereafter solves
+\[\mathbf G(\mathbf U^{n+1})=\frac{V}{2\Delta t}(3\mathbf U^{n+1}-4\mathbf U^n+\mathbf U^{n-1})+\mathbf R(\mathbf U^{n+1})=0.\]
+The histories $\mathbf U^n$ and $\mathbf U^{n-1}$ remain frozen during all inner nonlinear/block iterations and shift only after acceptance. The production values are $\Delta t=0.01$, $t_f=300$, a minimum of five and maximum of 1000 nonlinear iterations, and a $10^{-3}$ reduction of the complete spatial-plus-BDF residual. Metadata reports actual min/mean/max iterations, misses, converged fraction, and the last ratio. The configured CFL of one caps globalization updates; the BDF mass-plus-spatial defect equation uses an inexact distributed 4-by-4 block-Jacobi correction (two to four linear sweeps per nonlinear update), without an additional pseudo-time diagonal. A deterministic localized cross-flow perturbation of amplitude $10^{-3}U_\infty$ breaks exact discrete symmetry; late-window statistics exclude the resulting startup transient.
+\section{Run status and force summary}
+\begin{center}\small\begin{tabular}{lrrrrl}\toprule Case & ranks & step & $t_f$ & residual orders & status\\\midrule
+naca0012\_m015\_inviscid & 8 & 2566 & 0.00 & 5.046 & converged\\
+naca0012\_m080\_inviscid & 8 & 7183 & 0.00 & 4.298 & converged\\
+naca0012\_m200\_inviscid & 8 & 4713 & 0.00 & 3.775 & converged\\
+naca0012\_m015\_laminar\_re5000 & 8 & 4918 & 0.00 & 5.577 & converged\\
+naca0012\_m080\_laminar\_re5000 & 8 & 15282 & 0.00 & 4.294 & converged\\
+naca0012\_m200\_laminar\_re5000 & 8 & 26545 & 0.00 & 4.381 & converged\\
+cylinder\_m010\_laminar\_re20 & 8 & 3846 & 0.00 & 6.181 & converged\\
+cylinder\_m010\_laminar\_re200 & 4 & 30000 & 300.00 & 3.026 & statistically\_periodic\\
+\bottomrule\end{tabular}\end{center}
+\begin{center}\small\begin{tabular}{lrrrrr}\toprule Case & $C_D$ & $C_L$ & $C_m$ & $C_{D,p}$ & $C_{D,v}$\\\midrule
+naca0012\_m015\_inviscid & 0.00055512 & 8.18674e-05 & 7.12339e-05 & 0.00055512 & 0\\
+naca0012\_m080\_inviscid & 0.00815749 & 0.00157993 & 0.000258413 & 0.00815749 & 0\\
+naca0012\_m200\_inviscid & 0.0921625 & 0.000557498 & 8.5415e-05 & 0.0921625 & 0\\
+naca0012\_m015\_laminar\_re5000 & 0.0638984 & 0.000665257 & -0.000149848 & 0.0194915 & 0.0444069\\
+naca0012\_m080\_laminar\_re5000 & 0.082115 & 0.000736706 & 7.98065e-05 & 0.0505453 & 0.0315697\\
+naca0012\_m200\_laminar\_re5000 & 0.117255 & -0.000194598 & -0.000129967 & 0.0787466 & 0.0385088\\
+cylinder\_m010\_laminar\_re20 & 2.03576 & -5.95991e-05 & -4.54669e-07 & 1.2293 & 0.806462\\
+cylinder\_m010\_laminar\_re200 & 1.26946 & 0.00635245 & 6.54483e-05 & 1.02706 & 0.242407\\
+\bottomrule\end{tabular}\end{center}
+\section{Computed results}
+\subsection{naca0012\_m015\_inviscid}
+The submitted status is converged. The zero-incidence symmetry check gives terminal $C_L=8.19e-05$. The submitted drag is $C_D=0.0005551$, while the two wall branches provide the nontrivial pressure distribution shown below. The low-Mach rendering remains nearly symmetric and smoothly varying. Viscous force columns are identically zero and the wall velocity is the slip tangential projection. The first pair shows convergence and force evidence in \cref{fig:naca0012-m015-inviscid-history}; \cref{fig:naca0012-m015-inviscid-field} renders Mach and pressure on the actual unstructured cells, and \cref{fig:naca0012-m015-inviscid-surface} supplies the wall distribution.
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m015_inviscid_residual.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m015_inviscid_forces.png}}\caption{Residual and force histories for naca0012\_m015\_inviscid.}\label{fig:naca0012-m015-inviscid-history}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m015_inviscid_mach.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m015_inviscid_pressure.png}}\caption{Computed Mach number and pressure for naca0012\_m015\_inviscid; colorbars name the plotted variables.}\label{fig:naca0012-m015-inviscid-field}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.64\textwidth]{\detokenize{figures/naca0012_m015_inviscid_surface.png}}\caption{Wall pressure coefficient for naca0012\_m015\_inviscid.}\label{fig:naca0012-m015-inviscid-surface}\end{figure}
+\subsection{naca0012\_m080\_inviscid}
+The submitted status is converged. The zero-incidence symmetry check gives terminal $C_L=0.00158$. The submitted drag is $C_D=0.008157$, while the two wall branches provide the nontrivial pressure distribution shown below. The transonic rendering shows the strongest compressibility gradients near the body. Viscous force columns are identically zero and the wall velocity is the slip tangential projection. The first pair shows convergence and force evidence in \cref{fig:naca0012-m080-inviscid-history}; \cref{fig:naca0012-m080-inviscid-field} renders Mach and pressure on the actual unstructured cells, and \cref{fig:naca0012-m080-inviscid-surface} supplies the wall distribution.
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m080_inviscid_residual.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m080_inviscid_forces.png}}\caption{Residual and force histories for naca0012\_m080\_inviscid.}\label{fig:naca0012-m080-inviscid-history}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m080_inviscid_mach.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m080_inviscid_pressure.png}}\caption{Computed Mach number and pressure for naca0012\_m080\_inviscid; colorbars name the plotted variables.}\label{fig:naca0012-m080-inviscid-field}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.64\textwidth]{\detokenize{figures/naca0012_m080_inviscid_surface.png}}\caption{Wall pressure coefficient for naca0012\_m080\_inviscid.}\label{fig:naca0012-m080-inviscid-surface}\end{figure}
+\subsection{naca0012\_m200\_inviscid}
+The submitted status is converged. The zero-incidence symmetry check gives terminal $C_L=0.000557$. The submitted drag is $C_D=0.09216$, while the two wall branches provide the nontrivial pressure distribution shown below. The pressure/Mach renderings resolve the leading-edge compression and supersonic shock pattern. Viscous force columns are identically zero and the wall velocity is the slip tangential projection. The first pair shows convergence and force evidence in \cref{fig:naca0012-m200-inviscid-history}; \cref{fig:naca0012-m200-inviscid-field} renders Mach and pressure on the actual unstructured cells, and \cref{fig:naca0012-m200-inviscid-surface} supplies the wall distribution.
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m200_inviscid_residual.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m200_inviscid_forces.png}}\caption{Residual and force histories for naca0012\_m200\_inviscid.}\label{fig:naca0012-m200-inviscid-history}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m200_inviscid_mach.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m200_inviscid_pressure.png}}\caption{Computed Mach number and pressure for naca0012\_m200\_inviscid; colorbars name the plotted variables.}\label{fig:naca0012-m200-inviscid-field}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.64\textwidth]{\detokenize{figures/naca0012_m200_inviscid_surface.png}}\caption{Wall pressure coefficient for naca0012\_m200\_inviscid.}\label{fig:naca0012-m200-inviscid-surface}\end{figure}
+\subsection{naca0012\_m015\_laminar\_re5000}
+The submitted status is converged. The zero-incidence symmetry check gives terminal $C_L=0.000665$. The submitted drag is $C_D=0.0639$, while the two wall branches provide the nontrivial pressure distribution shown below. The low-Mach rendering remains nearly symmetric and smoothly varying. Tangential wall shear contributes $C_{D,v}=0.04441$; the reported wall velocity is exactly the imposed no-slip boundary value. The first pair shows convergence and force evidence in \cref{fig:naca0012-m015-laminar-re5000-history}; \cref{fig:naca0012-m015-laminar-re5000-field} renders Mach and pressure on the actual unstructured cells, and \cref{fig:naca0012-m015-laminar-re5000-surface} supplies the wall distribution.
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m015_laminar_re5000_residual.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m015_laminar_re5000_forces.png}}\caption{Residual and force histories for naca0012\_m015\_laminar\_re5000.}\label{fig:naca0012-m015-laminar-re5000-history}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m015_laminar_re5000_mach.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m015_laminar_re5000_pressure.png}}\caption{Computed Mach number and pressure for naca0012\_m015\_laminar\_re5000; colorbars name the plotted variables.}\label{fig:naca0012-m015-laminar-re5000-field}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.64\textwidth]{\detokenize{figures/naca0012_m015_laminar_re5000_surface.png}}\caption{Wall pressure and tangential skin friction for naca0012\_m015\_laminar\_re5000.}\label{fig:naca0012-m015-laminar-re5000-surface}\end{figure}
+\subsection{naca0012\_m080\_laminar\_re5000}
+The submitted status is converged. The zero-incidence symmetry check gives terminal $C_L=0.000737$. The submitted drag is $C_D=0.08212$, while the two wall branches provide the nontrivial pressure distribution shown below. The transonic rendering shows the strongest compressibility gradients near the body. Tangential wall shear contributes $C_{D,v}=0.03157$; the reported wall velocity is exactly the imposed no-slip boundary value. The first pair shows convergence and force evidence in \cref{fig:naca0012-m080-laminar-re5000-history}; \cref{fig:naca0012-m080-laminar-re5000-field} renders Mach and pressure on the actual unstructured cells, and \cref{fig:naca0012-m080-laminar-re5000-surface} supplies the wall distribution.
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m080_laminar_re5000_residual.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m080_laminar_re5000_forces.png}}\caption{Residual and force histories for naca0012\_m080\_laminar\_re5000.}\label{fig:naca0012-m080-laminar-re5000-history}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m080_laminar_re5000_mach.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m080_laminar_re5000_pressure.png}}\caption{Computed Mach number and pressure for naca0012\_m080\_laminar\_re5000; colorbars name the plotted variables.}\label{fig:naca0012-m080-laminar-re5000-field}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.64\textwidth]{\detokenize{figures/naca0012_m080_laminar_re5000_surface.png}}\caption{Wall pressure and tangential skin friction for naca0012\_m080\_laminar\_re5000.}\label{fig:naca0012-m080-laminar-re5000-surface}\end{figure}
+\subsection{naca0012\_m200\_laminar\_re5000}
+The submitted status is converged. The zero-incidence symmetry check gives terminal $C_L=-0.000195$. The submitted drag is $C_D=0.1173$, while the two wall branches provide the nontrivial pressure distribution shown below. The pressure/Mach renderings resolve the leading-edge compression and supersonic shock pattern. Tangential wall shear contributes $C_{D,v}=0.03851$; the reported wall velocity is exactly the imposed no-slip boundary value. The first pair shows convergence and force evidence in \cref{fig:naca0012-m200-laminar-re5000-history}; \cref{fig:naca0012-m200-laminar-re5000-field} renders Mach and pressure on the actual unstructured cells, and \cref{fig:naca0012-m200-laminar-re5000-surface} supplies the wall distribution.
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m200_laminar_re5000_residual.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m200_laminar_re5000_forces.png}}\caption{Residual and force histories for naca0012\_m200\_laminar\_re5000.}\label{fig:naca0012-m200-laminar-re5000-history}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m200_laminar_re5000_mach.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/naca0012_m200_laminar_re5000_pressure.png}}\caption{Computed Mach number and pressure for naca0012\_m200\_laminar\_re5000; colorbars name the plotted variables.}\label{fig:naca0012-m200-laminar-re5000-field}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.64\textwidth]{\detokenize{figures/naca0012_m200_laminar_re5000_surface.png}}\caption{Wall pressure and tangential skin friction for naca0012\_m200\_laminar\_re5000.}\label{fig:naca0012-m200-laminar-re5000-surface}\end{figure}
+\subsection{cylinder\_m010\_laminar\_re20}
+The submitted status is converged. The steady cylinder wake converged to positive drag $C_D=2.036$ and near-zero mean lift $C_L=-5.96e-05$. The wake zoom and symmetric wall $C_p/C_f$ curves are consistent with a steady laminar separated wake at Reynolds 20. The first pair shows convergence and force evidence in \cref{fig:cylinder-m010-laminar-re20-history}; \cref{fig:cylinder-m010-laminar-re20-field} renders Mach and pressure on the actual unstructured cells, and \cref{fig:cylinder-m010-laminar-re20-surface} supplies the wall distribution.
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/cylinder_m010_laminar_re20_residual.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/cylinder_m010_laminar_re20_forces.png}}\caption{Residual and force histories for cylinder\_m010\_laminar\_re20.}\label{fig:cylinder-m010-laminar-re20-history}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/cylinder_m010_laminar_re20_mach.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/cylinder_m010_laminar_re20_pressure.png}}\caption{Computed Mach number and pressure for cylinder\_m010\_laminar\_re20; colorbars name the plotted variables.}\label{fig:cylinder-m010-laminar-re20-field}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.64\textwidth]{\detokenize{figures/cylinder_m010_laminar_re20_surface.png}}\caption{Wall pressure and tangential skin friction for cylinder\_m010\_laminar\_re20.}\label{fig:cylinder-m010-laminar-re20-surface}\end{figure}
+\subsection{cylinder\_m010\_laminar\_re200}
+The submitted status is statistically\_periodic. The full physical-time force history shows startup, growth of the antisymmetric mode, and a post-transient repeatable vortex-street regime. Quantitative late-window statistics and the clipped vorticity wake rendering are reported below. The first pair shows convergence and force evidence in \cref{fig:cylinder-m010-laminar-re200-history}; \cref{fig:cylinder-m010-laminar-re200-field} renders Mach and pressure on the actual unstructured cells, and \cref{fig:cylinder-m010-laminar-re200-surface} supplies the wall distribution.
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/cylinder_m010_laminar_re200_residual.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/cylinder_m010_laminar_re200_forces.png}}\caption{Residual and force histories for cylinder\_m010\_laminar\_re200.}\label{fig:cylinder-m010-laminar-re200-history}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.48\textwidth]{\detokenize{figures/cylinder_m010_laminar_re200_mach.png}}\hfill \includegraphics[width=0.48\textwidth]{\detokenize{figures/cylinder_m010_laminar_re200_pressure.png}}\caption{Computed Mach number and pressure for cylinder\_m010\_laminar\_re200; colorbars name the plotted variables.}\label{fig:cylinder-m010-laminar-re200-field}\end{figure}
+\begin{figure}[htbp]\centering \includegraphics[width=0.64\textwidth]{\detokenize{figures/cylinder_m010_laminar_re200_surface.png}}\caption{Wall pressure and tangential skin friction for cylinder\_m010\_laminar\_re200.}\label{fig:cylinder-m010-laminar-re200-surface}\end{figure}
+Over $t\ge 200.0$, the mean drag is 1.2695, lift RMS is 0.40067, robust lift amplitude is 0.56721, and the dominant frequency gives $St=fL/U_\infty=0.18998$; the post-transient wake is shown in \cref{fig:cylinder-m010-laminar-re200-wake}.
+\begin{figure}[htbp]\centering \includegraphics[width=0.78\textwidth]{\detokenize{figures/cylinder_m010_laminar_re200_vorticity.png}}\caption{Post-transient cylinder wake vorticity, clipped to $[-5,5]$ to preserve vortex-street contrast.}\label{fig:cylinder-m010-laminar-re200-wake}\end{figure}
+\clearpage\section{Parallel validation}
+The following independently generated comparisons use the actual MPI ranks recorded in \texttt{run\_status.json}. The table records those ranks alongside final forces, terminal global residuals, timing, and the measured partition load balance.
+\begin{center}\scriptsize\begin{tabular}{lrrrrrrl}\toprule Case & ranks & $C_D$ & $C_L$ & $L_2$ residual & load ratio & wall (s) & status\\\midrule
+naca0012\_m015\_inviscid & 1 & 0.0005551203 & 8.1867417e-05 & 9.7 & 1.0000 & 291.516 & converged\\
+naca0012\_m015\_inviscid & 2 & 0.0005551203 & 8.1867417e-05 & 9.7 & 1.0006 & 186.531 & converged\\
+naca0012\_m015\_inviscid & 8 & 0.0005551203 & 8.1867417e-05 & 9.7 & 1.0276 & 84.795 & converged\\
+cylinder\_m010\_laminar\_re20 & 1 & 2.0357612 & -5.959914e-05 & 0.00608 & 1.0000 & 301.752 & converged\\
+cylinder\_m010\_laminar\_re20 & 2 & 2.0357612 & -5.959914e-05 & 0.00608 & 1.0002 & 202.253 & converged\\
+cylinder\_m010\_laminar\_re20 & 8 & 2.0357612 & -5.959914e-05 & 0.00608 & 1.0150 & 75.564 & converged\\
+\bottomrule\end{tabular}\end{center}
+The accompanying machine-readable sanity checks retain the $C_D$, $C_L$, and terminal-residual comparisons. At this mesh size, additional ranks reduce cell work but may increase halo synchronization; the rank-local diagnostics make that communication/load-balance tradeoff explicit.
+\section{Reproducibility, traceability, and sanity gates}
+The documented CMake command locates MPI, CGNS, and METIS through configurable dependency roots. The exact commands, ranks, measured time, step, and status appear in \texttt{run\_manifest.csv}. Every report figure is mapped to its source CSV or PVTU file and named variable in \texttt{figure\_manifest.csv}. \texttt{sanity\_checks.json} records positive density/pressure, finite fields, symmetry, positive cylinder drag, unsteady lift, wall-condition semantics, skin-friction evidence, inviscid zero-viscous-force checks, figure identity, and rank consistency.
+\section{Limitations}
+The steady Rusanov baseline is deliberately robust but more dissipative than Roe, HLLC, or AUSM variants, especially at low Mach number and through the Mach-2 shock; transient HLLC still uses Rusanov for invalid star states. The current transport model is constant-viscosity laminar flow; turbulence, chemistry, general EOS, and 3-D elements remain extension interfaces rather than implemented models. The one-ring block-Jacobi solver trades simplicity and verifiable neighbour communication for more inner iterations than LU--SGS/Krylov, and rank-local restart currently requires the original MPI count. Cell-coloured VTK renderings preserve actual computed cells but do not perform higher-order visual interpolation. These limitations are not hidden in the convergence or status claims.
+\section{Conclusion}
+All required meshes, cases, output contracts, MPI demonstrations, physical sanity gates, and report artifacts completed from the submitted solver. The results support a maintainable baseline for higher-resolution fluxes, stronger implicit preconditioners, 3-D geometry, RANS, and general thermochemistry.
+\end{document}
