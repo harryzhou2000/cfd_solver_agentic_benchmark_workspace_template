@@ -55,7 +55,20 @@
         "session_count": { "type": "integer" },
         "root_session_count": { "type": "integer" },
         "subagent_session_count": { "type": "integer" },
-        "sessions": { "type": "array", "items": { "type": "object" } }
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "tokens_input": { "type": "integer", "minimum": 0 },
+              "tokens_output": { "type": "integer", "minimum": 0 },
+              "tokens_reasoning": { "type": "integer", "minimum": 0 },
+              "tokens_cache_read": { "type": "integer", "minimum": 0 },
+              "tokens_cache_write": { "type": "integer", "minimum": 0 },
+              "cost": { "type": "number", "minimum": 0 }
+            }
+          }
+        }
       }
     },
     "analysis": {

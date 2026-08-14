@@ -124,11 +124,13 @@ def snapshot_detail(folder: Path) -> dict:
     env_snap = _load("env_snapshot.json")
     run_identity = _load("run_identity.json")
     report_pdf = find_report_pdf(workspace_for_snapshot(run_identity))
-    current_cost_estimate = query.current_cost_estimate(
-        expenses or summary.get("expenses") or {})
+    expense_facts = expenses or summary.get("expenses") or {}
+    metadata_facts = metadata or summary.get("metadata") or {}
     model_decomposition = query.current_model_decomposition(
-        expenses or summary.get("expenses") or {}, metadata or summary.get("metadata") or {},
-        agent_scores)
+        expense_facts, metadata_facts, agent_scores)
+    current_cost_estimate = query.current_snapshot_cost(
+        expense_facts, metadata_facts, agent_scores,
+        decomposition=model_decomposition)
     md_files = {}
     for name in ("summary.md", "agent_report.md", "contestant_final_response.md",
                  "review_code.md", "review_cfd.md", "review_results.md"):
@@ -159,6 +161,7 @@ def snapshot_detail(folder: Path) -> dict:
             ],
         },
         "env_snapshot": env_snap,
+        "environment_capture_phase": query.environment_capture_phase(env_snap),
         "run_identity": run_identity,
         "report_pdf": ({"relative_path": report_pdf["relative_path"],
                         "bytes": report_pdf["bytes"],

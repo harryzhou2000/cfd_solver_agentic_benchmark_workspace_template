@@ -75,6 +75,53 @@ class SnapshotProtocolTests(unittest.TestCase):
             self.assertTrue(estimate["dashboard_current"])
             self.assertEqual(len(estimate["metadata_sha256"]), 64)
 
+    def test_dashboard_reprices_selected_opencode_tree_when_persisted_cost_is_zero(self):
+        with tempfile.TemporaryDirectory() as raw:
+            price_file = Path(raw) / "prices.json"
+            price_file.write_text(json.dumps({
+                "defaults": {"input_per_mtok": 1, "cached_input_per_mtok": 0.25,
+                             "output_per_mtok": 4, "input_share": 0.75},
+                "models": {"kimi-for-coding/k3": {"input_per_mtok": 3,
+                                                       "cached_input_per_mtok": 0.3,
+                                                       "output_per_mtok": 15}},
+            }))
+            metadata = {"harness": {"harness": "opencode"}, "opencode": {"sessions": [
+                {"session_id": "root", "parent_id": None, "model": "k3",
+                 "provider": "kimi-for-coding", "variant": None,
+                 "tokens_input": 2_108_555, "tokens_cache_read": 132_839_894,
+                 "tokens_cache_write": 0, "tokens_output": 339_703,
+                 "tokens_reasoning": 0, "cost": 0.0},
+                {"session_id": "excluded", "parent_id": None, "model": "k3",
+                 "provider": "kimi-for-coding", "variant": None,
+                 "tokens_input": 9_000_000, "tokens_output": 9_000_000,
+                 "tokens_reasoning": 0, "cost": 0.0},
+            ]}}
+            scores = {"session_selection": {"roots": ["root"]}}
+            with patch.object(query, "COST_METADATA", price_file):
+                estimate = query.current_snapshot_cost({}, metadata, scores)
+            self.assertEqual(estimate["total"], 51.2732)
+            self.assertEqual(estimate["unpriced_tokens"], 0)
+            self.assertEqual(estimate["source"],
+                             "selected OpenCode session-tree token decomposition")
+
+    def test_environment_phase_respects_explicit_capture_not_opt_symlink(self):
+        self.assertEqual(query.environment_capture_phase({
+            "capture_phase": "post_run",
+            "workspace": {"external_symlink": "/opt/external"},
+        }), "post_run")
+        self.assertEqual(query.environment_capture_phase({
+            "version": "1.0",
+            "workspace": {"external_symlink": "/opt/external"},
+        }), "pre_run")
+        self.assertEqual(query.environment_capture_phase({
+            "provenance": {"pre_run_authority": False},
+            "workspace": {"external_symlink": "/opt/external"},
+        }), "post_run")
+        self.assertIsNone(query.environment_capture_phase({
+            "version": "1.1",
+            "workspace": {"external_symlink": "/opt/external"},
+        }))
+
     def test_codex_model_decomposition_keys_model_plus_single_observed_effort(self):
         with tempfile.TemporaryDirectory() as raw:
             price_file = Path(raw) / "prices.json"

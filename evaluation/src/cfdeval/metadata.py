@@ -253,7 +253,8 @@ def extract_opencode(args, workspace: str) -> dict:
         try:
             rows = db.execute(
                 "SELECT id, parent_id, directory, title, agent, model, "
-                "tokens_input, tokens_output, tokens_reasoning, cost, "
+                "tokens_input, tokens_output, tokens_reasoning, "
+                "tokens_cache_read, tokens_cache_write, cost, "
                 "time_created, time_updated, version FROM session "
                 "WHERE directory = ? OR directory LIKE ?",
                 (workspace, workspace + "/%"),
@@ -271,15 +272,15 @@ def extract_opencode(args, workspace: str) -> dict:
         })
         rows = []
 
-    versions = sorted({str(r[12]) for r in rows if r[12]})
+    versions = sorted({str(r[14]) for r in rows if r[14]})
     harness["version"] = ", ".join(versions) if versions else None
 
     for r in rows:
         m = json.loads(r[5]) if r[5] else {}
-        started = (datetime.fromtimestamp(r[10] / 1000, tz=timezone.utc).isoformat()
-                   if r[10] else None)
-        ended = (datetime.fromtimestamp(r[11] / 1000, tz=timezone.utc).isoformat()
-                 if r[11] else None)
+        started = (datetime.fromtimestamp(r[12] / 1000, tz=timezone.utc).isoformat()
+                   if r[12] else None)
+        ended = (datetime.fromtimestamp(r[13] / 1000, tz=timezone.utc).isoformat()
+                 if r[13] else None)
         sessions.append({
             "session_id": r[0],
             "parent_id": r[1],
@@ -291,9 +292,11 @@ def extract_opencode(args, workspace: str) -> dict:
             "tokens_input": r[6] or 0,
             "tokens_output": r[7] or 0,
             "tokens_reasoning": r[8] or 0,
-            "cost": r[9] or 0.0,
-            "time_created": r[10],
-            "time_updated": r[11],
+            "tokens_cache_read": r[9] or 0,
+            "tokens_cache_write": r[10] or 0,
+            "cost": r[11] or 0.0,
+            "time_created": r[12],
+            "time_updated": r[13],
             "started_at": started,
             "ended_at": ended,
         })
@@ -330,13 +333,20 @@ def extract_opencode(args, workspace: str) -> dict:
             "reasoning_efforts_seen": [s["variant"]] if s["variant"] else [],
             "max_context_used": 0, "threads": 0,
             "tokens_input": 0, "tokens_output": 0, "tokens_reasoning": 0,
+            "tokens_cache_read": 0, "tokens_cache_write": 0,
             "cost": 0.0,
         })
         agg["threads"] += 1
         agg["tokens_input"] += s["tokens_input"]
         agg["tokens_output"] += s["tokens_output"]
         agg["tokens_reasoning"] += s["tokens_reasoning"]
+        agg["tokens_cache_read"] += s["tokens_cache_read"]
+        agg["tokens_cache_write"] += s["tokens_cache_write"]
         agg["cost"] += s["cost"]
+        # OpenCode stores cumulative per-session usage, not a per-request
+        # context high-water mark. Preserve the historical raw-input proxy;
+        # adding cumulative cache reads here would misreport context as tens
+        # or hundreds of millions of tokens.
         agg["max_context_used"] = max(agg["max_context_used"], s["tokens_input"])
         if s["variant"] and s["variant"] not in agg["reasoning_efforts_seen"]:
             agg["reasoning_efforts_seen"].append(s["variant"])
@@ -373,7 +383,9 @@ def extract_opencode(args, workspace: str) -> dict:
             "type": typ,
             "model": s["model"],
             "variant": s["variant"],
-            "tokens_used": s["tokens_input"] + s["tokens_output"] + s["tokens_reasoning"],
+            "tokens_used": (s["tokens_input"] + s["tokens_cache_read"]
+                            + s["tokens_cache_write"] + s["tokens_output"]
+                            + s["tokens_reasoning"]),
             "cost": s["cost"],
         })
 

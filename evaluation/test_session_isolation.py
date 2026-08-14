@@ -4,9 +4,13 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+import json
+import sqlite3
 from pathlib import Path
+from types import SimpleNamespace
 
 from cfdeval import codex_data as cd
+from cfdeval import metadata as metadata_mod
 
 
 class SessionIsolationTests(unittest.TestCase):
@@ -74,6 +78,49 @@ class SessionIsolationTests(unittest.TestCase):
             cd.rebase_rollout_paths(threads, root)
             self.assertEqual(threads["thread-1"]["rollout_path"], str(local.resolve()))
             self.assertIsNone(threads["thread-2"]["rollout_path"])
+
+    def test_opencode_metadata_preserves_cache_counters(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp) / "workspace"
+            workspace.mkdir()
+            db_path = workspace / ".sessions" / "opencode-data" / "opencode" / "opencode.db"
+            db_path.parent.mkdir(parents=True)
+            db = sqlite3.connect(db_path)
+            try:
+                db.executescript("""
+                    CREATE TABLE session (
+                      id TEXT, parent_id TEXT, directory TEXT, title TEXT, agent TEXT,
+                      model TEXT, tokens_input INTEGER, tokens_output INTEGER,
+                      tokens_reasoning INTEGER, tokens_cache_read INTEGER,
+                      tokens_cache_write INTEGER, cost REAL, time_created INTEGER,
+                      time_updated INTEGER, version TEXT
+                    );
+                    CREATE TABLE message (id TEXT, session_id TEXT, data TEXT,
+                                          time_created INTEGER);
+                    CREATE TABLE part (message_id TEXT, data TEXT);
+                """)
+                db.execute(
+                    "INSERT INTO session VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    ("root", None, str(workspace.resolve()), "benchmark", "build",
+                     json.dumps({"id": "k3", "providerID": "kimi-for-coding"}),
+                     10, 3, 2, 100, 4, 0.0, 1_000, 2_000, "1.18.11"),
+                )
+                db.commit()
+            finally:
+                db.close()
+            config_dir = workspace / ".sessions" / "opencode-config"
+            config_dir.mkdir(parents=True)
+            args = SimpleNamespace(
+                opencode_db=str(db_path), opencode_config_dir=str(config_dir),
+                ocx_catalog=str(workspace / ".sessions" / "missing-catalog.json"),
+                idle_gap_seconds=600,
+            )
+            extracted = metadata_mod.extract_opencode(args, str(workspace.resolve()))
+            session = extracted["opencode"]["sessions"][0]
+            self.assertEqual(session["tokens_cache_read"], 100)
+            self.assertEqual(session["tokens_cache_write"], 4)
+            self.assertEqual(extracted["models"]["k3"]["tokens_cache_read"], 100)
+            self.assertEqual(extracted["subagents"], [])
 
 
 if __name__ == "__main__":

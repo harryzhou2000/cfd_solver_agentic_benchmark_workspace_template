@@ -518,8 +518,7 @@
     cards.push({ label: "Execution date", value: selection.execution_date || emDash, sub: "UTC primary-session start" });
     const env = detail.env_snapshot || {};
     const envCap = detail.env_captured === true;
-    const legacyPostRun = env.provenance && (env.provenance.pre_run_authority === false || String(env.provenance.capture_kind || "").toLowerCase().includes("post-run"));
-    const envPhase = env.capture_phase || (legacyPostRun ? "post_run" : envCap ? "pre_run" : null);
+    const envPhase = detail.environment_capture_phase;
     cards.push({
       label: "Environment provenance",
       value: envPhase || "missing",
@@ -1200,8 +1199,7 @@
     const ws = env.workspace || {};
     const net = env.network || {};
     const cap = env.captured_at;
-    const legacyPostRun = env.provenance && (env.provenance.pre_run_authority === false || String(env.provenance.capture_kind || "").toLowerCase().includes("post-run"));
-    const capturePhase = env.capture_phase || (legacyPostRun ? "post_run" : "pre_run");
+    const capturePhase = detail.environment_capture_phase;
     const warning = capturePhase === "post_run" || env.run_environment_available === false
       ? `<div class="banner warn"><strong>Post-run provenance reconstruction.</strong> Original execution-time harness, container, host, tools, and environment are unavailable. Capture-time values below are diagnostics only.</div>`
       : "";
@@ -1224,7 +1222,7 @@
       ["branch",    ws.branch || ws.git_branch],
       ["commit",    ws.commit || ws.git_commit],
       ["submodule", ws.benchmark_submodule ? (ws.benchmark_submodule.commit || "").slice(0,12) : null],
-      ["external",  ws.external],
+      ["external",  ws.external_symlink],
     ]));
     cards.push(envCard("Network", [
       ["hostname",  net.hostname],

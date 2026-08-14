@@ -66,6 +66,87 @@ def current_cost_estimate(expenses: dict) -> dict | None:
     return estimate
 
 
+def current_snapshot_cost(expenses: dict, metadata: dict,
+                          agent_scores: dict | None = None,
+                          decomposition: dict | None = None) -> dict | None:
+    """Reprice the attributable snapshot token facts with current metadata.
+
+    Codex stores model token aggregates in ``expenses.json``. OpenCode's
+    persisted DB cost may legitimately be zero even when token counters are
+    present, so use the manually selected OpenCode session tree represented by
+    the model decomposition instead of treating that persisted zero as a
+    current-price estimate.
+    """
+    harness = (metadata.get("harness") or {}).get("harness")
+    if harness != "opencode":
+        return current_cost_estimate(expenses)
+    decomposition = decomposition or current_model_decomposition(
+        expenses, metadata, agent_scores)
+    rows = decomposition.get("rows") or []
+    total = decomposition.get("total_current_cost_usd")
+    if not rows or total is None:
+        return None
+    if not decomposition.get("total_tokens"):
+        persisted = decomposition.get("total_persisted_cost_usd")
+        if persisted is None:
+            return None
+        return {
+            "total": persisted,
+            "by_model": {},
+            "unpriced_tokens": 0,
+            "estimate": False,
+            "metadata": None,
+            "metadata_sha256": None,
+            "dashboard_current": False,
+            "source": "selected OpenCode session-tree persisted cost; token facts unavailable",
+        }
+    return {
+        "total": total,
+        "by_model": {
+            row["key"]: {
+                "usd": row.get("current_cost_usd"),
+                "tokens": row.get("total", 0),
+                "pricing": row.get("pricing"),
+            }
+            for row in rows
+        },
+        "unpriced_tokens": sum(
+            int(row.get("total", 0) or 0)
+            for row in rows if row.get("pricing") == "defaults"
+        ),
+        "estimate": True,
+        "metadata": decomposition.get("cost_metadata"),
+        "metadata_sha256": decomposition.get("cost_metadata_sha256"),
+        "dashboard_current": True,
+        "source": "selected OpenCode session-tree token decomposition",
+    }
+
+
+def environment_capture_phase(env_snapshot: dict | None) -> str | None:
+    """Classify capture timing without rewriting explicit provenance.
+
+    The explicit modern field is authoritative. Older snapshots defaulted to
+    pre-run capture and may lack that field; legacy reconstruction markers are
+    the only reason to classify those old documents as post-run. A Docker
+    ``/opt`` external symlink describes runtime layout, not capture timing.
+    """
+    if not env_snapshot:
+        return None
+    phase = env_snapshot.get("capture_phase")
+    if phase in ("pre_run", "post_run"):
+        return phase
+    provenance = env_snapshot.get("provenance") or {}
+    if (provenance.get("pre_run_authority") is False
+            or "post-run" in str(provenance.get("capture_kind", "")).lower()):
+        return "post_run"
+    # Version 1.0 predates capture_phase and was emitted only by setup-time
+    # capture. Modern 1.1 documents must carry the explicit field; silently
+    # treating a malformed one as authoritative pre-run evidence is unsafe.
+    if env_snapshot.get("version") == "1.0":
+        return "pre_run"
+    return None
+
+
 def current_model_decomposition(expenses: dict, metadata: dict,
                                 agent_scores: dict | None = None) -> dict:
     """Build readable model + reasoning rows from immutable snapshot facts.
@@ -151,9 +232,12 @@ def current_model_decomposition(expenses: dict, metadata: dict,
             effort = info.get("variant") or "unknown"
             output = int(info.get("tokens_output", 0) or 0)
             reasoning = int(info.get("tokens_reasoning", 0) or 0)
-            input_t = int(info.get("tokens_input", 0) or 0)
+            raw_input = int(info.get("tokens_input", 0) or 0)
+            cache_read = int(info.get("tokens_cache_read", 0) or 0)
+            cache_write = int(info.get("tokens_cache_write", 0) or 0)
+            input_t = raw_input + cache_read + cache_write
             add(model, effort, {
-                "input": input_t, "output": output,
+                "input": input_t, "cached_input": cache_read, "output": output,
                 "reasoning_output": reasoning,
                 "total": input_t + output + reasoning,
             }, provider=info.get("provider"), persisted_cost=info.get("cost"),
@@ -228,8 +312,7 @@ def current_model_decomposition(expenses: dict, metadata: dict,
             if any(r["persisted_cost_usd"] is not None for r in rows) else None,
         "cost_metadata": str(COST_METADATA) if price_meta is not None else None,
         "cost_metadata_sha256": hashlib.sha256(raw).hexdigest() if raw else None,
-        "limitations": (["OpenCode current-price estimates have no cached-input split in metadata.json."]
-                        if harness == "opencode" and rows else []),
+        "limitations": [],
     }
 
 
@@ -323,23 +406,9 @@ def row_for(folder: Path, summary: dict) -> dict:
         x for x in (primary_model, primary_effort) if x
     ) or None
     session_tokens = ws_.get("tokens") or {}
-    dashboard_cost = current_cost_estimate(ex)
-    selected_opencode_ids: set[str] = set()
-    if selected_roots and opencode_by_id:
-        for session_id in opencode_by_id:
-            current = session_id
-            seen: set[str] = set()
-            while current and current not in seen:
-                seen.add(current)
-                if current in selected_roots:
-                    selected_opencode_ids.add(session_id)
-                    break
-                current = (opencode_by_id.get(current) or {}).get("parent_id")
-    opencode_cost = (
-        round(sum(float(opencode_by_id[sid].get("cost") or 0)
-                  for sid in selected_opencode_ids), 6)
-        if selected_opencode_ids else None
-    )
+    decomposition = current_model_decomposition(ex, md, agent_scores)
+    dashboard_cost = current_snapshot_cost(
+        ex, md, agent_scores, decomposition=decomposition)
     agent_reviewed = bool(
         (agent_scores or {}).get("rubric", {}).get("total_scored") is not None
         or any(
@@ -356,15 +425,7 @@ def row_for(folder: Path, summary: dict) -> dict:
                  - datetime.fromisoformat(an["window"]["start"])).total_seconds(), 1)
         except (TypeError, ValueError):
             pass
-    env_phase = (env_snapshot or {}).get("capture_phase")
-    if env_phase is None and env_snapshot:
-        provenance = env_snapshot.get("provenance") or {}
-        if provenance.get("pre_run_authority") is False or "post-run" in str(
-            provenance.get("capture_kind", "")
-        ).lower():
-            env_phase = "post_run"
-        else:
-            env_phase = "pre_run"
+    env_phase = environment_capture_phase(env_snapshot)
     row = {
         "contestant": folder.name,
         "run_id": (run_identity or {}).get("run_id") or folder.name,
@@ -380,8 +441,7 @@ def row_for(folder: Path, summary: dict) -> dict:
         "input_tokens": session_tokens.get("input"),
         "cached_input_tokens": session_tokens.get("cached_input"),
         "output_tokens": session_tokens.get("output"),
-        "cost_usd": (opencode_cost if opencode_cost is not None else
-                     (dashboard_cost or ex.get("cost_estimate_usd") or {}).get("total")),
+        "cost_usd": (dashboard_cost or ex.get("cost_estimate_usd") or {}).get("total"),
         "cost_metadata_sha256": (dashboard_cost or {}).get("metadata_sha256"),
         "subagents": len(md.get("subagents", [])),
         "loc_lines": ((me.get("loc") or {}).get("file") or {}).get("lines"),
