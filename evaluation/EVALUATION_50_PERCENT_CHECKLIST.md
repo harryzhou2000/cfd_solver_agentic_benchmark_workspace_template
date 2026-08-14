@@ -62,7 +62,7 @@ canonical evaluations count toward the quota and must not be repeated.
 ### `codex/gpt56` — 8 done, quota 4
 
 - [x] 01 — `codex_gpt56_01_cb349f`
-- [ ] 02 — BLOCKED: provenance reconstructed (`codex/gpt56/init` @ `f6c8822cbf3475de5af5ee6f930d2aa259536357`), but no configured origin remote prevents required canonical-upstream collision proof.
+- [x] 02 — `codex_gpt56_02_38616e`; 92/100; DQ no; submission `6183dc8fc067cd7dc4a4a2949ca53bd4f2b42820`; manager `7f4fe0f`; explicit eight-case plus report validator OK. Limitation: strict report-PNG audit does not recognize TeX-escaped underscores, so the curated result commit retains report.tex without its source PNGs.
 - [ ] 03
 - [ ] 04
 
