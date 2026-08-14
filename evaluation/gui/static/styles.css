@@ -412,6 +412,34 @@ td.branch-cell { font-family: var(--mono); color: var(--text-dim); font-size: 12
 .review-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
 .review-card h2:first-child { margin-top: 0; font-size: 1.05em; color: var(--accent); }
 
+/* DQ and per-case reason tabs */
+.reason-summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 18px;
+  margin-bottom: 14px; padding: 12px 14px; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--bg-2);
+}
+.reason-summary.is-dq { border-color: rgba(255,107,107,.45); background: rgba(196,45,45,.12); }
+.reason-label { margin-right: 9px; color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+.reason-summary-text { color: var(--text-dim); font-size: 13px; text-align: right; }
+.reason-table-wrap { overflow-x: auto; }
+.reason-table { table-layout: fixed; }
+.reason-table th:nth-child(1) { width: 70px; }
+.reason-table th:nth-child(2) { width: 72px; }
+.reason-table th:nth-child(3) { width: 28%; }
+.reason-table tr.is-triggered { background: rgba(196,45,45,.12); }
+.reason-evidence { white-space: pre-wrap; line-height: 1.45; color: var(--text-dim); }
+.case-reasons th:nth-child(1) { width: 29%; }
+.case-reasons th:nth-child(2) { width: 120px; }
+.case-id { margin-top: 3px; color: var(--text-mute); font-size: 10.5px; overflow-wrap: anywhere; }
+.case-score-detail { white-space: nowrap; }
+.case-score-detail .case-score { min-width: 42px; }
+.case-denom { margin-left: 6px; color: var(--text-mute); font-family: var(--mono); font-size: 11px; }
+@media (max-width: 760px) {
+  .reason-summary { align-items: flex-start; flex-direction: column; }
+  .reason-summary-text { text-align: left; }
+  .reason-table { table-layout: auto; min-width: 760px; }
+}
+
 /* sessions tab */
 .sessions-meta { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 16px; }
 .sessions-meta .card {

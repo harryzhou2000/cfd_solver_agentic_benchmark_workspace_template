@@ -572,6 +572,8 @@
     switch (name) {
       case "summary":  renderSummaryTab(detail); break;
       case "evaluation": renderEvaluationTab(detail); break;
+      case "dq-reasons": renderDqReasonsTab(detail); break;
+      case "case-scores": renderCaseScoresTab(detail); break;
       case "report":   renderReportTab(detail);  break;
       case "contestant": renderContestantTab(detail); break;
       case "pdf":      renderPdfTab(detail); break;
@@ -815,6 +817,71 @@
     function kvTable(pairs) {
       return `<table><tbody>${pairs.filter(([,v]) => v != null && v !== "").map(([k,v]) => `<tr><th>${escapeHtml(k)}</th><td class="mono">${escapeHtml(v)}</td></tr>`).join("")}</tbody></table>`;
     }
+  }
+
+  function renderDqReasonsTab(detail) {
+    const panel = $("#panel-dq-reasons");
+    const scores = detail.agent_scores;
+    if (!scores) {
+      panel.innerHTML = `<p class="muted">No agent_scores.json is available for this snapshot.</p>`;
+      return;
+    }
+    const dq = scores.disqualification || {};
+    const flags = Array.isArray(dq.flags) ? dq.flags : [];
+    const found = flags.filter(flag => flag.found === true);
+    let html = `<div class="reason-summary ${dq.triggered === true ? "is-dq" : ""}">
+      <div><span class="reason-label">Disqualified</span>${dqPill(dq.triggered)}</div>
+      <div class="reason-summary-text">${dq.triggered === true
+        ? `${found.length} trigger${found.length === 1 ? "" : "s"} established by the evaluator.`
+        : dq.triggered === false
+          ? "No disqualification trigger was established."
+          : "No explicit disqualification verdict is recorded."}</div>
+    </div>`;
+    if (!flags.length) {
+      panel.innerHTML = html + `<p class="muted">No disqualification checks are recorded.</p>`;
+      return;
+    }
+    html += `<div class="reason-table-wrap"><table class="md-table reason-table">
+      <thead><tr><th>Trigger</th><th>Found</th><th>Rule</th><th>Evidence / reason</th></tr></thead>
+      <tbody>${flags.map(flag => `<tr class="${flag.found === true ? "is-triggered" : ""}">
+        <td class="mono">${escapeHtml(flag.id ?? emDash)}</td>
+        <td>${flag.found === true ? dqPill(true) : flag.found === false ? boolPill(false) : pillFor(emDash, "pill-status-other")}</td>
+        <td>${escapeHtml(flag.text || emDash)}</td>
+        <td class="reason-evidence">${escapeHtml(flag.evidence || (flag.found === false ? "Not established." : emDash))}</td>
+      </tr>`).join("")}</tbody></table></div>`;
+    panel.innerHTML = html;
+  }
+
+  function renderCaseScoresTab(detail) {
+    const panel = $("#panel-case-scores");
+    const scores = detail.agent_scores;
+    if (!scores) {
+      panel.innerHTML = `<p class="muted">No agent_scores.json is available for this snapshot.</p>`;
+      return;
+    }
+    const cases = scores.case_scores || {};
+    const labels = [
+      ["naca0012_m015_inviscid", "NACA0012 M0.15 inviscid"],
+      ["naca0012_m080_inviscid", "NACA0012 M0.80 inviscid"],
+      ["naca0012_m200_inviscid", "NACA0012 M2.00 inviscid"],
+      ["naca0012_m015_laminar_re5000", "NACA0012 M0.15 laminar Re5000"],
+      ["naca0012_m080_laminar_re5000", "NACA0012 M0.80 laminar Re5000"],
+      ["naca0012_m200_laminar_re5000", "NACA0012 M2.00 laminar Re5000"],
+      ["cylinder_m010_laminar_re20", "Cylinder M0.10 laminar Re20"],
+      ["cylinder_m010_laminar_re200", "Cylinder M0.10 laminar Re200"],
+    ];
+    const rows = labels.map(([id, label]) => {
+      const item = cases[id] || {};
+      const value = Number(item.score);
+      const valid = item.score !== null && item.score !== undefined && Number.isFinite(value);
+      const bucket = valid ? Math.max(0, Math.min(5, Math.round(value))) : null;
+      const score = valid
+        ? `<span class="case-score case-score-${bucket}" title="${escapeHtml(value)} out of 5">${escapeHtml(value.toFixed(2))}</span><span class="case-denom">/ 5.00</span>`
+        : `<span class="muted">${emDash}</span>`;
+      return `<tr><td><strong>${escapeHtml(label)}</strong><div class="case-id mono">${escapeHtml(id)}</div></td><td class="case-score-detail">${score}</td><td class="reason-evidence">${escapeHtml(item.notes || emDash)}</td></tr>`;
+    });
+    panel.innerHTML = `<div class="reason-summary"><div><span class="reason-label">Scoring layer</span><span class="pill pill-info">independent 0–5</span></div><div class="reason-summary-text">Case scores do not alter the 100-point rubric or Code/CFD/Results reviews.</div></div>
+      <div class="reason-table-wrap"><table class="md-table reason-table case-reasons"><thead><tr><th>Case</th><th>Score</th><th>Evidence / reason</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
   }
 
   function renderReportTab(detail) {
