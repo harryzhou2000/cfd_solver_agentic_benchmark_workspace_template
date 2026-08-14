@@ -159,7 +159,12 @@ Reserve `[x]` for a snapshot that passes both gates.
       final result packages and report artifacts are absent, so cases score 0.
       Project-OpenCode root/descendant and terminal response are recorded; all
       score layers, index, and both completion gates pass.
-- [ ] 04
+- [x] 04 — `omo_slim_dsv4_04_d9ebd4`; 64/100 before DQ; DQ yes (trigger 7).
+      Curated submission `4733d433554726e4503a20b23df51c43e2d272e8`; three
+      existing case metadata files mark `completed: true` while paired
+      run-status files say failed, five required packages including Re200 are
+      absent, and report claims all eight complete. Telemetry/final-response,
+      all numeric score layers, index, and both completion gates pass.
 
 ## Legacy/session notes
 

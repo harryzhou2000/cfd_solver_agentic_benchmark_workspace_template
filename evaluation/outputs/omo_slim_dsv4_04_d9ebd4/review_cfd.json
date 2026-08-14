@@ -1,0 +1,116 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 4,
+      "notes": "Conservative perfect-gas formulation and force-coefficient definitions are implemented/described."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "CGNS reader, face/cell geometry, adjacency, and METIS graph construction are present; only partial failed-run evidence exists."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "Face residual assembly, boundary treatment, and global L2/Linf reductions are present, though failed histories do not validate production convergence."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Rusanov and Roe/Harten-Yee paths are implemented; the M2 metadata selects Roe with Harten-Yee."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Farfield, slip, and mirrored no-slip/adiabatic boundary implementations are present; output validation is inadequate."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "Least-squares gradients and reconstructed face states are called from residual assembly; no successful production result verifies accuracy."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Barth-Jespersen limiter and positivity fallback are implemented and called; production quality remains unverified."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Newtonian viscous path is implemented, but residual.cpp leaves temperature gradient TODO and report admits heat conduction is inactive; laminar result forces show zero viscous contribution."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Block LU-SGS/pseudo-time implementation exists, but all three available steady runs are failed with -0.89 to 0.43 residual-order reduction."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "Source contains frozen-history BDF2 dual-time loops and inner statistics, but no Re200 deliverable validates it."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 3,
+      "notes": "METIS k-way partition, owned/ghost data, and neighbor diagnostics are implemented; no np=1/2/4/8 comparison is delivered."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Solver uses explicit time stepping only",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Normal viscous traction mislabeled as skin friction",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.71
+}

@@ -1,0 +1,62 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 1,
+      "notes": "Only three of eight case directories exist. The three have files, but all record failed status; five required packages are absent."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 0,
+      "notes": "No submitted validator pass; the absent five case directories and incomplete report artifacts prevent a passing submission."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 0,
+      "notes": "All three present cases record convergence_status failed; five cases, including Re200, are absent."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 0,
+      "notes": "Failed tails are implausible (cylinder Re20 ends Cd 23.16 and Cl 16.94); sanity_checks records failed symmetry, wall, positivity, and Re200 checks; no rank comparison."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 1,
+      "notes": "Fourteen force/residual PNGs exist, but no computed Mach/pressure or Re200 wake figure; manifests name bare source CSVs that are not present beside the manifest."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 2,
+      "notes": "Well-structured equations and limitations, but it claims complete eight-case output and analyses that do not exist; run_manifest.csv is header-only."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 1,
+      "notes": "A figure manifest exists, but every entry references bare forces.csv/residuals.csv missing from the report directory and the report has no actual run summary."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "id": 7,
+      "evidence": "Existing package metadata says completed=true while its run_status says failed."
+    }
+  ],
+  "overall_score": 0.7
+}
