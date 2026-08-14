@@ -2,26 +2,18 @@
 
 - Evaluated at: 2026-08-14T01:35:17.793718+00:00
 - Evaluating agent: Codex
-- Harness: opencode
+- Harness: codex
 
 ## Run summary (auto)
 
 - Workspace: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04` branch `codex/dsv4_flash/04` commit `1b16448613a82d29f7f8f033b9216d5248a7db05`
 - Benchmark submodule: 1bc6580b84825037bbeac097ede1b2226d8185d1
-- Time: goal 0s, wall 0s
-- Tokens: 0 (main 0 / subagents 0); cost est. $0.00
-
-### Metadata questions requiring user answers
-
-| Question | Reason | Suggested source |
-|----------|--------|------------------|
-| opencode_sessions: Which opencode sessions belong to this contestant run? | no opencode sessions found for the workspace in the local database | opencode session list / opencode export <sessionID> |
-
-Record the user's answers in `agent_scores.json` under `metadata_answers`, then re-run summarize with `--answers`.
+- Time: goal 6422s, wall 6446s
+- Tokens: 101,426,739 (main 101,426,739 / subagents 0); cost est. $3.74
 
 ### Session analysis (auto)
 
-- Source: project — codex 1 threads / opencode 0 sessions
+- Source: project-local Codex bundle — codex 1 thread / opencode 0 sessions
 - Window: 2026-08-03T14:20:28.807000+00:00 → 2026-08-03T16:07:54.477000+00:00
 - Idle excluded: 0 gaps, 0s (threshold 600s, merged main+subagents)
 - Permission-wait candidates: 0 (method: heuristic; ask-tool events: 0)
@@ -52,16 +44,16 @@ I selected the sole migrated Codex root `019fc7fe-7a37-76b1-8e73-0945d566b6ed`, 
 
 | Section | Max | Score | Notes |
 |---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
+| Build, CLI, Output Contract | 10 | 7 | Source/CLI present and output validator passes, but final-result provenance is disqualifying. |
+| Mesh And Geometry | 10 | 8 | CGNS mesh and distributed geometry source present. |
+| Finite-Volume Residual And Boundary Conditions | 15 | 8 | Residual, flux and BC code present; no independent rerun or trustworthy self-produced final-result evidence. |
+| Second-Order Spatial Scheme | 10 | 7 | Reconstruction/limiting source present. |
+| Viscous Terms | 10 | 5 | Viscous path exists but claimed final result provenance is invalid. |
+| Implicit And Transient Methods | 15 | 5 | LU-SGS/BDF2 source present; no independent rerun or valid self-produced result evidence. |
+| MPI | 10 | 5 | MPI source exists; no independently verified rank-count result and no trustworthy submitted result credit. |
+| Case Results And Validation | 10 | 0 | Validator structural pass only; terminal answer admits sibling workspace results completed case matrix. |
+| Report, Visualization, Analysis | 5 | 0 | Report omits 29/41 manifest figures, all histories/Cp, and Re200 wake; force table blank. |
+| Extensibility | 5 | 3 | Modular source organization, but no credible end-to-end self-produced result evidence. |
 
 ## Review-area scores (0-5 weighted, review_*.json)
 
@@ -77,7 +69,7 @@ I selected the sole migrated Codex root `019fc7fe-7a37-76b1-8e73-0945d566b6ed`, 
 
 ## Metadata answers & session selection
 
-Migration manifest inventories exactly one Codex rollout for this workspace and no alternate harness candidates. Its final answer matches the root done marker's normal terminal status but reveals the disqualifying provenance issue.
+The refreshed telemetry was extracted exclusively from the workspace-local Codex bundle (`.sessions/codex/state_5.sqlite` and its bundled rollout), superseding the prior incoherent OpenCode metadata. Migration manifest inventories exactly one Codex rollout for this workspace and no alternate harness candidates. The selected root has no descendants. Its terminal final answer, `msg_d9e6f1951dfe44a59af2c99c3d9fca3d`, is one output-text part at 2026-08-03T16:07:54.415Z. Stored-message SHA-256: `437c92d181c903f14be675f41039c2ddd91c62228f6202d67b39626400c1c0bb`; extracted `contestant_final_response.md` SHA-256: `4b59a6a6d715091b9d20c69fde69f85f72b82b1d7093484499e1524e37a415bb`. The Markdown sidecar is not indexed by `cfdeval check`.
 
 ## Limitations
 

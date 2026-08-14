@@ -20,7 +20,7 @@
     "started_at": "2026-08-03T14:20:28.807000+00:00",
     "ended_at": "2026-08-03T16:07:54.477000+00:00",
     "time_basis": "Selected root rollout persisted-event timestamps, UTC.",
-    "rationale": "Migration manifest identifies sole root 019fc7fe-7a37-76b1-8e73-0945d566b6ed; terminal final answer msg_d9e6f1951dfe44a59af2c99c3d9fca3d is directly attributable."
+    "rationale": "Direct extraction from the bundled project Codex telemetry supersedes the prior mixed-harness automatic snapshot. Migration manifest identifies sole root 019fc7fe-7a37-76b1-8e73-0945d566b6ed; its rollout has no descendants. The first persisted run event is 2026-08-03T14:20:28.850Z; the terminal completed final response is msg_d9e6f1951dfe44a59af2c99c3d9fca3d at 2026-08-03T16:07:54.415Z (one output-text part). Stored message SHA-256 is 437c92d181c903f14be675f41039c2ddd91c62228f6202d67b39626400c1c0bb; newline-terminated extracted sidecar SHA-256 is 4b59a6a6d715091b9d20c69fde69f85f72b82b1d7093484499e1524e37a415bb. Source: workspace-local .sessions/codex/state_5.sqlite and bundled rollout."
   },
   "scores": {
     "code_review": {
@@ -233,7 +233,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 55,
+    "total_scored": 48,
     "sections": [
       {
         "id": "build_cli",
@@ -253,8 +253,8 @@
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 10,
-        "notes": "Residual, flux and BC code present; no independent rerun."
+        "score": 8,
+        "notes": "Residual, flux and BC code present; no independent rerun and no trustworthy self-produced final-result evidence."
       },
       {
         "id": "second_order",
@@ -274,22 +274,22 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 6,
-        "notes": "LU-SGS/BDF2 source present; no valid self-produced result evidence."
+        "score": 5,
+        "notes": "LU-SGS/BDF2 source present; no independent rerun or valid self-produced result evidence."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 6,
-        "notes": "MPI source exists; no trustworthy result credit."
+        "score": 5,
+        "notes": "MPI source exists; no independently verified rank-count result and no trustworthy submitted result credit."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 2,
-        "notes": "Validator structural pass only; terminal answer admits sibling workspace results completed case matrix."
+        "score": 0,
+        "notes": "Validator structural pass only; terminal answer admits sibling workspace results completed case matrix, so no submitted numerical-result credit is supportable."
       },
       {
         "id": "report_viz",
@@ -302,8 +302,8 @@
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 4,
-        "notes": "Modular source organization."
+        "score": 3,
+        "notes": "Modular source organization, but no credible end-to-end self-produced result evidence."
       }
     ]
   },

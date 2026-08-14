@@ -1,21 +1,92 @@
 {
-  "note": "opencode harness: codex tool-usage/LOC extraction not applicable",
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04",
   "tool_usage": {
-    "total": 0,
-    "by_tool": {},
-    "by_thread": {},
+    "total": 390,
+    "by_tool": {
+      "exec_command": 277,
+      "apply_patch": 87,
+      "write_stdin": 17,
+      "update_plan": 6,
+      "interrupt_agent": 2,
+      "update_goal": 1
+    },
+    "by_thread": {
+      "019fc7fe-7a37-76b1-8e73-0945d566b6ed": {
+        "exec_command": 277,
+        "update_plan": 6,
+        "apply_patch": 87,
+        "write_stdin": 17,
+        "interrupt_agent": 2,
+        "update_goal": 1
+      }
+    },
     "subagent_spawns": 0,
-    "risk_context": []
+    "risk_context": [
+      {
+        "thread_id": "019fc7fe-7a37-76b1-8e73-0945d566b6ed",
+        "approval_policy": "never",
+        "permission_profile": ":danger-full-access"
+      },
+      {
+        "thread_id": "019fc7fe-7a37-76b1-8e73-0945d566b6ed",
+        "approval_policy": "never",
+        "sandbox": "danger-full-access",
+        "network_access": null
+      }
+    ]
   },
   "loc": {
-    "method": "file",
-    "git": null,
+    "method": "git+file",
+    "git": {
+      "method": "git",
+      "repos": {
+        "workspace": {
+          "branch": "codex/dsv4_flash/04",
+          "commit": "1b16448613a82d29f7f8f033b9216d5248a7db05",
+          "tracked_source_files": 18,
+          "tracked_source_lines": 3124,
+          "by_extension": {
+            "cmake": 70,
+            "cpp": 2259,
+            "hpp": 624,
+            "py": 171
+          },
+          "diff_vs_base": {
+            "added": 3324,
+            "deleted": 0,
+            "base": "ab943567cd55e707e760531ed7f2c914d09a0537"
+          }
+        },
+        "cfd_solver_agentic_benchmark": {
+          "branch": "HEAD",
+          "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+          "tracked_source_files": 1,
+          "tracked_source_lines": 324,
+          "by_extension": {
+            "py": 324
+          },
+          "diff_vs_base": null
+        }
+      },
+      "lines_total": 3448
+    },
     "file": {
       "method": "file",
-      "files": 0,
-      "lines": 0,
-      "by_extension": {}
+      "files": 19,
+      "lines": 3448,
+      "by_extension": {
+        "cmake": 70,
+        "cpp": 2259,
+        "hpp": 624,
+        "py": 495
+      }
     }
   },
-  "rule_violations": []
+  "rule_violations": [],
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/sessions",
+    "generated_at": "2026-08-14T02:07:14.919154+00:00",
+    "num_threads": 1
+  }
 }

@@ -1,59 +1,93 @@
 {
   "harness": {
-    "harness": "opencode",
-    "version": "1.18.11",
-    "config_dir": "/home/harry/.config/opencode",
-    "config_entries": [
-      ".gitignore",
-      ".oh-my-opencode-slim",
-      "AGENTS.md",
-      "agent",
-      "agents",
-      "bun.lock",
-      "command",
-      "commands",
-      "dcp.jsonc",
-      "mcp",
-      "node_modules",
-      "oh-my-opencode-slim.json",
-      "oh-my-opencode-slim.json.bak-continue-on",
-      "oh-my-opencode-slim.json.bak-pre-continue",
-      "opencode.jsonc",
-      "opencode.jsonc.bak",
-      "opencode.jsonc.bak-pre-children",
-      "opencode.jsonc.bak-pre-compactfix",
-      "opencode.jsonc.bak-pre-npm081",
-      "opencode.jsonc.bak-pre-pr",
-      "package-lock.json",
-      "package.json",
-      "rate-limit-retry-debug.log",
-      "rate-limit-retry.json",
-      "rules",
-      "skill",
-      "skills",
-      "themes",
-      "tui.json"
-    ],
-    "model_provider": null
+    "harness": "codex",
+    "cli_version": "0.146.0",
+    "originator": "codex-tui",
+    "source": "cli",
+    "thread_source": "user",
+    "multi_agent_version": "v2",
+    "history_mode": "legacy",
+    "memory_mode": "disabled",
+    "model_provider": "openai",
+    "codex_runtime_version": null,
+    "plugins": []
   },
-  "models": {},
+  "models": {
+    "BLSC/DeepSeek-V4-Flash": {
+      "catalog": {
+        "display_name": null,
+        "context_window": 522500,
+        "max_context_window": null,
+        "supported_reasoning_levels": null
+      },
+      "reasoning_efforts_seen": [
+        "max"
+      ],
+      "max_context_used": 6293397816,
+      "threads": 1
+    }
+  },
   "context": {
-    "by_model": {},
-    "by_session": {},
+    "by_model": {
+      "BLSC/DeepSeek-V4-Flash": {
+        "context_window": 522500,
+        "max_context_used": 6293397816
+      }
+    },
+    "by_thread": {
+      "019fc7fe-7a37-76b1-8e73-0945d566b6ed": {
+        "model": "BLSC/DeepSeek-V4-Flash",
+        "max_input_tokens": 6293397816,
+        "mean_input_tokens": 6293397816.0,
+        "model_context_window_recorded": 522500
+      }
+    },
     "notes": []
   },
+  "threads": {
+    "019fc7fe-7a37-76b1-8e73-0945d566b6ed": {
+      "thread_id": "019fc7fe-7a37-76b1-8e73-0945d566b6ed",
+      "is_subagent": false,
+      "model": "BLSC/DeepSeek-V4-Flash",
+      "entry_model": "BLSC/DeepSeek-V4-Flash",
+      "model_provider": "openai",
+      "reasoning_effort": [
+        "max"
+      ],
+      "entry_reasoning_effort": "max",
+      "tokens_used": 101426739,
+      "cwd": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04",
+      "git_branch": "codex/dsv4_flash/init",
+      "created_at": 1785766771,
+      "updated_at": 1785773274,
+      "started_at": "2026-08-03T14:20:28.807000+00:00",
+      "ended_at": "2026-08-03T16:07:54.477000+00:00",
+      "context_used_max_input": 6293397816,
+      "context_used_mean_input": 6293397816.0,
+      "model_context_window_recorded": 522500
+    }
+  },
   "subagents": [],
-  "opencodex": null,
-  "opencode": {
-    "sessions": [],
-    "root_session_count": 0,
-    "subagent_session_count": 0,
-    "activity_time_seconds": 0.0,
-    "idle_time_seconds": 0.0,
-    "idle_gap_threshold_seconds": 600
+  "opencodex": {
+    "trigger": "non_vanilla_models",
+    "non_vanilla_models": [
+      "BLSC/DeepSeek-V4-Flash"
+    ],
+    "opencodex_version": null,
+    "opencodex_submodule_pin": null,
+    "config_facts": {},
+    "codex_proxy_fallback_config": null
   },
   "prompts": {
-    "by_root_session": {}
+    "by_root_thread": {
+      "019fc7fe-7a37-76b1-8e73-0945d566b6ed": {
+        "goal_objective": "complete the work defined cfd_solver_agentic_benchmark/.",
+        "goal_status": "complete",
+        "initial_user_prompt": null,
+        "resume_prompts": [],
+        "source": "session_rollout"
+      }
+    }
   },
   "workspace": {
     "git": {
@@ -81,27 +115,22 @@
     }
   },
   "session_window": {
-    "started_at": null,
-    "ended_at": null,
-    "activity_time_seconds": 0.0,
-    "idle_time_seconds": 0.0,
-    "idle_gap_threshold_seconds": 600
+    "started_at": "2026-08-03T14:20:28.807000+00:00",
+    "ended_at": "2026-08-03T16:07:54.477000+00:00"
   },
-  "questions": [
-    {
-      "id": "opencode_sessions",
-      "question": "Which opencode sessions belong to this contestant run?",
-      "reason": "no opencode sessions found for the workspace in the local database",
-      "suggested_source": "opencode session list / opencode export <sessionID>",
-      "answer": null
-    }
-  ],
-  "user_answers": {},
-  "status": "needs_user_input",
   "provenance": {
-    "opencode_db": "/home/harry/.local/share/opencode/opencode.db",
-    "opencode_config_dir": "/home/harry/.config/opencode",
-    "generated_at": "2026-08-14T01:33:58.126910+00:00",
-    "num_sessions": 0
-  }
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/sessions",
+    "history": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/history.jsonl",
+    "ocx_config": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/opencodex/config.json",
+    "ocx_catalog": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/opencodex-catalog.json",
+    "plugins_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/plugins",
+    "generated_at": "2026-08-14T02:07:14.217114+00:00",
+    "num_threads": 1
+  },
+  "questions": [],
+  "user_answers": {},
+  "status": "complete"
 }

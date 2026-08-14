@@ -1,29 +1,87 @@
 {
-  "note": "opencode harness: codex expenses extraction not applicable",
   "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04",
   "time_seconds": {
-    "goal_time": 0,
-    "wall_time": 0,
-    "activity_time_seconds": 0.0,
-    "idle_time_seconds": 0.0,
-    "idle_gap_threshold_seconds": 600,
-    "started_at": null,
-    "ended_at": null
-  },
-  "tokens": {
-    "total": 0,
-    "by_model": {},
-    "by_thread": {},
-    "main_vs_subagent": {
-      "main": 0,
-      "subagent": 0
+    "goal_time": 6422.0,
+    "wall_time": 6445.7,
+    "started_at": "2026-08-03T14:20:28.807000+00:00",
+    "ended_at": "2026-08-03T16:07:54.477000+00:00",
+    "by_root_thread": {
+      "019fc7fe-7a37-76b1-8e73-0945d566b6ed": {
+        "status": "complete",
+        "time_used_seconds": 6422,
+        "tokens_used": 3387676
+      }
+    },
+    "by_root_tree": {
+      "019fc7fe-7a37-76b1-8e73-0945d566b6ed": {
+        "status": "complete",
+        "goal_time_seconds": 6422,
+        "goal_tokens": 3387676,
+        "threads": 1,
+        "tokens_used": 101426739,
+        "model": "BLSC/DeepSeek-V4-Flash"
+      }
     }
   },
+  "tokens": {
+    "total": 101426739,
+    "by_model": {
+      "BLSC/DeepSeek-V4-Flash": {
+        "input": 101095041,
+        "cached_input": 98035584,
+        "non_cached_input": 3059457,
+        "output": 331698,
+        "reasoning_output": 156377,
+        "total": 101426739,
+        "fallback_tokens": 0
+      }
+    },
+    "by_thread": {
+      "019fc7fe-7a37-76b1-8e73-0945d566b6ed": {
+        "model": "BLSC/DeepSeek-V4-Flash",
+        "is_subagent": false,
+        "source": "rollout_cumulative",
+        "tokens": {
+          "BLSC/DeepSeek-V4-Flash": {
+            "input": 101095041,
+            "cached": 98035584,
+            "non_cached": 3059457,
+            "output": 331698,
+            "reasoning_output": 156377,
+            "total": 101426739
+          }
+        },
+        "total": 101426739
+      }
+    },
+    "main_vs_subagent": {
+      "main": 101426739,
+      "subagent": 0
+    },
+    "fallback_tokens": 0,
+    "discrepancy_notes": [],
+    "accounting_note": "Cached/input/output splits come from each selected thread's terminal rollout counter and are scaled only when needed to match state_5.sqlite threads.tokens_used."
+  },
   "cost_estimate_usd": {
-    "total": 0.0,
-    "by_model": {},
+    "total": 3.741,
+    "by_model": {
+      "BLSC/DeepSeek-V4-Flash": {
+        "usd": 3.741,
+        "tokens": 101426739,
+        "pricing": "metadata"
+      }
+    },
     "unpriced_tokens": 0,
-    "estimate": false,
-    "metadata": "opencode.db cost column"
+    "estimate": true,
+    "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.sessions/codex/sessions",
+    "fetched_at": "2026-08-14T02:07:14.568559+00:00",
+    "num_threads": 1,
+    "num_roots": 1
   }
 }

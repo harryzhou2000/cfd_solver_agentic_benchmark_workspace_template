@@ -1,21 +1,137 @@
 {
-  "note": "opencode harness: codex tool-usage/LOC extraction not applicable",
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/02",
   "tool_usage": {
-    "total": 0,
-    "by_tool": {},
-    "by_thread": {},
-    "subagent_spawns": 0,
-    "risk_context": []
+    "total": 533,
+    "by_tool": {
+      "exec_command": 366,
+      "apply_patch": 102,
+      "write_stdin": 59,
+      "update_plan": 2,
+      "view_image": 2,
+      "spawn_agent": 1,
+      "update_goal": 1
+    },
+    "by_thread": {
+      "019fbd2b-002f-7981-8f53-61c34659cce0": {
+        "exec_command": 314,
+        "write_stdin": 59,
+        "update_plan": 2,
+        "apply_patch": 100,
+        "spawn_agent": 1,
+        "update_goal": 1
+      },
+      "019fbd68-a78e-71b2-9d01-1eb7c8e5d86f": {
+        "exec_command": 52,
+        "apply_patch": 2,
+        "view_image": 2
+      }
+    },
+    "subagent_spawns": 1,
+    "risk_context": [
+      {
+        "thread_id": "019fbd2b-002f-7981-8f53-61c34659cce0",
+        "approval_policy": "never",
+        "permission_profile": ":danger-full-access"
+      },
+      {
+        "thread_id": "019fbd2b-002f-7981-8f53-61c34659cce0",
+        "approval_policy": "never",
+        "sandbox": "danger-full-access",
+        "network_access": null
+      },
+      {
+        "thread_id": "019fbd68-a78e-71b2-9d01-1eb7c8e5d86f",
+        "approval_policy": "never",
+        "sandbox": "danger-full-access",
+        "network_access": null
+      }
+    ]
   },
   "loc": {
-    "method": "file",
-    "git": null,
+    "method": "git+file",
+    "git": {
+      "method": "git",
+      "repos": {
+        "workspace": {
+          "branch": "codex/glm52/02",
+          "commit": "1e29ab3c455de3e293f0d1e45840136ba4e4ec08",
+          "tracked_source_files": 25,
+          "tracked_source_lines": 4429,
+          "by_extension": {
+            "cmake": 85,
+            "cpp": 2589,
+            "h": 481,
+            "py": 1274
+          },
+          "diff_vs_base": {
+            "added": 4900,
+            "deleted": 0,
+            "base": "de4960b2c72f0217b8e526539e02badbeebae9ca"
+          }
+        },
+        "cfd_solver_agentic_benchmark": {
+          "branch": "HEAD",
+          "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+          "tracked_source_files": 1,
+          "tracked_source_lines": 324,
+          "by_extension": {
+            "py": 324
+          },
+          "diff_vs_base": null
+        }
+      },
+      "lines_total": 4753
+    },
     "file": {
       "method": "file",
-      "files": 0,
-      "lines": 0,
-      "by_extension": {}
+      "files": 26,
+      "lines": 4753,
+      "by_extension": {
+        "cmake": 85,
+        "cpp": 2589,
+        "h": 481,
+        "py": 1598
+      }
     }
   },
-  "rule_violations": []
+  "rule_violations": [
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "019fbd2b-002f-7981-8f53-61c34659cce0",
+      "timestamp": "2026-08-01T11:54:24.403Z",
+      "tool": "exec_command",
+      "evidence": "/results && cd solver && python3 -m venv .venv && .venv/bin/pip install --quiet numpy matplotlib h5py 2>&1 | tail -5; echo \"EXIT: $?\""
+    },
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "019fbd2b-002f-7981-8f53-61c34659cce0",
+      "timestamp": "2026-08-01T13:47:26.651Z",
+      "tool": "exec_command",
+      "evidence": "h cd solver python3 -m venv .venv source .venv/bin/activate pip install numpy matplotlib h5py ```  ## Run a Single Case  ```bash export LD_LIBRARY_PATH=<workspace>/external/cfd_externals/inst"
+    },
+    {
+      "category": "unauthorized_remote_mutations",
+      "severity": "high",
+      "thread_id": "019fbd2b-002f-7981-8f53-61c34659cce0",
+      "timestamp": "2026-08-01T12:41:24.986Z",
+      "tool": "exec_command",
+      "evidence": "AID5/harry/projects/cfd_agentic_benchmark/codex_glm52_02 && git checkout -b solver/glm52/cfd2d 2>&1; git add solver/ .gitignore 2>/dev/null; git status --short | head -20"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "019fbd2b-002f-7981-8f53-61c34659cce0",
+      "timestamp": "2026-08-01T13:04:53.024Z",
+      "tool": "exec_command",
+      "evidence": "pkill -9 -f \"cfd2d\" 2>/dev/null; pkill -9 -f \"run_all\" 2>/dev/null; sleep 1; echo \"done\""
+    }
+  ],
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/02/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/02/.sessions/codex/sessions",
+    "generated_at": "2026-08-14T02:10:23.631923+00:00",
+    "num_threads": 2
+  }
 }

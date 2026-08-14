@@ -1,29 +1,103 @@
 {
-  "note": "opencode harness: codex expenses extraction not applicable",
   "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/02",
   "time_seconds": {
-    "goal_time": 0,
-    "wall_time": 0,
-    "activity_time_seconds": 0.0,
-    "idle_time_seconds": 0.0,
-    "idle_gap_threshold_seconds": 600,
-    "started_at": null,
-    "ended_at": null
-  },
-  "tokens": {
-    "total": 0,
-    "by_model": {},
-    "by_thread": {},
-    "main_vs_subagent": {
-      "main": 0,
-      "subagent": 0
+    "goal_time": 9296.0,
+    "wall_time": 14052.5,
+    "started_at": "2026-08-01T11:52:37.928000+00:00",
+    "ended_at": "2026-08-01T15:46:50.451000+00:00",
+    "by_root_thread": {
+      "019fbd2b-002f-7981-8f53-61c34659cce0": {
+        "status": "complete",
+        "time_used_seconds": 9296,
+        "tokens_used": 2742346
+      }
+    },
+    "by_root_tree": {
+      "019fbd2b-002f-7981-8f53-61c34659cce0": {
+        "status": "complete",
+        "goal_time_seconds": 9296,
+        "goal_tokens": 2742346,
+        "threads": 2,
+        "tokens_used": 87815105,
+        "model": "BLSC/GLM-5.2"
+      }
     }
   },
+  "tokens": {
+    "total": 87815105,
+    "by_model": {
+      "BLSC/GLM-5.2": {
+        "input": 87547520,
+        "cached_input": 84818560,
+        "non_cached_input": 2728960,
+        "output": 267585,
+        "reasoning_output": 72741,
+        "total": 87815105,
+        "fallback_tokens": 0
+      }
+    },
+    "by_thread": {
+      "019fbd2b-002f-7981-8f53-61c34659cce0": {
+        "model": "BLSC/GLM-5.2",
+        "is_subagent": false,
+        "source": "rollout_cumulative",
+        "tokens": {
+          "BLSC/GLM-5.2": {
+            "input": 84457539,
+            "cached": 81927488,
+            "non_cached": 2530051,
+            "output": 213064,
+            "reasoning_output": 46749,
+            "total": 84670603
+          }
+        },
+        "total": 84670603
+      },
+      "019fbd68-a78e-71b2-9d01-1eb7c8e5d86f": {
+        "model": "BLSC/GLM-5.2",
+        "is_subagent": true,
+        "source": "rollout_cumulative",
+        "tokens": {
+          "BLSC/GLM-5.2": {
+            "input": 3089981,
+            "cached": 2891072,
+            "non_cached": 198909,
+            "output": 54521,
+            "reasoning_output": 25992,
+            "total": 3144502
+          }
+        },
+        "total": 3144502
+      }
+    },
+    "main_vs_subagent": {
+      "main": 84670603,
+      "subagent": 3144502
+    },
+    "fallback_tokens": 0,
+    "discrepancy_notes": [],
+    "accounting_note": "Cached/input/output splits come from each selected thread's terminal rollout counter and are scaled only when needed to match state_5.sqlite threads.tokens_used."
+  },
   "cost_estimate_usd": {
-    "total": 0.0,
-    "by_model": {},
+    "total": 10.0016,
+    "by_model": {
+      "BLSC/GLM-5.2": {
+        "usd": 10.0016,
+        "tokens": 87815105,
+        "pricing": "metadata"
+      }
+    },
     "unpriced_tokens": 0,
-    "estimate": false,
-    "metadata": "opencode.db cost column"
+    "estimate": true,
+    "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/02/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/02/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/02/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/02/.sessions/codex/sessions",
+    "fetched_at": "2026-08-14T02:10:23.261231+00:00",
+    "num_threads": 2,
+    "num_roots": 1
   }
 }
