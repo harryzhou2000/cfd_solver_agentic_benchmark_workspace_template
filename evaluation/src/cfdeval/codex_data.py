@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sqlite3
 from datetime import datetime, timezone
@@ -47,11 +48,18 @@ def require_project_path(workspace: str | Path, path: str | Path,
 
 def local_telemetry_paths(workspace: str | Path, **overrides) -> dict[str, Path]:
     """Resolve optional CLI overrides while enforcing the project boundary."""
+    bundle = Path(workspace).resolve() / ".sessions"
+    if bundle.is_symlink():
+        raise ValueError(
+            f"contestant workspace .sessions bundle must not be a symlink: {bundle}")
     paths = project_paths(workspace)
     for key, value in overrides.items():
         if value is not None:
             paths[key] = require_project_path(workspace, value, key.replace("_", "-"))
-    return paths
+    return {
+        key: require_project_path(workspace, value, key.replace("_", "-"))
+        for key, value in paths.items()
+    }
 
 
 def rebase_rollout_paths(threads: dict[str, dict], sessions_root: str | Path) -> None:
@@ -298,12 +306,27 @@ def session_window(rollout_path: str) -> tuple[datetime | None, datetime | None]
 
 def select_threads(threads: dict[str, dict], workspace: str) -> dict[str, dict]:
     """Threads whose cwd is the workspace or nested inside it, plus all
-    descendants (subagent trees) of those threads."""
+    descendants (subagent trees) of those threads.
+
+    Docker-isolated runs record the mounted project as ``/workspace`` while
+    the bundled database is later read from its host-side contestant repo.
+    Since the database itself is constrained to that repo's ``.sessions``
+    bundle, treat the container mount namespace as a candidate match too.
+    """
     ws = str(Path(workspace).resolve())
+
+    def matches(cwd: str | None) -> bool:
+        if not cwd:
+            return False
+        if cwd == "/workspace" or cwd.startswith("/workspace/"):
+            return True
+        resolved = str(Path(cwd).resolve())
+        return resolved == ws or resolved.startswith(ws + os.sep)
+
     selected = {
         tid: t
         for tid, t in threads.items()
-        if t["cwd"] and (Path(t["cwd"]).resolve() == Path(ws) or str(Path(t["cwd"]).resolve()).startswith(ws + os.sep))
+        if matches(t["cwd"])
     }
     return selected
 
@@ -351,3 +374,30 @@ def parse_roots(roots_arg: str | None) -> list[str] | None:
         return None
     out = [r.strip() for r in roots_arg.split(",") if r.strip()]
     return out or None
+
+
+def select_opencode_session_trees(sessions: list[dict],
+                                  roots: list[str] | None) -> list[dict]:
+    """Restrict OpenCode candidate rows to requested roots and descendants."""
+    if roots is None:
+        return sessions
+    by_id = {s.get("session_id"): s for s in sessions if s.get("session_id")}
+    missing = [root for root in roots if root not in by_id]
+    if missing:
+        raise ValueError(f"unknown OpenCode root session ids: {missing}")
+    requested = set(roots)
+    selected = []
+    for session in sessions:
+        current = session.get("session_id")
+        seen = set()
+        while current and current not in seen:
+            seen.add(current)
+            if current in requested:
+                selected.append(dict(session))
+                break
+            current = (by_id.get(current) or {}).get("parent_id")
+    for session in selected:
+        if session.get("session_id") in requested:
+            session["original_parent_id"] = session.get("parent_id")
+            session["parent_id"] = None
+    return selected

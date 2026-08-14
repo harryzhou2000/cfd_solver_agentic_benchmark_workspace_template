@@ -15,7 +15,7 @@
 
 - Goal time (codex): **0 s**
 - Wall time: **0 s**
-- Tokens: **0** (main 0 / subagents 0)
+- Tokens: **430,551,708** (main 20,472,279 / subagents 410,079,429)
 
 ### Per root session
 
@@ -24,8 +24,11 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
+| deepseek/deepseek-v4-flash | 7,202,790 | 6,999,680 | 29,444 | 7,276,005 |
+| internal_openai_eccn/us/azure/openai/eccn-gpt-5.6-sol | 421,488,989 | 399,617,531 | 1,053,540 | 423,275,703 |
+| minimax/MiniMax-M3 | 0 | 0 | 0 | 0 |
 
-- Cost estimate: **$0.00** (estimate; unpriced tokens: 0)
+- Cost estimate: **$316.17** (estimate; unpriced tokens: 0)
 
 ## Measurements
 

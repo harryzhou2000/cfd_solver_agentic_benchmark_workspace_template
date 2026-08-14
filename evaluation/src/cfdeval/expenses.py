@@ -30,7 +30,14 @@ def model_cost(meta: dict, model: str | None):
     defaults = meta.get("defaults", {})
     if not model:
         return defaults, True
-    entry = meta.get("models", {}).get(model.lower())
+    models = meta.get("models", {})
+    key = model.lower()
+    entry = models.get(key)
+    if entry is None:
+        suffixes = [candidate for candidate in models
+                    if "/" not in candidate and key.endswith(candidate)]
+        if len(suffixes) == 1:
+            entry = models[suffixes[0]]
     if entry is None:
         return defaults, True
     return {
@@ -69,7 +76,11 @@ def estimate_by_model(meta: dict, by_model: dict) -> dict:
             price,
             input_t=agg.get("input") or None,
             cached_t=agg.get("cached_input") or None,
-            output_t=agg.get("output") or None,
+            output_t=(
+                (agg.get("output", 0) or 0)
+                + (0 if agg.get("reasoning_is_output_subset", True)
+                   else (agg.get("reasoning_output", 0) or 0))
+            ) or None,
             total_t=agg.get("total") if not agg.get("input") and not agg.get("output") else None,
         )
         estimates[model] = {
@@ -83,6 +94,102 @@ def estimate_by_model(meta: dict, by_model: dict) -> dict:
         "by_model": estimates,
         "unpriced_tokens": unpriced_tokens,
         "estimate": True,
+    }
+
+
+def opencode_expense_facts(metadata: dict, workspace: str,
+                           cost_metadata_path: str | Path,
+                           roots: list[str] | None = None) -> dict:
+    """Build a durable expense sidecar from root-scoped OpenCode metadata."""
+    sessions = ((metadata.get("opencode") or {}).get("sessions") or [])
+    roots = roots or (metadata.get("provenance") or {}).get("selected_roots")
+    if not roots:
+        candidates = [s.get("session_id") for s in sessions
+                      if s.get("session_id") and not s.get("parent_id")]
+        if len(candidates) == 1:
+            roots = candidates
+        elif sessions:
+            raise ValueError(
+                "OpenCode expense attribution requires explicit selected roots")
+    sessions = cd.select_opencode_session_trees(sessions, roots)
+    by_model: dict[str, dict] = {}
+    by_thread: dict[str, dict] = {}
+    main_tokens = subagent_tokens = 0
+    provider_cost = 0.0
+    for session in sessions:
+        model = session.get("model") or "unknown"
+        provider = session.get("provider")
+        key = f"{provider}/{model}" if provider else model
+        raw_input = int(session.get("tokens_input", 0) or 0)
+        cache_read = int(session.get("tokens_cache_read", 0) or 0)
+        cache_write = int(session.get("tokens_cache_write", 0) or 0)
+        output = int(session.get("tokens_output", 0) or 0)
+        reasoning = int(session.get("tokens_reasoning", 0) or 0)
+        input_total = raw_input + cache_read + cache_write
+        total = input_total + output + reasoning
+        bundle = {
+            "input": input_total,
+            "cached_input": cache_read,
+            "non_cached_input": raw_input + cache_write,
+            "output": output,
+            "reasoning_output": reasoning,
+            "reasoning_is_output_subset": False,
+            "total": total,
+        }
+        agg = by_model.setdefault(key, {name: 0 for name in (
+            "input", "cached_input", "non_cached_input", "output",
+            "reasoning_output", "total")})
+        agg["reasoning_is_output_subset"] = False
+        for name in ("input", "cached_input", "non_cached_input", "output",
+                     "reasoning_output", "total"):
+            agg[name] += bundle[name]
+        sid = session.get("session_id") or "unknown"
+        by_thread[sid] = {
+            "model": model,
+            "provider": provider,
+            "variant": session.get("variant"),
+            "is_subagent": bool(session.get("parent_id")),
+            "source": "opencode_session",
+            "tokens": {key: bundle},
+            "total": total,
+        }
+        if session.get("parent_id"):
+            subagent_tokens += total
+        else:
+            main_tokens += total
+        provider_cost += float(session.get("cost", 0) or 0)
+    price_path = Path(cost_metadata_path)
+    price_meta = json.loads(price_path.read_text())
+    estimate = estimate_by_model(price_meta, by_model)
+    estimate.update({
+        "metadata": str(price_path),
+        "provider_reported_total": round(provider_cost, 6),
+    })
+    sw = metadata.get("session_window") or {}
+    return {
+        "note": "OpenCode selected-session-tree token facts; current manager price estimate is separate from provider-reported cost",
+        "workspace": workspace,
+        "time_seconds": {
+            "goal_time": 0,
+            "wall_time": 0,
+            "activity_time_seconds": sw.get("activity_time_seconds", 0),
+            "idle_time_seconds": sw.get("idle_time_seconds", 0),
+            "idle_gap_threshold_seconds": sw.get("idle_gap_threshold_seconds", 600),
+            "started_at": sw.get("started_at"),
+            "ended_at": sw.get("ended_at"),
+        },
+        "tokens": {
+            "total": main_tokens + subagent_tokens,
+            "by_model": by_model,
+            "by_thread": by_thread,
+            "main_vs_subagent": {"main": main_tokens, "subagent": subagent_tokens},
+        },
+        "cost_estimate_usd": estimate,
+        "provenance": {
+            "source": "workspace-local OpenCode metadata selected session tree",
+            "selected_roots": roots,
+            "provider_reported_total": round(provider_cost, 6),
+        },
     }
 
 

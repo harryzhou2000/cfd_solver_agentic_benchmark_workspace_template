@@ -122,6 +122,37 @@ class SnapshotProtocolTests(unittest.TestCase):
             "workspace": {"external_symlink": "/opt/external"},
         }))
 
+    def test_opencode_without_attributable_tokens_displays_unavailable_not_zero(self):
+        metadata = {"harness": {"harness": "opencode"},
+                    "opencode": {"sessions": []}}
+        estimate = query.current_snapshot_cost(
+            {"cost_estimate_usd": {"total": 0.0}}, metadata)
+        self.assertIsNone(estimate["total"])
+        self.assertIn("unavailable", estimate["source"])
+
+    def test_routed_opencode_model_uses_canonical_suffix_price(self):
+        with tempfile.TemporaryDirectory() as raw:
+            price_file = Path(raw) / "prices.json"
+            price_file.write_text(json.dumps({
+                "defaults": {"input_per_mtok": 1, "cached_input_per_mtok": 0.25,
+                             "output_per_mtok": 4, "input_share": 0.75},
+                "models": {"gpt-5.6-sol": {"input_per_mtok": 2.5,
+                                                 "cached_input_per_mtok": 0.6,
+                                                 "output_per_mtok": 12}},
+            }))
+            metadata = {"harness": {"harness": "opencode"}, "opencode": {"sessions": [
+                {"session_id": "root", "parent_id": None,
+                 "model": "us/azure/openai/eccn-gpt-5.6-sol",
+                 "provider": "internal_openai_eccn", "variant": "high",
+                 "tokens_input": 100, "tokens_cache_read": 1000,
+                 "tokens_output": 10, "tokens_reasoning": 0, "cost": 0},
+            ]}}
+            with patch.object(query, "COST_METADATA", price_file):
+                estimate = query.current_snapshot_cost(
+                    {}, metadata, {"session_selection": {"roots": ["root"]}})
+            self.assertEqual(estimate["total"], 0.001)
+            self.assertEqual(estimate["unpriced_tokens"], 0)
+
     def test_codex_model_decomposition_keys_model_plus_single_observed_effort(self):
         with tempfile.TemporaryDirectory() as raw:
             price_file = Path(raw) / "prices.json"

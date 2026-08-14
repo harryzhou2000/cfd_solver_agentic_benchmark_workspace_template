@@ -387,6 +387,33 @@ python3 evaluation/tools/extract_sessions.py \
   --out evaluation/outputs/<run-id>/sessions.json
 ```
 
+Docker-isolated OpenCode rows may instead record `/workspace`. The extractor
+maps that container namespace only inside the contestant's workspace-local
+`.sessions` database. Always pass the manually confirmed root so metadata,
+sessions, and expense sidecars contain only that tree:
+
+```bash
+python3 evaluation/tools/extract_metadata.py \
+  --workspace <host-contestant-repo> --harness opencode \
+  --roots <confirmed-root-id> --out evaluation/outputs/<run-id>/metadata.json
+
+python3 evaluation/tools/extract_sessions.py \
+  --workspace <host-contestant-repo> --harness opencode \
+  --roots <confirmed-root-id> --out evaluation/outputs/<run-id>/sessions.json
+
+python3 evaluation/tools/extract_opencode_expenses.py \
+  --workspace <host-contestant-repo> \
+  --metadata evaluation/outputs/<run-id>/metadata.json \
+  --roots <confirmed-root-id> \
+  --out evaluation/outputs/<run-id>/expenses.json
+```
+
+The OpenCode expense sidecar must retain nonzero selected-tree raw input,
+cache-read, cache-write, output, and reasoning counters. It records both the
+provider-reported database cost and a separate estimate from the manager's
+current price table. A zero placeholder is not a valid completed snapshot when
+selected sessions contain usage.
+
 Verify the actual stored cwd before choosing either command. Do not try to
 merge the two cwd namespaces in one extraction; the non-primary harness is not
 part of the run. Record the database's container cwd separately from the host

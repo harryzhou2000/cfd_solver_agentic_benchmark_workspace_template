@@ -85,7 +85,16 @@ def current_snapshot_cost(expenses: dict, metadata: dict,
     rows = decomposition.get("rows") or []
     total = decomposition.get("total_current_cost_usd")
     if not rows or total is None:
-        return None
+        return {
+            "total": None,
+            "by_model": {},
+            "unpriced_tokens": 0,
+            "estimate": False,
+            "metadata": None,
+            "metadata_sha256": None,
+            "dashboard_current": False,
+            "source": "selected OpenCode session-tree token facts unavailable",
+        }
     if not decomposition.get("total_tokens"):
         persisted = decomposition.get("total_persisted_cost_usd")
         if persisted is None:
@@ -216,13 +225,18 @@ def current_model_decomposition(expenses: dict, metadata: dict,
     elif harness == "opencode" and (metadata.get("opencode") or {}).get("sessions"):
         oc_sessions = metadata["opencode"]["sessions"]
         by_id = {s.get("session_id"): s for s in oc_sessions if s.get("session_id")}
-        roots = ((agent_scores or {}).get("session_selection") or {}).get("roots") or []
+        roots = ((agent_scores or {}).get("session_selection") or {}).get("roots") or (
+            (metadata.get("provenance") or {}).get("selected_roots") or [])
+        if not roots:
+            candidates = [sid for sid, info in by_id.items()
+                          if not info.get("parent_id")]
+            roots = candidates if len(candidates) == 1 else []
         selected = set()
-        for session_id in by_id:
+        for session_id in by_id if roots else ():
             current, seen = session_id, set()
             while current and current not in seen:
                 seen.add(current)
-                if not roots or current in roots:
+                if current in roots:
                     selected.add(session_id)
                     break
                 current = (by_id.get(current) or {}).get("parent_id")
@@ -262,8 +276,18 @@ def current_model_decomposition(expenses: dict, metadata: dict,
             if row["provider"]:
                 candidates.append(f'{row["provider"]}/{row["model"]}')
             candidates.append(row["model"])
+            # Routed OpenCode model ids may embed deployment prefixes, e.g.
+            # ``us/azure/openai/eccn-gpt-5.6-sol``. Prefer an unambiguous
+            # canonical manager price key whose name is the routed suffix.
+            configured = (price_meta.get("models") or {})
+            suffix_aliases = [
+                key for key in configured
+                if "/" not in key and str(row["model"]).lower().endswith(key.lower())
+            ]
+            if len(suffix_aliases) == 1:
+                candidates.insert(0, suffix_aliases[0])
             price_key = next((c for c in candidates
-                              if c.lower() in (price_meta.get("models") or {})), candidates[-1])
+                              if c.lower() in configured), candidates[-1])
             price, defaults = model_cost(price_meta, price_key)
             if row["token_split_available"]:
                 current_cost = round(cost_for(

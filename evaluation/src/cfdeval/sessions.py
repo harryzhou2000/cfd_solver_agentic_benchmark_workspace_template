@@ -26,6 +26,7 @@ import hashlib
 import json
 import os
 import sqlite3
+import sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -206,7 +207,10 @@ def analyze_codex(workspace: str, state_db: str, sessions_root: str,
     root_ids, all_ids = cd.thread_trees(selected, edges)
     children = {c for _, c in edges}
     if roots:
-        root_ids = [r for r in roots if r in threads]
+        missing = [r for r in roots if r not in threads]
+        if missing:
+            raise ValueError(f"unknown Codex root thread ids: {missing}")
+        root_ids = list(roots)
         all_ids = set()
         for r in root_ids:
             all_ids |= cd.tree_of(r, threads, edges)
@@ -274,7 +278,8 @@ def opencode_sessions(opencode_db: str, workspace: str) -> list[dict]:
             "SELECT id, parent_id, directory, title, agent, model, "
             "tokens_input, tokens_output, tokens_reasoning, tokens_cache_read, "
             "tokens_cache_write, cost, time_created, time_updated, version "
-            "FROM session WHERE directory = ? OR directory LIKE ?",
+            "FROM session WHERE directory = ? OR directory LIKE ? "
+            "OR directory = '/workspace' OR directory LIKE '/workspace/%'",
             (workspace, workspace + "/%"),
         ).fetchall()
     except sqlite3.Error:
@@ -305,10 +310,12 @@ def opencode_sessions(opencode_db: str, workspace: str) -> list[dict]:
     return out
 
 
-def analyze_opencode(opencode_db: str, workspace: str) -> dict:
+def analyze_opencode(opencode_db: str, workspace: str,
+                     roots: list[str] | None = None) -> dict:
     """Return (doc_section, all_events). Events carry per-message token usage
     and per-part tool calls so bucketing covers cache history and tools."""
-    sessions = opencode_sessions(opencode_db, workspace)
+    sessions = cd.select_opencode_session_trees(
+        opencode_sessions(opencode_db, workspace), roots)
     by_id = {s["session_id"]: s for s in sessions}
     children = {s["session_id"] for s in sessions if s["parent_id"]}
     all_events: list[tuple[datetime, str, str, str, dict]] = []
@@ -393,6 +400,8 @@ def analyze_opencode(opencode_db: str, workspace: str) -> dict:
             {
                 "session_id": s["session_id"],
                 "parent_id": s["parent_id"],
+                "original_parent_id": s.get("original_parent_id"),
+                "directory": s.get("directory"),
                 "agent": s["agent"],
                 "model": s["model"],
                 "variant": s["variant"],
@@ -400,6 +409,8 @@ def analyze_opencode(opencode_db: str, workspace: str) -> dict:
                 "tokens_input": s["tokens_input"],
                 "tokens_output": s["tokens_output"],
                 "tokens_cache_read": s["tokens_cache_read"],
+                "tokens_cache_write": s["tokens_cache_write"],
+                "tokens_reasoning": s["tokens_reasoning"],
                 "started_at": _iso(s["time_created"]),
                 "ended_at": _iso(s["time_updated"]),
             }
@@ -756,7 +767,7 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
                     }
     if use_project_oc and project_opencode_db and project_opencode_db.exists():
         doc, events, toks, tools_ = analyze_opencode(
-            str(project_opencode_db), workspace)
+            str(project_opencode_db), workspace, roots)
         if doc["present"]:
             doc["source"] = "project"
             oc_docs.append(doc)
@@ -796,7 +807,8 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
     if oc_doc.get("present"):
         opencode_run_total = sum(
             (s.get("tokens_input", 0) + s.get("tokens_cache_read", 0)
-             + s.get("tokens_output", 0) + s.get("tokens_reasoning", 0))
+             + s.get("tokens_cache_write", 0) + s.get("tokens_output", 0)
+             + s.get("tokens_reasoning", 0))
             for s in oc_doc.get("sessions", []))
         accounting_notes.append(
             "opencode: session token columns are per-session (subagents have "
@@ -955,11 +967,15 @@ def main(argv: list[str] | None = None) -> int:
         if env_path.exists() else None,
     }
 
-    result = analyze(str(ws), str(state_db), str(sessions_root),
-                     str(opencode_db), args.bucket_seconds,
-                     args.idle_gap_seconds, source_choice,
-                     cd.parse_roots(args.roots),
-                     project_codex_root, project_opencode_db, harness_choice)
+    try:
+        result = analyze(str(ws), str(state_db), str(sessions_root),
+                         str(opencode_db), args.bucket_seconds,
+                         args.idle_gap_seconds, source_choice,
+                         cd.parse_roots(args.roots),
+                         project_codex_root, project_opencode_db, harness_choice)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
     result["workspace"] = str(ws)
     result["discovered_at"] = datetime.now(timezone.utc).isoformat()
     result["sources"] = disc["sources"]

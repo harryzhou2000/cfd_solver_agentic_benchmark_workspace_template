@@ -26,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from cfdeval import codex_data as cd  # noqa: E402
-from cfdeval import recording, validation  # noqa: E402
+from cfdeval import expenses as expense_tools, recording, validation  # noqa: E402
 
 
 def _git(args: list[str], cwd: Path) -> str | None:
@@ -281,22 +281,8 @@ def main(argv: list[str] | None = None) -> int:
     metadata = json.loads((out_dir / "metadata.json").read_text())
     harness = metadata.get("harness", {}).get("harness")
     if harness == "opencode":
-        # codex-only extractors are not applicable; opencode tokens/cost live
-        # in opencode.db and are recorded under metadata.opencode.sessions.
-        sw = metadata.get("session_window", {})
-        expenses = {"note": "opencode harness: codex expenses extraction not applicable",
-                    "workspace": str(ws),
-                    "time_seconds": {"goal_time": 0, "wall_time": 0,
-                                     "activity_time_seconds": sw.get("activity_time_seconds"),
-                                     "idle_time_seconds": sw.get("idle_time_seconds"),
-                                     "idle_gap_threshold_seconds": sw.get("idle_gap_threshold_seconds"),
-                                     "started_at": sw.get("started_at"),
-                                     "ended_at": sw.get("ended_at")},
-                    "tokens": {"total": 0, "by_model": {}, "by_thread": {},
-                               "main_vs_subagent": {"main": 0, "subagent": 0}},
-                    "cost_estimate_usd": {"total": 0.0, "by_model": {},
-                                          "unpriced_tokens": 0, "estimate": False,
-                                          "metadata": "opencode.db cost column"}}
+        expenses = expense_tools.opencode_expense_facts(
+            metadata, str(ws), args.cost_metadata)
         measurements = {"note": "opencode harness: codex tool-usage/LOC extraction "
                                 "not applicable",
                         "tool_usage": {"total": 0, "by_tool": {}, "by_thread": {},

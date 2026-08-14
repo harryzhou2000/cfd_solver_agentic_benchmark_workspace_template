@@ -256,7 +256,8 @@ def extract_opencode(args, workspace: str) -> dict:
                 "tokens_input, tokens_output, tokens_reasoning, "
                 "tokens_cache_read, tokens_cache_write, cost, "
                 "time_created, time_updated, version FROM session "
-                "WHERE directory = ? OR directory LIKE ?",
+                "WHERE directory = ? OR directory LIKE ? "
+                "OR directory = '/workspace' OR directory LIKE '/workspace/%'",
                 (workspace, workspace + "/%"),
             ).fetchall()
         finally:
@@ -284,6 +285,7 @@ def extract_opencode(args, workspace: str) -> dict:
         sessions.append({
             "session_id": r[0],
             "parent_id": r[1],
+            "directory": r[2],
             "title": r[3],
             "agent": r[4],
             "model": m.get("id") or m.get("modelID"),
@@ -300,6 +302,8 @@ def extract_opencode(args, workspace: str) -> dict:
             "started_at": started,
             "ended_at": ended,
         })
+    sessions = cd.select_opencode_session_trees(
+        sessions, cd.parse_roots(getattr(args, "roots", None)))
     # per-session activity time from message history (created/completed),
     # excluding idle gaps > threshold (interrupted by user or API).
     activity = opencode_activity_times(args.opencode_db,
@@ -498,6 +502,10 @@ def extract_opencode(args, workspace: str) -> dict:
             "opencode_config_dir": args.opencode_config_dir,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "num_sessions": len(sessions),
+            "selected_roots": cd.parse_roots(getattr(args, "roots", None)),
+            "host_workspace": workspace,
+            "recorded_directories": sorted({
+                s.get("directory") for s in sessions if s.get("directory")}),
         },
     }
 
@@ -514,6 +522,8 @@ def finalize(metadata: dict, questions: list[dict], answers_path: str | None) ->
         except (OSError, json.JSONDecodeError):
             answers = {}
         if isinstance(answers, dict):
+            if isinstance(answers.get("user_answers"), dict):
+                answers = answers["user_answers"]
             for q in questions:
                 if q["id"] in answers:
                     q["answer"] = answers[q["id"]]
