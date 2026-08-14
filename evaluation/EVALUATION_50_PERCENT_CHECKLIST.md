@@ -63,7 +63,7 @@ canonical evaluations count toward the quota and must not be repeated.
 
 - [x] 01 — `codex_gpt56_01_cb349f`
 - [x] 02 — `codex_gpt56_02_38616e`; 92/100; DQ no; submission `6183dc8fc067cd7dc4a4a2949ca53bd4f2b42820`; manager `7f4fe0f`; explicit eight-case plus report validator OK. Limitation: strict report-PNG audit does not recognize TeX-escaped underscores, so the curated result commit retains report.tex without its source PNGs.
-- [ ] 03
+- [x] 03 — `codex_gpt56_03_93b257`; 98/100; DQ no; submission `f06ea3fa63acbdbfce71ecd4debf603c355f751a`; all eight cases plus report validator OK. Limitation: strict audit excludes report PNGs referenced through TeX `\detokenize{}` paths, so the result-branch report source is not self-contained.
 - [ ] 04
 
 ### `codex/kimik3` — 1 done, quota 1
