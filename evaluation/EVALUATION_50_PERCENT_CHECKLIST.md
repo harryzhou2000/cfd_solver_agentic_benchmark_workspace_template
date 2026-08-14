@@ -50,7 +50,7 @@ canonical evaluations count toward the quota and must not be repeated.
 ### `codex/glm52-m3` — 5 done, quota 3
 
 - [x] 01 — `codex_glm52-m3_01_919b67`
-- [ ] 02
+- [ ] 02 — BLOCKED: provenance reconstructed (`codex/glm52-m3/init` @ `746ef39`), but workspace has no configured origin remote; canonical-upstream collision cannot be proven.
 - [ ] 03
 
 ### `codex/gpt56` — 8 done, quota 4
