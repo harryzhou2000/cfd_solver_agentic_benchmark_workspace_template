@@ -1,0 +1,398 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,hyperref,cleveref,tabularx}
+\title{2-D Unstructured Compressible Navier--Stokes Solver Benchmark Report}
+\author{Submitted solver team}
+\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+This report is generated from completed solver outputs only.  It covers all eight required cases, their submitted convergence status, force and residual evidence, field figures, MPI partition evidence, rank-count comparisons, and the cylinder Reynolds-200 shedding analysis.  The automation rejects failed, incomplete, or internally inconsistent report inputs; it does not independently establish physical correctness or solver provenance.
+\end{abstract}
+\section{Introduction}
+The benchmark solves the two-dimensional NACA0012 and circular-cylinder cases with a cell-centred, unstructured finite-volume compressible-flow solver.  Required results are accepted here only when their submitted status is \texttt{converged} or \texttt{statistically\_periodic}.  Values in tables and figures are read from the submitted CSV, VTK, JSON, and partition-diagnostic files; no histories, fields, or convergence labels are synthesized by this script.  These checks establish output consistency, not independent physical validation or proof of solver provenance.
+\section{Governing equations and nondimensionalization}
+The conservative state is $\mathbf U=[\rho,\rho u,\rho v,\rho E]^T$ and the reported equation set is the two-dimensional compressible Navier--Stokes system.  The discretized equation is
+\[
+\frac{\partial\mathbf U}{\partial t}+\frac{\partial\mathbf F^i}{\partial x}+\frac{\partial\mathbf G^i}{\partial y}=\frac{\partial\mathbf F^v}{\partial x}+\frac{\partial\mathbf G^v}{\partial y},
+\quad
+\mathbf F^i=\begin{bmatrix}\rho u\\\rho u^2+p\\\rho uv\\u(\rho E+p)\end{bmatrix},\quad
+\mathbf G^i=\begin{bmatrix}\rho v\\\rho uv\\\rho v^2+p\\v(\rho E+p)\end{bmatrix}.
+\]
+For the calorically perfect gas, $p=(\gamma-1)\rho e$, $E=e+\tfrac12(u^2+v^2)$, and $a=\sqrt{\gamma p/\rho}$.  The supplied inputs use $\gamma=1.4$, $R=1$, and $Pr=0.72$; laminar cases use constant viscosity $\mu=\rho_\infty U_\infty L_{ref}/Re$.  With $q_\infty=\tfrac12\rho_\infty U_\infty^2$, the reported coefficients are $C_D=D/(q_\infty A_{ref})$, $C_L=L/(q_\infty A_{ref})$, and $C_m=M_z/(q_\infty A_{ref}L_{ref})$.
+
+For viscous fluxes the Newtonian/Fourier model is $\tau_{xx}=2\mu u_x-\tfrac23\mu(u_x+v_y)$, $\tau_{yy}=2\mu v_y-\tfrac23\mu(u_x+v_y)$, $\tau_{xy}=\mu(u_y+v_x)$, and $\mathbf q=-\mu c_p\nabla T/Pr$.  The force split reports pressure traction separately from the tangential component of viscous traction; $C_f$ is based on this tangential traction rather than normal viscous traction.
+\section{Meshes, boundaries, and spatial discretization}
+Each residual is a sum of oriented face fluxes over an unstructured control volume:
+\[
+R_i=\sum_{f\in\partial\Omega_i}(\widehat{F}^i_f-\widehat{F}^v_f)|S_f|.
+\]
+Each face normal is directed from the owner cell to its neighbour or exterior.  The submitted metadata records the case-selectable inviscid flux: inviscid NACA packages use Rusanov variants, with recorded total-enthalpy consistency and rarefaction protection where active, while the remaining cases use HLLC with an admissibility-checked Rusanov fallback.  The case inputs map CGNS boundary families to farfield plus either inviscid slip wall or viscous no-slip adiabatic wall.  Farfield faces use a characteristic exterior state.  Every stationary impermeable body face uses the exact inviscid flux $[0,pn_x,pn_y,0]^T$ rather than solving a reflected reconstructed wall Riemann problem; no-slip walls additionally impose $u=v=0$ and zero normal temperature gradient in the viscous flux.  Submitted surface data are declared as \texttt{boundary\_value} output, so wall velocities in the report are not conflated with adjacent cell-centre velocities.
+
+Gradients are weighted least-squares reconstructions and face states are piecewise linear.  The production limiter is the submitted Barth--Jespersen method, followed by a pressure-jump sensor that smoothly flattens all primitive gradients only across captured shocks while remaining exactly inactive below its smooth-region onset.  Exact linear reproduction is unit-tested on an irregular stencil, and an asymptotic scaled irregular-stencil manufactured-solution regression requires observed smooth face-value order greater than 1.95 across successive refinements with the production sensor inactive.  Face-state density/pressure positivity uses the submitted scaling/backtracking method.  The report does not infer any other first-order fallback: its occurrence and trigger must be recorded in run notes or metadata before it can be claimed.
+
+\begin{table}[htbp]\centering\scriptsize
+\caption{Submitted mesh/case evidence. Boundary tags are the tags present in submitted wall surface rows.}\label{tab:mesh}
+\begin{tabularx}{\linewidth}{lrrrrX}\toprule Case & cells & faces & Mach & mode & surface tags\\\midrule
+naca0012\_m015\_inviscid & 20816 & 36498 & 0.15 & inviscid & bc-4 \\
+naca0012\_m080\_inviscid & 20816 & 36498 & 0.8 & inviscid & bc-4 \\
+naca0012\_m200\_inviscid & 20816 & 36498 & 2 & inviscid & bc-4 \\
+naca0012\_m015\_laminar\_re5000 & 20816 & 36498 & 0.15 & laminar & bc-4 \\
+naca0012\_m080\_laminar\_re5000 & 20816 & 36498 & 0.8 & laminar & bc-4 \\
+naca0012\_m200\_laminar\_re5000 & 20816 & 36498 & 2 & laminar & bc-4 \\
+cylinder\_m010\_laminar\_re20 & 10185 & 20180 & 0.1 & laminar & WALL \\
+cylinder\_m010\_laminar\_re200 & 10185 & 20180 & 0.1 & laminar & WALL \\
+\bottomrule\end{tabularx}\end{table}
+
+The production metadata identifies the reconstruction, limiter, and positivity method for every result: piecewise-linear reconstruction is applied to face states, the stated limiter controls oscillations, and the stated positivity control protects density and pressure.  The report does not infer an unused first-order fallback; any fallback must be described by the submitted metadata/notes.
+\begin{table}[htbp]\centering\scriptsize
+\caption{Production numerical methods. Concise labels are used for readability; exact method identifiers are retained in each \texttt{metadata.json}.}\label{tab:methods}
+\begin{tabularx}{\linewidth}{@{}lXXXX@{}}\toprule
+Case & inviscid flux & viscous flux & time integrator & implicit solver\\\midrule
+NACA0012 M=0.15 inviscid & Rusanov & none & local pseudo-time & $4\times4$ block Jacobi \\
+NACA0012 M=0.8 inviscid & Rusanov ($H_0$ consistent) & none & local pseudo-time & $4\times4$ block Jacobi \\
+NACA0012 M=2 inviscid & Rusanov ($H_0$ consistent, rarefaction guard) & none & local pseudo-time & $4\times4$ block Jacobi \\
+NACA0012 M=0.15 Re=5000 & HLLC + Rusanov fallback & Newtonian/Fourier & local pseudo-time & $4\times4$ block Jacobi \\
+NACA0012 M=0.8 Re=5000 & HLLC + Rusanov fallback & Newtonian/Fourier & local pseudo-time & $4\times4$ block Jacobi \\
+NACA0012 M=2 Re=5000 & HLLC + Rusanov fallback & Newtonian/Fourier & local pseudo-time & $4\times4$ block Jacobi \\
+Cylinder M=0.1 Re=20 & HLLC + Rusanov fallback & Newtonian/Fourier & local pseudo-time & $4\times4$ block Jacobi \\
+Cylinder M=0.1 Re=200 & HLLC + Rusanov fallback & Newtonian/Fourier & dual-time BDF2 & $4\times4$ block Jacobi \\
+\bottomrule\end{tabularx}
+\end{table}
+\section{Implicit steady march and true transient BDF2}
+Steady cases use the submitted local pseudo-time integrator and inner solver.  They retain the supplied startup CFL and ramp horizon while applying a documented conservative terminal cap; Anderson history is reset whenever the CFL changes.  Accelerated iterates must strictly reduce both global $L_2$ and $L_\infty$ residuals, and target convergence requires both norms plus a stable force tail.  The stationary-wall block uses the analytic pressure-flux Jacobian while its spectral radius remains in the pseudo-time mass.  Requested controls and detectable departures are listed in \cref{tab:controls}.  For the Re 200 cylinder, metadata identifies \texttt{true\_dual\_time\_BDF2}, with true BDF2 inner loop set to \texttt{True}.  The required outer physical-time loop holds $U^n$ and $U^{n-1}$ fixed while inner iterations solve for $U^{n+1}$, then advances the histories after accepted inner convergence.  Its submitted observed inner-iteration range is 133--283, mean 210.66, target-miss count 0, converged-step fraction 1, and last ratio 0.00098623.
+\begin{table}[htbp]\centering\scriptsize
+\caption{Supplied and observed controls.  Steady ramp details are explicitly marked unavailable when metadata does not store them.}\label{tab:controls}
+\begin{tabularx}{\linewidth}{lXXX}\toprule Case & supplied controls & actual stored evidence & detected deviation\\\midrule
+naca0012\_m015\_inviscid & N=20000; R=4; CFL=1--100; ramp=2000; I=3--50; r=0.01 & CFL=1--10; N=4782; I=3--50; r=0.01; ramp=observed directly in residual CFL rows & safeguarded terminal CFL 10 is below the supplied cap 100 \\
+naca0012\_m080\_inviscid & N=30000; R=4; CFL=1--100; ramp=3000; I=3--50; r=0.01 & CFL=1--2; N=3942; I=3--3; r=0.01; ramp=observed directly in residual CFL rows & safeguarded terminal CFL 2 is below the supplied cap 100 \\
+naca0012\_m200\_inviscid & N=40000; R=3; CFL=0.2--50; ramp=5000; I=3--80; r=0.01 & CFL=0.2--0.40899; N=2223; I=3--3; r=0.01; ramp=observed directly in residual CFL rows & safeguarded terminal CFL 0.408992 is below the supplied cap 50 \\
+naca0012\_m015\_laminar\_re5000 & N=40000; R=4; CFL=1--100; ramp=5000; I=3--80; r=0.01 & CFL=1--5; N=5145; I=4--23; r=0.01; ramp=observed directly in residual CFL rows & safeguarded terminal CFL 5 is below the supplied cap 100 \\
+naca0012\_m080\_laminar\_re5000 & N=40000; R=4; CFL=0.5--80; ramp=5000; I=3--80; r=0.01 & CFL=0.5--1; N=5000; I=5--8; r=0.01; ramp=observed directly in residual CFL rows & safeguarded terminal CFL 1 is below the supplied cap 80 \\
+naca0012\_m200\_laminar\_re5000 & N=50000; R=3; CFL=0.2--50; ramp=7000; I=3--100; r=0.01 & CFL=0.2--0.5723; N=4573; I=3--5; r=0.01; ramp=observed directly in residual CFL rows & safeguarded terminal CFL 0.572298 is below the supplied cap 50 \\
+cylinder\_m010\_laminar\_re20 & N=30000; R=5; CFL=1--100; ramp=3000; I=3--80; r=0.01 & CFL=1--5; N=3716; I=5--26; r=0.01; ramp=observed directly in residual CFL rows & safeguarded terminal CFL 5 is below the supplied cap 100 \\
+cylinder\_m010\_laminar\_re200 & dt=0.01; tf=300; I=5--1000; r=0.001 & CFL=1--1; N=30000; I=133--283; r=0.001; dt observed 0.01--0.01; tf 300.0 & none detected from stored evidence \\
+\bottomrule\end{tabularx}\end{table}
+\section{MPI decomposition, halo exchange, and no replication}
+The metadata identifies the partitioner and halo exchange for every submitted run.  It explicitly declares both full-mesh and full-conservative-state replication during solver iterations false.  Partition diagnostics below are the actual rank-local owned/ghost counts, neighbour ranges, and edge-cut metadata, rather than a preprocessing-only estimate.  Halo communication is neighbour-scoped as named in metadata; residuals and forces are the submitted global histories.
+\begin{table}[htbp]\centering\small
+\caption{Final-run partition evidence.  Owned, ghost, and neighbour entries are rankwise min--max; balance is maximum owned cells divided by the mean.}\label{tab:partition}
+\begin{tabular}{lrrrrrr}\toprule Case & ranks & owned & ghost & neighbours & balance & cut\\\midrule
+naca0012\_m015\_inviscid & 8 & 2590--2619 & 60--177 & 2--6 & 1.007 & 447 \\
+naca0012\_m080\_inviscid & 8 & 2590--2619 & 60--177 & 2--6 & 1.007 & 447 \\
+naca0012\_m200\_inviscid & 8 & 2590--2619 & 60--177 & 2--6 & 1.007 & 447 \\
+naca0012\_m015\_laminar\_re5000 & 8 & 2590--2619 & 60--177 & 2--6 & 1.007 & 447 \\
+naca0012\_m080\_laminar\_re5000 & 8 & 2590--2619 & 60--177 & 2--6 & 1.007 & 447 \\
+naca0012\_m200\_laminar\_re5000 & 8 & 2590--2619 & 60--177 & 2--6 & 1.007 & 447 \\
+cylinder\_m010\_laminar\_re20 & 8 & 1267--1279 & 96--133 & 3--7 & 1.005 & 483 \\
+cylinder\_m010\_laminar\_re200 & 8 & 1267--1279 & 96--133 & 3--7 & 1.005 & 483 \\
+\bottomrule\end{tabular}\end{table}
+\section{Output reproducibility and sanity checks}
+The generated \texttt{run\_manifest.csv} records both production and rank-validation commands, source directories, ranks, wall times, final steps, and statuses.  \texttt{figure\_manifest.csv} maps every figure to the actual CSV or field file and named variable.  \texttt{sanity\_checks.json} records contract-derived positivity, wall-condition, force, pressure-coefficient, and Re 200 wake checks.  Regeneration is documented with this repository's report tool; the TeX source is ready for \texttt{latexmk}.
+\section{Results}
+\subsection{Run status and final forces}
+\begin{table}[htbp]\centering\scriptsize
+\caption{Submitted run status.  Both residual reductions are recomputed from the first and final rows.}\label{tab:status}
+\begin{tabular}{lrrrrrrl}\toprule Case & ranks & steps & time & $L_2$ orders & $L_\infty$ orders & wall s & status\\\midrule
+NACA0012 M=0.15 inviscid & 8 & 4782 & 0 & 5.33 & 5.13 & 1164 & converged \\
+NACA0012 M=0.8 inviscid & 8 & 3942 & 0 & 0.569 & 0.856 & 531.4 & converged \\
+NACA0012 M=2 inviscid & 8 & 2223 & 0 & 3 & 3.26 & 324.9 & converged \\
+NACA0012 M=0.15 Re=5000 & 8 & 5145 & 0 & 4.34 & 4 & 2670 & converged \\
+NACA0012 M=0.8 Re=5000 & 8 & 5000 & 0 & 0.371 & 0.35 & 1187 & converged \\
+NACA0012 M=2 Re=5000 & 8 & 4573 & 0 & 3.65 & 3.56 & 1118 & converged \\
+Cylinder M=0.1 Re=20 & 8 & 3716 & 0 & 5.01 & 5.01 & 1073 & converged \\
+Cylinder M=0.1 Re=200 & 8 & 30000 & 300 & 1.29 & 1.19 & 1.154e+04 & stat. periodic \\
+\bottomrule\end{tabular}\end{table}
+\begin{table}[htbp]\centering\small
+\caption{Final force coefficients from each submitted force history.}\label{tab:forces}
+\begin{tabular}{lrrrrr}\toprule Case & $C_D$ & $C_L$ & $C_m$ & pressure drag & viscous drag\\\midrule
+naca0012\_m015\_inviscid & 0.00056425 & -1.5125e-05 & 4.5244e-05 & 0.00056425 & 0 \\
+naca0012\_m080\_inviscid & 0.020114 & -0.0015247 & 0.00028173 & 0.020114 & 0 \\
+naca0012\_m200\_inviscid & 0.091753 & -0.0014795 & -0.0003376 & 0.091753 & 0 \\
+naca0012\_m015\_laminar\_re5000 & 0.056405 & -0.00041188 & 8.4649e-06 & 0.018391 & 0.038013 \\
+naca0012\_m080\_laminar\_re5000 & 0.0889 & -0.00042574 & 8.1395e-05 & 0.048752 & 0.040148 \\
+naca0012\_m200\_laminar\_re5000 & 0.11573 & 0.00013323 & -4.9751e-05 & 0.010916 & 0.10482 \\
+cylinder\_m010\_laminar\_re20 & 2.049 & 0.00063295 & 2.8194e-06 & 1.2351 & 0.8139 \\
+cylinder\_m010\_laminar\_re200 & 1.2747 & -0.52747 & 0.0044818 & 1.0319 & 0.24275 \\
+\bottomrule\end{tabular}\end{table}
+\subsection{naca0012\_m015\_inviscid}
+The submitted status is \texttt{converged}; the computed first-to-last $L_2$/$L_\infty$ residual reductions are 5.33/5.13 orders. The final force row gives $C_D=0.00056425$, $C_L=-1.5125e-05$, and $C_m=4.5244e-05$. Figure~\ref{fig:naca0012_m015_inviscid-residual}, Figure~\ref{fig:naca0012_m015_inviscid-force_coefficients}, Figure~\ref{fig:naca0012_m015_inviscid-surface_cp}, Figure~\ref{fig:naca0012_m015_inviscid-mach}, Figure~\ref{fig:naca0012_m015_inviscid-pressure} provide the residual, force, wall $C_p/C_f$, Mach, and pressure evidence.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m015\_inviscid\_residuals.png}
+\caption{Global residual history.}
+\label{fig:naca0012_m015_inviscid-residual}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m015\_inviscid\_forces.png}
+\caption{Force-coefficient history.}
+\label{fig:naca0012_m015_inviscid-force_coefficients}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m015\_inviscid\_surface\_cp.png}
+\caption{Submitted surface pressure and skin-friction coefficients.}
+\label{fig:naca0012_m015_inviscid-surface_cp}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m015\_inviscid\_mach.png}
+\caption{Mach number from the final submitted field; the displayed percentile-clipped range is [0.037464, 0.17698].}
+\label{fig:naca0012_m015_inviscid-mach}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m015\_inviscid\_pressure.png}
+\caption{Pressure from the final submitted field; the displayed percentile-clipped range is [31.538, 32.211].}
+\label{fig:naca0012_m015_inviscid-pressure}
+\end{figure}
+\subsection{naca0012\_m080\_inviscid}
+The submitted status is \texttt{converged}; the computed first-to-last $L_2$/$L_\infty$ residual reductions are 0.569/0.856 orders. The final force row gives $C_D=0.020114$, $C_L=-0.0015247$, and $C_m=0.00028173$. Figure~\ref{fig:naca0012_m080_inviscid-residual}, Figure~\ref{fig:naca0012_m080_inviscid-force_coefficients}, Figure~\ref{fig:naca0012_m080_inviscid-surface_cp}, Figure~\ref{fig:naca0012_m080_inviscid-mach}, Figure~\ref{fig:naca0012_m080_inviscid-pressure} provide the residual, force, wall $C_p/C_f$, Mach, and pressure evidence.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m080\_inviscid\_residuals.png}
+\caption{Global residual history.}
+\label{fig:naca0012_m080_inviscid-residual}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m080\_inviscid\_forces.png}
+\caption{Force-coefficient history.}
+\label{fig:naca0012_m080_inviscid-force_coefficients}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m080\_inviscid\_surface\_cp.png}
+\caption{Submitted surface pressure and skin-friction coefficients.}
+\label{fig:naca0012_m080_inviscid-surface_cp}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m080\_inviscid\_mach.png}
+\caption{Mach number from the final submitted field; the displayed percentile-clipped range is [0.15511, 1.1321].}
+\label{fig:naca0012_m080_inviscid-mach}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m080\_inviscid\_pressure.png}
+\caption{Pressure from the final submitted field; the displayed percentile-clipped range is [0.75317, 1.676].}
+\label{fig:naca0012_m080_inviscid-pressure}
+\end{figure}
+\subsection{naca0012\_m200\_inviscid}
+The submitted status is \texttt{converged}; the computed first-to-last $L_2$/$L_\infty$ residual reductions are 3/3.26 orders. The final force row gives $C_D=0.091753$, $C_L=-0.0014795$, and $C_m=-0.0003376$. Figure~\ref{fig:naca0012_m200_inviscid-residual}, Figure~\ref{fig:naca0012_m200_inviscid-force_coefficients}, Figure~\ref{fig:naca0012_m200_inviscid-surface_cp}, Figure~\ref{fig:naca0012_m200_inviscid-mach}, Figure~\ref{fig:naca0012_m200_inviscid-pressure} provide the residual, force, wall $C_p/C_f$, Mach, and pressure evidence.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m200\_inviscid\_residuals.png}
+\caption{Global residual history.}
+\label{fig:naca0012_m200_inviscid-residual}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m200\_inviscid\_forces.png}
+\caption{Force-coefficient history.}
+\label{fig:naca0012_m200_inviscid-force_coefficients}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m200\_inviscid\_surface\_cp.png}
+\caption{Submitted surface pressure and skin-friction coefficients.}
+\label{fig:naca0012_m200_inviscid-surface_cp}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m200\_inviscid\_mach.png}
+\caption{Mach number from the final submitted field; the displayed percentile-clipped range is [0.19879, 2.1459].}
+\label{fig:naca0012_m200_inviscid-mach}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m200\_inviscid\_pressure.png}
+\caption{Pressure from the final submitted field; the displayed percentile-clipped range is [0.10953, 0.97393].}
+\label{fig:naca0012_m200_inviscid-pressure}
+\end{figure}
+\subsection{naca0012\_m015\_laminar\_re5000}
+The submitted status is \texttt{converged}; the computed first-to-last $L_2$/$L_\infty$ residual reductions are 4.34/4 orders. The final force row gives $C_D=0.056405$, $C_L=-0.00041188$, and $C_m=8.4649e-06$. Figure~\ref{fig:naca0012_m015_laminar_re5000-residual}, Figure~\ref{fig:naca0012_m015_laminar_re5000-force_coefficients}, Figure~\ref{fig:naca0012_m015_laminar_re5000-surface_cp}, Figure~\ref{fig:naca0012_m015_laminar_re5000-mach}, Figure~\ref{fig:naca0012_m015_laminar_re5000-pressure} provide the residual, force, wall $C_p/C_f$, Mach, and pressure evidence.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_residuals.png}
+\caption{Global residual history.}
+\label{fig:naca0012_m015_laminar_re5000-residual}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_forces.png}
+\caption{Force-coefficient history.}
+\label{fig:naca0012_m015_laminar_re5000-force_coefficients}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_surface\_cp.png}
+\caption{Submitted surface pressure and skin-friction coefficients.}
+\label{fig:naca0012_m015_laminar_re5000-surface_cp}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_mach.png}
+\caption{Mach number from the final submitted field; the displayed percentile-clipped range is [3.4982e-06, 0.17134].}
+\label{fig:naca0012_m015_laminar_re5000-mach}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_pressure.png}
+\caption{Pressure from the final submitted field; the displayed percentile-clipped range is [31.55, 32.231].}
+\label{fig:naca0012_m015_laminar_re5000-pressure}
+\end{figure}
+\subsection{naca0012\_m080\_laminar\_re5000}
+The submitted status is \texttt{converged}; the computed first-to-last $L_2$/$L_\infty$ residual reductions are 0.371/0.35 orders. The final force row gives $C_D=0.0889$, $C_L=-0.00042574$, and $C_m=8.1395e-05$. Figure~\ref{fig:naca0012_m080_laminar_re5000-residual}, Figure~\ref{fig:naca0012_m080_laminar_re5000-force_coefficients}, Figure~\ref{fig:naca0012_m080_laminar_re5000-surface_cp}, Figure~\ref{fig:naca0012_m080_laminar_re5000-mach}, Figure~\ref{fig:naca0012_m080_laminar_re5000-pressure} provide the residual, force, wall $C_p/C_f$, Mach, and pressure evidence.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_residuals.png}
+\caption{Global residual history.}
+\label{fig:naca0012_m080_laminar_re5000-residual}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_forces.png}
+\caption{Force-coefficient history.}
+\label{fig:naca0012_m080_laminar_re5000-force_coefficients}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_surface\_cp.png}
+\caption{Submitted surface pressure and skin-friction coefficients.}
+\label{fig:naca0012_m080_laminar_re5000-surface_cp}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_mach.png}
+\caption{Mach number from the final submitted field; the displayed percentile-clipped range is [0.00053447, 0.96641].}
+\label{fig:naca0012_m080_laminar_re5000-mach}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_pressure.png}
+\caption{Pressure from the final submitted field; the displayed percentile-clipped range is [0.89265, 1.6857].}
+\label{fig:naca0012_m080_laminar_re5000-pressure}
+\end{figure}
+\subsection{naca0012\_m200\_laminar\_re5000}
+The submitted status is \texttt{converged}; the computed first-to-last $L_2$/$L_\infty$ residual reductions are 3.65/3.56 orders. The final force row gives $C_D=0.11573$, $C_L=0.00013323$, and $C_m=-4.9751e-05$. Figure~\ref{fig:naca0012_m200_laminar_re5000-residual}, Figure~\ref{fig:naca0012_m200_laminar_re5000-force_coefficients}, Figure~\ref{fig:naca0012_m200_laminar_re5000-surface_cp}, Figure~\ref{fig:naca0012_m200_laminar_re5000-mach}, Figure~\ref{fig:naca0012_m200_laminar_re5000-pressure} provide the residual, force, wall $C_p/C_f$, Mach, and pressure evidence.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_residuals.png}
+\caption{Global residual history.}
+\label{fig:naca0012_m200_laminar_re5000-residual}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_forces.png}
+\caption{Force-coefficient history.}
+\label{fig:naca0012_m200_laminar_re5000-force_coefficients}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_surface\_cp.png}
+\caption{Submitted surface pressure and skin-friction coefficients.}
+\label{fig:naca0012_m200_laminar_re5000-surface_cp}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_mach.png}
+\caption{Mach number from the final submitted field; the displayed percentile-clipped range is [0.0013443, 1.9993].}
+\label{fig:naca0012_m200_laminar_re5000-mach}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_pressure.png}
+\caption{Pressure from the final submitted field; the displayed percentile-clipped range is [0.096422, 0.99969].}
+\label{fig:naca0012_m200_laminar_re5000-pressure}
+\end{figure}
+\subsection{cylinder\_m010\_laminar\_re20}
+The submitted status is \texttt{converged}; the computed first-to-last $L_2$/$L_\infty$ residual reductions are 5.01/5.01 orders. The final force row gives $C_D=2.049$, $C_L=0.00063295$, and $C_m=2.8194e-06$. Figure~\ref{fig:cylinder_m010_laminar_re20-residual}, Figure~\ref{fig:cylinder_m010_laminar_re20-force_coefficients}, Figure~\ref{fig:cylinder_m010_laminar_re20-surface_cp}, Figure~\ref{fig:cylinder_m010_laminar_re20-mach}, Figure~\ref{fig:cylinder_m010_laminar_re20-pressure} provide the residual, force, wall $C_p/C_f$, Mach, and pressure evidence.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re20\_residuals.png}
+\caption{Global residual history.}
+\label{fig:cylinder_m010_laminar_re20-residual}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re20\_forces.png}
+\caption{Force-coefficient history.}
+\label{fig:cylinder_m010_laminar_re20-force_coefficients}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re20\_surface\_cp.png}
+\caption{Submitted surface pressure and skin-friction coefficients.}
+\label{fig:cylinder_m010_laminar_re20-surface_cp}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re20\_mach.png}
+\caption{Mach number from the final submitted field; the displayed percentile-clipped range is [8.4008e-05, 0.11378].}
+\label{fig:cylinder_m010_laminar_re20-mach}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re20\_pressure.png}
+\caption{Pressure from the final submitted field; the displayed percentile-clipped range is [70.935, 71.992].}
+\label{fig:cylinder_m010_laminar_re20-pressure}
+\end{figure}
+\subsection{cylinder\_m010\_laminar\_re200}
+The submitted status is \texttt{statistically\_periodic}; the computed first-to-last $L_2$/$L_\infty$ residual reductions are 1.29/1.19 orders. The final force row gives $C_D=1.2747$, $C_L=-0.52747$, and $C_m=0.0044818$. Figure~\ref{fig:cylinder_m010_laminar_re200-residual}, Figure~\ref{fig:cylinder_m010_laminar_re200-force_coefficients}, Figure~\ref{fig:cylinder_m010_laminar_re200-surface_cp}, Figure~\ref{fig:cylinder_m010_laminar_re200-mach}, Figure~\ref{fig:cylinder_m010_laminar_re200-pressure} provide the residual, force, wall $C_p/C_f$, Mach, and pressure evidence. The final 20\% physical-time window is 240.01--300; it gives mean $C_D=1.2704$, lift amplitude 0.5694, and dominant lift frequency 0.18333 (Strouhal number is identical because the supplied $U_\infty=L_{ref}=1$). The native force cadence is $\Delta t=0.01$, spectral resolution is 0.016667, and peak/second magnitude ratio is 1.5571. Figure~\ref{fig:cylinder_m010_laminar_re200-vorticity} is the post-transient wake visualization and Figure~\ref{fig:cylinder_m010_laminar_re200-lift_spectrum} is the traceable lift spectrum.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re200\_residuals.png}
+\caption{Global residual history.}
+\label{fig:cylinder_m010_laminar_re200-residual}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re200\_forces.png}
+\caption{Force-coefficient history.}
+\label{fig:cylinder_m010_laminar_re200-force_coefficients}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re200\_surface\_cp.png}
+\caption{Submitted surface pressure and skin-friction coefficients.}
+\label{fig:cylinder_m010_laminar_re200-surface_cp}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re200\_mach.png}
+\caption{Mach number from the final submitted field; the displayed percentile-clipped range is [0.00037344, 0.13335].}
+\label{fig:cylinder_m010_laminar_re200-mach}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re200\_pressure.png}
+\caption{Pressure from the final submitted field; the displayed percentile-clipped range is [70.682, 71.898].}
+\label{fig:cylinder_m010_laminar_re200-pressure}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re200\_vorticity.png}
+\caption{Vorticity derived from final submitted velocity components; symmetric colour clipping is [-5, 5].}
+\label{fig:cylinder_m010_laminar_re200-vorticity}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/cylinder\_m010\_laminar\_re200\_lift\_spectrum.png}
+\caption{Post-transient detrended Hann-window lift spectrum from forces.csv; sample interval 0.01, window 59.99, frequency resolution 0.016667, dominant frequency 0.18333, peak/second ratio 1.56. The displayed low-frequency window ends at 0.91667; the FFT was evaluated through the Nyquist frequency 50.}
+\label{fig:cylinder_m010_laminar_re200-lift_spectrum}
+\end{figure}
+\section{Parallel validation}
+The following independent completed result packages compare final forces, residual reduction, rank-local load balance, neighbour count, and mean halo send/receive cells across MPI rank counts.  Absolute differences are measured against the smallest submitted rank count for the same case.  Timing is wall-clock time; the available CSV diagnostics quantify topology and payload but do not independently measure communication time.
+\begin{table}[htbp]\centering\scriptsize
+\caption{Rank-count consistency, residual reduction difference, and rank-local communication evidence.}\label{tab:ranks}
+\resizebox{\linewidth}{!}{\begin{tabular}{lrrrrrrrrrr}\toprule Case & ranks & wall s & $C_D$ & $C_L$ & $|\Delta C_D|$ & $|\Delta C_L|$ & $|\Delta R|$ & balance & nbr mean & send/recv mean\\\midrule
+cylinder\_m010\_laminar\_re20 & 1 & 822.3 & 2.049 & 0.00063295 & 0 & 0 & 0 & 1 & 0 & 0/0 \\
+cylinder\_m010\_laminar\_re20 & 8 & 106.8 & 2.049 & 0.00063295 & 4e-15 & 5.95e-14 & 8.88e-16 & 1 & 4.5 & 121/121 \\
+naca0012\_m015\_inviscid & 1 & 1695 & 0.00058177 & 0.00016455 & 0 & 0 & 0 & 1 & 0 & 0/0 \\
+naca0012\_m015\_inviscid & 8 & 209.1 & 0.00058177 & 0.00016455 & 7.47e-15 & 4.35e-14 & 5.16e-11 & 1.01 & 3.5 & 112/112 \\
+\bottomrule\end{tabular}}\end{table}
+\section{Limitations and failure analysis}
+This report is an evidence renderer, not a numerical adjudicator.  It rejects failed statuses and failed contract-derived sanity checks, but it cannot prove grid convergence, model-form accuracy, or source-code behavior from output alone.  Any remaining limitations are retained verbatim in the submitted run-manifest notes and should be evaluated alongside the residual, force, surface, field, and rank-comparison evidence above.
+\end{document}
