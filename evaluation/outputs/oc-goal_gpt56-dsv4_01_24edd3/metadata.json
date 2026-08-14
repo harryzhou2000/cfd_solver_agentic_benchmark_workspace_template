@@ -1,0 +1,99 @@
+{
+  "harness": {
+    "harness": "opencode",
+    "version": null,
+    "config_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/gpt56-dsv4/01/.sessions/opencode-config",
+    "config_entries": [
+      ".gitignore",
+      ".oh-my-opencode-slim",
+      "agents",
+      "commands",
+      "cost-guard.config.jsonc",
+      "mcp",
+      "node_modules",
+      "oh-my-opencode-slim.json",
+      "opencode.jsonc",
+      "opencode.jsonc.aux",
+      "opencode.jsonc.bkp",
+      "package-lock.json",
+      "package.json",
+      "rate-limit-retry-debug.log",
+      "rules",
+      "skills",
+      "themes",
+      "tui.json",
+      "tui.jsonc"
+    ],
+    "model_provider": null
+  },
+  "models": {},
+  "context": {
+    "by_model": {},
+    "by_session": {},
+    "notes": []
+  },
+  "subagents": [],
+  "opencodex": null,
+  "opencode": {
+    "sessions": [],
+    "root_session_count": 0,
+    "subagent_session_count": 0,
+    "activity_time_seconds": 0.0,
+    "idle_time_seconds": 0.0,
+    "idle_gap_threshold_seconds": 600
+  },
+  "prompts": {
+    "by_root_session": {}
+  },
+  "workspace": {
+    "git": {
+      "branch": "oc-goal/gpt56-dsv4/01",
+      "commit": "332ca95ef31bc8f694e699554f257729657f5d37"
+    },
+    "agents_md": {
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/gpt56-dsv4/01/AGENTS.md",
+      "exists": true,
+      "sha256": "6f67a229e3d8e607d76d4b9f7d2f3a085c9d9bfc4d8373481ee98784c340b69e",
+      "content": "# AGENTS.md\n\nProject instructions for coding agents working in this repository.\n\n## Sandbox (read/write restriction)\n\n- The agent is FORBIDDEN from reading or writing any directory other than the\n  current working directory (cwd). This includes `/tmp` and the parent\n  directory. All file reads and writes must stay inside the workspace.\n\n## 1. Git Discipline\n\n- Do NOT run `git pull`, `git push`, or switch branches without explicit user\n  authorization. Unauthorized remote or branch mutations are prohibited.\n- Do use `git commit` (and `git stash` when needed) freely as code checkpoints:\n  commit or stash working progress regularly so partial work can be resumed or\n  rolled back. Local checkpoint commits do not require approval; only pushing\n  and branch/remote mutations require it.\n\n## 2. Subagents\n\n- Delegating independent subtasks to subagents is encouraged.\n- Dispatch subagents with the `task` tool (normal dispatch) or the same\n  `task` tool with `background: true` (experimental background subagents;\n  requires `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true`); either form\n  may be used. `subagent_type` selects the agent, `prompt`/`description`\n  carry the task, and `task_id` resumes an earlier subagent session.\n- Subagent model policy: the ONLY allowed subagent model is\n  `deepseek/deepseek-v4-flash` (the deepseek-provided model id reported by\n  `opencode models`, configured on the subagent agent type used with the\n  `task` tool). Do not dispatch subagents with any other model.\n\n## 3. Persistence\n\n- Once the user has started a task, do not stop until the specified task is\n  accomplished to a level of satisfaction: completed results, validated\n  artifacts, and an honest report. Work through blockers with safe in-scope\n  checks and alternatives; only stop early when genuinely blocked or explicitly\n  told to stop.\n",
+      "matches_git_head": true
+    },
+    "codegraph": {
+      "exists": true,
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/gpt56-dsv4/01/.codegraph"
+    },
+    "benchmark_submodule": {
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/gpt56-dsv4/01/cfd_solver_agentic_benchmark",
+      "exists": true,
+      "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+      "branch": "HEAD",
+      "dirty": false,
+      "origin_url": "https://github.com/harryzhou2000/cfd_solver_agentic_benchmark"
+    }
+  },
+  "session_window": {
+    "started_at": null,
+    "ended_at": null,
+    "activity_time_seconds": 0.0,
+    "idle_time_seconds": 0.0,
+    "idle_gap_threshold_seconds": 600
+  },
+  "questions": [
+    {
+      "id": "opencode_sessions",
+      "question": "Which opencode sessions belong to this contestant run?",
+      "reason": "no opencode sessions found for the workspace in the local database",
+      "suggested_source": "opencode session list / opencode export <sessionID>",
+      "answer": "Unavailable: the workspace-bundled .sessions inventory contains no attributable OpenCode/Codex database rows or rollout JSONL; no external store was consulted."
+    }
+  ],
+  "user_answers": {
+    "opencode_sessions": "Unavailable: the workspace-bundled .sessions inventory contains no attributable OpenCode/Codex database rows or rollout JSONL; no external store was consulted."
+  },
+  "status": "complete",
+  "provenance": {
+    "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/gpt56-dsv4/01/.sessions/opencode-data/opencode/opencode.db",
+    "opencode_config_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/gpt56-dsv4/01/.sessions/opencode-config",
+    "generated_at": "2026-08-14T09:20:58.522761+00:00",
+    "num_sessions": 0
+  }
+}

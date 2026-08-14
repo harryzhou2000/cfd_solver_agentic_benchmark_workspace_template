@@ -133,7 +133,13 @@ Reserve `[x]` for a snapshot that passes both gates.
 
 ### `oc-goal/gpt56-dsv4` — 1 done, quota 1
 
-- [ ] 01
+- [x] 01 — `oc-goal_gpt56-dsv4_01_24edd3`; 95/100; DQ no.
+      Curated submission `332ca95ef31bc8f694e699554f257729657f5d37` passes
+      audit; all eight preserved original workspace packages and report pass
+      the explicit validator. Bundled `.sessions` contains no telemetry DB or
+      rollout, so harness/root/model/costs/timestamps and final response are
+      fail-closed unavailable; source/result scoring remains qualified. Both
+      completion gates pass.
 
 ### `oc-goal/kimik3-dsv4` — 3 done, quota 2
 
