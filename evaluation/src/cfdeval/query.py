@@ -14,6 +14,17 @@ from pathlib import Path
 CANONICAL_RUN_ID_RE = re.compile(r"^.+_[0-9a-f]{6}$")
 COST_METADATA = Path(__file__).resolve().parents[2] / "config" / "cost_metadata.json"
 
+CASE_SCORE_COLUMNS = {
+    "case_m015_inv": "naca0012_m015_inviscid",
+    "case_m080_inv": "naca0012_m080_inviscid",
+    "case_m200_inv": "naca0012_m200_inviscid",
+    "case_m015_re5k": "naca0012_m015_laminar_re5000",
+    "case_m080_re5k": "naca0012_m080_laminar_re5000",
+    "case_m200_re5k": "naca0012_m200_laminar_re5000",
+    "case_cyl_re20": "cylinder_m010_laminar_re20",
+    "case_cyl_re200": "cylinder_m010_laminar_re200",
+}
+
 
 def outputs_root() -> Path:
     return Path(__file__).resolve().parents[2] / "outputs"
@@ -130,16 +141,38 @@ def row_for(folder: Path, summary: dict) -> dict:
     ws_ = an.get("whole_session_stats", {})
     selected_roots = ((agent_scores or {}).get("session_selection") or {}).get("roots") or []
     primary_thread = (md.get("threads") or {}).get(selected_roots[0], {}) if selected_roots else {}
+    opencode_sessions = (md.get("opencode") or {}).get("sessions") or []
+    opencode_by_id = {s.get("session_id"): s for s in opencode_sessions if s.get("session_id")}
+    primary_opencode = opencode_by_id.get(selected_roots[0], {}) if selected_roots else {}
     efforts = primary_thread.get("reasoning_effort") or []
     if isinstance(efforts, str):
         efforts = [efforts]
-    primary_model = primary_thread.get("entry_model") or primary_thread.get("model")
-    primary_effort = primary_thread.get("entry_reasoning_effort") or (efforts[0] if efforts else None)
+    primary_model = (primary_thread.get("entry_model") or primary_thread.get("model")
+                     or primary_opencode.get("model"))
+    primary_effort = (primary_thread.get("entry_reasoning_effort")
+                      or (efforts[0] if efforts else None)
+                      or primary_opencode.get("variant"))
     primary_model_effort = " ".join(
         x for x in (primary_model, primary_effort) if x
     ) or None
     session_tokens = ws_.get("tokens") or {}
     dashboard_cost = current_cost_estimate(ex)
+    selected_opencode_ids: set[str] = set()
+    if selected_roots and opencode_by_id:
+        for session_id in opencode_by_id:
+            current = session_id
+            seen: set[str] = set()
+            while current and current not in seen:
+                seen.add(current)
+                if current in selected_roots:
+                    selected_opencode_ids.add(session_id)
+                    break
+                current = (opencode_by_id.get(current) or {}).get("parent_id")
+    opencode_cost = (
+        round(sum(float(opencode_by_id[sid].get("cost") or 0)
+                  for sid in selected_opencode_ids), 6)
+        if selected_opencode_ids else None
+    )
     agent_reviewed = bool(
         (agent_scores or {}).get("rubric", {}).get("total_scored") is not None
         or any(
@@ -165,7 +198,7 @@ def row_for(folder: Path, summary: dict) -> dict:
             env_phase = "post_run"
         else:
             env_phase = "pre_run"
-    return {
+    row = {
         "contestant": folder.name,
         "run_id": (run_identity or {}).get("run_id") or folder.name,
         "harness": md.get("harness", {}).get("harness"),
@@ -180,7 +213,8 @@ def row_for(folder: Path, summary: dict) -> dict:
         "input_tokens": session_tokens.get("input"),
         "cached_input_tokens": session_tokens.get("cached_input"),
         "output_tokens": session_tokens.get("output"),
-        "cost_usd": (dashboard_cost or ex.get("cost_estimate_usd") or {}).get("total"),
+        "cost_usd": (opencode_cost if opencode_cost is not None else
+                     (dashboard_cost or ex.get("cost_estimate_usd") or {}).get("total")),
         "cost_metadata_sha256": (dashboard_cost or {}).get("metadata_sha256"),
         "subagents": len(md.get("subagents", [])),
         "loc_lines": ((me.get("loc") or {}).get("file") or {}).get("lines"),
@@ -203,6 +237,12 @@ def row_for(folder: Path, summary: dict) -> dict:
         "submodule": ((ws.get("benchmark_submodule") or {}).get("commit") or "?")[:12],
         "branch": c.get("branch"),
     }
+    case_scores = (agent_scores or {}).get("case_scores") or {}
+    row.update({
+        column: (case_scores.get(case_id) or {}).get("score")
+        for column, case_id in CASE_SCORE_COLUMNS.items()
+    })
+    return row
 
 
 def query_cli(argv: list[str] | None = None) -> int:

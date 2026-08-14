@@ -34,6 +34,17 @@ RUBRIC_SECTIONS = [
     ("extensibility", "Extensibility", 5),
 ]
 
+CASE_SCORES = [
+    ("naca0012_m015_inviscid", "NACA0012 M0.15 inviscid"),
+    ("naca0012_m080_inviscid", "NACA0012 M0.80 inviscid"),
+    ("naca0012_m200_inviscid", "NACA0012 M2.00 inviscid"),
+    ("naca0012_m015_laminar_re5000", "NACA0012 M0.15 Re5000"),
+    ("naca0012_m080_laminar_re5000", "NACA0012 M0.80 Re5000"),
+    ("naca0012_m200_laminar_re5000", "NACA0012 M2.00 Re5000"),
+    ("cylinder_m010_laminar_re20", "Cylinder M0.10 Re20"),
+    ("cylinder_m010_laminar_re200", "Cylinder M0.10 Re200"),
+]
+
 
 def _load(out: Path, name: str) -> dict | None:
     p = out / name
@@ -220,6 +231,18 @@ def main(argv: list[str] | None = None) -> int:
         "| CFD methods |  |  |",
         "| Results |  |  |",
         "",
+        "## Per-case scores (independent 0-5)",
+        "",
+        "These scores do not contribute to the review-area scores or the "
+        "100-point rubric total.",
+        "",
+        "| Case | Score | Notes |",
+        "|------|------:|-------|",
+    ]
+    for _case_id, case_title in CASE_SCORES:
+        lines.append(f"| {case_title} |  |  |")
+    lines += [
+        "",
         "## Disqualification assessment",
         "",
         "> **Agent fills this in**: go through the 13 disqualification "
@@ -280,6 +303,10 @@ def main(argv: list[str] | None = None) -> int:
                  "score": None, "notes": None}
                 for sid, title, maxp in RUBRIC_SECTIONS
             ],
+        },
+        "case_scores": {
+            case_id: {"score": None, "notes": None}
+            for case_id, _title in CASE_SCORES
         },
         "disqualification": {"triggered": False, "flags": []},
         "limitations": [],

@@ -21,7 +21,7 @@ all inputs are read-only and outputs land under `evaluation/outputs/`.
 | 7. Verbose config snapshot: captured codex/opencode/opencodex configs and plugin manifests (redacted) | [specs/configs_spec.md](specs/configs_spec.md) | workspace `.sessions/` config bundle only |
 | 8. Session discovery + 30-min-bucketed analysis: cache history, tokens, tool categories, idle exclusion, permission waits | [specs/sessions_spec.md](specs/sessions_spec.md) | workspace `.sessions/codex/` or `.sessions/opencode-data/opencode/opencode.db` |
 | 9. Environment snapshot captured before the agent runs (optional) | [specs/env_snapshot_spec.md](specs/env_snapshot_spec.md) | host/container, tool versions, proxy env, workspace git state |
-| 10. Agent-driven evaluation report + scores stored in the snapshot | [specs/agent_evaluation_spec.md](specs/agent_evaluation_spec.md) | `agent_report.md`, `agent_scores.json` |
+| 10. Agent-driven evaluation report + independent rubric, review-area, and eight per-case 0-5 scores stored in the snapshot | [specs/agent_evaluation_spec.md](specs/agent_evaluation_spec.md) | `agent_report.md`, `agent_scores.json` |
 
 Root spec: [specs/summary_spec.md](specs/summary_spec.md). Output schema:
 [schemas/summary.schema.json](schemas/summary.schema.json).

@@ -1,12 +1,15 @@
 import json
 import io
+import re
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 import server
-from cfdeval import codex_data, query
+from cfdeval import codex_data, query, validation
 from cfdeval.sessions import CodexThreadEvents
 
 
@@ -158,6 +161,10 @@ class SnapshotProtocolTests(unittest.TestCase):
                     "result_review": {"overall_score": 1.4},
                 },
                 "rubric": {"total_scored": 58},
+                "case_scores": {
+                    "cylinder_m010_laminar_re20": {"score": 4.5, "notes": "credible"},
+                    "naca0012_m200_inviscid": {"score": 2, "notes": "weak shock"},
+                },
                 "disqualification": {"triggered": True},
             }))
             (folder / "run_identity.json").write_text(json.dumps({"run_id": "codex_model_01_deadbe"}))
@@ -171,6 +178,117 @@ class SnapshotProtocolTests(unittest.TestCase):
             self.assertEqual(row["execution_date"], "2026-07-31")
             self.assertTrue(row["disqualified"])
             self.assertEqual(row["env_capture_phase"], "post_run")
+            self.assertEqual(row["case_cyl_re20"], 4.5)
+            self.assertEqual(row["case_m200_inv"], 2)
+            self.assertIsNone(row["case_cyl_re200"])
+
+    def test_case_scores_schema_enforces_zero_to_five(self):
+        with tempfile.TemporaryDirectory() as raw:
+            path = Path(raw) / "agent_scores.json"
+            cases = {
+                case_id: {"score": 3, "notes": "case evidence"}
+                for case_id in query.CASE_SCORE_COLUMNS.values()
+            }
+            doc = {
+                "schema": "agent_scores", "contestant": "test",
+                "evaluated_at": "2026-08-14T00:00:00Z", "scores": {},
+                "rubric": {"total_possible": 100, "total_scored": None,
+                           "sections": []},
+                "case_scores": cases,
+            }
+            path.write_text(json.dumps(doc))
+            schema = Path(server.__file__).resolve().parents[1] / "schemas" / "agent_scores.schema.json"
+            valid, errors = validation.validate_file(path, schema)
+            self.assertTrue(valid, errors)
+            legacy = dict(doc)
+            legacy.pop("case_scores")
+            path.write_text(json.dumps(legacy))
+            valid, errors = validation.validate_file(path, schema)
+            self.assertTrue(valid, errors)
+            path.write_text(json.dumps(doc))
+            removed = cases.pop("cylinder_m010_laminar_re200")
+            path.write_text(json.dumps(doc))
+            valid, _errors = validation.validate_file(path, schema)
+            self.assertFalse(valid)
+            cases["cylinder_m010_laminar_re200"] = removed
+            cases["unexpected"] = {"score": 3, "notes": "not a case"}
+            path.write_text(json.dumps(doc))
+            valid, _errors = validation.validate_file(path, schema)
+            self.assertFalse(valid)
+            cases.pop("unexpected")
+            cases["cylinder_m010_laminar_re20"]["score"] = 5.1
+            path.write_text(json.dumps(doc))
+            valid, _errors = validation.validate_file(path, schema)
+            self.assertFalse(valid)
+
+    def test_agent_scaffold_contains_all_case_scores_in_task_order(self):
+        with tempfile.TemporaryDirectory() as raw:
+            out = Path(raw) / "snapshot"
+            out.mkdir()
+            tool = Path(server.__file__).resolve().parents[1] / "tools" / "generate_agent_report.py"
+            subprocess.run([sys.executable, str(tool), "--out", str(out)], check=True,
+                           capture_output=True, text=True)
+            scores = json.loads((out / "agent_scores.json").read_text())
+            self.assertEqual(list(scores["case_scores"]), list(query.CASE_SCORE_COLUMNS.values()))
+            self.assertTrue(all(item == {"score": None, "notes": None}
+                                for item in scores["case_scores"].values()))
+
+    def test_recording_preserves_independent_case_scores(self):
+        with tempfile.TemporaryDirectory() as raw:
+            folder = Path(raw) / "snapshot"
+            folder.mkdir()
+            cases = {
+                case_id: {"score": 4, "notes": "case evidence"}
+                for case_id in query.CASE_SCORE_COLUMNS.values()
+            }
+            scores = {
+                "schema": "agent_scores", "contestant": "test",
+                "evaluated_at": "2026-08-14T00:00:00Z",
+                "scores": {
+                    "code_review": {"points": [], "overall_score": 1},
+                    "cfd_review": {"points": [], "overall_score": 2},
+                    "result_review": {"points": [], "overall_score": 3},
+                },
+                "rubric": {"total_possible": 100, "total_scored": None,
+                           "sections": [{"id": "all", "title": "All",
+                                         "max_points": 100, "score": 77,
+                                         "notes": "rubric evidence"}]},
+                "case_scores": cases,
+            }
+            (folder / "agent_scores.json").write_text(json.dumps(scores))
+            tool = Path(server.__file__).resolve().parents[1] / "tools" / "record_agent_results.py"
+            subprocess.run([sys.executable, str(tool), "--folder", str(folder)], check=True,
+                           capture_output=True, text=True)
+            recorded = json.loads((folder / "agent_scores.json").read_text())
+            self.assertEqual(recorded["case_scores"], cases)
+            self.assertEqual(recorded["rubric"]["total_scored"], 77)
+            self.assertEqual([
+                recorded["scores"][area]["overall_score"]
+                for area in ("code_review", "cfd_review", "result_review")
+            ], [1, 2, 3])
+
+    def test_opencode_primary_model_and_persisted_tree_cost(self):
+        with tempfile.TemporaryDirectory() as raw:
+            folder = Path(raw)
+            summary = {"expenses": {"cost_estimate_usd": {"total": 0.0}}}
+            root = "root-session"
+            (folder / "metadata.json").write_text(json.dumps({
+                "harness": {"harness": "opencode"},
+                "opencode": {"sessions": [
+                    {"session_id": root, "parent_id": None,
+                     "model": "deepseek-v4-pro", "variant": "max", "cost": 5.9},
+                    {"session_id": "child", "parent_id": root,
+                     "model": "deepseek-v4-flash", "variant": "max", "cost": 0.8},
+                    {"session_id": "unrelated", "parent_id": None,
+                     "model": "other", "variant": "low", "cost": 99},
+                ]},
+            }))
+            (folder / "agent_scores.json").write_text(json.dumps({
+                "session_selection": {"roots": [root]},
+            }))
+            row = query.row_for(folder, summary)
+            self.assertEqual(row["primary_model_effort"], "deepseek-v4-pro max")
+            self.assertEqual(row["cost_usd"], 6.7)
 
     def test_hidden_attribute_beats_component_display_rules(self):
         css = (Path(__file__).parent / "static" / "styles.css").read_text()
@@ -184,6 +302,12 @@ class SnapshotProtocolTests(unittest.TestCase):
         self.assertIn('const initial = parseHash();', app)
         self.assertIn('route();\n    if (initial.view === "list") loadSnapshots();', app)
         self.assertIn('{ key: "disqualified",   label: "DQ",           type: "dq"', app)
+        self.assertEqual(re.findall(r'\{ key: "(case_[^"]+)"', app), [
+            "case_m015_inv", "case_m080_inv", "case_m200_inv",
+            "case_m015_re5k", "case_m080_re5k", "case_m200_re5k",
+            "case_cyl_re20", "case_cyl_re200",
+        ])
+        self.assertIn('case "case-score":  return fmtCaseScore(v);', app)
         self.assertIn('pill pill-status-blocked">yes</span>', app)
         self.assertIn('/static/app.js?v=', html)
         self.assertIn('/static/styles.css?v=', html)

@@ -20,6 +20,9 @@ live **inside the snapshot folder**, so every snapshot is self-contained.
     notes (point ids/weights from `evaluation/config/review_points_*.json`);
   - `rubric`: the 10 sections of the benchmark's `SCORING_RUBRIC.md`
     (100 points total) with per-section scores and the computed total;
+  - `case_scores`: all eight required cases, each with an independent 0-5
+    score and evidence note; these scores do not contribute to the rubric or
+    Code/CFD/Results review scores;
   - `disqualification`: the 13 triggers with evidence and found flags;
   - `limitations`: what could not be verified.
 
@@ -45,8 +48,9 @@ uv run cfdeval check evaluation/outputs/codex_gpt56_01
 
 ## Rules
 
-- Scores are judgments with evidence: every rubric/review point below
-  full marks should carry a note pointing to the evidence.
+- Scores are judgments with evidence: every per-case score and every
+  rubric/review point below full marks should carry a note pointing to the
+  evidence.
 - Nothing in this step writes into the contestant workspace or benchmark
   repo (read-only evaluation).
 - If the agent cannot verify a score, it records `null` and explains in

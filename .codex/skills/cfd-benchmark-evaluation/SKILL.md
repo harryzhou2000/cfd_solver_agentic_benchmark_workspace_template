@@ -631,6 +631,36 @@ Score these dimensions independently:
   solver; conversely, attractive report figures must not substitute for solver
   evidence.
 
+### Independent per-case scores
+
+Assign each required case its own evidence-backed score from 0 to 5 in
+`agent_scores.json.case_scores`. These eight scores are a third reporting
+layer: never add them to, average them into, or otherwise alter either the
+100-point rubric or the Code/CFD/Results review-area scores.
+
+Use the task's canonical order: the M0.15, M0.80, and M2.00 inviscid NACA0012
+cases; the corresponding three laminar Re5000 cases; cylinder Re20; cylinder
+Re200. Score the delivered case result and case-specific evidence:
+
+- `0`: missing/unreadable result, confirmed failed run, or no credible
+  case-result evidence;
+- `1`: recognizable attempt but severely incomplete, invalid, or physically
+  unusable;
+- `2`: substantial partial result with major completeness, convergence, or
+  credibility defects;
+- `3`: adequate, readable, and broadly credible result with material
+  limitations;
+- `4`: strong and substantially complete result with only minor limitations;
+- `5`: complete, contract-compliant, numerically credible, and convincingly
+  supported result.
+
+Fractional scores are permitted. Add a case-specific evidence note for every
+score. Keep report craftsmanship and shared implementation quality in their
+existing dimensions; do not punish the same global defect mechanically in all
+eight case scores unless it independently compromises every case. Apply the
+existing evidence-escalation policy, including the absolute prohibition on
+rerunning Re200.
+
 When the report and solver disagree, state separate conclusions, for example:
 "solver functionality verified by evaluator steady rerun; contestant result
 missing and report receives no completion/visualization credit." Do not hide
@@ -673,7 +703,8 @@ python3 evaluation/tools/generate_agent_report.py \
 Fill both:
 
 - `agent_scores.json`: review-area points, ten-section 100-point rubric,
-  disqualification evidence, session selection, metadata answers, limitations;
+  eight independent 0-5 case scores, disqualification evidence, session
+  selection, metadata answers, limitations;
 - `agent_report.md`: methodology, evidence, findings, comments, limitations,
   and verdict.
 

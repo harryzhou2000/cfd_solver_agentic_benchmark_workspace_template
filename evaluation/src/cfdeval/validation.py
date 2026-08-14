@@ -1,10 +1,12 @@
 """Draft-07 JSON-schema subset validator used for format-checking evaluation
 artifacts. Stdlib only; supports the schema features cfdeval uses (type
-incl. unions, enum, required, properties, additionalProperties, items, $ref)."""
+incl. unions, enum, numeric bounds, required, properties,
+additionalProperties, items, $ref)."""
 
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 
@@ -50,6 +52,13 @@ def validate(instance, schema, path: str = "$", errors: list[str] | None = None,
             return errors
     if "enum" in schema and instance not in schema["enum"]:
         errors.append(f"{path}: value {instance!r} not in enum {schema['enum']}")
+    if isinstance(instance, (int, float)) and not isinstance(instance, bool):
+        if not math.isfinite(instance):
+            errors.append(f"{path}: number must be finite")
+        if "minimum" in schema and instance < schema["minimum"]:
+            errors.append(f"{path}: value {instance!r} is below minimum {schema['minimum']}")
+        if "maximum" in schema and instance > schema["maximum"]:
+            errors.append(f"{path}: value {instance!r} exceeds maximum {schema['maximum']}")
     if isinstance(instance, dict):
         if "required" in schema:
             for key in schema["required"]:

@@ -62,6 +62,31 @@
         }
       }
     },
+    "case_scores": {
+      "type": "object",
+      "description": "Independent 0-5 assessment of each required benchmark case; not included in review-area or 100-point rubric totals.",
+      "additionalProperties": false,
+      "required": [
+        "naca0012_m015_inviscid",
+        "naca0012_m080_inviscid",
+        "naca0012_m200_inviscid",
+        "naca0012_m015_laminar_re5000",
+        "naca0012_m080_laminar_re5000",
+        "naca0012_m200_laminar_re5000",
+        "cylinder_m010_laminar_re20",
+        "cylinder_m010_laminar_re200"
+      ],
+      "properties": {
+        "naca0012_m015_inviscid": { "$ref": "#/definitions/case_score" },
+        "naca0012_m080_inviscid": { "$ref": "#/definitions/case_score" },
+        "naca0012_m200_inviscid": { "$ref": "#/definitions/case_score" },
+        "naca0012_m015_laminar_re5000": { "$ref": "#/definitions/case_score" },
+        "naca0012_m080_laminar_re5000": { "$ref": "#/definitions/case_score" },
+        "naca0012_m200_laminar_re5000": { "$ref": "#/definitions/case_score" },
+        "cylinder_m010_laminar_re20": { "$ref": "#/definitions/case_score" },
+        "cylinder_m010_laminar_re200": { "$ref": "#/definitions/case_score" }
+      }
+    },
     "disqualification": {
       "type": "object",
       "properties": {
@@ -83,6 +108,15 @@
     "limitations": { "type": "array", "items": { "type": "string" } }
   },
   "definitions": {
+    "case_score": {
+      "type": "object",
+      "required": ["score", "notes"],
+      "additionalProperties": false,
+      "properties": {
+        "score": { "type": ["number", "null"], "minimum": 0, "maximum": 5 },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
     "area": {
       "type": "object",
       "required": ["points", "overall_score"],

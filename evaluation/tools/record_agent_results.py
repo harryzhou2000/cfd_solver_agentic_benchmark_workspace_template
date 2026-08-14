@@ -3,8 +3,8 @@
 
 Validates `agent_scores.json` against its schema and the review-points
 configs (point ids must exist, scores 0-5), copies/refreshes the scores and
-report into the snapshot, recomputes the overall scores and rubric total, and
-re-records index.json.
+report into the snapshot, preserves the independent eight-case 0-5 scores,
+recomputes only the review overalls and rubric total, and re-records index.json.
 
 Usage:
   python3 evaluation/tools/record_agent_results.py --folder evaluation/outputs/<c>

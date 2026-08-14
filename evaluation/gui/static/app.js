@@ -36,6 +36,14 @@
     { key: "codegraph",      label: "Codegraph",    type: "bool",    sortType: "bool" },
     { key: "submodule",      label: "Submodule",    type: "text",    sortType: "str" },
     { key: "branch",         label: "Branch",       type: "text",    sortType: "str" },
+    { key: "case_m015_inv",  label: "M.15 Inv",     type: "case-score", sortType: "num" },
+    { key: "case_m080_inv",  label: "M.80 Inv",     type: "case-score", sortType: "num" },
+    { key: "case_m200_inv",  label: "M2 Inv",       type: "case-score", sortType: "num" },
+    { key: "case_m015_re5k", label: "M.15 Re5k",    type: "case-score", sortType: "num" },
+    { key: "case_m080_re5k", label: "M.80 Re5k",    type: "case-score", sortType: "num" },
+    { key: "case_m200_re5k", label: "M2 Re5k",      type: "case-score", sortType: "num" },
+    { key: "case_cyl_re20",  label: "Cyl Re20",     type: "case-score", sortType: "num" },
+    { key: "case_cyl_re200", label: "Cyl Re200",    type: "case-score", sortType: "num" },
   ];
 
   const $  = (sel, root = document) => root.querySelector(sel);
@@ -79,6 +87,13 @@
     if (Number.isNaN(v)) return emDash;
     if (v <= 1) return (v * 100).toFixed(0) + "%";
     return v.toFixed(2);
+  }
+
+  function fmtCaseScore(n) {
+    if (isNullish(n)) return emDash;
+    const v = Number(n);
+    if (!Number.isFinite(v)) return emDash;
+    return Number.isInteger(v) ? String(v) : v.toFixed(1).replace(/\.0$/, "");
   }
 
   function fmtPct(n) {
@@ -157,6 +172,7 @@
       case "tokens":      return fmtTokens(v);
       case "money":       return fmtMoney(v);
       case "score":       return fmtScore(v);
+      case "case-score":  return fmtCaseScore(v);
       case "pct":         return fmtPct(v);
       case "bool":        return boolPill(v);
       case "dq":          return dqPill(v);
@@ -290,6 +306,7 @@
         const cls = (col.type === "num" || col.type === "duration" ||
                      col.type === "tokens" || col.type === "money" ||
                      col.type === "score" || col.type === "pct" ||
+                     col.type === "case-score" ||
                      col.type === "int")
                      ? " class=\"num\"" : "";
         const statusTitle = col.key === "status"
