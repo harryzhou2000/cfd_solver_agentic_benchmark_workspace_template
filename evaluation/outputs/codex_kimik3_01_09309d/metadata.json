@@ -1,0 +1,136 @@
+{
+  "harness": {
+    "harness": "codex",
+    "cli_version": "0.146.0",
+    "originator": "codex-tui",
+    "source": "cli",
+    "thread_source": "user",
+    "multi_agent_version": "v2",
+    "history_mode": "legacy",
+    "memory_mode": "disabled",
+    "model_provider": "openai",
+    "codex_runtime_version": null,
+    "plugins": []
+  },
+  "models": {
+    "BLSC/Kimi-K3": {
+      "catalog": {
+        "display_name": null,
+        "context_window": 522500,
+        "max_context_window": null,
+        "supported_reasoning_levels": null
+      },
+      "reasoning_efforts_seen": [
+        "ultra"
+      ],
+      "max_context_used": 261253440,
+      "threads": 1
+    }
+  },
+  "context": {
+    "by_model": {
+      "BLSC/Kimi-K3": {
+        "context_window": 522500,
+        "max_context_used": 261253440
+      }
+    },
+    "by_thread": {
+      "019fc805-989c-7971-b70d-53fd4efa3889": {
+        "model": "BLSC/Kimi-K3",
+        "max_input_tokens": 261253440,
+        "mean_input_tokens": 89208545.0,
+        "model_context_window_recorded": 522500
+      }
+    },
+    "notes": []
+  },
+  "threads": {
+    "019fc805-989c-7971-b70d-53fd4efa3889": {
+      "thread_id": "019fc805-989c-7971-b70d-53fd4efa3889",
+      "is_subagent": false,
+      "model": "BLSC/Kimi-K3",
+      "entry_model": "BLSC/Kimi-K3",
+      "model_provider": "openai",
+      "reasoning_effort": [
+        "ultra"
+      ],
+      "entry_reasoning_effort": "ultra",
+      "tokens_used": 82061679,
+      "cwd": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01",
+      "git_branch": "codex/kimik3/init",
+      "created_at": 1785767237,
+      "updated_at": 1785878383,
+      "started_at": "2026-08-03T14:28:02.871000+00:00",
+      "ended_at": "2026-08-04T21:19:43.639000+00:00",
+      "context_used_max_input": 261253440,
+      "context_used_mean_input": 89208545.0,
+      "model_context_window_recorded": 522500
+    }
+  },
+  "subagents": [],
+  "opencodex": {
+    "trigger": "non_vanilla_models",
+    "non_vanilla_models": [
+      "BLSC/Kimi-K3"
+    ],
+    "opencodex_version": null,
+    "opencodex_submodule_pin": null,
+    "config_facts": {},
+    "codex_proxy_fallback_config": null
+  },
+  "prompts": {
+    "by_root_thread": {
+      "019fc805-989c-7971-b70d-53fd4efa3889": {
+        "goal_objective": "complete the work defined cfd_solver_agentic_benchmark/.",
+        "goal_status": "complete",
+        "initial_user_prompt": null,
+        "resume_prompts": [],
+        "source": "session_rollout"
+      }
+    }
+  },
+  "workspace": {
+    "git": {
+      "branch": "codex/kimik3/01",
+      "commit": "005d7d987066c8a9325c6c482c1c55a1e37b4c4d"
+    },
+    "agents_md": {
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/AGENTS.md",
+      "exists": true,
+      "sha256": "c8f6feb8107e496447c1787e4e717ded64a9420ea3849b6c6ac3c7cabc99797e",
+      "content": "# AGENTS.md\n\nProject instructions for coding agents working in this repository.\n\n## 1. Git Discipline\n\n- Do NOT run `git pull`, `git push`, or switch branches without explicit user\n  authorization. Unauthorized remote or branch mutations are prohibited.\n- Do use `git commit` (and `git stash` when needed) freely as code checkpoints:\n  commit or stash working progress regularly so partial work can be resumed or\n  rolled back. Local checkpoint commits do not require approval; only pushing\n  and branch/remote mutations require it.\n\n## 2. Subagents\n\n- Delegating independent subtasks to subagents is encouraged.\n- Subagent model policy: the ONLY allowed subagent model is `BLSC/Kimi-K3`\n  (passed as the `model` override to `spawn_agent`).\n  Do not spawn subagents with any other model.\n\n## 3. Persistence\n\n- Once the user has started a task, do not stop until the specified task is\n  accomplished to a level of satisfaction: completed results, validated\n  artifacts, and an honest report. Work through blockers with safe in-scope\n  checks and alternatives; only stop early when genuinely blocked or explicitly\n  told to stop.\n",
+      "matches_git_head": true
+    },
+    "codegraph": {
+      "exists": true,
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.codegraph"
+    },
+    "benchmark_submodule": {
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/cfd_solver_agentic_benchmark",
+      "exists": true,
+      "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+      "branch": "HEAD",
+      "dirty": false,
+      "origin_url": "https://github.com/harryzhou2000/cfd_solver_agentic_benchmark"
+    }
+  },
+  "session_window": {
+    "started_at": "2026-08-03T14:28:02.871000+00:00",
+    "ended_at": "2026-08-04T21:19:43.639000+00:00"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/sessions",
+    "history": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/history.jsonl",
+    "ocx_config": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/opencodex/config.json",
+    "ocx_catalog": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/opencodex-catalog.json",
+    "plugins_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/plugins",
+    "generated_at": "2026-08-14T08:04:00.100128+00:00",
+    "num_threads": 1
+  },
+  "questions": [],
+  "user_answers": {},
+  "status": "complete"
+}

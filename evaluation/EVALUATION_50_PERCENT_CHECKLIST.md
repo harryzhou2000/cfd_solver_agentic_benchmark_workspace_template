@@ -124,7 +124,12 @@ Reserve `[x]` for a snapshot that passes both gates.
 
 ### `codex/kimik3` — 1 done, quota 1
 
-- [ ] 01
+- [x] 01 — `codex_kimik3_01_09309d`; 84/100 before DQ; DQ yes (trigger 4).
+      Curated submission `005d7d987066c8a9325c6c482c1c55a1e37b4c4d`; project-Codex
+      root-scoped telemetry, final-response provenance, all review/case/DQ evidence,
+      validator, index, and both completion gates pass. Cylinder Re20 rankcount
+      Cd is 5.706 at np1/2/4 versus 1.953 at production np8 (65.77% change),
+      contradicting the report's all-rank 1.953 claim.
 
 ### `oc-goal/gpt56-dsv4` — 1 done, quota 1
 

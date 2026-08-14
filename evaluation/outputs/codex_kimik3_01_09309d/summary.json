@@ -1,0 +1,714 @@
+{
+  "contestant": {
+    "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01",
+    "branch": "codex/kimik3/01",
+    "git_commit": "005d7d987066c8a9325c6c482c1c55a1e37b4c4d",
+    "benchmark_submodule_commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+    "layout": "standard",
+    "solver_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/solver",
+    "results_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/solver/rankcount",
+    "report_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/solver/report",
+    "session_window": {
+      "start": "2026-08-01T12:23:09.026000+00:00",
+      "end": "2026-08-04T21:19:43.639000+00:00"
+    }
+  },
+  "expenses": {
+    "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01",
+    "time_seconds": {
+      "goal_time": 36426.0,
+      "wall_time": 111100.8,
+      "started_at": "2026-08-03T14:28:02.871000+00:00",
+      "ended_at": "2026-08-04T21:19:43.639000+00:00",
+      "by_root_thread": {
+        "019fc805-989c-7971-b70d-53fd4efa3889": {
+          "status": "complete",
+          "time_used_seconds": 36426,
+          "tokens_used": 14921148
+        }
+      },
+      "by_root_tree": {
+        "019fc805-989c-7971-b70d-53fd4efa3889": {
+          "status": "complete",
+          "goal_time_seconds": 36426,
+          "goal_tokens": 14921148,
+          "threads": 1,
+          "tokens_used": 82061679,
+          "model": "BLSC/Kimi-K3"
+        }
+      }
+    },
+    "tokens": {
+      "total": 82061679,
+      "by_model": {
+        "BLSC/Kimi-K3": {
+          "input": 81752330,
+          "cached_input": 67137507,
+          "non_cached_input": 14614823,
+          "output": 309349,
+          "reasoning_output": 109295,
+          "total": 82061679,
+          "fallback_tokens": 0
+        }
+      },
+      "by_thread": {
+        "019fc805-989c-7971-b70d-53fd4efa3889": {
+          "model": "BLSC/Kimi-K3",
+          "is_subagent": false,
+          "source": "rollout_cumulative",
+          "tokens": {
+            "BLSC/Kimi-K3": {
+              "input": 81752330,
+              "cached": 67137507,
+              "non_cached": 14614823,
+              "output": 309349,
+              "reasoning_output": 109295,
+              "total": 82061679
+            }
+          },
+          "total": 82061679
+        }
+      },
+      "main_vs_subagent": {
+        "main": 82061679,
+        "subagent": 0
+      },
+      "fallback_tokens": 0,
+      "discrepancy_notes": [],
+      "accounting_note": "Cached/input/output splits come from each selected thread's terminal rollout counter and are scaled only when needed to match state_5.sqlite threads.tokens_used."
+    },
+    "cost_estimate_usd": {
+      "total": 32.6366,
+      "by_model": {
+        "BLSC/Kimi-K3": {
+          "usd": 32.6366,
+          "tokens": 82061679,
+          "pricing": "metadata"
+        }
+      },
+      "unpriced_tokens": 0,
+      "estimate": true,
+      "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
+    },
+    "provenance": {
+      "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/state_5.sqlite",
+      "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/goals_1.sqlite",
+      "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/logs_2.sqlite",
+      "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/sessions",
+      "fetched_at": "2026-08-14T08:04:00.227905+00:00",
+      "num_threads": 1,
+      "num_roots": 1
+    }
+  },
+  "code_review": {
+    "review_area": "code_review",
+    "title": "Code review scorecard",
+    "points": [
+      {
+        "id": "code.build",
+        "title": "Build system and reproducibility",
+        "weight": 0.15,
+        "score": 4,
+        "notes": "CMake locates MPI, CGNS/HDF5 and METIS; README documents the build, but no independent clean build was run."
+      },
+      {
+        "id": "code.cli",
+        "title": "CLI and error handling",
+        "weight": 0.1,
+        "score": 5,
+        "notes": "main/config source implements the required solve --case/--output interface and FatalError paths."
+      },
+      {
+        "id": "code.organization",
+        "title": "Code organization and extensibility",
+        "weight": 0.12,
+        "score": 5,
+        "notes": "Distinct mesh, partition, halo, flux, reconstruction, residual, driver and output modules."
+      },
+      {
+        "id": "code.originality",
+        "title": "Originality and license compliance",
+        "weight": 0.15,
+        "score": 4,
+        "notes": "No direct internal wrapper/executable evidence found. Trust policy bars external similarity investigation."
+      },
+      {
+        "id": "code.hardcoding",
+        "title": "No hard-coded case logic",
+        "weight": 0.08,
+        "score": 5,
+        "notes": "JSON case configuration and CGNS input control the solver; no two-filename-only branch found."
+      },
+      {
+        "id": "code.mpi",
+        "title": "MPI correctness",
+        "weight": 0.15,
+        "score": 2,
+        "notes": "METIS, neighbour point-to-point exchange and reductions are source-evidenced, but cylinder steady Cd is 5.706 at np1/2/4 versus 1.953 at production np8: order-one inconsistency."
+      },
+      {
+        "id": "code.robustness",
+        "title": "Robustness and memory sanity",
+        "weight": 0.08,
+        "score": 4,
+        "notes": "Mesh/config checks, positivity backtracking and finite diagnostics are present; no independent stress run."
+      },
+      {
+        "id": "code.testing",
+        "title": "Testing and validation evidence",
+        "weight": 0.1,
+        "score": 4,
+        "notes": "All eight output packages pass the official validator and rank artifacts exist, but the cylinder rank evidence fails consistency."
+      },
+      {
+        "id": "code.hygiene",
+        "title": "Code hygiene",
+        "weight": 0.07,
+        "score": 4,
+        "notes": "Readable C++17 sources and curated submission; report source depends on excluded raw result/manifests for full regeneration."
+      }
+    ],
+    "disqualification_flags": [
+      {
+        "flag": "Existing solver executable called internally",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Force/residual files generated without solving",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Code only reads the two benchmark mesh filenames through hard-coded branches",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "MPI rank count changes results by order-one amounts for steady cases",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Explicit time stepping only (no implicit/steady capability claimed where required)",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Report claims algorithms that cannot be found in source",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "metadata.json marks incomplete/failed runs as successful",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Solver core, time integration, or MPI communication copied/adapted/wrapped from an existing open-source CFD codebase",
+        "triggered": null,
+        "notes": ""
+      }
+    ],
+    "overall_score": 4.0
+  },
+  "cfd_review": {
+    "review_area": "cfd_review",
+    "title": "CFD methods and algorithms review scorecard",
+    "points": [
+      {
+        "id": "cfd.equations",
+        "title": "Governing equations and nondimensionalization",
+        "weight": 0.06,
+        "score": 5,
+        "notes": "Report and physics source state conservative compressible NS, perfect-gas closure and nondimensionalization."
+      },
+      {
+        "id": "cfd.mesh",
+        "title": "Mesh import and unstructured geometry",
+        "weight": 0.1,
+        "score": 5,
+        "notes": "CGNS unstructured zones, geometry and adjacency are implemented in mesh/partition modules."
+      },
+      {
+        "id": "cfd.residual",
+        "title": "Conservative finite-volume residual",
+        "weight": 0.12,
+        "score": 5,
+        "notes": "Face-by-face conservative residual assembly is documented and source-evidenced."
+      },
+      {
+        "id": "cfd.flux",
+        "title": "Approximate Riemann flux and entropy fix",
+        "weight": 0.08,
+        "score": 4,
+        "notes": "Rusanov/local Lax-Friedrichs flux with viscous spectral augmentation is implemented; no richer entropy-stable flux."
+      },
+      {
+        "id": "cfd.bc",
+        "title": "Boundary conditions",
+        "weight": 0.08,
+        "score": 5,
+        "notes": "Characteristic farfield, slip wall and no-slip adiabatic wall paths are described and implemented."
+      },
+      {
+        "id": "cfd.reconstruction",
+        "title": "Second-order reconstruction",
+        "weight": 0.09,
+        "score": 5,
+        "notes": "Least-squares piecewise-linear reconstruction is present, with documented startup first-order continuation."
+      },
+      {
+        "id": "cfd.limiter",
+        "title": "Limiter and positivity control",
+        "weight": 0.08,
+        "score": 5,
+        "notes": "Production Venkatakrishnan limiter and density/pressure positivity control are source-evidenced."
+      },
+      {
+        "id": "cfd.viscous",
+        "title": "Viscous discretization",
+        "weight": 0.1,
+        "score": 5,
+        "notes": "Newtonian/Fourier viscous terms, gradients and tangential skin-friction reporting are evidenced in source and report."
+      },
+      {
+        "id": "cfd.implicit",
+        "title": "Implicit steady march",
+        "weight": 0.1,
+        "score": 5,
+        "notes": "Nonlinear LU-SGS defect correction with local pseudo-time/CFL controls is source-evidenced."
+      },
+      {
+        "id": "cfd.transient",
+        "title": "Transient BDF2 two-loop method (Re 200)",
+        "weight": 0.1,
+        "score": 5,
+        "notes": "Re200 metadata reports BDF2 dual time, 30000 steps to t=300 and inner statistics; evaluated read-only, never rerun."
+      },
+      {
+        "id": "cfd.mpi_partition",
+        "title": "MPI partitioning and scalability",
+        "weight": 0.09,
+        "score": 2,
+        "notes": "METIS ownership/ghost design is present, but submitted cylinder rank results show the disqualifying order-one rank dependence."
+      }
+    ],
+    "disqualification_flags": [
+      {
+        "flag": "Solver uses explicit time stepping only",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Normal viscous traction mislabeled as skin friction",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+        "triggered": null,
+        "notes": ""
+      }
+    ],
+    "overall_score": 4.65
+  },
+  "result_review": {
+    "review_area": "result_review",
+    "title": "Result review scorecard (outputs, visualizations, report)",
+    "points": [
+      {
+        "id": "res.contract",
+        "title": "Output contract compliance",
+        "weight": 0.2,
+        "score": 5,
+        "notes": "All eight required output directories and report pass validate_outputs.py."
+      },
+      {
+        "id": "res.validator",
+        "title": "Automated validator results",
+        "weight": 0.1,
+        "score": 5,
+        "notes": "Explicit official validator invocation returned OK for every case and solver/report."
+      },
+      {
+        "id": "res.completion",
+        "title": "Case completion and convergence",
+        "weight": 0.2,
+        "score": 5,
+        "notes": "All eight metadata files mark completed with converged/statistically_periodic status; Re200 reaches t=300."
+      },
+      {
+        "id": "res.plausibility",
+        "title": "Result plausibility and MPI consistency",
+        "weight": 0.15,
+        "score": 3,
+        "notes": "Most force/field evidence is plausible, but the cylinder steady MPI result is order-one inconsistent and rank validation prose is false."
+      },
+      {
+        "id": "res.visualization",
+        "title": "Visualizations",
+        "weight": 0.15,
+        "score": 5,
+        "notes": "Report includes named Mach, pressure, residual, force and surface plots plus Re200 vorticity, with figure manifest."
+      },
+      {
+        "id": "res.report",
+        "title": "Report quality and honesty",
+        "weight": 0.15,
+        "score": 3,
+        "notes": "Strong technical coverage and candid plateau note, but table 5 falsely reports cylinder np1/2/4 Cd=1.953 while retained artifacts have 5.706."
+      },
+      {
+        "id": "res.traceability",
+        "title": "Traceability of figures and claims",
+        "weight": 0.05,
+        "score": 3,
+        "notes": "Workspace report has figure/run manifests; curated commit excludes raw result data and report-generated manifests, limiting self-contained traceability."
+      }
+    ],
+    "disqualification_flags": [
+      {
+        "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Report figures do not correspond to submitted field/CSV outputs",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "metadata.json marks incomplete or failed runs as successful",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Debug outputs presented as final case results",
+        "triggered": null,
+        "notes": ""
+      }
+    ],
+    "overall_score": 4.3
+  },
+  "measurements": {
+    "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01",
+    "tool_usage": {
+      "total": 447,
+      "by_tool": {
+        "exec_command": 289,
+        "apply_patch": 116,
+        "write_stdin": 34,
+        "update_plan": 6,
+        "spawn_agent": 1,
+        "update_goal": 1
+      },
+      "by_thread": {
+        "019fc805-989c-7971-b70d-53fd4efa3889": {
+          "exec_command": 289,
+          "update_plan": 6,
+          "write_stdin": 34,
+          "apply_patch": 116,
+          "spawn_agent": 1,
+          "update_goal": 1
+        }
+      },
+      "subagent_spawns": 0,
+      "risk_context": [
+        {
+          "thread_id": "019fc805-989c-7971-b70d-53fd4efa3889",
+          "approval_policy": "never",
+          "permission_profile": ":danger-full-access"
+        },
+        {
+          "thread_id": "019fc805-989c-7971-b70d-53fd4efa3889",
+          "approval_policy": "never",
+          "sandbox": "danger-full-access",
+          "network_access": null
+        }
+      ]
+    },
+    "loc": {
+      "method": "git+file",
+      "git": {
+        "method": "git",
+        "repos": {
+          "workspace": {
+            "branch": "codex/kimik3/01",
+            "commit": "005d7d987066c8a9325c6c482c1c55a1e37b4c4d",
+            "tracked_source_files": 25,
+            "tracked_source_lines": 4195,
+            "by_extension": {
+              "cmake": 98,
+              "cpp": 2899,
+              "hpp": 812,
+              "py": 386
+            },
+            "diff_vs_base": {
+              "added": 4697,
+              "deleted": 0,
+              "base": "d18a15eb9bbda0091ca0562440562300a25ba884"
+            }
+          },
+          "cfd_solver_agentic_benchmark": {
+            "branch": "HEAD",
+            "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+            "tracked_source_files": 1,
+            "tracked_source_lines": 324,
+            "by_extension": {
+              "py": 324
+            },
+            "diff_vs_base": null
+          }
+        },
+        "lines_total": 4519
+      },
+      "file": {
+        "method": "file",
+        "files": 26,
+        "lines": 4519,
+        "by_extension": {
+          "cmake": 98,
+          "cpp": 2899,
+          "hpp": 812,
+          "py": 710
+        }
+      }
+    },
+    "rule_violations": [
+      {
+        "category": "unauthorized_remote_mutations",
+        "severity": "high",
+        "thread_id": "019fc805-989c-7971-b70d-53fd4efa3889",
+        "timestamp": "2026-08-03T14:36:26.680Z",
+        "tool": "exec_command",
+        "evidence": "ID5/harry/projects/cfd_agentic_benchmark/codex_kimik3_01 && git checkout -b solver/kimik3-01 && git branch --show-current"
+      },
+      {
+        "category": "network_access",
+        "severity": "medium",
+        "thread_id": "019fc805-989c-7971-b70d-53fd4efa3889",
+        "timestamp": "2026-08-03T14:36:26.681Z",
+        "tool": "exec_command",
+        "evidence": "results && python3 -m venv solver/.venv && solver/.venv/bin/pip install -q --upgrade pip 2>&1 | tail -1"
+      },
+      {
+        "category": "network_access",
+        "severity": "medium",
+        "thread_id": "019fc805-989c-7971-b70d-53fd4efa3889",
+        "timestamp": "2026-08-03T14:37:34.863Z",
+        "tool": "exec_command",
+        "evidence": "s/cfd_agentic_benchmark/codex_kimik3_01/solver && .venv/bin/pip install -q numpy matplotlib h5py scipy 2>&1 | tail -2; .venv/bin/python -c \"import numpy, matplotlib, h5py, scipy; print('venv "
+      },
+      {
+        "category": "network_access",
+        "severity": "medium",
+        "thread_id": "019fc805-989c-7971-b70d-53fd4efa3889",
+        "timestamp": "2026-08-04T02:09:12.759Z",
+        "tool": "apply_patch",
+        "evidence": "nt: + +```bash +cd solver +python3 -m venv .venv +.venv/bin/pip install numpy scipy matplotlib h5py +``` + +## Build + +```bash +cmake -S solver -B solver/build -DCFD_EXTERNALS_ROOT=\"$PWD/ext"
+      },
+      {
+        "category": "suspicious_patterns",
+        "severity": "medium",
+        "thread_id": "019fc805-989c-7971-b70d-53fd4efa3889",
+        "timestamp": "2026-08-04T02:24:29.541Z",
+        "tool": "exec_command",
+        "evidence": "45099 2245100 2245103 2245104 2>/dev/null || true; sleep 2; kill -9 2245099 2245100 2245103 2245104 2>/dev/null || true; ps -eo pid,args | rg 'naca0012_m080_laminar_re5000|naca0012_m200_la"
+      },
+      {
+        "category": "suspicious_patterns",
+        "severity": "medium",
+        "thread_id": "019fc805-989c-7971-b70d-53fd4efa3889",
+        "timestamp": "2026-08-04T17:36:47.722Z",
+        "tool": "exec_command",
+        "evidence": "24072 1224080 1224108 1224109 2>/dev/null || true; sleep 2; kill -9 1224072 1224080 1224108 1224109 2>/dev/null || true; ps -eo pid,etime,args | rg 'naca0012_m200_inviscid' | rg -v rg"
+      }
+    ],
+    "provenance": {
+      "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/state_5.sqlite",
+      "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/sessions",
+      "generated_at": "2026-08-14T08:04:00.556748+00:00",
+      "num_threads": 1
+    }
+  },
+  "metadata": {
+    "harness": {
+      "harness": "codex",
+      "cli_version": "0.146.0",
+      "originator": "codex-tui",
+      "source": "cli",
+      "thread_source": "user",
+      "multi_agent_version": "v2",
+      "history_mode": "legacy",
+      "memory_mode": "disabled",
+      "model_provider": "openai",
+      "codex_runtime_version": null,
+      "plugins": []
+    },
+    "models": {
+      "BLSC/Kimi-K3": {
+        "catalog": {
+          "display_name": null,
+          "context_window": 522500,
+          "max_context_window": null,
+          "supported_reasoning_levels": null
+        },
+        "reasoning_efforts_seen": [
+          "ultra"
+        ],
+        "max_context_used": 261253440,
+        "threads": 1
+      }
+    },
+    "context": {
+      "by_model": {
+        "BLSC/Kimi-K3": {
+          "context_window": 522500,
+          "max_context_used": 261253440
+        }
+      },
+      "by_thread": {
+        "019fc805-989c-7971-b70d-53fd4efa3889": {
+          "model": "BLSC/Kimi-K3",
+          "max_input_tokens": 261253440,
+          "mean_input_tokens": 89208545.0,
+          "model_context_window_recorded": 522500
+        }
+      },
+      "notes": []
+    },
+    "threads": {
+      "019fc805-989c-7971-b70d-53fd4efa3889": {
+        "thread_id": "019fc805-989c-7971-b70d-53fd4efa3889",
+        "is_subagent": false,
+        "model": "BLSC/Kimi-K3",
+        "entry_model": "BLSC/Kimi-K3",
+        "model_provider": "openai",
+        "reasoning_effort": [
+          "ultra"
+        ],
+        "entry_reasoning_effort": "ultra",
+        "tokens_used": 82061679,
+        "cwd": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01",
+        "git_branch": "codex/kimik3/init",
+        "created_at": 1785767237,
+        "updated_at": 1785878383,
+        "started_at": "2026-08-03T14:28:02.871000+00:00",
+        "ended_at": "2026-08-04T21:19:43.639000+00:00",
+        "context_used_max_input": 261253440,
+        "context_used_mean_input": 89208545.0,
+        "model_context_window_recorded": 522500
+      }
+    },
+    "subagents": [],
+    "opencodex": {
+      "trigger": "non_vanilla_models",
+      "non_vanilla_models": [
+        "BLSC/Kimi-K3"
+      ],
+      "opencodex_version": null,
+      "opencodex_submodule_pin": null,
+      "config_facts": {},
+      "codex_proxy_fallback_config": null
+    },
+    "prompts": {
+      "by_root_thread": {
+        "019fc805-989c-7971-b70d-53fd4efa3889": {
+          "goal_objective": "complete the work defined cfd_solver_agentic_benchmark/.",
+          "goal_status": "complete",
+          "initial_user_prompt": null,
+          "resume_prompts": [],
+          "source": "session_rollout"
+        }
+      }
+    },
+    "workspace": {
+      "git": {
+        "branch": "codex/kimik3/01",
+        "commit": "005d7d987066c8a9325c6c482c1c55a1e37b4c4d"
+      },
+      "agents_md": {
+        "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/AGENTS.md",
+        "exists": true,
+        "sha256": "c8f6feb8107e496447c1787e4e717ded64a9420ea3849b6c6ac3c7cabc99797e",
+        "content": "# AGENTS.md\n\nProject instructions for coding agents working in this repository.\n\n## 1. Git Discipline\n\n- Do NOT run `git pull`, `git push`, or switch branches without explicit user\n  authorization. Unauthorized remote or branch mutations are prohibited.\n- Do use `git commit` (and `git stash` when needed) freely as code checkpoints:\n  commit or stash working progress regularly so partial work can be resumed or\n  rolled back. Local checkpoint commits do not require approval; only pushing\n  and branch/remote mutations require it.\n\n## 2. Subagents\n\n- Delegating independent subtasks to subagents is encouraged.\n- Subagent model policy: the ONLY allowed subagent model is `BLSC/Kimi-K3`\n  (passed as the `model` override to `spawn_agent`).\n  Do not spawn subagents with any other model.\n\n## 3. Persistence\n\n- Once the user has started a task, do not stop until the specified task is\n  accomplished to a level of satisfaction: completed results, validated\n  artifacts, and an honest report. Work through blockers with safe in-scope\n  checks and alternatives; only stop early when genuinely blocked or explicitly\n  told to stop.\n",
+        "matches_git_head": true
+      },
+      "codegraph": {
+        "exists": true,
+        "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.codegraph"
+      },
+      "benchmark_submodule": {
+        "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/cfd_solver_agentic_benchmark",
+        "exists": true,
+        "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+        "branch": "HEAD",
+        "dirty": false,
+        "origin_url": "https://github.com/harryzhou2000/cfd_solver_agentic_benchmark"
+      }
+    },
+    "session_window": {
+      "started_at": "2026-08-03T14:28:02.871000+00:00",
+      "ended_at": "2026-08-04T21:19:43.639000+00:00"
+    },
+    "provenance": {
+      "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/state_5.sqlite",
+      "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/goals_1.sqlite",
+      "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/logs_2.sqlite",
+      "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/sessions",
+      "history": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/history.jsonl",
+      "ocx_config": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/opencodex/config.json",
+      "ocx_catalog": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/opencodex-catalog.json",
+      "plugins_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/plugins",
+      "generated_at": "2026-08-14T08:04:00.100128+00:00",
+      "num_threads": 1
+    },
+    "questions": [],
+    "user_answers": {},
+    "status": "complete"
+  },
+  "snapshot": {
+    "configs_captured": true,
+    "sessions_analyzed": true,
+    "env_snapshot_captured": true,
+    "agent_report": false,
+    "agent_scores": false
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01/.sessions/codex/sessions",
+    "generated_at": "2026-08-14T08:03:19.154796+00:00",
+    "tools": [
+      "extract_expenses.py",
+      "extract_measurements.py",
+      "extract_metadata.py",
+      "extract_configs.py",
+      "extract_sessions.py",
+      "generate_review_forms.py",
+      "summarize.py"
+    ]
+  }
+}
