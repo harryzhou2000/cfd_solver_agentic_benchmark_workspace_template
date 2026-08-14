@@ -1,0 +1,1 @@
+Goal history: created 2026-08-04 00:07 UTC, auto-continued once (15:44), and marked complete at 16:16 with evidence — all 8 cases + report pass the examiner validator, committed on branch solver/main-attempt (a5d3245).

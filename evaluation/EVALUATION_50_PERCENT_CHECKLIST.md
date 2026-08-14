@@ -143,7 +143,13 @@ Reserve `[x]` for a snapshot that passes both gates.
 
 ### `oc-goal/kimik3-dsv4` — 3 done, quota 2
 
-- [ ] 01
+- [x] 01 — `oc-goal_kimik3-dsv4_01_940dcb`; 91/100; DQ no.
+      Curated submission `f12b1cda2191dbc3e1361d45a309dad3cccd2172` passes
+      audit. The selected project-OpenCode benchmark root and terminal response
+      are recorded; two context-window setup sessions remain excluded from the
+      primary tree but contaminate aggregate auto-extractor telemetry. All eight
+      preserved result packages and report pass the explicit validator; Re200
+      was not rerun. Both completion gates pass.
 - [ ] 02
 
 ### `omo-slim/dsv4` — 8 done, quota 4
