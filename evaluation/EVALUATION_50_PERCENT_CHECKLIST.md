@@ -58,7 +58,7 @@ canonical evaluations count toward the quota and must not be repeated.
 ### `codex/gpt56` — 8 done, quota 4
 
 - [x] 01 — `codex_gpt56_01_cb349f`
-- [ ] 02
+- [ ] 02 — BLOCKED: provenance reconstructed (`codex/gpt56/init` @ `f6c8822cbf3475de5af5ee6f930d2aa259536357`), but no configured origin remote prevents required canonical-upstream collision proof.
 - [ ] 03
 - [ ] 04
 
