@@ -138,13 +138,7 @@ Reserve `[x]` for a snapshot that passes both gates.
 ### `oc-goal/kimik3-dsv4` — 3 done, quota 2
 
 - [ ] 01
-- [x] 02 — `omo_slim_dsv4_02_b52628`; 36/100 before DQ; DQ yes (triggers
-      2, 7, 9). Curated submission `e272cd3f195e4d7cf490acd9be3578c7893056e0`;
-      sole project-OpenCode root, terminal response provenance, all score/DQ
-      evidence, index, and both gates pass. Submitted source is serial,
-      steady-only/no BDF2 or METIS halo implementation, contradicting asserted
-      Re200 transient/MPI result metadata; full report validation also lacks a
-      Re200 wake manifest entry.
+- [ ] 02
 
 ### `omo-slim/dsv4` — 8 done, quota 4
 
@@ -153,7 +147,13 @@ Reserve `[x]` for a snapshot that passes both gates.
       model/expense/measurement consistency, identity/final-response sidecar
       provenance, index, and both completion gates without rewriting the
       immutable contestant submission.
-- [ ] 02
+- [x] 02 — `omo_slim_dsv4_02_b52628`; 36/100 before DQ; DQ yes (triggers
+      2, 7, 9). Curated submission `e272cd3f195e4d7cf490acd9be3578c7893056e0`;
+      sole project-OpenCode root, terminal response provenance, all score/DQ
+      evidence, index, and both gates pass. Submitted source is serial,
+      steady-only/no BDF2 or METIS halo implementation, contradicting asserted
+      Re200 transient/MPI result metadata; full report validation also lacks a
+      Re200 wake manifest entry.
 - [x] 03 — `omo_slim_dsv4_03_2fbbe7`; 27/100; DQ no. Curated source-only
       submission `72c27c36c8d01db85d8730cda1373cdb46f44751`; all eight immutable
       final result packages and report artifacts are absent, so cases score 0.
