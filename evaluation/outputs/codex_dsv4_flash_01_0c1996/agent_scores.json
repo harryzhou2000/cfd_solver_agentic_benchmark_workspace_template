@@ -307,6 +307,40 @@
       }
     ]
   },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 0,
+      "notes": "Explicit validator fails: metadata records convergence_status failed."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 3,
+      "notes": "Readable final output is among the six validator passes, but report validation/convergence claims are inaccurate."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 3,
+      "notes": "Readable final output is among the six validator passes, with materially unreliable report traceability."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 1,
+      "notes": "Recognizable output, but terminal Cd about -636 is physically noncredible."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 3,
+      "notes": "Validator-passing readable output, but suite-wide report/convergence evidence prevents stronger credit."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 3,
+      "notes": "Validator-passing readable output, but suite-wide report/convergence evidence prevents stronger credit."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 0,
+      "notes": "Divergent np1 terminal residual 1.16233e14 and Cd 3.35506e8; np1_final is also explicitly failed."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 2,
+      "notes": "Reaches t=300, but only 3 inner iterations (max 20 versus required controls) and constant force tails do not establish shedding."
+    }
+  },
   "disqualification": {
     "triggered": true,
     "flags": [
