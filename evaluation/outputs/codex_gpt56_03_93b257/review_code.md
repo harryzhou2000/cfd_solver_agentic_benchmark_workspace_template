@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-08-14T03:44:16.393916+00:00
+Generated: 2026-08-14T05:03:03.907933+00:00
 
-**Overall score: 4.8**
+**Overall score: 4.85**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -50,7 +50,7 @@ Generated: 2026-08-14T03:44:16.393916+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.8
+- Overall score (0-5): 4.85
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

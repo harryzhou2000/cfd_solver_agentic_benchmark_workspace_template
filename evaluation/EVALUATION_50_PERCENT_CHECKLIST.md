@@ -108,9 +108,10 @@ Reserve `[x]` for a snapshot that passes both gates.
       `7f4fe0f`, review-number repair `9d7ed10`. All 27 review evidence notes,
       weighted-overall consistency, and identity-sidecar provenance remain
       incomplete.
-- [ ] 03 — REPAIR `codex_gpt56_03_93b257`; 98/100; DQ no;
-      submission `f06ea3fa63acbdbfce71ecd4debf603c355f751a`; manager `57376d1`.
-      Only the three review weighted overalls need recomputation.
+- [x] 03 — `codex_gpt56_03_93b257`; 98/100; DQ no;
+      submission `f06ea3fa63acbdbfce71ecd4debf603c355f751a`; manager pending.
+      Recomputed Code/CFD/Results weighted overalls (4.85/4.92/4.95); both
+      current structural and semantic completion gates pass.
 - [ ] 04
 
 ### `codex/kimik3` — 1 done, quota 1
