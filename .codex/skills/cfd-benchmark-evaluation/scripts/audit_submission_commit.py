@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import posixpath
 import re
 import subprocess
 from pathlib import Path, PurePosixPath
@@ -93,18 +94,83 @@ def committed_text(workspace: Path, commit: str, path: str) -> str | None:
     return result.stdout
 
 
+def _without_comments(text: str) -> str:
+    return "\n".join(line.split("%", 1)[0] for line in text.splitlines())
+
+
+def _report_sources(workspace: Path, commit: str, report_tex: str) -> list[tuple[str, str]]:
+    """Read local TeX dependencies from the immutable commit, confined to report root."""
+    report_root = posixpath.dirname(report_tex)
+    pending = [report_tex]
+    visited: set[str] = set()
+    sources: list[tuple[str, str]] = []
+    include_re = re.compile(r"\\(?:input|include)\s*\{([^{}]+)\}")
+    while pending:
+        current = pending.pop()
+        if current in visited:
+            continue
+        visited.add(current)
+        text = committed_text(workspace, commit, current)
+        if text is None:
+            continue
+        text = _without_comments(text)
+        sources.append((current, text))
+        for match in include_re.finditer(text):
+            target = match.group(1).strip().replace(r"\_", "_")
+            if not target or "\\" in target or target.startswith("/"):
+                continue
+            if not PurePosixPath(target).suffix:
+                target += ".tex"
+            candidate = posixpath.normpath(posixpath.join(posixpath.dirname(current), target))
+            if candidate == report_root or not candidate.startswith(report_root + "/"):
+                continue
+            if candidate not in visited:
+                pending.append(candidate)
+    return sources
+
+
+def _graphics_references(sources: list[tuple[str, str]], report_root: str) -> set[str]:
+    graphic_re = re.compile(
+        r"\\includegraphics(?:\s*\[[^\]]*\])?\s*\{(?:\\detokenize\{([^{}]*)\}|([^{}]*))\}"
+    )
+    path_block_re = re.compile(r"\\graphicspath\s*\{((?:\{[^{}]*\})+)\}")
+    path_item_re = re.compile(r"\{([^{}]*)\}")
+    graphics_dirs: set[str] = {""}
+    for _source, text in sources:
+        normalized = text.replace(r"\_", "_")
+        for block in path_block_re.finditer(normalized):
+            for item in path_item_re.finditer(block.group(1)):
+                directory = item.group(1).strip()
+                if directory and not directory.startswith("/") and "\\" not in directory:
+                    graphics_dirs.add(directory)
+
+    references: set[str] = set()
+    for source, text in sources:
+        normalized = text.replace(r"\_", "_")
+        source_dir = posixpath.dirname(source)
+        for match in graphic_re.finditer(normalized):
+            target = (match.group(1) or match.group(2) or "").strip()
+            if not target or target.startswith("/") or "\\" in target:
+                continue
+            for graphics_dir in graphics_dirs:
+                candidate = posixpath.normpath(
+                    posixpath.join(source_dir, graphics_dir, target)
+                )
+                if candidate.startswith(report_root + "/"):
+                    references.add(candidate)
+                    if not PurePosixPath(candidate).suffix:
+                        references.add(candidate + ".png")
+    return references
+
+
 def png_is_referenced(workspace: Path, commit: str, path_text: str) -> bool:
     mapping = report_tex_path_for_png(path_text)
     if mapping is None:
         return False
-    report_tex, relative = mapping
-    text = committed_text(workspace, commit, report_tex)
-    if text is None:
-        return False
-    text = "\n".join(line.split("%", 1)[0] for line in text.splitlines())
-    without_extension = str(PurePosixPath(relative).with_suffix(""))
-    candidates = {relative, without_extension}
-    return any(candidate in text for candidate in candidates)
+    report_tex, _relative = mapping
+    sources = _report_sources(workspace, commit, report_tex)
+    references = _graphics_references(sources, posixpath.dirname(report_tex))
+    return path_text in references
 
 
 def main() -> int:

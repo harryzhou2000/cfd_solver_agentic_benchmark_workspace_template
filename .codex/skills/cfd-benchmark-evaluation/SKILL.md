@@ -220,6 +220,10 @@ Requirements:
   commit PNGs from probes, debug runs, or general result/visualization
   directories. Build the report from the committed tree after the audit; a
   textual reference check does not prove that the report compiles.
+  The audit follows local `\\input`/`\\include` TeX dependencies from immutable
+  commit blobs, confined to the report directory, and honors `\\graphicspath`;
+  keep genuinely referenced figures rather than deleting them to work around
+  an include-file layout.
 - Do not stage ignored session/config telemetry, credentials, build trees, the
   `external` symlink target, or `.eval` scratch data.
 - Treat `.sessions/` as a hard exclusion even if an older workspace failed to
