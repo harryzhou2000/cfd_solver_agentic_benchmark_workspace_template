@@ -1,0 +1,107 @@
+{
+  "harness": {
+    "harness": "opencode",
+    "version": "1.18.11",
+    "config_dir": "/home/harry/.config/opencode",
+    "config_entries": [
+      ".gitignore",
+      ".oh-my-opencode-slim",
+      "AGENTS.md",
+      "agent",
+      "agents",
+      "bun.lock",
+      "command",
+      "commands",
+      "dcp.jsonc",
+      "mcp",
+      "node_modules",
+      "oh-my-opencode-slim.json",
+      "oh-my-opencode-slim.json.bak-continue-on",
+      "oh-my-opencode-slim.json.bak-pre-continue",
+      "opencode.jsonc",
+      "opencode.jsonc.bak",
+      "opencode.jsonc.bak-pre-children",
+      "opencode.jsonc.bak-pre-compactfix",
+      "opencode.jsonc.bak-pre-npm081",
+      "opencode.jsonc.bak-pre-pr",
+      "package-lock.json",
+      "package.json",
+      "rate-limit-retry-debug.log",
+      "rate-limit-retry.json",
+      "rules",
+      "skill",
+      "skills",
+      "themes",
+      "tui.json"
+    ],
+    "model_provider": null
+  },
+  "models": {},
+  "context": {
+    "by_model": {},
+    "by_session": {},
+    "notes": []
+  },
+  "subagents": [],
+  "opencodex": null,
+  "opencode": {
+    "sessions": [],
+    "root_session_count": 0,
+    "subagent_session_count": 0,
+    "activity_time_seconds": 0.0,
+    "idle_time_seconds": 0.0,
+    "idle_gap_threshold_seconds": 600
+  },
+  "prompts": {
+    "by_root_session": {}
+  },
+  "workspace": {
+    "git": {
+      "branch": "codex/dsv4_flash/04",
+      "commit": "1b16448613a82d29f7f8f033b9216d5248a7db05"
+    },
+    "agents_md": {
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/AGENTS.md",
+      "exists": true,
+      "sha256": "643dfc10388e08a8b3d83757b718b7da2b4812efae5a4006549f169f0a6d9dc4",
+      "content": "# AGENTS.md\n\nProject instructions for coding agents working in this repository.\n\n## 1. Git Discipline\n\n- Do NOT run `git pull`, `git push`, or switch branches without explicit user\n  authorization. Unauthorized remote or branch mutations are prohibited.\n- Do use `git commit` (and `git stash` when needed) freely as code checkpoints:\n  commit or stash working progress regularly so partial work can be resumed or\n  rolled back. Local checkpoint commits do not require approval; only pushing\n  and branch/remote mutations require it.\n\n## 2. Subagents\n\n- Delegating independent subtasks to subagents is encouraged.\n- Subagent model policy: the ONLY allowed subagent model is\n  `BLSC/DeepSeek-V4-Flash` (passed as the `model` override to `spawn_agent`).\n  Do not spawn subagents with any other model.\n\n## 3. Use Subagents (Important)\n\n- Delegating independent subtasks to subagents is encouraged. Delegate\n  the following task types instead of doing the work in the main agent:\n  code audit, deep research, review, and mechanical execution.\n- Code audit: spawn a subagent to audit code for bugs, contract\n  compliance, hidden shortcuts, and originality; require file:line\n  evidence in its report.\n- Deep research: spawn a subagent to investigate APIs, dependencies,\n  numerical methods, or benchmark requirements before implementing.\n- Review: spawn a subagent to critique plans, code, reports, and results\n  before they are finalized.\n- Mechanical execution: spawn subagents for repetitive work (build\n  variants, case sweeps, file conversions, formatting, cleanup) so it\n  runs in parallel instead of blocking you.\n- Use the spawn tool with a concrete task name and a self-contained\n  message (passed as the `task_name` and `message` overrides to\n  `spawn_agent`). When the subagent model differs from yours, also pass\n  the `model` override with `fork_turns: \"none\"`; a full-history fork\n  inherits your model and rejects model overrides:\n\n  spawn_agent(\n    task_name: \"code_audit\",\n    message: \"Audit <scope> and report findings with file:line evidence.\",\n    model: \"<subagent model>\",\n    fork_turns: \"none\",\n  )\n\n- Subagents share the same workspace and can read and write files, but\n  `fork_turns: \"none\"` means they do not inherit the conversation\n  history, so the message must be self-contained. Give each one a clear\n  deliverable and ask for a concise written report; use `followup_task`\n  for iteration and `wait_agent` to collect results.\n\n## 4. Persistence\n\n- Once the user has started a task, do not stop until the specified task is\n  accomplished to a level of satisfaction: completed results, validated\n  artifacts, and an honest report. Work through blockers with safe in-scope\n  checks and alternatives; only stop early when genuinely blocked or explicitly\n  told to stop.\n",
+      "matches_git_head": true
+    },
+    "codegraph": {
+      "exists": true,
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/.codegraph"
+    },
+    "benchmark_submodule": {
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/04/cfd_solver_agentic_benchmark",
+      "exists": true,
+      "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+      "branch": "HEAD",
+      "dirty": false,
+      "origin_url": "https://github.com/harryzhou2000/cfd_solver_agentic_benchmark"
+    }
+  },
+  "session_window": {
+    "started_at": null,
+    "ended_at": null,
+    "activity_time_seconds": 0.0,
+    "idle_time_seconds": 0.0,
+    "idle_gap_threshold_seconds": 600
+  },
+  "questions": [
+    {
+      "id": "opencode_sessions",
+      "question": "Which opencode sessions belong to this contestant run?",
+      "reason": "no opencode sessions found for the workspace in the local database",
+      "suggested_source": "opencode session list / opencode export <sessionID>",
+      "answer": null
+    }
+  ],
+  "user_answers": {},
+  "status": "needs_user_input",
+  "provenance": {
+    "opencode_db": "/home/harry/.local/share/opencode/opencode.db",
+    "opencode_config_dir": "/home/harry/.config/opencode",
+    "generated_at": "2026-08-14T01:33:58.126910+00:00",
+    "num_sessions": 0
+  }
+}
