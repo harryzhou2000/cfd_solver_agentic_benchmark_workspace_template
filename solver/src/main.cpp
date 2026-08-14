@@ -139,6 +139,15 @@ int main(int argc, char** argv) {
         if (opt.start_step >= 0)
             case_input.run_control.start_step_override = opt.start_step;
 
+        // Pre-flight on every rank before the rank-0 serial mesh reader and
+        // the collective mesh distribution: if the mesh is missing, every
+        // rank exits with a clear nonzero status instead of hanging in the
+        // rank-0-to-peer send below.
+        if (!fs::exists(case_input.mesh_file)) {
+            throw std::runtime_error("mesh file does not exist: " +
+                                     case_input.mesh_file);
+        }
+
         if (opt.command == "inspect-mesh") {
             if (rank == 0) {
                 cfd::GlobalMesh mesh =

@@ -119,14 +119,15 @@ def build_figure_gallery(rows: list[dict], results_dir: Path,
                 "\\begin{subfigure}{" + width + "}"
                 "\\centering"
                 "\\includegraphics[width=\\linewidth]{figures/" + f + "}"
-                "\\caption{" + v + " (from \\texttt{" + s + "}).}"
+                "\\caption{" + v + " (from \\texttt{" + esc(s) + "}).}"
                 "\\end{subfigure}"
             )
             out.append("\\hfill")
         out.pop()  # trailing hfill
         out.append("\\caption{Post-processed figures for "
                    "\\texttt{" + esc(cid) + "}.}")
-        out.append("\\label{fig:gallery-" + esc(cid) + "}")
+        label = "".join(ch if ch.isalnum() else "-" for ch in cid)
+        out.append("\\label{fig:gallery-" + label + "}")
         out.append("\\end{figure}")
         out.append("")
     return "\n".join(out)

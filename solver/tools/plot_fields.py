@@ -59,8 +59,9 @@ def main() -> None:
     data = parse_vtu(field_path)
 
     window = (-args.zoom, args.zoom) if args.zoom else None
+    mach_vmax = max(1.6, clip_percentiles(data["mach"], 0.5, 99.5)[1])
     render_field(case_id, data, "mach", figdir / f"{case_id}_mach.png",
-                 clip=(0.0, 1.6), xlim=window, ylim=window,
+                 clip=(0.0, mach_vmax), xlim=window, ylim=window,
                  title=f"{case_id}: Mach number")
     render_field(case_id, data, "p", figdir / f"{case_id}_pressure.png",
                  xlim=window, ylim=window,

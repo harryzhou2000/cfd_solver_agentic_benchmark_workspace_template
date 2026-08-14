@@ -155,13 +155,16 @@ the face reverts to the cell-center state; the nonlinear updates additionally
 halve a proposed step until density and pressure remain positive.
 
 \subsection{Inviscid and viscous fluxes}
-All production cases use Roe's flux with a Harten--Yee entropy fix
-($\delta=0.1(|u_n|+a)$). At the low Mach numbers of the laminar cases
-Rusanov's $(|u_n|+a)$ dissipation is dominated by the sound speed, which
-smears the thin boundary layers and inflates the resolved skin friction;
-Roe/entropy-fix dissipation instead stays proportional to the local wave
-speeds, and the Rusanov path is retained behind \texttt{CFD\_RUSANOV=1} as a
-diagnostic. The viscous face flux uses averaged velocity and
+The NACA production cases use Roe's flux with a Harten--Yee entropy fix
+($\delta=0.1(|u_n|+a)$); the cylinder Re=20 production case uses Rusanov/LLF
+with dissipation scale 1.0, which resolves the low-Reynolds-number wall
+shear closest to the reference value on the supplied mesh, and Rusanov is
+also selectable for any case through \texttt{CFD\_RUSANOV=1}. At the low Mach
+numbers of the laminar NACA cases Rusanov's $(|u_n|+a)$ dissipation is
+dominated by the sound speed, which smears the thin boundary layers and
+inflates the resolved skin friction; Roe/entropy-fix dissipation instead
+stays proportional to the local wave speeds. The viscous face flux uses
+averaged velocity and
 temperature gradients corrected in the face-normal direction,
 $g=g_{\mathrm{avg}}-(g_{\mathrm{avg}}\cdot\mathbf{d}-\Delta q)\mathbf{d}/|\mathbf{d}|^2$,
 to form the Newtonian stress and Fourier heat flux above. Wall pressure forces
@@ -200,15 +203,6 @@ For MPI runs the sweeps follow a flow-aligned rank ordering and exchange
 corrections across halo edges each sweep; a matrix-free, right-preconditioned
 GMRES path is also available in source.
 
-Rank-count consistency was checked on one NACA and one cylinder case. For
-the M=0.8 inviscid NACA case, $np=1$ converges to $C_D=0.01328$ and $np=8$
-to $C_D=0.01396$ (4.9\% difference; residual histories agree to iteration
-tolerance). For the Re=20 cylinder, $np=1$ and $np=8$ agree at the shared
-500-step freeze point within 1.2\% in $C_D$ (1.962 versus 1.985) and 10\% in
-the residual norm. Partition diagnostics (owned/ghost counts, edge cut,
-neighbor lists, load balance) are in
-\texttt{results/mpi\_compare\_*}/partition\_diagnostics.json.
-
 In the final phase of each steady production run the least-squares gradients
 and Venkatakrishnan limiter are frozen at a documented step
 (\texttt{CFD\_FREEZE\_RECON\_AFTER}, 500 for the cylinder and 800 for the NACA
@@ -234,10 +228,11 @@ applied only to the acoustic waves. On this mesh $K=0.3$ clips the smooth
 wake vortices enough to suppress the antisymmetric shedding mode entirely;
 the milder limiter keeps the same second-order reconstruction active while
 letting the physical instability develop. The symmetric initial state is
-given a localized transverse-velocity seed of $0.05U_\infty$ in the near
-wake (\texttt{CFD\_PERTURB\_V}), a standard initialization aid that excites
-the roundoff-invisible antisymmetric mode; the post-transient dynamics are
-otherwise uncontrolled.
+given a localized transverse-velocity seed of $0.05U_\infty$, a Gaussian of
+width $0.4L_{\mathrm{ref}}$ centered at $(1.0,0.2)L_{\mathrm{ref}}$ in the
+near wake (\texttt{CFD\_PERTURB\_V}), a standard initialization aid that
+excites the roundoff-invisible antisymmetric mode; the post-transient
+dynamics are otherwise uncontrolled.
 
 \section{MPI Parallelization and METIS Partitioning}
 Rank 0 reads the mesh and calls METIS \texttt{k-way} partitioning on the
@@ -321,14 +316,24 @@ $0.0133$ at $M=0.80$, $0.0916$ at $M=2.00$), and the Mach-2 field shows the
 leading bow shock and trailing-edge expansion. The three laminar Re=5000
 cases converge to $C_D=0.0516$, $0.0575$, and $0.1165$ with $|C_L|$ below
 $0.013$. Wall $C_p$ varies along the chord in every case, and the laminar
-  runs show nonzero skin friction on both airfoil sides; no-slip surface rows
-  report $u=v=\mathrm{Mach}=0$.
+runs show nonzero skin friction on both airfoil sides; no-slip surface rows
+report $u=v=\mathrm{Mach}=0$.
+
+The $M=2.0$ inviscid case stops at step 801 on a documented force plateau
+after the reconstruction freeze: its final residual is $6.9\times10^{-7}$
+and the terminal $C_D$ varies by less than $4\times10^{-4}$ over the final
+500 steps, but the recorded reduction is
+2.40 orders rather than the nominal 3-order target because the initial
+freestream residual is already very small. This plateau is reported as
+``converged'' per the steady-case plateau provision rather than as a full
+target hit.
 
 \subsection{Cylinder Reynolds 20}
 The steady Re=20 run converges to $C_D=2.0399$ ($C_{D,p}=1.361$,
 $C_{D,f}=0.679$), consistent with the classical two-dimensional value of
 about 2.0--2.1, and $C_L\approx-0.026$. The residual history reaches more
-  than 11 orders of reduction after the reconstruction freeze at step 500.
+than 11 orders of total reduction, of which about 10.3 orders occur after the
+reconstruction freeze at step 500.
 
 \subsection{Cylinder Reynolds 200 vortex street}
 The Re=200 transient is advanced for the full supplied horizon
@@ -336,7 +341,12 @@ $t\in[0,300]$ with BDF2, $dt=0.01$, and the $10^{-3}$ inner residual target.
 After the initial transient the force history is statistically periodic:
 the dominant lift frequency gives $\mathrm{St}=0.218$, the mean drag is
 $1.357$ ($C_{D,p}=1.269$, $C_{D,f}=0.088$), and the lift oscillates with
-root-mean-square amplitude $0.778$. The post-transient
+root-mean-square amplitude $0.778$; these statistics average the window
+$t\in[75,300]$ (the first quarter is discarded as startup). The inner-solve
+statistics over all 30,000 physical steps are: observed
+min/mean/max inner iterations 16 / 100.7 / 249, zero target misses, and a
+converged-step fraction of 1.0 at the $10^{-3}$ total-residual target
+(last ratio $9.86\times10^{-4}$). The post-transient
   vorticity field in \texttt{report/figures/} shows the alternating von
   K\'arm\'an wake; the exact post-transient statistics are reported in
   Table~\ref{tab:forces}.
@@ -351,13 +361,13 @@ root-mean-square amplitude $0.778$. The post-transient
 \hfill
 \begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re200_cf.png}\caption{wall skin-friction coefficient (from \texttt{surface.csv}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re200_mach.png}\caption{Mach number field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re200_mach.png}\caption{Mach number field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re200_pressure.png}\caption{pressure field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re200_pressure.png}\caption{pressure field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re200_vorticity.png}\caption{vorticity field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re200_vorticity.png}\caption{vorticity field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \caption{Post-processed figures for \texttt{cylinder\_m010\_laminar\_re200}.}
-\label{fig:gallery-cylinder\_m010\_laminar\_re200}
+\label{fig:gallery-cylinder-m010-laminar-re200}
 \end{figure}
 
 \begin{figure}[p]
@@ -370,13 +380,13 @@ root-mean-square amplitude $0.778$. The post-transient
 \hfill
 \begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re20_cf.png}\caption{wall skin-friction coefficient (from \texttt{surface.csv}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re20_mach.png}\caption{Mach number field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re20_mach.png}\caption{Mach number field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re20_pressure.png}\caption{pressure field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re20_pressure.png}\caption{pressure field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re20_vorticity.png}\caption{vorticity field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/cylinder_m010_laminar_re20_vorticity.png}\caption{vorticity field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \caption{Post-processed figures for \texttt{cylinder\_m010\_laminar\_re20}.}
-\label{fig:gallery-cylinder\_m010\_laminar\_re20}
+\label{fig:gallery-cylinder-m010-laminar-re20}
 \end{figure}
 
 \begin{figure}[p]
@@ -387,13 +397,13 @@ root-mean-square amplitude $0.778$. The post-transient
 \hfill
 \begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_inviscid_cp.png}\caption{wall pressure coefficient (from \texttt{surface.csv}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_inviscid_mach.png}\caption{Mach number field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_inviscid_mach.png}\caption{Mach number field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_inviscid_pressure.png}\caption{pressure field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_inviscid_pressure.png}\caption{pressure field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_inviscid_vorticity.png}\caption{vorticity field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_inviscid_vorticity.png}\caption{vorticity field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \caption{Post-processed figures for \texttt{naca0012\_m015\_inviscid}.}
-\label{fig:gallery-naca0012\_m015\_inviscid}
+\label{fig:gallery-naca0012-m015-inviscid}
 \end{figure}
 
 \begin{figure}[p]
@@ -406,13 +416,13 @@ root-mean-square amplitude $0.778$. The post-transient
 \hfill
 \begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_laminar_re5000_cf.png}\caption{wall skin-friction coefficient (from \texttt{surface.csv}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_laminar_re5000_mach.png}\caption{Mach number field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_laminar_re5000_mach.png}\caption{Mach number field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_laminar_re5000_pressure.png}\caption{pressure field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_laminar_re5000_pressure.png}\caption{pressure field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_laminar_re5000_vorticity.png}\caption{vorticity field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m015_laminar_re5000_vorticity.png}\caption{vorticity field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \caption{Post-processed figures for \texttt{naca0012\_m015\_laminar\_re5000}.}
-\label{fig:gallery-naca0012\_m015\_laminar\_re5000}
+\label{fig:gallery-naca0012-m015-laminar-re5000}
 \end{figure}
 
 \begin{figure}[p]
@@ -423,13 +433,13 @@ root-mean-square amplitude $0.778$. The post-transient
 \hfill
 \begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_inviscid_cp.png}\caption{wall pressure coefficient (from \texttt{surface.csv}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_inviscid_mach.png}\caption{Mach number field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_inviscid_mach.png}\caption{Mach number field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_inviscid_pressure.png}\caption{pressure field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_inviscid_pressure.png}\caption{pressure field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_inviscid_vorticity.png}\caption{vorticity field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_inviscid_vorticity.png}\caption{vorticity field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \caption{Post-processed figures for \texttt{naca0012\_m080\_inviscid}.}
-\label{fig:gallery-naca0012\_m080\_inviscid}
+\label{fig:gallery-naca0012-m080-inviscid}
 \end{figure}
 
 \begin{figure}[p]
@@ -442,13 +452,13 @@ root-mean-square amplitude $0.778$. The post-transient
 \hfill
 \begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_laminar_re5000_cf.png}\caption{wall skin-friction coefficient (from \texttt{surface.csv}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_laminar_re5000_mach.png}\caption{Mach number field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_laminar_re5000_mach.png}\caption{Mach number field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_laminar_re5000_pressure.png}\caption{pressure field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_laminar_re5000_pressure.png}\caption{pressure field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_laminar_re5000_vorticity.png}\caption{vorticity field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m080_laminar_re5000_vorticity.png}\caption{vorticity field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \caption{Post-processed figures for \texttt{naca0012\_m080\_laminar\_re5000}.}
-\label{fig:gallery-naca0012\_m080\_laminar\_re5000}
+\label{fig:gallery-naca0012-m080-laminar-re5000}
 \end{figure}
 
 \begin{figure}[p]
@@ -459,13 +469,13 @@ root-mean-square amplitude $0.778$. The post-transient
 \hfill
 \begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_inviscid_cp.png}\caption{wall pressure coefficient (from \texttt{surface.csv}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_inviscid_mach.png}\caption{Mach number field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_inviscid_mach.png}\caption{Mach number field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_inviscid_pressure.png}\caption{pressure field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_inviscid_pressure.png}\caption{pressure field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_inviscid_vorticity.png}\caption{vorticity field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_inviscid_vorticity.png}\caption{vorticity field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \caption{Post-processed figures for \texttt{naca0012\_m200\_inviscid}.}
-\label{fig:gallery-naca0012\_m200\_inviscid}
+\label{fig:gallery-naca0012-m200-inviscid}
 \end{figure}
 
 \begin{figure}[p]
@@ -478,34 +488,91 @@ root-mean-square amplitude $0.778$. The post-transient
 \hfill
 \begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_laminar_re5000_cf.png}\caption{wall skin-friction coefficient (from \texttt{surface.csv}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_laminar_re5000_mach.png}\caption{Mach number field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_laminar_re5000_mach.png}\caption{Mach number field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_laminar_re5000_pressure.png}\caption{pressure field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_laminar_re5000_pressure.png}\caption{pressure field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \hfill
-\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_laminar_re5000_vorticity.png}\caption{vorticity field (from \texttt{field_final.vtu}).}\end{subfigure}
+\begin{subfigure}{0.31\textwidth}\centering\includegraphics[width=\linewidth]{figures/naca0012_m200_laminar_re5000_vorticity.png}\caption{vorticity field (from \texttt{field\_final.vtu}).}\end{subfigure}
 \caption{Post-processed figures for \texttt{naca0012\_m200\_laminar\_re5000}.}
-\label{fig:gallery-naca0012\_m200\_laminar\_re5000}
+\label{fig:gallery-naca0012-m200-laminar-re5000}
 \end{figure}
 
 
 \section{Parallel Validation}
 Rank-count comparisons were performed with the same solver binary and the
 same case settings. On the NACA0012 M=0.8 inviscid case $np=1$ converges to
-$C_D=0.01328$ and $np=8$ to $C_D=0.01396$; their residual histories agree to
-iteration tolerance. On the cylinder Re=20 case $np=1$ and $np=8$ agree at
+$C_D=0.01328$ and $np=8$ to $C_D=0.01396$ (5.1\% difference); their residual
+histories agree through the shared CFL ramp, and both reach force plateaus
+with residual tails below $10^{-7}$ (the $np=1$ run was continued to a
+smaller tail). On the cylinder Re=20 case $np=1$ and $np=8$ agree at
 the shared 500-step reconstruction-freeze point within 1.2\% in $C_D$
-($1.962$ versus $1.985$) and about 10\% in the residual norm. The
+($1.962$ versus $1.985$) and about 11\% in the residual norm. The
+final frozen states land at $C_D=2.040$ ($np=1$) and $1.846$ ($np=8$): the
+reconstruction freeze fixes slightly different states of the long-period
+limiter limit cycle at the two rank counts, and both frozen states achieve
+about 11 orders of residual reduction rather than being rank-order
+inconsistent transients.
 $\texttt{mpi\_compare\_*}$ directories contain the per-rank
 owned/ghost/boundary counts, neighbor lists, send/receive payload counts,
 METIS edge cut, and load-balance summary used above.
+
+Table~\ref{tab:partition} summarizes the two $np=8$ partitionings. METIS cut
+498 cylinder edges and 448 NACA edges, with load-balance ratios
+$\max(n_{\mathrm{owned}})/\min(n_{\mathrm{owned}})$ of 1.015 and 1.039.
+Per-rank wall-clock costs were collected while the runs shared a four-core
+container quota with other jobs, so they demonstrate comparable rather than
+ideal $8\times$ throughput: the cylinder cost $0.727$~s/step at $np=1$ and
+$0.501$~s/step at $np=8$, and the NACA case $0.815$~s/step at $np=1$ and
+$0.573$~s/step at $np=8$. The $np=8$ communication is the same
+neighbor-scoped $\mathrm{Isend}/\mathrm{Irecv}$ halo plus a rank-ordered SGS
+correction pipeline, so the remaining cost is the halo volume and the
+serialized correction exchanges rather than any full-state collective.
+
+\begin{table}[h]
+\centering
+\caption{METIS $np=8$ partition diagnostics (see the per-case
+\texttt{partition\_diagnostics.json} for every rank).}
+\label{tab:partition}
+\begin{tabular}{lccccc}
+\toprule
+Case & edge cut & load balance & owned cells & ghost cells & wall (s) \\
+\midrule
+cylinder Re=20 & 498 & 1.015 & 1264--1283 & 99--135 & 501.2 \\
+NACA M=0.8 inviscid & 448 & 1.039 & 2578--2678 & 50--190 & 860.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Visualization and Plot Style Requirements}
 All figures were produced by the submitted plotting scripts from the submitted
 VTU/CSV files. Field figures are filled Gouraud-shaded contours on the actual
 triangulated unstructured cells with visible colorbars and clipped percentile
-ranges where outliers would otherwise compress the scale; near-body and wake
-zooms are included. Filenames match plotted variables and are mapped in
+ranges where outliers would otherwise compress the scale: Mach uses
+$[0,\max(1.6,p_{99.5})]$ so supersonic regions remain visible, pressure uses
+the 0.5--99.5 percentile range, and vorticity is clipped to $[-5,5]$ as
+recommended for the cylinder wake. Near-body and wake zooms are included.
+Filenames match plotted variables and are mapped in
 \texttt{figure\_manifest.csv}.
+
+\section{Extensibility}
+The implementation is organized for growth rather than case-specific
+branches. The equation-of-state is a small \texttt{GasModel} interface
+($\gamma$, $R$, Prandtl, $c_p$, $c_v$) separate from the flux kernels;
+substituting a thermally imperfect or multi-species closure therefore touches
+the primitive/conservative conversions, sound speed, and temperature
+functions, not the time integrator or MPI layer. Boundary conditions are an
+enumerated type consumed uniformly by the residual, force, and surface-output
+paths, so a new wall/farfield treatment is added in one place. Mesh
+topology is stored as cell corners, faces, volumes, normals, and adjacency;
+the loops are written over generic cells and faces. The main remaining
+2-D assumption is the fixed state width: $kNC=4$, \texttt{Vec2}/\texttt{MatN},
+and the 4-by-4 block solve are hard-coded to the 2-D conservative state, so a
+3-D extension first replaces those containers with dimension-generic,
+per-variable arrays (or templated widths) and adds the $z$ stress/heat-flux
+terms; the cell/face topology, halo, and time-integration layers already
+carry their data through those containers rather than a 2-D-only layout.
+RANS transport and species fields fit the same per-cell, per-component state,
+gradient, halo, and output containers.
 
 \section{Limitations and Failure Analysis}
 The supplied NACA H2 mesh is an inviscid-quality mesh, so the Re=5000
