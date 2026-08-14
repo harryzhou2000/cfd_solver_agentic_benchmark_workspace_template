@@ -15,6 +15,22 @@ SPEC.loader.exec_module(audit)
 
 
 class SubmissionAuditTests(unittest.TestCase):
+    def test_output_namespace_inside_source_tree_is_allowed(self):
+        self.assertIsNone(audit.classify("solver/src/output/csv_writer.cpp"))
+        self.assertIsNone(audit.classify("solver/include/output/metadata.hpp"))
+        self.assertEqual(
+            audit.classify("solver/src/output/generated.csv"),
+            "prohibited generated/data extension .csv",
+        )
+        self.assertEqual(
+            audit.classify("solver/output/generated.cpp"),
+            "raw/generated/build directory",
+        )
+        self.assertEqual(
+            audit.classify("solver/results/src/generated.cpp"),
+            "raw/generated/build directory",
+        )
+
     def test_png_referenced_from_local_input_and_graphicspath(self):
         blobs = {
             "solver/report/report.tex": (

@@ -36,6 +36,7 @@ FORBIDDEN_BASENAMES = {
     "stderr.log", "field_final", "restart_final",
 }
 RESTART_OR_FIELD = re.compile(r"^(restart|checkpoint|field)(_|\.|-)", re.IGNORECASE)
+SOURCE_TREE_MARKERS = {"src", "source", "include"}
 
 
 def git(workspace: Path, args: list[str], *, binary: bool = False) -> bytes | str:
@@ -60,7 +61,16 @@ def classify(path_text: str) -> str | None:
     lowered_parts = tuple(part.lower() for part in path.parts)
     basename = path.name.lower()
     suffix = path.suffix.lower()
-    if any(part in FORBIDDEN_DIR_PARTS or part.startswith("build-") for part in lowered_parts[:-1]):
+    directory_parts = lowered_parts[:-1]
+    source_index = next(
+        (i for i, part in enumerate(directory_parts) if part in SOURCE_TREE_MARKERS),
+        None,
+    )
+    if any(
+        (part in FORBIDDEN_DIR_PARTS or part.startswith("build-"))
+        and (source_index is None or i < source_index)
+        for i, part in enumerate(directory_parts)
+    ):
         return "raw/generated/build directory"
     if basename in FORBIDDEN_BASENAMES or RESTART_OR_FIELD.match(basename):
         return "raw solver result or restart/field artifact"
