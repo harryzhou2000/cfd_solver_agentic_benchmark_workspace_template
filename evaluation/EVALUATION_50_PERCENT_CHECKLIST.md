@@ -150,7 +150,13 @@ Reserve `[x]` for a snapshot that passes both gates.
       primary tree but contaminate aggregate auto-extractor telemetry. All eight
       preserved result packages and report pass the explicit validator; Re200
       was not rerun. Both completion gates pass.
-- [ ] 02
+- [x] 02 — `oc-goal_kimik3-dsv4_02_0ceb76`; 94/100; DQ no.
+      Curated submission `4698ba1578ec446c6037bdbfa40e30b6ce82c9e1` passes
+      audit. The selected project-OpenCode root and exact terminal response are
+      recorded; a short earlier OpenCode session is excluded from the primary
+      tree and aggregate auto-extractor telemetry is qualified accordingly. All
+      eight preserved result packages and report pass the explicit validator;
+      Re200 was not rerun. Both completion gates pass.
 
 ### `omo-slim/dsv4` — 8 done, quota 4
 
