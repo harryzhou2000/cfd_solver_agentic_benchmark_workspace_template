@@ -56,8 +56,10 @@ Reserve `[x]` for a snapshot that passes both gates.
 
 ### `codex/dsv4_flash` — 10 done, quota 5
 
-- [ ] 01 — REPAIR `codex_dsv4_flash_01_0c1996`; rubric recorded,
-      but `code.originality` and the Code overall are incomplete.
+- [x] 01 — `codex_dsv4_flash_01_0c1996`; 58/100 before DQ; DQ yes (trigger 6);
+      submission `f6d8a1839a70c98d83a1e5baff9e2d6e111f7e2f`; manager pending.
+      Completed originality from direct internal evidence and recomputed
+      Code/CFD/Results overalls (3.32/3.34/1.35); both gates pass.
 - [ ] 02 — REPAIR `codex_dsv4_flash_02_3447d3`; **73/100** before
       DQ; DQ yes. Curated submission `93e8729` passes audit and supersedes
       recovery `2376b11`; manager `956cfd2`. All three review scorecards and
