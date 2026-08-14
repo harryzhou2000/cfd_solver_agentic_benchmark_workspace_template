@@ -74,11 +74,10 @@ Reserve `[x]` for a snapshot that passes both gates.
       submission `1b16448613a82d29f7f8f033b9216d5248a7db05`; manager pending.
       Direct sibling-result-reuse evidence retained; reviews 3.17/3.31/0.50,
       sidecar provenance, index, and both gates are complete.
-- [ ] 06 — REPAIR `codex_dsv4_flash_06_5b6b08`; 63/100; DQ no;
-      curated submission `e998060` supersedes recovery `8c757a9`; manager
-      `ce57f3b`. All three review scorecards and report sidecar provenance are
-      incomplete. Eight intentional null case scores have explicit unavailable
-      evidence notes.
+- [x] 06 — `codex_dsv4_flash_06_5b6b08`; 63/100; DQ no;
+      curated submission `e998060` supersedes recovery `8c757a9`; manager pending.
+      Source-only reviews 3.72/3.90/0.00, sidecar hashes, index, and both gates
+      complete. Eight case scores remain intentional nulls with unavailable-evidence notes.
 
 ### `codex/glm52` — 3 done, quota 2
 
