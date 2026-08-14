@@ -713,6 +713,14 @@ evidence to show it was verified, not merely self-reported. Do not
 proportionally extrapolate a partial rubric as if it were a completed score;
 leave the total incomplete until all required sections are assessed.
 
+Before calling an evaluation complete, fill every Code/CFD/Results review
+point with a 0-5 score and a non-empty evidence note. The three review-area
+overalls are weighted results of those points; they are not aliases for or
+manual projections of the 100-point rubric. Fill all ten rubric sections with
+scores and evidence notes. Fill all eight case-score entries; an intentional
+`null` is complete only when its note explains why the evidence is unavailable.
+Record an explicit true/false DQ verdict and evidence for every triggered flag.
+
 ## 6. Record, validate, and hand off
 
 Record the completed evaluation:
@@ -721,7 +729,25 @@ Record the completed evaluation:
 python3 evaluation/tools/record_agent_results.py \
   --folder evaluation/outputs/<run-id>
 cd evaluation && uv run cfdeval check outputs/<run-id>
+uv run cfdeval check-complete outputs/<run-id>
 ```
+
+`cfdeval check` validates artifact schemas and index hashes.
+`cfdeval check-complete` is the mandatory semantic completion gate. It verifies
+the three review scorecards and evidence notes, weighted overalls, all rubric
+sections, all case-score entries, DQ verdict, answered metadata questions,
+identity/report/final-response sidecars, and required indexed artifacts.
+`record_agent_results.py` runs this gate and exits nonzero when anything is
+incomplete. Do not bypass it, do not commit a snapshot as complete after it
+fails, and do not mark its checklist item complete.
+
+The batch checklist is shared evaluator state and may be edited by another
+evaluation agent. Before changing it, inspect its worktree status and latest
+commits, preserve concurrent entries, and coordinate ownership. Mark an item
+`[x]` only after both `cfdeval check` and `cfdeval check-complete` pass for its
+canonical snapshot. Include the snapshot ID, score, DQ verdict, submission and
+manager commits, and material limitations. A historical rubric score without a
+passing current completion gate remains pending repair, not completed.
 
 Inspect `index.json` and confirm all expected JSON artifacts are indexed with
 matching SHA-256 values. Confirm comparison queries show the run under its

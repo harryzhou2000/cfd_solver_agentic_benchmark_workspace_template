@@ -22,7 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from cfdeval import recording, validation  # noqa: E402
+from cfdeval import completion, recording, validation  # noqa: E402
 
 
 def _weighted_overall(points: list[dict]) -> float | None:
@@ -84,25 +84,19 @@ def main(argv: list[str] | None = None) -> int:
             })
         scores["scores"][area]["points"] = merged
         overall = _weighted_overall(merged)
-        recorded = scores["scores"][area].get("overall_score")
-        scores["scores"][area]["overall_score"] = (
-            recorded if recorded is not None else overall)
+        scores["scores"][area]["overall_score"] = overall
 
     # rubric total: section scores are rubric points; total = sum of scored
     # sections scaled to the full 100-point space
     secs = scores["rubric"]["sections"]
     scored_secs = [(s["max_points"], s["score"]) for s in secs
                    if s.get("score") is not None]
-    if scored_secs:
-        if sum(m for m, _ in scored_secs) == scores["rubric"]["total_possible"]:
-            scores["rubric"]["total_scored"] = round(
-                sum(sc for _m, sc in scored_secs), 1)
-        else:
-            # partial scoring: scale proportionally
-            scores["rubric"]["total_scored"] = round(
-                sum(sc for _m, sc in scored_secs)
-                * scores["rubric"]["total_possible"]
-                / sum(m for m, _ in scored_secs), 1)
+    if (scored_secs
+            and len(scored_secs) == len(secs)
+            and sum(m for m, _ in scored_secs) == scores["rubric"]["total_possible"]):
+        scores["rubric"]["total_scored"] = round(sum(sc for _m, sc in scored_secs), 1)
+    else:
+        scores["rubric"]["total_scored"] = None
 
     scores["evaluated_at"] = scores.get("evaluated_at") or datetime.now(timezone.utc).isoformat()
     folder.mkdir(parents=True, exist_ok=True)
@@ -123,8 +117,8 @@ def main(argv: list[str] | None = None) -> int:
          json.dumps({area: scores["scores"][area] for area in scores["scores"]})],
         capture_output=True, text=True)
     if r.returncode != 0:
-        print(f"WARNING: review forms refresh failed: {r.stderr[:300]}",
-              file=sys.stderr)
+        print(f"ERROR: review forms refresh failed: {r.stderr[:300]}", file=sys.stderr)
+        return 2
 
     # refresh summary.json review sections + summary.md
     if summary_path.exists():
@@ -171,8 +165,14 @@ def main(argv: list[str] | None = None) -> int:
                    "generate_agent_report.py", "record_agent_results.py"],
             schema_dir=ROOT / "schemas")
         print(f"wrote {folder / 'index.json'}")
-    print("agent scores recorded; validate with: "
-          "uv run cfdeval check " + str(folder))
+    defects = completion.completion_errors(folder)
+    if defects:
+        print(f"ERROR: evaluation completion gate failed ({len(defects)} defect(s)):",
+              file=sys.stderr)
+        for defect in defects:
+            print(f"  - {defect}", file=sys.stderr)
+        return 3
+    print("agent scores recorded; format and completion gates passed")
     return 0
 
 

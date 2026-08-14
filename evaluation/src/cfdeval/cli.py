@@ -11,7 +11,7 @@ def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
-        print("usage: cfdeval <check|query|summarize|extract-metadata|"
+        print("usage: cfdeval <check|check-complete|query|summarize|extract-metadata|"
               "extract-expenses|extract-measurements|extract-configs|"
               "extract-sessions|review-forms|gui> [...]")
         return 0 if argv else 2
@@ -19,6 +19,9 @@ def main(argv: list[str] | None = None) -> int:
     if cmd == "check":
         from cfdeval import validation
         return validation.check_cli(rest)
+    if cmd == "check-complete":
+        from cfdeval import completion
+        return completion.check_cli(rest)
     if cmd == "query":
         from cfdeval import query
         return query.query_cli(rest)

@@ -337,7 +337,7 @@ class SnapshotProtocolTests(unittest.TestCase):
             self.assertTrue(all(item == {"score": None, "notes": None}
                                 for item in scores["case_scores"].values()))
 
-    def test_recording_preserves_independent_case_scores(self):
+    def test_incomplete_recording_preserves_case_scores_but_fails_gate(self):
         with tempfile.TemporaryDirectory() as raw:
             folder = Path(raw) / "snapshot"
             folder.mkdir()
@@ -361,15 +361,17 @@ class SnapshotProtocolTests(unittest.TestCase):
             }
             (folder / "agent_scores.json").write_text(json.dumps(scores))
             tool = Path(server.__file__).resolve().parents[1] / "tools" / "record_agent_results.py"
-            subprocess.run([sys.executable, str(tool), "--folder", str(folder)], check=True,
-                           capture_output=True, text=True)
+            result = subprocess.run([sys.executable, str(tool), "--folder", str(folder)],
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 3)
+            self.assertIn("completion gate failed", result.stderr)
             recorded = json.loads((folder / "agent_scores.json").read_text())
             self.assertEqual(recorded["case_scores"], cases)
             self.assertEqual(recorded["rubric"]["total_scored"], 77)
             self.assertEqual([
                 recorded["scores"][area]["overall_score"]
                 for area in ("code_review", "cfd_review", "result_review")
-            ], [1, 2, 3])
+            ], [None, None, None])
 
     def test_opencode_primary_model_and_persisted_tree_cost(self):
         with tempfile.TemporaryDirectory() as raw:

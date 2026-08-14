@@ -85,7 +85,6 @@
     if (isNullish(n)) return emDash;
     const v = Number(n);
     if (Number.isNaN(v)) return emDash;
-    if (v <= 1) return (v * 100).toFixed(0) + "%";
     return v.toFixed(2);
   }
 

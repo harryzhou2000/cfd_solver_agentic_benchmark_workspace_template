@@ -31,8 +31,16 @@ canonical evaluations count toward the quota and must not be repeated.
       Reject any snapshot where sessions say Codex but metadata says OpenCode,
       or where nonzero Codex usage is paired with zero expenses/measurements.
 - [ ] Evaluate all rubric sections, validate all eight submitted cases and the
-      report, record comments and DQ evidence, index/check the snapshot, and
-      commit the manager snapshot separately. Do not push.
+      report, and fill every Code/CFD/Results point and evidence note, all three
+      weighted review overalls, all ten rubric sections, all eight case-score
+      entries, and an explicit DQ verdict.
+- [ ] Run both `cfdeval check` and `cfdeval check-complete`. Do not mark the
+      item complete if either fails. A case-score `null` requires an explicit
+      evidence-unavailable note; review point scores may not be null.
+- [ ] Index/check the snapshot and commit the manager snapshot separately. Do
+      not push. This checklist is shared evaluator state: inspect status/log and
+      coordinate ownership before editing it; preserve concurrent evaluator
+      updates.
 - [ ] Never rerun Re200. Do not repair migrated Docker-path `external` symlinks
       unless a permitted build verification genuinely requires an equivalent
       temporary path/mount; never commit that environmental accommodation.
@@ -40,30 +48,69 @@ canonical evaluations count toward the quota and must not be repeated.
 
 ## Series quotas and ordered work
 
+Current semantic-gate audit (2026-08-14): **12/22 target snapshots exist, but
+0/22 currently pass `cfdeval check-complete`**. Existing rubric decisions and
+immutable result commits remain evidence; `REPAIR` means finish the recorded
+review evidence/sidecar protocol and re-index, not repeat the solver evaluation.
+Reserve `[x]` for a snapshot that passes both gates.
+
 ### `codex/dsv4_flash` — 10 done, quota 5
 
-- [x] 01 — `codex_dsv4_flash_01_0c1996`
-- [x] 02 — `codex_dsv4_flash_02_3447d3`; 75/100 before DQ; DQ yes (terminal response admits Re200 strict inner-target failure while production metadata accepts it successful). Curated submission `93e8729` passes audit; supersedes recovery commit `2376b11`, which failed audit due non-curated artifacts. Eight case directories validate; curated report lacks excluded raw run_manifest.csv.
-- [x] 03 — `codex_dsv4_flash_03_294b64`; 87/100; DQ no; submission `9772c16083472abe27089e17fe87bb5329e68f4d`; manager `b9cae66`; all eight cases plus report validator OK. Limitation: report PNGs referenced only through an included TeX file were excluded by strict direct-reference audit, so curated report is not self-contained; Re200 does not shed.
-- [x] 04 — `codex_dsv4_flash_04_755869`; 48/100 before DQ; DQ yes (terminal response admits sibling workspace results used to complete case matrix); submission `1b16448613a82d29f7f8f033b9216d5248a7db05`; manager `612a300`; all eight cases plus report validator OK, but validator is structural and report includes only 12/41 manifested figures.
-- [x] 06 — `codex_dsv4_flash_06_5b6b08`; 63/100; DQ no; curated submission `e998060` passed audit after superseding recovery commit `8c757a9`. Raw case/report artifacts are excluded, so case and report validation are unavailable and all eight independent case scores are null.
+- [ ] 01 — REPAIR `codex_dsv4_flash_01_0c1996`; rubric recorded,
+      but `code.originality` and the Code overall are incomplete.
+- [ ] 02 — REPAIR `codex_dsv4_flash_02_3447d3`; **73/100** before
+      DQ; DQ yes. Curated submission `93e8729` passes audit and supersedes
+      recovery `2376b11`; manager `956cfd2`. All three review scorecards and
+      their evidence notes are incomplete; report sidecar provenance also needs
+      repair. Eight case directories validate; curated report lacks excluded
+      raw `run_manifest.csv`.
+- [ ] 03 — REPAIR `codex_dsv4_flash_03_294b64`; 87/100; DQ no;
+      submission `9772c16083472abe27089e17fe87bb5329e68f4d`; latest dashboard
+      repair `154f3ff`. Case scores/index now exist, but all three review
+      scorecards and report sidecar provenance remain incomplete.
+- [ ] 04 — REPAIR `codex_dsv4_flash_04_755869`; 48/100 before DQ;
+      DQ yes; submission `1b16448613a82d29f7f8f033b9216d5248a7db05`;
+      manager `612a300`. All three review scorecards remain incomplete.
+- [ ] 06 — REPAIR `codex_dsv4_flash_06_5b6b08`; 63/100; DQ no;
+      curated submission `e998060` supersedes recovery `8c757a9`; manager
+      `ce57f3b`. All three review scorecards and report sidecar provenance are
+      incomplete. Eight intentional null case scores have explicit unavailable
+      evidence notes.
 
 ### `codex/glm52` — 3 done, quota 2
 
-- [x] 01 — `codex_glm52_01_1307c9`
-- [ ] 02 — BLOCKED: provenance reconstructed (`codex/glm52/init` @ `de4960b`), but workspace has no usable `origin` remote (`git ls-remote origin` rc=128); canonical-upstream collision cannot be proven without an operator-approved remote repair/override.
+- [ ] 01 — REPAIR `codex_glm52_01_1307c9`; rubric/cases recorded,
+      but `code.originality`, the Code overall, and weighted-overall consistency
+      are incomplete.
+- [ ] 02 — REPAIR `codex_glm52_02_06cf18`; 76/100; DQ no;
+      submission `1e29ab3c`; review-point numbers were backfilled in `9d7ed10`,
+      but all 27 evidence notes and weighted-overall consistency remain
+      incomplete.
 
 ### `codex/glm52-m3` — 5 done, quota 3
 
-- [x] 01 — `codex_glm52-m3_01_919b67`
-- [ ] 02 — BLOCKED: provenance reconstructed (`codex/glm52-m3/init` @ `746ef39`), but workspace has no configured origin remote; canonical-upstream collision cannot be proven.
-- [ ] 03 — BLOCKED: provenance reconstructed (`codex/glm52-m3/init` @ `a14f203babe6794ad032aea760aed8e302e62b5a`), but no configured origin remote prevents required canonical-upstream collision proof.
+- [ ] 01 — REPAIR `codex_glm52-m3_01_919b67`; rubric/cases recorded,
+      but originality and weighted-overall consistency are incomplete.
+- [ ] 02 — PENDING: provenance reconstructed (`codex/glm52-m3/init` @
+      `746ef39`). Restore the verified manager canonical origin and run the
+      normal exact collision gate; missing origin alone is not a blocker.
+- [ ] 03 — PENDING: provenance reconstructed (`codex/glm52-m3/init` @
+      `a14f203babe6794ad032aea760aed8e302e62b5a`). Restore the verified manager
+      canonical origin and run the normal exact collision gate.
 
 ### `codex/gpt56` — 8 done, quota 4
 
-- [x] 01 — `codex_gpt56_01_cb349f`
-- [x] 02 — `codex_gpt56_02_38616e`; 92/100; DQ no; submission `6183dc8fc067cd7dc4a4a2949ca53bd4f2b42820`; manager `7f4fe0f`; explicit eight-case plus report validator OK. Limitation: strict report-PNG audit does not recognize TeX-escaped underscores, so the curated result commit retains report.tex without its source PNGs.
-- [x] 03 — `codex_gpt56_03_93b257`; 98/100; DQ no; submission `f06ea3fa63acbdbfce71ecd4debf603c355f751a`; all eight cases plus report validator OK. Limitation: strict audit excludes report PNGs referenced through TeX `\detokenize{}` paths, so the result-branch report source is not self-contained.
+- [ ] 01 — REPAIR `codex_gpt56_01_cb349f`; rubric/cases recorded, but
+      `code.originality`, the Code overall, and final-response provenance in the
+      report are incomplete.
+- [ ] 02 — REPAIR `codex_gpt56_02_38616e`; 92/100; DQ no;
+      submission `6183dc8fc067cd7dc4a4a2949ca53bd4f2b42820`; original manager
+      `7f4fe0f`, review-number repair `9d7ed10`. All 27 review evidence notes,
+      weighted-overall consistency, and identity-sidecar provenance remain
+      incomplete.
+- [ ] 03 — REPAIR `codex_gpt56_03_93b257`; 98/100; DQ no;
+      submission `f06ea3fa63acbdbfce71ecd4debf603c355f751a`; manager `57376d1`.
+      Only the three review weighted overalls need recomputation.
 - [ ] 04
 
 ### `codex/kimik3` — 1 done, quota 1
@@ -81,7 +128,9 @@ canonical evaluations count toward the quota and must not be repeated.
 
 ### `omo-slim/dsv4` — 8 done, quota 4
 
-- [x] 01 — `omo_slim_dsv4_01_12c8d9`
+- [ ] 01 — REPAIR `omo_slim_dsv4_01_12c8d9`; rubric/cases recorded,
+      but `code.originality`, the Code overall, and identity-sidecar provenance
+      are incomplete.
 - [ ] 02
 - [ ] 03
 - [ ] 04
@@ -100,8 +149,9 @@ canonical evaluations count toward the quota and must not be repeated.
 - `workspace/oc-goal/gpt56-dsv4/01` is Docker-native/self-contained but lacks a
   migration manifest and pre-run snapshot; inventory both bundled harness
   stores, determine the actual harness manually, and reconstruct provenance.
-- Existing canonical completed snapshots and result branches are immutable;
-  do not regenerate them as part of this batch.
+- Existing canonical result branches are immutable. Repair only manager-side
+  scoring/report/index artifacts for an existing snapshot; never rewrite its
+  contestant result commit merely to satisfy the completion gate.
 - A missing workspace `origin` is expected delivery state, not a blocker. Use
   the manager repository's verified canonical `origin`, add that exact URL as
   the workspace `origin`, and rerun the exact collision helper. Never overwrite
