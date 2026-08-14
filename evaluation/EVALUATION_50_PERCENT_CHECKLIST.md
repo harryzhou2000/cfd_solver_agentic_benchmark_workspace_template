@@ -100,9 +100,10 @@ Reserve `[x]` for a snapshot that passes both gates.
       submission `6148b7b8525000945d5591faceda30aeb1bc1180`; manager pending.
       Audit-clean source/report submission; all eight immutable required result
       packages absent and score 0; both gates pass.
-- [ ] 03 — PENDING: provenance reconstructed (`codex/glm52-m3/init` @
-      `a14f203babe6794ad032aea760aed8e302e62b5a`). Restore the verified manager
-      canonical origin and run the normal exact collision gate.
+- [x] 03 — `codex_glm52-m3_03_674665`; 59/100; DQ no;
+      submission `5b9dded7a68fa1309a19815a2eddb85b6910c788`; manager pending.
+      Audit-clean source-only submission; all eight required immutable result
+      packages absent and score 0; both gates pass.
 
 ### `codex/gpt56` — 8 done, quota 4
 

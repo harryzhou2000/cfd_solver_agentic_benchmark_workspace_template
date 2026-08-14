@@ -1,0 +1,117 @@
+{
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/03",
+  "time_seconds": {
+    "goal_time": 54590.0,
+    "wall_time": 54605.3,
+    "started_at": "2026-08-05T09:57:17.364000+00:00",
+    "ended_at": "2026-08-06T01:07:22.684000+00:00",
+    "by_root_thread": {
+      "019fd15a-834e-7510-941b-aec0a61981eb": {
+        "status": "complete",
+        "time_used_seconds": 54590,
+        "tokens_used": 1363330
+      }
+    },
+    "by_root_tree": {
+      "019fd15a-834e-7510-941b-aec0a61981eb": {
+        "status": "complete",
+        "goal_time_seconds": 54590,
+        "goal_tokens": 1363330,
+        "threads": 2,
+        "tokens_used": 175044248,
+        "model": "BLSC/GLM-5.2"
+      }
+    }
+  },
+  "tokens": {
+    "total": 175044248,
+    "by_model": {
+      "BLSC/GLM-5.2": {
+        "input": 172274492,
+        "cached_input": 171379648,
+        "non_cached_input": 894844,
+        "output": 469422,
+        "reasoning_output": 299062,
+        "total": 172743914,
+        "fallback_tokens": 0
+      },
+      "BLSC/MiniMax-M3": {
+        "input": 2282033,
+        "cached_input": 2227072,
+        "non_cached_input": 54961,
+        "output": 18301,
+        "reasoning_output": 0,
+        "total": 2300334,
+        "fallback_tokens": 0
+      }
+    },
+    "by_thread": {
+      "019fd15a-834e-7510-941b-aec0a61981eb": {
+        "model": "BLSC/GLM-5.2",
+        "is_subagent": false,
+        "source": "rollout_cumulative",
+        "tokens": {
+          "BLSC/GLM-5.2": {
+            "input": 172274492,
+            "cached": 171379648,
+            "non_cached": 894844,
+            "output": 469422,
+            "reasoning_output": 299062,
+            "total": 172743914
+          }
+        },
+        "total": 172743914
+      },
+      "019fd1b8-e74a-76f1-ae1e-e6cb09bc5440": {
+        "model": "BLSC/MiniMax-M3",
+        "is_subagent": true,
+        "source": "rollout_cumulative",
+        "tokens": {
+          "BLSC/MiniMax-M3": {
+            "input": 2282033,
+            "cached": 2227072,
+            "non_cached": 54961,
+            "output": 18301,
+            "reasoning_output": 0,
+            "total": 2300334
+          }
+        },
+        "total": 2300334
+      }
+    },
+    "main_vs_subagent": {
+      "main": 172743914,
+      "subagent": 2300334
+    },
+    "fallback_tokens": 0,
+    "discrepancy_notes": [],
+    "accounting_note": "Cached/input/output splits come from each selected thread's terminal rollout counter and are scaled only when needed to match state_5.sqlite threads.tokens_used."
+  },
+  "cost_estimate_usd": {
+    "total": 18.4636,
+    "by_model": {
+      "BLSC/GLM-5.2": {
+        "usd": 18.247,
+        "tokens": 172743914,
+        "pricing": "metadata"
+      },
+      "BLSC/MiniMax-M3": {
+        "usd": 0.2166,
+        "tokens": 2300334,
+        "pricing": "metadata"
+      }
+    },
+    "unpriced_tokens": 0,
+    "estimate": true,
+    "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/03/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/03/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/03/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/03/.sessions/codex/sessions",
+    "fetched_at": "2026-08-14T06:19:54.667254+00:00",
+    "num_threads": 2,
+    "num_roots": 1
+  }
+}
