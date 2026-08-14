@@ -15,7 +15,7 @@ All telemetry was refreshed from the workspace-local Codex bundle only: `.sessio
 - Telemetry: 87,815,105 tokens, 533 tools, 9,296 s goal time, 14,053 s wall time, estimated $10.00
 - Terminal response: `msg_1bb0189f24da407ea65ff5911ca0cdac`, one output-text part at 15:46:50.400Z; extracted response SHA-256 `65cab2561c31bc15b046be18abca492d6f2b45a0909603d87a785779fe751902`.
 
-`contestant_final_response.md` and `run_identity.json` remain unindexed sidecars, so `cfdeval check` does not validate their digests.
+`contestant_final_response.md` and `run_identity.json` remain unindexed sidecars, so `cfdeval check` does not validate their digests. The immutable `run_identity.json` SHA-256 is `f6d086a8507f2df19ff4eae3acca60f73a8a7fd534dc8a32bd5913b5a5b3a305`.
 
 ## Evaluation evidence
 

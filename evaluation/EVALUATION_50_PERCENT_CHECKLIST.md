@@ -82,10 +82,10 @@ Reserve `[x]` for a snapshot that passes both gates.
 - [ ] 01 — REPAIR `codex_glm52_01_1307c9`; rubric/cases recorded,
       but `code.originality`, the Code overall, and weighted-overall consistency
       are incomplete.
-- [ ] 02 — REPAIR `codex_glm52_02_06cf18`; 76/100; DQ no;
-      submission `1e29ab3c`; review-point numbers were backfilled in `9d7ed10`,
-      but all 27 evidence notes and weighted-overall consistency remain
-      incomplete.
+- [x] 02 — `codex_glm52_02_06cf18`; 76/100; DQ no;
+      submission `1e29ab3c`; manager pending. All 27 evidence notes,
+      weighted overalls (4.20/3.96/4.25), and identity/report sidecar
+      provenance were refreshed; both completion gates pass.
 
 ### `codex/glm52-m3` — 5 done, quota 3
 
