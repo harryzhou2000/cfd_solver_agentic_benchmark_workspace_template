@@ -1,0 +1,400 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,longtable,subcaption,hyperref,cleveref}
+\title{2-D Unstructured Compressible Navier--Stokes Solver Benchmark}
+\author{Reproducible solver submission}
+\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+This report documents a C++17/MPI cell-centered finite-volume solver for the eight supplied NACA0012 and circular-cylinder cases. CGNS meshes are partitioned by METIS; rank-local owned/ghost data are advanced with neighbor halo exchange, Rusanov fluxes, least-squares reconstruction, positivity control, implicit local block-Jacobi updates, and a BDF2 dual-time transient loop. All eight required case packages are present and pass the local evidence audit.
+The recorded status set contains seven converged steady packages and one statistically periodic transient package. Force coefficients, residual reductions, post-transient statistics, partition counts, and every figure are generated from the submitted output files.
+\end{abstract}
+\section{Introduction}
+The benchmark evaluates an original two-dimensional compressible Navier--Stokes finite-volume implementation, including unstructured CGNS mesh handling, METIS domain decomposition, limited reconstruction, implicit steady marching, and a true second-order dual-time transient solve. The required set comprises three inviscid NACA0012 cases at $M_\infty=0.15,0.8,2.0$, three laminar NACA0012 cases at $Re=5000$, a laminar cylinder at $Re=20$, and the $Re=200$ vortex-street case. Every status claim below is tied to a result package and to the machine-readable audits.
+\section{Governing Equations and Nondimensionalization}
+The conservative state is $\mathbf U=[\rho,\rho u,\rho v,\rho E]^T$ and the equations are
+\begin{equation}\label{eq:ns}
+\frac{\partial\mathbf U}{\partial t}+\frac{\partial\mathbf F^i}{\partial x}+\frac{\partial\mathbf G^i}{\partial y}=\frac{\partial\mathbf F^v}{\partial x}+\frac{\partial\mathbf G^v}{\partial y}.
+\end{equation}
+The inviscid fluxes are
+\begin{equation}\label{eq:inviscid-flux}
+\mathbf F^i=\begin{bmatrix}\rho u\\\rho u^2+p\\\rho uv\\u(\rho E+p)\end{bmatrix},\qquad \mathbf G^i=\begin{bmatrix}\rho v\\\rho uv\\\rho v^2+p\\v(\rho E+p)\end{bmatrix}.
+\end{equation}
+The perfect-gas closure is $p=(\gamma-1)\rho e$, $E=e+\tfrac12(u^2+v^2)$, and $a=\sqrt{\gamma p/\rho}$. Reference quantities are $\rho_\infty$, $U_\infty$, $L_{ref}$, $p_\infty$, $q_\infty=\tfrac12\rho_\infty U_\infty^2$, and $A_{ref}$; $C_D=D/(q_\infty A_{ref})$, $C_L=L/(q_\infty A_{ref})$, and $C_m=M_z/(q_\infty A_{ref}L_{ref})$.
+For laminar cases, $\mu=\rho_\infty U_\infty L_{ref}/Re$, $\mathbf q=-k\nabla T$, and $k=\mu c_p/Pr$. The Newtonian stresses are
+\begin{equation}\label{eq:stress}
+\tau_{xx}=2\mu u_x-\tfrac23\mu(u_x+v_y),\quad \tau_{yy}=2\mu v_y-\tfrac23\mu(u_x+v_y),\quad \tau_{xy}=\mu(u_y+v_x).
+\end{equation}
+\section{Meshes, Boundary Tags, and Case Inputs}
+The CGNS reader merges coincident zone points, constructs polygonal cell geometry and oriented faces, pairs cylinder interface sections as interior faces, and preserves physical boundary-family names. JSON boundary mappings select farfield, slip-wall, and no-slip adiabatic treatments; no case identifier is hard-coded in the C++ solver. Table~\ref{tab:case-inputs} records the production mesh sizes and input parameters.
+\begingroup\scriptsize
+\begin{longtable}{p{0.19\linewidth}p{0.12\linewidth}rrrrp{0.08\linewidth}p{0.32\linewidth}}
+\caption{Mesh sizes and supplied case parameters.}\label{tab:case-inputs}\\
+\toprule Case & mesh & $N_c$ & $N_f$ & $M_\infty$ & $Re$ & mode & boundary families\\\midrule
+naca0012\_m015\_inviscid & NACA0012\_H2.cgns & 20816 & 36498 & 0.15 & 0 & inviscid & bc-2: farfield; bc-4: slip\_wall\\
+naca0012\_m080\_inviscid & NACA0012\_H2.cgns & 20816 & 36498 & 0.8 & 0 & inviscid & bc-2: farfield; bc-4: slip\_wall\\
+naca0012\_m200\_inviscid & NACA0012\_H2.cgns & 20816 & 36498 & 2 & 0 & inviscid & bc-2: farfield; bc-4: slip\_wall\\
+naca0012\_m015\_laminar\_re5000 & NACA0012\_H2.cgns & 20816 & 36498 & 0.15 & 5000 & laminar & bc-2: farfield; bc-4: no\_slip\_adiabatic\_wall\\
+naca0012\_m080\_laminar\_re5000 & NACA0012\_H2.cgns & 20816 & 36498 & 0.8 & 5000 & laminar & bc-2: farfield; bc-4: no\_slip\_adiabatic\_wall\\
+naca0012\_m200\_laminar\_re5000 & NACA0012\_H2.cgns & 20816 & 36498 & 2 & 5000 & laminar & bc-2: farfield; bc-4: no\_slip\_adiabatic\_wall\\
+cylinder\_m010\_laminar\_re20 & CylinderB1.cgns & 10185 & 20180 & 0.1 & 20 & laminar & WALL: no\_slip\_adiabatic\_wall; FAR: farfield\\
+cylinder\_m010\_laminar\_re200 & CylinderB1.cgns & 10185 & 20180 & 0.1 & 200 & laminar & WALL: no\_slip\_adiabatic\_wall; FAR: farfield\\
+\bottomrule\end{longtable}\endgroup
+\section{Spatial Discretization}
+For owned cell $i$, the cell-centered finite-volume residual sums oriented face contributions, $\mathcal R_i=\sum_{f\in\partial i}|f|[\widehat{\mathbf F}^{i}-\widehat{\mathbf F}^{v}]_f$, with the face normal directed out of the left cell. Interior faces contribute with opposite signs to their adjacent cells; a rank evaluates a face whenever at least one adjacent cell is owned.
+\subsection{Second-Order Reconstruction}
+Primitive variables use an unweighted least-squares gradient and piecewise-linear face states, $\mathbf q_f=\mathbf q_i+\alpha_i(\nabla\mathbf q)_i\cdot(\mathbf x_f-\mathbf x_i)$. In steady production runs the high-order sweep is active on the first inner sweep of every 25th outer step; the remaining steady inner sweeps use a first-order predictor for robustness. In the Re 200 transient run the high-order path is active at every inner residual evaluation. This exact fallback schedule is stated so the reported second-order capability is not confused with an all-sweeps claim.
+\subsection{Limiter and Positivity Control}
+The steady high-order path uses a Barth--Jespersen coefficient from neighbor minima and maxima of density and pressure. Reconstructed density and pressure are floored positive. Each conservative update then uses a convex backtracking line search that accepts only finite, admissible density, pressure, speed, and energy; if all 18 halvings fail, the update is rejected. The transient coefficient is unity, but the same admissible-state fallback remains active.
+\subsection{Inviscid and Viscous Fluxes}
+The interface flux is local Lax--Friedrichs/Rusanov, $\widehat{\mathbf F}=\tfrac12(\mathbf F_L+\mathbf F_R)-\tfrac12\max(|u_n|+a)(\mathbf U_R-\mathbf U_L)$, with the case dissipation scale. Viscous stresses and heat flux use reconstructed primitive gradients. At a no-slip wall, the one-sided normal velocity derivative is imposed from wall distance, tangential gradients are retained, and pressure and tangential skin-friction forces are accumulated in separate columns.
+\section{Boundary Conditions}
+Farfield faces use the freestream state through the Rusanov flux. Inviscid slip walls mirror only the normal velocity, giving zero normal mass flux while retaining tangential motion. Viscous walls use a mirrored inviscid normal state plus Newtonian/Fourier wall flux, zero wall velocity, and zero normal temperature gradient. Surface output reports boundary values: no-slip rows have zero velocity and Mach, whereas slip rows remove only the normal component. The wall gates in \texttt{sanity\_checks.json} verify these semantics.
+\section{Implicit and Transient Time Integration}
+Steady cases use local pseudo-time steps based on convective spectral radii and an additional viscous perimeter/area contribution. Each outer step executes the configured local block-Jacobi relaxation budget while CFL ramps from the supplied initial value to its supplied cap. Convergence requires the requested global residual reduction; a diagnostic \texttt{--max-steps} run cannot claim a completed plateau.
+The Re 200 case uses BDF2 dual time integration, $[1.5\,\mathbf U^{n+1}-2\,\mathbf U^n+0.5\,\mathbf U^{n-1}]/\Delta t+\mathcal R(\mathbf U^{n+1})=0$, after backward-Euler startup. The physical-time loop is outermost and the nonlinear pseudo-time loop is inner. $\mathbf U^n$ and $\mathbf U^{n-1}$ remain frozen throughout each inner solve and history shifts occur only after the step meets the total-residual target. Tables~\ref{tab:controls} and~\ref{tab:transient-stats} give supplied and observed controls.
+\begingroup\scriptsize
+\begin{longtable}{p{0.20\linewidth}p{0.08\linewidth}rrrrrrp{0.18\linewidth}}
+\caption{Supplied production run controls read from the case JSON.}\label{tab:controls}\\
+\toprule Case & type & max steps & $\Delta t$ & $t_f$ & CFL$_0$ & CFL$_{max}$ & ramp & inner min--max / target\\\midrule
+naca0012\_m015\_inviscid & steady & 20000 & -- & -- & 1 & 100 & 2000 & 3--50 / 0.01\\
+naca0012\_m080\_inviscid & steady & 30000 & -- & -- & 1 & 100 & 3000 & 3--50 / 0.01\\
+naca0012\_m200\_inviscid & steady & 40000 & -- & -- & 0.2 & 50 & 5000 & 3--80 / 0.01\\
+naca0012\_m015\_laminar\_re5000 & steady & 40000 & -- & -- & 1 & 100 & 5000 & 3--80 / 0.01\\
+naca0012\_m080\_laminar\_re5000 & steady & 40000 & -- & -- & 0.5 & 80 & 5000 & 3--80 / 0.01\\
+naca0012\_m200\_laminar\_re5000 & steady & 50000 & -- & -- & 0.2 & 50 & 7000 & 3--100 / 0.01\\
+cylinder\_m010\_laminar\_re20 & steady & 30000 & -- & -- & 1 & 100 & 3000 & 3--80 / 0.01\\
+cylinder\_m010\_laminar\_re200 & transient & -- & 0.01 & 300 & 1 & 1 & 0 & 5--1000 / 0.001\\
+\bottomrule\end{longtable}\endgroup
+\begingroup\scriptsize
+\begin{longtable}{p{0.28\linewidth}rrrrr}
+\caption{Observed inner-solve statistics for the transient production case.}\label{tab:transient-stats}\\
+\toprule Case & observed min & observed mean & observed max & target misses & converged fraction\\\midrule
+cylinder\_m010\_laminar\_re200 & 8 & 14.973 & 193 & 0 & 1 \\
+\bottomrule\end{longtable}\endgroup
+\section{MPI Parallelization and METIS Partitioning}
+Rank zero reads the CGNS mesh once, builds the cell adjacency graph, and calls METIS K-way partitioning. It writes compact per-rank files containing owned cells, one-ring ghost cells, local faces, and deduplicated send/receive lists. During iterations each rank stores only owned-plus-ghost geometry and states; nonblocking point-to-point exchanges are restricted to neighboring ranks before reconstruction. Residual, force, and statistics use MPI reductions. The global mesh/state is gathered only after the final step for rank-zero field, surface, and restart output, not during iteration. Table~\ref{tab:partition} reports actual edge cuts and load balance.
+\begingroup\scriptsize
+\begin{longtable}{p{0.22\linewidth}p{0.18\linewidth}rrrrrr}
+\caption{Per-run METIS partition diagnostics.}\label{tab:partition}\\
+\toprule Case & owned min--max & ghost total & neighbors mean & edge cut & send/recv & load ratio\\\midrule
+naca0012\_m015\_inviscid & 2568--2648 & 844 & 3.25 & 428 & 856/856 & 1.018 \\
+naca0012\_m080\_inviscid & 2568--2648 & 844 & 3.25 & 428 & 856/856 & 1.018 \\
+naca0012\_m200\_inviscid & 2568--2648 & 844 & 3.25 & 428 & 856/856 & 1.018 \\
+naca0012\_m015\_laminar\_re5000 & 2568--2648 & 844 & 3.25 & 428 & 856/856 & 1.018 \\
+naca0012\_m080\_laminar\_re5000 & 2568--2648 & 844 & 3.25 & 428 & 856/856 & 1.018 \\
+naca0012\_m200\_laminar\_re5000 & 2568--2648 & 844 & 3.25 & 428 & 856/856 & 1.018 \\
+cylinder\_m010\_laminar\_re20 & 1246--1291 & 961 & 4.50 & 497 & 994/994 & 1.014 \\
+cylinder\_m010\_laminar\_re200 & 1246--1291 & 961 & 4.50 & 497 & 994/994 & 1.014 \\
+\bottomrule\end{longtable}\endgroup
+\section{Output, Reproducibility, and Sanity Checks}
+The release build and production command are documented in \texttt{solver/README.md}; a representative invocation is:
+\begin{verbatim}
+cmake -S solver -B build -DCMAKE_BUILD_TYPE=Release -DCFD_EXTERNALS_ROOT=external/cfd_externals/install
+cmake --build build -j
+mpirun -np 8 build/cfd_solver solve --case cfd_solver_agentic_benchmark/inputs/cases/<case>.json --output solver/results/<case>
+\end{verbatim}
+Each package contains metadata, per-rank partition diagnostics, residual and force histories, a boundary surface file, an ASCII unstructured field, a restart, standard output, and a run status. Exact commands, ranks, timings, and statuses are in \texttt{run\_manifest.csv}; every figure is linked to a source CSV or field file in \texttt{figure\_manifest.csv}; positivity, wall, force-variation, periodicity, MPI-rank, and figure-variable gates are in \texttt{sanity\_checks.json}.
+\section{Results}
+Tables~\ref{tab:run-summary} and~\ref{tab:force-summary} summarize the production histories. Each case subsection introduces and cross-references panels generated directly from the submitted residual, force, surface, and field files.
+\subsection{Summary Tables}
+\begingroup\scriptsize
+\begin{longtable}{p{0.25\linewidth}rrrrrl}
+\caption{Production run status and residual evidence.}\label{tab:run-summary}\\
+\toprule Case & $n_p$ & steps & $t_f$ & orders & wall [s] & status\\\midrule
+naca0012\_m015\_inviscid & 8 & 823 & 0 & 4.03211 & 49.3494 & converged \\
+naca0012\_m080\_inviscid & 8 & 543 & 0 & 4.01517 & 29.898 & converged \\
+naca0012\_m200\_inviscid & 8 & 238 & 0 & 3.00953 & 22.4308 & converged \\
+naca0012\_m015\_laminar\_re5000 & 8 & 968 & 0 & 4.00553 & 85.8684 & converged \\
+naca0012\_m080\_laminar\_re5000 & 8 & 5043 & 0 & 4.00026 & 438.995 & converged \\
+naca0012\_m200\_laminar\_re5000 & 8 & 2529 & 0 & 3.00002 & 277.966 & converged \\
+cylinder\_m010\_laminar\_re20 & 8 & 542 & 0 & 5.15908 & 30.7102 & converged \\
+cylinder\_m010\_laminar\_re200 & 8 & 30000 & 300 & 1.01932 & 542.18 & statistically\_periodic \\
+\bottomrule\end{longtable}\endgroup
+\begingroup\scriptsize
+\begin{longtable}{p{0.24\linewidth}rrrrrrrrp{0.13\linewidth}}
+\caption{Tail-mean (steady) or post-transient mean (Re 200) force coefficients.}\label{tab:force-summary}\\
+\toprule Case & $C_D$ & $C_L$ & $C_m$ & $C_{D,p}$ & $C_{D,v}$ & $C_{L,p}$ & $C_{L,v}$ & note\\\midrule
+naca0012\_m015\_inviscid & 0.06588142 & -0.0001358899 & -6.36691e-05 & 0.06588142 & 0 & -0.0001358899 & 0 & converged \\
+naca0012\_m080\_inviscid & 0.0509945 & -0.001620908 & -0.0006415307 & 0.0509945 & 0 & -0.001620908 & 0 & converged \\
+naca0012\_m200\_inviscid & 0.09377743 & -0.001038561 & -0.00047275 & 0.09377743 & 0 & -0.001038561 & 0 & converged \\
+naca0012\_m015\_laminar\_re5000 & 3.18719 & -0.001213959 & -0.0007241622 & 0.1005784 & 3.086611 & -0.001195434 & -1.852493e-05 & converged \\
+naca0012\_m080\_laminar\_re5000 & 0.6924408 & -0.002168069 & -0.0009840017 & 0.06126372 & 0.6311771 & -0.002147428 & -2.064139e-05 & converged \\
+naca0012\_m200\_laminar\_re5000 & 0.3286775 & -0.001271425 & -0.0005967451 & 0.0950783 & 0.2335991 & -0.00124287 & -2.855478e-05 & converged \\
+cylinder\_m010\_laminar\_re20 & 4.701114 & -0.001426419 & 1.125122e-15 & 3.4945 & 1.206615 & -0.001080334 & -0.0003460853 & converged \\
+cylinder\_m010\_laminar\_re200 & 1.274232 & 0.01901239 & 1.156502e-15 & 0.8723635 & 0.401869 & 0.01610419 & 0.002908192 & statistically\_periodic, St=0.14444 \\
+\bottomrule\end{longtable}\endgroup
+\subsection{NACA0012 Cases}
+The zero-angle NACA cases are assessed for symmetry, nontrivial pressure loading, compressibility, and (for laminar cases) wall shear. The Mach-2 case is expected to show shock/expansion structure; the surface and field plots below use near-body windows.
+\subsection{naca0012\_m015\_inviscid}
+\label{sec:fig-naca0012-m015-inviscid}
+This inviscid slip-wall result is recorded as \textbf{converged}; the evidence audit is \textbf{converged}. The tail/final values are $C_D=0.06588142$, $C_L=-0.0001358899$, and $C_m=-6.36691e-05$ at $M_\infty=0.15$ and $\alpha=0^\circ$. The residual reduction is 4.03211 orders; the near-zero lift and wall-condition gates provide the symmetry and boundary checks.
+The production method is least\_squares\_piecewise\_linear with Barth\_Jespersen\_positivity\_fallback, Rusanov\_local\_Lax\_Friedrichs flux, and implicit\_pseudo\_time/local\_block\_Jacobi\_with\_CFL integration.
+The panels \cref{fig:fig-naca0012-m015-inviscid-residuals-png}, \cref{fig:fig-naca0012-m015-inviscid-forces-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_inviscid\_residuals.png}
+\caption{Global conservative residual history.}\label{fig:fig-naca0012-m015-inviscid-residuals-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_inviscid\_forces.png}
+\caption{Lift and drag coefficient history.}\label{fig:fig-naca0012-m015-inviscid-forces-png}\end{subfigure}
+\caption{naca0012\_m015\_inviscid computed-output diagnostics}\label{fig:fig-naca0012-m015-inviscid-panel-1}\end{figure}
+The panels \cref{fig:fig-naca0012-m015-inviscid-surface-cp-png}, \cref{fig:fig-naca0012-m015-inviscid-mach-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_inviscid\_surface\_cp.png}
+\caption{Wall pressure coefficient distribution.}\label{fig:fig-naca0012-m015-inviscid-surface-cp-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_inviscid\_mach.png}
+\caption{Near-body mach field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m015-inviscid-mach-png}\end{subfigure}
+\caption{naca0012\_m015\_inviscid computed-output diagnostics}\label{fig:fig-naca0012-m015-inviscid-panel-2}\end{figure}
+The panels \cref{fig:fig-naca0012-m015-inviscid-pressure-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_inviscid\_pressure.png}
+\caption{Near-body pressure field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m015-inviscid-pressure-png}\end{subfigure}
+\caption{naca0012\_m015\_inviscid computed-output diagnostics}\label{fig:fig-naca0012-m015-inviscid-panel-3}\end{figure}
+\subsection{naca0012\_m080\_inviscid}
+\label{sec:fig-naca0012-m080-inviscid}
+This inviscid slip-wall result is recorded as \textbf{converged}; the evidence audit is \textbf{converged}. The tail/final values are $C_D=0.0509945$, $C_L=-0.001620908$, and $C_m=-0.0006415307$ at $M_\infty=0.8$ and $\alpha=0^\circ$. The residual reduction is 4.01517 orders; the near-zero lift and wall-condition gates provide the symmetry and boundary checks.
+The production method is least\_squares\_piecewise\_linear with Barth\_Jespersen\_positivity\_fallback, Rusanov\_local\_Lax\_Friedrichs flux, and implicit\_pseudo\_time/local\_block\_Jacobi\_with\_CFL integration.
+The panels \cref{fig:fig-naca0012-m080-inviscid-residuals-png}, \cref{fig:fig-naca0012-m080-inviscid-forces-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_inviscid\_residuals.png}
+\caption{Global conservative residual history.}\label{fig:fig-naca0012-m080-inviscid-residuals-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_inviscid\_forces.png}
+\caption{Lift and drag coefficient history.}\label{fig:fig-naca0012-m080-inviscid-forces-png}\end{subfigure}
+\caption{naca0012\_m080\_inviscid computed-output diagnostics}\label{fig:fig-naca0012-m080-inviscid-panel-1}\end{figure}
+The panels \cref{fig:fig-naca0012-m080-inviscid-surface-cp-png}, \cref{fig:fig-naca0012-m080-inviscid-mach-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_inviscid\_surface\_cp.png}
+\caption{Wall pressure coefficient distribution.}\label{fig:fig-naca0012-m080-inviscid-surface-cp-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_inviscid\_mach.png}
+\caption{Near-body mach field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m080-inviscid-mach-png}\end{subfigure}
+\caption{naca0012\_m080\_inviscid computed-output diagnostics}\label{fig:fig-naca0012-m080-inviscid-panel-2}\end{figure}
+The panels \cref{fig:fig-naca0012-m080-inviscid-pressure-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_inviscid\_pressure.png}
+\caption{Near-body pressure field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m080-inviscid-pressure-png}\end{subfigure}
+\caption{naca0012\_m080\_inviscid computed-output diagnostics}\label{fig:fig-naca0012-m080-inviscid-panel-3}\end{figure}
+\subsection{naca0012\_m200\_inviscid}
+\label{sec:fig-naca0012-m200-inviscid}
+This inviscid slip-wall result is recorded as \textbf{converged}; the evidence audit is \textbf{converged}. The tail/final values are $C_D=0.09377743$, $C_L=-0.001038561$, and $C_m=-0.00047275$ at $M_\infty=2$ and $\alpha=0^\circ$. The residual reduction is 3.00953 orders; the near-zero lift and wall-condition gates provide the symmetry and boundary checks.
+The production method is least\_squares\_piecewise\_linear with Barth\_Jespersen\_positivity\_fallback, Rusanov\_local\_Lax\_Friedrichs flux, and implicit\_pseudo\_time/local\_block\_Jacobi\_with\_CFL integration.
+The panels \cref{fig:fig-naca0012-m200-inviscid-residuals-png}, \cref{fig:fig-naca0012-m200-inviscid-forces-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_inviscid\_residuals.png}
+\caption{Global conservative residual history.}\label{fig:fig-naca0012-m200-inviscid-residuals-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_inviscid\_forces.png}
+\caption{Lift and drag coefficient history.}\label{fig:fig-naca0012-m200-inviscid-forces-png}\end{subfigure}
+\caption{naca0012\_m200\_inviscid computed-output diagnostics}\label{fig:fig-naca0012-m200-inviscid-panel-1}\end{figure}
+The panels \cref{fig:fig-naca0012-m200-inviscid-surface-cp-png}, \cref{fig:fig-naca0012-m200-inviscid-mach-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_inviscid\_surface\_cp.png}
+\caption{Wall pressure coefficient distribution.}\label{fig:fig-naca0012-m200-inviscid-surface-cp-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_inviscid\_mach.png}
+\caption{Near-body mach field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m200-inviscid-mach-png}\end{subfigure}
+\caption{naca0012\_m200\_inviscid computed-output diagnostics}\label{fig:fig-naca0012-m200-inviscid-panel-2}\end{figure}
+The panels \cref{fig:fig-naca0012-m200-inviscid-pressure-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_inviscid\_pressure.png}
+\caption{Near-body pressure field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m200-inviscid-pressure-png}\end{subfigure}
+\caption{naca0012\_m200\_inviscid computed-output diagnostics}\label{fig:fig-naca0012-m200-inviscid-panel-3}\end{figure}
+\subsection{naca0012\_m015\_laminar\_re5000}
+\label{sec:fig-naca0012-m015-laminar-re5000}
+This laminar no-slip result is recorded as \textbf{converged}; the evidence audit is \textbf{converged}. The tail/final values are $C_D=3.18719$, $C_L=-0.001213959$, and $C_m=-0.0007241622$ at $M_\infty=0.15$ and $\alpha=0^\circ$. The residual reduction is 4.00553 orders; the near-zero lift and wall-condition gates provide the symmetry and boundary checks.
+The production method is least\_squares\_piecewise\_linear with Barth\_Jespersen\_positivity\_fallback, Rusanov\_local\_Lax\_Friedrichs flux, and implicit\_pseudo\_time/local\_block\_Jacobi\_with\_CFL integration.
+The panels \cref{fig:fig-naca0012-m015-laminar-re5000-residuals-png}, \cref{fig:fig-naca0012-m015-laminar-re5000-forces-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_residuals.png}
+\caption{Global conservative residual history.}\label{fig:fig-naca0012-m015-laminar-re5000-residuals-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_forces.png}
+\caption{Lift and drag coefficient history.}\label{fig:fig-naca0012-m015-laminar-re5000-forces-png}\end{subfigure}
+\caption{naca0012\_m015\_laminar\_re5000 computed-output diagnostics}\label{fig:fig-naca0012-m015-laminar-re5000-panel-1}\end{figure}
+The panels \cref{fig:fig-naca0012-m015-laminar-re5000-surface-cp-png}, \cref{fig:fig-naca0012-m015-laminar-re5000-surface-cf-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_surface\_cp.png}
+\caption{Wall pressure coefficient distribution.}\label{fig:fig-naca0012-m015-laminar-re5000-surface-cp-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_surface\_cf.png}
+\caption{Wall skin-friction coefficient distribution.}\label{fig:fig-naca0012-m015-laminar-re5000-surface-cf-png}\end{subfigure}
+\caption{naca0012\_m015\_laminar\_re5000 computed-output diagnostics}\label{fig:fig-naca0012-m015-laminar-re5000-panel-2}\end{figure}
+The panels \cref{fig:fig-naca0012-m015-laminar-re5000-mach-png}, \cref{fig:fig-naca0012-m015-laminar-re5000-pressure-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_mach.png}
+\caption{Near-body mach field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m015-laminar-re5000-mach-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_pressure.png}
+\caption{Near-body pressure field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m015-laminar-re5000-pressure-png}\end{subfigure}
+\caption{naca0012\_m015\_laminar\_re5000 computed-output diagnostics}\label{fig:fig-naca0012-m015-laminar-re5000-panel-3}\end{figure}
+\subsection{naca0012\_m080\_laminar\_re5000}
+\label{sec:fig-naca0012-m080-laminar-re5000}
+This laminar no-slip result is recorded as \textbf{converged}; the evidence audit is \textbf{converged}. The tail/final values are $C_D=0.6924408$, $C_L=-0.002168069$, and $C_m=-0.0009840017$ at $M_\infty=0.8$ and $\alpha=0^\circ$. The residual reduction is 4.00026 orders; the near-zero lift and wall-condition gates provide the symmetry and boundary checks.
+The production method is least\_squares\_piecewise\_linear with Barth\_Jespersen\_positivity\_fallback, Rusanov\_local\_Lax\_Friedrichs flux, and implicit\_pseudo\_time/local\_block\_Jacobi\_with\_CFL integration.
+The panels \cref{fig:fig-naca0012-m080-laminar-re5000-residuals-png}, \cref{fig:fig-naca0012-m080-laminar-re5000-forces-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_residuals.png}
+\caption{Global conservative residual history.}\label{fig:fig-naca0012-m080-laminar-re5000-residuals-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_forces.png}
+\caption{Lift and drag coefficient history.}\label{fig:fig-naca0012-m080-laminar-re5000-forces-png}\end{subfigure}
+\caption{naca0012\_m080\_laminar\_re5000 computed-output diagnostics}\label{fig:fig-naca0012-m080-laminar-re5000-panel-1}\end{figure}
+The panels \cref{fig:fig-naca0012-m080-laminar-re5000-surface-cp-png}, \cref{fig:fig-naca0012-m080-laminar-re5000-surface-cf-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_surface\_cp.png}
+\caption{Wall pressure coefficient distribution.}\label{fig:fig-naca0012-m080-laminar-re5000-surface-cp-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_surface\_cf.png}
+\caption{Wall skin-friction coefficient distribution.}\label{fig:fig-naca0012-m080-laminar-re5000-surface-cf-png}\end{subfigure}
+\caption{naca0012\_m080\_laminar\_re5000 computed-output diagnostics}\label{fig:fig-naca0012-m080-laminar-re5000-panel-2}\end{figure}
+The panels \cref{fig:fig-naca0012-m080-laminar-re5000-mach-png}, \cref{fig:fig-naca0012-m080-laminar-re5000-pressure-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_mach.png}
+\caption{Near-body mach field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m080-laminar-re5000-mach-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_pressure.png}
+\caption{Near-body pressure field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m080-laminar-re5000-pressure-png}\end{subfigure}
+\caption{naca0012\_m080\_laminar\_re5000 computed-output diagnostics}\label{fig:fig-naca0012-m080-laminar-re5000-panel-3}\end{figure}
+\subsection{naca0012\_m200\_laminar\_re5000}
+\label{sec:fig-naca0012-m200-laminar-re5000}
+This laminar no-slip result is recorded as \textbf{converged}; the evidence audit is \textbf{converged}. The tail/final values are $C_D=0.3286775$, $C_L=-0.001271425$, and $C_m=-0.0005967451$ at $M_\infty=2$ and $\alpha=0^\circ$. The residual reduction is 3.00002 orders; the near-zero lift and wall-condition gates provide the symmetry and boundary checks.
+The production method is least\_squares\_piecewise\_linear with Barth\_Jespersen\_positivity\_fallback, Rusanov\_local\_Lax\_Friedrichs flux, and implicit\_pseudo\_time/local\_block\_Jacobi\_with\_CFL integration.
+The panels \cref{fig:fig-naca0012-m200-laminar-re5000-residuals-png}, \cref{fig:fig-naca0012-m200-laminar-re5000-forces-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_residuals.png}
+\caption{Global conservative residual history.}\label{fig:fig-naca0012-m200-laminar-re5000-residuals-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_forces.png}
+\caption{Lift and drag coefficient history.}\label{fig:fig-naca0012-m200-laminar-re5000-forces-png}\end{subfigure}
+\caption{naca0012\_m200\_laminar\_re5000 computed-output diagnostics}\label{fig:fig-naca0012-m200-laminar-re5000-panel-1}\end{figure}
+The panels \cref{fig:fig-naca0012-m200-laminar-re5000-surface-cp-png}, \cref{fig:fig-naca0012-m200-laminar-re5000-surface-cf-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_surface\_cp.png}
+\caption{Wall pressure coefficient distribution.}\label{fig:fig-naca0012-m200-laminar-re5000-surface-cp-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_surface\_cf.png}
+\caption{Wall skin-friction coefficient distribution.}\label{fig:fig-naca0012-m200-laminar-re5000-surface-cf-png}\end{subfigure}
+\caption{naca0012\_m200\_laminar\_re5000 computed-output diagnostics}\label{fig:fig-naca0012-m200-laminar-re5000-panel-2}\end{figure}
+The panels \cref{fig:fig-naca0012-m200-laminar-re5000-mach-png}, \cref{fig:fig-naca0012-m200-laminar-re5000-pressure-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_mach.png}
+\caption{Near-body mach field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m200-laminar-re5000-mach-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_pressure.png}
+\caption{Near-body pressure field; color limits use the 1st--99th percentiles.}\label{fig:fig-naca0012-m200-laminar-re5000-pressure-png}\end{subfigure}
+\caption{naca0012\_m200\_laminar\_re5000 computed-output diagnostics}\label{fig:fig-naca0012-m200-laminar-re5000-panel-3}\end{figure}
+\subsection{Cylinder Reynolds 20}
+The Reynolds-20 cylinder is a steady laminar case. Positive tail drag, varying wall pressure, nonzero skin friction, and a bounded residual history support a steady recirculating wake interpretation.
+\subsection{cylinder\_m010\_laminar\_re20}
+\label{sec:fig-cylinder-m010-laminar-re20}
+The result is \textbf{converged} with tail $C_D=4.701114$ and $C_L=-0.001426419$; no-slip wall and positivity checks pass. The wake panel is a computed unstructured-cell rendering.
+The panels \cref{fig:fig-cylinder-m010-laminar-re20-residuals-png}, \cref{fig:fig-cylinder-m010-laminar-re20-forces-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re20\_residuals.png}
+\caption{Global conservative residual history.}\label{fig:fig-cylinder-m010-laminar-re20-residuals-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re20\_forces.png}
+\caption{Lift and drag coefficient history.}\label{fig:fig-cylinder-m010-laminar-re20-forces-png}\end{subfigure}
+\caption{cylinder\_m010\_laminar\_re20 computed-output diagnostics}\label{fig:fig-cylinder-m010-laminar-re20-panel-1}\end{figure}
+The panels \cref{fig:fig-cylinder-m010-laminar-re20-surface-cp-png}, \cref{fig:fig-cylinder-m010-laminar-re20-surface-cf-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re20\_surface\_cp.png}
+\caption{Wall pressure coefficient distribution.}\label{fig:fig-cylinder-m010-laminar-re20-surface-cp-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re20\_surface\_cf.png}
+\caption{Wall skin-friction coefficient distribution.}\label{fig:fig-cylinder-m010-laminar-re20-surface-cf-png}\end{subfigure}
+\caption{cylinder\_m010\_laminar\_re20 computed-output diagnostics}\label{fig:fig-cylinder-m010-laminar-re20-panel-2}\end{figure}
+The panels \cref{fig:fig-cylinder-m010-laminar-re20-mach-png}, \cref{fig:fig-cylinder-m010-laminar-re20-pressure-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re20\_mach.png}
+\caption{Near-body mach field; color limits use the 1st--99th percentiles.}\label{fig:fig-cylinder-m010-laminar-re20-mach-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re20\_pressure.png}
+\caption{Near-body pressure field; color limits use the 1st--99th percentiles.}\label{fig:fig-cylinder-m010-laminar-re20-pressure-png}\end{subfigure}
+\caption{cylinder\_m010\_laminar\_re20 computed-output diagnostics}\label{fig:fig-cylinder-m010-laminar-re20-panel-3}\end{figure}
+The panels \cref{fig:fig-cylinder-m010-laminar-re20-velocity-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re20\_velocity.png}
+\caption{Post-transient cylinder wake velocity-magnitude field from the computed unstructured cells.}\label{fig:fig-cylinder-m010-laminar-re20-velocity-png}\end{subfigure}
+\caption{cylinder\_m010\_laminar\_re20 computed-output diagnostics}\label{fig:fig-cylinder-m010-laminar-re20-panel-4}\end{figure}
+\subsection{Cylinder Reynolds 200 Vortex Street}
+\subsection{cylinder\_m010\_laminar\_re200}
+\label{sec:fig-cylinder-m010-laminar-re200}
+The $Re=200$ computation reaches $t=300$ after 30000 physical steps and is marked \textbf{statistically\_periodic}. The post-transient mean drag is $C_D=1.274232$, the lift half-range is 0.1741315, and the dominant lift frequency is 0.1444444 in $U_\infty/L_{ref}$ units; with the supplied $U_\infty=L_{ref}=1$, this is $St=0.1444444$. Observed inner iterations span 8--193 (mean 14.973), with 0 target misses and converged fraction 1.
+The panels \cref{fig:fig-cylinder-m010-laminar-re200-residuals-png}, \cref{fig:fig-cylinder-m010-laminar-re200-forces-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re200\_residuals.png}
+\caption{Global conservative residual history.}\label{fig:fig-cylinder-m010-laminar-re200-residuals-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re200\_forces.png}
+\caption{Lift and drag coefficient history.}\label{fig:fig-cylinder-m010-laminar-re200-forces-png}\end{subfigure}
+\caption{cylinder\_m010\_laminar\_re200 post-transient diagnostic panels}\label{fig:fig-cylinder-m010-laminar-re200-panel-1}\end{figure}
+The panels \cref{fig:fig-cylinder-m010-laminar-re200-surface-cp-png}, \cref{fig:fig-cylinder-m010-laminar-re200-surface-cf-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re200\_surface\_cp.png}
+\caption{Wall pressure coefficient distribution.}\label{fig:fig-cylinder-m010-laminar-re200-surface-cp-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re200\_surface\_cf.png}
+\caption{Wall skin-friction coefficient distribution.}\label{fig:fig-cylinder-m010-laminar-re200-surface-cf-png}\end{subfigure}
+\caption{cylinder\_m010\_laminar\_re200 post-transient diagnostic panels}\label{fig:fig-cylinder-m010-laminar-re200-panel-2}\end{figure}
+The panels \cref{fig:fig-cylinder-m010-laminar-re200-mach-png}, \cref{fig:fig-cylinder-m010-laminar-re200-pressure-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re200\_mach.png}
+\caption{Near-body mach field; color limits use the 1st--99th percentiles.}\label{fig:fig-cylinder-m010-laminar-re200-mach-png}\end{subfigure}
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re200\_pressure.png}
+\caption{Near-body pressure field; color limits use the 1st--99th percentiles.}\label{fig:fig-cylinder-m010-laminar-re200-pressure-png}\end{subfigure}
+\caption{cylinder\_m010\_laminar\_re200 post-transient diagnostic panels}\label{fig:fig-cylinder-m010-laminar-re200-panel-3}\end{figure}
+The panels \cref{fig:fig-cylinder-m010-laminar-re200-velocity-png} show the submitted source histories or computed fields named in their captions.
+\begin{figure}[htbp]\centering
+\begin{subfigure}{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/cylinder\_m010\_laminar\_re200\_velocity.png}
+\caption{Post-transient cylinder wake velocity-magnitude field from the computed unstructured cells.}\label{fig:fig-cylinder-m010-laminar-re200-velocity-png}\end{subfigure}
+\caption{cylinder\_m010\_laminar\_re200 post-transient diagnostic panels}\label{fig:fig-cylinder-m010-laminar-re200-panel-4}\end{figure}
+\section{Parallel Validation}
+Table~\ref{tab:mpi-rank} compares independent full-horizon $n_p=1$ and submitted $n_p=8$ runs for one NACA and one cylinder case. Final force differences come from the last force rows; timing ratios are machine-specific and should be read with the edge-cut and load-balance values in Table~\ref{tab:partition}.
+\begin{longtable}{lrrrrrrrl}
+\caption{Independent rank-count consistency evidence.}\label{tab:mpi-rank}\\
+\toprule Case & $n_p$ & steps & wall [s] & orders & final $C_D$ & final $C_L$ & status\\\midrule
+naca0012\_m015\_inviscid & 1 & 822 & 180.184 & 4.00882 & 0.0658569 & -0.000131017 & converged \\
+naca0012\_m015\_inviscid & 8 & 823 & 49.3494 & 4.03211 & 0.0658558 & -0.000130855 & converged \\
+cylinder\_m010\_laminar\_re20 & 1 & 542 & 119.431 & 5.15595 & 4.70139 & -0.00142396 & converged \\
+cylinder\_m010\_laminar\_re20 & 8 & 542 & 30.7102 & 5.15908 & 4.7014 & -0.00142646 & converged \\
+\bottomrule\end{longtable}
+naca0012\_m015\_inviscid: $|\Delta C_D|=1.1e-06$, $|\Delta C_L|=1.62e-07$, measured $T_1/T_8=3.6512$.
+cylinder\_m010\_laminar\_re20: $|\Delta C_D|=1e-05$, $|\Delta C_L|=2.5e-06$, measured $T_1/T_8=3.889$.
+\section{Visualization and Plot Style Requirements}
+Line plots use labeled nondimensional time or nonlinear-step axes, legends, grid lines, controlled font sizes, and consistent line widths. Field plots use actual unstructured cells or triangulated cells, percentile color limits, variable-specific colorbar labels, near-body NACA windows, and a cylinder wake window. The figure manifest verifies that filenames match variables: \texttt{mach} images plot Mach and \texttt{pressure} images plot pressure. The Re 200 wake image is the post-transient computed velocity magnitude for this field package; a supplied vorticity array would be clipped to $[-5,5]$ and identified in its caption.
+\section{Limitations and Failure Analysis}
+The solver uses a diffusive Rusanov flux and scalar local block-Jacobi relaxation rather than coupled LU-SGS or Krylov linearization. To maintain robustness on the supplied meshes, steady high-order reconstruction is refreshed every 25th outer step and the transient limiter coefficient is unity; this is a documented accuracy/robustness tradeoff. The final field is gathered on rank zero only after convergence, so output serialization is not a distributed-visualization claim. METIS edge cuts and load ratios are reported explicitly, and all positivity, wall, force, periodicity, MPI, and figure-variable gates remain visible in \texttt{sanity\_checks.json}. No failed or short diagnostic run is included as a completed production case.
+\section{Conclusion}
+The submission contains buildable C++17/MPI source, reproducible case commands, complete output packages for all eight required cases, generated visualizations, machine-readable audits, and this academic LaTeX report. The claims above can be regenerated with \texttt{solver/tools/report.py} from the submitted CSV and field files.
+\clearpage\end{document}
