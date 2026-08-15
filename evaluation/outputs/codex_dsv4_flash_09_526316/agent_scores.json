@@ -1,0 +1,419 @@
+{
+  "schema": "agent_scores",
+  "contestant": "09",
+  "evaluated_at": "2026-08-15T02:38:56.862277+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": "Immutable submission 11adaa1f2ddb33753cb6c9ed5d1c7e9c481050fb."
+  },
+  "metadata_answers": {
+    "validator": "Fails at first canonical case because metadata convergence_status=failed."
+  },
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "019fdf88-1057-7ea1-8471-24edfbc48dc3"
+    ],
+    "execution_date": "2026-08-08",
+    "started_at": "2026-08-08T04:01:49.402000+00:00",
+    "ended_at": "2026-08-09T10:00:52.074000+00:00",
+    "time_basis": "Selected root tree persisted event window.",
+    "rationale": "Workspace-local root has four direct descendants and covers benchmark work through terminal report-compilation response."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "CMake documented; immutable report build passes but solver not clean-built."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "CLI source present; not rerun."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Modules separate mesh, flux, gradient, partition and solver."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "No internal wrapper evidence; no external search by trust policy."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Generic case reader, but only limited evidence."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Partition and MPI source present; result evidence weak."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 2,
+          "notes": "Reported high-CFL instability and failed cases."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Two committed probe programs."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 3,
+          "notes": "Curated code is clean; result artifacts excluded."
+        }
+      ],
+      "overall_score": 3.04,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Report/source describe compressible equations."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS and unstructured mesh paths present."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 3,
+          "notes": "Assembly source present but failed submitted convergence."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Roe flux source/report evidence."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Boundary paths implemented; not independently run."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 3,
+          "notes": "Gradient reconstruction source present."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Limiter source present."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "Laminar divergence limits validation."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "LU-SGS claimed and source present."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "BDF2 source/report but no credible transient result."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 3,
+          "notes": "Partition source present; no rank comparison."
+        }
+      ],
+      "overall_score": 3.04,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 2,
+          "notes": "Directories exist but validator sees failed status."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "Explicit validator fails immediately."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 1,
+          "notes": "Report admits broad instability/divergence."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 1,
+          "notes": "No credible canonical converged evidence."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "Committed short-test figures only."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "4-page report builds and is candid."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 2,
+          "notes": "Limited figure/report traceability; manifest excluded."
+        }
+      ],
+      "overall_score": 1.7,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 55,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 5,
+        "notes": "Report builds; solver build/CLI not independently rerun; failed outputs."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 8,
+        "notes": "CGNS/unstructured source evidence."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 10,
+        "notes": "Core implementation present; outcomes unstable."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 6,
+        "notes": "Gradient/limiter code present."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 5,
+        "notes": "Laminar failures limit credit."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 8,
+        "notes": "LU-SGS/BDF2 source claims, no successful evidence."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 5,
+        "notes": "Partition/MPI code but no credible rank comparison."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 2,
+        "notes": "Validator rejects canonical first result as failed."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 3,
+        "notes": "Compiling candid report, only short-test visualization coverage."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 3,
+        "notes": "Modular C++ organization."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 1,
+      "notes": "Submitted metadata failed; validator rejects."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 1,
+      "notes": "No independently credible final evidence."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 1,
+      "notes": "No independently credible final evidence."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 0,
+      "notes": "Report admits laminar divergence."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 0,
+      "notes": "Report admits laminar divergence."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 0,
+      "notes": "Report admits laminar divergence."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 1,
+      "notes": "Only short-test-level evidence."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 0,
+      "notes": "No credible completed transient deliverable; never rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": [
+      {
+        "flag": "Existing solver executable called internally",
+        "triggered": false,
+        "notes": "No internal wrapper evidence."
+      },
+      {
+        "flag": "Force/residual files generated without solving",
+        "triggered": false,
+        "notes": "Not established."
+      },
+      {
+        "flag": "Hard-coded two-mesh-only reader",
+        "triggered": false,
+        "notes": "Not established."
+      },
+      {
+        "flag": "Order-one MPI mismatch",
+        "triggered": false,
+        "notes": "No comparison supplied."
+      },
+      {
+        "flag": "Explicit only",
+        "triggered": false,
+        "notes": "LU-SGS/BDF2 source present."
+      },
+      {
+        "flag": "Unsupported report algorithm",
+        "triggered": false,
+        "notes": "Core claimed methods appear in source."
+      },
+      {
+        "flag": "Failed marked successful",
+        "triggered": false,
+        "notes": "Metadata says failed."
+      },
+      {
+        "flag": "Figure mismatch",
+        "triggered": false,
+        "notes": "Not established."
+      },
+      {
+        "flag": "METIS misrepresentation",
+        "triggered": false,
+        "notes": "Partition source present."
+      },
+      {
+        "flag": "Limiter disabled",
+        "triggered": false,
+        "notes": "Not established."
+      },
+      {
+        "flag": "Surface semantic failure",
+        "triggered": false,
+        "notes": "Not established."
+      },
+      {
+        "flag": "Misnamed figures",
+        "triggered": false,
+        "notes": "Not established."
+      },
+      {
+        "flag": "Copied core",
+        "triggered": false,
+        "notes": "No internal wrapper evidence; no external search."
+      }
+    ]
+  },
+  "limitations": [
+    "No clean solver build/rerun because delivered externals are dangling.",
+    "No Re200 rerun under prohibition.",
+    "Raw results were read only for validation and excluded from the commit."
+  ]
+}
