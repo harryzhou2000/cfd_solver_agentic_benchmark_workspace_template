@@ -1,0 +1,585 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,longtable,hyperref}
+\Urlmuskip=0mu plus 2mu\relax
+\setlength{\emergencystretch}{3em}
+\title{2-D Unstructured Compressible Navier--Stokes Solver Benchmark Report}
+\author{Automated evidence-grounded report}
+\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+A C++17/MPI cell-centred finite-volume solver was applied to all eight supplied unstructured CGNS cases using METIS partitions, second-order limited reconstruction, Rusanov convective flux, and Newtonian/Fourier viscous flux where applicable. 8 of 8 required cases completed with measured sanity checks passing; seven are steady and the Re200 cylinder is statistically periodic. The Re200 run reached a statistically periodic state with mean $C_D=1.1399$, lift amplitude 0.33817, and $St=0.16667$. Known accuracy and visualization limitations are stated explicitly.
+\end{abstract}
+\section{Introduction}
+The benchmark covers three inviscid and three laminar NACA0012 cases at zero angle of attack, plus laminar circular-cylinder cases at Reynolds 20 and 200. It exercises mesh import, compressible-flow numerics, implicit steady and physical-time transient integration, distributed-memory execution, restart/output integrity, and traceable post-processing. Results below distinguish final steady samples from post-transient statistics.
+\section{Governing equations and nondimensionalization}
+The conservative state is $\mathbf{U}=[\rho,\rho u,\rho v,\rho E]^T$ and $\partial_t\mathbf{U}+\partial_x\mathbf{F}^i+\partial_y\mathbf{G}^i=\partial_x\mathbf{F}^v+\partial_y\mathbf{G}^v$. The inviscid fluxes are $\mathbf{F}^i=[\rho u,\rho u^2+p,\rho uv,u(\rho E+p)]^T$ and $\mathbf{G}^i=[\rho v,\rho uv,\rho v^2+p,v(\rho E+p)]^T$, with $p=(\gamma-1)\rho e$, $E=e+(u^2+v^2)/2$, and $a=\sqrt{\gamma p/\rho}$. For viscous cases the flux contains Newtonian stresses $\tau_{ij}=\mu(\partial_i u_j+\partial_j u_i-\tfrac23\delta_{ij}\nabla\cdot\mathbf{u})$ and Fourier heat flux $q_i=-\mu c_p\partial_iT/Pr$. Constant viscosity is set by $Re=\rho_\infty U_\infty L/\mu$. The case reference density, velocity, and length nondimensionalize the solution; pressure uses $\rho_\infty U_\infty^2$, while $C_D=F_D/(q_\infty A)$, $C_L=F_L/(q_\infty A)$, and $C_m=M/(q_\infty A L)$ with $q_\infty=\tfrac12\rho_\infty U_\infty^2$.
+\section{Meshes, boundary tags, and case inputs}
+Rank 0 reads the CGNS unstructured zone, polygon connectivity, and named boundary sections. It constructs consistently oriented faces from cell edges, pairs interior edges, assigns boundary-family tags, and computes polygon area/centroid plus face midpoint, outward unit normal, and length. Boundary mappings are checked against the mesh before marching. Global sizes and supplied parameters are reproduced below.
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{llrrrrl}
+\toprule Case & mesh & cells & faces & Mach & Re & boundary tags\\\midrule
+naca0012\_m015\_inviscid & NACA0012\_H2.cgns & 20816 & 36498 & 0.15 & -- & bc-2:farfield, bc-4:slip\_wall\\
+naca0012\_m080\_inviscid & NACA0012\_H2.cgns & 20816 & 36498 & 0.8 & -- & bc-2:farfield, bc-4:slip\_wall\\
+naca0012\_m200\_inviscid & NACA0012\_H2.cgns & 20816 & 36498 & 2.0 & -- & bc-2:farfield, bc-4:slip\_wall\\
+naca0012\_m015\_laminar\_re5000 & NACA0012\_H2.cgns & 20816 & 36498 & 0.15 & 5000.0 & bc-2:farfield, bc-4:no\_slip\_adiabatic\_wall\\
+naca0012\_m080\_laminar\_re5000 & NACA0012\_H2.cgns & 20816 & 36498 & 0.8 & 5000.0 & bc-2:farfield, bc-4:no\_slip\_adiabatic\_wall\\
+naca0012\_m200\_laminar\_re5000 & NACA0012\_H2.cgns & 20816 & 36498 & 2.0 & 5000.0 & bc-2:farfield, bc-4:no\_slip\_adiabatic\_wall\\
+cylinder\_m010\_laminar\_re20 & CylinderB1.cgns & 10185 & 20180 & 0.1 & 20.0 & WALL:no\_slip\_adiabatic\_wall, FAR:farfield\\
+cylinder\_m010\_laminar\_re200 & CylinderB1.cgns & 10185 & 20180 & 0.1 & 200.0 & WALL:no\_slip\_adiabatic\_wall, FAR:farfield\\
+\bottomrule\end{longtable}
+}
+\section{Spatial discretization}
+For a cell $K$ of area $V_K$, the cell-centred finite-volume residual is $R_K=\sum_{f\subset\partial K}(\hat F_f^i-\hat F_f^v)|f|$, with each stored normal directed out of the left cell; the same interior-face flux is added to the left residual and subtracted from the right residual. The semi-discrete equation is $V_K\,dU_K/dt+R_K=0$. Boundary faces use a reconstructed interior state and a boundary/ghost state described below.
+\subsection{Second-order reconstruction, limiter, and positivity}
+Primitive gradients solve the weighted least-squares normal equations $A_K\nabla q_K=b_K$ from neighbor-centroid offsets, including exchanged ghost values and boundary values. Face states use $q_f=q_K+\alpha_K\nabla q_K\cdot(x_f-x_K)$. A Barth--Jespersen limiter chooses $0\leq\alpha_K\leq1$ so every extrapolated primitive remains inside local neighbor bounds. Production steady runs ramp the reconstruction factor from zero during startup to one, so the submitted terminal solutions use the full limited linear reconstruction. If reconstructed density or pressure is non-positive, that face side falls back to the admissible cell-centre state; conservative updates are likewise line-searched toward the old state until density and pressure are positive.
+\subsection{Inviscid and viscous fluxes}
+The convective numerical flux is Rusanov/local Lax--Friedrichs, $\hat F^i=\tfrac12[F_n(U_L)+F_n(U_R)]-\tfrac12s_{\max}(U_R-U_L)$, where $s_{\max}=\max(|u_{n,L}|+a_L,|u_{n,R}|+a_R)$ (times the recorded dissipation scale). No separate entropy fix is used. Laminar face velocity and temperature gradients are averaged from neighboring least-squares gradients. They form Newtonian stress and Fourier heat flux; at no-slip walls the normal velocity gradient is imposed from the cell-to-wall distance and the adiabatic temperature-normal gradient is zero. Pressure force and tangential wall shear are accumulated separately, so skin friction excludes viscous normal traction.
+\section{Boundary conditions}
+Farfield faces use a characteristic-style boundary state: incoming information is drawn from the prescribed freestream and outgoing information from the interior. A slip wall reflects normal velocity in the ghost state while retaining tangential velocity; its direct wall state has zero normal velocity. A no-slip adiabatic wall reflects both velocity components so the wall-interpolated velocity is zero, retains wall temperature for zero normal heat flux, and applies direct pressure plus tangential-shear wall fluxes. Consequently \texttt{surface.csv} contains boundary values, not adjacent cell-centre values; the measured slip/no-slip gates are reported in the sanity section.
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lllllll}
+\toprule Case & inviscid flux & viscous flux & reconstruction & limiter & positivity & implicit solver\\\midrule
+naca0012\_m015\_inviscid & Rusanov & disabled & LS linear & Barth--Jespersen & $\rho,p$ fallback & Schwarz LU--SGS\\
+naca0012\_m080\_inviscid & Rusanov & disabled & LS linear & Barth--Jespersen & $\rho,p$ fallback & Schwarz LU--SGS\\
+naca0012\_m200\_inviscid & Rusanov & disabled & LS linear & Barth--Jespersen & $\rho,p$ fallback & Schwarz LU--SGS\\
+naca0012\_m015\_laminar\_re5000 & Rusanov & Newtonian/Fourier & LS linear & Barth--Jespersen & $\rho,p$ fallback & Schwarz LU--SGS\\
+naca0012\_m080\_laminar\_re5000 & Rusanov & Newtonian/Fourier & LS linear & Barth--Jespersen & $\rho,p$ fallback & Schwarz LU--SGS\\
+naca0012\_m200\_laminar\_re5000 & Rusanov & Newtonian/Fourier & LS linear & Barth--Jespersen & $\rho,p$ fallback & Schwarz LU--SGS\\
+cylinder\_m010\_laminar\_re20 & Rusanov & Newtonian/Fourier & LS linear & Barth--Jespersen & $\rho,p$ fallback & Schwarz LU--SGS\\
+cylinder\_m010\_laminar\_re200 & Rusanov & Newtonian/Fourier & LS linear & Barth--Jespersen & $\rho,p$ fallback & Schwarz LU--SGS\\
+\bottomrule\end{longtable}
+}
+\section{Implicit and transient time integration}
+Steady marching uses a local pseudo-time step $\Delta\tau_K=\mathrm{CFL}\,V_K/\lambda_K$. The scalar diagonal contains convective spectral radii $(|u_n|+a)|f|$, a viscous contribution proportional to $\mu|f|/(\rho d)$, and any physical-time coefficient. CFL is ramped geometrically from the supplied initial to maximum value. Each nonlinear iteration applies forward and backward local cell sweeps to the scalar spectral Jacobian; exchanged ghost increments make this a distributed additive-Schwarz LU--SGS relaxation. Global $L_2/L_\infty$ residuals and forces use MPI reductions, and steady acceptance requires the recorded residual decrease plus a stable terminal force plateau.
+For Re200 the true BDF2 inner loop advances exactly $\Delta t=0.01$ to $t=300$. Backward Euler starts the first step; later steps solve $V_K(3U^{n+1}-4U^n+U^{n-1})/(2\Delta t)+R_K(U^{n+1})=0$. Both $U^n$ and $U^{n-1}$ remain frozen throughout every inner iteration, which evaluates the full spatial-plus-physical residual. History shifts only after the inner reduction target or permitted maximum is reached. This is a true physical-time outer/inner algorithm, not pseudo-time-only marching.
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lrrrrr}
+\toprule Case & max steps & CFL initial/max & ramp steps & inner min/max & target\\\midrule
+naca0012\_m015\_inviscid & 20000 & 1.0/100.0 & 2000 & 3/50 & 0.01\\
+naca0012\_m080\_inviscid & 30000 & 1.0/100.0 & 3000 & 3/50 & 0.01\\
+naca0012\_m200\_inviscid & 40000 & 0.2/50.0 & 5000 & 3/80 & 0.01\\
+naca0012\_m015\_laminar\_re5000 & 40000 & 1.0/100.0 & 5000 & 3/80 & 0.01\\
+naca0012\_m080\_laminar\_re5000 & 40000 & 0.5/80.0 & 5000 & 3/80 & 0.01\\
+naca0012\_m200\_laminar\_re5000 & 50000 & 0.2/50.0 & 7000 & 3/100 & 0.01\\
+cylinder\_m010\_laminar\_re20 & 30000 & 1.0/100.0 & 3000 & 3/80 & 0.01\\
+cylinder\_m010\_laminar\_re200 & -- & 1.0/1.0 & 0 & 5/1000 & 0.001\\
+\bottomrule\end{longtable}
+}
+Observed iteration statistics and physical-time controls are:
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lrrr}
+\toprule Case & observed inner min/max/mean & $\Delta t/t_f$ & completed steps\\\midrule
+naca0012\_m015\_inviscid & 3/3/3 & --/-- & 10000\\
+naca0012\_m080\_inviscid & 3/3/3 & --/-- & 10000\\
+naca0012\_m200\_inviscid & 3/3/3 & --/-- & 2120\\
+naca0012\_m015\_laminar\_re5000 & 3/3/3 & --/-- & 10000\\
+naca0012\_m080\_laminar\_re5000 & 3/3/3 & --/-- & 10000\\
+naca0012\_m200\_laminar\_re5000 & 3/3/3 & --/-- & 5503\\
+cylinder\_m010\_laminar\_re20 & 3/3/3 & --/-- & 10000\\
+cylinder\_m010\_laminar\_re200 & 110/1000/172.13 & 0.01/300.0 & 30000\\
+\bottomrule\end{longtable}
+}
+\section{Output, reproducibility, and run status}
+Configure with \path|cmake -S solver -B solver/build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON|, then run \path|cmake --build solver/build -j|. CMake locates MPI, CGNS, METIS, and nlohmann-json and records their resolved paths in the build cache. Regenerate evidence with \path|.venv/bin/python tools/generate_report.py --results results --report report| and the supplied \path|--case-inputs| directory. Each output contains metadata/status JSON, partition diagnostics, residual/force/surface CSV files, the PVTU master plus rank VTU pieces, rank restart pieces, and stdout. The machine-readable run, figure, rank-comparison, spectrum, and sanity manifests accompany this report. Exact 32-rank production commands are retained in the run manifest and printed below.
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lrrrrrl}
+\toprule Case & ranks & steps & time & residual orders & wall s & status\\\midrule
+naca0012\_m015\_inviscid & 32 & 10000 & 0 & 2.59 & 68.044192357 & converged\\
+naca0012\_m080\_inviscid & 32 & 10000 & 0 & 3.93 & 80.693608889 & converged\\
+naca0012\_m200\_inviscid & 32 & 2120 & 0 & 3 & 15.537148082000002 & converged\\
+naca0012\_m015\_laminar\_re5000 & 32 & 10000 & 0 & 2.25 & 96.10867234 & converged\\
+naca0012\_m080\_laminar\_re5000 & 32 & 10000 & 0 & 3.54 & 113.00992271300001 & converged\\
+naca0012\_m200\_laminar\_re5000 & 32 & 5503 & 0 & 3.7 & 79.91413564800001 & converged\\
+cylinder\_m010\_laminar\_re20 & 32 & 10000 & 0 & 1.21 & 56.25327697 & converged\\
+cylinder\_m010\_laminar\_re200 & 32 & 30000 & 300 & 3.28 & 6685.904943099999 & statistically\_periodic\\
+\bottomrule\end{longtable}
+}
+Exact command for naca0012\_m015\_inviscid (source \texttt{run\_manifest.csv}):
+\begin{quote}\footnotesize
+\path|mpirun -np 32 solver/build/cfd_solver solve --case cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_inviscid.json --output solver/results/naca0012_m015_inviscid --report-level full|
+\end{quote}
+Exact command for naca0012\_m080\_inviscid (source \texttt{run\_manifest.csv}):
+\begin{quote}\footnotesize
+\path|mpirun -np 32 solver/build/cfd_solver solve --case cfd_solver_agentic_benchmark/inputs/cases/naca0012_m080_inviscid.json --output solver/results/naca0012_m080_inviscid --report-level full|
+\end{quote}
+Exact command for naca0012\_m200\_inviscid (source \texttt{run\_manifest.csv}):
+\begin{quote}\footnotesize
+\path|mpirun -np 32 solver/build/cfd_solver solve --case cfd_solver_agentic_benchmark/inputs/cases/naca0012_m200_inviscid.json --output solver/results/naca0012_m200_inviscid --report-level full|
+\end{quote}
+Exact command for naca0012\_m015\_laminar\_re5000 (source \texttt{run\_manifest.csv}):
+\begin{quote}\footnotesize
+\path|mpirun -np 32 solver/build/cfd_solver solve --case cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_laminar_re5000.json --output solver/results/naca0012_m015_laminar_re5000 --report-level full|
+\end{quote}
+Exact command for naca0012\_m080\_laminar\_re5000 (source \texttt{run\_manifest.csv}):
+\begin{quote}\footnotesize
+\path|mpirun -np 32 solver/build/cfd_solver solve --case cfd_solver_agentic_benchmark/inputs/cases/naca0012_m080_laminar_re5000.json --output solver/results/naca0012_m080_laminar_re5000 --report-level full|
+\end{quote}
+Exact command for naca0012\_m200\_laminar\_re5000 (source \texttt{run\_manifest.csv}):
+\begin{quote}\footnotesize
+\path|mpirun -np 32 solver/build/cfd_solver solve --case cfd_solver_agentic_benchmark/inputs/cases/naca0012_m200_laminar_re5000.json --output solver/results/naca0012_m200_laminar_re5000 --report-level full|
+\end{quote}
+Exact command for cylinder\_m010\_laminar\_re20 (source \texttt{run\_manifest.csv}):
+\begin{quote}\footnotesize
+\path|mpirun -np 32 solver/build/cfd_solver solve --case cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re20.json --output solver/results/cylinder_m010_laminar_re20 --report-level full|
+\end{quote}
+Exact command for cylinder\_m010\_laminar\_re200 (source \texttt{run\_manifest.csv}):
+\begin{quote}\footnotesize
+\path|mpirun -np 32 solver/build/cfd_solver solve --case cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re200.json --output solver/results/cylinder_m010_laminar_re200 --report-level full|
+\end{quote}
+\section{Results}
+\subsection{Force summary}
+Steady rows are final recorded samples after residual reduction and a stable terminal-force plateau. Re200 uses a post-transient final-half mean; its lift amplitude is half the corresponding range.
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lrrrl}
+\toprule Case & $C_D$ & $C_L$ & $C_m$ & status\\\midrule
+naca0012\_m015\_inviscid & 0.14016 & -0.0025477 & 0.00015574 & converged\\
+naca0012\_m080\_inviscid & 0.008258 & 0.0019118 & 0.00037745 & converged\\
+naca0012\_m200\_inviscid & 0.090995 & 5.9294e-05 & -0.000102 & converged\\
+naca0012\_m015\_laminar\_re5000 & 0.43292 & -0.0010434 & -0.00036509 & converged\\
+naca0012\_m080\_laminar\_re5000 & 0.077839 & 8.8901e-05 & 1.8518e-05 & converged\\
+naca0012\_m200\_laminar\_re5000 & 0.040582 & -3.087e-06 & 3.9917e-06 & converged\\
+cylinder\_m010\_laminar\_re20 & 1.9713 & 0.0042614 & -0.00058525 & converged\\
+cylinder\_m010\_laminar\_re200 & 1.1399 & -0.00034011 & -1.8386e-05 & statistically\_periodic\\
+\bottomrule\end{longtable}
+}
+The pressure/viscous drag decomposition and transient amplitude are:
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lrrrl}
+\toprule Case & pressure drag & viscous drag & $C_L$ amplitude & metric\\\midrule
+naca0012\_m015\_inviscid & 0.14016 & 0 & -- & final\\
+naca0012\_m080\_inviscid & 0.008258 & 0 & -- & final\\
+naca0012\_m200\_inviscid & 0.090995 & 0 & -- & final\\
+naca0012\_m015\_laminar\_re5000 & 0.0024645 & 0.43046 & -- & final\\
+naca0012\_m080\_laminar\_re5000 & 0.060502 & 0.017337 & -- & final\\
+naca0012\_m200\_laminar\_re5000 & 0.013059 & 0.027523 & -- & final\\
+cylinder\_m010\_laminar\_re20 & 0.41058 & 1.5607 & -- & final\\
+cylinder\_m010\_laminar\_re200 & 0.90421 & 0.23571 & 0.33817 & mean, final half\\
+\bottomrule\end{longtable}
+}
+\section{MPI parallelization and METIS partitioning}
+Rank 0 builds the dual cell graph with one edge for every interior face and calls METIS $k$-way partitioning. It then packs and sends each rank only its owned cells, incident faces, boundary tags, and the one-layer off-rank stencil cells needed as ghosts; rank 0 discards the global iterative representation after distribution. Ownership crossings define sorted neighbor lists and exact send/receive global-cell maps. Every halo refresh posts neighbor-scoped \texttt{MPI\_Irecv}/\texttt{MPI\_Isend} operations and waits for completion. Solver iterations never \texttt{Allgather} the full mesh or conservative state. Only scalar/vector global diagnostics such as residual norms and integrated forces use \texttt{MPI\_Allreduce}.
+Representative production-rank rows below expose owned and ghost cells, boundary faces, neighbor degree, and cell-message counts. Their source is each case's \texttt{partition\_diagnostics.csv}; the complete files contain all 32 ranks.
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lrrrrrlrr}
+\toprule Case & rank & owned & ghost & boundary & neighbors & neighbor ranks & send & receive\\\midrule
+naca0012\_m200\_inviscid & 0 & 665 & 65 & 26 & 3 & 1;2;3 & 65 & 65\\
+naca0012\_m200\_inviscid & 16 & 662 & 82 & 0 & 7 & 6;7;17;18;19;22;24 & 81 & 82\\
+naca0012\_m200\_inviscid & 31 & 643 & 49 & 24 & 4 & 24;25;29;30 & 49 & 49\\
+cylinder\_m010\_laminar\_re20 & 0 & 318 & 65 & 0 & 4 & 1;2;3;6 & 65 & 65\\
+cylinder\_m010\_laminar\_re20 & 16 & 318 & 73 & 0 & 6 & 17;21;26;27;30;31 & 73 & 73\\
+cylinder\_m010\_laminar\_re20 & 31 & 323 & 67 & 9 & 6 & 16;20;21;28;29;30 & 68 & 67\\
+\bottomrule\end{longtable}
+}
+\subsection{Rank-count validation}
+The submitted NACA Mach-2 and cylinder Re20 comparisons provide recorded timing, residual, force, owned/ghost, balance, and edge-cut values at two and eight ranks. Increasing ranks reduces owned work per rank but increases the surface-to-volume ratio and halo/message overhead; the available end-to-end timings combine that communication cost with partition and I/O cost and therefore do not isolate it.
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lrrrrrrrrr}
+\toprule Case & ranks & wall s & $C_D$ & $C_L$ & residual metric & owned min/max & ghost mean & balance & edge cut\\\midrule
+cylinder\_m010\_laminar\_re20 & 2 & 643.87 & 2.0333 & 0.003638 & 280 & 5092/5093 & 94.5 & 1 & 102\\
+cylinder\_m010\_laminar\_re20 & 8 & 163.64 & 2.0056 & 0.0020048 & 280.7 & 1265/1284 & 121 & 1.009 & 522\\
+naca0012\_m200\_inviscid & 2 & 204.64 & 0.091007 & 7.2975e-05 & 8.621 & 10405/10411 & 119 & 1 & 122\\
+naca0012\_m200\_inviscid & 8 & 52.629 & 0.091012 & 6.2526e-05 & 8.626 & 2569/2640 & 96.38 & 1.015 & 388\\
+\bottomrule\end{longtable}
+}
+For cylinder\_m010\_laminar\_re20, submitted ranks span 2--8; final-force changes are $\Delta C_D=-0.02769$ and $\Delta C_L=-0.001633$, the recorded residual-metric change is 0.655, and the wall-time ratio is 3.935 (low-rank/high-rank). The load-balance-ratio change is 0.008444; edge cut and ghost counts are recorded rather than used to infer unmeasured communication overhead.
+For naca0012\_m200\_inviscid, submitted ranks span 2--8; final-force changes are $\Delta C_D=5.375e-06$ and $\Delta C_L=-1.045e-05$, the recorded residual-metric change is 0.004949, and the wall-time ratio is 3.888 (low-rank/high-rank). The load-balance-ratio change is 0.01432; edge cut and ghost counts are recorded rather than used to infer unmeasured communication overhead.
+Exact rank-comparison commands and source CSV paths are retained without abbreviation in \texttt{rank\_comparison\_manifest.csv}.
+\section{Field, surface, and history results}
+\subsection{naca0012\_m015\_inviscid}
+Reported status: \textbf{converged}. 
+Final steady evidence gives $C_D=0.14016$ and $C_L=-0.0025477$ with surface $C_p$ range -2.984--2.079. The small lift at the supplied zero incidence is consistent with upper/lower symmetry. Final cell fields span Mach 0.005075--0.1653 and pressure 30.25--32.79. The near-body views expose the low-Mach pressure field. Slip-normal velocity and zero viscous force are checked directly.
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_inviscid_residual}: Global residual-norm history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_inviscid_residual.png}
+\caption{Global residual-norm history.}
+\label{fig:naca0012_m015_inviscid_residual}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_inviscid_forces}: Aerodynamic force-coefficient history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_inviscid_forces.png}
+\caption{Aerodynamic force-coefficient history.}
+\label{fig:naca0012_m015_inviscid_forces}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_inviscid_surface_cp}: Wall pressure coefficient.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_inviscid_surface_cp.png}
+\caption{Wall pressure coefficient.}
+\label{fig:naca0012_m015_inviscid_surface_cp}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_inviscid_mach}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_inviscid_mach.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m015_inviscid_mach}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_inviscid_mach_detail}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_inviscid_mach_detail.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m015_inviscid_mach_detail}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_inviscid_pressure}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_inviscid_pressure.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m015_inviscid_pressure}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_inviscid_pressure_detail}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_inviscid_pressure_detail.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m015_inviscid_pressure_detail}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m080\_inviscid}
+Reported status: \textbf{converged}. 
+Final steady evidence gives $C_D=0.008258$ and $C_L=0.0019118$ with surface $C_p$ range -0.939--1.17. The small lift at the supplied zero incidence is consistent with upper/lower symmetry. Final cell fields span Mach 0.02367--1.267 and pressure 0.6466--1.701. The near-body views expose the transonic compressibility and possible localized steep gradients. Slip-normal velocity and zero viscous force are checked directly.
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_inviscid_residual}: Global residual-norm history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_inviscid_residual.png}
+\caption{Global residual-norm history.}
+\label{fig:naca0012_m080_inviscid_residual}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_inviscid_forces}: Aerodynamic force-coefficient history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_inviscid_forces.png}
+\caption{Aerodynamic force-coefficient history.}
+\label{fig:naca0012_m080_inviscid_forces}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_inviscid_surface_cp}: Wall pressure coefficient.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_inviscid_surface_cp.png}
+\caption{Wall pressure coefficient.}
+\label{fig:naca0012_m080_inviscid_surface_cp}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_inviscid_mach}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_inviscid_mach.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m080_inviscid_mach}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_inviscid_mach_detail}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_inviscid_mach_detail.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m080_inviscid_mach_detail}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_inviscid_pressure}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_inviscid_pressure.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m080_inviscid_pressure}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_inviscid_pressure_detail}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_inviscid_pressure_detail.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m080_inviscid_pressure_detail}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m200\_inviscid}
+Reported status: \textbf{converged}. 
+Final steady evidence gives $C_D=0.090995$ and $C_L=5.9294e-05$ with surface $C_p$ range -0.3501--1.724. The small lift at the supplied zero incidence is consistent with upper/lower symmetry. Final cell fields span Mach 0.02819--2.265 and pressure 0.003546--1.041. The near-body views expose the supersonic compression/expansion structure, with shocks broadened by Rusanov dissipation. Slip-normal velocity and zero viscous force are checked directly.
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_inviscid_residual}: Global residual-norm history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_inviscid_residual.png}
+\caption{Global residual-norm history.}
+\label{fig:naca0012_m200_inviscid_residual}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_inviscid_forces}: Aerodynamic force-coefficient history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_inviscid_forces.png}
+\caption{Aerodynamic force-coefficient history.}
+\label{fig:naca0012_m200_inviscid_forces}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_inviscid_surface_cp}: Wall pressure coefficient.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_inviscid_surface_cp.png}
+\caption{Wall pressure coefficient.}
+\label{fig:naca0012_m200_inviscid_surface_cp}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_inviscid_mach}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_inviscid_mach.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m200_inviscid_mach}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_inviscid_mach_detail}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_inviscid_mach_detail.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m200_inviscid_mach_detail}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_inviscid_pressure}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_inviscid_pressure.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m200_inviscid_pressure}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_inviscid_pressure_detail}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_inviscid_pressure_detail.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m200_inviscid_pressure_detail}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m015\_laminar\_re5000}
+Reported status: \textbf{converged}. 
+Final steady evidence gives $C_D=0.43292$ and $C_L=-0.0010434$ with surface $C_p$ range -0.9652--0.9606. The small lift at the supplied zero incidence is consistent with upper/lower symmetry. Final cell fields span Mach 1.646e-05--0.1728 and pressure 31.26--32.27. The near-body views expose the low-Mach pressure field. No-slip wall speed and nonzero skin friction are checked directly.
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_laminar_re5000_residual}: Global residual-norm history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_laminar_re5000_residual.png}
+\caption{Global residual-norm history.}
+\label{fig:naca0012_m015_laminar_re5000_residual}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_laminar_re5000_forces}: Aerodynamic force-coefficient history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_laminar_re5000_forces.png}
+\caption{Aerodynamic force-coefficient history.}
+\label{fig:naca0012_m015_laminar_re5000_forces}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_laminar_re5000_surface_cp}: Wall pressure coefficient and skin-friction coefficient.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_laminar_re5000_surface_cp.png}
+\caption{Wall pressure coefficient and skin-friction coefficient.}
+\label{fig:naca0012_m015_laminar_re5000_surface_cp}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_laminar_re5000_mach}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_laminar_re5000_mach.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m015_laminar_re5000_mach}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_laminar_re5000_mach_detail}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_laminar_re5000_mach_detail.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m015_laminar_re5000_mach_detail}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_laminar_re5000_pressure}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_laminar_re5000_pressure.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m015_laminar_re5000_pressure}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m015_laminar_re5000_pressure_detail}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m015_laminar_re5000_pressure_detail.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m015_laminar_re5000_pressure_detail}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m080\_laminar\_re5000}
+Reported status: \textbf{converged}. 
+Final steady evidence gives $C_D=0.077839$ and $C_L=8.8901e-05$ with surface $C_p$ range -0.2223--1.082. The small lift at the supplied zero incidence is consistent with upper/lower symmetry. Final cell fields span Mach 0.0003484--0.9814 and pressure 0.9053--1.706. The near-body views expose the transonic compressibility and possible localized steep gradients. No-slip wall speed and nonzero skin friction are checked directly.
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_laminar_re5000_residual}: Global residual-norm history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_laminar_re5000_residual.png}
+\caption{Global residual-norm history.}
+\label{fig:naca0012_m080_laminar_re5000_residual}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_laminar_re5000_forces}: Aerodynamic force-coefficient history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_laminar_re5000_forces.png}
+\caption{Aerodynamic force-coefficient history.}
+\label{fig:naca0012_m080_laminar_re5000_forces}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_laminar_re5000_surface_cp}: Wall pressure coefficient and skin-friction coefficient.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_laminar_re5000_surface_cp.png}
+\caption{Wall pressure coefficient and skin-friction coefficient.}
+\label{fig:naca0012_m080_laminar_re5000_surface_cp}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_laminar_re5000_mach}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_laminar_re5000_mach.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m080_laminar_re5000_mach}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_laminar_re5000_mach_detail}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_laminar_re5000_mach_detail.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m080_laminar_re5000_mach_detail}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_laminar_re5000_pressure}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_laminar_re5000_pressure.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m080_laminar_re5000_pressure}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m080_laminar_re5000_pressure_detail}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m080_laminar_re5000_pressure_detail.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m080_laminar_re5000_pressure_detail}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m200\_laminar\_re5000}
+Reported status: \textbf{converged}. 
+Final steady evidence gives $C_D=0.040582$ and $C_L=-3.087e-06$ with surface $C_p$ range 0.2504--0.6. The small lift at the supplied zero incidence is consistent with upper/lower symmetry. Final cell fields span Mach 0.0003823--2.05 and pressure 0.09687--1.02. The near-body views expose the supersonic compression/expansion structure, with shocks broadened by Rusanov dissipation. No-slip wall speed and nonzero skin friction are checked directly.
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_laminar_re5000_residual}: Global residual-norm history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_laminar_re5000_residual.png}
+\caption{Global residual-norm history.}
+\label{fig:naca0012_m200_laminar_re5000_residual}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_laminar_re5000_forces}: Aerodynamic force-coefficient history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_laminar_re5000_forces.png}
+\caption{Aerodynamic force-coefficient history.}
+\label{fig:naca0012_m200_laminar_re5000_forces}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_laminar_re5000_surface_cp}: Wall pressure coefficient and skin-friction coefficient.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_laminar_re5000_surface_cp.png}
+\caption{Wall pressure coefficient and skin-friction coefficient.}
+\label{fig:naca0012_m200_laminar_re5000_surface_cp}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_laminar_re5000_mach}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_laminar_re5000_mach.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m200_laminar_re5000_mach}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_laminar_re5000_mach_detail}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_laminar_re5000_mach_detail.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m200_laminar_re5000_mach_detail}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_laminar_re5000_pressure}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_laminar_re5000_pressure.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m200_laminar_re5000_pressure}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:naca0012_m200_laminar_re5000_pressure_detail}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/naca0012_m200_laminar_re5000_pressure_detail.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:naca0012_m200_laminar_re5000_pressure_detail}
+\end{figure}
+\clearpage
+\subsection{cylinder\_m010\_laminar\_re20}
+Reported status: \textbf{converged}. 
+Final steady force evidence gives $C_D=1.9713$ and $C_L=0.0042614$ with surface $C_p$ range -0.7227--0.6678. Final cell fields span Mach 0.0006136--0.1193 and pressure 70.53--72.79. At Re20 the terminal force plateau and symmetric near wake are consistent with the expected steady laminar regime; the wake view is plotted evidence rather than a separately fitted wake metric.
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re20_residual}: Global residual-norm history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re20_residual.png}
+\caption{Global residual-norm history.}
+\label{fig:cylinder_m010_laminar_re20_residual}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re20_forces}: Aerodynamic force-coefficient history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re20_forces.png}
+\caption{Aerodynamic force-coefficient history.}
+\label{fig:cylinder_m010_laminar_re20_forces}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re20_surface_cp}: Wall pressure coefficient and skin-friction coefficient.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re20_surface_cp.png}
+\caption{Wall pressure coefficient and skin-friction coefficient.}
+\label{fig:cylinder_m010_laminar_re20_surface_cp}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re20_mach}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re20_mach.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:cylinder_m010_laminar_re20_mach}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re20_mach_detail}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re20_mach_detail.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:cylinder_m010_laminar_re20_mach_detail}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re20_pressure}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re20_pressure.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:cylinder_m010_laminar_re20_pressure}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re20_pressure_detail}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re20_pressure_detail.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:cylinder_m010_laminar_re20_pressure_detail}
+\end{figure}
+\clearpage
+\subsection{cylinder\_m010\_laminar\_re200}
+Reported status: \textbf{statistically\_periodic}. 
+The final-half/post-transient evidence gives mean $C_D=1.1399$, mean $C_L=-0.00034011$, lift amplitude 0.33817, and dominant frequency $f=0.16667$ and $St=0.16667$ over $t=150.01$--$t=300$. The alternating lift and wake velocity structure demonstrate periodic shedding; 99.6\% of physical steps met the inner target. The full numerical spectrum is in \texttt{re200\_lift\_spectrum.csv}.
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re200_residual}: Global residual-norm history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re200_residual.png}
+\caption{Global residual-norm history.}
+\label{fig:cylinder_m010_laminar_re200_residual}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re200_forces}: Aerodynamic force-coefficient history.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re200_forces.png}
+\caption{Aerodynamic force-coefficient history.}
+\label{fig:cylinder_m010_laminar_re200_forces}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re200_surface_cp}: Wall pressure coefficient and skin-friction coefficient.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re200_surface_cp.png}
+\caption{Wall pressure coefficient and skin-friction coefficient.}
+\label{fig:cylinder_m010_laminar_re200_surface_cp}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re200_mach}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re200_mach.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:cylinder_m010_laminar_re200_mach}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re200_mach_detail}: Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re200_mach_detail.png}
+\caption{Cell-polygon mach number from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:cylinder_m010_laminar_re200_mach_detail}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re200_pressure}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re200_pressure.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:cylinder_m010_laminar_re200_pressure}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re200_pressure_detail}: Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re200_pressure_detail.png}
+\caption{Cell-polygon pressure from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:cylinder_m010_laminar_re200_pressure_detail}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re200_velocity_magnitude_wake}: Cell-polygon velocity magnitude from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re200_velocity_magnitude_wake.png}
+\caption{Cell-polygon velocity magnitude from final ASCII VTU field; colour range is clipped to the 1st--99th percentiles.}
+\label{fig:cylinder_m010_laminar_re200_velocity_magnitude_wake}
+\end{figure}
+The plotted quantity is introduced in Figure~\ref{fig:cylinder_m010_laminar_re200_lift_spectrum}: Post-transient lift spectrum calculated from forces.csv; dashed line marks the dominant frequency.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.88\linewidth]{figures/cylinder_m010_laminar_re200_lift_spectrum.png}
+\caption{Post-transient lift spectrum calculated from forces.csv; dashed line marks the dominant frequency.}
+\label{fig:cylinder_m010_laminar_re200_lift_spectrum}
+\end{figure}
+\clearpage
+\section{Sanity checks}
+The machine-readable \texttt{sanity\_checks.json} records positive density/pressure, nontrivial surface pressure, force behavior, final-wall checks, and exact Mach/pressure figure mappings. Viscous walls require maximum reported wall speed at most $10^{-6}$ and nonzero $|C_f|>10^{-12}$; inviscid slip walls require normal speed at most $10^{-6}$, nonzero tangential speed, and final viscous force at most $10^{-10}$. The manifest also confirms that plotted Mach and pressure variables match their file names and source PVTU masters. A failed measured gate forces status \texttt{failed}; it is not hidden by the solver's status claim.
+\section{Limitations and failure analysis}
+All required runs completed, so there is no concealed failed production case. Accuracy remains limited by the supplied mesh resolution, constant-viscosity laminar model, scalar-Jacobian LU--SGS approximation, and the deliberately robust but diffusive Rusanov flux; shocks and thin boundary layers are consequently broader than with a less dissipative flux and adapted high-resolution mesh. Reconstruction is first order during its documented startup ramp before reaching the terminal second-order setting. No turbulence, transition, moving mesh, or three-dimensional physics is claimed. The Re200 field output has no cell vorticity array, so its wake figure uses velocity magnitude and cannot expose signed vortex cores as directly. Field colourbars are cellwise 1st--99th percentile clipped, so they suppress extrema and must not be used to infer exact bounds. Rank comparisons are limited to two and eight ranks in one execution environment; they do not establish strong scaling or isolate communication from partitioning and I/O. With more time, the priorities would be a less dissipative shock flux, mesh/adaptation studies, explicit vorticity output, block or Krylov implicit solves, and broader rank scaling.
+\section{Software design and extension points}
+Case parsing, CGNS topology, distributed ownership, halo exchange, thermodynamics/fluxes, reconstruction, residual assembly, time integration, and output are separate modules. A three-dimensional extension would add the third momentum component and 3-D face/cell geometry; a general equation of state would replace primitive/conservative conversion and wave-speed closures; RANS or multispecies models would extend the state and flux kernels while retaining partition ownership and typed neighbor exchange. These are design extension points, not implemented capabilities.
+\end{document}
