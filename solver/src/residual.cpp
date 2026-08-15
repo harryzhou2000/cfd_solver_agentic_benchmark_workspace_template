@@ -117,8 +117,13 @@ void Solver::computeResidual(bool add_bdf2_source, double dt_phys) {
       wcx.push_back(fc.x); wcy.push_back(fc.y);
       wSx.push_back(f.Sx); wSy.push_back(f.Sy); wlen.push_back(len);
       wp.push_back(pwall);
-      wtx.push_back(txx*f.Sx + txy*f.Sy);
-      wty.push_back(txy*f.Sx + tyy*f.Sy);
+      // Wall viscous traction stored for force integration. The face normal S
+      // points out of the fluid (into the body); the tangential traction the
+      // fluid exerts on the body is -tau.n projected tangentially, so we store
+      // -tau.S to match the pressure-force sign convention (p-p_inf)*S which
+      // yields positive drag for a body in freestream.
+      wtx.push_back(-(txx*f.Sx + txy*f.Sy));
+      wty.push_back(-(txy*f.Sx + tyy*f.Sy));
       wRho.push_back((cg>=0 && cg<no) ? Wrho[cg] : Wrho[lc]);
     }
   }

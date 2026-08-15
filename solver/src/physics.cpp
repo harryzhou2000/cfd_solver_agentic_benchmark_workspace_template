@@ -114,6 +114,14 @@ Cons numericalInviscidFlux(const Physics& p, const Prim& L, const Prim& R,
 Cons viscousNormalFlux(const Physics& p, double u, double v, double T,
                         double ux, double uy, double vx, double vy,
                         double Tx, double Ty, double nx, double ny) {
+  // Physical viscous flux in direction n for the compressible NS in
+  // conservative form  dU/dt + div(F_inviscid - tau_dot + q) = 0, i.e. the
+  // viscous part of the numerical flux (to ADD to the inviscid flux) is
+  //   F_visc = [0, -(tau.n)_x, -(tau.n)_y, -(u*tau_nx + v*tau_ny) + q.n]
+  // with tau the Newtonian stress tensor and q = -k grad T (Fourier). The
+  // NEGATIVE sign on the stress terms is essential: the stress removes
+  // momentum/kinetic energy (dissipation). A flipped sign makes viscosity
+  // anti-diffusive and blows up low-Mach viscous cases from step 0.
   Cons F;  // zero mass entry
   if (!p.laminar || p.mu <= 0.0) return F;
   double mu = p.mu;
@@ -123,12 +131,12 @@ Cons viscousNormalFlux(const Physics& p, double u, double v, double T,
   double txy = mu*(uy + vx);
   double qx = -p.k_thermal * Tx;
   double qy = -p.k_thermal * Ty;
-  F.rhou() = txx*nx + txy*ny;
-  F.rhov() = txy*nx + tyy*ny;
-  // energy flux: u*(tau.n_x) + v*(tau.n_y) - q.n  (n=(nx,ny))
-  double taunx = txx*nx + txy*ny;
-  double tauny = txy*nx + tyy*ny;
-  F.rhoE() = u*taunx + v*tauny - (qx*nx + qy*ny);
+  double taunx = txx*nx + txy*ny;   // (tau.n)_x
+  double tauny = txy*nx + tyy*ny;   // (tau.n)_y
+  double qn = qx*nx + qy*ny;        // q.n  (heat flux in direction n)
+  F.rhou() = -taunx;
+  F.rhov() = -tauny;
+  F.rhoE() = -(u*taunx + v*tauny) + qn;
   return F;
 }
 

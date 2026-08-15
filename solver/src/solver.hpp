@@ -117,10 +117,16 @@ public:
  // global residual norms: per-equation L2, total L2, linf (MPI-reduced)
  void computeResidualNorms();
  void residualComponentsL2(double out[4]) const;
- // estimate local pseudo-time step (CFL * A / spectral radius)
- double localDt(int local_cell, double cfl) const;
+// estimate local pseudo-time step (CFL * A / spectral radius)
+double localDt(int local_cell, double cfl) const;
+ // positivity-preserving update limiter: scale dU per owned cell so the new
+ // state stays admissible (rho>=floor, p>=floor, |V|<=cap). Prevents the
+ // single-cell momentum runaway that cascades into NaN blowups.
+ void limitUpdatePositivity();
+ // repair inadmissible owned-cell states: floor rho/p, cap velocity magnitude.
+ void repairState();
 
- // ---- I/O (io.cpp) ----
+// ---- I/O (io.cpp) ----
  void writeMetadata(const std::string& status) const;
  void writeRunStatus() const;
  void appendResiduals(int step, double phys_time, int inner_iter,

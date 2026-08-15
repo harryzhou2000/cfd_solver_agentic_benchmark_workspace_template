@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.tr import Triangulation
+from matplotlib.tri import Triangulation
 
 def read_csv(path):
     rows = []
@@ -17,14 +17,15 @@ def read_csv(path):
 def read_vtu_ascii(path):
     txt = open(path).read()
     def block(name, comp=1):
-        m = re.search(r'<DataArray type="[^"]*" Name="%s"[^>]*>(.*?)</DataArray>' % name, txt, re.S)
+        m = re.search(r'<(?:DataArray|CellArray) type="[^"]*" Name="%s"[^>]*>(.*?)</(?:DataArray|CellArray)>' % name, txt, re.S)
         if not m:
             return None
-        vals = np.fromstring(m.group(1).strip(), sep=' ')
+        vals = np.array(m.group(1).split(), dtype=float)
         if comp > 1:
             vals = vals.reshape(-1, comp)
         return vals
-    pts = block("Points", comp=3)
+    pm = re.search(r'<Points><DataArray[^>]*>(.*?)</DataArray>', txt, re.S)
+    pts = np.fromstring(pm.group(1).strip(), sep=" ").reshape(-1,3) if pm else None
     conn = block("connectivity")
     offs = block("offsets")
     if pts is None or conn is None:

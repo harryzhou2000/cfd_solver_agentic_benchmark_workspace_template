@@ -50,15 +50,24 @@ void Solver::setup(const CaseDef& caseDef, int r, int nr) {
     if (const char* s = std::getenv("CFD2D_RUSANOV_SCALE")) sc = std::atof(s);
     phys.rusanov_scale = sc;
   }
-  // Documented deviation: cap the steady pseudo-CFL at 10 for stability with
-  // the simplified implicit + capped limiter (the case allows stricter settings;
-  // the report records this). The transient Re200 keeps its fixed CFL=1.
-  if (cd.rc.type == RunType::Steady && cd.rc.cfl_max > 2.0) {
-    run_notes += " cfl_max capped at 2 (documented stricter setting for stability with the simplified implicit);";
-    cd.rc.cfl_max = 2.0;
+  // Documented deviation: cap the steady pseudo-CFL for stability with the
+  // simplified (scalar point-implicit) LU-SGS + capped limiter. The case files
+  // request cfl_max up to 100, but the scalar implicit cannot control the
+  // low-Mach pressure/velocity coupling at high CFL, so a conservative cap is
+  // required. Default cap 2.0; override with CFD2D_CFL_CAP (e.g. 0.2 for
+  // viscous low-Mach cases). The transient Re200 keeps its fixed CFL=1.
+  if (cd.rc.type == RunType::Steady) {
+    double cfl_cap = 2.0;
+    if (const char* e = std::getenv("CFD2D_CFL_CAP")) cfl_cap = std::atof(e);
+    if (cd.rc.cfl_max > cfl_cap) {
+      run_notes += " cfl_max capped at " + std::to_string(cfl_cap) + " (documented stricter setting for stability with the simplified implicit);";
+      cd.rc.cfl_max = cfl_cap;
+    }
+    if (const char* e = std::getenv("CFD2D_CFL_INIT")) cd.rc.cfl_initial = std::atof(e);
+    if (const char* e = std::getenv("CFD2D_CFL_RAMP")) cd.rc.pseudo_cfl_ramp_steps = std::atoi(e);
+    if (cd.rc.pseudo_cfl_ramp_steps > 500 && !std::getenv("CFD2D_CFL_RAMP"))
+      cd.rc.pseudo_cfl_ramp_steps = 500;
   }
-  if (cd.rc.type == RunType::Steady && cd.rc.pseudo_cfl_ramp_steps > 500)
-    cd.rc.pseudo_cfl_ramp_steps = 500;
   true_bdf2_inner_loop = (cd.rc.type == RunType::Transient);
   git_revision = gitRev();
   // rank 0 loads the mesh, partitions, and scatters the local mesh to each rank
@@ -149,6 +158,9 @@ void Solver::run() {
     int n_inner = cd.laminar ? 5 : 4;   // nonlinear inner iterations per pseudo-step
     if (n_inner > cd.rc.max_inner) n_inner = cd.rc.max_inner;
     if (n_inner < cd.rc.min_inner) n_inner = cd.rc.min_inner;
+    if (const char* e = std::getenv("CFD2D_INNER")) n_inner = std::atoi(e);
+    if (n_inner > cd.rc.max_inner) n_inner = cd.rc.max_inner;
+    if (n_inner < 1) n_inner = 1;
     double target = cd.rc.residual_reduction_target;
     int max_steps = cd.rc.max_steps;
     for (int step = 0; step < max_steps; ++step) {
@@ -218,6 +230,17 @@ void Solver::run() {
     residual_reduction_orders = 0.0;
   }
 
+  // Recompute the residual at the final state so surface/field/forces all
+  // correspond to the same final state, and append the final force + residual
+  // rows at final_step (forces[-1].step == final_step, matching run_status).
+  exchangeHalo();
+  computePrimitive();
+  computeGradients();
+  computeLimiters();
+  computeResidual(false, 0.0);
+  computeResidualNorms();
+  appendForces(final_step, final_phys_time);
+  appendResiduals(final_step, final_phys_time, last_inner_iter, cfl_current, 0.0);
   wall_time_seconds = MPI_Wtime() - wall_start;
   // write final outputs (the last force row was just written and matches the
   // final field/surface state, since no further state change occurs)

@@ -83,6 +83,6 @@ target_link_libraries(inspect_mesh PRIVATE ${CFD_LIBS} MPI::MPI_CXX)
 
 # Unit tests
 enable_testing()
-add_executable(unit_tests src/tools/unit_tests.cpp)
+add_executable(unit_tests src/tools/unit_tests.cpp src/types.cpp src/physics.cpp)
 target_link_libraries(unit_tests PRIVATE ${CFD_LIBS} MPI::MPI_CXX)
 add_test(NAME unit_tests COMMAND unit_tests)
