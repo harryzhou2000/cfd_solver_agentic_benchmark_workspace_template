@@ -294,7 +294,7 @@ void Solver::writeFieldFinal() const {
   for (const auto& c : cells){ Prim w=phys.gas.primFromCons(Cons{ {c.U[0],c.U[1],c.U[2],c.U[3]} }); f << w.u << " " << w.v << " 0 "; } f << "</DataArray>\n";
   f << "        <DataArray type=\"Float64\" Name=\"pressure\" format=\"ascii\">";
   for (const auto& c : cells){ Prim w=phys.gas.primFromCons(Cons{ {c.U[0],c.U[1],c.U[2],c.U[3]} }); f << w.p << " "; } f << "</DataArray>\n";
-  f << "        <DataArray type=\"Float64\" Name=\"mach\" format=\"ascii\">";
+  f << "        <DataArray type=\"Float64\" Name=\"sound_speed\" format=\"ascii\">";
   for (const auto& c : cells){ Prim w=phys.gas.primFromCons(Cons{ {c.U[0],c.U[1],c.U[2],c.U[3]} }); f << phys.gas.soundSpeed(w) << " "; } f << "</DataArray>\n";
   f << "        <DataArray type=\"Float64\" Name=\"mach_number\" format=\"ascii\">";
   for (const auto& c : cells){ Prim w=phys.gas.primFromCons(Cons{ {c.U[0],c.U[1],c.U[2],c.U[3]} }); double a=phys.gas.soundSpeed(w); f << std::sqrt(w.u*w.u+w.v*w.v)/std::max(a,1e-30) << " "; } f << "</DataArray>\n";
