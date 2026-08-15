@@ -43,6 +43,108 @@ Cons numericalInviscidFlux(const Physics& p, const Prim& L, const Prim& R,
   for (int i = 0; i < NEQ; ++i) F.v[i] = 0.5 * (FL.v[i] + FR.v[i]);
   double aL = g.soundSpeed(L), aR = g.soundSpeed(R);
   double unL = L.u*nx + L.v*ny, unR = R.u*nx + R.v*ny;
+  if (p.use_ausmup) {
+    // AUSM+-up (Liou 2006, "A Sequel to AUSM, Part II", JCP 214:137-170).
+    // Split flux F = F_conv + F_pres with low-Mach pressure-velocity coupling.
+    // Formulas cross-confirmed vs SU2 (ausm_slau.cpp), myFoam (AUSMplusUpFlux.C),
+    // and CATO (ausm_plus_solver.f90, which cites Liou eq numbers inline).
+    //   F_conv = m12 * [1, u, v, H]^T_upwind  (mass flux m12 carries rho_up)
+    //   F_pres = [0, p12*nx, p12*ny, 0]^T      (pressure only in momentum)
+    // Two "-up" low-Mach terms (the key ingredients pstab lacked, done RIGHT):
+    //   M_p : pressure jump  -> Mach/mass flux   (Delta-p coupling, Eq.21)
+    //   p_u : normal-vel jump -> pressure        (Delta-Un coupling, Eq.26/75)
+    // Constants (Liou 2006): beta=1/8 (M4), alpha=3/16 all-speed (P5), sigma=1,
+    //   K_p=0.25, K_u=0.75 (cross-confirmed by 4 independent implementations).
+    // Consistency: at uniform flow M4+ + M4- = M and P5+ + P5- = 1 (verified
+    // algebraically and by unit test), so the flux reduces to the physical flux.
+    const double gm1 = g.gm1();
+    double rhoL = std::max(L.rho,1e-30), rhoR = std::max(R.rho,1e-30);
+    double pL = L.p, pR = R.p;
+    double aLv = g.soundSpeed(L), aRv = g.soundSpeed(R);
+    double HL = (g.consFromPrim(L).rhoE() + pL) / rhoL;  // H=(E+p)/rho
+    double HR = (g.consFromPrim(R).rhoE() + pR) / rhoR;
+    // --- interface sound speed a_{1/2} (Liou Eq.28-30): enthalpy-based a* then
+    //   per-side signed denominator, then min. At low Mach (|Un|<<a*) this
+    //   reduces to a*, but the exact form stays robust through the startup
+    //   transient where local cells may be briefly supersonic. ---
+    double coef = 2.0*gm1/(g.gamma+1.0);
+    double aStarL = std::sqrt(std::max(coef*std::fabs(HL), 1e-30));
+    double aStarR = std::sqrt(std::max(coef*std::fabs(HR), 1e-30));
+    double aHatL = aStarL*aStarL / std::max(aStarL,  unL);
+    double aHatR = aStarR*aStarR / std::max(aStarR, -unR);
+    double a12 = std::min(aHatL, aHatR);
+    a12 = std::max(a12, 1e-12);   // positivity floor
+    // Mach numbers (denominator is a_{1/2}, confirmed)
+    double ML = unL / a12, MR = unR / a12;
+    // --- Mach splitting M4 (Liou Eq.20, beta=1/8): M4+ + M4- = M ---
+    const double beta_m4 = 1.0/8.0;
+    auto M4p = [&](double M)->double{
+      if (M >= 1.0) return 0.5*(M+M);
+      if (M <= -1.0) return 0.0;
+      double m1 = M+1.0, m2 = M*M-1.0;
+      return 0.25*m1*m1 + beta_m4*m2*m2;
+    };
+    auto M4m = [&](double M)->double{
+      if (M >= 1.0) return 0.0;
+      if (M <= -1.0) return 0.5*(M+M);   // M<0: 0.5*(M-|M|)=M
+      double m1 = M-1.0, m2 = M*M-1.0;
+      return -0.25*m1*m1 - beta_m4*m2*m2;
+    };
+    // --- low-Mach scaling f_a (Eq.70-72): M0^2=min(1,max(Mbar^2,Minf^2)), f_a=M0(2-M0) ---
+    double Mbar2 = 0.5*(unL*unL + unR*unR) / (a12*a12);
+    double Minf2 = (p.ausmup_mcut > 0.0) ? p.ausmup_mcut*p.ausmup_mcut : 0.09;
+    double M0sq = std::min(1.0, std::max(Mbar2, Minf2));
+    double M0 = std::sqrt(M0sq);
+    double fa = M0*(2.0 - M0);            // f_a(0)=0, f_a(1)=1
+    fa = std::max(fa, 1e-6);              // avoid 1/fa singularity
+    // --- P5 pressure splitting (Eq.24), all-speed alpha (Eq.76): alpha=(3/16)(-4+5 fa^2) ---
+    double alpha_p5 = (3.0/16.0)*(-4.0 + 5.0*fa*fa);
+    auto P5p = [&](double M)->double{
+      if (M >= 1.0) return 1.0;
+      if (M <= -1.0) return 0.0;
+      double m1 = M+1.0, m2 = M*M-1.0;
+      return 0.25*m1*m1*(2.0-M) + alpha_p5*M*m2*m2;
+    };
+    auto P5m = [&](double M)->double{
+      if (M >= 1.0) return 0.0;
+      if (M <= -1.0) return 1.0;
+      double m1 = M-1.0, m2 = M*M-1.0;
+      return 0.25*m1*m1*(2.0+M) - alpha_p5*M*m2*m2;
+    };
+    // --- M_p: pressure-jump -> Mach coupling (Eq.21). rho_{1/2}=0.5(rhoL+rhoR). ---
+    //   M_p = -(Kp/fa) * max(1 - sigma*Mbar^2, 0) * (pR-pL)/(rho12*a12^2)
+    double rho12 = 0.5*(rhoL + rhoR);
+    double sigma = 1.0;
+    double Kp = p.ausmup_kp;
+    double Mp = 0.0;
+    if (Kp > 0.0) {
+      double cut = std::max(1.0 - sigma*Mbar2, 0.0);
+      Mp = -(Kp/fa) * cut * (pR - pL) / (rho12 * a12 * a12);
+    }
+    double M12 = M4p(ML) + M4m(MR) + Mp;
+    // --- p_{1/2} (Eq.75): P5*p + p_u, where p_u is the velocity-jump -> pressure coupling ---
+    double PpL = P5p(ML), PmR = P5m(MR);
+    double p12 = PpL*pL + PmR*pR;
+    double Ku = p.ausmup_ku;
+    if (Ku > 0.0) {
+      // p_u = -Ku * P5+(ML)*P5-(MR) * (rhoL+rhoR) * (fa*a12) * (unR-unL)   (Eq.26)
+      // This damps the high-freq pressure mode driven by normal-velocity jumps
+      // (the cap-1.0 blowup mode); the shedding shear is mostly TANGENTIAL so
+      // unR-unL across shear-aligned faces is small -> minimal over-damping.
+      double pu = -Ku * PpL * PmR * (rhoL + rhoR) * (fa * a12) * (unR - unL);
+      p12 += pu;
+    }
+    // --- mass flux + upwind convective state (chosen by sign of M12) ---
+    double m12 = a12 * M12;               // velocity scale (rho enters via rho_up)
+    double rho_up, u_up, v_up, H_up;
+    if (m12 >= 0.0) { rho_up = rhoL; u_up = L.u; v_up = L.v; H_up = HL; }
+    else            { rho_up = rhoR; u_up = R.u; v_up = R.v; H_up = HR; }
+    F.rho()  = m12 * rho_up;
+    F.rhou() = m12 * rho_up * u_up + p12 * nx;
+    F.rhov() = m12 * rho_up * v_up + p12 * ny;
+    F.rhoE() = m12 * rho_up * H_up;       // rho*H = rho*E + p (pressure carried in energy)
+    return F;
+  }
   if (!p.use_roe) {
     // Rusanov / local Lax-Friedrichs: -0.5*alpha*(R-L), alpha=max(|un|+a)
     double alpha = std::max(std::fabs(unL) + aL, std::fabs(unR) + aR) * p.rusanov_scale;
@@ -51,6 +153,49 @@ Cons numericalInviscidFlux(const Physics& p, const Prim& L, const Prim& R,
     F.rhov() -= 0.5*alpha*(R.rho*R.v - L.rho*L.v);
     Cons UR = g.consFromPrim(R), UL = g.consFromPrim(L);
     F.rhoE() -= 0.5*alpha*(UR.rhoE() - UL.rhoE());
+    return F;
+  }
+  if (p.use_hllc) {
+    // HLLC (Harten-Lax-van Leer-Contact, Toro) 3-wave solver. Resolves the
+    // contact/shear wave (less dissipative than Rusanov/HLL) and its multi-
+    // wave pressure coupling is more low-Mach robust than Roe (less carbuncle
+    // / odd-even decoupling), so it may capture Re200 shedding where Roe blows
+    // up and Rusanov over-damps. Formulas from Toro, Riemann Solvers.
+    double rhoL = L.rho, rhoR = R.rho, pL = L.p, pR = R.p;
+    // Roe-averaged state for the Einfeldt wave-speed bounds
+    double srL = std::sqrt(std::max(rhoL,1e-30)), srR = std::sqrt(std::max(rhoR,1e-30));
+    double denr = srL + srR;
+    double uRoe = (srL*L.u + srR*R.u)/denr, vRoe = (srL*L.v + srR*R.v)/denr;
+    double HL = (g.consFromPrim(L).rhoE() + pL)/std::max(rhoL,1e-30);
+    double HR = (g.consFromPrim(R).rhoE() + pR)/std::max(rhoR,1e-30);
+    double HRoe = (srL*HL + srR*HR)/denr;
+    double aRoe = std::sqrt(std::max(1e-30, g.gm1()*(HRoe - 0.5*(uRoe*uRoe + vRoe*vRoe))));
+    double unRoe = uRoe*nx + vRoe*ny;
+    double SL = std::min(unL - aL, unRoe - aRoe);
+    double SR = std::max(unR + aR, unRoe + aRoe);
+    double coefL = rhoL*(SL - unL), coefR = rhoR*(SR - unR);
+    double denom_sm = coefL - coefR;
+    double SM = (denom_sm != 0.0)
+      ? (pR - pL + coefL*unL - coefR*unR) / denom_sm : 0.5*(unL + unR);
+    double pStar = rhoL*(unL - SL)*(unL - SM) + pL;
+    // tangential basis (t perpendicular to n) -- contact preserves tang. vel.
+    double tx = -ny, ty = nx;
+    double utL = L.u*tx + L.v*ty, utR = R.u*tx + R.v*ty;
+    double rhoStL = rhoL*(SL - unL)/(SL - SM);
+    double rhoStR = rhoR*(SR - unR)/(SR - SM);
+    double ustL = SM*nx + utL*tx, vstL = SM*ny + utL*ty;
+    double ustR = SM*nx + utR*tx, vstR = SM*ny + utR*ty;
+    double gm1 = g.gm1();
+    double EstL = pStar/gm1 + 0.5*rhoStL*(ustL*ustL + vstL*vstL);
+    double EstR = pStar/gm1 + 0.5*rhoStR*(ustR*ustR + vstR*vstR);
+    Cons ULc = g.consFromPrim(L), URc = g.consFromPrim(R);
+    Cons UstL, UstR;
+    UstL.rho() = rhoStL; UstL.rhou() = rhoStL*ustL; UstL.rhov() = rhoStL*vstL; UstL.rhoE() = EstL;
+    UstR.rho() = rhoStR; UstR.rhou() = rhoStR*ustR; UstR.rhov() = rhoStR*vstR; UstR.rhoE() = EstR;
+    if (SL >= 0.0) { F = FL; }
+    else if (SM >= 0.0) { for (int k=0;k<NEQ;++k) F.v[k]=FL.v[k]+SL*(UstL.v[k]-ULc.v[k]); }
+    else if (SR >= 0.0) { for (int k=0;k<NEQ;++k) F.v[k]=FR.v[k]+SR*(UstR.v[k]-URc.v[k]); }
+    else { F = FR; }
     return F;
   }
   // Roe average
@@ -108,10 +253,24 @@ Cons numericalInviscidFlux(const Physics& p, const Prim& L, const Prim& R,
   // already per-mass energy H -> the conservative flux dissipation uses it
   // directly (Roe's H-based eigenvector). No extra scaling needed.
   for (int k = 0; k < 4; ++k) F.v[k] -= 0.5 * diss[k];
+  // Low-Mach pressure stabilization (Rhie-Chow-like): a 2nd-order (scalar-
+  // linearizable) pressure-gradient-driven momentum coupling that damps the
+  // high-frequency pressure checkerboard (the cap-1.0 blowup mode at low
+  // Mach, |un| << a) without damping the low-frequency shedding. For a
+  // pressure peak (dp=R.p-L.p<0) this adds a positive outward momentum flux
+  // (R[lc]-=flux/A -> dU/dt<0 at the peak), breaking the decoupling.
+  if (p.pstab_k > 0.0) {
+    double amp = p.pstab_k * (a - std::fabs(un));
+    if (amp > 0.0) {
+      F.rhou() -= amp * dp * nx;
+      F.rhov() -= amp * dp * ny;
+      F.rhoE() -= amp * dp * un;
+    }
+  }
   return F;
-}
+ }
 
-Cons viscousNormalFlux(const Physics& p, double u, double v, double T,
+ Cons viscousNormalFlux(const Physics& p, double u, double v, double T,
                         double ux, double uy, double vx, double vy,
                         double Tx, double Ty, double nx, double ny) {
   // Physical viscous flux in direction n for the compressible NS in

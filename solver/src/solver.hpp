@@ -44,14 +44,23 @@ public:
   std::vector<double> Un, Unm1; // transient history (BDF2)
   // primitive (size (n_owned+n_ghost))
   std::vector<double> Wrho, Wu, Wv, Wp, WT;
-  // cell-center gradients (owned only): per-variable x/y
-  std::vector<double> gRhoX, gRhoY, gUX, gUY, gVX, gVY, gPX, gPY, gTX, gTY;
-  // Barth-Jespersen limiter (owned only)
-  std::vector<double> limRho, limU, limV, limP;
-  // residual + update (owned)
- std::vector<double> R;        // size n_owned*NEQ
- std::vector<double> dU;       // size (n_owned+n_ghost)*NEQ (ghost unused)
- std::vector<double> diag;    // implicit diagonal (owned)
+ // cell-center gradients (owned only): per-variable x/y
+ std::vector<double> gRhoX, gRhoY, gUX, gUY, gVX, gVY, gPX, gPY, gTX, gTY;
+ // Barth-Jespersen limiter (owned only)
+ std::vector<double> limRho, limU, limV, limP;
+ // Fourth-order artificial-viscosity support (env CFD2D_SHED_AV, transient
+ // only): undivided cell Laplacians of the conserved variables, used to add a
+ // high-frequency (2dx) damping flux that lets the limiter cap be raised
+ // (full 2nd order) without the odd-even/2dx blowup, so the low-frequency
+ // von Karman shear mode is no longer over-damped. Steady cases are unaffected.
+ std::vector<double> lapU;      // size n_owned*NEQ, undivided Laplacian
+ bool shed_av = false;          // set from CFD2D_SHED_AV at setup
+ double av_k4 = 0.125;          // 4th-order AV coefficient (JST range)
+ int cur_step = 0;              // current physical step (for AV/limiter ramp)
+ // residual + update (owned)
+std::vector<double> R;        // size n_owned*NEQ
+std::vector<double> dU;       // size (n_owned+n_ghost)*NEQ (ghost unused)
+std::vector<double> diag;    // implicit diagonal (owned)
  // dual-time BDF contribution to the implicit diagonal (3/(2dt) for BDF2,
  // 1/dt for BDF1 startup, 0 for steady). Added to diag in implicitSolve.
  double bdf_diag_coeff = 0.0;
@@ -69,6 +78,9 @@ double cfl_current = 1.0;     // current pseudo-time CFL (set per step)
   // wall-face data for force/surface output (rebuilt each force eval)
   std::vector<double> wcx, wcy, wSx, wSy, wlen, wp, wtx, wty;
   std::vector<double> wRho;  // adjacent cell density at each wall face
+  // Precomputed spatial AV scaling per face (computed once in setup from the
+  // face-center distance; eliminates sqrt+tanh from the inner loop).
+  std::vector<double> face_av_scale;
 
   // ---- residual norms (global, recomputed after computeResidual) ----
   double compL2[4] = {0,0,0,0};  // per-equation global L2 (rho,rhou,rhov,rhoE)
@@ -76,12 +88,13 @@ double cfl_current = 1.0;     // current pseudo-time CFL (set per step)
   double residual_linf_last = 0.0;
 
   // ---- run/report metadata ----
-  std::string git_revision = "unknown";
-  std::string start_iso;
-  std::string run_command;
-  std::string run_notes;
-  double wall_time_seconds = 0.0;
-  Forces last_forces;
+ std::string git_revision = "unknown";
+ std::string start_iso;
+ std::string run_command;
+ std::string run_notes;
+ std::string restart_dir;   // if set (from --restart <dir>), load state after setup
+ double wall_time_seconds = 0.0;
+ Forces last_forces;
 
   // ---- run statistics ----
   double start_phys_time = 0.0;
@@ -107,12 +120,15 @@ double cfl_current = 1.0;     // current pseudo-time CFL (set per step)
   // ---- components (defined in sibling .cpp files) ----
   void exchangeHalo();                       // fill ghost U from neighbors
   void computePrimitive();                   // U -> W (owned+ghost)
-  void computeGradients();                   // Green-Gauss (owned)
-  void computeLimiters();                   // Barth-Jespersen (owned)
-  // fills R = -(1/A) sum F.S for owned cells; also collects wall-face data
-  // (pressure, traction) into wcx... for force output. If add_bdf2_source,
-  // adds the BDF2 physical-time source term to R using Un/Unm1.
-  void computeResidual(bool add_bdf2_source, double dt_phys);
+ void computeGradients();                   // Green-Gauss (owned)
+ void computeLimiters();                   // Barth-Jespersen (owned)
+ // Undivided Laplacian of conserved variables (owned) over internal+halo faces
+ // for the fourth-order artificial-viscosity backstop. Boundary faces skipped.
+ void computeConsLaplacians();
+ // fills R = -(1/A) sum F.S for owned cells; also collects wall-face data
+ // (pressure, traction) into wcx... for force output. If add_bdf2_source,
+ // adds the BDF2 physical-time source term to R using Un/Unm1.
+ void computeResidual(bool add_bdf2_source, double dt_phys);
   // LU-SGS / SGS linear solve: solve (diag + L+U) dU = R for owned cells.
   // n_sweeps forward/backward SGS passes.
   void implicitSolve(int n_sweeps);
@@ -145,6 +161,12 @@ double localDt(int local_cell, double cfl) const;
  void writeRestart() const;
  void writePartitionDiagnostics() const;
  void writePartitionFilesForExaminer() const;
+ // Load the owned+ghost conservative state from <dir>/restart_final.rank<r>.dat
+ // (written by writeRestart). The partition (np + METIS) must match the run
+ // that wrote the files. Used to start a low-dissipation run from a developed
+ // wake, bypassing the extreme startup transient that destabilizes reduced-
+ // dissipation discretizations.
+ void readRestart(const std::string& dir);
  Forces computeGlobalForcesLocal();
 
 private:

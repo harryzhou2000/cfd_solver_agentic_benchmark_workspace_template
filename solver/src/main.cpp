@@ -61,11 +61,12 @@ int main(int argc, char** argv) {
     // record the exact command for run_status.json
     std::string cmd = "mpirun -np " + std::to_string(nranks) + " cfd2d solve --case "
                       + case_path + " --output " + output_dir;
-    solver.run_command = cmd;
-    solver.run_notes = std::string("report-level=") + report_level
-                       + (restart_path.empty() ? "" : " restart=" + restart_path);
-    solver.setup(cd, rank, nranks);
-    solver.run();
+   solver.run_command = cmd;
+   solver.run_notes = std::string("report-level=") + report_level
+                      + (restart_path.empty() ? "" : " restart=" + restart_path);
+   solver.restart_dir = restart_path;
+   solver.setup(cd, rank, nranks);
+   solver.run();
     int rc = (solver.convergence_status == "converged" ||
               solver.convergence_status == "statistically_periodic") ? 0 : 0;
     // exit 0 on normal completion even if numerically plateaued (per contract:

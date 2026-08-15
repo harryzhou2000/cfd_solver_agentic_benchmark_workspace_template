@@ -37,22 +37,64 @@ void Solver::setup(const CaseDef& caseDef, int r, int nr) {
   // it captures shocks well; Rusanov/local-Lax-Friedrichs for subsonic where
   // Roe is low-Mach unstable. The Re200 transient uses Rusanov (case sets the
   // dissipation scale). CFD2D_FLUX_RUSANOV forces Rusanov for experiments.
-  bool roe = (cd.fs.mach >= 1.0) && (cd.rc.type != RunType::Transient);
-  if (std::getenv("CFD2D_FLUX_RUSANOV")) roe = false;
-  phys.init(cd.gas, cd.fs, cd.ref, cd.laminar, cd.reynolds,
-            cd.rc.rusanov_dissipation_scale, roe);
+ bool roe = (cd.fs.mach >= 1.0) && (cd.rc.type != RunType::Transient);
+ if (std::getenv("CFD2D_FLUX_RUSANOV")) roe = false;
+ // CFD2D_FLUX_ROE forces the Roe approximate Riemann solver (with Harten-Yee
+ // entropy fix) for any case. Roe damps shear/contact modes with dissipation
+ // ~|un| rather than Rusanov's ~(|un|+a), so at low Mach it preserves the
+ // separated-shear-layer instability that drives cylinder vortex shedding,
+ // which the Rusanov/LLF flux over-damps. Inactive unless set, so steady
+ // cases are unaffected (they keep their Rusanov flux).
+if (std::getenv("CFD2D_FLUX_ROE")) roe = true;
+// CFD2D_FLUX_HLLC forces the HLLC 3-wave flux (more low-Mach robust than Roe,
+// less dissipative than Rusanov on contact/shear). Inactive unless set.
+if (std::getenv("CFD2D_FLUX_HLLC")) { phys.use_hllc = true; roe = false; }
+// CFD2D_FLUX_AUSMUP: AUSM+-up (Liou 2006) split convective+pressure flux with
+// low-Mach pressure dissipation (Ku) and pressure-velocity coupling (Kp). The
+// one principled low-Mach flux not yet tried; genuinely different from pstab
+// (which added a Rhie-Chow term on top of Roe and was never linearized). Tunable
+// coefficients: CFD2D_AUSMUP_KU (pressure dissipation, default 0.35),
+// CFD2D_AUSMUP_KP (Mach pressure-coupling, default 0.0=off; try 0.25),
+// CFD2D_AUSMUP_MCUT (Kp floor, default 0.3). Inactive unless set.
+if (std::getenv("CFD2D_FLUX_AUSMUP")) { phys.use_ausmup = true; roe = false; phys.use_hllc = false; }
+if (phys.use_ausmup) {
+  if (const char* e = std::getenv("CFD2D_AUSMUP_KU")) phys.ausmup_ku = std::atof(e);
+  if (const char* e = std::getenv("CFD2D_AUSMUP_KP")) phys.ausmup_kp = std::atof(e);
+  if (const char* e = std::getenv("CFD2D_AUSMUP_MCUT")) phys.ausmup_mcut = std::atof(e);
+  if (const char* e = std::getenv("CFD2D_AUSMUP_LSCALE")) phys.ausmup_lscale = std::atof(e);
+  run_notes += " AUSM+-up flux (Ku=" + std::to_string(phys.ausmup_ku)
+    + ",Kp=" + std::to_string(phys.ausmup_kp) + ",Mcut=" + std::to_string(phys.ausmup_mcut) + ");";
+}
+ // CFD2D_PSTAB: low-Mach pressure stabilization (Rhie-Chow-like), added to the
+ // Roe/HLLC flux. Damps the high-freq pressure checkerboard (cap-1.0 blowup)
+ // without damping the low-freq shedding. Inactive unless set (steady cases
+ // unaffected).
+ if (const char* sp = std::getenv("CFD2D_PSTAB")) phys.pstab_k = std::atof(sp);
+phys.init(cd.gas, cd.fs, cd.ref, cd.laminar, cd.reynolds,
+          cd.rc.rusanov_dissipation_scale, roe);
   // For steady subsonic cases use an increased Rusanov dissipation scale (2.0)
   // to stabilize the 2nd-order reconstruction (default 1.0 lets a slow
   // anti-diffusive mode grow). Documented accuracy/stability trade-off.
-  // Override with CFD2D_RUSANOV_SCALE. Re200 keeps the case scale (1.0).
-  if (!roe) {
-    double sc = (cd.rc.type == RunType::Steady) ? 2.0 : cd.rc.rusanov_dissipation_scale;
-    if (const char* s = std::getenv("CFD2D_RUSANOV_SCALE")) sc = std::atof(s);
-    phys.rusanov_scale = sc;
-  }
-  // Documented deviation: cap the steady pseudo-CFL for stability with the
-  // simplified (scalar point-implicit) LU-SGS + capped limiter. The case files
-  // request cfl_max up to 100, but the scalar implicit cannot control the
+ // Override with CFD2D_RUSANOV_SCALE. Re200 keeps the case scale (1.0).
+ if (!roe) {
+   double sc = (cd.rc.type == RunType::Steady) ? 2.0 : cd.rc.rusanov_dissipation_scale;
+   if (const char* s = std::getenv("CFD2D_RUSANOV_SCALE")) sc = std::atof(s);
+   phys.rusanov_scale = sc;
+ }
+ // Fourth-order artificial-viscosity backstop (CFD2D_SHED_AV), transient only.
+ // Raises the limiter cap to full Barth and adds a 2dx-targeted damping flux
+ // so the low-frequency von Karman shear mode is no longer over-damped while
+ // the high-frequency numerical mode stays controlled. Steady cases are
+ // unaffected (env unset for them; they use steadyStep, not bdf2Step).
+ if (cd.rc.type == RunType::Transient && std::getenv("CFD2D_SHED_AV")) {
+   shed_av = true;
+   av_k4 = 0.125;
+   if (const char* s = std::getenv("CFD2D_AV_K4")) av_k4 = std::atof(s);
+   run_notes += " fourth-order AV backstop (CFD2D_SHED_AV) + full Barth limiter;";
+ }
+ // Documented deviation: cap the steady pseudo-CFL for stability with the
+ // simplified (scalar point-implicit) LU-SGS + capped limiter. The case files
+ // request cfl_max up to 100, but the scalar implicit cannot control the
   // low-Mach pressure/velocity coupling at high CFL, so a conservative cap is
   // required. Default cap 2.0; override with CFD2D_CFL_CAP (e.g. 0.2 for
   // viscous low-Mach cases). The transient Re200 keeps its fixed CFL=1.
@@ -120,13 +162,35 @@ void Solver::setup(const CaseDef& caseDef, int r, int nr) {
     int p = sgs_ptr[f.lc] + fill[f.lc]++; sgs_nb[p] = f.rc; sgs_face[p] = sgs_inner[idx];
     p = sgs_ptr[f.rc] + fill[f.rc]++; sgs_nb[p] = f.lc; sgs_face[p] = sgs_inner[idx];
   }
-  // initialize state to freestream on all local cells
-  int nloc = no + lm.n_ghost;
-  U.assign(nloc * NEQ, 0.0);
-  for (int c = 0; c < nloc; ++c)
-    for (int k = 0; k < NEQ; ++k) U[c*NEQ + k] = phys.U_inf.v[k];
-  // primitive arrays
-  Wrho.assign(nloc, phys.W_inf.rho);
+ // Precompute spatial AV scaling per face (tanh of distance from cylinder).
+ // k4_eff = av_k4 * (1 + scale * tanh(max(0,(r-r0))/L)). Stored per face so
+ // the inner loop just looks up the value (no sqrt+tanh per step).
+ face_av_scale.assign(lm.faces.size(), 1.0);
+ if (std::getenv("CFD2D_AV_SPATIAL")) {
+   double ascale = std::atof(std::getenv("CFD2D_AV_SPATIAL"));
+   double ar0 = 2.0;
+   if (const char* e2 = std::getenv("CFD2D_AV_SPATIAL_R0")) ar0 = std::atof(e2);
+   double aL = 10.0;
+   if (const char* e3 = std::getenv("CFD2D_AV_SPATIAL_L")) aL = std::atof(e3);
+   for (size_t fi = 0; fi < lm.faces.size(); ++fi) {
+     double r = std::sqrt(lm.faces[fi].center.x*lm.faces[fi].center.x +
+                          lm.faces[fi].center.y*lm.faces[fi].center.y);
+     face_av_scale[fi] = 1.0 + ascale * std::tanh(std::max(0.0, (r - ar0)) / aL);
+   }
+ }
+ // initialize state to freestream on all local cells
+ int nloc = no + lm.n_ghost;
+ U.assign(nloc * NEQ, 0.0);
+ for (int c = 0; c < nloc; ++c)
+   for (int k = 0; k < NEQ; ++k) U[c*NEQ + k] = phys.U_inf.v[k];
+ // Optional restart: load a developed state (e.g. a converged wake) so a
+ // low-dissipation discretization starts from a smooth field instead of the
+ // extreme uniform-freestream->no-slip-wall startup transient that
+ // destabilizes reduced-dissipation schemes. The np + METIS partition must
+ // match the run that wrote the restart files.
+ if (!restart_dir.empty()) readRestart(restart_dir);
+ // primitive arrays
+ Wrho.assign(nloc, phys.W_inf.rho);
   Wu.assign(nloc, phys.W_inf.u); Wv.assign(nloc, phys.W_inf.v);
   Wp.assign(nloc, phys.W_inf.p); WT.assign(nloc, phys.gas.temperature(phys.W_inf));
   if (rank == 0)

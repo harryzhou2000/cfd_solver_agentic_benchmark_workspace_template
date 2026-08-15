@@ -4,10 +4,35 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-
-namespace cfd {
-
-// helper: ghost primitive at a boundary face (uses the stored outward unit normal)
+ 
+ namespace cfd {
+void Solver::computeConsLaplacians() {
+  // Undivided Laplacian of the conserved variables (rho, rhou, rhov, rhoE),
+  // over internal and halo faces (rc>=0). Boundary faces skipped (ghost not
+  // stored; the AV targets the interior wake). Length-weighted for k4.
+  const int no = lm.n_owned;
+  const int nloc = no + lm.n_ghost;
+  lapU.assign(no * NEQ, 0.0);
+  for (int fi = 0; fi < (int)lm.faces.size(); ++fi) {
+    const LocalFace& f = lm.faces[fi];
+    int lc = f.lc, rc = f.rc;
+    if (rc < 0) continue;
+    if (lc < 0 || lc >= nloc || rc >= nloc) continue;
+    double len = std::max(f.len, 1e-30);
+    const double* Ulc = &U[lc * NEQ];
+    const double* Urc = &U[rc * NEQ];
+    if (lc < no) {
+      double* lap = &lapU[lc * NEQ];
+      for (int k = 0; k < NEQ; ++k) lap[k] += (Urc[k] - Ulc[k]) * len;
+    }
+    if (rc < no) {
+      double* lap = &lapU[rc * NEQ];
+      for (int k = 0; k < NEQ; ++k) lap[k] += (Ulc[k] - Urc[k]) * len;
+    }
+  }
+}
+ 
+ // helper: ghost primitive at a boundary face (uses the stored outward unit normal)
 static inline Prim faceGhost(const Solver& s, const LocalFace& f) {
   double len = std::max(f.len, 1e-30);
   double nx = f.Sx / len, ny = f.Sy / len;
@@ -17,6 +42,18 @@ static inline Prim faceGhost(const Solver& s, const LocalFace& f) {
   if (c < 0) return Wc;
   Wc.rho = s.Wrho[c]; Wc.u = s.Wu[c]; Wc.v = s.Wv[c]; Wc.p = s.Wp[c];
   return bcGhostState(s.phys, f.bctype, Wc, nx, ny);
+}
+
+// Venkatakrishnan smooth limiter function: psi = (d2^2 + 2 d2 |d| + eps2) /
+// (d2^2 + 2 d2 |d| + 2 d^2 + eps2), with d2 the (>=0) allowable excursion in
+// the direction of the signed increment d. C1-smooth (no Barth kinks/cycling);
+// psi->1 in smooth regions (d2>>d), psi->0 at extrema (d2~0, d!=0).
+static inline double venkPsi(double d, double d2, double eps2) {
+  if (d2 < 0.0) d2 = 0.0;
+  double ad = std::fabs(d);
+  double num = d2*d2 + 2.0*d2*ad + eps2;
+  double den = d2*d2 + 2.0*d2*ad + 2.0*d*d + eps2;
+  return (den > 1e-30) ? num/den : 1.0;
 }
 
 void Solver::computeGradients() {
@@ -92,6 +129,16 @@ void Solver::computeLimiters() {
   const int no = lm.n_owned;
   limRho.assign(no, 1.0); limU.assign(no, 1.0);
   limV.assign(no, 1.0); limP.assign(no, 1.0);
+  // Venkatakrishnan (smooth, less-dissipative) limiter as an alternative to
+  // Barth-Jespersen for the Re200 transient: Barth's min/kink non-smoothness
+  // excites high-frequency modes and causes limiter cycling with no-freeze,
+  // which (with the cap) over-damps the von Karman mode. Venkat is C1-smooth
+  // (no cycling) and fuller 2nd-order, so it may reach the shedding Hopf
+  // without the odd-en blowup. Inactive unless CFD2D_LIMITER=venkat.
+  bool venkat = false;
+  double venk_eps = 0.05;
+  if (const char* lv = std::getenv("CFD2D_LIMITER")) venkat = (std::string(lv) == "venkat");
+  if (const char* ev = std::getenv("CFD2D_VENK_EPS")) venk_eps = std::atof(ev);
   if (std::getenv("CFD2D_FIRSTORDER")) {
     std::fill(limRho.begin(),limRho.end(),0.0); std::fill(limU.begin(),limU.end(),0.0);
     std::fill(limV.begin(),limV.end(),0.0); std::fill(limP.begin(),limP.end(),0.0);
@@ -121,6 +168,13 @@ void Solver::computeLimiters() {
       mnP = std::min(mnP, nbc.p);   mxP = std::max(mxP, nbc.p);
     }
     double lR = 1, lU = 1, lV = 1, lP = 1;
+    // Venkat regularization eps^2 per variable (per cell), relative to the
+    // variable magnitude so uniform regions (increment d~0) keep psi->1
+    // (full 2nd order) instead of collapsing to first order.
+    double eR2 = venk_eps*venk_eps*std::max(Wrho[c]*Wrho[c],1.0);
+    double eU2 = venk_eps*venk_eps*std::max(Wu[c]*Wu[c],1.0);
+    double eV2 = venk_eps*venk_eps*std::max(Wv[c]*Wv[c],1.0);
+    double eP2 = venk_eps*venk_eps*std::max(Wp[c]*Wp[c],1.0);
     for (int fi : lm.cell_faces[c]) {
       const LocalFace& f = lm.faces[fi];
       Vec2 rf = f.center;
@@ -130,15 +184,27 @@ void Solver::computeLimiters() {
       double dU = gUX[c]*dx + gUY[c]*dy;
       double dV = gVX[c]*dx + gVY[c]*dy;
       double dP = gPX[c]*dx + gPY[c]*dy;
-      double eps = 1e-12;
-      if (dR >  eps) lR = std::min(lR, (mxR - Wrho[c]) / dR);
-      if (dR < -eps) lR = std::min(lR, (mnR - Wrho[c]) / dR);
-      if (dU >  eps) lU = std::min(lU, (mxU - Wu[c]) / dU);
-      if (dU < -eps) lU = std::min(lU, (mnU - Wu[c]) / dU);
-      if (dV >  eps) lV = std::min(lV, (mxV - Wv[c]) / dV);
-      if (dV < -eps) lV = std::min(lV, (mnV - Wv[c]) / dV);
-      if (dP >  eps) lP = std::min(lP, (mxP - Wp[c]) / dP);
-      if (dP < -eps) lP = std::min(lP, (mnP - Wp[c]) / dP);
+      if (venkat) {
+        // allowable excursion (>=0) in the direction of the signed increment
+        double d2R = (dR >= 0.0) ? (mxR - Wrho[c]) : (Wrho[c] - mnR);
+        double d2U = (dU >= 0.0) ? (mxU - Wu[c])   : (Wu[c] - mnU);
+        double d2V = (dV >= 0.0) ? (mxV - Wv[c])   : (Wv[c] - mnV);
+        double d2P = (dP >= 0.0) ? (mxP - Wp[c])   : (Wp[c] - mnP);
+        lR = std::min(lR, venkPsi(dR, d2R, eR2));
+        lU = std::min(lU, venkPsi(dU, d2U, eU2));
+        lV = std::min(lV, venkPsi(dV, d2V, eV2));
+        lP = std::min(lP, venkPsi(dP, d2P, eP2));
+      } else {
+        double eps = 1e-12;
+        if (dR >  eps) lR = std::min(lR, (mxR - Wrho[c]) / dR);
+        if (dR < -eps) lR = std::min(lR, (mnR - Wrho[c]) / dR);
+        if (dU >  eps) lU = std::min(lU, (mxU - Wu[c]) / dU);
+        if (dU < -eps) lU = std::min(lU, (mnU - Wu[c]) / dU);
+        if (dV >  eps) lV = std::min(lV, (mxV - Wv[c]) / dV);
+        if (dV < -eps) lV = std::min(lV, (mnV - Wv[c]) / dV);
+        if (dP >  eps) lP = std::min(lP, (mxP - Wp[c]) / dP);
+        if (dP < -eps) lP = std::min(lP, (mnP - Wp[c]) / dP);
+      }
     }
   limRho[c] = std::max(0.0, std::min(1.0, lR));
   limU[c] = std::max(0.0, std::min(1.0, lU));
@@ -150,9 +216,48 @@ void Solver::computeLimiters() {
   // anti-diffusive instability with the simplified implicit at high CFL; the
   // cap keeps the piecewise-linear reconstruction active (second-order in
   // smooth regions up to the cap) while remaining stable.
-  double cap = 0.5;
-  if (const char* e = std::getenv("CFD2D_LIMCAP")) cap = std::atof(e);
-  for (int i = 0; i < no; ++i) {
+double cap = 0.5;
+if (const char* e = std::getenv("CFD2D_LIMCAP")) cap = std::atof(e);
+ else if (venkat) cap = 1.0;   // Venkat is already a smooth bounded limiter in [0,1]; do not clip it (would re-add dissipation).
+ else if (shed_av) {
+  // Ramp cap 0.5 -> 1.0 over [ramp_start, ramp_start+ramp_len] (default
+   // 200..500, i.e. t=2..5). Before the ramp the run is the stable cap-0.5
+   // config; the full Barth + 4th-order AV backstop (active over the same
+   // window) lower the low-frequency dissipation so the von Karman shear mode
+   // can grow from the developed wake. CFD2D_LIMCAP overrides (forces a
+   // fixed cap, skipping the ramp) for experiments.
+   int rstart = 200, rlen = 300;
+   if (const char* es = std::getenv("CFD2D_AV_RAMP_START")) rstart = std::atoi(es);
+   double frac = (cur_step <= rstart) ? 0.0
+               : (cur_step >= rstart + rlen) ? 1.0
+               : double(cur_step - rstart) / double(rlen);
+   cap = 0.5 + 0.5 * frac;
+ }
+// CFD2D_CAP_RAMP: time-dependent cap schedule for sustainable shedding.
+  // The cap=0.8 AUSM+-up run develops real shedding (cl~0.13) but blows up at
+  // t~8.5 when the large-amplitude oscillation triggers a pressure/overshoot
+  // instability. This ramp lets the shedding develop at the high cap (cl grows
+  // to ~0.05-0.08 by t~6) then ramps the cap DOWN to add dissipation so the
+  // shedding saturates below the blowup threshold (~0.13) instead of diverging.
+  // Env: CFD2D_CAP_RAMP_T1 (start step, default off), CFD2D_CAP_RAMP_T2 (end
+  // step), CFD2D_CAP_RAMP_C2 (end cap). cap stays at CFD2D_LIMCAP before T1,
+  // ramps linearly to C2 over [T1,T2], stays at C2 after T2.
+  if (const char* e1 = std::getenv("CFD2D_CAP_RAMP_T1")) {
+    int t1 = std::atoi(e1);
+    int t2 = t1 + 300;
+    if (const char* e2 = std::getenv("CFD2D_CAP_RAMP_T2")) t2 = std::atoi(e2);
+    double c2 = cap;
+    if (const char* e3 = std::getenv("CFD2D_CAP_RAMP_C2")) c2 = std::atof(e3);
+    if (cur_step <= t1) {
+      // keep cap as-is (CFD2D_LIMCAP)
+    } else if (cur_step >= t2) {
+      cap = c2;
+    } else {
+      double frac = double(cur_step - t1) / double(t2 - t1);
+      cap = cap + (c2 - cap) * frac;
+    }
+  }
+for (int i = 0; i < no; ++i) {
     limRho[i]=std::min(limRho[i],cap); limU[i]=std::min(limU[i],cap);
     limV[i]=std::min(limV[i],cap); limP[i]=std::min(limP[i],cap);
   }

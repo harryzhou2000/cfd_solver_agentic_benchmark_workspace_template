@@ -22,9 +22,31 @@ struct Physics {
   double reynolds = 0.0;
   double mu = 0.0;        // dynamic viscosity (nondimensional)
   double k_thermal = 0.0; // = mu*cp/Pr
-  double rusanov_scale = 1.0;
-  bool use_roe = true;
-  Cons U_inf;
+ double rusanov_scale = 1.0;
+ bool use_roe = true;
+ double pstab_k = 0.0;   // CFD2D_PSTAB: Rhie-Chow-like low-Mach pressure
+                         // stabilization (2nd-order, linearizable). Damps the
+                         // high-freq pressure checkerboard that blows up cap-1
+                         // 0 at low Mach, without damping the low-freq shedding.
+ bool use_hllc = false;   // CFD2D_FLUX_HLLC: HLLC (3-wave) flux -- more low-Mach-
+                          // robust than Roe (less carbuncle) and less dissipative
+                          // on contact/shear than Rusanov, so it may capture the
+                          // Re200 shedding without the cap-1.0 pressure blowup.
+ // AUSM+-up (Liou 2006): split convective+pressure flux with low-Mach pressure
+ // dissipation. Unlike pstab (a Rhie-Chow term ADDED on top of Roe, never
+ // linearized in the implicit -> washed out or destabilizing), AUSM+-up
+ // REPLACES the flux: convective part uses upwind Mach splitting (shear
+ // dissipation ~|Un| like Roe, preserving the shedding shear layer); the
+ // pressure "up" term (Ku*f(M^2)*(pR-pL)) damps the high-freq pressure
+ // checkerboard (cap-1.0 blowup mode) while the low-freq von Karman shedding
+ // mode (tiny per-cell p jump) is barely touched. Genuinely different from
+ // pstab: consistent P5 split flux, not a flux add-on.
+ bool use_ausmup = false;  // CFD2D_FLUX_AUSMUP
+ double ausmup_ku = 0.75;  // CFD2D_AUSMUP_KU: p_u velocity->pressure coeff (Liou 2006 Eq.26)
+ double ausmup_kp = 0.25;  // CFD2D_AUSMUP_KP: M_p pressure->Mach coeff (Liou 2006 Eq.21)
+ double ausmup_mcut = 0.3; // CFD2D_AUSMUP_MCUT: Kp coupling floor (avoid M->0 blowup)
+ double ausmup_lscale = 1.0; // CFD2D_AUSMUP_LSCALE: over-linearize coupling in implicit (Jacoban more dissipative than residual for inner-solve stability at large shedding amplitude)
+ Cons U_inf;
   Prim W_inf;
   double q_inf = 0.0;     // 0.5*rho_inf*U_inf^2
   void init(const GasModel& g, const Freestream& f, const Reference& r,

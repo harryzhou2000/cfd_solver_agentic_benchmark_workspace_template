@@ -12,10 +12,34 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-namespace cfd {
-
-static std::string isoNow() {
+ 
+ namespace cfd {
+void Solver::readRestart(const std::string& dir) {
+  // Load owned+ghost conservative state from <dir>/restart_final.rank<r>.dat
+  // (written by writeRestart). The np + METIS partition must match the run
+  // that wrote the file (nloc checked). Restores U; computePrimitive() in the
+  // run loop derives W; bdf2Step step 0 uses BDF1 startup (Un=Unm1=U).
+  std::string path = dir + "/restart_final.rank" + std::to_string(rank) + ".dat";
+  std::ifstream f(path, std::ios::binary);
+  if (!f) {
+    std::fprintf(stderr, "[r%d] restart file not found: %s\n", rank, path.c_str());
+    MPI_Abort(MPI_COMM_WORLD, 1);
+  }
+  int nloc_file = 0;
+  f.read((char*)&nloc_file, sizeof(int));
+  int nloc = lm.n_owned + lm.n_ghost;
+  if (nloc_file != nloc) {
+    std::fprintf(stderr, "[r%d] restart nloc mismatch file=%d mesh=%d "
+                "(np/partition differs from the run that wrote the restart)\n",
+                rank, nloc_file, nloc);
+    MPI_Abort(MPI_COMM_WORLD, 1);
+  }
+  f.read((char*)U.data(), (std::streamsize)(nloc * NEQ * sizeof(double)));
+  if (rank == 0)
+    std::printf("[cfd2d] restart loaded from %s (%d local cells)\n", dir.c_str(), nloc);
+}
+ 
+ static std::string isoNow() {
   std::time_t t = std::time(nullptr);
   std::tm tmv = *std::gmtime(&t);
   char buf[40];

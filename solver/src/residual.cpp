@@ -88,9 +88,61 @@ void Solver::computeResidual(bool add_bdf2_source, double dt_phys) {
         ux=gUx[1]; uy=gUy[1]; vx=gVx[1]; vy=gVy[1]; Tx=gTx[1]; Ty=gTy[1];
         u=Wr.u; v=Wr.v; T=phys.gas.temperature(Wr);
       }
-      if (have) {
-        Cons Fv = viscousNormalFlux(phys, u, v, T, ux,uy,vx,vy,Tx,Ty, nx,ny);
-        for (int k=0;k<NEQ;++k) flux.v[k] += Fv.v[k] * len;
+     if (have) {
+       Cons Fv = viscousNormalFlux(phys, u, v, T, ux,uy,vx,vy,Tx,Ty, nx,ny);
+       for (int k=0;k<NEQ;++k) flux.v[k] += Fv.v[k] * len;
+     }
+   }
+
+    // Fourth-order artificial-viscosity backstop (env CFD2D_SHED_AV): a
+    // Jameson-style high-frequency (2dx) damping flux added to the face flux.
+    // It targets the 2dx/acoustic numerical mode that the broad-band first-
+    // order limiter cap was protecting against, so the cap can be raised to
+    // full Barth (minimal low-frequency dissipation) without the odd-even
+    // blowup. The 4th-derivative form (k^4 scaling) leaves the low-frequency
+    // von Karman shear mode essentially untouched. Applied only at faces with
+    // both sides owned (lapU is defined on owned cells; halo Laplacians would
+    // require an extra exchange and are not needed for the interior wake).
+    // AV active only after the startup ramp (cur_step >= CFD2D_AV_RAMP_START,
+    // default 200): before that the flow uses the stable cap-0.5/no-AV config.
+    int av_ramp_start = 200;
+    if (const char* e = std::getenv("CFD2D_AV_RAMP_START")) av_ramp_start = std::atoi(e);
+    if (shed_av && cur_step >= av_ramp_start && lcOwn && rcOwn) {
+      double aL = phys.gas.soundSpeed(Wl), aR = phys.gas.soundSpeed(Wr);
+      double unL = Wl.u*nx + Wl.v*ny, unR = Wr.u*nx + Wr.v*ny;
+      double alpha = std::max(std::fabs(unL)+aL, std::fabs(unR)+aR);
+      const double* lapL = &lapU[lc*NEQ];
+      const double* lapR = &lapU[rc*NEQ];
+      bool av_pressure_only = std::getenv("CFD2D_AV_PRESSURE_ONLY") != nullptr;
+      // Spatially-varying AV (CFD2D_AV_SPATIAL): scale k4 by distance from the
+      // cylinder center so the shedding can develop near the cylinder (fine mesh,
+      // weak AV) while vortices are damped in the far wake (coarse mesh, strong AV)
+      // where the t~10 blowup originates. k4_eff = k4 * max(1, scale*(r-r0)).
+      double k4_eff = av_k4;
+      // Use precomputed per-face scaling (computed in setup, no sqrt+tanh here)
+      k4_eff = av_k4 * face_av_scale[fi];
+      for (int k=0;k<NEQ;++k) {
+        // Pressure-only mode: skip momentum (k=1,2) to avoid damping the
+        // shedding shear mode; only damp rho (k=0) and rhoE (k=3) which carry
+        // the pressure/density checkerboard.
+        if (av_pressure_only && (k == 1 || k == 2)) continue;
+        double dlap = lapR[k] - lapL[k];
+        // Relative clamp: the AV is a high-frequency stabilizer, so clip the
+        // (undivided, length-weighted) Laplacian jump to a few times the local
+        // conserved magnitude. This prevents the extreme wall-startup
+        // transient (no-slip U=0 vs freestream) from driving the AV flux to
+        // non-physical values and NaN, while leaving the moderate wake values
+        // that actually need damping untouched.
+        double ucap = 5.0 * std::max(std::fabs(U[lc*NEQ+k]), std::fabs(U[rc*NEQ+k])) + 1e-6;
+        if (dlap >  ucap) dlap =  ucap;
+        if (dlap < -ucap) dlap = -ucap;
+        // Dissipative sign: at a peak (U_lc high) lap_lc<0, lap_rc>0 so
+        // dlap=lap_rc-lap_lc>0; the outward flux must be POSITIVE (carrying U
+        // away from the peak) for R=-(1/A)div(F)=dU/dt to be NEGATIVE there
+        // (damping). The residual uses R[lc]-=flux/A, so flux>0 -> R[lc]<0.
+        // The earlier "-av_k4" sign was inverted (anti-diffusive: amplified
+        // perturbations -> every AV variant blew up faster than no-AV).
+        flux.v[k] += k4_eff * alpha * len * dlap;
       }
     }
 
@@ -128,6 +180,28 @@ void Solver::computeResidual(bool add_bdf2_source, double dt_phys) {
     }
   }
 
+  // Sponge layer (CFD2D_SPONGE): volumetric damping toward freestream in the
+  // far field (r > r0). Prevents the t~10 blowup where shedding vortices convect
+  // into the coarse downstream mesh. O(N) per step (no Laplacian), targeted
+  // (sigma=0 near the cylinder, so the shedding is unaffected). The sponge
+  // coefficient ramps linearly from 0 at r0 to sigma_max at r1.
+  if (const char* e = std::getenv("CFD2D_SPONGE")) {
+    double sig_max = std::atof(e);
+    double sr0 = 8.0, sr1 = 30.0;
+    if (const char* e2 = std::getenv("CFD2D_SPONGE_R0")) sr0 = std::atof(e2);
+    if (const char* e3 = std::getenv("CFD2D_SPONGE_R1")) sr1 = std::atof(e3);
+    const Cons& Uinf = phys.U_inf;
+    for (int c = 0; c < no; ++c) {
+      double r = std::sqrt(lm.center[c].x*lm.center[c].x + lm.center[c].y*lm.center[c].y);
+      double sig = 0.0;
+      if (r > sr0) sig = sig_max * std::min(1.0, (r - sr0) / std::max(sr1 - sr0, 1.0));
+      if (sig > 0.0) {
+        double inv = 1.0 / lm.area[c];
+        for (int k = 0; k < NEQ; ++k)
+          R[c*NEQ+k] -= sig * (U[c*NEQ+k] - Uinf.v[k]) * inv;
+      }
+    }
+  }
   if (add_bdf2_source && dt_phys > 0.0) {
     // physical-time source: BDF2 (3U - 4Un + Unm1)/(2dt) for step>=1, BDF1
     // (U - Un)/dt for the startup step (step 0, where Unm1 is unavailable).

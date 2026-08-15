@@ -133,6 +133,7 @@ double Solver::steadyStep(int step, int n_inner) {
 void Solver::bdf2Step(int step, double dt) {
   // histories: Unm1 = U^{n-1}, Un = U^n (frozen during inner iterations)
   int nloc = lm.n_owned + lm.n_ghost;
+  cur_step = step;  // visible to computeLimiters/computeResidual for the AV ramp
   if (step == 0) {
     Unm1.assign(nloc * NEQ, 0.0);
     Un = U;   // U^{n-1} = U^n for startup
@@ -161,16 +162,37 @@ void Solver::bdf2Step(int step, double dt) {
  // each inner iteration with the updated primitive state. Roughly halves the
  // per-inner cost, which makes the long Re200 transient feasible. Steady cases
  // are unaffected (they use steadyStep, not bdf2Step).
-  bool freeze_grad = std::getenv("CFD2D_FREEZE_GRAD") != nullptr;
-  if (freeze_grad) {
-    exchangeHalo(); computePrimitive(); computeGradients(); computeLimiters();
-  }
-  for (int k = 0; k < max_inner; ++k) {
-    exchangeHalo();
-    computePrimitive();
-    if (!freeze_grad) { computeGradients(); computeLimiters(); }
-    // dual-time residual: R_spatial - BDF2 source
-    computeResidual(true, dt);
+ bool freeze_grad = std::getenv("CFD2D_FREEZE_GRAD") != nullptr;
+ if (freeze_grad) {
+   exchangeHalo(); computePrimitive(); computeGradients(); computeLimiters();
+ }
+ // AV Laplacian: live (recomputed each inner iter) so the high-frequency 2dx
+ // mode is caught as it grows -- a frozen Laplacian goes stale and can act
+ // anti-dissipative, causing earlier blowup. The AV's stabilizing diagonal is
+ // added to the implicit spectral radius (implicit.cpp) so the live AV does
+ // not stall the Newton convergence. exchangeHalo at the loop top fills ghost
+ // U, so the Laplacian sees fresh halo values each iteration.
+ for (int k = 0; k < max_inner; ++k) {
+   exchangeHalo();
+   computePrimitive();
+  if (!freeze_grad) { computeGradients(); computeLimiters(); }
+  // K-step refresh: recompute the AV Laplacian every K inner iterations
+  // (default K=3, CFD2D_AV_REFRESH). Within each K-block the Laplacian is
+  // FROZEN, so the scalar point-implicit Newton converges (a live every-iter
+  // AV stalls the inner solve at ratio~1 because the scalar implicit cannot
+  // linearize the neighbor-coupled 4th-order term). Across blocks the
+  // Laplacian refreshes so it tracks the evolving state instead of going
+  // stale/anti-dissipative (a fully-frozen AV computed once per physical
+  // step blows up early). AV is gated to after the startup transient
+  // (CFD2D_AV_RAMP_START, default 200) to avoid the extreme-wall-gradient NaN.
+  int av_ramp_start = 200;
+  if (const char* e = std::getenv("CFD2D_AV_RAMP_START")) av_ramp_start = std::atoi(e);
+  int av_refresh = 3;
+  if (const char* e = std::getenv("CFD2D_AV_REFRESH")) av_refresh = std::atoi(e);
+  if (av_refresh < 1) av_refresh = 1;
+  if (shed_av && cur_step >= av_ramp_start && (k % av_refresh == 0)) computeConsLaplacians();
+  // dual-time residual: R_spatial - BDF2 source
+  computeResidual(true, dt);
     computeResidualNorms();
     double rl2 = residualL2();
     if (k == 0) r0 = rl2;
