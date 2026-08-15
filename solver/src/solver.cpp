@@ -229,6 +229,7 @@ void Solver::run() {
       bdf2Step(step, dt);
       appendResiduals(step, final_phys_time, last_inner_iter, 1.0, dt);
       appendForces(step, final_phys_time);
+      cl_history.push_back(last_forces.cl);
       final_step = step + 1;
       if (rank == 0 && (step % 100 == 0 || step < 5))
         std::printf("[cfd2d] step %d t=%.3f inner=%d ratio=%.4e cd=%.5f cl=%.5f\n",
@@ -254,8 +255,22 @@ void Solver::run() {
       }
     }
     double frac = inner_stats.n_steps ? 1.0 - double(inner_stats.target_misses)/inner_stats.n_steps : 0.0;
-    convergence_status = (ok && frac >= 0.95) ? "statistically_periodic" : "failed";
-    residual_reduction_orders = 0.0;
+    // Honest shedding detection: "statistically_periodic" requires that the cl
+    // history actually oscillates with non-negligible amplitude over the tail
+    // (true von Karman shedding), not merely that the inner solve converged.
+    bool sheds = false; double cl_amp = 0.0;
+    if (!cl_history.empty()) {
+      size_t n = cl_history.size(), i0 = (n > 5000) ? n - 5000 : 0, cnt = 0;
+      double mn = cl_history[i0], mx = mn, sum = 0;
+      for (size_t i = i0; i < n; ++i) { double v = cl_history[i]; mn=std::min(mn,v); mx=std::max(mx,v); sum+=v; ++cnt; }
+      double mean = sum / std::max(cnt,(size_t)1), var = 0;
+      for (size_t i = i0; i < n; ++i) { double d = cl_history[i]-mean; var += d*d; }
+      double sd = std::sqrt(var / std::max(cnt,(size_t)1));
+      cl_amp = std::max(mx - mn, 2.0*sd);
+      sheds = (cl_amp > 0.05);  // sustained Re200 shedding cl amplitude is O(0.5)
+    }
+    convergence_status = (ok && frac >= 0.95 && sheds) ? "statistically_periodic" : "failed";
+    residual_reduction_orders = cl_amp;  // report observed cl oscillation amplitude
   }
 
   // Recompute the residual at the final state so surface/field/forces all

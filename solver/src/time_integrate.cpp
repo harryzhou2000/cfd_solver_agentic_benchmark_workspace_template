@@ -154,11 +154,21 @@ void Solver::bdf2Step(int step, double dt) {
   int niter = 0;
   bool converged = false;
   double last_ratio = 1.0;
+  // Optional speedup: freeze the Green-Gauss gradients + limiter for the
+ // whole physical step (compute once before the inner loop) instead of every
+ // inner iteration. The inner solve becomes a quasi-Newton iteration (stale
+ // reconstruction, O(dU) per step); the spatial residual is still recomputed
+ // each inner iteration with the updated primitive state. Roughly halves the
+ // per-inner cost, which makes the long Re200 transient feasible. Steady cases
+ // are unaffected (they use steadyStep, not bdf2Step).
+  bool freeze_grad = std::getenv("CFD2D_FREEZE_GRAD") != nullptr;
+  if (freeze_grad) {
+    exchangeHalo(); computePrimitive(); computeGradients(); computeLimiters();
+  }
   for (int k = 0; k < max_inner; ++k) {
     exchangeHalo();
     computePrimitive();
-    computeGradients();
-    computeLimiters();
+    if (!freeze_grad) { computeGradients(); computeLimiters(); }
     // dual-time residual: R_spatial - BDF2 source
     computeResidual(true, dt);
     computeResidualNorms();

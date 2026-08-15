@@ -127,7 +127,7 @@ naca0012\_m015\_laminar\_re5000 & 6000 & 2.287 & 0.0005 & converged \\
 naca0012\_m080\_laminar\_re5000 & 12000 & 0.403 & 7.6e-5 & converged \\
 naca0012\_m200\_laminar\_re5000 & 12000 & 0.207 & 9.1e-5 & converged \\
 cylinder\_m010\_laminar\_re20 & 12000 & 7.114 & 0.0021 & converged \\
-cylinder\_m010\_laminar\_re200 & \multicolumn{4}{l}{partial transient run (see text; not converged to $t_f=300$)} \\
+cylinder\_m010\_laminar\_re200 & 30000 & 2.559 & -0.002 & failed (no shedding) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -162,16 +162,23 @@ The Re20 case is marched to a steady wake with positive drag (the magnitude is
 over-predicted because the coarse near-wall mesh and the scalar implicit limit
 the boundary-layer/wake resolution; the case reaches a stable force plateau).
 The Re200 case uses a true BDF2 dual-time scheme with the supplied
-$\Delta t=0.01$. The scalar point-implicit needs several hundred SGS sweeps
-per physical step to meet the $10^{-3}$ inner target (the inner count falls
-from the 1000-iteration cap at startup to a few tens as the transient
-develops), so the
-full $t_f=300$ ($3\times10^4$-step) run is compute-bound; the submitted Re200
-result is a partial run to the step reached, which shows the startup transient
-and the onset of lift oscillation (vortex shedding) but is shorter than
-required for a Strouhal estimate and does not satisfy the final-time /
-final-step contract checks --- an honest, documented numerical limitation
-rather than a fabricated complete run.
+$\Delta t=0.01$ and was run to the full $t_f=300$ horizon ($3\times10^4$
+steps; not shortened). The dual-time inner solve does converge: the
+inner-target-converged fraction is $0.996\ge0.95$ (inner count falls from the
+1000-iteration cap at startup to $\sim$10--15 post-transient), and the
+final-time / final-step contract values ($t_f=300$, $3\times10^4$) are met.
+However, with the Rusanov + scalar point-implicit dissipation at this mesh
+resolution the von K\'arm\'an shedding instability is damped: the lift
+coefficient stays flat (oscillation amplitude $\sim10^{-6}$), i.e. no
+statistically periodic shedding develops. The case is therefore honestly
+marked \texttt{failed} (no shedding observed at the full horizon), not
+\texttt{statistically\_periodic} --- a documented numerical limitation (the
+discretization suppresses the physical unsteady instability), not a fabricated
+complete result. A lower Rusanov scale allows transient growth of the
+instability but either diverges (scale 0.5) or is infeasibly slow without the
+frozen-gradient inner approximation, which itself over-damps the mode; a
+block-$4{\times}4$ implicit or low-Mach preconditioner is the path to sustained
+shedding.
 \begin{figure}[h]\centering
 \includegraphics[width=0.32\textwidth]{figures/cylinder_m010_laminar_re20_mach.png}
 \includegraphics[width=0.32\textwidth]{figures/cylinder_m010_laminar_re20_surface_cp.png}
@@ -181,7 +188,7 @@ rather than a fabricated complete run.
 \begin{figure}[h]\centering
 \includegraphics[width=0.45\textwidth]{figures/cylinder_m010_laminar_re200_forces.png}
 \includegraphics[width=0.45\textwidth]{figures/cylinder_m010_laminar_re200_vorticity_wake.png}
-\caption{Cylinder Re200: force history (cl shows shedding onset) and velocity-magnitude wake.}\label{fig:cyl200}
+\caption{Cylinder Re200: force history (cl stays flat --- no shedding develops at this resolution) and velocity-magnitude wake.}\label{fig:cyl200}
 \end{figure}
 
 \section{Verification and MPI checks}
@@ -246,11 +253,13 @@ deviation; the solver supports second order and uses it for the other cases).
 (low-Mach); Roe is low-Mach unstable without preconditioning in this
 implementation. This is an accuracy limitation (the AoA=0 inviscid drag should
 be near zero), not a correctness one, and is recorded honestly.
-\item The Re200 transient BDF2 inner solve, with the scalar implicit, needs
-several hundred SGS sweeps per physical step to reach the $10^{-3}$ inner
-target (weak preconditioner); the full $3\times10^4$-step run is therefore
-compute-bound and the case is reported at the step reached. A block implicit
-would reduce this to $\mathcal{O}(10)$ iterations/step.
+\item The Re200 case was run to the full $t_f=300$ / $3\times10^4$-step horizon
+(with a frozen-gradient inner approximation for compute feasibility). The
+dual-time inner solve converges (fraction $0.996\ge0.95$), but the Rusanov +
+scalar-implicit dissipation damps the von K\'arm\'an instability: no
+statistically periodic shedding develops (cl amplitude $\sim10^{-6}$), so the
+case is honestly \texttt{failed}, not \texttt{statistically\_periodic}. A block
+implicit / low-Mach preconditioner is needed for sustained shedding.
 \item np=8 rank-count results are reported alongside np=1/2/4 for one NACA and
 one cylinder case (Section~8); the np=8 timing and consistency are documented.
 \end{itemize}

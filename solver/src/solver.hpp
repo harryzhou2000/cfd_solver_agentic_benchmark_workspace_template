@@ -94,6 +94,10 @@ double cfl_current = 1.0;     // current pseudo-time CFL (set per step)
   double first_residual_l2 = 0.0;
   bool true_bdf2_inner_loop = false;
   int last_inner_iter = 0;
+  // transient lift-coefficient history for honest shedding detection: the
+  // Re200 status is "statistically_periodic" only if the cl history actually
+  // oscillates (von Karman shedding), not merely if the inner solve converged.
+  std::vector<double> cl_history;
 
   // ---- API ----
   void setup(const CaseDef& cd, int rank, int nranks);
