@@ -44,7 +44,7 @@ def main():
                 try:
                     with open(src,"rb") as a, open(dst,"wb") as b: b.write(a.read())
                 except Exception: pass
-                var = "mach" if "mach" in f else ("pressure" if "pressure" in f else ("vorticity/velocity" if "vorticity" in f else ("residual" if "residual" in f else ("force" if "force" in f else "cp"))))
+                var = "mach" if "mach" in f else ("pressure" if "pressure" in f else ("velocity_magnitude" if "vorticity" in f else ("residual" if "residual" in f else ("force" if "force" in f else "cp"))))
                 ftype = "contour" if f in ("mach.png","pressure.png","vorticity_wake.png") else "line"
                 fig_manifest.append({"figure_file":"%s_%s"%(cid,f),"case_id":cid,"figure_type":ftype,
                     "variable":var,"source_file":f.replace(".png",".csv").replace("vorticity_wake","forces") if f not in ("mach.png","pressure.png") else "field_final.vtu",

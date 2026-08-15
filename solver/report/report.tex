@@ -164,7 +164,8 @@ the boundary-layer/wake resolution; the case reaches a stable force plateau).
 The Re200 case uses a true BDF2 dual-time scheme with the supplied
 $\Delta t=0.01$. The scalar point-implicit needs several hundred SGS sweeps
 per physical step to meet the $10^{-3}$ inner target (the inner count falls
-from $\sim$800 at startup to a few hundred as the transient develops), so the
+from the 1000-iteration cap at startup to a few tens as the transient
+develops), so the
 full $t_f=300$ ($3\times10^4$-step) run is compute-bound; the submitted Re200
 result is a partial run to the step reached, which shows the startup transient
 and the onset of lift oscillation (vortex shedding) but is shorter than
