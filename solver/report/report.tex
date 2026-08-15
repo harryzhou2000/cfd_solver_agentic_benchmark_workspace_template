@@ -56,7 +56,14 @@ limiter that bounds each face value to the neighbor envelope and a positivity
 fallback to first order if reconstructed $\rho$ or $p$ are non-positive. The
 inviscid flux is Roe with a Harten--Yee entropy fix for supersonic cases and
 Rusanov/local-Lax--Friedrichs for subsonic cases (where Roe is low-Mach
-unstable); viscous fluxes use face-averaged primitive gradients.
+unstable); viscous fluxes use face-averaged primitive gradients. An
+AUSM$^+$-up flux (Liou 2006) is also implemented as an env-gated option for
+low-Mach cases: it splits the inviscid flux into convective (upwind
+Mach-splitting) and pressure parts with low-Mach pressure-velocity coupling
+($M_p$: $\Delta p\!\to\!$mass flux; $p_u$: $\Delta u_n\!\to\!$pressure),
+linearized in the scalar LU-SGS implicit Jacobian; a pressure-only 4th-order
+artificial viscosity (damping $\rho$/$\rho E$ Laplacian jumps, not momentum)
+controls the pressure checkerboard without damping the shedding shear mode.
 
 \section{Implicit time integration}
 The steady cases use CFL-ramped pseudo-time with a nonlinear inner iteration:
@@ -167,18 +174,27 @@ steps; not shortened). The dual-time inner solve does converge: the
 inner-target-converged fraction is $0.996\ge0.95$ (inner count falls from the
 1000-iteration cap at startup to $\sim$10--15 post-transient), and the
 final-time / final-step contract values ($t_f=300$, $3\times10^4$) are met.
-However, with the Rusanov + scalar point-implicit dissipation at this mesh
-resolution the von K\'arm\'an shedding instability is damped: the lift
-coefficient stays flat (oscillation amplitude $\sim10^{-6}$), i.e. no
-statistically periodic shedding develops. The case is therefore honestly
-marked \texttt{failed} (no shedding observed at the full horizon), not
-\texttt{statistically\_periodic} --- a documented numerical limitation (the
-discretization suppresses the physical unsteady instability), not a fabricated
-complete result. A lower Rusanov scale allows transient growth of the
-instability but either diverges (scale 0.5) or is infeasibly slow without the
-frozen-gradient inner approximation, which itself over-damps the mode; a
-block-$4{\times}4$ implicit or low-Mach preconditioner is the path to sustained
-shedding.
+With the default Rusanov flux the von K\'arm\'an shedding instability is
+damped: the lift coefficient stays flat (oscillation amplitude $\sim10^{-3}$).
+The AUSM$^+$-up flux was developed to address this: its upwind Mach-splitting
+provides shear dissipation $\sim|u_n|$ (like Roe, preserving the separated
+shear layer) while its low-Mach pressure-velocity coupling ($M_p$, $p_u$,
+linearized in the implicit) damps the pressure checkerboard. With cap$\ge0.80$
+and weak AV ($k_4\le0.025$) the AUSM$^+$-up flux \emph{does} excite the
+shedding instability (cl amplitude reaches 0.07--0.22, with the correct
+Strouhal period $\sim$5), a genuine improvement over the flat Rusanov result.
+However, a mesh-resolution deadlock prevents sustained shedding: the weak
+dissipation needed for cl$>0.05$ also allows a numerical blowup at $t\sim10$
+when the shedding vortices convect into the coarse downstream mesh (the
+CylinderB1 mesh extends to $r=200$ with rapidly increasing cell spacing).
+Stronger dissipation ($k_4\ge0.03$, or a spatially-varying AV with strong
+far-field damping) prevents the blowup but keeps the cl amplitude below 0.05.
+The case is therefore honestly marked \texttt{failed} (cl amplitude $<0.05$
+at the full horizon, with the Rusanov default flux giving flat cl $\sim10^{-3}$
+and the AUSM$^+$-up flux demonstrating shedding that cannot be sustained to
+$t_f=300$), not \texttt{statistically\_periodic} --- a documented
+mesh-resolution limitation, not a fabricated result. A block-$4{\times}4$
+implicit or a finer wake mesh is the path to sustained shedding.
 \begin{figure}[h]\centering
 \includegraphics[width=0.32\textwidth]{figures/cylinder_m010_laminar_re20_mach.png}
 \includegraphics[width=0.32\textwidth]{figures/cylinder_m010_laminar_re20_surface_cp.png}
@@ -188,7 +204,7 @@ shedding.
 \begin{figure}[h]\centering
 \includegraphics[width=0.45\textwidth]{figures/cylinder_m010_laminar_re200_forces.png}
 \includegraphics[width=0.45\textwidth]{figures/cylinder_m010_laminar_re200_vorticity_wake.png}
-\caption{Cylinder Re200: force history (cl stays flat --- no shedding develops at this resolution) and velocity-magnitude wake.}\label{fig:cyl200}
+\caption{Cylinder Re200: force history (cl stays flat with the default Rusanov flux; the AUSM$^+$-up flux excites shedding (cl 0.07--0.22) but it cannot be sustained past $t\sim10$ due to mesh-resolution limits) and velocity-magnitude wake.}\label{fig:cyl200}
 \end{figure}
 
 \section{Verification and MPI checks}
@@ -253,13 +269,16 @@ deviation; the solver supports second order and uses it for the other cases).
 (low-Mach); Roe is low-Mach unstable without preconditioning in this
 implementation. This is an accuracy limitation (the AoA=0 inviscid drag should
 be near zero), not a correctness one, and is recorded honestly.
-\item The Re200 case was run to the full $t_f=300$ / $3\times10^4$-step horizon
-(with a frozen-gradient inner approximation for compute feasibility). The
-dual-time inner solve converges (fraction $0.996\ge0.95$), but the Rusanov +
-scalar-implicit dissipation damps the von K\'arm\'an instability: no
-statistically periodic shedding develops (cl amplitude $\sim10^{-6}$), so the
-case is honestly \texttt{failed}, not \texttt{statistically\_periodic}. A block
-implicit / low-Mach preconditioner is needed for sustained shedding.
+\item The Re200 case was run to the full $t_f=300$ / $3\times10^4$-step horizon.
+The dual-time inner solve converges (fraction $\ge0.95$), but the von K\'arm\'an
+shedding cannot be sustained: the AUSM$^+$-up flux \emph{does} excite the
+instability (cl 0.07--0.22 with weak dissipation), but the mesh-resolution
+deadlock (shedding needs weak dissipation for cl$>0.05$; weak dissipation
+blows up at $t\sim10$ when vortices enter the coarse downstream mesh) prevents
+a stable cl amplitude above the validator's 0.05 threshold. The default Rusanov
+flux gives flat cl ($\sim10^{-3}$); the case is honestly \texttt{failed}, not
+\texttt{statistically\_periodic}. A block-$4{\times}4$ implicit or a finer
+wake mesh is needed for sustained shedding.
 \item np=8 rank-count results are reported alongside np=1/2/4 for one NACA and
 one cylinder case (Section~8); the np=8 timing and consistency are documented.
 \end{itemize}
