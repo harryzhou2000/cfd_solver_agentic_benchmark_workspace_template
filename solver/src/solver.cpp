@@ -233,8 +233,25 @@ void Solver::run() {
       if (rank == 0 && (step % 100 == 0 || step < 5))
         std::printf("[cfd2d] step %d t=%.3f inner=%d ratio=%.4e cd=%.5f cl=%.5f\n",
           step, final_phys_time, last_inner_iter, inner_stats.last_ratio,
-          last_forces.cd, last_forces.cl);
+      last_forces.cd, last_forces.cl);
       if (!std::isfinite(inner_stats.last_ratio)) { ok=false; convergence_status="failed"; break; }
+      // Periodic checkpoint: write the full output-contract package every 500
+      // physical steps so that a stopped/killed transient run still leaves a
+      // complete, consistent result directory (forces[-1].step == final_step,
+      // field/surface/forces from the same state). A completed run overwrites
+      // these with the true convergence status after the loop.
+      if ((step + 1) % 500 == 0) {
+        convergence_status = "failed";  // checkpoint = incomplete (not final)
+        exchangeHalo(); computePrimitive(); computeGradients(); computeLimiters();
+        computeResidual(false, 0.0); computeResidualNorms();
+        appendForces(final_step, final_phys_time);
+        appendResiduals(final_step, final_phys_time, last_inner_iter, 1.0, dt);
+        wall_time_seconds = MPI_Wtime() - wall_start;
+        writeSurface(); writeFieldFinal(); writeRestart();
+        writePartitionDiagnostics(); writePartitionFilesForExaminer();
+        writeMetadata("failed"); writeRunStatus();
+        if (rank == 0) std::printf("[cfd2d] checkpoint step=%d t=%.2f\n", final_step, final_phys_time);
+      }
     }
     double frac = inner_stats.n_steps ? 1.0 - double(inner_stats.target_misses)/inner_stats.n_steps : 0.0;
     convergence_status = (ok && frac >= 0.95) ? "statistically_periodic" : "failed";
