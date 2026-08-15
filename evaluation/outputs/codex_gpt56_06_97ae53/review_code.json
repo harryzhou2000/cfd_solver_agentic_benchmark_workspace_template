@@ -1,0 +1,112 @@
+{
+  "review_area": "code_review",
+  "title": "Code review scorecard",
+  "points": [
+    {
+      "id": "code.build",
+      "title": "Build system and reproducibility",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "CMake C++17/MPI build and documented commands are committed; evaluator did not perform a clean rebuild because the host external symlink is dangling."
+    },
+    {
+      "id": "code.cli",
+      "title": "CLI and error handling",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "README documents case/config/output CLI and source contains argument validation."
+    },
+    {
+      "id": "code.organization",
+      "title": "Code organization and extensibility",
+      "weight": 0.12,
+      "score": 3,
+      "notes": "Functional but largely monolithic solver/src/main.cpp; tools/report.py and validation helper are separated."
+    },
+    {
+      "id": "code.originality",
+      "title": "Originality and license compliance",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Trust policy applied; no internal wrapper/executable call seen, but no external provenance investigation is performed."
+    },
+    {
+      "id": "code.hardcoding",
+      "title": "No hard-coded case logic",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "CGNS/config-driven case handling; no two-filename-only branches identified."
+    },
+    {
+      "id": "code.mpi",
+      "title": "MPI correctness",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "Source/report describe METIS owned/ghost partitioning, neighbor exchange, reductions and rank-local data; attempt evidence contains np=1/8 comparisons."
+    },
+    {
+      "id": "code.robustness",
+      "title": "Robustness and memory sanity",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Positivity fallback, finite checks and documented robust first-order predictor schedule."
+    },
+    {
+      "id": "code.testing",
+      "title": "Testing and validation evidence",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "Immutable attempt 297126a contains all eight validator-ready packages and reported Python/diff checks."
+    },
+    {
+      "id": "code.hygiene",
+      "title": "Code hygiene",
+      "weight": 0.07,
+      "score": 4,
+      "notes": "Curated result commit audit passed with 57 allowed source/report/figure paths and no prohibited paths."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Existing solver executable called internally",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Force/residual files generated without solving",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Code only reads the two benchmark mesh filenames through hard-coded branches",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "MPI rank count changes results by order-one amounts for steady cases",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Explicit time stepping only (no implicit/steady capability claimed where required)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims algorithms that cannot be found in source",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete/failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Solver core, time integration, or MPI communication copied/adapted/wrapped from an existing open-source CFD codebase",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.73
+}

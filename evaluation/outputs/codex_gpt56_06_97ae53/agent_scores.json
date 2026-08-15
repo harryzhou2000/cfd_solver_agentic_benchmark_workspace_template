@@ -1,0 +1,356 @@
+{
+  "schema": "agent_scores",
+  "contestant": "06",
+  "evaluated_at": "2026-08-15T07:00:00Z",
+  "evaluator": {
+    "agent": "codex-evaluator",
+    "session_id": null,
+    "harness": "codex",
+    "notes": "immutable source/result audit"
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "019fd895-3740-7e11-89a2-f7791227d1e9"
+    ],
+    "execution_date": "2026-08-06",
+    "started_at": "2026-08-06T19:39:16.488000+00:00",
+    "ended_at": "2026-08-09T07:15:42.811000+00:00",
+    "time_basis": "selected project Codex root UTC; start from bundled state_5.sqlite/rollout",
+    "contestant_final_response_status": "present",
+    "contestant_final_response_message_id": "msg_05d0fbb7077f24ea016a78291cfd648190ad11ad515e861cc0",
+    "contestant_final_response_timestamp": "2026-08-09T07:15:42.678Z",
+    "contestant_final_response_source": ".sessions/codex/sessions/2026/08/06/rollout-2026-08-06T19-38-05-019fd895-3740-7e11-89a2-f7791227d1e9.jsonl",
+    "rationale": "single continuous project-local Codex root (six threads including five descendants); the report/build/result task, initial codex/gpt56/init SHA, and terminal final-answer event identify this tree; no OpenCode bundle exists."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "CMake C++17/MPI build and documented commands are committed; evaluator did not perform a clean rebuild because the host external symlink is dangling."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "README documents case/config/output CLI and source contains argument validation."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 3,
+          "notes": "Functional but largely monolithic solver/src/main.cpp; tools/report.py and validation helper are separated."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Trust policy applied; no internal wrapper/executable call seen, but no external provenance investigation is performed."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "CGNS/config-driven case handling; no two-filename-only branches identified."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Source/report describe METIS owned/ghost partitioning, neighbor exchange, reductions and rank-local data; attempt evidence contains np=1/8 comparisons."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Positivity fallback, finite checks and documented robust first-order predictor schedule."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Immutable attempt 297126a contains all eight validator-ready packages and reported Python/diff checks."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4,
+          "notes": "Curated result commit audit passed with 57 allowed source/report/figure paths and no prohibited paths."
+        }
+      ],
+      "overall_score": 3.73,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Report/source document compressible governing variables and nondimensional controls."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS unstructured mesh, adjacency and boundary families are implemented/documented."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Cell-centered conservative FV residual assembly is documented and present in source."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Rusanov numerical flux is explicit; diffusive but legitimate."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Farfield, slip and no-slip adiabatic treatments are documented with reported gates."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 3,
+          "notes": "Least-squares linear reconstruction exists, but steady high-order sweep is only every 25th outer step."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Limiter/positivity controls are documented as production-active."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Newtonian/Fourier treatment and tangential skin-friction reporting are described."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Local block-Jacobi implicit relaxation and CFL/local controls are described; not a coupled LU-SGS method."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Reported BDF2 dual-time loop reaches t=300 with frozen histories, target-miss and inner-iteration statistics in immutable result evidence."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS, halo exchange, reductions and np=1/8 evidence are reported."
+        }
+      ],
+      "overall_score": 3.91,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 3,
+          "notes": "All packages are preserved in immutable attempt 297126a and passed validator, but raw outputs are correctly excluded from curated result commit."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Official validator explicitly passed exact eight canonical directories plus report from immutable attempt 297126a."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "Attempt metadata/report describe seven converged steady runs and Re200 statistically periodic at t=300."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Reported residual reductions, wall/positivity checks, forces and MPI comparisons are plausible; no independent rerun performed."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Curated report includes Mach, pressure, residual, force and surface/wake figures for every case."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Detailed LaTeX report states methods, controls, force tables, limitations and manifest traceability."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 4,
+          "notes": "Report identifies run/figure manifests and source CSV/field files, but raw evidence is intentionally outside curated submission."
+        }
+      ],
+      "overall_score": 4.4,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 89,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Documented CMake/CLI and full contract evidence in immutable attempt; clean evaluator rebuild not performed."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 9,
+        "notes": "CGNS unstructured geometry, boundary tags and METIS adjacency documented/source-inspected."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 13,
+        "notes": "Conservative FV/Rusanov and required boundary conditions documented; no independent numerical rerun."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Least-squares limited reconstruction and positivity exist; steady high order only every 25th outer step."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Newtonian/Fourier, no-slip gates and tangential skin-friction split documented."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 14,
+        "notes": "Block-Jacobi implicit method and BDF2 t=300 inner-control evidence; approximate rather than coupled linear solve."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 9,
+        "notes": "METIS/ghost exchange/reductions and np=1/8 NACA+cylinder comparisons are reported."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 9,
+        "notes": "All eight packages/report officially validate in immutable attempt; no independent rerun."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Complete referenced figures, controls, results tables, MPI and Re200 analysis."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Config/mesh-driven solver but core is largely a single source file."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 5,
+      "notes": "Official immutable-attempt validation; converged, 4.03-order residual reduction and field/force figures."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 5,
+      "notes": "Official immutable-attempt validation; converged credible compressible result and figures."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 5,
+      "notes": "Official immutable-attempt validation; converged with shock-oriented field evidence."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 5,
+      "notes": "Official immutable-attempt validation; converged no-slip result with surface/force evidence."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 5,
+      "notes": "Official immutable-attempt validation; converged no-slip result with figures."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 5,
+      "notes": "Official immutable-attempt validation; converged no-slip result with figures."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 5,
+      "notes": "Official immutable-attempt validation; converged steady wake, residual and wall evidence."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 5,
+      "notes": "Official immutable-attempt validation of submitted transient package; report records t=300, periodicity and Strouhal. Not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "Legacy provenance is a verified post-run reconstruction; original run environment/container is unavailable.",
+    "All raw result packages were intentionally excluded from curated submission and inspected only in immutable attempt 297126a.",
+    "No clean evaluator build/rerun was performed because the host external symlink is dangling; Re200 was not rerun by policy.",
+    "run_identity.json and contestant_final_response.md are unindexed sidecars; their SHA-256 values are recorded in agent_report.md."
+  ]
+}

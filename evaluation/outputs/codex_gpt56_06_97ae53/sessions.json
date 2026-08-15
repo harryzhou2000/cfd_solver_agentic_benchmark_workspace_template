@@ -1,0 +1,3982 @@
+{
+  "codex": {
+    "present": true,
+    "source_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/06/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/06/.sessions/codex/sessions",
+    "thread_count": 6,
+    "subagent_count": 5,
+    "root_count": 1,
+    "roots": [
+      {
+        "thread_id": "019fd895-3740-7e11-89a2-f7791227d1e9",
+        "model": "gpt-5.6-luna",
+        "thread_count": 6,
+        "started_at": "2026-08-06T19:39:16.488000+00:00",
+        "ended_at": "2026-08-09T07:15:42.811000+00:00",
+        "rollout_bytes": 16985189
+      }
+    ],
+    "rollout_bytes_total": 16985189,
+    "missing_rollouts": [],
+    "source": "project"
+  },
+  "opencode": {
+    "present": false,
+    "session_count": 0
+  },
+  "analysis": {
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "window": {
+      "start": "2026-08-06T19:39:16.488000+00:00",
+      "end": "2026-08-09T07:15:42.811000+00:00"
+    },
+    "idle_exclusion": {
+      "method": "merged timeline over main thread/session and all subagents; gaps with no events anywhere exceed the threshold and are excluded",
+      "gap_count": 1,
+      "gaps": [
+        {
+          "start": "2026-08-07T02:34:46.556000+00:00",
+          "end": "2026-08-09T06:50:29.741000+00:00",
+          "seconds": 188143.2,
+          "spanning_entities": [
+            "019fd895-3740-7e11-89a2-f7791227d1e9"
+          ]
+        }
+      ],
+      "idle_seconds_total": 188143.2
+    },
+    "permission_waits": {
+      "method": "heuristic",
+      "explicit_approval_events_found": false,
+      "ask_tool_events_found": 0,
+      "candidate_gaps": [],
+      "candidate_count": 0,
+      "policy_observed": [
+        "never",
+        "reviewer=user"
+      ],
+      "limitations": [
+        "codex rollouts contain no explicit approval-request/response event types (verified by scanning all local sessions); permission-blocked idle cannot be distinguished from user-away time with certainty",
+        "candidates are gaps > idle threshold between a tool/turn boundary and a user message / new turn in approval-aware threads; expect false positives when the user stepped away"
+      ]
+    },
+    "buckets": [
+      {
+        "bucket_index": 0,
+        "start": "2026-08-06T19:39:16.488000+00:00",
+        "end": "2026-08-06T20:09:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 14175257,
+          "cached_input": 13300480,
+          "non_cached_input": 874777,
+          "output": 106724,
+          "reasoning_output": 16514,
+          "total": 14281981
+        },
+        "cache": {
+          "cached_tokens": 13300480,
+          "input_tokens": 14175257,
+          "hit_ratio": 0.9383
+        },
+        "tools": {
+          "total": 169,
+          "by_tool": {
+            "exec": 139,
+            "send_message": 10,
+            "wait": 8,
+            "spawn_agent": 4,
+            "list_agents": 4,
+            "wait_agent": 4
+          },
+          "by_category": {
+            "shell": 139,
+            "collaboration": 30
+          }
+        },
+        "turns": {
+          "thread_goal_updated": 4,
+          "task_started": 7,
+          "agent_message": 15,
+          "sub_agent_activity": 16,
+          "task_complete": 3
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9",
+          "019fd896-d3fc-7f53-9ccb-5097d8c0bf1b",
+          "019fd897-0553-7ff2-ba7d-d99a43e21cc4",
+          "019fd897-16d5-7c20-a035-1e959a92b7e4"
+        ],
+        "active_entity_count": 4
+      },
+      {
+        "bucket_index": 1,
+        "start": "2026-08-06T20:09:16.488000+00:00",
+        "end": "2026-08-06T20:39:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 23556014,
+          "cached_input": 23076096,
+          "non_cached_input": 479918,
+          "output": 45189,
+          "reasoning_output": 16605,
+          "total": 23601203
+        },
+        "cache": {
+          "cached_tokens": 23076096,
+          "input_tokens": 23556014,
+          "hit_ratio": 0.9796
+        },
+        "tools": {
+          "total": 134,
+          "by_tool": {
+            "exec": 110,
+            "wait": 20,
+            "send_message": 2,
+            "list_agents": 1,
+            "followup_task": 1
+          },
+          "by_category": {
+            "shell": 110,
+            "collaboration": 24
+          }
+        },
+        "turns": {
+          "agent_message": 5,
+          "context_compacted": 1,
+          "sub_agent_activity": 3,
+          "task_started": 1,
+          "task_complete": 1
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9",
+          "019fd896-d3fc-7f53-9ccb-5097d8c0bf1b"
+        ],
+        "active_entity_count": 2
+      },
+      {
+        "bucket_index": 2,
+        "start": "2026-08-06T20:39:16.488000+00:00",
+        "end": "2026-08-06T21:09:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 129210672,
+          "cached_input": 125700608,
+          "non_cached_input": 3510064,
+          "output": 349892,
+          "reasoning_output": 111912,
+          "total": 129560564
+        },
+        "cache": {
+          "cached_tokens": 125700608,
+          "input_tokens": 129210672,
+          "hit_ratio": 0.9728
+        },
+        "tools": {
+          "total": 242,
+          "by_tool": {
+            "exec": 198,
+            "wait": 18,
+            "send_message": 8,
+            "list_agents": 6,
+            "wait_agent": 6,
+            "followup_task": 3,
+            "spawn_agent": 3
+          },
+          "by_category": {
+            "shell": 198,
+            "collaboration": 44
+          }
+        },
+        "turns": {
+          "agent_message": 31,
+          "sub_agent_activity": 40,
+          "task_complete": 5,
+          "task_started": 10,
+          "context_compacted": 5,
+          "thread_goal_updated": 2
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9",
+          "019fd896-d3fc-7f53-9ccb-5097d8c0bf1b",
+          "019fd897-0553-7ff2-ba7d-d99a43e21cc4",
+          "019fd8e5-cf85-7821-a998-6baff493d1df",
+          "019fd8e5-df62-7cd0-8312-10d8e7741994"
+        ],
+        "active_entity_count": 5
+      },
+      {
+        "bucket_index": 3,
+        "start": "2026-08-06T21:09:16.488000+00:00",
+        "end": "2026-08-06T21:39:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 21094452,
+          "cached_input": 20890624,
+          "non_cached_input": 203828,
+          "output": 43499,
+          "reasoning_output": 17071,
+          "total": 21137951
+        },
+        "cache": {
+          "cached_tokens": 20890624,
+          "input_tokens": 21094452,
+          "hit_ratio": 0.9903
+        },
+        "tools": {
+          "total": 153,
+          "by_tool": {
+            "exec": 125,
+            "wait": 24,
+            "send_message": 4
+          },
+          "by_category": {
+            "shell": 125,
+            "collaboration": 28
+          }
+        },
+        "turns": {
+          "agent_message": 4,
+          "sub_agent_activity": 4,
+          "task_complete": 3
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9",
+          "019fd897-0553-7ff2-ba7d-d99a43e21cc4",
+          "019fd8e5-cf85-7821-a998-6baff493d1df",
+          "019fd8e5-df62-7cd0-8312-10d8e7741994"
+        ],
+        "active_entity_count": 4
+      },
+      {
+        "bucket_index": 4,
+        "start": "2026-08-06T21:39:16.488000+00:00",
+        "end": "2026-08-06T22:09:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 25691991,
+          "cached_input": 25567744,
+          "non_cached_input": 124247,
+          "output": 26848,
+          "reasoning_output": 12705,
+          "total": 25718839
+        },
+        "cache": {
+          "cached_tokens": 25567744,
+          "input_tokens": 25691991,
+          "hit_ratio": 0.9952
+        },
+        "tools": {
+          "total": 125,
+          "by_tool": {
+            "exec": 101,
+            "wait": 24
+          },
+          "by_category": {
+            "shell": 101,
+            "collaboration": 24
+          }
+        },
+        "turns": {
+          "agent_message": 1
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 5,
+        "start": "2026-08-06T22:09:16.488000+00:00",
+        "end": "2026-08-06T22:39:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 16038183,
+          "cached_input": 15292416,
+          "non_cached_input": 745767,
+          "output": 35293,
+          "reasoning_output": 14258,
+          "total": 16073476
+        },
+        "cache": {
+          "cached_tokens": 15292416,
+          "input_tokens": 16038183,
+          "hit_ratio": 0.9535
+        },
+        "tools": {
+          "total": 140,
+          "by_tool": {
+            "exec": 115,
+            "wait": 15,
+            "followup_task": 4,
+            "send_message": 4,
+            "list_agents": 2
+          },
+          "by_category": {
+            "shell": 115,
+            "collaboration": 25
+          }
+        },
+        "turns": {
+          "context_compacted": 1,
+          "agent_message": 13,
+          "sub_agent_activity": 8,
+          "task_started": 4,
+          "task_complete": 4
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9",
+          "019fd897-0553-7ff2-ba7d-d99a43e21cc4",
+          "019fd8e5-cf85-7821-a998-6baff493d1df",
+          "019fd8e5-df62-7cd0-8312-10d8e7741994"
+        ],
+        "active_entity_count": 4
+      },
+      {
+        "bucket_index": 6,
+        "start": "2026-08-06T22:39:16.488000+00:00",
+        "end": "2026-08-06T23:09:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 19039317,
+          "cached_input": 18907392,
+          "non_cached_input": 131925,
+          "output": 17164,
+          "reasoning_output": 7114,
+          "total": 19056481
+        },
+        "cache": {
+          "cached_tokens": 18907392,
+          "input_tokens": 19039317,
+          "hit_ratio": 0.9931
+        },
+        "tools": {
+          "total": 124,
+          "by_tool": {
+            "exec": 90,
+            "wait": 34
+          },
+          "by_category": {
+            "shell": 90,
+            "collaboration": 34
+          }
+        },
+        "turns": {
+          "agent_message": 7
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 7,
+        "start": "2026-08-06T23:09:16.488000+00:00",
+        "end": "2026-08-06T23:39:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 18698683,
+          "cached_input": 18624768,
+          "non_cached_input": 73915,
+          "output": 8511,
+          "reasoning_output": 1800,
+          "total": 18707194
+        },
+        "cache": {
+          "cached_tokens": 18624768,
+          "input_tokens": 18698683,
+          "hit_ratio": 0.996
+        },
+        "tools": {
+          "total": 99,
+          "by_tool": {
+            "exec": 56,
+            "wait": 43
+          },
+          "by_category": {
+            "shell": 56,
+            "collaboration": 43
+          }
+        },
+        "turns": {
+          "agent_message": 5
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 8,
+        "start": "2026-08-06T23:39:16.488000+00:00",
+        "end": "2026-08-07T00:09:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 24911403,
+          "cached_input": 24212224,
+          "non_cached_input": 699179,
+          "output": 28825,
+          "reasoning_output": 12759,
+          "total": 24940228
+        },
+        "cache": {
+          "cached_tokens": 24212224,
+          "input_tokens": 24911403,
+          "hit_ratio": 0.9719
+        },
+        "tools": {
+          "total": 137,
+          "by_tool": {
+            "exec": 104,
+            "wait": 28,
+            "followup_task": 2,
+            "send_message": 2,
+            "list_agents": 1
+          },
+          "by_category": {
+            "shell": 104,
+            "collaboration": 33
+          }
+        },
+        "turns": {
+          "agent_message": 10,
+          "task_complete": 2,
+          "task_started": 3,
+          "context_compacted": 1,
+          "sub_agent_activity": 4
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9",
+          "019fd897-0553-7ff2-ba7d-d99a43e21cc4",
+          "019fd8e5-df62-7cd0-8312-10d8e7741994"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 9,
+        "start": "2026-08-07T00:09:16.488000+00:00",
+        "end": "2026-08-07T00:39:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 16634512,
+          "cached_input": 16448000,
+          "non_cached_input": 186512,
+          "output": 35065,
+          "reasoning_output": 15855,
+          "total": 16669577
+        },
+        "cache": {
+          "cached_tokens": 16448000,
+          "input_tokens": 16634512,
+          "hit_ratio": 0.9888
+        },
+        "tools": {
+          "total": 145,
+          "by_tool": {
+            "exec": 118,
+            "wait": 26,
+            "send_message": 1
+          },
+          "by_category": {
+            "shell": 118,
+            "collaboration": 27
+          }
+        },
+        "turns": {
+          "agent_message": 3,
+          "sub_agent_activity": 1,
+          "task_complete": 1
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9",
+          "019fd897-0553-7ff2-ba7d-d99a43e21cc4"
+        ],
+        "active_entity_count": 2
+      },
+      {
+        "bucket_index": 10,
+        "start": "2026-08-07T00:39:16.488000+00:00",
+        "end": "2026-08-07T01:09:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 25655641,
+          "cached_input": 25038080,
+          "non_cached_input": 617561,
+          "output": 32985,
+          "reasoning_output": 13632,
+          "total": 25688626
+        },
+        "cache": {
+          "cached_tokens": 25038080,
+          "input_tokens": 25655641,
+          "hit_ratio": 0.9759
+        },
+        "tools": {
+          "total": 146,
+          "by_tool": {
+            "exec": 122,
+            "wait": 21,
+            "followup_task": 1,
+            "list_agents": 1,
+            "send_message": 1
+          },
+          "by_category": {
+            "shell": 122,
+            "collaboration": 24
+          }
+        },
+        "turns": {
+          "agent_message": 8,
+          "sub_agent_activity": 2,
+          "context_compacted": 1,
+          "task_started": 1,
+          "task_complete": 1
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9",
+          "019fd897-0553-7ff2-ba7d-d99a43e21cc4"
+        ],
+        "active_entity_count": 2
+      },
+      {
+        "bucket_index": 11,
+        "start": "2026-08-07T01:09:16.488000+00:00",
+        "end": "2026-08-07T01:39:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 20244433,
+          "cached_input": 19654144,
+          "non_cached_input": 590289,
+          "output": 37093,
+          "reasoning_output": 15260,
+          "total": 20281526
+        },
+        "cache": {
+          "cached_tokens": 19654144,
+          "input_tokens": 20244433,
+          "hit_ratio": 0.9708
+        },
+        "tools": {
+          "total": 180,
+          "by_tool": {
+            "exec": 135,
+            "wait": 34,
+            "send_message": 8,
+            "followup_task": 3
+          },
+          "by_category": {
+            "shell": 135,
+            "collaboration": 45
+          }
+        },
+        "turns": {
+          "sub_agent_activity": 11,
+          "agent_message": 11,
+          "task_started": 3,
+          "task_complete": 3
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9",
+          "019fd897-0553-7ff2-ba7d-d99a43e21cc4",
+          "019fd8e5-cf85-7821-a998-6baff493d1df",
+          "019fd8e5-df62-7cd0-8312-10d8e7741994"
+        ],
+        "active_entity_count": 4
+      },
+      {
+        "bucket_index": 12,
+        "start": "2026-08-07T01:39:16.488000+00:00",
+        "end": "2026-08-07T02:09:16.488000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 18093491,
+          "cached_input": 17841152,
+          "non_cached_input": 252339,
+          "output": 12468,
+          "reasoning_output": 3806,
+          "total": 18105959
+        },
+        "cache": {
+          "cached_tokens": 17841152,
+          "input_tokens": 18093491,
+          "hit_ratio": 0.9861
+        },
+        "tools": {
+          "total": 120,
+          "by_tool": {
+            "exec": 86,
+            "wait": 34
+          },
+          "by_category": {
+            "shell": 86,
+            "collaboration": 34
+          }
+        },
+        "turns": {
+          "agent_message": 3
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 13,
+        "start": "2026-08-07T02:09:16.488000+00:00",
+        "end": "2026-08-07T02:39:16.488000+00:00",
+        "active_seconds": 1530.1,
+        "idle_seconds": 269.9,
+        "active": true,
+        "tokens": {
+          "input": 17060443,
+          "cached_input": 16661760,
+          "non_cached_input": 398683,
+          "output": 23615,
+          "reasoning_output": 9733,
+          "total": 17084058
+        },
+        "cache": {
+          "cached_tokens": 16661760,
+          "input_tokens": 17060443,
+          "hit_ratio": 0.9766
+        },
+        "tools": {
+          "total": 100,
+          "by_tool": {
+            "exec": 82,
+            "wait": 18
+          },
+          "by_category": {
+            "shell": 82,
+            "collaboration": 18
+          }
+        },
+        "turns": {
+          "agent_message": 7,
+          "task_complete": 2,
+          "task_started": 1,
+          "context_compacted": 1
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 14,
+        "start": "2026-08-07T02:39:16.488000+00:00",
+        "end": "2026-08-07T03:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 15,
+        "start": "2026-08-07T03:09:16.488000+00:00",
+        "end": "2026-08-07T03:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 16,
+        "start": "2026-08-07T03:39:16.488000+00:00",
+        "end": "2026-08-07T04:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 17,
+        "start": "2026-08-07T04:09:16.488000+00:00",
+        "end": "2026-08-07T04:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 18,
+        "start": "2026-08-07T04:39:16.488000+00:00",
+        "end": "2026-08-07T05:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 19,
+        "start": "2026-08-07T05:09:16.488000+00:00",
+        "end": "2026-08-07T05:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 20,
+        "start": "2026-08-07T05:39:16.488000+00:00",
+        "end": "2026-08-07T06:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 21,
+        "start": "2026-08-07T06:09:16.488000+00:00",
+        "end": "2026-08-07T06:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 22,
+        "start": "2026-08-07T06:39:16.488000+00:00",
+        "end": "2026-08-07T07:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 23,
+        "start": "2026-08-07T07:09:16.488000+00:00",
+        "end": "2026-08-07T07:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 24,
+        "start": "2026-08-07T07:39:16.488000+00:00",
+        "end": "2026-08-07T08:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 25,
+        "start": "2026-08-07T08:09:16.488000+00:00",
+        "end": "2026-08-07T08:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 26,
+        "start": "2026-08-07T08:39:16.488000+00:00",
+        "end": "2026-08-07T09:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 27,
+        "start": "2026-08-07T09:09:16.488000+00:00",
+        "end": "2026-08-07T09:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 28,
+        "start": "2026-08-07T09:39:16.488000+00:00",
+        "end": "2026-08-07T10:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 29,
+        "start": "2026-08-07T10:09:16.488000+00:00",
+        "end": "2026-08-07T10:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 30,
+        "start": "2026-08-07T10:39:16.488000+00:00",
+        "end": "2026-08-07T11:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 31,
+        "start": "2026-08-07T11:09:16.488000+00:00",
+        "end": "2026-08-07T11:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 32,
+        "start": "2026-08-07T11:39:16.488000+00:00",
+        "end": "2026-08-07T12:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 33,
+        "start": "2026-08-07T12:09:16.488000+00:00",
+        "end": "2026-08-07T12:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 34,
+        "start": "2026-08-07T12:39:16.488000+00:00",
+        "end": "2026-08-07T13:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 35,
+        "start": "2026-08-07T13:09:16.488000+00:00",
+        "end": "2026-08-07T13:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 36,
+        "start": "2026-08-07T13:39:16.488000+00:00",
+        "end": "2026-08-07T14:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 37,
+        "start": "2026-08-07T14:09:16.488000+00:00",
+        "end": "2026-08-07T14:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 38,
+        "start": "2026-08-07T14:39:16.488000+00:00",
+        "end": "2026-08-07T15:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 39,
+        "start": "2026-08-07T15:09:16.488000+00:00",
+        "end": "2026-08-07T15:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 40,
+        "start": "2026-08-07T15:39:16.488000+00:00",
+        "end": "2026-08-07T16:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 41,
+        "start": "2026-08-07T16:09:16.488000+00:00",
+        "end": "2026-08-07T16:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 42,
+        "start": "2026-08-07T16:39:16.488000+00:00",
+        "end": "2026-08-07T17:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 43,
+        "start": "2026-08-07T17:09:16.488000+00:00",
+        "end": "2026-08-07T17:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 44,
+        "start": "2026-08-07T17:39:16.488000+00:00",
+        "end": "2026-08-07T18:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 45,
+        "start": "2026-08-07T18:09:16.488000+00:00",
+        "end": "2026-08-07T18:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 46,
+        "start": "2026-08-07T18:39:16.488000+00:00",
+        "end": "2026-08-07T19:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 47,
+        "start": "2026-08-07T19:09:16.488000+00:00",
+        "end": "2026-08-07T19:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 48,
+        "start": "2026-08-07T19:39:16.488000+00:00",
+        "end": "2026-08-07T20:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 49,
+        "start": "2026-08-07T20:09:16.488000+00:00",
+        "end": "2026-08-07T20:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 50,
+        "start": "2026-08-07T20:39:16.488000+00:00",
+        "end": "2026-08-07T21:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 51,
+        "start": "2026-08-07T21:09:16.488000+00:00",
+        "end": "2026-08-07T21:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 52,
+        "start": "2026-08-07T21:39:16.488000+00:00",
+        "end": "2026-08-07T22:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 53,
+        "start": "2026-08-07T22:09:16.488000+00:00",
+        "end": "2026-08-07T22:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 54,
+        "start": "2026-08-07T22:39:16.488000+00:00",
+        "end": "2026-08-07T23:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 55,
+        "start": "2026-08-07T23:09:16.488000+00:00",
+        "end": "2026-08-07T23:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 56,
+        "start": "2026-08-07T23:39:16.488000+00:00",
+        "end": "2026-08-08T00:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 57,
+        "start": "2026-08-08T00:09:16.488000+00:00",
+        "end": "2026-08-08T00:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 58,
+        "start": "2026-08-08T00:39:16.488000+00:00",
+        "end": "2026-08-08T01:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 59,
+        "start": "2026-08-08T01:09:16.488000+00:00",
+        "end": "2026-08-08T01:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 60,
+        "start": "2026-08-08T01:39:16.488000+00:00",
+        "end": "2026-08-08T02:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 61,
+        "start": "2026-08-08T02:09:16.488000+00:00",
+        "end": "2026-08-08T02:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 62,
+        "start": "2026-08-08T02:39:16.488000+00:00",
+        "end": "2026-08-08T03:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 63,
+        "start": "2026-08-08T03:09:16.488000+00:00",
+        "end": "2026-08-08T03:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 64,
+        "start": "2026-08-08T03:39:16.488000+00:00",
+        "end": "2026-08-08T04:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 65,
+        "start": "2026-08-08T04:09:16.488000+00:00",
+        "end": "2026-08-08T04:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 66,
+        "start": "2026-08-08T04:39:16.488000+00:00",
+        "end": "2026-08-08T05:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 67,
+        "start": "2026-08-08T05:09:16.488000+00:00",
+        "end": "2026-08-08T05:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 68,
+        "start": "2026-08-08T05:39:16.488000+00:00",
+        "end": "2026-08-08T06:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 69,
+        "start": "2026-08-08T06:09:16.488000+00:00",
+        "end": "2026-08-08T06:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 70,
+        "start": "2026-08-08T06:39:16.488000+00:00",
+        "end": "2026-08-08T07:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 71,
+        "start": "2026-08-08T07:09:16.488000+00:00",
+        "end": "2026-08-08T07:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 72,
+        "start": "2026-08-08T07:39:16.488000+00:00",
+        "end": "2026-08-08T08:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 73,
+        "start": "2026-08-08T08:09:16.488000+00:00",
+        "end": "2026-08-08T08:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 74,
+        "start": "2026-08-08T08:39:16.488000+00:00",
+        "end": "2026-08-08T09:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 75,
+        "start": "2026-08-08T09:09:16.488000+00:00",
+        "end": "2026-08-08T09:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 76,
+        "start": "2026-08-08T09:39:16.488000+00:00",
+        "end": "2026-08-08T10:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 77,
+        "start": "2026-08-08T10:09:16.488000+00:00",
+        "end": "2026-08-08T10:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 78,
+        "start": "2026-08-08T10:39:16.488000+00:00",
+        "end": "2026-08-08T11:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 79,
+        "start": "2026-08-08T11:09:16.488000+00:00",
+        "end": "2026-08-08T11:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 80,
+        "start": "2026-08-08T11:39:16.488000+00:00",
+        "end": "2026-08-08T12:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 81,
+        "start": "2026-08-08T12:09:16.488000+00:00",
+        "end": "2026-08-08T12:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 82,
+        "start": "2026-08-08T12:39:16.488000+00:00",
+        "end": "2026-08-08T13:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 83,
+        "start": "2026-08-08T13:09:16.488000+00:00",
+        "end": "2026-08-08T13:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 84,
+        "start": "2026-08-08T13:39:16.488000+00:00",
+        "end": "2026-08-08T14:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 85,
+        "start": "2026-08-08T14:09:16.488000+00:00",
+        "end": "2026-08-08T14:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 86,
+        "start": "2026-08-08T14:39:16.488000+00:00",
+        "end": "2026-08-08T15:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 87,
+        "start": "2026-08-08T15:09:16.488000+00:00",
+        "end": "2026-08-08T15:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 88,
+        "start": "2026-08-08T15:39:16.488000+00:00",
+        "end": "2026-08-08T16:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 89,
+        "start": "2026-08-08T16:09:16.488000+00:00",
+        "end": "2026-08-08T16:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 90,
+        "start": "2026-08-08T16:39:16.488000+00:00",
+        "end": "2026-08-08T17:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 91,
+        "start": "2026-08-08T17:09:16.488000+00:00",
+        "end": "2026-08-08T17:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 92,
+        "start": "2026-08-08T17:39:16.488000+00:00",
+        "end": "2026-08-08T18:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 93,
+        "start": "2026-08-08T18:09:16.488000+00:00",
+        "end": "2026-08-08T18:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 94,
+        "start": "2026-08-08T18:39:16.488000+00:00",
+        "end": "2026-08-08T19:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 95,
+        "start": "2026-08-08T19:09:16.488000+00:00",
+        "end": "2026-08-08T19:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 96,
+        "start": "2026-08-08T19:39:16.488000+00:00",
+        "end": "2026-08-08T20:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 97,
+        "start": "2026-08-08T20:09:16.488000+00:00",
+        "end": "2026-08-08T20:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 98,
+        "start": "2026-08-08T20:39:16.488000+00:00",
+        "end": "2026-08-08T21:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 99,
+        "start": "2026-08-08T21:09:16.488000+00:00",
+        "end": "2026-08-08T21:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 100,
+        "start": "2026-08-08T21:39:16.488000+00:00",
+        "end": "2026-08-08T22:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 101,
+        "start": "2026-08-08T22:09:16.488000+00:00",
+        "end": "2026-08-08T22:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 102,
+        "start": "2026-08-08T22:39:16.488000+00:00",
+        "end": "2026-08-08T23:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 103,
+        "start": "2026-08-08T23:09:16.488000+00:00",
+        "end": "2026-08-08T23:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 104,
+        "start": "2026-08-08T23:39:16.488000+00:00",
+        "end": "2026-08-09T00:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 105,
+        "start": "2026-08-09T00:09:16.488000+00:00",
+        "end": "2026-08-09T00:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 106,
+        "start": "2026-08-09T00:39:16.488000+00:00",
+        "end": "2026-08-09T01:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 107,
+        "start": "2026-08-09T01:09:16.488000+00:00",
+        "end": "2026-08-09T01:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 108,
+        "start": "2026-08-09T01:39:16.488000+00:00",
+        "end": "2026-08-09T02:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 109,
+        "start": "2026-08-09T02:09:16.488000+00:00",
+        "end": "2026-08-09T02:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 110,
+        "start": "2026-08-09T02:39:16.488000+00:00",
+        "end": "2026-08-09T03:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 111,
+        "start": "2026-08-09T03:09:16.488000+00:00",
+        "end": "2026-08-09T03:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 112,
+        "start": "2026-08-09T03:39:16.488000+00:00",
+        "end": "2026-08-09T04:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 113,
+        "start": "2026-08-09T04:09:16.488000+00:00",
+        "end": "2026-08-09T04:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 114,
+        "start": "2026-08-09T04:39:16.488000+00:00",
+        "end": "2026-08-09T05:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 115,
+        "start": "2026-08-09T05:09:16.488000+00:00",
+        "end": "2026-08-09T05:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 116,
+        "start": "2026-08-09T05:39:16.488000+00:00",
+        "end": "2026-08-09T06:09:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 117,
+        "start": "2026-08-09T06:09:16.488000+00:00",
+        "end": "2026-08-09T06:39:16.488000+00:00",
+        "active_seconds": 0.0,
+        "idle_seconds": 1800.0,
+        "active": false,
+        "tokens": {
+          "input": 0,
+          "cached_input": 0,
+          "non_cached_input": 0,
+          "output": 0,
+          "reasoning_output": 0,
+          "total": 0
+        },
+        "cache": {
+          "cached_tokens": 0,
+          "input_tokens": 0,
+          "hit_ratio": null
+        },
+        "tools": {
+          "total": 0,
+          "by_tool": {},
+          "by_category": {}
+        },
+        "turns": {},
+        "active_entities": [],
+        "active_entity_count": 0
+      },
+      {
+        "bucket_index": 118,
+        "start": "2026-08-09T06:39:16.488000+00:00",
+        "end": "2026-08-09T07:09:16.488000+00:00",
+        "active_seconds": 1126.7,
+        "idle_seconds": 673.3,
+        "active": true,
+        "tokens": {
+          "input": 8546393,
+          "cached_input": 8303872,
+          "non_cached_input": 242521,
+          "output": 44315,
+          "reasoning_output": 13396,
+          "total": 8590708
+        },
+        "cache": {
+          "cached_tokens": 8303872,
+          "input_tokens": 8546393,
+          "hit_ratio": 0.9716
+        },
+        "tools": {
+          "total": 61,
+          "by_tool": {
+            "exec": 58,
+            "wait": 3
+          },
+          "by_category": {
+            "shell": 58,
+            "collaboration": 3
+          }
+        },
+        "turns": {
+          "thread_goal_updated": 1,
+          "task_started": 1,
+          "agent_message": 3
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 119,
+        "start": "2026-08-09T07:09:16.488000+00:00",
+        "end": "2026-08-09T07:15:42.811000+00:00",
+        "active_seconds": 386.3,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 4837317,
+          "cached_input": 4523008,
+          "non_cached_input": 314309,
+          "output": 10421,
+          "reasoning_output": 4693,
+          "total": 4847738
+        },
+        "cache": {
+          "cached_tokens": 4523008,
+          "input_tokens": 4837317,
+          "hit_ratio": 0.935
+        },
+        "tools": {
+          "total": 29,
+          "by_tool": {
+            "exec": 24,
+            "wait": 5
+          },
+          "by_category": {
+            "shell": 24,
+            "collaboration": 5
+          }
+        },
+        "turns": {
+          "context_compacted": 1,
+          "agent_message": 4
+        },
+        "active_entities": [
+          "019fd895-3740-7e11-89a2-f7791227d1e9"
+        ],
+        "active_entity_count": 1
+      }
+    ],
+    "whole_session_stats": {
+      "tokens": {
+        "input": 403488202,
+        "cached_input": 394042368,
+        "non_cached_input": 9445834,
+        "output": 857907,
+        "reasoning_output": 287113,
+        "total": 404346109,
+        "total_from_root_trees": 404346109,
+        "total_from_all_sessions": null
+      },
+      "cache": {
+        "cached_tokens": 394042368,
+        "input_tokens": 403488202,
+        "hit_ratio": 0.9766
+      },
+      "tools": {
+        "total": 2104,
+        "by_tool": {
+          "exec": 1663,
+          "wait": 355,
+          "send_message": 40,
+          "list_agents": 15,
+          "followup_task": 14,
+          "wait_agent": 10,
+          "spawn_agent": 7
+        },
+        "by_category": {
+          "shell": 1663,
+          "collaboration": 441
+        }
+      },
+      "turns": {
+        "thread_goal_updated": 7,
+        "task_started": 31,
+        "agent_message": 130,
+        "sub_agent_activity": 89,
+        "context_compacted": 11,
+        "task_complete": 26
+      },
+      "activity": {
+        "active_seconds": 26443.1,
+        "wall_seconds": 214586.3,
+        "idle_seconds": 188143.2
+      },
+      "per_entity": {
+        "019fd895-3740-7e11-89a2-f7791227d1e9": {
+          "kind": "codex_thread",
+          "is_subagent": false,
+          "events": 7496,
+          "tokens_total_subtree": 270739414,
+          "tools": {
+            "exec": 1401,
+            "spawn_agent": 7,
+            "list_agents": 12,
+            "send_message": 8,
+            "wait_agent": 9,
+            "wait": 341,
+            "followup_task": 14
+          },
+          "first_event": "2026-08-06T19:39:16.488000+00:00",
+          "last_event": "2026-08-09T07:15:42.811000+00:00",
+          "rollout_bytes": 12202516
+        },
+        "019fd896-d3fc-7f53-9ccb-5097d8c0bf1b": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 243,
+          "tokens_total_subtree": 2907759,
+          "tools": {
+            "exec": 31,
+            "wait": 2,
+            "send_message": 5
+          },
+          "first_event": "2026-08-06T19:39:51.230000+00:00",
+          "last_event": "2026-08-06T21:05:07.733000+00:00",
+          "rollout_bytes": 583500
+        },
+        "019fd897-0553-7ff2-ba7d-d99a43e21cc4": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 608,
+          "tokens_total_subtree": 15973233,
+          "tools": {
+            "exec": 104,
+            "send_message": 9,
+            "list_agents": 1,
+            "wait": 4
+          },
+          "first_event": "2026-08-06T19:40:03.862000+00:00",
+          "last_event": "2026-08-07T01:14:47.689000+00:00",
+          "rollout_bytes": 1383227
+        },
+        "019fd897-16d5-7c20-a035-1e959a92b7e4": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 163,
+          "tokens_total_subtree": 1589755,
+          "tools": {
+            "exec": 25,
+            "send_message": 3,
+            "wait_agent": 1
+          },
+          "first_event": "2026-08-06T19:40:08.351000+00:00",
+          "last_event": "2026-08-06T19:44:59.908000+00:00",
+          "rollout_bytes": 408022
+        },
+        "019fd8e5-cf85-7821-a998-6baff493d1df": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 670,
+          "tokens_total_subtree": 55322003,
+          "tools": {
+            "exec": 45,
+            "list_agents": 1,
+            "send_message": 5,
+            "wait": 2
+          },
+          "first_event": "2026-08-06T21:06:07.451000+00:00",
+          "last_event": "2026-08-07T01:13:26.920000+00:00",
+          "rollout_bytes": 1125673
+        },
+        "019fd8e5-df62-7cd0-8312-10d8e7741994": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 791,
+          "tokens_total_subtree": 57813945,
+          "tools": {
+            "exec": 57,
+            "list_agents": 1,
+            "send_message": 10,
+            "wait": 6
+          },
+          "first_event": "2026-08-06T21:06:11.512000+00:00",
+          "last_event": "2026-08-07T01:18:11.972000+00:00",
+          "rollout_bytes": 1282251
+        }
+      },
+      "accounting_notes": [
+        "codex: each selected thread has its own cumulative usage counter; run totals sum the selected root and its subagent threads. Bucket totals are per-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
+      ]
+    }
+  },
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/06",
+  "discovered_at": "2026-08-15T06:29:11.787210+00:00",
+  "sources": [
+    {
+      "id": "project_codex",
+      "kind": "project",
+      "harness": "codex",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/06/.sessions/codex",
+      "reachable": true,
+      "sessions_found": 6,
+      "note": "workspace-bundled .sessions/codex copy"
+    },
+    {
+      "id": "project_opencode",
+      "kind": "project",
+      "harness": "opencode",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/06/.sessions/opencode-data/opencode/opencode.db",
+      "reachable": false,
+      "sessions_found": 0,
+      "note": "workspace-bundled .sessions/opencode-data/opencode DB"
+    }
+  ],
+  "selected_source": "project",
+  "selection": {
+    "method": "script_discovery + agent classification",
+    "roots": [
+      "019fd895-3740-7e11-89a2-f7791227d1e9"
+    ],
+    "harness": "auto",
+    "questions": [],
+    "notes": [
+      "the evaluation agent classifies which sessions belong to the contestant run; unextractable choices are surfaced as questions"
+    ]
+  },
+  "env_snapshot": {
+    "captured": true,
+    "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/06/.eval/env_snapshot.json",
+    "sha256": "ffdf87932e44bab1180e53bfca64cfa450d9d7ba397e452a75791c2d0071c68c"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/06/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/06/.sessions/codex/sessions",
+    "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/06/.sessions/opencode-data/opencode/opencode.db",
+    "session_source": "project",
+    "harness": "auto",
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "generated_at": "2026-08-15T06:29:11.787231+00:00"
+  }
+}
