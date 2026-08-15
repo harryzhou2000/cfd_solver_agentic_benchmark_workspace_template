@@ -1,0 +1,353 @@
+{
+  "schema": "agent_scores",
+  "contestant": "07",
+  "evaluated_at": "2026-08-15T08:00:00Z",
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "019fdbed-a7d0-7072-a8ca-4ce5a84e49c0"
+    ],
+    "execution_date": "2026-08-07",
+    "started_at": "2026-08-07T11:15:02.806000+00:00",
+    "ended_at": "2026-08-09T08:56:12.800000+00:00",
+    "time_basis": "selected project Codex root UTC",
+    "contestant_final_response_status": "present",
+    "rationale": "manually selected single project Codex benchmark root; PONG root excluded."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "CMake build claimed and source present; no evaluator build."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Documented CLI."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Separated C++ modules."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Trust policy; no external search."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Config-driven cases."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "METIS/halo source and attempted np8 evidence."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Production transient acceptance is non-strict."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Original attempt validator pass."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 3,
+          "notes": "Curated source clean but report dependencies omitted by policy."
+        }
+      ],
+      "overall_score": 3.7,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Documented compressible FV."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS unstructured/METIS."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "FV residual source."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Rusanov."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Required BCs."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "Limited reconstruction."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Production limiter source."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Viscous source."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Local relaxation."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "Re200 long production uses minimum-inner explicit-like acceptance; report admits no strict nonlinear convergence."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS/halo; np8 diagnostics."
+        }
+      ],
+      "overall_score": 3.6,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 2,
+          "notes": "Raw packages validate only in original attempt; excluded from curated branch."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Original attempt exact eight/report validator pass."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 2,
+          "notes": "Steady plateaus and invalid strict Re200."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "Re200 limitation and zero-order viscous residual reductions."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Original report figures readable; curated report cannot build without forbidden PDFs/SVG."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "Original report candid, but curated TeX missing committed dependencies."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 3,
+          "notes": "Original manifest maps figures; excluded as raw CSV."
+        }
+      ],
+      "overall_score": 2.4,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 70,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Source/build documentation and attempt validator evidence; curated report build fails."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 9,
+        "notes": "CGNS/METIS source."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 12,
+        "notes": "FV/BC source."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Limited reconstruction."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Source, but viscous steady results weak."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 5,
+        "notes": "Re200 does not satisfy strict full-horizon inner convergence."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 8,
+        "notes": "METIS/halo and diagnostic np8."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 5,
+        "notes": "Attempt passes structure, but Re200 invalid and steady plateaus."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 3,
+        "notes": "Original report strong/candid; curated build failure."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Modular source."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 4,
+      "notes": "Attempt validated credible converged case."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 4,
+      "notes": "Attempt validated credible converged case."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 4,
+      "notes": "Attempt validated credible converged case."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 2,
+      "notes": "Attempt structure pass but report gives residual reduction 0/plateau."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 2,
+      "notes": "Attempt structure pass but report gives residual reduction 0/plateau."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 2,
+      "notes": "Attempt structure pass but report gives residual reduction 0/plateau."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 3,
+      "notes": "Attempt validated plateau result, weak residual reduction."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 1,
+      "notes": "No rerun; report admits full-horizon minimum-inner explicit-like acceptance rather than strict BDF2 inner convergence."
+    }
+  },
+  "disqualification": {
+    "triggered": true,
+    "flags": [
+      {
+        "flag": "metadata marks a non-strict Re200 inner solve statistically_periodic/successful",
+        "found": true,
+        "evidence": "report.tex explicitly states minimum-inner damped acceptance and lack of full-horizon strict nonlinear convergence while package metadata reports periodic success."
+      }
+    ]
+  },
+  "limitations": [
+    "post_run provenance reconstruction",
+    "raw original-attempt outputs excluded",
+    "committed-tree pdflatex fails missing figures/cylinder_m010_laminar_re200_residual.pdf after prohibited PDF/SVG omission",
+    "no Re200 rerun"
+  ]
+}

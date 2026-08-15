@@ -1,0 +1,183 @@
+{
+  "harness": {
+    "harness": "codex",
+    "cli_version": "0.146.0",
+    "originator": "codex-tui",
+    "source": "cli",
+    "thread_source": "user",
+    "multi_agent_version": "v2",
+    "history_mode": "legacy",
+    "memory_mode": "disabled",
+    "model_provider": "openai_vanilla",
+    "codex_runtime_version": null,
+    "plugins": [
+      {
+        "source": "cache",
+        "name": "openai-curated-remote",
+        "version": "github"
+      },
+      {
+        "source": "cache",
+        "name": "openai-curated-remote",
+        "version": "google-drive"
+      },
+      {
+        "source": "cache",
+        "name": "openai-curated-remote",
+        "version": "openai-templates"
+      },
+      {
+        "source": "cache",
+        "name": "openai-curated-remote",
+        "version": "outlook-calendar"
+      },
+      {
+        "source": "cache",
+        "name": "openai-curated-remote",
+        "version": "outlook-email"
+      },
+      {
+        "source": "cache",
+        "name": "openai-curated-remote",
+        "version": "slack"
+      },
+      {
+        "source": "cache",
+        "name": "openai-curated-remote",
+        "version": "teams"
+      },
+      {
+        "source": "cache",
+        "name": "openai-curated-remote",
+        "version": "workspace-agents"
+      }
+    ]
+  },
+  "models": {
+    "gpt-5.5": {
+      "catalog": {
+        "display_name": "GPT-5.5",
+        "context_window": 272000,
+        "max_context_window": 272000,
+        "supported_reasoning_levels": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      },
+      "reasoning_efforts_seen": [
+        "xhigh"
+      ],
+      "max_context_used": 11241129231,
+      "threads": 1
+    }
+  },
+  "context": {
+    "by_model": {
+      "gpt-5.5": {
+        "context_window": 272000,
+        "max_context_used": 11241129231
+      }
+    },
+    "by_thread": {
+      "019fdbed-a7d0-7072-a8ca-4ce5a84e49c0": {
+        "model": "gpt-5.5",
+        "max_input_tokens": 11241129231,
+        "mean_input_tokens": 11241129231.0,
+        "model_context_window_recorded": 258400
+      }
+    },
+    "notes": []
+  },
+  "threads": {
+    "019fdbed-a7d0-7072-a8ca-4ce5a84e49c0": {
+      "thread_id": "019fdbed-a7d0-7072-a8ca-4ce5a84e49c0",
+      "is_subagent": false,
+      "model": "gpt-5.5",
+      "entry_model": "gpt-5.5",
+      "model_provider": "openai_vanilla",
+      "reasoning_effort": [
+        "xhigh"
+      ],
+      "entry_reasoning_effort": "xhigh",
+      "tokens_used": 179288436,
+      "cwd": "/workspace",
+      "git_branch": "codex/gpt56/init",
+      "created_at": 1786101213,
+      "updated_at": 1786265772,
+      "started_at": "2026-08-07T11:15:02.806000+00:00",
+      "ended_at": "2026-08-09T08:56:12.800000+00:00",
+      "context_used_max_input": 11241129231,
+      "context_used_mean_input": 11241129231.0,
+      "model_context_window_recorded": 258400
+    }
+  },
+  "subagents": [],
+  "opencodex": null,
+  "prompts": {
+    "by_root_thread": {
+      "019fdbed-a7d0-7072-a8ca-4ce5a84e49c0": {
+        "goal_objective": "complete the task defined in cfd_solver_agentic_benchmark/ . Latex is provided.",
+        "goal_status": "complete",
+        "initial_user_prompt": {
+          "ts": 1786101302,
+          "text": "/goal complete the task defined in cfd_solver_agentic_benchmark/ ."
+        },
+        "resume_prompts": [
+          {
+            "ts": 1786265073,
+            "text": "/goal complete the task defined in cfd_solver_agentic_benchmark/ . Latex is provided."
+          }
+        ],
+        "source": "history"
+      }
+    }
+  },
+  "workspace": {
+    "git": {
+      "branch": "codex/gpt56/07",
+      "commit": "7ad799097f6d8426eb34d5a5ba092956a3e7d7b7"
+    },
+    "agents_md": {
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/AGENTS.md",
+      "exists": true,
+      "sha256": "0a05c72c06d30c4560816624d6c5c70d15138f0e7644fb5ad2f8443ae27be34e",
+      "content": "# AGENTS.md\n\nProject instructions for coding agents working in this repository.\n\n## Sandbox (read/write restriction)\n\n- The agent is FORBIDDEN from reading or writing any directory other than the\n  current working directory (cwd). This includes `/tmp` and the parent\n  directory. All file reads and writes must stay inside the workspace.\n\n## 1. Git Discipline\n\n- Do NOT run `git pull`, `git push`, or switch branches without explicit user\n  authorization. Unauthorized remote or branch mutations are prohibited.\n- Do use `git commit` (and `git stash` when needed) freely as code checkpoints:\n  commit or stash working progress regularly so partial work can be resumed or\n  rolled back. Local checkpoint commits do not require approval; only pushing\n  and branch/remote mutations require it.\n\n## 2. Subagents\n\n- Delegating independent subtasks to subagents is encouraged.\n- Subagent model policy: the ONLY allowed subagent models are `gpt-5.6-terra`\n  and `gpt-5.6-luna` (passed as the `model` override to `spawn_agent`).\n  Do not spawn subagents with any other model.\n\n## 3. Persistence\n\n- Once the user has started a task, do not stop until the specified task is\n  accomplished to a level of satisfaction: completed results, validated\n  artifacts, and an honest report. Work through blockers with safe in-scope\n  checks and alternatives; only stop early when genuinely blocked or explicitly\n  told to stop.\n",
+      "matches_git_head": true
+    },
+    "codegraph": {
+      "exists": true,
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/.codegraph"
+    },
+    "benchmark_submodule": {
+      "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/cfd_solver_agentic_benchmark",
+      "exists": true,
+      "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+      "branch": "HEAD",
+      "dirty": false,
+      "origin_url": "https://github.com/harryzhou2000/cfd_solver_agentic_benchmark"
+    }
+  },
+  "session_window": {
+    "started_at": "2026-08-07T11:15:02.806000+00:00",
+    "ended_at": "2026-08-09T08:56:12.800000+00:00"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/.sessions/codex/sessions",
+    "history": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/.sessions/codex/history.jsonl",
+    "ocx_config": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/.sessions/opencodex/config.json",
+    "ocx_catalog": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/.sessions/codex/opencodex-catalog.json",
+    "plugins_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07/.sessions/codex/plugins",
+    "generated_at": "2026-08-15T06:44:45.227141+00:00",
+    "num_threads": 1
+  },
+  "questions": [],
+  "user_answers": {},
+  "status": "complete"
+}
