@@ -1,0 +1,372 @@
+{
+  "schema": "agent_scores",
+  "contestant": "04",
+  "evaluated_at": "2026-08-15T04:03:44.683301+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": null
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "019fd883-6a9d-7c53-a1b1-96a168fb91ae"
+    ],
+    "execution_date": "2026-08-06",
+    "started_at": "2026-08-06T19:19:45.817000+00:00",
+    "ended_at": "2026-08-09T15:47:17.600000+00:00",
+    "time_basis": "UTC date of selected project-local Codex root start in .sessions/codex/state_5.sqlite; bundled rollout is present.",
+    "contestant_final_response_status": "present",
+    "contestant_final_response_absence_reason": null,
+    "rationale": "Sole project-local Codex root 019fd883-6a9d-7c53-a1b1-96a168fb91ae has 19 descendants and covers benchmark work through the terminal final response."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "CMake and README are committed; clean rebuild was not repeated because the external symlink is dangling."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Submitted main.cpp exposes solve --case/--output and reports bad invocation."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Mesh, physics, output and solver source are separated."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "No internal external-solver invocation found; trust policy excludes internet similarity investigation."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Case JSON and CLI paths, rather than two mesh-name branches, are source-supported."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 0.5,
+          "notes": "MPI code exists, but report Table rankcmp shows order-one steady NACA force changes across ranks."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Exceptions and positivity clamps are present; no independent stress rerun was performed."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "Attempt contains diagnostics, but final immutable submission omits all raw case packages."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 3,
+          "notes": "Readable C++ source, but many tuning scripts and excluded raw outputs limit reproducibility."
+        }
+      ],
+      "overall_score": 2.82,
+      "disqualification_flags": [
+        {
+          "id": 4,
+          "text": "MPI rank count changes results by order-one amounts for steady cases",
+          "evidence": "report.tex rank comparison reports NACA M0.15 CL 0.002416 at np=1 versus 53.72 at np=2, while calling the behavior qualitatively consistent."
+        }
+      ]
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Report and source describe compressible Navier-Stokes and nondimensional variables."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS unstructured mesh and boundary-family code is present."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Face-based residual assembly is source-supported."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 3.5,
+          "notes": "Approximate flux implementation is present; no independent numerical verification."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Farfield, slip and no-slip branches are source-supported."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 2,
+          "notes": "Gradient/reconstruction exists, but reported M2 laminar production uses first-order mode."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 2,
+          "notes": "Limiter/positivity paths exist; production reliability is not demonstrated for shock cases."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Newtonian/Fourier viscous treatment and wall output are source-supported."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Diagonal implicit and CFL controls are present, with documented weak convergence."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "BDF2/inner-solve path exists; Re200 report contains mutually contradictory periodicity text."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 2,
+          "notes": "METIS/halo code is present, but retained rank comparison establishes severe rank dependence."
+        }
+      ],
+      "overall_score": 3.24,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 3,
+          "notes": "All eight raw packages exist only in the immutable attempt worktree, not in the curated submission."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Validator is reproducible for the eight attempt packages after excluding _rerun_logs; curated commit itself has none."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 3,
+          "notes": "Raw/report evidence shows seven pass and M2 inviscid failed; metadata nonetheless says converged."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 2.3,
+          "notes": "M2 failure and order-one MPI inconsistency materially undermine the raw claims."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Committed figures are numerous and readable, including Mach/pressure histories and fields."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "The LaTex report is substantial but contains M2 and Re200 claim contradictions."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 2,
+          "notes": "No raw CSV/field/manifest is committed, so figures cannot be traced from the submission."
+        }
+      ],
+      "overall_score": 3.15,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 65,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 7,
+        "notes": "CMake/CLI source is credible, but clean rebuild and final contract output are not reproducible from curated commit."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 8,
+        "notes": "CGNS unstructured geometry, adjacency and boundary tags are source-supported."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 10,
+        "notes": "Conservative flux/residual and wall branches are implemented, with no independent solver rerun."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 5,
+        "notes": "Second-order machinery exists, but report documents first-order M2 laminar production fallback."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 7,
+        "notes": "Viscous gradients, stresses and heat flux are source-supported; final wall evidence is excluded."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 11,
+        "notes": "Implicit/BDF2 machinery and Re200 inner statistics exist, but report periodicity statements conflict."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 3,
+        "notes": "METIS and halo primitives exist, but raw rank comparison establishes order-one steady result dependence."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 5,
+        "notes": "Attempt raw packages show seven credible passes and failed M2 inviscid; no reproducible final package in submission."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Strong figure coverage and substantial report, reduced for contradictions and missing source-data traceability."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Module split is usable, though tuning scripts and reproducibility exclusions constrain extension."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 4,
+      "notes": "Attempt package validates, but is absent from curated submission."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 4,
+      "notes": "Attempt package validates, but is absent from curated submission."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 1,
+      "notes": "Raw metadata says converged while report sanity gate marks the case failed."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 3.5,
+      "notes": "Attempt package validates; final raw result is excluded from curated submission."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 3.5,
+      "notes": "Attempt package validates; final raw result is excluded from curated submission."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 3,
+      "notes": "Reported first-order shock fallback and excluded raw package limit credibility."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 2.5,
+      "notes": "Raw package validates, but rank table indicates material MPI sensitivity."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 1,
+      "notes": "No rerun; raw claim is excluded and report contradicts its periodicity conclusion."
+    }
+  },
+  "disqualification": {
+    "triggered": true,
+    "flags": [
+      {
+        "id": 4,
+        "text": "MPI rank count changes results by order-one amounts for steady cases",
+        "found": true,
+        "evidence": "report.tex rank table: NACA M0.15 inviscid CL 0.002416 at np=1 and 53.72 at np=2."
+      },
+      {
+        "id": 7,
+        "text": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "Attempt M2 inviscid metadata says converged while report sanity gate marks it failed."
+      }
+    ]
+  },
+  "limitations": [
+    "Legacy provenance is a verified post_run reconstruction; original execution environment is unavailable.",
+    "Curated submission excludes all raw case packages; attempt-worktree validation is evaluator evidence, not submitted-result evidence.",
+    "No Re200 rerun was performed."
+  ]
+}

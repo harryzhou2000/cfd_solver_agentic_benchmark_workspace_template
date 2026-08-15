@@ -1,0 +1,77 @@
+{
+  "review_area": "code_review",
+  "title": "Code review scorecard",
+  "points": [
+    {
+      "id": "code.build",
+      "title": "Build system and reproducibility",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "CMake and README are committed; clean rebuild was not repeated because the external symlink is dangling."
+    },
+    {
+      "id": "code.cli",
+      "title": "CLI and error handling",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "Submitted main.cpp exposes solve --case/--output and reports bad invocation."
+    },
+    {
+      "id": "code.organization",
+      "title": "Code organization and extensibility",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "Mesh, physics, output and solver source are separated."
+    },
+    {
+      "id": "code.originality",
+      "title": "Originality and license compliance",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "No internal external-solver invocation found; trust policy excludes internet similarity investigation."
+    },
+    {
+      "id": "code.hardcoding",
+      "title": "No hard-coded case logic",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Case JSON and CLI paths, rather than two mesh-name branches, are source-supported."
+    },
+    {
+      "id": "code.mpi",
+      "title": "MPI correctness",
+      "weight": 0.15,
+      "score": 0.5,
+      "notes": "MPI code exists, but report Table rankcmp shows order-one steady NACA force changes across ranks."
+    },
+    {
+      "id": "code.robustness",
+      "title": "Robustness and memory sanity",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "Exceptions and positivity clamps are present; no independent stress rerun was performed."
+    },
+    {
+      "id": "code.testing",
+      "title": "Testing and validation evidence",
+      "weight": 0.1,
+      "score": 2,
+      "notes": "Attempt contains diagnostics, but final immutable submission omits all raw case packages."
+    },
+    {
+      "id": "code.hygiene",
+      "title": "Code hygiene",
+      "weight": 0.07,
+      "score": 3,
+      "notes": "Readable C++ source, but many tuning scripts and excluded raw outputs limit reproducibility."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "id": 4,
+      "text": "MPI rank count changes results by order-one amounts for steady cases",
+      "evidence": "report.tex rank comparison reports NACA M0.15 CL 0.002416 at np=1 versus 53.72 at np=2, while calling the behavior qualitatively consistent."
+    }
+  ],
+  "overall_score": 2.82
+}
