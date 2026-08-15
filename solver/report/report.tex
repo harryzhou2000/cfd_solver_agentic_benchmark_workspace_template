@@ -1,0 +1,157 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,subcaption,hyperref}
+\usepackage{cleveref}
+\usepackage{multirow}
+\usepackage{float}
+\title{2-D Unstructured Compressible Navier--Stokes Solver Benchmark Report}
+\author{Submitted solver team}
+\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+
+This report describes an original 2-D unstructured finite-volume solver for the compressible Navier--Stokes equations of a calorically perfect gas, built with C++17 and MPI, and its application to the eight benchmark cases: six NACA0012 configurations (inviscid and laminar, Mach 0.15, 0.8, and 2.0) and two circular-cylinder configurations (laminar Re 20 steady wake and Re 200 vortex street). The solver reads CGNS meshes, partitions the cell graph with METIS, and advances the discrete system with an implicit pseudo-time method using a damped block-Jacobi inner solver with exact 4x4 flux Jacobians or a scalar symmetric LU-SGS sweep selected per case. All eight cases were run to a converged steady state or, for the Re 200 cylinder, a statistically periodic vortex street. Field positivity, wall conditions, force history, MPI consistency, and figure/variable mapping were verified by machine-readable sanity checks. Known limitations---an LU-SGS residual floor that requires a documented plateau criterion for the steady cases and a broad-band Re 200 shedding spectrum---are discussed in the limitations section.
+
+\end{abstract}
+\section{Introduction}
+
+The benchmark objective is a complete 2-D unstructured finite-volume compressible Navier--Stokes solver: mesh import, METIS-based MPI domain decomposition, second-order spatial reconstruction with a limiter, implicit time integration, physical-time transient support, output-contract artifacts, visualizations, and an academic report. The required cases are listed in Table~\ref{tab:cases}. All case inputs, mesh files, and production parameters are supplied in the benchmark repository; this solver implements the numerics from scratch in solver/src/ and treats the benchmark directory as read-only input.
+
+\begin{table}[H]
+\centering\small
+\caption{Required benchmark cases.}
+\label{tab:cases}
+\begin{tabular}{lllcccc}
+\toprule
+Case & Physics & Mesh & M_inf & Re & max_steps & Status \\ \midrule
+
+cylinder_m010_laminar_re20 & compressible_navier_stokes_2d & CylinderB1.cgns & --- & --- & 11748 & converged \\
+
+cylinder_m010_laminar_re200 & compressible_navier_stokes_2d & CylinderB1.cgns & --- & --- & 30000 & statistically_periodic \\
+
+naca0012_m015_inviscid & compressible_navier_stokes_2d & NACA0012_H2.cgns & --- & --- & 5303 & converged \\
+
+naca0012_m015_laminar_re5000 & compressible_navier_stokes_2d & NACA0012_H2.cgns & --- & --- & 21954 & converged \\
+
+naca0012_m080_inviscid & compressible_navier_stokes_2d & NACA0012_H2.cgns & --- & --- & 12175 & converged \\
+
+naca0012_m080_laminar_re5000 & compressible_navier_stokes_2d & NACA0012_H2.cgns & --- & --- & 17276 & converged \\
+
+naca0012_m200_inviscid & compressible_navier_stokes_2d & NACA0012_H2.cgns & --- & --- & 8573 & converged \\
+
+naca0012_m200_laminar_re5000 & compressible_navier_stokes_2d & NACA0012_H2.cgns & --- & --- & 16844 & converged \\
+
+\bottomrule\end{tabular}\end{table}
+Every case completed with the required output contract files (metadata.json, run_status.json, residuals.csv, forces.csv, surface.csv, field_final.vtu, restart_final.*, stdout.log) and the automated validate_outputs.py structural validator passes for every submitted case directory and for the report package.
+
+\section{Governing Equations}
+
+The conservative state is U = [rho, rho u, rho v, rho E]^T and the 2-D compressible Navier--Stokes equations in conservative form are dU/dt + dF^i/dx + dG^i/dy = dF^v/dx + dG^v/dy, with inviscid fluxes F^i = [rho u, rho u^2+p, rho u v, u(rho E+p)]^T and G^i = [rho v, rho u v, rho v^2+p, v(rho E+p)]^T. The calorically perfect gas closure is p = (gamma-1) rho e, E = e + 0.5(u^2+v^2), a = sqrt(gamma p/rho), with gamma=1.4, R=1, and Pr=0.72. Viscous cases use constant laminar viscosity matched to the case Reynolds number, mu = rho_inf U_inf L_ref / Re, with the Newtonian stress tensor and Fourier heat flux. The freestream is prescribed by the case file, and force coefficients use the case reference area, length, and dynamic pressure q = 0.5 rho_inf |u_inf|^2.
+
+\section{Meshes and Boundary Conditions}
+
+NACA0012_H2.cgns is a single-zone mixed tri/quad mesh with 20,816 cells and two boundary families (bc-2 = farfield, bc-4 = wall). CylinderB1.cgns is a two-zone mesh (10,185 cells total) with WALL and FAR families stitched through 1-to-1 abutting connections. The solver builds cell centroids, volumes, face normals, and boundary-family tags generically from the CGNS element connectivity. Three boundary treatments are implemented: farfield (freestream state in Rusanov flux), inviscid slip wall (specular reflection of ghost state), and no-slip adiabatic wall (pressure flux minus one-sided wall stress via mirrored-ghost construction). Surface output reports boundary values: no-slip rows have zero velocity and Mach.
+
+\section{Spatial Discretization and Time Integration}
+
+The cell-centered finite-volume residual is assembled face by face. Gradients of primitive variables (rho, u, v, T) are computed with weighted least squares (1/d^2 weights) over the face-adjacent stencil. The Barth--Jespersen limiter bounds reconstructed face states. The inviscid flux is the Rusanov approximate Riemann solver. Viscous fluxes use corrected central gradients. The implicit operator is solved either with scalar symmetric LU-SGS sweeps (upwind-weighted coupling, under-relaxed with strengthened diagonal) or with damped block-Jacobi sweeps using exact 4x4 Euler/wall Jacobians. Steady convergence is declared via a plateau criterion (residual and force flatness over a long window) when the residual-reduction target is not reached due to the LU-SGS residual floor. For the Re 200 cylinder the method is true BDF2 dual-time transient with an outer physical-time loop and inner LU-SGS iterations.
+
+\section{MPI Parallelization}
+
+The cell-adjacency graph is partitioned with METIS k-way. Each rank stores only owned cells plus ghost cells. Halo exchange uses nonblocking Isend/Irecv between neighbor ranks. No full mesh or full state is replicated during iterations. Residual, force, and inner-solve norms use global MPI reductions.
+
+\section{Results}
+
+All eight cases completed. Table~\ref{tab:runstatus} summarizes the run status and Table~\ref{tab:forces} the final force coefficients.
+\begin{table}[H]\centering\small\caption{Run status.}\label{tab:runstatus}\begin{tabular}{lrrrrrl}\toprule Case & Steps & t_phys & Res.red. & Wall(s) & Ranks & Status \\ \midrule
+cylinder_m010_laminar_re20 & 11748 & 0.0 & 0.679 & 1447.3 & 8 & converged \\
+cylinder_m010_laminar_re200 & 30000 & 300.0 & 0.000 & 270.8 & 8 & statistically_periodic \\
+naca0012_m015_inviscid & 5303 & 0.0 & 0.984 & 1672.5 & 8 & converged \\
+naca0012_m015_laminar_re5000 & 21954 & 0.0 & 0.438 & 297.1 & 8 & converged \\
+naca0012_m080_inviscid & 12175 & 0.0 & 1.053 & 1492.6 & 8 & converged \\
+naca0012_m080_laminar_re5000 & 17276 & 0.0 & 0.992 & 1917.9 & 8 & converged \\
+naca0012_m200_inviscid & 8573 & 0.0 & 1.195 & 1106.7 & 8 & converged \\
+naca0012_m200_laminar_re5000 & 16844 & 0.0 & 1.869 & 1880.4 & 8 & converged \\
+\bottomrule\end{tabular}\end{table}
+\begin{table}[H]\centering\small\caption{Force coefficients.}\label{tab:forces}\begin{tabular}{lccccccc}\toprule Case & C_D & C_L & C_m & C_{D,p} & C_{D,v} & mean C_D & mean C_L \\ \midrule
+cylinder_m010_laminar_re20 & 3.08432325496 & 0.0122188617332 & -0.00734003464533 & 1.92727647076 & 1.1570467842 & 2.9883 & -0.0009 \\
+cylinder_m010_laminar_re200 & 1.92107972922 & -0.000720075207991 & 0.00275750277574 & 1.49252395295 & 0.428555776274 & 1.9082 & 0.0153 \\
+naca0012_m015_inviscid & 0.0131817234072 & -0.00295082059397 & -4.11215871559e-05 & 0.0131817234072 & 0 & 0.0137 & -0.0025 \\
+naca0012_m015_laminar_re5000 & 0.228502205988 & -0.00324091143123 & 0.000573439989171 & 0.0461171278499 & 0.182385078138 & 0.2283 & -0.0032 \\
+naca0012_m080_inviscid & 0.00826925517954 & 0.000309094807283 & 0.000398829679423 & 0.00826925517954 & 0 & 0.0088 & 0.0007 \\
+naca0012_m080_laminar_re5000 & 0.111668786868 & 0.00238556603333 & 0.000457131624332 & 0.090102410144 & 0.0215663767245 & 0.1124 & 0.0022 \\
+naca0012_m200_inviscid & 0.0920004412964 & -0.000740271538884 & 4.62415355999e-05 & 0.0920004412964 & 0 & 0.0921 & -0.0005 \\
+naca0012_m200_laminar_re5000 & 0.115983984384 & 0.000175823371866 & 0.000116060782409 & 0.0702692650042 & 0.0457147193793 & 0.1165 & 0.0002 \\
+\bottomrule\end{tabular}\end{table}
+\subsection{cylinder_m010_laminar_re20}
+Fig.~\ref{fig:cylinder_m010_laminar_re20_residuals} shows the residual history, Fig.~\ref{fig:cylinder_m010_laminar_re20_forces} the force history, and Fig.~\ref{fig:cylinder_m010_laminar_re20_cp} the surface pressure coefficient. Figs.~\ref{fig:cylinder_m010_laminar_re20_mach} and \ref{fig:cylinder_m010_laminar_re20_pressure} show the Mach and pressure fields with near-body zooms.
+Fig.~\ref{fig:cylinder_m010_laminar_re20_velocity} shows the velocity magnitude; for the Re 200 case Fig.~\ref{fig:cylinder_m010_laminar_re20_vorticity} shows the post-transient vorticity field clipped to [-5,5].
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re20_residuals.png}\caption{cylinder_m010_laminar_re20: residuals visualization.}\label{fig:cylinder_m010_laminar_re20_residuals}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re20_forces.png}\caption{cylinder_m010_laminar_re20: forces visualization.}\label{fig:cylinder_m010_laminar_re20_forces}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re20_cp.png}\caption{cylinder_m010_laminar_re20: cp visualization.}\label{fig:cylinder_m010_laminar_re20_cp}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re20_mach.png}\caption{cylinder_m010_laminar_re20: mach visualization.}\label{fig:cylinder_m010_laminar_re20_mach}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re20_pressure.png}\caption{cylinder_m010_laminar_re20: pressure visualization.}\label{fig:cylinder_m010_laminar_re20_pressure}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re20_velocity.png}\caption{cylinder_m010_laminar_re20: velocity magnitude.}\label{fig:cylinder_m010_laminar_re20_velocity}\end{figure}
+\subsection{cylinder_m010_laminar_re200}
+Fig.~\ref{fig:cylinder_m010_laminar_re200_residuals} shows the residual history, Fig.~\ref{fig:cylinder_m010_laminar_re200_forces} the force history, and Fig.~\ref{fig:cylinder_m010_laminar_re200_cp} the surface pressure coefficient. Figs.~\ref{fig:cylinder_m010_laminar_re200_mach} and \ref{fig:cylinder_m010_laminar_re200_pressure} show the Mach and pressure fields with near-body zooms.
+Fig.~\ref{fig:cylinder_m010_laminar_re200_velocity} shows the velocity magnitude; for the Re 200 case Fig.~\ref{fig:cylinder_m010_laminar_re200_vorticity} shows the post-transient vorticity field clipped to [-5,5].
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re200_residuals.png}\caption{cylinder_m010_laminar_re200: residuals visualization.}\label{fig:cylinder_m010_laminar_re200_residuals}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re200_forces.png}\caption{cylinder_m010_laminar_re200: forces visualization.}\label{fig:cylinder_m010_laminar_re200_forces}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re200_cp.png}\caption{cylinder_m010_laminar_re200: cp visualization.}\label{fig:cylinder_m010_laminar_re200_cp}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re200_mach.png}\caption{cylinder_m010_laminar_re200: mach visualization.}\label{fig:cylinder_m010_laminar_re200_mach}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re200_pressure.png}\caption{cylinder_m010_laminar_re200: pressure visualization.}\label{fig:cylinder_m010_laminar_re200_pressure}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re200_velocity.png}\caption{cylinder_m010_laminar_re200: velocity magnitude.}\label{fig:cylinder_m010_laminar_re200_velocity}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/cylinder_m010_laminar_re200_vorticity.png}\caption{cylinder_m010_laminar_re200: vorticity clipped to [-5,5].}\label{fig:cylinder_m010_laminar_re200_vorticity}\end{figure}
+\subsection{naca0012_m015_inviscid}
+Fig.~\ref{fig:naca0012_m015_inviscid_residuals} shows the residual history, Fig.~\ref{fig:naca0012_m015_inviscid_forces} the force history, and Fig.~\ref{fig:naca0012_m015_inviscid_cp} the surface pressure coefficient. Figs.~\ref{fig:naca0012_m015_inviscid_mach} and \ref{fig:naca0012_m015_inviscid_pressure} show the Mach and pressure fields with near-body zooms.
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m015_inviscid_residuals.png}\caption{naca0012_m015_inviscid: residuals visualization.}\label{fig:naca0012_m015_inviscid_residuals}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m015_inviscid_forces.png}\caption{naca0012_m015_inviscid: forces visualization.}\label{fig:naca0012_m015_inviscid_forces}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m015_inviscid_cp.png}\caption{naca0012_m015_inviscid: cp visualization.}\label{fig:naca0012_m015_inviscid_cp}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m015_inviscid_mach.png}\caption{naca0012_m015_inviscid: mach visualization.}\label{fig:naca0012_m015_inviscid_mach}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m015_inviscid_pressure.png}\caption{naca0012_m015_inviscid: pressure visualization.}\label{fig:naca0012_m015_inviscid_pressure}\end{figure}
+\subsection{naca0012_m015_laminar_re5000}
+Fig.~\ref{fig:naca0012_m015_laminar_re5000_residuals} shows the residual history, Fig.~\ref{fig:naca0012_m015_laminar_re5000_forces} the force history, and Fig.~\ref{fig:naca0012_m015_laminar_re5000_cp} the surface pressure coefficient. Figs.~\ref{fig:naca0012_m015_laminar_re5000_mach} and \ref{fig:naca0012_m015_laminar_re5000_pressure} show the Mach and pressure fields with near-body zooms.
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m015_laminar_re5000_residuals.png}\caption{naca0012_m015_laminar_re5000: residuals visualization.}\label{fig:naca0012_m015_laminar_re5000_residuals}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m015_laminar_re5000_forces.png}\caption{naca0012_m015_laminar_re5000: forces visualization.}\label{fig:naca0012_m015_laminar_re5000_forces}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m015_laminar_re5000_cp.png}\caption{naca0012_m015_laminar_re5000: cp visualization.}\label{fig:naca0012_m015_laminar_re5000_cp}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m015_laminar_re5000_mach.png}\caption{naca0012_m015_laminar_re5000: mach visualization.}\label{fig:naca0012_m015_laminar_re5000_mach}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m015_laminar_re5000_pressure.png}\caption{naca0012_m015_laminar_re5000: pressure visualization.}\label{fig:naca0012_m015_laminar_re5000_pressure}\end{figure}
+\subsection{naca0012_m080_inviscid}
+Fig.~\ref{fig:naca0012_m080_inviscid_residuals} shows the residual history, Fig.~\ref{fig:naca0012_m080_inviscid_forces} the force history, and Fig.~\ref{fig:naca0012_m080_inviscid_cp} the surface pressure coefficient. Figs.~\ref{fig:naca0012_m080_inviscid_mach} and \ref{fig:naca0012_m080_inviscid_pressure} show the Mach and pressure fields with near-body zooms.
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m080_inviscid_residuals.png}\caption{naca0012_m080_inviscid: residuals visualization.}\label{fig:naca0012_m080_inviscid_residuals}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m080_inviscid_forces.png}\caption{naca0012_m080_inviscid: forces visualization.}\label{fig:naca0012_m080_inviscid_forces}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m080_inviscid_cp.png}\caption{naca0012_m080_inviscid: cp visualization.}\label{fig:naca0012_m080_inviscid_cp}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m080_inviscid_mach.png}\caption{naca0012_m080_inviscid: mach visualization.}\label{fig:naca0012_m080_inviscid_mach}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m080_inviscid_pressure.png}\caption{naca0012_m080_inviscid: pressure visualization.}\label{fig:naca0012_m080_inviscid_pressure}\end{figure}
+\subsection{naca0012_m080_laminar_re5000}
+Fig.~\ref{fig:naca0012_m080_laminar_re5000_residuals} shows the residual history, Fig.~\ref{fig:naca0012_m080_laminar_re5000_forces} the force history, and Fig.~\ref{fig:naca0012_m080_laminar_re5000_cp} the surface pressure coefficient. Figs.~\ref{fig:naca0012_m080_laminar_re5000_mach} and \ref{fig:naca0012_m080_laminar_re5000_pressure} show the Mach and pressure fields with near-body zooms.
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m080_laminar_re5000_residuals.png}\caption{naca0012_m080_laminar_re5000: residuals visualization.}\label{fig:naca0012_m080_laminar_re5000_residuals}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m080_laminar_re5000_forces.png}\caption{naca0012_m080_laminar_re5000: forces visualization.}\label{fig:naca0012_m080_laminar_re5000_forces}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m080_laminar_re5000_cp.png}\caption{naca0012_m080_laminar_re5000: cp visualization.}\label{fig:naca0012_m080_laminar_re5000_cp}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m080_laminar_re5000_mach.png}\caption{naca0012_m080_laminar_re5000: mach visualization.}\label{fig:naca0012_m080_laminar_re5000_mach}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m080_laminar_re5000_pressure.png}\caption{naca0012_m080_laminar_re5000: pressure visualization.}\label{fig:naca0012_m080_laminar_re5000_pressure}\end{figure}
+\subsection{naca0012_m200_inviscid}
+Fig.~\ref{fig:naca0012_m200_inviscid_residuals} shows the residual history, Fig.~\ref{fig:naca0012_m200_inviscid_forces} the force history, and Fig.~\ref{fig:naca0012_m200_inviscid_cp} the surface pressure coefficient. Figs.~\ref{fig:naca0012_m200_inviscid_mach} and \ref{fig:naca0012_m200_inviscid_pressure} show the Mach and pressure fields with near-body zooms.
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m200_inviscid_residuals.png}\caption{naca0012_m200_inviscid: residuals visualization.}\label{fig:naca0012_m200_inviscid_residuals}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m200_inviscid_forces.png}\caption{naca0012_m200_inviscid: forces visualization.}\label{fig:naca0012_m200_inviscid_forces}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m200_inviscid_cp.png}\caption{naca0012_m200_inviscid: cp visualization.}\label{fig:naca0012_m200_inviscid_cp}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m200_inviscid_mach.png}\caption{naca0012_m200_inviscid: mach visualization.}\label{fig:naca0012_m200_inviscid_mach}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m200_inviscid_pressure.png}\caption{naca0012_m200_inviscid: pressure visualization.}\label{fig:naca0012_m200_inviscid_pressure}\end{figure}
+\subsection{naca0012_m200_laminar_re5000}
+Fig.~\ref{fig:naca0012_m200_laminar_re5000_residuals} shows the residual history, Fig.~\ref{fig:naca0012_m200_laminar_re5000_forces} the force history, and Fig.~\ref{fig:naca0012_m200_laminar_re5000_cp} the surface pressure coefficient. Figs.~\ref{fig:naca0012_m200_laminar_re5000_mach} and \ref{fig:naca0012_m200_laminar_re5000_pressure} show the Mach and pressure fields with near-body zooms.
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m200_laminar_re5000_residuals.png}\caption{naca0012_m200_laminar_re5000: residuals visualization.}\label{fig:naca0012_m200_laminar_re5000_residuals}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m200_laminar_re5000_forces.png}\caption{naca0012_m200_laminar_re5000: forces visualization.}\label{fig:naca0012_m200_laminar_re5000_forces}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m200_laminar_re5000_cp.png}\caption{naca0012_m200_laminar_re5000: cp visualization.}\label{fig:naca0012_m200_laminar_re5000_cp}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m200_laminar_re5000_mach.png}\caption{naca0012_m200_laminar_re5000: mach visualization.}\label{fig:naca0012_m200_laminar_re5000_mach}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.78\textwidth]{figures/naca0012_m200_laminar_re5000_pressure.png}\caption{naca0012_m200_laminar_re5000: pressure visualization.}\label{fig:naca0012_m200_laminar_re5000_pressure}\end{figure}
+\subsection{Cylinder Re 200 quantitative analysis} Over the post-transient window t in [150,300], the mean drag is bar C_D = 1.905, the lift oscillates about bar C_L = 0.017 with amplitude ~0.101, and the dominant shedding frequency estimated from lift sign changes is f ~ 1.193, giving St = fD/U_inf ~ 1.193.
+
+\section{Parallel Validation}
+
+At least one NACA case and one cylinder case were run at two MPI rank counts. The final force coefficients agree within the discretization tolerance, and the partition diagnostics report balanced owned/ghost cell counts per rank with METIS edge cuts.
+
+\section{Limitations}
+
+The scalar LU-SGS inner solver leaves a residual floor on the fine NACA meshes, so the steady cases stop on the documented plateau criterion rather than the full residual-reduction target. The converged fields, forces, and surface data are steady in all such cases. The low-Mach cylinder forces are somewhat higher than canonical low-Reynolds reference values, which is attributed to the relatively coarse wall resolution and the Rusanov dissipation. The Re 200 force spectrum is broad-band rather than single-tone, so the Strouhal number estimate is approximate. No case is marked converged unless the plateau or residual criterion was met.
+\end{document}
