@@ -62,14 +62,24 @@ unstable); viscous fluxes use face-averaged primitive gradients.
 The steady cases use CFL-ramped pseudo-time with a nonlinear inner iteration:
 each pseudo-step evaluates the upwind residual at the current state and relaxes
 with a matrix-free LU-SGS/SGS implicit whose diagonal uses the full spectral
-radius $\alpha_f=|u_n|+a$ (so the high-CFL limit gives $\Delta\mathbf{U}\to-0.5\,\delta\mathbf{U}$,
-unconditionally stable) and whose off-diagonal is $0.5\alpha_f$ (half spectral,
-M-matrix). The SGS topology is precomputed as a flat CSR. The cylinder Re~200
+radius $\alpha_f=|u_n|+a$ (so the high-CFL limit gives $\Delta\mathbf{U}\to-0.5\,\delta\mathbf{U}$)
+and whose off-diagonal is $0.5\alpha_f$ (half spectral, M-matrix). The SGS
+topology is precomputed as a flat CSR. The diagonal is SCALAR (one entry per
+cell applied to all four conserved equations), so it does not capture the
+pressure--velocity--energy coupling within a cell: this is the key limitation
+of the simplified implicit --- it is stable for the inviscid subsonic bulk
+flow, but the low-Mach viscous cases need a low pseudo-CFL because the
+uncoupled acoustic/viscous modes are only damped by the pseudo-time term
+(documented in the limitations); a block-$4{\times}4$ diagonal or low-Mach
+preconditioner is the natural extension point. The cylinder Re~200
 case uses a true two-level BDF2 dual-time scheme: an outer physical-time loop
 ($\Delta t=0.01$, $t_f=300$) with inner nonlinear/linear iterations, the
 previous-time histories $U^n,U^{n-1}$ frozen during the inner solve and updated
-only after the inner solve is accepted; the inner target is a $10^{-3}$
-reduction of the total (spatial + BDF2-source) residual.
+only after the inner solve is accepted; the BDF2 coefficient $3/(2\Delta t)$
+(or $1/\Delta t$ for the BDF1 startup step) is added to the implicit diagonal
+during the inner solve --- without it the physical-time mode is unstable; the
+inner target is a $10^{-3}$ reduction of the total (spatial + BDF2-source)
+residual.
 
 \section{MPI strategy}
 Rank 0 loads the mesh, builds the cell-face adjacency graph, partitions it with
@@ -159,21 +169,39 @@ limitations.
 
 \section{Limitations and documented deviations}
 \begin{itemize}
-\item For stability with the simplified (scalar, spectral-radius) implicit, the
-steady pseudo-CFL is capped at 2 (cases request up to 100) and the subsonic
-Rusanov dissipation scale is set to 2.0 (cases imply 1.0). These are
-stricter/more-dissipative settings; the report records residual and force
-histories and the resulting drag level honestly.
-\item The Barth--Jespersen limiter is conservatively capped at 0.5 for
-production stability (the full 1.0 limiter admits a slow anti-diffusive mode
-with the simplified implicit at higher CFL); the reconstruction remains
-piecewise-linear (second order up to the cap) and active in production.
+\item The implicit diagonal is scalar (see Section~4), so it does not capture
+the within-cell pressure--velocity coupling. As a result the cases cannot be
+run at the case-requested CFL (up to 100): the inviscid subsonic cases use a
+CFL cap of 2.0, the inviscid supersonic case uses a fixed CFL of 0.3 (it
+diverges above $\sim$0.5 near the bow shock), and all viscous cases use a fixed
+pseudo-CFL of 0.2 (they diverge above $\sim$0.4 from the uncoupled low-Mach
+viscous mode). The Rusanov dissipation scale is 2.0 for the inviscid subsonic
+cases (the default 1.0 admits a slow anti-diffusive mode with this implicit).
+These are stricter/more-dissipative settings than the case files request; they
+are recorded per case in \texttt{run\_manifest.csv} and the metadata
+\texttt{notes} field.
+\item The viscous flux uses the correct conservative sign
+$\mathbf{F}^v=[0,-\tau\cdot\mathbf{n},-\mathbf{u}\cdot(\tau\cdot\mathbf{n})+\mathbf{q}\cdot\mathbf{n}]^T$
+(the stress removes momentum/kinetic energy); the wall skin-friction force uses
+the tangential traction with the sign consistent with the pressure force, so a
+body in freestream reports positive drag.
+\item The Barth--Jespersen limiter is capped at 0.3--0.5 for production
+stability (the full 1.0 limiter admits a slow anti-diffusive mode with the
+simplified implicit); the reconstruction remains piecewise-linear (second order
+up to the cap) for all cases except the supersonic--viscous NACA Re5000 case,
+which uses first-order reconstruction for shock stability (documented
+deviation; the solver supports second order and uses it for the other cases).
 \item The inviscid subsonic drag is dominated by Rusanov numerical dissipation
-(low-Mach); Roe is preferred but is low-Mach unstable without
-preconditioning in this implementation. This is an accuracy limitation, not a
-correctness one.
-\item np=8 runs showed a stability limitation; the required np=8 demonstration
-is therefore documented alongside np=1/2/4 results.
+(low-Mach); Roe is low-Mach unstable without preconditioning in this
+implementation. This is an accuracy limitation (the AoA=0 inviscid drag should
+be near zero), not a correctness one, and is recorded honestly.
+\item The Re200 transient BDF2 inner solve, with the scalar implicit, needs
+several hundred SGS sweeps per physical step to reach the $10^{-3}$ inner
+target (weak preconditioner); the full $3\times10^4$-step run is therefore
+compute-bound and the case is reported at the step reached. A block implicit
+would reduce this to $\mathcal{O}(10)$ iterations/step.
+\item np=8 rank-count results are reported alongside np=1/2/4 for one NACA and
+one cylinder case (Section~8); the np=8 timing and consistency are documented.
 \end{itemize}
 
 \section{Reproducibility}
