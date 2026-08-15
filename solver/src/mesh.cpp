@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <cstdio>
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
@@ -48,6 +49,24 @@ double polyArea(const std::vector<Vec2>& v) {
     a += p.x * q.y - q.x * p.y;
   }
   return 0.5 * a;
+}
+
+// Order polygon vertices CCW around their centroid. Some CGNS writers store
+// QUAD_4 nodes in a non-perimeter (e.g. structured i,j) order that produces a
+// self-intersecting (bowtie) polygon with near-zero signed area and wrong
+// edges. Sorting by polar angle around the centroid recovers the true convex
+// perimeter, which fixes both the area and the cell-edge topology for any
+// input node ordering. Harmless for already-CCW triangles.
+void sortCCW(std::vector<Vec2>& v) {
+  if (v.size() < 3) return;
+  double cx = 0, cy = 0;
+  for (const auto& p : v) { cx += p.x; cy += p.y; }
+  cx /= v.size(); cy /= v.size();
+  std::sort(v.begin(), v.end(), [cx, cy](const Vec2& a, const Vec2& b) {
+    double aa = std::atan2(a.y - cy, a.x - cx);
+    double ab = std::atan2(b.y - cy, b.x - cx);
+    return aa < ab;
+  });
 }
 
 uint64_t pairKey(int a, int b) {
@@ -171,14 +190,37 @@ Mesh load_cgns(const std::string& path,
       int zoneCellBase = nextCellId;
       for (const auto& corners : volumeCells) {
         std::vector<Vec2> verts;
+        std::vector<int> c = corners;  // mutable vertex-id copy (sorted with verts)
         for (int v : corners) {
           int idx = v - 1;
           if (idx < 0 || idx >= nverts)
             throw std::runtime_error("vertex id out of range in connectivity");
           verts.push_back({cx[idx], cy[idx]});
         }
+        // Sort vertices CCW around centroid. Some CGNS writers store QUAD_4
+        // nodes in a non-perimeter order (bowtie); this recovers the true
+        // convex perimeter so both area and edge topology are correct.
+        int nvc = (int)verts.size();
+        if (nvc >= 3) {
+          double ccx = 0, ccy = 0;
+          for (const auto& p : verts) { ccx += p.x; ccy += p.y; }
+          ccx /= nvc; ccy /= nvc;
+          std::vector<int> perm(nvc);
+          for (int i = 0; i < nvc; ++i) perm[i] = i;
+          std::sort(perm.begin(), perm.end(), [&](int i, int j) {
+            double ai = std::atan2(verts[i].y - ccy, verts[i].x - ccx);
+            double aj = std::atan2(verts[j].y - ccy, verts[j].x - ccx);
+            return ai < aj;
+          });
+          std::vector<Vec2> nv(nvc); std::vector<int> nc(nvc);
+          for (int i = 0; i < nvc; ++i) { nv[i] = verts[perm[i]]; nc[i] = c[perm[i]]; }
+          verts = nv; c = nc;
+        }
         double a = polyArea(verts);
-        if (a < 0) std::reverse(verts.begin(), verts.end());
+        if (nextCellId < 3 || nextCellId == 10752 || nextCellId == 10753)
+          std::fprintf(stderr, "[mesh] cell %d nvc=%d area=%.6e firstv=(%.4f,%.4f)\n",
+                       nextCellId, nvc, std::fabs(a), verts.front().x, verts.front().y);
+        if (a < 0) { std::reverse(verts.begin(), verts.end()); std::reverse(c.begin(), c.end()); }
         a = std::fabs(a);
         Cell cell;
         cell.global_id = nextCellId++;
@@ -189,12 +231,10 @@ Mesh load_cgns(const std::string& path,
         cell.center = cen * (1.0 / verts.size());
         mesh.cells.push_back(cell);
 
-        // enumerate CCW edges
-        int nvc = (int)verts.size();
+        // enumerate CCW edges (use the sorted vertex-id list c)
         for (int i = 0; i < nvc; ++i) {
           int j = (i + 1) % nvc;
-          // corners[i] is the zone-local vertex id
-          int va = corners[i], vb = corners[j];
+          int va = c[i], vb = c[j];
           uint64_t key = pairKey(va, vb);
           auto it = pending.find(key);
           if (it == pending.end()) {
