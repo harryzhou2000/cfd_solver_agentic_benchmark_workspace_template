@@ -1,0 +1,334 @@
+{
+  "codex": {
+    "present": true,
+    "source_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/07/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/07/.sessions/codex/sessions",
+    "thread_count": 1,
+    "subagent_count": 0,
+    "root_count": 1,
+    "roots": [
+      {
+        "thread_id": "019fcc37-26b8-7960-8a53-79430001b739",
+        "model": "BLSC/DeepSeek-V4-Flash",
+        "thread_count": 1,
+        "started_at": "2026-08-04T10:00:18.876000+00:00",
+        "ended_at": "2026-08-04T11:38:40.576000+00:00",
+        "rollout_bytes": 1921994
+      }
+    ],
+    "rollout_bytes_total": 1921994,
+    "missing_rollouts": [],
+    "source": "project"
+  },
+  "opencode": {
+    "present": false,
+    "session_count": 0
+  },
+  "analysis": {
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "window": {
+      "start": "2026-08-04T10:00:18.876000+00:00",
+      "end": "2026-08-04T11:38:40.576000+00:00"
+    },
+    "idle_exclusion": {
+      "method": "merged timeline over main thread/session and all subagents; gaps with no events anywhere exceed the threshold and are excluded",
+      "gap_count": 0,
+      "gaps": [],
+      "idle_seconds_total": 0
+    },
+    "permission_waits": {
+      "method": "heuristic",
+      "explicit_approval_events_found": false,
+      "ask_tool_events_found": 0,
+      "candidate_gaps": [],
+      "candidate_count": 0,
+      "policy_observed": [
+        "never",
+        "reviewer=user"
+      ],
+      "limitations": [
+        "codex rollouts contain no explicit approval-request/response event types (verified by scanning all local sessions); permission-blocked idle cannot be distinguished from user-away time with certainty",
+        "candidates are gaps > idle threshold between a tool/turn boundary and a user message / new turn in approval-aware threads; expect false positives when the user stepped away"
+      ]
+    },
+    "buckets": [
+      {
+        "bucket_index": 0,
+        "start": "2026-08-04T10:00:18.876000+00:00",
+        "end": "2026-08-04T10:30:18.876000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 19230348,
+          "cached_input": 18445056,
+          "non_cached_input": 785292,
+          "output": 112045,
+          "reasoning_output": 27663,
+          "total": 19342393
+        },
+        "cache": {
+          "cached_tokens": 18445056,
+          "input_tokens": 19230348,
+          "hit_ratio": 0.9592
+        },
+        "tools": {
+          "total": 137,
+          "by_tool": {
+            "exec_command": 112,
+            "apply_patch": 17,
+            "write_stdin": 7,
+            "update_plan": 1
+          },
+          "by_category": {
+            "shell": 119,
+            "editing": 17,
+            "planning": 1
+          }
+        },
+        "turns": {
+          "thread_goal_updated": 1,
+          "task_started": 1,
+          "agent_message": 27
+        },
+        "active_entities": [
+          "019fcc37-26b8-7960-8a53-79430001b739"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 1,
+        "start": "2026-08-04T10:30:18.876000+00:00",
+        "end": "2026-08-04T11:00:18.876000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 28100549,
+          "cached_input": 27929088,
+          "non_cached_input": 171461,
+          "output": 66751,
+          "reasoning_output": 28925,
+          "total": 28167300
+        },
+        "cache": {
+          "cached_tokens": 27929088,
+          "input_tokens": 28100549,
+          "hit_ratio": 0.9939
+        },
+        "tools": {
+          "total": 98,
+          "by_tool": {
+            "exec_command": 82,
+            "write_stdin": 13,
+            "apply_patch": 3
+          },
+          "by_category": {
+            "shell": 95,
+            "editing": 3
+          }
+        },
+        "turns": {
+          "agent_message": 36
+        },
+        "active_entities": [
+          "019fcc37-26b8-7960-8a53-79430001b739"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 2,
+        "start": "2026-08-04T11:00:18.876000+00:00",
+        "end": "2026-08-04T11:30:18.876000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 8475818,
+          "cached_input": 8430080,
+          "non_cached_input": 45738,
+          "output": 13713,
+          "reasoning_output": 5972,
+          "total": 8489531
+        },
+        "cache": {
+          "cached_tokens": 8430080,
+          "input_tokens": 8475818,
+          "hit_ratio": 0.9946
+        },
+        "tools": {
+          "total": 24,
+          "by_tool": {
+            "exec_command": 19,
+            "write_stdin": 5
+          },
+          "by_category": {
+            "shell": 24
+          }
+        },
+        "turns": {
+          "agent_message": 11
+        },
+        "active_entities": [
+          "019fcc37-26b8-7960-8a53-79430001b739"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 3,
+        "start": "2026-08-04T11:30:18.876000+00:00",
+        "end": "2026-08-04T11:38:40.576000+00:00",
+        "active_seconds": 501.7,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 6225332,
+          "cached_input": 6195328,
+          "non_cached_input": 30004,
+          "output": 6857,
+          "reasoning_output": 3003,
+          "total": 6232189
+        },
+        "cache": {
+          "cached_tokens": 6195328,
+          "input_tokens": 6225332,
+          "hit_ratio": 0.9952
+        },
+        "tools": {
+          "total": 15,
+          "by_tool": {
+            "exec_command": 11,
+            "write_stdin": 2,
+            "update_plan": 1,
+            "update_goal": 1
+          },
+          "by_category": {
+            "shell": 13,
+            "planning": 2
+          }
+        },
+        "turns": {
+          "agent_message": 6
+        },
+        "active_entities": [
+          "019fcc37-26b8-7960-8a53-79430001b739"
+        ],
+        "active_entity_count": 1
+      }
+    ],
+    "whole_session_stats": {
+      "tokens": {
+        "input": 62032047,
+        "cached_input": 60999552,
+        "non_cached_input": 1032495,
+        "output": 199366,
+        "reasoning_output": 65563,
+        "total": 62231413,
+        "total_from_root_trees": 62231413,
+        "total_from_all_sessions": null
+      },
+      "cache": {
+        "cached_tokens": 60999552,
+        "input_tokens": 62032047,
+        "hit_ratio": 0.9834
+      },
+      "tools": {
+        "total": 274,
+        "by_tool": {
+          "exec_command": 224,
+          "write_stdin": 27,
+          "apply_patch": 20,
+          "update_plan": 2,
+          "update_goal": 1
+        },
+        "by_category": {
+          "shell": 251,
+          "editing": 20,
+          "planning": 3
+        }
+      },
+      "turns": {
+        "thread_goal_updated": 1,
+        "task_started": 1,
+        "agent_message": 80,
+        "task_complete": 1
+      },
+      "activity": {
+        "active_seconds": 5901.7,
+        "wall_seconds": 5901.7,
+        "idle_seconds": 0.0
+      },
+      "per_entity": {
+        "019fcc37-26b8-7960-8a53-79430001b739": {
+          "kind": "codex_thread",
+          "is_subagent": false,
+          "events": 1191,
+          "tokens_total_subtree": 62231413,
+          "tools": {
+            "exec_command": 224,
+            "update_plan": 2,
+            "apply_patch": 20,
+            "write_stdin": 27,
+            "update_goal": 1
+          },
+          "first_event": "2026-08-04T10:00:18.876000+00:00",
+          "last_event": "2026-08-04T11:38:40.576000+00:00",
+          "rollout_bytes": 1921994
+        }
+      },
+      "accounting_notes": [
+        "codex: each selected thread has its own cumulative usage counter; run totals sum the selected root and its subagent threads. Bucket totals are per-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
+      ]
+    }
+  },
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/07",
+  "discovered_at": "2026-08-15T03:19:52.607125+00:00",
+  "sources": [
+    {
+      "id": "project_codex",
+      "kind": "project",
+      "harness": "codex",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/07/.sessions/codex",
+      "reachable": true,
+      "sessions_found": 1,
+      "note": "workspace-bundled .sessions/codex copy"
+    },
+    {
+      "id": "project_opencode",
+      "kind": "project",
+      "harness": "opencode",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/07/.sessions/opencode-data/opencode/opencode.db",
+      "reachable": false,
+      "sessions_found": 0,
+      "note": "workspace-bundled .sessions/opencode-data/opencode DB"
+    }
+  ],
+  "selected_source": "project",
+  "selection": {
+    "method": "script_discovery + agent classification",
+    "roots": [
+      "019fcc37-26b8-7960-8a53-79430001b739"
+    ],
+    "harness": "codex",
+    "questions": [],
+    "notes": [
+      "the evaluation agent classifies which sessions belong to the contestant run; unextractable choices are surfaced as questions"
+    ]
+  },
+  "env_snapshot": {
+    "captured": true,
+    "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/07/.eval/env_snapshot.json",
+    "sha256": "165795fbb90e0014d7243a7e1021db83fe4affa7aef6a761765248693218ed66"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/07/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/07/.sessions/codex/sessions",
+    "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/07/.sessions/opencode-data/opencode/opencode.db",
+    "session_source": "project",
+    "harness": "codex",
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "generated_at": "2026-08-15T03:19:52.607137+00:00"
+  }
+}

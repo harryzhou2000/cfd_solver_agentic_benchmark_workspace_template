@@ -1,0 +1,418 @@
+{
+  "schema": "agent_scores",
+  "contestant": "07",
+  "evaluated_at": "2026-08-15T03:20:54.176858+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": "Evidence-only review of immutable curated submission and detached raw attempt."
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "019fcc37-26b8-7960-8a53-79430001b739"
+    ],
+    "execution_date": "2026-08-04",
+    "started_at": "2026-08-04T10:00:18.876000+00:00",
+    "ended_at": "2026-08-04T11:38:40.576000+00:00",
+    "time_basis": "UTC timestamp of the first persisted event in the sole selected Codex root",
+    "rationale": "The sole project-local Codex root is a continuous benchmark implementation/build/run/report session. Its bundle is .sessions/codex/state_5.sqlite plus rollout-2026-08-04T17-59-54-019fcc37-26b8-7960-8a53-79430001b739.jsonl; it has no descendants or competing roots. Database historical cwd/git provenance and the rollout goal match this workspace. Terminal response: status present; message msg_f6ce70cc0b664e61951078675bf4c1dc at 2026-08-04T11:38:40.508Z; one ordered output-text part; stored-record SHA-256 0cb66f969061f7c727c66810e7b0c86424bc84f1a67d6ee2a398b0e9ee575fbe; extracted-text SHA-256 c0bfc1dc7f5f6d189e63ef2a5401ff18db13a314b3b069f1ca40dac1f5739449; no credential redaction."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "CMake and documented production scripts are present; no clean evaluator build was attempted."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "main.cpp implements solve CLI and raw run_status records production commands."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Separated mesh, partition, numerics, drivers, output, and case IO modules."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "No internal wrapper/executable invocation was found; trust policy applied without external similarity search."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Case JSON parsing and generic mesh/tag paths are present; no case-filename-only branch found in reviewed source."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "METIS ownership/ghost structures and neighbor Isend/Irecv appear in source; raw outputs report 8 ranks."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Positivity fallback and finite checks exist, but Re200 accepts a mere inner-residual decrease as convergence."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "README documents checks and raw package validates structurally; no independent clean build/rerun evidence."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4,
+          "notes": "Curated result contains source, documented scripts, TeX and referenced PNGs only; raw artifacts excluded."
+        }
+      ],
+      "overall_score": 3.82,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Conservative compressible NS state/closure and residual paths are documented and implemented."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS zones, mixed cells, boundary tags, face geometry and adjacency are represented in mesh modules."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Face-based residual assembly and global norms are present."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Rusanov flux and viscous corrected-central paths are present; accuracy is limited by dissipation."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Farfield, slip and no-slip adiabatic treatments are documented and source-backed."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "Weighted least-squares primitive reconstruction is called before interior-face fluxes."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Barth-Jespersen limiter and reconstructed-state positivity fallback are active source paths."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Gradient, Newtonian/Fourier, wall treatment and force split code are present."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Block-Jacobi/LU-SGS pseudo-time paths and CFL controls are source-backed."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "BDF2 outer loop/frozen histories exist, but Re200 exits at five iterations when residual merely decreases, not at the stated 1e-3 target."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS graph partitioning, owned/ghost state, Isend/Irecv and reductions are present; no evaluator rank rerun."
+        }
+      ],
+      "overall_score": 3.8,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "All eight raw output directories and report passed explicit validator in detached attempt worktree."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "validate_outputs.py returned success for eight named final directories and report."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 4,
+          "notes": "All packages are readable and complete; Re200 target-convergence claim is contradicted by source and last ratio 0.3696."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Fields/figures and force histories are delivered, but many steady residual reductions are below two orders and Re200 spectrum is admitted broad-band."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Curated referenced figures cover histories, Cp and fields; some zoom figures were excluded as unreferenced and report prose has a Re20/Re200 vorticity typo."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Report has methods, tables, figures and limitations, but overstates strict Re200 inner convergence/statistical confidence."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 4,
+          "notes": "Raw report includes manifests/sanity checks and validator passes; curated TeX retains referenced figures."
+        }
+      ],
+      "overall_score": 4.15,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 84,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Documented CMake/CLI and all raw packages structurally validate; clean evaluator build not performed."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 9,
+        "notes": "CGNS unstructured/multizone/tag and adjacency implementation is source-backed."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 14,
+        "notes": "Conservative Rusanov residual and three required boundary classes are present; no independent numerical rerun."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 9,
+        "notes": "WLS reconstruction, Barth limiter and positivity fallback are active source paths; no independent smooth-order study."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Viscous gradients/stress/heat/wall and force splitting are implemented and reported."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 10,
+        "notes": "Implicit steady and BDF2 dual-time structure exists, but Re200 falsely treats residual decrease as target convergence and caps at 60 despite configured 1000."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 8,
+        "notes": "METIS, rank-local ownership, halos and reductions are source-backed; raw data show eight-rank final cases but no evaluator MPI comparison."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 7,
+        "notes": "Eight readable validated packages include fields; steady reductions are modest and Re200 does not demonstrate the stated strict inner target."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Substantial TeX report and traced figures with honest broad-band/plateau limitations, but Re200 interpretation and one vorticity reference are weak."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Modular case/mesh/numerics/output interfaces support stated extensions."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 4,
+      "notes": "Readable validated package with field/history/Cp; residual reduction 0.984 orders is modest."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 4,
+      "notes": "Readable validated package and compressible visualization; residual reduction 1.053 orders limits confidence."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 4,
+      "notes": "Readable validated shock-regime package; residual reduction 1.195 orders is modest."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 3,
+      "notes": "Readable validated viscous package, but reported reduction is only 0.438 orders/plateau."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 4,
+      "notes": "Readable validated viscous package with fields and 0.992-order reduction."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 4,
+      "notes": "Readable validated viscous package with fields and strongest reported 1.869-order reduction."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 4,
+      "notes": "Readable validated steady package with wake/force/Cp evidence; reported residual reduction is 0.679 orders."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 2,
+      "notes": "Delivered horizon, fields and force history validate structurally, but source declares inner convergence after a mere decrease and final stored ratio is 0.3696 versus 0.001 target; not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": [
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "Reviewed curated source has no external solver executable invocation."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No affirmative synthetic-output evidence; raw eight-case package passed structural validation."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Reviewed case IO is JSON-driven; no filename-only case branch found."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "No affirmative order-one rank-change evidence; no evaluator MPI rerun."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Implicit block-Jacobi and LU-SGS paths are present."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Core claimed algorithms are located in source; Re200 convergence claim is scored down separately."
+      },
+      {
+        "id": 7,
+        "found": false,
+        "evidence": "No submitted metadata marked an explicitly failed run successful."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "Validator/report manifests provide no affirmative mismatch evidence."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "METIS and neighbor Isend/Irecv paths are present."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Reconstruction and limiter are called in residual assembly."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "Source/report state boundary-value wall outputs; no affirmative failure found."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "No affirmative variable/filename mismatch found in reviewed manifest."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "Trust policy: no external code search; no direct internal wrapper evidence."
+      }
+    ]
+  },
+  "limitations": [
+    "Post-run provenance reconstruction, not original runtime environment.",
+    "Raw validation was structural only in detached immutable attempt worktree; no solver case was rerun.",
+    "Cylinder Re200 was never rerun.",
+    "Report PDF/build and MPI consistency were not independently rerun by evaluator."
+  ]
+}

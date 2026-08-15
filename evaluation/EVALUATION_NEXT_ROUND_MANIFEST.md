@@ -68,7 +68,7 @@ unavailable.
 
 | Status | Workspace | Snapshot state | Expected result branch if provenance is approved | Current branch / HEAD | Dirty tracked / untracked | Telemetry | Blocker / curation risk |
 |---|---|---|---|---|---:|---|---|
-| [ ] BLOCKED | `workspace/codex/dsv4_flash/07` | missing | `codex/dsv4_flash/07` | `solver/attempt-1` / `915af136f1468146e3b809c31986b3653f927223` | 0 / 2 | Codex | Reconstruct initial provenance first. |
+| [x] `codex_dsv4_flash_07_aeae21`, 84/100, DQ=false | `workspace/codex/dsv4_flash/07` | post_run reconstruction | `codex/dsv4_flash/init` / `ab943567cd55e707e760531ed7f2c914d09a0537` | `codex/dsv4_flash/07` / submission `a7ea108144b09b06e809d3c5e55b1b2333830947` | 0 / 2 | Codex | Both gates passed. Raw eight-case/report validation passed in detached attempt worktree; Re200 inner target is not credibly met and was not rerun. |
 | [ ] BLOCKED | `workspace/codex/glm52-m3/04` | missing | `codex/glm52-m3/04` | `solver/impl` / `783eb18534a278714a4f7e2fe9e392038a95e2f2` | 0 / 1 | Codex | Reconstruct initial provenance first. |
 | [ ] BLOCKED | `workspace/codex/glm52/03` | missing | `codex/glm52/03` | `solver/glm52-cfdns2d` / `0305e4500d5c62cf325680114e794ba1d97a4e9b` | 0 / 2 | Codex | Reconstruct initial provenance first. |
 | [ ] BLOCKED | `workspace/codex/gpt56/05` | missing | `codex/gpt56/05` | `codex/gpt56/init` / `37b8e68396300a3b0a103feb8b9e695170e40a98` | 0 / 1 | Codex | Current init ref was advanced by contestant; it is not provenance. |
