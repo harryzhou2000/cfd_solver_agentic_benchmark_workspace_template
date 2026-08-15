@@ -29,11 +29,12 @@ https://github.com/harryzhou2000/cfd_solver_agentic_benchmark_workspace_template
 ```
 
 Every contestant repository currently lacks `origin`, as expected for
-delivered workspaces. Before branch creation, the evaluator must let the
-evaluation helper restore the exact verified manager `origin`, repeat the
-exact local and upstream collision checks, and stop if either check is no
-longer clear. This manifest is an audit record, not a substitute for the
-per-run collision gate.
+delivered workspaces. The evaluator must leave that state unchanged. Before
+branch creation, use the evaluation helper to query the exact verified manager
+upstream URL directly, repeat the exact local and upstream collision checks,
+and stop if either check is no longer clear. This read-only check needs no
+per-workspace authorization. This manifest is an audit record, not a
+substitute for the per-run collision gate.
 
 ## Wave A: authoritative pre-run provenance
 
@@ -110,8 +111,9 @@ For each row, the evaluator must:
 
 - [ ] Re-read `.codex/skills/cfd-benchmark-evaluation/SKILL.md`, confirm the
       root `done` marker, and establish authoritative immutable provenance.
-- [ ] Recheck the exact local and upstream result branch; restore only the
-      verified canonical `origin`, never invent or overwrite a different URL.
+- [ ] Recheck the exact local and upstream result branch. Leave a missing
+      contestant `origin` missing and query the verified manager upstream URL
+      directly; never invent or overwrite a URL.
 - [ ] Curate explicit submission paths and commit `results: <result-branch>`.
       Never use blind `git add -A`. Never commit `.sessions`, `.eval`, raw
       results, logs, restarts, fields, visualization working data, generated

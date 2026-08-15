@@ -174,16 +174,20 @@ collision; result branches are single-use and never reused. Never choose
 another number automatically; return to the operator.
 
 Delivered contestant workspaces are expected to have no `origin` remote. This
-is transport hygiene, not missing provenance and not a reason to block the
-evaluation. Before the collision query, obtain the canonical URL from the
-manager repository's verified `origin`, then restore that exact URL as the
-contestant workspace's `origin`. The helper performs this repair when `origin`
-is absent and reports `workspace_origin_added: true`. If a workspace already
-has `origin`, require its URL to equal the canonical manager upstream; never
-silently overwrite a different or unreadable remote. This remote repair changes
-only local Git configuration, is not part of the contestant submission, and
-must not be committed. Do not replace this procedure with an invented URL or
-with some other sibling workspace's remote.
+is transport hygiene, not missing provenance, not a blocker, and not an action
+that needs operator authorization. Do **not** add or restore a contestant
+remote. The collision helper reads the canonical URL from the manager
+repository's verified `origin` and queries that URL directly, leaving the
+contestant Git configuration untouched. It reports
+`workspace_origin_status: absent_expected` and
+`workspace_origin_mutated: false` for the normal delivered state.
+
+If a contestant workspace already has `origin`, require its URL to equal the
+canonical manager upstream; never overwrite a different or unreadable remote.
+An explicit `--upstream` remains an operator-approved override. Never invent a
+URL or copy one from another contestant workspace. Normal read-only collision
+checking against the verified manager upstream requires no separate
+per-workspace authorization.
 
 Then create the exact new result branch and commit the complete submission:
 

@@ -52,8 +52,8 @@ def manager_upstream() -> str:
     return result.stdout.strip()
 
 
-def ensure_workspace_origin(workspace: Path, canonical_upstream: str) -> bool:
-    """Restore the intentionally omitted contestant origin and verify its URL."""
+def workspace_origin_status(workspace: Path, canonical_upstream: str) -> str:
+    """Inspect contestant origin without mutating intentionally omitted remotes."""
     current = run(["git", "remote", "get-url", "origin"], workspace)
     if current.returncode != 0:
         remotes = run(["git", "remote"], workspace)
@@ -63,17 +63,14 @@ def ensure_workspace_origin(workspace: Path, canonical_upstream: str) -> bool:
             raise SystemExit(
                 "workspace origin exists but its URL is unreadable; repair it manually"
             )
-        added = run(["git", "remote", "add", "origin", canonical_upstream], workspace)
-        if added.returncode != 0:
-            raise SystemExit(f"could not restore workspace origin: {added.stderr.strip()}")
-        return True
+        return "absent_expected"
     workspace_upstream = current.stdout.strip()
     if workspace_upstream != canonical_upstream:
         raise SystemExit(
             "workspace origin does not match the canonical manager upstream: "
             f"{workspace_upstream!r} != {canonical_upstream!r}; do not overwrite it silently"
         )
-    return False
+    return "matching"
 
 
 def main() -> int:
@@ -95,7 +92,7 @@ def main() -> int:
     )
     initial_branch, branch = result_branch(snapshot_path, args.number)
     upstream = args.upstream or manager_upstream()
-    origin_added = ensure_workspace_origin(workspace, upstream)
+    origin_status = workspace_origin_status(workspace, upstream)
     ref = f"refs/heads/{branch}"
 
     local = run(["git", "show-ref", "--verify", "--quiet", ref], workspace)
@@ -115,7 +112,11 @@ def main() -> int:
         "result_branch": branch,
         "ref": ref,
         "upstream": upstream,
-        "workspace_origin_added": origin_added,
+        "workspace_origin_status": origin_status,
+        "workspace_origin_mutated": False,
+        # Retain the legacy field for consumers while making the no-mutation
+        # behavior explicit.
+        "workspace_origin_added": False,
         "local_exists": local.returncode == 0,
         "upstream_exists": upstream_exists,
         "available": local.returncode == 1 and not upstream_exists,

@@ -15,8 +15,9 @@ canonical evaluations count toward the quota and must not be repeated.
       post-run snapshot before branch creation.
 - [ ] Check the exact result branch locally and against the canonical upstream;
       never reuse a branch or choose another number. Delivered workspaces are
-      expected to lack `origin`: restore the exact manager-repository canonical
-      origin first, verify it, and record that local configuration repair.
+      expected to lack `origin`: leave it missing and query the verified
+      manager-repository canonical upstream URL directly. This read-only check
+      requires no separate authorization and makes no Git-config mutation.
 - [ ] Curate and commit the contestant submission. Never commit `.sessions`,
       `.eval`, results, logs, restarts, field/visualization working data,
       generated PDFs, credentials, or build products. Only report-referenced
@@ -202,6 +203,6 @@ Reserve `[x]` for a snapshot that passes both gates.
   scoring/report/index artifacts for an existing snapshot; never rewrite its
   contestant result commit merely to satisfy the completion gate.
 - A missing workspace `origin` is expected delivery state, not a blocker. Use
-  the manager repository's verified canonical `origin`, add that exact URL as
-  the workspace `origin`, and rerun the exact collision helper. Never overwrite
-  a different existing remote silently, and never commit local remote config.
+  the manager repository's verified canonical upstream URL directly without
+  adding a contestant remote. The exact collision helper must leave Git config
+  unchanged. Never overwrite a different existing remote.
