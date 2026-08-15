@@ -1,0 +1,116 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 3,
+      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Solver uses explicit time stepping only",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Normal viscous traction mislabeled as skin friction",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.0
+}
