@@ -1,0 +1,583 @@
+// Finite-volume solver implementation.
+#include "solver.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
+#include <stdexcept>
+
+#include "io.hpp"
+
+namespace cfd {
+
+namespace {
+constexpr double kRhoFloor = 1e-7;
+constexpr double kPFloor = 1e-7;
+inline double l2local(const std::vector<double>& R) {
+  double s = 0.0;
+  for (size_t i = 0; i + 3 < R.size(); i += 4)
+    s += R[i]*R[i]+R[i+1]*R[i+1]+R[i+2]*R[i+2]+R[i+3]*R[i+3];
+  return s;
+}
+}  // namespace
+
+void Solver::initialize(const CaseConfig& cfg_, int rank_, int nranks_) {
+  cfg = cfg_;
+  rank = rank_;
+  nranks = nranks_;
+  gas.gamma = cfg.gamma;
+  gas.R = cfg.R;
+  gas.prandtl = cfg.prandtl;
+  double Umag = cfg.vel_inf;
+  double aoa = cfg.aoa_deg * M_PI / 180.0;
+  fs.r() = cfg.rho_inf;
+  fs.u() = Umag * std::cos(aoa);
+  fs.v() = Umag * std::sin(aoa);
+  fs.p() = cfg.p_inf;
+  if (cfg.physics_mode == "laminar") {
+    double Re = cfg.reynolds;
+    mu = cfg.rho_inf * cfg.vel_inf * cfg.reynolds_length / std::max(Re, 1e-30);
+  } else {
+    mu = 0.0;
+  }
+  k_cond = mu * gas.cp() / gas.prandtl;
+  useRoe = (cfg.inviscid_flux_req == "approximate_riemann");
+  rusanovScale = cfg.rusanov_dissipation_scale;
+  entropyCoeff = 0.10;
+  U.assign(4 * lm.nLocal(), 0.0);
+  initFreestream();
+  grad.assign(6 * lm.nOwned, 0.0);
+  phi.assign(4 * lm.nOwned, 1.0);
+  lamFace.assign(lm.nFace, 0.0);
+  specRadCell.assign(lm.nOwned, 0.0);
+
+  // LU-SGS lower/upper adjacency (owned-owned faces only).
+  lowerOff.assign(lm.nOwned + 1, 0);
+  upperOff.assign(lm.nOwned + 1, 0);
+  std::vector<int> ldeg(lm.nOwned, 0), udeg(lm.nOwned, 0);
+  for (int f = 0; f < lm.nFace; ++f) {
+    int a = lm.faceL[f], b = lm.faceR[f];
+    if (b < 0 || b >= lm.nOwned) continue;
+    if (b < a) { ldeg[a]++; udeg[b]++; }
+    else { udeg[a]++; ldeg[b]++; }
+  }
+  for (int i = 0; i < lm.nOwned; ++i) {
+    lowerOff[i+1] = lowerOff[i] + ldeg[i];
+    upperOff[i+1] = upperOff[i] + udeg[i];
+  }
+  lowerCell.assign(lowerOff[lm.nOwned], -1);
+  lowerFace.assign(lowerOff[lm.nOwned], -1);
+  upperCell.assign(upperOff[lm.nOwned], -1);
+  upperFace.assign(upperOff[lm.nOwned], -1);
+  std::vector<int> lc(lm.nOwned, 0), uc(lm.nOwned, 0);
+  for (int f = 0; f < lm.nFace; ++f) {
+    int a = lm.faceL[f], b = lm.faceR[f];
+    if (b < 0 || b >= lm.nOwned) continue;
+    if (b < a) {
+      lowerCell[lowerOff[a] + lc[a]] = b; lowerFace[lowerOff[a] + lc[a]++] = f;
+      upperCell[upperOff[b] + uc[b]] = a; upperFace[upperOff[b] + uc[b]++] = f;
+    } else {
+      upperCell[upperOff[a] + uc[a]] = b; upperFace[upperOff[a] + uc[a]++] = f;
+      lowerCell[lowerOff[b] + lc[b]] = a; lowerFace[lowerOff[b] + lc[b]++] = f;
+    }
+  }
+}
+
+void Solver::initFreestream() {
+  Cons Ufs = toCons(fs, gas);
+  for (int i = 0; i < lm.nLocal(); ++i)
+    for (int k = 0; k < 4; ++k) U[4*i + k] = Ufs.q[k];
+}
+
+void Solver::exchangeHalo(std::vector<double>& state) {
+  if (lm.nGhost == 0) return;
+  int nnbr = (int)lm.neighborRanks.size();
+  std::vector<MPI_Request> reqs(nnbr * 2);
+  std::vector<std::vector<double>> sbuf(nnbr), rbuf(nnbr);
+  int r = 0;
+  for (int n = 0; n < nnbr; ++n) {
+    int nbr = lm.neighborRanks[n];
+    auto& sc = lm.sendCells[n];
+    sbuf[n].assign(sc.size() * 4, 0.0);
+    for (size_t i = 0; i < sc.size(); ++i)
+      for (int k = 0; k < 4; ++k) sbuf[n][4*i+k] = state[4*sc[i]+k];
+    rbuf[n].assign(lm.recvGhosts[n].size() * 4, 0.0);
+    MPI_Isend(sbuf[n].data(), (int)sbuf[n].size(), MPI_DOUBLE, nbr, 200, MPI_COMM_WORLD, &reqs[r++]);
+    MPI_Irecv(rbuf[n].data(), (int)rbuf[n].size(), MPI_DOUBLE, nbr, 200, MPI_COMM_WORLD, &reqs[r++]);
+  }
+  MPI_Waitall((int)reqs.size(), reqs.data(), MPI_STATUSES_IGNORE);
+  for (int n = 0; n < nnbr; ++n) {
+    auto& rg = lm.recvGhosts[n];
+    for (size_t i = 0; i < rg.size(); ++i)
+      for (int k = 0; k < 4; ++k) state[4*rg[i]+k] = rbuf[n][4*i+k];
+  }
+}
+
+// Green-Gauss primitive gradients: robust on skewed/sliver cells.
+// Fills `grad` (member) with [ux,uy,vx,vy,Tx,Ty] and a helper returns
+// reconstruction gradients [rho,u,v,p] (computed in computeResidual).
+static void greenGaussPrimitives(const LocalMesh& lm, const std::vector<double>& W,
+                                 const Gas& gas, const Prim& fs,
+                                 std::vector<double>& grecon8) {
+  // grecon8: [rho_x,rho_y,u_x,u_y,v_x,v_y,p_x,p_y] per owned cell.
+  for (int c = 0; c < lm.nOwned; ++c) {
+    double gx[4] = {0,0,0,0}, gy[4] = {0,0,0,0};
+    double Wc[4] = {W[4*c+0], W[4*c+1], W[4*c+2], W[4*c+3]};
+    int fo = lm.cellFaceOffset[c], fe = lm.cellFaceOffset[c+1];
+    for (int kk = fo; kk < fe; ++kk) {
+      int f = lm.cellFaces[kk];
+      double nx = lm.faceNx[f], ny = lm.faceNy[f], len = lm.faceLen[f];
+      if (lm.faceL[f] != c) { nx = -nx; ny = -ny; }
+      int nb = lm.faceR[f];
+      double Wf[4];
+      if (nb >= 0) {
+        for (int k = 0; k < 4; ++k) Wf[k] = 0.5 * (Wc[k] + W[4*nb+k]);
+      } else {
+        BCType bt = lm.faceBC[f].type;
+        if (bt == BCType::NoSlipAdiabaticWall) {
+          Wf[0]=Wc[0]; Wf[1]=0; Wf[2]=0; Wf[3]=Wc[3];
+        } else if (bt == BCType::SlipWall) {
+          double un = Wc[1]*lm.faceNx[f] + Wc[2]*lm.faceNy[f];
+          Wf[0]=Wc[0]; Wf[1]=Wc[1]-2*un*lm.faceNx[f]; Wf[2]=Wc[2]-2*un*lm.faceNy[f]; Wf[3]=Wc[3];
+        } else {
+          for (int k = 0; k < 4; ++k) Wf[k] = fs.q[k];
+        }
+      }
+      for (int k = 0; k < 4; ++k) { gx[k] += Wf[k]*nx*len; gy[k] += Wf[k]*ny*len; }
+    }
+    double invV = lm.cellVol[c] > 1e-30 ? 1.0 / lm.cellVol[c] : 0.0;
+    for (int k = 0; k < 4; ++k) {
+      grecon8[8*c + 2*k + 0] = gx[k] * invV;
+      grecon8[8*c + 2*k + 1] = gy[k] * invV;
+    }
+  }
+}
+
+void Solver::computeGradients() {
+  std::vector<double> W(4 * lm.nLocal());
+  for (int i = 0; i < lm.nLocal(); ++i) {
+    Cons Uc; for (int k=0;k<4;++k) Uc.q[k] = U[4*i+k];
+    Prim Wc = toPrim(Uc, gas);
+    for (int k=0;k<4;++k) W[4*i+k] = Wc.q[k];
+  }
+  std::vector<double> grecon8(8 * lm.nOwned, 0.0);
+  greenGaussPrimitives(lm, W, gas, fs, grecon8);
+  // member grad = [ux,uy,vx,vy,Tx,Ty]; T gradient via Green-Gauss on T.
+  for (int c = 0; c < lm.nOwned; ++c) {
+    grad[6*c+0] = grecon8[8*c+2];   // ux
+    grad[6*c+1] = grecon8[8*c+3];   // uy
+    grad[6*c+2] = grecon8[8*c+4];   // vx
+    grad[6*c+3] = grecon8[8*c+5];   // vy
+    double Tc = temperature(W[4*c+0], W[4*c+3], gas);
+    double Tx = 0, Ty = 0;
+    int fo = lm.cellFaceOffset[c], fe = lm.cellFaceOffset[c+1];
+    for (int kk = fo; kk < fe; ++kk) {
+      int f = lm.cellFaces[kk];
+      double nx = lm.faceNx[f], ny = lm.faceNy[f], len = lm.faceLen[f];
+      if (lm.faceL[f] != c) { nx = -nx; ny = -ny; }
+      int nb = lm.faceR[f];
+      double Tf;
+      if (nb >= 0) {
+        double Tn = temperature(W[4*nb+0], W[4*nb+3], gas);
+        Tf = 0.5 * (Tc + Tn);
+      } else {
+        BCType bt = lm.faceBC[f].type;
+        if (bt == BCType::NoSlipAdiabaticWall || bt == BCType::SlipWall) Tf = Tc;
+        else Tf = temperature(fs.r(), fs.p(), gas);
+      }
+      Tx += Tf*nx*len; Ty += Tf*ny*len;
+    }
+    double invV = lm.cellVol[c] > 1e-30 ? 1.0 / lm.cellVol[c] : 0.0;
+    grad[6*c+4] = Tx * invV;  // Tx
+    grad[6*c+5] = Ty * invV;  // Ty
+  }
+}
+
+void Solver::computeLimiters() {
+  // Barth-Jespersen limiter on [rho,u,v,p] using Green-Gauss gradients.
+  std::vector<double> W(4 * lm.nLocal());
+  for (int i = 0; i < lm.nLocal(); ++i) {
+    Cons Uc; for (int k=0;k<4;++k) Uc.q[k] = U[4*i+k];
+    Prim Wc = toPrim(Uc, gas);
+    for (int k=0;k<4;++k) W[4*i+k] = Wc.q[k];
+  }
+  std::vector<double> grecon8(8 * lm.nOwned, 0.0);
+  greenGaussPrimitives(lm, W, gas, fs, grecon8);
+  for (int c = 0; c < lm.nOwned; ++c) {
+    double Wmax[4], Wmin[4], Wc[4];
+    for (int k=0;k<4;++k) Wc[k] = W[4*c+k];
+    for (int k=0;k<4;++k) { Wmax[k]=Wc[k]; Wmin[k]=Wc[k]; }
+    int fo = lm.cellFaceOffset[c], fe = lm.cellFaceOffset[c+1];
+    for (int kk = fo; kk < fe; ++kk) {
+      int f = lm.cellFaces[kk];
+      int nb = lm.faceR[f];
+      if (nb < 0) continue;
+      for (int k=0;k<4;++k) { if(W[4*nb+k]>Wmax[k])Wmax[k]=W[4*nb+k]; if(W[4*nb+k]<Wmin[k])Wmin[k]=W[4*nb+k]; }
+    }
+    double phic[4] = {1,1,1,1};
+    double cx = lm.cellCx[c], cy = lm.cellCy[c];
+    double* g[4] = {&grecon8[8*c+0], &grecon8[8*c+2], &grecon8[8*c+4], &grecon8[8*c+6]};
+    for (int kk = fo; kk < fe; ++kk) {
+      int f = lm.cellFaces[kk];
+      double dx = lm.faceCx[f]-cx, dy = lm.faceCy[f]-cy;
+      for (int k=0;k<4;++k) {
+        double delta = g[k][0]*dx + g[k][1]*dy;
+        double phi_f;
+        if (delta > 0) phi_f = (Wmax[k]-Wc[k]) / std::max(delta, 1e-30);
+        else if (delta < 0) phi_f = (Wmin[k]-Wc[k]) / std::min(delta, -1e-30);
+        else phi_f = 1.0;
+        if (phi_f < 0) phi_f = 0;
+        if (phi_f < phic[k]) phic[k] = phi_f;
+      }
+    }
+    for (int k=0;k<4;++k) phi[4*c+k] = std::min(phic[k], 1.0);
+  }
+}
+
+void Solver::computeResidual(const std::vector<double>& state,
+                             std::vector<double>& R, std::vector<double>& D) {
+  if ((int)R.size() != 4*lm.nOwned) R.assign(4*lm.nOwned, 0.0);
+  else std::fill(R.begin(), R.end(), 0.0);
+  if ((int)D.size() != lm.nOwned) D.assign(lm.nOwned, 0.0);
+  else std::fill(D.begin(), D.end(), 0.0);
+  std::fill(specRadCell.begin(), specRadCell.end(), 0.0);
+
+  std::vector<double> W(4*lm.nLocal());
+  for (int i=0;i<lm.nLocal();++i){
+    Cons Uc; for(int k=0;k<4;++k) Uc.q[k]=state[4*i+k];
+    Prim Wc=toPrim(Uc,gas);
+    for(int k=0;k<4;++k) W[4*i+k]=Wc.q[k];
+  }
+  std::vector<double> grecon(8*lm.nOwned, 0.0);
+  greenGaussPrimitives(lm, W, gas, fs, grecon);
+
+  auto reconL = [&](int c, int f, Prim& WL) {
+    double dx=lm.faceCx[f]-lm.cellCx[c], dy=lm.faceCy[f]-lm.cellCy[c];
+    double r=W[4*c+0]+phi[4*c+0]*(grecon[8*c+0]*dx+grecon[8*c+1]*dy);
+    double u=W[4*c+1]+phi[4*c+1]*(grecon[8*c+2]*dx+grecon[8*c+3]*dy);
+    double v=W[4*c+2]+phi[4*c+2]*(grecon[8*c+4]*dx+grecon[8*c+5]*dy);
+    double p=W[4*c+3]+phi[4*c+3]*(grecon[8*c+6]*dx+grecon[8*c+7]*dy);
+    if (r<kRhoFloor) r=W[4*c+0]; if(p<kPFloor) p=W[4*c+3];
+    WL.r()=r; WL.u()=u; WL.v()=v; WL.p()=p;
+  };
+  auto reconR = [&](int nb, int f, Prim& WR) {
+    double dx=lm.faceCx[f]-lm.cellCx[nb], dy=lm.faceCy[f]-lm.cellCy[nb];
+    if (nb<lm.nOwned) {
+      double r=W[4*nb+0]+phi[4*nb+0]*(grecon[8*nb+0]*dx+grecon[8*nb+1]*dy);
+      double u=W[4*nb+1]+phi[4*nb+1]*(grecon[8*nb+2]*dx+grecon[8*nb+3]*dy);
+      double v=W[4*nb+2]+phi[4*nb+2]*(grecon[8*nb+4]*dx+grecon[8*nb+5]*dy);
+      double p=W[4*nb+3]+phi[4*nb+3]*(grecon[8*nb+6]*dx+grecon[8*nb+7]*dy);
+      if(r<kRhoFloor)r=W[4*nb+0]; if(p<kPFloor)p=W[4*nb+3];
+      WR.r()=r;WR.u()=u;WR.v()=v;WR.p()=p;
+    } else {
+      WR.r()=W[4*nb+0];WR.u()=W[4*nb+1];WR.v()=W[4*nb+2];WR.p()=W[4*nb+3];
+    }
+  };
+
+  for (int f=0; f<lm.nFace; ++f) {
+    int lc=lm.faceL[f];
+    int rc=lm.faceR[f];
+    double nx=lm.faceNx[f], ny=lm.faceNy[f], len=lm.faceLen[f];
+    Prim WL, WR;
+    reconL(lc, f, WL);
+    double F[4];
+    double lam;
+    if (rc >= 0) {
+      reconR(rc, f, WR);
+      Cons UL=toCons(WL,gas), UR=toCons(WR,gas);
+      if (useRoe) roeFlux(UL,UR,nx,ny,gas,entropyCoeff,F);
+      else rusanovFlux(UL,UR,nx,ny,gas,rusanovScale,F);
+      double un=0.5*(WL.u()+WR.u())*nx+0.5*(WL.v()+WR.v())*ny;
+      double a=0.5*(soundSpeed(WL.r(),WL.p(),gas)+soundSpeed(WR.r(),WR.p(),gas));
+      lam=std::fabs(un)+a;
+      if (mu>0.0) {
+        double ux,uy,vx,vy,Tx,Ty;
+        if (rc<lm.nOwned){
+          ux=0.5*(grad[6*lc+0]+grad[6*rc+0]); uy=0.5*(grad[6*lc+1]+grad[6*rc+1]);
+          vx=0.5*(grad[6*lc+2]+grad[6*rc+2]); vy=0.5*(grad[6*lc+3]+grad[6*rc+3]);
+          Tx=0.5*(grad[6*lc+4]+grad[6*rc+4]); Ty=0.5*(grad[6*lc+5]+grad[6*rc+5]);
+        } else { ux=grad[6*lc+0];uy=grad[6*lc+1];vx=grad[6*lc+2];vy=grad[6*lc+3];Tx=grad[6*lc+4];Ty=grad[6*lc+5]; }
+        Prim Wf; Wf.r()=0.5*(WL.r()+WR.r());Wf.u()=0.5*(WL.u()+WR.u());Wf.v()=0.5*(WL.v()+WR.v());Wf.p()=0.5*(WL.p()+WR.p());
+        double Fv[4]; viscousFluxDotN(Wf,ux,uy,vx,vy,Tx,Ty,mu,k_cond,nx,ny,Fv);
+        for(int k=0;k<4;++k) F[k]-=Fv[k];
+        double rhoa=0.5*(WL.r()+WR.r());
+        double dist=std::sqrt((lm.cellCx[rc]-lm.cellCx[lc])*(lm.cellCx[rc]-lm.cellCx[lc])+(lm.cellCy[rc]-lm.cellCy[lc])*(lm.cellCy[rc]-lm.cellCy[lc]));
+        lam += 4.0*mu/(3.0*std::max(rhoa,1e-12))*len/std::max(dist,1e-12);
+      }
+    } else {
+      BCType bt=lm.faceBC[f].type;
+      Cons UL=toCons(WL,gas);
+      if (bt==BCType::SlipWall) {
+        F[0]=0; F[1]=WL.p()*nx; F[2]=WL.p()*ny; F[3]=0;
+        lam=std::fabs(WL.u()*nx+WL.v()*ny)+soundSpeed(WL.r(),WL.p(),gas);
+      } else if (bt==BCType::NoSlipAdiabaticWall) {
+        F[0]=0; F[1]=WL.p()*nx; F[2]=WL.p()*ny; F[3]=0;
+        lam=soundSpeed(WL.r(),WL.p(),gas);
+        if (mu>0.0) {
+          double ux=grad[6*lc+0],uy=grad[6*lc+1],vx=grad[6*lc+2],vy=grad[6*lc+3],Tx=grad[6*lc+4],Ty=grad[6*lc+5];
+          Prim Ww; Ww.r()=WL.r();Ww.u()=0;Ww.v()=0;Ww.p()=WL.p();
+          double Fv[4]; viscousFluxDotN(Ww,ux,uy,vx,vy,Tx,Ty,mu,k_cond,nx,ny,Fv);
+          for(int k=0;k<4;++k) F[k]-=Fv[k];
+          double dist=std::sqrt((lm.faceCx[f]-lm.cellCx[lc])*(lm.faceCx[f]-lm.cellCx[lc])+(lm.faceCy[f]-lm.cellCy[lc])*(lm.faceCy[f]-lm.cellCy[lc]));
+          lam += 4.0*mu/(3.0*std::max(WL.r(),1e-12))*len/std::max(2.0*dist,1e-12);
+        }
+      } else {
+        Cons Ug=farfieldGhost(UL,fs,nx,ny,gas);
+        if (useRoe) roeFlux(UL,Ug,nx,ny,gas,entropyCoeff,F);
+        else rusanovFlux(UL,Ug,nx,ny,gas,rusanovScale,F);
+        double un=WL.u()*nx+WL.v()*ny;
+        double a=soundSpeed(WL.r(),WL.p(),gas);
+        lam=std::fabs(un)+a;
+        if (mu>0.0) {
+          double ux=grad[6*lc+0],uy=grad[6*lc+1],vx=grad[6*lc+2],vy=grad[6*lc+3],Tx=grad[6*lc+4],Ty=grad[6*lc+5];
+          Prim Wf; Wf.r()=0.5*(WL.r()+fs.r());Wf.u()=0.5*(WL.u()+fs.u());Wf.v()=0.5*(WL.v()+fs.v());Wf.p()=0.5*(WL.p()+fs.p());
+          double Fv[4]; viscousFluxDotN(Wf,ux,uy,vx,vy,Tx,Ty,mu,k_cond,nx,ny,Fv);
+          for(int k=0;k<4;++k) F[k]-=Fv[k];
+          double dist=std::sqrt((lm.faceCx[f]-lm.cellCx[lc])*(lm.faceCx[f]-lm.cellCx[lc])+(lm.faceCy[f]-lm.cellCy[lc])*(lm.faceCy[f]-lm.cellCy[lc]));
+          lam += 4.0*mu/(3.0*std::max(WL.r(),1e-12))*len/std::max(2.0*dist,1e-12);
+        }
+      }
+    }
+    lamFace[f]=lam;
+    double off=0.5*lam*len;
+    for(int k=0;k<4;++k){ R[4*lc+k]+=F[k]*len; }
+    specRadCell[lc]+=lam*len;
+    D[lc]+=off;
+    if (rc>=0 && rc<lm.nOwned){
+      for(int k=0;k<4;++k){ R[4*rc+k]-=F[k]*len; }
+      specRadCell[rc]+=lam*len;
+      D[rc]+=off;
+    }
+  }
+}
+
+void Solver::lusgsSolve(std::vector<double>& state, const std::vector<double>& R,
+                        const std::vector<double>& D, const std::vector<double>& Ustart) {
+  std::vector<double> dU(4*lm.nOwned, 0.0);
+  for (int i=0;i<lm.nOwned;++i){
+    double rhs[4]={-R[4*i+0],-R[4*i+1],-R[4*i+2],-R[4*i+3]};
+    for (int e=lowerOff[i];e<lowerOff[i+1];++e){
+      int j=lowerCell[e]; int f=lowerFace[e];
+      double off=0.5*lamFace[f]*lm.faceLen[f];
+      for(int k=0;k<4;++k) rhs[k]+=off*dU[4*j+k];
+    }
+    double Di=D[i]; if (Di<1e-30) Di=1e-30;
+    for(int k=0;k<4;++k) dU[4*i+k]=rhs[k]/Di;
+  }
+  for (int i=lm.nOwned-1;i>=0;--i){
+    double corr[4]={0,0,0,0};
+    for (int e=upperOff[i];e<upperOff[i+1];++e){
+      int j=upperCell[e]; int f=upperFace[e];
+      double off=0.5*lamFace[f]*lm.faceLen[f];
+      for(int k=0;k<4;++k) corr[k]+=off*dU[4*j+k];
+    }
+    double Di=D[i]; if(Di<1e-30)Di=1e-30;
+    for(int k=0;k<4;++k) dU[4*i+k]+=corr[k]/Di;
+  }
+  static long cap_triggers=0, cap_total=0;
+  for (int i=0;i<lm.nOwned;++i){
+    // Cap the update relative to the start-of-pseudo-step state so a single
+    // pseudo step cannot drain a thin/sliver cell: limit |dU| to 20% of the
+    // step-start magnitude per component, and keep rho/p positive.
+    double scale=1.0;
+    for(int s=0;s<10;s++){
+      double nU[4];
+      for(int k=0;k<4;++k) nU[k]=state[4*i+k]+scale*dU[4*i+k];
+      double rho=nU[0], u=nU[1]/rho, v=nU[2]/rho;
+      double p=gas.gm1()*(nU[3]-0.5*rho*(u*u+v*v));
+      bool ok = (rho>kRhoFloor && p>kPFloor);
+      for(int k=0;k<4 && ok;++k){
+        double allowed=0.5*std::max(std::fabs(Ustart[4*i+k]), 1e-12);
+        if (std::fabs(nU[k]-Ustart[4*i+k]) > allowed) ok=false;
+      }
+      if (ok) break;
+      scale*=0.5;
+    }
+    cap_total++; if(scale<1.0) cap_triggers++;
+    for(int k=0;k<4;++k) state[4*i+k]+=scale*dU[4*i+k];
+    double rho=state[4*i+0];
+    if (rho<kRhoFloor) state[4*i+0]=kRhoFloor;
+    double u=state[4*i+1]/state[4*i+0], v=state[4*i+2]/state[4*i+0];
+    double p=gas.gm1()*(state[4*i+3]-0.5*state[4*i+0]*(u*u+v*v));
+    if (p<kPFloor) state[4*i+3]=kPFloor+0.5*state[4*i+0]*(u*u+v*v);
+  }
+}
+
+double Solver::runSteady(const std::string& outDir) {
+  std::vector<double> R, D;
+  exchangeHalo(U);
+  computeGradients(); computeLimiters();
+  computeResidual(U,R,D);
+  double r0loc=l2local(R); double r0;
+  MPI_Allreduce(&r0loc,&r0,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  r0=std::sqrt(r0/lm.num_cells_global);
+  double target=std::pow(10.0,-cfg.residual_reduction_target);
+  InnerStats stats; stats.reset();
+  std::vector<double> Ubest=U;
+  double bestR=r0;
+  for (int step=1; step<=cfg.max_steps; ++step){
+    double cfl = cfg.cfl_initial + (cfg.cfl_max-cfg.cfl_initial)*
+                 std::min(1.0, (double)step/std::max(1,cfg.pseudo_cfl_ramp_steps));
+    exchangeHalo(U);
+    computeGradients(); computeLimiters();
+    computeResidual(U,R,D);
+    std::vector<double> Ustart=U;
+    double rfirstloc=l2local(R); double rfirst;
+    MPI_Allreduce(&rfirstloc,&rfirst,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+    rfirst=std::sqrt(rfirst/lm.num_cells_global);
+    double ratio=1.0; int inner=0; bool hit=false;
+    while (inner<cfg.max_inner_iterations){
+      std::vector<double> Dfull(D.size());
+      for (int i=0;i<lm.nOwned;++i){
+        double sp=specRadCell[i]; if(sp<1e-30)sp=1e-30;
+        Dfull[i]=sp*(1.0/cfl+0.5);
+      }
+      lusgsSolve(U,R,Dfull,Ustart);
+      exchangeHalo(U);
+      inner++;
+      computeResidual(U,R,D);
+      double rloc=l2local(R); double r2;
+      MPI_Allreduce(&rloc,&r2,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+      r2=std::sqrt(r2/lm.num_cells_global);
+      ratio = r2/std::max(rfirst,1e-30);
+      if (rank==0 && step==1) std::printf("    inner %d r2=%.4e ratio=%.4e\n", inner, r2, ratio);
+      if (inner>=cfg.min_inner_iterations && ratio<cfg.inner_residual_reduction_target){ hit=true; break; }
+    }
+    stats.record(inner,hit,ratio);
+    if(rank==0 && step%20==0) std::printf("    [cap] triggers=%ld/%ld\n", cap_triggers, cap_total);
+    double rloc=l2local(R); double rcur;
+    MPI_Allreduce(&rloc,&rcur,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+    rcur=std::sqrt(rcur/lm.num_cells_global);
+    if (rcur<bestR){ bestR=rcur; Ubest=U; }
+    double l2c[4]={0,0,0,0}, linf=0;
+    for (int i=0;i<lm.nOwned;++i) for(int k=0;k<4;++k){ double v=R[4*i+k]; l2c[k]+=v*v; if(std::fabs(v)>linf)linf=std::fabs(v); }
+    double gl2c[4]; MPI_Allreduce(l2c,gl2c,4,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+    double glinf; MPI_Allreduce(&linf,&glinf,1,MPI_DOUBLE,MPI_MAX,MPI_COMM_WORLD);
+    for(int k=0;k<4;++k) gl2c[k]=std::sqrt(gl2c[k]/lm.num_cells_global);
+    double cl,cd,cmz,pdrag,vdrag,plift,vlift;
+    computeForces(U,cl,cd,cmz,pdrag,vdrag,plift,vlift);
+    writeResidualRow(outDir, step, 0.0, inner, cfl, cfl, gl2c, glinf, rcur, rank);
+    writeForceRow(outDir, step, 0.0, cl,cd,cmz,pdrag,vdrag,plift,vlift, rank);
+    if (rank==0 && step<=12) std::printf("  step %d cfl=%.2f inner=%d ratio=%.3e rcur=%.3e (r0=%.3e) cd=%.4f cl=%.4f\n", step,cfl,inner,ratio,rcur,r0,cd,cl);
+    if (rcur < r0*target && r0>1e-30){
+      if (rank==0) std::printf("  converged at step %d\n", step);
+      break;
+    }
+  }
+  U=Ubest;
+  exchangeHalo(U);
+  return bestR;
+}
+
+double Solver::runTransient(const std::string& outDir) {
+  std::vector<double> R, D;
+  std::vector<double> Un=U, Unm1=U;
+  double dt=cfg.time_step;
+  double t=0.0; int nstep=0;
+  InnerStats stats; stats.reset();
+  double cfl=cfg.cfl_initial;
+  while (t < cfg.final_time - 1e-12){
+    nstep++;
+    double a0,a1,a2;
+    if (nstep==1){ a0=1.0; a1=-1.0; a2=0.0; }
+    else { a0=1.5; a1=-2.0; a2=0.5; }
+    exchangeHalo(U);
+    computeGradients(); computeLimiters();
+    std::vector<double> Ustart=U;
+    auto computeModRes = [&](std::vector<double>& Rm){
+      computeResidual(U,R,D);
+      for (int i=0;i<lm.nOwned;++i){
+        double V=lm.cellVol[i];
+        for(int k=0;k<4;++k){
+          double src=V*(a0*U[4*i+k]+a1*Un[4*i+k]+a2*Unm1[4*i+k])/dt;
+          Rm[4*i+k]=R[4*i+k]+src;
+        }
+      }
+    };
+    std::vector<double> Rm(4*lm.nOwned,0.0);
+    computeModRes(Rm);
+    double rfl=l2local(Rm); double rfirst;
+    MPI_Allreduce(&rfl,&rfirst,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+    rfirst=std::sqrt(rfirst/lm.num_cells_global);
+    double ratio=1.0; int inner=0; bool hit=false;
+    while (inner<cfg.max_inner_iterations){
+      std::vector<double> Dfull(lm.nOwned);
+      for (int i=0;i<lm.nOwned;++i){
+        double sp=specRadCell[i]; if(sp<1e-30)sp=1e-30;
+        Dfull[i]=sp*(1.0/cfl+0.5)+lm.cellVol[i]*a0/dt;
+      }
+      lusgsSolve(U,Rm,Dfull,Ustart);
+      exchangeHalo(U);
+      inner++;
+      computeModRes(Rm);
+      double rl=l2local(Rm); double r2;
+      MPI_Allreduce(&rl,&r2,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+      r2=std::sqrt(r2/lm.num_cells_global);
+      ratio=r2/std::max(rfirst,1e-30);
+      if (inner>=cfg.min_inner_iterations && ratio<cfg.inner_residual_reduction_target){ hit=true; break; }
+    }
+    stats.record(inner,hit,ratio);
+    Unm1=Un; Un=U;
+    t+=dt;
+    double cl,cd,cmz,pdrag,vdrag,plift,vlift; computeForces(U,cl,cd,cmz,pdrag,vdrag,plift,vlift);
+    double l2c[4]={0,0,0,0}, linf=0;
+    for (int i=0;i<lm.nOwned;++i) for(int k=0;k<4;++k){ double v=Rm[4*i+k]; l2c[k]+=v*v; if(std::fabs(v)>linf)linf=std::fabs(v); }
+    double gl2c[4]; MPI_Allreduce(l2c,gl2c,4,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+    double glinf; MPI_Allreduce(&linf,&glinf,1,MPI_DOUBLE,MPI_MAX,MPI_COMM_WORLD);
+    for(int k=0;k<4;++k) gl2c[k]=std::sqrt(gl2c[k]/lm.num_cells_global);
+    double rmod=l2local(Rm); MPI_Allreduce(MPI_IN_PLACE,&rmod,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD); rmod=std::sqrt(rmod/lm.num_cells_global);
+    writeResidualRow(outDir,nstep,t,inner,cfl,dt,gl2c,glinf,rmod, rank);
+    writeForceRow(outDir,nstep,t,cl,cd,cmz,pdrag,vdrag,plift,vlift, rank);
+    if (rank==0 && (nstep%100==0 || nstep<=5)) std::printf("  t=%.3f step=%d inner=%d ratio=%.3e cd=%.4f cl=%.4f\n", t,nstep,inner,ratio,cd,cl);
+    if (cfg.write_field_every_time>0 && std::fmod(t,cfg.write_field_every_time)<dt){
+      writeFieldVTU(outDir+"/field_t"+std::to_string(nstep)+".vtu", *this, rank);
+    }
+  }
+  innerStats = stats;
+  return t;
+}
+
+void Solver::computeForces(const std::vector<double>& state, double& cl, double& cd,
+                           double& cmz, double& pdrag, double& vdrag, double& plift,
+                           double& vlift) {
+  double qinf=0.5*cfg.rho_inf*cfg.vel_inf*cfg.vel_inf;
+  double A=cfg.ref_area; double L=cfg.ref_length;
+  double mcx=cfg.moment_cx, mcy=cfg.moment_cy;
+  double fxp=0,fyp=0,fxv=0,fyv=0,mom=0;
+  std::vector<double> W(4*lm.nLocal());
+  for (int i=0;i<lm.nLocal();++i){ Cons Uc; for(int k=0;k<4;++k)Uc.q[k]=state[4*i+k]; Prim Wc=toPrim(Uc,gas); for(int k=0;k<4;++k)W[4*i+k]=Wc.q[k]; }
+  for (int f=0;f<lm.nFace;++f){
+    BCType bt=lm.faceBC[f].type;
+    if (bt!=BCType::SlipWall && bt!=BCType::NoSlipAdiabaticWall) continue;
+    int lc=lm.faceL[f];
+    double nx=lm.faceNx[f], ny=lm.faceNy[f], len=lm.faceLen[f];
+    double p=W[4*lc+3];
+    fxp+=p*nx*len; fyp+=p*ny*len;
+    double rx=lm.faceCx[f]-mcx, ry=lm.faceCy[f]-mcy;
+    mom+= (rx*p*ny*len - ry*p*nx*len);
+    if (mu>0.0 && bt==BCType::NoSlipAdiabaticWall){
+      int c=lc;
+      double ux=grad[6*c+0],uy=grad[6*c+1],vx=grad[6*c+2],vy=grad[6*c+3];
+      double div=ux+vy;
+      double txx=2*mu*ux-2.0/3.0*mu*div;
+      double tyy=2*mu*vy-2.0/3.0*mu*div;
+      double txy=mu*(uy+vx);
+      double tx=txx*nx+txy*ny, ty=txy*nx+tyy*ny;
+      double tn=tx*nx+ty*ny;
+      double ttx=tx-tn*nx, tty=ty-tn*ny;
+      fxv+= -ttx*len; fyv+= -tty*len;
+      mom+= (rx*(-tty)*len - ry*(-ttx)*len);
+    }
+  }
+  double lsum[5]={fxp,fyp,fxv,fyv,mom};
+  double gsum[5]; MPI_Allreduce(lsum,gsum,5,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  double sc=1.0/(qinf*A+1e-30);
+  pdrag=gsum[0]*sc; plift=gsum[1]*sc;
+  vdrag=gsum[2]*sc; vlift=gsum[3]*sc;
+  cd=pdrag+vdrag; cl=plift+vlift;
+  cmz=gsum[4]*sc/(L+1e-30);
+}
+
+}  // namespace cfd
