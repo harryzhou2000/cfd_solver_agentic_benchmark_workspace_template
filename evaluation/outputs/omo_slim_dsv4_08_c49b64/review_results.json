@@ -1,0 +1,83 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 3,
+      "notes": "Seven package structures validate; Re200 production horizon fails."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Official validator passes seven then rejects Re200 t<300."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 3,
+      "notes": "Seven steady results complete; Re200 incomplete."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Steady plausibility reported; no independent rerun."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Curated report figures are absent by policy; original attempt report evidence only."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Report candidly says Re200 in progress."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 3,
+      "notes": "Original manifests map figures; raw manifests excluded."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report figures do not correspond to submitted field/CSV outputs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete or failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Debug outputs presented as final case results",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.0
+}
