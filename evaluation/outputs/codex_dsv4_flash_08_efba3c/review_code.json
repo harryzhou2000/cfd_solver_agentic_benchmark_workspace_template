@@ -1,0 +1,112 @@
+{
+  "review_area": "code_review",
+  "title": "Code review scorecard",
+  "points": [
+    {
+      "id": "code.build",
+      "title": "Build system and reproducibility",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "CMake build is documented; committed report builds in an isolated immutable worktree, but a clean solver build was not possible because the delivered external symlink is dangling."
+    },
+    {
+      "id": "code.cli",
+      "title": "CLI and error handling",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "main.cpp/config parsing provide solve/info and input checks; not rerun."
+    },
+    {
+      "id": "code.organization",
+      "title": "Code organization and extensibility",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "Separated config, mesh, numerics, driver, and main modules."
+    },
+    {
+      "id": "code.originality",
+      "title": "Originality and license compliance",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "No internal wrapper/executable evidence; trust policy prohibits external similarity search."
+    },
+    {
+      "id": "code.hardcoding",
+      "title": "No hard-coded case logic",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "CGNS and case parsing are generic rather than filename-only branches."
+    },
+    {
+      "id": "code.mpi",
+      "title": "MPI correctness",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "METIS partitioning, ghosts, neighbor exchange and reductions are present; no submitted rank-count comparison."
+    },
+    {
+      "id": "code.robustness",
+      "title": "Robustness and memory sanity",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "Positivity fallbacks and status output exist, but Re200 inner solve fails."
+    },
+    {
+      "id": "code.testing",
+      "title": "Testing and validation evidence",
+      "weight": 0.1,
+      "score": 2,
+      "notes": "No committed tests; structural validator is external evidence only."
+    },
+    {
+      "id": "code.hygiene",
+      "title": "Code hygiene",
+      "weight": 0.07,
+      "score": 4,
+      "notes": "Curated submission excludes build/results/session artifacts and source is organized."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Existing solver executable called internally",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Force/residual files generated without solving",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Code only reads the two benchmark mesh filenames through hard-coded branches",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "MPI rank count changes results by order-one amounts for steady cases",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Explicit time stepping only (no implicit/steady capability claimed where required)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims algorithms that cannot be found in source",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete/failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Solver core, time integration, or MPI communication copied/adapted/wrapped from an existing open-source CFD codebase",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.57
+}

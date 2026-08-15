@@ -46,7 +46,7 @@ workflow—not already evaluated.
 
 | Status | Workspace | Snapshot | Authoritative initial branch | Authoritative initial commit | Result branch | Current branch / HEAD | Dirty tracked / untracked | Telemetry | Readiness note |
 |---|---|---|---|---|---|---|---:|---|---|
-| [ ] | `workspace/codex/dsv4_flash/08` | `pre_run` v1.0 | `codex/dsv4_flash/init` | `e757c4e0bac4065c4a5ab7ead230b236e4a9984c` | `codex/dsv4_flash/08` | `solver/attempt-1` / `e757c4e0bac4065c4a5ab7ead230b236e4a9984c` | 0 / 780 | Codex | Large untracked submission; curate explicitly. |
+| [x] `codex_dsv4_flash_08_efba3c`, 76/100, DQ=false | `workspace/codex/dsv4_flash/08` | `pre_run` v1.0 | `codex/dsv4_flash/init` | `e757c4e0bac4065c4a5ab7ead230b236e4a9984c` | `codex/dsv4_flash/08` | submission `e5d4a7a8a595c9e19db2e9551cfc393b9e646dba` | 0 / 780 | Codex | Both gates passed. Seven steady cases validate; Re200 is honestly incomplete and has no rerun; no submitted MPI rank comparison. |
 | [ ] | `workspace/codex/dsv4_flash/09` | `pre_run` v1.0 | `codex/dsv4_flash/init` | `e757c4e0bac4065c4a5ab7ead230b236e4a9984c` | `codex/dsv4_flash/09` | `solver/cfd-attempt` / `8029d4f6911657c70dd135ddf00f16696a0dad1f` | 0 / 48 | Codex | Provenance-ready. |
 | [ ] | `workspace/codex/dsv4_flash/10` | `pre_run` v1.0 | `codex/dsv4_flash/init` | `e757c4e0bac4065c4a5ab7ead230b236e4a9984c` | `codex/dsv4_flash/10` | `solver/attempt1` / `71528746943881ca8ba746fd37b66ed9ec4c4f95` | 0 / 2 | Codex | Provenance-ready. |
 | [ ] | `workspace/codex/dsv4_flash/11` | `pre_run` v1.0 | `codex/dsv4_flash/init` | `e757c4e0bac4065c4a5ab7ead230b236e4a9984c` | `codex/dsv4_flash/11` | `codex/dsv4_flash/init` / `e757c4e0bac4065c4a5ab7ead230b236e4a9984c` | 0 / 926 | Codex | Submission is entirely untracked; curate explicitly. |
