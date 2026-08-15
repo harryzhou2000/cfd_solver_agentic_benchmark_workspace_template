@@ -1,0 +1,62 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 0,
+      "notes": "The official validator rejects the first required package because metadata convergence_status is failed; cylinder Re20/Re200 final packages are absent."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 0,
+      "notes": "Explicit eight-directory validator command exits 1 at naca0012_m015_inviscid: invalid final convergence_status in metadata: failed."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 0,
+      "notes": "All six readable NACA packages declare failed convergence; cylinder output is only partial stdout and Re200 has no final result package."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 0,
+      "notes": "M0.8/M2 histories grow, all laminar histories reach non-finite values, and no credible completed cylinder or transient evidence exists."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 1,
+      "notes": "The report source references field/history figures, but the immutable submission excludes them and no complete valid result set supports the visualization claims."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 2,
+      "notes": "The report discloses several limitations, but its conclusion claims requirements met and M0.8 steady convergence despite failed metadata/readable histories."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 1,
+      "notes": "The terminal response identifies uncommitted report/manifest artifacts, while immutable submission has only report.tex and no final validated package-to-figure traceability."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "id": 7,
+      "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
+    }
+  ],
+  "overall_score": 0.5
+}

@@ -1,0 +1,76 @@
+{
+  "review_area": "code_review",
+  "title": "Code review scorecard",
+  "points": [
+    {
+      "id": "code.build",
+      "title": "Build system and reproducibility",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "CMake source is substantial and the terminal response claims a build, but no independent evaluator build was performed and the delivered immutable commit has no build artifact."
+    },
+    {
+      "id": "code.cli",
+      "title": "CLI and error handling",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "main.cpp implements solve --case/--output/--restart/--report-level and argparse error handling."
+    },
+    {
+      "id": "code.organization",
+      "title": "Code organization and extensibility",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "Separate C++ modules cover case parsing, CGNS, geometry, partitioning, halo, reconstruction, flux, output, and solver logic."
+    },
+    {
+      "id": "code.originality",
+      "title": "Originality and license compliance",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "No direct internal wrapper/external-executable evidence was found. Trust policy prohibits external-copy investigation."
+    },
+    {
+      "id": "code.hardcoding",
+      "title": "No hard-coded case logic",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "JSON case reader and generic case paths are present; no two-mesh-only branch was established."
+    },
+    {
+      "id": "code.mpi",
+      "title": "MPI correctness",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "partition.cpp calls METIS_PartGraphKway and halo.cpp implements neighbor MPI_Isend/Irecv; no delivered rank-consistency demonstration."
+    },
+    {
+      "id": "code.robustness",
+      "title": "Robustness and memory sanity",
+      "weight": 0.08,
+      "score": 1,
+      "notes": "Six readable NACA outputs are marked failed, laminar histories become non-finite, and both cylinder final packages are absent."
+    },
+    {
+      "id": "code.testing",
+      "title": "Testing and validation evidence",
+      "weight": 0.1,
+      "score": 1,
+      "notes": "No passing final validator/test evidence: the official validator aborts on the first canonical package's failed metadata."
+    },
+    {
+      "id": "code.hygiene",
+      "title": "Code hygiene",
+      "weight": 0.07,
+      "score": 4,
+      "notes": "The immutable source tree is reasonably modular and has no committed build/result/session bulk artifacts."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "id": 7,
+      "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
+    }
+  ],
+  "overall_score": 3.16
+}

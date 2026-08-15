@@ -1,0 +1,90 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 4,
+      "notes": "Source defines conservative compressible variables, equation-of-state helpers, inviscid and viscous paths."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "CGNS reader, geometry, adjacency, and boundary-family handling are present in submitted source."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "solver.cpp assembles residuals with global reductions, but delivered numerical outcomes fail."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "Approximate Riemann-flux code is present; failed M0.8/M2 results do not support robust production behavior."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Dedicated boundary module implements farfield/slip/no-slip treatment in source."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "Least-squares primitive gradients and linear face reconstruction are invoked in source."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Barth-Jespersen limiting and positivity-oriented reconstruction checks are identifiable in source."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Viscous source exists, but all delivered laminar outputs fail/non-finite and no credible viscous case is complete."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 2,
+      "notes": "Steady loop uses one frozen-RHS LU-SGS sweep per step; the terminal response identifies the scalar-Jacobian solver as unable to meet the required residual reduction."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 2,
+      "notes": "run_transient has a BDF2 outer/inner structure, but no Re200 final package or production convergence evidence exists; Re200 was not rerun."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "METIS k-way and neighbor-scoped halo implementation are present; no successful np=8 NACA/cylinder evidence was delivered."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "id": 7,
+      "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
+    }
+  ],
+  "overall_score": 3.42
+}

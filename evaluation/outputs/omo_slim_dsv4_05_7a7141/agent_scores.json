@@ -1,0 +1,472 @@
+{
+  "schema": "agent_scores",
+  "contestant": "05",
+  "evaluated_at": "2026-08-15T08:00:00Z",
+  "evaluator": {
+    "agent": "Codex",
+    "session_id": null,
+    "harness": "opencode",
+    "notes": "Immutable submission/source audit and on-disk contestant evidence only; no solver rerun."
+  },
+  "metadata_answers": {
+    "context_window_deepseek-v4-pro@max": "Unavailable in bundled project telemetry; no external source queried.",
+    "context_window_deepseek-v4-flash@max": "Unavailable in bundled project telemetry; no external source queried.",
+    "context_window_deepseek-v4-flash@default": "Unavailable in bundled project telemetry; no external source queried."
+  },
+  "session_selection": {
+    "source": "project",
+    "harness": "opencode",
+    "source_db": "workspace/omo-slim/dsv4/05/.sessions/opencode-data/opencode/opencode.db",
+    "roots": [
+      "ses_035c966a1ffejVjVBfNUTSEjfE"
+    ],
+    "included_descendants": [
+      "ses_032e5ad67ffej2wSU20e0lhrbj",
+      "ses_032f50891ffesssNmeJN1jWJCq",
+      "ses_03360ee7effe6OfnNfGN6CSXPD",
+      "ses_0336d4d7dffeKzs5uzj2D81Rtc",
+      "ses_033a23989ffeEmKPl6OAZAp5j4",
+      "ses_033b592a4ffeOe8X53VqrJM8kR",
+      "ses_033c06ff6ffeg9GCbz1bZ2VcqS",
+      "ses_033c27c31ffeRQe3uLslutouMm",
+      "ses_033c2a64bffeLp5rhRkxamJGZl"
+    ],
+    "execution_date": "2026-08-04",
+    "started_at": "2026-08-04T00:40:03.680000+00:00",
+    "ended_at": "2026-08-04T15:58:30.474000+00:00",
+    "time_basis": "UTC time.created/time.updated records in the selected project-local OpenCode root session row.",
+    "contestant_final_response_status": "present",
+    "contestant_final_response_message_id": "msg_fcd7f387b001yaDom3N2F14csx",
+    "contestant_final_response_completed_at_ms": 1785859110057,
+    "contestant_final_response_part_ids": [
+      "prt_fcd7f5a10001ttv4Zv6tua1i10"
+    ],
+    "contestant_final_response_original_message_sha256": "5c8ad18cd49f5320732be0ed13ac0a86bb9139edeab697ca105c6ef278d55a2c",
+    "contestant_final_response_extracted_sha256": "e5d2f0eedda16ffae8a6c78edfb087d5ad123e6cd5342ef0929b0df5ab0bc6b8",
+    "contestant_final_response_ordered_text_part_count": 1,
+    "rationale": "The sole project-local OpenCode root, titled 'Deepwork cfd_solver_agentic_benchmark', covers the benchmark implementation, solver/report work, and nine task-specific descendants. It is the only root in the bundled DB. The terminal completed assistant message is deterministically the last root assistant message; its sole text part was copied verbatim, excluding the preceding reasoning part."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "CMake source is substantial and the terminal response claims a build, but no independent evaluator build was performed and the delivered immutable commit has no build artifact."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "main.cpp implements solve --case/--output/--restart/--report-level and argparse error handling."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Separate C++ modules cover case parsing, CGNS, geometry, partitioning, halo, reconstruction, flux, output, and solver logic."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "No direct internal wrapper/external-executable evidence was found. Trust policy prohibits external-copy investigation."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "JSON case reader and generic case paths are present; no two-mesh-only branch was established."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "partition.cpp calls METIS_PartGraphKway and halo.cpp implements neighbor MPI_Isend/Irecv; no delivered rank-consistency demonstration."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 1,
+          "notes": "Six readable NACA outputs are marked failed, laminar histories become non-finite, and both cylinder final packages are absent."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "No passing final validator/test evidence: the official validator aborts on the first canonical package's failed metadata."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4,
+          "notes": "The immutable source tree is reasonably modular and has no committed build/result/session bulk artifacts."
+        }
+      ],
+      "overall_score": 3.16,
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
+        }
+      ]
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Source defines conservative compressible variables, equation-of-state helpers, inviscid and viscous paths."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS reader, geometry, adjacency, and boundary-family handling are present in submitted source."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "solver.cpp assembles residuals with global reductions, but delivered numerical outcomes fail."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Approximate Riemann-flux code is present; failed M0.8/M2 results do not support robust production behavior."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Dedicated boundary module implements farfield/slip/no-slip treatment in source."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "Least-squares primitive gradients and linear face reconstruction are invoked in source."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Barth-Jespersen limiting and positivity-oriented reconstruction checks are identifiable in source."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Viscous source exists, but all delivered laminar outputs fail/non-finite and no credible viscous case is complete."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "Steady loop uses one frozen-RHS LU-SGS sweep per step; the terminal response identifies the scalar-Jacobian solver as unable to meet the required residual reduction."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "run_transient has a BDF2 outer/inner structure, but no Re200 final package or production convergence evidence exists; Re200 was not rerun."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS k-way and neighbor-scoped halo implementation are present; no successful np=8 NACA/cylinder evidence was delivered."
+        }
+      ],
+      "overall_score": 3.42,
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
+        }
+      ]
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 0,
+          "notes": "The official validator rejects the first required package because metadata convergence_status is failed; cylinder Re20/Re200 final packages are absent."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 0,
+          "notes": "Explicit eight-directory validator command exits 1 at naca0012_m015_inviscid: invalid final convergence_status in metadata: failed."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 0,
+          "notes": "All six readable NACA packages declare failed convergence; cylinder output is only partial stdout and Re200 has no final result package."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 0,
+          "notes": "M0.8/M2 histories grow, all laminar histories reach non-finite values, and no credible completed cylinder or transient evidence exists."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 1,
+          "notes": "The report source references field/history figures, but the immutable submission excludes them and no complete valid result set supports the visualization claims."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "The report discloses several limitations, but its conclusion claims requirements met and M0.8 steady convergence despite failed metadata/readable histories."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 1,
+          "notes": "The terminal response identifies uncommitted report/manifest artifacts, while immutable submission has only report.tex and no final validated package-to-figure traceability."
+        }
+      ],
+      "overall_score": 0.5,
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
+        }
+      ]
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 58,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 5,
+        "notes": "CMake and CLI source are present, but no independent build was run and the submitted final outputs fail the contract."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 8,
+        "notes": "CGNS unstructured mesh reader, geometry, adjacency, and boundary processing are implemented; no evaluator execution verification."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 11,
+        "notes": "Conservative residual, approximate fluxes, and dedicated BC source are substantial, but numerical failure limits verification credit."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 7,
+        "notes": "Least-squares reconstruction and Barth-Jespersen limiter are implemented, without credible smooth-region or successful production evidence."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 6,
+        "notes": "Viscous discretization and wall treatment source exist; all laminar delivered histories fail/non-finite."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 8,
+        "notes": "One-sweep LU-SGS steady logic and BDF2 dual loop exist, but scalar-Jacobian convergence is insufficient and Re200 has no final evidence."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 7,
+        "notes": "METIS partitioning, Isend/Irecv halo exchange, and reductions are source-visible; required successful rank-count comparisons are absent."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 0,
+        "notes": "Six readable NACA packages are failed; Re20 and Re200 final packages are missing. The explicit validator fails immediately."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 1,
+        "notes": "Report source is extensive and has limitations, but immutable figure dependencies are absent and conclusions conflict with failed delivered results."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Separated mesh, numerical, boundary, partition, and output modules plus JSON cases leave clear extension points."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 1,
+      "notes": "Recognizable package exists, but metadata/run_status say failed and terminal response admits only 0.64 residual orders; not a completed credible case."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 0,
+      "notes": "Package is present but failed; residual history grows rather than demonstrating a credible converged final result."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 0,
+      "notes": "Package is present but failed, with strongly growing residual history and no credible completed result."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 0,
+      "notes": "A structurally recognizable package exists, but metadata says failed and the delivered history becomes non-finite."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 0,
+      "notes": "Package is failed and its delivered residual/force history becomes non-finite."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 0,
+      "notes": "Package is failed and its delivered residual/force history becomes non-finite."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 0,
+      "notes": "Only partial stdout evidence exists; no required final case package or credible steady-wake result is delivered."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 0,
+      "notes": "No final transient package, periodicity/force evidence, or production controls evidence is delivered; it was not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": true,
+    "flags": [
+      {
+        "id": 1,
+        "text": "Existing solver executable is called internally",
+        "found": false,
+        "evidence": "No direct internal evidence of an external solver executable invocation was found in the immutable submitted source."
+      },
+      {
+        "id": 2,
+        "text": "Force or residual files are generated without solving",
+        "found": false,
+        "evidence": "Failed output alone does not establish synthetic histories."
+      },
+      {
+        "id": 3,
+        "text": "The code can only read these two mesh filenames through hard-coded branches",
+        "found": false,
+        "evidence": "Generic JSON case parsing and CGNS reader source were inspected; no such hard-coded-only branch was established."
+      },
+      {
+        "id": 4,
+        "text": "MPI rank count changes results by order-one amounts for steady cases",
+        "found": false,
+        "evidence": "Required comparison is absent, but absence does not establish an order-one mismatch."
+      },
+      {
+        "id": 5,
+        "text": "The solver uses explicit time stepping only",
+        "found": false,
+        "evidence": "Submitted source contains steady LU-SGS-style sweeps and a BDF2 transient loop."
+      },
+      {
+        "id": 6,
+        "text": "The report claims algorithms that cannot be found in source",
+        "found": false,
+        "evidence": "Core CGNS/METIS, flux, reconstruction, limiter, MPI, and BDF2 claims have identifiable source counterparts; their adequacy is scored separately."
+      },
+      {
+        "id": 7,
+        "text": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "Each of the six readable NACA metadata.json files sets completed: true while convergence_status is failed; paired run_status.json also says failed, and the official validator rejects this exact condition."
+      },
+      {
+        "id": 8,
+        "text": "Report figures do not correspond to submitted field/CSV outputs",
+        "found": false,
+        "evidence": "Traceability is inadequate because immutable report dependencies/results are absent, but no direct mismatch between a particular figure and a different source file was established."
+      },
+      {
+        "id": 9,
+        "text": "metadata.json reports METIS/ParMETIS but code uses only a geometric split or full-state replication",
+        "found": false,
+        "evidence": "partition.cpp directly calls METIS_PartGraphKway and halo.cpp uses neighbor sends/receives."
+      },
+      {
+        "id": 10,
+        "text": "A report claims second-order reconstruction or a shock limiter that is disabled for production cases",
+        "found": false,
+        "evidence": "Reconstruction and Barth-Jespersen limiter calls are present in the submitted residual path; failed production outcomes are scored separately."
+      },
+      {
+        "id": 11,
+        "text": "Surface no-slip checks fail because reported wall rows are actually adjacent cell-center velocities without documentation",
+        "found": false,
+        "evidence": "No direct contradictory surface-row evidence was established from the available failed packages."
+      },
+      {
+        "id": 12,
+        "text": "Figure files are misnamed",
+        "found": false,
+        "evidence": "Required figures are not immutably delivered; missing/unverifiable figures are scored as report/result defects, not a proven misnaming trigger."
+      },
+      {
+        "id": 13,
+        "text": "The finite-volume solver core, time integration, or MPI communication is copied, adapted, or wrapped from an existing open-source CFD codebase",
+        "found": false,
+        "evidence": "No direct internal evidence; trust policy forbids external-copy investigation."
+      }
+    ]
+  },
+  "limitations": [
+    "No solver case was rerun; cylinder Re200 was not rerun under the absolute policy.",
+    "Evaluation uses the audit-clean curated submission 308ffdad and on-disk immutable contestant result/telemetry evidence; untracked raw outputs are not part of the result commit.",
+    "No independent clean build was performed because it was unnecessary to resolve the failed submitted results.",
+    "Context-window values are unavailable in bundled project telemetry and no external source was queried."
+  ]
+}
