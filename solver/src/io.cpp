@@ -106,13 +106,13 @@ void Solver::writeMetadata(const std::string& status) const {
   kv("full_state_replication_during_iterations", "false");
   kv("full_mesh_replication_during_iterations", "false");
   kv("equation_set", "\"compressible_navier_stokes_2d\"");
-  kv("inviscid_flux", phys.use_roe ? "\"roe_harten_yee\"" : "\"rusanov_llf\"");
-  kv("entropy_fix", phys.use_roe ? "\"harten_yee_delta0.1a\"" : "null");
+  kv("inviscid_flux", phys.use_ausmup ? "\"ausm_plus_up\"" : (phys.use_roe ? "\"roe_harten_yee\"" : "\"rusanov_llf\""));
+  kv("entropy_fix", phys.use_ausmup ? "\"low_mach_pressure_velocity_coupling\"" : (phys.use_roe ? "\"harten_yee_delta0.1a\"" : "null"));
   kv("viscous_flux", phys.laminar ? "\"newtonian_fourier\"" : "\"disabled\"");
   kv("time_integrator", cd.rc.type==RunType::Steady ? "\"pseudo_time_implicit\"" : "\"bdf2_dual_time\"");
   kv("implicit_solver", "\"lu_sgs_spectral_scalar\"");
   kv("reconstruction", "\"green_gauss_gradient_barth_jespersen\"");
-  kv("limiter", "\"barth_jespersen\"");
+  kv("limiter", shed_av ? "\"barth_jespersen_plus_pressure_av\"" : "\"barth_jespersen\"");
   kv("spatial_order_claimed", "2");
   kv("positivity_preservation", "\"floor_clamp_first_order_fallback\"");
   kv("wall_boundary_output_semantics", "\"boundary_value_pressure_adjacent_cell\"");
