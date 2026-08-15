@@ -1,0 +1,353 @@
+{
+  "schema": "agent_scores",
+  "contestant": "03",
+  "evaluated_at": "2026-08-15T06:12:23.761057+00:00",
+  "evaluator": {
+    "agent": "codex-evaluator",
+    "session_id": null,
+    "harness": "codex",
+    "notes": null
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "019fbe25-8c45-7f20-a5e8-9501b5d23ba3"
+    ],
+    "execution_date": "2026-08-01",
+    "started_at": "2026-08-01T16:28:54.124000+00:00",
+    "ended_at": "2026-08-01T19:59:29.319000+00:00",
+    "time_basis": "UTC start of selected project-local Codex root.",
+    "contestant_final_response_status": "present",
+    "contestant_final_response_absence_reason": null,
+    "rationale": "Single root 019fbe25-8c45-7f20-a5e8-9501b5d23ba3 and its 11 descendants cover the benchmark run."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "CMake and README are submitted; raw validator passed in immutable attempt worktree."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CLI source and documented commands are present."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Source is modularized by mesh, IO, physics and solver."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "No internal wrapper found; trust policy excludes external similarity search."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Case-driven CLI supports both supplied meshes."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "MPI artifacts and rank tests exist, but independent parallel rerun was not performed."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Basic checks and error handling are present."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Validator proof and scripts are retained only in immutable attempt evidence."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 3,
+          "notes": "Readable source; excluded raw data prevents a clean submitted reproduction."
+        }
+      ],
+      "overall_score": 3.45,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Compressible equations and nondimensionalization are described."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS unstructured mesh handling is source-supported."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Finite-volume residual paths are source-supported."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Roe/Rusanov flux path is present; no evaluator rerun."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Boundary-condition code is present."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 3,
+          "notes": "Green-Gauss reconstruction is source-supported."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Barth-Jespersen limiter is source-supported."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Viscous flux and wall treatment are implemented."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "LU-SGS steady implicit method is documented."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "BDF2 Re200 reaches t=300 but report admits no vortex shedding."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 3,
+          "notes": "METIS/MPI paths and claimed comparisons exist; not independently rerun."
+        }
+      ],
+      "overall_score": 3.56,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 2,
+          "notes": "Curated submission excludes raw packages, though immutable attempt validates all eight structurally."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Attempt validator passed all eight plus report."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 3,
+          "notes": "All cases are structurally complete, but Re200 report admits no shedding."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Figures are readable; physical plausibility was source/report reviewed only."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Rich committed figure set under report figures."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Report is detailed and records the Re200 limitation."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 2,
+          "notes": "Raw manifests were correctly excluded, so figure-data traceability is not reproducible from submission."
+        }
+      ],
+      "overall_score": 3.05,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 75,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Build/CLI source is credible; raw output is excluded."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 8,
+        "notes": "CGNS and unstructured geometry are source-supported."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 11,
+        "notes": "Residual and BC source paths were inspected."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 7,
+        "notes": "Reconstruction/limiter source exists; no independent accuracy study."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Viscous terms and wall logic are source-supported."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 11,
+        "notes": "LU-SGS and BDF2 exist; Re200 result lacks shedding."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 7,
+        "notes": "METIS/halo source and attempt diagnostics exist, no independent MPI rerun."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 7,
+        "notes": "Attempt validator passed all cases; Re200 result is incomplete physically."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Detailed report and figures, limited reproducible traceability."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Modular source organization."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 3.5,
+      "notes": "Attempt package validator passed; raw package excluded."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 3.5,
+      "notes": "Attempt package validator passed; raw package excluded."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 3,
+      "notes": "Attempt package validator passed; no independent plausibility rerun."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 3.5,
+      "notes": "Attempt package validator passed; raw package excluded."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 3.5,
+      "notes": "Attempt package validator passed; raw package excluded."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 3,
+      "notes": "Attempt package validator passed; high-Mach credibility remains limited."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 3,
+      "notes": "Attempt package validator passed; no evaluator rerun."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 1,
+      "notes": "Re200 reaches t=300 but report admits no vortex shedding; not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "Legacy post-run reconstructed provenance.",
+    "Raw case packages were validated only in temporary immutable attempt worktree and are absent from curated submission.",
+    "No evaluator solver rerun; Re200 was not rerun."
+  ]
+}

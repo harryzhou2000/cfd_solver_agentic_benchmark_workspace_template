@@ -1,0 +1,710 @@
+{
+  "codex": {
+    "present": true,
+    "source_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/03/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/03/.sessions/codex/sessions",
+    "thread_count": 12,
+    "subagent_count": 11,
+    "root_count": 1,
+    "roots": [
+      {
+        "thread_id": "019fbe25-8c45-7f20-a5e8-9501b5d23ba3",
+        "model": "BLSC/GLM-5.2",
+        "thread_count": 12,
+        "started_at": "2026-08-01T16:28:54.124000+00:00",
+        "ended_at": "2026-08-01T19:59:29.319000+00:00",
+        "rollout_bytes": 5637268
+      }
+    ],
+    "rollout_bytes_total": 5637268,
+    "missing_rollouts": [],
+    "source": "project"
+  },
+  "opencode": {
+    "present": false,
+    "session_count": 0
+  },
+  "analysis": {
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "window": {
+      "start": "2026-08-01T16:28:54.124000+00:00",
+      "end": "2026-08-01T19:59:29.319000+00:00"
+    },
+    "idle_exclusion": {
+      "method": "merged timeline over main thread/session and all subagents; gaps with no events anywhere exceed the threshold and are excluded",
+      "gap_count": 0,
+      "gaps": [],
+      "idle_seconds_total": 0
+    },
+    "permission_waits": {
+      "method": "heuristic",
+      "explicit_approval_events_found": false,
+      "ask_tool_events_found": 0,
+      "candidate_gaps": [],
+      "candidate_count": 0,
+      "policy_observed": [
+        "never",
+        "reviewer=user"
+      ],
+      "limitations": [
+        "codex rollouts contain no explicit approval-request/response event types (verified by scanning all local sessions); permission-blocked idle cannot be distinguished from user-away time with certainty",
+        "candidates are gaps > idle threshold between a tool/turn boundary and a user message / new turn in approval-aware threads; expect false positives when the user stepped away"
+      ]
+    },
+    "buckets": [
+      {
+        "bucket_index": 0,
+        "start": "2026-08-01T16:28:54.124000+00:00",
+        "end": "2026-08-01T16:58:54.124000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 5274655,
+          "cached_input": 4991616,
+          "non_cached_input": 283039,
+          "output": 99420,
+          "reasoning_output": 45680,
+          "total": 5374075
+        },
+        "cache": {
+          "cached_tokens": 4991616,
+          "input_tokens": 5274655,
+          "hit_ratio": 0.9463
+        },
+        "tools": {
+          "total": 70,
+          "by_tool": {
+            "exec_command": 34,
+            "apply_patch": 32,
+            "write_stdin": 3,
+            "update_plan": 1
+          },
+          "by_category": {
+            "shell": 37,
+            "editing": 32,
+            "planning": 1
+          }
+        },
+        "turns": {
+          "thread_goal_updated": 2,
+          "task_started": 2,
+          "agent_message": 56,
+          "task_complete": 1
+        },
+        "active_entities": [
+          "019fbe25-8c45-7f20-a5e8-9501b5d23ba3"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 1,
+        "start": "2026-08-01T16:58:54.124000+00:00",
+        "end": "2026-08-01T17:28:54.124000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 9301525,
+          "cached_input": 9204544,
+          "non_cached_input": 96981,
+          "output": 34500,
+          "reasoning_output": 5736,
+          "total": 9336025
+        },
+        "cache": {
+          "cached_tokens": 9204544,
+          "input_tokens": 9301525,
+          "hit_ratio": 0.9896
+        },
+        "tools": {
+          "total": 70,
+          "by_tool": {
+            "exec_command": 45,
+            "apply_patch": 15,
+            "write_stdin": 10
+          },
+          "by_category": {
+            "shell": 55,
+            "editing": 15
+          }
+        },
+        "turns": {
+          "agent_message": 45,
+          "task_complete": 3,
+          "thread_goal_updated": 2,
+          "task_started": 2
+        },
+        "active_entities": [
+          "019fbe25-8c45-7f20-a5e8-9501b5d23ba3"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 2,
+        "start": "2026-08-01T17:28:54.124000+00:00",
+        "end": "2026-08-01T17:58:54.124000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 19770440,
+          "cached_input": 19564800,
+          "non_cached_input": 205640,
+          "output": 42516,
+          "reasoning_output": 2158,
+          "total": 19812956
+        },
+        "cache": {
+          "cached_tokens": 19564800,
+          "input_tokens": 19770440,
+          "hit_ratio": 0.9896
+        },
+        "tools": {
+          "total": 101,
+          "by_tool": {
+            "exec_command": 69,
+            "apply_patch": 22,
+            "write_stdin": 10
+          },
+          "by_category": {
+            "shell": 79,
+            "editing": 22
+          }
+        },
+        "turns": {
+          "thread_goal_updated": 1,
+          "task_started": 1,
+          "agent_message": 67,
+          "task_complete": 1
+        },
+        "active_entities": [
+          "019fbe25-8c45-7f20-a5e8-9501b5d23ba3"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 3,
+        "start": "2026-08-01T17:58:54.124000+00:00",
+        "end": "2026-08-01T18:28:54.124000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 20201149,
+          "cached_input": 20036224,
+          "non_cached_input": 164925,
+          "output": 44494,
+          "reasoning_output": 21476,
+          "total": 20245643
+        },
+        "cache": {
+          "cached_tokens": 20036224,
+          "input_tokens": 20201149,
+          "hit_ratio": 0.9918
+        },
+        "tools": {
+          "total": 78,
+          "by_tool": {
+            "exec_command": 48,
+            "write_stdin": 17,
+            "apply_patch": 12,
+            "update_plan": 1
+          },
+          "by_category": {
+            "shell": 65,
+            "editing": 12,
+            "planning": 1
+          }
+        },
+        "turns": {
+          "thread_goal_updated": 2,
+          "task_started": 2,
+          "agent_message": 35,
+          "task_complete": 1
+        },
+        "active_entities": [
+          "019fbe25-8c45-7f20-a5e8-9501b5d23ba3"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 4,
+        "start": "2026-08-01T18:28:54.124000+00:00",
+        "end": "2026-08-01T18:58:54.124000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 19893881,
+          "cached_input": 19473408,
+          "non_cached_input": 420473,
+          "output": 89959,
+          "reasoning_output": 52167,
+          "total": 19983840
+        },
+        "cache": {
+          "cached_tokens": 19473408,
+          "input_tokens": 19893881,
+          "hit_ratio": 0.9789
+        },
+        "tools": {
+          "total": 178,
+          "by_tool": {
+            "exec_command": 79,
+            "write_stdin": 73,
+            "wait_agent": 7,
+            "apply_patch": 6,
+            "update_plan": 5,
+            "spawn_agent": 4,
+            "list_agents": 4
+          },
+          "by_category": {
+            "shell": 152,
+            "collaboration": 15,
+            "editing": 6,
+            "planning": 5
+          }
+        },
+        "turns": {
+          "agent_message": 117,
+          "sub_agent_activity": 3,
+          "task_started": 3
+        },
+        "active_entities": [
+          "019fbe25-8c45-7f20-a5e8-9501b5d23ba3",
+          "019fbe9f-3559-72a2-bd18-daccdd698d99",
+          "019fbe9f-527e-7763-a29c-0f50e614be31",
+          "019fbe9f-8823-7062-be43-cd9fb5154337"
+        ],
+        "active_entity_count": 4
+      },
+      {
+        "bucket_index": 5,
+        "start": "2026-08-01T18:58:54.124000+00:00",
+        "end": "2026-08-01T19:28:54.124000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 32544281,
+          "cached_input": 32306560,
+          "non_cached_input": 237721,
+          "output": 71176,
+          "reasoning_output": 32807,
+          "total": 32615457
+        },
+        "cache": {
+          "cached_tokens": 32306560,
+          "input_tokens": 32544281,
+          "hit_ratio": 0.9927
+        },
+        "tools": {
+          "total": 214,
+          "by_tool": {
+            "exec_command": 110,
+            "write_stdin": 55,
+            "update_plan": 18,
+            "apply_patch": 15,
+            "wait_agent": 6,
+            "spawn_agent": 5,
+            "list_agents": 3,
+            "interrupt_agent": 2
+          },
+          "by_category": {
+            "shell": 165,
+            "planning": 18,
+            "collaboration": 16,
+            "editing": 15
+          }
+        },
+        "turns": {
+          "agent_message": 150,
+          "sub_agent_activity": 7,
+          "turn_aborted": 2,
+          "task_complete": 6,
+          "task_started": 5
+        },
+        "active_entities": [
+          "019fbe25-8c45-7f20-a5e8-9501b5d23ba3",
+          "019fbe9f-3559-72a2-bd18-daccdd698d99",
+          "019fbe9f-527e-7763-a29c-0f50e614be31",
+          "019fbe9f-8823-7062-be43-cd9fb5154337",
+          "019fbeba-a667-7de3-a2dd-287922eb2caa",
+          "019fbeba-c489-76a2-9015-3465b9cbd1d4",
+          "019fbeba-e739-7022-a9da-4c843a88de84",
+          "019fbec4-f5da-7b30-9d30-040ee55caa0e",
+          "019fbec5-19ce-7481-890f-f1b61ad18393"
+        ],
+        "active_entity_count": 9
+      },
+      {
+        "bucket_index": 6,
+        "start": "2026-08-01T19:28:54.124000+00:00",
+        "end": "2026-08-01T19:58:54.124000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 29125400,
+          "cached_input": 28968000,
+          "non_cached_input": 157400,
+          "output": 49802,
+          "reasoning_output": 13790,
+          "total": 29175202
+        },
+        "cache": {
+          "cached_tokens": 28968000,
+          "input_tokens": 29125400,
+          "hit_ratio": 0.9946
+        },
+        "tools": {
+          "total": 137,
+          "by_tool": {
+            "exec_command": 77,
+            "write_stdin": 33,
+            "update_plan": 13,
+            "apply_patch": 10,
+            "spawn_agent": 3,
+            "wait_agent": 1
+          },
+          "by_category": {
+            "shell": 110,
+            "planning": 13,
+            "editing": 10,
+            "collaboration": 4
+          }
+        },
+        "turns": {
+          "agent_message": 106,
+          "sub_agent_activity": 3,
+          "task_complete": 4,
+          "task_started": 4
+        },
+        "active_entities": [
+          "019fbe25-8c45-7f20-a5e8-9501b5d23ba3",
+          "019fbede-73b6-7e11-a3a3-97e9dc6e39fe",
+          "019fbede-92fd-7592-aa32-c99b89b4d9c6",
+          "019fbede-b5d1-7180-bad5-41bb4f4ffadd"
+        ],
+        "active_entity_count": 4
+      },
+      {
+        "bucket_index": 7,
+        "start": "2026-08-01T19:58:54.124000+00:00",
+        "end": "2026-08-01T19:59:29.319000+00:00",
+        "active_seconds": 35.2,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 1498368,
+          "cached_input": 1494656,
+          "non_cached_input": 3712,
+          "output": 1885,
+          "reasoning_output": 1055,
+          "total": 1500253
+        },
+        "cache": {
+          "cached_tokens": 1494656,
+          "input_tokens": 1498368,
+          "hit_ratio": 0.9975
+        },
+        "tools": {
+          "total": 3,
+          "by_tool": {
+            "exec_command": 2,
+            "update_goal": 1
+          },
+          "by_category": {
+            "shell": 2,
+            "planning": 1
+          }
+        },
+        "turns": {
+          "agent_message": 4
+        },
+        "active_entities": [
+          "019fbe25-8c45-7f20-a5e8-9501b5d23ba3"
+        ],
+        "active_entity_count": 1
+      }
+    ],
+    "whole_session_stats": {
+      "tokens": {
+        "input": 137609699,
+        "cached_input": 136039808,
+        "non_cached_input": 1569891,
+        "output": 433752,
+        "reasoning_output": 174869,
+        "total": 138043451,
+        "total_from_root_trees": 138043451,
+        "total_from_all_sessions": null
+      },
+      "cache": {
+        "cached_tokens": 136039808,
+        "input_tokens": 137609699,
+        "hit_ratio": 0.9886
+      },
+      "tools": {
+        "total": 851,
+        "by_tool": {
+          "exec_command": 464,
+          "write_stdin": 201,
+          "apply_patch": 112,
+          "update_plan": 38,
+          "wait_agent": 14,
+          "spawn_agent": 12,
+          "list_agents": 7,
+          "interrupt_agent": 2,
+          "update_goal": 1
+        },
+        "by_category": {
+          "shell": 665,
+          "editing": 112,
+          "planning": 39,
+          "collaboration": 35
+        }
+      },
+      "turns": {
+        "thread_goal_updated": 7,
+        "task_started": 19,
+        "agent_message": 580,
+        "task_complete": 17,
+        "sub_agent_activity": 13,
+        "turn_aborted": 2
+      },
+      "activity": {
+        "active_seconds": 12635.2,
+        "wall_seconds": 12635.2,
+        "idle_seconds": 0.0
+      },
+      "per_entity": {
+        "019fbe25-8c45-7f20-a5e8-9501b5d23ba3": {
+          "kind": "codex_thread",
+          "is_subagent": false,
+          "events": 2481,
+          "tokens_total_subtree": 124783892,
+          "tools": {
+            "exec_command": 313,
+            "write_stdin": 77,
+            "update_plan": 3,
+            "apply_patch": 110,
+            "spawn_agent": 12,
+            "wait_agent": 14,
+            "list_agents": 7,
+            "interrupt_agent": 2,
+            "update_goal": 1
+          },
+          "first_event": "2026-08-01T16:28:54.124000+00:00",
+          "last_event": "2026-08-01T19:59:29.319000+00:00",
+          "rollout_bytes": 2901054
+        },
+        "019fbe9f-3559-72a2-bd18-daccdd698d99": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 300,
+          "tokens_total_subtree": 2741946,
+          "tools": {
+            "update_plan": 2,
+            "exec_command": 25,
+            "write_stdin": 34
+          },
+          "first_event": "2026-08-01T18:38:52.840000+00:00",
+          "last_event": "2026-08-01T19:08:43.619000+00:00",
+          "rollout_bytes": 415274
+        },
+        "019fbe9f-527e-7763-a29c-0f50e614be31": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 360,
+          "tokens_total_subtree": 3929776,
+          "tools": {
+            "exec_command": 39,
+            "update_plan": 4,
+            "write_stdin": 17,
+            "apply_patch": 2
+          },
+          "first_event": "2026-08-01T18:39:00.297000+00:00",
+          "last_event": "2026-08-01T19:05:59.792000+00:00",
+          "rollout_bytes": 613183
+        },
+        "019fbe9f-8823-7062-be43-cd9fb5154337": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 268,
+          "tokens_total_subtree": 2310308,
+          "tools": {
+            "exec_command": 14,
+            "update_plan": 4,
+            "write_stdin": 30
+          },
+          "first_event": "2026-08-01T18:39:14.032000+00:00",
+          "last_event": "2026-08-01T19:03:13.347000+00:00",
+          "rollout_bytes": 367527
+        },
+        "019fbeba-a667-7de3-a2dd-287922eb2caa": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 112,
+          "tokens_total_subtree": 542110,
+          "tools": {
+            "update_plan": 5,
+            "exec_command": 10,
+            "write_stdin": 3
+          },
+          "first_event": "2026-08-01T19:08:51.251000+00:00",
+          "last_event": "2026-08-01T19:13:00.526000+00:00",
+          "rollout_bytes": 175173
+        },
+        "019fbeba-c489-76a2-9015-3465b9cbd1d4": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 115,
+          "tokens_total_subtree": 429280,
+          "tools": {
+            "update_plan": 5,
+            "exec_command": 14,
+            "write_stdin": 2
+          },
+          "first_event": "2026-08-01T19:08:58.984000+00:00",
+          "last_event": "2026-08-01T19:12:43.605000+00:00",
+          "rollout_bytes": 146073
+        },
+        "019fbeba-e739-7022-a9da-4c843a88de84": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 131,
+          "tokens_total_subtree": 554548,
+          "tools": {
+            "update_plan": 3,
+            "exec_command": 8,
+            "write_stdin": 12
+          },
+          "first_event": "2026-08-01T19:09:07.877000+00:00",
+          "last_event": "2026-08-01T19:18:26.906000+00:00",
+          "rollout_bytes": 153668
+        },
+        "019fbec4-f5da-7b30-9d30-040ee55caa0e": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 45,
+          "tokens_total_subtree": 116393,
+          "tools": {
+            "exec_command": 2,
+            "write_stdin": 3
+          },
+          "first_event": "2026-08-01T19:20:06.965000+00:00",
+          "last_event": "2026-08-01T19:23:46.210000+00:00",
+          "rollout_bytes": 99847
+        },
+        "019fbec5-19ce-7481-890f-f1b61ad18393": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 99,
+          "tokens_total_subtree": 381450,
+          "tools": {
+            "exec_command": 9,
+            "write_stdin": 5
+          },
+          "first_event": "2026-08-01T19:20:16.167000+00:00",
+          "last_event": "2026-08-01T19:26:40.349000+00:00",
+          "rollout_bytes": 155693
+        },
+        "019fbede-73b6-7e11-a3a3-97e9dc6e39fe": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 153,
+          "tokens_total_subtree": 998099,
+          "tools": {
+            "update_plan": 5,
+            "exec_command": 14,
+            "write_stdin": 6
+          },
+          "first_event": "2026-08-01T19:47:57.587000+00:00",
+          "last_event": "2026-08-01T19:54:25.205000+00:00",
+          "rollout_bytes": 233094
+        },
+        "019fbede-92fd-7592-aa32-c99b89b4d9c6": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 139,
+          "tokens_total_subtree": 916531,
+          "tools": {
+            "update_plan": 7,
+            "exec_command": 9,
+            "write_stdin": 7
+          },
+          "first_event": "2026-08-01T19:48:05.587000+00:00",
+          "last_event": "2026-08-01T19:55:40.285000+00:00",
+          "rollout_bytes": 213529
+        },
+        "019fbede-b5d1-7180-bad5-41bb4f4ffadd": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 79,
+          "tokens_total_subtree": 339118,
+          "tools": {
+            "exec_command": 7,
+            "write_stdin": 5
+          },
+          "first_event": "2026-08-01T19:48:14.515000+00:00",
+          "last_event": "2026-08-01T19:56:06.651000+00:00",
+          "rollout_bytes": 163153
+        }
+      },
+      "accounting_notes": [
+        "codex: each selected thread has its own cumulative usage counter; run totals sum the selected root and its subagent threads. Bucket totals are per-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
+      ]
+    }
+  },
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/03",
+  "discovered_at": "2026-08-15T06:11:17.440099+00:00",
+  "sources": [
+    {
+      "id": "project_codex",
+      "kind": "project",
+      "harness": "codex",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/03/.sessions/codex",
+      "reachable": true,
+      "sessions_found": 12,
+      "note": "workspace-bundled .sessions/codex copy"
+    },
+    {
+      "id": "project_opencode",
+      "kind": "project",
+      "harness": "opencode",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/03/.sessions/opencode-data/opencode/opencode.db",
+      "reachable": false,
+      "sessions_found": 0,
+      "note": "workspace-bundled .sessions/opencode-data/opencode DB"
+    }
+  ],
+  "selected_source": "project",
+  "selection": {
+    "method": "script_discovery + agent classification",
+    "roots": [
+      "019fbe25-8c45-7f20-a5e8-9501b5d23ba3"
+    ],
+    "harness": "auto",
+    "questions": [],
+    "notes": [
+      "the evaluation agent classifies which sessions belong to the contestant run; unextractable choices are surfaced as questions"
+    ]
+  },
+  "env_snapshot": {
+    "captured": true,
+    "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/03/.eval/env_snapshot.json",
+    "sha256": "8607c0131572ef245e752f8b7909da073cf65dbec304988c97c7881c50e74236"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/03/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/03/.sessions/codex/sessions",
+    "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/03/.sessions/opencode-data/opencode/opencode.db",
+    "session_source": "project",
+    "harness": "auto",
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "generated_at": "2026-08-15T06:11:17.440115+00:00"
+  }
+}
