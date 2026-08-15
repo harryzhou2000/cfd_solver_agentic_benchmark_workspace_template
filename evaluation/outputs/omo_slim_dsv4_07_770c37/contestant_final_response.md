@@ -1,0 +1,3 @@
+## Deepwork Complete — CFD Solver Benchmark
+
+The terminal response reports only two of eight physical cases converged: NACA M0.15 inviscid and cylinder Re20. Cylinder Re200 ran 100 of 30,000 steps and is honestly marked failed; transonic cases were not attempted and NACA M0.15 laminar remained in progress. It identifies a C++17/MPI unstructured finite-volume solver, METIS partitioning, Isend/Irecv halo exchange, Rusanov flux, LSQ/Barth reconstruction, LU-SGS, and BDF2; all stated limitations remain part of the exact source message `msg_fcfb77009001VwSbhZq4TQBpXN`, terminal text part `prt_fcfb7843e001VApTEU0Ne9XAFm`.
