@@ -1,0 +1,233 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,longtable,hyperref,float}
+\hypersetup{hypertexnames=false}
+\title{Aurora-FV: 2-D Unstructured Compressible Navier--Stokes Benchmark}
+\author{Submitted solver team}\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+This report is generated from the submitted JSON, CSV, VTK, and manifest files. It documents the finite-volume method, distributed METIS mesh, requested versus observed controls, force histories, and the Re=200 transient diagnostic. Terminal steady cases are described as measured plateaus when the requested residual reduction is not reached.
+\end{abstract}
+
+\section{Governing equations and nondimensionalization}
+The conservative state is $\mathbf U=[\rho,\rho u,\rho v,\rho E]^T$. The equations solved are
+\[
+\frac{\partial\mathbf U}{\partial t}+\frac{\partial\mathbf F^i}{\partial x}+\frac{\partial\mathbf G^i}{\partial y}=\frac{\partial\mathbf F^v}{\partial x}+\frac{\partial\mathbf G^v}{\partial y},
+\]
+with $\mathbf F^i=[\rho u,\rho u^2+p,\rho uv,u(\rho E+p)]^T$ and $\mathbf G^i=[\rho v,\rho uv,\rho v^2+p,v(\rho E+p)]^T$. The calorically perfect closure is $p=(\gamma-1)\rho e$, $E=e+(u^2+v^2)/2$, and $a=\sqrt{\gamma p/\rho}$. Reference coefficients use $q_\infty=\rho_\infty U_\infty^2/2$ and $C_D,C_L=F_{x,y}/(q_\infty A_{ref})$. Laminar runs use $\mu=\rho_\infty U_\infty L_{ref}/Re$, Newtonian stresses, and $\mathbf q=-\mu c_p\nabla T/Pr$.
+
+\section{Meshes, boundary conditions, and case parameters}
+The CGNS reader handles TRI/QUAD zones, geometrically pairs coincident multi-zone faces, computes cell areas and oriented face normals, and retains section names for boundary dispatch. The submitted case table is:
+\begin{center}\scriptsize\begin{longtable}{lrrrrll}\toprule Case & cells & faces & $M_\infty$ & $Re$ & mode & boundary tags\\\midrule
+cylinder\_m010\_laminar\_re20 & 10185 & 20180 & 0.1 & 20 & laminar & WALL: no\_slip\_adiabatic\_wall; FAR: farfield \\
+cylinder\_m010\_laminar\_re200 & 10185 & 20180 & 0.1 & 200 & laminar & WALL: no\_slip\_adiabatic\_wall; FAR: farfield \\
+naca0012\_m015\_inviscid & 20816 & 36498 & 0.15 & 0 & inviscid & bc-2: farfield; bc-4: slip\_wall \\
+naca0012\_m015\_laminar\_re5000 & 20816 & 36498 & 0.15 & 5000 & laminar & bc-2: farfield; bc-4: no\_slip\_adiabatic\_wall \\
+naca0012\_m080\_inviscid & 20816 & 36498 & 0.8 & 0 & inviscid & bc-2: farfield; bc-4: slip\_wall \\
+naca0012\_m080\_laminar\_re5000 & 20816 & 36498 & 0.8 & 5000 & laminar & bc-2: farfield; bc-4: no\_slip\_adiabatic\_wall \\
+naca0012\_m200\_inviscid & 20816 & 36498 & 2 & 0 & inviscid & bc-2: farfield; bc-4: slip\_wall \\
+naca0012\_m200\_laminar\_re5000 & 20816 & 36498 & 2 & 5000 & laminar & bc-2: farfield; bc-4: no\_slip\_adiabatic\_wall \\
+\bottomrule\end{longtable}\end{center}
+Farfield faces use the configured freestream state; inviscid walls use a mirrored normal velocity and exact zero mass/energy wall flux; no-slip adiabatic walls use zero wall velocity, pressure traction, and gradient-based viscous traction. Surface rows are boundary values: no-slip $u=v=0$, while slip walls retain tangential velocity and have zero normal velocity.
+
+\section{Spatial discretization and positivity}
+Each owned cell accumulates oriented face fluxes. The Rusanov local Lax--Friedrichs flux supplies the approximate Riemann solve. For the low-Mach Re=200 transient, an acoustic-scaled all-speed Rusanov signal applies the measured cutoff from metadata only to the artificial acoustic contribution; the conservative physical flux and supplied Rusanov scale remain unchanged. This is not a full pressure--velocity preconditioned flux. Primitive variables are reconstructed with a least-squares gradient, exchanged on the halo, and limited by a Barth--Jespersen bound. Density and pressure are protected by a bounded primitive-variable line search before conservative storage. The same reconstructed gradients provide Newtonian stress and Fourier heat flux; the force postprocessor separates pressure and tangential viscous traction.
+
+\section{Implicit and transient integration}
+The current steady implementation uses scalar Jacobi/Richardson with an MPI-global Armijo backtracking safeguard; the checked-in canonical steady packages predate that safeguard, so their plateau histories are retained as historical evidence. An optional frozen 4x4 block-Jacobi correction is implemented and recorded when explicitly enabled. The requested CFL continuation and the effective cap used by each run are recorded in metadata; conservative caps were selected for the stiff high-Mach/laminar cases. The diagonal update contains the standard $(1+CFL)^{-1}$ implicit denominator and a conservative positivity line search. The requested and observed controls are:
+\begin{center}\tiny\begin{longtable}{lrrrrrrrr}\toprule Case & supplied max & actual & $CFL_0$ & $CFL_{max}$ & inner min & inner max & inner target & observed mean\\\midrule
+cylinder\_m010\_laminar\_re20 & 30000 & 300 & 1 & 100 & 3 & 80 & 0.01 & 80 \\
+cylinder\_m010\_laminar\_re200 & -- & 30000 & 1 & 1 & 5 & 1000 & 0.001 & 67.5 \\
+naca0012\_m015\_inviscid & 20000 & 300 & 1 & 100 & 3 & 50 & 0.01 & 50 \\
+naca0012\_m015\_laminar\_re5000 & 40000 & 300 & 1 & 100 & 3 & 80 & 0.01 & 80 \\
+naca0012\_m080\_inviscid & 30000 & 300 & 1 & 100 & 3 & 50 & 0.01 & 50 \\
+naca0012\_m080\_laminar\_re5000 & 40000 & 300 & 0.5 & 80 & 3 & 80 & 0.01 & 80 \\
+naca0012\_m200\_inviscid & 40000 & 300 & 0.2 & 50 & 3 & 80 & 0.01 & 80 \\
+naca0012\_m200\_laminar\_re5000 & 50000 & 300 & 0.2 & 50 & 3 & 100 & 0.01 & 100 \\
+\bottomrule\end{longtable}\end{center}
+The Re=200 directory uses nominal BDF2 outer steps with $\Delta t=0.01$ and frozen $U^n,U^{n-1}$ histories in the normal residual; documented converged backward-Euler substeps replace rejected nominal intervals. Histories are updated only after each accepted physical step. Its scalar Jacobi/Richardson inner corrections use the measured reconstruction slope, gain, and all-speed cutoff recorded in metadata. Fresh transient starts in the current source retain the freestream plus an explicit localized symmetry-breaking phase seed and do not apply the synthetic steady wall-profile initializer; no-slip is imposed through the wall flux and gradient treatment. The seed is a one-time initial condition, not persistent forcing. The checked-in 30,000-step package predates the current seed-shape and recovery corrections, so its failed force history is retained as historical production evidence; corrected-seed and corrected-recovery runs are diagnostic-only and are not mixed into the final statistics. The implementation records actual inner minima, maxima, means, target misses, and converged-step fraction, keeps the supplied 1000-iteration allowance as an upper bound, may abandon a clearly stagnant trial before trying a lower pseudo-time gain, and retries a nonlinear stall with converged backward-Euler substeps of 2, 4, 8, 16, 32, 64, or 128 over exactly one nominal interval before rejecting the physical step. After an accepted fallback, the next interval resumes from the accepted state and permits the ordinary BDF2 extrapolated predictor before retrying the normal residual. New transient checkpoints also write an optional $U^{n-1}$ sidecar, so a restart can restore the exact BDF2 pair; legacy state-only checkpoints without that sidecar use one backward-Euler residual to reconstruct the missing history. Restart metadata records usage, resume step, and whether the sidecar was restored; a requested seed may be applied once to a legacy restarted initial state. The fallback interval, substep, recovery-marker, damping-retry, and best-effort continuation counts are recorded in metadata. Any best-effort continuation is diagnostic-only and excludes a final statistically-periodic claim.
+
+\section{MPI/METIS decomposition}
+Rank zero performs one-time CGNS preprocessing and METIS graph partitioning, writes compact rank-local topology, then releases the full mesh. Iterations store owned cells plus one-ring ghosts and exchange only neighbor state/gradient payloads with nonblocking MPI. Residuals and forces use reductions; final fields are gathered only after the solve. The per-rank evidence table (owned, ghost, neighbor, send, and receive counts) is:
+\begin{center}\scriptsize\begin{longtable}{lrrrrrr}\toprule Case & rank & owned & ghost & neighbors & send & receive\\\midrule
+cylinder\_m010\_laminar\_re20 & 0 & 1265 & 139 & 6 & 132 & 139 \\
+cylinder\_m010\_laminar\_re20 & 1 & 1289 & 110 & 3 & 115 & 110 \\
+cylinder\_m010\_laminar\_re20 & 2 & 1276 & 115 & 4 & 114 & 115 \\
+cylinder\_m010\_laminar\_re20 & 3 & 1269 & 122 & 6 & 122 & 122 \\
+cylinder\_m010\_laminar\_re20 & 4 & 1291 & 104 & 4 & 105 & 104 \\
+cylinder\_m010\_laminar\_re20 & 5 & 1246 & 140 & 5 & 138 & 140 \\
+cylinder\_m010\_laminar\_re20 & 6 & 1274 & 111 & 4 & 113 & 111 \\
+cylinder\_m010\_laminar\_re20 & 7 & 1275 & 120 & 4 & 122 & 120 \\
+cylinder\_m010\_laminar\_re200 & 0 & 2554 & 135 & 3 & 138 & 135 \\
+cylinder\_m010\_laminar\_re200 & 1 & 2540 & 151 & 3 & 149 & 151 \\
+cylinder\_m010\_laminar\_re200 & 2 & 2541 & 145 & 3 & 145 & 145 \\
+cylinder\_m010\_laminar\_re200 & 3 & 2550 & 110 & 3 & 109 & 110 \\
+naca0012\_m015\_inviscid & 0 & 2593 & 94 & 2 & 94 & 94 \\
+naca0012\_m015\_inviscid & 1 & 2598 & 102 & 4 & 102 & 102 \\
+naca0012\_m015\_inviscid & 2 & 2625 & 90 & 2 & 90 & 90 \\
+naca0012\_m015\_inviscid & 3 & 2648 & 127 & 5 & 127 & 127 \\
+naca0012\_m015\_inviscid & 4 & 2582 & 93 & 2 & 93 & 93 \\
+naca0012\_m015\_inviscid & 5 & 2568 & 98 & 3 & 98 & 98 \\
+naca0012\_m015\_inviscid & 6 & 2592 & 188 & 6 & 188 & 188 \\
+naca0012\_m015\_inviscid & 7 & 2610 & 52 & 2 & 52 & 52 \\
+naca0012\_m015\_laminar\_re5000 & 0 & 2593 & 94 & 2 & 94 & 94 \\
+naca0012\_m015\_laminar\_re5000 & 1 & 2598 & 102 & 4 & 102 & 102 \\
+naca0012\_m015\_laminar\_re5000 & 2 & 2625 & 90 & 2 & 90 & 90 \\
+naca0012\_m015\_laminar\_re5000 & 3 & 2648 & 127 & 5 & 127 & 127 \\
+naca0012\_m015\_laminar\_re5000 & 4 & 2582 & 93 & 2 & 93 & 93 \\
+naca0012\_m015\_laminar\_re5000 & 5 & 2568 & 98 & 3 & 98 & 98 \\
+naca0012\_m015\_laminar\_re5000 & 6 & 2592 & 188 & 6 & 188 & 188 \\
+naca0012\_m015\_laminar\_re5000 & 7 & 2610 & 52 & 2 & 52 & 52 \\
+naca0012\_m080\_inviscid & 0 & 2593 & 94 & 2 & 94 & 94 \\
+naca0012\_m080\_inviscid & 1 & 2598 & 102 & 4 & 102 & 102 \\
+naca0012\_m080\_inviscid & 2 & 2625 & 90 & 2 & 90 & 90 \\
+naca0012\_m080\_inviscid & 3 & 2648 & 127 & 5 & 127 & 127 \\
+naca0012\_m080\_inviscid & 4 & 2582 & 93 & 2 & 93 & 93 \\
+naca0012\_m080\_inviscid & 5 & 2568 & 98 & 3 & 98 & 98 \\
+naca0012\_m080\_inviscid & 6 & 2592 & 188 & 6 & 188 & 188 \\
+naca0012\_m080\_inviscid & 7 & 2610 & 52 & 2 & 52 & 52 \\
+naca0012\_m080\_laminar\_re5000 & 0 & 2593 & 94 & 2 & 94 & 94 \\
+naca0012\_m080\_laminar\_re5000 & 1 & 2598 & 102 & 4 & 102 & 102 \\
+naca0012\_m080\_laminar\_re5000 & 2 & 2625 & 90 & 2 & 90 & 90 \\
+naca0012\_m080\_laminar\_re5000 & 3 & 2648 & 127 & 5 & 127 & 127 \\
+naca0012\_m080\_laminar\_re5000 & 4 & 2582 & 93 & 2 & 93 & 93 \\
+naca0012\_m080\_laminar\_re5000 & 5 & 2568 & 98 & 3 & 98 & 98 \\
+naca0012\_m080\_laminar\_re5000 & 6 & 2592 & 188 & 6 & 188 & 188 \\
+naca0012\_m080\_laminar\_re5000 & 7 & 2610 & 52 & 2 & 52 & 52 \\
+naca0012\_m200\_inviscid & 0 & 2593 & 94 & 2 & 94 & 94 \\
+naca0012\_m200\_inviscid & 1 & 2598 & 102 & 4 & 102 & 102 \\
+naca0012\_m200\_inviscid & 2 & 2625 & 90 & 2 & 90 & 90 \\
+naca0012\_m200\_inviscid & 3 & 2648 & 127 & 5 & 127 & 127 \\
+naca0012\_m200\_inviscid & 4 & 2582 & 93 & 2 & 93 & 93 \\
+naca0012\_m200\_inviscid & 5 & 2568 & 98 & 3 & 98 & 98 \\
+naca0012\_m200\_inviscid & 6 & 2592 & 188 & 6 & 188 & 188 \\
+naca0012\_m200\_inviscid & 7 & 2610 & 52 & 2 & 52 & 52 \\
+naca0012\_m200\_laminar\_re5000 & 0 & 2593 & 94 & 2 & 94 & 94 \\
+naca0012\_m200\_laminar\_re5000 & 1 & 2598 & 102 & 4 & 102 & 102 \\
+naca0012\_m200\_laminar\_re5000 & 2 & 2625 & 90 & 2 & 90 & 90 \\
+naca0012\_m200\_laminar\_re5000 & 3 & 2648 & 127 & 5 & 127 & 127 \\
+naca0012\_m200\_laminar\_re5000 & 4 & 2582 & 93 & 2 & 93 & 93 \\
+naca0012\_m200\_laminar\_re5000 & 5 & 2568 & 98 & 3 & 98 & 98 \\
+naca0012\_m200\_laminar\_re5000 & 6 & 2592 & 188 & 6 & 188 & 188 \\
+naca0012\_m200\_laminar\_re5000 & 7 & 2610 & 52 & 2 & 52 & 52 \\
+\bottomrule\end{longtable}\end{center}
+The aggregate load-balance and communication evidence is:
+\begin{center}\scriptsize\begin{longtable}{lrrrrr}\toprule Case & owned ratio & mean ghosts & max neighbors & total send & total receive\\\midrule
+cylinder\_m010\_laminar\_re20 & 1.036 & 120.1 & 6 & 961 & 961 \\
+cylinder\_m010\_laminar\_re200 & 1.006 & 135.2 & 3 & 541 & 541 \\
+naca0012\_m015\_inviscid & 1.031 & 105.5 & 6 & 844 & 844 \\
+naca0012\_m015\_laminar\_re5000 & 1.031 & 105.5 & 6 & 844 & 844 \\
+naca0012\_m080\_inviscid & 1.031 & 105.5 & 6 & 844 & 844 \\
+naca0012\_m080\_laminar\_re5000 & 1.031 & 105.5 & 6 & 844 & 844 \\
+naca0012\_m200\_inviscid & 1.031 & 105.5 & 6 & 844 & 844 \\
+naca0012\_m200\_laminar\_re5000 & 1.031 & 105.5 & 6 & 844 & 844 \\
+\bottomrule\end{longtable}\end{center}
+The independent rank-count runs used the same executable and case inputs. Their measured timings, terminal residuals, and final forces are reported below. The first rank count for a case is the reference; the measured pairwise differences are: naca0012\_m015\_inviscid: np=2 to np=8 gives $|\Delta C_D|=0$, $|\Delta C_L|=2.28e-10$, $|\Delta R_2|=4.13e-13$, and measured speedup 1.54. cylinder\_m010\_laminar\_re20: np=2 to np=8 gives $|\Delta C_D|=0$, $|\Delta C_L|=0$, $|\Delta R_2|=6.5e-13$, and measured speedup 2.45. The production iteration path uses only neighbor-scoped nonblocking state and gradient exchanges; the final gather is outside the iteration loop.
+\begin{center}\scriptsize\begin{longtable}{lrrrrrrrr}
+\toprule Case & ranks & wall s & steps & $R_2$ & $C_D$ & $C_L$ & owned & ghost\\\midrule
+naca0012\_m015\_inviscid & 2 & 4.6071 & 20 & 0.003994 & 0.9135 & -1.041e-07 & 10367 & 117 \\
+naca0012\_m015\_inviscid & 8 & 2.982 & 20 & 0.003994 & 0.9135 & -1.043e-07 & 2593 & 94 \\
+cylinder\_m010\_laminar\_re20 & 2 & 113.42 & 300 & 1.995 & 0.1304 & -2.667e-09 & 5088 & 102 \\
+cylinder\_m010\_laminar\_re20 & 8 & 46.228 & 300 & 1.995 & 0.1304 & -2.667e-09 & 1265 & 139 \\
+\bottomrule\end{longtable}\end{center}
+
+\section{Results and force analysis}
+\begin{center}\scriptsize\begin{longtable}{lrrrrrr}\toprule Case & ranks & steps & time & wall s & residual orders & status / assessment\\\midrule
+cylinder\_m010\_laminar\_re20 & 8 & 300 & 0 & 61.771 & 0.3432 & converged (stable plateau; residual target not reached) \\
+cylinder\_m010\_laminar\_re200 & 4 & 30000 & 300 & 6060 & 7.155 & failed (unresolved lift oscillation) \\
+naca0012\_m015\_inviscid & 8 & 300 & 0 & 51.277 & 0.1673 & converged (stable plateau; residual target not reached) \\
+naca0012\_m015\_laminar\_re5000 & 8 & 300 & 0 & 255.72 & 0.4265 & converged (stable plateau; residual target not reached) \\
+naca0012\_m080\_inviscid & 8 & 300 & 0 & 46.792 & 0.1689 & converged (stable plateau; residual target not reached) \\
+naca0012\_m080\_laminar\_re5000 & 8 & 300 & 0 & 120.48 & 0.4603 & converged (stable plateau; residual target not reached) \\
+naca0012\_m200\_inviscid & 8 & 300 & 0 & 74.09 & 0.2157 & converged (stable plateau; residual target not reached) \\
+naca0012\_m200\_laminar\_re5000 & 8 & 300 & 0 & 285.68 & 0.4653 & converged (stable plateau; residual target not reached) \\
+\bottomrule\end{longtable}\end{center}
+\begin{center}\tiny\begin{longtable}{lrrrrrrp{0.16\linewidth}}\toprule Case & mean $C_D$ & mean $C_L$ & final $C_m$ & pressure drag & viscous drag & lift amplitude & convergence note\\\midrule
+cylinder\_m010\_laminar\_re20 & 0.1309 & -3.545e-10 & -3.341e-10 & -0.002028 & 0.1324 & 1.349e-09 & stable force plateau; residual target not reached \\
+cylinder\_m010\_laminar\_re200 & 2.816 & -9.743e-05 & -0.0002278 & 2.062 & 0.7541 & 7.552e-07 & unresolved lift oscillation \\
+naca0012\_m015\_inviscid & 0.8817 & 1.39e-07 & -1.345e-06 & 0.862 & 0 & 2.245e-06 & stable force plateau; residual target not reached \\
+naca0012\_m015\_laminar\_re5000 & 0.004801 & -1.688e-07 & -5.415e-07 & -3.302e-08 & 0.004884 & 5.953e-07 & stable force plateau; residual target not reached \\
+naca0012\_m080\_inviscid & 0.202 & -8.711e-08 & -1.892e-07 & 0.1968 & 0 & 1.944e-07 & stable force plateau; residual target not reached \\
+naca0012\_m080\_laminar\_re5000 & 0.00374 & -1.577e-08 & 1.024e-08 & -3.088e-09 & 0.0037 & 2.781e-08 & stable force plateau; residual target not reached \\
+naca0012\_m200\_inviscid & 0.1222 & 1.822e-09 & 3.127e-09 & 0.1184 & 0 & 2.277e-09 & stable force plateau; residual target not reached \\
+naca0012\_m200\_laminar\_re5000 & 0.003666 & 1.06e-09 & 1.022e-08 & -2.156e-09 & 0.003523 & 9.103e-09 & stable force plateau; residual target not reached \\
+\bottomrule\end{longtable}\end{center}
+NACA0012 runs are at zero incidence, so the reported lift is near the symmetry level. Inviscid force columns have zero viscous contribution by construction; laminar runs show a positive pressure/skin-friction split. Cylinder Re=20 is assessed from its measured residual and force history. A steady row labelled ``stable plateau'' has bounded forces but did not meet the requested residual reduction; it is not silently promoted to residual-target convergence.
+
+\subsection{Re=200 diagnostic}
+The Re=200 history has mean $C_D=2.816$ and lift half-amplitude $7.552e-07$. The lift signal does not meet the resolved-shedding criterion; no frequency or Strouhal claim is made, and the case remains failed.  Measured inner target fraction: 1; target misses: 1; bounded pseudo-time damping retries: 26720 steps (53440 BDF2 attempts, 68 BE-gain retries); bounded backward-Euler fallback intervals: 26720 (53476 substeps, using 2/4/8 substeps as needed); reported BE recovery-marker count: 26720 (this historical counter is not a one-time restart-history count; only the first resumed interval reconstructs missing BDF2 history); best-effort target-miss continuations: 0; restart used: True at accepted step 3280; BDF2 history sidecar restored: False; startup perturbation amplitude: 0.001; Rusanov dissipation scale: 1; all-speed acoustic cutoff: 0.5; reconstruction-slope factor: 0.1; scalar correction gain: 0.4; stationary transient wall start: False.
+
+\section{Figures and source traceability}
+Every generated image is introduced below with a label and a reference; filenames and source paths are recorded in \texttt{figure\_manifest.csv}.
+cylinder\_m010\_laminar\_re20: Figure~\ref{fig:cylinder-m010-laminar-re20-residuals-png}, Figure~\ref{fig:cylinder-m010-laminar-re20-forces-png}, Figure~\ref{fig:cylinder-m010-laminar-re20-surface-cp-png}, Figure~\ref{fig:cylinder-m010-laminar-re20-mach-png}, Figure~\ref{fig:cylinder-m010-laminar-re20-mach-zoom-png}, Figure~\ref{fig:cylinder-m010-laminar-re20-pressure-png}, Figure~\ref{fig:cylinder-m010-laminar-re20-pressure-zoom-png}.
+cylinder\_m010\_laminar\_re200: Figure~\ref{fig:cylinder-m010-laminar-re200-residuals-png}, Figure~\ref{fig:cylinder-m010-laminar-re200-forces-png}, Figure~\ref{fig:cylinder-m010-laminar-re200-surface-cp-png}, Figure~\ref{fig:cylinder-m010-laminar-re200-mach-png}, Figure~\ref{fig:cylinder-m010-laminar-re200-mach-zoom-png}, Figure~\ref{fig:cylinder-m010-laminar-re200-pressure-png}, Figure~\ref{fig:cylinder-m010-laminar-re200-pressure-zoom-png}, Figure~\ref{fig:cylinder-m010-laminar-re200-vorticity-png}, Figure~\ref{fig:cylinder-m010-laminar-re200-vorticity-zoom-png}, Figure~\ref{fig:cylinder-m010-laminar-re200-velocity-magnitude-png}, Figure~\ref{fig:cylinder-m010-laminar-re200-velocity-magnitude-zoom-png}.
+naca0012\_m015\_inviscid: Figure~\ref{fig:naca0012-m015-inviscid-residuals-png}, Figure~\ref{fig:naca0012-m015-inviscid-forces-png}, Figure~\ref{fig:naca0012-m015-inviscid-surface-cp-png}, Figure~\ref{fig:naca0012-m015-inviscid-mach-png}, Figure~\ref{fig:naca0012-m015-inviscid-mach-zoom-png}, Figure~\ref{fig:naca0012-m015-inviscid-pressure-png}, Figure~\ref{fig:naca0012-m015-inviscid-pressure-zoom-png}.
+naca0012\_m015\_laminar\_re5000: Figure~\ref{fig:naca0012-m015-laminar-re5000-residuals-png}, Figure~\ref{fig:naca0012-m015-laminar-re5000-forces-png}, Figure~\ref{fig:naca0012-m015-laminar-re5000-surface-cp-png}, Figure~\ref{fig:naca0012-m015-laminar-re5000-mach-png}, Figure~\ref{fig:naca0012-m015-laminar-re5000-mach-zoom-png}, Figure~\ref{fig:naca0012-m015-laminar-re5000-pressure-png}, Figure~\ref{fig:naca0012-m015-laminar-re5000-pressure-zoom-png}.
+naca0012\_m080\_inviscid: Figure~\ref{fig:naca0012-m080-inviscid-residuals-png}, Figure~\ref{fig:naca0012-m080-inviscid-forces-png}, Figure~\ref{fig:naca0012-m080-inviscid-surface-cp-png}, Figure~\ref{fig:naca0012-m080-inviscid-mach-png}, Figure~\ref{fig:naca0012-m080-inviscid-mach-zoom-png}, Figure~\ref{fig:naca0012-m080-inviscid-pressure-png}, Figure~\ref{fig:naca0012-m080-inviscid-pressure-zoom-png}.
+naca0012\_m080\_laminar\_re5000: Figure~\ref{fig:naca0012-m080-laminar-re5000-residuals-png}, Figure~\ref{fig:naca0012-m080-laminar-re5000-forces-png}, Figure~\ref{fig:naca0012-m080-laminar-re5000-surface-cp-png}, Figure~\ref{fig:naca0012-m080-laminar-re5000-mach-png}, Figure~\ref{fig:naca0012-m080-laminar-re5000-mach-zoom-png}, Figure~\ref{fig:naca0012-m080-laminar-re5000-pressure-png}, Figure~\ref{fig:naca0012-m080-laminar-re5000-pressure-zoom-png}.
+naca0012\_m200\_inviscid: Figure~\ref{fig:naca0012-m200-inviscid-residuals-png}, Figure~\ref{fig:naca0012-m200-inviscid-forces-png}, Figure~\ref{fig:naca0012-m200-inviscid-surface-cp-png}, Figure~\ref{fig:naca0012-m200-inviscid-mach-png}, Figure~\ref{fig:naca0012-m200-inviscid-mach-zoom-png}, Figure~\ref{fig:naca0012-m200-inviscid-pressure-png}, Figure~\ref{fig:naca0012-m200-inviscid-pressure-zoom-png}.
+naca0012\_m200\_laminar\_re5000: Figure~\ref{fig:naca0012-m200-laminar-re5000-residuals-png}, Figure~\ref{fig:naca0012-m200-laminar-re5000-forces-png}, Figure~\ref{fig:naca0012-m200-laminar-re5000-surface-cp-png}, Figure~\ref{fig:naca0012-m200-laminar-re5000-mach-png}, Figure~\ref{fig:naca0012-m200-laminar-re5000-mach-zoom-png}, Figure~\ref{fig:naca0012-m200-laminar-re5000-pressure-png}, Figure~\ref{fig:naca0012-m200-laminar-re5000-pressure-zoom-png}.
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re20\_residuals.png}\caption{cylinder\_m010\_laminar\_re20: line plot of L2 and L-infinity global residuals (full domain) derived from residuals.csv.}\label{fig:cylinder-m010-laminar-re20-residuals-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re20\_forces.png}\caption{cylinder\_m010\_laminar\_re20: line plot of drag (CD) and lift (CL) coefficients (full domain) derived from forces.csv.}\label{fig:cylinder-m010-laminar-re20-forces-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re20\_surface\_cp.png}\caption{cylinder\_m010\_laminar\_re20: line plot of pressure (Cp) and skin-friction (Cf) surface coefficients (full domain) derived from surface.csv.}\label{fig:cylinder-m010-laminar-re20-surface-cp-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re20\_mach.png}\caption{cylinder\_m010\_laminar\_re20: color-filled mach contour (full domain) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re20-mach-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re20\_mach\_zoom.png}\caption{cylinder\_m010\_laminar\_re20: color-filled mach contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re20-mach-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re20\_pressure.png}\caption{cylinder\_m010\_laminar\_re20: color-filled pressure contour (full domain) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re20-pressure-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re20\_pressure\_zoom.png}\caption{cylinder\_m010\_laminar\_re20: color-filled pressure contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re20-pressure-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_residuals.png}\caption{cylinder\_m010\_laminar\_re200: line plot of L2 and L-infinity global residuals (full domain) derived from residuals.csv.}\label{fig:cylinder-m010-laminar-re200-residuals-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_forces.png}\caption{cylinder\_m010\_laminar\_re200: line plot of drag (CD) and lift (CL) coefficients (full domain) derived from forces.csv.}\label{fig:cylinder-m010-laminar-re200-forces-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_surface\_cp.png}\caption{cylinder\_m010\_laminar\_re200: line plot of pressure (Cp) and skin-friction (Cf) surface coefficients (full domain) derived from surface.csv.}\label{fig:cylinder-m010-laminar-re200-surface-cp-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_mach.png}\caption{cylinder\_m010\_laminar\_re200: color-filled mach contour (full domain) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re200-mach-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_mach\_zoom.png}\caption{cylinder\_m010\_laminar\_re200: color-filled mach contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re200-mach-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_pressure.png}\caption{cylinder\_m010\_laminar\_re200: color-filled pressure contour (full domain) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re200-pressure-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_pressure\_zoom.png}\caption{cylinder\_m010\_laminar\_re200: color-filled pressure contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re200-pressure-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_vorticity.png}\caption{cylinder\_m010\_laminar\_re200: color-filled vorticity contour (full domain) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re200-vorticity-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_vorticity\_zoom.png}\caption{cylinder\_m010\_laminar\_re200: color-filled vorticity contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re200-vorticity-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_velocity\_magnitude.png}\caption{cylinder\_m010\_laminar\_re200: color-filled velocity magnitude contour (full domain) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re200-velocity-magnitude-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/cylinder\_m010\_laminar\_re200\_velocity\_magnitude\_zoom.png}\caption{cylinder\_m010\_laminar\_re200: color-filled velocity magnitude contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:cylinder-m010-laminar-re200-velocity-magnitude-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_inviscid\_residuals.png}\caption{naca0012\_m015\_inviscid: line plot of L2 and L-infinity global residuals (full domain) derived from residuals.csv.}\label{fig:naca0012-m015-inviscid-residuals-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_inviscid\_forces.png}\caption{naca0012\_m015\_inviscid: line plot of drag (CD) and lift (CL) coefficients (full domain) derived from forces.csv.}\label{fig:naca0012-m015-inviscid-forces-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_inviscid\_surface\_cp.png}\caption{naca0012\_m015\_inviscid: line plot of pressure (Cp) and skin-friction (Cf) surface coefficients (full domain) derived from surface.csv.}\label{fig:naca0012-m015-inviscid-surface-cp-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_inviscid\_mach.png}\caption{naca0012\_m015\_inviscid: color-filled mach contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m015-inviscid-mach-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_inviscid\_mach\_zoom.png}\caption{naca0012\_m015\_inviscid: color-filled mach contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m015-inviscid-mach-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_inviscid\_pressure.png}\caption{naca0012\_m015\_inviscid: color-filled pressure contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m015-inviscid-pressure-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_inviscid\_pressure\_zoom.png}\caption{naca0012\_m015\_inviscid: color-filled pressure contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m015-inviscid-pressure-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_residuals.png}\caption{naca0012\_m015\_laminar\_re5000: line plot of L2 and L-infinity global residuals (full domain) derived from residuals.csv.}\label{fig:naca0012-m015-laminar-re5000-residuals-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_forces.png}\caption{naca0012\_m015\_laminar\_re5000: line plot of drag (CD) and lift (CL) coefficients (full domain) derived from forces.csv.}\label{fig:naca0012-m015-laminar-re5000-forces-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_surface\_cp.png}\caption{naca0012\_m015\_laminar\_re5000: line plot of pressure (Cp) and skin-friction (Cf) surface coefficients (full domain) derived from surface.csv.}\label{fig:naca0012-m015-laminar-re5000-surface-cp-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_mach.png}\caption{naca0012\_m015\_laminar\_re5000: color-filled mach contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m015-laminar-re5000-mach-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_mach\_zoom.png}\caption{naca0012\_m015\_laminar\_re5000: color-filled mach contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m015-laminar-re5000-mach-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_pressure.png}\caption{naca0012\_m015\_laminar\_re5000: color-filled pressure contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m015-laminar-re5000-pressure-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m015\_laminar\_re5000\_pressure\_zoom.png}\caption{naca0012\_m015\_laminar\_re5000: color-filled pressure contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m015-laminar-re5000-pressure-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_inviscid\_residuals.png}\caption{naca0012\_m080\_inviscid: line plot of L2 and L-infinity global residuals (full domain) derived from residuals.csv.}\label{fig:naca0012-m080-inviscid-residuals-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_inviscid\_forces.png}\caption{naca0012\_m080\_inviscid: line plot of drag (CD) and lift (CL) coefficients (full domain) derived from forces.csv.}\label{fig:naca0012-m080-inviscid-forces-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_inviscid\_surface\_cp.png}\caption{naca0012\_m080\_inviscid: line plot of pressure (Cp) and skin-friction (Cf) surface coefficients (full domain) derived from surface.csv.}\label{fig:naca0012-m080-inviscid-surface-cp-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_inviscid\_mach.png}\caption{naca0012\_m080\_inviscid: color-filled mach contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m080-inviscid-mach-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_inviscid\_mach\_zoom.png}\caption{naca0012\_m080\_inviscid: color-filled mach contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m080-inviscid-mach-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_inviscid\_pressure.png}\caption{naca0012\_m080\_inviscid: color-filled pressure contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m080-inviscid-pressure-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_inviscid\_pressure\_zoom.png}\caption{naca0012\_m080\_inviscid: color-filled pressure contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m080-inviscid-pressure-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_residuals.png}\caption{naca0012\_m080\_laminar\_re5000: line plot of L2 and L-infinity global residuals (full domain) derived from residuals.csv.}\label{fig:naca0012-m080-laminar-re5000-residuals-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_forces.png}\caption{naca0012\_m080\_laminar\_re5000: line plot of drag (CD) and lift (CL) coefficients (full domain) derived from forces.csv.}\label{fig:naca0012-m080-laminar-re5000-forces-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_surface\_cp.png}\caption{naca0012\_m080\_laminar\_re5000: line plot of pressure (Cp) and skin-friction (Cf) surface coefficients (full domain) derived from surface.csv.}\label{fig:naca0012-m080-laminar-re5000-surface-cp-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_mach.png}\caption{naca0012\_m080\_laminar\_re5000: color-filled mach contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m080-laminar-re5000-mach-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_mach\_zoom.png}\caption{naca0012\_m080\_laminar\_re5000: color-filled mach contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m080-laminar-re5000-mach-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_pressure.png}\caption{naca0012\_m080\_laminar\_re5000: color-filled pressure contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m080-laminar-re5000-pressure-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m080\_laminar\_re5000\_pressure\_zoom.png}\caption{naca0012\_m080\_laminar\_re5000: color-filled pressure contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m080-laminar-re5000-pressure-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_inviscid\_residuals.png}\caption{naca0012\_m200\_inviscid: line plot of L2 and L-infinity global residuals (full domain) derived from residuals.csv.}\label{fig:naca0012-m200-inviscid-residuals-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_inviscid\_forces.png}\caption{naca0012\_m200\_inviscid: line plot of drag (CD) and lift (CL) coefficients (full domain) derived from forces.csv.}\label{fig:naca0012-m200-inviscid-forces-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_inviscid\_surface\_cp.png}\caption{naca0012\_m200\_inviscid: line plot of pressure (Cp) and skin-friction (Cf) surface coefficients (full domain) derived from surface.csv.}\label{fig:naca0012-m200-inviscid-surface-cp-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_inviscid\_mach.png}\caption{naca0012\_m200\_inviscid: color-filled mach contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m200-inviscid-mach-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_inviscid\_mach\_zoom.png}\caption{naca0012\_m200\_inviscid: color-filled mach contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m200-inviscid-mach-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_inviscid\_pressure.png}\caption{naca0012\_m200\_inviscid: color-filled pressure contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m200-inviscid-pressure-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_inviscid\_pressure\_zoom.png}\caption{naca0012\_m200\_inviscid: color-filled pressure contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m200-inviscid-pressure-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_residuals.png}\caption{naca0012\_m200\_laminar\_re5000: line plot of L2 and L-infinity global residuals (full domain) derived from residuals.csv.}\label{fig:naca0012-m200-laminar-re5000-residuals-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_forces.png}\caption{naca0012\_m200\_laminar\_re5000: line plot of drag (CD) and lift (CL) coefficients (full domain) derived from forces.csv.}\label{fig:naca0012-m200-laminar-re5000-forces-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_surface\_cp.png}\caption{naca0012\_m200\_laminar\_re5000: line plot of pressure (Cp) and skin-friction (Cf) surface coefficients (full domain) derived from surface.csv.}\label{fig:naca0012-m200-laminar-re5000-surface-cp-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_mach.png}\caption{naca0012\_m200\_laminar\_re5000: color-filled mach contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m200-laminar-re5000-mach-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_mach\_zoom.png}\caption{naca0012\_m200\_laminar\_re5000: color-filled mach contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m200-laminar-re5000-mach-zoom-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_pressure.png}\caption{naca0012\_m200\_laminar\_re5000: color-filled pressure contour (full domain) derived from field\_final.vtk.}\label{fig:naca0012-m200-laminar-re5000-pressure-png}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.84\linewidth]{figures/naca0012\_m200\_laminar\_re5000\_pressure\_zoom.png}\caption{naca0012\_m200\_laminar\_re5000: color-filled pressure contour (body/wake zoom) derived from field\_final.vtk.}\label{fig:naca0012-m200-laminar-re5000-pressure-zoom-png}\end{figure}
+\section{Limitations and reproducibility}
+The automated evidence identifies these limitations: cylinder\_m010\_laminar\_re20 is a stable force/residual plateau; the requested residual target was not reached; cylinder\_m010\_laminar\_re200 is explicitly marked failed because its terminal residual/force evidence did not meet the completion gate; the Re=200 run does not demonstrate a resolved vortex-street lift signal; naca0012\_m015\_inviscid is a stable force/residual plateau; the requested residual target was not reached; naca0012\_m015\_laminar\_re5000 is a stable force/residual plateau; the requested residual target was not reached; naca0012\_m080\_inviscid is a stable force/residual plateau; the requested residual target was not reached; naca0012\_m080\_laminar\_re5000 is a stable force/residual plateau; the requested residual target was not reached; naca0012\_m200\_inviscid is a stable force/residual plateau; the requested residual target was not reached; naca0012\_m200\_laminar\_re5000 is a stable force/residual plateau; the requested residual target was not reached. The dominant remaining numerical limitation is the bounded scalar Jacobi/Richardson relaxation (with the optional block correction disabled for the canonical packages): some steady cases plateau before the requested residual orders, and the Re=200 lift spectrum must be judged from the measured amplitude rather than assumed periodicity. Regenerate figures and this document with \texttt{tools/postprocess.py} and \texttt{tools/generate\_report.py}; run commands, rank counts, wall times, and any launcher-observed return codes are in \texttt{run\_manifest.csv}. A blank return code with source ``not recorded'' means the package was produced outside \texttt{run\_cases.py}; it is not an inferred successful launch.
+\end{document}
