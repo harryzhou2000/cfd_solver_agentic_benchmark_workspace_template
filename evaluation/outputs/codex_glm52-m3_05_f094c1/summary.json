@@ -1,0 +1,908 @@
+{
+  "contestant": {
+    "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05",
+    "branch": "codex/glm52-m3/05",
+    "git_commit": "0065953716e70f087f5d6d4fb512bc7e2fe2ba97",
+    "benchmark_submodule_commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+    "layout": "standard",
+    "solver_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/solver",
+    "results_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/solver/results",
+    "report_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/solver/report",
+    "session_window": {
+      "start": "2026-08-09T21:15:51.533000+00:00",
+      "end": "2026-08-10T03:44:08.214000+00:00"
+    }
+  },
+  "expenses": {
+    "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05",
+    "time_seconds": {
+      "goal_time": 23287.0,
+      "wall_time": 23296.7,
+      "started_at": "2026-08-09T21:15:51.533000+00:00",
+      "ended_at": "2026-08-10T03:44:08.214000+00:00",
+      "by_root_thread": {
+        "019fe861-1832-71b0-b1ae-2f9d13afd309": {
+          "status": "complete",
+          "time_used_seconds": 23287,
+          "tokens_used": 3768471
+        }
+      },
+      "by_root_tree": {
+        "019fe861-1832-71b0-b1ae-2f9d13afd309": {
+          "status": "complete",
+          "goal_time_seconds": 23287,
+          "goal_tokens": 3768471,
+          "threads": 1,
+          "tokens_used": 241544063,
+          "model": "BLSC/GLM-5.2"
+        }
+      }
+    },
+    "tokens": {
+      "total": 241544063,
+      "by_model": {
+        "BLSC/GLM-5.2": {
+          "input": 241014119,
+          "cached_input": 237774784,
+          "non_cached_input": 3239335,
+          "output": 529944,
+          "reasoning_output": 284053,
+          "total": 241544063,
+          "fallback_tokens": 0
+        }
+      },
+      "by_thread": {
+        "019fe861-1832-71b0-b1ae-2f9d13afd309": {
+          "model": "BLSC/GLM-5.2",
+          "is_subagent": false,
+          "source": "rollout_cumulative",
+          "tokens": {
+            "BLSC/GLM-5.2": {
+              "input": 241014119,
+              "cached": 237774784,
+              "non_cached": 3239335,
+              "output": 529944,
+              "reasoning_output": 284053,
+              "total": 241544063
+            }
+          },
+          "total": 241544063
+        }
+      },
+      "main_vs_subagent": {
+        "main": 241544063,
+        "subagent": 0
+      },
+      "fallback_tokens": 0,
+      "discrepancy_notes": [],
+      "accounting_note": "Cached/input/output splits come from each selected thread's terminal rollout counter and are scaled only when needed to match state_5.sqlite threads.tokens_used."
+    },
+    "cost_estimate_usd": {
+      "total": 25.9211,
+      "by_model": {
+        "BLSC/GLM-5.2": {
+          "usd": 25.9211,
+          "tokens": 241544063,
+          "pricing": "metadata"
+        }
+      },
+      "unpriced_tokens": 0,
+      "estimate": true,
+      "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
+    },
+    "provenance": {
+      "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/state_5.sqlite",
+      "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/goals_1.sqlite",
+      "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/logs_2.sqlite",
+      "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/sessions",
+      "fetched_at": "2026-08-15T02:52:35.159500+00:00",
+      "num_threads": 1,
+      "num_roots": 1
+    }
+  },
+  "code_review": {
+    "review_area": "code_review",
+    "title": "Code review scorecard",
+    "points": [
+      {
+        "id": "code.build",
+        "title": "Build system and reproducibility",
+        "weight": 0.15,
+        "score": 3,
+        "notes": "CMake and README are submitted; session records a clean build, but evaluator build was not possible with the dangling external symlink."
+      },
+      {
+        "id": "code.cli",
+        "title": "CLI and error handling",
+        "weight": 0.1,
+        "score": 4,
+        "notes": "main.cpp implements solve --case/--output and errors; not independently executed."
+      },
+      {
+        "id": "code.organization",
+        "title": "Code organization and extensibility",
+        "weight": 0.12,
+        "score": 4,
+        "notes": "Separated mesh, partition, IO, physics, and solver modules."
+      },
+      {
+        "id": "code.originality",
+        "title": "Originality and license compliance",
+        "weight": 0.15,
+        "score": 3,
+        "notes": "No internal wrapper/executable invocation found; trust policy does not permit external similarity investigation."
+      },
+      {
+        "id": "code.hardcoding",
+        "title": "No hard-coded case logic",
+        "weight": 0.08,
+        "score": 4,
+        "notes": "JSON/CGNS-driven case path is source-supported, though no independent generality run."
+      },
+      {
+        "id": "code.mpi",
+        "title": "MPI correctness",
+        "weight": 0.15,
+        "score": 3,
+        "notes": "METIS, neighbor Isend/Irecv and reductions are source-supported; no retained rank-comparison outputs validate behavior."
+      },
+      {
+        "id": "code.robustness",
+        "title": "Robustness and memory sanity",
+        "weight": 0.08,
+        "score": 3,
+        "notes": "Positive-state safeguards and exceptions are present; no independent stress test."
+      },
+      {
+        "id": "code.testing",
+        "title": "Testing and validation evidence",
+        "weight": 0.1,
+        "score": 2,
+        "notes": "Small diagnostic programs and session assertions exist, but result packages are absent from every immutable submission ref."
+      },
+      {
+        "id": "code.hygiene",
+        "title": "Code hygiene",
+        "weight": 0.07,
+        "score": 3,
+        "notes": "Readable C++17 code, but backup source copies and no reproducible final-result package reduce hygiene."
+      }
+    ],
+    "disqualification_flags": [
+      {
+        "flag": "Existing solver executable called internally",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Force/residual files generated without solving",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Code only reads the two benchmark mesh filenames through hard-coded branches",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "MPI rank count changes results by order-one amounts for steady cases",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Explicit time stepping only (no implicit/steady capability claimed where required)",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Report claims algorithms that cannot be found in source",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "metadata.json marks incomplete/failed runs as successful",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Solver core, time integration, or MPI communication copied/adapted/wrapped from an existing open-source CFD codebase",
+        "triggered": null,
+        "notes": ""
+      }
+    ],
+    "overall_score": 3.2
+  },
+  "cfd_review": {
+    "review_area": "cfd_review",
+    "title": "CFD methods and algorithms review scorecard",
+    "points": [
+      {
+        "id": "cfd.equations",
+        "title": "Governing equations and nondimensionalization",
+        "weight": 0.06,
+        "score": 4,
+        "notes": "Report/source describe compressible NS and nondimensionalization."
+      },
+      {
+        "id": "cfd.mesh",
+        "title": "Mesh import and unstructured geometry",
+        "weight": 0.1,
+        "score": 4,
+        "notes": "CGNS unstructured geometry and boundary-family handling are source-supported."
+      },
+      {
+        "id": "cfd.residual",
+        "title": "Conservative finite-volume residual",
+        "weight": 0.12,
+        "score": 4,
+        "notes": "Face-based conservative residual assembly is source-supported."
+      },
+      {
+        "id": "cfd.flux",
+        "title": "Approximate Riemann flux and entropy fix",
+        "weight": 0.08,
+        "score": 3,
+        "notes": "Implemented flux needs independent numerical verification; report calls it Roe but source inspection is the primary evidence."
+      },
+      {
+        "id": "cfd.bc",
+        "title": "Boundary conditions",
+        "weight": 0.08,
+        "score": 4,
+        "notes": "Farfield, slip, and no-slip paths are present."
+      },
+      {
+        "id": "cfd.reconstruction",
+        "title": "Second-order reconstruction",
+        "weight": 0.09,
+        "score": 1,
+        "notes": "Least-squares reconstruction exists but production steady runs hold limiter phi at zero through startup_steps=100000; transient explicitly zeros phi."
+      },
+      {
+        "id": "cfd.limiter",
+        "title": "Limiter and positivity control",
+        "weight": 0.08,
+        "score": 1,
+        "notes": "Venkatakrishnan limiter is computed but disabled for all documented production paths."
+      },
+      {
+        "id": "cfd.viscous",
+        "title": "Viscous discretization",
+        "weight": 0.1,
+        "score": 4,
+        "notes": "Newtonian/Fourier and wall treatment are source-supported."
+      },
+      {
+        "id": "cfd.implicit",
+        "title": "Implicit steady march",
+        "weight": 0.1,
+        "score": 4,
+        "notes": "LU-SGS pseudo-time path and CFL logic are source-supported."
+      },
+      {
+        "id": "cfd.transient",
+        "title": "Transient BDF2 two-loop method (Re 200)",
+        "weight": 0.1,
+        "score": 3,
+        "notes": "BDF2 dual-time source path exists, but no retained Re200 output proves production controls or inner convergence."
+      },
+      {
+        "id": "cfd.mpi_partition",
+        "title": "MPI partitioning and scalability",
+        "weight": 0.09,
+        "score": 3,
+        "notes": "Source supports METIS partitions and neighbor halos; retained delivered evidence cannot verify rank consistency."
+      }
+    ],
+    "disqualification_flags": [
+      {
+        "id": 10,
+        "text": "second-order reconstruction or shock limiter disabled for production cases",
+        "evidence": "solver.cpp lines 421-423 sets startup_steps=100000 and scales phi to zero; lines 530 and 558 explicitly zero phi in transient. report.tex lines 193-196 admits first-order production mode."
+      }
+    ],
+    "overall_score": 3.22
+  },
+  "result_review": {
+    "review_area": "result_review",
+    "title": "Result review scorecard (outputs, visualizations, report)",
+    "points": [
+      {
+        "id": "res.contract",
+        "title": "Output contract compliance",
+        "weight": 0.2,
+        "score": 0,
+        "notes": "No solver/results files are tracked in the curated commit or source attempt; explicit validator therefore fails immediately for missing metadata.json."
+      },
+      {
+        "id": "res.validator",
+        "title": "Automated validator results",
+        "weight": 0.1,
+        "score": 0,
+        "notes": "Evaluator explicit validator at source attempt be266cd fails: missing solver/results/naca0012_m015_inviscid/metadata.json."
+      },
+      {
+        "id": "res.completion",
+        "title": "Case completion and convergence",
+        "weight": 0.2,
+        "score": 1,
+        "notes": "A compiled six-page report tabulates claims, but none of eight required raw packages is retained for verification."
+      },
+      {
+        "id": "res.plausibility",
+        "title": "Result plausibility and MPI consistency",
+        "weight": 0.15,
+        "score": 1,
+        "notes": "Some report figures look interpretable, but absent fields/CSVs prevent numerical or MPI plausibility review."
+      },
+      {
+        "id": "res.visualization",
+        "title": "Visualizations",
+        "weight": 0.15,
+        "score": 2,
+        "notes": "The committed report compiles and includes selected readable figures, but it lacks required history/surface/cylinder-pressure coverage and source data."
+      },
+      {
+        "id": "res.report",
+        "title": "Report quality and honesty",
+        "weight": 0.15,
+        "score": 3,
+        "notes": "Report has equations, table, figures and candid convergence limitation, but overclaims complete validated outputs and contradicts source on production spatial order."
+      },
+      {
+        "id": "res.traceability",
+        "title": "Traceability of figures and claims",
+        "weight": 0.05,
+        "score": 0,
+        "notes": "figure_manifest, run_manifest, sanity checks, result CSVs and fields are absent from the immutable submission and attempt commit."
+      }
+    ],
+    "disqualification_flags": [
+      {
+        "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Report figures do not correspond to submitted field/CSV outputs",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "metadata.json marks incomplete or failed runs as successful",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Debug outputs presented as final case results",
+        "triggered": null,
+        "notes": ""
+      }
+    ],
+    "overall_score": 1.1
+  },
+  "measurements": {
+    "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05",
+    "tool_usage": {
+      "total": 749,
+      "by_tool": {
+        "exec_command": 501,
+        "write_stdin": 225,
+        "apply_patch": 11,
+        "update_plan": 10,
+        "interrupt_agent": 1,
+        "update_goal": 1
+      },
+      "by_thread": {
+        "019fe861-1832-71b0-b1ae-2f9d13afd309": {
+          "exec_command": 501,
+          "update_plan": 10,
+          "apply_patch": 11,
+          "write_stdin": 225,
+          "interrupt_agent": 1,
+          "update_goal": 1
+        }
+      },
+      "subagent_spawns": 0,
+      "risk_context": [
+        {
+          "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+          "approval_policy": "never",
+          "permission_profile": ":danger-full-access"
+        },
+        {
+          "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+          "approval_policy": "never",
+          "sandbox": "danger-full-access",
+          "network_access": null
+        }
+      ]
+    },
+    "loc": {
+      "method": "git+file",
+      "git": {
+        "method": "git",
+        "repos": {
+          "workspace": {
+            "branch": "codex/glm52-m3/05",
+            "commit": "0065953716e70f087f5d6d4fb512bc7e2fe2ba97",
+            "tracked_source_files": 25,
+            "tracked_source_lines": 2870,
+            "by_extension": {
+              "cmake": 53,
+              "cpp": 1832,
+              "hpp": 677,
+              "py": 308
+            },
+            "diff_vs_base": {
+              "added": 4889,
+              "deleted": 0,
+              "base": "a14f203babe6794ad032aea760aed8e302e62b5a"
+            }
+          },
+          "cfd_solver_agentic_benchmark": {
+            "branch": "HEAD",
+            "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+            "tracked_source_files": 1,
+            "tracked_source_lines": 324,
+            "by_extension": {
+              "py": 324
+            },
+            "diff_vs_base": null
+          }
+        },
+        "lines_total": 3194
+      },
+      "file": {
+        "method": "file",
+        "files": 282,
+        "lines": 94843,
+        "by_extension": {
+          "cmake": 61,
+          "cpp": 1909,
+          "hpp": 677,
+          "py": 92196
+        }
+      }
+    },
+    "rule_violations": [
+      {
+        "category": "network_access",
+        "severity": "medium",
+        "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+        "timestamp": "2026-08-09T22:34:29.739Z",
+        "tool": "exec_command",
+        "evidence": "for plotting python3 -m venv .venv 2>&1 | tail -2 .venv/bin/pip install --quiet numpy matplotlib 2>&1 | tail -3 .venv/bin/python -c \"import numpy, matplotlib; print('numpy', numpy.__version__"
+      },
+      {
+        "category": "network_access",
+        "severity": "medium",
+        "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+        "timestamp": "2026-08-09T22:37:11.117Z",
+        "tool": "exec_command",
+        "evidence": "solver && python3 -m venv .venv 2>&1 | tail -2 && .venv/bin/pip install --quiet numpy matplotlib 2>&1 | tail -2 && .venv/bin/python -c \"import numpy,matplotlib; print('ok', numpy.__version__)"
+      },
+      {
+        "category": "network_access",
+        "severity": "medium",
+        "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+        "timestamp": "2026-08-09T22:53:06.750Z",
+        "tool": "exec_command",
+        "evidence": "plots / artifacts)  ```bash python3 -m venv .venv .venv/bin/pip install numpy matplotlib .venv/bin/python tools/plot_results.py     # figures -> report/figures/ .venv/bin/python tools/make_ar"
+      },
+      {
+        "category": "unauthorized_remote_mutations",
+        "severity": "high",
+        "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+        "timestamp": "2026-08-09T22:53:27.807Z",
+        "tool": "exec_command",
+        "evidence": "cd /workspace && git checkout -b solver/attempt1-glm52 2>&1 | tail -2 && git add solver/ 2>&1 | tail -3 && git status --short 2>&1 | head -15"
+      },
+      {
+        "category": "unauthorized_remote_mutations",
+        "severity": "high",
+        "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+        "timestamp": "2026-08-09T23:55:04.517Z",
+        "tool": "exec_command",
+        "evidence": "cd /workspace/solver && git checkout src/solver.cpp && echo \"Restored solver.cpp from git\" && grep -c \"CHECK\\|DEBUG\" src/solver.cpp"
+      },
+      {
+        "category": "unauthorized_remote_mutations",
+        "severity": "high",
+        "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+        "timestamp": "2026-08-09T23:58:14.370Z",
+        "tool": "exec_command",
+        "evidence": "cd /workspace/solver && git checkout src/solver.cpp && python3 - <<'PYEOF' p = 'src/solver.cpp' s = open(p).read()  # 1. Remove the LUSGS_DBG block import re"
+      },
+      {
+        "category": "unauthorized_remote_mutations",
+        "severity": "high",
+        "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+        "timestamp": "2026-08-09T23:58:19.061Z",
+        "tool": "exec_command",
+        "evidence": "cd /workspace/solver && git checkout src/solver.cpp && grep -n \"LUSGS_DBG\\|step<=3.*printf\\|startup_steps = 100000\" src/solver.cpp"
+      },
+      {
+        "category": "unauthorized_remote_mutations",
+        "severity": "high",
+        "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+        "timestamp": "2026-08-10T01:07:08.549Z",
+        "tool": "exec_command",
+        "evidence": "cd /workspace/solver && git checkout src/solver.cpp && python3 - <<'PYEOF' p = 'src/solver.cpp' s = open(p).read() # Re-apply: damping=3.0, Ubest after visc_"
+      },
+      {
+        "category": "unauthorized_remote_mutations",
+        "severity": "high",
+        "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+        "timestamp": "2026-08-10T02:10:05.806Z",
+        "tool": "exec_command",
+        "evidence": "cd /workspace/solver && git checkout src/solver.cpp && python3 - <<'PYEOF' p = 'src/solver.cpp' s = open(p).read() # Re-apply the working settings: damping=3"
+      }
+    ],
+    "provenance": {
+      "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/state_5.sqlite",
+      "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/sessions",
+      "generated_at": "2026-08-15T02:52:35.679795+00:00",
+      "num_threads": 1
+    }
+  },
+  "metadata": {
+    "harness": {
+      "harness": "codex",
+      "cli_version": "0.146.0",
+      "originator": "codex-tui",
+      "source": "cli",
+      "thread_source": "user",
+      "multi_agent_version": "v2",
+      "history_mode": "legacy",
+      "memory_mode": "disabled",
+      "model_provider": "openai",
+      "codex_runtime_version": null,
+      "plugins": [
+        {
+          "source": "cache",
+          "name": "openai-curated-remote",
+          "version": "github"
+        },
+        {
+          "source": "cache",
+          "name": "openai-curated-remote",
+          "version": "google-drive"
+        },
+        {
+          "source": "cache",
+          "name": "openai-curated-remote",
+          "version": "openai-templates"
+        },
+        {
+          "source": "cache",
+          "name": "openai-curated-remote",
+          "version": "outlook-calendar"
+        },
+        {
+          "source": "cache",
+          "name": "openai-curated-remote",
+          "version": "outlook-email"
+        },
+        {
+          "source": "cache",
+          "name": "openai-curated-remote",
+          "version": "slack"
+        },
+        {
+          "source": "cache",
+          "name": "openai-curated-remote",
+          "version": "teams"
+        },
+        {
+          "source": "cache",
+          "name": "openai-curated-remote",
+          "version": "workspace-agents"
+        }
+      ]
+    },
+    "models": {
+      "BLSC/GLM-5.2": {
+        "catalog": {
+          "display_name": "BLSC/GLM-5.2",
+          "context_window": 550000,
+          "max_context_window": 550000,
+          "supported_reasoning_levels": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        "reasoning_efforts_seen": [
+          "ultra"
+        ],
+        "max_context_used": 32764064310,
+        "threads": 1
+      }
+    },
+    "context": {
+      "by_model": {
+        "BLSC/GLM-5.2": {
+          "context_window": 550000,
+          "max_context_used": 32764064310
+        }
+      },
+      "by_thread": {
+        "019fe861-1832-71b0-b1ae-2f9d13afd309": {
+          "model": "BLSC/GLM-5.2",
+          "max_input_tokens": 32764064310,
+          "mean_input_tokens": 32764064310.0,
+          "model_context_window_recorded": 522500
+        }
+      },
+      "notes": []
+    },
+    "threads": {
+      "019fe861-1832-71b0-b1ae-2f9d13afd309": {
+        "thread_id": "019fe861-1832-71b0-b1ae-2f9d13afd309",
+        "is_subagent": false,
+        "model": "BLSC/GLM-5.2",
+        "entry_model": "BLSC/GLM-5.2",
+        "model_provider": "openai",
+        "reasoning_effort": [
+          "ultra"
+        ],
+        "entry_reasoning_effort": "ultra",
+        "tokens_used": 241544063,
+        "cwd": "/workspace",
+        "git_branch": "codex/glm52-m3/init",
+        "created_at": 1786310105,
+        "updated_at": 1786333448,
+        "started_at": "2026-08-09T21:15:51.533000+00:00",
+        "ended_at": "2026-08-10T03:44:08.214000+00:00",
+        "context_used_max_input": 32764064310,
+        "context_used_mean_input": 32764064310.0,
+        "model_context_window_recorded": 522500
+      }
+    },
+    "subagents": [],
+    "opencodex": {
+      "trigger": "non_vanilla_models",
+      "non_vanilla_models": [
+        "BLSC/GLM-5.2"
+      ],
+      "opencodex_version": null,
+      "opencodex_submodule_pin": null,
+      "config_facts": {
+        "default_provider": "deepseek",
+        "providers": [
+          "BLSC",
+          "deepseek",
+          "openai",
+          "opencode-free"
+        ],
+        "multi_agent_mode": "v2",
+        "subagent_models": [
+          "gpt-5.6-terra",
+          "gpt-5.6-luna",
+          "BLSC/GLM-5.2",
+          "BLSC/MiniMax-M3",
+          "deepseek/deepseek-v4-flash"
+        ],
+        "disabled_models": [
+          "BLSC/Baichuan-M2",
+          "BLSC/Baichuan-M3",
+          "BLSC/Baichuan-M2-128K",
+          "BLSC/DeepSeek-R1",
+          "BLSC/DeepSeek-V3-250324",
+          "BLSC/DeepSeek-R1-0528",
+          "BLSC/DeepSeek-V3.1",
+          "BLSC/DeepSeek-V3.1-Terminus",
+          "BLSC/DeepSeek-V3.2",
+          "BLSC/DeepSeek-V3.2-Exp",
+          "BLSC/DeepSeek-V3.2-Instruct",
+          "BLSC/DeepSeek-V3.2-Thinking",
+          "BLSC/Doubao-Seedream-3.0-T2I",
+          "BLSC/Doubao-Seedream-4.5",
+          "BLSC/Doubao-Seedream-4.0",
+          "BLSC/Doubao-Seedream-5.0-lite",
+          "BLSC/ERNIE-4.5-Turbo-128K",
+          "BLSC/ERNIE-4.5-Turbo-32K",
+          "BLSC/ERNIE-4.5-Turbo-VL-32K",
+          "BLSC/ERNIE-5.0-Thinking-Preview",
+          "BLSC/GLM-4-9B",
+          "BLSC/GLM-4-Air",
+          "BLSC/GLM-4-AirX",
+          "BLSC/GLM-4-Flash",
+          "BLSC/GLM-4-FlashX",
+          "BLSC/GLM-4-Long",
+          "BLSC/GLM-4-Plus",
+          "BLSC/GLM-4.5",
+          "BLSC/GLM-4.5-Air",
+          "BLSC/GLM-4.5-AirX",
+          "BLSC/GLM-4.5-Flash",
+          "BLSC/GLM-4.5-X",
+          "BLSC/GLM-4.5V",
+          "BLSC/GLM-4.6",
+          "BLSC/GLM-4.6V",
+          "BLSC/GLM-4.7",
+          "BLSC/GLM-4V",
+          "BLSC/GLM-4V-Flash",
+          "BLSC/GLM-4V-Plus-0111",
+          "BLSC/GLM-5",
+          "BLSC/GLM-5-Turbo",
+          "BLSC/GLM-5.1",
+          "BLSC/GLM-ASR-2512",
+          "BLSC/GLM-CogView3-Flash",
+          "BLSC/GLM-Embedding-2",
+          "BLSC/GLM-Embedding-3",
+          "BLSC/GLM-Rerank",
+          "BLSC/GLM-Z1-Air",
+          "BLSC/GLM-Z1-AirX",
+          "BLSC/GLM-Z1-Flash",
+          "BLSC/Intern-S2-Preview",
+          "BLSC/Kimi-K2.5",
+          "BLSC/MiniMax-I2V-01",
+          "BLSC/MiniMax-I2V-01-Director",
+          "BLSC/MiniMax-I2V-01-Live",
+          "BLSC/MiniMax-M1-80k",
+          "BLSC/MiniMax-M2",
+          "BLSC/MiniMax-M2.5",
+          "BLSC/MiniMax-M2.7",
+          "BLSC/MiniMax-T2V-01",
+          "BLSC/MiniMax-T2V-01-Director",
+          "BLSC/MiniMax-Text-01",
+          "BLSC/PaddleOCR-VL-0.9B",
+          "BLSC/PaddleOCR-VL-1.5",
+          "BLSC/Qwen-Long",
+          "BLSC/Qwen2.5-72B-Instruct",
+          "BLSC/Qwen3-235B-A22B",
+          "BLSC/Qwen3-235B-A22B-Instruct-2507",
+          "BLSC/Qwen3-235B-A22B-Thinking-2507",
+          "BLSC/Qwen3-30B-A3B-Instruct-2507",
+          "BLSC/Qwen3-30B-A3B-Thinking-2507",
+          "BLSC/Qwen3-32B",
+          "BLSC/Qwen3-Coder-480B-A35B-Instruct",
+          "BLSC/Qwen3-Coder-Plus",
+          "BLSC/Qwen3-Next-80B-A3B-Instruct",
+          "BLSC/Qwen3-Next-80B-A3B-Thinking",
+          "BLSC/Qwen3-Omni-30b-a3b-Captioner",
+          "BLSC/Qwen3-VL-235B-A22B-Instruct",
+          "BLSC/Qwen3-VL-235B-A22B-Thinking",
+          "BLSC/Qwen3-VL-30B-A3B-Instruct",
+          "BLSC/Qwen3-VL-30B-A3B-Thinking",
+          "BLSC/Qwen3.5-122B-A10B",
+          "BLSC/Qwen3.5-27B",
+          "BLSC/Qwen3.5-35B-A3B",
+          "BLSC/Qwen3.5-397B-A17B",
+          "BLSC/Qwen3.5-Plus",
+          "BLSC/WanX2.1-T2I-Plus",
+          "BLSC/WanX2.1-T2I-Turbo"
+        ],
+        "context_cap_value": 550000,
+        "provider_effort_maps": {
+          "deepseek": {
+            "deepseek-v4-pro": {
+              "low": "high",
+              "medium": "high",
+              "high": "high",
+              "xhigh": "max",
+              "max": "max"
+            },
+            "deepseek-v4-flash": {
+              "low": "high",
+              "medium": "high",
+              "high": "high",
+              "xhigh": "max",
+              "max": "max"
+            }
+          },
+          "opencode-free": {
+            "deepseek-v4-flash-free": {
+              "low": "high",
+              "medium": "high",
+              "high": "high",
+              "xhigh": "max",
+              "max": "max"
+            }
+          },
+          "BLSC": {
+            "Kimi-K3": {
+              "none": "none",
+              "low": "low",
+              "medium": "high",
+              "high": "high",
+              "xhigh": "max",
+              "max": "max"
+            }
+          }
+        }
+      },
+      "codex_proxy_fallback_config": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/opencodex.config.toml"
+    },
+    "prompts": {
+      "by_root_thread": {
+        "019fe861-1832-71b0-b1ae-2f9d13afd309": {
+          "goal_objective": "Complete the goal defined in cfd_solver_agentic_benchmark/ .",
+          "goal_status": "complete",
+          "initial_user_prompt": {
+            "ts": 1786310151,
+            "text": "/goal Complete the goal defined in cfd_solver_agentic_benchmark/ ."
+          },
+          "resume_prompts": [],
+          "source": "history"
+        }
+      }
+    },
+    "workspace": {
+      "git": {
+        "branch": "codex/glm52-m3/05",
+        "commit": "0065953716e70f087f5d6d4fb512bc7e2fe2ba97"
+      },
+      "agents_md": {
+        "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/AGENTS.md",
+        "exists": true,
+        "sha256": "838fb21075bba5eab3069e66d2eee48f6345522464d3711ee03fd88bb3620162",
+        "content": "# AGENTS.md\n\nProject instructions for coding agents working in this repository.\n\n## Sandbox (read/write restriction)\n\n- The agent is FORBIDDEN from reading or writing any directory other than the\n  current working directory (cwd). This includes `/tmp` and the parent\n  directory. All file reads and writes must stay inside the workspace.\n\n## 1. Git Discipline\n\n- Do NOT run `git pull`, `git push`, or switch branches without explicit user\n  authorization. Unauthorized remote or branch mutations are prohibited.\n- Do use `git commit` (and `git stash` when needed) freely as code checkpoints:\n  commit or stash working progress regularly so partial work can be resumed or\n  rolled back. Local checkpoint commits do not require approval; only pushing\n  and branch/remote mutations require it.\n\n## 2. Subagents\n\n- Delegating independent subtasks to subagents is encouraged.\n- Subagent model policy: the allowed subagent models are `BLSC/GLM-5.2` and\n  `BLSC/MiniMax-M3` (passed as the `model` override to `spawn_agent`).\n  Do not spawn subagents with any other model.\n- Visual handoff (important): whenever a subagent produces something visual \u2014\n  a report, plot, figure, or postprocessing output \u2014 hand it off to a\n  `BLSC/MiniMax-M3` subagent for visual checks and design review before the\n  task is considered done.\n\n## 3. Use Subagents (Important)\n\n- Delegating independent subtasks to subagents is encouraged. Delegate\n  the following task types instead of doing the work in the main agent:\n  code audit, deep research, review, and mechanical execution.\n- Code audit: spawn a subagent to audit code for bugs, contract\n  compliance, hidden shortcuts, and originality; require file:line\n  evidence in its report.\n- Deep research: spawn a subagent to investigate APIs, dependencies,\n  numerical methods, or benchmark requirements before implementing.\n- Review: spawn a subagent to critique plans, code, reports, and results\n  before they are finalized.\n- Mechanical execution: spawn subagents for repetitive work (build\n  variants, case sweeps, file conversions, formatting, cleanup) so it\n  runs in parallel instead of blocking you.\n- Use the spawn tool with a concrete task name and a self-contained\n  message (passed as the `task_name` and `message` overrides to\n  `spawn_agent`). When the subagent model differs from yours, also pass\n  the `model` override with `fork_turns: \"none\"`; a full-history fork\n  inherits your model and rejects model overrides:\n\n  spawn_agent(\n    task_name: \"code_audit\",\n    message: \"Audit <scope> and report findings with file:line evidence.\",\n    model: \"<subagent model>\",\n    fork_turns: \"none\",\n  )\n\n- Subagents share the same workspace and can read and write files, but\n  `fork_turns: \"none\"` means they do not inherit the conversation\n  history, so the message must be self-contained. Give each one a clear\n  deliverable and ask for a concise written report; use `followup_task`\n  for iteration and `wait_agent` to collect results.\n\n## 4. Persistence\n\n- Once the user has started a task, do not stop until the specified task is\n  accomplished to a level of satisfaction: completed results, validated\n  artifacts, and an honest report. Work through blockers with safe in-scope\n  checks and alternatives; only stop early when genuinely blocked or explicitly\n  told to stop.\n",
+        "matches_git_head": true
+      },
+      "codegraph": {
+        "exists": true,
+        "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.codegraph"
+      },
+      "benchmark_submodule": {
+        "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/cfd_solver_agentic_benchmark",
+        "exists": true,
+        "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+        "branch": "HEAD",
+        "dirty": false,
+        "origin_url": "https://github.com/harryzhou2000/cfd_solver_agentic_benchmark"
+      }
+    },
+    "session_window": {
+      "started_at": "2026-08-09T21:15:51.533000+00:00",
+      "ended_at": "2026-08-10T03:44:08.214000+00:00"
+    },
+    "provenance": {
+      "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/state_5.sqlite",
+      "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/goals_1.sqlite",
+      "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/logs_2.sqlite",
+      "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/sessions",
+      "history": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/history.jsonl",
+      "ocx_config": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/opencodex/config.json",
+      "ocx_catalog": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/opencodex-catalog.json",
+      "plugins_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/plugins",
+      "generated_at": "2026-08-15T02:52:35.028164+00:00",
+      "num_threads": 1
+    },
+    "questions": [],
+    "user_answers": {},
+    "status": "complete"
+  },
+  "snapshot": {
+    "configs_captured": true,
+    "sessions_analyzed": true,
+    "env_snapshot_captured": true,
+    "agent_report": false,
+    "agent_scores": false
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/05/.sessions/codex/sessions",
+    "generated_at": "2026-08-15T02:52:34.685124+00:00",
+    "tools": [
+      "extract_expenses.py",
+      "extract_measurements.py",
+      "extract_metadata.py",
+      "extract_configs.py",
+      "extract_sessions.py",
+      "generate_review_forms.py",
+      "summarize.py"
+    ]
+  }
+}

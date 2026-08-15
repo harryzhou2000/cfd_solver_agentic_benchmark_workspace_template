@@ -1,0 +1,91 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 4,
+      "notes": "Report/source describe compressible NS and nondimensionalization."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "CGNS unstructured geometry and boundary-family handling are source-supported."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "Face-based conservative residual assembly is source-supported."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "Implemented flux needs independent numerical verification; report calls it Roe but source inspection is the primary evidence."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Farfield, slip, and no-slip paths are present."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 1,
+      "notes": "Least-squares reconstruction exists but production steady runs hold limiter phi at zero through startup_steps=100000; transient explicitly zeros phi."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 1,
+      "notes": "Venkatakrishnan limiter is computed but disabled for all documented production paths."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "Newtonian/Fourier and wall treatment are source-supported."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "LU-SGS pseudo-time path and CFL logic are source-supported."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "BDF2 dual-time source path exists, but no retained Re200 output proves production controls or inner convergence."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 3,
+      "notes": "Source supports METIS partitions and neighbor halos; retained delivered evidence cannot verify rank consistency."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "id": 10,
+      "text": "second-order reconstruction or shock limiter disabled for production cases",
+      "evidence": "solver.cpp lines 421-423 sets startup_steps=100000 and scales phi to zero; lines 530 and 558 explicitly zero phi in transient. report.tex lines 193-196 admits first-order production mode."
+    }
+  ],
+  "overall_score": 3.22
+}
