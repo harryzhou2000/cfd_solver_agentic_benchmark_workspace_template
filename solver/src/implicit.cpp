@@ -41,6 +41,7 @@ void Solver::implicitSolve(int n_sweeps) {
   for (int c = 0; c < no; ++c) {
     double dtau = localDt(c, cfl_current);
     diag[c] = 1.0 / std::max(dtau, 1e-30);
+    diag[c] += bdf_diag_coeff;   // dual-time BDF term (3/(2dt) BDF2, 1/dt BDF1)
   }
   // compute coefficients + diagonal contributions (internal faces)
   for (int idx = 0; idx < (int)sgs_inner.size(); ++idx) {

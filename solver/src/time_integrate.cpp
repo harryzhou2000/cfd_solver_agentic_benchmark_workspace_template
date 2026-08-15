@@ -137,11 +137,19 @@ void Solver::bdf2Step(int step, double dt) {
     Unm1.assign(nloc * NEQ, 0.0);
     Un = U;   // U^{n-1} = U^n for startup
   }
+  // dual-time BDF order + diagonal coefficient: BDF1 (1/dt) at startup step 0,
+  // BDF2 (3/(2dt)) thereafter. The BDF term MUST appear in the implicit
+  // diagonal for the dual-time inner solve to be stable (without it the
+  // physical-time mode diverges within ~15 steps).
+  if (step == 0) { bdf_order = 1; bdf_diag_coeff = 1.0 / dt; }
+  else           { bdf_order = 2; bdf_diag_coeff = 3.0 / (2.0 * dt); }
   // U currently holds U^n; iterate toward U^{n+1}
   double r0 = -1.0;
   bool first_order = (step == 0);  // BDF1 startup
   int min_inner = std::max(5, cd.rc.min_inner);
   int max_inner = std::max(min_inner, cd.rc.max_inner);
+  if (const char* e = std::getenv("CFD2D_MAX_INNER")) max_inner = std::atoi(e);
+  if (max_inner < min_inner) max_inner = min_inner;
   double target = cd.rc.inner_residual_target;  // 1e-3
   int niter = 0;
   bool converged = false;

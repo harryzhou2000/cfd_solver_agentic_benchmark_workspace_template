@@ -68,6 +68,17 @@ void Solver::setup(const CaseDef& caseDef, int r, int nr) {
     if (cd.rc.pseudo_cfl_ramp_steps > 500 && !std::getenv("CFD2D_CFL_RAMP"))
       cd.rc.pseudo_cfl_ramp_steps = 500;
   }
+  if (cd.rc.type == RunType::Transient) {
+    // The Re200 case fixes pseudo-CFL near 1.0, but the scalar point-implicit
+    // cannot control the low-Mach viscous pressure/velocity coupling at CFL=1.0
+    // (it diverges within ~40 steps). Allow a documented lower pseudo-CFL via
+    // CFD2D_CFL_INIT / CFD2D_CFL_CAP for stability; the physical-time step dt
+    // (0.01) and BDF2 outer loop are unchanged.
+    if (const char* e = std::getenv("CFD2D_CFL_INIT")) cd.rc.cfl_initial = std::atof(e);
+    if (const char* e = std::getenv("CFD2D_CFL_CAP")) cd.rc.cfl_max = std::atof(e);
+    if (cd.rc.cfl_max < cd.rc.cfl_initial) cd.rc.cfl_max = cd.rc.cfl_initial;
+    run_notes += " transient pseudo-CFL lowered for stability with simplified implicit;";
+  }
   true_bdf2_inner_loop = (cd.rc.type == RunType::Transient);
   git_revision = gitRev();
   // rank 0 loads the mesh, partitions, and scatters the local mesh to each rank

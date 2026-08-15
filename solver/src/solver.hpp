@@ -49,10 +49,14 @@ public:
   // Barth-Jespersen limiter (owned only)
   std::vector<double> limRho, limU, limV, limP;
   // residual + update (owned)
-  std::vector<double> R;        // size n_owned*NEQ
-  std::vector<double> dU;       // size (n_owned+n_ghost)*NEQ (ghost unused)
-  std::vector<double> diag;    // implicit diagonal (owned)
-  double cfl_current = 1.0;     // current pseudo-time CFL (set per step)
+ std::vector<double> R;        // size n_owned*NEQ
+ std::vector<double> dU;       // size (n_owned+n_ghost)*NEQ (ghost unused)
+ std::vector<double> diag;    // implicit diagonal (owned)
+ // dual-time BDF contribution to the implicit diagonal (3/(2dt) for BDF2,
+ // 1/dt for BDF1 startup, 0 for steady). Added to diag in implicitSolve.
+ double bdf_diag_coeff = 0.0;
+ int bdf_order = 2;            // 1 = BDF1 (startup), 2 = BDF2
+double cfl_current = 1.0;     // current pseudo-time CFL (set per step)
   std::vector<int> sgs_inner;   // internal faces with both sides owned (topology cache)
   std::vector<int> sgs_bnd;     // boundary faces touching owned cells (topology cache)
   // flat CSR for the SGS implicit (topology precomputed once in setup; only the

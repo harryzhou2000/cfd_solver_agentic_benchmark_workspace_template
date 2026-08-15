@@ -129,12 +129,21 @@ void Solver::computeResidual(bool add_bdf2_source, double dt_phys) {
   }
 
   if (add_bdf2_source && dt_phys > 0.0) {
-    double coef = 1.0 / (2.0 * dt_phys);
-    for (int c = 0; c < no; ++c)
-      for (int k = 0; k < NEQ; ++k) {
-        double u_cur = U[c*NEQ+k], u_n = Un[c*NEQ+k], u_nm1 = Unm1[c*NEQ+k];
-        R[c*NEQ+k] -= coef * (3.0*u_cur - 4.0*u_n + u_nm1);
-      }
+    // physical-time source: BDF2 (3U - 4Un + Unm1)/(2dt) for step>=1, BDF1
+    // (U - Un)/dt for the startup step (step 0, where Unm1 is unavailable).
+    if (bdf_order == 2) {
+      double coef = 1.0 / (2.0 * dt_phys);
+      for (int c = 0; c < no; ++c)
+        for (int k = 0; k < NEQ; ++k) {
+          double u_cur = U[c*NEQ+k], u_n = Un[c*NEQ+k], u_nm1 = Unm1[c*NEQ+k];
+          R[c*NEQ+k] -= coef * (3.0*u_cur - 4.0*u_n + u_nm1);
+        }
+    } else {
+      double coef = 1.0 / dt_phys;
+      for (int c = 0; c < no; ++c)
+        for (int k = 0; k < NEQ; ++k)
+          R[c*NEQ+k] -= coef * (U[c*NEQ+k] - Un[c*NEQ+k]);
+    }
   }
   if (std::getenv("CFD2D_DEBUG")) {
     int nbad = 0; double maxR = 0; int imax = 0;
