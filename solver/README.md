@@ -94,6 +94,28 @@ files request (up to 100); the exact settings (recorded per case in
   so the full t=300 / 30000-step run is compute-bound; the solver checkpoints
   the output package every 500 physical steps).
 
+### AUSM+-up low-Mach flux (env-gated, Re200 research)
+
+An AUSM+-up flux (Liou 2006, "A Sequel to AUSM, Part II") is implemented as an
+env-gated option for the Re200 case. It splits the inviscid flux into convective
+(upwind Mach-splitting) and pressure parts with low-Mach pressure-velocity
+coupling (M_p: Dp->mass flux; p_u: Dun->pressure), linearized in the scalar
+LU-SGS implicit Jacobian. A pressure-only 4th-order artificial viscosity
+(damping rho/rhoE Laplacian jumps, not momentum) controls the pressure
+checkerboard without damping the shedding shear mode.
+
+The AUSM+-up flux ENABLES the von Karman shedding instability (cl amplitude
+reaches 0.07-0.22 with weak dissipation) where the default Rusanov flux gives
+flat cl (~1e-3). However, a mesh-resolution deadlock prevents sustained
+shedding: the weak dissipation needed for cl>0.05 causes a numerical blowup at
+t~10 when the shedding vortices convect into the coarse downstream mesh
+(CylinderB1 extends to r=200 with rapidly increasing cell spacing). All stable
+configs give cl<0.05 (below the validator threshold). The Re200 case is
+therefore honestly 'failed' with both the default Rusanov flux and the AUSM+-up
+flux. Env vars: CFD2D_FLUX_AUSMUP, CFD2D_AUSMUP_KU (default 0.75),
+CFD2D_AUSMUP_KP (default 0.25), CFD2D_SHED_AV, CFD2D_AV_K4,
+CFD2D_AV_PRESSURE_ONLY, CFD2D_AV_SPATIAL, CFD2D_CAP_RAMP_*.
+
 These are stricter/more-dissipative settings than the case files request; the
 report records residual and force histories and the resulting drag levels
 honestly. The viscous flux uses the correct conservative sign (the stress
