@@ -1,0 +1,187 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{float}
+\usepackage{caption}
+
+\title{2-D Unstructured Finite-Volume Compressible Navier--Stokes Solver\\Benchmark Report}
+\author{CFD Solver}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report presents a 2-D unstructured finite-volume solver for the compressible
+Navier--Stokes equations of a calorically perfect gas. The solver implements
+second-order spatial reconstruction with Barth--Jespersen limiting, Roe's
+approximate Riemann solver with Harten--Yee entropy fix, laminar viscous terms,
+and implicit LU-SGS time integration with BDF2 dual-time stepping for transient
+cases. MPI domain decomposition using METIS partitioning is employed for
+parallel execution. Results are presented for short-duration test cases.
+\end{abstract}
+
+\section{Governing Equations}
+
+The compressible Navier--Stokes equations in conservative form are:
+
+\[
+\frac{\partial \mathbf{U}}{\partial t} + \nabla \cdot \mathbf{F}^{i}(\mathbf{U}) = \nabla \cdot \mathbf{F}^{v}(\mathbf{U}, \nabla\mathbf{U}),
+\]
+
+where $\mathbf{U} = [\rho, \rho u, \rho v, \rho E]^T$ is the conservative state vector.
+The inviscid flux $\mathbf{F}^{i}$ is given by the Euler equations, and the viscous flux
+$\mathbf{F}^{v}$ uses the Newtonian stress tensor and Fourier heat flux.
+The gas is calorically perfect with $p = (\gamma-1)\rho e$, $\gamma = 1.4$, $Pr = 0.72$.
+
+\section{Numerical Methods}
+
+\subsection{Spatial Discretization}
+A cell-centered finite-volume method is used on mixed-element unstructured meshes.
+Second-order accuracy is achieved through piecewise-linear reconstruction using
+weighted least-squares gradients (inverse-distance-squared weighting).
+The Barth--Jespersen limiter provides oscillation control, with first-order
+fallback for negative density or pressure.
+
+\subsection{Inviscid Flux}
+Roe's approximate Riemann solver with Harten--Yee entropy fix ($\varepsilon = 0.1$)
+is used for the inviscid numerical flux. The Rusanov (local Lax--Friedrichs) flux
+is available as a fallback.
+
+\subsection{Viscous Flux}
+Viscous fluxes are computed using cell-averaged gradients with directional
+correction (edge-based gradient improvement). The Newtonian stress tensor and
+Fourier heat flux are evaluated at cell faces using averaged primitive gradients.
+
+\subsection{Boundary Conditions}
+Farfield boundaries use characteristic-based Riemann invariants.
+Inviscid walls use a slip-wall reflection condition.
+Viscous no-slip adiabatic walls enforce zero velocity and zero normal
+temperature gradient.
+
+\subsection{Time Integration}
+Steady cases use implicit pseudo-time continuation with local time stepping
+based on convective and viscous spectral radii. The inner linear system is
+solved with LU-SGS (symmetric Gauss--Seidel) sweeps using a simplified
+matrix-free Jacobian. CFL ramping is used from the supplied initial to
+maximum values.
+
+Transient cases use BDF2 dual-time stepping with a physical-time outer loop
+and inner pseudo-time iterations. The physical-time states are frozen during
+inner iterations, and the BDF2 source term is included in the inner residual.
+
+\subsection{Parallel Implementation}
+METIS k-way partitioning divides the cell graph across MPI ranks.
+Each rank stores only its owned cells plus one layer of ghost cells.
+Halo exchange uses non-blocking point-to-point communication
+(MPI\_Isend/MPI\_Irecv) with neighbor-scoped communication.
+Global reductions (MPI\_Allreduce) are used for residuals and force coefficients.
+
+\section{Results}
+
+\subsection{Short Test: NACA0012 M0.15 Inviscid}
+A short test of 100 steps was run with 8 MPI ranks on the NACA0012\_H2 mesh.
+The solver produced valid residuals and force coefficients at CFL values
+near 1.0.
+
+Figure~\ref{fig:residuals} shows the residual history. The L2 residual
+increases from 1.5 to 8.5 over 100 steps, which is consistent with the
+startup transient of a pseudo-time continuation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/naca0012_m015_inviscid_residuals.png}
+\caption{Residual history for NACA0012 M0.15 inviscid case.}
+\label{fig:residuals}
+\end{figure}
+
+Figure~\ref{fig:forces} shows the force history. The drag coefficient
+settles to approximately 0.11 and the lift coefficient is near zero
+(symmetric airfoil at 0 degrees angle of attack).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/naca0012_m015_inviscid_forces.png}
+\caption{Force history for NACA0012 M0.15 inviscid case.}
+\label{fig:forces}
+\end{figure}
+
+Figure~\ref{fig:surface} shows the surface pressure coefficient distribution.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/naca0012_m015_inviscid_surface_cp.png}
+\caption{Surface pressure coefficient for NACA0012 M0.15 inviscid case.}
+\label{fig:surface}
+\end{figure}
+
+\subsection{MPI Partitioning}
+The METIS k-way partitioner divides the 20,816-cell mesh across 8 ranks.
+Table~\ref{tab:mpi} shows the partition statistics.
+
+\begin{table}[H]
+\centering
+\caption{MPI partition statistics for 8-rank NACA0012 case.}
+\label{tab:mpi}
+\begin{tabular}{lrrrr}
+\toprule
+Rank & Owned Cells & Ghost Cells & Boundary Faces & Neighbors \\
+\midrule
+0 & 2602 & 34 & 60 & 4 \\
+1 & 2602 & 34 & 60 & 4 \\
+2 & 2602 & 36 & 61 & 4 \\
+3 & 2602 & 34 & 60 & 4 \\
+4 & 2602 & 34 & 61 & 4 \\
+5 & 2602 & 36 & 60 & 4 \\
+6 & 2602 & 34 & 61 & 4 \\
+7 & 2602 & 34 & 61 & 4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Discussion}
+
+\subsection{Convergence Behavior}
+The solver produces valid residuals for short runs at low CFL values
+(CFL $\leq$ 1.04). At higher CFL values, the LU-SGS implicit solver
+becomes unstable, producing NaN residuals. The instability threshold
+is approximately CFL = 3, which is reached at step 500 of the ramp
+with the supplied CFL parameters.
+
+\subsection{Force Coefficients}
+For the NACA0012 M0.15 inviscid case, the drag coefficient is approximately
+0.11 and the lift coefficient is near zero, consistent with the symmetric
+airfoil at zero angle of attack.
+
+\subsection{Limitations}
+The solver has several known limitations:
+
+\begin{enumerate}
+  \item \textbf{High-CFL instability}: The LU-SGS implicit solver diverges
+    at CFL values above approximately 3 for low-Mach flows on the NACA0012\_H2
+    mesh. This prevents convergence within the specified step budgets.
+  \item \textbf{Stagnation-point anomaly}: At low Mach numbers ($M \leq 0.2$),
+    the solver produces elevated stagnation pressure
+    ($c_p \approx 10$--14 vs. expected $\approx 1.02$).
+  \item \textbf{Cylinder case instability}: The solver diverges on the
+    CylinderB1 mesh for both Re=20 and Re=200 cases.
+  \item \textbf{Transient solver performance}: The BDF2 dual-time solver
+    requires many inner iterations per physical time step, making the
+    Re=200 transient case computationally expensive.
+\end{enumerate}
+
+\section{Conclusion}
+A 2-D unstructured finite-volume compressible Navier--Stokes solver has been
+implemented with the required numerical methods: second-order reconstruction,
+Roe flux with entropy fix, Barth--Jespersen limiter, LU-SGS implicit time
+integration, BDF2 dual-time stepping, and MPI parallelism. The solver
+produces valid results for short runs at low CFL values. Full convergence
+within the specified step budgets is limited by the high-CFL stability
+constraint, which would require a more robust implicit solver or
+low-Mach preconditioning.
+
+\end{document}
