@@ -3,13 +3,13 @@
 // owned cells linearizes the Rusanov/Roe numerical flux as
 //   (1/dtau_i) dU_i + (1/A_i) Sum_f 0.5*alpha_f*(dU_i - dU_nb) = R_i,
 // i.e.  D_i dU_i - Sum_f c_f dU_nb = R_i  with
-//   D_i = 1/dtau_i + (1/A_i) Sum_f alpha_f * len_f      (FULL spectral)
-//   c_f  = (1/A_i) * 0.5 * alpha_f * len_f               (off-diagonal)
-// Using the FULL spectral alpha on the diagonal (not 0.5 alpha) is essential:
-// it makes the high-CFL limit dU -> -dU (removes the perturbation in one step),
-// giving unconditional stability and fast convergence. With only 0.5*alpha on
-// the diagonal the update would be dU ~ -2 dU (unstable). Multiple SGS sweeps
-// over the 0.5*alpha off-diagonal provide the linear-solver iterations.
+//   D_i = 1/dtau_i + (1/A_i) Sum_f alpha_f * len_f   (FULL spectral on diagonal)
+//   c_f  = (1/A_i) * 0.5 * alpha_f * len_f            (off-diagonal)
+// The FULL spectral on the diagonal makes the high-CFL limit dU -> -0.5 dU
+// (stable, removes ~half the perturbation per step). The SGS topology (which
+// owned cells neighbor which, via which face) is precomputed in setup as a flat
+// CSR; only the per-face coefficients alpha are recomputed each call -- this
+// avoids the per-call vector-of-vectors allocation churn that dominated runtime.
 #include "solver.hpp"
 #include <algorithm>
 #include <cmath>
@@ -42,15 +42,12 @@ void Solver::implicitSolve(int n_sweeps) {
     double dtau = localDt(c, cfl_current);
     diag[c] = 1.0 / std::max(dtau, 1e-30);
   }
-  std::vector<std::vector<std::pair<int,double>>> nb(no);
-  // internal faces (both owned): full spectral on diagonal, half on off-diag
+  // compute coefficients + diagonal contributions (internal faces)
   for (int idx = 0; idx < (int)sgs_inner.size(); ++idx) {
     const LocalFace& f = lm.faces[sgs_inner[idx]];
     double a = faceAlpha(*this, f); double len = f.len;
     diag[f.lc] += a*len/lm.area[f.lc];
     diag[f.rc] += a*len/lm.area[f.rc];
-    nb[f.lc].push_back({f.rc, 0.5*a*len/lm.area[f.lc]});
-    nb[f.rc].push_back({f.lc, 0.5*a*len/lm.area[f.rc]});
   }
   // boundary faces: full spectral on the owner diagonal
   for (int idx = 0; idx < (int)sgs_bnd.size(); ++idx) {
@@ -60,18 +57,32 @@ void Solver::implicitSolve(int n_sweeps) {
     if (f.rc>=0 && f.rc<no) diag[f.rc] += a*len/lm.area[f.rc];
   }
   for (int c = 0; c < no; ++c) diag[c] = std::max(diag[c], 1e-12);
+  // fill CSR coefficients (off-diagonal, half spectral)
+  for (int c = 0; c < no; ++c) {
+    for (int p = sgs_ptr[c]; p < sgs_ptr[c+1]; ++p) {
+      const LocalFace& f = lm.faces[sgs_face[p]];
+      sgs_coef[p] = 0.5 * faceAlpha(*this, f) * f.len / lm.area[c];
+    }
+  }
+  // symmetric Gauss-Seidel sweeps over the flat CSR
   for (int s = 0; s < n_sweeps; ++s) {
     for (int c = 0; c < no; ++c) {
       double rhs[NEQ]; for (int k=0;k<NEQ;++k) rhs[k]=R[c*NEQ+k];
-      for (const auto& pr : nb[c]){int j=pr.first;double cf=pr.second;
-        for (int k=0;k<NEQ;++k) rhs[k]+=cf*dU[j*NEQ+k];}
-      for (int k=0;k<NEQ;++k) dU[c*NEQ+k]=rhs[k]/diag[c];
+      for (int p = sgs_ptr[c]; p < sgs_ptr[c+1]; ++p) {
+        int j=sgs_nb[p]; double cf=sgs_coef[p];
+        for (int k=0;k<NEQ;++k) rhs[k]+=cf*dU[j*NEQ+k];
+      }
+      double invd = 1.0/diag[c];
+      for (int k=0;k<NEQ;++k) dU[c*NEQ+k]=rhs[k]*invd;
     }
     for (int c = no-1; c >= 0; --c) {
       double rhs[NEQ]; for (int k=0;k<NEQ;k++) rhs[k]=R[c*NEQ+k];
-      for (const auto& pr : nb[c]){int j=pr.first;double cf=pr.second;
-        for (int k=0;k<NEQ;++k) rhs[k]+=cf*dU[j*NEQ+k];}
-      for (int k=0;k<NEQ;++k) dU[c*NEQ+k]=rhs[k]/diag[c];
+      for (int p = sgs_ptr[c]; p < sgs_ptr[c+1]; ++p) {
+        int j=sgs_nb[p]; double cf=sgs_coef[p];
+        for (int k=0;k<NEQ;k++) rhs[k]+=cf*dU[j*NEQ+k];
+      }
+      double invd = 1.0/diag[c];
+      for (int k=0;k<NEQ;++k) dU[c*NEQ+k]=rhs[k]*invd;
     }
   }
 }

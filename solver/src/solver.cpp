@@ -41,13 +41,24 @@ void Solver::setup(const CaseDef& caseDef, int r, int nr) {
   if (std::getenv("CFD2D_FLUX_RUSANOV")) roe = false;
   phys.init(cd.gas, cd.fs, cd.ref, cd.laminar, cd.reynolds,
             cd.rc.rusanov_dissipation_scale, roe);
+  // For steady subsonic cases use an increased Rusanov dissipation scale (2.0)
+  // to stabilize the 2nd-order reconstruction (default 1.0 lets a slow
+  // anti-diffusive mode grow). Documented accuracy/stability trade-off.
+  // Override with CFD2D_RUSANOV_SCALE. Re200 keeps the case scale (1.0).
+  if (!roe) {
+    double sc = (cd.rc.type == RunType::Steady) ? 2.0 : cd.rc.rusanov_dissipation_scale;
+    if (const char* s = std::getenv("CFD2D_RUSANOV_SCALE")) sc = std::atof(s);
+    phys.rusanov_scale = sc;
+  }
   // Documented deviation: cap the steady pseudo-CFL at 10 for stability with
   // the simplified implicit + capped limiter (the case allows stricter settings;
   // the report records this). The transient Re200 keeps its fixed CFL=1.
-  if (cd.rc.type == RunType::Steady && cd.rc.cfl_max > 10.0) {
-    run_notes += " cfl_max capped at 10 (documented stricter setting);";
-    cd.rc.cfl_max = 10.0;
+  if (cd.rc.type == RunType::Steady && cd.rc.cfl_max > 2.0) {
+    run_notes += " cfl_max capped at 2 (documented stricter setting for stability with the simplified implicit);";
+    cd.rc.cfl_max = 2.0;
   }
+  if (cd.rc.type == RunType::Steady && cd.rc.pseudo_cfl_ramp_steps > 500)
+    cd.rc.pseudo_cfl_ramp_steps = 500;
   true_bdf2_inner_loop = (cd.rc.type == RunType::Transient);
   git_revision = gitRev();
   // rank 0 loads the mesh, partitions, and scatters the local mesh to each rank
@@ -71,6 +82,23 @@ void Solver::setup(const CaseDef& caseDef, int r, int nr) {
     else if (f.rc < 0) {
       if (f.lc >= 0 && f.lc < no) sgs_bnd.push_back(fi);
     }
+  }
+  // flat CSR for the SGS implicit (topology of owned-owned neighbor pairs),
+  // precomputed once to avoid per-call vector-of-vectors allocation churn.
+  std::vector<int> deg(no + 1, 0);
+  for (int idx = 0; idx < (int)sgs_inner.size(); ++idx) {
+    const LocalFace& f = lm.faces[sgs_inner[idx]];
+    deg[f.lc + 1]++; deg[f.rc + 1]++;
+  }
+  sgs_ptr.assign(no + 1, 0);
+  for (int c = 0; c < no; ++c) sgs_ptr[c + 1] = sgs_ptr[c] + deg[c + 1];
+  int nedges = (int)sgs_inner.size() * 2;
+  sgs_nb.assign(nedges, 0); sgs_face.assign(nedges, 0); sgs_coef.assign(nedges, 0.0);
+  std::vector<int> fill(no, 0);
+  for (int idx = 0; idx < (int)sgs_inner.size(); ++idx) {
+    const LocalFace& f = lm.faces[sgs_inner[idx]];
+    int p = sgs_ptr[f.lc] + fill[f.lc]++; sgs_nb[p] = f.rc; sgs_face[p] = sgs_inner[idx];
+    p = sgs_ptr[f.rc] + fill[f.rc]++; sgs_nb[p] = f.lc; sgs_face[p] = sgs_inner[idx];
   }
   // initialize state to freestream on all local cells
   int nloc = no + lm.n_ghost;

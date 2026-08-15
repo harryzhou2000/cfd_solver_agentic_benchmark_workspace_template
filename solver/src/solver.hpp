@@ -55,6 +55,13 @@ public:
   double cfl_current = 1.0;     // current pseudo-time CFL (set per step)
   std::vector<int> sgs_inner;   // internal faces with both sides owned (topology cache)
   std::vector<int> sgs_bnd;     // boundary faces touching owned cells (topology cache)
+  // flat CSR for the SGS implicit (topology precomputed once in setup; only the
+  // per-face coefficients are recomputed each implicitSolve call to avoid the
+  // per-call vector-of-vectors allocation churn that dominated runtime).
+  std::vector<int> sgs_ptr;        // size n_owned+1
+  std::vector<int> sgs_nb;         // neighbor local id per CSR entry
+  std::vector<int> sgs_face;       // face index per CSR entry
+  std::vector<double> sgs_coef;    // coefficient per CSR entry (recomputed/call)
   // wall-face data for force/surface output (rebuilt each force eval)
   std::vector<double> wcx, wcy, wSx, wSy, wlen, wp, wtx, wty;
   std::vector<double> wRho;  // adjacent cell density at each wall face
