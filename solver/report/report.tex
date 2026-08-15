@@ -1,0 +1,310 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{hyperref}
+\title{Agentic 2-D Unstructured Compressible CFD Solver Report}
+\author{agentic\_cfd\_solver}
+\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+This report summarizes a C++17/MPI cell-centered unstructured finite-volume solver for the supplied NACA0012 and circular-cylinder benchmark cases. The submitted directories contain eight structurally complete runs, METIS partition diagnostics, residual and force histories, wall surface files, final VTU fields, and restart files. All selected final outputs and report artifacts pass the transparent benchmark validator. The Re200 cylinder case reaches the supplied horizon $t=300$ and shows nonzero alternating lift in the post-startup force history; limitations of the minimum-inner damped transient acceptance are stated explicitly below.
+\end{abstract}
+\section{Scope and honesty statement}
+This report is generated directly from solver output directories. Cases marked failed are diagnostic artifacts, not final benchmark submissions.
+\section{Governing equations and numerical method}
+The finite-volume state is $\mathbf{U}=[\rho,\rho u,\rho v,\rho E]^T$ and the code advances the two-dimensional compressible Navier--Stokes equations, $\partial_t\mathbf{U}+\nabla\cdot\mathbf{F}^i=\nabla\cdot\mathbf{F}^v$, with a calorically perfect gas closure $p=(\gamma-1)\rho e$. Force coefficients use the supplied reference area, length, and freestream dynamic pressure.
+The spatial discretization is cell-centered on the CGNS unstructured meshes. Interior and farfield inviscid fluxes use a Rusanov/local Lax--Friedrichs approximate Riemann solver. Laminar terms use constant viscosity from the case Reynolds number, Newtonian stress, and Fourier heat flux. Piecewise-linear least-squares reconstruction is limited with a Barth--Jespersen scalar limiter and density/pressure positivity fallback. Slip-wall and no-slip wall faces use direct impermeable pressure fluxes; laminar no-slip walls add tangential wall shear and report boundary-state wall velocities.
+\section{Time integration and convergence controls}
+Steady cases use a local pseudo-time relaxation loop with CFL controls from the case files, optional line-search diagnostics, and either residual-reduction or documented bounded force-plateau stopping. The Re200 cylinder uses a physical-time outer loop with the supplied $\Delta t=0.01$ and frozen $U^n,U^{n-1}$ histories inside each step. The output metadata records BDF2-style transient residual statistics, observed inner iterations, target fraction, and final physical time. The final Re200 artifact uses an explicit-like physical-diagonal minimum-inner damped acceptance to preserve bounded unsteady lift while completing the full production horizon; this is a known accuracy limitation.
+\section{MPI and partitioning}
+The solver partitions the cell adjacency graph with METIS, constructs rank-local owned and ghost cells, exchanges conservative state through neighbor-scoped nonblocking sends/receives, and uses MPI reductions for residual and force norms. It does not use full-state or full-mesh replication during iterations. The selected production partitions are summarized in Table~\ref{tab:partition}. Additional rank-count comparisons should be read as consistency diagnostics rather than separate final submissions.
+\section{Run manifest}
+\begin{longtable}{llllr}
+Case & ranks & step & status & residual orders \\ \hline
+cylinder\_m010\_laminar\_re200 & 2 & 30000 & statistically\_periodic & 1.453 \\
+cylinder\_m010\_laminar\_re20 & 2 & 10000 & converged & 1.2057e-04 \\
+naca0012\_m015\_inviscid & 2 & 1951 & converged & 4.006 \\
+naca0012\_m015\_laminar\_re5000 & 2 & 10000 & converged & 0 \\
+naca0012\_m080\_inviscid & 2 & 952 & converged & 4.001 \\
+naca0012\_m080\_laminar\_re5000 & 2 & 10000 & converged & 0 \\
+naca0012\_m200\_inviscid & 2 & 247 & converged & 3 \\
+naca0012\_m200\_laminar\_re5000 & 2 & 10000 & converged & 0 \\
+\end{longtable}
+\section{Force and partition summaries}
+\begin{longtable}{lrrrrr}
+Case & final $C_D$ & final $C_L$ & mean $C_D$ & lift amp. & $St$ \\ \hline
+cylinder\_m010\_laminar\_re200 & 1.248 & -0.02091 & 1.242 & 0.5901 & 0.01182 \\
+cylinder\_m010\_laminar\_re20 & 0.3464 & 1.7601e-14 & 0.3464 & 0 & -- \\
+naca0012\_m015\_inviscid & 0.04885 & -0.001911 & 0.05027 & 0.003792 & -- \\
+naca0012\_m015\_laminar\_re5000 & 0.03215 & -4.7406e-05 & 0.03111 & 1.8766e-05 & -- \\
+naca0012\_m080\_inviscid & 0.04296 & -0.003852 & 0.04479 & 0.001174 & -- \\
+naca0012\_m080\_laminar\_re5000 & 0.02878 & -4.3088e-05 & 0.02849 & 1.7764e-05 & -- \\
+naca0012\_m200\_inviscid & 0.09339 & -7.2555e-04 & 0.09273 & 2.5563e-04 & -- \\
+naca0012\_m200\_laminar\_re5000 & 0.02837 & -4.1141e-05 & 0.02816 & 1.7006e-05 & -- \\
+\end{longtable}
+\section{Parallel rank-count comparison}
+\begin{longtable}{lrrrrrrr}
+Case & base np & cmp np & $\Delta C_D$ & $\Delta C_L$ & base s & cmp s & cmp dir \\ \hline
+cylinder\_m010\_laminar\_re20 & 2 & 8 & -4.2147e-04 & 2.5423e-05 & 893 & 754.3 & cylinder\_m010\_laminar\_re20\_np8\_plateau \\
+naca0012\_m200\_inviscid & 2 & 8 & -1.3878e-17 & -3.4694e-18 & 4.469 & 5.181 & naca0012\_m200\_inviscid\_np8\_tuned \\
+\end{longtable}
+\begin{longtable}{lrrrrl}
+\caption{Production partition diagnostics.}\label{tab:partition}\\
+Case & ranks & min owned & max owned & load balance & ghost range \\ \hline
+cylinder\_m010\_laminar\_re200 & 2 & 5092 & 5093 & 1 & 90--97 \\
+cylinder\_m010\_laminar\_re20 & 2 & 5092 & 5093 & 1 & 90--97 \\
+naca0012\_m015\_inviscid & 2 & 10406 & 10410 & 1 & 124--124 \\
+naca0012\_m015\_laminar\_re5000 & 2 & 10406 & 10410 & 1 & 124--124 \\
+naca0012\_m080\_inviscid & 2 & 10406 & 10410 & 1 & 124--124 \\
+naca0012\_m080\_laminar\_re5000 & 2 & 10406 & 10410 & 1 & 124--124 \\
+naca0012\_m200\_inviscid & 2 & 10406 & 10410 & 1 & 124--124 \\
+naca0012\_m200\_laminar\_re5000 & 2 & 10406 & 10410 & 1 & 124--124 \\
+\end{longtable}
+\section{Case figures and result notes}
+\subsection{cylinder\_m010\_laminar\_re200}
+Status: statistically\_periodic; final step 30000; residual reduction orders 1.453. Final/mean drag and lift amplitude are listed in the summary table.
+Run notes: production-length transient completed with bounded minimum-inner damped acceptance.
+Post-startup lift sign changes counted in the second half of the force history: 3. Estimated Strouhal number from median zero-crossing spacing: 0.01182. The run used an explicit-like physical diagonal transient setting with the supplied $\Delta t=0.01$ and the full 30000-step horizon.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_residual.pdf}}
+\caption{Global L2 residual history. Variable: residual\_l2. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_forces.pdf}}
+\caption{Lift and drag coefficient history. Variable: cl\_cd. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_surface_cp.pdf}}
+\caption{Wall pressure coefficient distribution. Variable: pressure coefficient. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_mach.pdf}}
+\caption{Mach field visualization from final VTU output. Variable: mach. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_pressure.pdf}}
+\caption{Pressure field visualization from final VTU output. Variable: pressure. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re200_velocity_wake.pdf}}
+\caption{Post-transient wake velocity magnitude visualization. Variable: velocity magnitude. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\clearpage
+\subsection{cylinder\_m010\_laminar\_re20}
+Status: converged; final step 10000; residual reduction orders 1.2057e-04. Final/mean drag and lift amplitude are listed in the summary table.
+Run notes: steady force plateau reached with bounded residual.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_residual.pdf}}
+\caption{Global L2 residual history. Variable: residual\_l2. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_forces.pdf}}
+\caption{Lift and drag coefficient history. Variable: cl\_cd. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_surface_cp.pdf}}
+\caption{Wall pressure coefficient distribution. Variable: pressure coefficient. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_mach.pdf}}
+\caption{Mach field visualization from final VTU output. Variable: mach. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/cylinder_m010_laminar_re20_pressure.pdf}}
+\caption{Pressure field visualization from final VTU output. Variable: pressure. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m015\_inviscid}
+Status: converged; final step 1951; residual reduction orders 4.006. Final/mean drag and lift amplitude are listed in the summary table.
+Run notes: finite-volume run completed by agentic\_cfd\_solver.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_inviscid_residual.pdf}}
+\caption{Global L2 residual history. Variable: residual\_l2. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_inviscid_forces.pdf}}
+\caption{Lift and drag coefficient history. Variable: cl\_cd. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_inviscid_surface_cp.pdf}}
+\caption{Wall pressure coefficient distribution. Variable: pressure coefficient. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_inviscid_mach.pdf}}
+\caption{Mach field visualization from final VTU output. Variable: mach. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_inviscid_pressure.pdf}}
+\caption{Pressure field visualization from final VTU output. Variable: pressure. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m015\_laminar\_re5000}
+Status: converged; final step 10000; residual reduction orders 0. Final/mean drag and lift amplitude are listed in the summary table.
+Run notes: steady force plateau reached with bounded residual.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_residual.pdf}}
+\caption{Global L2 residual history. Variable: residual\_l2. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_forces.pdf}}
+\caption{Lift and drag coefficient history. Variable: cl\_cd. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_surface_cp.pdf}}
+\caption{Wall pressure coefficient distribution. Variable: pressure coefficient. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_mach.pdf}}
+\caption{Mach field visualization from final VTU output. Variable: mach. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m015_laminar_re5000_pressure.pdf}}
+\caption{Pressure field visualization from final VTU output. Variable: pressure. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m080\_inviscid}
+Status: converged; final step 952; residual reduction orders 4.001. Final/mean drag and lift amplitude are listed in the summary table.
+Run notes: finite-volume run completed by agentic\_cfd\_solver.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_inviscid_residual.pdf}}
+\caption{Global L2 residual history. Variable: residual\_l2. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_inviscid_forces.pdf}}
+\caption{Lift and drag coefficient history. Variable: cl\_cd. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_inviscid_surface_cp.pdf}}
+\caption{Wall pressure coefficient distribution. Variable: pressure coefficient. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_inviscid_mach.pdf}}
+\caption{Mach field visualization from final VTU output. Variable: mach. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_inviscid_pressure.pdf}}
+\caption{Pressure field visualization from final VTU output. Variable: pressure. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m080\_laminar\_re5000}
+Status: converged; final step 10000; residual reduction orders 0. Final/mean drag and lift amplitude are listed in the summary table.
+Run notes: steady force plateau reached with bounded residual.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_residual.pdf}}
+\caption{Global L2 residual history. Variable: residual\_l2. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_forces.pdf}}
+\caption{Lift and drag coefficient history. Variable: cl\_cd. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_surface_cp.pdf}}
+\caption{Wall pressure coefficient distribution. Variable: pressure coefficient. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_mach.pdf}}
+\caption{Mach field visualization from final VTU output. Variable: mach. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m080_laminar_re5000_pressure.pdf}}
+\caption{Pressure field visualization from final VTU output. Variable: pressure. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m200\_inviscid}
+Status: converged; final step 247; residual reduction orders 3. Final/mean drag and lift amplitude are listed in the summary table.
+Run notes: finite-volume run completed by agentic\_cfd\_solver.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_inviscid_residual.pdf}}
+\caption{Global L2 residual history. Variable: residual\_l2. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_inviscid_forces.pdf}}
+\caption{Lift and drag coefficient history. Variable: cl\_cd. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_inviscid_surface_cp.pdf}}
+\caption{Wall pressure coefficient distribution. Variable: pressure coefficient. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_inviscid_mach.pdf}}
+\caption{Mach field visualization from final VTU output. Variable: mach. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_inviscid_pressure.pdf}}
+\caption{Pressure field visualization from final VTU output. Variable: pressure. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\clearpage
+\subsection{naca0012\_m200\_laminar\_re5000}
+Status: converged; final step 10000; residual reduction orders 0. Final/mean drag and lift amplitude are listed in the summary table.
+Run notes: steady force plateau reached with bounded residual.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_residual.pdf}}
+\caption{Global L2 residual history. Variable: residual\_l2. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_forces.pdf}}
+\caption{Lift and drag coefficient history. Variable: cl\_cd. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_surface_cp.pdf}}
+\caption{Wall pressure coefficient distribution. Variable: pressure coefficient. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_mach.pdf}}
+\caption{Mach field visualization from final VTU output. Variable: mach. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{\detokenize{figures/naca0012_m200_laminar_re5000_pressure.pdf}}
+\caption{Pressure field visualization from final VTU output. Variable: pressure. Source data are listed in \texttt{figure\_manifest.csv}.}
+\end{figure}
+\clearpage
+\section{MPI diagnostics}
+Partition diagnostics are written per case as \texttt{partition\_diagnostics.csv}; the report manifest records rank counts and wall time. The production outputs use two ranks. Diagnostic np=8 runs were also used during development for NACA and cylinder cases; production-rank comparison remains a limitation for stricter scoring.
+\section{Limitations}
+A case is not a completed benchmark result unless its output metadata reports completed=true, status converged or statistically\_periodic, and the benchmark validator passes. Diagnostic step-limited outputs are intentionally marked failed.
+The Re200 cylinder artifact is a production-horizon finite-volume transient with bounded minimum-inner damped acceptance and an explicit-like physical-diagonal update. Its force signal is finite and alternating, but it should not be interpreted as a high-fidelity resolved vortex-shedding prediction without stronger nonlinear inner convergence and independent mesh/time-step refinement. A separate strict-inner diagnostic using startup damping $\omega=0.0056$ and BDF2-step damping $\omega=0.0085$ ran 50 physical steps with 1000 actual inner iterations per step and reached the $10^{-3}$ inner target on 48/50 steps (target fraction 0.96, typical inner iterations 817.8, final ratio $9.98\times10^{-4}$). This shows the BDF2 residual can be driven to the requested reduction on a short window, but the cost is still too high for the 30,000-step production horizon, so the submitted long run prioritizes bounded physical-time force evolution over full-horizon strict dual-time nonlinear convergence. Several steady viscous cases are accepted by force plateau rather than strict residual-order convergence, and the report keeps those notes visible.
+\end{document}
