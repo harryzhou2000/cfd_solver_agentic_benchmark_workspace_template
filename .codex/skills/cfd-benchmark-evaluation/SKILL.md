@@ -434,6 +434,19 @@ OpenCode, or if Codex session tokens are nonzero while expenses/measurements
 are zero, treat the snapshot as internally invalid and repair it before
 scoring or committing.
 
+Codex `threads.model` is mutable and may contain only the last model selected
+in a thread. Never assign that thread's complete lifetime usage to this final
+value. Attribute each owned cumulative token delta to the latest owned
+`turn_context.model` or
+`thread_settings_applied.thread_settings.model` record. Apply the fork replay
+boundary first so inherited parent model records and counters cannot create a
+false switch. Only token deltas before the first explicit owned model record
+may fall back to the thread database model, and the expense sidecar must expose
+their count. When an extractor change alters this attribution, inventory every
+canonical snapshot with explicit selected roots, regenerate all and only the
+affected snapshots, preserve scores and review judgments byte-for-byte, and
+rerun both completion gates.
+
 For an OpenCode run whose database rows record the resolved host path, use:
 
 ```bash
