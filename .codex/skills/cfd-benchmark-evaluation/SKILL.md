@@ -211,6 +211,17 @@ the curated tip submission:
 
 For example, use `codex/gpt56/08`, not `results/codex-gpt56-08`.
 
+For an evaluator operating inside a delivered contestant repository under the
+manager's `workspace/` tree, the operator's instruction to evaluate the run is
+standing authorization to create and switch to this one exact,
+operator-numbered result branch at the recorded contestant checkpoint. Do not
+pause for separate branch-creation authorization after the collision checks
+pass. This narrow exception does not authorize reusing an existing branch,
+rewriting history, resetting, rebasing, force operations, pushing, creating or
+switching any other contestant branch, or changing branches in the manager
+repository. Those operations remain prohibited or require their own explicit
+authorization as otherwise specified.
+
 Requirements:
 
 - Refuse any existing target branch locally or upstream. Never switch to or
