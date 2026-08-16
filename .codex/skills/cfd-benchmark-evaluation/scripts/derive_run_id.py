@@ -56,6 +56,20 @@ def resolve_commit(workspace: Path, revision: str, label: str) -> str:
     return resolved
 
 
+def is_ancestor(workspace: Path, ancestor: str, descendant: str) -> bool:
+    result = subprocess.run(
+        ["git", "-C", str(workspace), "merge-base", "--is-ancestor", ancestor, descendant],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode == 0:
+        return True
+    if result.returncode == 1:
+        return False
+    raise SystemExit(f"git merge-base --is-ancestor failed: {result.stderr.strip()}")
+
+
 def normalize_artifact(rel: str) -> str:
     if "\\" in rel:
         raise SystemExit(f"artifact path must use repository '/' separators: {rel}")
@@ -148,6 +162,10 @@ def main() -> int:
         required=True,
         help="immutable result commit whose artifact blobs define the state hash",
     )
+    parser.add_argument(
+        "--contestant-checkpoint-commit",
+        help="pre-evaluation HEAD preserved as an ancestor of the final submission",
+    )
     parser.add_argument("--artifact", action="append", default=[])
     parser.add_argument("--out", help="also write the JSON identity record here")
     parser.add_argument("--env-snapshot", help="default: <workspace>/.eval/env_snapshot.json")
@@ -186,6 +204,22 @@ def main() -> int:
             f"submission commit {submission_commit} is not the tip of {result_branch} "
             f"({branch_commit})"
         )
+    contestant_checkpoint_commit = None
+    if args.contestant_checkpoint_commit:
+        contestant_checkpoint_commit = resolve_commit(
+            workspace,
+            args.contestant_checkpoint_commit,
+            "contestant checkpoint commit",
+        )
+        if not is_ancestor(workspace, initial_commit, contestant_checkpoint_commit):
+            raise SystemExit(
+                "initial commit is not an ancestor of the contestant checkpoint"
+            )
+        if not is_ancestor(workspace, contestant_checkpoint_commit, submission_commit):
+            raise SystemExit(
+                "final submission must descend from the contestant checkpoint "
+                f"{contestant_checkpoint_commit}"
+            )
 
     artifacts = []
     for rel in select_artifacts(workspace, submission_commit, args.artifact):
@@ -222,6 +256,8 @@ def main() -> int:
         "env_snapshot": str(snapshot_path),
         "workspace": str(workspace),
     }
+    if contestant_checkpoint_commit is not None:
+        result["contestant_checkpoint_commit"] = contestant_checkpoint_commit
     rendered = json.dumps(result, indent=2) + "\n"
     if args.out:
         out_path = Path(args.out)

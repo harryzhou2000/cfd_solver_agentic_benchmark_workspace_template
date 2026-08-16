@@ -1,4 +1,7 @@
 import importlib.util
+import json
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -59,6 +62,93 @@ class SubmissionAuditTests(unittest.TestCase):
                 Path("/unused"), "deadbeef", "solver/report/report.tex"
             )
         self.assertEqual([path for path, _text in sources], ["solver/report/report.tex"])
+
+
+class SubmissionAuditHistoryTests(unittest.TestCase):
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.repo = Path(self.tempdir.name)
+        self.git("init")
+        self.git("config", "user.email", "audit@example.invalid")
+        self.git("config", "user.name", "Audit Test")
+        (self.repo / "solver/src").mkdir(parents=True)
+        (self.repo / "solver/src/main.cpp").write_text("int main() { return 0; }\n")
+        self.git("add", "solver/src/main.cpp")
+        self.git("commit", "-m", "initial")
+        self.initial = self.git("rev-parse", "HEAD").stdout.strip()
+        (self.repo / ".eval").mkdir()
+        (self.repo / ".eval/env_snapshot.json").write_text(json.dumps({
+            "workspace": {
+                "branch": "codex/test/init",
+                "commit": self.initial,
+            }
+        }))
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def git(self, *args):
+        return subprocess.run(
+            ["git", "-C", str(self.repo), *args],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    def audit_result(self, submission, checkpoint):
+        result = subprocess.run(
+            [
+                "python3", str(SCRIPT),
+                "--workspace", str(self.repo),
+                "--submission-commit", submission,
+                "--contestant-checkpoint-commit", checkpoint,
+            ],
+            capture_output=True,
+            text=True,
+        )
+        return result, json.loads(result.stdout)
+
+    def add_contestant_raw_result(self):
+        (self.repo / "solver/results/run").mkdir(parents=True)
+        (self.repo / "solver/results/run/residuals.csv").write_text("iter,res\n1,1\n")
+        (self.repo / "solver/src/main.cpp").write_text("int main() { return 1; }\n")
+        self.git("add", "solver/src/main.cpp", "solver/results/run/residuals.csv")
+        self.git("commit", "-m", "contestant checkpoint")
+        return self.git("rev-parse", "HEAD").stdout.strip()
+
+    def test_preserves_contestant_history_and_accepts_tip_cleanup(self):
+        checkpoint = self.add_contestant_raw_result()
+        self.git("commit", "--allow-empty", "-m", "incomplete evaluator curation")
+        self.git("rm", "--cached", "solver/results/run/residuals.csv")
+        self.git("commit", "-m", "results: codex/test/01")
+        submission = self.git("rev-parse", "HEAD").stdout.strip()
+
+        process, result = self.audit_result(submission, checkpoint)
+
+        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertTrue(result["passed"])
+        self.assertEqual(result["contestant_checkpoint_commit"], checkpoint)
+        self.assertTrue(result["initial_is_ancestor_of_checkpoint"])
+        self.assertTrue(result["checkpoint_is_submission_ancestor"])
+        self.assertIn(
+            "solver/results/run/residuals.csv",
+            [item["path"] for item in result["removed_prohibited"]],
+        )
+        self.assertTrue((self.repo / "solver/results/run/residuals.csv").is_file())
+
+    def test_rejects_prohibited_artifact_still_present_at_tip(self):
+        checkpoint = self.add_contestant_raw_result()
+        self.git("commit", "--allow-empty", "-m", "results: codex/test/01")
+        submission = self.git("rev-parse", "HEAD").stdout.strip()
+
+        process, result = self.audit_result(submission, checkpoint)
+
+        self.assertEqual(process.returncode, 1)
+        self.assertFalse(result["passed"])
+        self.assertIn(
+            "solver/results/run/residuals.csv",
+            [item["path"] for item in result["violations"]],
+        )
 
 
 if __name__ == "__main__":

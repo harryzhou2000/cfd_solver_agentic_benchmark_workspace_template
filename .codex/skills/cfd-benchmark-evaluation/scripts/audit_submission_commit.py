@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reject raw data and generated artifacts changed by a result commit."""
+"""Audit the final submission tree while preserving contestant Git history."""
 
 from __future__ import annotations
 
@@ -54,6 +54,46 @@ def git(workspace: Path, args: list[str], *, binary: bool = False) -> bytes | st
 
 def resolve_commit(workspace: Path, revision: str) -> str:
     return str(git(workspace, ["rev-parse", "--verify", f"{revision}^{{commit}}"])).strip()
+
+
+def is_ancestor(workspace: Path, ancestor: str, descendant: str) -> bool:
+    result = subprocess.run(
+        ["git", "-C", str(workspace), "merge-base", "--is-ancestor", ancestor, descendant],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    if result.returncode == 0:
+        return True
+    if result.returncode == 1:
+        return False
+    raise SystemExit(f"git merge-base --is-ancestor failed: {result.stderr.strip()}")
+
+
+def changed_paths(workspace: Path, old: str, new: str) -> list[dict[str, str]]:
+    raw = git(
+        workspace,
+        ["diff", "--name-status", "-z", "--find-renames", old, new],
+        binary=True,
+    )
+    assert isinstance(raw, bytes)
+    fields = raw.split(b"\0")
+    changed: list[dict[str, str]] = []
+    index = 0
+    while index < len(fields) and fields[index]:
+        status = fields[index].decode("utf-8", errors="surrogateescape")
+        index += 1
+        old_path = None
+        if status.startswith(("R", "C")):
+            old_path = fields[index].decode("utf-8", errors="surrogateescape")
+            index += 1
+        path = fields[index].decode("utf-8", errors="surrogateescape")
+        index += 1
+        item = {"status": status, "path": path}
+        if old_path is not None:
+            item["old_path"] = old_path
+        changed.append(item)
+    return changed
 
 
 def classify(path_text: str) -> str | None:
@@ -187,6 +227,10 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--workspace", required=True)
     parser.add_argument("--submission-commit", required=True)
+    parser.add_argument(
+        "--contestant-checkpoint-commit",
+        help="pre-evaluation HEAD; the final submission must descend from it",
+    )
     parser.add_argument("--env-snapshot", help="default: <workspace>/.eval/env_snapshot.json")
     args = parser.parse_args()
     workspace = Path(args.workspace).resolve()
@@ -201,30 +245,39 @@ def main() -> int:
         raise SystemExit("environment snapshot lacks workspace.commit")
     initial_commit = resolve_commit(workspace, initial_revision)
     submission_commit = resolve_commit(workspace, args.submission_commit)
+    contestant_checkpoint_commit = None
+    curation_changed: list[dict[str, str]] = []
+    if args.contestant_checkpoint_commit:
+        contestant_checkpoint_commit = resolve_commit(
+            workspace, args.contestant_checkpoint_commit
+        )
+        if not is_ancestor(workspace, initial_commit, contestant_checkpoint_commit):
+            raise SystemExit(
+                "initial commit is not an ancestor of the contestant checkpoint; "
+                "resolve provenance instead of rewriting history"
+            )
+        if not is_ancestor(workspace, contestant_checkpoint_commit, submission_commit):
+            raise SystemExit(
+                "final submission must descend from the recorded contestant checkpoint "
+                f"({contestant_checkpoint_commit})"
+            )
+        curation_changed = changed_paths(
+            workspace, contestant_checkpoint_commit, submission_commit
+        )
 
-    raw = git(
-        workspace,
-        ["diff", "--name-status", "-z", "--find-renames", initial_commit, submission_commit],
-        binary=True,
-    )
-    assert isinstance(raw, bytes)
-    fields = raw.split(b"\0")
-    changed: list[dict[str, str]] = []
+    changed = changed_paths(workspace, initial_commit, submission_commit)
     violations: list[dict[str, str]] = []
-    index = 0
-    while index < len(fields) and fields[index]:
-        status = fields[index].decode("utf-8", errors="surrogateescape")
-        index += 1
-        old_path = None
-        if status.startswith(("R", "C")):
-            old_path = fields[index].decode("utf-8", errors="surrogateescape")
-            index += 1
-        path = fields[index].decode("utf-8", errors="surrogateescape")
-        index += 1
-        item = {"status": status, "path": path}
-        if old_path is not None:
-            item["old_path"] = old_path
-        changed.append(item)
+    removed_prohibited: list[dict[str, str]] = []
+    for item in curation_changed:
+        if not item["status"].startswith("D"):
+            continue
+        reason = classify(item["path"])
+        if reason is not None:
+            removed_prohibited.append({**item, "reason": reason})
+    for item in changed:
+        status = item["status"]
+        path = item["path"]
+        old_path = item.get("old_path")
         reason = classify(path)
         if reason is None and old_path is not None:
             old_reason = classify(old_path)
@@ -239,17 +292,34 @@ def main() -> int:
             reason = "report PNG is not referenced by committed report.tex"
         if reason is not None:
             if status.startswith("D"):
-                reason = "deleted inherited prohibited/data path; requires operator review: " + reason
-            violations.append({**item, "reason": reason})
+                cleanup = {**item, "reason": reason}
+                if cleanup not in removed_prohibited:
+                    removed_prohibited.append(cleanup)
+            else:
+                violations.append({**item, "reason": reason})
 
     result = {
         "initial_commit": initial_commit,
+        "contestant_checkpoint_commit": contestant_checkpoint_commit,
         "submission_commit": submission_commit,
+        "initial_is_ancestor_of_checkpoint": (
+            True if contestant_checkpoint_commit is not None else None
+        ),
+        "checkpoint_is_submission_ancestor": (
+            True if contestant_checkpoint_commit is not None else None
+        ),
+        "curation_changed_count": len(curation_changed),
+        "curation_changed": curation_changed,
         "changed_count": len(changed),
         "changed": changed,
+        "removed_prohibited": removed_prohibited,
         "violations": violations,
         "passed": not violations,
-        "note": "Pattern audit only; evaluator must still inspect every allowed path.",
+        "note": (
+            "Final-tip pattern audit only; preserved ancestor commits are not rewritten. "
+            "Evaluator must inspect every allowed path and record that earlier commits may "
+            "retain artifacts removed by the curation commit."
+        ),
     }
     print(json.dumps(result, indent=2))
     return 0 if result["passed"] else 1

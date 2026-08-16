@@ -13,6 +13,9 @@ record.
 ## Non-negotiable boundaries
 
 - Establish submission provenance before inspecting or scoring it.
+- Treat the initial commit only as the immutable starting-state anchor. Preserve
+  contestant commits made after it; never rebuild the result branch directly
+  on the initial commit merely to obtain a clean delta.
 - After the result commit, evaluate the contestant workspace read-only. Write
   evaluation artifacts only in the manager repository.
 - Derive identity from the initial branch recorded before the agent ran. Never
@@ -60,6 +63,14 @@ The pre-run snapshot is authoritative for:
 - `initial_branch = workspace.branch`;
 - `initial_commit = workspace.commit`.
 
+The initial commit records what the contestant received. It is not the
+expected current `HEAD`, the required parent of the result commit, or a clean
+tree to which evaluator work should be reset. The contestant may have made
+one or many commits, and may also have uncommitted deliverables at the end.
+Record the actual pre-evaluation branch and full `HEAD` as the
+`contestant_checkpoint_commit`; require the initial commit to be its ancestor
+unless an explicit legacy provenance decision documents otherwise.
+
 The initial branch must be exactly `<harness>/<model>/init`. Remove only the
 final `init` component to obtain the result-branch prefix. For example:
 
@@ -96,6 +107,7 @@ record:
 python3 .codex/skills/cfd-benchmark-evaluation/scripts/derive_run_id.py \
   --workspace <workspace> --number 08 \
   --submission-commit <result-commit-sha> \
+  --contestant-checkpoint-commit <pre-evaluation-head-sha> \
   --out /tmp/cfd-run-identity.json
 ```
 
@@ -189,7 +201,9 @@ URL or copy one from another contestant workspace. Normal read-only collision
 checking against the verified manager upstream requires no separate
 per-workspace authorization.
 
-Then create the exact new result branch and commit the complete submission:
+Then create the exact new result branch at the contestant's actual
+pre-evaluation `HEAD`, preserving all contestant-authored history, and commit
+the curated tip submission:
 
 ```text
 <initial branch without /init>/<operator number>
@@ -201,6 +215,12 @@ Requirements:
 
 - Refuse any existing target branch locally or upstream. Never switch to or
   reuse it for another evaluation.
+- Before switching, record `contestant_checkpoint_branch`, the full
+  `contestant_checkpoint_commit`, and the tracked/untracked status. Create the
+  result branch at that commit, not at `initial_commit`. Do not reset, rebase,
+  squash, cherry-pick onto the initial commit, or otherwise reparent existing
+  contestant commits for curation. A clean or partially clean contestant
+  checkpoint is normal.
 - Stage the curated contestant submission: solver source, build/config files,
   reproducibility scripts, report TeX/bibliography sources, curated report
   PNGs, `done`, and relevant tracked submodule pointers. Embed small report
@@ -238,6 +258,16 @@ Requirements:
   canonical paths explicitly, then use `git status --short --untracked-files=all`
   to account for every remaining untracked path as excluded or unexpectedly
   missing from the submission.
+- If a prohibited artifact is already tracked by a contestant commit, remove
+  it from the result-branch **index** in the curation commit while preserving
+  the workspace file as evaluation evidence (for example, use a scoped
+  `git rm --cached` after verifying the exact paths). Do not rewrite contestant
+  history merely because an ancestor tracked raw data. The final result-branch
+  tip must exclude raw data, logs, restarts, fields, generated PDFs, build
+  products, and visualization working files even when they remain reachable
+  from preserved contestant ancestors. Record this history-retention
+  limitation before pushing: deleting a path at the tip does not remove its
+  blob from earlier commits.
 - Inspect the staged file list and diff-stat before committing.
 - Use commit message `results: <result-branch>`, so the operator number appears
   exactly as it does in the branch and run ID.
@@ -249,12 +279,22 @@ After committing, audit the immutable delta against the initial commit:
 
 ```bash
 python3 .codex/skills/cfd-benchmark-evaluation/scripts/audit_submission_commit.py \
-  --workspace <workspace> --submission-commit <result-commit-sha>
+  --workspace <workspace> --submission-commit <result-commit-sha> \
+  --contestant-checkpoint-commit <pre-evaluation-head-sha>
 ```
 
 Do not evaluate or publish if the audit reports a prohibited changed path.
 Review the audit's allowed path list too; pattern checks supplement rather than
-replace evaluator judgment.
+replace evaluator judgment. A prohibited path removed by the curation commit
+is cleanup, not a violation; it must appear in the audit's
+`removed_prohibited` record. A prohibited path still present in the immutable
+submission tip remains a blocker. The audit also verifies that the initial
+commit is an ancestor of the contestant checkpoint and that the final
+submission descends from that checkpoint. Normally use one curation commit;
+if a failed intermediate curation commit already exists, repair it with a
+normal descendant cleanup commit rather than rewriting history. Audit the
+entire checkpoint-to-submission range. The checkpoint need not equal the
+initial commit or the submission's direct parent.
 
 Then call the run-ID helper with the full submission commit SHA. Verify
 that both the initial and submission revisions resolve to local Git commit
@@ -277,6 +317,7 @@ the snapshot:
 
 - canonical run ID and its derivation record;
 - initial branch and initial commit;
+- contestant checkpoint branch and commit recorded immediately before curation;
 - result branch and submission commit;
 - operator number;
 - selected artifact paths and SHA-256 values;
