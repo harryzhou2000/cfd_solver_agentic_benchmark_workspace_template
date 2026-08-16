@@ -12,9 +12,144 @@ from types import SimpleNamespace
 from cfdeval import codex_data as cd
 from cfdeval import expenses as expenses_mod
 from cfdeval import metadata as metadata_mod
+from cfdeval.sessions import CodexThreadEvents
 
 
 class SessionIsolationTests(unittest.TestCase):
+    def test_owned_rollout_continuation_survives_counter_reset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            rollout = Path(tmp) / "rollout-root.jsonl"
+            rows = [
+                {"timestamp": "2026-01-01T00:00:00Z", "type": "session_meta",
+                 "payload": {"id": "root", "timestamp": "2026-01-01T00:00:00Z"}},
+                {"timestamp": "2026-01-01T00:00:01Z", "type": "event_msg",
+                 "payload": {"type": "task_started", "turn_id": "turn-one",
+                             "started_at": 1767225601}},
+                {"timestamp": "2026-01-01T00:00:02Z", "type": "event_msg",
+                 "payload": {"type": "token_count", "info": {
+                     "total_token_usage": {"input_tokens": 90, "output_tokens": 10,
+                                           "total_tokens": 100}}}},
+                {"timestamp": "2026-01-01T00:01:00Z", "type": "event_msg",
+                 "payload": {"type": "task_started", "turn_id": "turn-two",
+                             "started_at": 1767225660}},
+                # A continued turn after compaction starts a new counter epoch.
+                {"timestamp": "2026-01-01T00:01:01Z", "type": "event_msg",
+                 "payload": {"type": "token_count", "info": {
+                     "total_token_usage": {"input_tokens": 18, "output_tokens": 2,
+                                           "total_tokens": 20}}}},
+                {"timestamp": "2026-01-01T00:01:02Z", "type": "event_msg",
+                 "payload": {"type": "token_count", "info": {
+                     "total_token_usage": {"input_tokens": 36, "output_tokens": 4,
+                                           "total_tokens": 40}}}},
+            ]
+            rollout.write_text("\n".join(json.dumps(row) for row in rows) + "\n")
+
+            facts = cd.rollout_usage_facts(str(rollout))
+            self.assertEqual(facts["total_tokens"], 140)
+            self.assertEqual(facts["input_tokens"], 126)
+            self.assertEqual(facts["output_tokens"], 14)
+            stream = CodexThreadEvents("root", str(rollout))
+            stream.load()
+            self.assertEqual(stream.cumulative_final, 140)
+            self.assertEqual(len(stream.token_events), 3)
+
+    def test_forked_rollout_replay_is_excluded_from_usage_and_tools(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp) / "rollout-parent.jsonl"
+            child = Path(tmp) / "rollout-child.jsonl"
+            nested = Path(tmp) / "rollout-nested.jsonl"
+
+            def token(ts, input_t, output_t, total_t, last_input):
+                return {"timestamp": ts, "type": "event_msg", "payload": {
+                    "type": "token_count", "info": {
+                        "total_token_usage": {
+                            "input_tokens": input_t,
+                            "cached_input_tokens": 0,
+                            "output_tokens": output_t,
+                            "reasoning_output_tokens": 0,
+                            "total_tokens": total_t,
+                        },
+                        "last_token_usage": {"input_tokens": last_input},
+                    }}}
+
+            parent_rows = [
+                {"timestamp": "2026-01-01T00:00:00Z", "type": "session_meta",
+                 "payload": {"id": "parent", "timestamp": "2026-01-01T00:00:00Z"}},
+                {"timestamp": "2026-01-01T00:00:01Z", "type": "event_msg",
+                 "payload": {"type": "task_started", "turn_id": "parent-turn",
+                             "started_at": 1767225601}},
+                token("2026-01-01T00:00:02Z", 90, 10, 100, 90),
+                {"timestamp": "2026-01-01T00:00:03Z", "type": "response_item",
+                 "payload": {"type": "function_call", "name": "parent_tool"}},
+                token("2026-01-01T00:00:04Z", 135, 15, 150, 45),
+            ]
+            child_rows = [
+                {"timestamp": "2026-01-01T00:01:00Z", "type": "session_meta",
+                 "payload": {"id": "child", "parent_thread_id": "parent",
+                             "forked_from_id": "parent",
+                             "timestamp": "2026-01-01T00:01:00Z"}},
+                *[{**row, "timestamp": "2026-01-01T00:01:00Z"}
+                  for row in parent_rows],
+                {"timestamp": "2026-01-01T00:01:01Z", "type": "event_msg",
+                 "payload": {"type": "task_started", "turn_id": "child-turn",
+                             "started_at": 1767225661}},
+                {"timestamp": "2026-01-01T00:01:02Z", "type": "response_item",
+                 "payload": {"type": "function_call", "name": "child_tool"}},
+                token("2026-01-01T00:01:03Z", 225, 25, 250, 90),
+            ]
+            nested_rows = [
+                {"timestamp": "2026-01-01T00:02:00Z", "type": "session_meta",
+                 "payload": {"id": "nested", "parent_thread_id": "child",
+                             "forked_from_id": "child",
+                             "timestamp": "2026-01-01T00:02:00Z"}},
+                *[{**row, "timestamp": "2026-01-01T00:02:00Z"}
+                  for row in child_rows],
+                {"timestamp": "2026-01-01T00:02:01Z", "type": "event_msg",
+                 "payload": {"type": "task_started", "turn_id": "nested-turn",
+                             "started_at": 1767225721}},
+                {"timestamp": "2026-01-01T00:02:02Z", "type": "response_item",
+                 "payload": {"type": "function_call", "name": "nested_tool"}},
+                token("2026-01-01T00:02:03Z", 270, 30, 300, 45),
+            ]
+            parent.write_text("\n".join(json.dumps(row) for row in parent_rows) + "\n")
+            child.write_text("\n".join(json.dumps(row) for row in child_rows) + "\n")
+            nested.write_text("\n".join(json.dumps(row) for row in nested_rows) + "\n")
+
+            root_facts = cd.rollout_usage_facts(str(parent))
+            self.assertEqual(root_facts["total_tokens"], 150)
+            root_stream = CodexThreadEvents("parent", str(parent))
+            root_stream.load()
+            self.assertEqual(root_stream.cumulative_final, 150)
+            self.assertEqual([name for _ts, name in root_stream.tool_events],
+                             ["parent_tool"])
+
+            facts = cd.rollout_usage_facts(str(child), str(parent))
+            self.assertEqual(facts["total_tokens"], 100)
+            self.assertEqual(facts["input_tokens"], 90)
+            self.assertEqual(facts["output_tokens"], 10)
+            self.assertEqual(
+                facts["accounting"]["baseline"]["total_tokens"], 150)
+
+            stream = CodexThreadEvents("child", str(child), str(parent))
+            stream.load()
+            self.assertEqual(stream.cumulative_final, 100)
+            self.assertEqual(stream.cumulative_usage["input_tokens"], 90)
+            self.assertEqual([name for _ts, name in stream.tool_events],
+                             ["child_tool"])
+
+            nested_facts = cd.rollout_usage_facts(str(nested), str(child))
+            self.assertEqual(nested_facts["total_tokens"], 50)
+            self.assertEqual(nested_facts["input_tokens"], 45)
+            self.assertEqual(
+                nested_facts["accounting"]["baseline"]["total_tokens"], 250)
+            nested_stream = CodexThreadEvents(
+                "nested", str(nested), str(child))
+            nested_stream.load()
+            self.assertEqual(nested_stream.cumulative_final, 50)
+            self.assertEqual(
+                [name for _ts, name in nested_stream.tool_events],
+                ["nested_tool"])
+
     def test_entrypoints_have_no_home_session_fallbacks(self):
         root = Path(__file__).resolve().parent
         targets = [

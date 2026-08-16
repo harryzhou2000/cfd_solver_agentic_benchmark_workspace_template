@@ -233,34 +233,160 @@ def iter_session_records(rollout_path):
                 continue
 
 
-def rollout_usage_facts(rollout_path: str) -> dict:
-    """Latest cumulative usage, persisted context size, and prompt statistics."""
-    final = {f: 0 for f in TOKEN_FIELDS}
+def _usage_fields(raw: dict | None) -> dict:
+    raw = raw or {}
+    return {field: max(int(raw.get(field, 0) or 0), 0)
+            for field in TOKEN_FIELDS}
+
+
+def rollout_task_started_ids(rollout_path: str | None) -> set[str]:
+    """Return persisted task turn IDs from one bundled rollout."""
+    return {
+        str(turn_id)
+        for rec in iter_session_records(rollout_path)
+        if rec.get("type") == "event_msg"
+        and (rec.get("payload") or {}).get("type") == "task_started"
+        and (turn_id := (rec.get("payload") or {}).get("turn_id"))
+    }
+
+
+def rollout_ownership(rollout_path: str | None,
+                      parent_rollout_path: str | None = None,
+                      parent_task_ids: set[str] | None = None) -> dict:
+    """Locate the non-inherited portion of a root or forked rollout.
+
+    Forked Codex rollouts begin with their own ``session_meta`` and then replay
+    the parent's persisted history.  Replay record timestamps are rewritten at
+    fork time, so timestamps alone cannot identify ownership.  The first
+    post-fork ``task_started`` is instead identified by both its creation-time
+    epoch and a turn ID absent from the parent rollout.  Token counters before
+    that boundary are the inherited cumulative baseline.
+    """
+    records = iter_session_records(rollout_path)
+    first = next(records, None)
+    zero = _usage_fields(None)
+    if not first:
+        return {
+            "is_fork": False, "available": False, "boundary_turn_id": None,
+            "baseline": zero, "inherited_records": 0,
+            "reason": "rollout unavailable or empty",
+        }
+    meta = first.get("payload") or {}
+    parent_id = meta.get("parent_thread_id") or meta.get("forked_from_id")
+    if not parent_id:
+        return {
+            "is_fork": False, "available": True, "boundary_turn_id": None,
+            "baseline": zero, "inherited_records": 0, "reason": None,
+        }
+    parent_available = (parent_task_ids is not None or (
+        parent_rollout_path and Path(parent_rollout_path).is_file()))
+    parent_turns = (parent_task_ids if parent_task_ids is not None else
+                    rollout_task_started_ids(parent_rollout_path)
+                    if parent_available else set())
+    created = parse_iso(meta.get("timestamp"))
+    created_second = int(created.timestamp()) if created else None
+    baseline = zero
+    inherited = 0
+    for rec in records:
+        payload = rec.get("payload") or {}
+        if rec.get("type") == "event_msg" and payload.get("type") == "task_started":
+            turn_id = payload.get("turn_id")
+            started_at = payload.get("started_at")
+            new_turn = (turn_id and str(turn_id) not in parent_turns
+                        if parent_available else turn_id and inherited == 0)
+            time_ok = (created_second is None or not isinstance(started_at, (int, float))
+                       or int(started_at) >= created_second)
+            if new_turn and time_ok:
+                return {
+                    "is_fork": True, "available": True,
+                    "boundary_turn_id": str(turn_id), "baseline": baseline,
+                    "inherited_records": inherited, "reason": None,
+                    "boundary_basis": ("parent-turn-id-and-creation-epoch"
+                                       if parent_available else
+                                       "first-record-task-no-replay"),
+                }
+        if rec.get("type") == "event_msg" and payload.get("type") == "token_count":
+            total = ((payload.get("info") or {}).get("total_token_usage") or {})
+            if total:
+                baseline = _usage_fields(total)
+        inherited += 1
+    return {
+        "is_fork": True, "available": False, "boundary_turn_id": None,
+        "baseline": baseline, "inherited_records": inherited,
+        "reason": ("fork-owned task boundary not found"
+                   if parent_available else
+                   "fork parent rollout unavailable and replay boundary ambiguous"),
+    }
+
+
+def iter_owned_session_records(rollout_path: str | None,
+                               ownership: dict):
+    """Yield only records owned by this thread, plus its own session metadata."""
+    boundary = ownership.get("boundary_turn_id")
+    if not ownership.get("available"):
+        return
+    if not ownership.get("is_fork"):
+        yield from iter_session_records(rollout_path)
+        return
+    started = False
+    for index, rec in enumerate(iter_session_records(rollout_path)):
+        if index == 0 and rec.get("type") == "session_meta":
+            yield rec
+            continue
+        payload = rec.get("payload") or {}
+        if (not started and rec.get("type") == "event_msg"
+                and payload.get("type") == "task_started"
+                and str(payload.get("turn_id")) == boundary):
+            started = True
+        if started:
+            yield rec
+
+
+def rollout_usage_facts(rollout_path: str,
+                        parent_rollout_path: str | None = None,
+                        parent_task_ids: set[str] | None = None) -> dict:
+    """Thread-owned usage, persisted context size, and prompt statistics."""
+    ownership = rollout_ownership(
+        rollout_path, parent_rollout_path, parent_task_ids)
+    baseline = ownership["baseline"]
+    previous = dict(baseline)
+    owned = _usage_fields(None)
     context_windows = []
     prompt_inputs = []
-    for rec in iter_session_records(rollout_path):
+    for rec in iter_owned_session_records(rollout_path, ownership):
         payload = rec.get("payload") or {}
         if rec.get("type") != "event_msg" or payload.get("type") != "token_count":
             continue
         info = payload.get("info") or {}
         total = info.get("total_token_usage") or {}
-        if total and total.get("total_tokens", 0) >= final["total_tokens"]:
-            final = {f: max(int(total.get(f, 0) or 0), 0) for f in TOKEN_FIELDS}
-            final["non_cached_input_tokens"] = max(
-                final["input_tokens"] - final["cached_input_tokens"], 0)
+        if total:
+            cur = _usage_fields(total)
+            if cur["total_tokens"] < previous["total_tokens"]:
+                delta = cur
+            else:
+                delta = {field: max(cur[field] - previous[field], 0)
+                         for field in TOKEN_FIELDS}
+            for field in TOKEN_FIELDS:
+                owned[field] += delta[field]
+            previous = cur
         cw = info.get("model_context_window")
         if isinstance(cw, int) and cw > 0:
             context_windows.append(cw)
         last_input = (info.get("last_token_usage") or {}).get("input_tokens")
         if isinstance(last_input, int) and last_input >= 0:
             prompt_inputs.append(last_input)
+    if not ownership.get("available"):
+        owned = _usage_fields(None)
+    owned["non_cached_input_tokens"] = max(
+        owned["input_tokens"] - owned["cached_input_tokens"], 0)
     return {
-        **final,
+        **owned,
         "model_context_window": max(context_windows) if context_windows else None,
         "max_prompt_input_tokens": max(prompt_inputs) if prompt_inputs else None,
         "mean_prompt_input_tokens": (
             sum(prompt_inputs) / len(prompt_inputs) if prompt_inputs else None
         ),
+        "accounting": ownership,
     }
 
 

@@ -243,6 +243,7 @@ def main(argv: list[str] | None = None) -> int:
     threads = cd.load_threads(args.state_db)
     cd.rebase_rollout_paths(threads, args.sessions_root)
     edges = cd.load_spawn_edges(args.state_db)
+    parent_by_child = {child: parent for parent, child in edges}
     goals = cd.load_goals(args.goals_db) if Path(args.goals_db).is_file() else {}
     selected = cd.select_threads(threads, workspace)
     roots, all_ids = cd.thread_trees(selected, edges)
@@ -268,7 +269,7 @@ def main(argv: list[str] | None = None) -> int:
     by_root_tree = {}
     for rid in roots:
         tree_ids = cd.tree_of(rid, threads, edges)
-        tree_tokens = sum(
+        state_tree_tokens = sum(
             (threads.get(tid) or {}).get("tokens_used", 0) for tid in tree_ids
         )
         g = goals.get(rid, {})
@@ -277,17 +278,26 @@ def main(argv: list[str] | None = None) -> int:
             "goal_time_seconds": g.get("time_used_seconds", 0),
             "goal_tokens": g.get("tokens_used", 0),
             "threads": len(tree_ids),
-            "tokens_used": tree_tokens,
+            "tokens_used": None,
+            "state_tokens_inherited_inclusive": state_tree_tokens,
             "model": (full_threads.get(rid) or {}).get("model"),
         }
 
     usage = cd.load_turn_usage(args.logs_db, all_ids) if Path(args.logs_db).is_file() else {}
     meta = json.loads(Path(args.cost_metadata).read_text())
+    parent_task_ids = {
+        tid: cd.rollout_task_started_ids((threads.get(tid) or {}).get("rollout_path"))
+        for tid in set(parent_by_child.values()) if threads.get(tid)
+    }
 
     # Rollouts retain exact cached/input/output splits even when legacy
     # logs_2.sqlite lacks per-turn usage rows.
     cumulative = {
-        tid: cd.rollout_usage_facts((full_threads.get(tid) or {}).get("rollout_path"))
+        tid: cd.rollout_usage_facts(
+            (full_threads.get(tid) or {}).get("rollout_path"),
+            (threads.get(parent_by_child.get(tid)) or {}).get("rollout_path"),
+            parent_task_ids.get(parent_by_child.get(tid)),
+        )
         for tid in all_ids if full_threads.get(tid)
     }
 
@@ -306,27 +316,45 @@ def main(argv: list[str] | None = None) -> int:
         is_sub = tid in children
         recs = usage.get(tid, [])
         rollout_rec = cumulative.get(tid) or {}
-        if rollout_rec.get("total_tokens", 0):
+        accounting = rollout_rec.get("accounting") or {}
+        if accounting.get("available"):
             thread_model = t["model"]
             declared = t["tokens_used"]
             observed = rollout_rec["total_tokens"]
-            scale = declared / observed if declared and observed else 1.0
+            is_fork = bool(accounting.get("is_fork"))
+            scale = (declared / observed
+                     if not is_fork and declared and observed else 1.0)
+            accounted_total = declared if not is_fork and declared else observed
             per_model = {thread_model: {
                 "input": int(round(rollout_rec["input_tokens"] * scale)),
                 "cached": int(round(rollout_rec["cached_input_tokens"] * scale)),
                 "non_cached": int(round(rollout_rec["non_cached_input_tokens"] * scale)),
                 "output": int(round(rollout_rec["output_tokens"] * scale)),
                 "reasoning_output": int(round(rollout_rec["reasoning_output_tokens"] * scale)),
-                "total": declared or observed,
+                "total": accounted_total,
             }}
-            total = declared or observed
+            total = accounted_total
             thread_entry = {
                 "model": thread_model,
                 "is_subagent": is_sub,
-                "source": "rollout_cumulative" if scale == 1.0 else "rollout_scaled_to_threads",
+                "source": ("rollout_fork_delta" if is_fork else
+                           "rollout_scaled_to_threads" if scale != 1.0 else
+                           "rollout_cumulative"),
                 "tokens": per_model,
                 "total": total,
+                "inherited_baseline_tokens": (
+                    (accounting.get("baseline") or {}).get("total_tokens", 0)),
             }
+            if is_fork and declared != observed:
+                discrepancy_notes.append(
+                    f"thread {tid}: ignored inherited-inclusive state token "
+                    f"counter {declared}; rollout-owned usage is {observed}"
+                )
+            elif scale != 1.0:
+                discrepancy_notes.append(
+                    f"root thread {tid}: rollout total {observed} scaled to "
+                    f"standalone state token counter {declared} (x{scale:.3f})"
+                )
         elif recs:
             thread_model = t["model"]
             per_model_log = {}
@@ -410,6 +438,10 @@ def main(argv: list[str] | None = None) -> int:
             main_tokens += total
 
     total_tokens = sum(b["total"] for b in by_model.values())
+    for rid, root_info in by_root_tree.items():
+        tree_ids = cd.tree_of(rid, threads, edges)
+        root_info["tokens_used"] = sum(
+            (by_thread.get(tid) or {}).get("total", 0) for tid in tree_ids)
 
     # ---- cost ------------------------------------------------------------
     current_cost = estimate_by_model(meta, by_model)
@@ -459,9 +491,11 @@ def main(argv: list[str] | None = None) -> int:
             "fallback_tokens": fallback_tokens_total,
             "discrepancy_notes": discrepancy_notes,
             "accounting_note": (
-                "Cached/input/output splits come from each selected thread's "
-                "terminal rollout counter and are scaled only when needed to "
-                "match state_5.sqlite threads.tokens_used."
+                "Cached/input/output splits come from thread-owned rollout "
+                "counter deltas. Fork replay is excluded at the first child-owned "
+                "task boundary, and fork state counters are diagnostic only. "
+                "A standalone root may retain the legacy state-counter scaling "
+                "fallback when its rollout ends before the persisted root total."
             ),
         },
         "cost_estimate_usd": {

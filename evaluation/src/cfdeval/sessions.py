@@ -81,9 +81,13 @@ def parse_ts(text: str | None):
 class CodexThreadEvents:
     """Aggregated per-thread event stream from a rollout file."""
 
-    def __init__(self, thread_id: str, rollout_path: str | None):
+    def __init__(self, thread_id: str, rollout_path: str | None,
+                 parent_rollout_path: str | None = None,
+                 parent_task_ids: set[str] | None = None):
         self.thread_id = thread_id
         self.rollout_path = rollout_path
+        self.parent_rollout_path = parent_rollout_path
+        self.parent_task_ids = parent_task_ids
         self._prev_tot: dict = {}
         self.cumulative_final: int | None = None   # final total_token_usage (thread total)
         self.cumulative_usage: dict[str, int] = {
@@ -116,7 +120,12 @@ class CodexThreadEvents:
             return
         self.bytes = p.stat().st_size
         self.sha256 = hashlib.sha256(p.read_bytes()).hexdigest() if self.bytes < 64 * 1024 * 1024 else None
-        for rec in cd.iter_session_records(str(p)):
+        ownership = cd.rollout_ownership(
+            str(p), self.parent_rollout_path, self.parent_task_ids)
+        if not ownership.get("available"):
+            return
+        self._prev_tot = dict(ownership.get("baseline") or {})
+        for rec in cd.iter_owned_session_records(str(p), ownership):
             ts = parse_ts(rec.get("timestamp"))
             if ts is None:
                 continue
@@ -154,7 +163,7 @@ class CodexThreadEvents:
                             for key in fields:
                                 self.cumulative_usage[key] += delta[key]
                         self._prev_tot = cur
-                        self.cumulative_final = cur["total_tokens"]
+                        self.cumulative_final = self.cumulative_usage["total_tokens"]
                         context_window = info.get("model_context_window")
                         if isinstance(context_window, int) and context_window > 0:
                             self.model_context_window = context_window
@@ -203,6 +212,7 @@ def analyze_codex(workspace: str, state_db: str, sessions_root: str,
     threads = cd.load_threads(state_db)
     cd.rebase_rollout_paths(threads, sessions_root)
     edges = cd.load_spawn_edges(state_db)
+    parent_by_child = {child: parent for parent, child in edges}
     selected = cd.select_threads(threads, workspace)
     root_ids, all_ids = cd.thread_trees(selected, edges)
     children = {c for _, c in edges}
@@ -216,11 +226,18 @@ def analyze_codex(workspace: str, state_db: str, sessions_root: str,
             all_ids |= cd.tree_of(r, threads, edges)
 
     streams: dict[str, CodexThreadEvents] = {}
+    parent_task_ids = {
+        tid: cd.rollout_task_started_ids((threads.get(tid) or {}).get("rollout_path"))
+        for tid in set(parent_by_child.values()) if threads.get(tid)
+    }
     for tid in sorted(all_ids):
         t = threads.get(tid)
         if not t:
             continue
-        s = CodexThreadEvents(tid, t.get("rollout_path"))
+        parent = threads.get(parent_by_child.get(tid)) or {}
+        s = CodexThreadEvents(
+            tid, t.get("rollout_path"), parent.get("rollout_path"),
+            parent_task_ids.get(parent_by_child.get(tid)))
         s.load()
         streams[tid] = s
 
@@ -815,9 +832,9 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
             "their own sessions); total_from_all_sessions sums them")
     if codex_doc.get("present"):
         accounting_notes.append(
-            "codex: each selected thread has its own cumulative usage counter; "
-            "run totals sum the selected root and its subagent threads. Bucket "
-            "totals are per-event "
+            "codex: fork replay is excluded at each child-owned task boundary; "
+            "run totals sum only root and subagent-owned counter deltas. Bucket "
+            "totals are per-owned-event "
             "total_token_usage deltas (cache-hit history is per submission; "
             "duplicate streaming ticks are excluded).")
 

@@ -269,9 +269,14 @@ def main(argv: list[str] | None = None) -> int:
     threads = cd.load_threads(args.state_db)
     cd.rebase_rollout_paths(threads, args.sessions_root)
     edges = cd.load_spawn_edges(args.state_db)
+    parent_by_child = {child: parent for parent, child in edges}
     selected = cd.select_threads(threads, str(workspace))
     _, all_ids = cd.thread_trees(selected, edges)
     children = {c for _, c in edges}
+    parent_task_ids = {
+        tid: cd.rollout_task_started_ids((threads.get(tid) or {}).get("rollout_path"))
+        for tid in set(parent_by_child.values()) if threads.get(tid)
+    }
     requested_roots = cd.parse_roots(args.roots)
     if requested_roots is not None:
         missing = [r for r in requested_roots if r not in threads]
@@ -296,7 +301,11 @@ def main(argv: list[str] | None = None) -> int:
             continue
         per_thread = Counter()
         risk_seen = set()
-        for rec in cd.iter_session_records(t["rollout_path"]):
+        parent = threads.get(parent_by_child.get(tid)) or {}
+        ownership = cd.rollout_ownership(
+            t["rollout_path"], parent.get("rollout_path"),
+            parent_task_ids.get(parent_by_child.get(tid)))
+        for rec in cd.iter_owned_session_records(t["rollout_path"], ownership):
             ts = rec.get("timestamp")
             rtype = rec.get("type")
             payload = rec.get("payload", {}) or {}
@@ -356,7 +365,7 @@ def main(argv: list[str] | None = None) -> int:
         kept.extend(items[:200])
         if len(items) > 200:
             kept.append({
-                "category": cat, "severity": "low", "thread_id": None,
+                "category": cat, "severity": "low", "thread_id": "multiple",
                 "timestamp": None, "tool": "summary",
                 "evidence": f"{len(items) - 200} additional {cat} findings truncated",
             })
