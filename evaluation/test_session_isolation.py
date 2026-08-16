@@ -12,7 +12,7 @@ from types import SimpleNamespace
 from cfdeval import codex_data as cd
 from cfdeval import expenses as expenses_mod
 from cfdeval import metadata as metadata_mod
-from cfdeval.sessions import CodexThreadEvents
+from cfdeval.sessions import CodexThreadEvents, analyze_opencode, whole_stats
 
 
 class SessionIsolationTests(unittest.TestCase):
@@ -259,9 +259,27 @@ class SessionIsolationTests(unittest.TestCase):
                 db.execute(
                     "INSERT INTO session VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     ("root", None, str(workspace.resolve()), "benchmark", "build",
-                     json.dumps({"id": "k3", "providerID": "kimi-for-coding"}),
-                     10, 3, 2, 100, 4, 0.0, 1_000, 2_000, "1.18.11"),
+                     json.dumps({"id": "deepseek-v4-pro", "providerID": "deepseek",
+                                 "variant": "high"}),
+                     10, 3, 2, 100, 4, 1.25, 1_000, 2_000, "1.18.11"),
                 )
+                messages = [
+                    ("m1", "root", json.dumps({
+                        "role": "assistant", "providerID": "kimi-for-coding",
+                        "modelID": "k3", "variant": "max", "cost": 0,
+                        "time": {"created": 1_000},
+                        "tokens": {"input": 4, "output": 1, "reasoning": 0,
+                                   "cache": {"read": 60, "write": 1}},
+                    }), 1_000),
+                    ("m2", "root", json.dumps({
+                        "role": "assistant", "providerID": "deepseek",
+                        "modelID": "deepseek-v4-pro", "variant": "high",
+                        "cost": 1.25, "time": {"created": 1_100},
+                        "tokens": {"input": 6, "output": 2, "reasoning": 2,
+                                   "cache": {"read": 40, "write": 3}},
+                    }), 1_100),
+                ]
+                db.executemany("INSERT INTO message VALUES (?,?,?,?)", messages)
                 db.commit()
             finally:
                 db.close()
@@ -276,8 +294,34 @@ class SessionIsolationTests(unittest.TestCase):
             session = extracted["opencode"]["sessions"][0]
             self.assertEqual(session["tokens_cache_read"], 100)
             self.assertEqual(session["tokens_cache_write"], 4)
-            self.assertEqual(extracted["models"]["k3"]["tokens_cache_read"], 100)
+            self.assertEqual(session["entry_model"], "k3")
+            self.assertEqual(session["entry_variant"], "max")
+            self.assertEqual(len(session["usage_by_model"]), 2)
+            self.assertEqual(extracted["models"]["k3@max"]["tokens_cache_read"], 60)
+            self.assertEqual(
+                extracted["models"]["deepseek-v4-pro@high"]["tokens_cache_read"], 40)
             self.assertEqual(extracted["subagents"], [])
+
+            prices = Path(tmp) / "prices.json"
+            prices.write_text(json.dumps({
+                "defaults": {"input_per_mtok": 1, "cached_input_per_mtok": 0.25,
+                             "output_per_mtok": 4, "input_share": 0.75},
+                "models": {
+                    "kimi-for-coding/k3": {"input_per_mtok": 3,
+                                            "cached_input_per_mtok": 0.3,
+                                            "output_per_mtok": 15},
+                    "deepseek/deepseek-v4-pro": {"input_per_mtok": 0.66,
+                                                  "cached_input_per_mtok": 0.022,
+                                                  "output_per_mtok": 1.98},
+                },
+            }))
+            facts = expenses_mod.opencode_expense_facts(
+                extracted, str(workspace.resolve()), prices, ["root"])
+            self.assertEqual(set(facts["tokens"]["by_model"]), {
+                "kimi-for-coding/k3", "deepseek/deepseek-v4-pro"})
+            self.assertEqual(facts["tokens"]["total"], 119)
+            self.assertEqual(
+                facts["cost_estimate_usd"]["provider_reported_total"], 1.25)
 
     def test_opencode_extractors_map_container_workspace_directory(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -368,6 +412,79 @@ class SessionIsolationTests(unittest.TestCase):
             self.assertEqual(facts["cost_estimate_usd"]["provider_reported_total"], 1.25)
             self.assertGreater(facts["cost_estimate_usd"]["total"], 0)
             self.assertEqual(facts["provenance"]["selected_roots"], ["root"])
+
+    def test_opencode_message_categories_and_parts_are_aggregated_once(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp) / "workspace"
+            workspace.mkdir()
+            db_path = workspace / ".sessions" / "opencode-data" / "opencode" / "opencode.db"
+            db_path.parent.mkdir(parents=True)
+            db = sqlite3.connect(db_path)
+            try:
+                db.executescript("""
+                    CREATE TABLE session (
+                      id TEXT, parent_id TEXT, directory TEXT, title TEXT, agent TEXT,
+                      model TEXT, tokens_input INTEGER, tokens_output INTEGER,
+                      tokens_reasoning INTEGER, tokens_cache_read INTEGER,
+                      tokens_cache_write INTEGER, cost REAL, time_created INTEGER,
+                      time_updated INTEGER, version TEXT
+                    );
+                    CREATE TABLE message (id TEXT, session_id TEXT, data TEXT,
+                                          time_created INTEGER);
+                    CREATE TABLE part (message_id TEXT, session_id TEXT, data TEXT,
+                                       time_created INTEGER);
+                """)
+                model = json.dumps({"id": "model", "providerID": "provider"})
+                rows = [
+                    ("root", None, str(workspace.resolve()), "root", "build", model,
+                     10, 3, 2, 100, 4, 1.25, 1_000, 2_000, "1"),
+                    ("child", "root", str(workspace.resolve()), "child", "task", model,
+                     7, 2, 1, 50, 6, 0.5, 1_100, 2_100, "1"),
+                    ("other", None, str(workspace.resolve()), "other", "build", model,
+                     999, 999, 999, 999, 999, 99, 1_200, 2_200, "1"),
+                ]
+                db.executemany("INSERT INTO session VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+
+                def message(mid, sid, created, raw, read, write, output, reasoning):
+                    data = json.dumps({
+                        "role": "assistant", "time": {"created": created},
+                        "tokens": {
+                            # Deliberately wrong: extraction must reconstruct
+                            # total from the immutable category counters.
+                            "total": 999999, "input": raw, "output": output,
+                            "reasoning": reasoning,
+                            "cache": {"read": read, "write": write},
+                        },
+                    })
+                    db.execute("INSERT INTO message VALUES (?,?,?,?)",
+                               (mid, sid, data, created))
+
+                message("m-root", "root", 1_000, 10, 100, 4, 3, 2)
+                message("m-child", "child", 1_100, 7, 50, 6, 2, 1)
+                message("m-other", "other", 1_200, 999, 999, 999, 999, 999)
+                # Pretty-printed JSON verifies tool detection does not depend
+                # on a compact `"type":"tool"` byte pattern.
+                db.execute("INSERT INTO part VALUES (?,?,?,?)", (
+                    "m-root", "root", json.dumps({"type": "tool", "tool": "bash"},
+                                                 indent=2), 1_001))
+                db.commit()
+            finally:
+                db.close()
+
+            doc, _events, token_events, tool_events = analyze_opencode(
+                str(db_path), str(workspace.resolve()), ["root"])
+            self.assertEqual([s["session_id"] for s in doc["sessions"]],
+                             ["root", "child"])
+            self.assertEqual(len(token_events), 2)
+            totals = whole_stats([], token_events, tool_events, [], [], {})["tokens"]
+            self.assertEqual(totals, {
+                "input": 177, "cached_input": 150, "cache_write": 10,
+                "non_cached_input": 27, "output": 5,
+                "reasoning_output": 3, "total": 185,
+                "total_from_root_trees": None,
+                "total_from_all_sessions": None,
+            })
+            self.assertEqual(tool_events[0][1], "bash")
 
 
 if __name__ == "__main__":

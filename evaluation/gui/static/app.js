@@ -465,10 +465,13 @@
     const sessionTokens = (((detail.sessions || {}).analysis || {}).whole_session_stats || {}).tokens || {};
     const selection = (detail.agent_scores || {}).session_selection || {};
     const primaryId = (selection.roots || [])[0];
-    const primary = ((detail.metadata || {}).threads || {})[primaryId] || {};
+    const md = detail.metadata || {};
+    const ocSessions = (((md.opencode || {}).sessions) || []);
+    const primary = (md.threads || {})[primaryId]
+      || ocSessions.find(s => s.session_id === primaryId) || {};
     const efforts = Array.isArray(primary.reasoning_effort) ? primary.reasoning_effort : (primary.reasoning_effort ? [primary.reasoning_effort] : []);
     const cards = [
-      { label: "Primary model", value: [primary.entry_model || primary.model, primary.entry_reasoning_effort || efforts[0]].filter(Boolean).join(" ") || emDash, sub: primaryId ? primaryId.slice(0, 13) : "" },
+      { label: "Primary model", value: [primary.entry_model || primary.model, primary.entry_reasoning_effort || primary.entry_variant || efforts[0] || primary.variant].filter(Boolean).join(" ") || emDash, sub: primaryId ? primaryId.slice(0, 13) : "" },
       { label: "Context window", value: fmtTokens(primary.model_context_window_recorded), sub: primary.context_used_max_input == null ? "usage unavailable" : `${fmtTokens(primary.context_used_max_input)} max observed input` },
       { label: "Total tokens",  value: fmtTokens(sessionTokens.total ?? ex.tokens?.total), sub: "selected root tree", cls: "is-strong" },
       { label: "Input", value: fmtTokens(sessionTokens.input), sub: `${fmtTokens(sessionTokens.non_cached_input)} non-cached` },

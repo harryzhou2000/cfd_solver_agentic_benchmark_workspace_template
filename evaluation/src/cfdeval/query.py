@@ -247,21 +247,34 @@ def current_model_decomposition(expenses: dict, metadata: dict,
                 current = (by_id.get(current) or {}).get("parent_id")
         for session_id in sorted(selected):
             info = by_id[session_id]
-            model = info.get("model") or "unknown"
-            effort = info.get("variant") or "unknown"
-            output = int(info.get("tokens_output", 0) or 0)
-            reasoning = int(info.get("tokens_reasoning", 0) or 0)
-            raw_input = int(info.get("tokens_input", 0) or 0)
-            cache_read = int(info.get("tokens_cache_read", 0) or 0)
-            cache_write = int(info.get("tokens_cache_write", 0) or 0)
-            input_t = raw_input + cache_read + cache_write
-            add(model, effort, {
-                "input": input_t, "cached_input": cache_read,
-                "cache_write": cache_write, "output": output,
-                "reasoning_output": reasoning,
-                "total": input_t + output + reasoning,
-            }, provider=info.get("provider"), persisted_cost=info.get("cost"),
-                basis="exact OpenCode model + variant aggregate")
+            units = info.get("usage_by_model") or [{
+                "model": info.get("model"), "provider": info.get("provider"),
+                "variant": info.get("variant"),
+                "tokens_input": info.get("tokens_input", 0),
+                "tokens_cache_read": info.get("tokens_cache_read", 0),
+                "tokens_cache_write": info.get("tokens_cache_write", 0),
+                "tokens_output": info.get("tokens_output", 0),
+                "tokens_reasoning": info.get("tokens_reasoning", 0),
+                "cost": info.get("cost"),
+            }]
+            for unit in units:
+                model = unit.get("model") or "unknown"
+                effort = unit.get("variant") or "unknown"
+                output = int(unit.get("tokens_output", 0) or 0)
+                reasoning = int(unit.get("tokens_reasoning", 0) or 0)
+                raw_input = int(unit.get("tokens_input", 0) or 0)
+                cache_read = int(unit.get("tokens_cache_read", 0) or 0)
+                cache_write = int(unit.get("tokens_cache_write", 0) or 0)
+                input_t = raw_input + cache_read + cache_write
+                add(model, effort, {
+                    "input": input_t, "cached_input": cache_read,
+                    "cache_write": cache_write, "output": output,
+                    "reasoning_output": reasoning,
+                    "total": input_t + output + reasoning,
+                }, provider=unit.get("provider"), persisted_cost=unit.get("cost"),
+                    basis=("exact OpenCode assistant-message model + variant aggregate"
+                           if info.get("usage_by_model") else
+                           "OpenCode session-row model + variant aggregate"))
     else:
         for model, token_bundle in ((expenses.get("tokens") or {}).get("by_model") or {}).items():
             model_info = (metadata.get("models") or {}).get(model) or {}
@@ -439,9 +452,11 @@ def row_for(folder: Path, summary: dict) -> dict:
     if isinstance(efforts, str):
         efforts = [efforts]
     primary_model = (primary_thread.get("entry_model") or primary_thread.get("model")
+                     or primary_opencode.get("entry_model")
                      or primary_opencode.get("model"))
     primary_effort = (primary_thread.get("entry_reasoning_effort")
                       or (efforts[0] if efforts else None)
+                      or primary_opencode.get("entry_variant")
                       or primary_opencode.get("variant"))
     primary_model_effort = " ".join(
         x for x in (primary_model, primary_effort) if x

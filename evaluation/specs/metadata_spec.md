@@ -52,6 +52,15 @@ For every thread (root and subagent) in the contestant's session set:
 - Codex rollout token events may persist `model_context_window`; retain this
   recorded value per thread and use it when catalog metadata is unavailable.
 
+For OpenCode, `session.model` is only the session's current/final selection;
+it may change during a run. Each selected session therefore records
+`entry_provider`, `entry_model`, and `entry_variant` from its first persisted
+assistant request plus `usage_by_model`, aggregated from assistant-message
+`providerID`, `modelID`, `variant`, token categories, and cost. This
+message-level decomposition is authoritative for model attribution and
+pricing. Session-row counters remain an independent whole-session total.
+Never add `step-finish` part usage because it duplicates message usage.
+
 ## 3. Context window used
 
 - `context_window` per model: the advertised window from the catalog, falling

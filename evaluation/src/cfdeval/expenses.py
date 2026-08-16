@@ -133,48 +133,70 @@ def opencode_expense_facts(metadata: dict, workspace: str,
     main_tokens = subagent_tokens = 0
     provider_cost = 0.0
     for session in sessions:
-        model = session.get("model") or "unknown"
-        provider = session.get("provider")
-        key = f"{provider}/{model}" if provider else model
-        raw_input = int(session.get("tokens_input", 0) or 0)
-        cache_read = int(session.get("tokens_cache_read", 0) or 0)
-        cache_write = int(session.get("tokens_cache_write", 0) or 0)
-        output = int(session.get("tokens_output", 0) or 0)
-        reasoning = int(session.get("tokens_reasoning", 0) or 0)
-        input_total = raw_input + cache_read + cache_write
-        total = input_total + output + reasoning
-        bundle = {
-            "input": input_total,
-            "cached_input": cache_read,
-            "cache_write": cache_write,
-            "non_cached_input": raw_input + cache_write,
-            "output": output,
-            "reasoning_output": reasoning,
-            "reasoning_is_output_subset": False,
-            "total": total,
-        }
-        agg = by_model.setdefault(key, {name: 0 for name in (
-            "input", "cached_input", "cache_write", "non_cached_input", "output",
-            "reasoning_output", "total")})
-        agg["reasoning_is_output_subset"] = False
-        for name in ("input", "cached_input", "cache_write", "non_cached_input", "output",
-                     "reasoning_output", "total"):
-            agg[name] += bundle[name]
+        units = session.get("usage_by_model") or [{
+            "model": session.get("model"), "provider": session.get("provider"),
+            "variant": session.get("variant"),
+            "tokens_input": session.get("tokens_input", 0),
+            "tokens_cache_read": session.get("tokens_cache_read", 0),
+            "tokens_cache_write": session.get("tokens_cache_write", 0),
+            "tokens_output": session.get("tokens_output", 0),
+            "tokens_reasoning": session.get("tokens_reasoning", 0),
+            "cost": session.get("cost", 0),
+        }]
+        thread_bundles: dict[str, dict] = {}
+        thread_total = 0
+        thread_provider_cost = 0.0
+        for unit in units:
+            model = unit.get("model") or "unknown"
+            provider = unit.get("provider")
+            key = f"{provider}/{model}" if provider else model
+            raw_input = int(unit.get("tokens_input", 0) or 0)
+            cache_read = int(unit.get("tokens_cache_read", 0) or 0)
+            cache_write = int(unit.get("tokens_cache_write", 0) or 0)
+            output = int(unit.get("tokens_output", 0) or 0)
+            reasoning = int(unit.get("tokens_reasoning", 0) or 0)
+            input_total = raw_input + cache_read + cache_write
+            total = input_total + output + reasoning
+            bundle = {
+                "input": input_total,
+                "cached_input": cache_read,
+                "cache_write": cache_write,
+                "non_cached_input": raw_input + cache_write,
+                "output": output,
+                "reasoning_output": reasoning,
+                "reasoning_is_output_subset": False,
+                "total": total,
+            }
+            agg = by_model.setdefault(key, {name: 0 for name in (
+                "input", "cached_input", "cache_write", "non_cached_input", "output",
+                "reasoning_output", "total")})
+            agg["reasoning_is_output_subset"] = False
+            thread_agg = thread_bundles.setdefault(key, {name: 0 for name in (
+                "input", "cached_input", "cache_write", "non_cached_input", "output",
+                "reasoning_output", "total")})
+            thread_agg["reasoning_is_output_subset"] = False
+            for name in ("input", "cached_input", "cache_write", "non_cached_input",
+                         "output", "reasoning_output", "total"):
+                agg[name] += bundle[name]
+                thread_agg[name] += bundle[name]
+            thread_total += total
+            thread_provider_cost += float(unit.get("cost", 0) or 0)
         sid = session.get("session_id") or "unknown"
         by_thread[sid] = {
-            "model": model,
-            "provider": provider,
-            "variant": session.get("variant"),
+            "model": session.get("entry_model") or session.get("model"),
+            "provider": session.get("entry_provider") or session.get("provider"),
+            "variant": session.get("entry_variant") or session.get("variant"),
             "is_subagent": bool(session.get("parent_id")),
-            "source": "opencode_session",
-            "tokens": {key: bundle},
-            "total": total,
+            "source": ("opencode_assistant_messages"
+                       if session.get("usage_by_model") else "opencode_session"),
+            "tokens": thread_bundles,
+            "total": thread_total,
         }
         if session.get("parent_id"):
-            subagent_tokens += total
+            subagent_tokens += thread_total
         else:
-            main_tokens += total
-        provider_cost += float(session.get("cost", 0) or 0)
+            main_tokens += thread_total
+        provider_cost += thread_provider_cost
     price_path = Path(cost_metadata_path)
     price_meta = json.loads(price_path.read_text())
     estimate = estimate_by_model(price_meta, by_model)

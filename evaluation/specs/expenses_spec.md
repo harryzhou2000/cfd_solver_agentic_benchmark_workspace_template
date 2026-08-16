@@ -4,8 +4,8 @@
 
 Extract execution expenses of a codex contestant run: **time**, **token
 usage** (main agent and all subagents), and an **estimated cost** computed
-from tokens against the centralized cost metadata. Targets codex contestants
-for now.
+from tokens against the centralized cost metadata. Both Codex and OpenCode
+selected session trees are supported.
 
 ## 1. Time
 
@@ -62,6 +62,15 @@ Token accounting:
 - Rollout or log totals are cross-checked against `threads.tokens_used`;
   discrepancies and any scaling needed to reconcile a split to that terminal
   total are recorded, not silently hidden.
+
+For OpenCode, the selected root and descendant sessions are counted once.
+Assistant-message token categories are disjoint: raw input, cache read, cache
+write, output, and reasoning. Normalized input is raw input plus both cache
+categories; normalized total adds output and reasoning. Model/provider/variant
+and provider-reported cost are aggregated from assistant messages, because a
+mutable `session.model` row cannot attribute lifetime counters after an
+in-session model switch. Session counters are used only as a total cross-check
+or as an explicit legacy fallback when message usage is unavailable.
 
 ## 3. Cost estimate
 

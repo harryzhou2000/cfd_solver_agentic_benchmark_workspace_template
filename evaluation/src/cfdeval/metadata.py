@@ -231,6 +231,81 @@ def opencode_activity_times(db_path: str, session_ids: list[str],
     return out
 
 
+def opencode_message_usage(db_path: str, sessions: list[dict]) -> dict[str, list[dict]]:
+    """Aggregate immutable OpenCode usage by the model on each assistant message.
+
+    ``session.model`` is mutable and reflects the last model selected in a
+    session. It therefore cannot attribute lifetime session counters when an
+    agent switches models. Message rows retain the provider, model, variant,
+    token categories, and provider-reported cost for each request.
+    """
+    by_session: dict[str, list[dict]] = {}
+    fallback = {s["session_id"]: s for s in sessions}
+    try:
+        db = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    except sqlite3.Error:
+        return by_session
+    try:
+        for sid, session in fallback.items():
+            aggregates: dict[tuple[str, str, str | None], dict] = {}
+            try:
+                rows = db.execute(
+                    "SELECT id, data, time_created FROM message "
+                    "WHERE session_id=? ORDER BY time_created, id", (sid,)
+                ).fetchall()
+            except sqlite3.Error:
+                continue
+            for message_id, raw, stored_created in rows:
+                try:
+                    message = json.loads(raw)
+                except (TypeError, json.JSONDecodeError):
+                    continue
+                if message.get("role") != "assistant":
+                    continue
+                tokens = message.get("tokens") or {}
+                if not isinstance(tokens, dict) or not tokens:
+                    continue
+                cache = tokens.get("cache") or {}
+                provider = message.get("providerID") or session.get("provider") or "unknown"
+                model = message.get("modelID") or session.get("model") or "unknown"
+                variant = message.get("variant")
+                if variant is None:
+                    variant = session.get("variant")
+                key = (str(provider), str(model), str(variant) if variant is not None else None)
+                agg = aggregates.setdefault(key, {
+                    "provider": key[0], "model": key[1], "variant": key[2],
+                    "message_count": 0, "tokens_input": 0,
+                    "tokens_output": 0, "tokens_reasoning": 0,
+                    "tokens_cache_read": 0, "tokens_cache_write": 0,
+                    "cost": 0.0, "first_message_id": message_id,
+                    "first_message_at": None, "last_message_at": None,
+                })
+                created = (message.get("time") or {}).get("created") or stored_created
+                agg["message_count"] += 1
+                agg["tokens_input"] += max(int(tokens.get("input", 0) or 0), 0)
+                agg["tokens_output"] += max(int(tokens.get("output", 0) or 0), 0)
+                agg["tokens_reasoning"] += max(int(tokens.get("reasoning", 0) or 0), 0)
+                agg["tokens_cache_read"] += max(int(cache.get("read", 0) or 0), 0)
+                agg["tokens_cache_write"] += max(int(cache.get("write", 0) or 0), 0)
+                agg["cost"] += float(message.get("cost", 0) or 0)
+                if created:
+                    stamp = datetime.fromtimestamp(created / 1000, tz=timezone.utc).isoformat()
+                    if agg["first_message_at"] is None:
+                        agg["first_message_at"] = stamp
+                    agg["last_message_at"] = stamp
+            if aggregates:
+                by_session[sid] = sorted(
+                    aggregates.values(),
+                    key=lambda item: (item["first_message_at"] or "", item["provider"],
+                                      item["model"], item["variant"] or ""),
+                )
+                for item in by_session[sid]:
+                    item["cost"] = round(item["cost"], 12)
+    finally:
+        db.close()
+    return by_session
+
+
 def extract_opencode(args, workspace: str) -> dict:
     """Best-effort metadata from the opencode harness (opencode.db). Anything
     that cannot be extracted is emitted as a question for the user."""
@@ -304,6 +379,19 @@ def extract_opencode(args, workspace: str) -> dict:
         })
     sessions = cd.select_opencode_session_trees(
         sessions, cd.parse_roots(getattr(args, "roots", None)))
+    message_usage = opencode_message_usage(args.opencode_db, sessions)
+    for session in sessions:
+        usage = message_usage.get(session["session_id"], [])
+        session["usage_by_model"] = usage
+        if usage:
+            entry = usage[0]
+            session["entry_provider"] = entry["provider"]
+            session["entry_model"] = entry["model"]
+            session["entry_variant"] = entry["variant"]
+        else:
+            session["entry_provider"] = session["provider"]
+            session["entry_model"] = session["model"]
+            session["entry_variant"] = session["variant"]
     # per-session activity time from message history (created/completed),
     # excluding idle gaps > threshold (interrupted by user or API).
     activity = opencode_activity_times(args.opencode_db,
@@ -330,41 +418,55 @@ def extract_opencode(args, workspace: str) -> dict:
     catalog = load_catalog(args.ocx_catalog)
     models: dict[str, dict] = {}
     for s in sessions:
-        key = f"{s['model']}@{s['variant']}" if s["variant"] else (s["model"] or "unknown")
-        agg = models.setdefault(key, {
+        units = s.get("usage_by_model") or [{
             "model": s["model"], "variant": s["variant"], "provider": s["provider"],
-            "catalog": {"display_name": None, "context_window": None},
-            "reasoning_efforts_seen": [s["variant"]] if s["variant"] else [],
-            "max_context_used": 0, "threads": 0,
-            "tokens_input": 0, "tokens_output": 0, "tokens_reasoning": 0,
-            "tokens_cache_read": 0, "tokens_cache_write": 0,
-            "cost": 0.0,
-        })
-        agg["threads"] += 1
-        agg["tokens_input"] += s["tokens_input"]
-        agg["tokens_output"] += s["tokens_output"]
-        agg["tokens_reasoning"] += s["tokens_reasoning"]
-        agg["tokens_cache_read"] += s["tokens_cache_read"]
-        agg["tokens_cache_write"] += s["tokens_cache_write"]
-        agg["cost"] += s["cost"]
+            "tokens_input": s["tokens_input"], "tokens_output": s["tokens_output"],
+            "tokens_reasoning": s["tokens_reasoning"],
+            "tokens_cache_read": s["tokens_cache_read"],
+            "tokens_cache_write": s["tokens_cache_write"], "cost": s["cost"],
+        }]
+        for unit in units:
+            key = (f"{unit['model']}@{unit['variant']}" if unit.get("variant")
+                   else (unit.get("model") or "unknown"))
+            agg = models.setdefault(key, {
+                "model": unit.get("model"), "variant": unit.get("variant"),
+                "provider": unit.get("provider"),
+                "catalog": {"display_name": None, "context_window": None},
+                "reasoning_efforts_seen": ([unit["variant"]]
+                                            if unit.get("variant") else []),
+                "max_context_used": 0, "threads": 0,
+                "tokens_input": 0, "tokens_output": 0, "tokens_reasoning": 0,
+                "tokens_cache_read": 0, "tokens_cache_write": 0,
+                "cost": 0.0,
+            })
+            agg["threads"] += 1
+            agg["tokens_input"] += unit.get("tokens_input", 0)
+            agg["tokens_output"] += unit.get("tokens_output", 0)
+            agg["tokens_reasoning"] += unit.get("tokens_reasoning", 0)
+            agg["tokens_cache_read"] += unit.get("tokens_cache_read", 0)
+            agg["tokens_cache_write"] += unit.get("tokens_cache_write", 0)
+            agg["cost"] += unit.get("cost", 0)
         # OpenCode stores cumulative per-session usage, not a per-request
         # context high-water mark. Preserve the historical raw-input proxy;
         # adding cumulative cache reads here would misreport context as tens
         # or hundreds of millions of tokens.
-        agg["max_context_used"] = max(agg["max_context_used"], s["tokens_input"])
-        if s["variant"] and s["variant"] not in agg["reasoning_efforts_seen"]:
-            agg["reasoning_efforts_seen"].append(s["variant"])
-        if not agg["catalog"]["context_window"]:
-            match = next(
-                (m for slug, m in catalog.items()
-                 if slug.rsplit("/", 1)[-1] == (s["model"] or "").lower()),
-                None,
-            )
-            if match:
-                agg["catalog"] = {
-                    "display_name": match.get("display_name"),
-                    "context_window": match.get("context_window"),
-                }
+            agg["max_context_used"] = max(agg["max_context_used"],
+                                           unit.get("tokens_input", 0))
+            if (unit.get("variant")
+                    and unit["variant"] not in agg["reasoning_efforts_seen"]):
+                agg["reasoning_efforts_seen"].append(unit["variant"])
+            if not agg["catalog"]["context_window"]:
+                match = next(
+                    (m for slug, m in catalog.items()
+                     if slug.rsplit("/", 1)[-1]
+                     == (unit.get("model") or "").lower()),
+                    None,
+                )
+                if match:
+                    agg["catalog"] = {
+                        "display_name": match.get("display_name"),
+                        "context_window": match.get("context_window"),
+                    }
     for key, agg in models.items():
         if not agg["catalog"]["context_window"]:
             questions.append({

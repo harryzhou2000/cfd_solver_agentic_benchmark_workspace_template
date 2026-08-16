@@ -360,18 +360,25 @@ def analyze_opencode(opencode_db: str, workspace: str,
                             ts = datetime.fromtimestamp(created / 1000, tz=timezone.utc)
                             tok = d.get("tokens") or {}
                             cache = tok.get("cache") or {}
-                            input_raw = tok.get("input", 0)
-                            cache_read = cache.get("read", 0)
+                            input_raw = max(int(tok.get("input", 0) or 0), 0)
+                            cache_read = max(int(cache.get("read", 0) or 0), 0)
+                            cache_write = max(int(cache.get("write", 0) or 0), 0)
+                            output = max(int(tok.get("output", 0) or 0), 0)
+                            reasoning = max(int(tok.get("reasoning", 0) or 0), 0)
                             usage = {
-                                # opencode counts cache reads separately from
-                                # input; normalize to codex semantics
-                                # (input includes cached):
-                                "input": input_raw + cache_read,
+                                # OpenCode counts cache reads and writes
+                                # separately from raw input. Normalize to the
+                                # manager contract where input includes every
+                                # input-side category and total is the exact
+                                # sum of the persisted category counters.
+                                "input": input_raw + cache_read + cache_write,
                                 "cached": cache_read,
-                                "non_cached": input_raw,
-                                "output": tok.get("output", 0),
-                                "reasoning": tok.get("reasoning", 0),
-                                "total": tok.get("total", 0),
+                                "cache_write": cache_write,
+                                "non_cached": input_raw + cache_write,
+                                "output": output,
+                                "reasoning": reasoning,
+                                "total": (input_raw + cache_read + cache_write
+                                          + output + reasoning),
                             }
                             all_events.append((ts, "opencode", sid,
                                                "message", {
@@ -384,8 +391,8 @@ def analyze_opencode(opencode_db: str, workspace: str,
                             ts = datetime.fromtimestamp(completed / 1000, tz=timezone.utc)
                             all_events.append((ts, "opencode", sid, "message_complete", {}))
                     parts = db.execute(
-                        "SELECT data, time_created FROM part WHERE session_id=? "
-                        "AND data LIKE '%\"type\":\"tool\"%'", (sid,)).fetchall()
+                        "SELECT data, time_created FROM part WHERE session_id=?",
+                        (sid,)).fetchall()
                     for pdata, ptc in parts:
                         try:
                             p = json.loads(pdata)
@@ -602,12 +609,14 @@ def build_buckets(window_start: datetime, window_end: datetime,
                 active_seconds += (hi - lo).total_seconds()
         active_seconds = round(min(active_seconds, bucket_seconds), 1)
         idle_seconds = round(max(0.0, (b_end - b_start).total_seconds() - active_seconds), 1)
-        tok = {"input": 0, "cached_input": 0, "non_cached_input": 0,
+        tok = {"input": 0, "cached_input": 0, "cache_write": 0,
+               "non_cached_input": 0,
                "output": 0, "reasoning_output": 0, "total": 0}
         for ts, usage, _eid in token_events:
             if b_start <= ts < b_end:
                 tok["input"] += usage.get("input", 0)
                 tok["cached_input"] += usage.get("cached", 0)
+                tok["cache_write"] += usage.get("cache_write", 0)
                 tok["non_cached_input"] += usage.get("non_cached", 0)
                 tok["output"] += usage.get("output", 0)
                 tok["reasoning_output"] += usage.get("reasoning", 0)
@@ -656,11 +665,13 @@ def build_buckets(window_start: datetime, window_end: datetime,
 def whole_stats(buckets, token_events, tool_events, turn_events,
                 intervals, per_entity, run_total_codex=None,
                 run_total_opencode=None, accounting_notes=None) -> dict:
-    tok = {"input": 0, "cached_input": 0, "non_cached_input": 0,
+    tok = {"input": 0, "cached_input": 0, "cache_write": 0,
+           "non_cached_input": 0,
            "output": 0, "reasoning_output": 0, "total": 0}
     for _ts, usage, _eid in token_events:
         tok["input"] += usage.get("input", 0)
         tok["cached_input"] += usage.get("cached", 0)
+        tok["cache_write"] += usage.get("cache_write", 0)
         tok["non_cached_input"] += usage.get("non_cached", 0)
         tok["output"] += usage.get("output", 0)
         tok["reasoning_output"] += usage.get("reasoning", 0)
@@ -720,6 +731,7 @@ def _norm_codex_usage(u: dict) -> dict:
     return {
         "input": input_t,
         "cached": cached_t,
+        "cache_write": max(u.get("cache_write_input_tokens", 0), 0),
         "non_cached": input_t - cached_t,
         "output": u.get("output_tokens", 0),
         "reasoning": u.get("reasoning_output_tokens", 0),
@@ -802,9 +814,12 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
                     "model": session.get("model"),
                     "variant": session.get("variant"),
                     "tokens_input": session.get("tokens_input", 0),
+                    "tokens_cache_read": session.get("tokens_cache_read", 0),
+                    "tokens_cache_write": session.get("tokens_cache_write", 0),
                     "tokens_total_session": (
                         session.get("tokens_input", 0)
                         + session.get("tokens_cache_read", 0)
+                        + session.get("tokens_cache_write", 0)
                         + session.get("tokens_output", 0)
                         + session.get("tokens_reasoning", 0)),
                     "started_at": session.get("started_at"),

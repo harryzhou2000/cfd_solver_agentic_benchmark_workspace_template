@@ -153,6 +153,47 @@ class SnapshotProtocolTests(unittest.TestCase):
             self.assertEqual(estimate["total"], 0.001)
             self.assertEqual(estimate["unpriced_tokens"], 0)
 
+    def test_opencode_decomposition_uses_message_models_after_session_switch(self):
+        with tempfile.TemporaryDirectory() as raw:
+            price_file = Path(raw) / "prices.json"
+            price_file.write_text(json.dumps({
+                "defaults": {"input_per_mtok": 1, "cached_input_per_mtok": 0.25,
+                             "output_per_mtok": 4, "input_share": 0.75},
+                "models": {
+                    "kimi-for-coding/k3": {"input_per_mtok": 3,
+                                            "cached_input_per_mtok": 0.3,
+                                            "output_per_mtok": 15},
+                    "deepseek/deepseek-v4-pro": {"input_per_mtok": 0.66,
+                                                  "cached_input_per_mtok": 0.022,
+                                                  "output_per_mtok": 1.98},
+                },
+            }))
+            metadata = {"harness": {"harness": "opencode"}, "opencode": {
+                "sessions": [{
+                    "session_id": "root", "parent_id": None,
+                    "model": "deepseek-v4-pro", "provider": "deepseek",
+                    "variant": "high", "entry_model": "k3",
+                    "entry_provider": "kimi-for-coding", "entry_variant": "max",
+                    "usage_by_model": [
+                        {"model": "k3", "provider": "kimi-for-coding",
+                         "variant": "max", "tokens_input": 4,
+                         "tokens_cache_read": 60, "tokens_cache_write": 1,
+                         "tokens_output": 1, "tokens_reasoning": 0, "cost": 0},
+                        {"model": "deepseek-v4-pro", "provider": "deepseek",
+                         "variant": "high", "tokens_input": 6,
+                         "tokens_cache_read": 40, "tokens_cache_write": 3,
+                         "tokens_output": 2, "tokens_reasoning": 2, "cost": 1.25},
+                    ],
+                }],
+            }}
+            with patch.object(query, "COST_METADATA", price_file):
+                decomposition = query.current_model_decomposition(
+                    {}, metadata, {"session_selection": {"roots": ["root"]}})
+            self.assertEqual([row["key"] for row in decomposition["rows"]],
+                             ["deepseek-v4-pro + high", "k3 + max"])
+            self.assertEqual(decomposition["total_tokens"], 119)
+            self.assertEqual(decomposition["total_persisted_cost_usd"], 1.25)
+
     def test_codex_model_decomposition_keys_model_plus_single_observed_effort(self):
         with tempfile.TemporaryDirectory() as raw:
             price_file = Path(raw) / "prices.json"

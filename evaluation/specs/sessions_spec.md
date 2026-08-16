@@ -56,10 +56,13 @@ which sessions belong to the run and answers any ambiguity:
 
 ## Bucketed statistics (per 30-minute bucket)
 
-- `tokens`: input (incl. cached), cached, non-cached, output, reasoning,
-  total — from per-submission usage records (codex `last_token_usage`
-  deltas; opencode per-message `tokens` with cache reads normalized into
-  input).
+- `tokens`: input (including cache reads and writes), cached reads, cache
+  writes, non-cached input, output, reasoning, and total — from
+  per-submission usage records (codex `last_token_usage` deltas; OpenCode
+  per-message category counters). OpenCode's raw input, cache-read, and
+  cache-write fields are disjoint; the normalized input and total fields are
+  recomputed from those immutable categories rather than trusting an optional
+  provider total.
 - `cache`: `cached_tokens`, `input_tokens`, `hit_ratio` per bucket — the
   cache-hit history of the run.
 - `tools`: total, by tool name, and by category (shell/editing/files/
