@@ -903,7 +903,7 @@
         "019fc19f-d832-70b2-a7ad-de61bc56f670": {
           "kind": "codex_thread",
           "is_subagent": true,
-          "events": 57,
+          "events": 56,
           "tokens_total_subtree": 120798,
           "tools": {
             "exec_command": 10,
@@ -915,12 +915,12 @@
         }
       },
       "accounting_notes": [
-        "codex: each selected thread has its own cumulative usage counter; run totals sum the selected root and its subagent threads. Bucket totals are per-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
+        "codex: fork replay is excluded at each child-owned task boundary; run totals sum only root and subagent-owned counter deltas. Bucket totals are per-owned-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
       ]
     }
   },
   "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/02",
-  "discovered_at": "2026-08-14T05:29:06.016709+00:00",
+  "discovered_at": "2026-08-16T12:06:41.634975+00:00",
   "sources": [
     {
       "id": "project_codex",
@@ -966,6 +966,6 @@
     "harness": "codex",
     "bucket_seconds": 1800,
     "idle_gap_seconds": 600,
-    "generated_at": "2026-08-14T05:29:06.016724+00:00"
+    "generated_at": "2026-08-16T12:06:41.634991+00:00"
   }
 }

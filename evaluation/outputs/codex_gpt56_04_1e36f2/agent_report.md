@@ -4,6 +4,10 @@
 - Provenance: operator-authorized post-run reconstruction of `codex/gpt56/init` / `f6c8822cbf3475de5af5ee6f930d2aa259536357`
 - Result identity: `codex_gpt56_04_1e36f2`; `run_identity.json` SHA-256 `5f17d3c48674f627023a988bb6771b310c49f0ca4d4a8ee16427c391786a0628`.
 
+## Session accounting correction
+
+Forked rollouts replayed large parent histories into descendants. Excluding inherited prefixes corrects the selected tree from 8,698,654,004 to 689,394,311 owned tokens, removing 8,009,259,693 replayed tokens. The current-price estimate changes from $2,980.9933 to $241.2582. Evaluation evidence, the 86/100 pre-DQ rubric, and the DQ verdict are unchanged.
+
 ## Session selection
 
 Project-local Codex root `019fcc41-b754-7b02-8563-d4cdfbcc43de`, with its 26 descendants, is the only substantive candidate and was selected. Its root-scoped window is 2026-08-04T10:11:34.470000+00:00 through 2026-08-05T11:44:54.367000+00:00, so execution date is 2026-08-04. The deterministically extracted terminal contestant-response sidecar is `contestant_final_response.md`, SHA-256 `d8c4b9a73be23263f3d8c45c8278e5597a032a556c037459cf196d4bc2ff70ec`; it is an unindexed derived Markdown sidecar.

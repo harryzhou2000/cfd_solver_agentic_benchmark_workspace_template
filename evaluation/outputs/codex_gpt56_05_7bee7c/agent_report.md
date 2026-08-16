@@ -10,7 +10,7 @@
 - Benchmark submodule: 1bc6580b84825037bbeac097ede1b2226d8185d1
 - Session window: 2026-08-05T13:29:10.098000+00:00 → 2026-08-05T19:17:15.900000+00:00
 - Time: goal 20869.0s, wall 20885.8s
-- Tokens: 182,127,240 (main 115,696,883 / subagents 66,430,357); cost est. $102.18
+- Tokens: 154,028,422 (main 115,696,883 / subagents 38,331,539); cost est. $91.4499
 
 ### Session analysis (auto)
 
@@ -20,7 +20,11 @@
 - Permission-wait candidates: 0 (method: heuristic; ask-tool events: 0)
   - limitation: codex rollouts contain no explicit approval-request/response event types (verified by scanning all local sessions); permission-blocked idle cannot be distinguished from user-away time with certainty
   - limitation: candidates are gaps > idle threshold between a tool/turn boundary and a user message / new turn in approval-aware threads; expect false positives when the user stepped away
-- Whole-session: tokens 182,127,240, cache hit 0.9734, tools 1332
+- Whole-session: tokens 154,028,422, cache hit 0.9730, tools 1332
+
+### Session accounting correction
+
+Fork replay previously added 28,098,818 inherited tokens to descendant totals. The selected tree is corrected from 182,127,240 to 154,028,422 owned tokens, and its current-price estimate from $102.1771 to $91.4499. Evaluation evidence, scores, and DQ verdict are unchanged.
 
 ### Structural result checks (auto)
 

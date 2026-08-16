@@ -9,33 +9,33 @@
 ## Snapshot
 
 - Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: no
-- Session analysis: 2026-08-09T10:06:24.505000+00:00 → 2026-08-15T03:02:39.208000+00:00; 274×1800s buckets; idle 4 gaps / 48593s excluded; permission-wait candidates 0; tokens 165,563,385,478 (cache hit 0.9877)
+- Session analysis: 2026-08-09T10:06:24.505000+00:00 → 2026-08-16T00:26:56.617000+00:00; 317×1800s buckets; idle 5 gaps / 49491s excluded; permission-wait candidates 0; tokens 5,477,942,644 (cache hit 0.9837)
 
 ## Expenses
 
-- Goal time (codex): **446024 s**
-- Wall time: **493023 s**
-- Tokens: **165,563,577,113** (main 4,241,561,045 / subagents 161,322,016,068)
+- Goal time (codex): **523046 s**
+- Wall time: **570032 s**
+- Tokens: **5,477,942,644** (main 4,975,794,470 / subagents 502,148,174)
 
 ### Per root session
 
 | Root | Status | Model | Threads | Tokens | Goal time (s) |
 |------|--------|-------|--------:|-------:|--------------:|
-| `019fe5fc` | active | gpt-5.6-luna | 69 | 165,563,577,113 | 446024 |
+| `019fe5fc` | complete | gpt-5.6-luna | 69 | 5,477,942,644 | 523046 |
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| gpt-5.6-luna | 11,327,008,952 | 11,176,586,177 | 14,083,029 | 11,341,091,981 |
-| gpt-5.6-terra | 154,042,882,936 | 152,152,164,864 | 179,602,196 | 154,222,485,132 |
+| gpt-5.6-luna | 5,170,318,361 | 5,097,428,480 | 6,426,597 | 5,176,744,958 |
+| gpt-5.6-terra | 300,221,581 | 284,033,408 | 976,105 | 301,197,686 |
 
-- Cost estimate: **$51039.23** (estimate; unpriced tokens: 0)
+- Cost estimate: **$679.81** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
-- Tool calls: **30,718**; top tools: exec=22142, wait=6523, wait_agent=1109, send_message=519, list_agents=199, followup_task=146
+- Tool calls: **35,982**; top tools: exec=25493, wait=8268, wait_agent=1137, send_message=622, list_agents=222, followup_task=158
 - Subagent spawns: 68
-- LOC (file scan): 11,855 lines / 34 files
-- LOC (git tracked): 3,911 lines
+- LOC (file scan): 12,128 lines / 35 files
+- LOC (git tracked): 3,962 lines
 
 ## Metadata
 
@@ -139,7 +139,7 @@
 | medium | sandbox_escalation | `019fe5fc` | e_ms":1000,"max_output_tokens":20000,"sandbox_permissions":"require_escalated","justification":"May I run the MPI transient continuation outside the sandbox so OpenMPI can create its PMIx sockets?" |
 | medium | sandbox_escalation | `019fe5fc` | e_ms":1000,"max_output_tokens":20000,"sandbox_permissions":"require_escalated","justification":"May I run the fresh-gradient HLLC startup test under MPI outside the sandbox?","prefix_rule":["/usr/b |
 | medium | sandbox_escalation | `019fe5fc` | e_ms":1000,"max_output_tokens":20000,"sandbox_permissions":"require_escalated","justification":"May I run the exact prior HLLC startup command to isolate the frozen-gradient effect?","prefix_rule": |
-| ... | 177 more | | |
+| ... | 178 more | | |
 
 ## Reviews
 

@@ -9,26 +9,26 @@
 ## Snapshot
 
 - Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: no
-- Session analysis: 2026-08-14T08:26:46.981000+00:00 → 2026-08-15T15:21:05.936000+00:00; 62×1800s buckets; idle 2 gaps / 71013s excluded; permission-wait candidates 0; tokens 325,794,414 (cache hit 0.9898)
+- Session analysis: 2026-08-14T08:26:46.981000+00:00 → 2026-08-15T15:21:05.936000+00:00; 62×1800s buckets; idle 2 gaps / 71013s excluded; permission-wait candidates 0; tokens 325,077,202 (cache hit 0.9899)
 
 ## Expenses
 
 - Goal time (codex): **66990 s**
 - Wall time: **111259 s**
-- Tokens: **325,794,414** (main 312,556,604 / subagents 13,237,810)
+- Tokens: **325,077,202** (main 312,556,604 / subagents 12,520,598)
 
 ### Per root session
 
 | Root | Status | Model | Threads | Tokens | Goal time (s) |
 |------|--------|-------|--------:|-------:|--------------:|
-| `019fff60` | blocked | BLSC/GLM-5.2 | 8 | 325,794,414 | 66990 |
+| `019fff60` | blocked | BLSC/GLM-5.2 | 8 | 325,077,202 | 66990 |
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
 | BLSC/GLM-5.2 | 320,133,979 | 317,093,184 | 1,461,461 | 321,595,440 |
-| BLSC/MiniMax-M3 | 4,171,467 | 3,913,111 | 27,507 | 4,198,974 |
+| BLSC/MiniMax-M3 | 3,456,644 | 3,230,231 | 25,118 | 3,481,762 |
 
-- Cost estimate: **$35.69** (estimate; unpriced tokens: 0)
+- Cost estimate: **$101.85** (estimate; unpriced tokens: 0)
 
 ## Measurements
 

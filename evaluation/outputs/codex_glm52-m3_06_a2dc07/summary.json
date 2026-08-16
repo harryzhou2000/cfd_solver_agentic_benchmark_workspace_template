@@ -33,13 +33,14 @@
           "goal_time_seconds": 66990,
           "goal_tokens": 3921672,
           "threads": 8,
-          "tokens_used": 325794414,
+          "tokens_used": 325077202,
+          "state_tokens_inherited_inclusive": 325794414,
           "model": "BLSC/GLM-5.2"
         }
       }
     },
     "tokens": {
-      "total": 325794414,
+      "total": 325077202,
       "by_model": {
         "BLSC/GLM-5.2": {
           "input": 320133979,
@@ -51,12 +52,12 @@
           "fallback_tokens": 0
         },
         "BLSC/MiniMax-M3": {
-          "input": 4171467,
-          "cached_input": 3913111,
-          "non_cached_input": 258356,
-          "output": 27507,
+          "input": 3456644,
+          "cached_input": 3230231,
+          "non_cached_input": 226413,
+          "output": 25118,
           "reasoning_output": 0,
-          "total": 4198974,
+          "total": 3481762,
           "fallback_tokens": 0
         }
       },
@@ -75,12 +76,13 @@
               "total": 312556604
             }
           },
-          "total": 312556604
+          "total": 312556604,
+          "inherited_baseline_tokens": 0
         },
         "01a00462-27e5-7e93-ad09-5b13d5483858": {
           "model": "BLSC/MiniMax-M3",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/MiniMax-M3": {
               "input": 265928,
@@ -91,12 +93,13 @@
               "total": 270672
             }
           },
-          "total": 270672
+          "total": 270672,
+          "inherited_baseline_tokens": 0
         },
         "01a0049c-5f0b-7593-b6c1-6e726f22b95a": {
           "model": "BLSC/GLM-5.2",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/GLM-5.2": {
               "input": 2840076,
@@ -107,12 +110,13 @@
               "total": 2880127
             }
           },
-          "total": 2880127
+          "total": 2880127,
+          "inherited_baseline_tokens": 0
         },
         "01a00580-f5f9-76b0-a9a7-336611d70a57": {
           "model": "BLSC/GLM-5.2",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/GLM-5.2": {
               "input": 482248,
@@ -123,12 +127,13 @@
               "total": 494061
             }
           },
-          "total": 494061
+          "total": 494061,
+          "inherited_baseline_tokens": 0
         },
         "01a00581-c9fc-7541-93ba-00e8f9250f98": {
           "model": "BLSC/GLM-5.2",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/GLM-5.2": {
               "input": 3611144,
@@ -139,12 +144,13 @@
               "total": 3663368
             }
           },
-          "total": 3663368
+          "total": 3663368,
+          "inherited_baseline_tokens": 0
         },
         "01a00581-ca4a-7042-8171-2482b95edd8f": {
           "model": "BLSC/GLM-5.2",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/GLM-5.2": {
               "input": 1952408,
@@ -155,12 +161,13 @@
               "total": 2001280
             }
           },
-          "total": 2001280
+          "total": 2001280,
+          "inherited_baseline_tokens": 0
         },
         "01a005fb-86b2-7ab1-b0bd-f3bc3c7f2501": {
           "model": "BLSC/MiniMax-M3",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/MiniMax-M3": {
               "input": 1630745,
@@ -171,44 +178,48 @@
               "total": 1637410
             }
           },
-          "total": 1637410
+          "total": 1637410,
+          "inherited_baseline_tokens": 0
         },
         "01a005fe-2e04-78b1-96cf-43b7d4d7c271": {
           "model": "BLSC/MiniMax-M3",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/MiniMax-M3": {
-              "input": 2274794,
-              "cached": 2106880,
-              "non_cached": 167914,
-              "output": 16098,
+              "input": 1559971,
+              "cached": 1424000,
+              "non_cached": 135971,
+              "output": 13709,
               "reasoning_output": 0,
-              "total": 2290892
+              "total": 1573680
             }
           },
-          "total": 2290892
+          "total": 1573680,
+          "inherited_baseline_tokens": 717212
         }
       },
       "main_vs_subagent": {
         "main": 312556604,
-        "subagent": 13237810
+        "subagent": 12520598
       },
       "fallback_tokens": 0,
-      "discrepancy_notes": [],
-      "accounting_note": "Cached/input/output splits come from each selected thread's terminal rollout counter and are scaled only when needed to match state_5.sqlite threads.tokens_used."
+      "discrepancy_notes": [
+        "thread 01a005fe-2e04-78b1-96cf-43b7d4d7c271: ignored inherited-inclusive state token counter 2290892; rollout-owned usage is 1573680"
+      ],
+      "accounting_note": "Cached/input/output splits come from thread-owned rollout counter deltas. Fork replay is excluded at the first child-owned task boundary, and fork state counters are diagnostic only. A standalone root may retain the legacy state-counter scaling fallback when its rollout ends before the persisted root total."
     },
     "cost_estimate_usd": {
-      "total": 35.6875,
+      "total": 101.8531,
       "by_model": {
         "BLSC/GLM-5.2": {
-          "usd": 35.264,
+          "usd": 101.2694,
           "tokens": 321595440,
           "pricing": "metadata"
         },
         "BLSC/MiniMax-M3": {
-          "usd": 0.4236,
-          "tokens": 4198974,
+          "usd": 0.5838,
+          "tokens": 3481762,
           "pricing": "metadata"
         }
       },
@@ -221,7 +232,7 @@
       "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/06/.sessions/codex/goals_1.sqlite",
       "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/06/.sessions/codex/logs_2.sqlite",
       "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/06/.sessions/codex/sessions",
-      "fetched_at": "2026-08-16T11:07:15.903487+00:00",
+      "fetched_at": "2026-08-16T12:06:42.861301+00:00",
       "num_threads": 8,
       "num_roots": 1
     }
@@ -666,11 +677,6 @@
           "approval_policy": "never",
           "sandbox": "danger-full-access",
           "network_access": null
-        },
-        {
-          "thread_id": "01a005fe-2e04-78b1-96cf-43b7d4d7c271",
-          "approval_policy": "never",
-          "permission_profile": null
         }
       ]
     },
@@ -2463,7 +2469,7 @@
     "provenance": {
       "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/06/.sessions/codex/state_5.sqlite",
       "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/06/.sessions/codex/sessions",
-      "generated_at": "2026-08-16T11:07:16.610985+00:00",
+      "generated_at": "2026-08-16T12:06:43.639609+00:00",
       "num_threads": 8
     }
   },

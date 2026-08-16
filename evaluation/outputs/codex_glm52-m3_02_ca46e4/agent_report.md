@@ -5,6 +5,10 @@
 - Identity: v2 `codex_glm52-m3_02_ca46e4`; `run_identity.json` SHA-256 `18dc46b7b02c18853880ad546084beffdd62f4ee8cbb28d3ec40df13d1681419`.
 - Scope: source-only / zero-results assessment. No evaluator execution was performed, and cylinder Re200 was not rerun.
 
+## Session accounting correction
+
+The selected root tree remains 102,546,862 tokens. Regeneration removed one inherited fork-replay activity record without changing owned token or tool totals. Repricing the immutable model/token split with the audited manager table changes the stored estimate from $11.6346 to $33.4368. Evaluation evidence, scores, and DQ verdict are unchanged.
+
 ## Evidence and methodology
 
 The immutable commit tree, task/output contract, scoring rubric, committed C++/CMake/README/report/scripts, `run_identity.json`, and project-local telemetry sidecars were read. `git ls-tree -r 6148b7b` proves that the submission has source, `report.tex`, and nine referenced PNG figures, but no `solver/results/<required-case>` directory, no raw result package, and no report `run_manifest`, `figure_manifest`, or `sanity_checks` artifact.

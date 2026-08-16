@@ -9,25 +9,25 @@
 ## Snapshot
 
 - Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: no
-- Session analysis: 2026-08-04T10:11:34.470000+00:00 → 2026-08-05T11:44:54.367000+00:00; 52×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 8,698,654,004 (cache hit 0.9795)
+- Session analysis: 2026-08-04T10:11:34.470000+00:00 → 2026-08-05T11:44:54.367000+00:00; 52×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 689,394,311 (cache hit 0.9745)
 
 ## Expenses
 
 - Goal time (codex): **91963 s**
 - Wall time: **92000 s**
-- Tokens: **8,698,654,004** (main 611,629,280 / subagents 8,087,024,724)
+- Tokens: **689,394,311** (main 611,629,280 / subagents 77,765,031)
 
 ### Per root session
 
 | Root | Status | Model | Threads | Tokens | Goal time (s) |
 |------|--------|-------|--------:|-------:|--------------:|
-| `019fcc41` | complete | gpt-5.6-terra | 27 | 8,698,654,004 | 91963 |
+| `019fcc41` | complete | gpt-5.6-terra | 27 | 689,394,311 | 91963 |
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| gpt-5.6-terra | 8,677,825,850 | 8,499,547,904 | 20,828,154 | 8,698,654,004 |
+| gpt-5.6-terra | 687,557,969 | 670,055,424 | 1,836,342 | 689,394,311 |
 
-- Cost estimate: **$2980.99** (estimate; unpriced tokens: 0)
+- Cost estimate: **$241.26** (estimate; unpriced tokens: 0)
 
 ## Measurements
 

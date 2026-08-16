@@ -5,6 +5,10 @@
 - Harness: Codex; selected root `019fbd25-a5cc-7550-b92d-6eb16af449ca` with 35 descendants
 - Session window: 2026-08-01T11:47:10.587Z–2026-08-03T19:38:04.163Z
 
+## Session accounting correction
+
+Fork replay previously contributed 179,777 inherited tokens. The selected tree is corrected from 593,306,055 to 593,126,278 owned tokens, and its current-price estimate from $366.7436 to $366.6755. Evaluation evidence, scores, and DQ verdict are unchanged.
+
 ## Evidence
 
 All telemetry/configuration was extracted only from the workspace-local `.sessions/codex` bundle. The selected root’s terminal response is `msg_0c7b34814af56050016a70ee14ad1c819993364090a1c0a372` at 2026-08-03T19:38:04.045Z; the extracted response SHA-256 is `8d8333a199a6eb7b1c040b4f418bb2c77457b51521a5f208ac03e9370a8ee2b5`. The immutable `run_identity.json` SHA-256 is `f6d537c708686d699e7ad42db24f1738d3ea10301c5c82a8304b8ef44dfa32ee`.

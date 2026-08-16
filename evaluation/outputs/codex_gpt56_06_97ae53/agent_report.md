@@ -6,6 +6,10 @@
 - Result audit: pass; 57 allowed changed paths and no prohibited path.
 - Canonical identity: `codex_gpt56_06_97ae53`; `run_identity.json` SHA-256 `5131b8e0f2275caf21dba4421e61ad22a57ec976ea11f5a6f6d66234195d46ce` (unindexed by index schema).
 
+## Session accounting correction
+
+Fork replay previously contributed 103,394,529 inherited tokens. The selected tree is corrected from 404,346,109 to 300,951,580 owned tokens. The current-price estimate changes from $84.7311 to $48.2491. Evaluation evidence, scores, and DQ verdict are unchanged.
+
 ## Provenance and selected telemetry
 
 This legacy run has a verified v1.1 `post_run` provenance reconstruction, not a pre-run capture. The workspace-local Codex database and bundled rollout identify root `019fd895-3740-7e11-89a2-f7791227d1e9`, recorded under container cwd `/workspace`, as the sole continuous benchmark tree; it began `2026-08-06T19:39:16.488Z` and ended `2026-08-09T07:15:42.811Z`. It has five selected descendants and no bundled OpenCode store. The recorded branch/SHA before implementation work and `git cat-file` establish the reconstructed initial state. Original run container/environment remain unavailable.

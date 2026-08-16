@@ -5,6 +5,10 @@
 - Harness: project-local Codex; root `019fca03-16cf-7760-87d8-d8c95a782ab3`, with three included subagents
 - Session window: 2026-08-03T23:46:00.103Z–2026-08-04T05:41:33.774Z
 
+## Session accounting correction
+
+Regeneration removed three inherited fork-replay activity records. Owned token accounting and the current-price estimate remain 128,560,924 tokens and $82.9332. Evaluation evidence, scores, and DQ verdict are unchanged.
+
 ## Evidence and verdict
 
 The selected root's terminal final response is `msg_0d083cd059377034016a717b87a0e88194a4f5b358f8cffd0c` at 2026-08-04T05:41:33.620Z, stored in the bundled rollout `rollout-2026-08-04T07-43-47-019fca03-16cf-7760-87d8-d8c95a782ab3.jsonl`. It has one ordered text part. Its exact extracted prose is in `contestant_final_response.md` (SHA-256 `5b13c46cea9825a49d71e7eeda0782beef97f31004ac520371d52b0a770cd1d7`); both sidecars are workspace-local telemetry derivatives, not raw session data. The immutable `run_identity.json` SHA-256 is `d6215547986230066a3529c417ca43f0e8eb16c7e16967bce60ee303b8a10a26`.

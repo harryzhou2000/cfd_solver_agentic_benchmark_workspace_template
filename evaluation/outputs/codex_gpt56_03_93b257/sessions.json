@@ -625,7 +625,7 @@
         "019fca06-05d8-7a32-984c-dfb8b8bd52bd": {
           "kind": "codex_thread",
           "is_subagent": true,
-          "events": 201,
+          "events": 200,
           "tokens_total_subtree": 4071694,
           "tools": {
             "exec": 35
@@ -637,7 +637,7 @@
         "019fca06-2c0e-7e22-a6d5-c7629862b686": {
           "kind": "codex_thread",
           "is_subagent": true,
-          "events": 177,
+          "events": 176,
           "tokens_total_subtree": 3479938,
           "tools": {
             "exec": 23,
@@ -650,7 +650,7 @@
         "019fca06-4857-7d33-9d8a-5eead7fce69a": {
           "kind": "codex_thread",
           "is_subagent": true,
-          "events": 298,
+          "events": 297,
           "tokens_total_subtree": 4886754,
           "tools": {
             "exec": 41
@@ -661,12 +661,12 @@
         }
       },
       "accounting_notes": [
-        "codex: each selected thread has its own cumulative usage counter; run totals sum the selected root and its subagent threads. Bucket totals are per-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
+        "codex: fork replay is excluded at each child-owned task boundary; run totals sum only root and subagent-owned counter deltas. Bucket totals are per-owned-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
       ]
     }
   },
   "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/03",
-  "discovered_at": "2026-08-14T03:34:18.020030+00:00",
+  "discovered_at": "2026-08-16T12:06:50.727809+00:00",
   "sources": [
     {
       "id": "project_codex",
@@ -712,6 +712,6 @@
     "harness": "codex",
     "bucket_seconds": 1800,
     "idle_gap_seconds": 600,
-    "generated_at": "2026-08-14T03:34:18.020049+00:00"
+    "generated_at": "2026-08-16T12:06:50.727826+00:00"
   }
 }

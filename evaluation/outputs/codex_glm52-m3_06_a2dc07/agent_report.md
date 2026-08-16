@@ -2,6 +2,10 @@
 
 Result branch `codex/glm52-m3/06` preserves contestant checkpoint `14db231df9f2b5ecb676a3a84a50c3b759d35626`; descendant curation tip `a063106730985373ab0dcf32c5247f79f391470f` passes the immutable audit. The tip removes 35 prohibited report artifacts from the index while retaining them on disk as read-only evidence. Earlier contestant commits still retain those blobs.
 
+## Session accounting correction
+
+Fork replay previously added 717,212 inherited tokens to descendant accounting. The selected tree is corrected from 325,794,414 to 325,077,202 owned tokens. With audited current price metadata, the stored estimate changes from $35.6875 to $101.8531. Evaluation evidence, scores, and DQ verdict are unchanged.
+
 ## Evidence and validation
 
 I inspected the committed C++/CMake/report sources and workspace-local output evidence read-only. The official validator returned `OK` for all seven steady final packages, but correctly rejected `cylinder_m010_laminar_re200`: its metadata has `completed=false`. This is a substantive failed case, not an infrastructure error. Re200 was not rerun.

@@ -34,6 +34,7 @@
           "goal_tokens": 3158849,
           "threads": 2,
           "tokens_used": 102546862,
+          "state_tokens_inherited_inclusive": 102546862,
           "model": "BLSC/GLM-5.2"
         }
       }
@@ -75,12 +76,13 @@
               "total": 102426064
             }
           },
-          "total": 102426064
+          "total": 102426064,
+          "inherited_baseline_tokens": 0
         },
         "019fc19f-d832-70b2-a7ad-de61bc56f670": {
           "model": "BLSC/MiniMax-M3",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/MiniMax-M3": {
               "input": 117812,
@@ -91,7 +93,8 @@
               "total": 120798
             }
           },
-          "total": 120798
+          "total": 120798,
+          "inherited_baseline_tokens": 0
         }
       },
       "main_vs_subagent": {
@@ -100,18 +103,18 @@
       },
       "fallback_tokens": 0,
       "discrepancy_notes": [],
-      "accounting_note": "Cached/input/output splits come from each selected thread's terminal rollout counter and are scaled only when needed to match state_5.sqlite threads.tokens_used."
+      "accounting_note": "Cached/input/output splits come from thread-owned rollout counter deltas. Fork replay is excluded at the first child-owned task boundary, and fork state counters are diagnostic only. A standalone root may retain the legacy state-counter scaling fallback when its rollout ends before the persisted root total."
     },
     "cost_estimate_usd": {
-      "total": 11.6346,
+      "total": 33.4368,
       "by_model": {
         "BLSC/GLM-5.2": {
-          "usd": 11.6155,
+          "usd": 33.4022,
           "tokens": 102426064,
           "pricing": "metadata"
         },
         "BLSC/MiniMax-M3": {
-          "usd": 0.0191,
+          "usd": 0.0346,
           "tokens": 120798,
           "pricing": "metadata"
         }
@@ -125,7 +128,7 @@
       "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/02/.sessions/codex/goals_1.sqlite",
       "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/02/.sessions/codex/logs_2.sqlite",
       "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/02/.sessions/codex/sessions",
-      "fetched_at": "2026-08-14T05:29:05.564567+00:00",
+      "fetched_at": "2026-08-16T12:06:41.769687+00:00",
       "num_threads": 2,
       "num_roots": 1
     }
@@ -484,11 +487,6 @@
         {
           "thread_id": "019fc19f-d832-70b2-a7ad-de61bc56f670",
           "approval_policy": "never",
-          "permission_profile": null
-        },
-        {
-          "thread_id": "019fc19f-d832-70b2-a7ad-de61bc56f670",
-          "approval_policy": "never",
           "sandbox": "danger-full-access",
           "network_access": null
         }
@@ -586,7 +584,7 @@
     "provenance": {
       "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/02/.sessions/codex/state_5.sqlite",
       "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/02/.sessions/codex/sessions",
-      "generated_at": "2026-08-14T05:29:05.912181+00:00",
+      "generated_at": "2026-08-16T12:06:42.128860+00:00",
       "num_threads": 2
     }
   },

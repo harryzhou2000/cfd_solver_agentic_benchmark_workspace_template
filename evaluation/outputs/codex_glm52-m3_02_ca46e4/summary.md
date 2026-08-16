@@ -28,7 +28,7 @@
 | BLSC/GLM-5.2 | 102,071,820 | 99,266,624 | 354,244 | 102,426,064 |
 | BLSC/MiniMax-M3 | 117,812 | 90,112 | 2,986 | 120,798 |
 
-- Cost estimate: **$11.63** (estimate; unpriced tokens: 0)
+- Cost estimate: **$33.44** (estimate; unpriced tokens: 0)
 
 ## Measurements
 

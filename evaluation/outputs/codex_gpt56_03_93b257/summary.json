@@ -34,6 +34,7 @@
           "goal_tokens": 2402739,
           "threads": 4,
           "tokens_used": 128560924,
+          "state_tokens_inherited_inclusive": 128560924,
           "model": "gpt-5.6-sol"
         }
       }
@@ -75,12 +76,13 @@
               "total": 116122538
             }
           },
-          "total": 116122538
+          "total": 116122538,
+          "inherited_baseline_tokens": 0
         },
         "019fca06-05d8-7a32-984c-dfb8b8bd52bd": {
           "model": "gpt-5.6-terra",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "gpt-5.6-terra": {
               "input": 4048205,
@@ -91,12 +93,13 @@
               "total": 4071694
             }
           },
-          "total": 4071694
+          "total": 4071694,
+          "inherited_baseline_tokens": 0
         },
         "019fca06-2c0e-7e22-a6d5-c7629862b686": {
           "model": "gpt-5.6-terra",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "gpt-5.6-terra": {
               "input": 3453022,
@@ -107,12 +110,13 @@
               "total": 3479938
             }
           },
-          "total": 3479938
+          "total": 3479938,
+          "inherited_baseline_tokens": 0
         },
         "019fca06-4857-7d33-9d8a-5eead7fce69a": {
           "model": "gpt-5.6-terra",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "gpt-5.6-terra": {
               "input": 4831789,
@@ -123,7 +127,8 @@
               "total": 4886754
             }
           },
-          "total": 4886754
+          "total": 4886754,
+          "inherited_baseline_tokens": 0
         }
       },
       "main_vs_subagent": {
@@ -132,7 +137,7 @@
       },
       "fallback_tokens": 0,
       "discrepancy_notes": [],
-      "accounting_note": "Cached/input/output splits come from each selected thread's terminal rollout counter and are scaled only when needed to match state_5.sqlite threads.tokens_used."
+      "accounting_note": "Cached/input/output splits come from thread-owned rollout counter deltas. Fork replay is excluded at the first child-owned task boundary, and fork state counters are diagnostic only. A standalone root may retain the legacy state-counter scaling fallback when its rollout ends before the persisted root total."
     },
     "cost_estimate_usd": {
       "total": 82.9332,
@@ -157,7 +162,7 @@
       "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/03/.sessions/codex/goals_1.sqlite",
       "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/03/.sessions/codex/logs_2.sqlite",
       "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/03/.sessions/codex/sessions",
-      "fetched_at": "2026-08-14T03:34:18.428621+00:00",
+      "fetched_at": "2026-08-16T12:06:51.164802+00:00",
       "num_threads": 4,
       "num_roots": 1
     }
@@ -522,29 +527,14 @@
         {
           "thread_id": "019fca06-05d8-7a32-984c-dfb8b8bd52bd",
           "approval_policy": "never",
-          "permission_profile": null
-        },
-        {
-          "thread_id": "019fca06-05d8-7a32-984c-dfb8b8bd52bd",
-          "approval_policy": "never",
           "sandbox": "danger-full-access",
           "network_access": null
         },
         {
           "thread_id": "019fca06-2c0e-7e22-a6d5-c7629862b686",
           "approval_policy": "never",
-          "permission_profile": null
-        },
-        {
-          "thread_id": "019fca06-2c0e-7e22-a6d5-c7629862b686",
-          "approval_policy": "never",
           "sandbox": "danger-full-access",
           "network_access": null
-        },
-        {
-          "thread_id": "019fca06-4857-7d33-9d8a-5eead7fce69a",
-          "approval_policy": "never",
-          "permission_profile": null
         },
         {
           "thread_id": "019fca06-4857-7d33-9d8a-5eead7fce69a",
@@ -605,7 +595,7 @@
     "provenance": {
       "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/03/.sessions/codex/state_5.sqlite",
       "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/03/.sessions/codex/sessions",
-      "generated_at": "2026-08-14T03:34:18.954367+00:00",
+      "generated_at": "2026-08-16T12:06:51.765132+00:00",
       "num_threads": 4
     }
   },
