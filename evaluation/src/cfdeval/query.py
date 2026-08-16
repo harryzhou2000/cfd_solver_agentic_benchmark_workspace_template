@@ -84,7 +84,7 @@ def current_snapshot_cost(expenses: dict, metadata: dict,
         expenses, metadata, agent_scores)
     rows = decomposition.get("rows") or []
     total = decomposition.get("total_current_cost_usd")
-    if not rows or total is None:
+    if not rows:
         return {
             "total": None,
             "by_model": {},
@@ -121,13 +121,17 @@ def current_snapshot_cost(expenses: dict, metadata: dict,
         },
         "unpriced_tokens": sum(
             int(row.get("total", 0) or 0)
-            for row in rows if row.get("pricing") == "defaults"
+            for row in rows if row.get("pricing") == "unresolved"
         ),
-        "estimate": True,
+        "estimate": total is not None,
         "metadata": decomposition.get("cost_metadata"),
         "metadata_sha256": decomposition.get("cost_metadata_sha256"),
         "dashboard_current": True,
-        "source": "selected OpenCode session-tree token decomposition",
+        "source": (
+            "selected OpenCode session-tree token decomposition"
+            if total is not None
+            else "selected OpenCode session-tree token decomposition; one or more model prices unresolved"
+        ),
     }
 
 
@@ -180,7 +184,7 @@ def current_model_decomposition(expenses: dict, metadata: dict,
         key = (model or "unknown", effort or "unknown")
         row = buckets.setdefault(key, {
             "model": key[0], "reasoning": key[1], "provider": provider,
-            "input": 0, "cached_input": 0, "output": 0,
+            "input": 0, "cached_input": 0, "cache_write": 0, "output": 0,
             "reasoning_output": 0, "total": 0,
             "persisted_cost_usd": 0.0, "has_persisted_cost": False,
             "attribution_basis": basis, "mixed_efforts_seen": set(),
@@ -193,6 +197,7 @@ def current_model_decomposition(expenses: dict, metadata: dict,
         row["input"] += int(tokens.get("input", 0) or 0)
         row["cached_input"] += int(
             tokens.get("cached_input", tokens.get("cached", 0)) or 0)
+        row["cache_write"] += int(tokens.get("cache_write", 0) or 0)
         row["output"] += int(tokens.get("output", 0) or 0)
         row["reasoning_output"] += int(
             tokens.get("reasoning_output", tokens.get("reasoning", 0)) or 0)
@@ -251,7 +256,8 @@ def current_model_decomposition(expenses: dict, metadata: dict,
             cache_write = int(info.get("tokens_cache_write", 0) or 0)
             input_t = raw_input + cache_read + cache_write
             add(model, effort, {
-                "input": input_t, "cached_input": cache_read, "output": output,
+                "input": input_t, "cached_input": cache_read,
+                "cache_write": cache_write, "output": output,
                 "reasoning_output": reasoning,
                 "total": input_t + output + reasoning,
             }, provider=info.get("provider"), persisted_cost=info.get("cost"),
@@ -267,6 +273,7 @@ def current_model_decomposition(expenses: dict, metadata: dict,
     rows = []
     total_current = 0.0
     total_persisted = 0.0
+    unpriced_tokens = 0
     for (_model, _effort), row in sorted(buckets.items()):
         current_cost = None
         pricing = "unavailable"
@@ -289,15 +296,22 @@ def current_model_decomposition(expenses: dict, metadata: dict,
             price_key = next((c for c in candidates
                               if c.lower() in configured), candidates[-1])
             price, defaults = model_cost(price_meta, price_key)
-            if row["token_split_available"]:
+            if price is None:
+                current_cost = None
+                pricing = "unresolved"
+                unpriced_tokens += row["total"]
+            elif row["token_split_available"]:
                 current_cost = round(cost_for(
                     price, input_t=row["input"], cached_t=row["cached_input"],
+                    cache_write_t=row["cache_write"],
                     output_t=(row["output"] if row["reasoning_is_output_subset"]
                               else row["output"] + row["reasoning_output"])), 4)
+                pricing = "metadata"
             else:
                 current_cost = round(cost_for(price, total_t=row["total"]), 4)
-            pricing = "defaults" if defaults else "metadata"
-            total_current += current_cost
+                pricing = "metadata"
+            if current_cost is not None:
+                total_current += current_cost
         persisted = (round(row["persisted_cost_usd"], 6)
                      if row.pop("has_persisted_cost") else None)
         if persisted is not None:
@@ -307,7 +321,8 @@ def current_model_decomposition(expenses: dict, metadata: dict,
         split_available = row.pop("token_split_available")
         row.update({
             "key": f'{row["model"]} + {row["reasoning"]}',
-            "non_cached_input": (max(row["input"] - row["cached_input"], 0)
+            "non_cached_input": (max(
+                row["input"] - row["cached_input"] - row["cache_write"], 0)
                                  if split_available else None),
             "current_cost_usd": current_cost,
             "persisted_cost_usd": persisted,
@@ -316,7 +331,7 @@ def current_model_decomposition(expenses: dict, metadata: dict,
             "token_split_available": split_available,
         })
         if not split_available:
-            for field in ("input", "cached_input", "output", "reasoning_output"):
+            for field in ("input", "cached_input", "cache_write", "output", "reasoning_output"):
                 row[field] = None
         rows.append(row)
     total_tokens = sum(r["total"] for r in rows)
@@ -331,7 +346,9 @@ def current_model_decomposition(expenses: dict, metadata: dict,
     return {
         "rows": rows,
         "total_tokens": total_tokens,
-        "total_current_cost_usd": round(total_current, 4) if price_meta is not None else None,
+        "total_current_cost_usd": (
+            round(total_current, 4)
+            if price_meta is not None and not unpriced_tokens else None),
         "total_persisted_cost_usd": round(total_persisted, 6)
             if any(r["persisted_cost_usd"] is not None for r in rows) else None,
         "cost_metadata": str(COST_METADATA) if price_meta is not None else None,

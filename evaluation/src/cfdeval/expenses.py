@@ -26,10 +26,15 @@ from cfdeval import codex_data as cd
 
 
 def model_cost(meta: dict, model: str | None):
-    """Return (prices dict or None, used_defaults: bool)."""
+    """Return ``(prices, used_defaults)`` for an exact/alias model.
+
+    Unknown and explicitly unresolved models stay unpriced.  Falling back to
+    the generic defaults would make a missing contract price look like a real
+    provider rate in the dashboard.
+    """
     defaults = meta.get("defaults", {})
     if not model:
-        return defaults, True
+        return None, True
     models = meta.get("models", {})
     key = model.lower()
     entry = models.get(key)
@@ -39,26 +44,33 @@ def model_cost(meta: dict, model: str | None):
         if len(suffixes) == 1:
             entry = models[suffixes[0]]
     if entry is None:
-        return defaults, True
+        return None, True
+    if entry.get("pricing_status") == "unresolved":
+        return None, False
+    input_rate = entry.get("input_per_mtok", defaults["input_per_mtok"])
     return {
-        "input_per_mtok": entry.get("input_per_mtok", defaults["input_per_mtok"]),
+        "input_per_mtok": input_rate,
         "cached_input_per_mtok": entry.get("cached_input_per_mtok", defaults["cached_input_per_mtok"]),
+        "cache_write_per_mtok": entry.get("cache_write_per_mtok", input_rate),
         "output_per_mtok": entry.get("output_per_mtok", defaults["output_per_mtok"]),
         "input_share": defaults["input_share"],
         "note": entry.get("note"),
     }, False
 
 
-def cost_for(price: dict, *, input_t=None, cached_t=None, output_t=None, total_t=None) -> float:
+def cost_for(price: dict, *, input_t=None, cached_t=None, cache_write_t=None,
+             output_t=None, total_t=None) -> float:
     """Estimate USD for a token bundle. Exact splits when available, else
     blended fallback using input_share."""
     if total_t is not None and input_t is None and output_t is None:
         share = price["input_share"]
         return total_t / 1e6 * (share * price["input_per_mtok"] + (1 - share) * price["output_per_mtok"])
-    non_cached = (input_t or 0) - (cached_t or 0)
+    non_cached = max(
+        (input_t or 0) - (cached_t or 0) - (cache_write_t or 0), 0)
     return (
         non_cached * price["input_per_mtok"]
         + (cached_t or 0) * price["cached_input_per_mtok"]
+        + (cache_write_t or 0) * price["cache_write_per_mtok"]
         + (output_t or 0) * price["output_per_mtok"]
     ) / 1e6
 
@@ -70,27 +82,31 @@ def estimate_by_model(meta: dict, by_model: dict) -> dict:
     unpriced_tokens = 0
     for model, agg in by_model.items():
         price, used_defaults = model_cost(meta, model)
-        if used_defaults and meta.get("models", {}).get(model.lower()) is None:
+        if price is None:
             unpriced_tokens += agg.get("total", 0)
-        cost = cost_for(
-            price,
-            input_t=agg.get("input") or None,
-            cached_t=agg.get("cached_input") or None,
-            output_t=(
-                (agg.get("output", 0) or 0)
-                + (0 if agg.get("reasoning_is_output_subset", True)
-                   else (agg.get("reasoning_output", 0) or 0))
-            ) or None,
-            total_t=agg.get("total") if not agg.get("input") and not agg.get("output") else None,
-        )
+            cost = None
+        else:
+            cost = cost_for(
+                price,
+                input_t=agg.get("input") or None,
+                cached_t=agg.get("cached_input") or None,
+                cache_write_t=agg.get("cache_write") or None,
+                output_t=(
+                    (agg.get("output", 0) or 0)
+                    + (0 if agg.get("reasoning_is_output_subset", True)
+                       else (agg.get("reasoning_output", 0) or 0))
+                ) or None,
+                total_t=agg.get("total") if not agg.get("input") and not agg.get("output") else None,
+            )
         estimates[model] = {
-            "usd": round(cost, 4),
+            "usd": round(cost, 4) if cost is not None else None,
             "tokens": agg.get("total", 0),
-            "pricing": "defaults" if used_defaults else "metadata",
+            "pricing": "unresolved" if price is None else "metadata",
         }
-        total_cost += cost
+        if cost is not None:
+            total_cost += cost
     return {
-        "total": round(total_cost, 4),
+        "total": round(total_cost, 4) if not unpriced_tokens else None,
         "by_model": estimates,
         "unpriced_tokens": unpriced_tokens,
         "estimate": True,
@@ -130,6 +146,7 @@ def opencode_expense_facts(metadata: dict, workspace: str,
         bundle = {
             "input": input_total,
             "cached_input": cache_read,
+            "cache_write": cache_write,
             "non_cached_input": raw_input + cache_write,
             "output": output,
             "reasoning_output": reasoning,
@@ -137,10 +154,10 @@ def opencode_expense_facts(metadata: dict, workspace: str,
             "total": total,
         }
         agg = by_model.setdefault(key, {name: 0 for name in (
-            "input", "cached_input", "non_cached_input", "output",
+            "input", "cached_input", "cache_write", "non_cached_input", "output",
             "reasoning_output", "total")})
         agg["reasoning_is_output_subset"] = False
-        for name in ("input", "cached_input", "non_cached_input", "output",
+        for name in ("input", "cached_input", "cache_write", "non_cached_input", "output",
                      "reasoning_output", "total"):
             agg[name] += bundle[name]
         sid = session.get("session_id") or "unknown"
@@ -464,10 +481,12 @@ def main(argv: list[str] | None = None) -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(expenses, indent=2) + "\n")
     print(f"wrote {out_path}")
+    cost_text = (f"${current_cost['total']:.2f}"
+                 if current_cost["total"] is not None else "unavailable")
     print(
         f"threads={len(all_ids)} roots={len(roots)} tokens={total_tokens:,} "
         f"goal_time={goal_time:.0f}s wall_time={wall_time:.0f}s "
-        f"cost≈${current_cost['total']:.2f}"
+        f"cost≈{cost_text}"
     )
     for rid, info in by_root_tree.items():
         print(

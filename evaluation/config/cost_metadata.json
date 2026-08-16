@@ -2,7 +2,15 @@
   "currency": "USD",
   "unit": "per 1,000,000 tokens",
   "generated_for": "cfd_solver_agentic_benchmark evaluation",
-  "note": "Centralized cost metadata used by evaluation/tools/extract_expenses.py. All prices are ESTIMATES seeded for benchmarking and MUST be replaced with actual provider/contract prices before cost figures are used outside this evaluation. Prices are per 1M tokens; cached_input is charged only when usage logs provide cached_input_tokens (otherwise the input price applies to all input tokens).",
+  "note": "Centralized display-time cost metadata used by the evaluation pipeline and dashboard. Prices are USD per 1M tokens. The dashboard reprices immutable token facts from this current file; it does not trust historical snapshot estimates. Explicitly unresolved models are never priced from defaults. Cache reads use cached_input; cache writes use cache_write when present and otherwise the cache-miss/input rate.",
+  "retrieved_at": "2026-08-16",
+  "sources": {
+    "openai_standard": "https://developers.openai.com/api/docs/pricing",
+    "deepseek_off_peak": "https://api-docs.deepseek.com/quick_start/pricing",
+    "minimax_standard": "https://platform.minimax.io/docs/guides/pricing-paygo",
+    "blsc_harness_config": "docker/configs/opencode/opencode.jsonc",
+    "kimi_catalog": "opencodex/src/usage/expected-prices.ts"
+  },
   "defaults": {
     "input_per_mtok": 1.0,
     "cached_input_per_mtok": 0.25,
@@ -11,144 +19,147 @@
   },
   "models": {
     "gpt-5.6-sol": {
-      "input_per_mtok": 2.5,
-      "cached_input_per_mtok": 0.6,
-      "output_per_mtok": 12.0,
+      "input_per_mtok": 5,
+      "cached_input_per_mtok": 0.5,
+      "output_per_mtok": 30.0,
       "estimate": true,
       "note": "estimate"
     },
     "gpt-5.6-terra": {
-      "input_per_mtok": 1.25,
-      "cached_input_per_mtok": 0.3,
-      "output_per_mtok": 10.0,
+      "input_per_mtok": 2,
+      "cached_input_per_mtok": 0.2,
+      "output_per_mtok": 12.0,
       "estimate": true,
       "note": "estimate"
     },
     "gpt-5.6-luna": {
-      "input_per_mtok": 0.4,
-      "cached_input_per_mtok": 0.1,
-      "output_per_mtok": 4.0,
+      "input_per_mtok": 0.2,
+      "cached_input_per_mtok": 0.02,
+      "output_per_mtok": 1.2,
       "estimate": true,
       "note": "estimate"
     },
     "gpt-5.5": {
-      "input_per_mtok": 1.25,
-      "cached_input_per_mtok": 0.3,
-      "output_per_mtok": 10.0,
+      "input_per_mtok": 5.0,
+      "cached_input_per_mtok": 0.5,
+      "output_per_mtok": 30.0,
       "estimate": true,
-      "note": "estimate"
+      "pricing_status": "official-standard",
+      "note": "Official OpenAI Standard price for gpt-5.5 with <272K context. The official row does not publish a cache-write rate or establish the >272K tier, so cache writes fall back to input and this flat estimate is limited to the published short-context tier. Retrieved 2026-08-16."
     },
     "gpt-5.4": {
-      "input_per_mtok": 1.25,
-      "cached_input_per_mtok": 0.3,
-      "output_per_mtok": 10.0,
+      "input_per_mtok": 2.5,
+      "cached_input_per_mtok": 0.25,
+      "output_per_mtok": 15.0,
       "estimate": true,
-      "note": "estimate"
+      "pricing_status": "official-standard",
+      "note": "Official OpenAI Standard price for gpt-5.4 with <272K context; retrieved 2026-08-16."
     },
     "gpt-5.4-mini": {
-      "input_per_mtok": 0.4,
-      "cached_input_per_mtok": 0.1,
-      "output_per_mtok": 4.0,
+      "input_per_mtok": 0.75,
+      "cached_input_per_mtok": 0.075,
+      "output_per_mtok": 4.5,
       "estimate": true,
-      "note": "estimate"
+      "pricing_status": "official-standard",
+      "note": "Official OpenAI Standard price; retrieved 2026-08-16."
     },
     "gpt-5.3-codex-spark": {
-      "input_per_mtok": 0.15,
-      "cached_input_per_mtok": 0.04,
-      "output_per_mtok": 0.6,
-      "estimate": true,
-      "note": "estimate"
+      "pricing_status": "unresolved",
+      "note": "Exact model is absent from the official OpenAI pricing page retrieved 2026-08-16; do not substitute gpt-5.3-codex."
     },
     "gpt-oss-120b": {
-      "input_per_mtok": 0.15,
-      "cached_input_per_mtok": 0.04,
-      "output_per_mtok": 0.6,
-      "estimate": true,
-      "note": "estimate"
+      "pricing_status": "unresolved",
+      "note": "Open-weight model pricing is provider-specific and this unqualified key does not identify a billable route."
     },
     "gpt-oss-20b": {
-      "input_per_mtok": 0.15,
-      "cached_input_per_mtok": 0.04,
-      "output_per_mtok": 0.6,
-      "estimate": true,
-      "note": "estimate"
+      "pricing_status": "unresolved",
+      "note": "Open-weight model pricing is provider-specific and this unqualified key does not identify a billable route."
     },
     "codex-auto-review": {
-      "input_per_mtok": 0.4,
-      "cached_input_per_mtok": 0.1,
-      "output_per_mtok": 4.0,
-      "estimate": true,
-      "note": "estimate"
+      "pricing_status": "unresolved",
+      "note": "Internal route has no public or repository contract rate; do not guess from another Codex model."
     },
     "blsc/glm-5.2": {
-      "input_per_mtok": 0.4,
-      "cached_input_per_mtok": 0.1,
-      "output_per_mtok": 1.6,
-      "estimate": true,
-      "note": "estimate; BLSC relay price"
-    },
-    "blsc/minimax-m3": {
-      "input_per_mtok": 0.3,
-      "cached_input_per_mtok": 0.08,
-      "output_per_mtok": 1.2,
-      "estimate": true,
-      "note": "estimate; BLSC relay price"
-    },
-    "blsc/kimi-k3": {
-      "input_per_mtok": 1.0,
-      "cached_input_per_mtok": 0.25,
+      "input_per_mtok": 1.14,
+      "cached_input_per_mtok": 0.29,
       "output_per_mtok": 4.0,
       "estimate": true,
-      "note": "estimate; BLSC relay price"
+      "pricing_status": "harness-config",
+      "note": "Exact BLSC GLM-5.2 cost row from the current vendored OpenCode harness config; retrieved 2026-08-16."
+    },
+    "blsc/minimax-m3": {
+      "input_per_mtok": 0.6,
+      "cached_input_per_mtok": 0.12,
+      "output_per_mtok": 2.4,
+      "estimate": true,
+      "pricing_status": "harness-config",
+      "note": "Exact BLSC MiniMax-M3 cost row from the current vendored OpenCode harness config; retrieved 2026-08-16."
+    },
+    "blsc/kimi-k3": {
+      "input_per_mtok": 3.0,
+      "cached_input_per_mtok": 0.3,
+      "output_per_mtok": 15.0,
+      "estimate": true,
+      "pricing_status": "harness-config",
+      "note": "Exact BLSC Kimi-K3 cost row from the current vendored OpenCode harness config; retrieved 2026-08-16."
     },
     "kimi-for-coding/k3": {
       "input_per_mtok": 3.0,
       "cached_input_per_mtok": 0.3,
       "output_per_mtok": 15.0,
       "estimate": true,
+      "pricing_status": "verified-derived",
       "note": "verified-derived from opencodex expected-prices.ts Kimi official-pricing mapping; persisted OpenCode subscription cost may be zero"
     },
     "blsc/deepseek-v4-flash": {
-      "input_per_mtok": 0.28,
-      "cached_input_per_mtok": 0.028,
-      "output_per_mtok": 0.42,
+      "input_per_mtok": 0.14,
+      "cached_input_per_mtok": 0.03,
+      "output_per_mtok": 0.29,
       "estimate": true,
-      "note": "estimate; BLSC relay price"
+      "pricing_status": "harness-config",
+      "note": "Exact BLSC DeepSeek-V4-Flash cost row from the current vendored OpenCode harness config; retrieved 2026-08-16."
     },
     "blsc/deepseek-v4-pro": {
-      "input_per_mtok": 0.56,
-      "cached_input_per_mtok": 0.056,
-      "output_per_mtok": 1.68,
+      "input_per_mtok": 1.71,
+      "cached_input_per_mtok": 0.14,
+      "output_per_mtok": 3.43,
       "estimate": true,
-      "note": "estimate; BLSC relay price"
+      "pricing_status": "harness-config",
+      "note": "Exact BLSC DeepSeek-V4-Pro cost row from the current vendored OpenCode harness config; retrieved 2026-08-16."
     },
     "deepseek/deepseek-v4-flash": {
-      "input_per_mtok": 0.28,
-      "cached_input_per_mtok": 0.028,
-      "output_per_mtok": 0.42,
+      "input_per_mtok": 0.22,
+      "cached_input_per_mtok": 0.007,
+      "cache_write_per_mtok": 0.22,
+      "output_per_mtok": 0.66,
       "estimate": true,
-      "note": "estimate; DeepSeek official API price"
+      "pricing_status": "official-off-peak",
+      "note": "Official DeepSeek ordinary/off-peak rate effective 2026-08-16 16:00 UTC; intentionally not the raised peak rate. Cache writes are cache misses and use the input rate. Retrieved 2026-08-16."
     },
     "deepseek/deepseek-v4-pro": {
-      "input_per_mtok": 0.56,
-      "cached_input_per_mtok": 0.056,
-      "output_per_mtok": 1.68,
+      "input_per_mtok": 0.66,
+      "cached_input_per_mtok": 0.022,
+      "cache_write_per_mtok": 0.66,
+      "output_per_mtok": 1.98,
       "estimate": true,
-      "note": "estimate; DeepSeek official API price"
+      "pricing_status": "official-off-peak",
+      "note": "Official DeepSeek ordinary/off-peak rate effective 2026-08-16 16:00 UTC; intentionally not the raised peak rate. Cache writes are cache misses and use the input rate. Retrieved 2026-08-16."
+    },
+    "minimax/minimax-m3": {
+      "input_per_mtok": 0.3,
+      "cached_input_per_mtok": 0.06,
+      "output_per_mtok": 1.2,
+      "estimate": true,
+      "pricing_status": "official-standard",
+      "note": "Official MiniMax permanent-discount Standard rate for requests with <=512K input tokens; the dashboard cannot reconstruct per-request long-context tiering from aggregate session counters. Retrieved 2026-08-16."
     },
     "alibaba-cn/deepseek-v4-flash": {
-      "input_per_mtok": 0.28,
-      "cached_input_per_mtok": 0.028,
-      "output_per_mtok": 0.42,
-      "estimate": true,
-      "note": "estimate"
+      "pricing_status": "unresolved",
+      "note": "Alibaba route pricing is not established by DeepSeek direct-provider pricing; no current contract source was supplied."
     },
     "alibaba-cn/deepseek-v4-pro": {
-      "input_per_mtok": 0.56,
-      "cached_input_per_mtok": 0.056,
-      "output_per_mtok": 1.68,
-      "estimate": true,
-      "note": "estimate"
+      "pricing_status": "unresolved",
+      "note": "Alibaba route pricing is not established by DeepSeek direct-provider pricing; no current contract source was supplied."
     }
   }
 }
