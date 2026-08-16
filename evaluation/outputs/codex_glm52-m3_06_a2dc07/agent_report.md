@@ -1,12 +1,12 @@
 # Agent Evaluation Report — GLM52-M3/06
 
-Result branch `codex/glm52-m3/06` preserves contestant checkpoint `14db231df9f2b5ecb676a3a84a50c3b759d35626`; descendant curation tip `19f12d449d11537d2bee57b6649137e3e01a1959` passes the immutable audit. The tip removes 35 prohibited report artifacts from the index while retaining them on disk as read-only evidence. Earlier contestant commits still retain those blobs.
+Result branch `codex/glm52-m3/06` preserves contestant checkpoint `14db231df9f2b5ecb676a3a84a50c3b759d35626`; descendant curation tip `a063106730985373ab0dcf32c5247f79f391470f` passes the immutable audit. The tip removes 35 prohibited report artifacts from the index while retaining them on disk as read-only evidence. Earlier contestant commits still retain those blobs.
 
 ## Evidence and validation
 
 I inspected the committed C++/CMake/report sources and workspace-local output evidence read-only. The official validator returned `OK` for all seven steady final packages, but correctly rejected `cylinder_m010_laminar_re200`: its metadata has `completed=false`. This is a substantive failed case, not an infrastructure error. Re200 was not rerun.
 
-The selected workspace-local Codex root is `019fff60-e8b8-7990-8df2-f0784bde7d60`, with its seven descendants. It is the only root and spans the benchmark work; it ends blocked with an honest report that the AUSM+-up experiments could initiate but not sustain shedding. The exact final response sidecar SHA-256 is `f5bf0361a7cd37cb4cdd08bf6ae15b595878f6e31021ef97c52e9ff7de9d1c85`; `run_identity.json` SHA-256 is `1928ac5613e32b7126b404d8631d89259e4038df1c38d5614c9f677f3421f1a7`. These sidecars are unindexed under the current contract and are not validated by `cfdeval check`.
+The selected workspace-local Codex root is `019fff60-e8b8-7990-8df2-f0784bde7d60`, with its seven descendants. It is the only root and spans the benchmark work; it ends blocked with an honest report that the AUSM+-up experiments could initiate but not sustain shedding. The exact final response sidecar SHA-256 is `f5bf0361a7cd37cb4cdd08bf6ae15b595878f6e31021ef97c52e9ff7de9d1c85`; `run_identity.json` SHA-256 is `89a4afdb6bc4ddb0a420ddf6aa9ff12e5ac3ea79e640b4065d8de7f3b3a85d70`. These sidecars are unindexed under the current contract and are not validated by `cfdeval check`.
 
 ## Rubric: 72/100
 
@@ -29,6 +29,6 @@ Case scores: M0.15 inviscid 2.5, M0.80 inviscid 3.0, M2 inviscid 3.0, M0.15 Re50
 
 No direct evidence supports any of the 13 DQ triggers. In particular, the Re200 result is not falsely presented as successful: it is marked failed/incomplete and the validator rejects it. The detailed false findings are in `agent_scores.json`.
 
-No evaluator rerun was performed. Raw results, generated PDF/logs, CSV manifests, and excluded figures were not copied into this manager snapshot. The final identity is `codex_glm52-m3_06_a58b94`.
+No evaluator rerun was performed. Raw results, generated PDF/logs, CSV manifests, and excluded figures were not copied into this manager snapshot. The final identity is `codex_glm52-m3_06_a2dc07`.
 
 Verdict: **72/100, no disqualification**. The solver has meaningful source/MPI work and seven structurally readable steady cases, but cannot receive Re200 case credit and has material physical-credibility limitations.

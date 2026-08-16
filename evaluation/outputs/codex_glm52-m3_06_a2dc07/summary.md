@@ -1,7 +1,7 @@
 # Final Result Summary — 06
 
 - Workspace: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/06`
-- Branch: `codex/glm52-m3/06` commit `19f12d449d11537d2bee57b6649137e3e01a1959`
+- Branch: `codex/glm52-m3/06` commit `a063106730985373ab0dcf32c5247f79f391470f`
 - Benchmark submodule: `1bc6580b84825037bbeac097ede1b2226d8185d1`
 - Layout: standard (solver: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/06/solver`, results: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/06/solver/results`, report: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/06/solver/report`)
 - Session window: 2026-08-14T08:26:46.981000+00:00 → 2026-08-15T15:21:05.936000+00:00
@@ -122,6 +122,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_glm52-m3_06_a58b94/review_code.md` (overall: 3.6)
-- CFD methods review: `codex_glm52-m3_06_a58b94/review_cfd.md` (overall: 3.82)
-- Result review: `codex_glm52-m3_06_a58b94/review_results.md` (overall: 2.5)
+- Code review scorecard: `codex_glm52-m3_06_a2dc07/review_code.md` (overall: 3.6)
+- CFD methods review: `codex_glm52-m3_06_a2dc07/review_cfd.md` (overall: 3.82)
+- Result review: `codex_glm52-m3_06_a2dc07/review_results.md` (overall: 2.5)
