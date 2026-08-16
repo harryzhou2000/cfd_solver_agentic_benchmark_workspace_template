@@ -5,9 +5,9 @@ Created 2026-08-16. Each row is a canonical `agent_scores.json` snapshot. Audit 
 | Snapshot | Audit | Old score/DQ | New score/DQ | Evidence-standard finding | Gates | Correction commit |
 |---|---|---|---|---|---|---|
 | codex_dsv4_flash_01_0c1996 | audited-no-change | 58/true | 58/true | Immutable attempt validator fails two cases; Re20/divergent and Re200 controls noncompliant; Roe claim absent in source supports DQ 6. | check + complete pass | pending batch |
-| codex_dsv4_flash_02_3447d3 | pending | 73/true | — | — | — | — |
-| codex_dsv4_flash_03_294b64 | pending | 87/false | — | — | — | — |
-| codex_dsv4_flash_04_755869 | pending | 48/true | — | — | — | — |
+| codex_dsv4_flash_02_3447d3 | audited-report-total-conflict | 73/true | 73/true | Scorecard/rubric total is 73 but prose still says 75; immutable audit/telemetry/validator support DQ 7 for admitted Re200 target miss reported successful. Report text correction pending next batch. | check + complete pass | pending batch |
+| codex_dsv4_flash_03_294b64 | audited-no-change | 87/false | 87/false | Immutable eight-case/report validator pass and sole local Codex root verified; Re200 lacks delivered vortex shedding and curated report excludes referenced figures, already deducted. | check + complete pass | pending batch |
+| codex_dsv4_flash_04_755869 | audited-no-change | 48/true | 48/true | Exact final response admits sibling-workspace result reuse (DQ 2); source gets partial credit but result/report credit remains zero; eight structural packages do not cure provenance. | check + complete pass | pending batch |
 | codex_dsv4_flash_06_5b6b08 | pending | 63/false | — | — | — | — |
 | codex_dsv4_flash_07_aeae21 | pending | 84/false | — | — | — | — |
 | codex_dsv4_flash_08_efba3c | pending | 76/false | — | — | — | — |
