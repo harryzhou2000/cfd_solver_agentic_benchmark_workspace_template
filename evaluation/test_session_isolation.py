@@ -169,6 +169,12 @@ class SessionIsolationTests(unittest.TestCase):
                 with self.subTest(target=target.name, marker=marker):
                     self.assertNotIn(marker, source)
 
+    def test_structured_codex_session_source_uses_union_tag(self):
+        source = {"subagent": {"thread_spawn": {"parent_thread_id": "parent"}}}
+        self.assertEqual(metadata_mod.session_meta_tag(source), "subagent")
+        self.assertEqual(metadata_mod.session_meta_tag("cli"), "cli")
+        self.assertIsNone(metadata_mod.session_meta_tag({"a": {}, "b": {}}))
+
     def test_project_defaults_are_nested_under_sessions(self):
         with tempfile.TemporaryDirectory() as tmp:
             workspace = Path(tmp) / "workspace"

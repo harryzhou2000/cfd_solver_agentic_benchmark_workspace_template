@@ -28,6 +28,10 @@ beneath `.sessions/codex/`:
 - `cli_version` (e.g. `0.146.0`), `originator` (`codex-tui`, `codex-exec`,
   `app-server`, ...), `source`, `thread_source`, `multi_agent_version`,
   `history_mode`, `memory_mode`, `model_provider`.
+- Codex may encode `source` or `thread_source` as a tagged object for a
+  spawned continuation. Store the scalar union tag (for example `subagent`)
+  in the ordinary field and retain the complete immutable object in the
+  corresponding `*_details` field.
 - `codex_runtime_version`: the selected codex version recorded in bundled
   `codex-runtime.json` / `version.json`, when present.
 - `plugins`: captured plugin manifests beneath the bundled Codex config root,

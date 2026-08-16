@@ -53,6 +53,21 @@ def session_meta(rollout_path: str) -> dict | None:
     return None
 
 
+def session_meta_tag(value) -> str | None:
+    """Normalize Codex session-meta union fields to their stable tag.
+
+    Root sessions usually persist ``source: "cli"``. Spawned continuations
+    may instead persist ``source: {"subagent": {...}}``; the object is useful
+    provenance, but the manager's scalar source field should retain the union
+    tag rather than violating its schema.
+    """
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict) and len(value) == 1:
+        return str(next(iter(value)))
+    return None
+
+
 def thread_efforts(rollout_path: str, usage_recs: list[dict]) -> list[str]:
     """Reasoning efforts recorded for a thread (turn_context + usage logs)."""
     efforts = []
@@ -727,12 +742,17 @@ def main(argv: list[str] | None = None) -> int:
     # ---- harness ---------------------------------------------------------
     metas = [session_meta(threads[r]["rollout_path"]) for r in roots]
     metas = [m for m in metas if m]
+    raw_source = metas[0].get("source") if metas else None
+    raw_thread_source = metas[0].get("thread_source") if metas else None
     harness = {
         "harness": "codex",
         "cli_version": metas[0].get("cli_version") if metas else None,
         "originator": metas[0].get("originator") if metas else None,
-        "source": metas[0].get("source") if metas else None,
-        "thread_source": metas[0].get("thread_source") if metas else None,
+        "source": session_meta_tag(raw_source),
+        "source_details": raw_source if isinstance(raw_source, dict) else None,
+        "thread_source": session_meta_tag(raw_thread_source),
+        "thread_source_details": (raw_thread_source
+                                  if isinstance(raw_thread_source, dict) else None),
         "multi_agent_version": metas[0].get("multi_agent_version") if metas else None,
         "history_mode": metas[0].get("history_mode") if metas else None,
         "memory_mode": metas[0].get("memory_mode") if metas else None,
