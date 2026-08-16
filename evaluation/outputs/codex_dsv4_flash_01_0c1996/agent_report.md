@@ -17,6 +17,10 @@ Only workspace-bundled `.sessions` evidence was used. The primary benchmark root
 
 Execution date is `2026-07-31` UTC from the primary root's first persisted `session_meta` timestamp. Excluded candidates: `019fb8ad`, `019fb8af`, `019fb8b1`, `019fb8b2`, `019fb8b6`, and `019fb8fa` are probes; `019fb8b7`, `019fb8d9`, and `019fb900-762` are aborted benchmark attempts. The continuation's terminal final answer is preserved verbatim in `contestant_final_response.md`: message `msg_7a3c2300a18542c8a1cc237a0e0b8fa7`, timestamp `2026-07-31T19:35:56.447Z`, one text part, extracted text SHA-256 `894eb60276fb2486420d21afed504bf8f5dd6d1169f50aca06ba7b3f53e58d8f`, sidecar SHA-256 `f164fa9e8dd77b52822cd928cdb9f6bb1e4b520cd62e9c41ac2f6cf55c136b1a`, and original stored-record SHA-256 `a89b2cfe8c2be71dd51721c2c0f840fe26012a24ef31f6505f4129dd1cf47f11`. This Markdown sidecar is intentionally unindexed.
 
+### Session accounting correction
+
+Explicit-root regeneration keeps the selected continuation total unchanged at 126,215,871 tokens but replaces the former total-only fallback with the bundled rollout's concrete split: 126,163,415 input tokens, including 3,740,928 cached, and 52,456 output tokens. Repricing that immutable split changes the stored estimate from $39.7580 to $17.2666. Evaluation evidence, scores, and DQ verdict are unchanged.
+
 ## Validation and findings
 
 No rerun or redraw was performed: readable contestant result artifacts already decide the relevant questions. The structural validator was invoked on the eight designated final case directories. It passes six and fails NACA M0.15 inviscid and cylinder Re20 because their metadata says `convergence_status: failed`; combined return code is 1. The report nevertheless says all eight pass.

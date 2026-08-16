@@ -1,8 +1,8 @@
 {
   "codex": {
     "present": true,
-    "source_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex/state_5.sqlite",
-    "sessions_root": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex/sessions",
+    "source_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex/sessions",
     "thread_count": 3,
     "subagent_count": 2,
     "root_count": 1,
@@ -63,6 +63,7 @@
         "tokens": {
           "input": 11187412,
           "cached_input": 11045824,
+          "cache_write": 0,
           "non_cached_input": 141588,
           "output": 86991,
           "reasoning_output": 14926,
@@ -106,6 +107,7 @@
         "tokens": {
           "input": 29572007,
           "cached_input": 29028352,
+          "cache_write": 0,
           "non_cached_input": 543655,
           "output": 108541,
           "reasoning_output": 53566,
@@ -157,6 +159,7 @@
         "tokens": {
           "input": 27235504,
           "cached_input": 27188352,
+          "cache_write": 0,
           "non_cached_input": 47152,
           "output": 25676,
           "reasoning_output": 1994,
@@ -198,6 +201,7 @@
         "tokens": {
           "input": 31243390,
           "cached_input": 31201536,
+          "cache_write": 0,
           "non_cached_input": 41854,
           "output": 22737,
           "reasoning_output": 0,
@@ -237,6 +241,7 @@
         "tokens": {
           "input": 33138710,
           "cached_input": 33100864,
+          "cache_write": 0,
           "non_cached_input": 37846,
           "output": 20031,
           "reasoning_output": 0,
@@ -278,6 +283,7 @@
         "tokens": {
           "input": 3657331,
           "cached_input": 3651712,
+          "cache_write": 0,
           "non_cached_input": 5619,
           "output": 2941,
           "reasoning_output": 0,
@@ -314,11 +320,12 @@
       "tokens": {
         "input": 136034354,
         "cached_input": 135216640,
+        "cache_write": 0,
         "non_cached_input": 817714,
         "output": 266917,
         "reasoning_output": 70486,
         "total": 136301271,
-        "total_from_root_trees": 130530375,
+        "total_from_root_trees": 136301271,
         "total_from_all_sessions": null
       },
       "cache": {
@@ -358,38 +365,67 @@
         "wall_seconds": 9108.9,
         "idle_seconds": 0.0
       },
-      "per_entity": {},
+      "per_entity": {
+        "019fb902-4a31-7af3-89ec-063a8039a580": {
+          "kind": "codex_thread",
+          "is_subagent": false,
+          "events": 2553,
+          "tokens_total_subtree": 130530375,
+          "tools": {
+            "exec_command": 533,
+            "update_plan": 4,
+            "apply_patch": 58,
+            "spawn_agent": 2,
+            "list_agents": 1,
+            "get_goal": 1,
+            "update_goal": 1
+          },
+          "first_event": "2026-07-31T16:30:04.065000+00:00",
+          "last_event": "2026-07-31T19:01:52.944000+00:00",
+          "rollout_bytes": 2335617
+        },
+        "019fb92d-6399-7732-a8b6-657d3a073ce5": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 133,
+          "tokens_total_subtree": 2566015,
+          "tools": {
+            "exec_command": 22,
+            "update_plan": 3,
+            "apply_patch": 1,
+            "view_image": 5
+          },
+          "first_event": "2026-07-31T17:16:27.497000+00:00",
+          "last_event": "2026-07-31T17:24:04.094000+00:00",
+          "rollout_bytes": 2710927
+        },
+        "019fb92d-9bec-7b12-aa98-32a5cc9697e2": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 188,
+          "tokens_total_subtree": 3204881,
+          "tools": {
+            "exec_command": 43,
+            "apply_patch": 2
+          },
+          "first_event": "2026-07-31T17:16:41.924000+00:00",
+          "last_event": "2026-07-31T17:31:16.204000+00:00",
+          "rollout_bytes": 517602
+        }
+      },
       "accounting_notes": [
-        "codex: total_token_usage / threads.tokens_used are subtree-inclusive per thread; summing all threads overcounts nested trees, so total_from_root_trees sums each root tree's final cumulative counter once. Bucket totals are per-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
+        "codex: fork replay is excluded at each child-owned task boundary; run totals sum only root and subagent-owned counter deltas. Bucket totals are per-owned-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
       ]
     }
   },
   "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01",
-  "discovered_at": "2026-08-13T12:26:42.998892+00:00",
+  "discovered_at": "2026-08-16T12:36:19.086944+00:00",
   "sources": [
-    {
-      "id": "system_codex",
-      "kind": "system",
-      "harness": "codex",
-      "root": "/home/harry/.codex/state_5.sqlite",
-      "reachable": true,
-      "sessions_found": 0,
-      "note": "user-level ~/.codex telemetry"
-    },
-    {
-      "id": "system_opencode",
-      "kind": "system",
-      "harness": "opencode",
-      "root": "/home/harry/.local/share/opencode/opencode.db",
-      "reachable": true,
-      "sessions_found": 0,
-      "note": "user-level ~/.local/share/opencode/opencode.db"
-    },
     {
       "id": "project_codex",
       "kind": "project",
       "harness": "codex",
-      "root": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex",
       "reachable": true,
       "sessions_found": 6,
       "note": "workspace-bundled .sessions/codex copy"
@@ -398,10 +434,10 @@
       "id": "project_opencode",
       "kind": "project",
       "harness": "opencode",
-      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/opencode-data/opencode.db",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/opencode-data/opencode/opencode.db",
       "reachable": false,
       "sessions_found": 0,
-      "note": "workspace-bundled .sessions/opencode-data copy"
+      "note": "workspace-bundled .sessions/opencode-data/opencode DB"
     }
   ],
   "selected_source": "project",
@@ -410,6 +446,7 @@
     "roots": [
       "019fb902-4a31-7af3-89ec-063a8039a580"
     ],
+    "harness": "codex",
     "questions": [],
     "notes": [
       "the evaluation agent classifies which sessions belong to the contestant run; unextractable choices are surfaced as questions"
@@ -421,12 +458,13 @@
     "sha256": "dab1a3b191859880a5380d732b50a86f4f76e9bd05e4575937844e1b73d824fc"
   },
   "provenance": {
-    "state_db": "/home/harry/.codex/state_5.sqlite",
-    "sessions_root": "/home/harry/.codex/sessions",
-    "opencode_db": "/home/harry/.local/share/opencode/opencode.db",
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/codex/sessions",
+    "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/01/.sessions/opencode-data/opencode/opencode.db",
     "session_source": "project",
+    "harness": "codex",
     "bucket_seconds": 1800,
     "idle_gap_seconds": 600,
-    "generated_at": "2026-08-13T12:26:42.998910+00:00"
+    "generated_at": "2026-08-16T12:36:19.086957+00:00"
   }
 }

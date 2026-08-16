@@ -11,6 +11,10 @@ The operator authorized a post-run provenance recovery. `env_snapshot.json` is e
 
 Only project-bundled session evidence was used. Root `019fbef6-8a0e-71f0-8642-db5302a41979` is the sustained main run, beginning `2026-08-01T20:14:16.086Z` and ending `2026-08-01T21:36:57.419Z`; it has no descendants. Its recorded container cwd is `/workspace`, mapped to the host contestant repository for extraction. Root `019fbef4-a59e-7ec0-9455-8c961d3b1cbf` is a 62-second setup/probe and was excluded. Thus execution date is `2026-08-01` UTC.
 
+### Session accounting correction
+
+The earlier accounting sidecars nevertheless included 78,119 tokens from excluded setup root `019fbef4-a59e-7ec0-9455-8c961d3b1cbf`. Explicit-root regeneration now matches the documented selection: 40,635,920 becomes 40,557,801 owned tokens with a concrete input/cache/output split. The current-price estimate changes from $28.4451 to $12.9611. Evaluation evidence, scores, and DQ verdict are unchanged.
+
 The terminal final response was deterministically selected from the last root `response_item` assistant message with `phase: final_answer`: message `msg_d06407089a1b424a91f3474f10ac3c46`, timestamp `2026-08-01T21:36:57.419Z`, one output-text part. Its stored-record SHA-256 is `9706caec3923b77f0eaffc11cb17d4fd7cc1abcd44058a0801d8916d3538515a`; extracted-text SHA-256 is `aa13c4b75102a84a15982ad704fefb26fc97be3d532a5854d89c4ab41bd80ce0`; saved sidecar SHA-256 is `916bd503ff339029d53a602f0b6ba3d38bfce3784d1f587460bf9168da529264`. `contestant_final_response.md` is intentionally unindexed.
 
 ## Validation and methods

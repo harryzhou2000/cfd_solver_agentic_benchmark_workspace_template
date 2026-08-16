@@ -9,30 +9,29 @@
 ## Snapshot
 
 - Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: yes / yes
-- Session analysis: 2026-08-01T20:12:51.919000+00:00 → 2026-08-01T21:36:57.469000+00:00; 3×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 40,635,920 (cache hit 0.9869)
+- Session analysis: 2026-08-01T20:14:30.524000+00:00 → 2026-08-01T21:36:57.469000+00:00; 3×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 40,557,801 (cache hit 0.9874)
 
 ## Expenses
 
-- Goal time (codex): **4907 s**
-- Wall time: **5046 s**
-- Tokens: **40,635,920** (main 40,635,920 / subagents 0)
+- Goal time (codex): **4885 s**
+- Wall time: **4947 s**
+- Tokens: **40,557,801** (main 40,557,801 / subagents 0)
 
 ### Per root session
 
 | Root | Status | Model | Threads | Tokens | Goal time (s) |
 |------|--------|-------|--------:|-------:|--------------:|
 | `019fbef6` | complete | BLSC/GLM-5.2 | 1 | 40,557,801 | 4885 |
-| `019fbef4` | paused | BLSC/GLM-5.2 | 1 | 78,119 | 22 |
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| BLSC/GLM-5.2 | 0 | 0 | 0 | 40,635,920 |
+| BLSC/GLM-5.2 | 40,351,096 | 39,842,368 | 206,705 | 40,557,801 |
 
-- Cost estimate: **$28.45** (estimate; unpriced tokens: 0)
+- Cost estimate: **$12.96** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
-- Tool calls: **258**; top tools: exec_command=249, apply_patch=5, update_plan=2, get_goal=1, update_goal=1
+- Tool calls: **249**; top tools: exec_command=240, apply_patch=5, update_plan=2, get_goal=1, update_goal=1
 - Subagent spawns: 0
 - LOC (file scan): 3,870 lines / 15 files
 - LOC (git tracked): 3,870 lines
@@ -50,7 +49,7 @@
 
 ### opencodex router (non-vanilla models: BLSC/GLM-5.2)
 
-- opencodex version: opencodex 2.14.0 (submodule None)
+- opencodex version: None (submodule None)
 - config facts: {}
 
 ### Prompts

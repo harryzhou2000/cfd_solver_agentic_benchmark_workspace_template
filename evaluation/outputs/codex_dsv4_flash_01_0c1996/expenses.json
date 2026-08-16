@@ -13,6 +13,7 @@
         "goal_tokens": 0,
         "threads": 1,
         "tokens_used": 126215871,
+        "state_tokens_inherited_inclusive": 126215871,
         "model": "BLSC/DeepSeek-V4-Flash"
       }
     }
@@ -21,46 +22,47 @@
     "total": 126215871,
     "by_model": {
       "BLSC/DeepSeek-V4-Flash": {
-        "input": 0,
-        "cached_input": 0,
-        "non_cached_input": 0,
-        "output": 0,
+        "input": 126163415,
+        "cached_input": 3740928,
+        "non_cached_input": 122422487,
+        "output": 52456,
         "reasoning_output": 0,
         "total": 126215871,
-        "fallback_tokens": 126215871
+        "fallback_tokens": 0
       }
     },
     "by_thread": {
       "019fb926-a333-7b03-b02b-37e86d1dd2e3": {
         "model": "BLSC/DeepSeek-V4-Flash",
         "is_subagent": false,
-        "source": "threads_fallback",
+        "source": "rollout_fork_delta",
         "tokens": {
           "BLSC/DeepSeek-V4-Flash": {
-            "input": 0,
-            "cached": 0,
-            "non_cached": 0,
-            "output": 0,
+            "input": 126163415,
+            "cached": 3740928,
+            "non_cached": 122422487,
+            "output": 52456,
             "reasoning_output": 0,
             "total": 126215871
           }
         },
         "total": 126215871,
-        "fallback_tokens": 126215871
+        "inherited_baseline_tokens": 0
       }
     },
     "main_vs_subagent": {
       "main": 126215871,
       "subagent": 0
     },
-    "fallback_tokens": 126215871,
-    "discrepancy_notes": []
+    "fallback_tokens": 0,
+    "discrepancy_notes": [],
+    "accounting_note": "Cached/input/output splits come from thread-owned rollout counter deltas. Fork replay is excluded at the first child-owned task boundary, and fork state counters are diagnostic only. A standalone root may retain the legacy state-counter scaling fallback when its rollout ends before the persisted root total."
   },
   "cost_estimate_usd": {
-    "total": 39.758,
+    "total": 17.2666,
     "by_model": {
       "BLSC/DeepSeek-V4-Flash": {
-        "usd": 39.758,
+        "usd": 17.2666,
         "tokens": 126215871,
         "pricing": "metadata"
       }
@@ -70,11 +72,11 @@
     "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
   },
   "provenance": {
-    "state_db": "/tmp/dsv4-flash-selected-state.sqlite",
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/state_5.sqlite",
     "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/goals_1.sqlite",
     "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/logs_2.sqlite",
     "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/sessions",
-    "fetched_at": "2026-08-13T11:47:00.681573+00:00",
+    "fetched_at": "2026-08-16T12:36:17.165344+00:00",
     "num_threads": 1,
     "num_roots": 1
   }

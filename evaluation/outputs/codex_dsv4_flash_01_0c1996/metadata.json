@@ -3,104 +3,70 @@
     "harness": "codex",
     "cli_version": "0.146.0",
     "originator": "codex-tui",
+    "source": "subagent",
+    "source_details": {
+      "subagent": {
+        "thread_spawn": {
+          "parent_thread_id": "019fb900-dcf6-7673-860a-d91822679d89",
+          "depth": 1,
+          "agent_path": "/root/run_mpi_validation",
+          "agent_nickname": "Jason",
+          "agent_role": null
+        }
+      }
+    },
     "thread_source": "subagent",
+    "thread_source_details": null,
     "multi_agent_version": "v2",
     "history_mode": "legacy",
     "memory_mode": "disabled",
     "model_provider": "openai",
     "codex_runtime_version": null,
-    "plugins": [
-      {
-        "source": "cache",
-        "name": "openai-curated-remote",
-        "version": "github"
-      },
-      {
-        "source": "cache",
-        "name": "openai-curated-remote",
-        "version": "google-drive"
-      },
-      {
-        "source": "cache",
-        "name": "openai-curated-remote",
-        "version": "openai-templates"
-      },
-      {
-        "source": "cache",
-        "name": "openai-curated-remote",
-        "version": "outlook-calendar"
-      },
-      {
-        "source": "cache",
-        "name": "openai-curated-remote",
-        "version": "outlook-email"
-      },
-      {
-        "source": "cache",
-        "name": "openai-curated-remote",
-        "version": "slack"
-      },
-      {
-        "source": "cache",
-        "name": "openai-curated-remote",
-        "version": "teams"
-      },
-      {
-        "source": "cache",
-        "name": "openai-curated-remote",
-        "version": "workspace-agents"
-      }
-    ]
+    "plugins": []
   },
   "models": {
     "BLSC/DeepSeek-V4-Flash": {
       "catalog": {
-        "display_name": "BLSC/DeepSeek-V4-Flash",
-        "context_window": 550000,
-        "max_context_window": 550000,
-        "supported_reasoning_levels": [
-          "low",
-          "medium",
-          "high",
-          "xhigh",
-          "max",
-          "ultra"
-        ]
+        "display_name": null,
+        "context_window": 522500,
+        "max_context_window": null,
+        "supported_reasoning_levels": null
       },
       "reasoning_efforts_seen": [
         "medium"
       ],
-      "max_context_used": 0,
+      "max_context_used": 495012,
       "threads": 1
     }
   },
   "context": {
     "by_model": {
       "BLSC/DeepSeek-V4-Flash": {
-        "context_window": 550000,
-        "max_context_used": 0
+        "context_window": 522500,
+        "max_context_used": 495012
       }
     },
     "by_thread": {
       "019fb926-a333-7b03-b02b-37e86d1dd2e3": {
         "model": "BLSC/DeepSeek-V4-Flash",
-        "max_input_tokens": null,
-        "mean_input_tokens": null
+        "max_input_tokens": 495012,
+        "mean_input_tokens": 253340.2,
+        "model_context_window_recorded": 522500
       }
     },
-    "notes": [
-      "no per-turn usage logs for BLSC/DeepSeek-V4-Flash; observed context window unknown"
-    ]
+    "notes": []
   },
   "threads": {
     "019fb926-a333-7b03-b02b-37e86d1dd2e3": {
       "thread_id": "019fb926-a333-7b03-b02b-37e86d1dd2e3",
       "is_subagent": false,
       "model": "BLSC/DeepSeek-V4-Flash",
+      "entry_model": "BLSC/DeepSeek-V4-Flash",
       "model_provider": "openai",
       "reasoning_effort": [
         "medium"
       ],
+      "entry_reasoning_effort": null,
       "tokens_used": 126215871,
       "cwd": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01",
       "git_branch": "codex/dsv4_flash/init",
@@ -108,8 +74,9 @@
       "updated_at": 1785526556,
       "started_at": "2026-07-31T17:09:05.035000+00:00",
       "ended_at": "2026-07-31T19:35:56.498000+00:00",
-      "context_used_max_input": null,
-      "context_used_mean_input": null
+      "context_used_max_input": 495012,
+      "context_used_mean_input": 253340.2,
+      "model_context_window_recorded": 522500
     }
   },
   "subagents": [],
@@ -118,154 +85,10 @@
     "non_vanilla_models": [
       "BLSC/DeepSeek-V4-Flash"
     ],
-    "opencodex_version": "opencodex 2.14.0",
+    "opencodex_version": null,
     "opencodex_submodule_pin": null,
-    "config_facts": {
-      "default_provider": "deepseek",
-      "providers": [
-        "BLSC",
-        "deepseek",
-        "openai",
-        "opencode-free"
-      ],
-      "multi_agent_mode": "v2",
-      "subagent_models": [
-        "gpt-5.6-terra",
-        "gpt-5.6-luna",
-        "BLSC/GLM-5.2",
-        "BLSC/MiniMax-M3",
-        "deepseek/deepseek-v4-flash"
-      ],
-      "disabled_models": [
-        "BLSC/Baichuan-M2",
-        "BLSC/Baichuan-M3",
-        "BLSC/Baichuan-M2-128K",
-        "BLSC/DeepSeek-R1",
-        "BLSC/DeepSeek-V3-250324",
-        "BLSC/DeepSeek-R1-0528",
-        "BLSC/DeepSeek-V3.1",
-        "BLSC/DeepSeek-V3.1-Terminus",
-        "BLSC/DeepSeek-V3.2",
-        "BLSC/DeepSeek-V3.2-Exp",
-        "BLSC/DeepSeek-V3.2-Instruct",
-        "BLSC/DeepSeek-V3.2-Thinking",
-        "BLSC/Doubao-Seedream-3.0-T2I",
-        "BLSC/Doubao-Seedream-4.5",
-        "BLSC/Doubao-Seedream-4.0",
-        "BLSC/Doubao-Seedream-5.0-lite",
-        "BLSC/ERNIE-4.5-Turbo-128K",
-        "BLSC/ERNIE-4.5-Turbo-32K",
-        "BLSC/ERNIE-4.5-Turbo-VL-32K",
-        "BLSC/ERNIE-5.0-Thinking-Preview",
-        "BLSC/GLM-4-9B",
-        "BLSC/GLM-4-Air",
-        "BLSC/GLM-4-AirX",
-        "BLSC/GLM-4-Flash",
-        "BLSC/GLM-4-FlashX",
-        "BLSC/GLM-4-Long",
-        "BLSC/GLM-4-Plus",
-        "BLSC/GLM-4.5",
-        "BLSC/GLM-4.5-Air",
-        "BLSC/GLM-4.5-AirX",
-        "BLSC/GLM-4.5-Flash",
-        "BLSC/GLM-4.5-X",
-        "BLSC/GLM-4.5V",
-        "BLSC/GLM-4.6",
-        "BLSC/GLM-4.6V",
-        "BLSC/GLM-4.7",
-        "BLSC/GLM-4V",
-        "BLSC/GLM-4V-Flash",
-        "BLSC/GLM-4V-Plus-0111",
-        "BLSC/GLM-5",
-        "BLSC/GLM-5-Turbo",
-        "BLSC/GLM-5.1",
-        "BLSC/GLM-ASR-2512",
-        "BLSC/GLM-CogView3-Flash",
-        "BLSC/GLM-Embedding-2",
-        "BLSC/GLM-Embedding-3",
-        "BLSC/GLM-Rerank",
-        "BLSC/GLM-Z1-Air",
-        "BLSC/GLM-Z1-AirX",
-        "BLSC/GLM-Z1-Flash",
-        "BLSC/Intern-S2-Preview",
-        "BLSC/Kimi-K2.5",
-        "BLSC/MiniMax-I2V-01",
-        "BLSC/MiniMax-I2V-01-Director",
-        "BLSC/MiniMax-I2V-01-Live",
-        "BLSC/MiniMax-M1-80k",
-        "BLSC/MiniMax-M2",
-        "BLSC/MiniMax-M2.5",
-        "BLSC/MiniMax-M2.7",
-        "BLSC/MiniMax-T2V-01",
-        "BLSC/MiniMax-T2V-01-Director",
-        "BLSC/MiniMax-Text-01",
-        "BLSC/PaddleOCR-VL-0.9B",
-        "BLSC/PaddleOCR-VL-1.5",
-        "BLSC/Qwen-Long",
-        "BLSC/Qwen2.5-72B-Instruct",
-        "BLSC/Qwen3-235B-A22B",
-        "BLSC/Qwen3-235B-A22B-Instruct-2507",
-        "BLSC/Qwen3-235B-A22B-Thinking-2507",
-        "BLSC/Qwen3-30B-A3B-Instruct-2507",
-        "BLSC/Qwen3-30B-A3B-Thinking-2507",
-        "BLSC/Qwen3-32B",
-        "BLSC/Qwen3-Coder-480B-A35B-Instruct",
-        "BLSC/Qwen3-Coder-Plus",
-        "BLSC/Qwen3-Next-80B-A3B-Instruct",
-        "BLSC/Qwen3-Next-80B-A3B-Thinking",
-        "BLSC/Qwen3-Omni-30b-a3b-Captioner",
-        "BLSC/Qwen3-VL-235B-A22B-Instruct",
-        "BLSC/Qwen3-VL-235B-A22B-Thinking",
-        "BLSC/Qwen3-VL-30B-A3B-Instruct",
-        "BLSC/Qwen3-VL-30B-A3B-Thinking",
-        "BLSC/Qwen3.5-122B-A10B",
-        "BLSC/Qwen3.5-27B",
-        "BLSC/Qwen3.5-35B-A3B",
-        "BLSC/Qwen3.5-397B-A17B",
-        "BLSC/Qwen3.5-Plus",
-        "BLSC/WanX2.1-T2I-Plus",
-        "BLSC/WanX2.1-T2I-Turbo"
-      ],
-      "context_cap_value": 550000,
-      "provider_effort_maps": {
-        "deepseek": {
-          "deepseek-v4-pro": {
-            "low": "high",
-            "medium": "high",
-            "high": "high",
-            "xhigh": "max",
-            "max": "max"
-          },
-          "deepseek-v4-flash": {
-            "low": "high",
-            "medium": "high",
-            "high": "high",
-            "xhigh": "max",
-            "max": "max"
-          }
-        },
-        "opencode-free": {
-          "deepseek-v4-flash-free": {
-            "low": "high",
-            "medium": "high",
-            "high": "high",
-            "xhigh": "max",
-            "max": "max"
-          }
-        },
-        "BLSC": {
-          "Kimi-K3": {
-            "none": "none",
-            "low": "low",
-            "medium": "high",
-            "high": "high",
-            "xhigh": "max",
-            "max": "max"
-          }
-        }
-      }
-    },
-    "codex_proxy_fallback_config": "/home/harry/.codex/opencodex.config.toml"
+    "config_facts": {},
+    "codex_proxy_fallback_config": null
   },
   "prompts": {
     "by_root_thread": {
@@ -308,15 +131,15 @@
     "ended_at": "2026-07-31T19:35:56.498000+00:00"
   },
   "provenance": {
-    "state_db": "/tmp/dsv4-flash-selected-state.sqlite",
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/state_5.sqlite",
     "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/goals_1.sqlite",
     "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/logs_2.sqlite",
     "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/sessions",
-    "history": "/home/harry/.codex/history.jsonl",
-    "ocx_config": "/home/harry/.opencodex/config.json",
-    "ocx_catalog": "/home/harry/.codex/opencodex-catalog.json",
-    "plugins_root": "/home/harry/.codex/plugins",
-    "generated_at": "2026-08-13T11:45:55.892915+00:00",
+    "history": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/history.jsonl",
+    "ocx_config": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/opencodex/config.json",
+    "ocx_catalog": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/opencodex-catalog.json",
+    "plugins_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01/.sessions/codex/plugins",
+    "generated_at": "2026-08-16T12:39:38.232273+00:00",
     "num_threads": 1
   },
   "questions": [],

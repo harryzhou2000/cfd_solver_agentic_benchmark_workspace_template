@@ -16,20 +16,15 @@
   "expenses": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01",
     "time_seconds": {
-      "goal_time": 4907.0,
-      "wall_time": 5045.6,
-      "started_at": "2026-08-01T20:12:51.919000+00:00",
+      "goal_time": 4885.0,
+      "wall_time": 4946.9,
+      "started_at": "2026-08-01T20:14:30.524000+00:00",
       "ended_at": "2026-08-01T21:36:57.469000+00:00",
       "by_root_thread": {
         "019fbef6-8a0e-71f0-8642-db5302a41979": {
           "status": "complete",
           "time_used_seconds": 4885,
           "tokens_used": 714758
-        },
-        "019fbef4-a59e-7ec0-9455-8c961d3b1cbf": {
-          "status": "paused",
-          "time_used_seconds": 22,
-          "tokens_used": 23143
         }
       },
       "by_root_tree": {
@@ -39,95 +34,72 @@
           "goal_tokens": 714758,
           "threads": 1,
           "tokens_used": 40557801,
-          "model": "BLSC/GLM-5.2"
-        },
-        "019fbef4-a59e-7ec0-9455-8c961d3b1cbf": {
-          "status": "paused",
-          "goal_time_seconds": 22,
-          "goal_tokens": 23143,
-          "threads": 1,
-          "tokens_used": 78119,
+          "state_tokens_inherited_inclusive": 40557801,
           "model": "BLSC/GLM-5.2"
         }
       }
     },
     "tokens": {
-      "total": 40635920,
+      "total": 40557801,
       "by_model": {
         "BLSC/GLM-5.2": {
-          "input": 0,
-          "cached_input": 0,
-          "non_cached_input": 0,
-          "output": 0,
-          "reasoning_output": 0,
-          "total": 40635920,
-          "fallback_tokens": 40635920
+          "input": 40351096,
+          "cached_input": 39842368,
+          "non_cached_input": 508728,
+          "output": 206705,
+          "reasoning_output": 95372,
+          "total": 40557801,
+          "fallback_tokens": 0
         }
       },
       "by_thread": {
-        "019fbef4-a59e-7ec0-9455-8c961d3b1cbf": {
-          "model": "BLSC/GLM-5.2",
-          "is_subagent": false,
-          "source": "threads_fallback",
-          "tokens": {
-            "BLSC/GLM-5.2": {
-              "input": 0,
-              "cached": 0,
-              "non_cached": 0,
-              "output": 0,
-              "reasoning_output": 0,
-              "total": 78119
-            }
-          },
-          "total": 78119,
-          "fallback_tokens": 78119
-        },
         "019fbef6-8a0e-71f0-8642-db5302a41979": {
           "model": "BLSC/GLM-5.2",
           "is_subagent": false,
-          "source": "threads_fallback",
+          "source": "rollout_cumulative",
           "tokens": {
             "BLSC/GLM-5.2": {
-              "input": 0,
-              "cached": 0,
-              "non_cached": 0,
-              "output": 0,
-              "reasoning_output": 0,
+              "input": 40351096,
+              "cached": 39842368,
+              "non_cached": 508728,
+              "output": 206705,
+              "reasoning_output": 95372,
               "total": 40557801
             }
           },
           "total": 40557801,
-          "fallback_tokens": 40557801
+          "inherited_baseline_tokens": 0
         }
       },
       "main_vs_subagent": {
-        "main": 40635920,
+        "main": 40557801,
         "subagent": 0
       },
-      "fallback_tokens": 40635920,
-      "discrepancy_notes": []
+      "fallback_tokens": 0,
+      "discrepancy_notes": [],
+      "accounting_note": "Cached/input/output splits come from thread-owned rollout counter deltas. Fork replay is excluded at the first child-owned task boundary, and fork state counters are diagnostic only. A standalone root may retain the legacy state-counter scaling fallback when its rollout ends before the persisted root total."
     },
     "cost_estimate_usd": {
-      "total": 28.4451,
+      "total": 12.9611,
       "by_model": {
         "BLSC/GLM-5.2": {
-          "usd": 28.4451,
-          "tokens": 40635920,
+          "usd": 12.9611,
+          "tokens": 40557801,
           "pricing": "metadata"
         }
       },
       "unpriced_tokens": 0,
       "estimate": true,
-      "metadata": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
+      "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
     },
     "provenance": {
-      "state_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/state_5.sqlite",
-      "goals_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/goals_1.sqlite",
-      "logs_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/logs_2.sqlite",
-      "sessions_root": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/sessions",
-      "fetched_at": "2026-08-13T11:59:39.956012+00:00",
-      "num_threads": 2,
-      "num_roots": 2
+      "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/state_5.sqlite",
+      "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/goals_1.sqlite",
+      "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/logs_2.sqlite",
+      "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/sessions",
+      "fetched_at": "2026-08-16T12:36:17.717478+00:00",
+      "num_threads": 1,
+      "num_roots": 1
     }
   },
   "code_review": {
@@ -444,18 +416,15 @@
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01",
     "tool_usage": {
-      "total": 258,
+      "total": 249,
       "by_tool": {
-        "exec_command": 249,
+        "exec_command": 240,
         "apply_patch": 5,
         "update_plan": 2,
         "get_goal": 1,
         "update_goal": 1
       },
       "by_thread": {
-        "019fbef4-a59e-7ec0-9455-8c961d3b1cbf": {
-          "exec_command": 9
-        },
         "019fbef6-8a0e-71f0-8642-db5302a41979": {
           "exec_command": 240,
           "update_plan": 2,
@@ -466,17 +435,6 @@
       },
       "subagent_spawns": 0,
       "risk_context": [
-        {
-          "thread_id": "019fbef4-a59e-7ec0-9455-8c961d3b1cbf",
-          "approval_policy": "never",
-          "permission_profile": ":danger-full-access"
-        },
-        {
-          "thread_id": "019fbef4-a59e-7ec0-9455-8c961d3b1cbf",
-          "approval_policy": "never",
-          "sandbox": "danger-full-access",
-          "network_access": null
-        },
         {
           "thread_id": "019fbef6-8a0e-71f0-8642-db5302a41979",
           "approval_policy": "never",
@@ -564,10 +522,10 @@
       }
     ],
     "provenance": {
-      "state_db": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/state_5.sqlite",
-      "sessions_root": "/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/sessions",
-      "generated_at": "2026-08-13T11:59:40.222696+00:00",
-      "num_threads": 2
+      "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/state_5.sqlite",
+      "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/sessions",
+      "generated_at": "2026-08-16T12:36:17.997221+00:00",
+      "num_threads": 1
     }
   },
   "metadata": {
@@ -576,7 +534,9 @@
       "cli_version": "0.146.0",
       "originator": "codex-tui",
       "source": "cli",
+      "source_details": null,
       "thread_source": "user",
+      "thread_source_details": null,
       "multi_agent_version": "v2",
       "history_mode": "legacy",
       "memory_mode": "disabled",
@@ -645,10 +605,10 @@
       "non_vanilla_models": [
         "BLSC/GLM-5.2"
       ],
-      "opencodex_version": "opencodex 2.14.0",
+      "opencodex_version": null,
       "opencodex_submodule_pin": null,
       "config_facts": {},
-      "codex_proxy_fallback_config": "/home/harry/.codex/opencodex.config.toml"
+      "codex_proxy_fallback_config": null
     },
     "prompts": {
       "by_root_thread": {
@@ -694,15 +654,15 @@
       "ended_at": "2026-08-01T21:36:57.469000+00:00"
     },
     "provenance": {
-      "state_db": "workspace/codex/glm52-m3/01/.sessions/codex/state_5.sqlite",
-      "goals_db": "workspace/codex/glm52-m3/01/.sessions/codex/goals_1.sqlite",
-      "logs_db": "workspace/codex/glm52-m3/01/.sessions/codex/logs_2.sqlite",
-      "sessions_root": "workspace/codex/glm52-m3/01/.sessions/codex/sessions",
-      "history": "/tmp/no-history",
-      "ocx_config": "/tmp/no-ocx-config",
-      "ocx_catalog": "/tmp/no-ocx-catalog",
-      "plugins_root": "/tmp/no-plugins",
-      "generated_at": "2026-08-13T15:19:16.646859+00:00",
+      "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/state_5.sqlite",
+      "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/goals_1.sqlite",
+      "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/logs_2.sqlite",
+      "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/sessions",
+      "history": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/history.jsonl",
+      "ocx_config": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/opencodex/config.json",
+      "ocx_catalog": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/opencodex-catalog.json",
+      "plugins_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/01/.sessions/codex/plugins",
+      "generated_at": "2026-08-16T12:39:38.388627+00:00",
       "num_threads": 1
     },
     "questions": [],

@@ -25,9 +25,9 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| BLSC/GLM-5.2 | 0 | 0 | 0 | 136,301,271 |
+| BLSC/GLM-5.2 | 136,034,354 | 135,216,640 | 266,917 | 136,301,271 |
 
-- Cost estimate: **$95.41** (estimate; unpriced tokens: 0)
+- Cost estimate: **$41.21** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
@@ -49,7 +49,7 @@
 
 ### opencodex router (non-vanilla models: BLSC/GLM-5.2)
 
-- opencodex version: opencodex 2.14.0 (submodule None)
+- opencodex version: None (submodule None)
 - config facts: {}
 
 ### Subagent threads

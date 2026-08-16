@@ -10,6 +10,10 @@ The operator authorized the explicit post-run reconstruction. `env_snapshot.json
 
 Only workspace-bundled Codex evidence was used. Main root `019fb902-4a31-7af3-89ec-063a8039a580` ran from `2026-07-31T16:29:22.874Z` through terminal final message `msg_6c5511f3b58548629bd195a1a7828b17` at `2026-07-31T19:01:52.878Z`; descendants `019fb92d-6399-7732-a8b6-657d3a073ce5` (plotting) and `019fb92d-9bec-7b12-aa98-32a5cc9697e2` (report) are included. Setup/preliminary roots `019fb8bb`, `019fb8d0`, and unrelated Slurm root `019fb8e4` are excluded. Final-response stored record SHA-256 is `adbbc84efc3bdbb04a68acd3d2be29ecff05cfcae87be8ae05bbaf8a30602366`; extracted text SHA-256 is `b60b29aa9142c991aefe83d13e07ac0d81b829d1412738f4f56d0d71299d2102`; sidecar SHA-256 is `bda47d9eb448f879b3c35a0456450b437e6ec8005dff46fb0c8cb4bf8a1addee`; one text part. The Markdown sidecar is unindexed.
 
+### Session accounting correction
+
+Explicit-root regeneration keeps the selected tree total unchanged at 136,301,271 tokens but replaces total-only fallback accounting with the concrete rollout split. It attributes 130,530,375 tokens to the main root and 5,770,896 to its two descendants, with 136,034,354 input and 266,917 output tokens overall. The current-price estimate changes from $95.4109 to $41.2127. Evaluation evidence, scores, and DQ verdict are unchanged.
+
 ## Evidence and findings
 
 No rerun or redraw was performed. Re200 was never rerun. Historical raw results were read from immutable `f9b3d2d86be7691191d72b8b323de4c503a2597a`; they are deliberately excluded from the curated result commit.

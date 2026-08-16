@@ -9,7 +9,7 @@
 ## Snapshot
 
 - Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: yes / yes
-- Session analysis: 2026-07-31T14:56:45.182000+00:00 → 2026-07-31T19:35:56.498000+00:00; 10×1800s buckets; idle 1 gaps / 1483s excluded; permission-wait candidates 0; tokens 152,423,948 (cache hit 0.0254)
+- Session analysis: 2026-07-31T17:09:05.035000+00:00 → 2026-07-31T19:35:56.498000+00:00; 5×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 126,215,871 (cache hit 0.0297)
 
 ## Expenses
 
@@ -25,9 +25,9 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| BLSC/DeepSeek-V4-Flash | 0 | 0 | 0 | 126,215,871 |
+| BLSC/DeepSeek-V4-Flash | 126,163,415 | 3,740,928 | 52,456 | 126,215,871 |
 
-- Cost estimate: **$39.76** (estimate; unpriced tokens: 0)
+- Cost estimate: **$17.27** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
@@ -39,19 +39,18 @@
 ## Metadata
 
 - Harness: codex cli 0.146.0 (codex-tui, provider openai)
-- Plugins: openai-curated-remote github, openai-curated-remote google-drive, openai-curated-remote openai-templates, openai-curated-remote outlook-calendar, openai-curated-remote outlook-email, openai-curated-remote slack, openai-curated-remote teams, openai-curated-remote workspace-agents
 - AGENTS.md: sha256 7bcbffcafddf (matches HEAD)
 - CodeGraph: absent
 - Benchmark submodule: ffc314f7dd88 (dirty)
 
 | Model | Effort(s) | Context window | Max context used | Threads |
 |-------|-----------|---------------:|-----------------:|--------:|
-| BLSC/DeepSeek-V4-Flash | medium | 550000 | n/a | 1 |
+| BLSC/DeepSeek-V4-Flash | medium | 522500 | 495,012 | 1 |
 
 ### opencodex router (non-vanilla models: BLSC/DeepSeek-V4-Flash)
 
-- opencodex version: opencodex 2.14.0 (submodule None)
-- config facts: {"default_provider": "deepseek", "providers": ["BLSC", "deepseek", "openai", "opencode-free"], "multi_agent_mode": "v2", "subagent_models": ["gpt-5.6-terra", "gpt-5.6-luna", "BLSC/GLM-5.2", "BLSC/MiniMax-M3", "deepseek/deepseek-v4-flash"], "disabled_models": ["BLSC/Baichuan-M2", "BLSC/Baichuan-M3", "BLSC/Baichuan-M2-128K", "BLSC/DeepSeek-R1", "BLSC/DeepSeek-V3-250324", "BLSC/DeepSeek-R1-0528", "BL
+- opencodex version: None (submodule None)
+- config facts: {}
 
 ### Prompts
 
