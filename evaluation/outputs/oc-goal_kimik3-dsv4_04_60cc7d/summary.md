@@ -24,9 +24,10 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| deepseek/deepseek-v4-pro | 89,694,780 | 88,887,757 | 222,968 | 89,918,249 |
+| deepseek/deepseek-v4-pro | 1,147,331 | 764,928 | 1,039 | 1,148,871 |
+| kimi-for-coding/k3 | 88,547,449 | 88,122,829 | 221,929 | 88,769,378 |
 
-- Cost estimate: **$5.81** (estimate; unpriced tokens: 0)
+- Cost estimate: **$31.31** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
@@ -44,7 +45,15 @@
 
 | Model | Effort(s) | Context window | Max context used | Threads |
 |-------|-----------|---------------:|-----------------:|--------:|
-| deepseek-v4-pro@max | max | 550000 | 807,023 | 1 |
+| deepseek-v4-pro@max | max | 550000 | 382,403 | 1 |
+| k3@max | max | ? | 424,620 | 1 |
+
+### Metadata questions for user (unextractable fields)
+
+| Question | Reason | Suggested source | Answer |
+|----------|--------|------------------|--------|
+| context_window_k3@max: What is the context window (max tokens) of model `k3`? | model is not listed in the local model catalog | provider docs or model card | Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried. |
+Provide answers as `{"<question_id>": "..."}` and re-run with `--answers <file>`; status then flips to complete.
 
 ### Prompts
 

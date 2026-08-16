@@ -28,32 +28,54 @@
     "tokens": {
       "total": 89918249,
       "by_model": {
+        "kimi-for-coding/k3": {
+          "input": 88547449,
+          "cached_input": 88122829,
+          "cache_write": 0,
+          "non_cached_input": 424620,
+          "output": 221929,
+          "reasoning_output": 0,
+          "total": 88769378,
+          "reasoning_is_output_subset": false
+        },
         "deepseek/deepseek-v4-pro": {
-          "input": 89694780,
-          "cached_input": 88887757,
-          "non_cached_input": 807023,
-          "output": 222968,
+          "input": 1147331,
+          "cached_input": 764928,
+          "cache_write": 0,
+          "non_cached_input": 382403,
+          "output": 1039,
           "reasoning_output": 501,
-          "total": 89918249,
+          "total": 1148871,
           "reasoning_is_output_subset": false
         }
       },
       "by_thread": {
         "ses_004294f0cffe1r1FQyzhLt47Ym": {
-          "model": "deepseek-v4-pro",
-          "provider": "deepseek",
+          "model": "k3",
+          "provider": "kimi-for-coding",
           "variant": "max",
           "is_subagent": false,
-          "source": "opencode_session",
+          "source": "opencode_assistant_messages",
           "tokens": {
+            "kimi-for-coding/k3": {
+              "input": 88547449,
+              "cached_input": 88122829,
+              "cache_write": 0,
+              "non_cached_input": 424620,
+              "output": 221929,
+              "reasoning_output": 0,
+              "total": 88769378,
+              "reasoning_is_output_subset": false
+            },
             "deepseek/deepseek-v4-pro": {
-              "input": 89694780,
-              "cached_input": 88887757,
-              "non_cached_input": 807023,
-              "output": 222968,
+              "input": 1147331,
+              "cached_input": 764928,
+              "cache_write": 0,
+              "non_cached_input": 382403,
+              "output": 1039,
               "reasoning_output": 501,
-              "reasoning_is_output_subset": false,
-              "total": 89918249
+              "total": 1148871,
+              "reasoning_is_output_subset": false
             }
           },
           "total": 89918249
@@ -65,11 +87,16 @@
       }
     },
     "cost_estimate_usd": {
-      "total": 5.8051,
+      "total": 31.3119,
       "by_model": {
+        "kimi-for-coding/k3": {
+          "usd": 31.0396,
+          "tokens": 88769378,
+          "pricing": "metadata"
+        },
         "deepseek/deepseek-v4-pro": {
-          "usd": 5.8051,
-          "tokens": 89918249,
+          "usd": 0.2723,
+          "tokens": 1148871,
           "pricing": "metadata"
         }
       },
@@ -447,6 +474,26 @@
       "model_provider": null
     },
     "models": {
+      "k3@max": {
+        "model": "k3",
+        "variant": "max",
+        "provider": "kimi-for-coding",
+        "catalog": {
+          "display_name": null,
+          "context_window": null
+        },
+        "reasoning_efforts_seen": [
+          "max"
+        ],
+        "max_context_used": 424620,
+        "threads": 1,
+        "tokens_input": 424620,
+        "tokens_output": 221929,
+        "tokens_reasoning": 0,
+        "tokens_cache_read": 88122829,
+        "tokens_cache_write": 0,
+        "cost": 0.0
+      },
       "deepseek-v4-pro@max": {
         "model": "deepseek-v4-pro",
         "variant": "max",
@@ -458,21 +505,25 @@
         "reasoning_efforts_seen": [
           "max"
         ],
-        "max_context_used": 807023,
+        "max_context_used": 382403,
         "threads": 1,
-        "tokens_input": 807023,
-        "tokens_output": 222968,
+        "tokens_input": 382403,
+        "tokens_output": 1039,
         "tokens_reasoning": 501,
-        "tokens_cache_read": 88887757,
+        "tokens_cache_read": 764928,
         "tokens_cache_write": 0,
-        "cost": 0.17045796900000001
+        "cost": 0.170457969
       }
     },
     "context": {
       "by_model": {
+        "k3@max": {
+          "context_window": null,
+          "max_context_used": 424620
+        },
         "deepseek-v4-pro@max": {
           "context_window": 550000,
-          "max_context_used": 807023
+          "max_context_used": 382403
         }
       },
       "by_session": {
@@ -508,6 +559,41 @@
           "started_at": "2026-08-13T15:56:19.059000+00:00",
           "ended_at": "2026-08-13T23:22:42.395000+00:00",
           "original_parent_id": null,
+          "usage_by_model": [
+            {
+              "provider": "kimi-for-coding",
+              "model": "k3",
+              "variant": "max",
+              "message_count": 345,
+              "tokens_input": 424620,
+              "tokens_output": 221929,
+              "tokens_reasoning": 0,
+              "tokens_cache_read": 88122829,
+              "tokens_cache_write": 0,
+              "cost": 0.0,
+              "first_message_id": "msg_ffbd6b213001dH6C2D8DSArsfh",
+              "first_message_at": "2026-08-13T15:56:19.347000+00:00",
+              "last_message_at": "2026-08-13T23:21:27.646000+00:00"
+            },
+            {
+              "provider": "deepseek",
+              "model": "deepseek-v4-pro",
+              "variant": "max",
+              "message_count": 3,
+              "tokens_input": 382403,
+              "tokens_output": 1039,
+              "tokens_reasoning": 501,
+              "tokens_cache_read": 764928,
+              "tokens_cache_write": 0,
+              "cost": 0.170457969,
+              "first_message_id": "msg_ffd6ea49f00118mh3HMLtFB9W9",
+              "first_message_at": "2026-08-13T23:21:54.591000+00:00",
+              "last_message_at": "2026-08-13T23:22:28.949000+00:00"
+            }
+          ],
+          "entry_provider": "kimi-for-coding",
+          "entry_model": "k3",
+          "entry_variant": "max",
           "activity": {
             "activity_time_seconds": 23352.2,
             "wall_time_seconds": 26782.5,
@@ -572,13 +658,23 @@
       "idle_time_seconds": 3430.3,
       "idle_gap_threshold_seconds": 600
     },
-    "questions": [],
-    "user_answers": {},
+    "questions": [
+      {
+        "id": "context_window_k3@max",
+        "question": "What is the context window (max tokens) of model `k3`?",
+        "reason": "model is not listed in the local model catalog",
+        "suggested_source": "provider docs or model card",
+        "answer": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried."
+      }
+    ],
+    "user_answers": {
+      "context_window_k3@max": "Unavailable in bundled immutable telemetry; no local model catalog entry is present and no home, provider, or internet source was queried."
+    },
     "status": "complete",
     "provenance": {
       "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/kimik3-dsv4/04/.sessions/opencode-data/opencode/opencode.db",
       "opencode_config_dir": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/kimik3-dsv4/04/.sessions/opencode-config",
-      "generated_at": "2026-08-15T03:13:34.655159+00:00",
+      "generated_at": "2026-08-16T12:22:33.466798+00:00",
       "num_sessions": 1,
       "selected_roots": [
         "ses_004294f0cffe1r1FQyzhLt47Ym"

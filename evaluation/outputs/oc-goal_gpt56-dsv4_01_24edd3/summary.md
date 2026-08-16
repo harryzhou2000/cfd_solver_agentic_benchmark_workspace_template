@@ -9,7 +9,7 @@
 ## Snapshot
 
 - Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: no
-- Session analysis: 2026-08-06T20:05:43.531000+00:00 → 2026-08-10T07:01:39.976000+00:00; 166×1800s buckets; idle 75 gaps / 228712s excluded; permission-wait candidates 1; tokens 430,551,708 (cache hit 0.9995)
+- Session analysis: 2026-08-06T20:05:43.531000+00:00 → 2026-08-10T07:01:39.976000+00:00; 166×1800s buckets; idle 75 gaps / 228712s excluded; permission-wait candidates 1; tokens 430,551,708 (cache hit 0.9485)
 
 ## Expenses
 
@@ -28,7 +28,7 @@
 | internal_openai_eccn/us/azure/openai/eccn-gpt-5.6-sol | 421,488,989 | 399,617,531 | 1,053,540 | 423,275,703 |
 | minimax/MiniMax-M3 | 0 | 0 | 0 | 0 |
 
-- Cost estimate: **$316.17** (estimate; unpriced tokens: 0)
+- Cost estimate: **$316.03** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
