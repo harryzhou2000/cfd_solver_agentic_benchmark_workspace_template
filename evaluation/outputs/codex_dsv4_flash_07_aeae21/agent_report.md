@@ -32,7 +32,7 @@ For Re200, `driver.cpp` uses a BDF2 outer physical-time loop and frozen historie
 
 The independent review scores are Code 3.78/5, CFD 3.82/5, and Results 4.14/5. The rubric totals 84/100: build/CLI 9, mesh 9, residual/BC 14, second order 9, viscous 9, implicit/transient 10, MPI 8, cases 7, report 4, extensibility 5. Case-specific scores and all deduction evidence are recorded in `agent_scores.json`.
 
-No disqualification trigger is established. In particular, no external solver wrapper, fake MPI evidence, hard-coded filename-only dispatcher, disabled reconstruction path, or synthetic-output evidence was found. The trust policy was followed: no external plagiarism/code search was performed.
+**DQ 7 is triggered.** Re200 metadata reports a successful/statistically periodic production run (zero target misses and 1.0 convergence fraction) although its recorded inner ratio is 0.3695944590912151 against the required 0.001 target and source accepts merely decreasing residuals as success. No external solver wrapper, fake MPI evidence, hard-coded filename-only dispatcher, disabled reconstruction path, or synthetic-output evidence was found. The trust policy was followed: no external plagiarism/code search was performed.
 
 ## Limitations
 
