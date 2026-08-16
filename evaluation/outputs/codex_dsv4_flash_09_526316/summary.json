@@ -34,6 +34,7 @@
           "goal_tokens": 1074967,
           "threads": 5,
           "tokens_used": 214347834,
+          "state_tokens_inherited_inclusive": 214347834,
           "model": "BLSC/DeepSeek-V4-Flash"
         }
       }
@@ -42,12 +43,21 @@
       "total": 214347834,
       "by_model": {
         "BLSC/DeepSeek-V4-Flash": {
-          "input": 213688381,
-          "cached_input": 205111168,
-          "non_cached_input": 8577213,
-          "output": 659453,
-          "reasoning_output": 341325,
-          "total": 214347834,
+          "input": 200729111,
+          "cached_input": 192960128,
+          "non_cached_input": 7768983,
+          "output": 642908,
+          "reasoning_output": 331424,
+          "total": 201372019,
+          "fallback_tokens": 0
+        },
+        "deepseek/deepseek-v4-flash": {
+          "input": 12959270,
+          "cached_input": 12151040,
+          "non_cached_input": 808230,
+          "output": 16545,
+          "reasoning_output": 9901,
+          "total": 12975815,
           "fallback_tokens": 0
         }
       },
@@ -58,20 +68,30 @@
           "source": "rollout_cumulative",
           "tokens": {
             "BLSC/DeepSeek-V4-Flash": {
-              "input": 183005009,
-              "cached": 175182464,
-              "non_cached": 7822545,
-              "output": 501233,
-              "reasoning_output": 250733,
-              "total": 183506242
+              "input": 170045739,
+              "cached": 163031424,
+              "non_cached": 7014315,
+              "output": 484688,
+              "reasoning_output": 240832,
+              "total": 170530427
+            },
+            "deepseek/deepseek-v4-flash": {
+              "input": 12959270,
+              "cached": 12151040,
+              "non_cached": 808230,
+              "output": 16545,
+              "reasoning_output": 9901,
+              "total": 12975815
             }
           },
-          "total": 183506242
+          "total": 183506242,
+          "inherited_baseline_tokens": 0,
+          "fallback_model_tokens": 0
         },
         "019fe1a2-00b6-7830-b123-db8a5a58c324": {
           "model": "BLSC/DeepSeek-V4-Flash",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/DeepSeek-V4-Flash": {
               "input": 5253193,
@@ -82,12 +102,14 @@
               "total": 5281923
             }
           },
-          "total": 5281923
+          "total": 5281923,
+          "inherited_baseline_tokens": 0,
+          "fallback_model_tokens": 0
         },
         "019fe1a2-22fd-71f3-be85-454c901efb70": {
           "model": "BLSC/DeepSeek-V4-Flash",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/DeepSeek-V4-Flash": {
               "input": 8369758,
@@ -98,12 +120,14 @@
               "total": 8402302
             }
           },
-          "total": 8402302
+          "total": 8402302,
+          "inherited_baseline_tokens": 0,
+          "fallback_model_tokens": 0
         },
         "019fe204-aa6f-7d00-b9e3-d8e222c27011": {
           "model": "BLSC/DeepSeek-V4-Flash",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/DeepSeek-V4-Flash": {
               "input": 255655,
@@ -114,12 +138,14 @@
               "total": 258500
             }
           },
-          "total": 258500
+          "total": 258500,
+          "inherited_baseline_tokens": 0,
+          "fallback_model_tokens": 0
         },
         "019fe54d-b9a5-77b1-9e54-f24985e0255c": {
           "model": "BLSC/DeepSeek-V4-Flash",
           "is_subagent": true,
-          "source": "rollout_cumulative",
+          "source": "rollout_fork_delta",
           "tokens": {
             "BLSC/DeepSeek-V4-Flash": {
               "input": 16804766,
@@ -130,7 +156,9 @@
               "total": 16898867
             }
           },
-          "total": 16898867
+          "total": 16898867,
+          "inherited_baseline_tokens": 0,
+          "fallback_model_tokens": 0
         }
       },
       "main_vs_subagent": {
@@ -139,14 +167,19 @@
       },
       "fallback_tokens": 0,
       "discrepancy_notes": [],
-      "accounting_note": "Cached/input/output splits come from each selected thread's terminal rollout counter and are scaled only when needed to match state_5.sqlite threads.tokens_used."
+      "accounting_note": "Cached/input/output splits come from thread-owned rollout counter deltas. Fork replay is excluded at the first child-owned task boundary. Each delta is attributed to the most recent owned turn_context or thread_settings_applied model; only deltas before an explicit owned model event use the thread database model. Fork state counters are diagnostic only. A standalone root may retain the legacy state-counter scaling fallback when its rollout ends before the persisted root total."
     },
     "cost_estimate_usd": {
-      "total": 8.4217,
+      "total": 7.3367,
       "by_model": {
         "BLSC/DeepSeek-V4-Flash": {
-          "usd": 8.4217,
-          "tokens": 214347834,
+          "usd": 7.0629,
+          "tokens": 201372019,
+          "pricing": "metadata"
+        },
+        "deepseek/deepseek-v4-flash": {
+          "usd": 0.2738,
+          "tokens": 12975815,
           "pricing": "metadata"
         }
       },
@@ -159,7 +192,7 @@
       "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/09/.sessions/codex/goals_1.sqlite",
       "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/09/.sessions/codex/logs_2.sqlite",
       "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/09/.sessions/codex/sessions",
-      "fetched_at": "2026-08-15T02:37:52.953486+00:00",
+      "fetched_at": "2026-08-16T13:02:05.748881+00:00",
       "num_threads": 5,
       "num_roots": 1
     }

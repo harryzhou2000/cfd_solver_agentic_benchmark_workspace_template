@@ -25,9 +25,10 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| BLSC/DeepSeek-V4-Flash | 213,688,381 | 205,111,168 | 659,453 | 214,347,834 |
+| BLSC/DeepSeek-V4-Flash | 200,729,111 | 192,960,128 | 642,908 | 201,372,019 |
+| deepseek/deepseek-v4-flash | 12,959,270 | 12,151,040 | 16,545 | 12,975,815 |
 
-- Cost estimate: **$8.42** (estimate; unpriced tokens: 0)
+- Cost estimate: **$7.34** (estimate; unpriced tokens: 0)
 
 ## Measurements
 

@@ -25,10 +25,10 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| gpt-5.6-sol | 170,350,429 | 165,869,056 | 407,652 | 170,758,081 |
-| gpt-5.6-terra | 41,677,884 | 39,523,072 | 329,152 | 42,007,036 |
+| gpt-5.6-sol | 166,268,883 | 161,963,520 | 370,151 | 166,639,034 |
+| gpt-5.6-terra | 45,759,430 | 43,428,608 | 366,653 | 46,126,083 |
 
-- Cost estimate: **$133.46** (estimate; unpriced tokens: 0)
+- Cost estimate: **$131.99** (estimate; unpriced tokens: 0)
 
 ## Measurements
 

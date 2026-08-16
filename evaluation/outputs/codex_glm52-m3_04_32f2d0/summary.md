@@ -25,10 +25,11 @@
 
 | Model | Input | Cached | Output | Total |
 |-------|------:|-------:|-------:|------:|
-| BLSC/GLM-5.2 | 1,023,032,406 | 969,318,080 | 5,560,194 | 1,028,592,600 |
+| BLSC/GLM-5.2 | 1,021,468,934 | 968,072,768 | 5,553,723 | 1,027,022,657 |
 | BLSC/MiniMax-M3 | 5,605,010 | 5,401,796 | 36,910 | 5,641,920 |
+| deepseek/deepseek-v4-flash | 1,563,472 | 1,245,312 | 6,471 | 1,569,943 |
 
-- Cost estimate: **$127.85** (estimate; unpriced tokens: 0)
+- Cost estimate: **$364.77** (estimate; unpriced tokens: 0)
 
 ## Measurements
 
