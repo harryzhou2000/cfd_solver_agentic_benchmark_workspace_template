@@ -16,6 +16,41 @@ from cfdeval.sessions import CodexThreadEvents, analyze_opencode, whole_stats
 
 
 class SessionIsolationTests(unittest.TestCase):
+    def test_owned_rollout_usage_is_attributed_across_model_switches(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            rollout = Path(tmp) / "rollout-root.jsonl"
+            rows = [
+                {"timestamp": "2026-01-01T00:00:00Z", "type": "session_meta",
+                 "payload": {"id": "root", "timestamp": "2026-01-01T00:00:00Z"}},
+                {"timestamp": "2026-01-01T00:00:01Z", "type": "turn_context",
+                 "payload": {"model": "model-a"}},
+                {"timestamp": "2026-01-01T00:00:02Z", "type": "event_msg",
+                 "payload": {"type": "token_count", "info": {
+                     "total_token_usage": {"input_tokens": 90,
+                                           "cached_input_tokens": 40,
+                                           "output_tokens": 10,
+                                           "total_tokens": 100}}}},
+                {"timestamp": "2026-01-01T00:01:00Z", "type": "event_msg",
+                 "payload": {"type": "thread_settings_applied",
+                             "thread_settings": {"model": "model-b"}}},
+                {"timestamp": "2026-01-01T00:01:01Z", "type": "event_msg",
+                 "payload": {"type": "token_count", "info": {
+                     "total_token_usage": {"input_tokens": 135,
+                                           "cached_input_tokens": 60,
+                                           "output_tokens": 15,
+                                           "total_tokens": 150}}}},
+            ]
+            rollout.write_text("\n".join(json.dumps(row) for row in rows) + "\n")
+
+            facts = cd.rollout_usage_facts(str(rollout), fallback_model="database-final")
+            self.assertEqual(facts["total_tokens"], 150)
+            self.assertEqual(set(facts["usage_by_model"]), {"model-a", "model-b"})
+            self.assertEqual(facts["usage_by_model"]["model-a"]["total_tokens"], 100)
+            self.assertEqual(facts["usage_by_model"]["model-b"]["total_tokens"], 50)
+            self.assertEqual(
+                facts["usage_by_model"]["model-b"]["cached_input_tokens"], 20)
+            self.assertEqual(facts["fallback_model_tokens"], 0)
+
     def test_owned_rollout_continuation_survives_counter_reset(self):
         with tempfile.TemporaryDirectory() as tmp:
             rollout = Path(tmp) / "rollout-root.jsonl"
@@ -75,6 +110,8 @@ class SessionIsolationTests(unittest.TestCase):
             parent_rows = [
                 {"timestamp": "2026-01-01T00:00:00Z", "type": "session_meta",
                  "payload": {"id": "parent", "timestamp": "2026-01-01T00:00:00Z"}},
+                {"timestamp": "2026-01-01T00:00:00Z", "type": "turn_context",
+                 "payload": {"model": "parent-model"}},
                 {"timestamp": "2026-01-01T00:00:01Z", "type": "event_msg",
                  "payload": {"type": "task_started", "turn_id": "parent-turn",
                              "started_at": 1767225601}},
@@ -93,6 +130,8 @@ class SessionIsolationTests(unittest.TestCase):
                 {"timestamp": "2026-01-01T00:01:01Z", "type": "event_msg",
                  "payload": {"type": "task_started", "turn_id": "child-turn",
                              "started_at": 1767225661}},
+                {"timestamp": "2026-01-01T00:01:01Z", "type": "turn_context",
+                 "payload": {"model": "child-model"}},
                 {"timestamp": "2026-01-01T00:01:02Z", "type": "response_item",
                  "payload": {"type": "function_call", "name": "child_tool"}},
                 token("2026-01-01T00:01:03Z", 225, 25, 250, 90),
@@ -107,6 +146,8 @@ class SessionIsolationTests(unittest.TestCase):
                 {"timestamp": "2026-01-01T00:02:01Z", "type": "event_msg",
                  "payload": {"type": "task_started", "turn_id": "nested-turn",
                              "started_at": 1767225721}},
+                {"timestamp": "2026-01-01T00:02:01Z", "type": "turn_context",
+                 "payload": {"model": "nested-model"}},
                 {"timestamp": "2026-01-01T00:02:02Z", "type": "response_item",
                  "payload": {"type": "function_call", "name": "nested_tool"}},
                 token("2026-01-01T00:02:03Z", 270, 30, 300, 45),
@@ -127,6 +168,9 @@ class SessionIsolationTests(unittest.TestCase):
             self.assertEqual(facts["total_tokens"], 100)
             self.assertEqual(facts["input_tokens"], 90)
             self.assertEqual(facts["output_tokens"], 10)
+            self.assertEqual(set(facts["usage_by_model"]), {"child-model"})
+            self.assertEqual(
+                facts["usage_by_model"]["child-model"]["total_tokens"], 100)
             self.assertEqual(
                 facts["accounting"]["baseline"]["total_tokens"], 150)
 
@@ -140,6 +184,8 @@ class SessionIsolationTests(unittest.TestCase):
             nested_facts = cd.rollout_usage_facts(str(nested), str(child))
             self.assertEqual(nested_facts["total_tokens"], 50)
             self.assertEqual(nested_facts["input_tokens"], 45)
+            self.assertEqual(
+                set(nested_facts["usage_by_model"]), {"nested-model"})
             self.assertEqual(
                 nested_facts["accounting"]["baseline"]["total_tokens"], 250)
             nested_stream = CodexThreadEvents(

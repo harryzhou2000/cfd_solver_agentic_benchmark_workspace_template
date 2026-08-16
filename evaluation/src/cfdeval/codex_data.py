@@ -344,17 +344,31 @@ def iter_owned_session_records(rollout_path: str | None,
 
 def rollout_usage_facts(rollout_path: str,
                         parent_rollout_path: str | None = None,
-                        parent_task_ids: set[str] | None = None) -> dict:
+                        parent_task_ids: set[str] | None = None,
+                        fallback_model: str | None = None) -> dict:
     """Thread-owned usage, persisted context size, and prompt statistics."""
     ownership = rollout_ownership(
         rollout_path, parent_rollout_path, parent_task_ids)
     baseline = ownership["baseline"]
     previous = dict(baseline)
     owned = _usage_fields(None)
+    usage_by_model: dict[str, dict] = {}
+    current_model = fallback_model
+    explicit_model_seen = False
+    fallback_model_tokens = 0
     context_windows = []
     prompt_inputs = []
     for rec in iter_owned_session_records(rollout_path, ownership):
         payload = rec.get("payload") or {}
+        observed_model = None
+        if rec.get("type") == "turn_context":
+            observed_model = payload.get("model")
+        elif (rec.get("type") == "event_msg"
+              and payload.get("type") == "thread_settings_applied"):
+            observed_model = (payload.get("thread_settings") or {}).get("model")
+        if observed_model:
+            current_model = str(observed_model)
+            explicit_model_seen = True
         if rec.get("type") != "event_msg" or payload.get("type") != "token_count":
             continue
         info = payload.get("info") or {}
@@ -368,6 +382,12 @@ def rollout_usage_facts(rollout_path: str,
                          for field in TOKEN_FIELDS}
             for field in TOKEN_FIELDS:
                 owned[field] += delta[field]
+            model = current_model or "unknown"
+            model_usage = usage_by_model.setdefault(model, _usage_fields(None))
+            for field in TOKEN_FIELDS:
+                model_usage[field] += delta[field]
+            if not explicit_model_seen:
+                fallback_model_tokens += delta["total_tokens"]
             previous = cur
         cw = info.get("model_context_window")
         if isinstance(cw, int) and cw > 0:
@@ -377,10 +397,17 @@ def rollout_usage_facts(rollout_path: str,
             prompt_inputs.append(last_input)
     if not ownership.get("available"):
         owned = _usage_fields(None)
+        usage_by_model = {}
+        fallback_model_tokens = 0
     owned["non_cached_input_tokens"] = max(
         owned["input_tokens"] - owned["cached_input_tokens"], 0)
+    for model_usage in usage_by_model.values():
+        model_usage["non_cached_input_tokens"] = max(
+            model_usage["input_tokens"] - model_usage["cached_input_tokens"], 0)
     return {
         **owned,
+        "usage_by_model": usage_by_model,
+        "fallback_model_tokens": fallback_model_tokens,
         "model_context_window": max(context_windows) if context_windows else None,
         "max_prompt_input_tokens": max(prompt_inputs) if prompt_inputs else None,
         "mean_prompt_input_tokens": (

@@ -319,6 +319,7 @@ def main(argv: list[str] | None = None) -> int:
             (full_threads.get(tid) or {}).get("rollout_path"),
             (threads.get(parent_by_child.get(tid)) or {}).get("rollout_path"),
             parent_task_ids.get(parent_by_child.get(tid)),
+            (full_threads.get(tid) or {}).get("model"),
         )
         for tid in all_ids if full_threads.get(tid)
     }
@@ -347,14 +348,29 @@ def main(argv: list[str] | None = None) -> int:
             scale = (declared / observed
                      if not is_fork and declared and observed else 1.0)
             accounted_total = declared if not is_fork and declared else observed
-            per_model = {thread_model: {
-                "input": int(round(rollout_rec["input_tokens"] * scale)),
-                "cached": int(round(rollout_rec["cached_input_tokens"] * scale)),
-                "non_cached": int(round(rollout_rec["non_cached_input_tokens"] * scale)),
-                "output": int(round(rollout_rec["output_tokens"] * scale)),
-                "reasoning_output": int(round(rollout_rec["reasoning_output_tokens"] * scale)),
-                "total": accounted_total,
-            }}
+            rollout_by_model = rollout_rec.get("usage_by_model") or {
+                thread_model: rollout_rec}
+            per_model = {}
+            for model, model_usage in rollout_by_model.items():
+                per_model[model] = {
+                    "input": int(round(model_usage["input_tokens"] * scale)),
+                    "cached": int(round(model_usage["cached_input_tokens"] * scale)),
+                    "non_cached": int(round(
+                        model_usage["non_cached_input_tokens"] * scale)),
+                    "output": int(round(model_usage["output_tokens"] * scale)),
+                    "reasoning_output": int(round(
+                        model_usage["reasoning_output_tokens"] * scale)),
+                    "total": int(round(model_usage["total_tokens"] * scale)),
+                }
+            # Preserve the authoritative standalone state total exactly after
+            # per-model rounding.  Fork totals are already owned-rollout exact.
+            total_delta = accounted_total - sum(
+                bundle["total"] for bundle in per_model.values())
+            if total_delta and per_model:
+                largest = max(
+                    per_model,
+                    key=lambda model: rollout_by_model[model]["total_tokens"])
+                per_model[largest]["total"] += total_delta
             total = accounted_total
             thread_entry = {
                 "model": thread_model,
@@ -366,6 +382,8 @@ def main(argv: list[str] | None = None) -> int:
                 "total": total,
                 "inherited_baseline_tokens": (
                     (accounting.get("baseline") or {}).get("total_tokens", 0)),
+                "fallback_model_tokens": rollout_rec.get(
+                    "fallback_model_tokens", 0),
             }
             if is_fork and declared != observed:
                 discrepancy_notes.append(
@@ -515,7 +533,10 @@ def main(argv: list[str] | None = None) -> int:
             "accounting_note": (
                 "Cached/input/output splits come from thread-owned rollout "
                 "counter deltas. Fork replay is excluded at the first child-owned "
-                "task boundary, and fork state counters are diagnostic only. "
+                "task boundary. Each delta is attributed to the most recent owned "
+                "turn_context or thread_settings_applied model; only deltas before "
+                "an explicit owned model event use the thread database model. "
+                "Fork state counters are diagnostic only. "
                 "A standalone root may retain the legacy state-counter scaling "
                 "fallback when its rollout ends before the persisted root total."
             ),
