@@ -18,6 +18,18 @@ SPEC.loader.exec_module(audit)
 
 
 class SubmissionAuditTests(unittest.TestCase):
+    def test_latex_build_and_generated_sanity_artifacts_are_rejected(self):
+        for path in (
+            "solver/report/report.aux",
+            "solver/report/report.fdb_latexmk",
+            "solver/report/report.fls",
+            "solver/report/report.synctex.gz",
+            "solver/report/report.run.xml",
+            "solver/report/sanity_checks.json",
+        ):
+            with self.subTest(path=path):
+                self.assertIsNotNone(audit.classify(path))
+
     def test_output_namespace_inside_source_tree_is_allowed(self):
         self.assertIsNone(audit.classify("solver/src/output/csv_writer.cpp"))
         self.assertIsNone(audit.classify("solver/include/output/metadata.hpp"))

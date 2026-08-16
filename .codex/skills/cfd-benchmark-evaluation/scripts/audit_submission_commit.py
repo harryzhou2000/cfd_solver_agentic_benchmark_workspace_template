@@ -29,11 +29,13 @@ FORBIDDEN_EXTENSIONS = {
     ".jpg", ".jpeg", ".gif", ".bmp", ".tif", ".tiff", ".svg", ".pdf",
     ".csv", ".tsv", ".npy", ".npz", ".parquet", ".feather", ".arrow",
     ".mat", ".pkl", ".pickle", ".sqlite", ".sqlite3", ".db",
+    ".aux", ".bbl", ".bcf", ".blg", ".fdb_latexmk", ".fls", ".nav",
+    ".snm", ".toc", ".vrb",
 }
 FORBIDDEN_BASENAMES = {
     "residuals.csv", "forces.csv", "surface.csv", "partition_diagnostics.csv",
     "partition_diagnostics.json", "metadata.json", "run_status.json", "stdout.log",
-    "stderr.log", "field_final", "restart_final",
+    "stderr.log", "field_final", "restart_final", "sanity_checks.json",
 }
 RESTART_OR_FIELD = re.compile(r"^(restart|checkpoint|field)(_|\.|-)", re.IGNORECASE)
 SOURCE_TREE_MARKERS = {"src", "source", "include"}
@@ -114,6 +116,8 @@ def classify(path_text: str) -> str | None:
         return "raw/generated/build directory"
     if basename in FORBIDDEN_BASENAMES or RESTART_OR_FIELD.match(basename):
         return "raw solver result or restart/field artifact"
+    if basename.endswith((".run.xml", ".synctex.gz")):
+        return "prohibited LaTeX build artifact"
     if suffix == ".png":
         if not any(path_text.startswith(prefix) for prefix in REPORT_FIGURE_PREFIXES):
             return "PNG outside an approved report figures directory"
