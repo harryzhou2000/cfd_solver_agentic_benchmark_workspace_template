@@ -5,7 +5,7 @@ Created 2026-08-16. Each row is a canonical `agent_scores.json` snapshot. Audit 
 | Snapshot | Audit | Old score/DQ | New score/DQ | Evidence-standard finding | Gates | Correction commit |
 |---|---|---|---|---|---|---|
 | codex_dsv4_flash_01_0c1996 | audited-no-change | 58/true | 58/true | Immutable attempt validator fails two cases; Re20/divergent and Re200 controls noncompliant; Roe claim absent in source supports DQ 6. | check + complete pass | pending batch |
-| codex_dsv4_flash_02_3447d3 | audited-report-total-conflict | 73/true | 73/true | Scorecard/rubric total is 73 but prose still says 75; immutable audit/telemetry/validator support DQ 7 for admitted Re200 target miss reported successful. Report text correction pending next batch. | check + complete pass | pending batch |
+| codex_dsv4_flash_02_3447d3 | audited-report-corrected | 73/true | 73/true | Report verdict total corrected from 75 to the scorecard/rubric total 73; immutable audit/telemetry/validator support DQ 7 for admitted Re200 target miss reported successful. | check + complete pass | pending batch |
 | codex_dsv4_flash_03_294b64 | audited-no-change | 87/false | 87/false | Immutable eight-case/report validator pass and sole local Codex root verified; Re200 lacks delivered vortex shedding and curated report excludes referenced figures, already deducted. | check + complete pass | pending batch |
 | codex_dsv4_flash_04_755869 | audited-no-change | 48/true | 48/true | Exact final response admits sibling-workspace result reuse (DQ 2); source gets partial credit but result/report credit remains zero; eight structural packages do not cure provenance. | check + complete pass | pending batch |
 | codex_dsv4_flash_06_5b6b08 | audited-report-corrected | 63/false | 63/false | Immutable curated submission has no raw cases; written standard requires 0 (not null) for each absent case. Scorecard already has eight 0s; report prose needs correction from null to zero. | check + complete pass | pending batch |
@@ -15,32 +15,32 @@ Created 2026-08-16. Each row is a canonical `agent_scores.json` snapshot. Audit 
 | codex_dsv4_flash_10_6468ba | audited-no-change | 86/false | 86/false | Immutable raw attempt provides all eight validator-passing contestant packages/report; curated branch correctly excludes raw data; high source/report credit remains evidence-based. | check + complete pass | pending batch |
 | codex_dsv4_flash_11_6e6ac8 | audited-no-change | 70/false | 70/false | Seven steady canonical packages validate; missing Re200 metadata receives no completion/case-result credit and no rerun; no false-success metadata/DQ evidence. | check + complete pass | pending batch |
 | codex_glm52-m3_01_919b67 | audited-corrected | 72/false | 72/true | Written DQ 7 applies: Re200 is labelled complete/periodic despite capped 10-iteration inner solves and final ratio 0.156 versus the 1e-3 target. | check + complete pass after rerun | pending batch |
-| codex_glm52-m3_02_ca46e4 | pending | 60/false | — | — | — | — |
-| codex_glm52-m3_03_674665 | pending | 59/false | — | — | — | — |
-| codex_glm52-m3_04_32f2d0 | pending | 65/true | — | — | — | — |
-| codex_glm52-m3_05_f094c1 | pending | 60/true | — | — | — | — |
-| codex_glm52_01_1307c9 | pending | 58/true | — | — | — | — |
-| codex_glm52_02_06cf18 | pending | 76/false | — | — | — | — |
-| codex_glm52_03_e7d38e | pending | 75/false | — | — | — | — |
-| codex_gpt56_01_cb349f | pending | 97/false | — | — | — | — |
-| codex_gpt56_02_38616e | pending | 92/false | — | — | — | — |
-| codex_gpt56_03_93b257 | pending | 98/false | — | — | — | — |
-| codex_gpt56_04_1e36f2 | pending | 86/true | — | — | — | — |
-| codex_gpt56_05_7bee7c | pending | 85/false | — | — | — | — |
-| codex_gpt56_06_97ae53 | pending | 89/false | — | — | — | — |
-| codex_gpt56_07_b7c2c8 | pending | 70/true | — | — | — | — |
-| codex_kimik3_01_09309d | pending | 84/true | — | — | — | — |
-| oc-goal_gpt56-dsv4_01_24edd3 | pending | 95/false | — | — | — | — |
-| oc-goal_kimik3-dsv4_01_940dcb | pending | 91/false | — | — | — | — |
-| oc-goal_kimik3-dsv4_02_0ceb76 | pending | 94/false | — | — | — | — |
-| oc-goal_kimik3-dsv4_03_28ff60 | pending | 72/false | — | — | — | — |
-| oc-goal_kimik3-dsv4_04_60cc7d | pending | 72/false | — | — | — | — |
-| omo_slim_dsv4_01_12c8d9 | pending | 85/false | — | — | — | — |
-| omo_slim_dsv4_02_b52628 | pending | 36/true | — | — | — | — |
-| omo_slim_dsv4_03_2fbbe7 | pending | 27/false | — | — | — | — |
-| omo_slim_dsv4_04_d9ebd4 | pending | 64/true | — | — | — | — |
-| omo_slim_dsv4_05_7a7141 | pending | 58/true | — | — | — | — |
-| omo_slim_dsv4_06_d8d434 | pending | 70/false | — | — | — | — |
-| omo_slim_dsv4_07_770c37 | pending | 42/false | — | — | — | — |
-| omo_slim_dsv4_08_c49b64 | pending | 84/false | — | — | — | — |
-| codex_gpt56_08_715d70 | deferred-conflict | 30/false | — | protected unrelated modified report/expense/measurement files | — | — |
+| codex_glm52-m3_02_ca46e4 | audited-no-change | 60/false | 60/false | Immutable curated commit has no canonical result packages; all eight case scores are correctly zero, while missing metadata is not affirmative DQ evidence. | check + complete pass | pending batch |
+| codex_glm52-m3_03_674665 | audited-no-change | 59/false | 59/false | Immutable curated commit has no case packages or report figures; source-only credit and eight zero case scores are supported, with no false-success metadata. | check + complete pass | pending batch |
+| codex_glm52-m3_04_32f2d0 | audited-no-change | 65/true | 65/true | Immutable attempt metadata marks failed M2 inviscid evidence converged and report shows order-one rank discrepancy; existing DQ findings stand. | check + complete pass | pending batch |
+| codex_glm52-m3_05_f094c1 | audited-no-change | 60/true | 60/true | Source directly disables reconstruction/limiting in production; existing DQ 10 and one-point attempt-only case scores remain supported. | check + complete pass | pending batch |
+| codex_glm52_01_1307c9 | audited-no-change | 58/true | 58/true | Re200 is labelled periodic despite capped inner solves and 0.928488 final ratio; existing false-success DQ finding remains supported. | check + complete pass | pending batch |
+| codex_glm52_02_06cf18 | audited-no-change | 76/false | 76/false | Eight case packages and report pass structural validation; documented convergence and rank-evidence limits are deductions, with no affirmative DQ contradiction recorded. | check + complete pass | pending batch |
+| codex_glm52_03_e7d38e | audited-no-change | 75/false | 75/false | Immutable attempt validates all eight cases; lack of credible Re200 shedding is already a result limitation, not false-success metadata. | check + complete pass | pending batch |
+| codex_gpt56_01_cb349f | audited-no-change | 97/false | 97/false | Eight immutable packages validate; Re200 reaches t=300 with 0.9971 target attainment and delivered periodic statistics. | check + complete pass | pending batch |
+| codex_gpt56_02_38616e | audited-no-change | 92/false | 92/false | All eight packages validate; Re200 final ratio 0.00098623 meets the stated target and submitted rank comparisons exist. | check + complete pass | pending batch |
+| codex_gpt56_03_93b257 | audited-no-change | 98/false | 98/false | Validator and source/result evidence support all eight completed packages, including Re200 t=300; no contrary status evidence. | check + complete pass | pending batch |
+| codex_gpt56_04_1e36f2 | audited-no-change | 86/true | 86/true | Existing DQ 4 is supported by a 73.81% NACA Cd change between np2 and np8. | check + complete pass | pending batch |
+| codex_gpt56_05_7bee7c | audited-no-change | 85/false | 85/false | Seven steady packages/report validate; Re200 is OOM-unverified rather than asserted valid, so no DQ inference is added. | check + complete pass | pending batch |
+| codex_gpt56_06_97ae53 | audited-no-change | 89/false | 89/false | Re200 metadata records t=300, zero target misses and 8–193 inner iterations; source/report claims align. | check + complete pass | pending batch |
+| codex_gpt56_07_b7c2c8 | audited-no-change | 70/true | 70/true | Report admits non-strict Re200 inner acceptance while metadata reports periodic success; existing DQ 7 remains supported. | check + complete pass | pending batch |
+| codex_kimik3_01_09309d | audited-no-change | 84/true | 84/true | Existing DQ 4 is supported by a 65.77% Re20 Cd difference between np1–4 evidence and np8 production output. | check + complete pass | pending batch |
+| oc-goal_gpt56-dsv4_01_24edd3 | audited-no-change | 95/false | 95/false | Eight raw immutable packages validate; Re200 t=300, zero target misses, and periodic status have aligned evidence. | check + complete pass | pending batch |
+| oc-goal_kimik3-dsv4_01_940dcb | audited-no-change | 91/false | 91/false | Eight immutable packages validate with finite finals and consistent completed statuses; telemetry aggregation remains explicitly qualified. | check + complete pass | pending batch |
+| oc-goal_kimik3-dsv4_02_0ceb76 | audited-no-change | 94/false | 94/false | Eight immutable packages validate and Re200 metadata records a 1.0 inner-target fraction; no status contradiction found. | check + complete pass | pending batch |
+| oc-goal_kimik3-dsv4_03_28ff60 | audited-no-change | 72/false | 72/false | Immutable attempt validates all packages; missing deterministic terminal answer is qualified, and legacy done marker is not a DQ. | check + complete pass | pending batch |
+| oc-goal_kimik3-dsv4_04_60cc7d | audited-report-corrected | 72/false | 72/false | Report scorecard prose corrected from 80 to rubric total 72; all eight immutable packages validate and DQ remains false. | check + complete pass | pending batch |
+| omo_slim_dsv4_01_12c8d9 | audited-no-change | 85/false | 85/false | All eight packages/report validate; Re200 t=300 without shedding is honestly reported and already deducted. | check + complete pass | pending batch |
+| omo_slim_dsv4_02_b52628 | audited-no-change | 36/true | 36/true | Submitted outputs contradict serial steady-only source; DQ 2, 7, and 9 remain direct internal evidence. | check + complete pass | pending batch |
+| omo_slim_dsv4_03_2fbbe7 | audited-no-change | 27/false | 27/false | No final packages and source states transient/reconstruction/viscous paths are unimplemented; no metadata falsely marks success. | check + complete pass | pending batch |
+| omo_slim_dsv4_04_d9ebd4 | audited-no-change | 64/true | 64/true | Existing cases mark completed despite paired failed status, while five cases are absent and report claims complete; DQ 7 remains direct evidence. | check + complete pass | pending batch |
+| omo_slim_dsv4_05_7a7141 | audited-no-change | 58/true | 58/true | Six readable cases declare completed while failed and validator rejects them; cylinder cases are incomplete, so DQ 7 remains supported. | check + complete pass | pending batch |
+| omo_slim_dsv4_06_d8d434 | audited-no-change | 70/false | 70/false | Seven steady packages validate; missing Re200 is candidly pending and correctly gets zero completion credit without DQ. | check + complete pass | pending batch |
+| omo_slim_dsv4_07_770c37 | audited-no-change | 42/false | 42/false | Only M0.15 validates; terminal answer honestly identifies incomplete/failed remaining work, so no false-success DQ. | check + complete pass | pending batch |
+| omo_slim_dsv4_08_c49b64 | audited-no-change | 84/false | 84/false | Seven steady packages validate; Re200 is explicitly in progress and below t=300, correctly zero-scored without DQ. | check + complete pass | pending batch |
+| codex_gpt56_08_715d70 | blocked-protected-conflict | 30/false | — | Protected dirty report is a scaffold replacement and protected telemetry sidecars differ from indexed hashes; no retrospective write is authorized. Existing committed report says Re200 is honestly failed, so no DQ 7 correction is supported from committed evidence. | `cfdeval check` fails SHA-256 for expenses, measurements, and metadata; complete gate not run | operator decision required |
