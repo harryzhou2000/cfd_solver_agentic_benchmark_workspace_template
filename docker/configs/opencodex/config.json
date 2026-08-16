@@ -1,5 +1,7 @@
 {
   "port": 10109,
+  "managementUsageMaxReadBytes": 67108864,
+  "appOwnedMemoryBudgetMb": 256,
   "providers": {
     "deepseek": {
       "adapter": "openai-chat",
@@ -146,14 +148,21 @@
           "xhigh",
           "max"
         ],
-        "DeepSeek-V4-Flash": [
+        "DeepSeek-V4-Flash-0731": [
           "low",
           "medium",
           "high",
           "xhigh",
           "max"
         ],
-        "DeepSeek-V4-Pro": [
+        "DeepSeek-V4-Pro-0813": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "GLM-5.3": [
           "low",
           "medium",
           "high",
@@ -165,34 +174,40 @@
         "Kimi-K3": "max"
       },
       "models": [
-        "DeepSeek-V4-Flash",
-        "DeepSeek-V4-Pro",
+        "DeepSeek-V4-Flash-0731",
+        "DeepSeek-V4-Pro-0813",
         "GLM-5.2",
         "Kimi-K2.6",
         "Kimi-K3",
         "MiniMax-M3",
         "Qwen3.6-Plus",
-        "Qwen3.7-Max"
+        "Qwen3.7-Max",
+        "Qwen3.8-Max",
+        "GLM-5.3"
       ],
       "modelContextWindows": {
-        "DeepSeek-V4-Pro": 1000000,
-        "DeepSeek-V4-Flash": 1000000,
+        "DeepSeek-V4-Pro-0813": 1000000,
+        "DeepSeek-V4-Flash-0731": 1000000,
         "GLM-5.2": 1000000,
         "Qwen3.7-Max": 1000000,
         "MiniMax-M3": 1000000,
         "Qwen3.6-Plus": 1000000,
         "Kimi-K3": 1000000,
-        "Kimi-K2.6": 256000
+        "Kimi-K2.6": 256000,
+        "Qwen3.8-Max": 1000000,
+        "GLM-5.3": 1000000
       },
       "preserveReasoningContentModels": [
-        "DeepSeek-V4-Flash",
-        "DeepSeek-V4-Pro",
+        "DeepSeek-V4-Flash-0731",
+        "DeepSeek-V4-Pro-0813",
         "GLM-5.2",
         "Kimi-K2.6",
         "Kimi-K3",
         "MiniMax-M3",
         "Qwen3.6-Plus",
-        "Qwen3.7-Max"
+        "Qwen3.7-Max",
+        "Qwen3.8-Max",
+        "GLM-5.3"
       ],
       "modelInputModalities": {
         "Kimi-K3": [
@@ -206,19 +221,87 @@
         "Qwen3.7-Max": [
           "text",
           "image"
+        ],
+        "Qwen3.8-Max": [
+          "text",
+          "image"
         ]
       },
       "noVisionModels": [
-        "DeepSeek-V4-Flash",
-        "DeepSeek-V4-Pro",
+        "DeepSeek-V4-Flash-0731",
+        "DeepSeek-V4-Pro-0813",
         "GLM-5.2",
         "Kimi-K2.6",
-        "MiniMax-M3"
-      ]
+        "MiniMax-M3",
+        "GLM-5.3"
+      ],
+      "modelCosts": {
+        "GLM-5.2": {
+          "input": 1.14,
+          "output": 4,
+          "cacheRead": 0.29,
+          "cacheWrite": 4
+        },
+        "Qwen3.7-Max": {
+          "input": 1.71,
+          "output": 5.14,
+          "cacheRead": 0.34,
+          "cacheWrite": 0
+        },
+        "MiniMax-M3": {
+          "input": 0.6,
+          "output": 2.4,
+          "cacheRead": 0.12,
+          "cacheWrite": 0
+        },
+        "Kimi-K2.6": {
+          "input": 0.93,
+          "output": 3.86,
+          "cacheRead": 0.19,
+          "cacheWrite": 0
+        },
+        "Kimi-K3": {
+          "input": 2.86,
+          "output": 14.29,
+          "cacheRead": 0.29,
+          "cacheWrite": 14.29
+        },
+        "Qwen3.6-Plus": {
+          "input": 0.57,
+          "output": 3.43,
+          "cacheRead": 0.06,
+          "cacheWrite": 0
+        },
+        "DeepSeek-V4-Flash-0731": {
+          "input": 0.14,
+          "output": 0.29,
+          "cacheRead": 0.0029,
+          "cacheWrite": 0.29
+        },
+        "DeepSeek-V4-Pro-0813": {
+          "input": 0.43,
+          "output": 0.86,
+          "cacheRead": 0.0036,
+          "cacheWrite": 0.86
+        },
+        "GLM-5.3": {
+          "input": 1.14,
+          "output": 4,
+          "cacheRead": 0.29,
+          "cacheWrite": 4
+        },
+        "Qwen3.8-Max": {
+          "input": 1.71,
+          "output": 5.14,
+          "cacheRead": 0.21,
+          "cacheWrite": 5.14
+        }
+      }
     }
   },
   "defaultProvider": "deepseek",
   "openaiProviderTierVersion": 2,
+  "googleAntigravityStaticCatalogVersion": 2,
   "providerContextCaps": {
     "deepseek": 550000,
     "BLSC": 550000,
@@ -237,7 +320,6 @@
   "websockets": false,
   "codexAutoStart": false,
   "proxy": "http://192.168.31.65:20181",
-  "activeCodexAccountId": "__main__",
   "customModels": [],
   "disabledModels": [
     "BLSC/Baichuan-M2",
@@ -332,5 +414,6 @@
   "autoSwitchThreshold": 80,
   "accountPoolStrategy": "quota",
   "multiAgentMode": "v2",
-  "codexAccounts": []
+  "codexAccounts": [],
+  "activeCodexAccountId": "__main__"
 }

@@ -151,3 +151,4 @@ export HISTCONTROL=ignoreboth:erasedups
 # alias ollama="docker exec -it open-webui ollama"
 
 [ -f ~/.envset ] && source ~/.envset
+. "$HOME/.cargo/env"

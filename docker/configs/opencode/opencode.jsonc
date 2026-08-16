@@ -386,7 +386,7 @@
         "baseURL": "https://llmapi.blsc.cn/v1"
       },
       "models": {
-        "DeepSeek-V4-Pro": {
+        "DeepSeek-V4-Pro-0813": {
           "name": "DeepSeek V4 Pro",
           "reasoning": true,
           "interleaved": { "field": "reasoning_content" },
@@ -399,16 +399,17 @@
             ]
           },
           "cost": {
-            "input": 1.71,
-            "output": 3.43,
-            "cache_read": 0.14
+            "input": 0.43,
+            "output": 0.86,
+            "cache_read": 0.0036,
+            "cache_write": 0.86
           },
           "limit": {
             "context": 560000,
             "output": 384000
           }
         },
-        "DeepSeek-V4-Flash": {
+        "DeepSeek-V4-Flash-0731": {
           "name": "DeepSeek V4 Flash",
           "reasoning": true,
           "interleaved": { "field": "reasoning_content" },
@@ -423,7 +424,8 @@
           "cost": {
             "input": 0.14,
             "output": 0.29,
-            "cache_read": 0.03
+            "cache_read": 0.0029,
+            "cache_write": 0.29
           },
           "limit": {
             "context": 560000,
@@ -445,7 +447,31 @@
           "cost": {
             "input": 1.14,
             "output": 4,
-            "cache_read": 0.29
+            "cache_read": 0.29,
+            "cache_write": 4
+          },
+          "limit": {
+            "context": 560000,
+            "output": 128000
+          }
+        },
+                "GLM-5.3": {
+          "name": "GLM-5.3",
+          "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "cost": {
+            "input": 1.14,
+            "output": 4,
+            "cache_read": 0.29,
+            "cache_write": 4
           },
           "limit": {
             "context": 560000,
@@ -459,6 +485,20 @@
             "input": 1.71,
             "output": 5.14,
             "cache_read": 0.34
+          },
+          "limit": {
+            "context": 560000,
+            "output": 128000
+          }
+        },
+                "Qwen3.8-Max": {
+          "name": "Qwen3.8-Max",
+          "reasoning": true,
+          "cost": {
+            "input": 1.71,
+            "output": 5.14,
+            "cache_read": 0.21,
+            "cache_write": 5.14
           },
           "limit": {
             "context": 560000,
@@ -525,9 +565,10 @@
             ]
           },
           "cost": {
-            "input": 3,
-            "output": 15,
-            "cache_read": 0.3
+            "input": 2.86,
+            "output": 14.29,
+            "cache_read": 0.29,
+            "cache_write": 14.29
           },
           "limit": {
             "context": 560000,
@@ -1101,7 +1142,7 @@
         "noInterruptOnUserMessage": true,
         "noContinueWhileChildrenActive": true
       }
-    ]
+    ],
   ],
   "command": {
     "goal": {
