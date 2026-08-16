@@ -7,7 +7,7 @@ HTTP. Stdlib only:
   python3 evaluation/gui/server.py [--port 8787] [--outputs evaluation/outputs]
 
 Endpoints:
-  GET /api/snapshots              table rows (same shape as `cfdeval query table --json`)
+  GET /api/snapshots              table rows, wrapped as {"snapshots": [...]}
   GET /api/snapshot/<contestant>   full detail payload
   GET /api/snapshot/<contestant>/file/<artifact>   raw artifact (md/json)
   GET /api/snapshot/<contestant>/report-pdf       report PDF from matching workspace
