@@ -14,7 +14,7 @@ Created 2026-08-16. Each row is a canonical `agent_scores.json` snapshot. Audit 
 | codex_dsv4_flash_09_526316 | audited-no-change | 55/false | 55/false | Immutable validator fails failed M0.15 metadata; committed report candidly documents instability/divergence and no failed result is relabeled success. | check + complete pass | pending batch |
 | codex_dsv4_flash_10_6468ba | audited-no-change | 86/false | 86/false | Immutable raw attempt provides all eight validator-passing contestant packages/report; curated branch correctly excludes raw data; high source/report credit remains evidence-based. | check + complete pass | pending batch |
 | codex_dsv4_flash_11_6e6ac8 | audited-no-change | 70/false | 70/false | Seven steady canonical packages validate; missing Re200 metadata receives no completion/case-result credit and no rerun; no false-success metadata/DQ evidence. | check + complete pass | pending batch |
-| codex_glm52-m3_01_919b67 | pending | 72/false | — | — | — | — |
+| codex_glm52-m3_01_919b67 | audited-corrected | 72/false | 72/true | Written DQ 7 applies: Re200 is labelled complete/periodic despite capped 10-iteration inner solves and final ratio 0.156 versus the 1e-3 target. | check + complete pass after rerun | pending batch |
 | codex_glm52-m3_02_ca46e4 | pending | 60/false | — | — | — | — |
 | codex_glm52-m3_03_674665 | pending | 59/false | — | — | — | — |
 | codex_glm52-m3_04_32f2d0 | pending | 65/true | — | — | — | — |

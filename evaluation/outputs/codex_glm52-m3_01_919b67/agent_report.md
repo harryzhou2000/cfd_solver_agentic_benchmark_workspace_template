@@ -39,10 +39,10 @@ The structural contract is complete, and the historical manifest maps 56 figures
 
 ## Disqualification assessment
 
-No trigger is substantiated. There is no direct internal external-solver wrapper, generated-without-solving evidence, hard-coded two-mesh branch, order-one MPI inconsistency, explicit-only path, figure mismatch, geometric-only partitioning, disabled production reconstruction/limiter, or undocumented cell-center no-slip output. Trigger 13 was not externally investigated under the trust policy. The full per-trigger record is in `agent_scores.json`.
+DQ 7 is substantiated: Re200 metadata/report labels the run complete/periodic despite every final record using the capped 10 inner iterations and a final ratio of 0.156 against the required 1e-3 target. There is no direct internal external-solver wrapper, generated-without-solving evidence, hard-coded two-mesh branch, order-one MPI inconsistency, explicit-only path, figure mismatch, geometric-only partitioning, disabled production reconstruction/limiter, or undocumented cell-center no-slip output. Trigger 13 was not externally investigated under the trust policy. The full per-trigger record is in `agent_scores.json`.
 
 ## Limitations and verdict
 
 The environment capture is post-run only; clean build, bad-input CLI, and steady reruns were not performed. The BLSC/GLM-5.2 context window is not in bundled evidence. `run_identity.json` and the final-response Markdown are unindexed sidecars, so `cfdeval check` cannot validate them.
 
-Verdict: **72/100, not disqualified.** Strengths are the real source-level CFD/MPI implementation and complete historical output contract. The principal deductions are weak steady convergence, Re200 inner-solve noncompliance, and report/metadata overstatement.
+Verdict: **72/100 before disqualification.** Strengths are the real source-level CFD/MPI implementation and complete historical output contract. The principal deductions are weak steady convergence, Re200 inner-solve noncompliance, and report/metadata overstatement.
