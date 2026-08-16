@@ -10,8 +10,8 @@ Created 2026-08-16. Each row is a canonical `agent_scores.json` snapshot. Audit 
 | codex_dsv4_flash_04_755869 | audited-no-change | 48/true | 48/true | Exact final response admits sibling-workspace result reuse (DQ 2); source gets partial credit but result/report credit remains zero; eight structural packages do not cure provenance. | check + complete pass | pending batch |
 | codex_dsv4_flash_06_5b6b08 | audited-report-corrected | 63/false | 63/false | Immutable curated submission has no raw cases; written standard requires 0 (not null) for each absent case. Scorecard already has eight 0s; report prose needs correction from null to zero. | check + complete pass | pending batch |
 | codex_dsv4_flash_07_aeae21 | audited-corrected | 84/false | 84/true | Written DQ 7 applies: Re200 metadata claims success/zero misses despite 0.3696 inner ratio vs 0.001 target and source's non-strict acceptance. | check + complete pass | pending batch |
-| codex_dsv4_flash_08_efba3c | pending | 76/false | — | — | — | — |
-| codex_dsv4_flash_09_526316 | pending | 55/false | — | — | — | — |
+| codex_dsv4_flash_08_efba3c | audited-no-change | 76/false | 76/false | Immutable validator confirms seven steady cases; Re200 truthfully incomplete and case-scored 0; no submitted np8 comparison; source/telemetry attribution verified. | check + complete pass | pending batch |
+| codex_dsv4_flash_09_526316 | audited-no-change | 55/false | 55/false | Immutable validator fails failed M0.15 metadata; committed report candidly documents instability/divergence and no failed result is relabeled success. | check + complete pass | pending batch |
 | codex_dsv4_flash_10_6468ba | pending | 86/false | — | — | — | — |
 | codex_dsv4_flash_11_6e6ac8 | pending | 70/false | — | — | — | — |
 | codex_glm52-m3_01_919b67 | pending | 72/false | — | — | — | — |
