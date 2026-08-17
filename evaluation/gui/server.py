@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.parse
@@ -94,8 +95,33 @@ def _tracked_report_tex_paths(workspace: Path, run_identity: dict | None) -> lis
         path = workspace / rel
         if _inside(path, workspace):
             candidates.append(rel)
-    return sorted(candidates, key=lambda rel: (
+
+    contents: dict[Path, str] = {}
+    referenced: set[Path] = set()
+    candidate_set = set(candidates)
+    for rel in candidates:
+        try:
+            blob = subprocess.run(
+                ["git", "show", f"{submission}:{rel.as_posix()}"],
+                cwd=workspace, check=True, capture_output=True, text=True, timeout=5,
+            ).stdout
+        except (OSError, subprocess.SubprocessError):
+            blob = ""
+        contents[rel] = blob
+        for include in re.findall(r"\\(?:input|include)\s*\{([^}]+)\}", blob):
+            dependency = rel.parent / include
+            if dependency.suffix.lower() != ".tex":
+                dependency = dependency.with_suffix(".tex")
+            if dependency in candidate_set:
+                referenced.add(dependency)
+
+    roots = [rel for rel in candidates
+             if rel.name.lower() == "report.tex"
+             or "\\documentclass" in contents.get(rel, "")
+             or rel not in referenced]
+    return sorted(roots, key=lambda rel: (
         0 if rel.name.lower() == "report.tex" else 1,
+        0 if "\\documentclass" in contents.get(rel, "") else 1,
         0 if rel.parent.name.lower() == "report" else 1,
         len(rel.parts), rel.as_posix(),
     ))
