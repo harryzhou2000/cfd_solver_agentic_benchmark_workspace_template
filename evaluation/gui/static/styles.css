@@ -110,13 +110,37 @@ code, pre, .mono { font-family: var(--mono); }
 .view-tools input[type="search"]:focus {
   outline: none; border-color: var(--accent);
 }
-.filter-meta {
-  display: flex; justify-content: space-between; gap: 14px;
-  color: var(--text-dim); font-size: 11px; line-height: 1.35;
+.filter-builder {
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 12px; margin-bottom: 12px;
 }
-.filter-meta code { color: var(--text-muted); }
-#filter-status { flex: 0 0 auto; }
-#filter-status.has-issue { color: var(--warn); }
+.filter-builder-head {
+  display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px;
+  color: var(--text-dim); font-size: 12px;
+}
+.filter-builder-head strong { color: var(--text); font-size: 13px; }
+#filter-status { margin-left: auto; white-space: nowrap; }
+.column-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.filter-empty { color: var(--text-mute); font-size: 12px; padding: 3px 0; }
+.column-filter {
+  display: grid; grid-template-columns: minmax(120px, 180px) minmax(105px, 145px) minmax(110px, 190px) 30px;
+  gap: 6px; align-items: center; padding: 6px;
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.column-filter select, .column-filter input {
+  min-width: 0; background: var(--bg-0); color: var(--text);
+  border: 1px solid var(--border-strong); border-radius: 4px;
+  padding: 5px 7px; font-size: 12px;
+}
+.column-filter select:focus, .column-filter input:focus {
+  outline: 1px solid var(--accent); border-color: var(--accent);
+}
+.filter-remove {
+  width: 28px; height: 28px; padding: 0; border-radius: 4px;
+  border: 1px solid transparent; background: transparent;
+  color: var(--text-dim); cursor: pointer; font-size: 19px; line-height: 1;
+}
+.filter-remove:hover { color: var(--red); border-color: var(--red); }
 .btn {
   background: var(--bg-2); border: 1px solid var(--border-strong);
   color: var(--text); padding: 7px 12px; border-radius: var(--radius-sm);
@@ -639,6 +663,9 @@ table.configs-table tbody tr.is-open { background: var(--bg-2); }
   .view-tools { width: 100%; }
   .filter-box { flex: 1; min-width: 0; }
   .view-tools input[type="search"] { width: 100%; }
-  #filter-help { display: none; }
+  .filter-builder-head { flex-wrap: wrap; }
+  #filter-status { width: 100%; margin-left: 0; }
+  .column-filter { width: 100%; grid-template-columns: 1fr 1fr; }
+  .filter-value { grid-column: 1 / -2; }
   .metrics-cards { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
 }

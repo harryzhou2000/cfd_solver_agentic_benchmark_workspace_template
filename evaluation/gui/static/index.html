@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>CFD Benchmark Evaluation</title>
-    <link rel="stylesheet" href="/static/styles.css?v=20260817-1" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260817-2" />
   </head>
   <body>
     <header class="topbar">
@@ -29,18 +29,25 @@
               <input
                 id="filter-input"
                 type="search"
-                placeholder='Filter all columns or use model:gpt56 status:complete code>=4'
-                aria-describedby="filter-help filter-status"
+                placeholder="Search all columns…"
+                aria-label="Search all columns"
                 autocomplete="off"
                 spellcheck="false"
               />
-              <div class="filter-meta">
-                <span id="filter-help">AND terms · <code>column:value</code> · <code>code&gt;=4</code> · alternatives with <code>|</code> · quote phrases</span>
-                <span id="filter-status" aria-live="polite"></span>
-              </div>
             </div>
+            <button id="add-filter-btn" class="btn" type="button">+ Add filter</button>
+            <button id="clear-filters-btn" class="btn btn-ghost" type="button">Clear</button>
             <button id="reload-btn" class="btn" type="button" title="Reload">&#x21bb; Reload</button>
           </div>
+        </div>
+
+        <div class="filter-builder" aria-label="Composable column filters">
+          <div class="filter-builder-head">
+            <strong>Column filters</strong>
+            <span>Filters with values are combined with AND.</span>
+            <span id="filter-status" aria-live="polite"></span>
+          </div>
+          <div id="column-filters" class="column-filters"></div>
         </div>
 
         <div id="legend" class="legend" aria-label="Legend">
@@ -154,6 +161,6 @@
       <span class="pill"></span>
     </template>
 
-    <script src="/static/app.js?v=20260817-1" defer></script>
+    <script src="/static/app.js?v=20260817-2" defer></script>
   </body>
 </html>

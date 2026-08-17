@@ -46,17 +46,6 @@
     { key: "case_cyl_re200", label: "Cyl Re200",      caseTag: "Cyl",  caseLabel: "Re200",     type: "case-score", sortType: "num" },
   ];
 
-  const FILTER_ALIASES = {
-    run: "run_id", id: "run_id", model: "primary_model_effort",
-    primary_model: "primary_model_effort", goal: "goal_time_s",
-    wall: "wall_time_s", activity: "activity_time_s", input: "input_tokens",
-    cached: "cached_input_tokens", output: "output_tokens", total: "tokens",
-    cost: "cost_usd", code: "code_score", cfd: "cfd_score",
-    results: "result_score", result: "result_score", rubric: "rubric_total",
-    dq: "disqualified", date: "execution_date", cache: "cache_hit",
-    env: "env_capture_phase", reviewed: "agent_reviewed",
-  };
-
   const $  = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -207,6 +196,8 @@
     sortKey: "run_id",
     sortDir: "asc",
     filter: "",
+    columnFilters: [],
+    nextFilterId: 1,
     currentName: null,
     detailCache: new Map(),   // contestant name -> detail payload
     detailTab: "summary",
@@ -289,53 +280,14 @@
   }
 
   function applyFilter(rows) {
-    const parsed = parseFilter(state.filter);
-    state.filterIssues = parsed.issues;
-    if (parsed.clauses.length === 0) return rows;
-    return rows.filter(row => parsed.clauses.every(clause => matchesClause(row, clause)));
-  }
-
-  function splitFilterExpression(input) {
-    const tokens = [];
-    let current = "", quote = null;
-    for (const char of String(input || "")) {
-      if ((char === '"' || char === "'") && (!quote || quote === char)) {
-        quote = quote ? null : char;
-      } else if (/\s/.test(char) && !quote) {
-        if (current) tokens.push(current);
-        current = "";
-      } else {
-        current += char;
-      }
-    }
-    if (current) tokens.push(current);
-    return { tokens, unclosedQuote: quote !== null };
-  }
-
-  function resolveFilterKey(raw) {
-    const key = String(raw || "").toLowerCase().replace(/-/g, "_");
-    if (FILTER_ALIASES[key]) return FILTER_ALIASES[key];
-    if (TABLE_COLUMNS.some(col => col.key === key)) return key;
-    const byLabel = TABLE_COLUMNS.find(col =>
-      col.label.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") === key);
-    return byLabel ? byLabel.key : null;
-  }
-
-  function parseFilter(input) {
-    const split = splitFilterExpression(input);
-    const issues = split.unclosedQuote ? ["Unclosed quote"] : [];
-    const clauses = split.tokens.map(token => {
-      const match = token.match(/^([a-zA-Z][\w-]*)(!=|>=|<=|:|=|>|<)(.*)$/);
-      if (!match) return { key: null, op: ":", value: token };
-      const key = resolveFilterKey(match[1]);
-      if (!key) {
-        issues.push(`Unknown column: ${match[1]}`);
-        return { key: null, op: ":", value: token };
-      }
-      if (!match[3]) issues.push(`Missing value for ${match[1]}`);
-      return { key, op: match[2], value: match[3] };
+    const global = state.filter.trim().toLowerCase();
+    const active = state.columnFilters.filter(item => String(item.value || "").trim());
+    if (!global && active.length === 0) return rows;
+    return rows.filter(row => {
+      const globalMatch = !global || clauseValues(row, null)
+        .some(value => searchableValue(value).includes(global));
+      return globalMatch && active.every(clause => matchesClause(row, clause));
     });
-    return { clauses, issues };
   }
 
   function searchableValue(value) {
@@ -351,16 +303,15 @@
   }
 
   function matchesClause(row, clause) {
-    const rawNeedles = String(clause.value || "").toLowerCase().split("|");
-    const needles = rawNeedles.filter(Boolean);
-    if (needles.length === 0) return false;
+    const needle = String(clause.value || "").trim().toLowerCase();
+    if (!needle) return true;
     const values = clauseValues(row, clause.key);
     const column = clause.key && TABLE_COLUMNS.find(col => col.key === clause.key);
     const numeric = column && ["num", "duration", "tokens", "money", "score",
       "pct", "case-score", "int"].includes(column.sortType === "num" ? column.type : "");
 
     if ([">", ">=", "<", "<="].includes(clause.op)) {
-      const target = Number(needles[0]);
+      const target = Number(needle);
       if (!Number.isFinite(target)) return false;
       return values.some(value => {
         const actual = Number(value);
@@ -373,21 +324,78 @@
     }
 
     const equality = clause.op === "=" || clause.op === "!=";
-    const matched = values.some(value => needles.some(needle => {
+    const matched = values.some(value => {
       if (numeric && equality) return Number(value) === Number(needle);
       const haystack = searchableValue(value);
       return equality ? haystack === needle.replace(/_/g, " ") : haystack.includes(needle.replace(/_/g, " "));
-    }));
+    });
     return clause.op === "!=" ? !matched : matched;
+  }
+
+  function operatorOptions(column) {
+    const numeric = column && column.sortType === "num";
+    if (numeric) return [
+      ["=", "equals"], ["!=", "does not equal"], [">=", "at least"],
+      ["<=", "at most"], [">", "greater than"], ["<", "less than"],
+    ];
+    return [[":", "contains"], ["=", "is"], ["!=", "is not"]];
+  }
+
+  function renderFilterBuilder() {
+    const root = $("#column-filters");
+    if (!root) return;
+    if (state.columnFilters.length === 0) {
+      root.innerHTML = `<span class="filter-empty">No column filters. Add one to compose an AND query.</span>`;
+      return;
+    }
+    root.innerHTML = state.columnFilters.map(item => {
+      const column = TABLE_COLUMNS.find(col => col.key === item.key) || TABLE_COLUMNS[0];
+      const operators = operatorOptions(column);
+      if (!operators.some(([op]) => op === item.op)) item.op = operators[0][0];
+      return `<div class="column-filter" data-filter-id="${item.id}">
+        <select class="filter-column" aria-label="Filter column">${TABLE_COLUMNS.map(col =>
+          `<option value="${escapeHtml(col.key)}"${col.key === column.key ? " selected" : ""}>${escapeHtml(col.label)}</option>`
+        ).join("")}</select>
+        <select class="filter-operator" aria-label="Filter operator">${operators.map(([op, label]) =>
+          `<option value="${escapeHtml(op)}"${op === item.op ? " selected" : ""}>${escapeHtml(label)}</option>`
+        ).join("")}</select>
+        <input class="filter-value" type="text" value="${escapeHtml(item.value)}" placeholder="value" aria-label="Filter value" />
+        <button class="filter-remove" type="button" title="Remove filter" aria-label="Remove filter">&times;</button>
+      </div>`;
+    }).join("");
+
+    $$(".column-filter", root).forEach(row => {
+      const id = Number(row.dataset.filterId);
+      const item = state.columnFilters.find(filter => filter.id === id);
+      if (!item) return;
+      $(".filter-column", row).addEventListener("change", event => {
+        item.key = event.target.value;
+        item.op = operatorOptions(TABLE_COLUMNS.find(col => col.key === item.key))[0][0];
+        renderFilterBuilder();
+        renderTable();
+      });
+      $(".filter-operator", row).addEventListener("change", event => {
+        item.op = event.target.value;
+        renderTable();
+      });
+      $(".filter-value", row).addEventListener("input", event => {
+        item.value = event.target.value;
+        renderTable();
+      });
+      $(".filter-remove", row).addEventListener("click", () => {
+        state.columnFilters = state.columnFilters.filter(filter => filter.id !== id);
+        renderFilterBuilder();
+        renderTable();
+      });
+    });
   }
 
   function updateFilterStatus(shown, total) {
     const el = $("#filter-status");
     if (!el) return;
-    const issues = state.filterIssues || [];
-    const count = state.filter.trim() ? `${shown} of ${total} rows` : `${total} rows`;
-    el.textContent = issues.length ? `${count} · ${issues.join(" · ")}` : count;
-    el.classList.toggle("has-issue", issues.length > 0);
+    const active = state.columnFilters.filter(item => String(item.value || "").trim()).length;
+    const filtering = state.filter.trim() || active > 0;
+    el.textContent = filtering ? `${shown} of ${total} rows · ${active} column filter${active === 1 ? "" : "s"}` : `${total} rows`;
   }
 
   function applySort(rows) {
@@ -1428,6 +1436,21 @@
       state.filter = ev.target.value || "";
       renderTable();
     });
+    $("#add-filter-btn").addEventListener("click", () => {
+      state.columnFilters.push({
+        id: state.nextFilterId++, key: "harness", op: ":", value: "",
+      });
+      renderFilterBuilder();
+      const inputs = $$(".filter-value", $("#column-filters"));
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    });
+    $("#clear-filters-btn").addEventListener("click", () => {
+      state.filter = "";
+      state.columnFilters = [];
+      $("#filter-input").value = "";
+      renderFilterBuilder();
+      renderTable();
+    });
     $("#reload-btn").addEventListener("click", () => {
       state.detailCache.clear();
       loadSnapshots();
@@ -1446,6 +1469,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     wireListView();
     wireDetailView();
+    renderFilterBuilder();
     // Always apply the initial route. Assigning an already-current "#/" hash
     // does not emit hashchange, which previously left both views hidden.
     const initial = parseHash();
