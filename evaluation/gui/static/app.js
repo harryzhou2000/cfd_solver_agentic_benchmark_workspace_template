@@ -46,6 +46,17 @@
     { key: "case_cyl_re200", label: "Cyl Re200",      caseTag: "Cyl",  caseLabel: "Re200",     type: "case-score", sortType: "num" },
   ];
 
+  const FILTER_ALIASES = {
+    run: "run_id", id: "run_id", model: "primary_model_effort",
+    primary_model: "primary_model_effort", goal: "goal_time_s",
+    wall: "wall_time_s", activity: "activity_time_s", input: "input_tokens",
+    cached: "cached_input_tokens", output: "output_tokens", total: "tokens",
+    cost: "cost_usd", code: "code_score", cfd: "cfd_score",
+    results: "result_score", result: "result_score", rubric: "rubric_total",
+    dq: "disqualified", date: "execution_date", cache: "cache_hit",
+    env: "env_capture_phase", reviewed: "agent_reviewed",
+  };
+
   const $  = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -278,14 +289,105 @@
   }
 
   function applyFilter(rows) {
-    const q = state.filter.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter(r => {
-      const a = (r.contestant || "").toLowerCase();
-      const b = (r.harness    || "").toLowerCase();
-      const c = (r.branch     || "").toLowerCase();
-      return a.includes(q) || b.includes(q) || c.includes(q);
+    const parsed = parseFilter(state.filter);
+    state.filterIssues = parsed.issues;
+    if (parsed.clauses.length === 0) return rows;
+    return rows.filter(row => parsed.clauses.every(clause => matchesClause(row, clause)));
+  }
+
+  function splitFilterExpression(input) {
+    const tokens = [];
+    let current = "", quote = null;
+    for (const char of String(input || "")) {
+      if ((char === '"' || char === "'") && (!quote || quote === char)) {
+        quote = quote ? null : char;
+      } else if (/\s/.test(char) && !quote) {
+        if (current) tokens.push(current);
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+    if (current) tokens.push(current);
+    return { tokens, unclosedQuote: quote !== null };
+  }
+
+  function resolveFilterKey(raw) {
+    const key = String(raw || "").toLowerCase().replace(/-/g, "_");
+    if (FILTER_ALIASES[key]) return FILTER_ALIASES[key];
+    if (TABLE_COLUMNS.some(col => col.key === key)) return key;
+    const byLabel = TABLE_COLUMNS.find(col =>
+      col.label.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") === key);
+    return byLabel ? byLabel.key : null;
+  }
+
+  function parseFilter(input) {
+    const split = splitFilterExpression(input);
+    const issues = split.unclosedQuote ? ["Unclosed quote"] : [];
+    const clauses = split.tokens.map(token => {
+      const match = token.match(/^([a-zA-Z][\w-]*)(!=|>=|<=|:|=|>|<)(.*)$/);
+      if (!match) return { key: null, op: ":", value: token };
+      const key = resolveFilterKey(match[1]);
+      if (!key) {
+        issues.push(`Unknown column: ${match[1]}`);
+        return { key: null, op: ":", value: token };
+      }
+      if (!match[3]) issues.push(`Missing value for ${match[1]}`);
+      return { key, op: match[2], value: match[3] };
     });
+    return { clauses, issues };
+  }
+
+  function searchableValue(value) {
+    if (isNullish(value)) return "null unavailable —";
+    if (value === true) return "true yes";
+    if (value === false) return "false no";
+    return String(value).toLowerCase().replace(/_/g, " ");
+  }
+
+  function clauseValues(row, key) {
+    if (key) return [row[key]];
+    return [row.contestant, ...TABLE_COLUMNS.map(col => row[col.key])];
+  }
+
+  function matchesClause(row, clause) {
+    const rawNeedles = String(clause.value || "").toLowerCase().split("|");
+    const needles = rawNeedles.filter(Boolean);
+    if (needles.length === 0) return false;
+    const values = clauseValues(row, clause.key);
+    const column = clause.key && TABLE_COLUMNS.find(col => col.key === clause.key);
+    const numeric = column && ["num", "duration", "tokens", "money", "score",
+      "pct", "case-score", "int"].includes(column.sortType === "num" ? column.type : "");
+
+    if ([">", ">=", "<", "<="].includes(clause.op)) {
+      const target = Number(needles[0]);
+      if (!Number.isFinite(target)) return false;
+      return values.some(value => {
+        const actual = Number(value);
+        if (!Number.isFinite(actual)) return false;
+        if (clause.op === ">") return actual > target;
+        if (clause.op === ">=") return actual >= target;
+        if (clause.op === "<") return actual < target;
+        return actual <= target;
+      });
+    }
+
+    const equality = clause.op === "=" || clause.op === "!=";
+    const matched = values.some(value => needles.some(needle => {
+      if (numeric && equality) return Number(value) === Number(needle);
+      const haystack = searchableValue(value);
+      return equality ? haystack === needle.replace(/_/g, " ") : haystack.includes(needle.replace(/_/g, " "));
+    }));
+    return clause.op === "!=" ? !matched : matched;
+  }
+
+  function updateFilterStatus(shown, total) {
+    const el = $("#filter-status");
+    if (!el) return;
+    const issues = state.filterIssues || [];
+    const count = state.filter.trim() ? `${shown} of ${total} rows` : `${total} rows`;
+    el.textContent = issues.length ? `${count} · ${issues.join(" · ")}` : count;
+    el.classList.toggle("has-issue", issues.length > 0);
   }
 
   function applySort(rows) {
@@ -298,6 +400,7 @@
     buildTableHeader();
     const tbody = $("#snapshots-tbody");
     const rows = applySort(applyFilter(state.snapshots));
+    updateFilterStatus(rows.length, state.snapshots.length);
 
     if (state.snapshots.length === 0) {
       $("#table-wrap").hidden = true;
@@ -914,8 +1017,16 @@
     const panel = $("#panel-pdf");
     const pdf = detail.report_pdf;
     if (!pdf) {
+      const search = detail.report_pdf_search || {};
+      const expected = Array.isArray(search.expected_paths) ? search.expected_paths : [];
+      const diagnosis = search.workspace_found === false
+        ? "The matching contestant workspace could not be resolved."
+        : expected.length
+          ? `Tracked report source found. Expected compiled output: ${expected.map(path => `<code>${escapeHtml(path)}</code>`).join(", ")}.`
+          : "No report PDF or tracked report TeX source was found in the matching workspace.";
       panel.innerHTML = `<div class="env-notice"><strong>No workspace report PDF found.</strong>
-        <p>The dashboard searched the matching contestant workspace for a report PDF. PDFs are viewed in place and are not copied into the evaluation snapshot.</p></div>`;
+        <p>${diagnosis}</p>
+        <p>PDFs are viewed in place and are not copied into the evaluation snapshot.</p></div>`;
       return;
     }
     panel.innerHTML = `<div class="pdf-toolbar">

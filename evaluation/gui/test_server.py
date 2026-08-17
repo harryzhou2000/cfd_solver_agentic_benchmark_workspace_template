@@ -26,6 +26,41 @@ class ReportPdfDiscoveryTests(unittest.TestCase):
             found = server.find_report_pdf(workspace)
             self.assertEqual(found["relative_path"], "solver/report/report.pdf")
 
+    def test_does_not_mistake_plot_pdf_for_report(self):
+        with tempfile.TemporaryDirectory() as raw:
+            workspace = Path(raw)
+            figures = workspace / "solver" / "report" / "figures"
+            figures.mkdir(parents=True)
+            (figures / "force_history.pdf").write_bytes(b"%PDF-plot")
+            self.assertIsNone(server.find_report_pdf(workspace))
+
+    def test_submission_report_source_anchors_pdf_and_missing_diagnostics(self):
+        with tempfile.TemporaryDirectory() as raw:
+            workspace = Path(raw)
+            report = workspace / "solver" / "report"
+            report.mkdir(parents=True)
+            (report / "paper.tex").write_text("report")
+            subprocess.run(["git", "init", "-q"], cwd=workspace, check=True)
+            subprocess.run(["git", "add", "solver/report/paper.tex"],
+                           cwd=workspace, check=True)
+            subprocess.run([
+                "git", "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                "commit", "-q", "-m", "report source",
+            ], cwd=workspace, check=True)
+            commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=workspace, text=True).strip()
+            identity = {"submission_commit": commit}
+
+            missing = server.report_pdf_search(workspace, identity)
+            self.assertIsNone(missing["report"])
+            self.assertEqual(missing["tracked_tex_paths"], ["solver/report/paper.tex"])
+            self.assertEqual(missing["expected_paths"], ["solver/report/paper.pdf"])
+
+            (report / "paper.pdf").write_bytes(b"%PDF-paper")
+            (workspace / "report.pdf").write_bytes(b"%PDF-unrelated")
+            found = server.find_report_pdf(workspace, identity)
+            self.assertEqual(found["relative_path"], "solver/report/paper.pdf")
+
     def test_workspace_identity_cannot_escape_workspace_root(self):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw) / "workspace"
@@ -541,6 +576,12 @@ class SnapshotProtocolTests(unittest.TestCase):
         self.assertIn('data-tab="models"', html)
         self.assertIn('function renderQuestionsTab(detail)', app)
         self.assertIn('function renderModelsTab(detail)', app)
+        self.assertIn('function parseFilter(input)', app)
+        self.assertIn('model: "primary_model_effort"', app)
+        self.assertIn('parsed.clauses.every', app)
+        self.assertIn('detail.report_pdf_search || {}', app)
+        self.assertIn('id="filter-help"', html)
+        self.assertIn('id="filter-status"', html)
         css = (static / "styles.css").read_text()
         self.assertIn('table.snapshots th.case-col', css)
         self.assertIn('width: 68px; min-width: 68px; max-width: 68px;', css)

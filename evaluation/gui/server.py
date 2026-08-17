@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
 import sys
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -69,17 +70,67 @@ def workspace_for_snapshot(run_identity: dict | None) -> Path | None:
     return None
 
 
-def find_report_pdf(workspace: Path | None) -> dict | None:
-    """Find one likely report PDF, skipping telemetry, environments, and builds."""
+def _tracked_report_tex_paths(workspace: Path, run_identity: dict | None) -> list[Path]:
+    """Return report-like TeX sources tracked by the immutable submission."""
+    identity = run_identity or {}
+    submission = identity.get("submission_commit")
+    if not isinstance(submission, str) or not submission:
+        return []
+    try:
+        proc = subprocess.run(
+            ["git", "ls-tree", "-r", "--name-only", submission],
+            cwd=workspace, check=True, capture_output=True, text=True, timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return []
+    candidates = []
+    for raw in proc.stdout.splitlines():
+        rel = Path(raw)
+        lowered = [part.lower() for part in rel.parts]
+        if rel.suffix.lower() != ".tex":
+            continue
+        if rel.name.lower() != "report.tex" and "report" not in lowered[:-1]:
+            continue
+        path = workspace / rel
+        if _inside(path, workspace):
+            candidates.append(rel)
+    return sorted(candidates, key=lambda rel: (
+        0 if rel.name.lower() == "report.tex" else 1,
+        0 if rel.parent.name.lower() == "report" else 1,
+        len(rel.parts), rel.as_posix(),
+    ))
+
+
+def report_pdf_search(workspace: Path | None, run_identity: dict | None = None) -> dict:
+    """Resolve the report PDF and retain useful diagnostics when it is absent."""
     if workspace is None:
-        return None
-    skip = {".git", ".sessions", ".eval", ".venv", "build", "build-debug", "build-release"}
-    found = []
+        return {"report": None, "workspace_found": False, "expected_paths": [],
+                "tracked_tex_paths": []}
+
+    tex_paths = _tracked_report_tex_paths(workspace, run_identity)
+    expected = [rel.with_suffix(".pdf") for rel in tex_paths]
+    found: list[tuple[tuple, Path, str, int]] = []
+    for rank, rel in enumerate(expected):
+        path = workspace / rel
+        if path.is_symlink() or not _inside(path, workspace) or not path.is_file():
+            continue
+        try:
+            size = path.stat().st_size
+        except OSError:
+            continue
+        found.append(((0, rank), path, rel.as_posix(), size))
+
+    # Legacy snapshots may lack a usable submission commit. Keep the fallback
+    # deliberately narrow: arbitrary plot PDFs are not contestant reports.
+    skip = {
+        ".git", ".sessions", ".eval", ".venv", "build", "build-debug",
+        "build-release", "cfd_solver_agentic_benchmark", "external",
+    }
     for root, dirs, files in os.walk(workspace, followlinks=False):
         dirs[:] = sorted(d for d in dirs if d not in skip and not d.startswith("cmake-build"))
         root_path = Path(root)
         for name in sorted(files):
-            if not name.lower().endswith(".pdf"):
+            if name.lower() != "report.pdf":
                 continue
             path = root_path / name
             if path.is_symlink() or not _inside(path, workspace):
@@ -90,13 +141,29 @@ def find_report_pdf(workspace: Path | None) -> dict | None:
                 continue
             rel = path.relative_to(workspace).as_posix()
             parts = [p.lower() for p in path.relative_to(workspace).parts]
-            score = (0 if name.lower() == "report.pdf" else 1,
-                     0 if "report" in parts[:-1] else 1, len(parts), rel)
+            score = (1, 0 if "report" in parts[:-1] else 1, len(parts), rel)
             found.append((score, path, rel, size))
     if not found:
-        return None
+        return {
+            "report": None,
+            "workspace_found": True,
+            "workspace": str(workspace),
+            "expected_paths": [rel.as_posix() for rel in expected],
+            "tracked_tex_paths": [rel.as_posix() for rel in tex_paths],
+        }
     _, path, rel, size = min(found, key=lambda item: item[0])
-    return {"path": path, "relative_path": rel, "bytes": size}
+    return {
+        "report": {"path": path, "relative_path": rel, "bytes": size},
+        "workspace_found": True,
+        "workspace": str(workspace),
+        "expected_paths": [rel.as_posix() for rel in expected],
+        "tracked_tex_paths": [rel.as_posix() for rel in tex_paths],
+    }
+
+
+def find_report_pdf(workspace: Path | None, run_identity: dict | None = None) -> dict | None:
+    """Find the report PDF tied to a submitted report source."""
+    return report_pdf_search(workspace, run_identity)["report"]
 
 
 def snapshot_detail(folder: Path) -> dict:
@@ -123,7 +190,8 @@ def snapshot_detail(folder: Path) -> dict:
     configs = _load("configs.json")
     env_snap = _load("env_snapshot.json")
     run_identity = _load("run_identity.json")
-    report_pdf = find_report_pdf(workspace_for_snapshot(run_identity))
+    report_search = report_pdf_search(workspace_for_snapshot(run_identity), run_identity)
+    report_pdf = report_search["report"]
     expense_facts = expenses or summary.get("expenses") or {}
     metadata_facts = metadata or summary.get("metadata") or {}
     model_decomposition = query.current_model_decomposition(
@@ -167,6 +235,8 @@ def snapshot_detail(folder: Path) -> dict:
                         "bytes": report_pdf["bytes"],
                         "url": f"/api/snapshot/{urllib.parse.quote(folder.name, safe='')}/report-pdf"}
                        if report_pdf else None),
+        "report_pdf_search": {key: value for key, value in report_search.items()
+                              if key != "report"},
         "markdown": md_files,
         "artifacts": sorted(
             p.name for p in folder.iterdir() if p.is_file() and p.name in SAFE_ARTIFACTS),
@@ -241,7 +311,7 @@ class Handler(BaseHTTPRequestHandler):
                         identity = json.loads((folder / "run_identity.json").read_text())
                     except (OSError, json.JSONDecodeError):
                         identity = None
-                    report = find_report_pdf(workspace_for_snapshot(identity))
+                    report = find_report_pdf(workspace_for_snapshot(identity), identity)
                     if not report:
                         return self._not_found("workspace report PDF")
                     return self._file(report["path"], "application/pdf")
