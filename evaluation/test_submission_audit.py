@@ -30,6 +30,14 @@ class SubmissionAuditTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertIsNotNone(audit.classify(path))
 
+    def test_curated_pdf_figure_is_allowed_but_generated_report_pdf_is_not(self):
+        self.assertIsNone(audit.classify(
+            "solver/report/figures/case_np8_mach.pdf"))
+        self.assertEqual(
+            audit.classify("solver/report/report.pdf"),
+            "PDF outside an approved report figures directory",
+        )
+
     def test_output_namespace_inside_source_tree_is_allowed(self):
         self.assertIsNone(audit.classify("solver/src/output/csv_writer.cpp"))
         self.assertIsNone(audit.classify("solver/include/output/metadata.hpp"))
@@ -46,14 +54,14 @@ class SubmissionAuditTests(unittest.TestCase):
             "raw/generated/build directory",
         )
 
-    def test_png_referenced_from_local_input_and_graphicspath(self):
+    def test_png_and_pdf_referenced_from_local_input_and_graphicspath(self):
         blobs = {
             "solver/report/report.tex": (
                 r"\graphicspath{{figures/}}" "\n"
                 r"\input{generated_results}" "\n"
             ),
             "solver/report/generated_results.tex": (
-                r"\includegraphics[width=.9\linewidth]{case\_np8\_mach.png}" "\n"
+                r"\includegraphics[width=.9\linewidth]{case\_np8\_mach}" "\n"
             ),
         }
         with mock.patch.object(audit, "committed_text", side_effect=lambda _w, _c, p: blobs.get(p)):
@@ -62,6 +70,9 @@ class SubmissionAuditTests(unittest.TestCase):
             ))
             self.assertFalse(audit.png_is_referenced(
                 Path("/unused"), "deadbeef", "solver/report/figures/unreferenced.png"
+            ))
+            self.assertTrue(audit.figure_is_referenced(
+                Path("/unused"), "deadbeef", "solver/report/figures/case_np8_mach.pdf"
             ))
 
     def test_tex_dependency_cannot_escape_report_directory(self):

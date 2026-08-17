@@ -26,7 +26,7 @@ FORBIDDEN_EXTENSIONS = {
     ".log", ".out", ".stdout", ".stderr", ".bin", ".dat", ".h5", ".hdf5",
     ".cgns", ".vtk", ".vtu", ".pvtu", ".pvd", ".xdmf", ".xmf", ".plt",
     ".tec", ".szplt", ".o", ".obj", ".a", ".so", ".dylib", ".dll", ".exe",
-    ".jpg", ".jpeg", ".gif", ".bmp", ".tif", ".tiff", ".svg", ".pdf",
+    ".jpg", ".jpeg", ".gif", ".bmp", ".tif", ".tiff", ".svg",
     ".csv", ".tsv", ".npy", ".npz", ".parquet", ".feather", ".arrow",
     ".mat", ".pkl", ".pickle", ".sqlite", ".sqlite3", ".db",
     ".aux", ".bbl", ".bcf", ".blg", ".fdb_latexmk", ".fls", ".nav",
@@ -118,16 +118,16 @@ def classify(path_text: str) -> str | None:
         return "raw solver result or restart/field artifact"
     if basename.endswith((".run.xml", ".synctex.gz")):
         return "prohibited LaTeX build artifact"
-    if suffix == ".png":
+    if suffix in {".png", ".pdf"}:
         if not any(path_text.startswith(prefix) for prefix in REPORT_FIGURE_PREFIXES):
-            return "PNG outside an approved report figures directory"
+            return f"{suffix[1:].upper()} outside an approved report figures directory"
         return None
     if suffix in FORBIDDEN_EXTENSIONS:
         return f"prohibited generated/data extension {suffix}"
     return None
 
 
-def report_tex_path_for_png(path_text: str) -> tuple[str, str] | None:
+def report_tex_path_for_figure(path_text: str) -> tuple[str, str] | None:
     for prefix in REPORT_FIGURE_PREFIXES:
         if path_text.startswith(prefix):
             report_root = prefix.removesuffix("figures/")
@@ -214,38 +214,47 @@ def _graphics_references(sources: list[tuple[str, str]], report_root: str) -> se
                     references.add(candidate)
                     if not PurePosixPath(candidate).suffix:
                         references.add(candidate + ".png")
+                        references.add(candidate + ".pdf")
 
         # A common report-local helper wraps \includegraphics in a four-argument
         # subfigure macro: \subp{width}{figure-stem}{caption}{label}.  The
         # second argument remains a concrete committed figure dependency even
         # though TeX expands it through \plotfile, so follow it explicitly.
         # Do this only when the same source defines the conventional helper
-        # with a PNG report-figure path; arbitrary macros remain out of scope.
-        if re.search(
-            r"\\newcommand\s*\{\\(?:plotfile|subp)\}.*?figures/(?:#1|#2)\\?\.png",
+        # with a PNG/PDF report-figure path; arbitrary macros remain out of scope.
+        helper = re.search(
+            r"\\newcommand\s*\{\\(?:plotfile|subp)\}.*?figures/(?:#1|#2)\\?\.(png|pdf)",
             normalized,
-            flags=re.DOTALL,
-        ):
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+        if helper:
+            extension = helper.group(1).lower()
             for call in re.finditer(r"\\subp\s*\{[^{}]*\}\s*\{([^{}]+)\}", normalized):
                 stem = call.group(1).strip()
                 if not stem or stem.startswith("/") or "\\" in stem:
                     continue
                 candidate = posixpath.normpath(
-                    posixpath.join(source_dir, "figures", stem + ".png")
+                    posixpath.join(source_dir, "figures", stem + "." + extension)
                 )
                 if candidate.startswith(report_root + "/"):
                     references.add(candidate)
     return references
 
 
-def png_is_referenced(workspace: Path, commit: str, path_text: str) -> bool:
-    mapping = report_tex_path_for_png(path_text)
+def figure_is_referenced(workspace: Path, commit: str, path_text: str) -> bool:
+    mapping = report_tex_path_for_figure(path_text)
     if mapping is None:
         return False
     report_tex, _relative = mapping
     sources = _report_sources(workspace, commit, report_tex)
     references = _graphics_references(sources, posixpath.dirname(report_tex))
     return path_text in references
+
+
+# Backward-compatible names for evaluator scripts/tests written before PDF
+# report figures were admitted.
+report_tex_path_for_png = report_tex_path_for_figure
+png_is_referenced = figure_is_referenced
 
 
 def main() -> int:
@@ -310,11 +319,11 @@ def main() -> int:
                 reason = "renamed inherited prohibited/data path; requires operator review: " + old_reason
         if (
             reason is None
-            and path.lower().endswith(".png")
+            and path.lower().endswith((".png", ".pdf"))
             and not status.startswith("D")
-            and not png_is_referenced(workspace, submission_commit, path)
+            and not figure_is_referenced(workspace, submission_commit, path)
         ):
-            reason = "report PNG is not referenced by committed report.tex"
+            reason = "report figure is not referenced by committed report.tex"
         if reason is not None:
             if status.startswith("D"):
                 cleanup = {**item, "reason": reason}

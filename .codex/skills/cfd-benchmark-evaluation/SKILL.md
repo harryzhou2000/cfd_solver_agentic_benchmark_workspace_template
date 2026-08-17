@@ -27,8 +27,9 @@ record.
   that the number is free.
 - Commit only reproducible code/report material. Never commit raw solver data,
   logs, restarts, field files, or visualization working files. Permit curated
-  PNGs only under the report's figure directory so the report builds directly
-  from the repository.
+  PNG or PDF figure assets only under the report's figure directory so the
+  report builds directly from the repository. A generated report PDF remains
+  prohibited.
 - Keep structural validation separate from source, physics, MPI, and report
   judgment. A passing validator is necessary, not sufficient.
 - Trust that submitted code and artifacts are the contestant's work. Do not
@@ -234,7 +235,7 @@ Requirements:
   checkpoint is normal.
 - Stage the curated contestant submission: solver source, build/config files,
   reproducibility scripts, report TeX/bibliography sources, curated report
-  PNGs, `done`, and relevant tracked submodule pointers. Embed small report
+  PNG/PDF figures, `done`, and relevant tracked submodule pointers. Embed small report
   tables in report source; do not commit raw tabular data files.
 - First derive the canonical submission set from the task/output contract and
   the contestant's documented final paths. Keep all run data in the workspace
@@ -250,10 +251,12 @@ Requirements:
   generated report PDF; executables, libraries, objects, or build/cache trees.
   Existing immutable benchmark inputs inherited from the initial commit need
   not be removed, but the result commit must not add or modify such data.
-- Permit `.png` files only below a report `figures/` directory, and only when
-  they are curated figures referenced by the committed `report.tex`. Do not
-  commit PNGs from probes, debug runs, or general result/visualization
-  directories. Build the report from the committed tree after the audit; a
+- Permit `.png` and `.pdf` figure files only below a report `figures/`
+  directory, and only when they are curated figures referenced by the
+  committed `report.tex`. Do not convert an original contestant PDF figure to
+  PNG merely to satisfy curation. Do not commit figure assets from probes,
+  debug runs, or general result/visualization directories, and never commit
+  the generated report PDF. Build the report from the committed tree after the audit; a
   textual reference check does not prove that the report compiles.
   The audit follows local `\\input`/`\\include` TeX dependencies from immutable
   commit blobs, confined to the report directory, and honors `\\graphicspath`;
@@ -274,8 +277,8 @@ Requirements:
   the workspace file as evaluation evidence (for example, use a scoped
   `git rm --cached` after verifying the exact paths). Do not rewrite contestant
   history merely because an ancestor tracked raw data. The final result-branch
-  tip must exclude raw data, logs, restarts, fields, generated PDFs, build
-  products, and visualization working files even when they remain reachable
+  tip must exclude raw data, logs, restarts, fields, generated report PDFs,
+  build products, and visualization working files even when they remain reachable
   from preserved contestant ancestors. Record this history-retention
   limitation before pushing: deleting a path at the tip does not remove its
   blob from earlier commits.
@@ -666,7 +669,7 @@ order and stop as soon as the evidence is decisive:
    report figures are missing, poor, misleading, or technically hard to read,
    create evaluator-only plots from those existing files. Use the submitted
    plotting scripts when suitable; otherwise use a small independent plotting
-   command. Do not edit `report.tex`, replace report PNGs, or commit generated
+   command. Do not edit `report.tex`, replace report figures, or commit generated
    plots. Record what source files and variables were visualized.
 3. Only when evidence required to judge solver functionality is genuinely
    missing, consider rerunning a **steady** case. First confirm the source
