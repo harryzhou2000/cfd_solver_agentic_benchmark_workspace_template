@@ -41,6 +41,12 @@ The work here is:
   into contestant workspaces.
 - `.venv/` — local Python environment for benchmark tooling.
 
+## Services
+
+- Never stop, start, or restart the `ocx` service. The ocx proxy lifecycle is
+  user-owned; agents may use its management API/CLI for read-only inspection
+  and model/catalog operations, but must not touch service state.
+
 ## Git Discipline
 
 - Do NOT run `git pull`, `git push`, or switch branches without explicit user
