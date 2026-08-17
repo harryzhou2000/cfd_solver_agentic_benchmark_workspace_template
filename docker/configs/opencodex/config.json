@@ -73,7 +73,13 @@
       "adapter": "openai-responses",
       "baseUrl": "https://chatgpt.com/backend-api/codex",
       "codexAccountMode": "pool",
-      "authMode": "forward"
+      "authMode": "forward",
+      "modelContextWindows": {
+        "gpt-5.6-sol": 380000,
+        "gpt-5.6-terra": 380000,
+        "gpt-5.6-luna": 380000,
+        "gpt-daybreak-blue-latest": 380000
+      }
     },
     "opencode-free": {
       "adapter": "openai-chat",
@@ -108,6 +114,13 @@
       "adapter": "openai-chat",
       "baseUrl": "https://llmapi.blsc.cn",
       "allowPrivateNetwork": false,
+      "retryOn429": {
+        "enabled": true,
+        "attempts": 5,
+        "intervalMs": 5000,
+        "maxIntervalMs": 60000,
+        "respectRetryAfter": true
+      },
       "authMode": "key",
       "apiKeyPool": [
         {
@@ -296,13 +309,6 @@
           "cacheRead": 0.21,
           "cacheWrite": 5.14
         }
-      },
-      "retryOn429": {
-        "enabled": true,
-        "attempts": 5,
-        "intervalMs": 5000,
-        "maxIntervalMs": 60000,
-        "respectRetryAfter": true
       }
     }
   },
@@ -327,7 +333,6 @@
   "websockets": false,
   "codexAutoStart": false,
   "proxy": "http://192.168.31.65:20181",
-  "customModels": [],
   "disabledModels": [
     "BLSC/Baichuan-M2",
     "BLSC/Baichuan-M3",
@@ -422,5 +427,9 @@
   "accountPoolStrategy": "quota",
   "multiAgentMode": "v2",
   "codexAccounts": [],
-  "activeCodexAccountId": "__main__"
+  "activeCodexAccountId": "__main__",
+  "customModelCatalogMigration": {
+    "version": 1,
+    "legacyOwnedSlugs": []
+  }
 }
