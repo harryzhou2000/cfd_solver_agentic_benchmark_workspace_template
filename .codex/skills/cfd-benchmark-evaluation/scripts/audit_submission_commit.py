@@ -214,6 +214,27 @@ def _graphics_references(sources: list[tuple[str, str]], report_root: str) -> se
                     references.add(candidate)
                     if not PurePosixPath(candidate).suffix:
                         references.add(candidate + ".png")
+
+        # A common report-local helper wraps \includegraphics in a four-argument
+        # subfigure macro: \subp{width}{figure-stem}{caption}{label}.  The
+        # second argument remains a concrete committed figure dependency even
+        # though TeX expands it through \plotfile, so follow it explicitly.
+        # Do this only when the same source defines the conventional helper
+        # with a PNG report-figure path; arbitrary macros remain out of scope.
+        if re.search(
+            r"\\newcommand\s*\{\\(?:plotfile|subp)\}.*?figures/(?:#1|#2)\\?\.png",
+            normalized,
+            flags=re.DOTALL,
+        ):
+            for call in re.finditer(r"\\subp\s*\{[^{}]*\}\s*\{([^{}]+)\}", normalized):
+                stem = call.group(1).strip()
+                if not stem or stem.startswith("/") or "\\" in stem:
+                    continue
+                candidate = posixpath.normpath(
+                    posixpath.join(source_dir, "figures", stem + ".png")
+                )
+                if candidate.startswith(report_root + "/"):
+                    references.add(candidate)
     return references
 
 
