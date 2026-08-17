@@ -1,7 +1,7 @@
 # Final Result Summary — 01
 
 - Workspace: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/gpt56-dsv4/01`
-- Branch: `oc-goal/gpt56-dsv4/01` commit `908a5234f8bf7647bb4f39d9eb0316d1118bf18d`
+- Branch: `oc-goal/gpt56-dsv4/01` commit `ade19533de3283fb2c92c36e723d34792afcdc90`
 - Benchmark submodule: `1bc6580b84825037bbeac097ede1b2226d8185d1`
 - Layout: standard (solver: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/gpt56-dsv4/01/solver`, results: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/gpt56-dsv4/01/solver/.probe_implicit_pseudotransient_bridge_m080_np8_20260808`, report: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/gpt56-dsv4/01/solver/report`)
 - Session window: 2026-08-06T20:05:43.295000+00:00 → 2026-08-10T07:01:44.847000+00:00
@@ -32,7 +32,7 @@
 
 ## Measurements
 
-- Tool calls: **0**; top tools:
+- Tool calls: **0**; top tools: 
 - Subagent spawns: 0
 - LOC (file scan): 0 lines / 0 files
 
@@ -102,6 +102,6 @@ None detected.
 
 ## Reviews
 
-- Code review scorecard: `oc-goal_gpt56-dsv4_01_36a01a/review_code.md` (overall: 4.2)
-- CFD methods review: `oc-goal_gpt56-dsv4_01_36a01a/review_cfd.md` (overall: 4.73)
-- Result review: `oc-goal_gpt56-dsv4_01_36a01a/review_results.md` (overall: 4.5)
+- Code review scorecard: `oc-goal_gpt56-dsv4_01_f83d02/review_code.md` (overall: 4.2)
+- CFD methods review: `oc-goal_gpt56-dsv4_01_f83d02/review_cfd.md` (overall: 4.73)
+- Result review: `oc-goal_gpt56-dsv4_01_f83d02/review_results.md` (overall: 4.5)

@@ -2,7 +2,7 @@
 
 - Immutable submission: `332ca95ef31bc8f694e699554f257729657f5d37` on `oc-goal/gpt56-dsv4/01`.
 - Reconstructed provenance: `oc-goal/gpt56-dsv4/init` / `7bb0b026bbc59386143a6f8c46ed56e9e687e900`; post-run snapshot with unavailable original environment.
-- Identity: `oc-goal_gpt56-dsv4_01_36a01a`; `run_identity.json` SHA-256: `e7cd756ebc4a78c081130a06f828def289795ec0ca7b5d04216000aaa3043799`.
+- Identity: `oc-goal_gpt56-dsv4_01_f83d02`; `run_identity.json` SHA-256: `25fb794aafdc69ede30b4c7e71b77c3b0c061b52b2e6e9c71615cf8a4c09b147`.
 
 ## Telemetry and final response
 
