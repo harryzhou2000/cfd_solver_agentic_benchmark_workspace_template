@@ -37,6 +37,17 @@ shells).
 
 - The workspace is the only host path mounted (`/workspace`); the host parent
   is not visible inside the container.
+- A per-workspace lock file (`$WS/.sessions/docker.lock`) records the
+  container instance that owns the workspace (`container=`,
+  `launcher_pid=`, `started=`, `workspace=`) and is bind-mounted
+  read-only into the container, so the docker executor can neither modify nor
+  unlink it. The launcher refuses to start when the lock exists, and refuses
+  to start when a container with the chosen name already exists (no silent
+  force-remove). The lock is removed when the container exits normally:
+  interactive modes remove it via an EXIT trap, `--detach` removes it from a
+  `docker wait` watcher when the container stops. A stale lock (SIGKILLed
+  launcher) blocks relaunch by design; remove it manually only after
+  confirming no container is running for that workspace.
 - Network is host (`--network host`), so `127.0.0.1:<OCX_PORT>` reaches a
   host-side ocx service.
 - seccomp/apparmor are relaxed (`--security-opt ...=unconfined`) so codex's
@@ -91,6 +102,13 @@ shells).
 - `[entrypoint] mapping cfd_agent -> uid=...` stall: the passwd rewrite +
   shallow chown is intentional (no recursive chown); check mounted host dirs
   are owned by the invoking user.
+- `ERROR: workspace is locked ...`: a launcher for this workspace is active
+  or left a stale lock after being killed. Confirm `docker ps -a` shows no
+  container for this workspace, then remove
+  `$WS/.sessions/docker.lock` manually.
+- `ERROR: container '<name>' already exists ...`: remove or rename the
+  existing container instead of relaunching (the launcher no longer
+  force-removes it).
 - Container still running after the terminal closed: interactive mode no
   longer force-removes on signal, so the container survives; reattach with
   `docker attach <name>` or stop it with `docker stop <name>` (rerun with

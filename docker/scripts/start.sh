@@ -32,6 +32,13 @@ fi
 # (read-only; never written to the workspace). The live host config stack is
 # never used as the config source.
 #
+# A per-workspace lock file ($WS/.sessions/docker.lock) records the container
+# instance that owns the workspace and is bind-mounted read-only into the
+# container, so the docker executor can neither modify nor unlink it. The
+# launcher refuses to start when the lock exists or when a container with the
+# chosen name already exists. The lock is removed on normal exit; a stale
+# lock (killed launcher) blocks relaunch by design until removed manually.
+#
 # User mapping (enroot-style): the image ships one generic user (cfd_agent).
 # The entrypoint remaps it to this host's uid/gid at start (HOST_UID/HOST_GID
 # env), so files created in the container are owned by the invoking user and
@@ -139,6 +146,34 @@ NAME="${NAME_ARG:-bench-$(basename "$WS" | tr -c 'A-Za-z0-9_.-' '_')}"
 # can neither see nor write outside its workspace. The image's own
 # /workspace dir is shadowed by this mount.
 MOUNTS=(-v "$WS:$CTR_WS")
+
+# --- per-workspace launch lock ----------------------------------------------
+# The lock file records which container instance owns the workspace. It is
+# bind-mounted read-only into the container, so the docker executor can
+# neither modify nor unlink it (the file is a mountpoint; unlinking fails).
+# The lock is removed when the container exits normally; a stale lock
+# (SIGKILLed launcher) blocks relaunch by design and must be removed manually.
+LOCK_FILE="$WS/.sessions/docker.lock"
+if [ -e "$LOCK_FILE" ]; then
+  echo "ERROR: workspace is locked by an existing launcher: $LOCK_FILE" >&2
+  sed 's/^/  /' "$LOCK_FILE" >&2 2>/dev/null || true
+  echo "       remove the lock manually only after confirming no container is running for this workspace." >&2
+  exit 1
+fi
+if [ -n "$(docker ps -aq --filter "name=^/${NAME}$" 2>/dev/null)" ]; then
+  echo "ERROR: container '$NAME' already exists (running or stopped); remove it first or choose another --name" >&2
+  exit 1
+fi
+mkdir -p "$WS/.sessions"
+{
+  echo "container=$NAME"
+  echo "launcher_pid=$$"
+  echo "started=$(date -Is)"
+  echo "workspace=$WS"
+} > "$LOCK_FILE"
+chmod 0444 "$LOCK_FILE"
+MOUNTS+=(-v "$LOCK_FILE:$CTR_WS/.sessions/docker.lock:ro")
+
 # WORKSPACE tells the entrypoint to start the shell in the contestant
 # workspace (also set as the docker working dir via -w below).
 ENVS=(-e HOME="$IMG_HOME" -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
@@ -388,6 +423,7 @@ echo "  image:     $IMAGE"
 echo "  workspace: $WS"
 echo "  harness:   $HARNESS"
 echo "  name:      $NAME"
+echo "  lock:      $LOCK_FILE (removed on container exit)"
 echo "  cpus:      $CPUS"
 echo "  mode:      $([ "$DETACH" = 1 ] && echo 'detach (survives terminal close)' || echo 'interactive (signals pass through to the container)')"
 echo "  start dir: $WS (entrypoint cd + docker -w)"
@@ -419,6 +455,14 @@ cleanup() {
   docker rm -f "$NAME" >/dev/null 2>&1 || true
 }
 
+remove_lock() {
+  # Only remove the lock this launcher created (pid guard): a concurrent
+  # failed launcher must not delete a live launcher's lock.
+  if [ -f "$LOCK_FILE" ] && grep -q "^launcher_pid=$$$" "$LOCK_FILE" 2>/dev/null; then
+    rm -f "$LOCK_FILE"
+  fi
+}
+
 if [ "$DETACH" = "1" ]; then
   # Detached mode: the container is decoupled from this launcher's lifetime.
   # `--rm` stays (it only removes the container after it exits on its own —
@@ -426,30 +470,36 @@ if [ "$DETACH" = "1" ]; then
   # a terminal close / SSH drop / Ctrl-C on the logs tail cannot force-remove
   # the container.
   echo "== starting detached: docker stop $NAME when done =="
-  docker run -dit --rm --network host --name "$NAME" \
+  if ! docker run -dit --rm --network host --name "$NAME" \
     --user root:root \
     --cpus "$CPUS" \
     -w "$CTR_WS" \
     "${SECURITY_OPTS[@]}" \
     "${ENVS[@]}" \
     "${MOUNTS[@]}" \
-    "$IMAGE" "${CMD[@]}"
+    "$IMAGE" "${CMD[@]}"; then
+    remove_lock
+    exit 1
+  fi
+  # Remove the workspace lock when the container exits, not when this
+  # launcher returns (the container keeps running detached).
+  ( docker wait "$NAME" >/dev/null 2>&1 || true; remove_lock ) &
+  disown 2>/dev/null || true
   echo "container $NAME is running; tailing logs (ctrl-c only stops the tail):"
   docker logs -f --tail 100 "$NAME"
   exit 0
 fi
 
 # Interactive mode: the container's life is tied to this launcher terminal.
-# Remove a container left over from a previous session (a SIGKILLed launcher,
-# or a closed terminal while the container kept running; the name is
-# deterministic per workspace, and a stale one would block `docker run`).
-docker rm -f "$NAME" >/dev/null 2>&1 || true
+# The lock and container-name conflict checks happened before launch. Remove
+# the lock on normal exit (container exit, Ctrl-C, or an error); a SIGKILL
+# leaves a stale lock that blocks relaunch by design.
 
 if [ "$FORCE_REMOVE" = "1" ]; then
   # Opt-in launcher trap: force-remove on EXIT/INT/TERM/HUP so no bench-*
   # container survives Ctrl-C or a closed terminal. docker run must run in
   # the background and be waited on for the trap to fire immediately.
-  trap cleanup EXIT INT TERM HUP
+  trap 'cleanup; remove_lock' EXIT INT TERM HUP
   docker run -it --rm --network host --name "$NAME" \
     --user root:root \
     --cpus "$CPUS" \
@@ -465,6 +515,7 @@ else
   # docker client and are proxied into the container (--sig-proxy); the
   # container decides how to exit and --rm removes it afterwards. Foreground
   # so the launcher's exit status mirrors `docker run`.
+  trap 'remove_lock' EXIT
   docker run -it --rm --network host --name "$NAME" \
     --user root:root \
     --cpus "$CPUS" \
