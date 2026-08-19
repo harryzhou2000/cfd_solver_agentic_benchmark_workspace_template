@@ -23,8 +23,8 @@ ARG no_proxy
 ARG JOBS=4
 
 # --- pinned versions / commits (override with --build-arg to switch) --------
-ARG OPENCODE_VERSION=1.18.14
-ARG CODEX_VERSION=0.146.0
+ARG OPENCODE_VERSION=1.18.18
+ARG CODEX_VERSION=0.148.0
 ARG OPENCODEX_REPO=https://github.com/harryzhou2000/opencodex.git
 ARG OPENCODEX_COMMIT=ea7f5a69748c666f739143142627f8ace1fcb271
 ARG OCX_RELAY_REPO=https://github.com/harryzhou2000/ocx-relay.git

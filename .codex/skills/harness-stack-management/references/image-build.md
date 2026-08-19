@@ -19,8 +19,8 @@
 | Component | Pin |
 |---|---|
 | Base | ubuntu:24.04 |
-| opencode | 1.18.14 |
-| codex-cli | 0.146.0 |
+| opencode | 1.18.18 |
+| codex-cli | 0.148.0 |
 | Node.js | 24.18.0 |
 | bun | 1.3.14 |
 | uv | 0.12.1 |
