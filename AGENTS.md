@@ -20,13 +20,11 @@ Project instructions for coding agents working in this repository.
 ## 2. Subagents
 
 - Delegating independent subtasks to subagents is encouraged.
-- Subagent model policy: the allowed subagent models are `BLSC/GLM-5.3` and
-  `BLSC/MiniMax-M3` (passed as the `model` override to `spawn_agent`).
-  Do not spawn subagents with any other model.
-- Visual handoff (important): whenever a subagent produces something visual —
-  a report, plot, figure, or postprocessing output — hand it off to a
-  `BLSC/MiniMax-M3` subagent for visual checks and design review before the
-  task is considered done.
+- Subagent model policy: the ONLY allowed subagent model ID is
+  `vllm/qwen3.8-27b-int8-w8a16-mtp` (passed exactly as the `model` override to
+  `spawn_agent`). Every `spawn_agent` call must pass this exact model override;
+  never omit it or rely on model inheritance. Any other model ID, alias,
+  spelling, provider prefix, or fallback is strictly forbidden.
 
 ## 3. Use Subagents (Important)
 
@@ -45,14 +43,14 @@ Project instructions for coding agents working in this repository.
   runs in parallel instead of blocking you.
 - Use the spawn tool with a concrete task name and a self-contained
   message (passed as the `task_name` and `message` overrides to
-  `spawn_agent`). When the subagent model differs from yours, also pass
-  the `model` override with `fork_turns: "none"`; a full-history fork
-  inherits your model and rejects model overrides:
+  `spawn_agent`). Always pass the exact required `model` override with
+  `fork_turns: "none"`; a full-history fork inherits the main model and is
+  therefore forbidden:
 
   spawn_agent(
     task_name: "code_audit",
     message: "Audit <scope> and report findings with file:line evidence.",
-    model: "<subagent model>",
+    model: "vllm/qwen3.8-27b-int8-w8a16-mtp",
     fork_turns: "none",
   )
 
