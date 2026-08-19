@@ -22,9 +22,10 @@ Project instructions for coding agents working in this repository.
 - Delegating independent subtasks to subagents is encouraged.
 - Subagent model policy: the ONLY allowed subagent model ID is
   `vllm/qwen3.8-27b-int8-w8a16-mtp` (passed exactly as the `model` override to
-  `spawn_agent`). Every `spawn_agent` call must pass this exact model override;
-  never omit it or rely on model inheritance. Any other model ID, alias,
-  spelling, provider prefix, or fallback is strictly forbidden.
+  `spawn_agent`). A `spawn_agent` call may omit the `model` override and inherit
+  its model normally. If it supplies an explicit `model` override, it must use
+  this exact ID. Any other explicit model ID, alias, spelling, provider prefix,
+  or fallback is strictly forbidden.
 
 ## 3. Use Subagents (Important)
 
@@ -43,9 +44,9 @@ Project instructions for coding agents working in this repository.
   runs in parallel instead of blocking you.
 - Use the spawn tool with a concrete task name and a self-contained
   message (passed as the `task_name` and `message` overrides to
-  `spawn_agent`). Always pass the exact required `model` override with
-  `fork_turns: "none"`; a full-history fork inherits the main model and is
-  therefore forbidden:
+  `spawn_agent`). Either omit `model` to inherit normally, or pass the exact
+  allowed `model` override with `fork_turns: "none"`. Never explicitly override
+  to another model ID:
 
   spawn_agent(
     task_name: "code_audit",
