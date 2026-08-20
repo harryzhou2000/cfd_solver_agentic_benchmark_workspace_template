@@ -45,6 +45,9 @@ edits inside RUN steps.
 - texlive-full is installed after the harness binaries (current layout),
   so this rebuild reused the cached harness layers; future harness version
   bumps will also rebuild the texlive layer.
+- codex-cli and codegraph share one npm layer (system prefix /opt/node);
+  @openai/codex is installed via npm because the official GitHub standalone
+  tarball does NOT ship codex-code-mode-host (Code Mode breaks without it).
 - The image is user-agnostic: one generic `cfd_agent` (uid/gid 1000), home
   kept empty, opencode stores under `/opt` (XDG_*), entrypoint remaps at
   start.
@@ -68,5 +71,8 @@ edits inside RUN steps.
 - `curl`/`git` timeouts: export `HTTP_PROXY`/`HTTPS_PROXY` (e.g. source
   `~/.setproxy.sh`) before `docker/build.sh`; loopback proxies are
   auto-detected.
+- "Code Mode is unavailable ... failed to spawn code-mode-host": the codex
+  install is not the npm package (or the image predates the npm switch);
+  rebuild so /usr/local/bin/codex resolves through @openai/codex.
 - Plugin missing after build: rerun the affected step with `--no-cache`
   (flaky first-run npm installs are the known cause).

@@ -171,22 +171,16 @@ RUN chmod +x /usr/local/bin/install-opencode-plugins \
     && install-opencode-plugins --manifest /opt/opencode-plugins.json \
     && chmod -R a+rwX /opt/opencode-config /opt/opencode-cache
 
-# --- codex-cli (host version) — official standalone release -----------------
-# The standalone tarball extracts a single binary at the top level (no
-# bin/ subdirectory).
-RUN curl -fsSL -o /tmp/codex.tar.gz \
-        "https://github.com/openai/codex/releases/download/rust-v${CODEX_VERSION}/codex-x86_64-unknown-linux-musl.tar.gz" \
-    && mkdir -p /opt/codex-standalone \
-    && tar -xzf /tmp/codex.tar.gz -C /opt/codex-standalone \
-    && ln -sf /opt/codex-standalone/codex-x86_64-unknown-linux-musl /usr/local/bin/codex \
-    && rm -f /tmp/codex.tar.gz
-
-# --- codegraph 1.2.0 (host version) — official npm package ------------------
-# npm global installs land in /opt/node (system prefix). The npm cache is
-# redirected to the cache mount so ~/.npm never appears in the image home.
+# --- codex-cli (host version) — official npm package (system install) --------
+# npm global installs land in /opt/node (system prefix). The npm package
+# @openai/codex@<version> pulls the platform package that ships BOTH the
+# codex binary and the code-mode-host (the standalone GitHub tarball does
+# not, which breaks Code Mode). The npm cache is redirected to the cache
+# mount so ~/.npm never appears in the image home.
 RUN --mount=type=cache,target=/root/.npm \
     npm_config_cache=/root/.npm \
-    npm install -g @colbymchenry/codegraph@1.2.0 --no-audit --no-fund
+    npm install -g @openai/codex@${CODEX_VERSION} --no-audit --no-fund \
+    && npm install -g @colbymchenry/codegraph@1.2.0 --no-audit --no-fund
 
 # --- opencodex proxy — official source install at the pinned commit ---------
 RUN --mount=type=cache,target=/root/.bun-cache \
