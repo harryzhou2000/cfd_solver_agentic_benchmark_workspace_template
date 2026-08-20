@@ -42,9 +42,9 @@ edits inside RUN steps.
 - Order matters: build stack + uv + openmpi (apt) → doxygen → externals
   (heavy source build) → harnesses. Keep heavy layers below frequently
   changing ones.
-- texlive-full is installed after the harness binaries (current layout),
-  so this rebuild reused the cached harness layers; future harness version
-  bumps will also rebuild the texlive layer.
+- texlive-full is installed BELOW the harness layers (after the externals
+  build, before bun/uv/opencode/codex/opencodex), so harness version bumps
+  never invalidate the heavy texlive layer.
 - codex-cli and codegraph share one npm layer (system prefix /opt/node);
   @openai/codex is installed via npm because the official GitHub standalone
   tarball does NOT ship codex-code-mode-host (Code Mode breaks without it).
