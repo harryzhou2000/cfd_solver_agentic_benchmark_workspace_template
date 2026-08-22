@@ -35,10 +35,13 @@ references. Never commit unredacted credentials — the script exits non-zero
 if any remain. See [references/config-stack.md](references/config-stack.md).
 
 ### Create a contestant workspace
-Run `docker/scripts/setup-workspace.sh <path> [branch]` to clone the template,
+Run `docker/scripts/setup-workspace.sh <path> <harness>/<model>/init` to clone the template,
 pin the benchmark submodule, remove origin, initialize codegraph, symlink
-external, and capture an optional env snapshot. Relative paths land under
-`workspace/`; absolute paths are used as-is.
+external, and capture the required pre-run environment snapshot. The snapshot
+binds the exact initial commit to a normalized init-branch name detected from
+the matching local or remote-tracking ref; setup fails closed if this
+provenance cannot be captured. Relative paths land under `workspace/`;
+absolute paths are used as-is.
 
 ### Launch a container
 Run `bash docker/scripts/start.sh --workspace DIR --harness codex [--detach]`.

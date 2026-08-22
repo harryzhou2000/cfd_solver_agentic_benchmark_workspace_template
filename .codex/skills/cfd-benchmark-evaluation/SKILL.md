@@ -20,11 +20,12 @@ record.
   evaluation artifacts only in the manager repository.
 - Derive identity from the initial branch recorded before the agent ran. Never
   infer identity from models found in sessions or telemetry.
-- Require the operator to supply the run number. Preserve it byte-for-byte,
-  including leading zeros; never auto-increment or normalize it.
+- Require the operator to supply the run label. Preserve it byte-for-byte;
+  never auto-increment or normalize it. The legacy CLI/JSON names `--number`
+  and `operator_number` store this label and do not imply that it is numeric.
 - Prove the exact result branch is absent from the configured upstream before
   creating it. A failed or unavailable remote check is a blocker, not evidence
-  that the number is free.
+  that the label is free.
 - Commit only reproducible code/report material. Never commit raw solver data,
   logs, restarts, field files, or visualization working files. Permit curated
   PNG or PDF figure assets only under the report's figure directory so the
@@ -56,13 +57,24 @@ record.
 Require:
 
 - contestant workspace path;
-- operator-selected number, such as `08`;
+- operator-selected run label, such as `08` or `trial-a`;
 - `<workspace>/.eval/env_snapshot.json` from before the contestant ran.
 
 The pre-run snapshot is authoritative for:
 
 - `initial_branch = workspace.branch`;
 - `initial_commit = workspace.commit`.
+
+At pre-run capture, detect the initial branch from refs that point to the exact
+captured `HEAD`. Accept either a workspace-local `refs/heads/...` ref or a
+remote-tracking `refs/remotes/<remote>/...` ref and normalize both to
+`<harness>/<model>/init`. Prefer the current symbolic local branch when it is
+valid. Otherwise require exactly one normalized candidate or an explicit
+`--initial-branch` disambiguation. Record the selected ref, its local versus
+remote-tracking source, all candidates, and the exact commit in snapshot
+provenance. A Git commit does not encode a branch name, so never attempt to
+derive the submission namespace from the commit alone; the recorded
+branch-name/commit pair is the authority.
 
 The initial commit records what the contestant received. It is not the
 expected current `HEAD`, the required parent of the result commit, or a clean
@@ -77,10 +89,17 @@ final `init` component to obtain the result-branch prefix. For example:
 
 ```text
 initial branch: codex/gpt56/init
-number:         08
+run label:      08
 result branch:  codex/gpt56/08
 run-id base:    codex_gpt56_08
 ```
+
+The run label is one safe, portable Git branch component. It must start with
+an ASCII letter or digit and then contain only ASCII letters, digits, `.`,
+`_`, or `-`; it may not contain `..`, end in `.`, or end in `.lock`. Numeric
+labels and leading zeros remain valid, but digits are not required. For
+example, `trial-a` produces `codex/gpt56/trial-a` and
+`codex_gpt56_trial-a`.
 
 Do not use the workspace basename. Do not replace `gpt56` with a model
 actually observed during the run.
@@ -115,7 +134,7 @@ python3 .codex/skills/cfd-benchmark-evaluation/scripts/derive_run_id.py \
 The canonical run ID is:
 
 ```text
-<harness>_<model>_<operator-number>_<state-hash-6>
+<harness>_<model>_<operator-label>_<state-hash-6>
 ```
 
 The state hash is the first six lowercase hex characters of SHA-256 over
@@ -184,7 +203,13 @@ is the canonical workspace-template upstream. An explicit `--upstream` is an
 operator-approved override, not an evaluator convenience. Refuse a remote
 collision even if the branch is absent locally. Refuse any local branch
 collision; result branches are single-use and never reused. Never choose
-another number automatically; return to the operator.
+another label automatically; return to the operator.
+
+The helper also reports the current local and upstream commits, when present,
+for the recorded initial-branch name and whether each still matches the frozen
+initial commit. These are drift diagnostics, not replacements for the pre-run
+snapshot: a local-only initial branch is valid, and a later upstream ref move
+does not rewrite historical provenance.
 
 Delivered contestant workspaces are expected to have no `origin` remote. This
 is transport hygiene, not missing provenance, not a blocker, and not an action
@@ -207,7 +232,7 @@ pre-evaluation `HEAD`, preserving all contestant-authored history, and commit
 the curated tip submission:
 
 ```text
-<initial branch without /init>/<operator number>
+<initial branch without /init>/<operator label>
 ```
 
 For example, use `codex/gpt56/08`, not `results/codex-gpt56-08`.
@@ -215,7 +240,7 @@ For example, use `codex/gpt56/08`, not `results/codex-gpt56-08`.
 For an evaluator operating inside a delivered contestant repository under the
 manager's `workspace/` tree, the operator's instruction to evaluate the run is
 standing authorization to create and switch to this one exact,
-operator-numbered result branch at the recorded contestant checkpoint. Do not
+operator-labelled result branch at the recorded contestant checkpoint. Do not
 pause for separate branch-creation authorization after the collision checks
 pass. This narrow exception does not authorize reusing an existing branch,
 rewriting history, resetting, rebasing, force operations, pushing, creating or
@@ -283,7 +308,7 @@ Requirements:
   limitation before pushing: deleting a path at the tip does not remove its
   blob from earlier commits.
 - Inspect the staged file list and diff-stat before committing.
-- Use commit message `results: <result-branch>`, so the operator number appears
+- Use commit message `results: <result-branch>`, so the operator label appears
   exactly as it does in the branch and run ID.
 - Record the resulting submission commit SHA. Verify the worktree is clean,
   aside from explicitly documented ignored or excluded material.
@@ -333,7 +358,7 @@ the snapshot:
 - initial branch and initial commit;
 - contestant checkpoint branch and commit recorded immediately before curation;
 - result branch and submission commit;
-- operator number;
+- operator label (stored as `operator_number` for compatibility);
 - selected artifact paths and SHA-256 values;
 - benchmark submodule commit;
 - session selection and rationale;

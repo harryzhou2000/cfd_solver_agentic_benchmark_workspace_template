@@ -86,16 +86,17 @@ shells).
 
 ## setup-workspace.sh
 
-`docker/scripts/setup-workspace.sh <path> [branch]`
+`docker/scripts/setup-workspace.sh <path> <harness>/<model>/init`
 
 - Relative paths resolve under `<repo>/workspace/` (override `WS_ROOT`);
   absolute paths are used as-is. Refuses to overwrite an existing dir.
-- Steps: clone template branch (default `main`), `git submodule update
+- Steps: clone the required init branch, `git submodule update
   --init --recursive`, create git-excluded session dirs, `git remote rm
   origin`, `codegraph init` (when available), symlink `external` ->
   `EXTERNAL_SRC` (default `/opt/external`, the image-built externals), then
-  optionally write an env snapshot via
-  `evaluation/tools/env_snapshot.py` (optional; failures do not abort).
+  write the required pre-run snapshot via `evaluation/tools/env_snapshot.py`.
+  Snapshot capture binds the exact commit to the matching local or
+  remote-tracking init ref; setup aborts if provenance is missing or ambiguous.
 
 ## Troubleshooting
 

@@ -99,6 +99,18 @@
         "script_version": { "type": "string" },
         "reconstruction_sources": { "type": "array", "items": { "type": "string" } },
         "captured_workspace_state": { "type": ["object", "null"] },
+        "initial_branch_detection": {
+          "type": ["object", "null"],
+          "properties": {
+            "canonical_branch": { "type": "string" },
+            "commit": { "type": "string" },
+            "selected_ref": { "type": "string" },
+            "source": { "enum": ["local", "remote_tracking"] },
+            "symbolic_head": { "type": ["string", "null"] },
+            "candidate_refs": { "type": "array", "items": { "type": "object" } },
+            "explicit_expected_branch": { "type": ["string", "null"] }
+          }
+        },
         "limitations": { "type": "array", "items": { "type": "string" } }
       }
     }

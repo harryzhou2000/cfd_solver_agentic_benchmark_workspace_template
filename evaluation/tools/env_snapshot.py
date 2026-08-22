@@ -40,7 +40,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-VERSION = "1.1"
+VERSION = "1.2"
+
+INITIAL_BRANCH_PART = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 REDACT_MARK = "***REDACTED***"
 _SK_KEY = re.compile(r"\bsk-[A-Za-z0-9_\-]{8,}")
@@ -97,6 +99,100 @@ def _git(args: list[str], cwd: Path) -> str | None:
         return r.stdout.strip() if r.returncode == 0 else None
     except (OSError, subprocess.TimeoutExpired):
         return None
+
+
+def _canonical_initial_branch(name: str) -> str | None:
+    """Normalize one local/upstream init-branch name to <harness>/<model>/init."""
+    candidate = name
+    if candidate.startswith("refs/heads/"):
+        candidate = candidate.removeprefix("refs/heads/")
+    elif candidate.startswith("refs/remotes/"):
+        remote_path = candidate.removeprefix("refs/remotes/").split("/", 1)
+        if len(remote_path) != 2:
+            return None
+        candidate = remote_path[1]
+    parts = candidate.split("/")
+    if (
+        len(parts) != 3
+        or parts[-1] != "init"
+        or any(not INITIAL_BRANCH_PART.fullmatch(part) for part in parts[:-1])
+    ):
+        return None
+    return candidate
+
+
+def detect_initial_branch(ws: Path, expected: str | None = None) -> dict:
+    """Bind a canonical init-branch name to the exact pre-run HEAD commit."""
+    commit = _git(["rev-parse", "HEAD"], ws)
+    if not commit:
+        raise SystemExit("cannot resolve the workspace HEAD commit")
+    symbolic = _git(["symbolic-ref", "--quiet", "--short", "HEAD"], ws)
+    refs_text = _git([
+        "for-each-ref", f"--points-at={commit}", "--format=%(refname)",
+        "refs/heads", "refs/remotes",
+    ], ws) or ""
+    candidates = []
+    for ref in refs_text.splitlines():
+        canonical = _canonical_initial_branch(ref)
+        if canonical is None:
+            continue
+        source = "local" if ref.startswith("refs/heads/") else "remote_tracking"
+        candidates.append({"ref": ref, "canonical_branch": canonical, "source": source})
+
+    canonical_expected = None
+    if expected:
+        canonical_expected = _canonical_initial_branch(expected)
+        if canonical_expected is None:
+            remote_short_matches = [
+                item for item in candidates
+                if item["source"] == "remote_tracking"
+                and item["ref"].removeprefix("refs/remotes/") == expected
+            ]
+            remote_short_names = {
+                item["canonical_branch"] for item in remote_short_matches
+            }
+            if len(remote_short_names) == 1:
+                canonical_expected = next(iter(remote_short_names))
+        if canonical_expected is None:
+            raise SystemExit(
+                "--initial-branch must identify <harness>/<model>/init, optionally "
+                "as refs/heads/..., <remote>/..., or refs/remotes/<remote>/..."
+            )
+        candidates = [
+            item for item in candidates
+            if item["canonical_branch"] == canonical_expected
+        ]
+        if not candidates:
+            raise SystemExit(
+                f"initial branch {canonical_expected!r} has no local or remote-tracking "
+                f"ref at pre-run HEAD {commit}"
+            )
+
+    symbolic_canonical = _canonical_initial_branch(symbolic or "")
+    selected = next((
+        item for item in candidates
+        if item["source"] == "local"
+        and item["canonical_branch"] == symbolic_canonical
+    ), None)
+    if selected is None:
+        names = sorted({item["canonical_branch"] for item in candidates})
+        if len(names) != 1:
+            detail = ", ".join(names) if names else "none"
+            raise SystemExit(
+                "cannot uniquely detect the initial branch at pre-run HEAD; "
+                f"canonical candidates: {detail}; pass --initial-branch to disambiguate"
+            )
+        selected = next(item for item in candidates if item["canonical_branch"] == names[0])
+
+    return {
+        "canonical_branch": selected["canonical_branch"],
+        "commit": commit,
+        "selected_ref": selected["ref"],
+        "source": selected["source"],
+        "symbolic_head": symbolic,
+        "candidate_refs": candidates,
+        "explicit_expected_branch": canonical_expected,
+    }
 
 
 def redact_value(value: str, cap: int = 40) -> str:
@@ -232,8 +328,11 @@ def main(argv: list[str] | None = None) -> int:
                     help="TCP-probe configured proxy endpoints")
     ap.add_argument("--capture-phase", choices=("pre_run", "post_run"),
                     default="pre_run")
-    ap.add_argument("--initial-branch",
-                    help="operator-approved reconstructed initial branch (post_run only)")
+    ap.add_argument(
+        "--initial-branch",
+        help=("expected local/upstream initial branch for pre_run disambiguation, or "
+              "operator-approved reconstructed initial branch for post_run"),
+    )
     ap.add_argument("--initial-commit",
                     help="operator-approved reconstructed full initial commit (post_run only)")
     ap.add_argument("--reconstruction-source", action="append", default=[],
@@ -244,9 +343,9 @@ def main(argv: list[str] | None = None) -> int:
     out_path = Path(args.out) if args.out else ws / ".eval" / "env_snapshot.json"
 
     if args.capture_phase == "pre_run" and (
-        args.initial_branch or args.initial_commit or args.reconstruction_source
+        args.initial_commit or args.reconstruction_source
     ):
-        ap.error("reconstruction options require --capture-phase post_run")
+        ap.error("--initial-commit and --reconstruction-source require post_run")
     if args.capture_phase == "post_run" and not (
         args.initial_branch and args.initial_commit and args.reconstruction_source
     ):
@@ -263,6 +362,7 @@ def main(argv: list[str] | None = None) -> int:
     captured_workspace = workspace_section(ws)
     authoritative_workspace = dict(captured_workspace)
     limitations = []
+    initial_branch_detection = None
     if args.capture_phase == "post_run":
         authoritative_workspace["branch"] = args.initial_branch
         authoritative_workspace["commit"] = args.initial_commit
@@ -273,6 +373,9 @@ def main(argv: list[str] | None = None) -> int:
             "Original harness version and container image identity are unavailable.",
         ]
     else:
+        initial_branch_detection = detect_initial_branch(ws, args.initial_branch)
+        authoritative_workspace["branch"] = initial_branch_detection["canonical_branch"]
+        authoritative_workspace["commit"] = initial_branch_detection["commit"]
         authoritative_workspace["state_timing"] = "initial_observed_pre_run"
 
     doc = {
@@ -297,6 +400,7 @@ def main(argv: list[str] | None = None) -> int:
             "script_version": VERSION,
             "reconstruction_sources": args.reconstruction_source,
             "captured_workspace_state": captured_workspace if args.capture_phase == "post_run" else None,
+            "initial_branch_detection": initial_branch_detection,
             "limitations": limitations,
         },
     }

@@ -4,20 +4,20 @@
 #   git remote rm origin && codegraph init && ln -s <external> .
 #
 # Usage:
-#   docker/scripts/setup-workspace.sh <path> [branch]
+#   docker/scripts/setup-workspace.sh <path> <initial-branch>
 # <path> is used as-is when absolute; relative paths resolve under the
 # manager repo's workspace/ directory (override with WS_ROOT):
 #   docker/scripts/setup-workspace.sh codex/gpt56/08 codex/gpt56/init
 #   -> <repo>/workspace/codex/gpt56/08
 #   docker/scripts/setup-workspace.sh /abs/path/omo_slim_dsv4_06 omo_slim/dsv4/init
-# (branch defaults to main; workspace/ is git-ignored)
+# The initial branch must be <harness>/<model>/init; workspace/ is git-ignored.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
-WS_ARG="${1:?usage: setup-workspace.sh <path> [branch]}"
-BRANCH="${2:-main}"
+WS_ARG="${1:?usage: setup-workspace.sh <path> <initial-branch>}"
+BRANCH="${2:?usage: setup-workspace.sh <path> <initial-branch>}"
 WS_ROOT="${WS_ROOT:-$ROOT/workspace}"
 BENCH_ROOT="${BENCH_ROOT:-/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark}"
 TEMPLATE_URL="${TEMPLATE_URL:-https://github.com/harryzhou2000/cfd_solver_agentic_benchmark_workspace_template.git}"
@@ -71,21 +71,20 @@ else
   echo "warning: external source $EXTERNAL_SRC not found; create the symlink manually" >&2
 fi
 
-echo "== setup: environment snapshot (optional; captured before the agent runs) =="
+echo "== setup: environment snapshot (required; captured before the agent runs) =="
 if command -v python3 >/dev/null 2>&1; then
   ENV_SNAP="$ROOT/evaluation/tools/env_snapshot.py"
   if [ -f "$ENV_SNAP" ]; then
-    if python3 "$ENV_SNAP" --workspace "$WS" --probe-proxy; then
-      echo "  (env snapshot written to $WS/.eval/env_snapshot.json; the evaluation"
-      echo "   pipeline copies it into the result snapshot as env_snapshot.json)"
-    else
-      echo "  (env snapshot failed; the run continues without it — it is optional)"
-    fi
+    python3 "$ENV_SNAP" --workspace "$WS" --initial-branch "$BRANCH" --probe-proxy
+    echo "  (env snapshot written to $WS/.eval/env_snapshot.json; the evaluation"
+    echo "   pipeline copies it into the result snapshot as env_snapshot.json)"
   else
-    echo "  (env_snapshot.py not found in this template revision — skipping)"
+    echo "error: env_snapshot.py not found in this template revision" >&2
+    exit 1
   fi
 else
-  echo "  (python3 not found — env snapshot skipped; it is optional)"
+  echo "error: python3 is required to capture the pre-run environment snapshot" >&2
+  exit 1
 fi
 
 echo

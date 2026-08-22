@@ -11,7 +11,6 @@ import subprocess
 from pathlib import Path, PurePosixPath
 
 
-NUMBER_RE = re.compile(r"^[0-9]+$")
 BRANCH_PART_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 OBJECT_ID_RE = re.compile(r"^[0-9a-f]+$")
 
@@ -31,6 +30,22 @@ DEFAULT_ARTIFACT_GROUPS = (
         "cfd_solver_agentic_benchmark/solver/report/report.tex",
     ),
 )
+
+
+def validate_run_label(label: str) -> str:
+    """Accept one portable Git branch component and preserve it byte-for-byte."""
+    if (
+        not BRANCH_PART_RE.fullmatch(label)
+        or ".." in label
+        or label.endswith(".")
+        or label.lower().endswith(".lock")
+    ):
+        raise SystemExit(
+            "run label (--number) must be a safe single Git branch component: start with an ASCII "
+            "letter or digit; then use only letters, digits, '.', '_', or '-'; "
+            "do not use '..', a trailing '.', or a '.lock' suffix"
+        )
+    return label
 
 
 def git(workspace: Path, args: list[str], *, binary: bool = False) -> bytes | str:
@@ -142,6 +157,7 @@ def hash_commit_blob(workspace: Path, commit: str, rel: str) -> tuple[str, str]:
 
 
 def parse_initial_branch(branch: str, number: str) -> tuple[str, str]:
+    number = validate_run_label(number)
     parts = branch.split("/")
     if len(parts) != 3 or parts[-1] != "init":
         raise SystemExit(
@@ -156,7 +172,10 @@ def parse_initial_branch(branch: str, number: str) -> tuple[str, str]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--workspace", required=True)
-    parser.add_argument("--number", required=True)
+    parser.add_argument(
+        "--number", required=True,
+        help="operator-selected run label (legacy option name; need not be numeric)",
+    )
     parser.add_argument(
         "--submission-commit",
         required=True,
@@ -171,8 +190,6 @@ def main() -> int:
     parser.add_argument("--env-snapshot", help="default: <workspace>/.eval/env_snapshot.json")
     args = parser.parse_args()
 
-    if not NUMBER_RE.fullmatch(args.number):
-        raise SystemExit("number must contain digits only; leading zeros are preserved")
     workspace = Path(args.workspace).resolve()
     git(workspace, ["rev-parse", "--git-dir"])
     snapshot_path = (
