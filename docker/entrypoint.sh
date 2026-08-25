@@ -58,8 +58,10 @@ if [ "$(id -u)" = "0" ] && [ -n "${HOST_UID:-}" ] && [ -n "${HOST_GID:-}" ]; the
     # follow the new uid; a recursive chown would copy up the home on
     # overlayfs every start.
     chown "$HOST_UID:$HOST_GID" "/home/$IMG_USER"
+    # Read-only ro mounts (e.g. ~/.claude.json, ~/.codex/auth.json) cannot
+    # be chowned; ignore failures so the container still starts.
     find "/home/$IMG_USER" -mindepth 1 -maxdepth 1 \
-      -exec chown "$HOST_UID:$HOST_GID" {} +
+      -exec sh -c 'u="$1"; g="$2"; shift 2; for f in "$@"; do chown "$u:$g" "$f" 2>/dev/null || true; done' _ "$HOST_UID" "$HOST_GID" {} +
   fi
   exec setpriv --reuid "$HOST_UID" --regid "$HOST_GID" --init-groups "$0" "$@"
 fi

@@ -98,6 +98,7 @@ cfg = json.load(open(src))
 
 for key in (
     "customApiKeyResponses",
+    "primaryApiKey",
     "oauthAccount",
     "machineID",
     "userID",

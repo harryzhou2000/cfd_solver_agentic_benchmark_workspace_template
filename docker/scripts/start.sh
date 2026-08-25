@@ -257,7 +257,9 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   MOUNTS+=(-v "$CLAUDE_DIR:$IMG_HOME/.claude")
   # Claude's user-level config (~/.claude.json) is vendored sanitized and
   # mounted at the container home so claude finds mcpServers/onboarding/etc.
-  if [ -f "$CONFIG_STACK/claude/claude.json" ]; then
+  # In host-credentials mode the real ~/.claude.json is ro-mounted below,
+  # so the sanitized session copy is only used without host credentials.
+  if [ "$HOST_CRED" != "1" ] && [ -f "$CONFIG_STACK/claude/claude.json" ]; then
     cp -a "$CONFIG_STACK/claude/claude.json" "$CLAUDE_DIR/claude.json"
     MOUNTS+=(-v "$CLAUDE_DIR/claude.json:$IMG_HOME/.claude.json")
   fi
@@ -389,6 +391,13 @@ PYEOF
       # Claude Code OAuth credentials; mounted read-only so the container can
       # never modify the host credentials.
       MOUNTS+=(-v "$HOME/.claude/.credentials.json:$IMG_HOME/.claude/.credentials.json:ro")
+    fi
+    if [ -f "$HOME/.claude.json" ]; then
+      touch "$CLAUDE_DIR/claude.json"  # non-credential placeholder; real file mounts over it
+      # Claude Code user config with live credentials (primaryApiKey,
+      # customApiKeyResponses, oauthAccount); mounted read-only so the
+      # container gets the real auth and never modifies the host file.
+      MOUNTS+=(-v "$HOME/.claude.json:$IMG_HOME/.claude.json:ro")
     fi
   fi
 
