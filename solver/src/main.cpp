@@ -224,6 +224,83 @@ int main(int argc, char** argv) {
       MPI_Finalize();
       return maxerr_int < 1e-8 ? 0 : 1;
     }
+    if (cmd == "surface") {
+      // Regenerate surface.csv from an existing restart file. Post-processing
+      // only: loads the state, recomputes primitives/gradients/limiter, and
+      // rewrites <output>/surface.csv. Does not advance the solution.
+      std::string case_path, out_dir, restart_file, lim = "venkat";
+      for (int i = 2; i < argc; ++i) {
+        std::string a = argv[i];
+        auto next = [&](const char* nm) -> std::string {
+          if (i + 1 >= argc) throw std::runtime_error(std::string("missing value for ") + nm);
+          return argv[++i];
+        };
+        if (a == "--case") case_path = next("--case");
+        else if (a == "--output") out_dir = next("--output");
+        else if (a == "--restart") restart_file = next("--restart");
+        else if (a == "--limiter") lim = next("--limiter");
+        else throw std::runtime_error("unknown argument: " + a);
+      }
+      if (case_path.empty() || out_dir.empty() || restart_file.empty())
+        throw std::runtime_error("surface requires --case, --output, --restart");
+      cfd::CaseFile cs = cfd::load_case_file(case_path);
+      cfd::SolverConfig cfg;
+      cfg.limiter = (lim == "venkat") ? 2 : (lim == "barth") ? 1 : 0;
+      cfd::SolverContext ctx;
+      ctx.rank = rank;
+      ctx.comm = MPI_COMM_WORLD;
+      ctx.cs = &cs;
+      ctx.cfg = cfg;
+      std::string perr;
+      if (!cfd::preprocess_partition(cs.mesh_file, nranks, out_dir, &perr) &&
+          !perr.empty())
+        throw std::runtime_error(perr);
+      ctx.mesh = cfd::load_local_partition(out_dir, rank, nranks, ctx.pinfo);
+      ctx.init();
+      {
+        std::ifstream f(restart_file, std::ios::binary);
+        if (!f) throw std::runtime_error("cannot open restart file");
+        char magic[16];
+        f.read(magic, 16);
+        if (std::strncmp(magic, "CFDRST01", 8) != 0)
+          throw std::runtime_error("bad restart file magic");
+        int64_t step64, nc64;
+        int32_t ns32;
+        double t8;
+        f.read(reinterpret_cast<char*>(&step64), 8);
+        f.read(reinterpret_cast<char*>(&t8), 8);
+        f.read(reinterpret_cast<char*>(&nc64), 8);
+        f.read(reinterpret_cast<char*>(&ns32), 4);
+        if (nc64 != ctx.pinfo.n_cells_global)
+          throw std::runtime_error("restart cell count mismatch");
+        std::vector<double> states(static_cast<size_t>(nc64) * 4 * ns32);
+        f.read(reinterpret_cast<char*>(states.data()),
+               static_cast<std::streamsize>(states.size() * sizeof(double)));
+        if (!f) throw std::runtime_error("restart file truncated");
+        for (int i = 0; i < ctx.mesh.n_cells; ++i) {
+          int64_t g = ctx.mesh.cell_global[i];
+          for (int v = 0; v < 4; ++v) ctx.st.U[i][v] = states[(g * 4) + v];
+        }
+      }
+      cfd::compute_primitives(ctx.mesh, cs.gas, ctx.st);
+      cfd::AssembleOpts o;
+      o.viscous = cs.fs.viscous;
+      o.inviscid_flux = cfg.inviscid_flux;
+      o.limiter = cfg.limiter;
+      o.venkat_k = cfg.venkat_k;
+      cfd::ForceSums fl;
+      ctx.eval_residual(o, fl);  // fills W, gradW, phi consistently
+      auto rows = cfd::compute_surface_rows(ctx.mesh, cs, ctx.st, o);
+      cfd::OutputContext oc;
+      oc.dir = out_dir;
+      oc.rank = rank;
+      oc.n_ranks = nranks;
+      oc.comm = MPI_COMM_WORLD;
+      cfd::write_surface_csv(oc, ctx.mesh, rows);
+      if (rank == 0) std::printf("surface.csv regenerated from %s\n", restart_file.c_str());
+      MPI_Finalize();
+      return 0;
+    }
     if (cmd != "solve") {
       if (rank == 0) { usage(); }
       MPI_Finalize();
@@ -237,6 +314,7 @@ int main(int argc, char** argv) {
     std::string limiter = "venkat", flux = "roe";
     int max_steps_override = -1;
     double final_time_override = -1.0, time_step_override = -1.0;
+    double residual_target_override = -1.0;
     double cfl_max_override = -1.0;
     for (int i = 2; i < argc; ++i) {
       std::string a = argv[i];
@@ -254,8 +332,12 @@ int main(int argc, char** argv) {
       else if (a == "--pert-duration") cfg.pert_duration = std::stod(next("--pert-duration"));
       else if (a == "--sweeps-per-inner")
         cfg.transient_sweeps_per_inner = std::stoi(next("--sweeps-per-inner"));
+      else if (a == "--pseudo-cfl")
+        cfg.transient_pseudo_cfl = std::stod(next("--pseudo-cfl"));
       else if (a == "--venkat-k") cfg.venkat_k = std::stod(next("--venkat-k"));
       else if (a == "--max-steps") max_steps_override = std::stoi(next("--max-steps"));
+      else if (a == "--residual-target")
+        residual_target_override = std::stod(next("--residual-target"));
       else if (a == "--final-time") final_time_override = std::stod(next("--final-time"));
       else if (a == "--time-step") time_step_override = std::stod(next("--time-step"));
       else if (a == "--cfl-max") cfl_max_override = std::stod(next("--cfl-max"));
@@ -282,6 +364,8 @@ int main(int argc, char** argv) {
     cfd::CaseFile cs = cfd::load_case_file(case_path);
     if (max_steps_override > 0) cs.run.max_steps = max_steps_override;
     if (final_time_override > 0) cs.run.final_time = final_time_override;
+    if (residual_target_override > 0)
+      cs.run.residual_reduction_target = residual_target_override;
     if (time_step_override > 0) cs.run.time_step = time_step_override;
     if (cfl_max_override > 0) cs.run.cfl_max = cfl_max_override;
 
@@ -345,11 +429,18 @@ int main(int argc, char** argv) {
       for (int i = 0; i < ctx.mesh.n_cells; ++i) {
         int64_t g = ctx.mesh.cell_global[i];
         for (int v = 0; v < 4; ++v) ctx.st.U[i][v] = states[(g * 4) + v];
-        if (i < ctx.mesh.n_owned && ns32 >= 3) {
-          for (int v = 0; v < 4; ++v) {
-            ctx.U_n[i][v] = states[(static_cast<size_t>(nc64) + g) * 4 + v];
-            ctx.U_nm1[i][v] = states[(2ull * nc64 + g) * 4 + v];
-          }
+      }
+      for (int i = 0; i < ctx.mesh.n_owned; ++i) {
+        int64_t g = ctx.mesh.cell_global[i];
+        for (int v = 0; v < 4; ++v) {
+          // A restart file without BDF history (e.g. written by a steady
+          // run) restarts with zero initial acceleration: U_n = U_nm1 = U.
+          ctx.U_n[i][v] =
+              (ns32 >= 3) ? states[(static_cast<size_t>(nc64) + g) * 4 + v]
+                          : ctx.st.U[i][v];
+          ctx.U_nm1[i][v] =
+              (ns32 >= 3) ? states[(2ull * nc64 + g) * 4 + v]
+                          : ctx.st.U[i][v];
         }
       }
       start_step = step64;

@@ -18,7 +18,8 @@ struct SolverConfig {
   int inviscid_flux = 0;    // 0 Roe, 1 Rusanov
   double pert_aoa_deg = 0.0;
   double pert_duration = 0.0;
-  int transient_sweeps_per_inner = 1;  // SGS sweep pairs per inner iteration
+  int transient_sweeps_per_inner = 6;  // SGS sweep pairs per nonlinear refresh
+  double transient_pseudo_cfl = 100.0;  // pseudo-time safeguard CFL (dual time)
 };
 
 struct ResidualNorms {

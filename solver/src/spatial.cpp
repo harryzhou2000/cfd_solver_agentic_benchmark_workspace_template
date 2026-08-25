@@ -476,8 +476,11 @@ std::vector<SurfaceRow> compute_surface_rows(const LocalMesh& m, const CaseFile&
           double corr = gn - (gx * ex + gy * ey);
           return std::pair<double, double>{gx + corr * ex, gy + corr * ey};
         };
-        auto gu = wall_grad(1, WL[1]);
-        auto gv = wall_grad(2, WL[2]);
+        // Mirror uses CELL-CENTER velocity (see assemble_residual): the
+        // face-reconstructed WL is ~0 at the wall and would zero the
+        // normal-derivative correction, underreporting cf massively.
+        auto gu = wall_grad(1, s.W[L][1]);
+        auto gv = wall_grad(2, s.W[L][2]);
         double div = gu.first + gv.second;
         double txx = 2.0 * mu * gu.first - 2.0 / 3.0 * mu * div;
         double tyy = 2.0 * mu * gv.second - 2.0 / 3.0 * mu * div;

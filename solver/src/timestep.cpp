@@ -480,31 +480,64 @@ RunResult run_transient(SolverContext& ctx, OutputContext& out, long start_step,
       ctx.st.U[i] = pred;
     }
 
-    // Initial inner residual at the predictor.
+    // Initial nonlinear BDF residual at the predictor.
     ctx.eval_residual(o, fl);
     compute_F(c0, c1, c2);
     ResidualNorms n0 = ctx.global_norms_F(F);
     const double ref = std::max(n0.l2, 1e-30);
 
-    int inner = 0;
+    // Frozen approximate Jacobian diagonal for this step. The physical BDF
+    // time term vol*c0 dominates the diagonal of large cells; near-wall
+    // cells are regularized by the inviscid/viscous spectral radius. The
+    // pseudo-time term is only a safeguard: near CFL~1 it dwarfs vol*c0 on
+    // fine cells and throttles outer defect-correction convergence, so the
+    // default pseudo CFL is high (dual-time interpretation).
+    const double pseudo_cfl = ctx.cfg.transient_pseudo_cfl;
+    for (int i = 0; i < ctx.mesh.n_owned; ++i) {
+      double dtl = ctx.local_dt(i, pseudo_cfl);
+      diag[i] = ctx.mesh.vol[i] / dtl + ctx.mesh.vol[i] * c0 +
+                0.5 * ctx.st.lambda_sum[i];
+    }
+
+    // Two-level inner solve. The inner level is defect correction on the
+    // frozen approximate Jacobian: SGS sweep pairs drive the *linear*
+    // residual rA = F + (D+B) dUs toward zero without re-evaluating fluxes.
+    // The outer level refreshes the true nonlinear BDF residual F(U) after
+    // each batch of sweeps, so the loop converges the genuine nonlinear
+    // two-level BDF2 system instead of a single linearization.
+    for (auto& d : dU) d = Vec4{};
+    ctx.halo.exchange(ctx.mesh, &dU[0][0], 4);
+    std::vector<Vec4> rA(ctx.mesh.n_owned);
+    std::vector<Vec4> corr(ctx.mesh.n_cells, Vec4{});
+    const int spk = std::max(1, ctx.cfg.transient_sweeps_per_inner);
+    int inner = 0;  // total SGS sweep pairs this step (reported statistic)
     double ratio = 1.0;
     bool hit = false;
-    for (inner = 1; inner <= rc.max_inner_iterations; ++inner) {
-      for (int i = 0; i < ctx.mesh.n_owned; ++i) {
-        double dtl = ctx.local_dt(i, rc.cfl_initial);  // CFL fixed near 1.0
-        diag[i] = ctx.mesh.vol[i] / dtl + ctx.mesh.vol[i] * c0 +
-                  0.5 * ctx.st.lambda_sum[i];
-        rhs[i] = scale4(F[i], -1.0);
+    while (inner < rc.max_inner_iterations) {
+      apply_approx_jacobian(ctx, diag, dU, rA);
+      for (int i = 0; i < ctx.mesh.n_owned; ++i) iadd4(rA[i], F[i]);
+      for (int sw = 0; sw < spk && inner < rc.max_inner_iterations; ++sw) {
+        for (int i = 0; i < ctx.mesh.n_owned; ++i) rhs[i] = scale4(rA[i], -1.0);
+        for (auto& d : corr) d = Vec4{};
+        sgs_sweep_pair(ctx, diag, rhs, corr, true);
+        for (int i = 0; i < ctx.mesh.n_owned; ++i) iadd4(dU[i], corr[i]);
+        ++inner;
+        ctx.halo.exchange(ctx.mesh, &dU[0][0], 4);
+        apply_approx_jacobian(ctx, diag, dU, rA);
+        for (int i = 0; i < ctx.mesh.n_owned; ++i) iadd4(rA[i], F[i]);
       }
+      // Outer refresh of the true nonlinear BDF residual at U + dU.
+      double ra = global_rms(ctx.comm, ctx.mesh.n_owned, rA);
+      apply_update(ctx, dU);
       for (auto& d : dU) d = Vec4{};
       ctx.halo.exchange(ctx.mesh, &dU[0][0], 4);
-      for (int sw = 0; sw < ctx.cfg.transient_sweeps_per_inner; ++sw)
-        sgs_sweep_pair(ctx, diag, rhs, dU, true);
-      apply_update(ctx, dU);
       ctx.eval_residual(o, fl);
       compute_F(c0, c1, c2);
       fnorms = ctx.global_norms_F(F);
       ratio = fnorms.l2 / ref;
+      if (getenv("CFD_DEBUG_INNER") && ctx.rank == 0 && n <= 5)
+        std::printf("    step %ld outer: inner %d linRes %.3e nonlin ratio %.4e\n",
+                    step, inner, ra, ratio);
       if (inner >= rc.min_inner_iterations &&
           ratio <= rc.inner_residual_reduction_target) {
         hit = true;
