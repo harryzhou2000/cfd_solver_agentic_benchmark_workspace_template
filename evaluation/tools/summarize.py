@@ -25,7 +25,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from cfdeval import codex_data as cd  # noqa: E402
+from cfdeval import claude_data, codex_data as cd  # noqa: E402
 from cfdeval import expenses as expense_tools, recording, validation  # noqa: E402
 
 
@@ -182,7 +182,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ocx-config", default=None)
     ap.add_argument("--ocx-catalog", default=None)
     ap.add_argument("--plugins-root", default=None)
-    ap.add_argument("--harness", choices=("auto", "codex", "opencode"),
+    ap.add_argument("--harness", choices=("auto", "codex", "opencode", "claude"),
                     default="auto",
                     help="manual primary harness classification")
     ap.add_argument("--idle-gap-seconds", type=int, default=600,
@@ -199,6 +199,11 @@ def main(argv: list[str] | None = None) -> int:
                          "(e.g. {\"harness\": \"codex\"})")
     ap.add_argument("--out", default=None)
     ap.add_argument(
+        "--terminal-root", default=None,
+        help="Claude root containing the terminal contestant response; required "
+             "when --roots contains multiple continuation roots",
+    )
+    ap.add_argument(
         "--roots",
         default=None,
         help="Comma-separated root thread ids to include (each with its subagent "
@@ -206,6 +211,15 @@ def main(argv: list[str] | None = None) -> int:
              "including botched ones.",
     )
     args = ap.parse_args(argv)
+
+    parsed_roots = cd.parse_roots(args.roots)
+    if args.harness == "claude":
+        if not parsed_roots:
+            ap.error("--harness claude requires explicit --roots")
+        if len(parsed_roots) > 1 and args.terminal_root is None:
+            ap.error("--terminal-root is required for multiple Claude roots")
+        if args.terminal_root is not None and args.terminal_root not in parsed_roots:
+            ap.error("--terminal-root must be one of the explicitly selected --roots")
 
     ws = Path(args.workspace).resolve()
     paths = cd.local_telemetry_paths(
@@ -228,10 +242,14 @@ def main(argv: list[str] | None = None) -> int:
             cmd += ["--state-db", args.state_db,
                     "--goals-db", args.goals_db, "--logs-db", args.logs_db,
                     "--sessions-root", args.sessions_root,
-                    "--cost-metadata", args.cost_metadata]
+                    "--cost-metadata", args.cost_metadata,
+                    "--harness", "claude" if args.harness == "claude" else "codex",
+                    "--claude-root", str(paths["claude_root"])]
         elif tool == "extract_measurements.py":
             cmd += ["--state-db", args.state_db,
-                    "--logs-db", args.logs_db, "--sessions-root", args.sessions_root]
+                    "--logs-db", args.logs_db, "--sessions-root", args.sessions_root,
+                    "--harness", "claude" if args.harness == "claude" else "codex",
+                    "--claude-root", str(paths["claude_root"])]
         elif tool == "extract_metadata.py":
             cmd += ["--state-db", args.state_db,
                     "--goals-db", args.goals_db, "--logs-db", args.logs_db,
@@ -239,6 +257,7 @@ def main(argv: list[str] | None = None) -> int:
                     "--history", args.history, "--ocx-config", args.ocx_config,
                     "--ocx-catalog", args.ocx_catalog,
                     "--plugins-root", args.plugins_root,
+                    "--claude-root", str(paths["claude_root"]),
                     "--harness", args.harness,
                     "--idle-gap-seconds", str(args.idle_gap_seconds)]
             if args.answers:
@@ -252,6 +271,7 @@ def main(argv: list[str] | None = None) -> int:
                     "--project-codex-root", str(paths["codex_root"]),
                     "--opencode-db", str(paths["opencode_db"]),
                     "--project-opencode-db", str(paths["opencode_db"])]
+            cmd += ["--project-claude-root", str(paths["claude_root"])]
             if args.session_answers:
                 cmd += ["--session-answers", args.session_answers]
         if args.roots and tool in {
@@ -265,6 +285,7 @@ def main(argv: list[str] | None = None) -> int:
         "--codex-home", str(paths["codex_root"]),
         "--opencode-config-dir", str(paths["opencode_config_dir"]),
         "--opencodex-config-dir", str(paths["opencodex_config_dir"]),
+        "--claude-config-dir", str(paths["claude_root"]),
     ], check=True)
     subprocess.run(_base_cmd("extract_sessions.py", "sessions.json"), check=True)
     subprocess.run([sys.executable, str(ROOT / "tools" / "generate_review_forms.py"),
@@ -280,6 +301,21 @@ def main(argv: list[str] | None = None) -> int:
 
     metadata = json.loads((out_dir / "metadata.json").read_text())
     harness = metadata.get("harness", {}).get("harness")
+    final_response = None
+    if harness == "claude":
+        selected_roots = parsed_roots or []
+        terminal_root = args.terminal_root
+        if len(selected_roots) == 1 and terminal_root is None:
+            terminal_root = selected_roots[0]
+        final_response = claude_data.final_response(
+            ws, terminal_root, paths["claude_root"])
+        metadata.setdefault("claude", {})["final_response"] = {
+            key: value for key, value in final_response.items() if key != "text"
+        }
+        (out_dir / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
+        if final_response["status"] == "complete":
+            (out_dir / "contestant_final_response.md").write_text(
+                final_response["text"], encoding="utf-8")
     if harness == "opencode":
         expenses = expense_tools.opencode_expense_facts(
             metadata, str(ws), args.cost_metadata)
@@ -380,6 +416,9 @@ def main(argv: list[str] | None = None) -> int:
             "env_snapshot_captured": env_snap_captured,
             "agent_report": (out_dir / "agent_report.md").exists(),
             "agent_scores": (out_dir / "agent_scores.json").exists(),
+            "contestant_final_response": (
+                {key: value for key, value in final_response.items() if key != "text"}
+                if final_response else None),
         },
         "provenance": {
             "state_db": args.state_db,
@@ -485,7 +524,9 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
         "",
         "## Expenses",
         "",
-        f"- Goal time (codex): **{e['time_seconds']['goal_time']:.0f} s**",
+        (f"- Goal time: **{e['time_seconds']['goal_time']:.0f} s**"
+         if e['time_seconds'].get('goal_time') is not None
+         else "- Goal time: **unavailable**"),
         f"- Wall time: **{e['time_seconds']['wall_time']:.0f} s**",
         f"- Tokens: **{e['tokens']['total']:,}** "
         f"(main {e['tokens']['main_vs_subagent']['main']:,} / "
@@ -501,8 +542,9 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
         key=lambda kv: -kv[1]["tokens_used"],
     ):
         lines.append(
-            f"| `{rid[:8]}` | {info['status']} | {info['model']} | "
-            f"{info['threads']} | {info['tokens_used']:,} | {info['goal_time_seconds']} |"
+            f"| `{rid[:8]}` | {info.get('status')} | {info.get('model')} | "
+            f"{info.get('threads', 0)} | {info.get('tokens_used', 0):,} | "
+            f"{info.get('goal_time_seconds')} |"
         )
     lines += [
         "",
@@ -516,8 +558,11 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
         )
     lines += [
         "",
-        f"- Cost estimate: **${e['cost_estimate_usd']['total']:.2f}** "
-        f"(estimate; unpriced tokens: {e['cost_estimate_usd']['unpriced_tokens']:,})",
+        (f"- Cost estimate: **${e['cost_estimate_usd']['total']:.2f}** "
+         f"(estimate; unpriced tokens: {e['cost_estimate_usd']['unpriced_tokens']:,})"
+         if e['cost_estimate_usd'].get('total') is not None
+         else f"- Cost estimate: **unavailable** (unpriced tokens: "
+              f"{e['cost_estimate_usd'].get('unpriced_tokens', 0):,})"),
         "",
         "## Measurements",
         "",

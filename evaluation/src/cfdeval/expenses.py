@@ -22,6 +22,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from cfdeval import claude_data
 from cfdeval import codex_data as cd
 
 
@@ -232,6 +233,82 @@ def opencode_expense_facts(metadata: dict, workspace: str,
     }
 
 
+def claude_expense_facts(workspace: str, roots: list[str],
+                         claude_root: str | Path,
+                         cost_metadata_path: str | Path) -> dict:
+    """Build expenses from additive assistant-message usage in Claude JSONL."""
+    data = claude_data.facts(workspace, roots, claude_root)
+    by_thread = {}
+    main_tokens = subagent_tokens = 0
+    for entity in data["entities"]:
+        eid = entity["entity_id"]
+        usage = data["usage_by_entity"].get(eid, {})
+        total = sum(bundle["total"] for bundle in usage.values())
+        by_thread[eid] = {
+            "model": max(usage, key=lambda model: usage[model]["total"])
+            if usage else None,
+            "is_subagent": entity["is_subagent"],
+            "source": "claude_assistant_messages",
+            "tokens": usage,
+            "usage_by_model_effort": data["usage_attribution_by_entity"].get(
+                eid, []),
+            "total": total,
+        }
+        if entity["is_subagent"]:
+            subagent_tokens += total
+        else:
+            main_tokens += total
+    stamps = sorted(ts for ts, _h, _eid, _kind, _info in data["all_events"])
+    started = stamps[0] if stamps else None
+    ended = stamps[-1] if stamps else None
+    wall = (ended - started).total_seconds() if started and ended else 0.0
+    price_path = Path(cost_metadata_path)
+    estimate = estimate_by_model(json.loads(price_path.read_text()), data["by_model"])
+    estimate["metadata"] = str(price_path)
+    return {
+        "note": "Claude selected-root token facts from workspace-local project JSONL; "
+                "unknown models remain unpriced",
+        "workspace": workspace,
+        "time_seconds": {
+            "goal_time": None,
+            "wall_time": round(wall, 1),
+            "started_at": started.isoformat() if started else None,
+            "ended_at": ended.isoformat() if ended else None,
+            "by_root_tree": {
+                root: {
+                    "status": None,
+                    "model": None,
+                    "threads": sum(e["root_id"] == root for e in data["entities"]),
+                    "tokens_used": sum(
+                        sum(v["total"] for v in data["usage_by_entity"].get(
+                            e["entity_id"], {}).values())
+                        for e in data["entities"] if e["root_id"] == root),
+                    "goal_time_seconds": None,
+                }
+                for root in roots
+            },
+        },
+        "tokens": {
+            "total": main_tokens + subagent_tokens,
+            "by_model": data["by_model"],
+            "by_thread": by_thread,
+            "main_vs_subagent": {"main": main_tokens, "subagent": subagent_tokens},
+            "fallback_tokens": 0,
+            "discrepancy_notes": [],
+            "accounting_note": "Anthropic input categories are disjoint in the "
+                               "persisted usage object; manager input is their sum",
+        },
+        "cost_estimate_usd": estimate,
+        "provenance": {
+            "source": "workspace-local Claude project JSONL",
+            "claude_root": str(claude_root),
+            "selected_roots": roots,
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+            "num_threads": len(data["entities"]),
+        },
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Extract codex contestant expenses")
     ap.add_argument("--workspace", required=True)
@@ -239,6 +316,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--goals-db", default=None)
     ap.add_argument("--logs-db", default=None)
     ap.add_argument("--sessions-root", default=None)
+    ap.add_argument("--harness", choices=("codex", "claude"), default="codex")
+    ap.add_argument("--claude-root", default=None,
+                    help="<workspace>/.sessions/claude by default")
     root = Path(__file__).resolve().parents[2]
     ap.add_argument("--cost-metadata", default=str(root / "config" / "cost_metadata.json"))
     ap.add_argument("--out", default=None)
@@ -254,13 +334,35 @@ def main(argv: list[str] | None = None) -> int:
     workspace = str(Path(args.workspace).resolve())
     paths = cd.local_telemetry_paths(
         workspace, state_db=args.state_db, goals_db=args.goals_db,
-        logs_db=args.logs_db, sessions_root=args.sessions_root)
+        logs_db=args.logs_db, sessions_root=args.sessions_root,
+        claude_root=args.claude_root)
     for key in ("state_db", "goals_db", "logs_db", "sessions_root"):
         setattr(args, key, str(paths[key]))
     eval_root = Path(__file__).resolve().parents[2]
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / Path(workspace).name / "expenses.json"
     )
+
+    if args.harness == "claude":
+        roots = cd.parse_roots(args.roots)
+        if not roots:
+            print("ERROR: Claude expense extraction requires explicit --roots",
+                  file=sys.stderr)
+            return 2
+        try:
+            expenses = claude_expense_facts(
+                workspace, roots, paths["claude_root"], args.cost_metadata)
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(expenses, indent=2) + "\n")
+        print(f"wrote {out_path}")
+        print(f"threads={len(expenses['tokens']['by_thread'])} "
+              f"tokens={expenses['tokens']['total']:,} cost=unavailable"
+              if expenses["cost_estimate_usd"]["total"] is None
+              else f"cost≈${expenses['cost_estimate_usd']['total']:.2f}")
+        return 0
 
     threads = cd.load_threads(args.state_db)
     cd.rebase_rollout_paths(threads, args.sessions_root)

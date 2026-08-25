@@ -44,7 +44,10 @@ provenance cannot be captured. Relative paths land under `workspace/`;
 absolute paths are used as-is.
 
 ### Launch a container
-Run `bash docker/scripts/start.sh --workspace DIR --harness codex [--detach]`.
+Run `bash docker/scripts/start.sh --workspace DIR --harness codex [--detach]`
+(or select `opencode` / `claude`). Claude Code state is seeded and persisted at
+`<workspace>/.sessions/claude`, mounted as `/home/cfd_agent/.claude`; preserve
+the whole directory for later manager-side post-processing.
 It installs the vendored stack into `DIR/.sessions/` and mounts them into the
 container at `/workspace`. Use `--detach` for runs that outlive a terminal;
 interactive mode passes signals through to the container (no force-remove

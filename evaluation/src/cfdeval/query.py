@@ -188,7 +188,7 @@ def current_model_decomposition(expenses: dict, metadata: dict,
             "reasoning_output": 0, "total": 0,
             "persisted_cost_usd": 0.0, "has_persisted_cost": False,
             "attribution_basis": basis, "mixed_efforts_seen": set(),
-            "reasoning_is_output_subset": harness == "codex",
+            "reasoning_is_output_subset": harness in ("codex", "claude"),
             "token_split_available": token_split_available,
         })
         row["token_split_available"] = (
@@ -227,6 +227,28 @@ def current_model_decomposition(expenses: dict, metadata: dict,
                     provider=thread.get("model_provider"), basis=basis,
                     mixed=efforts if len(efforts) > 1 else [],
                     token_split_available=token_info.get("source") != "threads_fallback")
+    elif harness == "claude" and by_thread:
+        for thread_id, token_info in by_thread.items():
+            thread = threads.get(thread_id) or {}
+            exact_units = token_info.get("usage_by_model_effort") or []
+            if exact_units:
+                for unit in exact_units:
+                    add(unit.get("model") or "unknown",
+                        unit.get("effort") or "unknown", unit,
+                        basis="exact Claude assistant-message model + effort aggregate")
+                continue
+            efforts = thread.get("reasoning_effort") or []
+            if isinstance(efforts, str):
+                efforts = [efforts]
+            effort = (efforts[0] if len(efforts) == 1 else
+                      f'mixed({",".join(sorted(set(efforts)))})'
+                      if efforts else "unknown")
+            basis = ("persisted Claude top-level effort"
+                     if len(efforts) == 1 else
+                     "Claude thread aggregate; per-effort token split unavailable")
+            for model, token_bundle in (token_info.get("tokens") or {}).items():
+                add(model, effort, token_bundle, basis=basis,
+                    mixed=efforts if len(efforts) > 1 else [])
     elif harness == "opencode" and (metadata.get("opencode") or {}).get("sessions"):
         oc_sessions = metadata["opencode"]["sessions"]
         by_id = {s.get("session_id"): s for s in oc_sessions if s.get("session_id")}

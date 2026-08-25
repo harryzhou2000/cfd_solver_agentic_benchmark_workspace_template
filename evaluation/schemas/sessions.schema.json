@@ -14,7 +14,7 @@
         "properties": {
           "id": { "type": "string" },
           "kind": { "enum": ["system", "project"] },
-          "harness": { "enum": ["codex", "opencode"] },
+          "harness": { "enum": ["codex", "opencode", "claude"] },
           "root": { "type": "string" },
           "reachable": { "type": "boolean" },
           "sessions_found": { "type": "integer" },
@@ -69,6 +69,22 @@
             }
           }
         }
+      }
+    },
+    "claude": {
+      "type": "object",
+      "properties": {
+        "present": { "type": "boolean" },
+        "source": { "type": ["string", "null"] },
+        "source_root": { "type": "string" },
+        "session_count": { "type": "integer" },
+        "root_session_count": { "type": "integer" },
+        "subagent_session_count": { "type": "integer" },
+        "sessions": { "type": "array", "items": { "type": "object" } },
+        "malformed_records": { "type": "array", "items": { "type": "object" } },
+        "untimed_usage_records": { "type": "integer" },
+        "untimed_tool_records": { "type": "integer" },
+        "inline_sidechain_records_excluded": { "type": "integer" }
       }
     },
     "analysis": {

@@ -21,6 +21,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+from cfdeval import claude_data
 from cfdeval import codex_data as cd
 
 
@@ -29,7 +30,8 @@ SOURCE_EXTS = {
     ".cu", ".f90", ".f", ".F90", ".F", ".f95", ".cmake",
 }
 SKIP_DIRS = {".git", "build", "build-*", ".venv", "venv", "external", "node_modules",
-             "__pycache__", ".codex", ".agents", "dist", ".cache", ".pytest_cache"}
+             "__pycache__", ".codex", ".agents", ".sessions", "dist", ".cache",
+             ".pytest_cache"}
 
 
 def _skip_dir(name: str) -> bool:
@@ -246,6 +248,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--state-db", default=None)
     ap.add_argument("--logs-db", default=None)
     ap.add_argument("--sessions-root", default=None)
+    ap.add_argument("--harness", choices=("codex", "claude"), default="codex")
+    ap.add_argument("--claude-root", default=None,
+                    help="<workspace>/.sessions/claude by default")
     ap.add_argument("--out", default=None)
     ap.add_argument(
         "--roots",
@@ -259,13 +264,107 @@ def main(argv: list[str] | None = None) -> int:
     workspace = Path(args.workspace).resolve()
     paths = cd.local_telemetry_paths(
         workspace, state_db=args.state_db, logs_db=args.logs_db,
-        sessions_root=args.sessions_root)
+        sessions_root=args.sessions_root, claude_root=args.claude_root)
     for key in ("state_db", "logs_db", "sessions_root"):
         setattr(args, key, str(paths[key]))
     eval_root = Path(__file__).resolve().parents[2]
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / workspace.name / "measurements.json"
     )
+    if args.harness == "claude":
+        roots = cd.parse_roots(args.roots)
+        if not roots:
+            print("ERROR: Claude measurement extraction requires explicit --roots",
+                  file=sys.stderr)
+            return 2
+        try:
+            data = claude_data.facts(workspace, roots, paths["claude_root"])
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
+        by_tool = Counter()
+        by_thread = {}
+        violations = []
+        seen = set()
+        subagent_uuids = {
+            str(row.get("uuid"))
+            for entity in data["entities"] if entity["is_subagent"]
+            for row in entity["records"] if row.get("uuid")
+        }
+        for entity in data["entities"]:
+            eid = entity["entity_id"]
+            per_entity = Counter()
+            seen_tool_ids = set()
+            for group in claude_data.assistant_groups(entity["records"]):
+                duplicated_in_subagent_file = any(
+                    str(row.get("uuid")) in subagent_uuids
+                    for row in group["rows"] if row.get("uuid"))
+                if (group["is_sidechain"] or duplicated_in_subagent_file) \
+                        and not entity["is_subagent"]:
+                    continue
+                for item in group["blocks"]:
+                    block = item["block"]
+                    if block.get("type") != "tool_use":
+                        continue
+                    row = item["row"]
+                    ts_value = row.get("timestamp") or row.get("ts")
+                    tool_id = block.get("id")
+                    if tool_id and str(tool_id) in seen_tool_ids:
+                        continue
+                    if tool_id:
+                        seen_tool_ids.add(str(tool_id))
+                    name = str(block.get("name") or "unknown")
+                    by_tool[name] += 1
+                    per_entity[name] += 1
+                    raw_input = block.get("input")
+                    evidence_text = (raw_input if isinstance(raw_input, str)
+                                     else json.dumps(raw_input, ensure_ascii=False)
+                                     if raw_input is not None else "")
+                    for category, severity, evidence in scan_text(
+                            evidence_text, [str(workspace)]):
+                        key = (category, eid, str(ts_value), evidence[:80])
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        violations.append({
+                            "category": category,
+                            "severity": severity,
+                            "thread_id": eid,
+                            "timestamp": str(ts_value) if ts_value else None,
+                            "tool": name,
+                            "evidence": evidence,
+                        })
+            by_thread[eid] = dict(per_entity)
+        loc_file = file_scan_loc(workspace)
+        loc_git = git_loc(workspace)
+        measurements = {
+            "workspace": str(workspace),
+            "tool_usage": {
+                "total": sum(by_tool.values()),
+                "by_tool": dict(by_tool.most_common()),
+                "by_thread": by_thread,
+                "subagent_spawns": sum(e["is_subagent"] for e in data["entities"]),
+                "risk_context": [],
+            },
+            "loc": {
+                "method": "git+file" if loc_git else "file",
+                "git": loc_git,
+                "file": loc_file,
+            },
+            "rule_violations": violations,
+            "provenance": {
+                "claude_root": str(paths["claude_root"]),
+                "selected_roots": roots,
+                "generated_at": datetime.now(timezone.utc).isoformat(),
+                "num_threads": len(data["entities"]),
+            },
+        }
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(measurements, indent=2) + "\n")
+        print(f"wrote {out_path}")
+        print(f"tool_calls={sum(by_tool.values())} top={by_tool.most_common(3)} "
+              f"violations={len(violations)} loc_file={loc_file['lines']}")
+        return 0
     threads = cd.load_threads(args.state_db)
     cd.rebase_rollout_paths(threads, args.sessions_root)
     edges = cd.load_spawn_edges(args.state_db)

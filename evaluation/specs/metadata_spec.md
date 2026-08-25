@@ -17,8 +17,9 @@ All execution metadata and captured run-time configuration comes exclusively
 from `<workspace>/.sessions/`. External path overrides are rejected and the
 evaluator account's state is never queried. A missing local database, rollout,
 history, catalog, or config is recorded as unavailable; it never triggers a
-fallback. The evaluator manually confirms `--harness` and, for Codex, the
-primary `--roots`, including Docker runs whose recorded cwd is `/workspace`.
+fallback. The evaluator manually confirms `--harness` and the primary
+`--roots`; Claude requires explicit roots, including Docker runs whose
+recorded cwd is `/workspace`.
 
 ## 1. Harness metadata
 
@@ -64,6 +65,17 @@ assistant request plus `usage_by_model`, aggregated from assistant-message
 message-level decomposition is authoritative for model attribution and
 pricing. Session-row counters remain an independent whole-session total.
 Never add `step-finish` part usage because it duplicates message usage.
+
+For Claude, model names come from selected root/subagent assistant-message
+records. Repeated assistant messages are deduplicated by persisted message ID.
+Reasoning effort comes only from persisted top-level `effort`; it is `null`
+when absent. The advertised context window remains `null` because project
+JSONL does not record it. Do not infer either from a model name or provider
+documentation during extraction. Subagents are the
+JSONL files beneath the selected root's `subagents/` directory plus inline
+`isSidechain` records, normalized as separate entities and deduplicated by
+UUID when both forms exist; `parentUuid` is message ancestry and is not used
+as session ancestry.
 
 ## 3. Context window used
 

@@ -25,6 +25,7 @@ from cfdeval import redact
 
 
 DIGEST_ONLY = {
+    ".credentials.json": "Claude credentials file — presence and digest only, content never captured",
     "auth.json": "credentials file — presence and digest only, content never captured",
     "codex-accounts.json": "credentials file — presence and digest only, content never captured",
     "admin-api-token": "credentials file — presence and digest only",
@@ -86,6 +87,26 @@ def capture_file(path: Path, role: str, caps: dict) -> dict:
     return entry
 
 
+def capture_local_file(path: Path, role: str, caps: dict) -> dict:
+    """Capture a config only when it is a real bundled file, not a symlink."""
+    if not path.is_symlink():
+        return capture_file(path, role, caps)
+    return {
+        "role": role,
+        "kind": "file",
+        "path": str(path),
+        "exists": False,
+        "sha256": None,
+        "bytes": None,
+        "content": None,
+        "content_included": False,
+        "redacted": False,
+        "redaction_hits": 0,
+        "truncated": False,
+        "notes": ["symlinked config rejected; external content not read"],
+    }
+
+
 def capture_dir_files(directory: Path, role: str, caps: dict,
                       suffixes=(".json", ".jsonc", ".toml", ".md", ".sh"),
                       max_files: int = 60, max_depth: int = 3) -> list[dict]:
@@ -127,7 +148,8 @@ def plugin_manifests(plugins_root: Path, caps: dict) -> list[dict]:
 
 
 def capture(workspace: Path, codex_home: Path, opencode_config_dir: Path,
-            opencodex_config_dir: Path, caps: dict | None = None) -> dict:
+            opencodex_config_dir: Path, claude_config_dir: Path,
+            caps: dict | None = None) -> dict:
     caps = caps or DEFAULT_CAPS
     ws = workspace.resolve()
     entries: list[dict] = []
@@ -163,6 +185,17 @@ def capture(workspace: Path, codex_home: Path, opencode_config_dir: Path,
         entries.append(capture_file(ox / name, "opencodex", caps))
     for cand in sorted(ox.glob("catalog-backup*.json")):
         entries.append(capture_file(cand, "opencodex", caps))
+
+    # Claude Code config: explicit allowlist only. Never recurse through the
+    # Claude home, because it also contains projects/history/debug telemetry.
+    cl = claude_config_dir
+    for name in ("settings.json", "CLAUDE.md", "statusline-command.sh",
+                 "version.json", ".credentials.json"):
+        entries.append(capture_local_file(cl / name, "claude", caps))
+    if not (cl / "agents").is_symlink() and (cl / "agents").is_dir():
+        for agent_file in sorted((cl / "agents").glob("*.md"))[:60]:
+            if not agent_file.is_symlink():
+                entries.append(capture_local_file(agent_file, "claude_agent", caps))
 
     # workspace-local configs
     entries.append(capture_file(ws / "AGENTS.md", "workspace", caps))
@@ -203,6 +236,7 @@ def capture(workspace: Path, codex_home: Path, opencode_config_dir: Path,
             "codex_home": str(ch),
             "opencode_config_dir": str(oc),
             "opencodex_config_dir": str(ox),
+            "claude_config_dir": str(cl),
         },
         "redaction": {
             "policy": "secret-like values and credential files are never embedded; "
@@ -227,6 +261,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--codex-home", default=None)
     ap.add_argument("--opencode-config-dir", default=None)
     ap.add_argument("--opencodex-config-dir", default=None)
+    ap.add_argument("--claude-config-dir", default=None)
     ap.add_argument("--max-bytes", type=int, default=None,
                     help="override the default per-file content cap (bytes)")
     args = ap.parse_args(argv)
@@ -235,7 +270,8 @@ def main(argv: list[str] | None = None) -> int:
     paths = cd.local_telemetry_paths(
         ws, codex_root=args.codex_home,
         opencode_config_dir=args.opencode_config_dir,
-        opencodex_config_dir=args.opencodex_config_dir)
+        opencodex_config_dir=args.opencodex_config_dir,
+        claude_root=args.claude_config_dir)
     eval_root = Path(__file__).resolve().parents[2]
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / ws.name / "configs.json")
@@ -243,7 +279,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.max_bytes:
         caps["default"] = args.max_bytes
     doc = capture(ws, paths["codex_root"], paths["opencode_config_dir"],
-                  paths["opencodex_config_dir"], caps)
+                  paths["opencodex_config_dir"], paths["claude_root"], caps)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(doc, indent=2) + "\n")
     n = len(doc["configs"])

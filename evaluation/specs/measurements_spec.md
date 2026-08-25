@@ -17,6 +17,13 @@ and their subagent trees.
   `danger-full-access` usage) from `event_msg`/`turn_context`, summarized as
   risk context, not as a violation by itself.
 
+For Claude, extract deduplicated `tool_use` content blocks from the explicitly
+selected root and its bundled subagents. Preserve tool names, scan the
+structured `input` payload with the same redacted violation detector, and use
+the same filesystem/Git LOC measurements. Claude project JSONL does not expose
+a stable approval/sandbox policy contract, so `risk_context` is empty rather
+than inferred.
+
 ## 2. LOC generated
 
 Two methods are reported when possible:

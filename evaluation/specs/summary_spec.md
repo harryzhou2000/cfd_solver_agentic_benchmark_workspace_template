@@ -21,6 +21,7 @@ workspace.
 | Codex per-turn usage logs | `<workspace>/.sessions/codex/logs_2.sqlite` (`logs`) | exact input/cached/output token splits per thread+model |
 | Codex session history | `<workspace>/.sessions/codex/sessions/**/rollout-*.jsonl` | timestamps, tool usage, subagent messages, rule-violation evidence |
 | OpenCode sessions | `<workspace>/.sessions/opencode-data/opencode/opencode.db` | session tree, messages, tokens, prompts, activity |
+| Claude Code sessions | `<workspace>/.sessions/claude/projects/**/*.jsonl` | explicitly selected root/subagent tree, messages, tokens, tools, final prose |
 | Cost metadata | `evaluation/config/cost_metadata.json` | cost estimation |
 | Review points | `evaluation/config/review_points_{code,cfd,results}.json` | scorecard generation |
 | Execution metadata/config | captured files beneath `<workspace>/.sessions/` | metadata record (see `metadata_spec.md`) |
@@ -36,7 +37,9 @@ Discovery inventories every bundled candidate, including botched, abandoned,
 `paused`, `blocked`, or still-`active` runs. The evaluator must manually
 classify the primary harness and root/session tree; newest, largest, or
 cwd-matched is not sufficient. For Docker cwd mismatches, pass the confirmed
-`--harness` and Codex `--roots` explicitly.
+`--harness` and `--roots` explicitly. Claude never auto-selects even a sole
+candidate; multiple continuation roots also require `--terminal-root` for the
+root containing the final contestant response.
 
 The generated summary keeps them separable:
 
@@ -64,6 +67,9 @@ The generated summary keeps them separable:
    metadata (see `metadata_spec.md`).
 7. `review_code.md`, `review_cfd.md`, `review_results.md` — blank scorecards
    for reviewers, one point per row with a score column.
+8. `contestant_final_response.md` — exact credential-redacted terminal Claude
+   prose when a completed, unambiguous response exists (unindexed Markdown;
+   provenance is retained in `metadata.json`).
 
 All JSON artifacts validate against the schemas in `evaluation/schemas/`
 and are format-checked by `cfdeval check` / `tools/check_result.py`; the

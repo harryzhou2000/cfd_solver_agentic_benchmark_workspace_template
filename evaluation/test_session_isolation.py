@@ -202,7 +202,7 @@ class SessionIsolationTests(unittest.TestCase):
             root / "tools" / "summarize.py",
             *(root / "src" / "cfdeval" / name for name in (
                 "codex_data.py", "configs.py", "expenses.py", "measurements.py",
-                "metadata.py", "sessions.py")),
+                "metadata.py", "sessions.py", "claude_data.py")),
         ]
         forbidden = (
             "Path.home()", "codex_home()", "default_paths()",

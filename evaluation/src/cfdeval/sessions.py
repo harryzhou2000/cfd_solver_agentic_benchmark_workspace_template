@@ -31,6 +31,7 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from cfdeval import claude_data
 from cfdeval import codex_data as cd
 
 
@@ -56,6 +57,7 @@ TOOL_CATEGORIES: dict[str, set[str]] = {
 
 
 def tool_category(name: str) -> str:
+    name = name.lower()
     for cat, names in TOOL_CATEGORIES.items():
         if name in names:
             return cat
@@ -718,6 +720,125 @@ def whole_stats(buckets, token_events, tool_events, turn_events,
     }
 
 
+def analyze_claude(workspace: str, root: Path, roots: list[str] | None,
+                   bucket_seconds: int, idle_gap_seconds: int) -> dict:
+    data = claude_data.facts(workspace, roots or [], root)
+    timeline = merged_timeline(data["all_events"])
+    intervals, gaps = active_intervals(timeline, idle_gap_seconds)
+    window_start = timeline[0][0] if timeline else None
+    window_end = timeline[-1][0] if timeline else None
+    entity_events = [(ts, eid) for ts, _h, eid, _kind, _info in timeline]
+    buckets = build_buckets(
+        window_start, window_end, bucket_seconds, intervals,
+        data["token_events"], data["tool_events"], data["turn_events"],
+        entity_events,
+    )
+    whole = whole_stats(
+        buckets, data["token_events"], data["tool_events"],
+        data["turn_events"], intervals, data["per_entity"],
+        accounting_notes=[
+            "claude: assistant-message usage is additive; input includes raw "
+            "input, cache reads, and cache creation, while each category "
+            "remains separately exposed"
+        ],
+    )
+    # Untimed persisted messages still count toward immutable usage/tool
+    # totals, but cannot be placed into timeline buckets.
+    if data["untimed_usage"]:
+        totals = {
+            "input": sum(v["input"] for v in data["by_model"].values()),
+            "cached_input": sum(v["cached_input"] for v in data["by_model"].values()),
+            "cache_write": sum(v["cache_write"] for v in data["by_model"].values()),
+            "non_cached_input": sum(v["non_cached_input"] for v in data["by_model"].values()),
+            "output": sum(v["output"] for v in data["by_model"].values()),
+            "reasoning_output": 0,
+            "total": sum(v["total"] for v in data["by_model"].values()),
+            "total_from_root_trees": None,
+            "total_from_all_sessions": None,
+        }
+        whole["tokens"] = totals
+        whole["cache"] = {
+            "cached_tokens": totals["cached_input"],
+            "input_tokens": totals["input"],
+            "hit_ratio": round(totals["cached_input"] / totals["input"], 4)
+            if totals["input"] else None,
+        }
+        whole["accounting_notes"].append(
+            f"{len(data['untimed_usage'])} assistant usage record(s) lacked a "
+            "timestamp and are included only in whole-session totals")
+    if data["untimed_tool_events"]:
+        by_tool = Counter(whole["tools"]["by_tool"])
+        by_category = Counter(whole["tools"]["by_category"])
+        for name, _eid, _path, _line in data["untimed_tool_events"]:
+            by_tool[name] += 1
+            by_category[tool_category(name)] += 1
+        whole["tools"] = {
+            "total": sum(by_tool.values()),
+            "by_tool": dict(by_tool.most_common()),
+            "by_category": dict(by_category.most_common()),
+        }
+    entities = []
+    for entity in data["entities"]:
+        entities.append({
+            "entity_id": entity["entity_id"],
+            "root_id": entity["root_id"],
+            "parent_id": entity["parent_id"],
+            "is_subagent": entity["is_subagent"],
+            "cwd": entity["cwd"],
+            "started_at": entity["started_at"],
+            "ended_at": entity["ended_at"],
+            "source": entity["path"],
+            "source_sha256": entity["sha256"],
+            "records": len(entity["records"]),
+        })
+    return {
+        "codex": {"present": False, "thread_count": 0},
+        "opencode": {"present": False, "session_count": 0},
+        "claude": {
+            "present": bool(entities),
+            "source": "project",
+            "source_root": str(root),
+            "session_count": len(entities),
+            "root_session_count": sum(not e["is_subagent"] for e in entities),
+            "subagent_session_count": sum(e["is_subagent"] for e in entities),
+            "sessions": entities,
+            "malformed_records": data["malformed_records"],
+            "untimed_usage_records": len(data["untimed_usage"]),
+            "untimed_tool_records": len(data["untimed_tool_events"]),
+            "inline_sidechain_records_excluded": data[
+                "inline_sidechain_records_excluded"],
+        },
+        "analysis": {
+            "bucket_seconds": bucket_seconds,
+            "idle_gap_seconds": idle_gap_seconds,
+            "window": {
+                "start": window_start.isoformat() if window_start else None,
+                "end": window_end.isoformat() if window_end else None,
+            },
+            "idle_exclusion": {
+                "method": "merged selected Claude root and subagent timeline; "
+                          "gaps longer than the threshold are excluded",
+                "gap_count": len(gaps),
+                "gaps": gaps,
+                "idle_seconds_total": round(sum(g["seconds"] for g in gaps), 1),
+            },
+            "permission_waits": {
+                "method": "unavailable",
+                "explicit_approval_events_found": False,
+                "candidate_gaps": [],
+                "candidate_count": 0,
+                "policy_observed": [],
+                "limitations": [
+                    "Claude project JSONL does not provide a stable explicit "
+                    "permission-wait contract; idle gaps are not classified"
+                ],
+            },
+            "buckets": buckets,
+            "whole_session_stats": whole,
+        },
+    }
+
+
 def _norm_codex_usage(u: dict) -> dict:
     """Codex `last_token_usage` delta → normalized usage dict.
 
@@ -744,10 +865,17 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
             session_source: str, roots: list[str] | None,
             project_codex_root: Path | None,
             project_opencode_db: Path | None,
+            project_claude_root: Path | None = None,
             harness: str = "auto") -> dict:
     """Main analysis entry: discover sources, merge timelines, bucket."""
     if session_source != "project":
         raise ValueError("only workspace-local project sessions are permitted")
+    if harness == "claude":
+        if project_claude_root is None:
+            raise ValueError("workspace-local Claude root is unavailable")
+        return analyze_claude(
+            workspace, project_claude_root, roots, bucket_seconds,
+            idle_gap_seconds)
     codex_docs = []
     oc_docs = []
     all_events: list = []
@@ -892,7 +1020,7 @@ def analyze(workspace: str, state_db: str, sessions_root: str,
 
 
 def discover(workspace: str, project_codex_root: Path,
-             project_opencode_db: Path) -> dict:
+             project_opencode_db: Path, project_claude_root: Path) -> dict:
     """List candidate harnesses in the workspace-local session bundle."""
     def _count_codex(db, sroot):
         if not Path(db).exists():
@@ -922,6 +1050,12 @@ def discover(workspace: str, project_codex_root: Path,
          "root": str(project_opencode_db), "reachable": project_opencode_db.exists(),
          "sessions_found": _count_opencode(project_opencode_db),
          "note": "workspace-bundled .sessions/opencode-data/opencode DB"},
+        {"id": "project_claude", "kind": "project", "harness": "claude",
+         "root": str(project_claude_root),
+         "reachable": project_claude_root.exists(),
+         "sessions_found": len(
+             claude_data.discover(workspace, project_claude_root)["sessions"]),
+         "note": "workspace-bundled .sessions/claude project JSONL"},
     ]
     return {"sources": sources}
 
@@ -936,9 +1070,11 @@ def main(argv: list[str] | None = None) -> int:
                     help="<workspace>/.sessions/codex by default")
     ap.add_argument("--project-opencode-db", default=None,
                     help="<workspace>/.sessions/opencode-data/opencode/opencode.db by default")
+    ap.add_argument("--project-claude-root", default=None,
+                    help="<workspace>/.sessions/claude by default")
     ap.add_argument("--session-source", choices=("project",), default="project",
                     help="retained for compatibility; only project is permitted")
-    ap.add_argument("--harness", choices=("auto", "codex", "opencode"),
+    ap.add_argument("--harness", choices=("auto", "codex", "opencode", "claude"),
                     default="auto", help="manually selected primary harness")
     ap.add_argument("--session-answers", default=None,
                     help="JSON answers from the evaluation agent for discovery "
@@ -960,11 +1096,15 @@ def main(argv: list[str] | None = None) -> int:
     project_opencode_db = (
         cd.require_project_path(ws, args.project_opencode_db, "project-opencode-db")
         if args.project_opencode_db else paths["opencode_db"])
+    project_claude_root = (
+        cd.require_project_path(ws, args.project_claude_root, "project-claude-root")
+        if args.project_claude_root else paths["claude_root"])
     state_db = paths["state_db"]
     sessions_root = paths["sessions_root"]
     opencode_db = paths["opencode_db"]
 
-    disc = discover(str(ws), project_codex_root, project_opencode_db)
+    disc = discover(str(ws), project_codex_root, project_opencode_db,
+                    project_claude_root)
     questions = []
     source_choice = args.session_source
     harness_choice = args.harness
@@ -974,7 +1114,7 @@ def main(argv: list[str] | None = None) -> int:
             if isinstance(answers, dict) and answers.get("session_source") == "project":
                 source_choice = answers["session_source"]
             if (isinstance(answers, dict) and harness_choice == "auto"
-                    and answers.get("harness") in ("codex", "opencode")):
+                    and answers.get("harness") in ("codex", "opencode", "claude")):
                 harness_choice = answers["harness"]
         except (OSError, json.JSONDecodeError):
             pass
@@ -982,8 +1122,8 @@ def main(argv: list[str] | None = None) -> int:
     if len(both_have) > 1 and harness_choice == "auto":
         questions.append({
             "id": "harness",
-            "question": "Both Codex and OpenCode project-local sessions exist "
-                        "for this workspace. Which harness ran the contestant?",
+            "question": "Multiple project-local harness session stores contain "
+                        "data for this workspace. Which harness ran the contestant?",
             "reason": "session discovery found multiple harnesses; the agent "
                       "must classify the run",
             "suggested_source": "workspace AGENTS.md branch name or the run "
@@ -1004,7 +1144,8 @@ def main(argv: list[str] | None = None) -> int:
                          str(opencode_db), args.bucket_seconds,
                          args.idle_gap_seconds, source_choice,
                          cd.parse_roots(args.roots),
-                         project_codex_root, project_opencode_db, harness_choice)
+                         project_codex_root, project_opencode_db,
+                         project_claude_root, harness_choice)
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
@@ -1027,6 +1168,7 @@ def main(argv: list[str] | None = None) -> int:
         "state_db": str(state_db),
         "sessions_root": str(sessions_root),
         "opencode_db": str(opencode_db),
+        "claude_root": str(project_claude_root),
         "session_source": source_choice,
         "harness": harness_choice,
         "bucket_seconds": args.bucket_seconds,

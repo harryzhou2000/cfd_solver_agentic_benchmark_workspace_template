@@ -23,17 +23,22 @@ which sessions belong to the run and answers any ambiguity:
 |---|---|---|
 | `project_codex` | `<workspace>/.sessions/codex/` (state_5.sqlite + sessions/) | codex |
 | `project_opencode` | `<workspace>/.sessions/opencode-data/opencode/opencode.db` | opencode |
+| `project_claude` | `<workspace>/.sessions/claude/projects/**/*.jsonl` | claude |
 
 - No evaluator-account store is searched and no external telemetry path is
   accepted. Missing project-local evidence is unavailable; discovery fails
   closed rather than falling back.
 - The agent manually classifies the primary run, then passes
-  `--harness codex|opencode`. When both bundled harness stores contain
+  `--harness codex|opencode|claude`. When multiple bundled harness stores contain
   candidates and no choice is recorded, `sessions.json.selection.questions`
   surfaces a structured question; `--session-answers <json>` records the
   answer and `summarize.py --session-answers` forwards it.
 - Codex roots are scoped with `--roots <thread-id,...>` (each root plus its
   spawn tree), matching the expenses/measurements extractors.
+- Claude always requires explicit `--roots <session-id,...>` and includes the
+  selected root's bundled `subagents/*.jsonl`. Duplicate IDs, malformed
+  selected JSONL, symlinks, and external overrides fail closed. Missing
+  timestamps affect buckets, not immutable whole-session token/tool totals.
 - Docker rows may record cwd `/workspace` although `--workspace` names the host
   contestant directory. This mismatch must be handled explicitly with the
   confirmed `--harness` and `--roots`; cwd matching is only candidate evidence.
@@ -59,8 +64,9 @@ which sessions belong to the run and answers any ambiguity:
 - `tokens`: input (including cache reads and writes), cached reads, cache
   writes, non-cached input, output, reasoning, and total — from
   per-submission usage records (codex `last_token_usage` deltas; OpenCode
-  per-message category counters). OpenCode's raw input, cache-read, and
-  cache-write fields are disjoint; the normalized input and total fields are
+  per-message category counters; Claude assistant-message usage). OpenCode and
+  Claude raw input, cache-read, and cache-write/create fields are disjoint; the
+  normalized input and total fields are
   recomputed from those immutable categories rather than trusting an optional
   provider total.
 - `cache`: `cached_tokens`, `input_tokens`, `hit_ratio` per bucket — the

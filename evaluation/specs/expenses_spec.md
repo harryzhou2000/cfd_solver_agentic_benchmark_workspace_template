@@ -5,7 +5,8 @@
 Extract execution expenses of a codex contestant run: **time**, **token
 usage** (main agent and all subagents), and an **estimated cost** computed
 from tokens against the centralized cost metadata. Both Codex and OpenCode
-selected session trees are supported.
+selected session trees are supported, as are explicitly selected Claude Code
+root/subagent trees from `.sessions/claude`.
 
 ## 1. Time
 
@@ -71,6 +72,14 @@ and provider-reported cost are aggregated from assistant messages, because a
 mutable `session.model` row cannot attribute lifetime counters after an
 in-session model switch. Session counters are used only as a total cross-check
 or as an explicit legacy fallback when message usage is unavailable.
+
+For Claude, assistant-message `input_tokens`, `cache_read_input_tokens`, and
+`cache_creation_input_tokens` are disjoint. Normalized input is their sum;
+normalized total adds output. Repeated persisted assistant messages are
+deduplicated by message ID. Claude has no persisted Codex goal timer, so
+`goal_time` is `null`. Models absent from audited price metadata remain
+unpriced and make the estimated total unavailable rather than receiving a
+generic invented rate.
 
 ## 3. Cost estimate
 

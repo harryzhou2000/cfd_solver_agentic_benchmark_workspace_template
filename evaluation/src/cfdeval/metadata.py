@@ -26,6 +26,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+from cfdeval import claude_data
 from cfdeval import codex_data as cd
 
 
@@ -652,6 +653,135 @@ def finalize(metadata: dict, questions: list[dict], answers_path: str | None) ->
     return metadata
 
 
+def extract_claude(args, workspace: str) -> dict:
+    roots = cd.parse_roots(args.roots)
+    data = claude_data.facts(workspace, roots or [], args.claude_root)
+    models: dict[str, dict] = {}
+    entities: dict[str, dict] = {}
+    subagents = []
+    starts = []
+    ends = []
+    for entity in data["entities"]:
+        eid = entity["entity_id"]
+        usage = data["models_by_entity"].get(eid, {})
+        primary_model = max(usage, key=usage.get) if usage else None
+        entities[eid] = {
+            "thread_id": eid,
+            "root_id": entity["root_id"],
+            "parent_thread_id": entity["parent_id"],
+            "is_subagent": entity["is_subagent"],
+            "model": primary_model,
+            "models": sorted(usage),
+            "reasoning_effort": data["efforts_by_entity"].get(eid) or None,
+            "tokens_used": sum(usage.values()),
+            "cwd": entity["cwd"],
+            "started_at": entity["started_at"],
+            "ended_at": entity["ended_at"],
+        }
+        if entity["started_at"]:
+            starts.append(entity["started_at"])
+        if entity["ended_at"]:
+            ends.append(entity["ended_at"])
+        if entity["is_subagent"]:
+            subagents.append({
+                "thread_id": eid,
+                "parent_thread_id": entity["parent_id"],
+                "type": "claude_subagent",
+                "model": primary_model,
+                "reasoning_effort": data["efforts_by_entity"].get(eid) or None,
+                "tokens_used": sum(usage.values()),
+            })
+    for model, usage in data["by_model"].items():
+        models[model] = {
+            "catalog": {
+                "display_name": model,
+                "context_window": None,
+                "max_context_window": None,
+                "supported_reasoning_levels": None,
+            },
+            "reasoning_efforts_seen": data["efforts_by_model"].get(model, []),
+            "max_context_used": 0,
+            "threads": sum(model in m for m in data["models_by_entity"].values()),
+        }
+    root = Path(args.claude_root)
+    observed_versions = sorted({
+        str(row.get("version"))
+        for entity in data["entities"] for row in entity["records"]
+        if row.get("version")
+    })
+    version = ", ".join(observed_versions) if observed_versions else None
+    version_file = root / "version.json"
+    if version is None and not version_file.is_symlink() and version_file.is_file():
+        try:
+            version_doc = json.loads(version_file.read_text())
+            version = version_doc.get("version") or version_doc.get("selectedVersion")
+        except (OSError, json.JSONDecodeError):
+            pass
+    config_entries = sorted(p.name for p in root.iterdir()) if root.is_dir() else []
+    limitations = [
+        "Claude Code project JSONL records do not expose a stable context-window field",
+        "reasoning effort is null for messages whose persisted record omits top-level effort",
+    ]
+    if data["malformed_records"]:
+        limitations.append(
+            f"{len(data['malformed_records'])} malformed/unreadable JSONL records were skipped")
+    return {
+        "harness": {
+            "harness": "claude",
+            "version": version,
+            "cli_version": version,
+            "source": "workspace-local .sessions/claude project JSONL",
+            "config_dir": str(root),
+            "config_entries": config_entries,
+            "model_provider": None,
+            "plugins": [],
+        },
+        "models": models,
+        "context": {
+            "by_model": {
+                model: {"context_window": None,
+                        "max_context_used": info["max_context_used"]}
+                for model, info in models.items()
+            },
+            "by_thread": {
+                eid: {"model": info["model"], "max_input_tokens": None,
+                      "model_context_window_recorded": None}
+                for eid, info in entities.items()
+            },
+            "notes": limitations[:2],
+        },
+        "threads": entities,
+        "subagents": subagents,
+        "opencodex": None,
+        "opencode": None,
+        "claude": {
+            "root_session_count": len(data["roots"]),
+            "subagent_session_count": len(subagents),
+            "selected_roots": data["roots"],
+            "malformed_records": data["malformed_records"],
+            "inline_sidechain_records_excluded": data[
+                "inline_sidechain_records_excluded"],
+            "limitations": limitations,
+        },
+        "prompts": {"by_root_thread": data["prompts"]},
+        "workspace": workspace_state(Path(workspace)),
+        "session_window": {
+            "started_at": min(starts, default=None),
+            "ended_at": max(ends, default=None),
+        },
+        "questions": [],
+        "user_answers": {},
+        "status": "complete",
+        "provenance": {
+            "claude_root": str(root),
+            "selected_roots": data["roots"],
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "num_threads": len(entities),
+            "host_workspace": workspace,
+        },
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Extract contestant run metadata")
     ap.add_argument("--workspace", required=True)
@@ -664,7 +794,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ocx-catalog", default=None)
     ap.add_argument("--plugins-root", default=None)
     ap.add_argument("--roots", default=None)
-    ap.add_argument("--harness", choices=("auto", "codex", "opencode"),
+    ap.add_argument("--harness", choices=("auto", "codex", "opencode", "claude"),
                     default="auto",
                     help="manual harness classification; auto never uses a host store")
     ap.add_argument(
@@ -674,6 +804,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--opencode-db", default=None)
     ap.add_argument("--opencode-config-dir", default=None)
+    ap.add_argument("--claude-root", default=None,
+                    help="<workspace>/.sessions/claude by default")
     ap.add_argument("--answers", default=None,
                     help="JSON file mapping question ids to user-provided answers "
                          "(evaluation agent asks the user for anything not extractable).")
@@ -688,11 +820,13 @@ def main(argv: list[str] | None = None) -> int:
         history=args.history, ocx_config=args.ocx_config,
         ocx_catalog=args.ocx_catalog, plugins_root=args.plugins_root,
         opencode_db=args.opencode_db,
-        opencode_config_dir=args.opencode_config_dir)
+        opencode_config_dir=args.opencode_config_dir,
+        claude_root=args.claude_root)
     for key in ("state_db", "goals_db", "logs_db", "sessions_root", "history",
                 "ocx_config", "ocx_catalog", "plugins_root", "opencode_db",
                 "opencode_config_dir"):
         setattr(args, key, str(paths[key]))
+    args.claude_root = str(paths["claude_root"])
     out_path = Path(args.out) if args.out else (
         eval_root / "outputs" / Path(workspace).name / "metadata.json"
     )
@@ -704,6 +838,30 @@ def main(argv: list[str] | None = None) -> int:
     roots, all_ids = cd.thread_trees(selected, edges)
     children = {c for _, c in edges}
     requested = cd.parse_roots(args.roots)
+    if args.harness == "auto":
+        try:
+            claude_candidates = claude_data.discover(
+                workspace, paths["claude_root"])["sessions"]
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
+        if claude_candidates:
+            print("ERROR: Claude candidate sessions exist; manually classify the "
+                  "harness and pass --harness claude --roots <confirmed-id>",
+                  file=sys.stderr)
+            return 2
+    if args.harness == "claude":
+        try:
+            metadata = extract_claude(args, workspace)
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(metadata, indent=2) + "\n")
+        print(f"wrote {out_path}")
+        print(f"harness=claude threads={len(metadata.get('threads', {}))} "
+              f"subagents={len(metadata['subagents'])} status={metadata['status']}")
+        return 0
     if args.harness == "opencode" or (
             args.harness == "auto" and not all_ids and requested is None
             and not Path(args.state_db).is_file()):

@@ -399,6 +399,11 @@ Codex host rollouts:   <repo>/.sessions/codex/sessions/**/rollout-*.jsonl
 OpenCode host DB:      <repo>/.sessions/opencode-data/opencode/opencode.db
 OpenCode container DB: /workspace/.sessions/opencode-data/opencode/opencode.db
 OpenCode data root:    /workspace/.sessions/opencode-data/opencode
+
+Claude host home:      <repo>/.sessions/claude
+Claude container home: /home/cfd_agent/.claude
+Claude root sessions:  <repo>/.sessions/claude/projects/<encoded-project>/<session-id>.jsonl
+Claude subagents:      <repo>/.sessions/claude/projects/<encoded-project>/<session-id>/subagents/*.jsonl
 ```
 
 Here `<repo>` means the host contestant repository, not the manager repo.
@@ -511,6 +516,11 @@ provider-reported database cost and a separate estimate from the manager's
 current price table. A zero placeholder is not a valid completed snapshot when
 selected sessions contain usage.
 
+For a Claude Code run, read
+[references/claude-code.md](references/claude-code.md) before selecting roots
+or generating telemetry/final-response artifacts. Its explicit-root,
+workspace-boundary, token-normalization, and terminal-root rules are mandatory.
+
 Verify the actual stored cwd before choosing either command. Do not try to
 merge the two cwd namespaces in one extraction; the non-primary harness is not
 part of the run. Record the database's container cwd separately from the host
@@ -611,6 +621,15 @@ reasoning and tool parts; use the database part order. Do not substitute a last
 commentary/update after an interruption. If channel/completion metadata is
 missing or more than one record could be the terminal answer, mark extraction
 ambiguous and ask the operator rather than applying a heuristic.
+
+For Claude, choose the chronologically last non-sidechain root assistant
+message whose persisted `stop_reason` is exactly `end_turn`, concatenating its
+ordered text blocks. Ignore tool-use turns and all subagent prose. Hash the
+exact raw JSONL bytes of contributing fragments in line order. If terminal completed messages tie on timestamp,
+or no completed text message exists, record ambiguity/absence rather than
+guessing. `evaluation/tools/extract_claude_final_response.py` implements this
+rule; `summarize.py --harness claude` also writes the Markdown sidecar and its
+provenance.
 
 Record the harness, root/session ID, message ID or timestamp, read-only source,
 original stored-message SHA-256, extracted file SHA-256, and ordered part count

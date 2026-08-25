@@ -18,6 +18,7 @@ Produced by `evaluation/tools/extract_configs.py` (cfdeval package:
 | `plugin_manifest` | captured plugin manifests beneath `.sessions/codex/plugins/`, when bundled |
 | `opencode` | captured config files beneath `.sessions/opencode-config/`, when bundled |
 | `opencodex` | captured config/version/catalog files beneath the applicable `.sessions/` config root, when bundled |
+| `claude` | explicit allowlist beneath `.sessions/claude/`: `settings.json`, `CLAUDE.md`, `statusline-command.sh`, `version.json`, and `agents/*.md` |
 
 Repository evidence such as the submitted `AGENTS.md`, `.gitmodules`, and
 benchmark rubric is recorded by the workspace/benchmark metadata collectors;
@@ -31,8 +32,10 @@ not silently replaced from another location.
 ## Redaction policy
 
 - **Credential files** (`auth.json`, `codex-accounts.json`, `admin-api-token`,
-  `installation_id`) are recorded as presence + sha256 only; content is never
+  `installation_id`, Claude `.credentials.json`) are recorded as presence + sha256 only; content is never
   embedded.
+- Claude capture is allowlist-only; `projects/`, `history.jsonl`, debug logs,
+  daemon state, and every other trajectory/runtime artifact are excluded.
 - Secret-like values in every other file (sk- keys, Bearer tokens,
   api keys/tokens/secrets/passwords, proxy `user:pass@` URLs, long base64)
   are replaced with `***REDACTED***`; `redaction_hits` counts replacements.

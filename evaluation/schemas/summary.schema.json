@@ -32,7 +32,7 @@
         "time_seconds": {
           "type": "object",
           "properties": {
-            "goal_time": { "type": "number" },
+            "goal_time": { "type": ["number", "null"] },
             "wall_time": { "type": "number" },
             "by_root_thread": { "type": "object" },
             "by_root_tree": {
@@ -42,7 +42,7 @@
                 "type": "object",
                 "properties": {
                   "status": { "type": ["string", "null"] },
-                  "goal_time_seconds": { "type": "number" },
+                  "goal_time_seconds": { "type": ["number", "null"] },
                   "goal_tokens": { "type": "integer" },
                   "threads": { "type": "integer" },
                   "tokens_used": { "type": "integer" },
@@ -65,7 +65,7 @@
         "cost_estimate_usd": {
           "type": "object",
           "properties": {
-            "total": { "type": "number" },
+            "total": { "type": ["number", "null"] },
             "by_model": { "type": "object" },
             "unpriced_tokens": { "type": "integer" },
             "estimate": { "type": "boolean" },
@@ -141,6 +141,7 @@
         "subagents": { "type": "array", "items": { "type": "object" } },
         "opencodex": { "type": ["object", "null"] },
         "opencode": { "type": ["object", "null"] },
+        "claude": { "type": ["object", "null"] },
         "prompts": { "type": "object" },
         "workspace": {
           "type": "object",

@@ -8,7 +8,7 @@
       "type": "object",
       "required": ["harness"],
       "properties": {
-        "harness": { "enum": ["codex", "opencode", "unknown"] },
+        "harness": { "enum": ["codex", "opencode", "claude", "unknown"] },
         "version": { "type": ["string", "null"] },
         "cli_version": { "type": ["string", "null"] },
         "originator": { "type": ["string", "null"] },
@@ -55,6 +55,7 @@
         "idle_gap_threshold_seconds": { "type": "integer" }
       }
     },
+    "claude": { "type": ["object", "null"] },
     "prompts": { "type": "object" },
     "workspace": { "type": "object" },
     "session_window": {

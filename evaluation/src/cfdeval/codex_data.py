@@ -16,6 +16,7 @@ def project_paths(workspace: str | Path) -> dict[str, Path]:
     codex = root / "codex"
     return {
         "sessions_bundle": root,
+        "claude_root": root / "claude",
         "codex_root": codex,
         "state_db": codex / "state_5.sqlite",
         "goals_db": codex / "goals_1.sqlite",
