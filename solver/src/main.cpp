@@ -159,6 +159,71 @@ int main(int argc, char** argv) {
       MPI_Finalize();
       return 0;
     }
+    if (cmd == "gradcheck") {
+      // Verifies that the LSQ gradient operator reproduces a linear field
+      // exactly on the actual mesh (single rank only).
+      if (nranks != 1) throw std::runtime_error("gradcheck is serial-only");
+      std::string mesh;
+      for (int i = 2; i < argc; ++i)
+        if (std::strcmp(argv[i], "--mesh") == 0 && i + 1 < argc) mesh = argv[++i];
+      if (mesh.empty()) throw std::runtime_error("gradcheck requires --mesh");
+      // Build a single-rank partition in a temp dir next to the mesh.
+      std::string tmpdir = "results/gradcheck_part";
+      std::string err;
+      if (!cfd::preprocess_partition(mesh, 1, tmpdir, &err) && !err.empty())
+        throw std::runtime_error(err);
+      cfd::PartitionInfo pi;
+      cfd::LocalMesh lm = cfd::load_local_partition(tmpdir, 0, 1, pi);
+      // Manufactured linear field for each variable: W_v = a_v x + b_v y + c_v.
+      const double A[4] = {1.0, -2.0, 0.5, 3.0};
+      const double B[4] = {0.7, 1.3, -1.1, 2.2};
+      const double C[4] = {5.0, 0.1, 0.2, 10.0};
+      cfd::CaseFile dummy;  // not used by gradients except for BC map
+      // Minimal case plumbing: reuse a real case file for the BC map.
+      (void)dummy;
+      // We need a CaseFile with a bc_map covering all families. Build one
+      // generically: farfield for every family (valid for gradient check).
+      cfd::CaseFile cs;
+      for (const auto& nm : lm.bc_names) cs.bc_map[nm] = cfd::BCType::Farfield;
+      cs.gas = cfd::GasModel{};
+      cs.fs_rho = 1.0; cs.fs_vmag = 1.0; cs.fs_p = 1.0;
+      cs.fs.u = 1.0; cs.fs.v = 0.0; cs.aoa_deg = 0.0;
+      cfd::FlowState st;
+      st.allocate(lm);
+      for (int i = 0; i < lm.n_cells; ++i) {
+        double x = lm.cx[i], y = lm.cy[i];
+        for (int v = 0; v < 4; ++v) st.W[i][v] = A[v] * x + B[v] * y + C[v];
+      }
+      cfd::AssembleOpts o;
+      cfd::compute_gradients(lm, cs, st, o);
+      double maxerr_int = 0.0, maxerr_bnd = 0.0;
+      int worst_i = -1;
+      double worst_e = 0.0;
+      for (int i = 0; i < lm.n_owned; ++i) {
+        bool touches_bnd = false;
+        for (int k = lm.cell_face_start[i]; k < lm.cell_face_start[i + 1]; ++k)
+          if (lm.face_r[lm.cell_face_list[k]] < 0) touches_bnd = true;
+        double e = 0.0;
+        for (int v = 0; v < 4; ++v) {
+          e = std::max(e, std::fabs(st.gradW[i][2 * v] - A[v]));
+          e = std::max(e, std::fabs(st.gradW[i][2 * v + 1] - B[v]));
+        }
+        if (touches_bnd)
+          maxerr_bnd = std::max(maxerr_bnd, e);
+        else
+          maxerr_int = std::max(maxerr_int, e);
+        if (e > worst_e) { worst_e = e; worst_i = i; }
+      }
+      std::printf("gradcheck interior max err: %.3e\n", maxerr_int);
+      std::printf("gradcheck boundary-adjacent max err: %.3e\n", maxerr_bnd);
+      if (worst_i >= 0)
+        std::printf("worst cell %d at (%.3f, %.3f), err %.3e\n", worst_i,
+                    lm.cx[worst_i], lm.cy[worst_i], worst_e);
+      std::printf("gradcheck max linear-field gradient error: %.3e\n",
+                  std::max(maxerr_int, maxerr_bnd));
+      MPI_Finalize();
+      return maxerr_int < 1e-8 ? 0 : 1;
+    }
     if (cmd != "solve") {
       if (rank == 0) { usage(); }
       MPI_Finalize();
@@ -171,6 +236,8 @@ int main(int argc, char** argv) {
     cfd::SolverConfig cfg;
     std::string limiter = "venkat", flux = "roe";
     int max_steps_override = -1;
+    double final_time_override = -1.0, time_step_override = -1.0;
+    double cfl_max_override = -1.0;
     for (int i = 2; i < argc; ++i) {
       std::string a = argv[i];
       auto next = [&](const char* name) -> std::string {
@@ -189,6 +256,9 @@ int main(int argc, char** argv) {
         cfg.transient_sweeps_per_inner = std::stoi(next("--sweeps-per-inner"));
       else if (a == "--venkat-k") cfg.venkat_k = std::stod(next("--venkat-k"));
       else if (a == "--max-steps") max_steps_override = std::stoi(next("--max-steps"));
+      else if (a == "--final-time") final_time_override = std::stod(next("--final-time"));
+      else if (a == "--time-step") time_step_override = std::stod(next("--time-step"));
+      else if (a == "--cfl-max") cfl_max_override = std::stod(next("--cfl-max"));
       else throw std::runtime_error("unknown argument: " + a);
     }
     if (case_path.empty() || out_dir.empty())
@@ -211,6 +281,9 @@ int main(int argc, char** argv) {
 
     cfd::CaseFile cs = cfd::load_case_file(case_path);
     if (max_steps_override > 0) cs.run.max_steps = max_steps_override;
+    if (final_time_override > 0) cs.run.final_time = final_time_override;
+    if (time_step_override > 0) cs.run.time_step = time_step_override;
+    if (cfl_max_override > 0) cs.run.cfl_max = cfl_max_override;
 
     cfd::OutputContext oc;
     oc.comm = MPI_COMM_WORLD;

@@ -231,7 +231,9 @@ void write_field_vtu(OutputContext& oc, const LocalMesh& m, const CaseFile& cs,
       (void)iend;
 
       std::vector<int> node_map(n_nodes);
+      std::unordered_map<int, int> gid2local;
       for (int i = 0; i < n_nodes; ++i) {
+        gid2local[ng[i]] = i;
         auto it = gn2out.find(ng[i]);
         if (it == gn2out.end()) {
           int oid = static_cast<int>(px.size());
@@ -243,16 +245,12 @@ void write_field_vtu(OutputContext& oc, const LocalMesh& m, const CaseFile& cs,
           node_map[i] = it->second;
         }
       }
-      // Owned cells arrive in ascending global-id order per rank; the
-      // global id sequence is implicit in the data order of state arrays,
-      // so recover gids by position is not possible here. We instead rely on
-      // the caller passing cells whose global ids we reconstruct from the
-      // partition: conn order is per-rank local order, so attach gid later.
       int coff = 0;
       for (int i = 0; i < n_owned; ++i) {
         CellOut co;
         co.gid = -1;
-        for (int k = 0; k < nno[i]; ++k) co.conn.push_back(node_map[conn[coff + k]]);
+        for (int k = 0; k < nno[i]; ++k)
+          co.conn.push_back(node_map[gid2local[conn[coff + k]]]);
         coff += nno[i];
         cells.push_back(std::move(co));
         std::array<double, nv> row;

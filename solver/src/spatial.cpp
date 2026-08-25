@@ -289,13 +289,18 @@ void assemble_residual(const LocalMesh& m, const CaseFile& cs, FlowState& s,
       lam_face = (std::fabs(un) + af) * A;
 
       if (o.viscous) {
-        // Corrected-average face gradients of u, v, T.
+        // Corrected-average face gradients of u, v, T. The finite-difference
+        // correction along the cell-to-cell direction MUST use cell-center
+        // values (s.W), not the reconstructed face states: WL and WR are both
+        // evaluated at the same face centroid, so (WR - WL)/d would vanish
+        // for smooth fields and destroy the normal-derivative coupling.
         double dx = m.cx[R] - m.cx[L];
         double dy = m.cy[R] - m.cy[L];
         double d = std::max(std::hypot(dx, dy), 1e-30);
         double ex = dx / d, ey = dy / d;
         double rhoL = WL[0], rhoR = WR[0];
-        double TL = WL[3] / (rhoL * gas.R), TR = WR[3] / (rhoR * gas.R);
+        double TL = s.W[L][3] / (s.W[L][0] * gas.R);
+        double TR = s.W[R][3] / (s.W[R][0] * gas.R);
         const auto& gL = s.gradW[L];
         const auto& gR = s.gradW[R];
         auto face_grad = [&](int comp, double vL, double vR) -> std::pair<double, double> {
@@ -305,8 +310,8 @@ void assemble_residual(const LocalMesh& m, const CaseFile& cs, FlowState& s,
           double corr = gn - (gx * ex + gy * ey);
           return {gx + corr * ex, gy + corr * ey};
         };
-        auto gu = face_grad(1, WL[1], WR[1]);
-        auto gv = face_grad(2, WL[2], WR[2]);
+        auto gu = face_grad(1, s.W[L][1], s.W[R][1]);
+        auto gv = face_grad(2, s.W[L][2], s.W[R][2]);
         // T gradient from primitive gradients at each cell, then corrected.
         auto cell_Tgrad = [&](int c, double rho, double T) {
           double gx = (s.gradW[c][6] - T * s.gradW[c][0]) / (rho * gas.R);
@@ -318,7 +323,7 @@ void assemble_residual(const LocalMesh& m, const CaseFile& cs, FlowState& s,
         double Tgx = 0.5 * (gTL.first + gTR.first);
         double Tgy = 0.5 * (gTL.second + gTR.second);
         {
-          double gn = (TR - TL) / d;
+          double gn = (TR - TL) / d;  // cell-center temperatures
           double corr = gn - (Tgx * ex + Tgy * ey);
           Tgx += corr * ex;
           Tgy += corr * ey;
@@ -370,16 +375,19 @@ void assemble_residual(const LocalMesh& m, const CaseFile& cs, FlowState& s,
           double ex = dxc / dist, ey = dyc / dist;
           double d = 2.0 * dist;
           double rhoL = WL[0];
-          double TL = WL[3] / (rhoL * gas.R);
           const auto& gL = s.gradW[L];
+          // Mirror correction uses CELL-CENTER velocity: u_ghost = -u_cell at
+          // the reflected ghost center (distance 2*dist). Using the
+          // face-reconstructed WL here would double-count the extrapolation
+          // and drive the wall shear toward zero at second order.
           auto wall_grad = [&](int comp, double vL) -> std::pair<double, double> {
             double gx = gL[2 * comp], gy = gL[2 * comp + 1];
-            double gn = (-vL - vL) / d;  // (v_ghost - v_L) / d, v_ghost = -v_L
+            double gn = (-vL - vL) / d;  // (v_ghost - v_cell) / d, v_ghost = -v_cell
             double corr = gn - (gx * ex + gy * ey);
             return {gx + corr * ex, gy + corr * ey};
           };
-          auto gu = wall_grad(1, WL[1]);
-          auto gv = wall_grad(2, WL[2]);
+          auto gu = wall_grad(1, s.W[L][1]);
+          auto gv = wall_grad(2, s.W[L][2]);
           // Adiabatic: normal temperature gradient is exactly zero.
           double Tgx = 0.0, Tgy = 0.0;
           Vec4 Fv = viscous_flux_phys(0.0, 0.0, gu.first, gu.second, gv.first,
@@ -387,7 +395,10 @@ void assemble_residual(const LocalMesh& m, const CaseFile& cs, FlowState& s,
           for (int k = 0; k < 4; ++k) F[k] -= Fv[k];
           lam_face += 2.0 * mu / std::max(rhoL, RHO_FLOOR) * A / dist;
 
-          // Forces: pressure + tangential shear traction.
+          // Forces on the body: with the face normal n pointing out of the
+          // fluid domain (into the wall), the fluid-to-body force is
+          //   F = integral p n dA  -  integral tau . n dA.
+          // The skin-friction part uses only the tangential shear traction.
           double div = gu.first + gv.second;
           double txx = 2.0 * mu * gu.first - 2.0 / 3.0 * mu * div;
           double tyy = 2.0 * mu * gv.second - 2.0 / 3.0 * mu * div;
@@ -398,12 +409,12 @@ void assemble_residual(const LocalMesh& m, const CaseFile& cs, FlowState& s,
           double ttx = tx - tn * nx, tty = ty - tn * ny;  // tangential traction
           fs.fx_p += pw * nx * A;
           fs.fy_p += pw * ny * A;
-          fs.fx_v += ttx * A;
-          fs.fy_v += tty * A;
+          fs.fx_v -= ttx * A;
+          fs.fy_v -= tty * A;
           double rx = m.face_cx[f] - cs.ref.moment_center[0];
           double ry = m.face_cy[f] - cs.ref.moment_center[1];
           fs.mz_p += (rx * (pw * ny) - ry * (pw * nx)) * A;
-          fs.mz_v += (rx * tty - ry * ttx) * A;
+          fs.mz_v -= (rx * tty - ry * ttx) * A;
         } else if (bc == BCType::SlipWall) {
           fs.fx_p += pw * nx * A;
           fs.fy_p += pw * ny * A;
@@ -435,7 +446,7 @@ std::vector<SurfaceRow> compute_surface_rows(const LocalMesh& m, const CaseFile&
     BCType bc = cs.bc_map.at(m.bc_names[m.face_bc[f]]);
     if (bc == BCType::Farfield) continue;  // surface.csv covers walls
     const int L = m.face_l[f];
-    const double nx = m.face_nx[f], ny = m.face_ny[f], A = m.face_area[f];
+    const double nx = m.face_nx[f], ny = m.face_ny[f];
     Vec4 WL = reconstruct_at_face(m, s, L, f);
     SurfaceRow row;
     row.x = m.face_cx[f];
@@ -477,7 +488,7 @@ std::vector<SurfaceRow> compute_surface_rows(const LocalMesh& m, const CaseFile&
         double ttx = tx - tn * nx, tty = ty - tn * ny;
         // Signed cf along the face tangential direction.
         double t_hat_x = -ny, t_hat_y = nx;
-        row.cf = (ttx * t_hat_x + tty * t_hat_y) / cs.fs.q_dyn;
+        row.cf = -(ttx * t_hat_x + tty * t_hat_y) / cs.fs.q_dyn;
       } else {
         row.cf = 0.0;
       }
