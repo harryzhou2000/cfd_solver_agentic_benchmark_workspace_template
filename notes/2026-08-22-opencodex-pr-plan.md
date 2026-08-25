@@ -112,3 +112,19 @@ All three PRs rebased onto upstream/dev @ 98ed186c7 (current dev) and pushed:
 
 Remaining: wait for bot/maintainer convergence on all three; re-undraft A/B if
 the gate bot re-drafts after a body/push event; land C once sponsored.
+
+## Status 2026-08-25 (evening) — PR D added, all four converged
+
+- D — PR #2527 (feat/auto-review-model-override): listed as PR D per user
+  request. Bot findings fixed and landed on head 1a51fd461: GET /api/providers
+  exposes autoReviewModel/autoReviewModelOverrides; canonical openai rejects the
+  fields explicitly on POST/PATCH (with a canonical-seeded regression); the
+  trusted openai-api rebuild keeps the configured override (regression added).
+  The earlier flash/terra audit items were already addressed on the head
+  (folded-known bare-target slugging, fail-closed sync validation, custom-row
+  inheritance, no-template stamping, redaction, whitespace keys). CodeRabbit
+  clean, all gates green, undrafted, MERGEABLE.
+- A #2350 and B #2351 remain ready (undrafted, green, MERGEABLE).
+- C #2355 remains draft only for maintainer-sponsored on the auth-api re-anchor
+  hunk; full Summary/Test plan body is prepared at /tmp/body-c-full.md and will
+  be published once the label lands.
