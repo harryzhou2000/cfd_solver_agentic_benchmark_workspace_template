@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include <set>
@@ -59,7 +60,25 @@ struct PartHeader {
 bool preprocess_partition(const std::string& mesh_file, int n_ranks,
                           const std::string& out_dir, std::string* error) {
   const std::string dir = part_dir(out_dir, n_ranks);
-  if (file_exists(dir + "/DONE")) return false;  // cache hit
+  if (file_exists(dir + "/DONE")) {
+    // Cache hit: validate that the cached partition matches the requested
+    // mesh and rank count before reusing it. A stale cache (e.g. the same
+    // output directory reused with a different mesh) must be rebuilt,
+    // otherwise ranks would silently load the wrong mesh partition.
+    bool valid = false;
+    try {
+      std::ifstream gf(dir + "/global.json");
+      nlohmann::json g;
+      gf >> g;
+      valid = g.value("mesh_file", std::string()) == mesh_file &&
+              g.value("n_ranks", -1) == n_ranks;
+    } catch (...) {
+      valid = false;
+    }
+    if (valid) return false;
+    // Stale cache: remove and fall through to a full rebuild.
+    std::filesystem::remove_all(dir);
+  }
 
   try {
     GlobalMesh gm = read_cgns_mesh(mesh_file);

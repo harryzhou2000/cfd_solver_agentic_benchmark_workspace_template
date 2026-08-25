@@ -521,7 +521,7 @@ int main(int argc, char** argv) {
           ? "bdf2_two_level (bdf1 first step)"
           : "implicit_pseudo_time_backward_euler";
       md["implicit_solver"] = "symmetric_gauss_seidel (LU-SGS) simplified_jacobian";
-      md["reconstruction"] = "piecewise_linear_unweighted_lsq_gradient";
+      md["reconstruction"] = "piecewise_linear_inverse_distance2_weighted_lsq_gradient";
       md["limiter"] = limiter == "venkat"
           ? "venkatakrishnan (k=" + std::to_string(cfg.venkat_k) + ")"
           : limiter == "barth" ? "barth_jespersen" : "none_first_order";
@@ -543,6 +543,12 @@ int main(int argc, char** argv) {
       md["cfl_initial"] = cs.run.cfl_initial;
       md["cfl_max"] = cs.run.cfl_max;
       md["pseudo_cfl_ramp_steps"] = cs.run.pseudo_cfl_ramp_steps;
+      if (cs.run.type == "transient") {
+        // Diagonal safeguard actually used by the transient inner solve;
+        // distinct from the case-file pseudo-CFL recommendation (1.0).
+        md["transient_pseudo_cfl"] = cfg.transient_pseudo_cfl;
+        md["transient_sweeps_per_inner"] = cfg.transient_sweeps_per_inner;
+      }
       md["start_time_utc"] = start_utc;
       md["end_time_utc"] = end_utc;
       md["completed"] = res.status != "failed";

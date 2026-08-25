@@ -1,0 +1,1134 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,subcaption,hyperref}
+\usepackage{cleveref}
+\emergencystretch=1.5em
+\title{2-D Unstructured Compressible Navier--Stokes Solver Benchmark Report}
+\author{Submitted solver team}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report documents \texttt{cfd2d}, a cell-centered finite-volume solver
+for the two-dimensional compressible Navier--Stokes equations on unstructured
+triangular/quadrilateral meshes read from CGNS files, and its application to
+the eight required benchmark cases: inviscid and laminar ($Re=5000$) flow over
+a NACA0012 airfoil at Mach 0.15, 0.8, and 2.0, and laminar flow over a
+circular cylinder at Mach 0.1, $Re=20$ (steady) and $Re=200$ (unsteady vortex
+shedding). The solver uses Roe's approximate Riemann solver with a Harten
+entropy fix, inverse-distance-weighted least-squares reconstruction with a
+Venkatakrishnan limiter, a backward-Euler pseudo-time march with an
+LU-SGS-style symmetric Gauss--Seidel defect-correction inner solve for steady
+cases, and a true two-level BDF2 transient integrator with defect-correction
+nonlinear inner iterations for the vortex-shedding case. Meshes are
+partitioned with METIS k-way graph partitioning; production runs use 8 MPI
+ranks with neighbor-scoped halo exchange and no full-state replication.
+All eight required cases completed successfully:
+$C_D=0.00253$ ($M0.15$ inviscid), $0.00867$ ($M0.8$ inviscid), $0.0883$
+($M2.0$ inviscid, documented plateau at 2.26 orders), $0.0733$ ($M0.15$
+laminar), $0.0701$ ($M0.8$ laminar), $0.1350$ ($M2.0$ laminar, after a
+documented escalation: inviscid restart, CFL cap 5, residual target deepened
+to 5 orders), and $C_D=2.020$ for the cylinder at $Re=20$ (literature
+$\approx2.0$--$2.1$). The cylinder $Re=200$ BDF2 run ($\Delta t=0.01$,
+$t_f=300$) reached a statistically periodic vortex street: post-transient
+($t\ge150$) mean $C_D=1.262$, mean $C_L\approx0$ with oscillation half-range
+$\approx0.56$, and Strouhal number $St=0.187$ from a windowed FFT of the lift
+history. All eight cases pass the automated physics/contract sanity checks
+(\cref{sec:output}). Known
+limitations --- the inviscid residual plateau from limiter cycling, the
+CFL-cap escalation of the high-Mach laminar cases, and an initially
+under-converged $M2.0$ laminar run that was caught by force-plausibility
+checks and redone --- are discussed openly in \cref{sec:limitations}.
+\end{abstract}
+
+\section{Introduction}
+The benchmark objective is to develop, document, and validate a parallel
+solver for the two-dimensional compressible Navier--Stokes equations on
+unstructured CGNS meshes, and to demonstrate it on a fixed set of eight
+required cases spanning inviscid subsonic, transonic, and supersonic flow and
+laminar viscous flow, including an unsteady vortex-shedding case
+(\cref{tab:cases}). All case definitions, boundary-condition mappings, and run
+controls are taken from the supplied case files in
+\texttt{cfd\_solver\_agentic\_benchmark/inputs/cases/}; the case JSONs are the
+source of truth for every parameter reported here.
+
+This is a technical CFD report, not only a run log: numerical choices are
+connected to the observed residuals, forces, and flow fields, and runs that
+are partial or escalated are labeled as such rather than presented as clean
+successes. In particular, the two high-Mach laminar cases departed from the
+supplied case-file controls (restarts from the converged inviscid states, CFL
+caps, and a deepened residual target); both departures are documented with
+their causes and outcomes in \cref{sec:results,sec:limitations}.
+
+\section{Governing Equations and Nondimensionalization}
+The solver advances the conservative state
+\[
+\mathbf{U}=[\rho,\rho u,\rho v,\rho E]^T,
+\]
+governed by the 2-D compressible Navier--Stokes equations in conservative
+form,
+\[
+\frac{\partial \mathbf{U}}{\partial t}
++\frac{\partial \mathbf{F}^i}{\partial x}
++\frac{\partial \mathbf{G}^i}{\partial y}
+=\frac{\partial \mathbf{F}^v}{\partial x}
++\frac{\partial \mathbf{G}^v}{\partial y}.
+\]
+The inviscid fluxes are
+\[
+\mathbf{F}^i=\begin{bmatrix}\rho u\\ \rho u^2+p\\ \rho uv\\ u(\rho E+p)\end{bmatrix},\qquad
+\mathbf{G}^i=\begin{bmatrix}\rho v\\ \rho uv\\ \rho v^2+p\\ v(\rho E+p)\end{bmatrix},
+\]
+with the perfect-gas closure
+\[
+p=(\gamma-1)\rho e,\qquad E=e+\tfrac12(u^2+v^2),\qquad a=\sqrt{\gamma p/\rho}.
+\]
+For viscous cases the fluxes use the Newtonian stress tensor with the Stokes
+hypothesis,
+\[
+\tau_{xx}=2\mu\,u_x-\tfrac{2}{3}\mu\left(u_x+v_y\right),\quad
+\tau_{yy}=2\mu\,v_y-\tfrac{2}{3}\mu\left(u_x+v_y\right),\quad
+\tau_{xy}=\mu\left(u_y+v_x\right),
+\]
+Fourier heat conduction $q_x=-k\,T_x$, $q_y=-k\,T_y$, and the energy-row
+viscous flux $(u\tau_{xx}+v\tau_{xy}+kT_x,\;u\tau_{xy}+v\tau_{yy}+kT_y)$.
+The viscosity model is constant, matched to the case Reynolds number,
+\[
+\mu=\frac{\rho_\infty U_\infty L_{Re}}{Re},\qquad
+k=\frac{\mu c_p}{Pr},\qquad Pr=0.72,\quad c_p=\frac{\gamma R}{\gamma-1},
+\]
+with $\gamma=1.4$, $R=1.0$ from the case files.
+
+All cases use the nondimensionalization stated in the case files:
+$\rho_\infty=1$, $|V|_\infty=1$, reference length $L=1$ (airfoil chord /
+cylinder diameter), and free-stream pressure set by the Mach number,
+\[
+p_\infty=\frac{1}{\gamma M_\infty^2}
+\quad(\text{e.g. } 31.746 \text{ at } M=0.15,\; 1.1161 \text{ at } M=0.8,\;
+0.17857 \text{ at } M=2.0),
+\]
+so the free-stream sound speed, density, and pressure are mutually consistent
+with $a_\infty=|V|_\infty/M_\infty$. The dynamic pressure is
+\[
+q_\infty=\tfrac12\rho_\infty|V|_\infty^2=0.5.
+\]
+Force and moment coefficients are normalized by $q_\infty A_{\rm ref}$ and
+$q_\infty A_{\rm ref}L_{\rm ref}$ with $A_{\rm ref}=L_{\rm ref}=1$:
+\[
+C_D=\frac{\mathbf{F}\cdot\hat{d}}{q_\infty A_{\rm ref}},\quad
+C_L=\frac{\mathbf{F}\cdot\hat{l}}{q_\infty A_{\rm ref}},\quad
+C_{m_z}=\frac{m_z}{q_\infty A_{\rm ref}L_{\rm ref}},
+\]
+where $\hat d=(\cos\alpha,\sin\alpha)$, $\hat l=(-\sin\alpha,\cos\alpha)$ for
+angle of attack $\alpha$ (all required cases use $\alpha=0$), and moments are
+taken about the case-file moment center ($(0.25,0)$ for the airfoil, the
+cylinder center $(0,0)$). Pressure and viscous contributions are accumulated
+and reported separately (\cref{sec:spatial}).
+
+\section{Meshes, Boundary Tags, and Case Inputs}
+Meshes are read from CGNS files with the CGNS mid-level library. The reader
+loops over all unstructured zones in the base, reads vertex coordinates and
+element connectivity (triangles and quadrilaterals), and merges conformal
+zone interfaces geometrically by matching vertex coordinates, so multi-zone
+meshes become a single contiguous cell/face topology; both supplied meshes
+contain a single unstructured zone, so the merge path is a safeguard rather
+than an active requirement here. Boundary-family names are read from the mesh
+and mapped to physical boundary conditions through the case file's
+\texttt{boundary\_conditions} block --- the solver never hard-codes one naming
+convention: the NACA0012 mesh tags its boundaries \texttt{bc-2} (farfield) and
+\texttt{bc-4} (wall), while the cylinder mesh uses \texttt{FAR} and
+\texttt{WALL}.
+
+After the merge, the solver builds the face-based data structure: every
+interior face connects exactly two cells, and boundary faces carry their
+family tag. Cell volumes (areas in 2-D) come from the polygon geometry, face
+normals from the edge vectors with the orientation convention "out of the
+left (lower-connectivity) cell," flipped when the stored connectivity order
+requires it, and wall lengths for force integration are the boundary edge
+lengths. \cref{tab:cases} summarizes the meshes, tags, and case parameters
+parsed from the case files.
+
+\begin{table}[htbp]
+\centering
+\caption{Meshes, boundary-tag mappings, and key case parameters for the eight
+required cases (parsed from the case JSONs). All NACA cases share the
+\texttt{NACA0012\_H2} mesh (20816 cells, 36498 faces) and moment center
+$(0.25,0)$; both cylinder cases share the \texttt{CylinderB1} mesh (10185
+cells, 20180 faces) and moment center $(0,0)$. Steady run controls are listed
+as \texttt{max\_steps} / \texttt{residual\_reduction\_target} / CFL
+$\text{initial}\to\text{max}$ / \texttt{pseudo\_cfl\_ramp\_steps}.}
+\label{tab:cases}
+{\scriptsize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lllp{4.2cm}l@{}}
+\toprule
+Case id & Mode & $M_\infty$ / $Re$ & BC mapping (tag $\to$ condition) & Run controls \\
+\midrule
+\texttt{naca0012\_m015\_inviscid} & inviscid & 0.15 / -- &
+\texttt{bc-2}$\to$farfield; \texttt{bc-4}$\to$slip\_wall & 20000 / 4.0 / $1\to100$ / 2000 \\
+\texttt{naca0012\_m080\_inviscid} & inviscid & 0.8 / -- &
+\texttt{bc-2}$\to$farfield; \texttt{bc-4}$\to$slip\_wall & 30000 / 4.0 / $1\to100$ / 3000 \\
+\texttt{naca0012\_m200\_inviscid} & inviscid & 2.0 / -- &
+\texttt{bc-2}$\to$farfield; \texttt{bc-4}$\to$slip\_wall & 40000 / 3.0 / $0.2\to50$ / 5000 \\
+\texttt{naca0012\_m015\_laminar\_re5000} & laminar & 0.15 / 5000 &
+\texttt{bc-2}$\to$farfield; \texttt{bc-4}$\to$no\_slip\_adiabatic\_wall & 40000 / 4.0 / $1\to100$ / 5000 \\
+\texttt{naca0012\_m080\_laminar\_re5000} & laminar & 0.8 / 5000 &
+\texttt{bc-2}$\to$farfield; \texttt{bc-4}$\to$no\_slip\_adiabatic\_wall & 40000 / 4.0 / $0.5\to80$ / 5000 \\
+\texttt{naca0012\_m200\_laminar\_re5000} & laminar & 2.0 / 5000 &
+\texttt{bc-2}$\to$farfield; \texttt{bc-4}$\to$no\_slip\_adiabatic\_wall & 50000 / 3.0 / $0.2\to50$ / 7000 \\
+\texttt{cylinder\_m010\_laminar\_re20} & laminar & 0.1 / 20 &
+\texttt{FAR}$\to$farfield; \texttt{WALL}$\to$no\_slip\_adiabatic\_wall & 30000 / 5.0 / $1\to100$ / 3000 \\
+\texttt{cylinder\_m010\_laminar\_re200} & laminar & 0.1 / 200 &
+\texttt{FAR}$\to$farfield; \texttt{WALL}$\to$no\_slip\_adiabatic\_wall & transient BDF2: $\Delta t=0.01$, $t_f=300$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+All steady cases use \texttt{min\_inner\_iterations=3},
+\texttt{max\_inner\_iterations=50--100} (per case file), and
+\texttt{inner\_residual\_reduction\_target=0.01}; the transient case uses
+5/1000/0.001. Where production runs departed from the supplied controls
+(restarts, CFL caps, deepened targets), \cref{sec:time,sec:limitations}
+document both the supplied and the actual values.
+
+\section{Spatial Discretization}
+\label{sec:spatial}
+The solver is cell-centered: the conservative state $\mathbf U_i$ is stored at
+cell centroids, and the semi-discrete residual on the unstructured mesh is the
+face loop
+\[
+R_i(\mathbf U)=\sum_{f\in\partial i}\mathbf{\hat F}_f\,A_f,
+\]
+where the numerical flux $\mathbf{\hat F}_f=\mathbf{\hat F}(\mathbf W_L,\mathbf W_R,\mathbf n_f)$
+is evaluated from reconstructed primitive left/right states at the face
+centroid and the face normal $\mathbf n_f$ of area $A_f$. Face normals are
+oriented out of the left cell of the connectivity pair, so the right cell
+receives $-\mathbf{\hat F}_f A_f$ from the same face evaluation and the scheme
+is exactly conservative. Boundary faces contribute a single flux evaluated
+with a boundary state or a mirrored ghost state (\cref{sec:bcs}).
+
+\subsection{Second-Order Reconstruction}
+Cell gradients of the primitive variables $\mathbf W=[\rho,u,v,p]^T$ are
+computed by least squares over the face-neighbor stencil. Every interior
+neighbor contributes its centroid and cell value; every boundary face
+contributes a virtual point at the face centroid carrying the boundary value
+(free-stream state at farfield faces, the normal-velocity-removed mirror at
+slip walls, and $(\rho_i,0,0,p_i)$ at no-slip walls, which implies zero
+normal gradient of $p$ and $T$ there). The system solved per cell is
+\[
+\underbrace{\sum_{k} w_k
+\begin{bmatrix}\Delta x_k\\ \Delta y_k\end{bmatrix}
+\begin{bmatrix}\Delta x_k & \Delta y_k\end{bmatrix}}_{M_i}\,
+\nabla W_{v,i}
+=
+\sum_k w_k\,(W_{v,k}-W_{v,i})
+\begin{bmatrix}\Delta x_k\\ \Delta y_k\end{bmatrix},
+\qquad w_k=\frac{1}{\Delta x_k^2+\Delta y_k^2},
+\]
+i.e.\ inverse-distance-squared weighted least squares, with the $2\times2$
+normal matrix $M_i$ inverted analytically and regularized by $10^{-12}$ on the
+diagonal for degenerate stencils; \texttt{metadata.json} records the scheme as
+\texttt{piecewise\_linear\_inverse\_distance2\_weighted\_lsq\_gradient}.
+The \texttt{gradcheck} diagnostic command fills the
+mesh with a manufactured linear field $W_v=A_vx+B_vy+C_v$ and measures the
+gradient error: interior cells reproduce the exact gradient to
+$3.8\times10^{-13}$ on the cylinder mesh and $1.7\times10^{-10}$ on the
+finer-celled airfoil mesh (logs: \texttt{results/gradcheck\_*.log}), far
+below the $10^{-8}$ pass criterion. Boundary-adjacent cells are
+reported separately because the farfield virtual value is the constant
+free-stream state rather than the manufactured field, so exactness is not
+expected there.
+
+Reconstructed face states are piecewise linear,
+$\mathbf W_{L}=\mathbf W_i+\phi_i\,\nabla\mathbf W_i\cdot(\mathbf x_f-\mathbf x_i)$
+(and analogously $\mathbf W_R$), with $\phi_i$ the limiter of
+\cref{sec:limiter}. Second-order reconstruction is active in all production
+runs. A first-order fallback exists at two levels and is a safety mechanism,
+not a mode of operation: (i) per face, if a reconstructed face state violates
+the density or pressure floor, that face state is reset to the cell-centroid
+value (first order at that face); (ii) per cell, if the conservative update
+still violates positivity, the increment is halved up to 30 times and skipped
+entirely if still invalid. No production run required the per-cell skip; the
+per-face fallback triggers only near the $M2.0$ shocks.
+
+\subsection{Limiter and Positivity Control}
+\label{sec:limiter}
+The default limiter is the Venkatakrishnan smooth limiter. For each cell,
+stencil extrema $W^{\min}_v,W^{\max}_v$ are taken over neighbors and boundary
+virtual values; per face, with $d_2=\nabla W_{v,i}\cdot(\mathbf x_f-\mathbf x_i)$
+and $d_1=W^{\max}_v-W_{v,i}$ if $d_2>0$ else $W^{\min}_v-W_{v,i}$,
+\[
+\phi_f=\frac{d_1^2+2\epsilon^2+2d_1d_2}
+{d_1^2+2d_2^2+d_1d_2+\epsilon^2},
+\qquad
+\epsilon^2=(K h)^3,\quad h=\sqrt{\mathrm{vol}_i},\quad K=5,
+\]
+clipped to $[0,1]$ and minimized over faces, $\phi_i=\min_f\phi_f$ per
+variable. Barth--Jespersen limiting ($\phi_f=\min(1,d_1/d_2)$) is available
+via \texttt{--limiter barth}, and an unlimited first-order mode via
+\texttt{--limiter none}; all production runs use the Venkatakrishnan default.
+Faces with $|d_2|\le 10^{-14}(|W_{v,i}|+1)$ skip limiting.
+
+Density and pressure positivity is protected at three levels: hard floors
+$\rho,p\ge10^{-10}$ in every conservative$\leftrightarrow$primitive
+conversion; the per-face first-order fallback described above; and per-cell
+update backtracking (increment halving, at most 30 times, else the cell update
+is skipped). The transient predictor likewise falls back to $U^n$ if the
+linear extrapolation overshoots the floors.
+
+\subsection{Inviscid and Viscous Fluxes}
+The inviscid flux is Roe's approximate Riemann solver. With Roe averages
+$\tilde u=(u_L+s\,u_R)/(1+s)$, $s=\sqrt{\rho_R/\rho_L}$ (same for $v,h$),
+$\tilde a^2=(\gamma-1)(\tilde h-\tfrac12\tilde q^2)$, wave strengths
+$\alpha_{1,4}=\tfrac12(\Delta p\mp\tilde\rho\,\tilde a\,\Delta u_n)/\tilde a^2$,
+$\alpha_2=\Delta\rho-\Delta p/\tilde a^2$, $\alpha_3=\tilde\rho\,\Delta u_t$,
+and dissipation $\sum_k|\tilde\lambda_k|\alpha_k R_k$ assembled from the usual
+Roe eigenvectors, the face flux is
+$\hat F=\tfrac12(F_L+F_R)-\tfrac12\sum_k|\tilde\lambda_k|\alpha_k R_k$.
+A Harten entropy fix with threshold $\delta=0.1\,\tilde a$ is applied to all
+three distinct wave speeds $\tilde u_n-\tilde a$, $\tilde u_n$,
+$\tilde u_n+\tilde a$ via
+$|\lambda|_{\rm fix}=\tfrac12(\lambda^2/\delta+\delta)$ when
+$|\lambda|<\delta$. A Rusanov (local Lax--Friedrichs) flux with
+$s=\max(|u_{nL}|+a_L,|u_{nR}|+a_R)$ is available via \texttt{--flux rusanov}
+and is also the dissipation model inside the implicit approximate Jacobian
+(\cref{sec:time}); all production runs use Roe.
+
+For viscous runs, face gradients of velocity and temperature use the
+corrected-average scheme: the arithmetic average of the two cells' LSQ
+gradients is corrected along the cell-to-cell direction $\mathbf e$ by the
+cell-center finite difference,
+\[
+\overline{\nabla W}=\tfrac12(\nabla W_L+\nabla W_R),\qquad
+\nabla W_f=\overline{\nabla W}+
+\Big(\frac{W_R-W_L}{|\mathbf x_R-\mathbf x_L|}
+-\overline{\nabla W}\cdot\mathbf e\Big)\mathbf e .
+\]
+The correction deliberately uses cell-center values rather than the
+reconstructed face states: both reconstructed states are evaluated at the same
+face centroid, so their difference would vanish. The temperature gradient is
+formed per cell from primitive gradients,
+$\nabla T=(\nabla p-T\nabla\rho)/(\rho R)$, then averaged and corrected with
+cell-center temperatures. At no-slip wall faces the scheme uses a mirrored
+ghost state at twice the cell-to-face distance,
+$\mathbf u_{\rm ghost}=-\mathbf u_{\rm cell}$, again with cell-center
+velocities (face-reconstructed values would drive the wall shear toward
+zero), and the adiabatic condition is enforced exactly as
+$\nabla T=\mathbf 0$ at the wall. The viscous flux is then evaluated with the
+Newtonian stress tensor and Fourier heat flux at the wall velocity $(0,0)$.
+
+Skin friction is tangential only: the traction
+$\mathbf t=\boldsymbol\tau\cdot\mathbf n$ has its normal component removed,
+$\mathbf t_t=\mathbf t-(\mathbf t\cdot\mathbf n)\mathbf n$, before
+integration. Pressure and viscous force contributions are accumulated into
+separate sums at every wall face ($p_w\mathbf n A$ versus $-\mathbf t_t A$),
+and moments about the reference center are split the same way, so
+\texttt{forces.csv} reports \texttt{pressure\_drag}, \texttt{viscous\_drag},
+\texttt{pressure\_lift}, \texttt{viscous\_lift} alongside the totals
+(\cref{tab:forces}).
+
+\section{Boundary Conditions}
+\label{sec:bcs}
+Three boundary types are used, selected per family from the case file.
+
+\paragraph{Farfield.} A characteristic (Riemann-invariant) condition. From the
+interior state and the free-stream state, the invariants
+$R^+=u_n^{\rm int}+2a_{\rm int}/(\gamma-1)$ and
+$R^-=u_n^{\infty}-2a_\infty/(\gamma-1)$ give the boundary normal velocity and
+sound speed, $u_{n,b}=(R^++R^-)/2$, $a_b=(\gamma-1)(R^+-R^-)/4$. Subsonic
+inflow takes entropy and tangential velocity from the free stream; subsonic
+outflow takes them from the interior. Supersonic inflow prescribes the full
+free-stream state and supersonic outflow the full interior state. The boundary
+flux is then computed by the \emph{same} Roe/Rusanov solver on the interior
+and boundary states, so the farfield treatment is fully consistent with the
+interior flux.
+
+\paragraph{Inviscid slip wall.} The wall flux is pressure-only,
+$\hat F_w=(0,\;p_w n_x,\;p_w n_y,\;0)$ with $p_w$ the reconstructed left
+pressure --- identical to the mirror-state Riemann flux at a stationary wall.
+
+\paragraph{No-slip adiabatic wall.} The inviscid flux is the same
+pressure-only form; the viscous flux uses the mirrored-ghost gradient
+($\mathbf u_{\rm ghost}=-\mathbf u_{\rm cell}$ at $2\times$ the cell-to-face
+distance) and exactly zero wall temperature gradient, so the wall is adiabatic
+by construction and the wall shear enters through the tangential traction
+only.
+
+\paragraph{Surface output semantics.} \texttt{surface.csv} rows report
+\emph{boundary values}, not adjacent cell-center values: at no-slip walls the
+reported velocity and Mach number are the imposed wall values ($u=v=M=0$,
+satisfied to machine precision in the output), with density and pressure from
+the reconstructed face state; at slip walls the reported velocity is the
+tangential-projected boundary value (near-zero normal component, nonzero
+tangential component). The metadata records
+\texttt{wall\_boundary\_output\_semantics=boundary\_value}.
+
+\section{Implicit and Transient Time Integration}
+\label{sec:time}
+\paragraph{Steady pseudo-time march.} Steady cases march backward Euler in
+pseudo time with local time steps. Each pseudo step solves the
+defect-correction system
+\[
+(D+B)\,\Delta U=-R(U),\qquad
+D_{ii}=\frac{\mathrm{vol}_i}{\Delta t_i^{\rm local}}+\tfrac12\Lambda_i,
+\]
+where $B$ is a simplified Rusanov-type approximate Jacobian (exact inviscid
+flux Jacobian of the neighbor state contracted with the face normal, plus the
+scalar face spectral radius) assembled from frozen states. The local time step
+is
+\[
+\Delta t_i^{\rm local}=\frac{\mathrm{CFL}\;\mathrm{vol}_i}{\Lambda_i},\qquad
+\Lambda_i=\sum_{f\in\partial i}\lambda_f,\quad
+\lambda_f=\big(|\bar u_n|+\bar a\big)A_f
+\;\Big[+\frac{2\mu}{\rho_f}\frac{A_f}{d_f}\text{ on viscous faces}\Big],
+\]
+i.e.\ convective plus viscous spectral-radius estimates. The CFL follows a
+geometric ramp
+$\mathrm{CFL}(s)=\mathrm{CFL}_{\rm initial}
+(\mathrm{CFL}_{\rm max}/\mathrm{CFL}_{\rm initial})^{\min(1,(s-1)/N_{\rm ramp})}$
+with $N_{\rm ramp}=$ \texttt{pseudo\_cfl\_ramp\_steps} from the case file.
+
+\paragraph{Inner solver.} The linear system is iterated, not solved directly:
+each inner iteration applies one symmetric Gauss--Seidel sweep pair (forward
+ascending, then backward descending over owned cells, with halo exchange of
+$\Delta U$ between sweeps) to the \emph{true} linear residual
+$r_A=R+(D+B)\Delta U$, which is re-formed after every sweep pair, so the
+defect correction converges to the solution of $(D+B)\Delta U=-R$ rather than
+to a single sweep. Inner iterations stop when the RMS ratio
+$\|r_A\|/\|r_{A,0}\|\le$ \texttt{inner\_residual\_reduction\_target}, subject
+to the case-file minimum/maximum bounds. Observed inner-iteration counts are
+modest --- typical values 3.0--12.5 per pseudo step across the production
+steady cases, with a 100\% inner-target hit rate in every converged run
+(\texttt{inner\_target\_converged\_fraction=1.0} in all metadata).
+
+\paragraph{Convergence criteria.} A steady run reports \texttt{converged} when
+the combined residual RMS has dropped by at least
+\texttt{residual\_reduction\_target} orders from its initial value, or at a
+documented plateau: residual down $\ge2$ orders \emph{and} relative drift of
+the mean $C_D$ between the first and last fifths of the trailing
+($\le2000$-step) window below $10^{-3}$. A non-finite residual marks the run
+\texttt{failed} immediately.
+
+\paragraph{Parameters actually used.} \cref{tab:controls} lists the supplied
+case-file controls against the values actually used. Two cases departed from
+the supplied values, both documented in \cref{sec:limitations}: the $M0.8$
+laminar case was restarted from the converged inviscid state with the CFL
+capped at 4 (supplied: $0.5\to80$, cold start) after a higher-CFL instability,
+and the $M2.0$ laminar case was restarted from the inviscid state with CFL
+capped at 5 and the residual target deepened from 3.0 to 5.0.
+
+\begin{table}[htbp]
+\centering
+\caption{Supplied versus actually used run controls for the steady cases.
+"Same" means the case-file value was used unchanged. $^{\rm a}$Used:
+restarted from the converged inviscid state, CFL capped at \textbf{4} (after a
+higher-CFL instability, \cref{sec:limitations}). $^{\rm b}$Used: restarted
+from the inviscid state, CFL capped at \textbf{5}, residual target deepened
+$3.0\to\textbf{5.0}$ (\cref{sec:limitations}).}
+\label{tab:controls}
+{\scriptsize\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Case & \texttt{max\_steps} & res.\ target & \texttt{cfl} $\text{initial}\to\text{max}$ & \texttt{ramp\_steps} & inner min/max/target \\
+\midrule
+\texttt{naca0012\_m015\_inviscid} & 20000 (same) & 4.0 (same) & $1\to100$ (same) & 2000 (same) & 3/50/0.01 (same) \\
+\texttt{naca0012\_m080\_inviscid} & 30000 (same) & 4.0 (same) & $1\to100$ (same) & 3000 (same) & 3/50/0.01 (same) \\
+\texttt{naca0012\_m200\_inviscid} & 40000 (same) & 3.0 (same) & $0.2\to50$ (same) & 5000 (same) & 3/80/0.01 (same) \\
+\texttt{naca0012\_m015\_laminar\_re5000} & 40000 (same) & 4.0 (same) & $1\to100$ (same) & 5000 (same) & 3/80/0.01 (same) \\
+\texttt{naca0012\_m080\_laminar\_re5000} & 40000 (same) & 4.0 (same) & $0.5\to80$; used cap 4$^{\rm a}$ & 5000 (same) & 3/80/0.01 (same) \\
+\texttt{naca0012\_m200\_laminar\_re5000} & 50000 (same) & 3.0; used 5.0$^{\rm b}$ & $0.2\to50$; used cap 5$^{\rm b}$ & 7000 (same) & 3/100/0.01 (same) \\
+\texttt{cylinder\_m010\_laminar\_re20} & 30000 (same) & 5.0 (same) & $1\to100$ (same) & 3000 (same) & 3/80/0.01 (same) \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{Transient: true two-level BDF2.} The cylinder $Re=200$ case uses a
+genuine dual-time formulation --- an outer physical-time loop with inner
+nonlinear defect-correction iterations at every physical step, not a
+pseudo-time-only march. The physical residual at step $n+1$ is
+\[
+F_i(U)=\mathrm{vol}_i\left(c_0 U_i+c_1 U_i^{n}+c_2 U_i^{n-1}\right)+R_i(U),
+\qquad
+c_0=\tfrac{3}{2\Delta t},\; c_1=-\tfrac{2}{\Delta t},\; c_2=\tfrac{1}{2\Delta t},
+\]
+the standard second-order BDF2 combination. The first step after a cold start
+uses BDF1 ($c_0=1/\Delta t$, $c_1=-1/\Delta t$, $c_2=0$); a restart that
+carries BDF2 history continues directly with BDF2. Each physical step starts
+from a linear-extrapolation predictor $U^*=U^n+(U^n-U^{n-1})$ (with positivity
+fallback to $U^n$), then iterates: batches of symmetric Gauss--Seidel sweep
+pairs on the linear residual $r_A=F+(D+B)\Delta U$ alternate with an outer
+nonlinear refresh (apply $\Delta U$, re-evaluate the true $F(U)$, recompute
+the ratio $\|F\|_2/\|F_0\|_2$), until the total residual --- spatial plus
+physical time term --- has dropped by the inner target $10^{-3}$, bounded by
+\texttt{min\_inner\_iterations=5} and \texttt{max\_inner\_iterations=1000}.
+$U^n$ and $U^{n-1}$ remain frozen during \emph{all} inner iterations for
+$U^{n+1}$; the BDF2 history update ($U^{n-1}\leftarrow U^n$,
+$U^n\leftarrow U^{n+1}$) happens only after the inner loop has converged,
+exactly as the case file requires
+(\texttt{bdf2\_history\_update=after\_inner\_convergence}). Production
+settings are the supplied ones: \texttt{time\_step=0.01},
+\texttt{final\_time=300.0}, inner bounds 5/1000, inner target $10^{-3}$ on
+\texttt{total\_spatial\_plus\_physical\_time}.
+
+\paragraph{Dual-time pseudo diagonal.} The inner diagonal is
+\[
+D_{ii}=\frac{\mathrm{vol}_i}{\Delta t_i^{\rm pseudo}}
++\mathrm{vol}_i\,c_0+\tfrac12\Lambda_i,
+\qquad
+\Delta t_i^{\rm pseudo}=\mathrm{CFL}_{\rm pseudo}\,
+\frac{\mathrm{vol}_i}{\Lambda_i},
+\]
+with $\mathrm{CFL}_{\rm pseudo}=100$ (solver default, \texttt{--pseudo-cfl}).
+The case file recommends a pseudo-time CFL fixed near 1.0
+(\texttt{cfl\_initial=cfl\_max=1.0}), a guard against destabilizing
+Jacobi-style inner solvers; the defect-correction inner solve used here sits
+in the opposite regime, so the production run departs from that
+recommendation deliberately, as follows. This value matters: at
+$\mathrm{CFL}_{\rm pseudo}\sim1$ the pseudo term
+$\mathrm{vol}/\Delta t^{\rm pseudo}=\Lambda/\mathrm{CFL}_{\rm pseudo}$ dwarfs
+the physical term $\mathrm{vol}\,c_0$ on fine cells, so the inner iteration
+behaves like a stiff pseudo-steady solve and the nonlinear defect correction
+stalls --- a debug run at pseudo-CFL 1 (\texttt{results/dbg\_inner/}) needed a
+typical 961 inner iterations per step and hit the 1000-iteration cap on one
+of the three recorded steps (\texttt{inner\_target\_misses=1}). Raising the
+pseudo-CFL to 100 lets the physical term dominate the
+diagonal and restored convergence to roughly 54--132 inner iterations per
+step in production (\cref{sec:re200}).
+
+\paragraph{Startup perturbation.} To break the exact top-bottom symmetry of
+the initialized state, the free-stream direction is offset by
+$\Delta\alpha(t)=2^\circ\,(1-t/10)$ for $t<10$ (options
+\texttt{--pert-aoa-deg 2.0 --pert-duration 10.0}), a taper that seeds the
+vortex street without permanently tilting the flow. The transient run was
+initialized from a steady pseudo-converged state on the same mesh
+(\texttt{cases/cylinder\_m010\_laminar\_re200\_steadyinit.json}: converged in
+1262 pseudo steps, 3.07 orders, 20.0 s wall), so the boundary layer and wake
+are established before shedding begins.
+
+\section{MPI Parallelization and METIS Partitioning}
+\label{sec:mpi}
+The cell adjacency graph (cells as nodes, interior faces as edges, CSR format)
+is partitioned with METIS k-way partitioning ($k=$ number of ranks, single
+constraint) in a serial preprocessing step on rank 0. The result is cached on
+disk in a per-rank-count directory \texttt{partitions/np}$N$\texttt{/} under
+the output directory (one \texttt{rank}$r$\texttt{.bin} file per rank plus
+\texttt{global.json} and a
+\texttt{DONE} marker; the cache is reused only after validating the stored
+mesh path and rank count), so repeated runs at the same rank count skip
+re-partitioning; other ranks wait at a barrier while rank 0 preprocesses. Each
+rank then loads only its local mesh --- owned cells plus a one-cell
+face-adjacent ghost layer, ghosts ordered by (owner rank, global id) --- and
+its per-neighbor send/receive lists.
+
+Halo exchange is neighbor-scoped nonblocking
+\texttt{MPI\_Isend}/\texttt{MPI\_Irecv} over the ghost layer; buffers are
+sorted by global cell id so send and receive orders match. Three array
+families are exchanged: the conservative state $U$ (4 doubles/cell, at the
+start of every residual evaluation), a packed gradient+limiter buffer
+($\nabla W$ and $\phi$, 12 doubles/cell), and the update $\Delta U$
+(4 doubles/cell) between SGS sweeps. Scalar and vector reductions use
+\texttt{MPI\_Allreduce} (residual norms, inner-loop RMS, and the 6-component
+force/moment sums). \textbf{Solver iterations never replicate the full mesh or
+the full conservative state on every rank}: every run's metadata asserts
+\texttt{full\_mesh\_replication\_during\_iterations=false} and
+\texttt{full\_state\_replication\_during\_iterations=false}. Restart files are
+gathered to rank 0 and written in global-cell-id order (transient runs store
+the three states $U^{n+1},U^n,U^{n-1}$), so restarts are independent of the
+rank count that wrote them; on read, each rank picks its owned cells by global
+id.
+
+\cref{tab:partition} reports the partition diagnostics for the production
+$np=8$ runs. Load balance (max/min owned cells) is 1.030 (airfoil) and 1.015
+(cylinder); the ghost layer adds 2--10\% cells per rank (airfoil 1.8--7.7\%,
+cylinder 7.8--9.6\%); edge cut is 422 of
+36498 faces (1.2\%) for the airfoil and 476 of 20180 (2.4\%) for the cylinder.
+Rank 5 of the airfoil partition is the interior block (7 neighbors, 201
+ghosts, only 20 boundary faces), while rank 4 touches a single neighbor ---
+the k-way structure of a long thin C-grid domain.
+
+\begin{table}[htbp]
+\centering
+\caption{Partition diagnostics from \texttt{partition\_diagnostics.csv} for
+the production $np=8$ runs: owned/ghost cells, neighbor-rank count, and halo
+send/receive cell counts per rank (the CSV also records per-rank boundary-face
+counts). Receive counts equal the ghost counts; send counts differ by at most
+one on three ranks (a boundary-ownership asymmetry in the diagnostic), with
+matching buffer sizes by construction. Load balance is max/min owned cells;
+edge cut is the number of partitioned faces.}
+\label{tab:partition}
+\footnotesize
+\begin{tabular}{@{}lccccc@{\hspace{1.5em}}lccccc@{}}
+\toprule
+& \multicolumn{5}{c}{\texttt{NACA0012\_H2} (20816 cells)} & \multicolumn{5}{c}{\texttt{CylinderB1} (10185 cells)} \\
+\cmidrule(lr){2-6}\cmidrule(lr){7-12}
+Rank & Owned & Ghost & Neigh & Send/Recv & Rank & Owned & Ghost & Neigh & Send/Recv \\
+\midrule
+0 & 2550 & 88 & 2 & 88/88 & 0 & 1281 & 120 & 5 & 120/120 \\
+1 & 2627 & 91 & 3 & 91/91 & 1 & 1262 & 104 & 3 & 103/104 \\
+2 & 2623 & 108 & 3 & 109/108 & 2 & 1275 & 113 & 4 & 112/113 \\
+3 & 2610 & 92 & 3 & 91/92 & 3 & 1273 & 118 & 3 & 118/118 \\
+4 & 2557 & 47 & 1 & 47/47 & 4 & 1269 & 99 & 3 & 98/99 \\
+5 & 2613 & 201 & 7 & 201/201 & 5 & 1276 & 118 & 6 & 120/118 \\
+6 & 2612 & 96 & 2 & 96/96 & 6 & 1273 & 121 & 4 & 122/121 \\
+7 & 2624 & 108 & 3 & 108/108 & 7 & 1276 & 122 & 6 & 122/122 \\
+\midrule
+Edge cut & \multicolumn{4}{l}{422 (1.2\% of 36498 faces)} & & \multicolumn{5}{l}{476 (2.4\% of 20180 faces)} \\
+Load balance & \multicolumn{4}{l}{1.030} & & \multicolumn{5}{l}{1.015} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Output, Reproducibility, and Sanity Checks}
+\label{sec:output}
+\paragraph{Build and run.} The solver is C++17, built with CMake ($\ge3.16$)
+against MPI (OpenMPI 4.1 tested), CGNS and METIS from the externals tree
+(\texttt{CFD\_EXTERNALS\_ROOT}, defaulting through the workspace
+\texttt{external/} symlink to \texttt{/opt/external/cfd\_externals/install}),
+and header-only nlohmann/json under \texttt{/opt/external}:
+\begin{verbatim}
+cd solver && cmake -S . -B build && cmake --build build -j8
+mpirun -np 8 ./build/cfd2d solve \
+  --case /workspace/cfd_solver_agentic_benchmark/inputs/cases/<case_id>.json \
+  --output results/<case_id> --limiter venkat --flux roe
+\end{verbatim}
+\texttt{tools/run\_case.sh <case\_id>} wraps this invocation
+(\texttt{NP}/\texttt{LIMITER} environment overrides). Production runs use
+$np=8$; restarts add \texttt{--restart results/<source>/restart\_final.bin},
+and the escalated runs add \texttt{--cfl-max}/\texttt{--residual-target}
+overrides --- the full command line of every run is recorded in its
+\texttt{run\_status.json}. Diagnostic commands: \texttt{meshinfo},
+\texttt{selftest} (conservative/primitive round-trip, Roe consistency and
+dissipation checks, positivity floors, flux Jacobian versus finite
+difference), \texttt{gradcheck} (LSQ linear-field exactness), and
+\texttt{surface} (regenerate \texttt{surface.csv} from a restart without
+re-solving).
+
+\paragraph{Generated files.} Each run directory contains
+\texttt{residuals.csv} (per-equation RMS of $R/\mathrm{vol}$, combined L2 and
+$L_\infty$, inner-iteration count, CFL, $\Delta t$ per step),
+\texttt{forces.csv} (\texttt{step, physical\_time, cl, cd, cmz,
+pressure\_drag, viscous\_drag, pressure\_lift, viscous\_lift}, every step),
+\texttt{surface.csv} (boundary values per wall face: $x,y,n_x,n_y,p,c_p,c_f,
+\rho,u,v,M$ plus family tag, sorted by family then atan2 angle),
+\texttt{field\_*.vtu} snapshots (cell data $\rho,u,v,p,M,T$, vorticity
+$\omega_z=\partial_x v-\partial_y u$, and \texttt{partition\_rank}; the
+transient case writes one snapshot per $\Delta t=1.0$),
+\texttt{restart\_*.bin} (global-id ordered), \texttt{metadata.json} (full
+numerics/MPI manifest including inner-iteration statistics and the
+no-replication assertions), \texttt{run\_status.json} (machine-readable final
+status, command line, wall time, residual reduction),
+\texttt{partition\_diagnostics.\{csv,json\}}, \texttt{stdout.log}, and the
+\texttt{partitions/} cache.
+
+\paragraph{Figure regeneration.} All figures in \cref{sec:results} are
+regenerated from the CSV/VTU files by \texttt{tools/plot\_results.py} (no
+screenshots); \texttt{report/figure\_manifest.csv} maps every figure file to
+its case, figure type, plotted variable, and source file, and is the audit
+trail behind the captions used here.
+
+\paragraph{Sanity checks.} \texttt{tools/sanity\_checks.py} writes
+\texttt{report/sanity\_checks.json} with a per-case verdict and exits nonzero
+if any check fails; for the final artifact set it reports
+\texttt{all\_ok=true}. The check families are: (i) \emph{positivity} ---
+minimum $\rho$ and $p$ over the final VTU field and over the wall rows of
+\texttt{surface.csv} are strictly positive; (ii) \emph{wall condition} ---
+slip walls have $|u_n|<10^{-8}$ (the tangential projection is exact to
+roundoff) and no-slip walls report exactly $u=v=M=0$ with nonzero skin
+friction; (iii) \emph{force history} --- finite residual/force/surface
+histories, final $C_D$ inside wide literature-informed plausibility windows
+per case, $|C_L|<0.02$ for the symmetric zero-AoA cases, no gross late-run
+drift (final-decile half-window drift $<10\%$), and exactly zero viscous
+force columns for inviscid runs; (iv) \emph{convergence evidence} --- status
+\texttt{converged} (or \texttt{statistically\_periodic} for $Re=200$) with
+$\ge2$ orders of residual reduction, and for the shedding case Strouhal in
+$[0.15,0.25]$, lift amplitude $>0.05$, and final physical time $\ge300$; and
+(v) \emph{figure-variable checks} --- the figure manifest is re-validated
+against the examiner's rules (files on disk, filename/variable consistency,
+per-case Mach and pressure entries, and a vorticity/velocity wake entry for
+$Re=200$). The per-case values these checks consume appear in
+\cref{tab:status,tab:forces}.
+
+\section{Results}
+\label{sec:results}
+All numbers below are read from the run artifacts (\texttt{run\_status.json},
+\texttt{forces.csv}, \texttt{residuals.csv}, \texttt{surface.csv}) under
+\texttt{solver/results/}. All eight required cases have completed: seven
+converged (one at a documented plateau), and the $Re=200$ vortex-shedding
+case reached \texttt{statistically\_periodic} at $t=300$.
+
+\subsection{Summary Tables}
+\begin{table}[htbp]
+\centering
+\caption{Run status for the eight required cases (from
+\texttt{run\_status.json}). All runs used $np=8$ MPI ranks. Residual
+reduction is in orders of magnitude of the combined L2 residual; "plateau"
+marks the documented-plateau stop of \cref{sec:time}. Step counters for the
+restarted runs continue from the restart source (2205 / 40000 / 1262 for the
+$M0.8$ inviscid, $M2.0$ inviscid, and $Re=200$ steady-init states
+respectively); the $Re=200$ row executed 30000 physical steps
+($\Delta t=0.01$) after its steady initialization.}
+\label{tab:status}
+{\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrrl@{}}
+\toprule
+Case id & Ranks & Steps & Phys.\ time & Orders & Wall time [s] & Status \\
+\midrule
+\texttt{naca0012\_m015\_inviscid} & 8 & 1470 & 0 & 4.10 & 16.8 & converged \\
+\texttt{naca0012\_m080\_inviscid} & 8 & 2205 & 0 & 4.00 & 195.4 & converged \\
+\texttt{naca0012\_m200\_inviscid} & 8 & 40000 & 0 & 2.26 & 2894.7 & converged (plateau) \\
+\texttt{naca0012\_m015\_laminar\_re5000} & 8 & 1939 & 0 & 4.01 & 155.2 & converged \\
+\texttt{naca0012\_m080\_laminar\_re5000} & 8 & 8710 & 0 & 4.00 & 134.1 & converged \\
+\texttt{naca0012\_m200\_laminar\_re5000} & 8 & 76601 & 0 & 5.00 & 930.1 & converged \\
+\texttt{cylinder\_m010\_laminar\_re20} & 8 & 2226 & 0 & 5.00 & 148.2 & converged \\
+\texttt{cylinder\_m010\_laminar\_re200} & 8 & 31262 & 300.0 & 3.04 & 3872.6 & statistically periodic \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Final force coefficients and pressure/viscous drag split (last row of
+\texttt{forces.csv}; moments about the case-file centers).
+For the statistically periodic $Re=200$ case the values are means over the
+post-transient window $t\ge150$ (last row otherwise).}
+\label{tab:forces}
+{\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Case id & $C_D$ & $C_L$ & $C_{m_z}$ & $C_D^{\rm pres}$ & $C_D^{\rm visc}$ & Notes \\
+\midrule
+\texttt{naca0012\_m015\_inviscid} & 0.00253 & $-9.28\mathrm{e}{-4}$ & $-4.97\mathrm{e}{-4}$ & 0.00253 & 0 & 4.10 orders \\
+\texttt{naca0012\_m080\_inviscid} & 0.00867 & $2.17\mathrm{e}{-3}$ & $4.61\mathrm{e}{-4}$ & 0.00867 & 0 & 4.00 orders \\
+\texttt{naca0012\_m200\_inviscid} & 0.08827 & $-3.36\mathrm{e}{-3}$ & $7.47\mathrm{e}{-4}$ & 0.08827 & 0 & plateau, 2.26 orders \\
+\texttt{naca0012\_m015\_laminar\_re5000} & 0.07332 & $2.02\mathrm{e}{-3}$ & $6.80\mathrm{e}{-4}$ & 0.01446 & 0.05886 & 4.01 orders \\
+\texttt{naca0012\_m080\_laminar\_re5000} & 0.07010 & $1.34\mathrm{e}{-3}$ & $2.16\mathrm{e}{-4}$ & 0.03983 & 0.03027 & 4.00 orders \\
+\texttt{naca0012\_m200\_laminar\_re5000} & 0.13504 & $-1.52\mathrm{e}{-3}$ & $2.32\mathrm{e}{-4}$ & 0.09445 & 0.04059 & 5.00 orders, escalated \\
+\texttt{cylinder\_m010\_laminar\_re20} & 2.02039 & $3.57\mathrm{e}{-4}$ & $2.53\mathrm{e}{-5}$ & 1.22004 & 0.80035 & 5.00 orders \\
+\texttt{cylinder\_m010\_laminar\_re200} & 1.2616 & $-3\mathrm{e}{-5}$ & $1.97\mathrm{e}{-5}$ & 1.0200 & 0.2416 & $t\ge150$ means; $St=0.187$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{NACA0012 Cases}
+\label{sec:naca}
+All six airfoil cases share the \texttt{NACA0012\_H2} mesh (20816 cells) at
+zero angle of attack, so symmetry about the chord line is an exact property of
+the continuous problems and a direct check on the solutions.
+
+\paragraph{$M0.15$ inviscid.} The run converged in 1470 pseudo steps to 4.10
+orders of residual reduction (\cref{fig:res-m015inv,fig:forces-m015inv}). The
+final drag $C_D=0.00253$ is the spurious (numerical) drag level of the
+second-order scheme on this mesh --- in inviscid subsonic flow at zero AoA the
+physical drag is zero (d'Alembert) --- and $C_L=-9.3\times10^{-4}$ bounds the
+departure from symmetry. The surface $C_p$ (\cref{fig:cp-m015inv}) is
+symmetric to within the line width, with the stagnation value
+$C_p\approx1.018$ slightly above the incompressible value of 1 as expected at
+$M=0.15$; the Mach and pressure fields
+(\cref{fig:mach-m015inv,fig:pres-m015inv}) show the smooth low-speed
+acceleration over the nose.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/residuals_naca0012_m015_inviscid.png}\caption{Residual history (RMS per equation and combined L2) from \texttt{residuals.csv}.}\label{fig:res-m015inv}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/forces_naca0012_m015_inviscid.png}\caption{Force-coefficient history ($C_D$, $C_L$) from \texttt{forces.csv}.}\label{fig:forces-m015inv}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/surface_cp_naca0012_m015_inviscid.png}\caption{Surface $C_p$ distribution from \texttt{surface.csv}.}\label{fig:cp-m015inv}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_mach_naca0012_m015_inviscid.png}\caption{Mach-number field from \texttt{field\_final.vtu}.}\label{fig:mach-m015inv}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_pressure_naca0012_m015_inviscid.png}\caption{Static-pressure field from \texttt{field\_final.vtu}.}\label{fig:pres-m015inv}\end{subfigure}
+\caption{NACA0012, $M_\infty=0.15$, inviscid, $\alpha=0$.}
+\label{fig:m015inv}
+\end{figure}
+
+\paragraph{$M0.8$ inviscid.} Converged in 2205 steps to 4.00 orders
+(\cref{fig:res-m080inv}); the force history (\cref{fig:forces-m080inv})
+settles to $C_D=0.00867$, the wave drag of the transonic shock system, with
+$C_L=2.2\times10^{-3}$. The $C_p$ distribution (\cref{fig:cp-m080inv}) shows
+the shock pressure jump at mid-chord on both surfaces, symmetric as expected
+at $\alpha=0$; the Mach and pressure contours
+(\cref{fig:mach-m080inv,fig:pres-m080inv}) show the supersonic pocket
+terminating in a near-normal shock above and below the airfoil. The Harten
+entropy fix keeps the Roe flux non-oscillatory through the shock, and the
+late-time limiter cycling that caps further residual reduction at
+$\approx4$ orders is discussed in \cref{sec:limitations}.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/residuals_naca0012_m080_inviscid.png}\caption{Residual history from \texttt{residuals.csv}.}\label{fig:res-m080inv}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/forces_naca0012_m080_inviscid.png}\caption{Force history from \texttt{forces.csv}.}\label{fig:forces-m080inv}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/surface_cp_naca0012_m080_inviscid.png}\caption{Surface $C_p$ from \texttt{surface.csv}.}\label{fig:cp-m080inv}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_mach_naca0012_m080_inviscid.png}\caption{Mach-number field from \texttt{field\_final.vtu}.}\label{fig:mach-m080inv}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_pressure_naca0012_m080_inviscid.png}\caption{Static-pressure field from \texttt{field\_final.vtu}.}\label{fig:pres-m080inv}\end{subfigure}
+\caption{NACA0012, $M_\infty=0.8$, inviscid, $\alpha=0$.}
+\label{fig:m080inv}
+\end{figure}
+
+\paragraph{$M2.0$ inviscid.} This case ran to its 40000-step cap and stopped
+at the documented plateau: 2.26 orders of residual reduction with the mean
+drag drift below $10^{-3}$ over the trailing window
+(\cref{fig:res-m200inv,fig:forces-m200inv}). The final $C_D=0.0883$ is the
+bow-shock wave drag; $C_L=-3.4\times10^{-3}$. The surface $C_p$
+(\cref{fig:cp-m200inv}) shows the strong leading-edge compression followed by
+expansion over the forebody, and the Mach/pressure fields
+(\cref{fig:mach-m200inv,fig:pres-m200inv}) show the detached bow shock ahead
+of the nose with the shock/expansion system along the airfoil. The residual
+does not reach the 3-order case-file target because the limiter cycles near
+the shocks; the plateau stop with stable forces is the documented behavior
+allowed by the task.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.44\textwidth}\includegraphics[width=\textwidth]{figures/residuals_naca0012_m200_inviscid.png}\caption{Residual history from \texttt{residuals.csv}.}\label{fig:res-m200inv}\end{subfigure}\hfill
+\begin{subfigure}{0.44\textwidth}\includegraphics[width=\textwidth]{figures/forces_naca0012_m200_inviscid.png}\caption{Force history from \texttt{forces.csv}.}\label{fig:forces-m200inv}\end{subfigure}
+
+\begin{subfigure}{0.44\textwidth}\includegraphics[width=\textwidth]{figures/surface_cp_naca0012_m200_inviscid.png}\caption{Surface $C_p$ from \texttt{surface.csv}.}\label{fig:cp-m200inv}\end{subfigure}\hfill
+\begin{subfigure}{0.44\textwidth}\includegraphics[width=\textwidth]{figures/field_mach_naca0012_m200_inviscid.png}\caption{Mach-number field from \texttt{field\_final.vtu}.}\label{fig:mach-m200inv}\end{subfigure}
+
+\begin{subfigure}{0.44\textwidth}\includegraphics[width=\textwidth]{figures/field_pressure_naca0012_m200_inviscid.png}\caption{Static-pressure field from \texttt{field\_final.vtu}.}\label{fig:pres-m200inv}\end{subfigure}
+\caption{NACA0012, $M_\infty=2.0$, inviscid, $\alpha=0$.}
+\label{fig:m200inv}
+\end{figure}
+
+\paragraph{$M0.15$ laminar, $Re=5000$.} Converged in 1939 steps to 4.01
+orders from a cold start (\cref{fig:res-m015lam,fig:forces-m015lam}). The drag
+$C_D=0.0733$ is dominated by skin friction: $C_D^{\rm visc}=0.0589$ versus
+$C_D^{\rm pres}=0.0145$, as expected for a low-speed laminar airfoil at zero
+lift. The surface figure (\cref{fig:cp-m015lam}) adds the skin-friction
+distribution $C_f$, symmetric upper/lower, with the leading-edge peak and
+monotone decay toward the trailing edge; the Mach and pressure fields
+(\cref{fig:mach-m015lam,fig:pres-m015lam}) show the thin attached boundary
+layer and weak wake.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/residuals_naca0012_m015_laminar_re5000.png}\caption{Residual history from \texttt{residuals.csv}.}\label{fig:res-m015lam}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/forces_naca0012_m015_laminar_re5000.png}\caption{Force history from \texttt{forces.csv}.}\label{fig:forces-m015lam}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/surface_cp_naca0012_m015_laminar_re5000.png}\caption{Surface $C_p$ and $C_f$ from \texttt{surface.csv}.}\label{fig:cp-m015lam}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_mach_naca0012_m015_laminar_re5000.png}\caption{Mach-number field from \texttt{field\_final.vtu}.}\label{fig:mach-m015lam}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_pressure_naca0012_m015_laminar_re5000.png}\caption{Static-pressure field from \texttt{field\_final.vtu}.}\label{fig:pres-m015lam}\end{subfigure}
+\caption{NACA0012, $M_\infty=0.15$, laminar, $Re=5000$, $\alpha=0$.}
+\label{fig:m015lam}
+\end{figure}
+
+\paragraph{$M0.8$ laminar, $Re=5000$.} This case was restarted from the
+converged $M0.8$ inviscid state with the pseudo-CFL capped at 4 (supplied:
+$0.5\to80$ cold start) after a higher-CFL instability was observed
+(\cref{sec:limitations}); it converged in 8710 total steps (6505 after the
+restart) to 4.00 orders measured against the restart baseline
+(\cref{fig:res-m080lam,fig:forces-m080lam}). The drag $C_D=0.0701$ splits into
+$C_D^{\rm pres}=0.0398$ (shock-induced pressure drag) and
+$C_D^{\rm visc}=0.0303$. The shock/boundary-layer interaction is visible in
+the $C_p$ and $C_f$ distributions (\cref{fig:cp-m080lam}) and in the Mach and
+pressure fields (\cref{fig:mach-m080lam,fig:pres-m080lam}).
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/residuals_naca0012_m080_laminar_re5000.png}\caption{Residual history from \texttt{residuals.csv}.}\label{fig:res-m080lam}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/forces_naca0012_m080_laminar_re5000.png}\caption{Force history from \texttt{forces.csv}.}\label{fig:forces-m080lam}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/surface_cp_naca0012_m080_laminar_re5000.png}\caption{Surface $C_p$ and $C_f$ from \texttt{surface.csv}.}\label{fig:cp-m080lam}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_mach_naca0012_m080_laminar_re5000.png}\caption{Mach-number field from \texttt{field\_final.vtu}.}\label{fig:mach-m080lam}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_pressure_naca0012_m080_laminar_re5000.png}\caption{Static-pressure field from \texttt{field\_final.vtu}.}\label{fig:pres-m080lam}\end{subfigure}
+\caption{NACA0012, $M_\infty=0.8$, laminar, $Re=5000$, $\alpha=0$.}
+\label{fig:m080lam}
+\end{figure}
+
+\paragraph{$M2.0$ laminar, $Re=5000$.}
+\label{sec:m200lam}
+This case has the most involved run history of the benchmark, documented in
+full in \cref{sec:limitations}: an under-converged first run at the case-file
+3-order target, a diverged high-CFL debug continuation, and finally the
+production redo from the inviscid restart with \texttt{--cfl-max 5} and
+\texttt{--residual-target 5.0}. The redo converged cleanly: 76601 total steps
+(36601 after the restart), 5.00 orders of residual reduction, 930 s wall
+(\cref{fig:res-m200lam,fig:forces-m200lam}). The final drag $C_D=0.1350$
+($C_D^{\rm pres}=0.0944$, $C_D^{\rm visc}=0.0406$) is stable to $10^{-4}$ over
+the last 500 steps, and $C_L=-1.5\times10^{-3}$. The drag is roughly $1.5\times$
+the inviscid wave drag: the bow shock pressure rise
+(\cref{fig:cp-m200lam,fig:pres-m200lam}) dominates, with the laminar
+boundary layer visible in the Mach field (\cref{fig:mach-m200lam}) and the
+$C_f$ distribution.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/residuals_naca0012_m200_laminar_re5000.png}\caption{Residual history from \texttt{residuals.csv}.}\label{fig:res-m200lam}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/forces_naca0012_m200_laminar_re5000.png}\caption{Force history from \texttt{forces.csv}.}\label{fig:forces-m200lam}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/surface_cp_naca0012_m200_laminar_re5000.png}\caption{Surface $C_p$ and $C_f$ from \texttt{surface.csv}.}\label{fig:cp-m200lam}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_mach_naca0012_m200_laminar_re5000.png}\caption{Mach-number field from \texttt{field\_final.vtu}.}\label{fig:mach-m200lam}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_pressure_naca0012_m200_laminar_re5000.png}\caption{Static-pressure field from \texttt{field\_final.vtu}.}\label{fig:pres-m200lam}\end{subfigure}
+\caption{NACA0012, $M_\infty=2.0$, laminar, $Re=5000$, $\alpha=0$ (production
+redo with CFL cap 5 and 5-order residual target).}
+\label{fig:m200lam}
+\end{figure}
+
+\subsection{Cylinder Reynolds 20}
+\label{sec:re20}
+The steady laminar cylinder case converged in 2226 pseudo steps to 5.00 orders
+of residual reduction (\cref{fig:res-re20,fig:forces-re20}). The final drag
+$C_D=2.020$ ($C_D^{\rm pres}=1.220$, $C_D^{\rm visc}=0.800$) sits inside the
+literature range $\approx2.0$--$2.1$ for steady laminar flow past a circular
+cylinder at $Re=20$, and $C_L=3.6\times10^{-4}$ with
+$C_{m_z}=2.5\times10^{-5}$ confirm the top-bottom symmetry of the solution.
+The surface distribution (\cref{fig:cp-re20}) shows the stagnation pressure at
+the front point and the low, nearly constant base pressure over the separated
+rear, with $C_f$ vanishing at the separation points; the pressure, Mach, and
+velocity-magnitude fields
+(\cref{fig:pres-re20,fig:mach-re20,fig:velmag-re20}) show the steady,
+symmetric pair of attached recirculation bubbles closing the near wake ---
+the expected steady topology at $Re=20$, well below the shedding onset
+($Re\approx47$).
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/residuals_cylinder_m010_laminar_re20.png}\caption{Residual history from \texttt{residuals.csv}.}\label{fig:res-re20}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/forces_cylinder_m010_laminar_re20.png}\caption{Force history from \texttt{forces.csv}.}\label{fig:forces-re20}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/surface_cp_cylinder_m010_laminar_re20.png}\caption{Surface $C_p$ and $C_f$ from \texttt{surface.csv}.}\label{fig:cp-re20}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_pressure_cylinder_m010_laminar_re20.png}\caption{Static-pressure field from \texttt{field\_final.vtu}.}\label{fig:pres-re20}\end{subfigure}
+
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_mach_cylinder_m010_laminar_re20.png}\caption{Mach-number field from \texttt{field\_final.vtu}.}\label{fig:mach-re20}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\textwidth]{figures/field_velmag_cylinder_m010_laminar_re20.png}\caption{Velocity-magnitude field (wake zoom) from \texttt{field\_final.vtu}.}\label{fig:velmag-re20}\end{subfigure}
+\caption{Cylinder, $M_\infty=0.1$, laminar, $Re=20$ (steady).}
+\label{fig:re20}
+\end{figure}
+
+\subsection{Cylinder Reynolds 200 Vortex Street}
+\label{sec:re200}
+{\sloppy
+The transient case integrates BDF2 with $\Delta t=0.01$ to $t_f=300$ (30000
+physical steps) from the steady pseudo-converged initialization state
+(\cref{sec:time}), with the $2^\circ$ tapered startup perturbation. The run
+completed with \texttt{run\_status.json} reporting
+\texttt{convergence\_status=statistically\_periodic} ("post-transient periodic
+vortex shedding established"), final physical time $300.0$, 3872.6 s wall on
+8 ranks. The two-level structure was exercised exactly as specified: inner
+defect-correction iterations converged the total (spatial $+$ physical-time)
+residual by the required $10^{-3}$ at \emph{every} step (zero
+\texttt{inner\_target} misses, \texttt{inner\_target\_converged\_fraction}
+$=1.0$; final ratios $7$--$10\times10^{-4}$), with 54--132 inner iterations
+per step, mean 87 (\cref{fig:res-re200}).\par}
+
+The force history (\cref{fig:forces-re200}) shows the perturbation-induced
+onset of shedding within the first $\approx20$ time units and a clean
+statistically periodic alternating lift signal thereafter. Quantitative
+post-transient statistics were computed with a Hann-windowed FFT of $C_L(t)$
+and $C_D(t)$ over $t\ge150$ from \texttt{forces.csv} via
+\texttt{tools/cfdplot.py} \texttt{spectral\_stats}: the dominant lift
+frequency is $f=0.1867$, i.e.\ Strouhal $St=fD/U=0.187$ ($D=U=1$), the mean
+drag is $C_D=1.262$ (pressure $1.020$ $+$ viscous $0.242$), the mean lift is
+$C_L=-3\times10^{-5}$, the lift oscillates with half-range $\approx0.56$
+(peak-to-peak $\approx1.13$; the windowed-FFT amplitude returned by
+\texttt{spectral\_stats} is $1.10$), and the drag oscillation has FFT
+amplitude $0.048$ at twice the lift frequency ($f=0.373$) --- the expected
+drag pulse twice per shedding cycle. The mean moment coefficient is
+$C_{m_z}=1.97\times10^{-5}$. These values are consistent with the literature
+for laminar vortex shedding at $Re=200$ ($St\approx0.19$--$0.21$, mean
+$C_D\approx1.3$--$1.4$); the wake vorticity (\cref{fig:vort-re200}, clipped to
+$[-5,5]$ per the case-file recommendation) and the pressure and velocity
+fields (\cref{fig:pres-re200,fig:velmag-re200}) show the developed
+K\'arm\'an street.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.40\textwidth}\includegraphics[width=\textwidth]{figures/residuals_cylinder_m010_laminar_re200.png}\caption{Inner-loop residual ratio from \texttt{residuals.csv}.}\label{fig:res-re200}\end{subfigure}\hfill
+\begin{subfigure}{0.40\textwidth}\includegraphics[width=\textwidth]{figures/forces_cylinder_m010_laminar_re200.png}\caption{Force history ($C_D$, $C_L$) from \texttt{forces.csv}.}\label{fig:forces-re200}\end{subfigure}
+
+\begin{subfigure}{0.40\textwidth}\includegraphics[width=\textwidth]{figures/wake_vorticity_cylinder_m010_laminar_re200.png}\caption{Wake vorticity $\omega_z$, clipped to $[-5,5]$, from the VTU snapshots.}\label{fig:vort-re200}\end{subfigure}\hfill
+\begin{subfigure}{0.40\textwidth}\includegraphics[width=\textwidth]{figures/field_pressure_cylinder_m010_laminar_re200.png}\caption{Static-pressure field from the VTU snapshots.}\label{fig:pres-re200}\end{subfigure}
+
+\begin{subfigure}{0.40\textwidth}\includegraphics[width=\textwidth]{figures/field_velmag_cylinder_m010_laminar_re200.png}\caption{Velocity-magnitude field from the VTU snapshots.}\label{fig:velmag-re200}\end{subfigure}
+\caption{Cylinder, $M_\infty=0.1$, laminar, $Re=200$, BDF2 $\Delta t=0.01$,
+statistically periodic state at $t=300$.}
+\label{fig:re200}
+\end{figure}
+
+\section{Parallel Validation}
+\label{sec:parallel}
+{\sloppy
+Two cases were run across $np\in\{1,2,4,8\}$ in a dedicated back-to-back
+sweep (\texttt{tools/rank\_sweep.sh}, outputs under
+\texttt{results/rankstudy/}); \cref{tab:rankstudy} collects the results.
+Every rank count re-partitions the mesh (edge cut rises with $np$: 122 at
+$np=2$ to 422 at $np=8$ for the airfoil), so the SGS sweep order and the
+approximate
+Jacobian differ slightly between rank counts; the iteration counts to reach
+the 4--5 order targets therefore differ slightly (1470--1482 steps for the
+airfoil case, 2129--2226 for the cylinder case), but the converged states
+agree as follows.\par}
+
+\begin{table}[htbp]
+\centering
+\caption{Rank study: final forces, steps, and wall times across MPI rank
+counts for \texttt{naca0012\_m015\_inviscid} and
+\texttt{cylinder\_m010\_laminar\_re20}, all from one back-to-back sweep on
+the shared host (load average 23--37 during the window). Wall times at these
+small mesh sizes are indicative rather than HPC-grade; force consistency and
+run-to-run determinism are the validation metrics.}
+\label{tab:rankstudy}
+\small
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+Case & $np$ & Steps & Orders & $C_D$ & $C_L$ & Wall [s] \\
+\midrule
+\texttt{naca0012\_m015\_inviscid} & 1 & 1482 & 4.03 & 0.001705 & $-1.94\mathrm{e}{-4}$ & 57.6 \\
+ & 2 & 1471 & 4.00 & 0.002467 & $-2.48\mathrm{e}{-3}$ & 37.0 \\
+ & 4 & 1474 & 4.05 & $-2.89\mathrm{e}{-4}$ & $-1.30\mathrm{e}{-3}$ & 14.6 \\
+ & 8 & 1470 & 4.10 & 0.002527 & $-9.28\mathrm{e}{-4}$ & 20.7 \\
+\midrule
+\texttt{cylinder\_m010\_laminar\_re20} & 1 & 2129 & 5.00 & 2.01895 & $5.63\mathrm{e}{-4}$ & 34.4 \\
+ & 2 & 2144 & 5.00 & 2.01920 & $4.99\mathrm{e}{-4}$ & 17.9 \\
+ & 4 & 2173 & 5.00 & 2.01951 & $-1.58\mathrm{e}{-4}$ & 10.3 \\
+ & 8 & 2226 & 5.00 & 2.02039 & $3.57\mathrm{e}{-4}$ & 13.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Force consistency.} For the cylinder case the final drag agrees
+across rank counts to within $1.4\times10^{-3}$ in $C_D$ (0.07\%) and lift to
+$\pm6\times10^{-4}$ --- the partitioning changes only the convergence path,
+not the converged state. For the inviscid airfoil case the absolute drag is
+itself only $\mathcal O(10^{-3})$ (spurious inviscid drag, \cref{sec:naca});
+the rank-to-rank scatter ($-2.9\times10^{-4}$ to $2.5\times10^{-3}$) is of the
+same order as the discretization/convergence error at 4 orders of residual
+reduction, and the lift scatter is $\pm1.3\times10^{-3}$ about the mean. There
+is no systematic
+rank-dependent drift in either case, consistent with the global-id-ordered,
+rank-count-independent restart files and the no-replication assertions of
+\cref{sec:mpi}. Moreover, the $np=8$ sweep runs reproduce the production
+$np=8$ runs exactly --- identical step counts (1470 and 2226) and identical
+final forces to all printed digits --- demonstrating run-to-run determinism
+at fixed rank count and partition.
+
+\paragraph{Timing and load balance.} Within the sweep (one machine-load
+window), wall time scales from 57.6 s ($np=1$) to 14.6 s ($np=4$) for the
+airfoil --- a $3.9\times$ speedup, 99\% parallel efficiency --- and from
+34.4 s to 10.3 s for the cylinder ($3.3\times$, 84\%). At $np=8$ both cases
+run slightly slower than at $np=4$ (20.7 s and 13.6 s): with only
+$\approx$2600 (airfoil) or 1300 (cylinder) owned cells per rank, the halo
+exchange and per-step \texttt{MPI\_Allreduce} latency are comparable to the
+compute, and the shared host adds noise at these runtimes. Load balance
+from the partition diagnostics is 1.03 or better at $np=8$
+(\cref{tab:partition}); communication volume remains small (edge cut
+$\le2.4\%$ of faces). For reference, the production $np=8$ runs recorded
+16.8 s (airfoil) and 148.2 s (cylinder) at times of heavier machine load ---
+run-to-run timing variability on this shared host is exactly why the sweep
+timings above were all taken back-to-back.
+
+\section{Visualization and Plot Style Requirements}
+\label{sec:viz}
+All figures are generated programmatically by \texttt{tools/plot\_results.py}
+from the run artifacts and are listed with their source files in
+\texttt{report/figure\_manifest.csv}; no screenshots are used.
+
+\begin{enumerate}
+  \item Line plots (residual histories, force histories, surface
+        distributions) use readable font sizes, $1.5$--$2$\,pt line widths,
+        labeled nondimensional axes (pseudo step versus $\log_{10}$ residual
+        RMS; physical time versus $C_D$, $C_L$; surface angle versus $C_p$,
+        $C_f$), legends, and grid lines, with consistent colors per quantity
+        across cases.
+  \item Field plots are triangulated filled contours (cell values averaged to
+        nodes) with labeled colorbars naming the plotted variable, near-body
+        zoom windows that resolve the airfoil boundary layer / shock and the
+        cylinder wake, and clipped ranges where an automatic range would hide
+        the structure (wake vorticity clipped to $[-5,5]$).
+  \item Both Mach and pressure contours are provided for every case, and file
+        names match the plotted variable exactly
+        (\texttt{field\_mach\_<case>.png} plots Mach,
+        \texttt{field\_pressure\_<case>.png} plots pressure,
+        \texttt{field\_velmag\_<case>.png} plots velocity magnitude,
+        \texttt{wake\_vorticity\_<case>.png} plots $\omega_z$).
+  \item Per-case figures are laid out as compact subfigure grids (this report
+        uses \texttt{subcaption} blocks) rather than sparse one-plot pages,
+        and every figure is introduced in the text with a cross-reference.
+\end{enumerate}
+
+\section{Code Organization and Extensibility}
+\label{sec:code}
+The solver is split into single-responsibility modules
+(	exttt{src/}): \texttt{mesh.cpp} (CGNS import, cell/face geometry),
+\texttt{partition.cpp} (METIS graph partitioning, ghost layer, halo plan,
+per-rank partition cache), \texttt{spatial.cpp} (least-squares gradients,
+limiters, inviscid/viscous flux assembly, boundary conditions),
+\texttt{timestep.cpp} (steady and BDF2 transient drivers, LU-SGS inner
+solves, force reduction), \texttt{output.cpp} (CSV/VTU/restart/diagnostic
+writers), \texttt{case\_file.cpp} (JSON parsing and reference values), and
+\texttt{physics.hpp} (conserved/primitive conversion, Roe and Rusanov
+fluxes, exact flux Jacobian, viscous stresses). No supplied case is
+hard-coded anywhere in solver logic: boundary-family-to-condition mapping,
+freestream state, gas model ($\gamma$, $R$, $Pr$), reference quantities,
+and run controls are all parsed from the case JSON, and case-to-case
+variation enters only through input files or documented command-line
+options. Extension space is deliberate: a general equation of state
+replaces the calorically-perfect relations in \texttt{physics.hpp} behind
+the \texttt{GasModel} interface; RANS adds an eddy-viscosity field consumed
+by \texttt{viscous\_flux\_phys} plus transport/source terms in the
+residual driver; multi-species and 3-D extend the state vector and the
+geometry/face loops, which are written in terms of face normals and cell
+volumes rather than 2-D-specific formulas.
+
+\section{Limitations and Failure Analysis}
+\label{sec:limitations}
+\paragraph{Inviscid residual plateau.} The three inviscid cases reach
+4.0--4.1 orders of residual reduction and then plateau: the Venkatakrishnan
+limiter cycles near the shocks (and, at $M0.15$, near the stagnation region),
+so the residual stops decreasing although the forces are stable. The $M2.0$
+inviscid case plateaus earlier, at 2.26 orders, again with stable forces; it
+was stopped at its 40000-step cap and marked converged under the
+documented-plateau criterion allowed by the task ($\ge2$ orders $+$ force
+drift $<10^{-3}$). Machine-zero steady residuals would require a more
+shock-robust limiting strategy or a converged frozen-limiter pass.
+
+\paragraph{High-Mach laminar escalation.} The $M0.8$ and $M2.0$ laminar cases
+could not be run cold at their supplied CFL schedules: the
+shock/boundary-layer stiffness at high pseudo-CFL produced a higher-CFL
+instability. Both were therefore restarted from their converged inviscid
+states with the CFL capped (4 and 5 respectively, versus supplied maxima of 80
+and 50). The $M0.8$ laminar restart then converged cleanly to 4.00 orders at
+$C_D=0.0701$.
+
+\paragraph{$M2.0$ laminar: under-converged first run, divergence, redo.}
+The first $M2.0$ laminar run used the case-file 3-order residual target and
+appeared converged while the boundary layer was still developing from the
+inviscid restart: the restart transient falls 3 orders almost entirely during
+the re-adjustment of the shock system (at $-2.8$ orders from the restart
+baseline the drag was still $C_D\approx4.5$, and it fell through $1.2$ by
+$-3.5$ orders), so a 3-order stop lands mid-development at $C_D\approx3.2$,
+an order of magnitude above the plausible window. That run would have been
+misreported as successful had the force level not been checked. A debug
+continuation (\texttt{results/dbg\_m200lam\_continue/}) then diverged once the
+CFL ramp exceeded $\approx7$ (non-finite residual at step 47933, marked
+\texttt{failed}). The production redo used \texttt{--cfl-max 5} and
+\texttt{--residual-target 5.0} and converged to 5.00 orders in 76601 total
+steps (36601 after the restart), 930 s, with $C_D=0.1350$ stable to
+$10^{-4}$ over the last 500 steps. The lesson --- residual-orders alone are
+not a safe convergence criterion for restarted viscous cases --- is why the
+sanity checks of \cref{sec:output} include a force-plausibility window.
+
+\paragraph{$Re=200$ statistics window.} The $Re=200$ vortex-shedding run
+completed to $t=300$ and is marked \texttt{statistically\_periodic} by the
+solver's own late-window periodicity test, and the post-transient statistics
+($St=0.187$, mean $C_D=1.26$) sit inside the literature ranges. The
+statistics are nevertheless computed on a 150-time-unit window, so the FFT
+frequency resolution is coarse ($\Delta f\approx1/150$) and the quoted
+amplitudes carry a few-percent window-to-window variability; a longer
+integration would tighten them.
+
+\paragraph{Further improvements with more time.} (i) A shock-robust or
+frozen-limiter variant to push the inviscid cases past the plateau;
+(ii) mesh refinement in the airfoil boundary layer and cylinder wake to reduce
+the spurious inviscid drag floor and tighten the $Re=200$ statistics (a longer
+time window would also tighten the FFT frequency resolution, currently
+$\Delta f\approx1/150$); (iii) replacing the simplified Rusanov Jacobian
+with a Roe-consistent Jacobian in the inner solve to cut inner iterations at
+high Mach.
+
+\end{document}

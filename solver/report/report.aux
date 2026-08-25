@@ -1,0 +1,290 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Governing Equations and Nondimensionalization}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Meshes, Boundary Tags, and Case Inputs}{3}{section.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Meshes, boundary-tag mappings, and key case parameters for the eight required cases (parsed from the case JSONs). All NACA cases share the \texttt  {NACA0012\_H2} mesh (20816 cells, 36498 faces) and moment center $(0.25,0)$; both cylinder cases share the \texttt  {CylinderB1} mesh (10185 cells, 20180 faces) and moment center $(0,0)$. Steady run controls are listed as \texttt  {max\_steps} / \texttt  {residual\_reduction\_target} / CFL $\text  {initial}\to \text  {max}$ / \texttt  {pseudo\_cfl\_ramp\_steps}.}}{3}{table.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:cases}{{1}{3}{Meshes, boundary-tag mappings, and key case parameters for the eight required cases (parsed from the case JSONs). All NACA cases share the \texttt {NACA0012\_H2} mesh (20816 cells, 36498 faces) and moment center $(0.25,0)$; both cylinder cases share the \texttt {CylinderB1} mesh (10185 cells, 20180 faces) and moment center $(0,0)$. Steady run controls are listed as \texttt {max\_steps} / \texttt {residual\_reduction\_target} / CFL $\text {initial}\to \text {max}$ / \texttt {pseudo\_cfl\_ramp\_steps}}{table.caption.1}{}}
+\newlabel{tab:cases@cref}{{[table][1][]1}{[1][3][]3}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Spatial Discretization}{3}{section.4}\protected@file@percent }
+\newlabel{sec:spatial}{{4}{3}{Spatial Discretization}{section.4}{}}
+\newlabel{sec:spatial@cref}{{[section][4][]4}{[1][3][]3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Second-Order Reconstruction}{4}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Limiter and Positivity Control}{4}{subsection.4.2}\protected@file@percent }
+\newlabel{sec:limiter}{{4.2}{4}{Limiter and Positivity Control}{subsection.4.2}{}}
+\newlabel{sec:limiter@cref}{{[subsection][2][4]4.2}{[1][4][]4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Inviscid and Viscous Fluxes}{5}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Boundary Conditions}{5}{section.5}\protected@file@percent }
+\newlabel{sec:bcs}{{5}{5}{Boundary Conditions}{section.5}{}}
+\newlabel{sec:bcs@cref}{{[section][5][]5}{[1][5][]5}}
+\@writefile{toc}{\contentsline {paragraph}{Farfield.}{5}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Inviscid slip wall.}{6}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{No-slip adiabatic wall.}{6}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Surface output semantics.}{6}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Implicit and Transient Time Integration}{6}{section.6}\protected@file@percent }
+\newlabel{sec:time}{{6}{6}{Implicit and Transient Time Integration}{section.6}{}}
+\newlabel{sec:time@cref}{{[section][6][]6}{[1][6][]6}}
+\@writefile{toc}{\contentsline {paragraph}{Steady pseudo-time march.}{6}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Inner solver.}{6}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Convergence criteria.}{6}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Parameters actually used.}{7}{section*.9}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Supplied versus actually used run controls for the steady cases. "Same" means the case-file value was used unchanged. $^{\rm  a}$Used: restarted from the converged inviscid state, CFL capped at \textbf  {4} (after a higher-CFL instability, \cref  {sec:limitations}). $^{\rm  b}$Used: restarted from the inviscid state, CFL capped at \textbf  {5}, residual target deepened $3.0\to \textbf  {5.0}$ (\cref  {sec:limitations}).}}{7}{table.caption.10}\protected@file@percent }
+\newlabel{tab:controls}{{2}{7}{Supplied versus actually used run controls for the steady cases. "Same" means the case-file value was used unchanged. $^{\rm a}$Used: restarted from the converged inviscid state, CFL capped at \textbf {4} (after a higher-CFL instability, \cref {sec:limitations}). $^{\rm b}$Used: restarted from the inviscid state, CFL capped at \textbf {5}, residual target deepened $3.0\to \textbf {5.0}$ (\cref {sec:limitations})}{table.caption.10}{}}
+\newlabel{tab:controls@cref}{{[table][2][]2}{[1][7][]7}}
+\@writefile{toc}{\contentsline {paragraph}{Transient: true two-level BDF2.}{7}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Dual-time pseudo diagonal.}{7}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Startup perturbation.}{8}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}MPI Parallelization and METIS Partitioning}{8}{section.7}\protected@file@percent }
+\newlabel{sec:mpi}{{7}{8}{MPI Parallelization and METIS Partitioning}{section.7}{}}
+\newlabel{sec:mpi@cref}{{[section][7][]7}{[1][8][]8}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Output, Reproducibility, and Sanity Checks}{8}{section.8}\protected@file@percent }
+\newlabel{sec:output}{{8}{8}{Output, Reproducibility, and Sanity Checks}{section.8}{}}
+\newlabel{sec:output@cref}{{[section][8][]8}{[1][8][]8}}
+\@writefile{toc}{\contentsline {paragraph}{Build and run.}{8}{section*.15}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Partition diagnostics from \texttt  {partition\_diagnostics.csv} for the production $np=8$ runs: owned/ghost cells, neighbor-rank count, and halo send/receive cell counts per rank (the CSV also records per-rank boundary-face counts). Receive counts equal the ghost counts; send counts differ by at most one on three ranks (a boundary-ownership asymmetry in the diagnostic), with matching buffer sizes by construction. Load balance is max/min owned cells; edge cut is the number of partitioned faces.}}{9}{table.caption.14}\protected@file@percent }
+\newlabel{tab:partition}{{3}{9}{Partition diagnostics from \texttt {partition\_diagnostics.csv} for the production $np=8$ runs: owned/ghost cells, neighbor-rank count, and halo send/receive cell counts per rank (the CSV also records per-rank boundary-face counts). Receive counts equal the ghost counts; send counts differ by at most one on three ranks (a boundary-ownership asymmetry in the diagnostic), with matching buffer sizes by construction. Load balance is max/min owned cells; edge cut is the number of partitioned faces}{table.caption.14}{}}
+\newlabel{tab:partition@cref}{{[table][3][]3}{[1][8][]9}}
+\@writefile{toc}{\contentsline {paragraph}{Generated files.}{9}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Figure regeneration.}{9}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Sanity checks.}{10}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Results}{10}{section.9}\protected@file@percent }
+\newlabel{sec:results}{{9}{10}{Results}{section.9}{}}
+\newlabel{sec:results@cref}{{[section][9][]9}{[1][10][]10}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Summary Tables}{10}{subsection.9.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Run status for the eight required cases (from \texttt  {run\_status.json}). All runs used $np=8$ MPI ranks. Residual reduction is in orders of magnitude of the combined L2 residual; "plateau" marks the documented-plateau stop of \cref  {sec:time}. Step counters for the restarted runs continue from the restart source (2205 / 40000 / 1262 for the $M0.8$ inviscid, $M2.0$ inviscid, and $Re=200$ steady-init states respectively); the $Re=200$ row executed 30000 physical steps ($\Delta t=0.01$) after its steady initialization.}}{10}{table.caption.19}\protected@file@percent }
+\newlabel{tab:status}{{4}{10}{Run status for the eight required cases (from \texttt {run\_status.json}). All runs used $np=8$ MPI ranks. Residual reduction is in orders of magnitude of the combined L2 residual; "plateau" marks the documented-plateau stop of \cref {sec:time}. Step counters for the restarted runs continue from the restart source (2205 / 40000 / 1262 for the $M0.8$ inviscid, $M2.0$ inviscid, and $Re=200$ steady-init states respectively); the $Re=200$ row executed 30000 physical steps ($\Delta t=0.01$) after its steady initialization}{table.caption.19}{}}
+\newlabel{tab:status@cref}{{[table][4][]4}{[1][10][]10}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}NACA0012 Cases}{10}{subsection.9.2}\protected@file@percent }
+\newlabel{sec:naca}{{9.2}{10}{NACA0012 Cases}{subsection.9.2}{}}
+\newlabel{sec:naca@cref}{{[subsection][2][9]9.2}{[1][10][]10}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Final force coefficients and pressure/viscous drag split (last row of \texttt  {forces.csv}; moments about the case-file centers). For the statistically periodic $Re=200$ case the values are means over the post-transient window $t\ge 150$ (last row otherwise).}}{11}{table.caption.20}\protected@file@percent }
+\newlabel{tab:forces}{{5}{11}{Final force coefficients and pressure/viscous drag split (last row of \texttt {forces.csv}; moments about the case-file centers). For the statistically periodic $Re=200$ case the values are means over the post-transient window $t\ge 150$ (last row otherwise)}{table.caption.20}{}}
+\newlabel{tab:forces@cref}{{[table][5][]5}{[1][10][]11}}
+\@writefile{toc}{\contentsline {paragraph}{$M0.15$ inviscid.}{11}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{$M0.8$ inviscid.}{11}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{$M2.0$ inviscid.}{11}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{$M0.15$ laminar, $Re=5000$.}{11}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{$M0.8$ laminar, $Re=5000$.}{11}{section*.29}\protected@file@percent }
+\newlabel{fig:res-m015inv}{{1a}{12}{Residual history (RMS per equation and combined L2) from \texttt {residuals.csv}}{figure.caption.22}{}}
+\newlabel{fig:res-m015inv@cref}{{[subfigure][1][1]1a}{[1][11][]12}}
+\newlabel{sub@fig:res-m015inv}{{a}{12}{Residual history (RMS per equation and combined L2) from \texttt {residuals.csv}}{figure.caption.22}{}}
+\newlabel{sub@fig:res-m015inv@cref}{{[subfigure][1][1]1a}{[1][11][]12}}
+\newlabel{fig:forces-m015inv}{{1b}{12}{Force-coefficient history ($C_D$, $C_L$) from \texttt {forces.csv}}{figure.caption.22}{}}
+\newlabel{fig:forces-m015inv@cref}{{[subfigure][2][1]1b}{[1][11][]12}}
+\newlabel{sub@fig:forces-m015inv}{{b}{12}{Force-coefficient history ($C_D$, $C_L$) from \texttt {forces.csv}}{figure.caption.22}{}}
+\newlabel{sub@fig:forces-m015inv@cref}{{[subfigure][2][1]1b}{[1][11][]12}}
+\newlabel{fig:cp-m015inv}{{1c}{12}{Surface $C_p$ distribution from \texttt {surface.csv}}{figure.caption.22}{}}
+\newlabel{fig:cp-m015inv@cref}{{[subfigure][3][1]1c}{[1][11][]12}}
+\newlabel{sub@fig:cp-m015inv}{{c}{12}{Surface $C_p$ distribution from \texttt {surface.csv}}{figure.caption.22}{}}
+\newlabel{sub@fig:cp-m015inv@cref}{{[subfigure][3][1]1c}{[1][11][]12}}
+\newlabel{fig:mach-m015inv}{{1d}{12}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.22}{}}
+\newlabel{fig:mach-m015inv@cref}{{[subfigure][4][1]1d}{[1][11][]12}}
+\newlabel{sub@fig:mach-m015inv}{{d}{12}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.22}{}}
+\newlabel{sub@fig:mach-m015inv@cref}{{[subfigure][4][1]1d}{[1][11][]12}}
+\newlabel{fig:pres-m015inv}{{1e}{12}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.22}{}}
+\newlabel{fig:pres-m015inv@cref}{{[subfigure][5][1]1e}{[1][11][]12}}
+\newlabel{sub@fig:pres-m015inv}{{e}{12}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.22}{}}
+\newlabel{sub@fig:pres-m015inv@cref}{{[subfigure][5][1]1e}{[1][11][]12}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces NACA0012, $M_\infty =0.15$, inviscid, $\alpha =0$.}}{12}{figure.caption.22}\protected@file@percent }
+\newlabel{fig:m015inv}{{1}{12}{NACA0012, $M_\infty =0.15$, inviscid, $\alpha =0$}{figure.caption.22}{}}
+\newlabel{fig:m015inv@cref}{{[figure][1][]1}{[1][11][]12}}
+\newlabel{fig:res-m080inv}{{2a}{13}{Residual history from \texttt {residuals.csv}}{figure.caption.24}{}}
+\newlabel{fig:res-m080inv@cref}{{[subfigure][1][2]2a}{[1][11][]13}}
+\newlabel{sub@fig:res-m080inv}{{a}{13}{Residual history from \texttt {residuals.csv}}{figure.caption.24}{}}
+\newlabel{sub@fig:res-m080inv@cref}{{[subfigure][1][2]2a}{[1][11][]13}}
+\newlabel{fig:forces-m080inv}{{2b}{13}{Force history from \texttt {forces.csv}}{figure.caption.24}{}}
+\newlabel{fig:forces-m080inv@cref}{{[subfigure][2][2]2b}{[1][11][]13}}
+\newlabel{sub@fig:forces-m080inv}{{b}{13}{Force history from \texttt {forces.csv}}{figure.caption.24}{}}
+\newlabel{sub@fig:forces-m080inv@cref}{{[subfigure][2][2]2b}{[1][11][]13}}
+\newlabel{fig:cp-m080inv}{{2c}{13}{Surface $C_p$ from \texttt {surface.csv}}{figure.caption.24}{}}
+\newlabel{fig:cp-m080inv@cref}{{[subfigure][3][2]2c}{[1][11][]13}}
+\newlabel{sub@fig:cp-m080inv}{{c}{13}{Surface $C_p$ from \texttt {surface.csv}}{figure.caption.24}{}}
+\newlabel{sub@fig:cp-m080inv@cref}{{[subfigure][3][2]2c}{[1][11][]13}}
+\newlabel{fig:mach-m080inv}{{2d}{13}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.24}{}}
+\newlabel{fig:mach-m080inv@cref}{{[subfigure][4][2]2d}{[1][11][]13}}
+\newlabel{sub@fig:mach-m080inv}{{d}{13}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.24}{}}
+\newlabel{sub@fig:mach-m080inv@cref}{{[subfigure][4][2]2d}{[1][11][]13}}
+\newlabel{fig:pres-m080inv}{{2e}{13}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.24}{}}
+\newlabel{fig:pres-m080inv@cref}{{[subfigure][5][2]2e}{[1][11][]13}}
+\newlabel{sub@fig:pres-m080inv}{{e}{13}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.24}{}}
+\newlabel{sub@fig:pres-m080inv@cref}{{[subfigure][5][2]2e}{[1][11][]13}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces NACA0012, $M_\infty =0.8$, inviscid, $\alpha =0$.}}{13}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:m080inv}{{2}{13}{NACA0012, $M_\infty =0.8$, inviscid, $\alpha =0$}{figure.caption.24}{}}
+\newlabel{fig:m080inv@cref}{{[figure][2][]2}{[1][11][]13}}
+\newlabel{fig:res-m200inv}{{3a}{14}{Residual history from \texttt {residuals.csv}}{figure.caption.26}{}}
+\newlabel{fig:res-m200inv@cref}{{[subfigure][1][3]3a}{[1][11][]14}}
+\newlabel{sub@fig:res-m200inv}{{a}{14}{Residual history from \texttt {residuals.csv}}{figure.caption.26}{}}
+\newlabel{sub@fig:res-m200inv@cref}{{[subfigure][1][3]3a}{[1][11][]14}}
+\newlabel{fig:forces-m200inv}{{3b}{14}{Force history from \texttt {forces.csv}}{figure.caption.26}{}}
+\newlabel{fig:forces-m200inv@cref}{{[subfigure][2][3]3b}{[1][11][]14}}
+\newlabel{sub@fig:forces-m200inv}{{b}{14}{Force history from \texttt {forces.csv}}{figure.caption.26}{}}
+\newlabel{sub@fig:forces-m200inv@cref}{{[subfigure][2][3]3b}{[1][11][]14}}
+\newlabel{fig:cp-m200inv}{{3c}{14}{Surface $C_p$ from \texttt {surface.csv}}{figure.caption.26}{}}
+\newlabel{fig:cp-m200inv@cref}{{[subfigure][3][3]3c}{[1][11][]14}}
+\newlabel{sub@fig:cp-m200inv}{{c}{14}{Surface $C_p$ from \texttt {surface.csv}}{figure.caption.26}{}}
+\newlabel{sub@fig:cp-m200inv@cref}{{[subfigure][3][3]3c}{[1][11][]14}}
+\newlabel{fig:mach-m200inv}{{3d}{14}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.26}{}}
+\newlabel{fig:mach-m200inv@cref}{{[subfigure][4][3]3d}{[1][11][]14}}
+\newlabel{sub@fig:mach-m200inv}{{d}{14}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.26}{}}
+\newlabel{sub@fig:mach-m200inv@cref}{{[subfigure][4][3]3d}{[1][11][]14}}
+\newlabel{fig:pres-m200inv}{{3e}{14}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.26}{}}
+\newlabel{fig:pres-m200inv@cref}{{[subfigure][5][3]3e}{[1][11][]14}}
+\newlabel{sub@fig:pres-m200inv}{{e}{14}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.26}{}}
+\newlabel{sub@fig:pres-m200inv@cref}{{[subfigure][5][3]3e}{[1][11][]14}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces NACA0012, $M_\infty =2.0$, inviscid, $\alpha =0$.}}{14}{figure.caption.26}\protected@file@percent }
+\newlabel{fig:m200inv}{{3}{14}{NACA0012, $M_\infty =2.0$, inviscid, $\alpha =0$}{figure.caption.26}{}}
+\newlabel{fig:m200inv@cref}{{[figure][3][]3}{[1][11][]14}}
+\newlabel{fig:res-m015lam}{{4a}{15}{Residual history from \texttt {residuals.csv}}{figure.caption.28}{}}
+\newlabel{fig:res-m015lam@cref}{{[subfigure][1][4]4a}{[1][11][]15}}
+\newlabel{sub@fig:res-m015lam}{{a}{15}{Residual history from \texttt {residuals.csv}}{figure.caption.28}{}}
+\newlabel{sub@fig:res-m015lam@cref}{{[subfigure][1][4]4a}{[1][11][]15}}
+\newlabel{fig:forces-m015lam}{{4b}{15}{Force history from \texttt {forces.csv}}{figure.caption.28}{}}
+\newlabel{fig:forces-m015lam@cref}{{[subfigure][2][4]4b}{[1][11][]15}}
+\newlabel{sub@fig:forces-m015lam}{{b}{15}{Force history from \texttt {forces.csv}}{figure.caption.28}{}}
+\newlabel{sub@fig:forces-m015lam@cref}{{[subfigure][2][4]4b}{[1][11][]15}}
+\newlabel{fig:cp-m015lam}{{4c}{15}{Surface $C_p$ and $C_f$ from \texttt {surface.csv}}{figure.caption.28}{}}
+\newlabel{fig:cp-m015lam@cref}{{[subfigure][3][4]4c}{[1][11][]15}}
+\newlabel{sub@fig:cp-m015lam}{{c}{15}{Surface $C_p$ and $C_f$ from \texttt {surface.csv}}{figure.caption.28}{}}
+\newlabel{sub@fig:cp-m015lam@cref}{{[subfigure][3][4]4c}{[1][11][]15}}
+\newlabel{fig:mach-m015lam}{{4d}{15}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.28}{}}
+\newlabel{fig:mach-m015lam@cref}{{[subfigure][4][4]4d}{[1][11][]15}}
+\newlabel{sub@fig:mach-m015lam}{{d}{15}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.28}{}}
+\newlabel{sub@fig:mach-m015lam@cref}{{[subfigure][4][4]4d}{[1][11][]15}}
+\newlabel{fig:pres-m015lam}{{4e}{15}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.28}{}}
+\newlabel{fig:pres-m015lam@cref}{{[subfigure][5][4]4e}{[1][11][]15}}
+\newlabel{sub@fig:pres-m015lam}{{e}{15}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.28}{}}
+\newlabel{sub@fig:pres-m015lam@cref}{{[subfigure][5][4]4e}{[1][11][]15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces NACA0012, $M_\infty =0.15$, laminar, $Re=5000$, $\alpha =0$.}}{15}{figure.caption.28}\protected@file@percent }
+\newlabel{fig:m015lam}{{4}{15}{NACA0012, $M_\infty =0.15$, laminar, $Re=5000$, $\alpha =0$}{figure.caption.28}{}}
+\newlabel{fig:m015lam@cref}{{[figure][4][]4}{[1][11][]15}}
+\newlabel{sec:m200lam}{{9.2}{16}{$M2.0$ laminar, $Re=5000$}{section*.31}{}}
+\newlabel{sec:m200lam@cref}{{[subsection][2][9]9.2}{[1][16][]16}}
+\@writefile{toc}{\contentsline {paragraph}{$M2.0$ laminar, $Re=5000$.}{16}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Cylinder Reynolds 20}{16}{subsection.9.3}\protected@file@percent }
+\newlabel{sec:re20}{{9.3}{16}{Cylinder Reynolds 20}{subsection.9.3}{}}
+\newlabel{sec:re20@cref}{{[subsection][3][9]9.3}{[1][16][]16}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.4}Cylinder Reynolds 200 Vortex Street}{16}{subsection.9.4}\protected@file@percent }
+\newlabel{sec:re200}{{9.4}{16}{Cylinder Reynolds 200 Vortex Street}{subsection.9.4}{}}
+\newlabel{sec:re200@cref}{{[subsection][4][9]9.4}{[1][16][]16}}
+\newlabel{fig:res-m080lam}{{5a}{17}{Residual history from \texttt {residuals.csv}}{figure.caption.30}{}}
+\newlabel{fig:res-m080lam@cref}{{[subfigure][1][5]5a}{[1][16][]17}}
+\newlabel{sub@fig:res-m080lam}{{a}{17}{Residual history from \texttt {residuals.csv}}{figure.caption.30}{}}
+\newlabel{sub@fig:res-m080lam@cref}{{[subfigure][1][5]5a}{[1][16][]17}}
+\newlabel{fig:forces-m080lam}{{5b}{17}{Force history from \texttt {forces.csv}}{figure.caption.30}{}}
+\newlabel{fig:forces-m080lam@cref}{{[subfigure][2][5]5b}{[1][16][]17}}
+\newlabel{sub@fig:forces-m080lam}{{b}{17}{Force history from \texttt {forces.csv}}{figure.caption.30}{}}
+\newlabel{sub@fig:forces-m080lam@cref}{{[subfigure][2][5]5b}{[1][16][]17}}
+\newlabel{fig:cp-m080lam}{{5c}{17}{Surface $C_p$ and $C_f$ from \texttt {surface.csv}}{figure.caption.30}{}}
+\newlabel{fig:cp-m080lam@cref}{{[subfigure][3][5]5c}{[1][16][]17}}
+\newlabel{sub@fig:cp-m080lam}{{c}{17}{Surface $C_p$ and $C_f$ from \texttt {surface.csv}}{figure.caption.30}{}}
+\newlabel{sub@fig:cp-m080lam@cref}{{[subfigure][3][5]5c}{[1][16][]17}}
+\newlabel{fig:mach-m080lam}{{5d}{17}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.30}{}}
+\newlabel{fig:mach-m080lam@cref}{{[subfigure][4][5]5d}{[1][16][]17}}
+\newlabel{sub@fig:mach-m080lam}{{d}{17}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.30}{}}
+\newlabel{sub@fig:mach-m080lam@cref}{{[subfigure][4][5]5d}{[1][16][]17}}
+\newlabel{fig:pres-m080lam}{{5e}{17}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.30}{}}
+\newlabel{fig:pres-m080lam@cref}{{[subfigure][5][5]5e}{[1][16][]17}}
+\newlabel{sub@fig:pres-m080lam}{{e}{17}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.30}{}}
+\newlabel{sub@fig:pres-m080lam@cref}{{[subfigure][5][5]5e}{[1][16][]17}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces NACA0012, $M_\infty =0.8$, laminar, $Re=5000$, $\alpha =0$.}}{17}{figure.caption.30}\protected@file@percent }
+\newlabel{fig:m080lam}{{5}{17}{NACA0012, $M_\infty =0.8$, laminar, $Re=5000$, $\alpha =0$}{figure.caption.30}{}}
+\newlabel{fig:m080lam@cref}{{[figure][5][]5}{[1][16][]17}}
+\newlabel{fig:res-m200lam}{{6a}{18}{Residual history from \texttt {residuals.csv}}{figure.caption.32}{}}
+\newlabel{fig:res-m200lam@cref}{{[subfigure][1][6]6a}{[1][16][]18}}
+\newlabel{sub@fig:res-m200lam}{{a}{18}{Residual history from \texttt {residuals.csv}}{figure.caption.32}{}}
+\newlabel{sub@fig:res-m200lam@cref}{{[subfigure][1][6]6a}{[1][16][]18}}
+\newlabel{fig:forces-m200lam}{{6b}{18}{Force history from \texttt {forces.csv}}{figure.caption.32}{}}
+\newlabel{fig:forces-m200lam@cref}{{[subfigure][2][6]6b}{[1][16][]18}}
+\newlabel{sub@fig:forces-m200lam}{{b}{18}{Force history from \texttt {forces.csv}}{figure.caption.32}{}}
+\newlabel{sub@fig:forces-m200lam@cref}{{[subfigure][2][6]6b}{[1][16][]18}}
+\newlabel{fig:cp-m200lam}{{6c}{18}{Surface $C_p$ and $C_f$ from \texttt {surface.csv}}{figure.caption.32}{}}
+\newlabel{fig:cp-m200lam@cref}{{[subfigure][3][6]6c}{[1][16][]18}}
+\newlabel{sub@fig:cp-m200lam}{{c}{18}{Surface $C_p$ and $C_f$ from \texttt {surface.csv}}{figure.caption.32}{}}
+\newlabel{sub@fig:cp-m200lam@cref}{{[subfigure][3][6]6c}{[1][16][]18}}
+\newlabel{fig:mach-m200lam}{{6d}{18}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.32}{}}
+\newlabel{fig:mach-m200lam@cref}{{[subfigure][4][6]6d}{[1][16][]18}}
+\newlabel{sub@fig:mach-m200lam}{{d}{18}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.32}{}}
+\newlabel{sub@fig:mach-m200lam@cref}{{[subfigure][4][6]6d}{[1][16][]18}}
+\newlabel{fig:pres-m200lam}{{6e}{18}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.32}{}}
+\newlabel{fig:pres-m200lam@cref}{{[subfigure][5][6]6e}{[1][16][]18}}
+\newlabel{sub@fig:pres-m200lam}{{e}{18}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.32}{}}
+\newlabel{sub@fig:pres-m200lam@cref}{{[subfigure][5][6]6e}{[1][16][]18}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces NACA0012, $M_\infty =2.0$, laminar, $Re=5000$, $\alpha =0$ (production redo with CFL cap 5 and 5-order residual target).}}{18}{figure.caption.32}\protected@file@percent }
+\newlabel{fig:m200lam}{{6}{18}{NACA0012, $M_\infty =2.0$, laminar, $Re=5000$, $\alpha =0$ (production redo with CFL cap 5 and 5-order residual target)}{figure.caption.32}{}}
+\newlabel{fig:m200lam@cref}{{[figure][6][]6}{[1][16][]18}}
+\newlabel{fig:res-re20}{{7a}{19}{Residual history from \texttt {residuals.csv}}{figure.caption.33}{}}
+\newlabel{fig:res-re20@cref}{{[subfigure][1][7]7a}{[1][16][]19}}
+\newlabel{sub@fig:res-re20}{{a}{19}{Residual history from \texttt {residuals.csv}}{figure.caption.33}{}}
+\newlabel{sub@fig:res-re20@cref}{{[subfigure][1][7]7a}{[1][16][]19}}
+\newlabel{fig:forces-re20}{{7b}{19}{Force history from \texttt {forces.csv}}{figure.caption.33}{}}
+\newlabel{fig:forces-re20@cref}{{[subfigure][2][7]7b}{[1][16][]19}}
+\newlabel{sub@fig:forces-re20}{{b}{19}{Force history from \texttt {forces.csv}}{figure.caption.33}{}}
+\newlabel{sub@fig:forces-re20@cref}{{[subfigure][2][7]7b}{[1][16][]19}}
+\newlabel{fig:cp-re20}{{7c}{19}{Surface $C_p$ and $C_f$ from \texttt {surface.csv}}{figure.caption.33}{}}
+\newlabel{fig:cp-re20@cref}{{[subfigure][3][7]7c}{[1][16][]19}}
+\newlabel{sub@fig:cp-re20}{{c}{19}{Surface $C_p$ and $C_f$ from \texttt {surface.csv}}{figure.caption.33}{}}
+\newlabel{sub@fig:cp-re20@cref}{{[subfigure][3][7]7c}{[1][16][]19}}
+\newlabel{fig:pres-re20}{{7d}{19}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.33}{}}
+\newlabel{fig:pres-re20@cref}{{[subfigure][4][7]7d}{[1][16][]19}}
+\newlabel{sub@fig:pres-re20}{{d}{19}{Static-pressure field from \texttt {field\_final.vtu}}{figure.caption.33}{}}
+\newlabel{sub@fig:pres-re20@cref}{{[subfigure][4][7]7d}{[1][16][]19}}
+\newlabel{fig:mach-re20}{{7e}{19}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.33}{}}
+\newlabel{fig:mach-re20@cref}{{[subfigure][5][7]7e}{[1][16][]19}}
+\newlabel{sub@fig:mach-re20}{{e}{19}{Mach-number field from \texttt {field\_final.vtu}}{figure.caption.33}{}}
+\newlabel{sub@fig:mach-re20@cref}{{[subfigure][5][7]7e}{[1][16][]19}}
+\newlabel{fig:velmag-re20}{{7f}{19}{Velocity-magnitude field (wake zoom) from \texttt {field\_final.vtu}}{figure.caption.33}{}}
+\newlabel{fig:velmag-re20@cref}{{[subfigure][6][7]7f}{[1][16][]19}}
+\newlabel{sub@fig:velmag-re20}{{f}{19}{Velocity-magnitude field (wake zoom) from \texttt {field\_final.vtu}}{figure.caption.33}{}}
+\newlabel{sub@fig:velmag-re20@cref}{{[subfigure][6][7]7f}{[1][16][]19}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Cylinder, $M_\infty =0.1$, laminar, $Re=20$ (steady).}}{19}{figure.caption.33}\protected@file@percent }
+\newlabel{fig:re20}{{7}{19}{Cylinder, $M_\infty =0.1$, laminar, $Re=20$ (steady)}{figure.caption.33}{}}
+\newlabel{fig:re20@cref}{{[figure][7][]7}{[1][16][]19}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Parallel Validation}{20}{section.10}\protected@file@percent }
+\newlabel{sec:parallel}{{10}{20}{Parallel Validation}{section.10}{}}
+\newlabel{sec:parallel@cref}{{[section][10][]10}{[1][20][]20}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Rank study: final forces, steps, and wall times across MPI rank counts for \texttt  {naca0012\_m015\_inviscid} and \texttt  {cylinder\_m010\_laminar\_re20}, all from one back-to-back sweep on the shared host (load average 23--37 during the window). Wall times at these small mesh sizes are indicative rather than HPC-grade; force consistency and run-to-run determinism are the validation metrics.}}{20}{table.caption.35}\protected@file@percent }
+\newlabel{tab:rankstudy}{{6}{20}{Rank study: final forces, steps, and wall times across MPI rank counts for \texttt {naca0012\_m015\_inviscid} and \texttt {cylinder\_m010\_laminar\_re20}, all from one back-to-back sweep on the shared host (load average 23--37 during the window). Wall times at these small mesh sizes are indicative rather than HPC-grade; force consistency and run-to-run determinism are the validation metrics}{table.caption.35}{}}
+\newlabel{tab:rankstudy@cref}{{[table][6][]6}{[1][20][]20}}
+\@writefile{toc}{\contentsline {paragraph}{Force consistency.}{20}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Timing and load balance.}{20}{section*.37}\protected@file@percent }
+\newlabel{fig:res-re200}{{8a}{21}{Inner-loop residual ratio from \texttt {residuals.csv}}{figure.caption.34}{}}
+\newlabel{fig:res-re200@cref}{{[subfigure][1][8]8a}{[1][20][]21}}
+\newlabel{sub@fig:res-re200}{{a}{21}{Inner-loop residual ratio from \texttt {residuals.csv}}{figure.caption.34}{}}
+\newlabel{sub@fig:res-re200@cref}{{[subfigure][1][8]8a}{[1][20][]21}}
+\newlabel{fig:forces-re200}{{8b}{21}{Force history ($C_D$, $C_L$) from \texttt {forces.csv}}{figure.caption.34}{}}
+\newlabel{fig:forces-re200@cref}{{[subfigure][2][8]8b}{[1][20][]21}}
+\newlabel{sub@fig:forces-re200}{{b}{21}{Force history ($C_D$, $C_L$) from \texttt {forces.csv}}{figure.caption.34}{}}
+\newlabel{sub@fig:forces-re200@cref}{{[subfigure][2][8]8b}{[1][20][]21}}
+\newlabel{fig:vort-re200}{{8c}{21}{Wake vorticity $\omega _z$, clipped to $[-5,5]$, from the VTU snapshots}{figure.caption.34}{}}
+\newlabel{fig:vort-re200@cref}{{[subfigure][3][8]8c}{[1][20][]21}}
+\newlabel{sub@fig:vort-re200}{{c}{21}{Wake vorticity $\omega _z$, clipped to $[-5,5]$, from the VTU snapshots}{figure.caption.34}{}}
+\newlabel{sub@fig:vort-re200@cref}{{[subfigure][3][8]8c}{[1][20][]21}}
+\newlabel{fig:pres-re200}{{8d}{21}{Static-pressure field from the VTU snapshots}{figure.caption.34}{}}
+\newlabel{fig:pres-re200@cref}{{[subfigure][4][8]8d}{[1][20][]21}}
+\newlabel{sub@fig:pres-re200}{{d}{21}{Static-pressure field from the VTU snapshots}{figure.caption.34}{}}
+\newlabel{sub@fig:pres-re200@cref}{{[subfigure][4][8]8d}{[1][20][]21}}
+\newlabel{fig:velmag-re200}{{8e}{21}{Velocity-magnitude field from the VTU snapshots}{figure.caption.34}{}}
+\newlabel{fig:velmag-re200@cref}{{[subfigure][5][8]8e}{[1][20][]21}}
+\newlabel{sub@fig:velmag-re200}{{e}{21}{Velocity-magnitude field from the VTU snapshots}{figure.caption.34}{}}
+\newlabel{sub@fig:velmag-re200@cref}{{[subfigure][5][8]8e}{[1][20][]21}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Cylinder, $M_\infty =0.1$, laminar, $Re=200$, BDF2 $\Delta t=0.01$, statistically periodic state at $t=300$.}}{21}{figure.caption.34}\protected@file@percent }
+\newlabel{fig:re200}{{8}{21}{Cylinder, $M_\infty =0.1$, laminar, $Re=200$, BDF2 $\Delta t=0.01$, statistically periodic state at $t=300$}{figure.caption.34}{}}
+\newlabel{fig:re200@cref}{{[figure][8][]8}{[1][20][]21}}
+\@writefile{toc}{\contentsline {section}{\numberline {11}Visualization and Plot Style Requirements}{22}{section.11}\protected@file@percent }
+\newlabel{sec:viz}{{11}{22}{Visualization and Plot Style Requirements}{section.11}{}}
+\newlabel{sec:viz@cref}{{[section][11][]11}{[1][22][]22}}
+\@writefile{toc}{\contentsline {section}{\numberline {12}Code Organization and Extensibility}{22}{section.12}\protected@file@percent }
+\newlabel{sec:code}{{12}{22}{Code Organization and Extensibility}{section.12}{}}
+\newlabel{sec:code@cref}{{[section][12][]12}{[1][22][]22}}
+\@writefile{toc}{\contentsline {section}{\numberline {13}Limitations and Failure Analysis}{22}{section.13}\protected@file@percent }
+\newlabel{sec:limitations}{{13}{22}{Limitations and Failure Analysis}{section.13}{}}
+\newlabel{sec:limitations@cref}{{[section][13][]13}{[1][22][]22}}
+\@writefile{toc}{\contentsline {paragraph}{Inviscid residual plateau.}{22}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{High-Mach laminar escalation.}{23}{section*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{$M2.0$ laminar: under-converged first run, divergence, redo.}{23}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{$Re=200$ statistics window.}{23}{section*.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Further improvements with more time.}{23}{section*.42}\protected@file@percent }
+\gdef \@abspage@last{23}

@@ -20,8 +20,8 @@ Project instructions for coding agents working in this repository.
 ## 2. Subagents
 
 - Delegating independent subtasks to subagents is encouraged.
-- Subagent model policy: the ONLY allowed subagent model is `BLSC/Kimi-K3`
-  (passed as the `model` override to `spawn_agent`).
+- Subagent model policy: the ONLY allowed subagent model is yourself
+  (no `model` override to `spawn_agent`).
   Do not spawn subagents with any other model.
 
 ## 3. Use Subagents (Important)

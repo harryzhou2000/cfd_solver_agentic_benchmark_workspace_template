@@ -5,8 +5,9 @@ Navier--Stokes equations on unstructured meshes (triangles/quads), written in
 C++17 with MPI + METIS domain decomposition. It implements:
 
 - Roe approximate Riemann solver (Harten entropy fix) and Rusanov flux
-- Unweighted least-squares gradients (exact for linear fields, verified by
-  the gradcheck command), Barth--Jespersen and Venkatakrishnan limiters
+- Inverse-distance-squared weighted least-squares gradients (exact for
+  linear fields, verified by the gradcheck command), Barth--Jespersen and
+  Venkatakrishnan limiters
 - Corrected-average viscous face gradients; no-slip adiabatic walls via a
   mirrored-ghost wall gradient; characteristic farfield boundary condition
 - Implicit steady pseudo-time marching: backward Euler in pseudo time with an
@@ -38,7 +39,9 @@ C++17 with MPI + METIS domain decomposition. It implements:
 
 ## Run
 
-    mpirun -np 8 ./build/cfd2d solve +      --case /workspace/cfd_solver_agentic_benchmark/inputs/cases/<case_id>.json +      --output results/<case_id> --limiter venkat --flux roe
+    mpirun -np 8 ./build/cfd2d solve \
+      --case /workspace/cfd_solver_agentic_benchmark/inputs/cases/<case_id>.json \
+      --output results/<case_id> --limiter venkat --flux roe
 
 Useful options: --restart <file>, --limiter venkat|barth|none,
 --flux roe|rusanov, --cfl-max, --residual-target, --max-steps,
@@ -57,3 +60,20 @@ environment overrides).
     .venv/bin/python tools/sanity_checks.py     # physics/contract sanity checks
 
 Results live in results/<case_id>/; report sources and figures in report/.
+
+## Code layout and extensibility
+
+src/ is split into mesh.cpp (CGNS import, geometry), partition.cpp (METIS
+graph partitioning, ghost layer, halo plan, per-rank cache), spatial.cpp
+(gradients, limiters, inviscid/viscous flux assembly, boundary conditions),
+timestep.cpp (steady pseudo-time driver, BDF2 transient driver, LU-SGS
+inner solves, force reduction), output.cpp (CSV/VTU/restart/partition
+diagnostics), case_file.cpp (JSON parsing), and physics.hpp (state
+conversion, Roe/Rusanov fluxes, flux Jacobian, viscous stresses). No case
+specifics are hard-coded: boundary mapping, freestream, gas model, and run
+controls all come from the case JSON. Extension points: a general equation
+of state replaces the calorically-perfect relations in physics.hpp behind
+GasModel; RANS adds an eddy-viscosity field consumed by viscous_flux_phys
+plus transport/source terms in the residual driver; multi-species and 3-D
+extend the state vector and the geometry/face loops, which are written in
+terms of face normals and cell volumes rather than 2-D-specific formulas.

@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import numpy as np  # noqa: E402
 
-from cfdplot import read_csv_cols, spectral_stats  # noqa: E402
+from cfdplot import load_vtu, read_csv_cols, spectral_stats  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "results"
@@ -44,6 +44,48 @@ CD_RANGE = {
 }
 
 
+def add_field_wall_force_checks(entry: dict, case_id: str, d: Path) -> None:
+    """Positivity (final field + wall rows), wall-BC, and force-history
+    drift checks on the completed run directory d."""
+    checks = entry["checks"]
+    vtu = d / "field_final.vtu"
+    if vtu.exists():
+        _, _, cdata = load_vtu(vtu)
+        entry["field_min_rho"] = float(np.min(cdata["rho"]))
+        entry["field_min_pressure"] = float(np.min(cdata["pressure"]))
+        checks["field_positivity"] = bool(
+            entry["field_min_rho"] > 0.0 and entry["field_min_pressure"] > 0.0
+        )
+    surf = read_csv_cols(d / "surface.csv")
+    entry["wall_min_pressure"] = float(np.min(surf["pressure"]))
+    checks["wall_positivity"] = bool(
+        float(np.min(surf["rho"])) > 0.0 and entry["wall_min_pressure"] > 0.0
+    )
+    if "inviscid" in case_id:
+        # Slip wall: reported velocity is tangentially projected, so the
+        # normal component must vanish to roundoff.
+        un = np.abs(surf["u"] * surf["nx"] + surf["v"] * surf["ny"])
+        entry["wall_max_normal_velocity"] = float(np.max(un))
+        checks["wall_slip_normal_velocity"] = bool(np.max(un) < 1e-8)
+    else:
+        # No-slip wall: surface rows report boundary values u=v=mach=0,
+        # and the skin-friction column must be nonzero (regression guard
+        # for the corrected-face-gradient cf computation).
+        worst = max(
+            float(np.max(np.abs(surf["u"]))),
+            float(np.max(np.abs(surf["v"]))),
+            float(np.max(np.abs(surf["mach"]))),
+        )
+        entry["wall_max_velocity"] = worst
+        checks["wall_noslip_exact"] = bool(worst < 1e-14)
+        entry["wall_max_abs_cf"] = float(np.max(np.abs(surf["cf"])))
+        checks["wall_friction_nonzero"] = bool(entry["wall_max_abs_cf"] > 1e-6)
+    md = json.loads((d / "metadata.json").read_text())
+    checks["metadata_reconstruction_label"] = "inverse_distance2" in str(
+        md.get("reconstruction", "")
+    )
+
+
 def check_case(case_id: str) -> dict:
     d = RESULTS / case_id
     entry: dict = {"case_id": case_id, "checks": {}, "status": "missing"}
@@ -70,6 +112,7 @@ def check_case(case_id: str) -> dict:
         and np.all(np.isfinite(surf["cp"]))
     )
     entry["checks"]["finite_histories"] = finite
+    add_field_wall_force_checks(entry, case_id, d)
 
     lo, hi = CD_RANGE[case_id]
     if "re200" in case_id:
@@ -90,6 +133,18 @@ def check_case(case_id: str) -> dict:
         entry["checks"]["statistically_periodic"] = entry["status"] == "statistically_periodic"
         entry["checks"]["final_time_300"] = bool(status["final_physical_time"] >= 300.0)
     else:
+        # Late-window force stability: the mean of the second half of the
+        # final decile of the force history must not drift from the first
+        # half by more than 10% (scaled by max(|cd|, 0.05) so near-zero
+        # inviscid drags are not failed by roundoff-level oscillation).
+        # This catches grossly under-converged runs whose residual target
+        # tripped while forces were still ramping.
+        n = len(cd)
+        w = cd[int(0.9 * n):]
+        h = max(1, len(w) // 2)
+        drift = float(abs(w[h:].mean() - w[:h].mean()) / max(abs(cd[-1]), 0.05))
+        entry["late_force_halfdrift"] = drift
+        entry["checks"]["late_force_drift_small"] = bool(drift < 0.10)
         entry["checks"]["cd_plausible"] = bool(lo <= cd[-1] <= hi)
         entry["checks"]["cl_small"] = bool(abs(cl[-1]) < 0.02)
         entry["checks"]["converged"] = entry["status"] == "converged"
@@ -105,10 +160,96 @@ def check_case(case_id: str) -> dict:
     return entry
 
 
+def rank_study() -> dict:
+    """MPI rank-count consistency for one NACA and one cylinder case.
+    All four rank counts come from the dedicated back-to-back sweep in
+    results/rankstudy/ (same machine-load window), not the production
+    np=8 runs, so wall times are directly comparable within the sweep."""
+    out = {}
+    for cid in ["naca0012_m015_inviscid", "cylinder_m010_laminar_re20"]:
+        rows = []
+        for np_ in [1, 2, 4, 8]:
+            d = RESULTS / "rankstudy" / f"{cid}_np{np_}"
+            sp = d / "run_status.json"
+            if not sp.exists():
+                continue
+            st = json.loads(sp.read_text())
+            forces = read_csv_cols(d / "forces.csv")
+            rows.append({
+                "mpi_ranks": np_,
+                "final_step": st["final_step"],
+                "wall_time_seconds": st["wall_time_seconds"],
+                "residual_reduction_orders": st["residual_reduction_orders"],
+                "cd_final": float(forces["cd"][-1]),
+                "cl_final": float(forces["cl"][-1]),
+            })
+        if rows:
+            cds = [r["cd_final"] for r in rows]
+            cls = [r["cl_final"] for r in rows]
+            out[cid] = {
+                "runs": rows,
+                "cd_spread": float(max(cds) - min(cds)),
+                "cl_spread": float(max(cls) - min(cls)),
+                "cd_spread_ok": bool(max(cds) - min(cds) < 0.01 * max(1.0, abs(cds[-1]))),
+            }
+    return out
+
+
+def figure_checks() -> dict:
+    """Mirror the examiner's figure-manifest rules so violations are caught
+    before submission: manifest presence, files on disk, filename/variable
+    substring consistency, per-case mach+pressure entries, and a wake
+    (vorticity/velocity) entry for the Re200 case."""
+    import csv
+
+    out: dict = {"checks": {}}
+    manifest = ROOT / "report" / "figure_manifest.csv"
+    out["checks"]["manifest_present"] = manifest.exists()
+    if not manifest.exists():
+        out["ok"] = False
+        return out
+    files_ok = True
+    name_var_ok = True
+    per_case: dict = {}
+    n = 0
+    with manifest.open(newline="") as f:
+        for row in csv.DictReader(f):
+            n += 1
+            if not (ROOT / "report" / "figures" / row["figure_file"]).exists():
+                files_ok = False
+            fn = row["figure_file"].lower()
+            var = row["variable"].lower()
+            if "mach" in fn and "mach" not in var:
+                name_var_ok = False
+            if "pressure" in fn and "pressure" not in var:
+                name_var_ok = False
+            per_case.setdefault(row["case_id"], set()).add(var)
+    out["entries"] = n
+    out["checks"]["files_exist"] = files_ok
+    out["checks"]["filename_variable_consistent"] = name_var_ok
+    mp_ok = True
+    wake_ok = True
+    for cid in CASES:
+        vs = per_case.get(cid, set())
+        if "mach" not in vs or "pressure" not in vs:
+            mp_ok = False
+        if "re200" in cid and not any("vorticity" in v or "velocity" in v for v in vs):
+            wake_ok = False
+    out["checks"]["per_case_mach_and_pressure"] = mp_ok
+    out["checks"]["re200_wake_variable"] = wake_ok
+    out["ok"] = all(out["checks"].values())
+    return out
+
+
 def main() -> int:
     cases = sys.argv[1:] if len(sys.argv) > 1 else CASES
     report = {"cases": [check_case(c) for c in cases]}
-    report["all_ok"] = all(c["ok"] for c in report["cases"])
+    report["mpi_rank_study"] = rank_study()
+    report["figure_checks"] = figure_checks()
+    rank_ok = all(v["cd_spread_ok"] for v in report["mpi_rank_study"].values())
+    report["all_ok"] = (
+        all(c["ok"] for c in report["cases"]) and rank_ok and report["figure_checks"]["ok"]
+    )
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(report, indent=2) + "\n")
     for c in report["cases"]:
