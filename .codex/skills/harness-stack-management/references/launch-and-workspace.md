@@ -10,7 +10,7 @@ shells).
 | Flag | Meaning |
 |---|---|
 | `--workspace DIR` (or positional) | Host workspace dir; mounted at `/workspace` |
-| `--harness shell\|codex\|opencode` | Default command in the container (default `shell`) |
+| `--harness shell\|codex\|opencode\|claude` | Default command in the container (default `shell`) |
 | `--codex-profile ocx` | Run `codex -p ocx` (profile-based provider routing) |
 | `--name NAME` / `-n` | Container name (default `bench-<workspace-basename>`) |
 | `--cpus N` | CPU quota (default 4) |
@@ -31,7 +31,7 @@ shells).
 | `OCX_PORT` | ocx port passed into the container (probe port; default 10100, host service commonly 10109) |
 | `OPENCODEX_AUTOSTART` | `1` starts a container-local ocx (default `0`; host-hosted service assumed) |
 | `HTTP(S)_PROXY`, `ALL_PROXY`, `NO_PROXY` | Forwarded when already exported; loopback hosts kept out of `NO_PROXY` |
-| `OPENCODE_*`, `OPENCODEX_*` | Credential envs already exported on the host are forwarded into the container |
+| `OPENCODE_*`, `OPENCODEX_*`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` | Credential envs already exported on the host are forwarded into the container |
 
 ### Behavior
 
@@ -79,6 +79,7 @@ shells).
 | `opencode-config/` | `~/.config/opencode` | opencode config |
 | `opencode-data/opencode/` | `$XDG_DATA_HOME/opencode` | opencode sessions, DB, auth |
 | `opencodex/` | `~/.opencodex` | ocx config + runtime state |
+| `claude/` | `~/.claude` | Claude Code config + sessions/history/daemon state |
 | `bash/` | `~/.bashrc` etc. | bash setup + history |
 
 `.sessions/`, `.opencode/`, `.eval/` are git-excluded per workspace

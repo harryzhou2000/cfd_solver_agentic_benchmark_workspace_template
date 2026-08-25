@@ -43,7 +43,7 @@ if [ -n "${BUILD_PROGRESS:-}" ]; then
   BUILD_OPTS+=(--progress "$BUILD_PROGRESS")
 fi
 # Forward version/commit overrides (defaults live in the Dockerfile ARGs).
-for v in OPENCODE_VERSION CODEX_VERSION \
+for v in OPENCODE_VERSION CODEX_VERSION CLAUDE_VERSION \
          OPENCODEX_REPO OPENCODEX_COMMIT \
          OCX_RELAY_REPO OCX_RELAY_COMMIT \
          EXTERNAL_HEADERONLYS_REPO EXTERNAL_HEADERONLYS_TAG \

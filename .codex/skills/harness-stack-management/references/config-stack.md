@@ -8,6 +8,8 @@
 - `codex/` — `config.toml`, `opencodex.config.toml`, `ocx.config.toml`,
   `opencodex-catalog.json`, `AGENTS.md`
 - `opencodex/` — `config.json`
+- `claude/` — Claude Code user config: `settings.json`, `CLAUDE.md`,
+  `statusline-command.sh`, `agents/`
 - `bash/` — `.bashrc`/`.bash_profile`/`.profile`/`.inputrc`/`.alias`/`.envset`
 
 All files are credential-free: apiKeys are either `REDACTED`, opencode
@@ -16,7 +18,9 @@ All files are credential-free: apiKeys are either `REDACTED`, opencode
 
 ## Regenerating (`docker/scripts/sync-configs.sh`)
 
-1. Copies the current host configs (opencode, codex, opencodex, bash dotfiles).
+1. Copies the current host configs (opencode, codex, opencodex, claude, bash
+   dotfiles). Claude credential state (`~/.claude/.credentials.json`,
+   `remote-settings.json`, daemon/session data) is never copied.
 2. Redacts `apiKey`/`key`/`sk-...` values.
 3. Guards host-absolute `source ~/...` lines in the bash files.
 4. With `--env-mode`: rewrites opencode apiKeys to per-provider
@@ -37,12 +41,14 @@ The goal plugin is pinned to `npm:opencode-goal-plugin@0.8.1` in
 ## Supplying credentials at runtime
 
 - Exported `OPENCODE_*` / `OPENCODEX_*` env vars on the host are forwarded
-  into the container by start.sh (no host file reads).
+  into the container by start.sh (no host file reads); exported
+  `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` are forwarded too.
 - `--host-credentials` additionally reads the live host configs (opencode
   providers → `OPENCODE_API_KEY_<PROVIDER>`, opencodex providers →
   `OPENCODEX_<PROVIDER>_API_KEY`) into container env and ro-mounts codex
-  `auth.json` + opencode `auth.json`/`account.json`. Nothing is written into
-  the workspace.
+  `auth.json`, opencode `auth.json`/`account.json`, and Claude Code's
+  `~/.claude/.credentials.json` (OAuth). Nothing is written into the
+  workspace.
 - Codex auth is file-based (`auth.json`); there is no codex env-key path.
 
 ## Rules

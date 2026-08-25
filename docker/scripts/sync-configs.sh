@@ -73,6 +73,18 @@ done
 echo "== copying opencodex config =="
 [ -e "$HOME/.opencodex/config.json" ] && cp -a "$HOME/.opencodex/config.json" "$D/opencodex/"
 
+echo "== copying claude configs =="
+# Claude Code user config lives in ~/.claude (settings.json, CLAUDE.md,
+# statusline, agents/). Credential material (~/.claude/.credentials.json,
+# remote-settings.json, daemon/session state) is NEVER vendored: the OAuth
+# credential file is only ro-mounted at container start by start.sh
+# --host-credentials; ANTHROPIC_API_KEY/AUTH_TOKEN can be passed as env.
+mkdir -p "$D/claude"
+for f in settings.json CLAUDE.md statusline-command.sh; do
+  [ -e "$HOME/.claude/$f" ] && cp -a "$HOME/.claude/$f" "$D/claude/"
+done
+[ -d "$HOME/.claude/agents" ] && { mkdir -p "$D/claude/agents" && cp -a "$HOME/.claude/agents/." "$D/claude/agents/"; }
+
 echo "== redacting secrets =="
 find "$D" -type f \( -name '*.json' -o -name '*.jsonc' -o -name '*.toml' -o -name '*.md' -o -name '*.txt' \
   -o -name '.bashrc' -o -name '.bash_profile' -o -name '.profile' -o -name '.inputrc' -o -name '.alias' -o -name '.envset' \) \

@@ -12,7 +12,7 @@ fi
 # Usage:
 #   docker/scripts/start.sh [--workspace DIR] [--host-credentials]
 #     [--image-config] [--mount-host-configs]
-#     [--harness shell|codex|opencode] [--codex-profile ocx]
+#     [--harness shell|codex|opencode|claude] [--codex-profile ocx]
 #     [--name NAME] [--cpus N] [--detach] [--force-remove] [-- cmd...]
 #   CONFIG_STACK=/path/to/stack CPUS=8 OCX_PORT=10109 \
 #     docker/scripts/start.sh --workspace DIR
@@ -25,8 +25,9 @@ fi
 #   - codex      -> $WS/.sessions/codex            mounted at /home/cfd_agent/.codex
 #   - opencode   -> $WS/.sessions/opencode-config  mounted at /home/cfd_agent/.config/opencode
 #   - opencodex  -> $WS/.sessions/opencodex        mounted at /home/cfd_agent/.opencodex
+#   - claude     -> $WS/.sessions/claude           mounted at /home/cfd_agent/.claude
 #   - bash       -> $WS/.sessions/bash             mounted at ~/.bashrc/.profile/... (default Ubuntu setup)
-# Sessions/logs/DBs persist in $WS/.sessions for all three harnesses.
+# Sessions/logs/DBs persist in $WS/.sessions for all harnesses.
 # The stack's apiKeys are env references: export the vars on this host, or
 # pass --host-credentials to export the real keys from the live host configs
 # (read-only; never written to the workspace). The live host config stack is
@@ -51,8 +52,8 @@ fi
 # --image-config: use the image's pristine state directly (no config stack,
 # no workspace session bundle; sessions are ephemeral; for bare/CI runs).
 # --mount-host-configs: bind-mount the live host config dirs
-# (~/.codex, ~/.config/opencode, ~/.local/share/opencode, ~/.opencodex) over
-# the installed stack, for live-edit workflows without a rebuild
+# (~/.codex, ~/.config/opencode, ~/.local/share/opencode, ~/.opencodex,
+# ~/.claude) over the installed stack, for live-edit workflows without a rebuild
 # (non-reproducible escape hatch).
 #
 # Interactive mode does NOT intercept signals by default: `docker run -it
@@ -130,7 +131,8 @@ case "$HARNESS" in
   shell) CMD=("/bin/bash") ;;
   codex) CMD=("codex") ;;
   opencode) CMD=("opencode") ;;
-  *) echo "unknown --harness $HARNESS (shell|codex|opencode)" >&2; exit 1 ;;
+  claude) CMD=("claude") ;;
+  *) echo "unknown --harness $HARNESS (shell|codex|opencode|claude)" >&2; exit 1 ;;
 esac
 if [ "$HARNESS" = "codex" ] && [ -n "$CODEX_PROFILE" ] && [ $# -eq 0 ]; then
   # Route codex through the user-level opencodex profile (e.g. -p ocx) so
@@ -209,7 +211,8 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   CONFIG_STACK="${CONFIG_STACK:-$ROOT/docker/configs}"
   if [ ! -f "$CONFIG_STACK/opencode/opencode.jsonc" ] \
      || [ ! -d "$CONFIG_STACK/codex" ] \
-     || [ ! -d "$CONFIG_STACK/opencodex" ]; then
+     || [ ! -d "$CONFIG_STACK/opencodex" ] \
+     || [ ! -d "$CONFIG_STACK/claude" ]; then
     echo "ERROR: config stack incomplete at $CONFIG_STACK" >&2
     echo "       regenerate it with: docker/scripts/sync-configs.sh --env-mode" >&2
     exit 1
@@ -221,6 +224,7 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   OC_CONFIG_DIR="$SESS/opencode-config"
   OC_DATA_DIR="$SESS/opencode-data/opencode"
   OCX_DIR="$SESS/opencodex"
+  CLAUDE_DIR="$SESS/claude"
 
   echo "== installing vendored config stack ($CONFIG_STACK) into $SESS =="
   echo "  (credential-free: apiKeys are env references; supply them via"
@@ -245,6 +249,12 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   mkdir -p "$OCX_DIR"
   rsync -a --no-owner --no-group "$CONFIG_STACK/opencodex/" "$OCX_DIR/"
   MOUNTS+=(-v "$OCX_DIR:$IMG_HOME/.opencodex")
+
+  # claude: vendored config dir mounted at the claude home path; runtime
+  # state (sessions, history, daemon) persists in the workspace copy.
+  mkdir -p "$CLAUDE_DIR"
+  rsync -a --no-owner --no-group "$CONFIG_STACK/claude/" "$CLAUDE_DIR/"
+  MOUNTS+=(-v "$CLAUDE_DIR:$IMG_HOME/.claude")
 
   # bash: default Ubuntu bash setup (system template vendored under
   # docker/configs/bash — the manager host's bashrc settings + friendly
@@ -273,6 +283,9 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   done
   for v in $(env | sed -n 's/^\(OPENCODEX_[A-Z0-9_]*\)=.*/\1/p'); do
     ENVS+=(-e "$v")
+  done
+  for v in ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN; do
+    if [ -n "${!v:-}" ]; then ENVS+=(-e "$v=${!v}"); fi
   done
 
   if [ "$HOST_CRED" = "1" ]; then
@@ -365,6 +378,12 @@ PYEOF
         MOUNTS+=(-v "$HOME/.local/share/opencode/$f:$SESS_CTR/opencode-data/opencode/$f:ro")
       fi
     done
+    if [ -f "$HOME/.claude/.credentials.json" ]; then
+      touch "$CLAUDE_DIR/.credentials.json"  # non-credential placeholder; real file mounts over it
+      # Claude Code OAuth credentials; mounted read-only so the container can
+      # never modify the host credentials.
+      MOUNTS+=(-v "$HOME/.claude/.credentials.json:$IMG_HOME/.claude/.credentials.json:ro")
+    fi
   fi
 
   # keep bundled sessions out of git (also covers pre-existing workspaces)
@@ -379,7 +398,7 @@ fi
 
 if [ "$MOUNT_HOST" = "1" ]; then
   echo "WARNING: --mount-host-configs mounts the live host config dirs over the vendored stack (non-reproducible escape hatch)"
-  for d in .codex .config/opencode .local/share/opencode .opencodex; do
+  for d in .codex .config/opencode .local/share/opencode .opencodex .claude; do
     if [ -d "$HOME/$d" ]; then
       MOUNTS+=(-v "$HOME/$d:$IMG_HOME/$d")
     else
@@ -442,6 +461,7 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   echo "  opencode:     $WS/.sessions/opencode-config -> $IMG_HOME/.config/opencode"
   echo "  opencode data:$SESS_CTR/opencode-data (XDG_DATA_HOME)"
   echo "  opencodex:    $WS/.sessions/opencodex -> $IMG_HOME/.opencodex"
+  echo "  claude:       $WS/.sessions/claude -> $IMG_HOME/.claude"
   echo "  ocx service:  host-hosted by default (no in-container ocx; OPENCODEX_AUTOSTART=1 to opt in)"
   [ "$HOST_CRED" = "1" ] && echo "  credentials:  host-credentials mode (live keys via env/binds)"
   [ "$MOUNT_HOST" = "1" ] && echo "  credentials/configs: live host dirs mounted over the stack"

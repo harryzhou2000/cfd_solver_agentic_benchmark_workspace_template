@@ -9,7 +9,7 @@
   forces it. The build does not source any proxy script.
 - `BUILD_NO_CACHE=1`, `BUILD_PROGRESS=<plain|tty>`.
 - Forwards version/commit overrides from env: `OPENCODE_VERSION`,
-  `CODEX_VERSION`, `OPENCODEX_REPO`/`OPENCODEX_COMMIT`,
+  `CODEX_VERSION`, `CLAUDE_VERSION`, `OPENCODEX_REPO`/`OPENCODEX_COMMIT`,
   `OCX_RELAY_REPO`/`OCX_RELAY_COMMIT`,
   `EXTERNAL_HEADERONLYS_REPO`/`EXTERNAL_HEADERONLYS_TAG`,
   `CFD_EXTERNALS_REPO`/`CFD_EXTERNALS_COMMIT`.
@@ -20,7 +20,8 @@
 |---|---|
 | Base | ubuntu:24.04 |
 | opencode | 1.18.18 |
-| codex-cli | 0.148.0 |
+| codex-cli | 0.149.1 |
+| claude-code | 2.1.241 (@anthropic-ai/claude-code, npm) |
 | Node.js | 24.18.0 |
 | bun | 1.3.14 |
 | uv | 0.12.1 |
@@ -48,6 +49,9 @@ edits inside RUN steps.
 - codex-cli and codegraph share one npm layer (system prefix /opt/node);
   @openai/codex is installed via npm because the official GitHub standalone
   tarball does NOT ship codex-code-mode-host (Code Mode breaks without it).
+- Claude Code (@anthropic-ai/claude-code) installs in the same npm layer;
+  the package ships its native binary (claude.exe), so it is functional even
+  when npm skips postinstall scripts.
 - The image is user-agnostic: one generic `cfd_agent` (uid/gid 1000), home
   kept empty, opencode stores under `/opt` (XDG_*), entrypoint remaps at
   start.

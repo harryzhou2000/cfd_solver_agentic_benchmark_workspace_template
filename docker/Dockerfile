@@ -24,7 +24,8 @@ ARG JOBS=4
 
 # --- pinned versions / commits (override with --build-arg to switch) --------
 ARG OPENCODE_VERSION=1.18.18
-ARG CODEX_VERSION=0.148.0
+ARG CODEX_VERSION=0.149.1
+ARG CLAUDE_VERSION=2.1.241
 ARG OPENCODEX_REPO=https://github.com/harryzhou2000/opencodex.git
 ARG OPENCODEX_COMMIT=ea7f5a69748c666f739143142627f8ace1fcb271
 ARG OCX_RELAY_REPO=https://github.com/harryzhou2000/ocx-relay.git
@@ -182,15 +183,18 @@ RUN chmod +x /usr/local/bin/install-opencode-plugins \
     && install-opencode-plugins --manifest /opt/opencode-plugins.json \
     && chmod -R a+rwX /opt/opencode-config /opt/opencode-cache
 
-# --- codex-cli (host version) — official npm package (system install) --------
+# --- codex-cli + claude (host versions) — official npm packages (system) ------
 # npm global installs land in /opt/node (system prefix). The npm package
 # @openai/codex@<version> pulls the platform package that ships BOTH the
 # codex binary and the code-mode-host (the standalone GitHub tarball does
-# not, which breaks Code Mode). The npm cache is redirected to the cache
-# mount so ~/.npm never appears in the image home.
+# not, which breaks Code Mode). Claude Code (@anthropic-ai/claude-code) is
+# installed the same way; the package ships the native binary (claude.exe)
+# so it works even when npm skips postinstall scripts. The npm cache is
+# redirected to the cache mount so ~/.npm never appears in the image home.
 RUN --mount=type=cache,target=/root/.npm \
     npm_config_cache=/root/.npm \
     npm install -g @openai/codex@${CODEX_VERSION} --no-audit --no-fund \
+    && npm install -g @anthropic-ai/claude-code@${CLAUDE_VERSION} --no-audit --no-fund \
     && npm install -g @colbymchenry/codegraph@1.2.0 --no-audit --no-fund
 
 # --- opencodex proxy — official source install at the pinned commit ---------
