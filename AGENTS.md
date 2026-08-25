@@ -21,8 +21,8 @@ Project instructions for coding agents working in this repository.
 
 - Delegating independent subtasks to subagents is encouraged.
 - Subagent model policy: use self-model delegation only. Every subagent must
-  inherit the main agent's model. Do not pass a `model` override to
-  `spawn_agent`; any explicit model override is strictly forbidden.
+  inherit the main Claude Code session's model. Omit the Agent tool's `model`
+  parameter. Any explicit subagent model override is strictly forbidden.
 
 ## 3. Use Subagents (Important)
 
@@ -39,22 +39,24 @@ Project instructions for coding agents working in this repository.
 - Mechanical execution: spawn subagents for repetitive work (build
   variants, case sweeps, file conversions, formatting, cleanup) so it
   runs in parallel instead of blocking you.
-- Use the spawn tool with a concrete task name and a self-contained
-  message (passed as the `task_name` and `message` overrides to
-  `spawn_agent`). Omit the `model` field so the subagent inherits the main
-  agent's model:
+- Use Claude Code's Agent tool with a short `description`, a self-contained
+  `prompt`, and an appropriate `subagent_type` such as `general-purpose` or
+  `Explore`. Omit `model` so delegation inherits the current model:
 
-  spawn_agent(
-    task_name: "code_audit",
-    message: "Audit <scope> and report findings with file:line evidence.",
-    fork_turns: "none",
+  ```text
+  Agent(
+    description: "Audit solver implementation",
+    prompt: "Audit <scope> and report concrete findings with file:line evidence.",
+    subagent_type: "general-purpose",
   )
+  ```
 
-- Subagents share the same workspace and can read and write files, but
-  `fork_turns: "none"` means they do not inherit the conversation
-  history, so the message must be self-contained. Give each one a clear
-  deliverable and ask for a concise written report; use `followup_task`
-  for iteration and `wait_agent` to collect results.
+- Launch independent Agent calls concurrently when useful. Use
+  `run_in_background: true` only for work that can proceed asynchronously,
+  and resume an existing agent when iterating instead of starting a duplicate.
+- Subagents share the workspace but receive only the task context supplied in
+  their prompt. Give each one a bounded scope, relevant paths and constraints,
+  a concrete deliverable, and a request for a concise written report.
 
 ## 4. Persistence
 
