@@ -9,7 +9,9 @@
   `opencodex-catalog.json`, `AGENTS.md`
 - `opencodex/` — `config.json`
 - `claude/` — Claude Code user config: `settings.json`, `CLAUDE.md`,
-  `statusline-command.sh`, `agents/`
+  `statusline-command.sh`, `agents/`, and `claude.json` (sanitized
+  `~/.claude.json`: mcpServers/onboarding kept; `oauthAccount`,
+  `customApiKeyResponses`, `machineID`/`userID`, `projects` removed)
 - `bash/` — `.bashrc`/`.bash_profile`/`.profile`/`.inputrc`/`.alias`/`.envset`
 
 All files are credential-free: apiKeys are either `REDACTED`, opencode

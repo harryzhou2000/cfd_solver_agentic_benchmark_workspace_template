@@ -85,6 +85,35 @@ for f in settings.json CLAUDE.md statusline-command.sh; do
 done
 [ -d "$HOME/.claude/agents" ] && { mkdir -p "$D/claude/agents" && cp -a "$HOME/.claude/agents/." "$D/claude/agents/"; }
 
+# ~/.claude.json is Claude's user-level config (mcpServers, onboarding,
+# account mapping). It also carries account/API-key material, so vendor a
+# sanitized copy: drop the credential-bearing and per-machine fields while
+# keeping the functional settings (mcpServers, theme, onboarding flags).
+if [ -e "$HOME/.claude.json" ]; then
+  python3 - "$HOME/.claude.json" "$D/claude/claude.json" <<'PYEOF'
+import json, sys
+
+src, dst = sys.argv[1], sys.argv[2]
+cfg = json.load(open(src))
+
+for key in (
+    "customApiKeyResponses",
+    "oauthAccount",
+    "machineID",
+    "userID",
+    "projects",
+    "githubRepoPaths",
+    "additionalModelCostsCache",
+    "additionalModelOptionsCache",
+):
+    cfg.pop(key, None)
+
+with open(dst, "w") as f:
+    json.dump(cfg, f, indent=2, ensure_ascii=False)
+    f.write("\n")
+PYEOF
+fi
+
 echo "== redacting secrets =="
 find "$D" -type f \( -name '*.json' -o -name '*.jsonc' -o -name '*.toml' -o -name '*.md' -o -name '*.txt' \
   -o -name '.bashrc' -o -name '.bash_profile' -o -name '.profile' -o -name '.inputrc' -o -name '.alias' -o -name '.envset' \) \

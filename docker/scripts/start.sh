@@ -255,6 +255,12 @@ if [ "$MOUNT_CONFIG" = "1" ]; then
   mkdir -p "$CLAUDE_DIR"
   rsync -a --no-owner --no-group "$CONFIG_STACK/claude/" "$CLAUDE_DIR/"
   MOUNTS+=(-v "$CLAUDE_DIR:$IMG_HOME/.claude")
+  # Claude's user-level config (~/.claude.json) is vendored sanitized and
+  # mounted at the container home so claude finds mcpServers/onboarding/etc.
+  if [ -f "$CONFIG_STACK/claude/claude.json" ]; then
+    cp -a "$CONFIG_STACK/claude/claude.json" "$CLAUDE_DIR/claude.json"
+    MOUNTS+=(-v "$CLAUDE_DIR/claude.json:$IMG_HOME/.claude.json")
+  fi
 
   # bash: default Ubuntu bash setup (system template vendored under
   # docker/configs/bash — the manager host's bashrc settings + friendly
@@ -405,6 +411,9 @@ if [ "$MOUNT_HOST" = "1" ]; then
       echo "  (skip: $HOME/$d does not exist on this host)"
     fi
   done
+  if [ -f "$HOME/.claude.json" ]; then
+    MOUNTS+=(-v "$HOME/.claude.json:$IMG_HOME/.claude.json")
+  fi
 fi
 
 # Announce every env var passed to the container. Values never print fully:

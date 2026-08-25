@@ -79,7 +79,7 @@ shells).
 | `opencode-config/` | `~/.config/opencode` | opencode config |
 | `opencode-data/opencode/` | `$XDG_DATA_HOME/opencode` | opencode sessions, DB, auth |
 | `opencodex/` | `~/.opencodex` | ocx config + runtime state |
-| `claude/` | `~/.claude` | Claude Code config + sessions/history/daemon state |
+| `claude/` | `~/.claude`, `~/.claude.json` | Claude Code config (settings, CLAUDE.md, sanitized user config) + sessions/history/daemon state |
 | `bash/` | `~/.bashrc` etc. | bash setup + history |
 
 `.sessions/`, `.opencode/`, `.eval/` are git-excluded per workspace
