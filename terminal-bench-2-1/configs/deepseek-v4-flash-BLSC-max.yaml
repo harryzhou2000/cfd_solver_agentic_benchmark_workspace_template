@@ -1,7 +1,7 @@
-# Terminal-Bench 2.1 — terminus-2 on BLSC/DeepSeek-V4-Flash (routed through
-# the local litellm proxy) at max effort, chat-completions SSE, no trial
-# retries, 3x timeout multiplier, 3 attempts per trial, all tasks in the
-# dataset (no limit).
+# Terminal-Bench 2.1 — terminus-2 on BLSC/DeepSeek-V4-Flash at max effort,
+# chat-completions SSE streamed DIRECTLY to https://llmapi.blsc.cn/v1 (no
+# litellm proxy), 3x timeout multiplier, 3 attempts per trial, all tasks in
+# the dataset (no limit).
 #
 # Run:  ./terminal-bench-2-1/run.sh
 #   or: harbor run -c terminal-bench-2-1/configs/deepseek-v4-flash-BLSC-max.yaml -y
@@ -10,10 +10,10 @@
 # Responses API configuration (also the shape ocx/opencodex expects)
 # ---------------------------------------------------------------------------
 # NOTE: the ACTIVE path below is CHAT COMPLETIONS (/v1/chat/completions with
-# stream=true), which is the working path for terminus-2 through litellm:
-# harbor drains the SSE into one LLMResponse and interleaved_thinking replays
-# reasoning_content client-side, so no server-side conversation state is
-# needed. The Responses API notes are kept here as reference / ocx usage.
+# stream=true) DIRECTLY against BLSC: harbor drains the SSE into one
+# LLMResponse and interleaved_thinking replays reasoning_content client-side,
+# so no server-side conversation state is needed. The Responses API notes are
+# kept here as reference / ocx usage.
 #
 # terminus-2 can talk to the litellm proxy with the OpenAI Responses API
 # (/v1/responses) using:
@@ -45,8 +45,8 @@
 # job_name is intentionally unset: each run gets a fresh timestamped
 # directory under jobs_dir (override with --job-name <name>).
 #
-# The API key is read from LITELLM_API_KEY in the project-root .env: run.sh
-# renders "${LITELLM_API_KEY}" into a throwaway config under .cache before
+# The API key is read from BLSC_API_KEY in the project-root .env: run.sh
+# renders "${BLSC_API_KEY}" into a throwaway config under .cache before
 # calling harbor, so no key ever lands in this vendored file.
 
 jobs_dir: terminal-bench-2-1/jobs/deepseek-v4-flash-BLSC-max
@@ -77,31 +77,30 @@ retry:
 
 agents:
   - name: terminus-2
-    # The openai/ prefix selects litellm's OpenAI-compatible client; the proxy
-    # still receives model "BLSC/DeepSeek-V4-Flash" (its BLSC route).
-    model_name: openai/BLSC/DeepSeek-V4-Flash
+    # The openai/ prefix selects litellm's OpenAI-compatible client; the wire
+    # model is "DeepSeek-V4-Flash" sent verbatim to llmapi.blsc.cn.
+    model_name: openai/DeepSeek-V4-Flash
     kwargs:
-      api_base: http://127.0.0.1:4000/v1
+      api_base: https://llmapi.blsc.cn/v1
       llm_kwargs:
-        api_key: ${LITELLM_API_KEY}
+        api_key: ${BLSC_API_KEY}
       # Chat-completions SSE (harbor fork tb21-responses-streaming):
-      # terminus-2 <-> litellm speak /v1/chat/completions with stream=true.
+      # terminus-2 <-> BLSC speak /v1/chat/completions with stream=true.
       # The patched harbor drains the SSE into one LLMResponse, and
       # reasoning_content is replayed client-side via interleaved_thinking,
       # so no server-side conversation state is needed.
       llm_call_kwargs:
         stream: true
         # litellm's OpenAI-compatible client drops top-level reasoning_effort
-        # for openai/<proxy-model> names; extra_body puts it on the wire so the
-        # proxy's custom provider (blsc, allowed_openai_params) forwards
-        # reasoning_effort: max upstream.
+        # for openai/ names; extra_body puts it on the wire so BLSC receives
+        # reasoning_effort: max.
         extra_body:
           reasoning_effort: max
       use_responses_api: false
       reasoning_effort: max
       # Register the model with litellm so every call carries max_output_tokens
-      # (sent as max_tokens on the streamed chat call; BLSC's declared limit
-      # in the proxy config: 128K).
+      # (sent as max_tokens on the streamed chat call; BLSC's declared limit:
+      # 128K).
       model_info:
         max_input_tokens: 1000000
         max_output_tokens: 128000

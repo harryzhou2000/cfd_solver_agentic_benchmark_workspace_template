@@ -1,6 +1,6 @@
 {
   "port": 10109,
-  "managementUsageMaxReadBytes": 67108864,
+  "managementUsageMaxReadBytes": 268435456,
   "appOwnedMemoryBudgetMb": 256,
   "providers": {
     "deepseek": {
@@ -108,7 +108,8 @@
       "preserveReasoningContentModels": [
         "deepseek-v4-flash-free"
       ],
-      "keyOptional": true
+      "keyOptional": true,
+      "apiKeyPool": []
     },
     "BLSC": {
       "adapter": "openai-chat",
@@ -310,6 +311,447 @@
           "cacheWrite": 5.14
         }
       }
+    },
+    "kimi-code": {
+      "adapter": "openai-chat",
+      "baseUrl": "https://api.kimi.com/coding/v1",
+      "authMode": "key",
+      "apiKey": "$OPENCODEX_KIMI_CODE_API_KEY",
+      "defaultModel": "kimi-k2.7-code",
+      "models": [
+        "k3",
+        "k3[1m]",
+        "kimi-k2.7-code",
+        "kimi-k2.7-code-highspeed",
+        "kimi-k2.6",
+        "kimi-k2.5",
+        "kimi-for-coding"
+      ],
+      "modelContextWindows": {
+        "k3": 262144,
+        "k3[1m]": 1048576,
+        "kimi-k2.7-code": 262144,
+        "kimi-k2.7-code-highspeed": 262144,
+        "kimi-k2.6": 262144,
+        "kimi-k2.5": 262144,
+        "kimi-for-coding": 262144
+      },
+      "modelInputModalities": {
+        "k3": [
+          "text",
+          "image"
+        ],
+        "k3[1m]": [
+          "text",
+          "image"
+        ]
+      },
+      "modelReasoningEfforts": {
+        "k3": [
+          "low",
+          "high",
+          "max"
+        ],
+        "k3[1m]": [
+          "low",
+          "high",
+          "max"
+        ],
+        "kimi-k2.7-code": [],
+        "kimi-k2.7-code-highspeed": [],
+        "kimi-k2.6": [],
+        "kimi-k2.5": [],
+        "kimi-for-coding": []
+      },
+      "modelDefaultReasoningEfforts": {
+        "k3": "max",
+        "k3[1m]": "max"
+      },
+      "modelReasoningEffortMap": {
+        "k3": {
+          "none": "none",
+          "low": "low",
+          "medium": "high",
+          "high": "high",
+          "xhigh": "max",
+          "max": "max"
+        },
+        "k3[1m]": {
+          "none": "none",
+          "low": "low",
+          "medium": "high",
+          "high": "high",
+          "xhigh": "max",
+          "max": "max"
+        }
+      },
+      "noReasoningModels": [
+        "kimi-k2.7-code",
+        "kimi-k2.7-code-highspeed",
+        "kimi-k2.6",
+        "kimi-k2.5",
+        "kimi-for-coding"
+      ],
+      "noTemperatureModels": [
+        "k3",
+        "k3[1m]",
+        "kimi-k2.7-code",
+        "kimi-k2.7-code-highspeed",
+        "kimi-k2.6",
+        "kimi-k2.5",
+        "kimi-for-coding"
+      ],
+      "noTopPModels": [
+        "k3",
+        "k3[1m]",
+        "kimi-k2.7-code",
+        "kimi-k2.7-code-highspeed",
+        "kimi-k2.6",
+        "kimi-k2.5",
+        "kimi-for-coding"
+      ],
+      "noPenaltyModels": [
+        "k3",
+        "k3[1m]",
+        "kimi-k2.7-code",
+        "kimi-k2.7-code-highspeed",
+        "kimi-k2.6",
+        "kimi-k2.5",
+        "kimi-for-coding"
+      ],
+      "promptCacheKey": true,
+      "autoToolChoiceOnlyModels": [
+        "kimi-k2.7-code",
+        "kimi-k2.7-code-highspeed",
+        "kimi-for-coding"
+      ],
+      "preserveReasoningContentModels": [
+        "k3",
+        "k3[1m]",
+        "kimi-k2.7-code",
+        "kimi-k2.7-code-highspeed",
+        "kimi-k2.6",
+        "kimi-k2.5",
+        "kimi-for-coding"
+      ],
+      "modelSuffixBracketStrip": true,
+      "apiKeyPool": [
+        {
+          "id": "34aa47bd",
+          "key": "$OPENCODEX_KIMI_CODE_API_KEY"
+        }
+      ]
+    },
+    "vllm": {
+      "adapter": "openai-chat",
+      "baseUrl": "http://localhost:20380/v1",
+      "allowPrivateNetwork": true,
+      "authMode": "key",
+      "apiKey": "$OPENCODEX_VLLM_API_KEY",
+      "apiKeyPool": [
+        {
+          "id": "fa1b0eee",
+          "key": "$OPENCODEX_VLLM_API_KEY"
+        }
+      ],
+      "modelCosts": {
+        "qwen3.8-27b-int8-w8a16-mtp": {
+          "input": 0.4,
+          "output": 3,
+          "cacheRead": 0.04,
+          "cacheWrite": 0
+        }
+      },
+      "defaultModel": "qwen3.8-27b-int8-w8a16-mtp",
+      "models": [
+        "qwen3.8-27b-int8-w8a16-mtp"
+      ],
+      "liveModels": false,
+      "modelContextWindows": {
+        "qwen3.8-27b-int8-w8a16-mtp": 256000
+      },
+      "preserveReasoningContentModels": [
+        "qwen3.8-27b-int8-w8a16-mtp"
+      ],
+      "modelReasoningEfforts": {
+        "qwen3.8-27b-int8-w8a16-mtp": [
+          "low",
+          "medium",
+          "xhigh"
+        ]
+      },
+      "modelDefaultReasoningEfforts": {
+        "qwen3.8-27b-int8-w8a16-mtp": "xhigh"
+      },
+      "modelReasoningEffortMap": {
+        "qwen3.8-27b-int8-w8a16-mtp": {
+          "low": "low",
+          "medium": "medium",
+          "xhigh": "xhigh"
+        }
+      },
+      "defaultMaxOutputTokens": 12800
+    },
+    "ollama": {
+      "adapter": "openai-chat",
+      "baseUrl": "http://localhost:11434/v1",
+      "allowPrivateNetwork": true,
+      "modelContextWindows": {
+        "huihui_ai/Qwen3.8-abliterated:27b": 256000,
+        "huihui_ai/Qwen3.6-abliterated:35b": 128000
+      },
+      "preserveReasoningContentModels": [
+        "huihui_ai/Qwen3.6-abliterated:35b",
+        "huihui_ai/Qwen3.8-abliterated:27b",
+        "huihui_ai-Qwen3.6-abliterated:35b",
+        "huihui_ai-Qwen3.8-abliterated:27b"
+      ]
+    },
+    "xiaomi-mimo": {
+      "adapter": "openai-chat",
+      "baseUrl": "https://api.xiaomimimo.com/v1",
+      "authMode": "key",
+      "apiKey": "$OPENCODEX_XIAOMI_MIMO_API_KEY",
+      "defaultModel": "mimo-v2.5",
+      "models": [
+        "mimo-v2.5"
+      ],
+      "reasoningEfforts": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "reasoningEffortMap": {
+        "xhigh": "high",
+        "max": "high",
+        "ultra": "high"
+      },
+      "apiKeyPool": [
+        {
+          "id": "2b453ad1",
+          "key": "$OPENCODEX_XIAOMI_MIMO_API_KEY"
+        }
+      ],
+      "contextWindow": 550000
+    },
+    "internal_eccn": {
+      "adapter": "openai-chat",
+      "baseUrl": "https://inference-api.nvidia.com/v1",
+      "apiKey": "$OPENCODEX_INTERNAL_ECCN_API_KEY",
+      "liveModels": false,
+      "models": [
+        "us/aws/anthropic/eccn-claude-opus-5",
+        "us/azure/anthropic/eccn-claude-opus-5",
+        "us/aws/anthropic/eccn-claude-haiku-4-5-v1",
+        "us/aws/anthropic/eccn-claude-opus-4-5",
+        "us/aws/anthropic/eccn-claude-opus-4-6",
+        "us/aws/anthropic/eccn-claude-opus-4-7",
+        "us/azure/anthropic/eccn-claude-opus-4-8",
+        "us/aws/anthropic/eccn-claude-opus-4-8",
+        "us/aws/anthropic/eccn-claude-sonnet-4-5-v1",
+        "us/aws/anthropic/eccn-claude-sonnet-4-6",
+        "us/aws/anthropic/eccn-claude-sonnet-5",
+        "us/azure/anthropic/eccn-claude-sonnet-5",
+        "nvidia/moonshotai/eccn-kimi-k3",
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro",
+        "nvidia/zai-org/eccn-glm-5.2"
+      ],
+      "modelContextWindows": {
+        "us/aws/anthropic/eccn-claude-opus-5": 1000000,
+        "us/azure/anthropic/eccn-claude-opus-5": 1000000,
+        "us/aws/anthropic/eccn-claude-haiku-4-5-v1": 200000,
+        "us/aws/anthropic/eccn-claude-opus-4-5": 200000,
+        "us/aws/anthropic/eccn-claude-opus-4-6": 1000000,
+        "us/aws/anthropic/eccn-claude-opus-4-7": 1000000,
+        "us/azure/anthropic/eccn-claude-opus-4-8": 200000,
+        "us/aws/anthropic/eccn-claude-opus-4-8": 1000000,
+        "us/aws/anthropic/eccn-claude-sonnet-4-5-v1": 200000,
+        "us/aws/anthropic/eccn-claude-sonnet-4-6": 200000,
+        "us/aws/anthropic/eccn-claude-sonnet-5": 1000000,
+        "us/azure/anthropic/eccn-claude-sonnet-5": 1000000,
+        "nvidia/moonshotai/eccn-kimi-k3": 1000000,
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": 1000000,
+        "nvidia/zai-org/eccn-glm-5.2": 1000000
+      },
+      "modelInputModalities": {
+        "us/aws/anthropic/eccn-claude-opus-4-8": [
+          "text",
+          "image"
+        ],
+        "nvidia/moonshotai/eccn-kimi-k3": [
+          "text",
+          "image"
+        ]
+      },
+      "noVisionModels": [
+        "us/aws/anthropic/eccn-claude-opus-5",
+        "us/azure/anthropic/eccn-claude-opus-5",
+        "us/aws/anthropic/eccn-claude-haiku-4-5-v1",
+        "us/aws/anthropic/eccn-claude-opus-4-5",
+        "us/aws/anthropic/eccn-claude-opus-4-6",
+        "us/aws/anthropic/eccn-claude-opus-4-7",
+        "us/azure/anthropic/eccn-claude-opus-4-8",
+        "us/aws/anthropic/eccn-claude-sonnet-4-5-v1",
+        "us/aws/anthropic/eccn-claude-sonnet-4-6",
+        "us/aws/anthropic/eccn-claude-sonnet-5",
+        "us/azure/anthropic/eccn-claude-sonnet-5",
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro",
+        "nvidia/zai-org/eccn-glm-5.2"
+      ],
+      "modelCosts": {
+        "us/aws/anthropic/eccn-claude-opus-5": {
+          "input": 3.79,
+          "output": 18.98,
+          "cacheRead": 0.38,
+          "cacheWrite": 4.74
+        },
+        "us/azure/anthropic/eccn-claude-opus-5": {
+          "input": 3.45,
+          "output": 17.25,
+          "cacheRead": 0.34,
+          "cacheWrite": 4.31
+        },
+        "us/aws/anthropic/eccn-claude-haiku-4-5-v1": {
+          "input": 0.76,
+          "output": 3.79,
+          "cacheRead": 0.08,
+          "cacheWrite": 0.95
+        },
+        "us/aws/anthropic/eccn-claude-opus-4-5": {
+          "input": 3.79,
+          "output": 18.98,
+          "cacheRead": 0.38,
+          "cacheWrite": 4.74
+        },
+        "us/aws/anthropic/eccn-claude-opus-4-6": {
+          "input": 3.79,
+          "output": 18.98,
+          "cacheRead": 0.38,
+          "cacheWrite": 4.74
+        },
+        "us/aws/anthropic/eccn-claude-opus-4-7": {
+          "input": 3.79,
+          "output": 18.98,
+          "cacheRead": 0.38,
+          "cacheWrite": 4.74
+        },
+        "us/azure/anthropic/eccn-claude-opus-4-8": {
+          "input": 3.45,
+          "output": 17.25,
+          "cacheRead": 0.34,
+          "cacheWrite": 4.31
+        },
+        "us/aws/anthropic/eccn-claude-opus-4-8": {
+          "input": 3.79,
+          "output": 18.98,
+          "cacheRead": 0.38,
+          "cacheWrite": 4.74
+        },
+        "us/aws/anthropic/eccn-claude-sonnet-4-5-v1": {
+          "input": 2.28,
+          "output": 11.38,
+          "cacheRead": 0.23,
+          "cacheWrite": 2.85
+        },
+        "us/aws/anthropic/eccn-claude-sonnet-4-6": {
+          "input": 2.28,
+          "output": 11.38,
+          "cacheRead": 0.23,
+          "cacheWrite": 2.85
+        },
+        "us/aws/anthropic/eccn-claude-sonnet-5": {
+          "input": 1.52,
+          "output": 7.59,
+          "cacheRead": 0.15,
+          "cacheWrite": 1.9
+        },
+        "us/azure/anthropic/eccn-claude-sonnet-5": {
+          "input": 1.38,
+          "output": 6.9,
+          "cacheRead": 0.14,
+          "cacheWrite": 1.73
+        },
+        "nvidia/moonshotai/eccn-kimi-k3": {
+          "input": 1.45,
+          "output": 7.25,
+          "cacheRead": 0.19,
+          "cacheWrite": 1.81
+        },
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0
+        },
+        "nvidia/zai-org/eccn-glm-5.2": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0
+        }
+      },
+      "preserveReasoningContentModels": [
+        "us/aws/anthropic/eccn-claude-opus-5",
+        "us/azure/anthropic/eccn-claude-opus-5",
+        "us/aws/anthropic/eccn-claude-haiku-4-5-v1",
+        "us/aws/anthropic/eccn-claude-opus-4-5",
+        "us/aws/anthropic/eccn-claude-opus-4-6",
+        "us/aws/anthropic/eccn-claude-opus-4-7",
+        "us/azure/anthropic/eccn-claude-opus-4-8",
+        "us/aws/anthropic/eccn-claude-opus-4-8",
+        "us/aws/anthropic/eccn-claude-sonnet-4-5-v1",
+        "us/aws/anthropic/eccn-claude-sonnet-4-6",
+        "us/aws/anthropic/eccn-claude-sonnet-5",
+        "us/azure/anthropic/eccn-claude-sonnet-5",
+        "nvidia/moonshotai/eccn-kimi-k3",
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro",
+        "nvidia/zai-org/eccn-glm-5.2"
+      ],
+      "apiKeyPool": [
+        {
+          "id": "aaff00d0",
+          "key": "$OPENCODEX_INTERNAL_ECCN_API_KEY"
+        }
+      ],
+      "modelReasoningEfforts": {
+        "nvidia/moonshotai/eccn-kimi-k3": [
+          "low",
+          "high",
+          "max"
+        ],
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": [
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "nvidia/zai-org/eccn-glm-5.2": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ]
+      },
+      "modelDefaultReasoningEfforts": {
+        "nvidia/moonshotai/eccn-kimi-k3": "max"
+      },
+      "modelReasoningEffortMap": {
+        "nvidia/moonshotai/eccn-kimi-k3": {
+          "none": "none",
+          "low": "low",
+          "medium": "high",
+          "high": "high",
+          "xhigh": "max",
+          "max": "max"
+        },
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": {
+          "low": "high",
+          "medium": "high",
+          "high": "high",
+          "xhigh": "max",
+          "max": "max"
+        }
+      }
     }
   },
   "defaultProvider": "deepseek",
@@ -317,8 +759,14 @@
   "googleAntigravityStaticCatalogVersion": 2,
   "providerContextCaps": {
     "deepseek": 550000,
+    "openai": 550000,
+    "opencode-free": 550000,
     "BLSC": 550000,
-    "opencode-free": 550000
+    "kimi-code": 550000,
+    "vllm": 550000,
+    "ollama": 550000,
+    "xiaomi-mimo": 550000,
+    "internal_eccn": 550000
   },
   "contextCapValue": 550000,
   "multiAgentGuidanceEnabled": true,
@@ -326,9 +774,9 @@
   "subagentModels": [
     "gpt-5.6-terra",
     "gpt-5.6-luna",
-    "BLSC/MiniMax-M3",
     "deepseek/deepseek-v4-flash",
-    "BLSC/GLM-5.3"
+    "BLSC/GLM-5.3",
+    "kimi-code/k3"
   ],
   "websockets": false,
   "codexAutoStart": false,
@@ -421,7 +869,24 @@
     "BLSC/Qwen3.5-397B-A17B",
     "BLSC/Qwen3.5-Plus",
     "BLSC/WanX2.1-T2I-Plus",
-    "BLSC/WanX2.1-T2I-Turbo"
+    "BLSC/WanX2.1-T2I-Turbo",
+    "ollama/starcoder2:15b",
+    "ollama/qwen3.6:latest",
+    "ollama/qwen2.5:7b-instruct",
+    "ollama/qwen2.5-coder:32b",
+    "ollama/mdq100-Gemma3-Instruct-Abliterated:27b",
+    "ollama/llava-llama3:8b",
+    "ollama/llama3.1:8b",
+    "ollama/huihui_ai-Qwen3.8-abliterated:27b-q8_0",
+    "ollama/huihui_ai-gemma3-abliterated:27b",
+    "ollama/huihui_ai-gemma-4-abliterated:48b",
+    "ollama/huihui_ai-deepseek-r1-abliterated:32b",
+    "ollama/deepseek-r1:32b",
+    "ollama/deepseek-r1:8b",
+    "ollama/dolphin-llama3:8b",
+    "ollama/fredrezones55-Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive:latest",
+    "ollama/gemma3:27b",
+    "ollama/gemma3:latest"
   ],
   "autoSwitchThreshold": 80,
   "accountPoolStrategy": "quota",

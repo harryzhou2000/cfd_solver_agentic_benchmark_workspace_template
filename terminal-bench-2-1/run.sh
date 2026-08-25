@@ -48,23 +48,30 @@ elif [ -f "../.env" ]; then
   ENV_FILE="../.env"
 fi
 
-# Render ${LITELLM_API_KEY} from .env into a throwaway config when referenced.
-if grep -qF '${LITELLM_API_KEY}' "$CFG"; then
+# Render ${LITELLM_API_KEY} / ${DEEPSEEK_API_KEY} / ${BLSC_API_KEY} from .env
+# into a throwaway config when referenced.
+if grep -qE '\$\{(LITELLM_API_KEY|DEEPSEEK_API_KEY|BLSC_API_KEY)\}' "$CFG"; then
   if [ -z "$ENV_FILE" ]; then
-    echo "config references \${LITELLM_API_KEY} but no .env was found (looked in ./ and ../)" >&2
-    exit 1
-  fi
-  LITELLM_KEY="$(sed -n 's/^LITELLM_API_KEY=//p' "$ENV_FILE" | tail -1)"
-  if [ -z "$LITELLM_KEY" ]; then
-    echo "LITELLM_API_KEY is missing from $ENV_FILE" >&2
+    echo "config references \${LITELLM_API_KEY}/\${DEEPSEEK_API_KEY}/\${BLSC_API_KEY} but no .env was found (looked in ./ and ../)" >&2
     exit 1
   fi
   RENDER_DIR="terminal-bench-2-1/.cache/rendered-configs"
   mkdir -p "$RENDER_DIR"
   RENDERED_CFG="$RENDER_DIR/$(basename "$CFG").rendered.yaml"
-  LITELLM_KEY_SED="$(printf '%s' "$LITELLM_KEY" | sed 's/[&\\/]/\\&/g')"
-  sed "s|\${LITELLM_API_KEY}|$LITELLM_KEY_SED|g" "$CFG" > "$RENDERED_CFG"
-  echo "rendered $CFG -> $RENDERED_CFG (LITELLM_API_KEY injected from $ENV_FILE)" >&2
+  cp "$CFG" "$RENDERED_CFG"
+  for KEY_NAME in LITELLM_API_KEY DEEPSEEK_API_KEY BLSC_API_KEY; do
+    if ! grep -qF "\${$KEY_NAME}" "$RENDERED_CFG"; then
+      continue
+    fi
+    KEY_VAL="$(sed -n "s/^$KEY_NAME=//p" "$ENV_FILE" | tail -1)"
+    if [ -z "$KEY_VAL" ]; then
+      echo "$KEY_NAME is missing from $ENV_FILE" >&2
+      exit 1
+    fi
+    KEY_SED="$(printf '%s' "$KEY_VAL" | sed 's/[&\\/]/\\&/g')"
+    sed -i "s|\${$KEY_NAME}|$KEY_SED|g" "$RENDERED_CFG"
+  done
+  echo "rendered $CFG -> $RENDERED_CFG (keys injected from $ENV_FILE)" >&2
   CFG="$RENDERED_CFG"
 fi
 

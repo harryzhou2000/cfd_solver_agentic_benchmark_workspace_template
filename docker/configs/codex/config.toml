@@ -1,9 +1,9 @@
 service_tier = "default"
 model_provider = "openai_vanilla"
-model = "gpt-5.6-terra"
-model_context_window = 380000
-model_reasoning_effort = "high"
-approvals_reviewer = "auto_review"
+model = "gpt-5.6-sol"
+# model_context_window = 380000
+model_reasoning_effort = "medium"
+approvals_reviewer = "user"
 [mcp_servers.codegraph]
 command = "codegraph"
 args = ["serve", "--mcp"]
@@ -71,6 +71,9 @@ trust_level = "trusted"
 [projects."/home/harry/projects/PMGDraft"]
 trust_level = "trusted"
 
+[projects."/mnt/ssd-SATARAID5/harry/projects/vllm-serve"]
+trust_level = "trusted"
+
 [tui]
 status_line = ["model-with-reasoning", "project-name", "git-branch", "permissions", "approval-mode", "context-remaining", "used-tokens", "total-input-tokens", "total-output-tokens", "fast-mode", "context-window-size"]
 status_line_use_colors = true
@@ -93,3 +96,14 @@ name = "OpenAI Vanilla"
 base_url = "https://chatgpt.com/backend-api/codex"
 wire_api = "responses"
 requires_openai_auth = true
+
+[marketplaces.openai-bundled]
+last_updated = "2026-08-24T07:15:11Z"
+source_type = "local"
+source = "/home/cfd_agent/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[plugins."sites@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
