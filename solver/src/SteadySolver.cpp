@@ -70,14 +70,19 @@ SteadyResult runSteady(LocalMesh& lm,
     // Fix C: lower initial CFL for very low-Re viscous cases (Re < 100)
     double cfl_effective_init = (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0)
                                 ? std::min(cfl0, 0.01) : cfl0;
-    double cfl_effective = cfl_effective_init;  // adaptive CFL tracker
-    // Fix I: allow Fix D to reduce CFL well below initial value
-    double cfl_recovery_floor = std::max(cfl_effective_init * 0.01, 0.001);
+   double cfl_effective = cfl_effective_init;  // adaptive CFL tracker
+   // Fix I: allow Fix D to reduce CFL well below initial value
+    // For viscous cases: allow very low floor (need aggressive reduction for BL stability)
+    // For inviscid cases: floor at initial CFL to prevent CFL crashing below starting value
+    double cfl_recovery_floor = (mu > 0.0)
+        ? std::max(cfl_effective_init * 0.01, 0.001)
+        : cfl_effective_init;
     double prev_outer_res = 0.0;               // outer residual tracker
     double min_outer_res_ever = std::numeric_limits<double>::max();  // Fix D
     int fix_d_consecutive = 0;  // Fix J: reset baseline after prolonged Fix D
-    // Fix B: longer first-order startup for Re<100 (need more steps for BL establishment)
-    const int first_order_steps = (mu > 0.0) ? ((cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 2000 : 500) : 0;
+   // Fix B: longer first-order startup for Re<100 (need more steps for BL establishment)
+    // For inviscid: 100 steps of first-order to allow transonic shocks to form stably
+    const int first_order_steps = (mu > 0.0) ? ((cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 2000 : 500) : 100;
 
     SteadyResult result;
     result.final_step = 0;
