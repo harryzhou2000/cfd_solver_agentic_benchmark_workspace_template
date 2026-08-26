@@ -540,6 +540,108 @@
       "apiKey": "$OPENCODEX_INTERNAL_ECCN_API_KEY",
       "liveModels": false,
       "models": [
+        "nvidia/moonshotai/eccn-kimi-k3",
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro",
+        "nvidia/zai-org/eccn-glm-5.2"
+      ],
+      "modelContextWindows": {
+        "nvidia/moonshotai/eccn-kimi-k3": 1000000,
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": 1000000,
+        "nvidia/zai-org/eccn-glm-5.2": 1000000
+      },
+      "modelInputModalities": {
+        "nvidia/moonshotai/eccn-kimi-k3": [
+          "text",
+          "image"
+        ]
+      },
+      "noVisionModels": [
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro",
+        "nvidia/zai-org/eccn-glm-5.2"
+      ],
+      "modelCosts": {
+        "nvidia/moonshotai/eccn-kimi-k3": {
+          "input": 1.45,
+          "output": 7.25,
+          "cacheRead": 0.19,
+          "cacheWrite": 1.81
+        },
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0
+        },
+        "nvidia/zai-org/eccn-glm-5.2": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0
+        }
+      },
+      "preserveReasoningContentModels": [
+        "nvidia/moonshotai/eccn-kimi-k3",
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro",
+        "nvidia/zai-org/eccn-glm-5.2"
+      ],
+      "apiKeyPool": [
+        {
+          "id": "aaff00d0",
+          "key": "$OPENCODEX_INTERNAL_ECCN_API_KEY"
+        }
+      ],
+      "modelReasoningEfforts": {
+        "nvidia/moonshotai/eccn-kimi-k3": [
+          "low",
+          "high",
+          "max"
+        ],
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": [
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "nvidia/zai-org/eccn-glm-5.2": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ]
+      },
+      "modelDefaultReasoningEfforts": {
+        "nvidia/moonshotai/eccn-kimi-k3": "max"
+      },
+      "modelReasoningEffortMap": {
+        "nvidia/moonshotai/eccn-kimi-k3": {
+          "none": "none",
+          "low": "low",
+          "medium": "high",
+          "high": "high",
+          "xhigh": "max",
+          "max": "max"
+        },
+        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": {
+          "low": "high",
+          "medium": "high",
+          "high": "high",
+          "xhigh": "max",
+          "max": "max"
+        }
+      }
+    },
+    "internal_anth_eccn": {
+      "adapter": "anthropic",
+      "baseUrl": "https://inference-api.nvidia.com/v1",
+      "apiKey": "$OPENCODEX_INTERNAL_ECCN_API_KEY",
+      "apiKeyPool": [
+        {
+          "id": "aaff00d0",
+          "key": "$OPENCODEX_INTERNAL_ECCN_API_KEY"
+        }
+      ],
+      "liveModels": false,
+      "models": [
         "us/aws/anthropic/eccn-claude-opus-5",
         "us/azure/anthropic/eccn-claude-opus-5",
         "us/aws/anthropic/eccn-claude-haiku-4-5-v1",
@@ -551,10 +653,7 @@
         "us/aws/anthropic/eccn-claude-sonnet-4-5-v1",
         "us/aws/anthropic/eccn-claude-sonnet-4-6",
         "us/aws/anthropic/eccn-claude-sonnet-5",
-        "us/azure/anthropic/eccn-claude-sonnet-5",
-        "nvidia/moonshotai/eccn-kimi-k3",
-        "nvidia/deepseek-ai/eccn-deepseek-v4-pro",
-        "nvidia/zai-org/eccn-glm-5.2"
+        "us/azure/anthropic/eccn-claude-sonnet-5"
       ],
       "modelContextWindows": {
         "us/aws/anthropic/eccn-claude-opus-5": 1000000,
@@ -568,17 +667,10 @@
         "us/aws/anthropic/eccn-claude-sonnet-4-5-v1": 200000,
         "us/aws/anthropic/eccn-claude-sonnet-4-6": 200000,
         "us/aws/anthropic/eccn-claude-sonnet-5": 1000000,
-        "us/azure/anthropic/eccn-claude-sonnet-5": 1000000,
-        "nvidia/moonshotai/eccn-kimi-k3": 1000000,
-        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": 1000000,
-        "nvidia/zai-org/eccn-glm-5.2": 1000000
+        "us/azure/anthropic/eccn-claude-sonnet-5": 1000000
       },
       "modelInputModalities": {
         "us/aws/anthropic/eccn-claude-opus-4-8": [
-          "text",
-          "image"
-        ],
-        "nvidia/moonshotai/eccn-kimi-k3": [
           "text",
           "image"
         ]
@@ -594,9 +686,7 @@
         "us/aws/anthropic/eccn-claude-sonnet-4-5-v1",
         "us/aws/anthropic/eccn-claude-sonnet-4-6",
         "us/aws/anthropic/eccn-claude-sonnet-5",
-        "us/azure/anthropic/eccn-claude-sonnet-5",
-        "nvidia/deepseek-ai/eccn-deepseek-v4-pro",
-        "nvidia/zai-org/eccn-glm-5.2"
+        "us/azure/anthropic/eccn-claude-sonnet-5"
       ],
       "modelCosts": {
         "us/aws/anthropic/eccn-claude-opus-5": {
@@ -670,24 +760,6 @@
           "output": 6.9,
           "cacheRead": 0.14,
           "cacheWrite": 1.73
-        },
-        "nvidia/moonshotai/eccn-kimi-k3": {
-          "input": 1.45,
-          "output": 7.25,
-          "cacheRead": 0.19,
-          "cacheWrite": 1.81
-        },
-        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0
-        },
-        "nvidia/zai-org/eccn-glm-5.2": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0
         }
       },
       "preserveReasoningContentModels": [
@@ -702,56 +774,8 @@
         "us/aws/anthropic/eccn-claude-sonnet-4-5-v1",
         "us/aws/anthropic/eccn-claude-sonnet-4-6",
         "us/aws/anthropic/eccn-claude-sonnet-5",
-        "us/azure/anthropic/eccn-claude-sonnet-5",
-        "nvidia/moonshotai/eccn-kimi-k3",
-        "nvidia/deepseek-ai/eccn-deepseek-v4-pro",
-        "nvidia/zai-org/eccn-glm-5.2"
-      ],
-      "apiKeyPool": [
-        {
-          "id": "aaff00d0",
-          "key": "$OPENCODEX_INTERNAL_ECCN_API_KEY"
-        }
-      ],
-      "modelReasoningEfforts": {
-        "nvidia/moonshotai/eccn-kimi-k3": [
-          "low",
-          "high",
-          "max"
-        ],
-        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": [
-          "high",
-          "xhigh",
-          "max"
-        ],
-        "nvidia/zai-org/eccn-glm-5.2": [
-          "low",
-          "medium",
-          "high",
-          "xhigh",
-          "max"
-        ]
-      },
-      "modelDefaultReasoningEfforts": {
-        "nvidia/moonshotai/eccn-kimi-k3": "max"
-      },
-      "modelReasoningEffortMap": {
-        "nvidia/moonshotai/eccn-kimi-k3": {
-          "none": "none",
-          "low": "low",
-          "medium": "high",
-          "high": "high",
-          "xhigh": "max",
-          "max": "max"
-        },
-        "nvidia/deepseek-ai/eccn-deepseek-v4-pro": {
-          "low": "high",
-          "medium": "high",
-          "high": "high",
-          "xhigh": "max",
-          "max": "max"
-        }
-      }
+        "us/azure/anthropic/eccn-claude-sonnet-5"
+      ]
     }
   },
   "defaultProvider": "deepseek",
