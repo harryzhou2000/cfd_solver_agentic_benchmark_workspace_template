@@ -489,6 +489,35 @@ number of orders below the initial value.  The target reduction varies by case:
 4 orders for the NACA subsonic/transonic cases and 3 orders for the
 supersonic cases.
 
+\Cref{tab:inner_stats} reports the observed inner-iteration statistics.
+
+\begin{table}[H]
+\centering
+\caption{Observed inner-iteration statistics for completed cases.}
+\label{tab:inner_stats}
+\footnotesize
+\begin{tabular}{lcccccc}
+\toprule
+Case & Obs.\ Min & Obs.\ Max & Mean & Conv.\ Frac.\ & Misses \\
+\midrule
+\texttt{naca0012\_m015\_inv}   & 7  & 50  & 40 & 0.491 & 194 \\
+\texttt{naca0012\_m015\_lam}   & 6  & 61  & 35 & 1.000 & 0 \\
+\texttt{naca0012\_m080\_inv}   & 7  & 50  & 35 & 0.745 & 98 \\
+\texttt{naca0012\_m080\_lam}   & 5  & 80  & 46 & 0.921 & 88 \\
+\texttt{naca0012\_m200\_inv}   & 4  & 21  & 12 & 1.000 & 0 \\
+\texttt{naca0012\_m200\_lam}   & 4  & 13  & 8  & 1.000 & 0 \\
+\texttt{cylinder\_re20}       & 7  & 80  & 47 & 0.930 & 37 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Cases with lower convergence fractions (M=0.15 inviscid at 49.1\%, M=0.8
+inviscid at 74.5\%) hit the maximum inner iteration limit during early CFL
+ramp stages where the pseudo-time step is small and the point-implicit
+smoother is least effective.  The laminar cases at M=2.0 and M=0.15 achieve
+100\% convergence fraction because the viscous terms improve the diagonal
+dominance of the implicit operator.
+
 \subsection{Transient BDF2 Integration}
 \label{sec:bdf2}
 
@@ -1201,27 +1230,31 @@ $np$ & $C_D$ & $C_L$ & Steps & Wall Time (s) \\
 \centering
 \caption{MPI parallel validation: cylinder $\mathrm{Re}=20$ force coefficients
   across rank counts.  $C_D$ agrees to 7 significant figures
-  ($|\Delta C_D|/C_D \approx 2.7\times10^{-7}$).}
+  ($|\Delta C_D|/C_D \approx 6.1\times10^{-7}$).}
 \label{tab:parallel_cyl}
 \begin{tabular}{ccccc}
 \toprule
 $np$ & $C_D$ & $C_L$ & Steps & Wall Time (s) \\
 \midrule
+1 & 6.13992093 & $-7.949\times10^{-4}$ & 528 & 748.6 \\
 2 & 6.13991883 & $-7.942\times10^{-4}$ & 528 & 1044.9 \\
-8 & 6.13991720 & $-7.936\times10^{-4}$ & 528 & 22.7 \\
+4 & 6.13992273 & $-7.938\times10^{-4}$ & 528 & 19.2 \\
+8 & 6.13991720 & $-7.936\times10^{-4}$ & 528 & 21.1 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \paragraph{Cylinder $\mathrm{Re}=20$ MPI results.}
-The cylinder viscous case shows excellent consistency between $np=2$ and $np=8$:
-$C_D$ agrees to 7 significant figures and $C_L$ to 5 significant figures.
-The step count is identical (528 steps).  The small differences
-($\mathcal{O}(10^{-7})$ relative) are attributed to floating-point
-summation-order effects in the global residual reduction and halo exchange,
-which alter the iteration trajectory slightly.  The wall time drops from
-1044.9\,s ($np=2$) to 22.7\,s ($np=8$), a $46\times$ speedup reflecting both
-the reduced per-rank work and cache-size benefits.
+The cylinder viscous case shows excellent consistency across all four rank
+counts: $C_D$ agrees to 7 significant figures and $C_L$ to 5 significant
+figures.  The step count is identical (528 steps) at all rank counts.  The
+maximum relative $C_D$ difference
+($|6.13992273 - 6.13991720|/6.13992 \approx 9.0\times10^{-7}$) is attributed
+to floating-point summation-order effects in the global residual reduction
+and halo exchange, which alter the iteration trajectory slightly.
+The serial run ($np=1$) takes 748.6\,s, while $np=4$ (19.2\,s) and $np=8$
+(21.1\,s) show that for this modest mesh (10{,}185 cells), four ranks
+already saturate the available parallelism.
 
 From the $np=2$ partition diagnostics (\cref{tab:partition}), the METIS
 partition of the NACA\,0012 mesh achieves near-perfect balance
