@@ -1670,73 +1670,34 @@ void CFDSolver::compute_surface_data() {
 }
 
 void CFDSolver::write_field_vtu(const std::string& filename) {
-    auto& mesh = (mpi_size == 1 && local_mesh.cells.empty()) ? global_mesh : local_mesh;
     double gamma = config.gas.gamma;
+    int ncells_global = global_mesh.num_cells_global;
 
+    // Gather cell states from all ranks to rank 0
+    std::vector<double> all_states(ncells_global * 4, 0.0);
     if (mpi_size > 1) {
-        // Gather all field data on rank 0
-        // For simplicity, each rank sends its owned cells
-        int local_ncells = num_owned;
-        int local_nnodes = 0;
-
-        // Build local-only node set for owned cells
-        std::set<int> owned_node_set;
+        // Each rank packs owned cell states into global-id-indexed buffer
+        std::vector<double> local_buf(ncells_global * 4, 0.0);
         for (int c = 0; c < num_owned; c++) {
-            for (int n : mesh.cells[c].nodes) {
-                owned_node_set.insert(n);
-            }
+            int gc = local_to_global[c];
+            for (int k = 0; k < 4; k++) local_buf[gc*4+k] = U[c][k];
         }
-        local_nnodes = (int)owned_node_set.size();
-
-        // Gather counts
-        std::vector<int> cell_counts(mpi_size), node_counts(mpi_size);
-        MPI_Gather(&local_ncells, 1, MPI_INT, cell_counts.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
-        MPI_Gather(&local_nnodes, 1, MPI_INT, node_counts.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-        // Pack cell data: for each cell, [nnodes, node_coords..., field_values...]
-        // Simpler: pack nodes separately, then cells with local node indexing
-        // Actually, for VTU output, let's just gather on rank 0 and write
-
-        // Send owned cell states to rank 0
-        std::vector<double> local_states(local_ncells * 4);
-        std::vector<double> local_coords;
-        std::vector<int> local_cell_nodes;
-        std::vector<int> local_cell_sizes;
-
-        std::map<int,int> local_node_remap;
-        int nid = 0;
-        for (int n : owned_node_set) {
-            local_node_remap[n] = nid++;
-            local_coords.push_back(mesh.nodes[n].x());
-            local_coords.push_back(mesh.nodes[n].y());
+        MPI_Reduce(local_buf.data(), all_states.data(), ncells_global * 4,
+                   MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    } else {
+        for (int c = 0; c < ncells_global; c++) {
+            for (int k = 0; k < 4; k++) all_states[c*4+k] = U[c][k];
         }
-
-        for (int c = 0; c < num_owned; c++) {
-            for (int k = 0; k < 4; k++) local_states[c*4+k] = U[c][k];
-            local_cell_sizes.push_back((int)mesh.cells[c].nodes.size());
-            for (int n : mesh.cells[c].nodes) {
-                local_cell_nodes.push_back(local_node_remap[n]);
-            }
-        }
-
-        // Gather everything on rank 0
-        // This is simplified - in production would use proper gather
-        if (mpi_rank == 0) {
-            // For rank 0, just write the global mesh with gathered data
-            // For now, write rank 0's portion only as a simplification
-            // TODO: proper gather for multi-rank VTU
-        }
-
-        // Fallback: only rank 0 writes its own data
-        if (mpi_rank != 0) return;
     }
 
-    // Write VTU file
+    if (mpi_rank != 0) return;
+
     std::ofstream vtu(filename);
     if (!vtu.is_open()) return;
 
-    int ncells = num_owned;
-    // Get unique nodes for owned cells
+    // Use global mesh for VTU output
+    auto& mesh = global_mesh;
+    int ncells = ncells_global;
     std::set<int> node_set;
     for (int c = 0; c < ncells; c++) {
         for (int n : mesh.cells[c].nodes) node_set.insert(n);
@@ -1761,60 +1722,50 @@ void CFDSolver::write_field_vtu(const std::string& filename) {
     vtu << "</DataArray>\n</Points>\n";
 
     // Cell data
+    auto cs = [&](int c) -> Vec4 {
+        return Vec4(all_states[c*4], all_states[c*4+1], all_states[c*4+2], all_states[c*4+3]);
+    };
+
     vtu << "<CellData>\n";
 
-    // Density
     vtu << "<DataArray type=\"Float64\" Name=\"Density\" format=\"ascii\">\n";
-    for (int c = 0; c < ncells; c++) vtu << U[c][0] << "\n";
+    for (int c = 0; c < ncells; c++) vtu << all_states[c*4] << "\n";
     vtu << "</DataArray>\n";
 
-    // Velocity
     vtu << "<DataArray type=\"Float64\" Name=\"Velocity\" NumberOfComponents=\"3\" format=\"ascii\">\n";
     for (int c = 0; c < ncells; c++) {
-        double rho = U[c][0];
-        vtu << U[c][1]/rho << " " << U[c][2]/rho << " 0.0\n";
+        double rho = all_states[c*4];
+        vtu << all_states[c*4+1]/rho << " " << all_states[c*4+2]/rho << " 0.0\n";
     }
     vtu << "</DataArray>\n";
 
-    // Pressure
     vtu << "<DataArray type=\"Float64\" Name=\"Pressure\" format=\"ascii\">\n";
-    for (int c = 0; c < ncells; c++) {
-        vtu << pressure_from_conservative(U[c], gamma) << "\n";
-    }
+    for (int c = 0; c < ncells; c++) vtu << pressure_from_conservative(cs(c), gamma) << "\n";
     vtu << "</DataArray>\n";
 
-    // Mach
     vtu << "<DataArray type=\"Float64\" Name=\"Mach\" format=\"ascii\">\n";
     for (int c = 0; c < ncells; c++) {
-        double rho = U[c][0];
-        double u = U[c][1]/rho, v = U[c][2]/rho;
-        double p = pressure_from_conservative(U[c], gamma);
+        Vec4 Uc = cs(c);
+        double rho = Uc[0], u = Uc[1]/rho, v = Uc[2]/rho;
+        double p = pressure_from_conservative(Uc, gamma);
         double a = speed_of_sound(p, rho, gamma);
         vtu << std::sqrt(u*u + v*v) / a << "\n";
     }
     vtu << "</DataArray>\n";
 
-    // Temperature
     vtu << "<DataArray type=\"Float64\" Name=\"Temperature\" format=\"ascii\">\n";
     for (int c = 0; c < ncells; c++) {
-        double rho = U[c][0];
-        double p = pressure_from_conservative(U[c], gamma);
-        vtu << p / (rho * config.gas.R) << "\n";
+        double rho = all_states[c*4];
+        vtu << pressure_from_conservative(cs(c), gamma) / (rho * config.gas.R) << "\n";
     }
     vtu << "</DataArray>\n";
 
-    // Total Energy
     vtu << "<DataArray type=\"Float64\" Name=\"TotalEnergy\" format=\"ascii\">\n";
-    for (int c = 0; c < ncells; c++) {
-        vtu << U[c][3] / U[c][0] << "\n";
-    }
+    for (int c = 0; c < ncells; c++) vtu << all_states[c*4+3] / all_states[c*4] << "\n";
     vtu << "</DataArray>\n";
 
-    // Partition
     vtu << "<DataArray type=\"Int32\" Name=\"Partition\" format=\"ascii\">\n";
-    for (int c = 0; c < ncells; c++) {
-        vtu << mpi_rank << "\n";
-    }
+    for (int c = 0; c < ncells; c++) vtu << cell_partition[c] << "\n";
     vtu << "</DataArray>\n";
 
     vtu << "</CellData>\n";
@@ -1853,15 +1804,27 @@ void CFDSolver::write_field_vtu(const std::string& filename) {
 }
 
 void CFDSolver::write_restart(const std::string& filename) {
+    int ncells_global = global_mesh.num_cells_global;
+    std::vector<double> all_states(ncells_global * 4, 0.0);
+    if (mpi_size > 1) {
+        std::vector<double> local_buf(ncells_global * 4, 0.0);
+        for (int c = 0; c < num_owned; c++) {
+            int gc = local_to_global[c];
+            for (int k = 0; k < 4; k++) local_buf[gc*4+k] = U[c][k];
+        }
+        MPI_Reduce(local_buf.data(), all_states.data(), ncells_global * 4,
+                   MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    } else {
+        for (int c = 0; c < ncells_global; c++) {
+            for (int k = 0; k < 4; k++) all_states[c*4+k] = U[c][k];
+        }
+    }
     if (mpi_rank != 0) return;
-    auto& mesh = (mpi_size == 1 && local_mesh.cells.empty()) ? global_mesh : local_mesh;
 
     std::ofstream f(filename, std::ios::binary);
-    int nc = num_owned;
+    int nc = ncells_global;
     f.write(reinterpret_cast<const char*>(&nc), sizeof(int));
-    for (int c = 0; c < nc; c++) {
-        f.write(reinterpret_cast<const char*>(U[c].data()), 4 * sizeof(double));
-    }
+    f.write(reinterpret_cast<const char*>(all_states.data()), nc * 4 * sizeof(double));
     f.close();
 }
 
@@ -1871,8 +1834,10 @@ void CFDSolver::write_outputs(const std::string& output_dir) {
     auto end_time = std::chrono::steady_clock::now();
     wall_time_seconds = std::chrono::duration<double>(end_time - start_time).count();
 
-    // Compute surface data
+    // Collective operations: all ranks must participate
     compute_surface_data();
+    write_field_vtu(output_dir + "/field_final.vtu");
+    write_restart(output_dir + "/restart_final.bin");
 
     if (mpi_rank != 0) return;
 
@@ -1986,12 +1951,6 @@ void CFDSolver::write_outputs(const std::string& output_dir) {
               << sp.mach << "," << sp.tag << "\n";
         }
     }
-
-    // Write field VTU
-    write_field_vtu(output_dir + "/field_final.vtu");
-
-    // Write restart
-    write_restart(output_dir + "/restart_final.bin");
 
     // Write run_status.json
     {
