@@ -123,8 +123,16 @@ void computeResidual(const ResidualContext& ctx,
                 break;
         }
 
-        // Inviscid flux
-        StateVec flux = rusanov_flux(U_int, U_ghost, nx, ny, gamma, diss_scale);
+       // Inviscid flux
+        StateVec flux;
+        if (bc == BcType::NoSlipAdiabaticWall) {
+            // Pressure-only flux {0, p*nx, p*ny, 0} for no-slip wall.
+            // Avoids excessive Rusanov dissipation from velocity-negation ghost.
+            double p_wall = pressure(U_int, gamma);
+            flux = {0.0, p_wall * nx, p_wall * ny, 0.0};
+        } else {
+            flux = rusanov_flux(U_int, U_ghost, nx, ny, gamma, diss_scale);
+        }
 
         // Viscous flux at no-slip wall
         if (mu > 0.0 && bc == BcType::NoSlipAdiabaticWall) {
