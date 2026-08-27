@@ -958,10 +958,17 @@ split:
   inviscid solution is genuinely singular (\cref{sec:resnorm}) and where the
   residual also concentrates. It does not reach the integrated forces, which
   agree to \mpiMaxAbsCdNaca{} absolute.
-\item \code{field\_final.vtu} is sorted by global cell id after the gather, so
-  cell $k$ of the file is the same mesh cell at every rank count and two runs
-  can be compared row for row. The one deliberate exception is the
-  \code{RankId} field, whose whole purpose is to record the partition.
+\item \code{field\_final.vtu} is assembled deterministically: the cells are
+  sorted by global cell id and the unique mesh points are numbered by global
+  node id, so the point block, the connectivity block and the cell ordering are
+  identical at every rank count and two runs can be compared row for row. The
+  one deliberate exception is the \code{RankId} field, whose whole purpose is to
+  record the partition. \code{tests/mpi\_consistency.sh} asserts all of this as
+  a regression test --- identical point and connectivity blocks against the
+  single-rank run, cells in ascending global id, every point referenced by a
+  cell and every field finite --- because a defect in the rank-0 gather is
+  invisible in the CSV outputs and would otherwise only be noticed by looking at
+  a picture.
 \item \code{restart\_final.bin} is written in global cell order, which is what
   lets a state written on 8 ranks be reloaded on 4 (\cref{sec:output}).
 \end{itemize}
@@ -973,15 +980,20 @@ Verification is independent of the benchmark cases and is produced by
 \code{cfd2d verify}, whose output is \code{report/verification.json}.
 
 \subsection{Unit tests}
-\code{ctest} runs \unitTestCases{} test cases (\unitTestAssertions{}
-assertions, \unitTestFailures{} failing; \code{report/unit\_tests.log}) covering
+\code{ctest} runs two tests. The first is a \code{doctest} suite of
+\unitTestCases{} test cases (\unitTestAssertions{} assertions,
+\unitTestFailures{} failing; \code{report/unit\_tests.log}) covering
 polygon area/centroid and edge normals,
 the equation-of-state round trip, consistency of all three Riemann solvers
 ($\boldsymbol{\Phi}(\mathbf{W},\mathbf{W})=\mathbf{F}(\mathbf{W})$), the exact
 upwind limit for supersonic states, exactness of the Roe flux across a
 stationary Rankine--Hugoniot shock, the algebraic wall-flux identity
 \cref{eq:wallflux} for both wall types, freestream preservation of the farfield
-condition, and the stress tensor and adiabatic viscous flux.
+condition, and the stress tensor and adiabatic viscous flux. The second,
+\code{tests/mpi\_consistency.sh}, is a parallel regression test: it runs the
+same case on 1, 2 and 4 ranks and checks partition completeness, non-empty and
+symmetric halos, agreement of the global residual and forces, and the
+determinism of the field file described in \cref{sec:rankindependent}.
 
 \subsection{Freestream preservation and linear exactness on the benchmark mesh}
 On the NACA0012 mesh, a uniform freestream produces a residual of
@@ -1765,8 +1777,11 @@ output files and share one style module (\code{tools/plot\_style.py}).
   connectivity, and cell values are moved to the nodes by area-weighted
   averaging. No interpolation grid and no scatter plot is used anywhere.
   Every filled contour plot uses 60 levels, and the near-body Mach and pressure
-  views additionally carry 18 thin contour lines so that the shape of the
-  isolines is readable and not only the colour.
+  views additionally carry 12 thin contour lines so that the shape of the
+  isolines is readable and not only the colour. The line levels exclude the
+  outer $15\%$ of the plotted range: the outermost bands are the undisturbed
+  freestream and the no-slip wall, large nearly uniform plateaus whose ragged
+  edge a contour line would trace without conveying anything.
 \item \textbf{Colour bars} are always present and always carry the variable name
   and its nondimensional definition. Ranges of the Mach, pressure and
   velocity-magnitude plots are clipped to the $1$--$99$ percentile \emph{of the
@@ -1889,6 +1904,22 @@ acoustic speed rather than the convective speed, which adds artificial
 dissipation. The $Re=20$ cylinder drag nevertheless lands within $1\%$ of the
 accepted value, so the effect is tolerable on these meshes, but a
 Weiss--Smith-type preconditioner would improve the low-Mach cases.
+
+\paragraph{Outer-field resolution of the supersonic cases.} The supplied
+aerofoil mesh is a viscous-type grid: it puts its cells into the boundary layer
+and coarsens quickly away from the body, reaching cell sizes of order $0.1c$
+within one chord. That is the right choice for the $Re=5000$ cases and the wrong
+one for the Mach-wave field of a supersonic flow. The consequence is visible in
+the near-body Mach plots of the two Mach 2 cases (\cref{fig:naca200,%
+fig:naca200v}): the waves radiated by the captured leading-edge shock are
+resolved across one or two cells and appear as rays aligned with the mesh, and
+they are sharper above the section than below it because the triangulation is
+not mirror-symmetric there. Plotting the raw cell values with flat shading
+gives the same picture, so this is the solution and not the contouring. The
+surface quantities and the integrated forces are not affected --- the upper and
+lower surface $C_p$ distributions of the Mach 2 laminar case agree to
+$1.0\times10^{-2}$ rms and its $C_L$ is $1.3\times10^{-4}$ --- but a study that
+cared about the wave field would need a mesh adapted to it.
 
 \paragraph{Single mesh per geometry.} The benchmark supplies one mesh per
 geometry, so no grid-convergence study of the benchmark results themselves is
