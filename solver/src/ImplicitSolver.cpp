@@ -19,7 +19,6 @@ void lusgsSolve(const LocalMesh& lm,
     int n_total = n_owned + lm.n_ghost;
     dU.assign(n_total, {0,0,0,0});
 
-    // Diagonal: D_i = V_i/dt_i + spectral_radii[i]
     std::vector<double> diag(n_owned);
     for (int i = 0; i < n_owned; i++) {
         double dt_i = dt_local[i];
@@ -27,7 +26,6 @@ void lusgsSolve(const LocalMesh& lm,
         diag[i] = lm.cell_vol[i] / dt_i + spectral_radii[i];
     }
 
-    // Compute preconditioned lambda for a face between i_cell and neighbour j.
     auto face_lambda = [&](int fidx, int i_cell, int j) -> double {
         const StateVec& Uj = states[j];
         double rho_j = Uj[0], u = Uj[1]/rho_j, v = Uj[2]/rho_j;
@@ -45,37 +43,28 @@ void lusgsSolve(const LocalMesh& lm,
         return 0.5 * (std::abs(vn_f) + a_eff) * area + visc_lambda;
     };
 
-    // Forward sweep: (D + L)*dU* = -R
-    // Ghost cells are always upper-triangle in local ordering (j >= n_owned > i),
-    // so they never participate in the forward sweep.
+    // Forward sweep: ghost cells always upper-triangle, never contribute here.
     std::vector<StateVec> dU_star(n_total, {0,0,0,0});
     for (int i = 0; i < n_owned; i++) {
         StateVec rhs = {-residuals[i][0], -residuals[i][1], -residuals[i][2], -residuals[i][3]};
-
         for (int fidx : lm.cell_face_ids_local[i]) {
             int L = lm.face_left_local[fidx], R = lm.face_right_local[fidx];
             if (R < 0) continue;
             int j = (L == i) ? R : L;
-            if (j >= n_owned) continue;  // ghost -- always upper-triangle
-            if (j >= i) continue;        // upper triangle
-
+            if (j >= n_owned) continue;
+            if (j >= i) continue;
             double lambda = face_lambda(fidx, i, j);
             for (int k=0; k<4; k++) rhs[k] += lambda * dU_star[j][k];
         }
-
         double inv_d = 1.0 / diag[i];
         for (int k=0; k<4; k++) dU_star[i][k] = rhs[k] * inv_d;
     }
 
-    // Share forward-sweep result so ghost slots carry the owning rank's dU_star.
+    // Exchange dU_star so ghost slots carry the owning rank's forward-sweep result.
     haloExchange(dU_star, lm, comm);
-
-    // Seed ghost slots in dU with dU_star as initial proxy for ghost upper-triangle.
     for (int j = n_owned; j < n_total; j++) dU[j] = dU_star[j];
 
-    // Backward sweep: (D + U)*dU = D*dU* - U*dU
-    // Ghost cells contribute via dU[j] which improves with each exchange pass.
-    // Only owned lower-triangle neighbours (j < n_owned && j <= i) are skipped.
+    // Backward sweep helper.
     auto backwardSweep = [&]() {
         for (int i = n_owned-1; i >= 0; i--) {
             StateVec rhs = dU_star[i];
@@ -83,7 +72,7 @@ void lusgsSolve(const LocalMesh& lm,
                 int L = lm.face_left_local[fidx], R = lm.face_right_local[fidx];
                 if (R < 0) continue;
                 int j = (L == i) ? R : L;
-                if (j < n_owned && j <= i) continue;  // owned lower triangle
+                if (j < n_owned && j <= i) continue;
                 double lambda = face_lambda(fidx, i, j);
                 for (int k=0; k<4; k++) rhs[k] += (lambda / diag[i]) * dU[j][k];
             }
@@ -91,17 +80,10 @@ void lusgsSolve(const LocalMesh& lm,
         }
     };
 
-    // Perform multiple backward sweep passes with MPI exchange between each pass.
-    // n_bsweeps = n_ranks ensures information propagates across all partition
-    // boundaries in the domain (each exchange adds one rank-distance of coupling).
-    // For np=1 this is exactly 1 sweep (no ghost cells, no exchange needed).
-    int n_bsweeps = std::max(1, lm.n_ranks);
-    for (int pass = 0; pass < n_bsweeps; pass++) {
-        backwardSweep();
-        if (pass < n_bsweeps - 1) {
-            // Exchange updated dU so each rank's ghost slots carry the neighbor's
-            // current backward-sweep result before the next pass.
-            haloExchange(dU, lm, comm);
-        }
-    }
+    // Pass 1: use dU_star proxy for ghost upper-triangle.
+    backwardSweep();
+    // Pass 2: exchange actual dU, then re-sweep with accurate ghost values.
+    haloExchange(dU, lm, comm);
+    backwardSweep();
 }
+

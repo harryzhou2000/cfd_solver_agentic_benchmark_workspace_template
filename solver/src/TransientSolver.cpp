@@ -95,7 +95,8 @@ TransientResult runTransient(LocalMesh& lm,
         std::vector<StateVec> states_ref = states;
         haloExchange(states_ref, lm, comm);
         computeGradients(lm, states_ref, grads);
-        if (mu > 0.0) computePrimGradients(lm, states_ref, gamma, R_gas, prim_grads);
+        haloExchangeGrads(grads, lm, comm);
+        if (mu > 0.0) { computePrimGradients(lm, states_ref, gamma, R_gas, prim_grads); haloExchangePrimGrads(prim_grads, lm, comm); }
         else prim_grads.assign(n_total, {GradVec{0,0}, GradVec{0,0}, GradVec{0,0}});
         computeLimiters(lm, states_ref, grads, limiters);
 
@@ -152,7 +153,8 @@ TransientResult runTransient(LocalMesh& lm,
             haloExchange(states, lm, comm);
             // Update grads from current states each iteration; keep limiters frozen from states_ref
             computeGradients(lm, states, grads);
-            if (mu > 0.0) computePrimGradients(lm, states, gamma, R_gas, prim_grads);
+            haloExchangeGrads(grads, lm, comm);
+            if (mu > 0.0) { computePrimGradients(lm, states, gamma, R_gas, prim_grads); haloExchangePrimGrads(prim_grads, lm, comm); }
 
             // Spatial residual (frozen limiters, updated grads)
             {
@@ -259,7 +261,8 @@ TransientResult runTransient(LocalMesh& lm,
         if (step % rc.write_forces_every == 0) {
             haloExchange(states, lm, comm);
             computeGradients(lm, states, grads);
-            if (mu > 0.0) computePrimGradients(lm, states, gamma, R_gas, prim_grads);
+            haloExchangeGrads(grads, lm, comm);
+            if (mu > 0.0) { computePrimGradients(lm, states, gamma, R_gas, prim_grads); haloExchangePrimGrads(prim_grads, lm, comm); }
             else prim_grads.assign(n_total, {GradVec{0,0}, GradVec{0,0}, GradVec{0,0}});
             Forces forces = out.computeForces(states, grads, prim_grads);
             if (rank == 0) out.writeForceRow(step, t, forces);
@@ -292,7 +295,8 @@ TransientResult runTransient(LocalMesh& lm,
     // Final output
     haloExchange(states, lm, comm);
     computeGradients(lm, states, grads);
-    if (mu > 0.0) computePrimGradients(lm, states, gamma, R_gas, prim_grads);
+            haloExchangeGrads(grads, lm, comm);
+    if (mu > 0.0) { computePrimGradients(lm, states, gamma, R_gas, prim_grads); haloExchangePrimGrads(prim_grads, lm, comm); }
     else prim_grads.assign(n_total, {GradVec{0,0}, GradVec{0,0}, GradVec{0,0}});
 
     Forces forces = out.computeForces(states, grads, prim_grads);

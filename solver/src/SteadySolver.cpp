@@ -127,6 +127,7 @@ SteadyResult runSteady(LocalMesh& lm,
         // === Compute reference state (start of outer step) ===
         haloExchange(states, lm, comm);
         computeGradients(lm, states, grads);
+        haloExchangeGrads(grads, lm, comm);
         if (mu > 0.0)
             computePrimGradients(lm, states, gamma, R_gas, prim_grads);
         else
@@ -298,6 +299,7 @@ SteadyResult runSteady(LocalMesh& lm,
             // to prevent frozen-gradient instability as the boundary layer develops.
             if (mu > 0.0) {
                 computeGradients(lm, states, grads);
+        haloExchangeGrads(grads, lm, comm);
                 computePrimGradients(lm, states, gamma, R_gas, prim_grads);
                 // Fix A: update limiters each inner iter; ramp to full 2nd-order
                 computeLimiters(lm, states, grads, limiters);
@@ -435,7 +437,8 @@ SteadyResult runSteady(LocalMesh& lm,
         if (step % rc.write_forces_every == 0 || step == 1) {
             haloExchange(states, lm, comm);
             computeGradients(lm, states, grads);
-            if (mu > 0.0) computePrimGradients(lm, states, gamma, R_gas, prim_grads);
+        haloExchangeGrads(grads, lm, comm);
+            if (mu > 0.0) { computePrimGradients(lm, states, gamma, R_gas, prim_grads); haloExchangePrimGrads(prim_grads, lm, comm); }
             else prim_grads.assign(n_total, {GradVec{0,0}, GradVec{0,0}, GradVec{0,0}});
             Forces forces = out.computeForces(states, grads, prim_grads);
             if (rank == 0) out.writeForceRow(step, 0.0, forces);
@@ -468,7 +471,8 @@ SteadyResult runSteady(LocalMesh& lm,
     // Final state output
     haloExchange(states, lm, comm);
     computeGradients(lm, states, grads);
-    if (mu > 0.0) computePrimGradients(lm, states, gamma, R_gas, prim_grads);
+        haloExchangeGrads(grads, lm, comm);
+    if (mu > 0.0) { computePrimGradients(lm, states, gamma, R_gas, prim_grads); haloExchangePrimGrads(prim_grads, lm, comm); }
     else prim_grads.assign(n_total, {GradVec{0,0}, GradVec{0,0}, GradVec{0,0}});
 
     Forces forces = out.computeForces(states, grads, prim_grads);
