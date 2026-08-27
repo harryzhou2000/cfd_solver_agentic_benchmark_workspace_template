@@ -1,0 +1,390 @@
+{
+  "schema": "agent_scores",
+  "contestant": "claude/generic/opus-01",
+  "evaluated_at": "2026-08-27T00:00:00+00:00",
+  "evaluator": {
+    "name": "codex-incremental-evaluator"
+  },
+  "scores": {
+    "code_review": {
+      "overall_score": 4.45,
+      "disqualification_flags": [],
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 5,
+          "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4,
+          "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+        }
+      ]
+    },
+    "cfd_review": {
+      "overall_score": 4.92,
+      "disqualification_flags": [],
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 5,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 5,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 5,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 5,
+          "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+        }
+      ]
+    },
+    "result_review": {
+      "overall_score": 4.7,
+      "disqualification_flags": [],
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 4,
+          "notes": "All eight original contestant packages and report pass explicit validation; raw evidence is deliberately excluded from curated submission."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "All eight original contestant packages and report pass explicit validation; raw evidence is deliberately excluded from curated submission."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "All eight original contestant packages and report pass explicit validation; raw evidence is deliberately excluded from curated submission."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "All eight original contestant packages and report pass explicit validation; raw evidence is deliberately excluded from curated submission."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "All eight original contestant packages and report pass explicit validation; raw evidence is deliberately excluded from curated submission."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "All eight original contestant packages and report pass explicit validation; raw evidence is deliberately excluded from curated submission."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 3,
+          "notes": "All eight original contestant packages and report pass explicit validation; raw evidence is deliberately excluded from curated submission."
+        }
+      ]
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 97,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Source, report, and immutable contestant result evidence reviewed."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 10,
+        "notes": "Source, report, and immutable contestant result evidence reviewed."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 15,
+        "notes": "Source, report, and immutable contestant result evidence reviewed."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Source, report, and immutable contestant result evidence reviewed."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 10,
+        "notes": "Source, report, and immutable contestant result evidence reviewed."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 15,
+        "notes": "Source, report, and immutable contestant result evidence reviewed."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 10,
+        "notes": "Source, report, and immutable contestant result evidence reviewed."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 10,
+        "notes": "Source, report, and immutable contestant result evidence reviewed."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Source, report, and immutable contestant result evidence reviewed."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Source, report, and immutable contestant result evidence reviewed."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 5,
+      "notes": "Validator-passing readable submitted result with credible reported convergence and corresponding figures."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 5,
+      "notes": "Validator-passing readable submitted result with credible reported convergence and corresponding figures."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 5,
+      "notes": "Validator-passing readable submitted result with credible reported convergence and corresponding figures."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 5,
+      "notes": "Validator-passing readable submitted result with credible reported convergence and corresponding figures."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 5,
+      "notes": "Validator-passing readable submitted result with credible reported convergence and corresponding figures."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 5,
+      "notes": "Validator-passing readable submitted result with credible reported convergence and corresponding figures."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 5,
+      "notes": "Validator-passing readable submitted result with credible reported convergence and corresponding figures."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 5,
+      "notes": "Validator-passing submitted t=300 BDF2 package with periodicity and inner-control evidence; not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": [
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No direct internal wrapper/executable evidence found."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "Output writers are coupled to solver execution."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Submitted rank-study evidence reports comparable ranks."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Implicit local pseudo-time and LU-SGS-style paths present."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Report algorithm claims map to reviewed source."
+      },
+      {
+        "id": 7,
+        "found": false,
+        "evidence": "Validator-readable statuses and Re200 horizon agree with terminal response."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "METIS_PartGraphKway and neighbor MPI exchange present."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Production reconstruction/limiter path present; freeze disclosed."
+      }
+    ]
+  },
+  "session_selection": {
+    "source": "project",
+    "harness": "claude",
+    "roots": [
+      "3a8e926a-3e32-45e8-a8dd-893091c1e00f"
+    ],
+    "execution_date": "2026-08-25",
+    "started_at": "2026-08-25T12:24:12.933000+00:00",
+    "ended_at": "2026-08-25T17:40:38.570000+00:00",
+    "time_basis": "Selected workspace-local Claude root first persisted event, UTC.",
+    "rationale": "Selected root contains benchmark prompt, continuous work, five persisted subagent transcripts, and deterministic terminal end_turn at source line 4739."
+  },
+  "metadata_answers": {},
+  "limitations": [
+    "No clean evaluator rebuild or rerun; external symlink is dangling.",
+    "Raw results and generated PDF removed only at curated tip and reviewed read-only.",
+    "run_identity.json and contestant_final_response.md are unindexed sidecars."
+  ]
+}

@@ -124,11 +124,13 @@ def main(argv: list[str] | None = None) -> int:
             + (f", activity {t.get('activity_time_seconds')}s" if t.get("activity_time_seconds") else ""))
         tok = e.get("tokens", {})
         cost = e.get("cost_estimate_usd", {})
+        cost_total = cost.get("total")
+        cost_text = "unavailable" if cost_total is None else f"${cost_total:.2f}"
         lines.append(
             f"- Tokens: {tok.get('total', 0):,} "
             f"(main {tok.get('main_vs_subagent', {}).get('main', 0):,} / "
             f"subagents {tok.get('main_vs_subagent', {}).get('subagent', 0):,}); "
-            f"cost est. ${cost.get('total', 0):.2f}")
+            f"cost est. {cost_text}")
     if metadata.get("questions"):
         lines += [
             "",

@@ -1,0 +1,155 @@
+{
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-01",
+  "tool_usage": {
+    "total": 1333,
+    "by_tool": {
+      "Bash": 1295,
+      "Read": 13,
+      "Edit": 8,
+      "Agent": 5,
+      "TaskStop": 4,
+      "Monitor": 3,
+      "ToolSearch": 2,
+      "Write": 2,
+      "ListAgents": 1
+    },
+    "by_thread": {
+      "3a8e926a-3e32-45e8-a8dd-893091c1e00f": {
+        "Bash": 1106,
+        "Read": 13,
+        "Agent": 1,
+        "Edit": 8,
+        "ListAgents": 1,
+        "ToolSearch": 2,
+        "Monitor": 3,
+        "Write": 2,
+        "TaskStop": 4
+      },
+      "3a8e926a-3e32-45e8-a8dd-893091c1e00f:a19c4360c6e529fcc": {
+        "Bash": 38,
+        "Agent": 1
+      },
+      "3a8e926a-3e32-45e8-a8dd-893091c1e00f:a8767b8f17f3727fc": {
+        "Bash": 51,
+        "Agent": 2
+      },
+      "3a8e926a-3e32-45e8-a8dd-893091c1e00f:a95b4d7034218ba4e": {
+        "Bash": 23
+      },
+      "3a8e926a-3e32-45e8-a8dd-893091c1e00f:ae3537b5f34d1fd7c": {
+        "Bash": 43,
+        "Agent": 1
+      },
+      "3a8e926a-3e32-45e8-a8dd-893091c1e00f:ae3997e9c3ef62d58": {
+        "Bash": 34
+      }
+    },
+    "subagent_spawns": 5,
+    "risk_context": []
+  },
+  "loc": {
+    "method": "git+file",
+    "git": {
+      "method": "git",
+      "repos": {
+        "workspace": {
+          "branch": "claude/generic/opus-01",
+          "commit": "8dae7ba6b828c8b72dfa9e55e407f6c4e8098303",
+          "tracked_source_files": 45,
+          "tracked_source_lines": 8019,
+          "by_extension": {
+            "cmake": 103,
+            "cpp": 4511,
+            "h": 1133,
+            "py": 2272
+          },
+          "diff_vs_base": {
+            "added": 0,
+            "deleted": 829,
+            "base": "e540d7f16fc4a8e25bf86525e52cee4314d50a44"
+          }
+        },
+        "cfd_solver_agentic_benchmark": {
+          "branch": "HEAD",
+          "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+          "tracked_source_files": 1,
+          "tracked_source_lines": 324,
+          "by_extension": {
+            "py": 324
+          },
+          "diff_vs_base": null
+        }
+      },
+      "lines_total": 8343
+    },
+    "file": {
+      "method": "file",
+      "files": 46,
+      "lines": 8343,
+      "by_extension": {
+        "cmake": 103,
+        "cpp": 4511,
+        "h": 1133,
+        "py": 2596
+      }
+    }
+  },
+  "rule_violations": [
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "3a8e926a-3e32-45e8-a8dd-893091c1e00f",
+      "timestamp": "2026-08-25T12:24:56.191Z",
+      "tool": "Bash",
+      "evidence": "thon3 -m venv .venv 2>&1 | tail -2 && timeout 300 .venv/bin/pip install --quiet numpy matplotlib h5py scipy 2>&1 | tail -5; .venv/bin/python -c \\\"import numpy,matplotlib,h5py,scipy;print('ok'"
+    },
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "3a8e926a-3e32-45e8-a8dd-893091c1e00f",
+      "timestamp": "2026-08-25T13:32:20.840Z",
+      "tool": "Bash",
+      "evidence": "<workspace>\\npython3 -m venv solver/.venv\\nsolver/.venv/bin/pip install numpy matplotlib h5py scipy\\n\\n# 1. all eight cases at np=8 (writes solver/report/run_manifest.csv)\\nsolver/.venv/bin/p"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "3a8e926a-3e32-45e8-a8dd-893091c1e00f",
+      "timestamp": "2026-08-25T13:56:42.251Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"kill -9 19772 2>/dev/null; sleep 1; pgrep -f chain_steady || echo \\\"chain disarmed\\\"\", \"description\": \"Force kill chain\"}"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "3a8e926a-3e32-45e8-a8dd-893091c1e00f",
+      "timestamp": "2026-08-25T14:16:45.507Z",
+      "tool": "Bash",
+      "evidence": "nd\": \"ps aux | grep \\\"[_]k2\\\" | awk '{print $2}' | xargs -r kill -9 2>/dev/null; sleep 2; ps aux | grep \\\"[f]vm2d solve\\\" | grep -o \\\"output [^ ]*\\\" | sort -u; echo \\\"cleaned\\\"\", \"descript"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "3a8e926a-3e32-45e8-a8dd-893091c1e00f",
+      "timestamp": "2026-08-25T14:17:50.043Z",
+      "tool": "Bash",
+      "evidence": "nd\": \"ps aux | grep \\\"[_]k3\\\" | awk '{print $2}' | xargs -r kill -9 2>/dev/null; sleep 1\\npython3 - <<'PY'\\np='src/core/CaseConfig.h'; s=open(p).read()\\ns=s.replace(\\\"\\\"\\\"  bool adaptiveCf"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "3a8e926a-3e32-45e8-a8dd-893091c1e00f",
+      "timestamp": "2026-08-25T14:40:58.039Z",
+      "tool": "Bash",
+      "evidence": "d\": \"ps aux | grep \\\"[_]km1\\\" | awk '{print $2}' | xargs -r kill -9 2>/dev/null; sleep 2\\npython3 - <<'PY'\\np='src/core/CaseConfig.h'; s=open(p).read()\\ns=s.replace(\\\"\\\"\\\"  long limiterFre"
+    }
+  ],
+  "provenance": {
+    "claude_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-01/.sessions/claude",
+    "selected_roots": [
+      "3a8e926a-3e32-45e8-a8dd-893091c1e00f"
+    ],
+    "generated_at": "2026-08-27T13:19:39.104726+00:00",
+    "num_threads": 6
+  }
+}
