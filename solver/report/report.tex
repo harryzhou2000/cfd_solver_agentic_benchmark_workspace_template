@@ -45,6 +45,14 @@ and all eight are reported by the solver as \texttt{converged} or
 solver itself recorded; no case is relabelled, and coefficients are quoted only to the
 precision the convergence evidence supports.
 
+Two of the eight reach a stable plateau slightly short of their requested residual
+reduction --- $3.92$ of $4.00$ orders for the transonic inviscid case and $2.90$ of $3.00$
+for the supersonic inviscid case --- and this is stated wherever those cases are quoted
+rather than left to be discovered. In both the residual \emph{rises} once the prescribed
+CFL ramp reaches its cap, so the target is unreachable at the supplied controls; the
+best state by residual norm is what is reported and written, and the forces are stationary
+there. \Cref{sec:naca} gives the histories.
+
 Several defects found during preparation of this report are documented rather than
 hidden, and the convergence criterion in particular was corrected five times as
 successive cases exposed distinct ways for a naive test to be fooled

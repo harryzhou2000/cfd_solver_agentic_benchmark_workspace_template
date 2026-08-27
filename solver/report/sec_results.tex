@@ -202,9 +202,38 @@ steps.
 \Cref{fig:naca015inv-hist} shows the residual and force histories and
 \cref{fig:naca015inv-field} the Mach and pressure fields. The $C_p$ distribution
 in \cref{fig:naca015inv-cp} should be symmetric between upper and lower surfaces
-and should recover the stagnation value $C_p=1$ at the leading edge; the surface
-row nearest the nose reports $C_p=\num{0.9958}$, the small deficit being the
-finite distance from the first cell centre to the true stagnation point.
+and should approach the stagnation value at the leading edge. The surface row nearest
+the nose reports $C_p=\cnsNoseCpNacaSubInv$, which \emph{exceeds} the familiar value of
+$1$ --- and that is correct, because $C_p=1$ is the \emph{incompressible} stagnation
+value. For compressible flow the isentropic stagnation pressure coefficient is
+\begin{equation}
+  C_{p0}=\frac{p_0/p_\infty-1}{\tfrac12\gamma \Minf^2}
+  =\frac{\left(1+\tfrac{\gamma-1}{2}\Minf^2\right)^{\gamma/(\gamma-1)}-1}
+         {\tfrac12\gamma \Minf^2},
+  \label{eq:stagcp}
+\end{equation}
+which exceeds unity and tends to $1$ as $\Minf\to0$. It evaluates to
+$\cnsStagCpNacaSubInv$ at $\Minf=0.15$ and $\cnsStagCpNacaTraInv$ at $\Minf=0.80$.
+\Cref{eq:stagcp} is the right reference only while the stagnation streamline is isentropic,
+which is true subsonically but \emph{not} at $\Minf=2.0$: there the flow crosses the bow
+shock first, so the attainable ceiling is the lower post-shock pitot value of
+\cref{eq:pitot}, $1.6573$, rather than the isentropic $\cnsStagCpNacaSupInv$. That case is
+treated separately in \cref{sec:m200asym}.
+
+Measured against the correct reference, the computed nose value is a deficit of
+$\cnsNoseCpDeficitPctNacaSubInv\,\%$, consistent with the first cell centre lying a
+finite distance from the true stagnation point so that the sampled state retains a
+little dynamic pressure. The transonic case behaves the same way, reporting
+$\cnsNoseCpNacaTraInv$ against $\cnsStagCpNacaTraInv$, a
+$\cnsNoseCpDeficitPctNacaTraInv\,\%$ deficit.
+
+This correction is worth recording because an earlier draft compared the wall value
+against $1$ instead of against \cref{eq:stagcp}. Doing so inverts the sign of the
+discrepancy --- a genuine deficit below $C_{p0}$ appears as an excess above $1$ --- and
+the draft then attached the finite-cell-offset explanation to a discrepancy pointing the
+wrong way. The number and its explanation were individually plausible and jointly
+incoherent. Both are now harvested from the submitted \texttt{surface.csv} and the case
+file's Mach number rather than transcribed, so neither can drift from the run again.
 
 \begin{figure}[htbp]
   \centering
@@ -294,6 +323,27 @@ specified in the case file rather than of the spatial scheme.} That is a materia
 different and considerably less alarming statement than the plateau this report described
 in two earlier drafts, and the difference was found only by plotting the residual against
 the CFL rather than reading the final scalar.
+
+\paragraph{Why the shortfall is a plateau and not an unfinished run.} The distinction
+matters, because \emph{stopping short of a target} and \emph{a target that is unreachable
+at the supplied controls} are different claims. The evidence for the second is that the
+residual does not merely stop falling --- it \textbf{rises}. Over the $950$ steps after the
+best state at step $2546$ the residual averages $\num{4.51e-3}$ against that best value of
+$\num{4.68e-4}$, never returning below $\num{4.68e-4}$ and reaching $\num{5.00e-3}$, while
+the CFL ramp completes its climb to the cap of $100$. A run that could still reach $4.00$
+orders under these controls would have to descend through the level it had already
+achieved, and it does not: it settles onto a higher plateau and stays there.
+
+The supersonic inviscid case is the same story with a shorter tail: best $\num{1.8346e-3}$
+at step $4854$, which is $2.8964$ of the requested $3.00$ orders, followed by a rise to a
+plateau averaging $\num{3.84e-3}$ and peaking at $\num{6.64e-3}$.
+
+Both cases therefore satisfy the condition the supplied parameters attach to an early
+stop --- residuals, forces and fields at a stable plateau, with the final force row
+matching the written field and surface state --- and both are within $0.09$ and $0.10$
+orders of their targets at the state reported. The shortfall is stated rather than
+smoothed over, but it is a documented plateau at the supplied controls, not an
+abandoned march.
 
 A reader checking \texttt{forces.csv} for this case will notice that the final row's step
 number is \emph{lower} than the row before it, because the restored state is written after

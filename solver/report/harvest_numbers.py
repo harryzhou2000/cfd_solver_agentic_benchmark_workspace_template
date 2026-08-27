@@ -69,6 +69,9 @@ def transient_status(forces_path, start=None):
 
 REPORT_DIR = Path(__file__).resolve().parent
 RESULTS_DIR = REPORT_DIR.parent / "results"
+#: Supplied case inputs, read only for values that originate there (the
+#: freestream Mach number) rather than being recorded in metadata.json.
+CASES_DIR = Path("/workspace/cfd_solver_agentic_benchmark/inputs/cases")
 
 PENDING = "\\pending"
 
@@ -303,12 +306,42 @@ def main():
         status = read_json(case_dir / "run_status.json") or {}
         meta = read_json(case_dir / "metadata.json") or {}
         forces = read_rows(case_dir / "forces.csv")
+        surface = read_rows(case_dir / "surface.csv")
         last = forces[-1] if forces else {}
 
         # A run is usable only if it completed AND its output postdates the
         # trusted cutoff.  Stale output is reported as pending, never as a result.
         stale = is_stale(case_dir / "run_status.json")
         finished = bool(status) and not stale
+
+        # Stagnation-point diagnostic, harvested rather than hand-copied so it cannot
+        # go stale when a case is re-run.  For a COMPRESSIBLE flow the stagnation
+        # reference is not Cp = 1: the isentropic stagnation pressure coefficient is
+        #   Cp0 = (p0/p_inf - 1) / (gamma/2 M^2),  p0/p = (1 + (g-1)/2 M^2)^(g/(g-1))
+        # which exceeds 1 and tends to 1 as M -> 0.  Comparing a wall value against 1
+        # rather than against Cp0 inverts the SIGN of the discrepancy, which is how a
+        # stale figure in this report once acquired a backwards physical explanation.
+        if surface and finished:
+            # The freestream Mach number is an input and lives in the supplied case
+            # file; it is not recorded in metadata.json.
+            mach_inf = None
+            case_json = read_json(CASES_DIR / (case_id + ".json"))
+            if case_json:
+                mach_inf = (case_json.get("freestream") or {}).get("mach")
+            try:
+                nose = min(surface, key=lambda r: float(r["x"]))
+                nose_cp = float(nose["cp"])
+            except (KeyError, TypeError, ValueError):
+                nose_cp = None
+            if nose_cp is not None:
+                define("NoseCp" + key, num(nose_cp, 7))
+                if isinstance(mach_inf, (int, float)) and mach_inf > 0:
+                    g = 1.4
+                    m2 = float(mach_inf) ** 2
+                    cp0 = ((1.0 + 0.5 * (g - 1.0) * m2) ** (g / (g - 1.0)) - 1.0) / (0.5 * g * m2)
+                    define("StagCp" + key, num(cp0, 7))
+                    define("NoseCpDeficitPct" + key,
+                           num(100.0 * (cp0 - nose_cp) / cp0, 3))
         if stale and status:
             print("  SKIPPING STALE: %s (predates trusted cutoff)" % case_id)
         cd = last.get("cd")
