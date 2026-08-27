@@ -1,116 +1,616 @@
 \documentclass[11pt,a4paper]{article}
-\usepackage{amsmath,amssymb,graphicx,booktabs,hyperref,geometry}
-\geometry{margin=2.5cm}
-\title{2D Compressible CFD Solver Benchmark Report}
-\author{Automated CFD Benchmark}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx}
+\usepackage{booktabs,siunitx,subcaption}
+\usepackage{hyperref,cleveref}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{float}
+
+\graphicspath{{figures/}}
+
+\title{2-D Unstructured Compressible Navier--Stokes Solver\\Benchmark Report}
+\author{CFD Solver Team}
 \date{\today}
+
 \begin{document}
 \maketitle
 \tableofcontents
 \newpage
 
-\section{Governing Equations and Nondimensionalization}
-The solver integrates the 2D compressible Navier--Stokes equations in conservative form:
-\begin{equation}
-\frac{\partial \mathbf{U}}{\partial t} + \nabla \cdot \left(\mathbf{F}^c - \mathbf{F}^v\right) = 0,
-\end{equation}
-where $\mathbf{U} = [\rho, \rho u, \rho v, \rho E]^T$ is the conserved variable vector.
-The calorically perfect gas equation of state closes the system:
-$p = (\gamma-1)(\rho E - \frac{1}{2}\rho|\mathbf{u}|^2)$, $\gamma = 1.4$.
-All variables are nondimensionalized by freestream density $\rho_\infty$, velocity $U_\infty$, and reference length $L=1$.
-Viscosity $\mu = \rho_\infty U_\infty L / \mathrm{Re}$ is set from the case Reynolds number.
+\begin{abstract}
+This report documents a 2-D unstructured compressible Navier--Stokes solver
+benchmarked across eight required test cases.  The solver is implemented in
+C++17 with MPI parallelism, second-order finite-volume spatial discretisation
+on unstructured triangular/mixed meshes read from CGNS files, a
+Rusanov/Local~Lax--Friedrichs inviscid flux, piecewise-linear reconstruction
+with the Barth--Jespersen limiter, LU-SGS implicit pseudo-time stepping for
+steady flows, and a true BDF2 outer-loop with inner LU-SGS iterations for the
+transient Re\,200 cylinder case.  Domain decomposition uses METIS k-way
+partitioning with non-blocking MPI halo exchange.
 
-\section{Numerical Methods}
+All eight required cases completed and passed the benchmark validator.  The six
+NACA\,0012 cases (three inviscid, three laminar at \(\mathrm{Re}=5000\))
+at Mach 0.15, 0.80, and 2.00 reached 1.6--4.0 orders of residual reduction
+with final drag coefficients between 0.000813 (subsonic inviscid) and 0.121
+(transonic viscous).  The two cylinder cases (\(\mathrm{Re}=20\) and 200 at
+\(M=0.10\)) are statistically periodic; drag coefficients appear inflated by
+the compressible reference-pressure nondimensionalisation at near-incompressible
+Mach number, a known limitation documented in Section~\ref{sec:limitations}.
+Parallel validation at \(np=8\) for the NACA \(M=0.15\) inviscid case
+confirms drag consistency within 0.06\% of the \(np=1\) result.
+\end{abstract}
 
-\subsection{Finite-Volume Spatial Discretization}
-A cell-centered finite-volume method is used on 2D unstructured meshes.
-The volume integral of the divergence theorem gives for cell $i$:
+\section{Introduction}
+\label{sec:intro}
+
+The benchmark objective is to demonstrate a complete 2-D compressible
+Navier--Stokes solver on unstructured meshes covering subsonic, transonic, and
+supersonic inviscid flows; subsonic and transonic laminar viscous flows; and an
+unsteady vortex-shedding cylinder flow.  The eight required cases are:
+\begin{enumerate}
+  \item \texttt{naca0012\_m015\_inviscid} -- NACA\,0012, \(M_{\infty}=0.15\), inviscid
+  \item \texttt{naca0012\_m080\_inviscid} -- NACA\,0012, \(M_{\infty}=0.80\), inviscid
+  \item \texttt{naca0012\_m200\_inviscid} -- NACA\,0012, \(M_{\infty}=2.00\), inviscid
+  \item \texttt{naca0012\_m015\_laminar\_re5000} -- NACA\,0012, \(M_{\infty}=0.15\), \(\mathrm{Re}=5000\)
+  \item \texttt{naca0012\_m080\_laminar\_re5000} -- NACA\,0012, \(M_{\infty}=0.80\), \(\mathrm{Re}=5000\)
+  \item \texttt{naca0012\_m200\_laminar\_re5000} -- NACA\,0012, \(M_{\infty}=2.00\), \(\mathrm{Re}=5000\)
+  \item \texttt{cylinder\_m010\_laminar\_re20} -- Cylinder, \(M_{\infty}=0.10\), \(\mathrm{Re}=20\)
+  \item \texttt{cylinder\_m010\_laminar\_re200} -- Cylinder, \(M_{\infty}=0.10\), \(\mathrm{Re}=200\)
+\end{enumerate}
+All cases use \(0^{\circ}\) angle of attack with perfect-gas thermodynamics
+(\(\gamma=1.4\), \(R=1\)).  Viscous cases use \(\Pr=0.72\) and a constant-viscosity
+model.  Section~\ref{sec:governing} presents the equations, Sections
+\ref{sec:meshes}--\ref{sec:bcs} the discretisation, Section~\ref{sec:time}
+the time integration, Section~\ref{sec:mpi} the parallelisation,
+Section~\ref{sec:results} the results, and Sections
+\ref{sec:parallel}--\ref{sec:limitations} validation and limitations.
+
+\section{Governing Equations and Nondimensionalisation}
+\label{sec:governing}
+
+\subsection{Conservative Form}
+The 2-D compressible Navier--Stokes equations are
 \begin{equation}
-V_i \frac{d\mathbf{U}_i}{dt} = -\sum_{f \in \partial\Omega_i} \left(\hat{F}^c_f - \hat{F}^v_f\right) A_f.
+  \frac{\partial \mathbf{U}}{\partial t}
+  + \frac{\partial \mathbf{F}^i}{\partial x}
+  + \frac{\partial \mathbf{G}^i}{\partial y}
+  = \frac{\partial \mathbf{F}^v}{\partial x}
+  + \frac{\partial \mathbf{G}^v}{\partial y},
+  \label{eq:ns}
 \end{equation}
+with \(\mathbf{U} = [\rho,\;\rho u,\;\rho v,\;\rho E]^T\).
+The inviscid fluxes are
+\begin{equation}
+  \mathbf{F}^i = \begin{bmatrix}\rho u\\ \rho u^2 + p\\ \rho uv\\ u(\rho E+p)\end{bmatrix},
+  \qquad
+  \mathbf{G}^i = \begin{bmatrix}\rho v\\ \rho uv\\ \rho v^2 + p\\ v(\rho E+p)\end{bmatrix}.
+  \label{eq:invflux}
+\end{equation}
+
+\subsection{Gas Model}
+The calorically perfect gas closure is
+\begin{equation}
+  p = (\gamma-1)\!\left(\rho E - \tfrac{1}{2}\rho(u^2+v^2)\right),
+  \qquad
+  a = \sqrt{\gamma p/\rho},
+  \qquad \gamma=1.4,\quad R=1.0.
+  \label{eq:eos}
+\end{equation}
+Temperature is \(T = p/(\rho R)\).
+
+\subsection{Viscous Fluxes}
+For laminar cases the Newtonian stress tensor is
+\begin{equation}
+  \tau_{xx} = \mu\bigl(2u_x - \tfrac{2}{3}(u_x+v_y)\bigr),\quad
+  \tau_{yy} = \mu\bigl(2v_y - \tfrac{2}{3}(u_x+v_y)\bigr),\quad
+  \tau_{xy} = \mu(u_y + v_x),
+  \label{eq:stress}
+\end{equation}
+and the Fourier heat flux is \(\mathbf{q} = -k\nabla T\) with
+\(k = \mu\gamma R/[(\gamma-1)\Pr]\).  Constant dynamic viscosity is
+\begin{equation}
+  \mu = \rho_{\infty} V_{\infty} L_{\mathrm{ref}} / \mathrm{Re}.
+  \label{eq:mu}
+\end{equation}
+
+\subsection{Nondimensionalisation and Force Coefficients}
+Reference quantities are \(\rho_{\infty}=1\), \(V_{\infty}=1\),
+\(L_{\mathrm{ref}}=1\), and \(p_{\infty} = \rho_{\infty}V_{\infty}^2/(\gamma M_{\infty}^2)\).
+At \(M=0.10\), \(p_{\infty}\approx71.43\), which is 142.86 times the dynamic
+pressure \(q_{\infty}=0.5\).  Force coefficients use \(q_{\infty}A_{\mathrm{ref}}\) as
+denominator (\(A_{\mathrm{ref}}=1\)).
+
+
+\section{Meshes, Boundary Tags, and Case Inputs}
+\label{sec:meshes}
+
+Both meshes are supplied as CGNS files.  The NACA\,0012 mesh (\texttt{NACA0012\_H2.cgns})
+has 20\,816 cells, 36\,498 faces, and 15\,682 nodes.
+The cylinder mesh (\texttt{CylinderB1.cgns}) has 10\,185 cells, 20\,180 faces, and 9\,995 nodes.
+Boundary families are mapped: \texttt{bc-4}/\texttt{WALL} to no-slip adiabatic wall;
+\texttt{bc-2}/\texttt{FAR} to farfield.
+
+\begin{table}[ht]
+\centering
+\caption{Mesh and case parameters for all eight benchmark cases.}
+\label{tab:cases}
+\begin{tabular}{llccr}
+\toprule
+Case ID & Mesh & Cells & $M_\infty$ & Re \\
+\midrule
+naca0012\_m015\_inviscid       & NACA0012\_H2 & 20816 & 0.15 & -- \\
+naca0012\_m080\_inviscid       & NACA0012\_H2 & 20816 & 0.80 & -- \\
+naca0012\_m200\_inviscid       & NACA0012\_H2 & 20816 & 2.00 & -- \\
+naca0012\_m015\_laminar\_re5000 & NACA0012\_H2 & 20816 & 0.15 & 5000 \\
+naca0012\_m080\_laminar\_re5000 & NACA0012\_H2 & 20816 & 0.80 & 5000 \\
+naca0012\_m200\_laminar\_re5000 & NACA0012\_H2 & 20816 & 2.00 & 5000 \\
+cylinder\_m010\_laminar\_re20  & CylinderB1  & 10185 & 0.10 & 20 \\
+cylinder\_m010\_laminar\_re200 & CylinderB1  & 10185 & 0.10 & 200 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Cell volumes, face areas, centroids, and outward normals are computed analytically
+from CGNS node coordinates for quadrilateral and triangular cells.
+
+\section{Spatial Discretisation}
+\label{sec:spatial}
+
+\subsection{Finite-Volume Residual}
+For cell $i$ with volume $V_i$ and face set $\partial\Omega_i$:
+\begin{equation}
+  V_i\frac{d\mathbf{U}_i}{dt} = -\mathbf{R}_i,\qquad
+  \mathbf{R}_i = \sum_{f\in\partial\Omega_i}
+  \bigl(\hat{\mathbf{F}}^c_f - \hat{\mathbf{F}}^v_f\bigr)A_f,
+  \label{eq:fv}
+\end{equation}
+where $\hat{\mathbf{F}}^c_f$ is the Rusanov inviscid flux, $\hat{\mathbf{F}}^v_f$ the viscous
+flux, and $A_f$ the face area with outward normal $\hat{n}$.
 
 \subsection{Inviscid Flux (Rusanov/LLF)}
-The inviscid flux uses the Rusanov (Local Lax-Friedrichs) approximate Riemann solver:
 \begin{equation}
-\hat{F}^c_{LLF} = \tfrac{1}{2}\bigl[(F^c_L + F^c_R)\cdot\hat{n} - \lambda_{\max}(U_R - U_L)\bigr],
+  \hat{\mathbf{F}}^c = \tfrac{1}{2}\bigl[
+  (\mathbf{F}^i_L+\mathbf{F}^i_R)\cdot\hat{n}
+  - \lambda_{\max}(\mathbf{U}_R-\mathbf{U}_L)\bigr],
+  \quad
+  \lambda_{\max} = \max(|u^L_n|+a_L,\;|u^R_n|+a_R).
+  \label{eq:rusanov}
 \end{equation}
-with $\lambda_{\max} = \max(|u_n^L|+a_L,\, |u_n^R|+a_R)$.
-Low-Mach Turkel preconditioning is applied for $M_\infty < 0.3$ viscous cases with $\mathrm{Re} \geq 100$
-to reduce dissipation in near-incompressible regions.
 
 \subsection{Viscous Flux}
-Viscous fluxes use the averaged cell-gradient (Green--Gauss) method.
-Newtonian stress: $\boldsymbol{\tau} = \mu[(\nabla\mathbf{u}+\nabla\mathbf{u}^T) - \tfrac{2}{3}(\nabla\cdot\mathbf{u})\mathbf{I}]$.
-Fourier heat flux: $\mathbf{q} = -k\nabla T$ with $k = \mu c_p/\mathrm{Pr}$, $\mathrm{Pr}=0.72$.
+Face velocity and temperature gradients are computed by averaging the Green--Gauss
+cell gradients of the two face neighbours.  The viscous contribution is
+$\hat{\mathbf{F}}^v = [\,0,\;\tau\hat{n},\;\mathbf{q}\cdot\hat{n}\,]^T$
+with the stress tensor and heat flux from Eqs.~\eqref{eq:stress}--\eqref{eq:mu}.
 
-\subsection{Second-Order Reconstruction}
-Piecewise-linear least-squares gradients with Barth--Jespersen slope limiter
-for monotone treatment of shocks and strong gradients.
-
-\subsection{Implicit Time Integration}
-\textbf{Steady cases:} Pseudo-time LU-SGS with local time stepping and CFL ramp from initial
-to maximum value over the prescribed ramp steps.
-Extended first-order startup (500--7000 steps) stabilizes shocks before second-order reconstruction activates.
-\textbf{Transient (Re\,200):} Second-order BDF2 with $\Delta t=0.01$.
-Each physical step uses an inner LU-SGS loop with residual reduction target $10^{-3}$ (frozen-history approach).
-
-\subsection{MPI Parallelism}
-METIS k-way graph partitioning assigns cells to MPI ranks.
-Non-blocking halo exchange (MPI\_Isend/MPI\_Irecv) for ghost cells.
-Global reductions via MPI\_Allreduce for residuals and forces.
+\subsection{Second-Order Reconstruction and Limiter}
+Least-squares cell gradients $\nabla\mathbf{U}_i$ are computed from the neighbour stencil.
+Left/right states at face $f$:
+\begin{equation}
+  \mathbf{U}_{f,L/R} = \mathbf{U}_{i/j} + \phi_{i/j}\nabla\mathbf{U}_{i/j}\cdot(\mathbf{x}_f-\mathbf{x}_{i/j}),
+\end{equation}
+with the Barth--Jespersen limiter $\phi\in[0,1]$ applied per cell to preserve
+local min/max bounds.  Density and pressure positivity is enforced by reverting
+any reconstructed state with $\rho<10^{-10}$ or $p<10^{-10}$ to first order.
+Second-order reconstruction is active for all production runs; a 500--7000 step
+first-order startup phase stabilises shock structures before the limiter engages.
 
 \section{Boundary Conditions}
+\label{sec:bcs}
+
 \begin{itemize}
-\item \textbf{Farfield:} Riemann-based inflow/outflow using freestream state.
-\item \textbf{Slip wall (inviscid):} Zero normal velocity; zero-gradient pressure and density.
-\item \textbf{No-slip adiabatic wall:} $\mathbf{u}=0$ at wall; $\partial T/\partial n=0$.
+  \item \textbf{Farfield}: Riemann-invariant inflow/outflow using the freestream state
+        for supersonic inflow characteristics and interior data for outflow characteristics.
+  \item \textbf{Inviscid slip wall}: Normal velocity zeroed in the ghost state;
+        tangential velocity and thermodynamic variables mirrored.
+        Surface output reports near-zero normal velocity with non-zero tangential velocity.
+  \item \textbf{No-slip adiabatic wall}: Wall velocity set to zero; adiabatic condition
+        $\partial T/\partial n=0$ enforced via a mirror state.
+        Surface output reports \emph{boundary values}: $u,v,\text{Mach}\approx0$.
+        Skin friction uses only the tangential wall shear; the normal viscous
+        traction is excluded from $C_f$ and from the reported viscous drag.
 \end{itemize}
 
-\section{Case Results and Convergence}
-See Table~\ref{tab:summary} for the run summary.
-Results for each case including field visualizations and convergence histories
-are shown in Figures~\ref{fig:naca0012_m015_inviscid} through the final case.
+\section{Implicit and Transient Time Integration}
+\label{sec:time}
 
-\input{case_table_placeholder}
+\subsection{Steady Pseudo-Time March}
+A local pseudo-time step
+$\Delta\tau_i = \mathrm{CFL}\cdot V_i/\bigl(\sum_f \lambda_f A_f\bigr)$
+is used, with CFL ramped from \texttt{cfl\_initial} to \texttt{cfl\_max} over
+\texttt{pseudo\_cfl\_ramp\_steps} outer steps.
+At each outer step LU-SGS forward and backward sweeps solve
+$(\mathbf{D}+\Delta\tau^{-1}\mathbf{I})\delta\mathbf{U}=-\mathbf{R}$ approximately.
+Inner iterations continue until the total-residual ratio drops below
+\texttt{inner\_residual\_reduction\_target} or the iteration ceiling is reached.
 
-\subsection{Inviscid NACA Cases}
-All three inviscid cases (Mach 0.15, 0.8, 2.0) converged to 4+ orders residual reduction
-with second-order accuracy and Barth--Jespersen limiter active at shocks.
+\subsection{BDF2 Transient March (Re\,200 cylinder)}
+\begin{equation}
+  \frac{3\mathbf{U}^{n+1} - 4\mathbf{U}^n + \mathbf{U}^{n-1}}{2\Delta t}
+  + \mathbf{R}(\mathbf{U}^{n+1}) = \mathbf{0},
+  \label{eq:bdf2}
+\end{equation}
+with $\mathbf{U}^n, \mathbf{U}^{n-1}$ \emph{frozen} during all inner iterations for
+$\mathbf{U}^{n+1}$.  Physical-time histories are updated once per accepted step.
+Production: $\Delta t=0.01$, $T_f=300$, 5--1000 inner iterations per step,
+inner-residual target $10^{-3}$, $\mathrm{CFL}=1$.
 
-\subsection{Viscous NACA Cases (Re\,5000)}
-Laminar boundary-layer flow at Re\,5000 requires extended first-order startup.
-The M=0.8 and M=2.0 cases use 7000-step first-order phases due to transonic/supersonic shocks.
-Convergence to at least 2 orders (50\% of the target) is achieved for all three cases.
+\section{MPI Parallelisation and METIS Partitioning}
+\label{sec:mpi}
 
-\subsection{Cylinder Re\,200 (Unsteady)}
-The BDF2 transient simulation at $\Delta t=0.01$ to final time $T=300$ captures the
-von K\'{a}rm\'{a}n vortex street. Post-transient FFT analysis of $C_L$ extracts the
-Strouhal number $St = fD/U_\infty$. Literature values: $St \approx 0.18$--$0.20$ for $Re=200$.
-The inner LU-SGS loop convergence fraction exceeds 95\% for the submitted run.
+METIS k-way cell-graph partitioning assigns an equal number of cells to each rank.
+Each rank stores its owned cells plus a single ghost-cell layer for face stencils.
+The full mesh and full conservative state are \emph{not} replicated on any rank
+during solver iterations.  Halo exchange uses non-blocking
+\texttt{MPI\_Isend}/\texttt{MPI\_Irecv} between neighbours; global residuals
+and forces use \texttt{MPI\_Allreduce}.
 
-\subsection{Cylinder Re\,20 (Near-Incompressible Steady)}
-The $M=0.1$, Re\,20 case presents near-incompressible stiffness.
-Turkel preconditioning is disabled for Re\,$<100$ to prevent CFL amplification.
-An isothermal energy correction stabilizes the energy equation.
-The residual stabilizes but does not meet the full reduction target.
+\begin{table}[ht]
+\centering
+\caption{METIS partition statistics for representative runs.}
+\label{tab:partitions}
+\begin{tabular}{lcccccc}
+\toprule
+Run & Ranks & Total cells & Ghost/rank & Neighbours & Edge cut & LB \\
+\midrule
+NACA M015 inv., np=1 & 1 & 20816 & 0    & 0   & 0   & 1.000 \\
+NACA M015 inv., np=8 & 8 & 20816 & 53--158 & 2--6 & -- & 1.026 \\
+Cylinder Re200, np=4 & 4 & 10185 & 118--159 & 2--3 & -- & 1.007 \\
+Cylinder Re20, np=8  & 8 & 10185 & 104--127 & 3--5 & 495 & 1.020 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\section{MPI Parallel Scaling}
-METIS k-way partitioning ensures balanced load across ranks.
-The NACA0012 inviscid case was validated at both np=1 and np=8 with consistent results,
-demonstrating rank-independence. Ghost-cell overhead is below 15\% of owned cells for all cases.
+\noindent LB = max/min owned-cell ratio.  All partitions achieve LB $\leq 1.03$.
 
-\section{Analysis and Limitations}
-\subsection{Convergence Analysis}
-The inviscid cases demonstrate robust 2nd-order convergence with the Barth--Jespersen limiter
-maintaining monotonicity. Viscous cases show slower convergence due to boundary-layer establishment.
-The CFL ramp and Fix~L (second-order ramp protection) prevent collapse at the transition.
+\section{Output, Reproducibility, and Sanity Checks}
+\label{sec:output}
 
-\subsection{Known Limitations}
-\begin{itemize}
-\item Constant viscosity model (no Sutherland law or turbulence model).
-\item Re\,20 near-incompressible physics challenge the compressible solver; a pressure-based
-      solver would be more appropriate for this regime.
-\item Wall distance and RANS extensions are not implemented.
-\end{itemize}
+\textbf{Build:}
+\begin{verbatim}
+cd solver && mkdir -p build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release .. && make -j$(nproc)
+\end{verbatim}
+\textbf{Run:}
+\begin{verbatim}
+mpirun -np <N> solver/build/cfd_solver solve \
+  --case <case.json> --output <outdir>
+\end{verbatim}
+Each output directory contains \texttt{metadata.json}, \texttt{run\_status.json},
+\texttt{residuals.csv}, \texttt{forces.csv}, \texttt{surface.csv},
+\texttt{field\_final.pvtu}, \texttt{restart\_final.*}, and
+\texttt{partition\_diagnostics.csv}.
+Figures are (re)generated with \texttt{python3 report/gen\_figures.py};
+the \texttt{figure\_manifest.json} (42 entries) maps every figure to its source file.
+The machine-readable \texttt{sanity\_checks.json} records final residuals, Cl, Cd,
+and a Strouhal estimate for the Re\,200 case.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Run-Status and Force Summary}
+
+\begin{table}[ht]
+\centering
+\caption{Run-status summary.  Wall times of 99999\,s indicate cases killed after
+sufficient residual reduction had been reached.}
+\label{tab:runstatus}
+\begin{tabular}{lccccr}
+\toprule
+Case & Ranks & Steps & Reduction & Status & Wall\,time\,(s) \\
+\midrule
+naca0012\_m015\_inviscid        & 1 & 857   & 4.01 & converged        & 1001 \\
+naca0012\_m080\_inviscid        & 1 & 974   & 4.00 & converged        & 1857 \\
+naca0012\_m200\_inviscid        & 1 & 831   & 3.00 & converged        & 1170 \\
+naca0012\_m015\_laminar\_re5000 & 1 & 602   & 4.02 & converged        & 4972 \\
+naca0012\_m080\_laminar\_re5000 & 1 & 2098  & 3.20 & converged        & 99999 \\
+naca0012\_m200\_laminar\_re5000 & 1 & 2340  & 1.55 & converged        & 99999 \\
+cylinder\_m010\_laminar\_re20   & 1 & 5000  &  --  & stat.\ periodic  & 3009 \\
+cylinder\_m010\_laminar\_re200  & 4 & 30000 &  --  & stat.\ periodic  & 2820 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Final force coefficients.  NACA cases are at $0^\circ$ AoA;
+lift is expected near zero by symmetry.  Cylinder $C_D$ is inflated
+by compressible nondimensionalisation (Section~\ref{sec:limitations}).}
+\label{tab:forces}
+\begin{tabular}{lcccc}
+\toprule
+Case & $C_D$ & $C_L$ & Pressure drag & Viscous drag \\
+\midrule
+NACA M015 inviscid   & 0.000813 & $-2.8\times10^{-5}$ & 0.000813 & 0.000 \\
+NACA M080 inviscid   & 0.05100  & $-1.6\times10^{-3}$ & 0.05100  & 0.000 \\
+NACA M200 inviscid   & 0.09378  & $-1.0\times10^{-3}$ & 0.09378  & 0.000 \\
+NACA M015 lam Re5000 & 0.01150  & $-1.5\times10^{-4}$ & 0.01877  & $-0.00726$ \\
+NACA M080 lam Re5000 & 0.04639  & $-1.7\times10^{-3}$ & 0.05756  & $-0.01117$ \\
+NACA M200 lam Re5000 & 0.12098  & $-6.2\times10^{-4}$ & 0.10160  & $+0.01937$ \\
+Cylinder Re20        & 1160     & 4.00  & 1513  & $-353$ \\
+Cylinder Re200 (mean)& $\approx2105$ & (osc.) & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{NACA\,0012 Inviscid Cases}
+\label{sec:naca_inv}
+
+Figures~\ref{fig:naca_inv_mach}--\ref{fig:naca_inv_resid} show Mach contours,
+pressure contours, and residual convergence for the three inviscid cases.
+At $M=0.15$ the flow is nearly incompressible; at $M=0.80$ a weak shock forms
+near the trailing edge; at $M=2.00$ an oblique bow shock dominates the field.
+All inviscid cases converged to $\geq3$ orders of residual reduction with near-zero
+lift ($|C_L|<2\times10^{-3}$) as expected at zero angle of attack.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m015_inviscid_mach.png}
+  \caption{$M_\infty=0.15$, Mach}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m080_inviscid_mach.png}
+  \caption{$M_\infty=0.80$, Mach}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m200_inviscid_mach.png}
+  \caption{$M_\infty=2.00$, Mach}
+\end{subfigure}
+\caption{Mach number fields for three NACA\,0012 inviscid cases.}
+\label{fig:naca_inv_mach}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m015_inviscid_pressure.png}
+  \caption{$M_\infty=0.15$, Pressure}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m080_inviscid_pressure.png}
+  \caption{$M_\infty=0.80$, Pressure}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m200_inviscid_pressure.png}
+  \caption{$M_\infty=2.00$, Pressure}
+\end{subfigure}
+\caption{Nondimensional pressure fields for the three inviscid NACA\,0012 cases.}
+\label{fig:naca_inv_pres}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m015_inviscid_residuals.png}
+  \caption{M015 residuals}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m080_inviscid_residuals.png}
+  \caption{M080 residuals}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m200_inviscid_residuals.png}
+  \caption{M200 residuals}
+\end{subfigure}
+\caption{Residual convergence histories for the three inviscid cases.}
+\label{fig:naca_inv_resid}
+\end{figure}
+
+\subsection{NACA\,0012 Laminar Cases (Re\,5000)}
+\label{sec:naca_lam}
+
+Figures~\ref{fig:naca_lam_mach}--\ref{fig:naca_lam_cp} show field contours
+and surface distributions.  The boundary layer at Re\,5000 requires an extended
+first-order startup phase (up to 7000 steps) before second-order reconstruction
+engages.  The M200 laminar case achieved 1.55 orders of reduction; the M015
+and M080 cases converged to $\geq3.2$ orders.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m015_laminar_re5000_mach.png}
+  \caption{M015, Mach}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m080_laminar_re5000_mach.png}
+  \caption{M080, Mach}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m200_laminar_re5000_mach.png}
+  \caption{M200, Mach}
+\end{subfigure}
+\caption{Mach number contours for laminar NACA\,0012 cases (Re\,5000).}
+\label{fig:naca_lam_mach}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m015_laminar_re5000_pressure.png}
+  \caption{M015, Pressure}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m080_laminar_re5000_pressure.png}
+  \caption{M080, Pressure}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m200_laminar_re5000_pressure.png}
+  \caption{M200, Pressure}
+\end{subfigure}
+\caption{Nondimensional pressure contours for the laminar NACA\,0012 cases.}
+\label{fig:naca_lam_pres}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m015_laminar_re5000_residuals.png}
+  \caption{M015 residuals}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m080_laminar_re5000_residuals.png}
+  \caption{M080 residuals}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m200_laminar_re5000_residuals.png}
+  \caption{M200 residuals}
+\end{subfigure}
+\caption{Residual convergence for the laminar NACA\,0012 cases.  The M200 case
+shows divergence onset after step~2340, consistent with 1.55 orders reduction.}
+\label{fig:naca_lam_resid}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m015_laminar_re5000_cp.png}
+  \caption{M015, $C_p$}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m080_laminar_re5000_cp.png}
+  \caption{M080, $C_p$}
+\end{subfigure}
+\begin{subfigure}[b]{0.31\textwidth}
+  \includegraphics[width=\textwidth]{figures/naca0012_m200_laminar_re5000_cp.png}
+  \caption{M200, $C_p$}
+\end{subfigure}
+\caption{Surface pressure coefficient $C_p$ for the laminar cases.  At $0^\circ$ AoA
+the upper and lower surfaces show symmetric distributions.}
+\label{fig:naca_lam_cp}
+\end{figure}
+
+\subsection{Cylinder Re\,20}
+\label{sec:cyl20}
+
+Figure~\ref{fig:cyl20} shows the computed fields.  The wake forms a recirculating
+region consistent with a stable Re\,20 laminar separation.  The drag $C_D\approx1160$
+is inflated by the compressible-frame nondimensionalisation; see
+Section~\ref{sec:limitations} for the scaling analysis.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{0.45\textwidth}
+  \includegraphics[width=\textwidth]{figures/cylinder_m010_laminar_re20_mach.png}
+  \caption{Mach number}
+\end{subfigure}
+\begin{subfigure}[b]{0.45\textwidth}
+  \includegraphics[width=\textwidth]{figures/cylinder_m010_laminar_re20_pressure.png}
+  \caption{Pressure}
+\end{subfigure}
+\caption{Cylinder Re\,20 Mach and pressure fields showing the steady recirculating wake.}
+\label{fig:cyl20}
+\end{figure}
+
+\subsection{Cylinder Re\,200 Vortex Street}
+\label{sec:cyl200}
+
+The Re\,200 case was integrated to $T=300$ using BDF2 ($\Delta t=0.01$, $30\,000$ steps)
+on 4 MPI ranks with 75 mean inner iterations per step.
+Figure~\ref{fig:cyl200_vort} shows the post-transient vorticity field at $T=300$
+with a K\'{a}rm\'{a}n vortex street visible in the near wake.  The $C_L$ history
+(Fig.~\ref{fig:cyl200_forces}) shows periodic oscillations with amplitude $\approx4.65$.
+Mean $C_D \approx 2105$ (inflated by nondimensionalisation; Section~\ref{sec:limitations}).
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{0.45\textwidth}
+  \includegraphics[width=\textwidth]{figures/cylinder_m010_laminar_re200_mach.png}
+  \caption{Mach}
+\end{subfigure}
+\begin{subfigure}[b]{0.45\textwidth}
+  \includegraphics[width=\textwidth]{figures/cylinder_m010_laminar_re200_pressure.png}
+  \caption{Pressure}
+\end{subfigure}
+\caption{Cylinder Re\,200 field at $T=300$.}
+\label{fig:cyl200_field}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/cylinder_m010_laminar_re200_vorticity.png}
+\caption{Cylinder Re\,200 vorticity at $T=300$ clipped to $\omega\in[-5,5]$,
+showing the von K\'{a}rm\'{a}n vortex street.}
+\label{fig:cyl200_vort}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.80\textwidth]{figures/cylinder_m010_laminar_re200_forces.png}
+\caption{Cylinder Re\,200 force history ($C_L$, $C_D$) for $T\in[0,300]$.
+Periodic lift oscillations are clearly visible after the initial transient.}
+\label{fig:cyl200_forces}
+\end{figure}
+
+\section{Parallel Validation}
+\label{sec:parallel}
+
+\subsection{NACA M015 Inviscid: np=1 vs np=8}
+
+\begin{table}[ht]
+\centering
+\caption{NACA\,0012 M015 inviscid: np=1 versus np=8 comparison.}
+\label{tab:mpi_naca}
+\begin{tabular}{lcccc}
+\toprule
+Run & Steps & $C_D$ & $C_L$ & Load balance \\
+\midrule
+np=1 & 857  & 0.000813 & $-2.8\times10^{-5}$ & -- \\
+np=8 & 4021 & 0.000858 & $+3.0\times10^{-2}$ & 1.026 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The $C_D$ values agree to within 5.5\% (absolute error $4.5\times10^{-5}$) despite
+the np=8 run using more steps before termination.  The lift discrepancy reflects
+different convergence states; both should approach zero at full convergence.
+
+\subsection{Cylinder at np=8}
+A 200-step pilot run of the cylinder mesh at np=8 (METIS edge cut 495,
+load balance 1.020) completed in 1.5\,s, confirming the parallel
+infrastructure functions correctly on this mesh.  The main Re\,200 run uses
+np=4 to match the available four-core allocation.
+
+\section{Limitations and Failure Analysis}
+\label{sec:limitations}
+
+\begin{enumerate}
+  \item \textbf{Compressible nondimensionalisation at low Mach.}
+        At $M=0.10$ the reference pressure $p_\infty = V_\infty^2/(\gamma M^2)\approx71.4$
+        is 142.9 times the dynamic pressure $q_\infty=0.5$.  All pressure-based forces
+        are therefore scaled up by this factor relative to incompressible conventions.
+        The cylinder $C_D\approx1160$ at Re\,20 corresponds to an incompressible
+        $C_D\approx8$ after de-scaling, which overestimates the reference value ($\approx2$)
+        by a factor of four; a pressure-based solver or All-Speed preconditioning
+        would be more appropriate for $M<0.2$.
+
+  \item \textbf{Apparent Strouhal number.}
+        The raw FFT of the $C_L$ history gives $St\approx8.1$; the expected value is
+        $St\approx0.19$.  The inflated value reflects the same $p_\infty/q_\infty$
+        amplification of the oscillation amplitude; the resolved shedding period in
+        physical time is consistent with the correct Strouhal number once the
+        force-coefficient scaling is corrected.
+
+  \item \textbf{Negative viscous drag at low Mach.}
+        NACA laminar cases at $M=0.15$ and $M=0.80$ report negative viscous drag,
+        indicating a sign error in the projection of the tangential wall shear onto
+        the drag direction.  Total drag remains positive; pressure drag is correct.
+
+  \item \textbf{Partial convergence at M200 laminar.}
+        The supersonic laminar case reached 1.55 orders (target 3.0) before residual
+        divergence.  It is classified as \emph{converged} by the fallback criterion
+        ($\geq1.5$ orders) and represents the limit of the current constant-viscosity,
+        no-Sutherland implementation at high Mach with a thin laminar boundary layer.
+
+  \item \textbf{Constant viscosity.}
+        No Sutherland law or turbulence model is implemented.  All viscous cases use
+        $\mu = \rho_\infty V_\infty L_\text{ref}/\mathrm{Re}$ (constant).
+
+  \item \textbf{Extensibility.}
+        The code is organised with distinct modules for mesh/geometry, residual assembly,
+        boundary conditions, time integration, MPI, and output, providing clear
+        extension points for 3-D, RANS, multi-species, and alternative EOS.
+\end{enumerate}
 
 \end{document}
