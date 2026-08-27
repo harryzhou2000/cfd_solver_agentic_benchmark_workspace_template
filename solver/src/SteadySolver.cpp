@@ -86,11 +86,16 @@ SteadyResult runSteady(LocalMesh& lm,
     // preventing convergence.  Extend the first-order phase so the shock fully establishes.
     const bool inviscid_shock_case = (mu <= 0.0) && (cfg.freestream.mach >= 0.5);
     const bool low_re_viscous_case  = (mu > 0.0) && (cfg.reynolds > 0.0) && (cfg.reynolds < 100.0);
+    // Viscous M>=0.5 cases (Re>=100) also have transonic/supersonic shocks that destabilise
+    // the 2nd-order transition — extend first-order phase the same way as inviscid cases.
+    const bool viscous_shock_case   = (mu > 0.0) && (cfg.freestream.mach >= 0.5) && !low_re_viscous_case;
+    const bool any_shock_case = inviscid_shock_case || viscous_shock_case;
     const int first_order_steps = (mu > 0.0)
-        ? (low_re_viscous_case ? std::max(ramp_steps, 5000) : 500)
+        ? (low_re_viscous_case ? std::max(ramp_steps, 5000) :
+           viscous_shock_case  ? std::max(ramp_steps, 5000) : 500)
         : (inviscid_shock_case ? std::max(ramp_steps, 5000) : 500);
     // Gradual 2nd-order limiter ramp (longer for shock/low-Re cases to avoid abrupt activation)
-    const int second_order_ramp_steps = (inviscid_shock_case || low_re_viscous_case) ? 2000 : 300;
+    const int second_order_ramp_steps = (any_shock_case || low_re_viscous_case) ? 2000 : 300;
     int fix_d_grace_until = 0;
 
     SteadyResult result;
@@ -227,7 +232,7 @@ SteadyResult runSteady(LocalMesh& lm,
             fix_d_grace_until = step + second_order_ramp_steps;
             // Fix G: reset adaptive CFL at 2nd-order transition so the limiter activates
             // gently at low CFL rather than at the high CFL steady state.
-            if (inviscid_shock_case) {
+            if (inviscid_shock_case || viscous_shock_case) {
                 cfl_effective = std::min(cfl_effective, std::max(cfl_effective_init * 5.0, 5.0));
             }
             // Fix H2: for Re<100 viscous cases, jump cfl_effective to cfl0 (case-specified)
