@@ -302,7 +302,8 @@ SteadyResult runSteady(LocalMesh& lm,
             // to prevent frozen-gradient instability as the boundary layer develops.
             if (mu > 0.0) {
                 computeGradients(lm, states, grads);
-        haloExchangeGrads(grads, lm, comm);
+                // Ghost gradients remain frozen from outer exchange (states_ref-based).
+                // Do NOT call haloExchangeGrads inside inner loop.
                 computePrimGradients(lm, states, gamma, R_gas, prim_grads);
                 // Fix A: update limiters each inner iter; ramp to full 2nd-order
                 computeLimiters(lm, states, grads, limiters);

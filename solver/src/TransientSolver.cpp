@@ -153,8 +153,11 @@ TransientResult runTransient(LocalMesh& lm,
             haloExchange(states, lm, comm);
             // Update grads from current states each iteration; keep limiters frozen from states_ref
             computeGradients(lm, states, grads);
-            haloExchangeGrads(grads, lm, comm);
-            if (mu > 0.0) { computePrimGradients(lm, states, gamma, R_gas, prim_grads); haloExchangePrimGrads(prim_grads, lm, comm); }
+            // Ghost gradients remain frozen from outer haloExchangeGrads (states_ref) for
+            // inner-loop stability. computeGradients now only zeros owned-cell gradients
+            // so ghost grads are preserved across inner iterations.
+            if (mu > 0.0) { computePrimGradients(lm, states, gamma, R_gas, prim_grads); }
+            // Do NOT call haloExchangePrimGrads inside inner loop (same reason).
 
             // Spatial residual (frozen limiters, updated grads)
             {
