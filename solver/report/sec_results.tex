@@ -85,15 +85,14 @@ trailing window and difference them:
   and no extrapolation of it is defensible.
 \end{itemize}
 
-This distinction is what the review's monotone-trend observation actually detects,
-and it separates the cases cleanly. For the cylinder at $\Reinf=20$ the sub-block
-decrements over the certifying window run
+This distinction is what the review's monotone-trend observation actually detects.
+For the cylinder at $\Reinf=20$ the sub-block decrements over the certifying window run
 \begin{center}
-  $-4.42,\ -3.63,\ -2.94,\ -2.22,\ -1.64,\ -1.18,\ -0.82,\ -0.55,\ -0.36$
+  $-4.42,\ -3.68,\ -2.93,\ -2.22,\ -1.64,\ -1.18,\ -0.82,\ -0.55,\ -0.37$
   \quad (units of $10^{-3}$),
 \end{center}
-with successive ratios $0.82, 0.81, 0.76, 0.74, 0.72, 0.70, 0.67, 0.65$. That is a
-clean geometric decay, with a mean ratio of $0.733$.
+with successive ratios $0.83, 0.80, 0.76, 0.74, 0.72, 0.70, 0.67, 0.67$. That is a
+clean geometric decay, with a mean ratio of $\cnsMeasRatioCylSteady$.
 
 The solver now performs this estimate itself and states the resulting precision in its
 own termination note, so the figure quoted here is the solver's rather than an external
@@ -118,7 +117,8 @@ digits.
 
 This asymptote is quotable as a number because the extrapolation is well conditioned
 here. By \cref{eq:tailsum} the fitted ratio's error is amplified by $r/(1-r)$, which at
-$r=0.733$ is only $2.7$, so a percent-level error in the ratio moves the asymptote by a
+$r=\cnsMeasRatioCylSteady$ is only $\cnsMeasAmpCylSteady$, so a percent-level error in the
+ratio moves the asymptote by a
 few percent of an already small remaining distance. \Cref{sec:conditioning} shows the same
 formula at $r=0.994$, where the amplification is $165$ and no asymptote may be quoted.
 The distinction is quantitative rather than a matter of judgement, and it is the test
@@ -126,41 +126,120 @@ applied throughout this report before any extrapolated figure is given.
 
 \paragraph{The discriminator is graded, not bimodal.} It would be neater if converged and
 unconverged cases fell on opposite sides of $r=1$, and an earlier draft of this report
-claimed exactly that, contrasting the cylinder's $0.733$ against a ratio above unity for the
-supersonic laminar case. The submitted runs do not support it, and the honest structure is
-more useful anyway.
+claimed exactly that, contrasting the cylinder against a ratio above unity for the
+supersonic laminar case. Measuring the diagnostic on all seven steady runs rather than on
+two of them refutes that structure, and what replaces it is both more defensible and more
+useful. \Cref{tab:ladder} is the full set.
 
-Measured on the submitted \texttt{forces.csv}, \texttt{naca0012\_m200\_laminar\_re5000}
-has a decay ratio of $0.9195$ --- comfortably below $1$, decaying, with every decrement
-positive as the drag rises monotonically towards its asymptote. That verdict is not a
-windowing artifact: sweeping trailing windows of $500$, $1000$ and $2000$ steps against
-$10$, $9$ and $5$ sub-blocks gives nine estimates from $0.9195$ to $0.9790$, all below $1$.
-So this case is \emph{converged}, and the solver reports it as such.
+\begin{table}[htbp]
+  \centering
+  \caption{Geometric-tail diagnostic for every steady case, measured on the submitted
+  \texttt{forces.csv} by \texttt{report/check\_decrement.py} over the $500$-step window
+  \emph{ending at the reported state}. $r$ is the mean ratio of successive sub-block
+  decrements; the remaining movement is $|d_{\text{last}}|\,r/(1-r)$ by
+  \cref{eq:tailsum}. A geometric tail is a model for a monotone approach only, so no
+  estimate is given where the window is non-monotone.}
+  \label{tab:ladder}
+  \footnotesize
+  \begin{tabular}{lrrrrl}
+    \toprule
+    Case & $r$ & $r/(1-r)$ & Remaining & \% of $C_D$ & Window \\
+    \midrule
+    Cylinder $\Reinf=20$ & $\cnsMeasRatioCylSteady$ & $\cnsMeasAmpCylSteady$
+      & $\cnsMeasRemainingCylSteady$ & $\cnsMeasRemainingPctCylSteady$ & monotone \\
+    NACA $\Minf=0.15$ lam. & $\cnsMeasRatioNacaSubLam$ & $\cnsMeasAmpNacaSubLam$
+      & $\cnsMeasRemainingNacaSubLam$ & $\cnsMeasRemainingPctNacaSubLam$ & monotone \\
+    NACA $\Minf=2.0$ lam. & $\cnsMeasRatioNacaSupLam$ & $\cnsMeasAmpNacaSupLam$
+      & $\cnsMeasRemainingNacaSupLam$ & $\cnsMeasRemainingPctNacaSupLam$ & monotone \\
+    NACA $\Minf=0.80$ inv. & $\cnsMeasRatioNacaTraInv$ & $\cnsMeasAmpNacaTraInv$
+      & $\cnsMeasRemainingNacaTraInv$ & $\cnsMeasRemainingPctNacaTraInv$ & monotone \\
+    \midrule
+    NACA $\Minf=0.80$ lam. & $\cnsMeasRatioNacaTraLam$ & --- & --- & ---
+      & non-monotone \\
+    NACA $\Minf=2.0$ inv. & $\cnsMeasRatioNacaSupInv$ & --- & --- & ---
+      & non-monotone \\
+    NACA $\Minf=0.15$ inv. & $\cnsMeasRatioNacaSubInv$ & --- & --- & ---
+      & non-monotone \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-What separates the cases is therefore not which side of $1$ the ratio falls, but the
-\textbf{amplification} $r/(1-r)$ of \cref{eq:tailsum}, which is what decides whether an
-extrapolated asymptote may be quoted:
-\begin{center}
-\begin{tabular}{lrrl}
-  \toprule
-  Case & Ratio $r$ & $r/(1-r)$ & Extrapolation \\
-  \midrule
-  Cylinder $\Reinf=20$ & $\cnsDecayRatioCylSteady$ & $\cnsDecayAmpCylSteady$
-    & well conditioned, quotable \\
-  NACA $\Minf=2.0$ laminar & $\cnsDecayRatioNacaSupLam$ & $\cnsDecayAmpNacaSupLam$
-    & usable, fewer digits earned \\
-  NACA $\Minf=2.0$ laminar, mid-run & $0.994$ & $165$ & worthless \\
-  \bottomrule
-\end{tabular}
-\end{center}
+Three things follow, and the first is the one that dismantles the old framing.
 
-\noindent The quantity is continuous and so is the conclusion drawn from it. At
-$\cnsDecayAmpCylSteady$ the cylinder's asymptote is insensitive to the fit and is quoted as a
-number. At $\cnsDecayAmpNacaSupLam$ the supersonic laminar case is extrapolable but earns
-fewer digits --- the solver's own note puts the remaining movement at
-$\cnsTailRemainingNacaSupLam$, or $\cnsTailRemainingPctNacaSupLam\,\%$, and says explicitly
-that no more digits than that are earned. At $165$, which is where the same case sat earlier
-in its march (\cref{sec:conditioning}), nothing may be quoted at all.
+\textbf{$r>1$ does not mean ``not converged'' --- it means the geometric model does not
+apply.} The split in \cref{tab:ladder} is exactly the monotone/non-monotone split: all four
+cases with $r<1$ have monotone windows and all three with $r>1$ do not. The ratio and the
+monotone test are therefore not two independent checks but one distinction seen two ways. A
+non-monotone window means the drag is oscillating about its mean rather than approaching it
+from one side, so summing a geometric series is simply the wrong operation; the remaining
+movement is bounded by the oscillation amplitude instead. \texttt{naca0012\_m080\_laminar\_re5000}
+makes the point unarguable: it has $r=\cnsMeasRatioNacaTraLam$, above unity, and it is
+\emph{converged}, hitting its residual target of $4.00$ orders exactly. Reading $r>1$ as a
+convergence failure would condemn it on the strength of using the wrong model for its tail.
+
+\textbf{Within the monotone class, $r$ measures conditioning and nothing else.} This is where
+the amplification $r/(1-r)$ of \cref{eq:tailsum} does its work, and the four monotone cases
+form a continuous ladder --- $\cnsMeasAmpCylSteady$, $\cnsMeasAmpNacaSubLam$,
+$\cnsMeasAmpNacaSupLam$, $\cnsMeasAmpNacaTraInv$ --- with no gap anywhere in it. At the low
+end the cylinder's asymptote is insensitive to the fit and is quoted as a number. At
+$\cnsMeasAmpNacaSupLam$ the supersonic laminar case is still extrapolable but earns fewer
+digits, and the solver's own note says so, putting the remaining movement at
+$\cnsTailRemainingNacaSupLam$ and stating that no more digits than that are earned. At the
+$165$ this same case reached earlier in its march (\cref{sec:conditioning}) nothing may be
+quoted at all. The conclusion is graded because the quantity is, and the earlier draft's
+claim of a wide margin between two populations was an artifact of looking at two points.
+
+\textbf{$r$ does not rank the cases by how much movement is left.} It is tempting to read
+the amplification as a figure of merit, and that would give the wrong ordering. The
+$\Minf=0.15$ laminar case has the \emph{better} ratio
+($\cnsMeasRatioNacaSubLam$ against $\cnsMeasRatioNacaSupLam$) and yet more than twenty times
+the outstanding movement relative to its own drag ($\cnsMeasRemainingPctNacaSubLam\,\%$
+against $\cnsMeasRemainingPctNacaSupLam\,\%$), because the amplification multiplies a last
+decrement that is itself two orders of magnitude larger. Trustworthiness is ranked by the
+remaining movement; the amplification only says how much to believe that estimate. Note also
+that absolute and relative orderings differ --- the cylinder has the largest absolute
+remaining movement at $\cnsMeasRemainingCylSteady$ and nearly the smallest as a fraction of
+its drag --- so the measure has to be named whenever such a ranking is given, and this report
+ranks on the fraction.
+
+\paragraph{The window has to end at the state that is reported.} Producing
+\cref{tab:ladder} surfaced a subtlety that is easy to get wrong and that changes the verdict
+on three of the seven cases, so the convention is recorded here rather than left implicit in a
+script. Where the best-state fallback of \cref{sec:naca} fired, the restored row is appended
+\emph{after} the rows of the march that superseded it (\cref{sec:histwrinkle}). A window
+taken as ``the last $500$ rows of the file'' therefore splices $499$ rows from the abandoned
+march onto a single row from an earlier step, and the resulting diagnostic describes a
+trajectory the solver \emph{threw away}.
+
+On \texttt{naca0012\_m080\_inviscid} the two readings are not close. The tail of the
+abandoned march gives $r=0.7233$ with only $\num{2.55e-7}$ of movement outstanding, which
+looks like the best-converged case in the whole set. The window ending at the state actually
+reported gives $r=\cnsMeasRatioNacaTraInv$ and $\cnsMeasRemainingNacaTraInv$ --- a factor of
+$182$ more outstanding movement, and the worst fraction of any monotone case at
+$\cnsMeasRemainingPctNacaTraInv\,\%$. The flattering number is the one measured on the
+discarded trajectory. \Cref{tab:ladder} uses the window ending at the reported state
+throughout, because that is the state \texttt{surface.csv}, \texttt{field\_final.vtu} and every
+quoted coefficient belong to; a precision claim about a discarded march would be a claim about
+nothing that was submitted.
+
+Two further conventions are fixed for the same reason. Only the first row is kept for a
+duplicated step, matching the solver, whose note quotes the first of the two values written at
+the final step. And the multiplier on the last decrement is $r/(1-r)$, not $1/(1-r)$: the
+former reproduces the solver's own quoted remaining movement on all three cases whose note
+contains one, to $0.1\,\%$, while the latter is high by $15$ to $27\,\%$. That agreement is
+the check that the diagnostic in \cref{tab:ladder} and the diagnostic in the solver are the
+same computation, arrived at independently: the report's script reads only \texttt{forces.csv}
+and never parses the note.
+
+One caution about the $\Minf=0.80$ inviscid row, because it invites a wrong inference. Its
+force tail is monotone and its remaining movement is small in absolute terms, yet this is also
+one of the two cases whose residual target was missed and whose residual \emph{rises} after
+the best state (\cref{sec:plateau}). A well-behaved force tail and an unconverged residual are
+not in contradiction --- forces are area-weighted integrals, so they average away exactly the
+localised error the residual norm is dominated by, which is the same effect discussed for the
+supersonic inviscid case in \cref{sec:m200asym}. The force-tail figure is evidence about the
+drag and about nothing else, and it must not be read as evidence that the residual behaviour
+was acceptable.
 
 This makes the review's finding easier to state precisely. It was right that a monotone
 certifying window is a warning sign, and right that this case was not converged \emph{at the
@@ -187,7 +266,7 @@ collecting them, because they are independent and a reader should know which app
   plus the amplitude, $C_D=0.0880\pm0.0007$ (\cref{sec:limitcycle}).
   \item \textbf{Conditioning of the tail estimate.} For a monotone asymptotic approach the
   remaining movement is computable, but only where the decay ratio is away from unity. At
-  $r=0.733$ the cylinder's asymptote is quotable; at $r=0.994$ nothing is
+  $r=\cnsMeasRatioCylSteady$ the cylinder's asymptote is quotable; at $r=0.994$ nothing is
   (\cref{sec:conditioning}).
   \item \textbf{Partition sensitivity.} For the one case needing tens of thousands of
   iterations, two rank counts give answers $\num{5.0e-4}$ apart, far more than either run's
@@ -252,7 +331,8 @@ treated separately in \cref{sec:m200asym}.
 
 The size of that distinction is worth one more sentence, because choosing the wrong
 reference at $\Minf=2.0$ would not merely be imprecise. The isentropic value
-$\cnsStagCpNacaSupInv$ overstates the attainable ceiling by $47.1\,\%$ relative to the
+$\cnsStagCpNacaSupInv$ overstates the attainable ceiling by
+$\cnsIsenOverstatePctNacaSupInv\,\%$ relative to the
 post-shock $\cnsPitotCpNacaSupInv$, and on the supersonic inviscid case
 $\cnsFacesOverPitotNacaSupInv$ of $\cnsNumWallFacesNacaSupInv$ wall faces exceed the correct
 bound while \textbf{zero} exceed the isentropic one. Quoting the isentropic figure
@@ -364,7 +444,9 @@ different and considerably less alarming statement than the plateau this report 
 in two earlier drafts, and the difference was found only by plotting the residual against
 the CFL rather than reading the final scalar.
 
-\paragraph{Why the shortfall is a plateau and not an unfinished run.} The distinction
+\paragraph{Why the shortfall is a plateau and not an unfinished run.}
+\label{sec:plateau}
+The distinction
 matters, because \emph{stopping short of a target} and \emph{a target that is unreachable
 at the supplied controls} are different claims. The evidence for the second is that the
 residual does not merely stop falling --- it \textbf{rises}. Over the $950$ steps after the
@@ -538,8 +620,8 @@ defect.
 \begin{itemize}
   \item All nine lie between $x=\cnsOverPitotXMinNacaSupInv$ and
   $x=\cnsOverPitotXMaxNacaSupInv$ --- the first $0.18\,\%$ of a
-  chord that extends to $x=1.0053$. The remaining $395$ faces, covering more than
-  $99.8\,\%$ of the surface, satisfy the bound.
+  chord that extends to $x=1.0053$. The remaining $\cnsFacesUnderPitotNacaSupInv$ faces,
+  spanning more than $99.8\,\%$ of the chord, satisfy the bound.
   \item $\cnsOverPitotUpperNacaSupInv$ of the nine are on the \emph{upper} surface. At zero
   incidence that
   one-sidedness is itself the defect signature: a symmetric configuration has no physical

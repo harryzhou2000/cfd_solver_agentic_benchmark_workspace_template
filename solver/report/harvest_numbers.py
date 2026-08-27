@@ -166,6 +166,117 @@ def num(value, digits=6):
     return "\\num{%.*g}" % (digits, value)
 
 
+def reintegrate(surface, area_ref):
+    """Re-integrate wall drag from the published surface.csv, independently of the solver.
+
+    The face arc lengths are not published, so they are reconstructed from the ordered
+    face midpoints and normals by a polygon-closure least-squares solve: consecutive
+    vertices satisfy v_{i+1} = 2 m_i - v_i, and each vertex must lie in its face's
+    plane.  That reconstruction is exact rather than approximate -- on the cylinder it
+    recovers the analytic chord of the 100-sided polygon to 6e-13 -- which matters,
+    because an earlier version of this check used half the spacing between neighbouring
+    midpoints and its second-order error swamped the quantity being measured.
+
+    Returns the drag components computed from cp and cf alone, for comparison against
+    forces.csv.  Nothing here reads a geometric quantity from the solver.
+    """
+    try:
+        mid = [(float(r["x"]), float(r["y"])) for r in surface]
+        nrm = [(float(r["nx"]), float(r["ny"])) for r in surface]
+        cp = [float(r["cp"]) for r in surface]
+        cf = [float(r["cf"]) for r in surface]
+    except (KeyError, TypeError, ValueError):
+        return None
+    n = len(mid)
+    if n < 8 or not area_ref:
+        return None
+    # Vertices as an affine function of the unknown first vertex, then a 2x2
+    # least-squares solve for that vertex against the in-plane conditions.
+    a = [(0.0, 0.0)]
+    for i in range(1, n):
+        a.append((2.0 * mid[i - 1][0] - a[i - 1][0], 2.0 * mid[i - 1][1] - a[i - 1][1]))
+    ata = [[0.0, 0.0], [0.0, 0.0]]
+    atb = [0.0, 0.0]
+    for i in range(n):
+        sgn = -1.0 if i % 2 else 1.0
+        row = (sgn * nrm[i][0], sgn * nrm[i][1])
+        rhs = ((mid[i][0] - a[i][0]) * nrm[i][0] + (mid[i][1] - a[i][1]) * nrm[i][1])
+        for p in range(2):
+            for q in range(2):
+                ata[p][q] += row[p] * row[q]
+            atb[p] += row[p] * rhs
+    det = ata[0][0] * ata[1][1] - ata[0][1] * ata[1][0]
+    if abs(det) < 1.0e-30:
+        return None
+    v0 = ((atb[0] * ata[1][1] - ata[0][1] * atb[1]) / det,
+          (ata[0][0] * atb[1] - atb[0] * ata[1][0]) / det)
+    pressure = 0.0
+    viscous = 0.0
+    for i in range(n):
+        sgn = -1.0 if i % 2 else 1.0
+        vx = a[i][0] + sgn * v0[0]
+        vy = a[i][1] + sgn * v0[1]
+        length = 2.0 * math.hypot(mid[i][0] - vx, mid[i][1] - vy)
+        pressure += cp[i] * nrm[i][0] * length
+        viscous += cf[i] * (-nrm[i][1]) * length
+    return {"pressure_drag": pressure / area_ref, "viscous_drag": viscous / area_ref}
+
+
+def tail_diagnostic(forces, final_step, window=500, blocks=10):
+    """Geometric-tail diagnostic on the drag window ENDING at the reported state.
+
+    Three conventions matter here and getting them wrong changes the verdict, so
+    they are spelled out.  (1) Rows are restricted to steps at or below
+    ``final_step``: where the best-state fallback fired, the restored row is
+    appended AFTER the rows of the march that superseded it, so a naive "last 500
+    rows of the file" window splices the tail of the abandoned march onto one row
+    from an earlier step and measures a trajectory that was thrown away.  (2) Only
+    the FIRST row for a given step is kept, matching the solver, whose note quotes
+    the first of the two values written at the final step.  (3) The remaining
+    movement is the last decrement times r/(1-r), not 1/(1-r); the former
+    reproduces the solver's own quoted figures and the latter is 15-27 % high.
+
+    A geometric tail is only a model for a MONOTONE approach.  Where the window is
+    non-monotone the drag is oscillating about its mean, so no tail is returned:
+    r > 1 there means "wrong model", not "not converged".
+    """
+    if not forces or final_step is None:
+        return None
+    seen = set()
+    series = []
+    for row in forces:
+        try:
+            step = int(float(row["step"]))
+            value = float(row["cd"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if step > int(final_step) or step in seen:
+            continue
+        seen.add(step)
+        series.append(value)
+    if len(series) < window:
+        return None
+    segment = series[-window:]
+    size = len(segment) // blocks
+    means = [sum(segment[i * size:(i + 1) * size]) / size for i in range(blocks)]
+    dec = [means[i + 1] - means[i] for i in range(blocks - 1)]
+    ratios = [abs(dec[i + 1]) / abs(dec[i]) for i in range(len(dec) - 1)
+              if abs(dec[i]) > 0.0]
+    if not ratios:
+        return None
+    ratio = sum(ratios) / len(ratios)
+    monotone = all(d > 0 for d in dec) or all(d < 0 for d in dec)
+    out = {"ratio": ratio, "monotone": monotone, "cd": series[-1],
+           "last_decrement": dec[-1]}
+    if monotone and ratio < 1.0:
+        amp = ratio / (1.0 - ratio)
+        remaining = abs(dec[-1]) * amp
+        out["amplification"] = amp
+        out["remaining"] = remaining
+        out["remaining_pct"] = 100.0 * remaining / abs(series[-1])
+    return out
+
+
 def drift(values, fraction=0.10):
     """Change in a quantity across the trailing fraction of its history.
 
@@ -364,6 +475,46 @@ def main():
             if m:
                 define("TailAsymptote" + key, num(float(m.group(1)), 7))
 
+            # The same diagnostic recomputed from forces.csv alone, for every case
+            # rather than only the ones whose note happens to quote it.  This is the
+            # discriminator the convergence argument turns on, and a hand-written
+            # version of it inverted a conclusion once already, so the whole ladder
+            # is machine-extracted.  Independent of the note-parsing above, which
+            # makes the two a cross-check rather than one authority copied twice.
+            td = tail_diagnostic(forces, status.get("final_step"))
+            if td:
+                define("MeasRatio" + key, num(td["ratio"], 4))
+                define("MeasMonotone" + key,
+                       "monotone" if td["monotone"] else "non-monotone")
+                if "amplification" in td:
+                    define("MeasAmp" + key, num(td["amplification"], 3))
+                    define("MeasRemaining" + key, num(td["remaining"], 3))
+                    define("MeasRemainingPct" + key, num(td["remaining_pct"], 3))
+
+            # Independent re-integration of the wall forces from surface.csv, compared
+            # against forces.csv.  Harvested rather than hand-tabulated because the
+            # previous hand-written version of this table was measured on a superseded
+            # run AND with a cruder arc-length estimate, which together understated the
+            # agreement by nine orders of magnitude.
+            area_ref = 1.0
+            case_json_r = read_json(CASES_DIR / (case_id + ".json")) or {}
+            ref_block = case_json_r.get("reference") or {}
+            if isinstance(ref_block.get("area"), (int, float)):
+                area_ref = float(ref_block["area"])
+            ri = reintegrate(surface, area_ref) if surface else None
+            if ri and last:
+                for field, mac in (("pressure_drag", "ReintPd"),
+                                   ("viscous_drag", "ReintVd")):
+                    got = ri[field]
+                    ref = last.get(field)
+                    if not isinstance(ref, (int, float)):
+                        continue
+                    define(mac + key, num(got, 10))
+                    define(mac + "Ref" + key, num(ref, 10))
+                    define(mac + "Abs" + key, num(abs(got - ref), 3))
+                    if abs(ref) > 0.0:
+                        define(mac + "Rel" + key, num(abs(got - ref) / abs(ref), 3))
+
             # Pointwise wall diagnostics.  These are harvested rather than written by
             # hand because a superseded hand-written value survived into prose four
             # times during preparation, twice inverting the conclusion it supported.
@@ -403,6 +554,14 @@ def main():
                     define("OverPitotXMax" + key, num(max(x for x, _, _ in over), 6))
                     define("OverPitotUpper" + key,
                            num(sum(1 for _, y, _ in over if y > 0.0), 3))
+                # Faces satisfying the bound, and the margin by which the isentropic
+                # reference would overstate the post-shock ceiling.  Both were hand
+                # typed and both are measurements of a run, so both are harvested:
+                # the count moves if the case is re-run, and quoting the isentropic
+                # value as the ceiling would hide the violation entirely.
+                define("FacesUnderPitot" + key, num(len(cps) - len(over), 5))
+                cp0 = ((1.0 + 0.5 * (g - 1.0) * m2) ** (g / (g - 1.0)) - 1.0) / (0.5 * g * m2)
+                define("IsenOverstatePct" + key, num(100.0 * (cp0 - pitot) / pitot, 3))
         if stale and status:
             print("  SKIPPING STALE: %s (predates trusted cutoff)" % case_id)
         cd = last.get("cd")

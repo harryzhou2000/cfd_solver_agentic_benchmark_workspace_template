@@ -299,17 +299,79 @@ separate script that reconstructs the boundary face lengths from the edge midpoi
 and normals through a polygon-closure least-squares solve rather than reading any
 geometric quantity from the solver. The reconstruction is itself verifiable: for the
 cylinder the recovered edge lengths match the exact chord of a 100-sided polygon to
-$\num{3.0e-12}$, and the recovered perimeter is $3.141076$ against $\pi$, the
-difference being the polygon-versus-circle discrepancy rather than an error.
+$\num{6.1e-13}$, and the recovered perimeter matches the exact perimeter of that polygon
+to $\num{3.1e-14}$. Against $\pi$ the recovered perimeter is $3.141076$, low by
+$\num{1.6e-4}$ relative --- but that gap is the chord-versus-arc deficit of an inscribed
+$100$-gon, a property of the supplied mesh's geometry, and quoting it as an accuracy
+measure would mis-attribute a discretization of the circle to the method being checked.
 
-The result is that \textbf{the viscous drag re-integrates to machine precision}:
-$\num{2.7e-14}$ relative for the cylinder and $\num{7.3e-14}$ for the
-$\Minf=0.15$ laminar airfoil. This is a strong statement, because it confirms that
-the $C_f$ column of \texttt{surface.csv} is the same tangential projection the force
-integral uses, with no independent recomputation that might differ. Pressure drag
-agrees to $\num{1.7e-5}$ relative on the cylinder and $\num{1.6e-5}$ on the
-$\Minf=0.15$ laminar airfoil, the residual being the midpoint-rule quadrature in the
-checking script against the solver's face-centroid values.
+The result is that \textbf{both drag components re-integrate to machine precision on
+every case}. \Cref{tab:reintegrate} gives the comparison. The worst relative
+disagreement anywhere in the set is $\num{5.6e-9}$, and that on the case whose drag is
+smallest; the other six agree to between $\num{1e-14}$ and $\num{2e-10}$. The three
+inviscid cases return viscous drag that is exactly zero on both sides, bit for bit,
+because every $C_f$ entry they publish is identically zero.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Wall drag re-integrated from the published \texttt{surface.csv} against the
+  final row of \texttt{forces.csv}. The re-integration reads only $C_p$, $C_f$ and the
+  face normals, and reconstructs its own face lengths; it shares no geometric quantity
+  with the solver. Relative differences are against the \texttt{forces.csv} value.}
+  \label{tab:reintegrate}
+  \footnotesize
+  \begin{tabular}{lrrrr}
+    \toprule
+    & \multicolumn{2}{c}{Pressure drag} & \multicolumn{2}{c}{Viscous drag} \\
+    \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+    Case & Absolute & Relative & Absolute & Relative \\
+    \midrule
+    Cyl.\ $\Reinf=20$ & $\cnsReintPdAbsCylSteady$ & $\cnsReintPdRelCylSteady$
+      & $\cnsReintVdAbsCylSteady$ & $\cnsReintVdRelCylSteady$ \\
+    NACA $\Minf=0.15$ inv. & $\cnsReintPdAbsNacaSubInv$ & $\cnsReintPdRelNacaSubInv$
+      & $0$ & exactly $0$ \\
+    NACA $\Minf=0.80$ inv. & $\cnsReintPdAbsNacaTraInv$ & $\cnsReintPdRelNacaTraInv$
+      & $0$ & exactly $0$ \\
+    NACA $\Minf=2.0$ inv. & $\cnsReintPdAbsNacaSupInv$ & $\cnsReintPdRelNacaSupInv$
+      & $0$ & exactly $0$ \\
+    NACA $\Minf=0.15$ lam. & $\cnsReintPdAbsNacaSubLam$ & $\cnsReintPdRelNacaSubLam$
+      & $\cnsReintVdAbsNacaSubLam$ & $\cnsReintVdRelNacaSubLam$ \\
+    NACA $\Minf=0.80$ lam. & $\cnsReintPdAbsNacaTraLam$ & $\cnsReintPdRelNacaTraLam$
+      & $\cnsReintVdAbsNacaTraLam$ & $\cnsReintVdRelNacaTraLam$ \\
+    NACA $\Minf=2.0$ lam. & $\cnsReintPdAbsNacaSupLam$ & $\cnsReintPdRelNacaSupLam$
+      & $\cnsReintVdAbsNacaSupLam$ & $\cnsReintVdRelNacaSupLam$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+That agreement confirms rather more than that the numbers match. It establishes that the
+$C_p$ and $C_f$ columns of \texttt{surface.csv} are the same projections the force
+integral uses, with no independent recomputation that might quietly differ, and that the
+published normals and the solver's are the same vectors: reversing the assumed tangent
+direction flips the sign of every viscous drag exactly, so the orientation is pinned by
+the data rather than assumed. Lift re-integrates to the same tolerance, including sign,
+which pins the normal convention independently.
+
+\paragraph{An earlier version of this check understated the agreement by nine orders of
+magnitude, and the reason is worth stating.} A previous draft reported this comparison at
+around $\num{1e-3}$ absolute and attributed the residual to quadrature. That figure was
+not measuring the solver. It came from estimating each face's arc length as half the
+distance between neighbouring face midpoints --- a second-order approximation on a curved
+surface, whose own error is far larger than the inconsistency being looked for. Replacing
+it with the exact polygon reconstruction drops the disagreement to the values in
+\cref{tab:reintegrate}, between four and nine orders of magnitude smaller depending on the
+case.
+
+The two estimators can be run side by side, and the gap between them is the whole of the
+earlier figure: on the cylinder the crude length gives $\num{9.9e-4}$ relative against
+$\cnsReintPdRelCylSteady$ for the exact one, and on the $\Minf=0.15$ inviscid airfoil it
+gives $\num{4.7e-2}$ against $\cnsReintPdRelNacaSubInv$. The lesson is the one that recurs
+throughout this section: a cross-check reports the sum of the solver's error and the
+checker's own, and until the checker's contribution is bounded independently, a null result
+cannot be distinguished from a blunt instrument. The reconstruction here is bounded by the
+cylinder test --- it recovers the analytic chord of the 100-sided polygon to
+$\num{6.1e-13}$ --- which is what licenses reading the table as a statement about the
+solver.
 
 \paragraph{One case where the check initially failed, and why.} On
 \texttt{naca0012\_m200\_laminar\_re5000} the same procedure disagreed by
@@ -334,40 +396,24 @@ where it mattered most. After the change the same check gives $\num{1.84e-3}$
 relative on that case, a factor of $27$ improvement, with the remainder attributable to
 the script's arc-length approximation.
 
-\paragraph{Absolute, not relative, is the right measure here.} A first attempt at
-summarising this check quoted a \emph{relative} bound across cases, and that was a
-mistake worth correcting explicitly because the corrected version reverses which case
-looks worst. Repeating the check on the post-fix runs gives
+\paragraph{Which measure to quote, and a caution that outlived its own table.} While the
+checking script still carried its approximate arc length, an intermediate draft argued that
+the \emph{absolute} difference rather than the relative one was the meaningful summary. That
+reasoning was sound and is worth preserving even though the table it described is gone: on
+the $\Minf=0.15$ inviscid case a relative measure is divided by a drag whose exact value is
+zero, so the case reported the largest relative and one of the smallest absolute
+disagreements simultaneously, and a relative bound quoted across cases whose drags span two
+orders of magnitude ranks them by their denominators rather than by their errors. That case
+is still the relative outlier in \cref{tab:reintegrate} for exactly that reason, at
+$\cnsReintPdRelNacaSubInv$ against an absolute $\cnsReintPdAbsNacaSubInv$.
 
-\begin{center}
-\begin{tabular}{lrrrr}
-  \toprule
-  Case & From \texttt{surface.csv} & From \texttt{forces.csv} & Absolute & Relative \\
-  \midrule
-  Cylinder $\Reinf=20$ & $1.219698$ & $1.220902$ & \num{1.20e-3} & \num{9.87e-4} \\
-  NACA $\Minf=0.15$ inv. & $0.000913$ & $\cnsCdNacaSubInv$ & \num{4.69e-5} & \num{4.88e-2} \\
-  NACA $\Minf=0.80$ inv. & $0.008752$ & $0.008771$ & \num{1.97e-5} & \num{2.25e-3} \\
-  \bottomrule
-\end{tabular}
-\end{center}
-
-\noindent The $\Minf=0.15$ inviscid case has the \emph{largest} relative discrepancy at
-$\num{4.88e-2}$ and simultaneously the \emph{smallest} absolute one at $\num{4.69e-5}$.
-The relative figure is large only because it is divided by a drag whose exact value is
-zero, and this is also the limit-cycle case whose peak-to-peak oscillation exceeds its own
-mean, so a relative measure of anything is close to meaningless for it. Quoting a relative
-bound across cases whose drags span two orders of magnitude was the error; the absolute
-column is the meaningful one, and on it every case agrees to better than
-$\num{1.2e-3}$.
-
-Two further points make the check interpretable. First, the residual disagreement is
-dominated by the \emph{checking script}, not the solver: the script approximates each
-face's arc length as half the distance between neighbouring face midpoints, which is a
-second-order approximation on a curved surface. The absolute figures above are therefore
-an \textbf{upper bound} on the true inconsistency. Second, and the reason the check is
-worth reporting at all, it is independent of the solver's integration path --- it reads
-only the published surface data and reconstructs its own geometry --- so it can detect
-exactly the class of error that an internal consistency check cannot.
+What has changed is that the argument no longer has to carry any weight. With the exact
+reconstruction both measures are negligible on every case, so the choice between them became
+presentational rather than the difference between a clean result and a worrying one. The
+reason the check is worth reporting at all is unchanged: it is independent of the solver's
+integration path --- it reads only the published surface data and reconstructs its own
+geometry --- so it detects exactly the class of error that an internal consistency check
+cannot.
 
 That independence is what found the bug. Both call sites were individually
 self-consistent, so no assertion the solver makes about itself would have caught them
@@ -394,18 +440,34 @@ the numbers exactly.
 The same two-evaluation structure means a run's termination note and its machine-readable
 \texttt{residual\_reduction\_orders} field can differ: the note quotes the in-loop residual
 at the step where the convergence test fired, while the field quotes the post-loop
-re-evaluation from the state actually written out. Where the two differ the field is the
-conservative one and is the one corresponding to the submitted \texttt{field\_final.vtu}, so
-it is what this report quotes throughout --- every residual figure here is harvested from
-that field rather than parsed from the note. The general point is that a residual is a
-property of a state, so quoting one without saying which state it belongs to is incomplete.
+re-evaluation from the state actually written out. This report quotes the field throughout,
+because it is the residual \emph{of the state that was submitted} --- the one in
+\texttt{field\_final.vtu} --- and a residual quoted for any other state is a statement about
+something the reader cannot inspect.
+
+It should be said plainly that this choice is not the conservative one. On all seven steady
+cases the field records \emph{more} orders than the note, by between $0.01$ and $1.02$: for
+\texttt{naca0012\_m015\_inviscid} the note says $4.73$ and the field
+$\cnsOrdersNacaSubInv$. The gap is largest exactly where the best-state fallback fired,
+because there the note's figure describes the abandoned end of the march while the field
+describes the restored state. An earlier draft of this paragraph asserted the opposite, that
+the field was the more conservative of the two, which was wrong in the same direction on every
+case --- so the justification for quoting it has to be correspondence with the submitted
+state, not pessimism. The general point survives intact and is the reason the distinction is
+recorded at all: a residual is a property of a state, so quoting one without saying which
+state it belongs to is incomplete.
 
 \paragraph{A history that is not monotone in the step number.} One further consequence of
+\label{sec:histwrinkle}
 the best-state fallback of \cref{sec:naca} deserves flagging for anyone reusing these
 outputs. When the fallback fires, the restored state is appended \emph{after} the rows of
 the march that passed it, so the final row of \texttt{forces.csv} and
 \texttt{residuals.csv} carries a step number \emph{lower} than the row above it: for
-\texttt{naca0012\_m080\_inviscid} the sequence ends $3491, 3492, 3493, 2547$.
+\texttt{naca0012\_m080\_inviscid} the sequence ends $3494, 3495, 3496, 2546$ in both files.
+The appended row is a byte-for-byte duplicate of the row already present at that step, so it
+restates an existing sample rather than adding a new one --- which is what makes a naive
+trailing-window statistic on such a file measure the wrong trajectory, as
+\cref{sec:digits} sets out.
 
 The contract is satisfied --- the last force row matches \texttt{final\_step} in
 \texttt{run\_status.json} and corresponds to \texttt{field\_final.vtu}, and the supplied
@@ -877,18 +939,22 @@ $C_D=0.137643$ with an estimated $\num{6.9e-6}$ still to come, so
 \textbf{$C_D=0.13764$} is the honest figure and no further digits are earned. Same
 formula throughout; it became trustworthy exactly when its conditioning improved.
 
-Contrast the cylinder of \cref{sec:digits}, where $r=0.733$ gives an amplification of only
-$2.7$. Across the three regimes --- $2.7$, $11$, and $245$ --- the same expression is
+Contrast the cylinder of \cref{sec:digits}, where $r=\cnsMeasRatioCylSteady$ gives an
+amplification of only
+$\cnsMeasAmpCylSteady$. Across the three regimes --- $\cnsMeasAmpCylSteady$, $11$, and $245$
+--- the same expression is
 respectively excellent, usable, and worthless, which is why the amplification factor and
 not the quality of the fit is what decides whether an extrapolated number may be printed.
 
 \paragraph{Consequences for how the report uses the decay ratio.} The ratio is used as a
-\textbf{classifier}, not an estimator: $0.994$ is not converged, $0.919$ and $0.733$ are,
-and that judgement is robust because it depends on which side of the threshold $r$ falls
-rather than on its precise value. A tail figure is quoted as a number only where the
-amplification is small. Where the solver prints a tail estimate for a case whose ratio is
-near unity, that number is a \textbf{lower bound on the remaining movement} and must not
-be quoted as a predicted converged value, including when read directly out of
+\textbf{classifier}, not an estimator: $0.994$ is too ill conditioned to extrapolate, while
+$\cnsMeasRatioNacaSupLam$ and $\cnsMeasRatioCylSteady$ are not. That judgement does not rest
+on the ratio's precise value, but neither is it a threshold test --- as \cref{tab:ladder}
+shows, the amplification it implies varies continuously across the cases and the
+trustworthiness of the resulting estimate varies with it. A tail figure is quoted as a number
+only where the amplification is small. Where the solver prints a tail estimate for a case
+whose ratio is near unity, that number is a \textbf{lower bound on the remaining movement}
+and must not be quoted as a predicted converged value, including when read directly out of
 \texttt{run\_status.json}.
 
 \paragraph{And it bounds one trajectory, not the spread between trajectories.} There is a
