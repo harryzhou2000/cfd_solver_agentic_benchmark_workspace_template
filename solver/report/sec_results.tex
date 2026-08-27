@@ -950,6 +950,48 @@ on every physical step with zero misses. This case is presented as a complete fi
 result rather than an honest partial, and the shedding statistics below are measured on
 the full record.
 
+\paragraph{The integration method is what it claims to be, checked from the output.} Four
+properties of \emph{how} this case is integrated were verified by reading
+\texttt{forces.csv} and \texttt{residuals.csv} rather than by inspecting the driver
+(\texttt{report/check\_transient\_method.py}):
+\begin{itemize}
+  \item the physical time step is exactly the prescribed $\Delta t=0.01$, with a maximum
+  deviation of $\num{1.9e-14}$ over the whole record --- round-off in the accumulated time,
+  not a variable step;
+  \item step numbers increment by exactly one with \textbf{zero} exceptions, so there is one
+  force row per \emph{physical} step and the history is sampled by physical time rather than
+  by inner iteration. A history written per inner iteration would misrepresent the temporal
+  resolution, and this rules it out;
+  \item inner-iteration counts lie in $49$--$144$ with a mean of $131$, entirely inside the
+  requested band of $5$--$1000$, so the dual-time inner loop is genuinely iterating and not
+  running to a fixed count;
+  \item the inner convergence target of $10^{-3}$ is met on every logged step, with the
+  worst observed ratio $\num{9.99e-4}$ --- just inside the target, which is what a loop
+  exiting \emph{on} its criterion rather than on an iteration cap looks like.
+\end{itemize}
+
+\paragraph{The analysis window is chosen on evidence, not convenience.} A post-transient
+statistic is only meaningful if the initial transient has passed, so the window start must
+be justified rather than assumed. Non-overlapping $20$-time-unit windows give
+\begin{center}
+\begin{tabular}{lrrr}
+  \toprule
+  Window & Mean $C_D$ & $C_D$ peak-to-peak & $C_L$ amplitude \\
+  \midrule
+  $t\in[40,60)$ & $1.232039$ & $0.080868$ & $0.526468$ \\
+  $t\in[60,80)$ & $1.246408$ & $0.047190$ & $0.530698$ \\
+  $t\in[80,100)$ & $1.246819$ & $0.046299$ & $0.530723$ \\
+  $t\in[100,120)$ & $1.247663$ & $0.046269$ & $0.530563$ \\
+  $t\in[120,140)$ & $1.246239$ & $0.046159$ & $0.530400$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+\noindent The first window is still saturating --- its peak-to-peak is $75\,\%$ larger than
+the others and its mean is $\num{1.4e-2}$ low. From $t=60$ onward the mean is flat to about
+$\num{1e-3}$ and the amplitude to $\num{4e-4}$. The statistics quoted below therefore use a
+window starting well after $t=60$, which is clear of the transient by a wide margin rather
+than by a judgement call.
+
 \paragraph{Development of the instability.} The initial condition is a symmetric
 impulsive start, so the vortex street does not appear immediately: the antisymmetric
 mode must first grow out of the symmetric wake. The lift signal traces this
