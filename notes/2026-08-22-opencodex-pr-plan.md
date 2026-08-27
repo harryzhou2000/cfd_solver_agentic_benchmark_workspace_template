@@ -167,3 +167,11 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 
 - Third consecutive goal turn with the same blocker: all four PRs draft + hygiene-blocked (unsponsored_surface), no maintainer-sponsored label, upstream dev unchanged at 8b1b65b8d/2.34.0, devlog privacy-scan flag unfixed. All in-scope work is done: 0 unresolved threads on all PRs, CodeRabbit clean, every reviewer comment replied, branches rebased on current dev, local suites green.
 - Unblock paths (external): (1) maintainers apply maintainer-sponsored to A/B/D (package.json bump) and C (auth-api hunk); or (2) upstream bumps dev to 2.35.0 and fixes the devlog privacy-scan flag, then rebase and drop the package.json bump/workarounds.
+
+## Status 2026-08-27/28 (resumed) - upstream unblocked, bumps dropped
+
+- Upstream landed #2766: dev bumped to 2.35.0 (d1def682d) and the release-doc privacy-scan false positive was fixed (3110bd186). The external blocker for A/B/D is gone.
+- Rebased A/B/D onto d1def682d and dropped the package.json bump + devlog changes entirely (conflicts resolved to upstream; empty revert commits dropped). Diffs now touch only feature files. Heads: A 5422a7728, B 862c2aa55, D 6c22214bd, C 85ea3c3c2.
+- Local validation: A 122 pass, B 62+201+33+32 pass, D 333 pass, C 42+16 pass; privacy scan + version-line + typecheck + diff-check clean on all.
+- Gates: A/B/D hygiene/enforce-target/label/resolve-pr all PASS and PRs are ready (4/4 checklist); runtime CI (Cross-platform/Service lifecycle/React Doctor) is action_required awaiting maintainer workflow approval. CodeRabbit: A pass, D pass (0 unresolved), B pending after resume.
+- Ingwannu reviewed the pre-rebase heads on all three (no new blockers; asked for rebase onto #2766 + drop bump) - replied on A/B/D confirming both are done. C rebased, owner pinged once for maintainer-sponsored (UI change authorization + auth-api hunk).
