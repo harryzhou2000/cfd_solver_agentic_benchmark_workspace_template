@@ -16,6 +16,9 @@ asserts that the results are usable rather than merely present:
 *   the transient analysis recovers the Strouhal number that was synthesised
     into the fixture, to within the FFT frequency resolution;
 *   the inviscid case produces no skin-friction figure, and viscous cases do.
+*   the sidecar `figure_manifest_extra.csv` puts externally generated figures into
+    the manifest, drops entries whose file is absent, and never shadows a
+    generated row.
 
 Finally it invokes the benchmark's own examiner validate_report() on the
 generated report artefacts, so the manifest is checked by the real grader rather
@@ -64,6 +67,9 @@ REQUIRED_MANIFEST_HEADER = [
     "source_file",
     "caption",
 ]
+
+#: Sidecar filename that make_figures reads for externally generated figures.
+EXTRA_SIDECAR_NAME = "figure_manifest_extra.csv"
 
 
 class CheckFailure(AssertionError):
@@ -473,6 +479,77 @@ def check_transient(json_path: Path) -> None:
     )
 
 
+def check_extra_manifest(make_figures, fixture_tree: Path, root: Path, source_figure: Path) -> None:
+    """The sidecar manifest must carry externally generated figures.
+
+    The report displays figures that no case directory can produce (the
+    sensitivity study's variant comparisons), so `build_all` appends rows from
+    `figure_manifest_extra.csv`.  Three properties are asserted here: a declared
+    figure that exists is manifested, a declared figure that does not exist is
+    dropped rather than manifested as a dangling reference, and a sidecar row
+    never shadows a generated one.
+    """
+    print("checking the extra-manifest sidecar")
+    work = root / "extra_manifest"
+    figures_dir = work / "figures"
+    figures_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = work / "figure_manifest.csv"
+
+    present = "selftest_extra_figure.png"
+    absent = "selftest_missing_figure.png"
+    shadow = "cylinder_m010_laminar_re200_mach.png"
+
+    # The "present" figure stands in for a real externally generated figure, so
+    # it has to exist on disk before the manifest is written.  The "absent" one
+    # is deliberately never created.
+    shutil.copy2(source_figure, figures_dir / present)
+    missing_path = figures_dir / absent
+    check(not missing_path.exists(), "fixture error: %s should not exist" % missing_path)
+
+    header = ",".join(REQUIRED_MANIFEST_HEADER)
+    rows = [
+        header,
+        '%s,extra_case,comparison,cp,extra_case/surface.csv,"a caption long enough to pass"' % present,
+        '%s,extra_case,comparison,cp,extra_case/surface.csv,"a caption long enough to pass"' % absent,
+        '%s,cylinder_m010_laminar_re200,contour,shadowed,bogus.vtu,"must not win over the generated row"' % shadow,
+    ]
+    (work / EXTRA_SIDECAR_NAME).write_text("\n".join(rows) + "\n")
+
+    summary = make_figures.build_all(
+        results_root=fixture_tree,
+        out_dir=figures_dir,
+        manifest_path=manifest_path,
+        transient_json=work / "transient.json",
+        farfield=False,
+    )
+
+    with manifest_path.open(newline="") as handle:
+        manifested = list(csv.DictReader(handle))
+    names = [r["figure_file"] for r in manifested]
+
+    check(present in names, "sidecar figure %s was not added to the manifest" % present)
+    check(
+        absent not in names,
+        "sidecar declared %s, which does not exist, yet it reached the manifest" % absent,
+    )
+    check(
+        names.count(shadow) == 1,
+        "%s appears %d times; a sidecar row must not duplicate a generated one"
+        % (shadow, names.count(shadow)),
+    )
+    shadowed = [r for r in manifested if r["figure_file"] == shadow]
+    if shadowed:
+        check(
+            shadowed[0]["variable"] == "mach",
+            "the sidecar overrode the generated row for %s (variable=%r)"
+            % (shadow, shadowed[0]["variable"]),
+        )
+    check(
+        summary.get("manifest_extra_rows") == 1,
+        "build_all reported %r extra rows, expected 1" % summary.get("manifest_extra_rows"),
+    )
+
+
 def run_examiner(report_dir: Path, case_dirs: List[Path]) -> None:
     """Run the benchmark examiner's validate_report() on the generated report.
 
@@ -564,6 +641,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     check_figures(figures_dir)
     check_manifest(manifest_path, figures_dir)
     check_transient(root / "cylinder_m010_laminar_re200_transient.json")
+    check_extra_manifest(
+        make_figures, fixture_tree, root, figures_dir / "cylinder_m010_laminar_re20_forces.png"
+    )
 
     stage_report(figures_dir, manifest_path, report_dir)
     run_examiner(report_dir, sorted(p for p in fixture_tree.iterdir() if p.is_dir()))

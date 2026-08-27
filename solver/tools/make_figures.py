@@ -34,6 +34,13 @@ Field conventions, which the examiner checks:
     requirement.
 *   source_file is the originating data file relative to the results root, for
     example cylinder_m010_laminar_re200/field_final.vtu.
+
+Figures that are not produced from a case output directory -- the sensitivity
+study's variant comparisons, for example -- cannot be discovered by walking the
+results tree, yet the contract requires the manifest to map *every* figure the
+report displays.  Those are declared in a sidecar CSV next to the manifest,
+`figure_manifest_extra.csv`, with the same header; its rows are appended to the
+generated ones so they survive every regeneration.
 """
 
 from __future__ import annotations
@@ -58,6 +65,41 @@ MANIFEST_HEADER = [
     "source_file",
     "caption",
 ]
+
+#: Sidecar file (relative to the manifest) declaring figures built outside this
+#: tool.  Rows whose figure_file is absent from the figures directory are
+#: skipped, so a stale entry cannot make the manifest reference a missing file.
+EXTRA_MANIFEST_NAME = "figure_manifest_extra.csv"
+
+
+def read_extra_manifest(manifest_path: Path, figures_dir: Path) -> List[Dict[str, str]]:
+    """Read the sidecar manifest of externally generated figures.
+
+    Only rows whose figure actually exists in *figures_dir* are returned, and a
+    row that duplicates a generated figure is left to the generator.
+    """
+    sidecar = Path(manifest_path).parent / EXTRA_MANIFEST_NAME
+    if not sidecar.exists():
+        return []
+    figures_dir = Path(figures_dir)
+    rows: List[Dict[str, str]] = []
+    with sidecar.open(newline="") as handle:
+        reader = csv.DictReader(handle)
+        missing_cols = set(MANIFEST_HEADER) - set(reader.fieldnames or [])
+        if missing_cols:
+            raise RuntimeError(
+                "%s is missing required columns: %s"
+                % (sidecar, ", ".join(sorted(missing_cols)))
+            )
+        for row in reader:
+            name = (row.get("figure_file") or "").strip()
+            if not name:
+                continue
+            if not (figures_dir / name).is_file():
+                print("extra manifest: skipping %s (not in %s)" % (name, figures_dir))
+                continue
+            rows.append({key: (row.get(key) or "").strip() for key in MANIFEST_HEADER})
+    return rows
 
 #: A directory is treated as a case when it holds at least one of these.
 CASE_MARKERS = (
@@ -249,6 +291,16 @@ def build_all(
             }
         )
 
+    extra_rows = read_extra_manifest(manifest_path, out_dir)
+    generated = set(row["figure_file"] for row in rows)
+    extra_rows = [row for row in extra_rows if row["figure_file"] not in generated]
+    if extra_rows:
+        print(
+            "extra manifest: %d externally generated figure(s): %s"
+            % (len(extra_rows), ", ".join(r["figure_file"] for r in extra_rows))
+        )
+    rows = rows + extra_rows
+
     manifest = write_manifest(rows, manifest_path)
     print("manifest written: %s (%d rows)" % (manifest, len(rows)))
 
@@ -256,6 +308,7 @@ def build_all(
         "cases": summary_cases,
         "manifest": str(manifest),
         "manifest_rows": len(rows),
+        "manifest_extra_rows": len(extra_rows),
         "figures_dir": str(out_dir),
         "transient_results": transient_results,
     }
