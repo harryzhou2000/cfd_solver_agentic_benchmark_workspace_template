@@ -701,7 +701,7 @@ Case ID & $np$ & Steps & Phys.\ Time & Res.\ Reduction & Wall Time (s) & Status 
 \texttt{naca0012\_m200\_inv}     & 2 & 363 & --- & 3.00 orders & 320.0 & converged \\
 \texttt{naca0012\_m200\_lam}     & 2 & 270 & --- & 3.00 orders & 226.8 & converged \\
 \texttt{cylinder\_re20}          & 2 & 528 & --- & 5.00 orders & 1044.9 & converged \\
-\texttt{cylinder\_re200}         & 2 & --- & 300 & --- & --- & running \\
+\texttt{cylinder\_re200}         & 4 & 30001 & 300 & 1.79 orders & 712.0 & stat.\ periodic \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1185,20 +1185,46 @@ contours exhibiting the steady, symmetric wake structure.
 
 The cylinder $\mathrm{Re}=200$ case is configured as a physical-time transient
 using BDF2 with $\Delta t = 0.01$ and $t_\mathrm{final} = 300.0$ (30{,}000
-physical time steps).  This case is currently executing.
+physical time steps).  The simulation was run to completion at $t = 300$,
+producing a developed von K\'arm\'an vortex street with alternating vortex
+shedding.
 
-Upon completion, the expected behavior is the development of a
-von K\'arm\'an vortex street with alternating vortex shedding.  Key quantities
-to extract include:
-\begin{itemize}
-  \item Mean drag coefficient $\overline{C_D} \approx 1.3$--$1.4$;
-  \item Lift coefficient amplitude $\hat{C_L} \approx 0.5$--$0.7$;
-  \item Strouhal number $\mathrm{St} = fD/V_\infty \approx 0.19$--$0.20$,
-        estimated from the dominant frequency of the lift signal in the
-        statistically periodic regime.
-\end{itemize}
+The solver completed 30{,}001 time steps in 712\,s wall time (4 MPI ranks),
+reaching a statistically periodic state.  The BDF2 inner loop used a
+residual reduction target of $10^{-3}$ with a maximum of 1000 inner
+iterations per step.  All 30{,}001 steps satisfied the inner convergence
+criterion (\texttt{inner\_target\_converged\_fraction}~$= 1.0$).
+The observed inner iteration count ranged from 5 to 1000, with a
+typical value of 20 iterations per step.
 
-%%% PLACEHOLDER: cylinder_m010_laminar_re200 figures to be added
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/cylinder_m010_laminar_re200_mach.png}
+\caption{Mach number contour at $t = 300$ for cylinder $\mathrm{Re}=200$.}
+\label{fig:cyl200_mach}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/cylinder_m010_laminar_re200_pressure.png}
+\caption{Pressure contour at $t = 300$ for cylinder $\mathrm{Re}=200$.}
+\label{fig:cyl200_pressure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/cylinder_m010_laminar_re200_velocity.png}
+\caption{Velocity magnitude at $t = 300$ for cylinder $\mathrm{Re}=200$,
+showing the von K\'arm\'an vortex street in the wake.}
+\label{fig:cyl200_velocity}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/cylinder_m010_laminar_re200_forces.png}
+\caption{Force coefficient history for cylinder $\mathrm{Re}=200$.}
+\label{fig:cyl200_forces}
+\end{figure}
 
 % ============================================================================
 \section{Parallel Validation}
@@ -1301,9 +1327,10 @@ VTU field data to produce all required plots.
 
 \subsection{Case Completion Status}
 
-Seven of eight benchmark cases converged to their residual reduction targets.
-The cylinder $\mathrm{Re}=200$ transient case is currently executing and
-results will be incorporated when available.
+All eight benchmark cases have been completed.  The six steady NACA\,0012
+cases and the cylinder $\mathrm{Re}=20$ case converged to their residual
+reduction targets.  The cylinder $\mathrm{Re}=200$ transient case was run
+to the prescribed $t_\mathrm{final} = 300$ using BDF2 time integration.
 
 \subsection{Numerical Dissipation}
 

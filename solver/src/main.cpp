@@ -20,6 +20,9 @@ int main(int argc, char* argv[]) {
     solve_cmd.add_argument("--output").required().help("Output directory");
     solve_cmd.add_argument("--restart").default_value(std::string("")).help("Restart file");
     solve_cmd.add_argument("--report-level").default_value(std::string("brief")).help("Report level");
+    solve_cmd.add_argument("--max-inner").default_value(-1).scan<'i', int>().help("Override max inner iterations");
+    solve_cmd.add_argument("--dt").default_value(-1.0).scan<'g', double>().help("Override physical time step");
+    solve_cmd.add_argument("--cfl").default_value(-1.0).scan<'g', double>().help("Override CFL number");
     program.add_subparser(solve_cmd);
 
     try {
@@ -48,6 +51,10 @@ int main(int argc, char* argv[]) {
     CFDSolver solver;
     solver.mpi_rank = rank;
     solver.mpi_size = size;
+    solver.output_dir = output_dir;
+    solver.cli_max_inner = solve_cmd.get<int>("--max-inner");
+    solver.cli_dt = solve_cmd.get<double>("--dt");
+    solver.cli_cfl = solve_cmd.get<double>("--cfl");
     solver.start_time = std::chrono::steady_clock::now();
 
     try {

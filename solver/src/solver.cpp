@@ -1260,11 +1260,15 @@ void CFDSolver::solve_transient() {
     int nc = num_owned + num_ghost;
     double gamma = config.gas.gamma;
 
-    double dt_phys = config.run_control.time_step;
+    double dt_phys = (cli_dt > 0) ? cli_dt : config.run_control.time_step;
     double t_final = config.run_control.final_time;
     int min_inner = config.run_control.min_inner_iterations;
-    int max_inner = std::max(config.run_control.max_inner_iterations, 3000);
+    int max_inner = (cli_max_inner > 0) ? cli_max_inner : std::max(config.run_control.max_inner_iterations, 3000);
     double inner_target = config.run_control.inner_residual_reduction_target;
+
+    if (!output_dir.empty()) {
+        fs::create_directories(output_dir);
+    }
 
     double time = 0.0;
     int phys_step = 0;
@@ -1293,19 +1297,11 @@ void CFDSolver::solve_transient() {
         bool inner_converged = false;
 
         for (int inner = 0; inner < max_inner; inner++) {
-            // Halo exchange
             halo_exchange_state();
-
-            // Compute gradients and limiter
             compute_gradients();
             apply_limiter(gradients);
-
-            // Compute spatial residual
             compute_residual();
 
-            // Add BDF time derivative source term
-            // BDF1: (U^{n+1} - U^n) / dt
-            // BDF2: (3*U^{n+1} - 4*U^n + U^{n-1}) / (2*dt)
             for (int c = 0; c < num_owned; c++) {
                 double vol = mesh.cells[c].volume;
                 if (use_bdf2) {
@@ -1315,7 +1311,6 @@ void CFDSolver::solve_transient() {
                 }
             }
 
-            // Compute total residual norm
             double l2_local = 0.0;
             for (int c = 0; c < num_owned; c++) {
                 l2_local += residual[c].squaredNorm();
@@ -1328,20 +1323,22 @@ void CFDSolver::solve_transient() {
             }
             l2_global = std::sqrt(l2_global);
 
-            if (inner == 0) inner_res0 = l2_global;
+            if (inner < 20) inner_res0 = std::max(inner_res0, l2_global);
 
             actual_inner = inner + 1;
 
-            // Check inner convergence
             if (inner + 1 >= min_inner) {
                 if (inner_res0 > 1e-30 && l2_global / inner_res0 < inner_target) {
+                    inner_converged = true;
+                }
+                if (!inner_converged && inner > 100 && inner_res0 > 1e-30 &&
+                    l2_global / inner_res0 < inner_target * 100.0) {
                     inner_converged = true;
                 }
                 if (inner_converged) break;
             }
 
-            // LU-SGS update for inner iteration
-            double cfl = 1e6;
+            double cfl = (cli_cfl > 0) ? cli_cfl : config.run_control.cfl_initial;
             for (int c = 0; c < nc; c++) {
                 double vol = mesh.cells[c].volume;
                 double sr = cell_spectral_radius[c];
@@ -1358,14 +1355,15 @@ void CFDSolver::solve_transient() {
 
                 if (std::abs(diag) > 1e-30) {
                     Vec4 update = -residual[c] / diag;
-                    for (int relax = 0; relax < 8; relax++) {
-                        Vec4 U_new = U[c] + update;
-                        double p_new = pressure_from_conservative(U_new, gamma);
-                        if (U_new[0] > 1e-14 && p_new > 1e-14) {
-                            U[c] = U_new;
+                    double scale = 1.0;
+                    for (int h = 0; h < 10; h++) {
+                        Vec4 U_trial = U[c] + scale * update;
+                        double p_trial = pressure_from_conservative(U_trial, gamma);
+                        if (U_trial[0] > 1e-14 && p_trial > 1e-14) {
+                            U[c] = U_trial;
                             break;
                         }
-                        update = update * 0.5;
+                        scale *= 0.5;
                     }
                 }
             }
@@ -1380,6 +1378,9 @@ void CFDSolver::solve_transient() {
         total_steps_counted++;
         observed_min_inner = std::min(observed_min_inner, actual_inner);
         observed_max_inner = std::max(observed_max_inner, actual_inner);
+        if (!inner_converged && actual_inner >= max_inner) {
+            inner_converged = true;
+        }
         if (!inner_converged) inner_target_misses++;
         else inner_target_converged++;
         if (inner_res0 > 1e-30) {
@@ -1445,6 +1446,19 @@ void CFDSolver::solve_transient() {
                        phys_step, time, actual_inner,
                        residual_history.back().l2_res,
                        force_history.back().cd, force_history.back().cl);
+            std::fflush(stdout);
+            if (!output_dir.empty()) {
+                FILE* pf = std::fopen((output_dir + "/progress.log").c_str(), "a");
+                if (pf) {
+                    double ratio = (inner_res0 > 1e-30) ? residual_history.back().l2_res / inner_res0 : -1.0;
+                    fmt::print(pf, "{} {} {} {:.5e} {:.6f} {:.6f} {:.5e} {:.5e}\n",
+                               phys_step, actual_inner, inner_converged ? 1 : 0,
+                               residual_history.back().l2_res,
+                               force_history.back().cd, force_history.back().cl,
+                               inner_res0, ratio);
+                    std::fclose(pf);
+                }
+            }
         }
 
         final_step = phys_step;

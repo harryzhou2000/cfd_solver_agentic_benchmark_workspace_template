@@ -98,6 +98,12 @@ public:
     int final_step = 0;
     double final_physical_time = 0.0;
     std::string convergence_status = "failed";
+    std::string output_dir;
+
+    // CLI overrides (-1 means use config value)
+    int cli_max_inner = -1;
+    double cli_dt = -1.0;
+    double cli_cfl = -1.0;
 
     // Inner iteration stats
     int total_inner_iters = 0;
