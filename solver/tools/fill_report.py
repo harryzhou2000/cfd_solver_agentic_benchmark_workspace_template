@@ -40,7 +40,7 @@ def fmt(x, nd=4):
 def case_section(cid, e, figs):
     t = []
     t.append("\\subsection{%s}\\label{sec:%s}" % (TITLES.get(cid, cid), cid))
-    status = e.get("convergence_status", "")
+    status = str(e.get("convergence_status", "")).replace("_", "\\_")
     orders = e.get("residual_reduction_orders", "")
     steps = e.get("final_step", "")
     cd = e.get("cd", ""); cl = e.get("cl", "")
@@ -108,12 +108,17 @@ def main():
         if cid not in summary: continue
         e = summary[cid]
         short = cid.replace("naca0012_","N-").replace("_","\\_").replace("cylinder_","cyl\\_")
+        if e.get("strouhal") is not None:
+            cdv = fmt(e.get("mean_cd_posttransient"),5) + "$^{*}$"
+            clv = ("$\\pm$" + fmt(e.get("cl_amplitude"),5) + "$^{*}$")
+        else:
+            cdv = fmt(e.get("cd",0),5); clv = fmt(e.get("cl",0),5)
         rows.append("%s & %s & %s & %s & %s & %s \\\\" % (
-            short, fmt(e.get("cd",0),5), fmt(e.get("cl",0),5),
+            short, cdv, clv,
             e.get("residual_reduction_orders",""), e.get("final_step",""),
-            e.get("convergence_status","")))
+            str(e.get("convergence_status","")).replace("_","\\_")))
     rows += ["\\bottomrule", "\\end{tabular}",
-             "\\caption{Final force coefficients, residual reduction, and convergence status for all cases.}",
+             "\\caption{Final force coefficients, residual reduction, and convergence status for all cases. For the transient Re 200 case ($^{*}$) the table shows the post-transient mean $C_D$ and the lift oscillation amplitude, not an instantaneous value.}",
              "\\label{tab:results}\\end{table}"]
     summary_tex = "\n".join(rows)
     out = {"case_tex": case_tex, "summary_tex": summary_tex}

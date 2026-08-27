@@ -33,11 +33,41 @@
     }
   },
   "cylinder_m010_laminar_re200": {
-    "all_passed": false,
-    "sanity_check_error": {
-      "detail": "ValueError: Some errors were detected !\n    Line #12359 (got 3 columns instead of 9)",
-      "pass": false,
-      "value": null
+    "all_passed": true,
+    "cp_variation_along_wall": {
+      "detail": "std(cp) over 100 wall rows = 0.798306",
+      "pass": true,
+      "value": 0.7983064653007754
+    },
+    "cylinder_positive_mean_drag": {
+      "detail": "mean cd over t>200 = 0.995403",
+      "pass": true,
+      "value": 0.9954025829173072
+    },
+    "mach_pressure_figures_mapped": {
+      "detail": "cylinder_m010_laminar_re200_mach.png -> mach, cylinder_m010_laminar_re200_pressure.png -> pressure in manifest",
+      "pass": true,
+      "value": 1.0
+    },
+    "noslip_wall_velocity_and_cf": {
+      "detail": "max wall |u|,|v| = 0 (limit 1e-6); max |cf| = 0.172677 (must be > 0)",
+      "pass": true,
+      "value": 0.0
+    },
+    "positive_density_pressure": {
+      "detail": "min density=0.985603, min pressure=70.4128",
+      "pass": true,
+      "value": 0.9856034517288208
+    },
+    "re200_unsteady_lift": {
+      "detail": "peak-to-peak cl over last time quartile (t >= 225.002) = 1.50035",
+      "pass": true,
+      "value": 1.50034513323
+    },
+    "status_not_failed": {
+      "detail": "convergence_status='statistically_periodic', completed=True; final results must be 'converged'/'statistically_periodic' with completed=true",
+      "pass": true,
+      "value": 1.0
     }
   },
   "naca0012_m015_inviscid": {

@@ -232,3 +232,40 @@ The supersonic laminar case shows a detached bow shock, a subsonic nose pocket, 
 \caption{Cylinder laminar, $M_\infty=0.1$, $Re=20$ (steady): post-transient vorticity wake (clipped to $[-5,5]$).}\label{fig:cylinder_m010_laminar_re20_vorticity_wake}\end{figure}
 
 The cylinder at $Re=20$ converges to a steady, symmetric wake: $C_L\approx5\times10^{-3}\approx0$ and the lift/drag histories are stationary (Fig.~\ref{fig:cylinder_m010_laminar_re20_forces}). A closed recirculation bubble forms behind the cylinder (Fig.~\ref{fig:cylinder_m010_laminar_re20_mach_zoom}); the wall pressure coefficient peaks at the front stagnation point ($C_p\approx1$) and is symmetric top-bottom. This stiff low-Mach viscous case required the Rusanov flux, the smooth Venkatakrishnan limiter, and a conservative pseudo-CFL cap to avoid a spurious limit cycle (see \S\ref{sec:limitations}); it then converged by $5.0$ orders. The drag $C_D\approx0.89$ is positive and the wake is steady, though the magnitude is under-predicted relative to the canonical $C_D\approx2.0$ because of low-Mach numerical dissipation (\S\ref{sec:limitations}).
+
+\subsection{Cylinder laminar, $M_\infty=0.1$, $Re=200$ (vortex shedding)}\label{sec:cylinder_m010_laminar_re200}
+\noindent Status: \textbf{statistically\_periodic}. Post-transient vortex shedding: Strouhal $St=0.2$, mean $C_D=0.9954$, lift amplitude $\Delta C_L=0.7496$. 30000 physical steps to $t=3e+02$ (np=4, 9903 s).
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.55\linewidth]{figures/cylinder_m010_laminar_re200_residual.png}
+\caption{Cylinder laminar, $M_\infty=0.1$, $Re=200$ (vortex shedding): residual history (per-equation L2 and global L2).}\label{fig:cylinder_m010_laminar_re200_residual}\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.55\linewidth]{figures/cylinder_m010_laminar_re200_forces.png}
+\caption{Cylinder laminar, $M_\infty=0.1$, $Re=200$ (vortex shedding): lift and drag coefficient history.}\label{fig:cylinder_m010_laminar_re200_forces}\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.55\linewidth]{figures/cylinder_m010_laminar_re200_surface_cp.png}
+\caption{Cylinder laminar, $M_\infty=0.1$, $Re=200$ (vortex shedding): surface pressure coefficient.}\label{fig:cylinder_m010_laminar_re200_surface_cp}\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.49\linewidth]{figures/cylinder_m010_laminar_re200_mach.png}
+\caption{Cylinder laminar, $M_\infty=0.1$, $Re=200$ (vortex shedding): Mach field.}\label{fig:cylinder_m010_laminar_re200_mach}\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.49\linewidth]{figures/cylinder_m010_laminar_re200_mach_zoom.png}
+\caption{Cylinder laminar, $M_\infty=0.1$, $Re=200$ (vortex shedding): Mach (zoom) field.}\label{fig:cylinder_m010_laminar_re200_mach_zoom}\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.49\linewidth]{figures/cylinder_m010_laminar_re200_pressure.png}
+\caption{Cylinder laminar, $M_\infty=0.1$, $Re=200$ (vortex shedding): pressure field.}\label{fig:cylinder_m010_laminar_re200_pressure}\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.49\linewidth]{figures/cylinder_m010_laminar_re200_pressure_zoom.png}
+\caption{Cylinder laminar, $M_\infty=0.1$, $Re=200$ (vortex shedding): pressure (zoom) field.}\label{fig:cylinder_m010_laminar_re200_pressure_zoom}\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.7\linewidth]{figures/cylinder_m010_laminar_re200_vorticity_wake.png}
+\caption{Cylinder laminar, $M_\infty=0.1$, $Re=200$ (vortex shedding): post-transient vorticity wake (clipped to $[-5,5]$).}\label{fig:cylinder_m010_laminar_re200_vorticity_wake}\end{figure}
+
+The cylinder at $Re=200$ is run as a true BDF2 dual-time transient ($\Delta t=0.01$, $t_f=300$, $30{,}000$ physical steps, inner LU-SGS solve to a $10^{-3}$ total-residual reduction per step). After the initial transient a self-sustained von K\'arm\'an vortex street develops: the lift oscillates periodically (Fig.~\ref{fig:cylinder_m010_laminar_re200_forces}) and the post-transient vorticity field (Fig.~\ref{fig:cylinder_m010_laminar_re200_vorticity_wake}) shows the alternating signed vortices convecting downstream. The measured Strouhal number, mean drag, and lift amplitude are reported in the summary line above and in Table~\ref{tab:results}; the shedding frequency is extracted from the post-transient lift history by an FFT. The drag magnitude is under-predicted relative to incompressible references ($C_D\approx1.3$) owing to low-Mach dissipation (\S\ref{sec:limitations}), but the shedding frequency and flow structure are correct.
