@@ -12,8 +12,9 @@ namespace cfd {
 struct PartitionResult {
   std::vector<int> part;          // owning rank of each global cell
   GlobalIndex edge_cut = 0;
-  std::string method;             // "metis_kway_contiguous", "metis_kway_noncontiguous",
-                                  // or "single_rank_no_partitioning"
+  std::string method;             // METIS k-way, annotated with whether the
+                                  // contiguity constraint had to be relaxed and
+                                  // whether METIS ran at all (single rank)
   // Cells of each rank in reverse Cuthill-McKee order (bandwidth reduction for
   // the Gauss-Seidel sweeps of the implicit solver).
   std::vector<std::vector<Index>> ordered_cells;

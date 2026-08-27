@@ -1,10 +1,11 @@
 // Approximate Riemann solvers for the 2-D compressible Euler fluxes.
 //
-// Three schemes are provided.  HLLC is the production default because the Roe
-// flux suffers the classical shock instability at the Mach 2 bow shock on the
-// supplied aerofoil mesh; Roe with a Harten-Yee entropy fix and Rusanov (local
+// Three schemes are provided.  HLLC is the production default, for positivity
+// rather than accuracy: its wave-speed estimate keeps the intermediate states
+// physical without help.  Roe with a Harten-Yee entropy fix and Rusanov (local
 // Lax-Friedrichs) are selectable from the command line and are used to
-// cross-check the flux implementation (see the report).
+// cross-check the flux implementation; with the shock fix below all three agree
+// on the Mach 2 drag to under a percent (see the report).
 //
 // Both contact-resolving schemes are combined with a multidimensional shock fix
 // (shockFixWeight below), because resolving the contact wave is exactly what

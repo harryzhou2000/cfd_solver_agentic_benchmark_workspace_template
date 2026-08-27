@@ -14,8 +14,9 @@ namespace cfd {
 enum class LimiterType { kNone, kBarthJespersen, kVenkatakrishnan };
 
 struct SolverOptions {
-  // HLLC is the production default: it is positivity friendly and free of the
-  // Roe shock instability that appears at the Mach 2 bow shock on this mesh.
+  // HLLC is the production default because it is positivity friendly.  Both it
+  // and Roe need the multidimensional shock fix below at the Mach 2 bow shock;
+  // with it, the two agree on the drag to under a percent.
   RiemannScheme flux = RiemannScheme::kHllc;
   Real entropy_fix = 0.10;
   // Multidimensional shock fix: blends the contact-resolving flux towards
