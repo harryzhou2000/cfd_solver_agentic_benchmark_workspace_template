@@ -1,0 +1,210 @@
+{
+  "schema": "env_snapshot",
+  "version": "1.1",
+  "capture_phase": "pre_run",
+  "run_environment_available": true,
+  "runtime_at_run": {
+    "availability": "captured",
+    "harness_version": "see tools and provenance",
+    "container_image": null
+  },
+  "captured_at": "2026-08-14T01:49:35.048031+00:00",
+  "local_time": "2026-08-14T09:49:35+08:00",
+  "host": {
+    "hostname": "gpu704",
+    "os": "Linux 6.8.0-136-generic",
+    "machine": "x86_64",
+    "python": "3.14.3",
+    "cpus": 64,
+    "memory_gb": 503.5,
+    "loadavg_1_5_15": [
+      "7.94",
+      "11.36",
+      "10.29"
+    ],
+    "in_docker": false,
+    "docker": {
+      "container_id": null
+    }
+  },
+  "tools": {
+    "codex": {
+      "installed": true,
+      "path": "/home/harry/.local/bin/codex",
+      "version": "codex-cli 0.147.0"
+    },
+    "opencode": {
+      "installed": true,
+      "path": "/home/harry/.opencode/bin/opencode",
+      "version": "1.18.11"
+    },
+    "opencodex": {
+      "installed": true,
+      "path": "/home/harry/.npm-global/bin/opencodex",
+      "version": "opencodex 2.14.0"
+    },
+    "uv": {
+      "installed": true,
+      "path": "/home/harry/.local/bin/uv",
+      "version": "uv 0.12.1 (x86_64-unknown-linux-gnu)"
+    },
+    "python3": {
+      "installed": true,
+      "path": "/home/linuxbrew/.linuxbrew/bin/python3",
+      "version": "Python 3.14.3"
+    },
+    "git": {
+      "installed": true,
+      "path": "/usr/bin/git",
+      "version": "git version 2.52.0"
+    },
+    "cmake": {
+      "installed": true,
+      "path": "/usr/bin/cmake",
+      "version": "cmake version 3.28.3"
+    },
+    "mpirun": {
+      "installed": true,
+      "path": "/mnt/ssd-SATARAID5/harry/tools/openmpi-5.0.9/install/bin/mpirun",
+      "version": "mpirun (Open MPI) 5.0.9"
+    },
+    "mpicc": {
+      "installed": true,
+      "path": "/mnt/ssd-SATARAID5/harry/tools/openmpi-5.0.9/install/bin/mpicc",
+      "version": "gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    },
+    "gcc": {
+      "installed": true,
+      "path": "/usr/bin/gcc",
+      "version": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    },
+    "docker": {
+      "installed": true,
+      "path": "/usr/bin/docker",
+      "version": "Docker version 29.5.3, build d1c06ef"
+    },
+    "codegraph": {
+      "installed": true,
+      "path": "/home/harry/.local/bin/codegraph",
+      "version": "1.2.0"
+    }
+  },
+  "environment": {
+    "count": 10,
+    "vars": [
+      {
+        "name": "HTTP_PROXY",
+        "set": true,
+        "value": "http://192.168.31.65:20181/"
+      },
+      {
+        "name": "HTTPS_PROXY",
+        "set": true,
+        "value": "http://192.168.31.65:20181/"
+      },
+      {
+        "name": "ALL_PROXY",
+        "set": true,
+        "value": "socks5://192.168.31.65:20180/"
+      },
+      {
+        "name": "http_proxy",
+        "set": true,
+        "value": "http://192.168.31.65:20181/"
+      },
+      {
+        "name": "https_proxy",
+        "set": true,
+        "value": "http://192.168.31.65:20181/"
+      },
+      {
+        "name": "SHELL",
+        "set": true,
+        "value": "/bin/zsh"
+      },
+      {
+        "name": "USER",
+        "set": true,
+        "value": "harry"
+      },
+      {
+        "name": "LOGNAME",
+        "set": true,
+        "value": "harry"
+      },
+      {
+        "name": "HOME",
+        "set": true,
+        "value": "/home/harry"
+      },
+      {
+        "name": "LANG",
+        "set": true,
+        "value": "en_US.UTF-8"
+      }
+    ]
+  },
+  "network": {
+    "proxy_env": [
+      {
+        "url": "http://192.168.31.65:20181/",
+        "reachable": true,
+        "host": "192.168.31.65",
+        "port": 20181,
+        "env": "HTTP_PROXY"
+      },
+      {
+        "url": "http://192.168.31.65:20181/",
+        "reachable": true,
+        "host": "192.168.31.65",
+        "port": 20181,
+        "env": "HTTPS_PROXY"
+      },
+      {
+        "url": "socks5://192.168.31.65:20180/",
+        "reachable": false,
+        "error": "[Errno 111] Connection refused",
+        "env": "ALL_PROXY"
+      },
+      {
+        "url": "http://192.168.31.65:20181/",
+        "reachable": true,
+        "host": "192.168.31.65",
+        "port": 20181,
+        "env": "http_proxy"
+      },
+      {
+        "url": "http://192.168.31.65:20181/",
+        "reachable": true,
+        "host": "192.168.31.65",
+        "port": 20181,
+        "env": "https_proxy"
+      }
+    ],
+    "note": "only local TCP probes, no external requests"
+  },
+  "workspace": {
+    "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/oc-goal/kimik3-dsv4/05",
+    "branch": "oc-goal/kimik3-dsv4/init",
+    "commit": "7bb0b026bbc59386143a6f8c46ed56e9e687e900",
+    "git_dirty": true,
+    "dirty_files": 1,
+    "agents_md_sha256": "6f67a229e3d8e607d76d4b9f7d2f3a085c9d9bfc4d8373481ee98784c340b69e",
+    "codegraph": true,
+    "done_marker": false,
+    "external_symlink": "/opt/external",
+    "benchmark_submodule": {
+      "exists": true,
+      "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+      "branch": "HEAD"
+    },
+    "state_timing": "initial_observed_pre_run"
+  },
+  "provenance": {
+    "script": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/tools/env_snapshot.py",
+    "script_version": "1.1",
+    "reconstruction_sources": [],
+    "captured_workspace_state": null,
+    "limitations": []
+  }
+}
