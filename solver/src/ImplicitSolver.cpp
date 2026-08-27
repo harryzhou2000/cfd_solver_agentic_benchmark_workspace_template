@@ -46,8 +46,8 @@ void lusgsSolve(const LocalMesh& lm,
     };
 
     // Forward sweep: (D + L)*dU* = -R
-    // Ghost cells (j >= n_owned) skipped here; cross-partition coupling recovered
-    // after the MPI halo exchange below.
+    // Ghost cells (j >= n_owned) are always upper-triangle in local ordering
+    // so they never participate in the forward sweep.
     std::vector<StateVec> dU_star(n_total, {0,0,0,0});
     for (int i = 0; i < n_owned; i++) {
         StateVec rhs = {-residuals[i][0], -residuals[i][1], -residuals[i][2], -residuals[i][3]};
@@ -56,7 +56,7 @@ void lusgsSolve(const LocalMesh& lm,
             int L = lm.face_left_local[fidx], R = lm.face_right_local[fidx];
             if (R < 0) continue;  // boundary face
             int j = (L == i) ? R : L;
-            if (j >= n_owned) continue;  // ghost -- included after halo exchange
+            if (j >= n_owned) continue;  // ghost -- always upper-triangle
             if (j >= i) continue;        // upper triangle
 
             double lambda = face_lambda(fidx, i, j);
@@ -67,29 +67,38 @@ void lusgsSolve(const LocalMesh& lm,
         for (int k=0; k<4; k++) dU_star[i][k] = rhs[k] * inv_d;
     }
 
-    // MPI: share forward-sweep result across partition boundaries so each rank
-    // has dU_star for its ghost cells (the owning rank's forward-sweep result).
+    // MPI: share forward-sweep result so ghost slots carry the owning rank's dU_star.
     haloExchange(dU_star, lm, comm);
 
-    // Seed ghost slots in dU with dU_star as first-order approximation for the
-    // cross-partition upper-triangle term in the backward sweep.
+    // Seed ghost slots in dU with dU_star as first-order proxy for backward sweep.
     for (int j = n_owned; j < n_total; j++) dU[j] = dU_star[j];
 
-    // Backward sweep: (D + U)*dU = D*dU* - U*dU
-    // Ghost cells (j >= n_owned) contribute via dU[j] = dU_star[j] set above.
-    // Only owned lower-triangle neighbours (j < n_owned && j <= i) are excluded.
-    for (int i = n_owned-1; i >= 0; i--) {
-        StateVec rhs = dU_star[i];
-
-        for (int fidx : lm.cell_face_ids_local[i]) {
-            int L = lm.face_left_local[fidx], R = lm.face_right_local[fidx];
-            if (R < 0) continue;
-            int j = (L == i) ? R : L;
-            if (j < n_owned && j <= i) continue;  // owned lower triangle
-
-            double lambda = face_lambda(fidx, i, j);
-            for (int k=0; k<4; k++) rhs[k] += (lambda / diag[i]) * dU[j][k];
+    // Backward sweep helper (factored for reuse in both passes).
+    // Ghost cells (j >= n_owned) contribute via dU[j] which is seeded above.
+    auto backwardSweep = [&]() {
+        for (int i = n_owned-1; i >= 0; i--) {
+            StateVec rhs = dU_star[i];
+            for (int fidx : lm.cell_face_ids_local[i]) {
+                int L = lm.face_left_local[fidx], R = lm.face_right_local[fidx];
+                if (R < 0) continue;
+                int j = (L == i) ? R : L;
+                if (j < n_owned && j <= i) continue;  // owned lower triangle
+                double lambda = face_lambda(fidx, i, j);
+                for (int k=0; k<4; k++) rhs[k] += (lambda / diag[i]) * dU[j][k];
+            }
+            dU[i] = rhs;
         }
-        dU[i] = rhs;
-    }
+    };
+
+    // Pass 1: backward sweep with dU_star proxy for ghost upper-triangle coupling.
+    backwardSweep();
+
+    // MPI: exchange actual backward-sweep dU so ghost slots now carry the
+    // owning rank's true backward-sweep result (much better than dU_star proxy).
+    haloExchange(dU, lm, comm);
+
+    // Pass 2: re-run backward sweep with updated ghost dU values.
+    // Ghost cells now hold the neighbor rank's backward-sweep result, giving
+    // accurate cross-partition upper-triangle coupling.
+    backwardSweep();
 }
