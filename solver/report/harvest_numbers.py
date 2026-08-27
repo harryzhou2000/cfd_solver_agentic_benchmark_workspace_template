@@ -176,6 +176,45 @@ def drift(values, fraction=0.10):
     return segment[-1] - segment[0]
 
 
+#: Stationarity tolerances, matching src/solve/steady_driver.cpp exactly so this
+#: table cannot disagree with the status the solver recorded:
+#:   kCdRelTol = 1e-2, kCdAbsTol = 1e-5, kCdDriftRelTol = 1e-3.
+CD_REL_TOL = 1.0e-2
+CD_ABS_TOL = 1.0e-5
+CD_DRIFT_REL_TOL = 1.0e-3
+
+
+def stationarity(values, window=500):
+    """Classify a force history using the solver's own two-branch criterion.
+
+    The solver accepts two distinct routes to a stationary force: a small span over
+    the trailing window (a fixed point), or a small drift of the window mean against
+    the preceding window (a limit cycle).  Both tolerances and the absolute floor
+    are taken from the solver source, because a table that classified these runs by
+    a different rule than the solver used would contradict the status recorded in
+    run_status.json.
+    """
+    if len(values) < 2 * window:
+        return None
+    last = values[-window:]
+    prev = values[-2 * window : -window]
+    span = max(last) - min(last)
+    mean_last = sum(last) / len(last)
+    mean_prev = sum(prev) / len(prev)
+    scale = max(abs(mean_last), 1e-9)
+    span_tol = max(CD_REL_TOL * max(abs(mean_last), 1.0e-4), CD_ABS_TOL)
+    drift = abs(mean_last - mean_prev)
+    drift_tol = max(CD_DRIFT_REL_TOL * abs(mean_last), CD_ABS_TOL)
+    return {
+        "span": span,
+        "span_rel": span / scale,
+        "span_ok": span <= span_tol,
+        "mean_drift": mean_last - mean_prev,
+        "mean_drift_rel": drift / scale,
+        "drift_ok": drift <= drift_tol,
+    }
+
+
 def shedding_stats(rows, half=0.5):
     """Mean/RMS forces and a Strouhal estimate from a transient force history.
 
@@ -253,6 +292,9 @@ def main():
     for _case_id, key, _label in CASES:
         define("PhysTime" + key, PENDING)
     for _case_id, key, _label in CASES:
+        define("SpanRel" + key, PENDING)
+        define("MeanDriftRel" + key, PENDING)
+    for _case_id, key, _label in CASES:
         for field, _digits in META_FIELDS:
             define(camel(field) + key, PENDING)
 
@@ -306,17 +348,42 @@ def main():
             status.get("convergence_status", "?").replace("_", "\\_"),
         ]) + " \\\\")
 
-        # Honest stationarity note derived from the drag history itself.
+        # Stationarity note derived from the drag history using the same two
+        # branches the solver's own criterion uses, so a converged limit cycle is
+        # not mislabelled as a drifting run.
         note = "--"
-        if cd_drift is not None and cd is not None:
-            scale = max(abs(cd), 1e-9)
-            rel = abs(cd_drift) / scale
-            if rel > 1e-2:
-                note = "\\textbf{drifting} (%.0f\\%%)" % (100.0 * rel)
-            elif rel > 1e-3:
-                note = "near-stationary"
+        st = stationarity([r["cd"] for r in forces]) if forces else None
+        # The solver's own verdict is authoritative: it is what gated the run, and
+        # it was evaluated on the exact trailing window the run terminated on.
+        # Re-deriving a verdict here from the final CSV cannot reproduce that window
+        # exactly (the driver appends extra final-state rows after the test), so a
+        # locally computed classification can disagree marginally with the recorded
+        # status.  The note text is therefore parsed for the branch the solver took,
+        # and the local computation is used only as a fallback.
+        notes = str(status.get("notes", ""))
+        if "bounded oscillation" in notes:
+            note = "limit cycle"
+            if st is not None:
+                # A peak-to-peak expressed as a percentage of a near-zero mean is
+                # meaningless (it can exceed 100 %), so for those cases the
+                # amplitude is quoted in absolute terms instead.
+                if st["span_rel"] <= 0.5:
+                    note = "limit cycle (%.1f\\%% p--p)" % (100.0 * st["span_rel"])
+                else:
+                    note = "limit cycle (p--p \\num{%.1e})" % st["span"]
+        elif "stationary to" in notes:
+            note = "fixed point"
+        elif "still moving" in notes or "not_converged" in notes:
+            note = "\\textbf{not stationary}"
+        elif st is not None:
+            if st["span_ok"]:
+                note = "fixed point"
+            elif st["drift_ok"]:
+                note = "limit cycle (%.1f\\%% p--p)" % (100.0 * st["span_rel"])
             else:
-                note = "stationary"
+                note = "\\textbf{drifting} (%.1f\\%%)" % (100.0 * st["mean_drift_rel"])
+            define("SpanRel" + key, num(100.0 * st["span_rel"], 3))
+            define("MeanDriftRel" + key, num(st["mean_drift_rel"], 3))
         force_rows.append(" & ".join([
             label,
             num(cd, 4),
