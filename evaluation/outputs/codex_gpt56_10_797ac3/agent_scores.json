@@ -1,0 +1,365 @@
+{
+  "schema": "agent_scores",
+  "contestant": "10",
+  "evaluated_at": "2026-08-27T15:40:00+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": "Immutable curation tip and workspace-local telemetry reviewed."
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "01a00e56-e6e8-7411-8fce-12931bff5c71"
+    ],
+    "execution_date": "2026-08-17 through 2026-08-26",
+    "started_at": "2026-08-17T06:10:24.334000+00:00",
+    "ended_at": "2026-08-26T06:32:43.758000+00:00",
+    "time_basis": "selected bundled Codex root UTC rollout timestamps",
+    "rationale": "Selected the sole production root and its 47 descendants from workspace-local .sessions; excluded later evaluator-history roots."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "CMake build and documented runner submitted."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Runner and documented case controls present."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Solver, tools, and report are separated."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "No authorship investigation; source reviewed only."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Case metadata drives production paths."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Distributed implementation exists, but submitted smoke comparison has large rank-dependent force deltas."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Positivity and guarded updates are documented."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Eight validator packages and report pass structurally."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4,
+          "notes": "Curated source is readable; raw artifacts excluded from submission tip."
+        }
+      ],
+      "overall_score": 4.1,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 5,
+          "notes": "Conservative equations and nondimensionalization documented."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "CGNS unstructured mesh path and geometry evidence submitted."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 5,
+          "notes": "Face-oriented finite-volume residual documented and source present."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Roe with smoothing and Rusanov selections are distinguished."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Farfield, slip, and no-slip treatments documented."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 5,
+          "notes": "Least-squares piecewise-linear reconstruction documented."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Positivity backtrack and limiter rationale provided."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Newtonian stress and Fourier heat flux documented."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Pseudo-time method exists, but steady target convergence is not achieved."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "BDF2 Re200 evidence reaches physical horizon and periodicity gates."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 3,
+          "notes": "METIS/halo design exists; smoke-force inconsistency limits confidence."
+        }
+      ],
+      "overall_score": 4.72,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "All eight submitted raw packages meet structural contract."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Explicit examiner validation passed all eight packages and report."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 1,
+          "notes": "Seven steady statuses say converged despite 0.02-0.67 reported residual-order reductions."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Re200 periodic result is credible; rank smoke force deltas and steady plateaus limit the rest."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Referenced figure assets are present and readable."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Report explicitly calls the steady outcomes bounded plateaus."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 4,
+          "notes": "Figure mapping is complete; curated submission omits raw files by policy."
+        }
+      ],
+      "overall_score": 3.85,
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "text": "steady statuses are contradictory",
+          "evidence": "See top-level disqualification evidence.",
+          "found": true
+        }
+      ]
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 90,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 10,
+        "notes": "Complete build/CLI and contract evidence."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 10,
+        "notes": "CGNS unstructured geometry implementation."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 15,
+        "notes": "Conservative residual and named boundary treatments."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 10,
+        "notes": "Least-squares linear reconstruction with limiter."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 10,
+        "notes": "Laminar stresses and heat flux documented."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 14,
+        "notes": "Strong BDF2 evidence; steady nonlinear convergence remains deficient."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 7,
+        "notes": "Partition/halo implementation, limited by materially inconsistent smoke forces."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 4,
+        "notes": "Structural pass and credible Re200, but most steady results are plateaus mislabeled converged."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Complete, readable, and unusually candid report."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Configuration and postprocessing tools submitted."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 2,
+      "notes": "Bounded plateau falsely labeled converged."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 2,
+      "notes": "Bounded plateau falsely labeled converged."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 2,
+      "notes": "Bounded plateau falsely labeled converged."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 1,
+      "notes": "Near-zero residual reduction yet labeled converged."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 1.5,
+      "notes": "Bounded plateau falsely labeled converged."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 1.5,
+      "notes": "Bounded plateau falsely labeled converged."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 1,
+      "notes": "Near-zero residual reduction yet labeled converged."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 5,
+      "notes": "Full 30000-step delivered transient package passes stated periodicity evidence; not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "metadata/status marks incomplete or failed runs as successful",
+        "evidence": "All seven steady run_status.json files use convergence_status=converged while reporting only 0.021 to 0.673 residual-reduction orders; the report itself says the target is not reached and calls them bounded pseudo-time plateaus.",
+        "found": true
+      }
+    ]
+  },
+  "limitations": [
+    "No evaluator clean build or MPI rerun was performed.",
+    "Re200 was not rerun.",
+    "Structural validation does not establish numerical convergence or MPI equivalence."
+  ]
+}

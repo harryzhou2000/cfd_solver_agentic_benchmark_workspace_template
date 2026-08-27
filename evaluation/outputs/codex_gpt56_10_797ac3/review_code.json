@@ -1,0 +1,112 @@
+{
+  "review_area": "code_review",
+  "title": "Code review scorecard",
+  "points": [
+    {
+      "id": "code.build",
+      "title": "Build system and reproducibility",
+      "weight": 0.15,
+      "score": 5,
+      "notes": "CMake build and documented runner submitted."
+    },
+    {
+      "id": "code.cli",
+      "title": "CLI and error handling",
+      "weight": 0.1,
+      "score": 5,
+      "notes": "Runner and documented case controls present."
+    },
+    {
+      "id": "code.organization",
+      "title": "Code organization and extensibility",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "Solver, tools, and report are separated."
+    },
+    {
+      "id": "code.originality",
+      "title": "Originality and license compliance",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "No authorship investigation; source reviewed only."
+    },
+    {
+      "id": "code.hardcoding",
+      "title": "No hard-coded case logic",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Case metadata drives production paths."
+    },
+    {
+      "id": "code.mpi",
+      "title": "MPI correctness",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Distributed implementation exists, but submitted smoke comparison has large rank-dependent force deltas."
+    },
+    {
+      "id": "code.robustness",
+      "title": "Robustness and memory sanity",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "Positivity and guarded updates are documented."
+    },
+    {
+      "id": "code.testing",
+      "title": "Testing and validation evidence",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "Eight validator packages and report pass structurally."
+    },
+    {
+      "id": "code.hygiene",
+      "title": "Code hygiene",
+      "weight": 0.07,
+      "score": 4,
+      "notes": "Curated source is readable; raw artifacts excluded from submission tip."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Existing solver executable called internally",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Force/residual files generated without solving",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Code only reads the two benchmark mesh filenames through hard-coded branches",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "MPI rank count changes results by order-one amounts for steady cases",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Explicit time stepping only (no implicit/steady capability claimed where required)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims algorithms that cannot be found in source",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete/failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Solver core, time integration, or MPI communication copied/adapted/wrapped from an existing open-source CFD codebase",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 4.1
+}
