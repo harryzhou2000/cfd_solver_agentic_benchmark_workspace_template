@@ -162,3 +162,8 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - A #2350: devlog reverted too. Head e3be23ec4.
 - Discovered lidge-jun's 08-22 owner review comments on all four PRs had NO replies: A (priority review + Responses emptiness blocker), B (priority review + apiKeys plaintext blocker), C (priority review + incidental loadConfig blocker), D (priority review). Verified every item is addressed on current heads and posted concise status replies to all six comments (B's apiKeys blocker reply posted separately). All review threads across A/B/C/D resolved (A 4, B 38, C 9, D 12; 0 unresolved).
 - Remaining: all four PRs draft + hygiene-blocked awaiting maintainer-sponsored (A/B/D: package.json version bump; C: auth-api hunk), or upstream bumping dev to 2.35.0 / fixing the devlog privacy-scan flag so our workarounds can be dropped.
+
+## Status 2026-08-27 (blocked) - external maintainer gate
+
+- Third consecutive goal turn with the same blocker: all four PRs draft + hygiene-blocked (unsponsored_surface), no maintainer-sponsored label, upstream dev unchanged at 8b1b65b8d/2.34.0, devlog privacy-scan flag unfixed. All in-scope work is done: 0 unresolved threads on all PRs, CodeRabbit clean, every reviewer comment replied, branches rebased on current dev, local suites green.
+- Unblock paths (external): (1) maintainers apply maintainer-sponsored to A/B/D (package.json bump) and C (auth-api hunk); or (2) upstream bumps dev to 2.35.0 and fixes the devlog privacy-scan flag, then rebase and drop the package.json bump/workarounds.
