@@ -38,6 +38,25 @@ endif()
 
 # Write via a temporary file and only replace the real header when the contents
 # change, so an unchanged revision does not force a rebuild of the whole tree.
+#
+# When the contents DO change, the translation units that embed the revision must
+# be recompiled.  Ninja/Make track the generated header as a dependency of those
+# objects, but only if the header is newer than them -- and copy_if_different
+# preserves nothing about the sources that read it, so the touch below makes the
+# dependency edge fire reliably.
 configure_file("${CNS2D_VERSION_IN}" "${CNS2D_VERSION_OUT}.tmp" @ONLY)
-execute_process(COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-                        "${CNS2D_VERSION_OUT}.tmp" "${CNS2D_VERSION_OUT}")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E compare_files
+                        "${CNS2D_VERSION_OUT}.tmp" "${CNS2D_VERSION_OUT}"
+                RESULT_VARIABLE cns2d_version_differs
+                OUTPUT_QUIET ERROR_QUIET)
+if(NOT cns2d_version_differs EQUAL 0)
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E copy
+                          "${CNS2D_VERSION_OUT}.tmp" "${CNS2D_VERSION_OUT}")
+  # Touch the sources that embed the revision so the change cannot be missed.
+  foreach(src "${CNS2D_SOURCE_DIR}/src/io/output_writer.cpp"
+              "${CNS2D_SOURCE_DIR}/src/main.cpp")
+    if(EXISTS "${src}")
+      execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${src}")
+    endif()
+  endforeach()
+endif()
