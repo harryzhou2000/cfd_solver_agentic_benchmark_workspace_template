@@ -63,7 +63,7 @@ scheme. \numCases{} of the eight required cases produced a complete result packa
 \numFailedCases{} marked failed. The Reynolds 20 cylinder gives $C_D=\cdCylinderMZeroOneZeroLaminarReTwoZero$,
 in agreement with the accepted value of $2.0$--$2.05$, and the Reynolds 200
 cylinder develops a vortex street with Strouhal number \stFft{} and mean drag
-\meanCdReTwoHundred. Of \sanityTotalChecks{} automated physics sanity
+\meanCdReTwoHundred, each a few percent below the accepted range. Of \sanityTotalChecks{} automated physics sanity
 checks over \sanityCases{} cases, \sanityFailures{} fail.
 \end{abstract}
 
@@ -538,11 +538,12 @@ so the shock itself stays sharp; a face lying in the front has $\alpha=0$ and is
 damped. The supersonic factor switches the fix off entirely in subsonic flow,
 where a shock cannot exist --- without it the pressure-gradient sensor also
 fires on the stagnation region of a stretched mesh, and the $M_\infty=0.15$ and
-cylinder results change in the fourth digit for no reason. With it, the two shock-free
-cases run with \code{--shock-fix 0} reproduce their production drag to
-\shockFixInactiveMaxDiff{} relative --- the cylinder and the $M_\infty=0.15$
-laminar aerofoil are bit-for-bit unaffected --- while the transonic
-$M_\infty=0.8$ case, which does contain a shock, moves by
+cylinder results change in the fourth digit for no reason. With it, the cylinder and the $M_\infty=0.15$ laminar aerofoil rerun with
+\code{--shock-fix 0} reproduce their production drag to
+\shockFixInactiveMaxDiff{} relative --- and since those runs use 4 ranks against
+the production 8, that residual is the rank-count difference of
+\cref{tab:mpi} rather than the fix, which on those cases never activates. The
+transonic $M_\infty=0.8$ case, which does contain a shock, moves by
 \shockFixDiffTransonic{}. The two Mach 2 cases are the ones the fix is for.
 
 The pressure gradient is the same halo-exchanged least-squares gradient used for
@@ -1581,8 +1582,13 @@ laminar vortex street~\cite{williamson,henderson}. Source:
 \gtable{tab_re200}
 \end{table}
 
-\Cref{tab:re200} collects the comparison. The Strouhal number is within the
-accepted band; the mean drag and the lift amplitude sit a few percent below it.
+\Cref{tab:re200} collects the comparison. All three quantities sit slightly
+\emph{below} the accepted ranges, and consistently so: the Strouhal number by
+\reTwoHundredBelowSt\%, the mean drag by \reTwoHundredBelowMeanCd\% and the lift
+amplitude by \reTwoHundredBelowClAmp\%, each measured against the lower edge of
+its band. A single systematic shortfall in all three is more informative than
+three separate discrepancies would be, because the same mechanism --- a wake
+that is slightly weaker than it should be --- lowers all of them together.
 Three effects contribute in that direction and none of them is a defect of the
 scheme: the reference values are for incompressible flow while these
 computations are at $M_\infty=0.1$, which lowers the drag slightly; the upwind
@@ -1958,9 +1964,12 @@ and machine-level freestream preservation and linear exactness on the benchmark
 mesh; the two quantitative validation targets available in the literature ---
 $C_D\approx2.0$--$2.05$ for the $Re=20$ cylinder~\cite{dennischang,tritton} and
 $St\approx0.19$--$0.20$, $C_D\approx1.32$--$1.40$ for the $Re=200$ vortex
-street~\cite{williamson,henderson} --- are reproduced: the $Re=20$ drag and its
-pressure/friction split to within $2\%$, and the $Re=200$ Strouhal number within
-the accepted band with a mean drag and lift amplitude a few percent below it,
+street~\cite{williamson,henderson} --- are reproduced to within a few percent:
+the $Re=20$ drag and its pressure/friction split to $2\%$, and the $Re=200$
+Strouhal number, mean drag and lift amplitude to \reTwoHundredBelowSt\%,
+\reTwoHundredBelowMeanCd\% and \reTwoHundredBelowClAmp\% below the lower edge of
+their accepted bands --- a single consistent shortfall rather than three
+independent errors,
 for the reasons set out in \cref{sec:cyl200}.
 
 The principal weaknesses, all documented in \cref{sec:limitations}, are the

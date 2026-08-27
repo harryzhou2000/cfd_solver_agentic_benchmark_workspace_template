@@ -906,6 +906,19 @@ def main():
             macro("rankWorstColumn", esc(str(w["worst_at"]["column"])))
             macro("rankWorstX", f"{w['worst_at']['x']:.4f}")
 
+    # ---------------------------------------- Re 200 deviation from literature
+    sh = os.path.join(args.report, "shedding_analysis.json")
+    if os.path.exists(sh):
+        S = json.load(open(sh))
+        # Lower edge of the accepted bands, which is what the computed values
+        # are compared against in the text.
+        for key, name, edge in (("strouhal_fft", "St", 0.19),
+                                ("mean_cd", "MeanCd", 1.32),
+                                ("cl_amplitude", "ClAmp", 0.60)):
+            v = float(S[key])
+            macro("reTwoHundredBelow" + name,
+                  f"{100.0 * (edge - v) / edge:.1f}")
+
     # Sanity-check summary
     sp = os.path.join(args.report, "sanity_checks.json")
     if os.path.exists(sp):
