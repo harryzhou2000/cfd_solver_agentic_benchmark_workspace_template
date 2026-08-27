@@ -22,7 +22,8 @@ ALL_CASES = [
 
 
 def short_id(case_id):
-    return case_id.replace('naca0012_', 'naca_').replace('cylinder_m010_', 'cyl_').replace('laminar_', 'lam_')
+    s = case_id.replace('naca0012_', 'naca-').replace('cylinder_m010_', 'cyl-').replace('laminar_', 'lam-')
+    return s.replace('_', r'\_')
 
 
 def generate_run_status_table():

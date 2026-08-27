@@ -134,7 +134,6 @@ LocalMesh build_local_mesh(const Mesh& global_mesh,
         lm.mesh.boundary_groups.push_back(lbg);
     }
 
-    int dbg_skip156 = 0, dbg_bc_faces = 0, dbg_orphan_faces = 0;
     for (int fi = 0; fi < (int)global_mesh.faces.size(); fi++) {
         auto& gf = global_mesh.faces[fi];
         int gl = gf.left_cell, gr = gf.right_cell;
@@ -152,13 +151,12 @@ LocalMesh build_local_mesh(const Mesh& global_mesh,
         lf.bc_id = gf.bc_id;
 
         if (left_local) lf.left_cell = global_to_local_cell[gl];
-        if (right_local) lf.right_cell = global_to_local_cell.count(gr) ? global_to_local_cell[gr] : -1;
+        if (right_local) lf.right_cell = global_to_local_cell[gr];
 
-        if (lf.is_boundary) dbg_bc_faces++;
-        if (!lf.is_boundary && gr < 0) dbg_orphan_faces++;
-
+        // Skip non-boundary interior faces at the outer edge of the ghost
+        // layer (one local cell, other cell not in our partition at all).
+        // Do NOT skip physical boundary faces (gr < 0 in global mesh).
         if (!lf.is_boundary && lf.left_cell >= 0 && lf.right_cell < 0 && !right_local) {
-            dbg_skip156++;
             continue;
         }
         if (!lf.is_boundary && lf.right_cell >= 0 && lf.left_cell < 0 && !left_local) {
@@ -167,6 +165,19 @@ LocalMesh build_local_mesh(const Mesh& global_mesh,
             lf.normal = -lf.normal;
         }
 
+        // For partition boundary faces (interior faces between an owned cell
+        // and a ghost cell), ensure the owned cell is always the left cell
+        // and the face normal points outward from the owned cell.
+        if (!lf.is_boundary && lf.left_cell >= 0 && lf.right_cell >= 0) {
+            bool left_owned  = (lf.left_cell < lm.num_owned);
+            bool right_owned = (lf.right_cell < lm.num_owned);
+            if (!left_owned && right_owned) {
+                std::swap(lf.left_cell, lf.right_cell);
+                lf.normal = -lf.normal;
+            }
+        }
+
+        // Ensure the face normal points outward from the left cell.
         if (lf.left_cell >= 0) {
             Vec2 c = lm.mesh.cells[lf.left_cell].centroid;
             if ((lf.midpoint - c).dot(lf.normal) < 0) {

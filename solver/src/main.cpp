@@ -224,6 +224,37 @@ int main(int argc, char** argv) {
             }
         }
 
+        // Broadcast boundary face info so non-root ranks can identify
+        // physical boundary edges in build_cell_face_adjacency.
+        {
+            int nbc_faces = 0;
+            std::vector<int> bc_face_data;
+            if (rank == 0) {
+                for (auto& f : global_mesh.faces) {
+                    if (f.is_boundary) {
+                        bc_face_data.push_back(f.nodes[0]);
+                        bc_face_data.push_back(f.nodes[1]);
+                        bc_face_data.push_back(f.bc_id);
+                        nbc_faces++;
+                    }
+                }
+            }
+            MPI_Bcast(&nbc_faces, 1, MPI_INT, 0, MPI_COMM_WORLD);
+            int data_size = nbc_faces * 3;
+            if (rank != 0) bc_face_data.resize(data_size);
+            if (data_size > 0)
+                MPI_Bcast(bc_face_data.data(), data_size, MPI_INT, 0, MPI_COMM_WORLD);
+            if (rank != 0) {
+                for (int i = 0; i < nbc_faces; i++) {
+                    Face face;
+                    face.nodes = {bc_face_data[i*3], bc_face_data[i*3+1]};
+                    face.is_boundary = true;
+                    face.bc_id = bc_face_data[i*3+2];
+                    global_mesh.faces.push_back(face);
+                }
+            }
+        }
+
         if (rank != 0) {
             global_mesh.num_cells_global = ncells_global;
             build_cell_face_adjacency(global_mesh);
