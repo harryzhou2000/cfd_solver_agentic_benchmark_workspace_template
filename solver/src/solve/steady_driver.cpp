@@ -118,6 +118,21 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
   std::vector<Real> previous_window_pressure;
   std::vector<Real> previous_window_viscous;
   bool cd_monotone_trend = false;
+  // A monotone trend is NOT by itself evidence of non-convergence.  What matters
+  // is whether the sub-block decrements DECAY: geometrically decaying decrements
+  // are an asymptotic approach whose remaining distance is bounded and
+  // computable, whereas roughly constant decrements are an unfinished transient.
+  //
+  // Measured on the two cases that motivated this: the cylinder at Re 20 has
+  // decrement ratios 0.82 0.81 0.76 0.74 0.72 0.70 0.67 0.65 (mean 0.73), giving
+  // a remaining tail of -9.8e-04 on a drag of 2.018, i.e. converged to 0.05 %.
+  // The M 2.0 laminar airfoil has ratios averaging 1.02 -- no decay at all -- and
+  // is genuinely still developing.  Rejecting every monotone run would reject the
+  // former along with the latter.
+  constexpr Real kDecayRatioMax = 0.92;  // decrements must shrink by at least 8 % per block
+  Real cd_decay_ratio = 0.0;
+  Real cd_tail_estimate = 0.0;
+  bool cd_trend_decaying = false;
   Real cd_drift_window = 0.0;
   bool forces_limit_cycle = false;
   std::vector<Real> previous_window_cd;
@@ -355,7 +370,62 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
       // Relative test, but never tighter than the absolute floor, so a drag that
       // is essentially zero cannot pass by oscillating through zero.
       cd_tol_window = std::max(kCdRelTol * cd_mag, kCdAbsTol);
-      forces_stationary = cd_span_window <= cd_tol_window;
+
+      // Sub-block trend analysis, computed ONCE and used by both branches below.
+      // A span test alone can be cleared by a hair while the signal marches in
+      // one direction throughout the window, so the trend must be inspected
+      // whichever branch establishes stationarity.
+      {
+        const std::size_t block = kForceWindow / kTrendBlocks;
+        Real bm[kTrendBlocks];
+        for (std::size_t b = 0; b < kTrendBlocks; ++b) {
+          Real s = 0.0;
+          for (std::size_t i = 0; i < block; ++i) s += recent_cd[b * block + i];
+          bm[b] = s / static_cast<Real>(block);
+        }
+        bool rising = true;
+        bool falling = true;
+        for (std::size_t b = 0; b + 1 < kTrendBlocks; ++b) {
+          if (!(bm[b + 1] > bm[b])) rising = false;
+          if (!(bm[b + 1] < bm[b])) falling = false;
+        }
+        cd_monotone_trend = rising || falling;
+
+        // Decay of the decrements, and the geometric-tail estimate of how much
+        // drag movement remains.
+        cd_decay_ratio = 0.0;
+        cd_tail_estimate = 0.0;
+        cd_trend_decaying = false;
+        if (cd_monotone_trend) {
+          Real ratio_sum = 0.0;
+          int ratio_count = 0;
+          for (std::size_t b = 0; b + 2 < kTrendBlocks; ++b) {
+            const Real d0 = bm[b + 1] - bm[b];
+            const Real d1 = bm[b + 2] - bm[b + 1];
+            if (std::abs(d0) > kTiny) {
+              ratio_sum += std::abs(d1) / std::abs(d0);
+              ++ratio_count;
+            }
+          }
+          if (ratio_count > 0) {
+            cd_decay_ratio = ratio_sum / static_cast<Real>(ratio_count);
+            cd_trend_decaying = cd_decay_ratio < kDecayRatioMax;
+            if (cd_trend_decaying) {
+              const Real last_decrement = bm[kTrendBlocks - 1] - bm[kTrendBlocks - 2];
+              cd_tail_estimate =
+                  std::abs(last_decrement) * cd_decay_ratio / (1.0 - cd_decay_ratio);
+            }
+          }
+        }
+      }
+
+      // Span branch: the drag has stopped moving over the window.  A monotone
+      // march is admitted only when its decrements are decaying and the estimated
+      // remaining distance is itself within tolerance, so a tolerance cleared by
+      // a hair on a still-marching signal cannot certify convergence.
+      forces_stationary = (cd_span_window <= cd_tol_window) &&
+                          (!cd_monotone_trend ||
+                           (cd_trend_decaying && cd_tail_estimate <= cd_tol_window));
 
       // Drift of the window mean against the mean of the preceding window.
       if (!forces_stationary && previous_window_cd.size() == kForceWindow) {
@@ -385,24 +455,9 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
             std::max(kCdDriftRelTol * std::max(std::abs(v_now), std::abs(v_prev)), kCdAbsTol);
         const bool components_settled = (p_drift <= p_tol) && (v_drift <= v_tol);
 
-        // Monotone-trend test over sub-blocks of the trailing window.  An
-        // oscillation about a fixed mean is not monotone; a developing solution
-        // is.  Only the former may be called a converged limit cycle.
-        const std::size_t block = kForceWindow / kTrendBlocks;
-        bool rising = true;
-        bool falling = true;
-        for (std::size_t b = 0; b + 1 < kTrendBlocks; ++b) {
-          Real m0 = 0.0;
-          Real m1 = 0.0;
-          for (std::size_t i = 0; i < block; ++i) {
-            m0 += recent_cd[b * block + i];
-            m1 += recent_cd[(b + 1) * block + i];
-          }
-          if (!(m1 > m0)) rising = false;
-          if (!(m1 < m0)) falling = false;
-        }
-        cd_monotone_trend = rising || falling;
-
+        // The trend was computed above and is shared with the span branch.  A
+        // limit cycle oscillates about its mean, so a monotone march is never a
+        // limit cycle regardless of how small its net drift is.
         if (cd_drift_window <= drift_tol && components_settled && !cd_monotone_trend) {
           forces_stationary = true;
           forces_limit_cycle = true;
@@ -427,6 +482,22 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
             "%.6f stationary to %.3e (tolerance %.3e) over the last %zu steps",
             orders, target_orders, step, last_forces.cd, cd_span_window, cd_tol_window,
             kForceWindow);
+        if (cd_monotone_trend && cd_trend_decaying) {
+          // The window is monotone but decaying: state the extrapolated asymptote
+          // and the remaining distance, so the number of earned digits is explicit
+          // rather than implied by the printed precision.
+          outcome.notes += formatString(
+              ".  The window is still monotone with decrements decaying at a ratio of %.3f per "
+              "sub-block, so this is an asymptotic approach rather than a fixed point already "
+              "reached: the geometric tail gives an estimated %.2e of C_D movement remaining "
+              "(%.3f %% ), i.e. an asymptote near %.6f.  C_D is therefore converged to about "
+              "%.1e and no more digits than that are earned.",
+              cd_decay_ratio, cd_tail_estimate,
+              100.0 * cd_tail_estimate / std::max(std::abs(last_forces.cd), kTiny),
+              last_forces.cd - (recent_cd.back() > recent_cd.front() ? -cd_tail_estimate
+                                                                     : cd_tail_estimate),
+              cd_tail_estimate);
+        }
       }
       logInfo(outcome.notes);
       break;
