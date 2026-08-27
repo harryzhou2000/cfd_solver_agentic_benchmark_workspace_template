@@ -28,6 +28,20 @@ run is recorded in its \texttt{run\_status.json}. Malformed input, a missing
 mesh, an unmapped boundary family, or an inconsistent freestream cause a
 non-zero exit with a specific message rather than a silent default.
 
+Every flag advertised in the required CLI is implemented. \texttt{--report-level}
+selects how much of the mesh-verification report is printed: \texttt{full} lists
+every measured quantity, while \texttt{brief} prints a one-line summary. The
+verification checks themselves always run, so the level cannot influence a computed
+result --- confirmed by running the same case at both levels and diffing the
+outputs, which are byte-identical in \texttt{residuals.csv} and
+\texttt{forces.csv}. Exit codes are distinct and reduced across ranks with
+\texttt{MPI\_MAX}: $0$ on success, $1$ for an \texttt{MPI\_Init} failure, $2$ for
+bad input, and $3$ for a numerically failed run.
+
+Build and run instructions, dependency versions, per-case outputs, the test suite,
+the Python tooling and a ten-step reproduce-from-clean-checkout sequence are
+documented in \texttt{README.md} at the root of the solver tree.
+
 \subsection{Generated files}
 
 Each case directory contains \texttt{metadata.json},
@@ -130,6 +144,18 @@ the normal matrix \cref{eq:normaleq}, which on the most stretched wall cells
 (aspect ratios of order $10^3$) is large. This is a genuine, if small,
 free-stream-preservation error and is listed in \cref{sec:limitations} rather
 than suppressed.
+
+The consequence is that the verification summary reports \texttt{CHECK} rather than
+\texttt{PASS} on both supplied meshes: the \texttt{PASS} verdict additionally
+requires exact uniform-flow preservation below $10^{-12}$, and these stretched
+meshes achieve $\num{2.123e-11}$. The distinction is deliberate. The hard geometric
+identities in \cref{tab:verification} are conditions no valid mesh may violate and
+they throw outright, so reaching the summary at all establishes that the mesh is
+usable; \texttt{CHECK} flags a quantity that is small but not at machine precision.
+It is worth noting that the solver reports this against itself: the same
+$\num{2.1e-11}$ appears in \texttt{report/sanity\_checks.json} as a check recorded
+failing its threshold, so the shortfall is surfaced by the solver's own diagnostics
+rather than discovered only by external validation.
 
 \subsection{Wall, positivity, and force checks}
 

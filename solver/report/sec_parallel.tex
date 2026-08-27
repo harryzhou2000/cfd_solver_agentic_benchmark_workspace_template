@@ -27,12 +27,15 @@ $np=1,2,4,8$, so that both meshes and both wall types are exercised, and
 
 The study covers \texttt{cylinder\_m010\_laminar\_re20} and
 \texttt{naca0012\_m015\_laminar\_re5000}, exercising both meshes and both wall
-types, at $np=1,2,4,8$. The airfoil case agrees to \textbf{five significant
-figures} across an eight-fold change in rank count, with a maximum deviation of
-$\num{1.0e-4}$ relative from the serial result, while the METIS edge cut rises
-from $0$ to $439$ cut faces. The cylinder case agrees to \textbf{four significant
-figures}, from $2.12601$ at $np=1$ to $2.12701$ at $np=8$, a relative deviation of
-$\num{4.7e-4}$, with the edge cut rising through $0, 97, 282, 471$.
+types, at $np=1,2,4,8$. Stated conservatively, the force coefficients agree to
+\textbf{within $\num{5e-4}$ relative} across an eight-fold change in rank count,
+the worst case being $\num{4.7e-4}$ for the cylinder at $np=8$. Per case: the
+airfoil agrees to five significant figures with a maximum deviation of
+$\num{1.0e-4}$ while its edge cut rises from $0$ to $439$ cut faces, and the
+cylinder agrees to four significant figures, from $2.12601$ at $np=1$ to
+$2.12701$ at $np=8$, with the edge cut rising through $0, 97, 282, 471$. Quoting a
+single figure of five significant digits for both cases would overstate the
+cylinder result.
 
 Agreement at this level is the expected and correct result. Since a reader might
 reasonably expect bitwise reproducibility, it is worth being explicit that

@@ -79,6 +79,22 @@ experimental value even when the Strouhal number agrees well. This is a limitati
 of the problem statement rather than of the solver, but it matters when comparing
 the amplitude in \cref{sec:cyl200} against experiment.
 
+\paragraph{The build locates more dependencies than it uses.} The CMake
+configuration finds ParMETIS, Eigen and \texttt{fmt}, but no source file includes
+any of them: the actual dependencies are CGNS, HDF5, METIS, zlib,
+\texttt{nlohmann/json} and MPI. The macro \texttt{CNS2D\_HAVE\_EIGEN} is defined
+but never used. This is stated because a build that advertises more than it needs
+can mislead a reader about what the solver actually relies on, and because
+partitioning is METIS serial $k$-way, not ParMETIS, despite ParMETIS being located.
+
+\paragraph{The reproduce sequence points into \texttt{scratch/}.} The documented
+reproduction path references \texttt{scratch/production.sh} and
+\texttt{scratch/scaling\_study.sh}, which are the scripts that actually produced
+the submitted runs. That directory is therefore not purely disposable. The
+alternative would be retyping the commands into the README, where they could drift
+from what was really executed; an honest pointer to the real script is preferred
+over a tidier one that might not match.
+
 \subsection{What would be done next}
 
 In priority order: replace the least-squares normal-equation solve with a scaled
@@ -113,7 +129,7 @@ The verification evidence is quantitative and is collected in
 \cref{tab:verification}: geometric identities at machine precision, exact
 least-squares gradients for linear fields, discrete conservation at
 $\vConservation$, and an analytic Jacobian confirmed against finite differences.
-Force coefficients agree to five significant figures across $np=1,2,4,8$.
+Force coefficients agree to within $\num{5e-4}$ relative across $np=1,2,4,8$.
 
 The most useful methodological result is negative and is documented in
 \cref{sec:stationarity}: normalising the steady convergence test by the
