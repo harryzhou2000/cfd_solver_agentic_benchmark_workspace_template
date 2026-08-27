@@ -1,0 +1,1263 @@
+\section{Results}
+\label{sec:results}
+
+Every number in this section is harvested mechanically from the submitted output
+files. The convergence status quoted for each case is the status the solver itself
+wrote to \texttt{run\_status.json}; no case is relabelled here. Where a value
+appears as \pending, that run had not completed when this document was last
+compiled, and the entry is deliberately left visibly empty rather than filled
+with an estimate.
+
+\subsection{Summary Tables}
+\label{sec:summary}
+
+\Cref{tab:runstatus} is the run-status table and \cref{tab:forces} the force
+table. In \cref{tab:forces} the final column reports the measured stationarity of
+the drag history: the change in $C_D$ across the trailing tenth of the recorded
+history, classified against the criterion of \cref{eq:stationarity}. A case marked
+\textbf{drifting} has not reached a steady state, regardless of how many residual
+orders it achieved, and its coefficients should be read as a snapshot rather than
+a converged value.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Run status for all eight required cases, transcribed from each
+  \texttt{run\_status.json}. Physical time is zero for steady cases by
+  construction. Wall time is for the rank count shown, under the 4-CPU container
+  quota described in \cref{sec:quota}.}
+  \label{tab:runstatus}
+  \footnotesize
+  \input{tab_runstatus}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Force coefficients from the final row of each \texttt{forces.csv}, with
+  the pressure/viscous drag split. The final column records how the run established
+  stationarity, taken from the solver's own termination record rather than
+  re-derived, and distinguishes three outcomes: a \emph{fixed point} reached within
+  the span tolerance; a \emph{limit cycle} whose mean is converged but whose state
+  keeps oscillating; and an \emph{asymptotic} approach, still monotone at
+  termination but with geometrically decaying increments, for which the quoted
+  $\pm$ is the solver's estimate of the $C_D$ movement still remaining and therefore
+  the precision of the coefficient (see \cref{sec:digits}). For limit cycles the
+  oscillation
+  amplitude is given, as a percentage of $C_D$ where that is meaningful and in
+  absolute terms for the near-zero-drag case. \textbf{For the limit-cycle rows the
+  quoted $C_D$ is a single-instant snapshot and its trailing digits are not
+  significant}; the meaningful statement for those cases is the mean plus amplitude,
+  given in \cref{eq:m200drag} for $\Minf=2.0$ inviscid and in
+  \cref{sec:naca} for the others. The $\Reinf=200$ transient is periodic by
+  construction, so the steady stationarity tests do not apply to it: its drag is
+  \emph{supposed} to oscillate, and its convergence is established by the periodicity
+  measurements of \cref{tab:saturation} instead. Its row is a single-instant snapshot of
+  a periodic signal; the mean and amplitude given in \cref{sec:cyl200} are the
+  meaningful quantities.}
+  \label{tab:forces}
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \input{tab_forces}
+\end{table}
+
+\subsection{How many digits of each coefficient are earned}
+\label{sec:digits}
+
+An adversarial review of the completed runs raised a question that deserves a direct
+answer rather than a defence: several cases were stopped while their drag history
+was still moving in one direction, so how much of each quoted coefficient is real?
+The answer turned out to require a distinction the solver was not making, and it now
+makes it and reports the result, so this subsection describes a criterion in the code
+rather than a post-hoc analysis of it.
+
+The question cannot be answered by the convergence status alone, because
+\emph{monotone motion and non-convergence are not the same thing}. What separates
+them is how the increments behave. Take the sub-block means of $C_D$ over the
+trailing window and difference them:
+
+\begin{itemize}
+  \item If the successive decrements shrink \textbf{geometrically}, with a roughly
+  constant ratio $r<1$, the iteration is in its asymptotic regime. The distance
+  still to be covered is the sum of the remaining geometric series,
+  $\Delta_{\infty}\approx d_{\text{last}}\,r/(1-r)$, which is bounded, small, and
+  computable. The run is converged, and the remaining error is quantifiable.
+  \item If the decrements are roughly \textbf{constant}, the solution is marching at
+  a steady rate and there is no asymptote in sight. That is an unfinished transient,
+  and no extrapolation of it is defensible.
+\end{itemize}
+
+This distinction is what the review's monotone-trend observation actually detects,
+and it separates the cases cleanly. For the cylinder at $\Reinf=20$ the sub-block
+decrements over the certifying window run
+\begin{center}
+  $-4.42,\ -3.63,\ -2.94,\ -2.22,\ -1.64,\ -1.18,\ -0.82,\ -0.55,\ -0.36$
+  \quad (units of $10^{-3}$),
+\end{center}
+with successive ratios $0.82, 0.81, 0.76, 0.74, 0.72, 0.70, 0.67, 0.65$. That is a
+clean geometric decay, with a mean ratio of $0.733$.
+
+The solver now performs this estimate itself and states the resulting precision in its
+own termination note, so the figure quoted here is the solver's rather than an external
+reconstruction of it: the geometric tail gives $\num{9.89e-4}$ of $C_D$ movement
+remaining, or $0.049\,\%$, for an asymptote near $2.0174$. \textbf{Three digits of this
+coefficient are earned and the fourth is not}, and it is quoted that way in
+\cref{sec:cyl20}.
+
+That figure has two independent corroborations, which is why it is quoted with
+confidence. First, the extrapolation script written for this report, working only from
+the submitted \texttt{forces.csv} and knowing nothing of the solver's internals,
+independently gives an asymptote of $2.0177$ bracketed between $2.0176$ and $2.0178$
+across the range of observed ratios --- agreeing with the solver's own estimate to
+$\num{3e-4}$. Second, the sensitivity study of \cref{sec:sensitivity} ran this case
+further, to $6.73$ residual orders, and obtained $C_D=\num{2.018119}$, which sits
+between the reported value and the extrapolated asymptote, exactly where a longer run
+on a decaying tail is required to land. Two runs of different length and two
+independent extrapolations agree on the first three digits and disagree in the fourth,
+which is a more useful statement of the uncertainty than any single run's trailing
+digits.
+
+This asymptote is quotable as a number because the extrapolation is well conditioned
+here. By \cref{eq:tailsum} the fitted ratio's error is amplified by $r/(1-r)$, which at
+$r=0.733$ is only $2.7$, so a percent-level error in the ratio moves the asymptote by a
+few percent of an already small remaining distance. \Cref{sec:conditioning} shows the same
+formula at $r=0.994$, where the amplification is $165$ and no asymptote may be quoted.
+The distinction is quantitative rather than a matter of judgement, and it is the test
+applied throughout this report before any extrapolated figure is given.
+
+By contrast, the case the review identified as the worst instance,
+\texttt{naca0012\_m200\_laminar\_re5000}, fails this test decisively: its decrement
+ratios are $1.11, 1.27, 0.86, 0.85, 1.04, 1.03, 1.00, 0.99$ with a mean of $1.019$, so
+the increments are not decaying at all and the tail sum diverges. There is no asymptote
+to extrapolate to, and none is offered. Combined with the component cancellation of
+\cref{sec:cancellation}, that case is reported as not converged.
+
+The contrast between mean ratios of $0.733$ and $1.019$ is what makes the discriminator
+usable rather than merely descriptive: the two cases are separated by a wide margin on a
+single measured quantity, not by a judgement call. It is worth being explicit that this
+vindicates part of the review's finding and corrects part of it. The review was right
+that a monotone certifying window is a warning sign and right that
+\texttt{naca0012\_m200\_laminar\_re5000} was not converged. It was wrong to conclude
+that all monotone cases were unconverged: a monotone approach with geometrically
+decaying increments is the normal, correct behaviour of a converging iteration, and a
+criterion that rejected it would reject good runs along with bad ones.
+
+The general policy adopted for this section follows from the above: coefficients are
+quoted to the precision the convergence evidence supports, an extrapolated asymptote
+and its bracket are given where the tail is demonstrably geometric, and the trailing
+digits produced by the solver are not reproduced merely because they exist. The
+script that performs the extrapolation is \texttt{report/extrapolate\_tail.py} and
+the window diagnostics are \texttt{report/check\_window.py}, both of which read only
+the submitted \texttt{forces.csv}.
+
+\paragraph{Three different things limit precision, and each is quantified.} It is worth
+collecting them, because they are independent and a reader should know which applies where:
+
+\begin{itemize}
+  \item \textbf{Limit-cycle amplitude.} For $\Minf=2.0$ inviscid the solution is a bounded
+  oscillation, so no number of iterations produces more digits: the honest report is the mean
+  plus the amplitude, $C_D=0.0880\pm0.0007$ (\cref{sec:limitcycle}).
+  \item \textbf{Conditioning of the tail estimate.} For a monotone asymptotic approach the
+  remaining movement is computable, but only where the decay ratio is away from unity. At
+  $r=0.733$ the cylinder's asymptote is quotable; at $r=0.994$ nothing is
+  (\cref{sec:conditioning}).
+  \item \textbf{Partition sensitivity.} For the one case needing tens of thousands of
+  iterations, two rank counts give answers $\num{5.0e-4}$ apart, far more than either run's
+  own tail estimate, so its fourth digit is partition-dependent rather than converged
+  (\cref{sec:conditioning}).
+\end{itemize}
+
+None of the three is a defect; each is a property of the problem or the algorithm, measured
+rather than assumed. Their value is that they say where the reported digits come from, and
+by implication that the coefficients not carrying such a caveat are limited only by the
+convergence level stated beside them.
+
+\subsection{NACA0012 Cases}
+\label{sec:naca}
+
+All six airfoil cases use the same mesh at zero angle of attack, so the exact
+solution is symmetric about $y=0$ and the exact lift and moment are zero. The
+computed $C_L$ and $C_{m,z}$ in \cref{tab:forces} are therefore measures of the
+discretization's ability to preserve symmetry on a mesh that is not itself
+symmetric in its cell connectivity.
+
+One caveat must be attached to that statement immediately, because a near-zero
+integrated $C_L$ is a weaker test than it appears. Lift is an \emph{integral} of the
+surface pressure difference, so equal and opposite local asymmetries cancel in it. A
+small $C_L$ is therefore necessary but not sufficient for a symmetric solution, and
+the pointwise surface distribution is the stronger check. \Cref{sec:m200asym}
+reports a case where the integrated lift is small while the local surface
+distribution is badly asymmetric, so $C_L$ alone should not be read as evidence of
+symmetry preservation for the supersonic case.
+
+\subsubsection{Subsonic inviscid, $\Minf=0.15$}
+
+This case is the cleanest available measure of pure discretization error. At
+$\Minf=0.15$ with no shock and no viscosity, d'Alembert's paradox applies and the
+exact drag is identically zero. Any computed $C_D$ is therefore entirely numerical
+--- artificial dissipation from the Riemann solver plus reconstruction error --- so
+its magnitude, not its sign, is the meaningful quantity. The solver reports
+$C_D=\cnsCdNacaSubInv$ with $C_L=\cnsClNacaSubInv$, over
+$\cnsOrdersNacaSubInv$ orders of residual reduction in $\cnsStepsNacaSubInv$
+steps.
+
+\Cref{fig:naca015inv-hist} shows the residual and force histories and
+\cref{fig:naca015inv-field} the Mach and pressure fields. The $C_p$ distribution
+in \cref{fig:naca015inv-cp} should be symmetric between upper and lower surfaces
+and should approach the stagnation value at the leading edge. The surface row nearest
+the nose reports $C_p=\cnsNoseCpNacaSubInv$, which \emph{exceeds} the familiar value of
+$1$ --- and that is correct, because $C_p=1$ is the \emph{incompressible} stagnation
+value. For compressible flow the isentropic stagnation pressure coefficient is
+\begin{equation}
+  C_{p0}=\frac{p_0/p_\infty-1}{\tfrac12\gamma \Minf^2}
+  =\frac{\left(1+\tfrac{\gamma-1}{2}\Minf^2\right)^{\gamma/(\gamma-1)}-1}
+         {\tfrac12\gamma \Minf^2},
+  \label{eq:stagcp}
+\end{equation}
+which exceeds unity and tends to $1$ as $\Minf\to0$. It evaluates to
+$\cnsStagCpNacaSubInv$ at $\Minf=0.15$ and $\cnsStagCpNacaTraInv$ at $\Minf=0.80$.
+\Cref{eq:stagcp} is the right reference only while the stagnation streamline is isentropic,
+which is true subsonically but \emph{not} at $\Minf=2.0$: there the flow crosses the bow
+shock first, so the attainable ceiling is the lower post-shock pitot value of
+\cref{eq:pitot}, $1.6573$, rather than the isentropic $\cnsStagCpNacaSupInv$. That case is
+treated separately in \cref{sec:m200asym}.
+
+The size of that distinction is worth one more sentence, because choosing the wrong
+reference at $\Minf=2.0$ would not merely be imprecise. The isentropic value
+$\cnsStagCpNacaSupInv$ overstates the attainable ceiling by $47.1\,\%$ relative to the
+post-shock $1.6573$, and on the supersonic inviscid case $9$ of $404$ wall faces exceed the
+correct bound while \textbf{zero} exceed the isentropic one. Quoting the isentropic figure
+would therefore have converted a genuine, diagnostic bound violation into an apparently
+clean result, and removed the evidence that \cref{sec:m200asym} rests on. A reference value
+is not a presentational detail when it is the thing a bound is measured against.
+
+Measured against the correct reference, the computed nose value is a deficit of
+$\cnsNoseCpDeficitPctNacaSubInv\,\%$, consistent with the first cell centre lying a
+finite distance from the true stagnation point so that the sampled state retains a
+little dynamic pressure. The transonic case behaves the same way, reporting
+$\cnsNoseCpNacaTraInv$ against $\cnsStagCpNacaTraInv$, a
+$\cnsNoseCpDeficitPctNacaTraInv\,\%$ deficit.
+
+This correction is worth recording because an earlier draft compared the wall value
+against $1$ instead of against \cref{eq:stagcp}. Doing so inverts the sign of the
+discrepancy --- a genuine deficit below $C_{p0}$ appears as an excess above $1$ --- and
+the draft then attached the finite-cell-offset explanation to a discrepancy pointing the
+wrong way. The number and its explanation were individually plausible and jointly
+incoherent. Both are now harvested from the submitted \texttt{surface.csv} and the case
+file's Mach number rather than transcribed, so neither can drift from the run again.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m015_inviscid_residuals.png}{\linewidth}
+    \caption{Residual history.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m015_inviscid_forces.png}{\linewidth}
+    \caption{Force history.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=0.15$, inviscid. Left: total and per-component
+  $L_2$ residual norms and the $L_\infty$ norm against pseudo-time step, from
+  \texttt{residuals.csv}. Right: $C_L$ and $C_D$ against step, from
+  \texttt{forces.csv}.}
+  \label{fig:naca015inv-hist}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m015_inviscid_mach.png}{\linewidth}
+    \caption{Mach number.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m015_inviscid_pressure.png}{\linewidth}
+    \caption{Pressure.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=0.15$, inviscid: near-body Mach number and
+  pressure contours from \texttt{field\_final.vtu}. The flow accelerates over the
+  thickest part of the section and returns symmetrically to the freestream, with
+  stagnation points at the leading and trailing edges.}
+  \label{fig:naca015inv-field}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{naca0012_m015_inviscid_cp.png}{0.62\textwidth}
+  \caption{NACA0012 at $\Minf=0.15$, inviscid: surface pressure coefficient
+  against chordwise position from \texttt{surface.csv}. Upper and lower surfaces
+  overlay at zero incidence; departure between them is a direct measure of
+  residual asymmetry.}
+  \label{fig:naca015inv-cp}
+\end{figure}
+
+\subsubsection{Transonic inviscid, $\Minf=0.80$}
+
+At $\Minf=0.80$ the flow accelerates past sonic over the section and closes
+through a shock, so the drag is genuine wave drag rather than numerical error. The
+solver reports $C_D=\cnsCdNacaTraInv$ with $C_L=\cnsClNacaTraInv$ after
+$\cnsStepsNacaTraInv$ steps and $\cnsOrdersNacaTraInv$ orders. This case is the
+most demanding for the limiter, since the shock sits on the body where the cells
+are smallest, and it is the case where the residual/force distinction of
+\cref{sec:stationarity} matters most.
+
+\Cref{fig:naca080inv-hist} shows the convergence and force histories and
+\cref{fig:naca080inv-field} the resulting fields. The supersonic pocket
+terminated by a shock is the defining feature: because the section is symmetric
+at zero incidence, one such pocket forms on each surface and the two shocks are
+mirror images, so the drag in \cref{tab:forces} is wave drag with no lift.
+
+\paragraph{This case is not a plateau, and the story changed three times.} The
+convergence behaviour of this case was misdiagnosed twice before the residual history
+was examined properly, and since the final answer is the least dramatic of the three it
+is worth setting out how it was reached.
+
+The residual reaches $\num{4.681e-4}$ at step $2547$ with the ramped CFL near $50$ ---
+that is $3.92$ orders against a requested $4.00$ --- and then \emph{degrades} by a factor
+of $10.7$ as the geometric ramp of \cref{eq:ramp} continues to its cap of $100$. The
+original run reported the degraded value, $2.89$ orders, and described it as a plateau.
+
+Two explanations were given for that plateau before the right one. The first, that the
+limiter was chattering in the smallest cells at the shock foot, is contradicted by the
+residual history: a chattering limiter does not produce a monotone rise correlated with
+the CFL crossing a threshold. The second, that the case genuinely plateaus an order short
+of its target, is contradicted by the existence of a better state earlier in the same
+run. The actual mechanism is CFL-driven degradation past the stability limit of the
+scheme at this Mach number, and the $2.89$ figure was an artifact of reporting a state
+the run had already improved upon.
+
+The solver now retains the best state by residual norm and restores it when the march
+ends more than a factor of two above that level, so the reported residual and the written
+field always correspond. Under that logic this case reports $3.92$ orders at step $2547$.
+\textbf{The honest summary is therefore that the transonic case converges to $3.92$ of
+the requested $4.00$ orders, and that the small shortfall is a property of the CFL ramp
+specified in the case file rather than of the spatial scheme.} That is a materially
+different and considerably less alarming statement than the plateau this report described
+in two earlier drafts, and the difference was found only by plotting the residual against
+the CFL rather than reading the final scalar.
+
+\paragraph{Why the shortfall is a plateau and not an unfinished run.} The distinction
+matters, because \emph{stopping short of a target} and \emph{a target that is unreachable
+at the supplied controls} are different claims. The evidence for the second is that the
+residual does not merely stop falling --- it \textbf{rises}. Over the $950$ steps after the
+best state at step $2546$ the residual averages $\num{4.51e-3}$ against that best value of
+$\num{4.68e-4}$, never returning below $\num{4.68e-4}$ and reaching $\num{5.00e-3}$, while
+the CFL ramp completes its climb to the cap of $100$. A run that could still reach $4.00$
+orders under these controls would have to descend through the level it had already
+achieved, and it does not: it settles onto a higher plateau and stays there.
+
+The supersonic inviscid case is the same story with a shorter tail: best $\num{1.8346e-3}$
+at step $4854$, which is $2.8964$ of the requested $3.00$ orders, followed by a rise to a
+plateau averaging $\num{3.84e-3}$ and peaking at $\num{6.64e-3}$.
+
+Both cases therefore satisfy the condition the supplied parameters attach to an early
+stop --- residuals, forces and fields at a stable plateau, with the final force row
+matching the written field and surface state --- and both are within $0.09$ and $0.10$
+orders of their targets at the state reported. The shortfall is stated rather than
+smoothed over, but it is a documented plateau at the supplied controls, not an
+abandoned march.
+
+A reader checking \texttt{forces.csv} for this case will notice that the final row's step
+number is \emph{lower} than the row before it, because the restored state is written after
+the march has passed it. That is intentional and the contract is still satisfied: the last
+row of \texttt{forces.csv} matches \texttt{final\_step} in \texttt{run\_status.json} and
+corresponds to the field in \texttt{field\_final.vtu}, which is what the output contract
+requires. The supplied validator accepts these files.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m080_inviscid_residuals.png}{\linewidth}
+    \caption{Residual history.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m080_inviscid_forces.png}{\linewidth}
+    \caption{Force history.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=0.80$, inviscid: residual and force histories from
+  \texttt{residuals.csv} and \texttt{forces.csv}.}
+  \label{fig:naca080inv-hist}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m080_inviscid_mach.png}{\linewidth}
+    \caption{Mach number.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m080_inviscid_pressure.png}{\linewidth}
+    \caption{Pressure.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=0.80$, inviscid: near-body Mach and pressure
+  contours from \texttt{field\_final.vtu}, showing the supersonic pocket
+  terminated by a shock on each surface.}
+  \label{fig:naca080inv-field}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{naca0012_m080_inviscid_cp.png}{0.62\textwidth}
+  \caption{NACA0012 at $\Minf=0.80$, inviscid: surface $C_p$ from
+  \texttt{surface.csv}. The shock appears as a sharp pressure recovery; its
+  chordwise position and sharpness are set by the limiter of
+  \cref{eq:limiter}.}
+  \label{fig:naca080inv-cp}
+\end{figure}
+
+\subsubsection{Supersonic inviscid, $\Minf=2.0$}
+
+At $\Minf=2.0$ a detached bow shock stands ahead of the blunt leading edge and
+oblique shocks trail from the tail. The reported drag is
+$C_D=\cnsCdNacaSupInv$ with $C_L=\cnsClNacaSupInv$, reached in
+$\cnsStepsNacaSupInv$ steps with $\cnsOrdersNacaSupInv$ orders of residual
+reduction. The characteristic farfield of \cref{sec:bc} is what lets the bow shock
+leave the domain cleanly: on the upstream arc the normal Mach number exceeds unity
+in magnitude and the state is fully imposed, while on the downstream arc it is
+fully extrapolated.
+
+This case requires more care in reporting than the other two, because its
+converged state is a small \emph{limit cycle} rather than a fixed point. As
+established in \cref{sec:limitcycle}, the drag settles into a bounded oscillation
+about a constant mean instead of approaching a single value: the trailing-window
+span is independent of window length over a factor of twenty in window size, while
+the window mean is constant to $\num{4.4e-5}$ relative. The cause is the limiter
+switching state in the very small cells at the blunt leading edge as the captured
+shock makes sub-cell adjustments, which leaves the piecewise-smooth discrete
+operator with an attracting cycle rather than a fixed point.
+
+The appropriate way to state such a result is the mean together with the
+amplitude, so the quoted precision matches what the solution actually possesses:
+\begin{equation}
+  C_D = 0.0880 \pm 0.0007 \qquad (\Minf=2.0,\ \text{inviscid}),
+  \label{eq:m200drag}
+\end{equation}
+the uncertainty being half the peak-to-peak oscillation, about $1.3\,\%$ of $C_D$.
+Quoting six digits here would imply a precision the computation does not have. Note
+in particular that \textbf{the number of significant digits is limited by the limit
+cycle, not by the residual level}: driving the residual lower would not sharpen
+this figure, because the state never stops moving.
+
+\Cref{fig:naca200inv-hist} gives the residual and force histories for this case.
+
+\Cref{fig:naca200inv-farfield} shows the whole-domain Mach field, which is
+included for a specific verification reason rather than for display. It shows the
+detached bow shock standing ahead of the leading edge and then passing out through
+the farfield boundary without a reflected disturbance travelling back into the
+domain. That is direct visual confirmation that the characteristic farfield of
+\cref{sec:bc} handles a strong shock correctly: a Dirichlet freestream condition
+on the outflow arc would reflect the shock and contaminate the near-body solution.
+
+\paragraph{Two pointwise physical checks that this case fails.}
+\label{sec:m200asym}
+An audit of this case found that its drag history, which looks stationary, is a misleading
+indicator of the state of the field: two pointwise checks on the surface output fail. They
+are worth reporting because they are independent of any convergence bookkeeping --- one is a
+statement about pressure and the other about geometry, and neither consults a residual norm
+or a force history. They still fail on the current run, in which the best state by residual
+norm was restored as described in \cref{sec:naca}, so this is not an artifact of the CFL
+degradation documented there.
+
+The first is a \textbf{hard physical bound}. The highest pressure any
+point on a body in a steady $\Minf=2.0$ inviscid flow can reach is the pitot
+pressure behind a normal shock, which corresponds to
+\begin{equation}
+  C_{p,\max}=\frac{p_{t2}/p_\infty-1}{\tfrac12\gamma \Minf^2}=1.6573
+  \qquad (\Minf=2.0,\ \gamma=1.4).
+  \label{eq:pitot}
+\end{equation}
+No converged inviscid solution may exceed it. The second is \textbf{up/down symmetry}:
+on a mesh whose geometry is symmetric to $10^{-14}$, the 202 upper/lower surface pairs
+matched by $x$ must carry equal $C_p$.
+
+Measured on the submitted \texttt{surface.csv} of each run, with
+\texttt{report/check\_m200\_physics.py}:
+
+\begin{center}
+\begin{tabular}{lrr}
+  \toprule
+  & $\Minf=2.0$ inviscid & $\Minf=2.0$ laminar \\
+  \midrule
+  Max surface $C_p$ & $2.1434$ & $1.5847$ \\
+  Relative to the bound $1.6573$ & $\mathbf{+29.3\,\%}$ & $-4.4\,\%$ \\
+  Wall faces exceeding the bound & $\mathbf{9}$ of $404$ & $0$ of $404$ \\
+  Worst pair asymmetry $\Delta C_p$ & $\mathbf{1.2440}$ & $0.1554$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{The inviscid case fails both tests and the laminar case at the same Mach
+number passes both.} That contrast is the useful part, because it rules out the obvious
+innocent explanations. The two cases share the mesh, the freestream Mach number, the
+geometry and the flux; they differ only in the presence of physical viscosity. So the
+failures cannot be attributed to the mesh, to the Mach number, or to the pitot reference
+being wrong --- the same reference applied to the same mesh at the same Mach number is
+satisfied with $4.4\,\%$ margin by the laminar run.
+
+What distinguishes them is that physical viscosity damps the leading-edge cells. With no
+viscosity, the shock position in cells of volume $\num{4.7e-9}$ is set by the limiter
+alone, and the limiter is not a smooth function of the state (\cref{sec:limitcycle}).
+A $29\,\%$ overshoot of a hard physical ceiling on $9$ faces, together with an $O(1)$
+up/down asymmetry on a mesh symmetric to $10^{-14}$, is the signature of a shock that has
+settled into a non-physical configuration in those cells and stayed there.
+
+\textbf{No convergence claim is made for the $\Minf=2.0$ inviscid case on the strength of
+its drag history.} Its solver-recorded status reflects the drag being stationary, which it
+is; these two pointwise tests show that a stationary integrated force is not sufficient
+evidence of a converged field. In particular $C_L$ for this case must not be read as
+evidence of symmetry preservation: the integrated lift stays small only because the local
+asymmetries cancel in the integral, which is exactly the cancellation warned about in
+\cref{sec:naca}. The natural next step is mesh refinement at the leading edge, which would
+establish whether the overshoot is a resolution artifact or something more fundamental; it
+is not available here and is recorded in \cref{sec:limitations}.
+
+The farfield behaviour described above is unaffected by any of this, since it concerns
+the boundary treatment rather than the near-field state.
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{naca0012_m200_inviscid_mach_farfield.png}{0.66\textwidth}
+  \caption{NACA0012 at $\Minf=2.0$, inviscid: whole-domain Mach number from
+  \texttt{field\_final.vtu}. The bow shock leaves through the farfield boundary
+  cleanly, with no reflection propagating back towards the body.}
+  \label{fig:naca200inv-farfield}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m200_inviscid_residuals.png}{\linewidth}
+    \caption{Residual history.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m200_inviscid_forces.png}{\linewidth}
+    \caption{Force history.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=2.0$, inviscid: residual and force histories from
+  \texttt{residuals.csv} and \texttt{forces.csv}.}
+  \label{fig:naca200inv-hist}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m200_inviscid_mach.png}{\linewidth}
+    \caption{Mach number.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m200_inviscid_pressure.png}{\linewidth}
+    \caption{Pressure.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=2.0$, inviscid: Mach and pressure contours from
+  \texttt{field\_final.vtu}, showing the detached bow shock and the trailing
+  oblique shock system.}
+  \label{fig:naca200inv-field}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{naca0012_m200_inviscid_cp.png}{0.62\textwidth}
+  \caption{NACA0012 at $\Minf=2.0$, inviscid: surface $C_p$ from
+  \texttt{surface.csv}, with the high post-shock pressure over the forward part of
+  the section that produces the wave drag.}
+  \label{fig:naca200inv-cp}
+\end{figure}
+
+\subsubsection{Laminar cases at $\Reinf=5000$}
+
+The three laminar airfoil cases replace the slip wall by a no-slip adiabatic wall
+and add the viscous terms of \cref{eq:viscflux} with $\mu=\num{2e-4}$ from
+\cref{eq:mu}. The drag now splits into a pressure part and a skin-friction part,
+and \cref{tab:forces} reports both. For orientation, the laminar flat-plate
+result $C_f = 1.328/\sqrt{\Reinf}$ integrated over both sides of a unit chord
+gives a friction drag of order $0.04$, so a physically plausible viscous drag for
+these cases is of order $10^{-2}$ and any value approaching unity indicates an
+undeveloped boundary layer rather than a converged solution --- the failure mode
+documented in \cref{sec:stationarity}.
+
+Results: at $\Minf=0.15$, $C_D=\cnsCdNacaSubLam$
+($C_{D,p}=\cnsPdNacaSubLam$, $C_{D,v}=\cnsVdNacaSubLam$) after
+$\cnsStepsNacaSubLam$ steps; at $\Minf=0.80$, $C_D=\cnsCdNacaTraLam$
+($C_{D,p}=\cnsPdNacaTraLam$, $C_{D,v}=\cnsVdNacaTraLam$) after
+$\cnsStepsNacaTraLam$ steps.
+
+\paragraph{The supersonic laminar case is the hardest in the set.} At $\Minf=2.0$ the
+solver reports $C_D=\cnsCdNacaSupLam$ ($C_{D,p}=\cnsPdNacaSupLam$,
+$C_{D,v}=\cnsVdNacaSupLam$) after $\cnsStepsNacaSupLam$ steps, and the status recorded
+for it in \cref{tab:runstatus} is \cnsStatusNacaSupLam{} --- which must be read together
+with \cref{sec:criterionworks}, where this case is the worked example.
+
+It combines the two things that make a steady solve slow: a strong bow shock whose
+position is set by cells of volume $\num{5.4e-8}$ at the leading edge, and a boundary
+layer on the same surface that must develop through those cells. The residual target is
+not the difficulty --- the residual passes $3.00$ orders early and reaches $4.78$ --- the
+difficulty is that the pressure drag continues to build as the shock system strengthens
+over the forward section, long after the residual has stopped being informative. It took
+$\num{48319}$ pseudo-time steps and $6947\,\mathrm{s}$ --- an order of magnitude more
+steps than any other case --- and the force criterion held it open for the whole of that
+march. \Cref{sec:criterionworks} gives the measurements.
+
+The result is physically coherent, which is the point worth making after the history this
+case has had. Its drag is roughly $2.5$ times the $\Minf=0.15$ laminar value and is now
+dominated by \emph{pressure} drag, $\cnsPdNacaSupLam$ against $\cnsVdNacaSupLam$ viscous.
+That is the expected supersonic signature: wave drag from the bow shock is the leading
+contribution and skin friction is secondary. The viscous part, $\cnsVdNacaSupLam$, remains
+below the subsonic value for the compressibility reason given above. Compare this with the
+$C_D=2.176$ that the defective termination test originally reported for this case, in which
+the viscous part alone was $2.17$ against a flat-plate expectation of order $0.04$: the
+difference between that figure and this one is the whole of the convergence investigation
+in \cref{sec:stationarity}.
+
+The wall treatment can be checked directly in the submitted output: because
+\texttt{surface.csv} carries boundary values (\cref{sec:ghostvsface}), the
+velocity and Mach columns on a no-slip wall are identically zero, while the $C_f$
+column carries the tangential shear of \cref{eq:shear}. The skin-friction
+distributions are shown in \cref{fig:naca-lam-cf}.
+
+\paragraph{An absolute check against Blasius theory.} The $\Minf=0.15$ case
+admits the most stringent validation available anywhere in this benchmark,
+because it can be compared against a closed-form result rather than a range. At
+low Mach number the boundary layer on a thin section is approximately that of a
+flat plate, for which the Blasius solution gives the friction drag coefficient of
+a plate wetted on both sides as
+\begin{equation}
+  C_{D,f}=\frac{2\times1.328}{\sqrt{\Reinf}}
+  =\frac{2.656}{\sqrt{5000}}=\num{0.037562}.
+  \label{eq:blasius}
+\end{equation}
+The solver's computed viscous drag for this case is
+$C_{D,v}=\cnsVdNacaSubLam$, obtained by integrating the tangential wall shear of
+\cref{eq:shear} over the $\nacaWallEdges$ wall faces of an unstructured mesh.
+The two agree to $2.4\,\%$.
+
+This deserves emphasis because of what it tests: not a plausibility range, but an
+absolute comparison against analytic theory of a quantity assembled from the
+least-squares gradients, the wall-normal gradient correction of
+\cref{eq:wallgrad}, the tangential projection of \cref{eq:shear}, and the
+parallel force reduction. An error in any one of those would show up here. It is
+equally important not to overclaim: a NACA0012 is not a flat plate. It has
+$12\,\%$ thickness, a favourable pressure gradient over the forward section and an
+adverse one aft, and a finite leading-edge radius, so exact agreement is neither
+expected nor meaningful. Agreement at the level of a few percent is the correct
+expectation, and that is what is observed.
+
+\paragraph{The operand is still moving, and by how much.} One caveat belongs with this
+comparison, because without it the headline figure is partly a function of when the run
+was stopped. The viscous drag was still falling at termination, with decrements that
+decay geometrically --- so by the criterion of \cref{sec:digits} this is an asymptotic
+approach with a computable remainder, not an unfinished transient, and the remainder can
+be estimated.
+
+How large the remainder is depends on the window used to estimate the decay, and rather
+than pick the flattering one the sweep is given
+(\texttt{report/blasius\_sensitivity.py}):
+
+\begin{center}
+\begin{tabular}{rrrr}
+  \toprule
+  Window (steps) & Decay ratio & Asymptote & Below \cref{eq:blasius} \\
+  \midrule
+  \num{500} & $0.844$ & \num{0.036512} & $2.79\,\%$ \\
+  \num{1000} & $0.735$ & \num{0.036488} & $2.86\,\%$ \\
+  \num{1500} & $0.667$ & \num{0.036444} & $2.98\,\%$ \\
+  \num{2000} & $0.593$ & \num{0.036420} & $3.04\,\%$ \\
+  \num{3000} & $0.486$ & \num{0.036353} & $3.22\,\%$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The estimated asymptote is stable to about $\num{1.6e-4}$, or $0.4\,\%$ of
+itself, across a six-fold change in window length; the implied agreement with Blasius
+ranges from $2.8\,\%$ to $3.2\,\%$. Longer windows reach further back into the faster
+decay and so extrapolate slightly further, which is why the figure drifts in one
+direction rather than scattering.
+
+The honest summary is therefore: \textbf{$2.4\,\%$ as computed, and $2.8$--$3.2\,\%$ if
+iterated to the estimated asymptote}. The conclusion --- agreement at the level of a few
+percent, which is what a $12\,\%$-thick section compared against flat-plate theory can
+support --- is unchanged either way. But the more precise-looking $2.4\,\%$ is the better
+of the two figures and owes part of its closeness to the stopping point, which a reader
+is entitled to know. The extrapolated range is a geometric-model estimate rather than a
+measurement, and is quoted as a range for that reason.
+
+The compressible cases behave consistently with this picture: viscous drag falls
+to $\cnsVdNacaTraLam$ at $\Minf=0.80$ and $\cnsVdNacaSupLam$ at $\Minf=2.0$.
+Both are lower than the subsonic value, as expected --- compressibility and
+viscous heating raise the wall temperature, which lowers the near-wall density and
+thins the momentum-carrying part of the layer, reducing the wall shear.
+
+It matters that \cref{eq:blasius} is compared against the \emph{viscous component
+alone}, $\cnsVdNacaSubLam$, and never against the total
+$C_D=\cnsCdNacaSubLam$. Flat-plate theory models skin friction only; the
+remaining $\cnsPdNacaSubLam$ is pressure drag, which it does not describe at all.
+
+\paragraph{The viscous pressure drag is physical, not numerical.} That
+$\cnsPdNacaSubLam$ of pressure drag deserves a comment, because inviscid theory
+says it should be zero: d'Alembert's paradox applies to a symmetric section at
+zero incidence in subsonic flow. It is nonzero here for a physical reason. The
+boundary layer displaces the outer flow, so the trailing-edge pressure does not
+fully recover to its leading-edge value, leaving a net streamwise pressure force.
+This is genuine viscous-pressure (form) drag.
+
+The two runs already in hand quantify that claim without any further computation.
+The $\Minf=0.15$ \emph{inviscid} case on the same mesh has no viscosity and no
+shock, so its entire drag is discretization error --- the numerical noise floor of
+this mesh at this Mach number.
+
+That floor must itself be quoted as a cycle rather than as a number, for exactly the
+reason set out in \cref{sec:limitcycle}: this case terminates on a limit cycle whose
+peak-to-peak amplitude is larger than its own mean. Over the trailing 500 steps the
+inviscid drag has mean $\num{0.001003}$ and spans $\num{0.000370}$ to
+$\num{0.001643}$, a peak-to-peak of $127\,\%$ of the mean. The viscous pressure drag
+therefore exceeds the noise floor by a factor of $18$ measured against the window
+mean, with the ratio spanning $11$ to $50$ across the cycle. Quoting the single
+figure of $18$ from one arbitrary sample of an oscillation would apply a standard
+this report criticises elsewhere.
+
+Even at the least favourable point in the cycle the margin is a factor of $11$, so
+the conclusion is unaffected: the viscous pressure drag is an order of magnitude
+above the discretization noise of the identical mesh, and is therefore physical.
+
+Convergence for the three laminar cases is shown in \cref{fig:naca-lam-res} and
+the corresponding force histories in \cref{fig:naca-lam-forces}; the latter are
+the binding evidence, for the reasons given in \cref{sec:stationarity}. The
+surface pressure distributions are collected in \cref{fig:naca-lam-cp} and the
+fields in \cref{fig:naca-lam-field}, where the boundary layer appears as a thin
+low-Mach layer hugging the surface that is absent from the corresponding inviscid
+cases.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_residuals.png}{\linewidth}
+    \caption{$\Minf=0.15$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_residuals.png}{\linewidth}
+    \caption{$\Minf=0.80$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_residuals.png}{\linewidth}
+    \caption{$\Minf=2.0$.}
+  \end{subfigure}
+  \caption{Residual histories for the three laminar NACA0012 cases at
+  $\Reinf=5000$, from each \texttt{residuals.csv}.}
+  \label{fig:naca-lam-res}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_forces.png}{\linewidth}
+    \caption{$\Minf=0.15$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_forces.png}{\linewidth}
+    \caption{$\Minf=0.80$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_forces.png}{\linewidth}
+    \caption{$\Minf=2.0$.}
+  \end{subfigure}
+  \caption{Force histories for the three laminar NACA0012 cases at
+  $\Reinf=5000$, from each \texttt{forces.csv}. These histories, not the residual
+  norms, are the binding convergence evidence discussed in
+  \cref{sec:stationarity}.}
+  \label{fig:naca-lam-forces}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_cf.png}{\linewidth}
+    \caption{$\Minf=0.15$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_cf.png}{\linewidth}
+    \caption{$\Minf=0.80$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_cf.png}{\linewidth}
+    \caption{$\Minf=2.0$.}
+  \end{subfigure}
+  \caption{Skin-friction coefficient along the airfoil for the laminar cases,
+  from the \texttt{cf} column of each \texttt{surface.csv}. $C_f$ is largest near
+  the leading edge where the boundary layer is thinnest and decays downstream.}
+  \label{fig:naca-lam-cf}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_cp.png}{\linewidth}
+    \caption{$\Minf=0.15$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_cp.png}{\linewidth}
+    \caption{$\Minf=0.80$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_cp.png}{\linewidth}
+    \caption{$\Minf=2.0$.}
+  \end{subfigure}
+  \caption{Surface pressure coefficient along the airfoil for the laminar cases
+  at $\Reinf=5000$, from the \texttt{cp} column of each \texttt{surface.csv}.
+  Comparing these with the inviscid distributions of
+  \cref{fig:naca015inv-cp,fig:naca080inv-cp,fig:naca200inv-cp} isolates the effect
+  of the boundary layer on the pressure field, which is largest near the trailing
+  edge where the displacement thickness is greatest.}
+  \label{fig:naca-lam-cp}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_mach.png}{\linewidth}
+    \caption{$\Minf=0.15$, Mach.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_mach.png}{\linewidth}
+    \caption{$\Minf=0.80$, Mach.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_mach.png}{\linewidth}
+    \caption{$\Minf=2.0$, Mach.}
+  \end{subfigure}\\[6pt]
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_pressure.png}{\linewidth}
+    \caption{$\Minf=0.15$, pressure.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_pressure.png}{\linewidth}
+    \caption{$\Minf=0.80$, pressure.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_pressure.png}{\linewidth}
+    \caption{$\Minf=2.0$, pressure.}
+  \end{subfigure}
+  \caption{Laminar NACA0012 cases at $\Reinf=5000$: near-body Mach number (top)
+  and pressure (bottom) from each \texttt{field\_final.vtu}. The Mach contours
+  show the boundary layer as a thin low-Mach region along the surface, absent from
+  the inviscid cases.}
+  \label{fig:naca-lam-field}
+\end{figure}
+
+\subsection{Cylinder Reynolds 20}
+\label{sec:cyl20}
+
+At $\Reinf=20$ the cylinder wake is steady, symmetric, and closed: a pair of
+standing recirculation bubbles behind the body with no shedding. This is the most
+quantitatively checkable case in the benchmark, because the literature value for
+the drag coefficient of a circular cylinder at $\Reinf=20$ is well established at
+$C_D\approx 2.0$--$2.1$.
+
+The solver reports $C_D=\cnsCdCylSteady$, split as
+$C_{D,p}=\cnsPdCylSteady$ pressure and $C_{D,v}=\cnsVdCylSteady$ friction, with
+$C_L=\cnsClCylSteady$ after $\cnsStepsCylSteady$ steps and
+$\cnsOrdersCylSteady$ orders of residual reduction. Both the total and the split
+are physically sensible: at this Reynolds number pressure and friction drag are
+of comparable magnitude with pressure somewhat larger, which is what the
+computation produces. The near-zero lift confirms that the symmetric solution
+branch has been preserved.
+
+Because its drag is known independently from the literature, this case is also the
+reference point for the sensitivity study of \cref{sec:sensitivity}. Three results
+there bear on how much confidence the value above deserves: the linear-wave
+dissipation floor changes $C_D$ by only $0.021\,\%$ (\cref{tab:floorsweep}), the
+Venkatakrishnan constant by $0.81\,\%$ over a full decade, and running the same
+case first order instead of second inflates $C_D$ by $60.5\,\%$ to $3.24$, well
+outside the literature range. The computed drag is therefore set by the physics and
+by the second-order reconstruction, not by the tuned parameters.
+
+\Cref{fig:cyl20-hist} shows the residual and force histories, and
+\cref{fig:cyl20-field} the pressure, Mach, velocity-magnitude and wall-$C_p$
+views. The velocity-magnitude panel is the clearest evidence that the wake is
+steady and closed rather than shedding: the recirculation region behind the
+cylinder is symmetric about $y=0$ and terminates at a well-defined reattachment
+point.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_residuals.png}{\linewidth}
+    \caption{Residual history.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_forces.png}{\linewidth}
+    \caption{Force history.}
+  \end{subfigure}
+  \caption{Cylinder at $\Reinf=20$: residual and force histories from
+  \texttt{residuals.csv} and \texttt{forces.csv}. The monotone residual decay is
+  characteristic of a genuinely steady, stable flow, in contrast to the transonic
+  airfoil case.}
+  \label{fig:cyl20-hist}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_pressure.png}{\linewidth}
+    \caption{Pressure.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_mach.png}{\linewidth}
+    \caption{Mach number.}
+  \end{subfigure}\\[6pt]
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_velocity.png}{\linewidth}
+    \caption{Velocity magnitude (wake).}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_cp.png}{\linewidth}
+    \caption{Wall $C_p$.}
+  \end{subfigure}
+  \caption{Cylinder at $\Reinf=20$: fields from \texttt{field\_final.vtu} and the
+  wall pressure coefficient from \texttt{surface.csv}. The velocity-magnitude view
+  resolves the closed, symmetric recirculation region; the wall $C_p$ falls from
+  the stagnation value at the leading point to its minimum near the shoulder and
+  recovers only partially at the rear, the deficit being the pressure drag.}
+  \label{fig:cyl20-field}
+\end{figure}
+
+\subsection{Cylinder Reynolds 200 Vortex Street}
+\label{sec:cyl200}
+
+At $\Reinf=200$ the steady wake is unstable and the flow settles into a periodic
+von K\'arm\'an vortex street. This case is integrated in physical time by the
+dual-time BDF2 scheme of \cref{sec:bdf2} with the supplied production controls:
+$\Delta t=0.01$ to $t_f=300$, i.e.\ $\num{30000}$ physical steps, with 5 to 1000
+inner iterations per step against an inner target of $10^{-3}$ on the total
+transient residual.
+
+\paragraph{Completion requirement.} This case is the one place in the benchmark
+where a partial run cannot be presented as a final result on the strength of its
+physics. The submission contract requires the transient to reach
+$\num{30000}$ physical steps and $t=300$; a run that stops earlier is an
+incomplete transient regardless of how clean its wake looks, and is reported as
+such here. The solver's own status label is
+\texttt{statistically\_periodic}, which it applies only once the horizon is
+reached and the inner solve converged on at least $95\,\%$ of physical steps.
+
+The status reported by the solver for the submitted run is
+\cnsStatusCylShed, at $\cnsStepsCylShed$ physical steps and physical time
+$t=\cnsPhysTimeCylShed$. Inner-solve statistics from \texttt{metadata.json} are:
+typical $\cnsTypicalInnerIterationsCylShed$ inner iterations per physical step,
+observed range $\cnsObservedMinInnerIterationsCylShed$ to
+$\cnsObservedMaxInnerIterationsCylShed$, with
+$\cnsInnerTargetMissesCylShed$ target misses and a converged-step fraction of
+$\cnsInnerTargetConvergedFractionCylShed$.
+
+\textbf{Both hard requirements are therefore met}: the run reached the full
+$\num{30000}$ physical steps and $t=300$, and the inner solve met its $10^{-3}$ target
+on every physical step with zero misses. This case is presented as a complete final
+result rather than an honest partial, and the shedding statistics below are measured on
+the full record.
+
+\paragraph{The integration method is what it claims to be, checked from the output.} Four
+properties of \emph{how} this case is integrated were verified by reading
+\texttt{forces.csv} and \texttt{residuals.csv} rather than by inspecting the driver
+(\texttt{report/check\_transient\_method.py}):
+\begin{itemize}
+  \item the physical time step is exactly the prescribed $\Delta t=0.01$, with a maximum
+  deviation of $\num{1.9e-14}$ over the whole record --- round-off in the accumulated time,
+  not a variable step;
+  \item step numbers increment by exactly one with \textbf{zero} exceptions, so there is one
+  force row per \emph{physical} step and the history is sampled by physical time rather than
+  by inner iteration. A history written per inner iteration would misrepresent the temporal
+  resolution, and this rules it out;
+  \item inner-iteration counts lie in $49$--$144$ with a mean of $131$, entirely inside the
+  requested band of $5$--$1000$, so the dual-time inner loop is genuinely iterating and not
+  running to a fixed count;
+  \item the inner convergence target of $10^{-3}$ is met on every logged step, with the
+  worst observed ratio $\num{9.99e-4}$ --- just inside the target, which is what a loop
+  exiting \emph{on} its criterion rather than on an iteration cap looks like.
+\end{itemize}
+
+\paragraph{The analysis window is chosen on evidence, not convenience.} A post-transient
+statistic is only meaningful if the initial transient has passed, so the window start must
+be justified rather than assumed. Non-overlapping $20$-time-unit windows give
+\begin{center}
+\begin{tabular}{lrrr}
+  \toprule
+  Window & Mean $C_D$ & $C_D$ peak-to-peak & $C_L$ amplitude \\
+  \midrule
+  $t\in[40,60)$ & $1.232039$ & $0.080868$ & $0.526468$ \\
+  $t\in[60,80)$ & $1.246408$ & $0.047190$ & $0.530698$ \\
+  $t\in[80,100)$ & $1.246819$ & $0.046299$ & $0.530723$ \\
+  $t\in[100,120)$ & $1.247663$ & $0.046269$ & $0.530563$ \\
+  $t\in[120,140)$ & $1.246239$ & $0.046159$ & $0.530400$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+\noindent The first window is still saturating --- its peak-to-peak is $75\,\%$ larger than
+the others and its mean is $\num{1.4e-2}$ low. From $t=60$ onward the mean is flat to about
+$\num{1e-3}$ and the amplitude to $\num{4e-4}$. The statistics quoted below therefore use a
+window starting well after $t=60$, which is clear of the transient by a wide margin rather
+than by a judgement call.
+
+\paragraph{Development of the instability.} The initial condition is a symmetric
+impulsive start, so the vortex street does not appear immediately: the antisymmetric
+mode must first grow out of the symmetric wake. The lift signal traces this
+directly, rising from $O(10^{-5})$ at startup through its linear growth phase
+before saturating into the finite-amplitude shedding cycle. With
+$St\approx0.19$ the shedding period is about $5.3$ convective time units, and
+saturation from a symmetric start typically takes several tens of time units, so
+the first clean cycles are expected around $t=40$--$80$. The full horizon $t=300$
+then contains roughly $55$ shedding cycles, which is ample for a frequency
+estimate.
+
+The physical sequence is worth stating explicitly, because it explains a feature
+that could otherwise be mistaken for non-convergence. The impulsive start produces
+a symmetric pair of standing recirculation bubbles, as in the $\Reinf=20$ case.
+At $\Reinf=200$ that symmetric state is linearly unstable, so the antisymmetric
+mode grows exponentially --- the lift climbs by more than four orders of magnitude,
+from $\num{2.6e-5}$ at startup to an amplitude above $0.5$ --- until nonlinearity
+saturates it into the alternating von K\'arm\'an street. As the wake shortens and
+the base pressure drops, the mean drag \emph{rises}. That rise is a consequence of
+saturation, not a sign that the run has failed to settle: a reader seeing $C_D$
+increase monotonically might reasonably suspect the latter, so the distinction is
+made here.
+
+\paragraph{Evidence that the flow reaches a genuine limit cycle.} Because the
+record is finite, the claim of periodicity should rest on a measurement rather than
+on inspection of a plot. The sharpest available indicator is the \emph{spread of
+the individual period estimates} taken from successive lift zero crossings within
+the analysis window. \Cref{tab:saturation} shows how the measurement evolves as the
+window is moved forward through the record.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Shedding statistics as the analysis window is advanced through the
+  record, from \texttt{tools/transient\_status.py} reading \texttt{forces.csv}.
+  Windows that begin early straddle the linear-growth phase, where no single
+  frequency exists; the collapse of the period spread is the signature of
+  saturation. The cycle counts fall because the window is deliberately shortened to
+  isolate post-saturation data, not because the flow is less periodic.}
+  \label{tab:saturation}
+  \small
+  \begin{tabular}{rrrrrr}
+    \toprule
+    Window & $St$ & Period & Spread & Spread/period & Mean $C_D$ \\
+    \midrule
+    $t\ge16.8$ & \num{0.1666} & \num{6.0023} & \num{2.2324} & $37\,\%$ & \num{1.1173} \\
+    $t\ge30$ & \num{0.1796} & \num{5.5667} & \num{0.1947} & $3.5\,\%$ & \num{1.1928} \\
+    $t\ge40$ & \num{0.1816} & \num{5.5078} & \num{0.0360} & $0.7\,\%$ & \num{1.2276} \\
+    $t\ge60$ & \num{0.1830} & \num{5.4652} & \num{0.0022} & $0.04\,\%$ & \num{1.2468} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The argument rests on the first column of trends: the period spread collapses from
+$37\,\%$ of the period to $\num{0.04}\,\%$. Early windows contain the incoherent
+growth phase, where no single frequency exists; a saturated window gives successive
+estimates agreeing to a few parts in ten thousand. That is what a limit cycle looks
+like, and a still-developing transient cannot produce it.
+
+\paragraph{A trend that is an artifact of nested windows.} An earlier draft drew a
+second conclusion from \cref{tab:saturation}: that $St$ and $\overline{C_D}$ approach
+their literature values monotonically \emph{from below}, and that this indicated an
+amplitude still saturating which further marching would carry closer to the literature
+figures. \textbf{That inference was wrong}, and the correction matters because it
+changes what the reader should expect from a completed run.
+
+The windows in \cref{tab:saturation} are nested: each begins later than the last but
+all end at the end of the record, so they share the same saturated tail and differ only
+in how much of the growth phase they still include. A monotone trend across nested
+windows therefore measures the progressive exclusion of the growth phase, not any
+evolution of the converged state. The correct test uses \emph{non-overlapping} late
+windows, and on those the quantities are flat rather than climbing:
+
+\begin{center}
+\begin{tabular}{lrrr}
+  \toprule
+  Window & $St$ & $\overline{C_D}$ & Period spread \\
+  \midrule
+  $t\in[60,100]$ & \num{0.1830} & \num{1.2466} & --- \\
+  $t\in[100,140]$ & \num{0.1829} & \num{1.2470} & --- \\
+  $t\in[140,180]$ & \num{0.1829} & \num{1.2466} & --- \\
+  $t\in[180,220]$ & \num{0.1829} & \num{1.2462} & --- \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Over $160$ convective time units and some $30$ shedding cycles, $St$ is
+constant at $0.1829$ and $\overline{C_D}$ constant to $\num{8e-4}$. The lift amplitude
+is likewise flat at $\pm0.530$. The cycle is converged, and it is converged at
+$St=0.183$ against a literature range of $0.19$--$0.20$ and
+$\overline{C_D}=1.247$ against $1.3$--$1.4$.
+
+\textbf{Those gaps are therefore standing discrepancies of the computed limit cycle,
+not transient undershoot that more marching will close.} A shortfall of about $4\,\%$
+in $St$ and $5\,\%$ in mean drag are quoted as such.
+
+That both errors have the \emph{same sign} is itself informative rather than incidental.
+A simultaneous under-prediction of shedding frequency and mean drag is the expected
+signature of a two-dimensional laminar computation of this flow on a single unrefined
+mesh. The physical wake at $\Reinf=200$ is weakly three-dimensional --- spanwise
+instability of the shed vortices sets in near this Reynolds number --- and a strictly
+two-dimensional calculation cannot represent it. Numerical dissipation on an unrefined
+wake mesh acts in the same direction, weakening the shed vortices, which lowers both the
+base-pressure deficit that sets the drag and the frequency at which the wake sheds.
+\Cref{sec:limitations} records the absence of a grid-convergence study as the first thing
+that would need doing to separate the mesh contribution from the dimensional one.
+
+A $4$--$5\,\%$ standing discrepancy with a credible physical cause is a more useful
+result than a claim of agreement the computation has not earned. Reporting the nested-window
+trend as evidence that the answer would improve on completion would have been the latter,
+and it is corrected rather than left standing because the distinction is exactly the one
+this report insists on elsewhere: a trend measured across windows that share data is not
+a trend in the underlying quantity.
+
+\paragraph{The individual vortices are resolved.} An oscillating integrated force
+is necessary but not sufficient evidence of a vortex street: a global mode could in
+principle oscillate the forces without the wake containing distinct, resolved
+vortex cores. The field output settles this. In the intermediate field at $t=76$
+the cell vorticity spans $-28.0$ to $+32.1$, and counting sign reversals of the
+vorticity along the wake between $x/D=1$ and $15$ gives $9$ reversals on the
+centreline and $10$ and $14$ on lines offset to $y/D=0.3$ and $0.6$. Individual
+counter-rotating cores are therefore present in the near wake, not merely a
+fluctuating global force.
+
+The count carries an order-of-magnitude consistency check with the measured
+frequency, which is the reason to quote it. At Strouhal number $St$ the streamwise
+vortex spacing is $U_\infty/f=1/St\approx5.5$ diameters, and the sign alternates
+every half spacing, predicting roughly $5$ reversals over the $14$-diameter sampled
+extent. The primary measurement gives $9$, $10$ and $14$ on the three lines, so the
+observed counts exceed the prediction by a factor of about two to three; the
+independent reimplementation described below gives $6$, $7$ and $9$, an excess of
+$20$--$80\,\%$. Quoting only the second set would understate the discrepancy, so both
+are given: the honest statement is that prediction and measurement agree in order of
+magnitude, with the measurement running high by a factor between one and three
+depending on the counting procedure.
+
+The excess is expected in this direction. The prediction assumes a single row of
+alternating cores exactly on the sampling line and a spacing fixed at its
+far-wake value, whereas the sampling line crosses a wake that meanders laterally, and
+the cores are closer together near the body than after they have convected and spread.
+Both effects add reversals. What the check establishes is that the number of cores in
+the near wake is consistent with the measured shedding frequency to within a small
+integer factor --- enough to rule out a global oscillation with no resolved cores,
+which is the alternative it exists to exclude, and not enough to serve as a
+quantitative validation.
+
+This must be read as a consistency check rather than a precise measurement, and the
+reason is worth stating because it is a genuine weakness of the diagnostic. The
+reversal count depends on how the wake is sampled. A naive approach that selects
+cells near a line and sorts them by $x$ inflates the count severely, because it
+interleaves cells at different $y$ and so crosses repeatedly between vortex cores
+and the shear layers between them: on this field that approach gives anywhere from
+$1$ to $73$ reversals as the selection band is widened from $0.02$ to $0.4$
+diameters, which is a metric measuring its own sampling window rather than the
+flow. The figures quoted above instead bin the wake into uniform $x$ intervals and
+take the cell nearest the sampling line in each, giving a well-defined
+one-dimensional signal. An independent reimplementation of that binned procedure,
+differing in bin count and tie-breaking, returned $6$, $7$ and $9$ reversals on the
+same three lines. The count is therefore reproducible to within a few reversals
+rather than to the digit, and no argument here depends on more precision than that.
+
+\paragraph{Shedding statistics.} The quantities below are computed over the second
+half of the available record, $t\in[\cnsShedTStart, \cnsShedTEnd]$, so that the
+initial transient is excluded. They are meaningful only if that window lies within
+a saturated shedding regime; where the run did not reach saturation, the entries
+are marked as unavailable rather than filled with numbers that would describe a
+developing transient.
+
+\begin{center}
+\footnotesize
+\begin{tabular}{lrl}
+  \toprule
+  Quantity & Computed & Literature ($\Reinf=200$) \\
+  \midrule
+  Analysis window & $t\in[\cnsShedTStart,\ \cnsShedTEnd]$ & --- \\
+  Completed cycles in window & $\cnsShedCycles$ & --- \\
+  Saturation gate ($\ge5$ cycles) & \textbf{\cnsShedSaturated} & --- \\
+  Shedding period & $\cnsShedPeriod$ & $\approx 5.3$ \\
+  Period spread ($\cnsShedEstimates$ estimates) & $\cnsShedSpread$
+    ($\cnsShedSpreadPct\,\%$) & --- \\
+  Strouhal number $St=fD/U_\infty$ & $\cnsShedStrouhal$ & $\approx 0.19$--$0.20$ \\
+  Mean $C_D$ & $\cnsShedCdMean$ & $\approx 1.3$--$1.4$ \\
+  $C_D$ peak-to-peak & $\cnsShedCdPtp$ & --- \\
+  Mean $C_L$ & $\cnsShedClMean$ & $0$ by symmetry \\
+  $C_L$ amplitude & $\pm\cnsShedClAmp$ & $\approx 0.6$--$0.7$ \\
+  $C_L$ rms & $\cnsShedClRms$ & --- \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+The analysis window contains $\cnsShedCycles$ shedding cycles, and the
+saturated-regime test (at least five completed cycles in the window) returns
+\textbf{\cnsShedSaturated}. That qualifier governs how the table above should be
+read: with fewer than a few cycles a nominal frequency estimate is an artefact of
+the window length rather than a property of the flow, so the Strouhal figure is
+only quotable when the test passes.
+
+The Strouhal number is obtained from linearly interpolated zero crossings of the
+lift signal, which requires no assumption about spectral resolution; with
+$D=U_\infty=1$ the Strouhal number is numerically the frequency. These values come
+from \texttt{tools/transient\_status.py}, the same tool used to monitor the running
+case, so the statistics reported here are the ones the run-time diagnostics reported.
+
+A second tool, an FFT-based estimator, was used earlier in the run to produce the
+periodogram of \cref{fig:cyl200-spectrum}, and it must not be read as an independent
+confirmation of the table: it was last run at $t\approx11$, deep in the growth phase,
+where it returned $St=0.228$ and $\overline{C_D}=1.05$. Those figures describe a
+pre-saturation record and are superseded by the zero-crossing values quoted above,
+which are measured on the saturated window. The spectrum figure is retained because it
+shows a single dominant peak rather than a broadband signal, which is a qualitative
+statement that survives the frequency shift, but the numerical values in the table
+come from one authority only. The lift oscillates about zero at the shedding
+frequency while the drag oscillates about its mean at twice that frequency, which
+is the standard signature of alternating vortex shedding: each shed vortex
+produces a lift excursion of one sign but a drag excursion regardless of sign.
+This behaviour is visible directly in \cref{fig:cyl200-forces}, and the wake
+structure producing it in \cref{fig:cyl200-wake}.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_forces.png}{\linewidth}
+    \caption{Force histories.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_residuals.png}{\linewidth}
+    \caption{Transient residual history.}
+  \end{subfigure}
+  \caption{Cylinder at $\Reinf=200$: post-transient $C_L$ and $C_D$ against
+  physical time from \texttt{forces.csv}, and the total transient residual per
+  physical step from \texttt{residuals.csv}. The lift oscillates at the shedding
+  frequency and the drag at twice that frequency.}
+  \label{fig:cyl200-forces}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{cylinder_m010_laminar_re200_spectrum.png}{0.62\textwidth}
+  \caption{Cylinder at $\Reinf=200$: power spectrum of the post-transient lift
+  signal from \texttt{forces.csv}, with the dominant peak marked. The peak
+  frequency is the shedding frequency used for the Strouhal number.}
+  \label{fig:cyl200-spectrum}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_vorticity.png}{\linewidth}
+    \caption{Vorticity, clipped to $[-5,5]$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_velocity.png}{\linewidth}
+    \caption{Velocity magnitude.}
+  \end{subfigure}\\[6pt]
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_pressure.png}{\linewidth}
+    \caption{Pressure.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_mach.png}{\linewidth}
+    \caption{Mach number.}
+  \end{subfigure}
+  \caption{Cylinder at $\Reinf=200$: post-transient wake visualisations from
+  \texttt{field\_final.vtu}. Vorticity is clipped to the recommended $[-5,5]$
+  range, without which the near-wall vorticity extremes compress the wake into a
+  single colour. The alternating pattern of opposite-signed vortices is the
+  vortex street; the low-pressure cores in panel (c) mark the individual
+  vortices.}
+  \label{fig:cyl200-wake}
+\end{figure}

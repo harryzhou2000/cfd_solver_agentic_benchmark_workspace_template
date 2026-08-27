@@ -1,0 +1,119 @@
+\section{Meshes, Boundary Tags, and Case Inputs}
+\label{sec:mesh}
+
+\subsection{CGNS input}
+
+Meshes are read through the CGNS mid-level library. The reader walks every base
+and every zone, accepts \texttt{Unstructured} zones only, and reads the
+coordinate arrays \texttt{CoordinateX}/\texttt{CoordinateY}. The two supplied meshes
+differ here, which is why the reader cannot assume either layout:
+\texttt{NACA0012\_H2.cgns} declares \texttt{PhysicalDimension} $=3$ and carries a
+nominally zero \texttt{CoordinateZ}, which is read and discarded, while
+\texttt{CylinderB1.cgns} declares \texttt{PhysicalDimension} $=2$ and has no $z$
+coordinate at all. Both declare \texttt{CellDimension} $=2$. The solver logs the
+declared dimensions for each mesh it opens. Element sections are scanned
+for the supported two-dimensional element types \texttt{TRI\_3} and
+\texttt{QUAD\_4}, which become cells, and \texttt{BAR\_2}, which becomes a
+boundary edge. No structured-grid or single-element-type assumption is made
+anywhere: the NACA mesh is genuinely mixed, with $\nacaTri$ triangles and
+$\nacaQuad$ quadrilaterals.
+
+Two CGNS subtleties required specific handling and are worth recording:
+
+\begin{itemize}
+  \item \textbf{Boundary conditions.} The \texttt{BC\_t} nodes store a
+  \texttt{PointRange} with \texttt{GridLocation=EdgeCenter}. These indices are
+  \emph{element} indices, not node indices, and they coincide with the
+  \texttt{ElementRange} of the identically named \texttt{BAR\_2} section. The
+  reader therefore maps each boundary condition to its edge section by range
+  containment, then tags the resulting mesh edges with the family name. Family
+  names are carried as strings and matched against the
+  \texttt{boundary\_conditions} dictionary of the case file, so
+  \texttt{bc-2}/\texttt{bc-4} and \texttt{WALL}/\texttt{FAR} are handled by the
+  same code path. An unmapped or unknown family is a fatal, clearly reported
+  error.
+  \item \textbf{Multi-zone connectivity.} The cylinder mesh has two zones. Its
+  interfaces are stored as \texttt{GridConnectivity\_t} of type
+  \texttt{Abutting1to1}, \emph{not} as \texttt{GridConnectivity1to1\_t}: a
+  \texttt{cg\_n1to1} query returns zero. The reader therefore uses
+  \texttt{cg\_nconns}/\texttt{cg\_conn\_info}/\texttt{cg\_conn\_read} and
+  interprets the \texttt{PointList}/\texttt{PointListDonor} pairs as one-based
+  zone-local \emph{vertex} indices (the SIDS default location). Paired nodes are
+  merged into single global nodes; the supplied interface point lists are
+  bit-identical, so the maximum merge distance is exactly zero. After merging,
+  the cylinder mesh has $\cylNodes$ nodes and $\cylCells$ cells.
+\end{itemize}
+
+\subsection{Face extraction and geometry}
+
+Cells are converted to an internal polygon representation and a face list is
+built by hashing each edge's sorted node pair. An edge seen by two cells becomes
+an interior face with a left and a right cell; an edge seen once becomes a
+boundary face carrying its family tag. This yields the cell--face adjacency
+graph used for reconstruction, for the gradient stencils and, in its dual form,
+for partitioning.
+
+Cell area and centroid come from the shoelace formula over the vertex loop,
+\begin{equation}
+  A=\frac12\sum_i \left(x_i y_{i+1}-x_{i+1}y_i\right),\qquad
+  \mathbf{x}_c=\frac{1}{6A}\sum_i (\mathbf{x}_i+\mathbf{x}_{i+1})
+  \left(x_i y_{i+1}-x_{i+1}y_i\right),
+  \label{eq:shoelace}
+\end{equation}
+which is exact for both triangles and quadrilaterals and needs no subdivision.
+Cell node ordering is \emph{normalised} rather than assumed: any cell whose signed
+area comes out negative has its node list reversed, and the number of reorientations
+is logged. Only a zero or degenerate area is fatal, since that cannot be repaired by
+reordering. For both supplied meshes the reorientation count is zero --- every cell
+is already stored counter-clockwise --- so the normalisation is a no-op here, but the
+reader does not depend on that being true. In two dimensions a
+face is a straight segment from $\mathbf{x}_a$ to $\mathbf{x}_b$, so its length
+$\Delta s$ (the two-dimensional analogue of face area) and unit normal are
+\begin{equation}
+  \Delta s=\|\mathbf{x}_b-\mathbf{x}_a\|,\qquad
+  \mathbf{n}=\frac{1}{\Delta s}\left(y_b-y_a,\ -(x_b-x_a)\right),
+\end{equation}
+with the face centroid at the segment midpoint. Each face normal is then
+oriented outward from its left cell by testing the sign of
+$\mathbf{n}\cdot(\mathbf{x}_f-\mathbf{x}_{c,\mathrm{left}})$ and flipping when
+required. On a boundary face the left cell is by construction the adjacent fluid
+cell, so \textbf{the boundary normal points out of the fluid and into the body}.
+That convention matters for the force integration in \cref{sec:forces} and is
+the single easiest sign error to make in a solver of this kind.
+
+\subsection{Mesh and case summary}
+
+\Cref{tab:meshes} summarises both meshes. The wall-boundary counts are what the
+surface output and force integration act on: $\nacaWallEdges$ edges around the
+airfoil and $\cylWallEdges$ around the cylinder.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Supplied meshes as read and preprocessed by the solver. The cylinder
+  figures are after the two zones have been merged across their
+  \texttt{Abutting1to1} interface.}
+  \label{tab:meshes}
+  \small
+  \begin{tabular}{lrr}
+    \toprule
+    Quantity & NACA0012\_H2 & CylinderB1 \\
+    \midrule
+    CGNS zones & 1 & 2 (merged) \\
+    Nodes & $\nacaNodes$ & $\cylNodes$ \\
+    Cells & $\nacaCells$ & $\cylCells$ \\
+    \quad triangles & $\nacaTri$ & mixed \\
+    \quad quadrilaterals & $\nacaQuad$ & mixed \\
+    Faces & $\nacaFaces$ & $\cylFaces$ \\
+    Boundary faces & $\nacaBoundaryFaces$ & $\cylBoundaryFaces$ \\
+    Wall-family edges & $\nacaWallEdges$ (\texttt{bc-4}) & $\cylWallEdges$ (\texttt{WALL}) \\
+    Farfield edges & $\nacaFarEdges$ (\texttt{bc-2}) & $\cylFarEdges$ (\texttt{FAR}) \\
+    Farfield extent & $\approx 80\,c$ & $200\,D$ \\
+    Body extent & $x\in[0,1.005]$, $t=0.120$ & $r=0.5$ exactly \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+A note on the airfoil geometry: the \texttt{bc-4} family spans $x\in[0,1.005]$
+with a maximum thickness of $0.120$, consistent with a NACA0012 section of unit
+chord. Its identification as the body, rather than \texttt{bc-2} at radius
+$\approx 80$, comes from the case-file mapping and not from geometry.

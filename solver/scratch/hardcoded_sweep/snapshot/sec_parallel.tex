@@ -1,0 +1,261 @@
+\section{Parallel Validation}
+\label{sec:parallel}
+
+A partitioned second-order solver must give the same answer regardless of how the
+mesh is cut. The rank-count study covers one NACA case and one cylinder case at
+$np=1,2,4,8$, so that both meshes and both wall types are exercised, and
+\cref{tab:scaling} reports the resulting forces, edge cuts, and timings.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Rank-count study on one cylinder and one airfoil case. Every run uses
+  an identical fixed budget of 1500 pseudo-time steps, so the comparison is
+  like-for-like, with $C_D$ from \texttt{forces.csv} and the edge cut from
+  \texttt{metadata.json}. The deviation column is relative to that case's own
+  $np=1$ result.}
+  \label{tab:scaling}
+  \small
+  \input{tab_scaling}
+  \\[2pt]
+  \footnotesize $^\ddagger$Wall times are as recorded by the solver itself in each run's
+  \texttt{run\_status.json}, and are therefore solve-only: they exclude process startup and
+  MPI teardown, which are not properties of the solver. An earlier version of this study ran
+  concurrently with the
+  $\Reinf=200$ transient and its timings were contended; the study was re-run with the
+  machine otherwise idle, so these are clean measurements. The force values were unaffected
+  by the contention either way, since they do not depend on elapsed time.
+\end{table}
+
+\subsection{Consistency across rank counts}
+
+The study covers \texttt{cylinder\_m010\_laminar\_re20} and
+\texttt{naca0012\_m015\_laminar\_re5000}, exercising both meshes and both wall
+types, at $np=1,2,4,8$. Stated conservatively, the force coefficients agree to
+\textbf{within $\num{5e-4}$ relative} across an eight-fold change in rank count,
+the worst case being $\num{4.7e-4}$ for the cylinder at $np=8$. Per case: the
+airfoil agrees to five significant figures with a maximum deviation of
+$\num{1.0e-4}$ while its edge cut rises from $0$ to $439$ cut faces, and the
+cylinder agrees to four significant figures, from $2.12601$ at $np=1$ to
+$2.12701$ at $np=8$, with the edge cut rising through $0, 97, 282, 471$. Quoting a
+single figure of five significant digits for both cases would overstate the
+cylinder result.
+
+Agreement at this level is the expected and correct result. Since a reader might
+reasonably expect bitwise reproducibility, it is worth being explicit that
+\textbf{bit-identical results across rank counts are not achievable for this
+algorithm, and their absence is not a defect}.
+
+Three mechanisms could make results rank-dependent, and two of them are
+eliminated by construction:
+
+\begin{itemize}
+  \item \textbf{Reconstruction across a cut.} A partition face must reconstruct
+  identically from both sides. This holds because the halo exchange carries
+  gradients and limiter factors as well as the state (\cref{sec:mpi}), so
+  \cref{eq:recon} sees identical inputs on both ranks. Without the gradient and
+  limiter exchange, the scheme would silently degrade to first order at every cut
+  and the drag would change with rank count at the percent level.
+  \item \textbf{Force double-counting.} A wall face on a partition boundary must
+  be integrated exactly once. This is enforced by integrating only faces whose
+  adjacent cell is owned (\cref{sec:forces}).
+  \item \textbf{Floating-point summation order.} This one is irreducible. The
+  global residual and force reductions sum contributions in an order that depends
+  on the partition, and floating-point addition is not associative, so results
+  differ in the last few digits. Those differences then feed back through the
+  nonlinear iteration, which is why agreement is to five figures rather than to
+  machine precision.
+\end{itemize}
+
+To that last point must be added the sweep ordering, which is the larger of the
+two effects here. As described in \cref{sec:lusgs}, LU-SGS is a block
+Gauss--Seidel-type smoother: its forward and backward sweeps run over local cell
+index, so the order in which cells are updated is a property of the partition. A
+different partition is a different --- equally valid --- smoother, reaching the same
+fixed point along a different path. At a fixed budget of 1500 steps the iterates
+have therefore not travelled identical trajectories, and small differences remain.
+This is inherent to Gauss--Seidel-type smoothers in parallel and is the reason the
+cylinder case, whose drag is two orders of magnitude larger than the airfoil's,
+shows a slightly larger absolute spread.
+
+What the study does establish is the property that matters: the halo exchange
+supplies correct off-rank data, the global reductions are correct, and no
+rank-count-dependent error of physical significance exists. A genuine defect in
+either would produce order-one differences, not differences in the fifth digit ---
+and the benchmark explicitly treats order-one rank dependence as disqualifying.
+
+The remaining rank dependence is in the \emph{path} to the solution rather than
+the solution itself. As noted in \cref{sec:lusgs}, LU-SGS is exactly Gauss--Seidel
+within a rank and block-Jacobi across ranks, because off-rank increments are
+frozen between sweeps. Increasing the rank count therefore weakens the implicit
+coupling slightly and can change the iteration count needed to reach a given
+residual level, without changing the converged answer. This is a well-known and
+accepted property of LU-SGS in parallel, and it is the reason the per-step
+inner-iteration counts recorded in each run's \texttt{residuals.csv} need not match
+across rank counts even though the converged forces do.
+
+\subsection{Load balance and communication}
+
+\Cref{tab:partition} gives the per-rank decomposition for a representative
+production run, with a load-balance ratio of $\cnsPartitionBalance$. METIS
+balances the cell count well, but two caveats apply to interpreting that number as
+time-to-solution balance:
+
+\begin{itemize}
+  \item Boundary faces are not distributed in proportion to cells. A rank holding
+  part of the airfoil surface does more work per cell than a rank holding only
+  farfield cells, because wall faces carry the extra boundary-state and
+  viscous-correction work of \cref{eq:wallgrad}. The
+  \texttt{num\_boundary\_faces} column of \cref{tab:partition} shows this spread
+  directly.
+  \item Neighbour counts vary between ranks, so the halo-exchange cost is not
+  uniform. The interior ranks of the partition have the most neighbours and thus
+  the largest message counts per exchange.
+\end{itemize}
+
+Communication volume per exchange is small: each neighbour pair moves the cells
+listed in the send/receive columns of \cref{tab:partition}, times 4 components for
+the state or limiter and 8 for the gradients. Because the exchanged surface scales
+as the partition perimeter while the work scales as the partition area, the
+communication fraction grows with rank count on a fixed mesh. On meshes of this
+size ($\num{20816}$ and $\num{10185}$ cells) that trend is present but is not what
+limits the runs reported here: as \cref{sec:quota} shows, the binding constraint is
+the 4-CPU container quota, and the $np=8$ regression in \cref{tab:rankchoice} is
+oversubscription rather than communication cost.
+
+\subsection{The execution environment constrains the parallel study}
+\label{sec:quota}
+
+Any parallel measurement in this report must be read against one environmental
+fact, without which the numbers are unintelligible: \textbf{the container is
+limited to 4 CPUs by a cgroup quota}. The control file
+\texttt{/sys/fs/cgroup/cpu.max} reads \texttt{400000 100000}, that is a 400\,\%
+share of one CPU period, and the limit applies to the \emph{total} CPU consumed by
+all processes in the container simultaneously.
+
+This is actively misleading to detect, which is why it is worth recording. The
+usual indicators all suggest a large machine: \texttt{nproc} reports 64, and
+\texttt{lscpu} shows 32 physical cores across two sockets with two threads each.
+Nothing in that output hints at the cap. It was confirmed by summing the CPU
+percentages of all solver processes during a run, which totalled $400.4\,\%$ ---
+exactly the quota.
+
+The consequence is that a run at any rank count above four does not use more
+hardware; it merely divides the same four CPUs among more processes, adding
+communication and synchronisation for nothing. Two earlier sets of scaling timings
+taken before this was understood were measuring contention against the quota
+rather than the solver, and have been discarded rather than reported. They are
+mentioned here only because discarding them is itself part of an honest account of
+the measurement process.
+
+\subsection{Rank-count scaling under the 4-CPU quota}
+\label{sec:rankchoice}
+
+With the quota understood, the scaling measurement becomes meaningful. Each rank
+count below was timed on the $\Reinf=200$ transient over 30 physical steps, run
+one job at a time with nothing else executing, so the full quota was available to
+the job being measured.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Wall time for 30 physical steps of the $\Reinf=200$ transient, one job
+  at a time with the full 4-CPU quota available. Speedup is relative to $np=1$.}
+  \label{tab:rankchoice}
+  \small
+  \begin{tabular}{rrrl}
+    \toprule
+    Ranks & Wall time (s) & Speedup & Regime \\
+    \midrule
+    1 & 50.7 & 1.00 & serial baseline \\
+    2 & 18.3 & 2.77 & superlinear (cache) \\
+    4 & 9.8 & 5.17 & optimum, matches the quota \\
+    8 & 12.2 & 4.16 & quota oversubscribed \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Three features of \cref{tab:rankchoice} are worth explaining, because each says
+something different about the solver.
+
+The \textbf{optimum at $np=4$} coincides exactly with the CPU allowance, which is
+the expected result and confirms that the quota, not the mesh size or the
+communication pattern, sets the useful rank count here.
+
+The \textbf{speedup of 5.17 on 4 CPUs is superlinear}, and the jump from $np=1$ to
+$np=2$ is $2.77$ rather than $2$. This is a working-set effect rather than an
+anomaly: a single rank sweeps the entire $\cylCells$-cell mesh, whose state,
+gradients and limiter arrays together exceed cache, while each rank of a
+two-way partition works on roughly half the data and reuses it far more
+effectively across the gradient, limiter and flux passes of one residual
+evaluation. The LU-SGS sweeps, which touch the same arrays repeatedly, amplify the
+effect.
+
+The \textbf{regression at $np=8$} is oversubscription of the quota: eight
+processes share four CPUs, so each is descheduled roughly half the time while
+still paying the full halo-exchange and synchronisation cost. It is not evidence
+of a communication bottleneck in the solver, and it would be wrong to read it as
+such.
+
+\paragraph{The same shape appears independently on two other configurations.} The
+rank-count study of \cref{tab:scaling} was re-run with the machine otherwise idle, and its
+timings reproduce this curve on a different case, a different mesh and a different physics
+mode from \cref{tab:rankchoice}: monotone speedup through $np=4$ followed by regression at
+$np=8$, with speedups at the optimum of $3.9\times$ for the cylinder at $\Reinf=20$ and
+$4.4\times$ for the $\Reinf=5000$ airfoil. Three independent measurements --- a transient
+and two steady cases, on both meshes and both wall types --- put the optimum at $np=4$ and
+show the same $np=8$ regression. That the optimum tracks the CPU allowance rather than the
+mesh size or the physics is the strongest available evidence that the quota is what sets
+it.
+
+All production cases therefore run at $np=4$, sequentially, one case at a time.
+The benchmark also asks for an $np=8$ demonstration, which is included in the
+rank-count study of \cref{tab:scaling}; under this quota $np=8$ is a correctness
+and consistency demonstration rather than a performance one.
+
+\subsection{Process binding: a secondary effect}
+\label{sec:binding}
+
+A second scheduling problem was found on the way to the quota finding. It is real
+and worth recording, but it is secondary: fixing it helped, yet no amount of
+binding can overcome a 4-CPU cap.
+
+OpenMPI's default binding policy places every independent \texttt{mpirun} job on
+the same cores, starting from the first NUMA node. Concurrent jobs therefore pile
+onto one node's CPUs while the remaining CPUs appear idle; at one point 28
+processes were sharing a single NUMA node's CPUs at roughly $7\,\%$ of a core
+each. This produces no error message, only uniformly poor performance, which is
+what made it easy to misattribute to the solver. The fix was to pin each job to a
+disjoint set of physical cores with \texttt{taskset}. Notably
+\texttt{mpirun -{}-cpu-set} was not usable: it fails silently with exit status 1
+for CPU ids outside the first NUMA node, even for a trivial command such as
+\texttt{hostname}.
+
+The combination of these two effects explains the earlier unexplained slowdowns:
+attempts at $np=16$ and $np=24$ were four- to six-fold oversubscribed against the
+quota while also competing for a single NUMA node.
+
+\section{Visualization and Plot Style Requirements}
+\label{sec:visualization}
+
+All figures are generated by a single reproducible pipeline
+(\texttt{tools/make\_figures.py}) reading only submitted output files, and every
+figure is recorded in \texttt{report/figure\_manifest.csv} together with the case,
+figure type, plotted variable, source file, and caption. The manifest is what makes
+each figure traceable to its data.
+
+The plotting conventions are uniform: line plots use readable font sizes,
+consistent line widths and a colour-blind-safe palette, labelled and
+nondimensionalised axes, legends, and a light grid; residual histories use a
+logarithmic ordinate. Field plots are filled contour renderings on the actual
+unstructured triangulation --- quadrilaterals are split for rendering only, never
+for the solution --- rather than scatter point clouds, and each carries a colourbar
+labelled with its variable name. Near-body views are used for the airfoil and
+cylinder so the boundary layer, shocks and wake are visible at a useful scale, with
+separate whole-domain views where the farfield behaviour matters.
+
+Two conventions are worth stating explicitly because they are contract
+requirements. First, file names match plotted variables exactly: a file named
+\texttt{..\_mach.png} plots Mach number and \texttt{..\_pressure.png} plots
+pressure, and both are produced for every case. Second, vorticity plots use the
+recommended symmetric clipped range $[-5,5]$; the near-wall vorticity of a no-slip
+cylinder is more than an order of magnitude larger than the wake vorticity, so
+automatic scaling renders the vortex street invisible.

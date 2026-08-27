@@ -1,0 +1,83 @@
+\documentclass[11pt]{article}
+\input{preamble}
+\input{numbers}
+\input{numbers_auto}
+
+\title{2-D Unstructured Compressible Navier--Stokes Solver\\Benchmark Report}
+\author{\texttt{cns2d} --- submitted solver}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report documents \texttt{cns2d}, an original cell-centred finite-volume
+solver for the two-dimensional compressible Navier--Stokes equations on mixed
+unstructured meshes, written in C++17 with MPI and METIS. The spatial
+discretization is second order through piecewise-linear inverse-distance
+least-squares reconstruction of the primitive variables with a Venkatakrishnan
+limiter; the inviscid flux is a Roe flux with a Harten--Hyman entropy fix
+extended to the linear waves, with HLLC and Rusanov also implemented and HLLC
+serving as a positivity fallback. Viscous terms use the Newtonian stress tensor
+and Fourier heat flux built from the same least-squares gradients. Steady cases
+are advanced by an implicit pseudo-time march with local time stepping and a
+matrix-free LU-SGS inner solve; the vortex-shedding case uses a true dual-time
+BDF2 scheme with an outer physical-time loop and frozen history levels. The mesh
+is partitioned once with METIS $k$-way on the cell dual graph, and
+iteration-time communication is strictly neighbour-scoped point-to-point halo
+exchange: no rank holds the full mesh or the full conservative state during
+iterations.
+
+Verification is quantitative: face-closure error $\vFaceClosure$, volume closure
+$\vVolumeClosure$, cell area against the boundary line integral
+$\vAreaLineIntegral$, exactness of the least-squares gradient on a linear field
+$\vLsqExactness$, a discrete conservation defect of $\vConservation$, and
+agreement of the analytic Jacobian-vector product with central finite differences
+to $\vJacobianFd$ over $\vJacobianStates$ random states. The slip-wall flux carries
+exactly zero mass and energy flux for any interior state, with the normal momentum
+equal to the wall pressure in the limit of vanishing wall-normal velocity
+(\cref{eq:slipflux}); force coefficients agree to within $\num{5e-4}$ relative across
+$np=1,2,4,8$.
+
+All eight required cases were run to completion with the supplied production controls,
+and all eight are reported by the solver as \texttt{converged} or
+\texttt{statistically\_periodic}. \Cref{sec:results} gives each with the status the
+solver itself recorded; no case is relabelled, and coefficients are quoted only to the
+precision the convergence evidence supports.
+
+Two of the eight reach a stable plateau slightly short of their requested residual
+reduction --- $3.92$ of $4.00$ orders for the transonic inviscid case and $2.90$ of $3.00$
+for the supersonic inviscid case --- and this is stated wherever those cases are quoted
+rather than left to be discovered. In both the residual \emph{rises} once the prescribed
+CFL ramp reaches its cap, so the target is unreachable at the supplied controls; the
+best state by residual norm is what is reported and written, and the forces are stationary
+there. \Cref{sec:naca} gives the histories.
+
+Several defects found during preparation of this report are documented rather than
+hidden, and the convergence criterion in particular was corrected five times as
+successive cases exposed distinct ways for a naive test to be fooled
+(\cref{sec:stationarity}). A latent sign error in the unused HLLC star state is now
+covered by a dedicated regression test (\cref{sec:hllcbug}), as is the slip-wall flux
+property above, which an adversarial review found to have been asserted without ever
+being tested. Added dissipation on the linear waves, introduced to suppress a
+stagnation-point checkerboard mode, is disclosed and quantified in \cref{sec:fluxes}
+together with a controlled experiment showing it is \emph{not} needed for these cases.
+\end{abstract}
+
+\tableofcontents
+\clearpage
+
+\input{sec_intro}
+\input{sec_equations}
+\input{sec_mesh}
+\input{sec_spatial}
+\input{sec_bc}
+\input{sec_implicit}
+\input{sec_mpi}
+\input{sec_verification}
+\input{sec_sensitivity}
+\input{sec_results}
+\input{sec_parallel}
+\input{sec_limitations}
+
+\end{document}

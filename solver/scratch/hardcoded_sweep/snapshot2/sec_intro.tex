@@ -1,0 +1,57 @@
+\section{Introduction}
+\label{sec:intro}
+
+The benchmark asks for an original, parallel, second-order-accurate
+finite-volume solver for the compressible Navier--Stokes equations on the
+supplied unstructured CGNS meshes, and for eight cases to be run to
+convergence with contract-compliant output. The eight required cases are
+listed in \cref{tab:cases}. They span a deliberately wide range: an
+essentially incompressible inviscid flow whose exact drag is zero, a transonic
+case with a shock on the body, a supersonic case with a detached bow shock,
+three laminar airfoil cases at $\Reinf=5000$ that add a boundary layer and
+skin friction, a steady separated cylinder wake at $\Reinf=20$, and an
+unsteady von K\'arm\'an vortex street at $\Reinf=200$ that must be integrated
+in physical time.
+
+This is intended as a technical report rather than a run log. Each numerical
+choice is stated as it is implemented in the source, and \cref{sec:results}
+connects those choices to what the runs actually produced --- including where
+the results fall short of the requested targets. Section numbering follows the
+required report outline.
+
+\begin{table}[htbp]
+  \centering
+  \caption{The eight required benchmark cases with the boundary-family
+  mapping read from each case file. Family names differ between the two meshes
+  and are never hard-coded in the solver.}
+  \label{tab:cases}
+  \small
+  % Tightened column separation and reduced font: the case ids and BC mappings are
+  % long, and this keeps the table inside the text block.
+  \setlength{\tabcolsep}{3.5pt}
+  \footnotesize
+  \begin{tabular}{llllr}
+    % Tightened column separation: the case ids and BC mappings are long, and this
+    % keeps the table inside the text block without shrinking the font further.
+    \toprule
+    Case id & Mesh & Physics & BC mapping & Max steps \\
+    \midrule
+    \texttt{naca0012\_m015\_inviscid} & NACA0012\_H2 & inviscid, $\Minf=0.15$
+      & \texttt{bc-2}$\to$far, \texttt{bc-4}$\to$slip & \num{20000} \\
+    \texttt{naca0012\_m080\_inviscid} & NACA0012\_H2 & inviscid, $\Minf=0.80$
+      & \texttt{bc-2}$\to$far, \texttt{bc-4}$\to$slip & \num{30000} \\
+    \texttt{naca0012\_m200\_inviscid} & NACA0012\_H2 & inviscid, $\Minf=2.0$
+      & \texttt{bc-2}$\to$far, \texttt{bc-4}$\to$slip & \num{40000} \\
+    \texttt{naca0012\_m015\_laminar\_re5000} & NACA0012\_H2 & laminar, $\Minf=0.15$
+      & \texttt{bc-4}$\to$no-slip & \num{40000} \\
+    \texttt{naca0012\_m080\_laminar\_re5000} & NACA0012\_H2 & laminar, $\Minf=0.80$
+      & \texttt{bc-4}$\to$no-slip & \num{40000} \\
+    \texttt{naca0012\_m200\_laminar\_re5000} & NACA0012\_H2 & laminar, $\Minf=2.0$
+      & \texttt{bc-4}$\to$no-slip & \num{50000} \\
+    \texttt{cylinder\_m010\_laminar\_re20} & CylinderB1 & laminar, $\Reinf=20$
+      & \texttt{WALL}$\to$no-slip, \texttt{FAR}$\to$far & \num{30000} \\
+    \texttt{cylinder\_m010\_laminar\_re200} & CylinderB1 & laminar, $\Reinf=200$
+      & \texttt{WALL}$\to$no-slip, \texttt{FAR}$\to$far & \num{30000} \\
+    \bottomrule
+  \end{tabular}
+\end{table}

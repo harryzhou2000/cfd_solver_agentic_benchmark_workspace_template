@@ -1,0 +1,272 @@
+\section{Spatial Discretization}
+\label{sec:spatial}
+
+Integrating \cref{eq:ns} over a fixed control volume $\Omega_i$ and applying the
+divergence theorem gives the cell-centred semi-discrete form
+\begin{equation}
+  V_i\frac{\mathrm{d}\overline{\mathbf{U}}_i}{\mathrm{d}t}
+  = \mathbf{R}_i
+  = -\sum_{f\in\partial\Omega_i}
+     \left[\mathbf{H}^i(\mathbf{W}^-_f,\mathbf{W}^+_f,\mathbf{n}_f)
+          -\mathbf{H}^v(\mathbf{W}_f,\nabla\mathbf{W}_f,\mathbf{n}_f)\right]\Delta s_f,
+  \label{eq:fv}
+\end{equation}
+where $\overline{\mathbf{U}}_i$ is the cell average, $V_i$ the cell area,
+$\mathbf{H}^i$ the numerical inviscid normal flux, $\mathbf{H}^v$ the viscous
+normal flux of \cref{eq:viscflux}, and $\mathbf{n}_f$ the outward unit normal of
+face $f$.
+
+The implementation stores each face once and visits it once. Because the stored
+normal is outward from the left cell, the accumulated flux is subtracted from the
+left cell and added to the right cell:
+\begin{equation}
+  \mathbf{R}_{\mathrm{left}(f)} \mathrel{-}= \mathbf{H}_f\,\Delta s_f,
+  \qquad
+  \mathbf{R}_{\mathrm{right}(f)} \mathrel{+}= \mathbf{H}_f\,\Delta s_f .
+  \label{eq:scatter}
+\end{equation}
+A single face therefore contributes equal and opposite amounts to its two
+neighbours, which makes the discretization conservative by construction: interior
+contributions telescope exactly and only boundary fluxes can change the global
+integral. This is verified to $\vConservation$ in \cref{sec:verification}.
+
+On a boundary face there is no right cell. The left state is reconstructed to the
+face as usual and an appropriate exterior state is synthesised by the boundary
+condition (\cref{sec:bc}); the same numerical flux function is then applied. This
+keeps boundary and interior faces on one code path, so no boundary case can drift
+out of sync with the interior scheme.
+
+A face is processed if either of its cells is owned by the current rank. Faces on
+a partition boundary are thus evaluated redundantly on both ranks, which is
+cheaper than communicating fluxes. Because both ranks execute the same operations in
+the same order on the same halo-exchanged inputs, they compute bit-identical values for
+that face. This is a statement about a single face evaluation only: the \emph{global}
+result still depends on rank count through the summation order of the reductions and
+the partition-dependent LU-SGS sweep order, as \cref{sec:mpi} sets out.
+
+\subsection{Second-Order Reconstruction}
+\label{sec:reconstruction}
+
+Second-order accuracy comes from a piecewise-linear reconstruction of the
+\emph{primitive} variables $\mathbf{W}=(\rho,u,v,p)$. Primitives are chosen so
+that the positivity of density and pressure can be enforced directly on the
+reconstructed face state, which is not possible when limiting conservative
+variables.
+
+For each cell the gradient is an inverse-distance-weighted least-squares fit over
+the face neighbours. The gradient $\mathbf{g}_i$ of a variable $\phi$ minimises
+\begin{equation}
+  J(\mathbf{g}_i)=\sum_{j\in\mathcal{N}(i)} w_j^2
+  \left[\mathbf{g}_i\!\cdot\!(\mathbf{x}_j-\mathbf{x}_i)-(\phi_j-\phi_i)\right]^2,
+  \qquad w_j=\frac{1}{\|\mathbf{x}_j-\mathbf{x}_i\|},
+  \label{eq:lsq}
+\end{equation}
+whose normal equations are the $2\times2$ system
+\begin{equation}
+  \underbrace{\begin{bmatrix}
+    \sum_j w_j^2\Delta x_j^2 & \sum_j w_j^2\Delta x_j\Delta y_j\\
+    \sum_j w_j^2\Delta x_j\Delta y_j & \sum_j w_j^2\Delta y_j^2
+  \end{bmatrix}}_{\mathbf{A}_i}\mathbf{g}_i
+  =\sum_j w_j^2 (\phi_j-\phi_i)
+  \begin{bmatrix}\Delta x_j\\ \Delta y_j\end{bmatrix} .
+  \label{eq:normaleq}
+\end{equation}
+Since $\mathbf{A}_i$ depends only on geometry, it is inverted once during
+preprocessing and folded into a per-neighbour weight vector
+$\mathbf{W}_j=w_j^2\,\mathbf{A}_i^{-1}\Delta\mathbf{x}_j$, so that at run time
+the gradient of every variable is the single sum
+$\mathbf{g}_i=\sum_j \mathbf{W}_j(\phi_j-\phi_i)$ --- one dot product per
+neighbour per variable, with no linear algebra in the hot loop. A nearly
+rank-deficient stencil (possible when a cell's neighbours are almost collinear)
+is detected by comparing $\det\mathbf{A}_i$ against
+$10^{-12}\,\mathrm{tr}(\mathbf{A}_i)^2$ and regularised by a small diagonal
+shift, rather than being allowed to produce an unbounded gradient.
+
+Boundary faces contribute a stencil entry located at the face centroid and
+carrying the \emph{physical} boundary state (\cref{sec:bc}), not the mirrored
+ghost state. This distinction is essential: using a mirrored state here would
+double every wall-normal gradient and corrupt the skin friction in the first cell
+off the wall.
+
+The face states are then
+\begin{equation}
+  \mathbf{W}^{\pm}_f=\mathbf{W}_{i}+\Phi_i\odot
+  \left[\mathbf{g}_i\!\cdot\!(\mathbf{x}_f-\mathbf{x}_i)\right],
+  \label{eq:recon}
+\end{equation}
+with $\Phi_i$ the limiter of \cref{sec:limiter} and $\odot$ a component-wise
+product. Second-order reconstruction is \textbf{active in every production run
+reported here}; the only first-order fallback is the positivity mechanism below,
+whose activation count is recorded per run and reported in
+\texttt{metadata.json}.
+
+\subsection{Limiter and Positivity Control}
+\label{sec:limiter}
+
+Both a Barth--Jespersen and a Venkatakrishnan limiter are implemented; the
+production runs use Venkatakrishnan. For each cell and variable the neighbour
+envelope $\phi^{\min}_i,\phi^{\max}_i$ is gathered over the face neighbours,
+including boundary-face states so that a wall-adjacent cell is not falsely
+flagged as an extremum. With $\Delta_f$ the unlimited increment towards face $f$
+from \cref{eq:recon} and
+$y=(\phi^{\max}_i-\phi_i)/\Delta_f$ for $\Delta_f>0$ (or
+$y=(\phi^{\min}_i-\phi_i)/\Delta_f$ for $\Delta_f<0$), the two limiters are
+\begin{equation}
+  \Phi^{\mathrm{BJ}}=\min\left(1,\,y\right),
+  \qquad
+  \Phi^{\mathrm{V}}=\frac{y^2+2y+\epsilon^2/\Delta_f^2}
+                         {y^2+y+2+\epsilon^2/\Delta_f^2},
+  \label{eq:limiter}
+\end{equation}
+and the cell limiter is the minimum over its faces, clipped to $[0,1]$. The
+Venkatakrishnan threshold is $\epsilon^2=(K h_i)^3$ with
+$h_i=\sqrt{V_i}$ the cell length scale and $K$ a case-settable constant. This
+threshold is what switches the limiter off in smooth regions: without it,
+limiter chattering on a stretched mesh stalls the steady residual, which is
+precisely the mechanism discussed in \cref{sec:stationarity}.
+
+Positivity is protected in two places. At the reconstruction stage, if the
+limited face state still has $\rho\le0$ or $p\le0$, the whole increment is
+halved repeatedly (up to eight times) and finally dropped to the first-order
+cell average, which is always admissible; each such event is counted. After each
+implicit update a final safety net floors density and pressure at
+$10^{-8}$ of their freestream values and replaces any non-finite state by the
+freestream, again counting every occurrence. Because these counts are written to
+the run metadata, a run cannot quietly rely on clipping to look healthy.
+
+\subsection{Inviscid and Viscous Fluxes}
+\label{sec:fluxes}
+
+Three inviscid numerical fluxes are implemented --- Roe with an entropy fix,
+HLLC, and Rusanov/local Lax--Friedrichs --- selectable per run. Production runs
+use \textbf{Roe}. With Roe averages
+$\hat{\rho}=\sqrt{\rho_L\rho_R}$ and
+$\hat{\phi}=(\sqrt{\rho_L}\phi_L+\sqrt{\rho_R}\phi_R)/(\sqrt{\rho_L}+\sqrt{\rho_R})$
+for $\phi\in\{u,v,H\}$, and $\hat{a}^2=(\gamma-1)(\hat{H}-\tfrac12|\hat{\mathbf{u}}|^2)$,
+the flux is
+\begin{equation}
+  \mathbf{H}^{\mathrm{Roe}}=\tfrac12\left(\mathbf{F}_L+\mathbf{F}_R\right)
+  -\tfrac12\sum_{k}\tilde{\lambda}_k\alpha_k\mathbf{r}_k ,
+  \label{eq:roe}
+\end{equation}
+with wave speeds $\lambda_{1,2,3}=\hat{u}_n-\hat{a},\ \hat{u}_n,\ \hat{u}_n+\hat{a}$,
+acoustic amplitudes
+$\alpha_{1,3}=(\Delta p\mp\hat{\rho}\hat{a}\Delta u_n)/(2\hat{a}^2)$, entropy
+amplitude $\alpha_2=\Delta\rho-\Delta p/\hat{a}^2$, and a separately assembled
+shear contribution proportional to $\hat{\rho}\,\Delta u_t$.
+
+\paragraph{Entropy fix.} The eigenvalues are smoothed by the Harten function
+\begin{equation}
+  \tilde{\lambda}(\lambda,\delta)=
+  \begin{cases}
+    |\lambda|, & |\lambda|\ge\delta,\\[2pt]
+    \dfrac{\lambda^2+\delta^2}{2\delta}, & |\lambda|<\delta,
+  \end{cases}
+  \label{eq:harten}
+\end{equation}
+applied to \emph{all three} waves. For the acoustic waves $\delta$ is the
+Harten--Hyman spread, e.g.
+$\delta_1=\max\!\left(0,\lambda_1-(u_{n,L}-a_L),(u_{n,R}-a_R)-\lambda_1\right)$,
+which removes the non-physical expansion shock admitted by plain Roe at a sonic
+point. In addition, every wave receives a floor
+\begin{equation}
+  \delta \ge \delta_{\min}=0.05\,
+  \max\!\left(|u_{n,L}|+a_L,\ |u_{n,R}|+a_R\right).
+  \label{eq:floor}
+\end{equation}
+The floor addresses a second, distinct failure that proved important on these
+meshes. The entropy and shear waves share the eigenvalue $u_n$, which vanishes
+wherever the flow is parallel to a face --- at a stagnation point, and along the
+symmetry line of a symmetric body. There the density and tangential-velocity
+jumps are left completely undamped, which is the classical Roe
+checkerboard/carbuncle mode. It does not diverge; it quietly stalls the steady
+residual and breaks the symmetry that a zero-incidence case should preserve.
+Applying the floor through the same smooth Harten function keeps the flux
+consistent, because identical left and right states make the jumps themselves
+vanish. The coefficient $0.05$ is small enough to leave boundary layers and
+contact discontinuities sharp.
+
+\paragraph{Viscous fluxes.} Face gradients are built from the same
+least-squares cell gradients. On an interior face the two cell gradients are
+averaged and then corrected along the cell-to-cell direction
+$\mathbf{e}=\Delta\mathbf{x}/\|\Delta\mathbf{x}\|$ so the face gradient
+reproduces the actual cell-value difference exactly,
+\begin{equation}
+  \nabla\phi_f=\overline{\nabla\phi}
+  +\left(\frac{\phi_R-\phi_L}{\|\Delta\mathbf{x}\|}
+  -\overline{\nabla\phi}\cdot\mathbf{e}\right)\mathbf{e},
+  \label{eq:facegrad}
+\end{equation}
+which suppresses the odd-even decoupling that a plain average allows. The
+temperature gradient is derived from the density and pressure gradients through
+$T=p/(\rho R)$,
+$\nabla T=R^{-1}\left(\nabla p/\rho-p\,\nabla\rho/\rho^2\right)$.
+
+On a wall face the viscous flux is evaluated with the \emph{physical} wall state
+and the wall-normal derivative is corrected using the imposed wall value: with
+$d_n=(\mathbf{x}_f-\mathbf{x}_i)\cdot\mathbf{n}$,
+\begin{equation}
+  \nabla\phi \leftarrow \nabla\phi
+  +\left(\frac{\phi_{\mathrm{wall}}-\phi_i}{d_n}
+  -\nabla\phi\cdot\mathbf{n}\right)\mathbf{n}.
+  \label{eq:wallgrad}
+\end{equation}
+This is what makes the skin friction reflect the actual near-wall profile on a
+stretched boundary-layer mesh instead of the much smaller cell-average gradient.
+For an adiabatic wall the normal component of $\nabla T$ is then projected out
+exactly, enforcing $\partial T/\partial n=0$.
+
+\paragraph{Positivity fallback.} If the Roe average is inadmissible
+($\hat{a}^2\le0$, possible for a very strong expansion), the flux falls back to
+HLLC for that face, which is positivity preserving. This is reported in
+\texttt{metadata.json} as part of the flux description rather than hidden. In
+practice this path is not taken: every completed production run records zero
+positivity-fallback events, so the reported results are pure Roe fluxes
+throughout. That has a consequence for what the
+production results can and cannot verify, discussed in \cref{sec:hllcbug}.
+
+\paragraph{Named dissipation and limiter parameters.} For completeness, the
+scheme carries four tuned constants, all disclosed here rather than buried in the
+source: the linear-wave dissipation floor coefficient $\pLinearFloor$ in
+\cref{eq:floor}; the Venkatakrishnan threshold constant $K=\pVenkatK$ in
+\cref{eq:limiter}; and the viscous spectral-radius factors $\pViscTimeFactor$ in
+the local time step \cref{eq:dtau} and $\pViscJacFactor$ in the implicit
+off-diagonal \cref{eq:offdiag}.
+
+\subsubsection{Added dissipation on the linear waves: disclosure}
+\label{sec:lineardissipation}
+
+The floor \cref{eq:floor} deserves to be stated plainly, because only part of it
+is textbook. Smoothing the \emph{acoustic} eigenvalues by the Harten--Hyman
+spread is the standard entropy fix and needs no defence. Applying a floor to the
+\emph{entropy and shear} eigenvalues is different: it is added artificial
+dissipation, a carbuncle cure, and it is not part of the classical Roe scheme.
+
+It is present because without it these cases do not converge correctly. The
+entropy and shear waves share the eigenvalue $u_n$, which vanishes identically on
+any face where the flow is parallel to the face --- including the stagnation
+streamline of a symmetric body at zero incidence, which is exactly the
+configuration of all six airfoil cases. There, density and tangential-velocity
+jumps are advected with zero dissipation, producing a checkerboard mode that does
+not diverge but stalls the residual and destroys the symmetry the solution should
+have.
+
+The cost is quantifiable. At a stagnation face where the exact numerical flux is
+$[0,\,p,\,0,\,0]$ in normalised form, the floored scheme returns
+$[\num{-2.96e-4},\,1.0,\,\num{2.13e-4},\,\num{7.42e-5}]$: a mass-flux error of
+about $3\times10^{-4}$ relative to the pressure term. The scheme remains
+consistent, since identical left and right states make all jumps vanish and the
+exact physical flux is recovered, but at a stagnation point the added dissipation
+is genuinely there.
+
+The honest concern is that at $\Reinf=5000$ this numerical dissipation competes
+with the physical viscosity, so a fraction of the computed skin friction could in
+principle be an artefact of the floor rather than of $\mu$. That concern was tested
+rather than argued away, by sweeping the coefficient in controlled experiments.
+\Cref{sec:floorsens} reports the outcome in full, and it does not support the
+design choice: the floor changes $C_D$ by $0.021\,\%$ on the cylinder, and
+disabling it entirely produces no checkerboard mode even on the zero-incidence
+inviscid airfoil, where the entropy and shear eigenvalues vanish on the stagnation
+streamline and no physical viscosity is present to damp a carbuncle. The floor is
+therefore retained as a safeguard for conditions not exercised here, and no result
+in this report depends on it.

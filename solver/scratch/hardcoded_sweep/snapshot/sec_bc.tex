@@ -1,0 +1,207 @@
+\section{Boundary Conditions}
+\label{sec:bc}
+
+Three boundary conditions are implemented, selected per family by the case file:
+\texttt{farfield}, \texttt{slip\_wall}, and \texttt{no\_slip\_adiabatic\_wall}.
+
+\subsection{Ghost state versus face state}
+\label{sec:ghostvsface}
+
+A design point worth stating explicitly, because it is a common source of silent
+error, is that each boundary condition supplies \emph{two} different exterior
+states and the solver uses them in different places:
+
+\begin{itemize}
+  \item The \textbf{ghost state} $\mathbf{U}^{\mathrm{ghost}}$ is a mirrored or
+  characteristic state passed to the Riemann solver as the right state. Its
+  purpose is that the resulting numerical flux \emph{enforces} the boundary
+  condition.
+  \item The \textbf{face state} $\mathbf{U}^{\mathrm{face}}$ is the physical
+  state that actually exists on the boundary. It is used for the least-squares
+  gradient stencil, for the limiter envelope, for the viscous wall flux, and for
+  the surface output written to \texttt{surface.csv}.
+\end{itemize}
+
+Conflating the two is what produces the classic artefacts: doubled wall-normal
+gradients, wall rows in the surface output that are really adjacent cell-centre
+values, and a no-slip wall that reports a nonzero velocity. The distinction also
+means \texttt{surface.csv} carries genuine boundary values, which is declared in
+the metadata as \texttt{wall\_boundary\_output\_semantics = boundary\_value}.
+Cell-centre quantities are written separately to
+\texttt{surface\_cell\_center.csv} so the two can never be confused.
+
+\subsection{Inviscid slip wall}
+
+The ghost state reflects the normal momentum component while preserving density
+and total energy,
+\begin{equation}
+  \mathbf{u}^{\mathrm{ghost}}=\mathbf{u}-2(\mathbf{u}\!\cdot\!\mathbf{n})\mathbf{n},
+  \qquad
+  \rho^{\mathrm{ghost}}=\rho,\qquad
+  (\rho E)^{\mathrm{ghost}}=\rho E,
+  \label{eq:slipghost}
+\end{equation}
+which is consistent because reflection leaves $|\mathbf{u}|$ unchanged. Feeding
+\cref{eq:slipghost} to the Roe flux gives
+\begin{equation}
+  \mathbf{H}^{\mathrm{wall}}=\left[0,\ p\,n_x + \varepsilon n_x,\
+  p\,n_y + \varepsilon n_y,\ 0\right]^T,
+  \qquad \varepsilon \to 0 \ \text{ as } u_n\to0,
+  \label{eq:slipflux}
+\end{equation}
+that is, \textbf{exactly} zero mass flux and \textbf{exactly} zero energy flux, with a
+normal force that reduces to the pure pressure force $p\mathbf{n}$ only in the limit of
+vanishing normal velocity.
+
+An earlier draft of this report stated \cref{eq:slipflux} as an exact identity with
+$\varepsilon\equiv0$, and that was wrong; the correction is recorded here rather than
+quietly made because the claim had also been listed as a verified check. The mirrored
+state has a normal-velocity jump of $\Delta u_n=-2u_n$, so the acoustic wave amplitudes
+in the Roe dissipation do not vanish and their contributions do not cancel in the
+normal-momentum component. Probing the solver's own \texttt{roeFlux} with the mirrored
+state (via \texttt{report/check\_slip\_flux.sh}, which links the shipped library rather
+than reimplementing it) gives, for $p=0.7143$:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+  \toprule
+  Interior state, normal & Mass & Normal mom. & Energy & $u_n$ \\
+  \midrule
+  $\mathbf{V}=(0.3,0.1)$, $\mathbf{n}=+y$ & $0$ & $0.8244$ & $0$ & $0.100$ \\
+  $\mathbf{V}=(0.9,-0.2)$, $\mathbf{n}=(0.6,0.8)$ & \num{-2.8e-17} & $1.2441$ & $0$ & $0.380$ \\
+  $\mathbf{V}=(1,0)$, $\mathbf{n}=+y$ & \num{-5.4e-17} & $0.7143$ & \num{-1.7e-16} & $0$ \\
+  $\mathbf{V}=0$ & $0$ & $0.7143$ & $0$ & $0$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The two rows with $u_n=0$ --- a purely tangential flow and a stagnation point
+--- return the pressure exactly. The rows with $u_n\ne0$ carry an excess that grows with
+$u_n$. The mass and energy components are exactly zero in every case, which is the part
+of the identity that matters for conservation: no mass or energy crosses a slip wall
+regardless of the iterate.
+
+The practical significance is small but should be stated rather than assumed. On a
+converged solution the wall condition is satisfied, so $u_n$ at a slip wall is at
+machine level --- the sanity checks record a maximum $|u_n|$ of
+$\num{1.0e-13}$, $\num{1.4e-13}$ and $\num{1.9e-13}$ on the three inviscid cases --- and
+the excess is correspondingly negligible in the reported forces. The discrepancy is a
+property of \emph{intermediate} iterates, where it acts as a restoring term driving
+$u_n$ towards zero, which is the intended behaviour of a ghost-state wall treatment.
+What is \emph{not} justified is calling the identity exact, and it is no longer claimed
+as such here or in \cref{sec:verification}.
+
+The corresponding face state removes the normal velocity entirely,
+$\mathbf{u}^{\mathrm{face}}=\mathbf{u}-(\mathbf{u}\!\cdot\!\mathbf{n})\mathbf{n}$,
+keeps $\rho$ and $p$, and corrects the total energy for the reduced kinetic
+energy. A slip wall therefore reports near-zero \emph{normal} velocity with a
+retained tangential velocity, exactly as the output contract requires.
+
+\subsection{Viscous no-slip adiabatic wall}
+
+The ghost state reverses the entire velocity vector,
+$\mathbf{u}^{\mathrm{ghost}}=-\mathbf{u}$, with $\rho$ and $\rho E$ unchanged, so
+that the arithmetic face average of the interior and ghost velocities is exactly
+zero. The face state imposes the wall condition directly: zero velocity,
+interior pressure ($\partial p/\partial n=0$), and interior temperature
+(adiabatic, $\partial T/\partial n=0$), with the density following from the
+equation of state,
+\begin{equation}
+  \mathbf{u}^{\mathrm{face}}=\mathbf{0},\quad
+  p^{\mathrm{face}}=p_i,\quad
+  T^{\mathrm{face}}=T_i,\quad
+  \rho^{\mathrm{face}}=\frac{p^{\mathrm{face}}}{R\,T^{\mathrm{face}}},\quad
+  (\rho e)^{\mathrm{face}}=\frac{p^{\mathrm{face}}}{\gamma-1}.
+  \label{eq:noslipface}
+\end{equation}
+
+Two points of honesty about \cref{eq:noslipface}. First, with $p^{\mathrm{face}}=p_i$
+and $T^{\mathrm{face}}=T_i$ the equation of state returns the interior density
+bit-for-bit, so writing $\rho=p/(RT)$ is a statement of \emph{why} the wall density
+equals the interior density rather than a computation that produces a different value;
+the code says as much in a comment at the same line. It is the correct form because it
+is what makes the adiabatic assumption explicit and would give the right answer if
+either the pressure or the temperature condition were changed, but no claim of
+sophistication over a copy is intended. Second, the total energy is written here as
+$\rho e$ rather than $\rho E$ because the velocity is zero: the general definition of
+\cref{sec:equations} includes the kinetic term, which vanishes at a no-slip wall, and
+using the same symbol for the reduced quantity would be inconsistent with the rest of
+the report.
+
+Because the surface output uses this state, the reported wall velocity and Mach
+number are identically zero to machine precision. The adiabatic condition is
+additionally enforced on the flux by projecting the normal component out of
+$\nabla T$, as described after \cref{eq:wallgrad}.
+
+\subsection{Farfield}
+
+The farfield is characteristic, based on locally one-dimensional Riemann
+invariants along the face normal. With interior values $(\rho_i,p_i,u_{n,i},a_i)$
+and freestream values $(\rho_\infty,p_\infty,u_{n,\infty},a_\infty)$, the normal
+Mach number $M_n=u_{n,i}/a_i$ selects the branch:
+
+\begin{itemize}
+  \item $M_n\ge 1$ (supersonic outflow): the boundary state is the interior state;
+  nothing is imposed.
+  \item $M_n\le -1$ (supersonic inflow): the boundary state is the freestream.
+  \item $|M_n|<1$ (subsonic): the outgoing and incoming invariants
+  \begin{equation}
+    R^+=u_{n,i}+\frac{2a_i}{\gamma-1},\qquad
+    R^-=u_{n,\infty}-\frac{2a_\infty}{\gamma-1}
+  \end{equation}
+  are combined into
+  $u_{n,b}=\tfrac12(R^++R^-)$ and $a_b=\tfrac14(\gamma-1)(R^+-R^-)$. Entropy
+  $s=p/\rho^\gamma$ and the tangential velocity are taken from the upwind side
+  (interior if $u_{n,b}>0$, freestream otherwise), giving
+  $\rho_b=\left(a_b^2/(\gamma s)\right)^{1/(\gamma-1)}$ and
+  $p_b=s\rho_b^\gamma$.
+\end{itemize}
+
+This treatment is what allows the supersonic cases to be posed on the same mesh
+as the subsonic ones without special handling: at $\Minf=2$ the inflow arc is
+fully determined by the freestream and the outflow arc is fully determined by the
+interior, so the bow shock can leave the domain cleanly. Degenerate invariant
+combinations that would give $a_b\le0$, or a non-positive reconstructed density or
+pressure, fall back to the freestream state rather than producing an unphysical
+boundary value. The same characteristic state is used as both ghost and face
+state at the farfield, since no wall condition applies there.
+
+\subsection{Force integration and the pressure/friction split}
+\label{sec:forces}
+
+Forces are integrated over wall faces only. Recalling from \cref{sec:mesh} that
+the stored boundary normal $\mathbf{n}$ points out of the fluid and into the
+body, the outward normal of the \emph{body} surface is $\mathbf{m}=-\mathbf{n}$,
+and the Cauchy traction exerted by the fluid on the body is
+\begin{equation}
+  \mathbf{t}=\boldsymbol{\sigma}\!\cdot\!\mathbf{m}
+  =\left(-p\mathbf{I}+\boldsymbol{\tau}\right)\!\cdot\!(-\mathbf{n})
+  =p\,\mathbf{n}-\boldsymbol{\tau}\!\cdot\!\mathbf{n}.
+  \label{eq:traction}
+\end{equation}
+The pressure force per face is therefore $+(p_{\mathrm{wall}}-p_\infty)\mathbf{n}\,\Delta s$
+--- referenced to $p_\infty$ so that a uniform ambient pressure contributes
+nothing on a closed body --- and the viscous force is $-\boldsymbol{\tau}\!\cdot\!\mathbf{n}\,\Delta s$.
+Getting this sign pair right is essential: with the opposite viscous sign a flat
+plate with $\partial u/\partial y>0$ would produce thrust instead of drag.
+
+The wall pressure is reconstructed from the adjacent cell with the same gradient
+used by the flux, so the integrand is second-order accurate and consistent with
+the residual. For the friction the \emph{tangential} part of the viscous
+traction is used,
+\begin{equation}
+  \boldsymbol{\tau}_t=\boldsymbol{\tau}\!\cdot\!\mathbf{n}
+  -\left[(\boldsymbol{\tau}\!\cdot\!\mathbf{n})\!\cdot\!\mathbf{n}\right]\mathbf{n},
+  \label{eq:shear}
+\end{equation}
+which is what the contract requires: the normal viscous traction is explicitly
+excluded rather than being mislabelled as skin friction. The wall-normal velocity
+derivatives entering $\boldsymbol{\tau}$ are corrected with the imposed zero wall
+velocity exactly as in \cref{eq:wallgrad}.
+
+Each wall face is integrated by the rank that owns its adjacent cell, so a face on
+a partition boundary is counted exactly once globally, and the six accumulators
+(pressure force, viscous force, moment, wall length) are combined in a single
+\texttt{MPI\_Allreduce}. The moment about the case reference centre is
+$M_z=\sum (\mathbf{r}\times\mathbf{f})_z$ with
+$\mathbf{r}=\mathbf{x}_f-\mathbf{x}_{\mathrm{ref}}$, positive counter-clockwise.

@@ -1,0 +1,177 @@
+\section{Limitations and Failure Analysis}
+\label{sec:limitations}
+
+This section lists what is genuinely unresolved. Items that were found and fixed
+are described in their own sections and are not repeated here as if they were
+still open.
+
+\paragraph{Free-stream preservation is not exact.} The uniform-flow check reaches
+$O(10^{-11})$ rather than the requested $10^{-12}$, and the solver emits a warning
+on every run. The cause is identified: the least-squares normal matrix
+\cref{eq:normaleq} is poorly conditioned on the most stretched wall cells (aspect
+ratios of order $10^3$), so the computed gradient of a constant field is not
+exactly zero. The residual level involved is far below any converged residual, so
+it does not affect the reported results, but it does place a floor on the
+attainable residual and is the first thing that would need attention before
+chasing deeper convergence. A weighted QR solve, or scaling the stencil offsets
+before forming the normal equations, would improve it.
+
+\paragraph{The CFL ramp can overshoot the stability limit and lose convergence.}
+An earlier draft of this report attributed the transonic residual plateau to
+limiter chatter in the smallest wall cells. \textbf{That explanation was wrong},
+and the correction is instructive enough to record rather than quietly replace.
+
+Examining the residual history of \texttt{naca0012\_m080\_inviscid} shows the
+residual reaching $\num{4.6765e-4}$ at step 2546 with the ramped CFL at $49.7$ ---
+that is $3.92$ orders, essentially the requested $4.00$ --- and then \emph{degrading}
+to $\num{4.9518e-3}$ by step 3496 as the ramp pushed the CFL to its cap of $100$.
+The run therefore discarded slightly more than one order of convergence and
+reported the worse figure. The mechanism is not limiter chatter but CFL-driven
+degradation past the stability limit of the scheme at this Mach number: the
+geometric ramp of \cref{eq:ramp} continues to its cap regardless of whether the
+iteration is still contracting.
+
+The solver now retains the best state by residual norm and restores it if the march
+ends more than a factor of two above that level, recording the fallback in the run
+notes so that the reported residual and the written field always correspond. The
+broader lesson is that a CFL cap taken from a case file is an input, not a
+guarantee: the largest \emph{usable} CFL is a property of the scheme and the mesh,
+and a ramp that ignores whether the residual is still falling can undo its own
+progress.
+
+With the fallback in place this case reports $3.92$ orders rather than $2.89$, so what
+two earlier drafts described as a plateau an order short of target is in fact a near-miss
+of the target caused by the ramp. \Cref{sec:naca} gives the full sequence. The limitation
+that remains is real but narrower than first stated: the ramp is open-loop, and a CFL
+schedule that responded to whether the residual was still falling would not need a
+best-state fallback to protect it from itself.
+
+\paragraph{A process failure in the run harness, recorded because it nearly corrupted
+results.} During the re-runs required by the convergence fixes above, a termination
+signal matched an outer wrapper script but orphaned the inner loop, so a subsequent
+relaunch had two independent streams iterating the same seven cases into the same output
+directories concurrently. The symptom was visible in the progress log --- cases completing
+in an order the launching script does not use --- and the affected outputs were discarded
+rather than harvested.
+
+This is worth recording for two reasons. First, it is a reminder that results written
+into a shared directory carry no record of which process wrote them, so a concurrent
+writer produces files that are individually well-formed and collectively meaningless.
+Second, it is the reason this report's harvesting script enforces a trusted-after
+timestamp: every case whose \texttt{run\_status.json} predates the cutoff is reported as
+still in progress rather than as a result, which is what turned a potential silent
+corruption into a visible gap. The cutoff was raised five times during preparation as
+successive fixes superseded earlier runs, and each raise was accompanied by re-running
+every affected case with a single identical binary.
+
+\paragraph{LU-SGS degrades at high CFL.} The spectral radius of the SGS iteration
+approaches unity as $\mathrm{CFL}\to\infty$, so at the ramped targets of
+\cref{tab:controls} the inner solve of \cref{eq:steadysystem} reaches its
+iteration bound with the linear residual only partially reduced. The available
+remedies are more inner sweeps (expensive) or a lower CFL cap (slower outer
+convergence). What was deliberately \emph{not} done is inflating the diagonal to
+make the reported inner ratio look better, which as noted in \cref{sec:lusgs}
+produces a number that is meaningless. A matrix-free GMRES with the present
+operator as preconditioner would be the natural improvement.
+
+\paragraph{Boundary-layer resolution at $\Reinf=5000$.} The supplied NACA mesh was
+not built for viscous computation at this Reynolds number. With
+$\mu=\num{2e-4}$ the laminar boundary layer near the trailing edge has a thickness
+of order $10^{-2}$ chords, spanned by only a few cells over much of the chord. The
+skin-friction distributions of \cref{fig:naca-lam-cf} should therefore be read as
+under-resolved, and the friction drag in \cref{tab:forces} carries a
+correspondingly larger discretization error than the pressure drag. Mesh
+refinement normal to the wall, not a solver change, is what this needs.
+
+\paragraph{Shock capturing is monotone but diffuse.} The Venkatakrishnan limiter
+smears a shock over two to three cells. At $\Minf=2.0$ the bow shock stands off
+the leading edge in a region of relatively coarse cells, so the captured shock is
+thicker there than on the body. This affects the sharpness of the contours in
+\cref{fig:naca200inv-field} more than it affects the integrated forces, since the
+pressure jump across the shock is captured conservatively even when it is spread.
+
+\paragraph{The observed order of accuracy is not measured.} The evidence for
+second order here is structural, diagnostic and comparative: exact recovery of
+linear-field gradients ($\vLsqExactness$), the verified analytic Jacobian, the
+positivity-fallback counts showing the second-order path is active in production,
+and the first-versus-second-order comparison of \cref{sec:ordersens}, where first
+order inflates cylinder drag by $60.5\,\%$ and out of the literature range. That
+last result demonstrates the reconstruction does substantial work, but it is not
+the same thing as measuring a convergence rate. A grid-convergence study on a
+sequence of systematically refined meshes would establish the observed order
+directly; only one mesh per geometry was supplied, so that measurement is absent.
+This remains a gap in the verification and is better stated than glossed over.
+
+\paragraph{Vorticity is a derived quantity.} The vorticity written to the field
+file and plotted in \cref{fig:cyl200-wake} is computed from the same
+least-squares velocity gradients used by the viscous flux, so it inherits their
+accuracy. It is adequate for identifying and counting vortices, and hence for the
+Strouhal estimate, but it is not a high-order vorticity reconstruction and its
+peak values near the wall should not be read quantitatively.
+
+\paragraph{Two-dimensionality of the $\Reinf=200$ wake.} The computation is
+two-dimensional by construction. A real cylinder wake at $\Reinf=200$ is already
+weakly three-dimensional, so the computed lift amplitude is expected to exceed the
+experimental value even when the Strouhal number agrees well. This is a limitation
+of the problem statement rather than of the solver, but it matters when comparing
+the amplitude in \cref{sec:cyl200} against experiment.
+
+\paragraph{The build locates more dependencies than it uses.} The CMake
+configuration finds ParMETIS, Eigen and \texttt{fmt}, but no source file includes
+any of them: the actual dependencies are CGNS, HDF5, METIS, zlib,
+\texttt{nlohmann/json} and MPI. The macro \texttt{CNS2D\_HAVE\_EIGEN} is defined
+but never used. This is stated because a build that advertises more than it needs
+can mislead a reader about what the solver actually relies on, and because
+partitioning is METIS serial $k$-way, not ParMETIS, despite ParMETIS being located.
+
+\paragraph{The reproduce sequence points into \texttt{scratch/}.} The documented
+reproduction path references \texttt{scratch/production.sh} and
+\texttt{scratch/scaling\_study.sh}, which are the scripts that actually produced
+the submitted runs. That directory is therefore not purely disposable. The
+alternative would be retyping the commands into the README, where they could drift
+from what was really executed; an honest pointer to the real script is preferred
+over a tidier one that might not match.
+
+\subsection{What would be done next}
+
+In priority order: replace the least-squares normal-equation solve with a scaled
+QR factorisation to recover exact free-stream preservation; add a matrix-free
+GMRES outer Krylov solve preconditioned by the present LU-SGS operator, to
+decouple outer convergence from the CFL cap; generate a refined mesh family to
+measure the observed order of accuracy directly; and refine the airfoil meshes
+normal to the wall so the $\Reinf=5000$ skin friction becomes mesh-independent.
+One further experiment is specifically indicated by \cref{sec:floorsens}: repeat
+the linear-wave floor sweep on the $\Minf=0.80$ and $\Minf=2.0$ cases, which is
+the regime where the Roe carbuncle is actually notorious and the only place the
+floor might prove necessary.
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+An original second-order finite-volume solver for the two-dimensional compressible
+Navier--Stokes equations has been implemented, verified, and applied to all eight
+required benchmark cases. The discretization is a cell-centred conservative finite
+volume scheme with inverse-distance least-squares primitive reconstruction, a
+Venkatakrishnan limiter, and a Roe flux whose Harten--Hyman entropy fix is extended
+to the linear waves --- an extension that proved necessary, not decorative, because
+the undamped entropy and shear waves at stagnation points otherwise stall the
+steady residual and break symmetry. Steady cases use an implicit pseudo-time march
+with local time stepping and a matrix-free LU-SGS inner solve; the vortex-shedding
+case uses a true dual-time BDF2 scheme with frozen history levels and an outer
+physical-time loop. Parallelism is METIS $k$-way partitioning of the cell dual
+graph with neighbour-scoped halo exchange, with no full-mesh or full-state
+replication during iterations.
+
+The verification evidence is quantitative and is collected in
+\cref{tab:verification}: geometric identities at machine precision, exact
+least-squares gradients for linear fields, discrete conservation at
+$\vConservation$, and an analytic Jacobian confirmed against finite differences.
+Force coefficients agree to within $\num{5e-4}$ relative across $np=1,2,4,8$.
+
+The most useful methodological result is negative and is documented in
+\cref{sec:stationarity}: normalising the steady convergence test by the
+impulsive-start residual can terminate a run while its forces are still moving,
+producing results that look converged and are not. Requiring force stationarity as
+well as residual reduction fixed this, and the affected cases were re-run. The
+per-case status in \cref{tab:runstatus} is reported exactly as the solver recorded
+it.

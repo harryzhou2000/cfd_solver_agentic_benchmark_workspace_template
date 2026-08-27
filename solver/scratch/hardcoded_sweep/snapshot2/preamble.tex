@@ -1,0 +1,21 @@
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,subcaption,hyperref}
+\usepackage{cleveref}
+\usepackage{longtable}
+
+\sisetup{exponent-product=\times}
+
+% Every figure is guarded: the document must compile whether or not the figure
+% generation step has run yet.  The placeholder prints the missing file name, so
+% \detokenize is required -- the names contain underscores, which are not valid
+% in ordinary text mode.
+\newcommand{\cnsfig}[2]{%
+  \IfFileExists{figures/#1}{\includegraphics[width=#2]{figures/#1}}{%
+    \fbox{\parbox[c][0.26\textheight][c]{#2}{%
+      \centering\ttfamily\scriptsize\detokenize{#1}\par\vspace{4pt}%
+      \normalfont\itshape figure not yet generated\par\vspace{2pt}%
+      \normalfont\scriptsize regenerate with tools/make\_figures.py}}}}
+
+% Shorthand for the nondimensional freestream symbols used throughout.
+\newcommand{\Minf}{M_\infty}
+\newcommand{\Reinf}{\mathit{Re}}

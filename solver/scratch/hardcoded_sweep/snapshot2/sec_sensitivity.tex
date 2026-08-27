@@ -1,0 +1,156 @@
+\section{Numerical Sensitivity Study}
+\label{sec:sensitivity}
+
+Three scheme parameters were varied in controlled experiments to establish whether
+the reported forces depend on them. All variants were built from a separate copy of
+the source tree, so the production build was never modified; the baseline variant
+binary is byte-identical to the unmodified build of the same tree, which confirms the
+instrumentation compiles away at the baseline value and so cannot have shifted the
+reference point of the sweep. It is not evidence about the instrumentation at other
+values, where the code does differ by construction. Every variant was run one at a
+time under the CPU quota of \cref{sec:quota}.
+
+\subsection{The linear-wave dissipation floor is unnecessary for these cases}
+\label{sec:floorsens}
+
+\Cref{sec:lineardissipation} disclosed that the Roe flux applies a dissipation
+floor of $\pLinearFloor$ times the local maximum wave speed to \emph{all} waves,
+including the entropy and shear waves whose eigenvalue $u_n$ vanishes on a
+stagnation streamline. That is added artificial dissipation beyond the classical
+Harten--Hyman entropy fix, and it was introduced prophylactically to suppress a
+checkerboard mode. The controlled experiment does not support the necessity of that
+choice, and the result is reported here as it came out.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Cylinder $\Reinf=20$, converged runs, with the linear-wave floor
+  coefficient swept. All three variants converge to 6.73 residual orders.}
+  \label{tab:floorsweep}
+  \small
+  \begin{tabular}{rrrr}
+    \toprule
+    Floor coefficient & $C_D$ & Pressure & Viscous \\
+    \midrule
+    \num{0.05} (production) & \num{2.018119} & \num{1.220943} & \num{0.797176} \\
+    \num{0.01} & \num{2.017701} & \num{1.220480} & \num{0.797221} \\
+    \num{0.00} (disabled) & \num{2.017754} & \num{1.220447} & \num{0.797307} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\Cref{tab:floorsweep} shows a total spread of $\num{4.2e-4}$ in $C_D$, which is
+$0.021\,\%$ of the coefficient --- far below any physically meaningful difference and
+below the case's own convergence tolerance. Disabling the floor entirely produced no
+checkerboard mode by three independent measures: a second-to-first surface
+difference ratio of $0.128$, four sign alternations per 100 wall faces, and mirror
+asymmetry of $\num{6e-4}$.
+
+The cylinder is a mild test, so the experiment was repeated on the case designed to
+provoke the mode: \texttt{naca0012\_m015\_inviscid}, where $u_n$ vanishes exactly on
+the stagnation streamline of a symmetric body at zero incidence and there is
+\emph{no physical viscosity} to damp a carbuncle. Over a fixed \num{8000}-step
+budget, restricted to the leading-edge region $x/c<0.1$:
+
+\begin{table}[htbp]
+  \centering
+  \caption{NACA0012 $\Minf=0.15$ inviscid stagnation-region diagnostics at a fixed
+  \num{8000}-step budget, leading edge $x/c<0.1$. The exact stagnation value is
+  $C_p=1$.}
+  \label{tab:stagnation}
+  \small
+  \begin{tabular}{lrr}
+    \toprule
+    Diagnostic & Floor \num{0.05} & Floor \num{0.00} \\
+    \midrule
+    $\mathrm{d}C_p$ sign alternations & 1 of 119 & 1 of 119 \\
+    Oscillation ratio $d_2/d_1$ & \num{0.263} & \num{0.274} \\
+    Stagnation $C_p$ & \num{1.002635} & \num{1.002502} \\
+    Mirror asymmetry & \num{3.42e-3} & \num{3.28e-3} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The two columns of \cref{tab:stagnation} are indistinguishable, and
+\cref{fig:stagnation} shows the surface distributions overlaying. Where the
+convergence behaviour differs at all it mildly \emph{favours} the disabled floor:
+171 versus 168 CFL rejections, a residual-increase fraction of $50.5\,\%$ versus
+$50.7\,\%$, and maximum inner iterations of 33 versus 19.
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{naca_stagnation_cp.png}{\textwidth}
+  \caption{NACA0012 $\Minf=0.15$ inviscid: surface $C_p$ and its differences with
+  the linear-wave floor enabled (\num{0.05}) and disabled (\num{0}), from the
+  \texttt{surface.csv} of each variant run. The two are visually
+  indistinguishable, including in the stagnation region where a carbuncle would
+  appear.}
+  \label{fig:stagnation}
+\end{figure}
+
+\paragraph{Conclusion, stated against the design choice.} For the eight benchmark
+cases the floor is \textbf{a conservative but unnecessary safeguard}. It changes no
+reported number materially, and removing it produces no checkerboard mode even in
+the case constructed to provoke one. It is retained as insurance for meshes and
+conditions not exercised here, but \emph{no result in this report depends on it}.
+
+\paragraph{Scope limit.} This conclusion does not generalise. Neither test
+exercises the regime in which the Roe carbuncle is most notorious --- a strong bow
+shock at high Mach number on shock-aligned quadrilateral cells. The $\Minf=0.80$
+and $\Minf=2.0$ cases would be where to look, and that experiment was not
+performed. What is established is that the floor is unnecessary \emph{for these
+cases}, not that it is unnecessary in general.
+
+\paragraph{A diagnostic that had to be localised.} One statistic from this study is
+worth recording as a caution. Computed over the whole surface, the oscillation
+ratio is $1.72$, which looks alarming. It is not oscillation: it comes entirely
+from the blunt trailing edge at $x/c=1.005$, where the $C_p$ jump is about $1.46$.
+It appears mirror-symmetrically on both surfaces, in both variants, and in the
+converged production run ($1.728$), and it falls to $0.263$ when the final $1\,\%$
+of chord is excluded. Every surface-oscillation statistic quoted above therefore
+excludes the trailing edge, and is labelled as doing so. A diagnostic that is not
+localised before being interpreted can easily manufacture a defect that does not
+exist.
+
+\subsection{Second-order reconstruction: what it is worth}
+\label{sec:ordersens}
+
+Running the cylinder $\Reinf=20$ case first order instead of second gives
+$C_D=\num{3.239634}$ against the second-order $\num{2.018119}$: first order
+\textbf{overpredicts drag by $60.5\,\%$}, and almost all of the error is in the
+pressure component, which rises by roughly $90\,\%$. Since the literature value is
+$2.0$--$2.1$, the first-order result is not merely different but wrong, while the
+second-order result is in range.
+
+This is the most direct evidence available that the piecewise-linear
+reconstruction of \cref{sec:reconstruction} does substantial work rather than
+being nominally present. It also quantifies what the numerical dissipation of a
+first-order scheme costs on this mesh: excessive dissipation thickens the
+separated wake, reduces base-pressure recovery, and inflates form drag.
+
+\subsection{Limiter parameter}
+\label{sec:limitersens}
+
+Varying the Venkatakrishnan constant $K$ over a full decade gives
+$C_D=\num{2.032244}$ at $K=1$, $\num{2.018119}$ at $K=\pVenkatK$ (production), and
+$\num{2.015887}$ at $K=10$. The variation is monotone with a total spread of
+$0.81\,\%$, so the reported drag is not sensitive to this parameter at the level
+that matters for the conclusions here. The monotone trend is the expected
+direction: a larger $K$ widens the smooth-region threshold of
+\cref{eq:limiter}, limits less, and returns slightly less dissipative results.
+
+\subsection{Independent reproduction}
+\label{sec:reproduction}
+
+The variant binaries were configured and built from a separate copy of the source
+tree through an independent CMake configure. The floor-$\pLinearFloor$ variant
+reproduces $C_D=\num{2.018119}$ for the cylinder $\Reinf=20$ case, agreeing with
+the production binary to seven digits at matched conditions. This is an
+independent reproduction of the headline cylinder result rather than a re-reading
+of the same output files.
+
+All force values quoted in this report are machine-extracted from the submitted
+CSV and JSON outputs rather than transcribed by hand --- both for the tables
+generated by \texttt{report/harvest\_numbers.py} and for the sensitivity values
+above, which were verified against generated JSON. That verification caught one
+transcription error in a draft of the sensitivity summary, which is the reason the
+practice is worth following.
