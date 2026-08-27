@@ -67,10 +67,16 @@ SteadyResult runSteady(LocalMesh& lm,
     StateVec res0_global = {0,0,0,0};
     bool res0_set = false;
     double cfl = cfl0;
-    // cfl_effective_init: use the case-specified cfl0 for all cases.
-    // The earlier artificial cap to 0.1 for Re<100 prevented convergence because
-    // Fix D holds CFL at the floor permanently when residuals are non-monotone.
+    // Re<100 viscous: cap initial CFL to 0.1 so the first few steps (starting from freestream)
+    // don't apply huge corrections that blow up the residual.  Fix H2 (at step first_order_steps)
+    // jumps CFL to cfl0 and simultaneously raises the Fix D floor so Fix D can't pull CFL back to 0.1.
     double cfl_effective_init = cfl0;
+    if (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) {
+        cfl_effective_init = std::min(cfl0, 0.1);
+    }
+    // Fix D minimum floor: starts at cfl_effective_init; bumped to cfl0 after first-order transition
+    // for low-Re cases so Fix D cannot undo the Fix-H2 CFL jump.
+    double cfl_fix_d_floor = cfl_effective_init;
      double cfl_effective = cfl_effective_init;  // adaptive CFL tracker
     double prev_outer_res = 0.0;               // outer residual tracker
     double min_outer_res_ever = std::numeric_limits<double>::max();  // Fix D
@@ -220,7 +226,7 @@ SteadyResult runSteady(LocalMesh& lm,
             // a limit cycle where Fix E is always blocked (floor=5 was insufficient — oscillation
             // kept CFL exactly at 5.0 for 40000 steps with zero net progress).
             double fix_d_floor = (mu <= 0.0 && cfg.freestream.mach > 1.0)
-                ? std::max(cfl_effective_init, 20.0) : cfl_effective_init;
+                ? std::max(cfl_fix_d_floor, 20.0) : cfl_fix_d_floor;
             cfl_effective = std::max(cfl_effective * 0.97, fix_d_floor);
         }
         // Reset baseline at second-order transition — prevents Fix D over-reacting to expected residual jump
@@ -232,13 +238,12 @@ SteadyResult runSteady(LocalMesh& lm,
             if (inviscid_shock_case || viscous_shock_case) {
                 cfl_effective = std::min(cfl_effective, std::max(cfl_effective_init * 5.0, 5.0));
             }
-            // Fix H2: for Re<100 viscous cases, jump cfl_effective to cfl0 (case-specified)
-            // at the first-order transition. The CFL was held at 0.1 during the BL build-up
-            // phase, and Fix D prevents Fix E from ramping CFL when residuals grow. Jumping to
-            // cfl0 (=1.0 for cylinder cases) matches the empirically observed optimal CFL for
-            // convergence of the wake in the post-build-up phase.
+            // Fix H2: for Re<100 viscous cases, jump cfl_effective to cfl0 at the first-order
+            // transition. Also raise the Fix D floor to cfl0 so Fix D cannot reduce CFL back
+            // to the initial 0.1 floor after the jump.
             if (low_re_viscous_case) {
                 cfl_effective = std::max(cfl_effective, cfl0);
+                cfl_fix_d_floor = cfl0;  // Prevent Fix D from undoing the jump
             }
         }
 
