@@ -1958,16 +1958,26 @@ for the reasons set out in \cref{sec:cyl200}.
 
 The principal weaknesses, all documented in \cref{sec:limitations}, are the
 limiter-induced residual limit cycle on the shock-containing cases, which leaves
-a few tenths of a percent of uncertainty in the Mach 2 drag; the absence of
-low-Mach preconditioning; and the fact that the supplied single mesh per
-geometry makes a grid-convergence study of the benchmark results themselves
-impossible, so the reported coefficients carry an unquantified spatial
-discretisation error on top of the iterative one. The largest single correction
-made during development --- and the clearest illustration of why the force split
-is worth reporting separately --- was the wall-stress treatment of
-\cref{eq:wallstress}: assembling the no-slip traction from the general
-face-gradient formula produced a normal component worth $67\%$ of the Mach 2
-laminar drag, where the exact value is zero.
+a few tenths of a percent of uncertainty in the Mach 2 drag; a residual
+shock-capturing overshoot at the Mach 2 stagnation point, which the shock fix
+reduces to $\shockFixCpExcessFixed\%$ of the exact bound but does not remove;
+the absence of low-Mach preconditioning; the coarseness of the supplied viscous
+mesh in the outer supersonic wave field; and the fact that the supplied single
+mesh per geometry makes a grid-convergence study of the benchmark results
+themselves impossible, so the reported coefficients carry an unquantified
+spatial discretisation error on top of the iterative one. Two corrections made during development are worth naming, because both were
+found by checking a computed result against a quantity whose exact value is
+known, and neither would have been visible in a residual history. The first is
+the wall-stress treatment of \cref{eq:wallstress}: assembling the no-slip
+traction from the general face-gradient formula produced a normal component
+worth about two thirds of the Mach 2 laminar drag, where the exact value is
+zero. The second is the shock fix of \cref{eq:shockfix}: on the Mach 2 aerofoil
+the unfixed HLLC flux carbuncled, putting the leading-edge pressure
+$\shockFixCpExcessUnfixed\%$ above the Rayleigh--Pitot ceiling and giving
+$|C_L|=$~\shockFixClUnfixed{} for a symmetric section at zero incidence. Both
+checks are now automated in \code{tools/sanity\_checks.py}, which is the
+practical lesson: the useful tests are the ones that compare against an exact
+value, not against a previous run.
 
 
 \begin{thebibliography}{99}
