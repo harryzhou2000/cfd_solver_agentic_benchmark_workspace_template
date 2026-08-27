@@ -204,19 +204,6 @@ wall face the two differ. On six cases the limiter is inactive on essentially ev
 wall face and the discrepancy is invisible; on the $\Minf=2.0$ laminar airfoil the
 limiter is active on the leading-edge cells, and there it is not.
 
-It is worth being precise about the "invisible on six cases" claim, because a first
-pass at it was wrong and the correction is instructive. The re-integration is not
-uniformly tight on the other six in \emph{relative} terms: the $\Minf=0.15$ inviscid
-case shows $\num{5.3e-2}$ relative, larger even than the case with the real bug. That
-figure is an artifact of dividing by a near-zero drag --- in absolute terms the
-discrepancy is $\num{5.4e-5}$, and this is the limit-cycle case whose peak-to-peak
-oscillation is $127\,\%$ of its own mean, so a relative measure of anything is
-meaningless for it. The correct statement is that the discrepancy is at or below the
-checking script's own arc-length noise floor of about $\num{1e-3}$ absolute on every
-case except the $\Minf=2.0$ laminar airfoil, where it was a genuine solver
-inconsistency. Quoting a relative bound across cases whose drags differ by two orders
-of magnitude was the error.
-
 This mattered beyond the size of the number, because the output contract requires
 the final force row to correspond to the state written to \texttt{surface.csv}, and
 on that case it did not. The force integral now applies the limiter factor, which is
@@ -227,14 +214,49 @@ where it mattered most. After the change the same check gives $\num{1.84e-3}$
 relative on that case, a factor of $27$ improvement, with the remainder attributable to
 the script's arc-length approximation.
 
-Two things are worth stating plainly about this finding. First, it changes reported
-numbers: the pressure drag of the $\Minf=2.0$ laminar case moves by about $5\,\%$,
-so every figure for that case in this report comes from a run made after the fix.
-Second, it was found by an adversarial review performing exactly the cross-check an
-examiner would attempt, and it would not have been found by any internal consistency
-check the solver applies to itself, since both call sites were individually
-self-consistent. That is an argument for the external re-integration as a standing
-part of the verification suite rather than a one-off.
+\paragraph{Absolute, not relative, is the right measure here.} A first attempt at
+summarising this check quoted a \emph{relative} bound across cases, and that was a
+mistake worth correcting explicitly because the corrected version reverses which case
+looks worst. Repeating the check on the post-fix runs gives
+
+\begin{center}
+\begin{tabular}{lrrrr}
+  \toprule
+  Case & From \texttt{surface.csv} & From \texttt{forces.csv} & Absolute & Relative \\
+  \midrule
+  Cylinder $\Reinf=20$ & $1.219698$ & $1.220902$ & \num{1.20e-3} & \num{9.87e-4} \\
+  NACA $\Minf=0.15$ inv. & $0.000913$ & $0.000960$ & \num{4.69e-5} & \num{4.88e-2} \\
+  NACA $\Minf=0.80$ inv. & $0.008752$ & $0.008771$ & \num{1.97e-5} & \num{2.25e-3} \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The $\Minf=0.15$ inviscid case has the \emph{largest} relative discrepancy at
+$\num{4.88e-2}$ and simultaneously the \emph{smallest} absolute one at $\num{4.69e-5}$.
+The relative figure is large only because it is divided by a drag whose exact value is
+zero, and this is also the limit-cycle case whose peak-to-peak oscillation exceeds its own
+mean, so a relative measure of anything is close to meaningless for it. Quoting a relative
+bound across cases whose drags span two orders of magnitude was the error; the absolute
+column is the meaningful one, and on it every case agrees to better than
+$\num{1.2e-3}$.
+
+Two further points make the check interpretable. First, the residual disagreement is
+dominated by the \emph{checking script}, not the solver: the script approximates each
+face's arc length as half the distance between neighbouring face midpoints, which is a
+second-order approximation on a curved surface. The absolute figures above are therefore
+an \textbf{upper bound} on the true inconsistency. Second, and the reason the check is
+worth reporting at all, it is independent of the solver's integration path --- it reads
+only the published surface data and reconstructs its own geometry --- so it can detect
+exactly the class of error that an internal consistency check cannot.
+
+That independence is what found the bug. Both call sites were individually
+self-consistent, so no assertion the solver makes about itself would have caught them
+disagreeing with each other; it took an outside integration of the published artifact,
+which is the first cross-check a competent examiner would attempt. The finding changes
+reported numbers --- the pressure drag of the $\Minf=2.0$ laminar case moves by about
+$5\,\%$ --- so every figure for that case in this report comes from a run made after the
+fix, and the external re-integration is retained as a standing part of the verification
+suite rather than a one-off.
 
 \paragraph{A wrinkle in the history files.} Both \texttt{forces.csv} and
 \texttt{residuals.csv} contain the final step number \emph{twice}, with slightly
@@ -262,6 +284,42 @@ more conservative of the two and is the one that corresponds to the submitted
 taken from that field rather than from the note. The gap is a reminder that a residual
 is a property of a state, so quoting one without saying which state it belongs to is
 incomplete.
+
+\paragraph{A history that is not monotone in the step number.} One further consequence of
+the best-state fallback of \cref{sec:naca} deserves flagging for anyone reusing these
+outputs. When the fallback fires, the restored state is appended \emph{after} the rows of
+the march that passed it, so the final row of \texttt{forces.csv} and
+\texttt{residuals.csv} carries a step number \emph{lower} than the row above it: for
+\texttt{naca0012\_m080\_inviscid} the sequence ends $3491, 3492, 3493, 2547$.
+
+The contract is satisfied --- the last force row matches \texttt{final\_step} in
+\texttt{run\_status.json} and corresponds to \texttt{field\_final.vtu}, and the supplied
+validator accepts these files --- but any downstream tool that assumes step numbers
+increase monotonically will trip on it. The alternative would be to truncate the history
+at the restored step, and that was deliberately not done: truncating would discard the
+evidence that the degradation happened at all, which is precisely the evidence
+\cref{sec:naca} needs in order to explain the case honestly. Keeping the full march and
+appending the restored state preserves the diagnosis at the cost of a non-monotone index.
+
+\subsubsection{Provenance of the convergence evidence}
+\label{sec:provenance}
+
+The convergence findings above were measured on runs that have since been superseded:
+each fix required re-running the affected cases, and \texttt{results/} was regenerated
+several times as a result. That raises a fair question about whether the evidence for the
+findings can still be checked, since the numbers quoted --- the $2.89$-order transonic
+figure, the $\num{0.03921}\to\num{0.04237}$ monotone march, the component drifts of
+\cref{sec:cancellation} --- describe files that no longer exist in the results tree.
+
+They are preserved and checkable. The generation the adversarial review examined was
+recovered from the repository at commit \texttt{605a981} into
+\texttt{scratch/verify/old\_gen/} and confirmed byte-identical to the tracked blobs
+before the re-runs overwrote the working tree. Every figure quoted in
+\cref{sec:stationarity,sec:tolerance,sec:limitcycle,sec:cancellation,sec:hairsbreadth}
+can therefore be recomputed from that snapshot, and the scripts that do so
+(\texttt{report/check\_window.py} and \texttt{report/extrapolate\_tail.py}) read nothing
+but the CSV files. The results reported in \cref{sec:results} come from the final runs;
+the diagnostic history comes from the snapshot, and the two are kept distinct.
 
 \subsection{A defect in the steady termination test}
 \label{sec:stationarity}
