@@ -57,6 +57,11 @@ def analyse_case(cdir, cid, manifest_vars):
     is_cyl = "cylinder" in cid
     transient = float(meta.get("physical_time_step", 0.0)) > 0.0
     checks = []
+    # Several checks below need the freestream conditions from the case file.
+    # If it is not where CASE_DIR says, they would quietly disappear and the
+    # gate would still report "all passed", so the absence is itself a failure.
+    checks.append(check("case_input_file_readable", case is not None,
+                        f"case definition found under {CASE_DIR}", cid + ".json"))
 
     rho = mesh.cell_data["Density"]
     p = mesh.cell_data["Pressure"]
@@ -228,6 +233,8 @@ def analyse_case(cdir, cid, manifest_vars):
     # failed is always "consistent" (it is not claiming anything).
     consistent = (not status_ok) or all_passed
     return dict(case_id=cid, convergence_status=status["convergence_status"],
+                viscous=bool(viscous),
+                physical_time_step=float(meta.get("physical_time_step", 0.0)),
                 completed=bool(meta.get("completed", False)),
                 mpi_ranks=int(meta["mpi_ranks"]),
                 final_cl=cl_last, final_cd=cd_last, mean_cd_last_quarter=cd_mean,
@@ -269,6 +276,22 @@ def main():
               f"{'OK' if not failed else 'FAILED: ' + ','.join(failed)}")
     report["num_cases"] = len(report["cases"])
     report["num_failed_checks"] = n_fail
+    # A check that silently stops running is indistinguishable from a check that
+    # passes unless the inventory is recorded, so record it: every case of the
+    # same kind must run the same set.
+    kinds = {}
+    for c in report["cases"]:
+        kind = ("cylinder" if "cylinder" in c["case_id"] else "aerofoil") + \
+               ("_transient" if c.get("physical_time_step", 0.0) else "_steady") + \
+               ("_viscous" if c.get("viscous") else "_inviscid")
+        kinds.setdefault(kind, []).append((c["case_id"],
+                                           tuple(x["name"] for x in c["checks"])))
+    inconsistent = {k: [cid for cid, names in v if names != v[0][1]]
+                    for k, v in kinds.items()}
+    inconsistent = {k: v for k, v in inconsistent.items() if v}
+    report["check_inventory"] = {k: list(v[0][1]) for k, v in kinds.items()}
+    report["cases_with_missing_checks"] = inconsistent
+    report["all_checks_ran"] = not inconsistent
     report["all_cases_pass"] = n_fail == 0
     report["all_status_consistent"] = all(c["status_consistent"] for c in report["cases"])
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)

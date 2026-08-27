@@ -106,9 +106,14 @@ if os.path.exists("report/figure_manifest.csv"):
 
 if os.path.exists("report/rank_independence.json"):
     ri = json.load(open("report/rank_independence.json"))
-    bad = [k for k, v in ri.items()
-           if not all(d["identical_geometry_and_order"] for d in v.values())]
-    check("rank-independent surface output structure", not bad, ",".join(bad[:3]))
+    check("rank study: every expected comparison ran", ri["all_comparisons_ran"],
+          f"{ri['comparisons']}/{ri['comparisons_expected']}")
+    check("rank-independent surface output structure", not ri["structure_failures"],
+          ",".join(ri["structure_failures"][:3]))
+    check("rank-independent surface solution within tolerance",
+          not ri["solution_failures"],
+          f"max {ri['max_relative_solution_difference']:.2e} "
+          f"vs tol {ri['solution_tolerance']:.0e}")
 
 if os.path.exists("studies/restart/restart_check.json"):
     rc = json.load(open("studies/restart/restart_check.json"))

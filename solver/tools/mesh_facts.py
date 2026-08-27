@@ -164,7 +164,20 @@ def main():
         out["meshes"][tag] = geometry_facts(m)
         out["meshes"][tag]["source_case"] = cid
         if tag == "naca":
-            out["meshes"][tag]["sliver_residual_concentration"] = sliver_concentration(m)
+            # The concentration depends on the solution as well as the mesh, so
+            # it is reported across every case that shares this mesh rather than
+            # from one case presented as a property of the grid.
+            conc = {}
+            for other in sorted(os.listdir(args.results)):
+                f2 = os.path.join(args.results, other, "field_final.vtu")
+                if other.startswith("naca") and os.path.exists(f2):
+                    conc[other] = sliver_concentration(read_vtu(f2))
+            out["meshes"][tag]["sliver_residual_concentration"] = conc.get(cid)
+            out["meshes"][tag]["sliver_residual_concentration_by_case"] = conc
+            if conc:
+                counts = [v["num_cells"] for v in conc.values()]
+                out["meshes"][tag]["sliver_cells_min"] = min(counts)
+                out["meshes"][tag]["sliver_cells_max"] = max(counts)
             out["meshes"][tag]["leading_edge_mirror_symmetry"] = mirror_symmetry(m, -0.02, 0.02)
             out["meshes"][tag]["body_mirror_symmetry"] = mirror_symmetry(m, -0.5, 1.5)
 
@@ -184,8 +197,10 @@ def main():
     f = os.path.join(args.results, "naca0012_m200_laminar_re5000", "field_final.vtu")
     if os.path.exists(f):
         m = read_vtu(f)
-        xy = m.cell_centers()
-        chord = xy[:, 0].max() - xy[:, 0].min()
+        # The section runs from x = 0 to x = 1.005 (see the mesh table), so the
+        # nominal unit chord places the station within half a percent of
+        # mid-chord.  Deriving a chord from the cell centres would give the
+        # farfield extent, not the body.
         bl = boundary_layer(m, 0.5, 1.0, float(naca_half_thickness(0.5)))
         if bl:
             out["cases"]["naca0012_m200_laminar_re5000"] = dict(boundary_layer=bl)

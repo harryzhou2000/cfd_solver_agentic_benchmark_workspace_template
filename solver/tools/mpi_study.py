@@ -45,15 +45,17 @@ def main():
         print(f"no rank-study runs found under {args.root}")
         return 1
 
-    # Rank-independent output discipline: the files that are supposed to be
-    # identical at every rank count are compared byte for byte, and the field
-    # file (which carries a deliberately rank-dependent RankId array) is
-    # compared cell by cell after both have been sorted by global cell id.
+    # Rank-independent output discipline for the surface files.  (The field
+    # file is checked separately, by tests/mpi_consistency.sh, which compares
+    # its point and connectivity blocks and its cell ordering.)
     # What must be rank-independent is the *structure* of the file: the same rows
     # in the same order, describing the same boundary faces.  The solution
     # columns cannot be bit-identical, because different rank counts take
-    # slightly different iteration paths and stop at different steps; those are
-    # reported as a difference, to be read against the force tolerance.
+    # slightly different iteration paths and stop at different steps, so they
+    # are held to a tolerance instead of to equality.  Both properties are
+    # enforced -- structure exactly, solution against SOLUTION_TOL -- because a
+    # check that is recorded but never compared to anything is not a check.
+    SOLUTION_TOL = 5.0e-2   # relative, per column RMS
     GEOM = ["x", "y", "nx", "ny", "tag"]
     ri = {}
     for case, by_np in sorted(runs.items()):
@@ -74,7 +76,19 @@ def main():
                     all(x[c] == y[c] for c in geom) for x, y in zip(ra, rb))
                 diffs, worst_at = [], None
                 worst = 0.0
+                scale = {}
                 if same_rows:
+                    for c in (ra[0] if ra else {}):
+                        if c in geom:
+                            continue
+                        try:
+                            col = np.array([float(x[c]) for x in ra])
+                        except ValueError:
+                            continue
+                        # RMS of the column, floored by its own peak magnitude
+                        # so a column that is identically zero cannot divide.
+                        rms = float(np.sqrt((col**2).mean()))
+                        scale[c] = max(rms, 1e-12)
                     for x, y in zip(ra, rb):
                         for c in x:
                             if c in geom:
@@ -83,7 +97,13 @@ def main():
                                 fa, fb = float(x[c]), float(y[c])
                             except ValueError:
                                 continue
-                            d = abs(fa - fb) / max(abs(fa), 1.0)
+                            # Scale each column by its own magnitude over the
+                            # file, not by max(|value|, 1): a floor of 1 turns
+                            # this into an absolute difference for every column
+                            # whose values are below one -- cf, mach, the
+                            # velocity components -- and these cases are
+                            # non-dimensionalised so that is most of them.
+                            d = abs(fa - fb) / scale.get(c, 1.0)
                             diffs.append(d)
                             if d > worst:
                                 worst, worst_at = d, dict(column=c, x=float(x["x"]),
@@ -91,26 +111,48 @@ def main():
                 ri.setdefault(f"{case}:{fn}", {})[f"np{ref_np}_vs_np{np_}"] = dict(
                     same_row_count=bool(same_rows),
                     identical_geometry_and_order=bool(same_geom),
-                    max_relative_solution_difference=worst,
+                    # None, not 0.0: a structurally mismatched pair has no
+                    # meaningful solution difference and must not be recorded as
+                    # a perfect one.
+                    max_relative_solution_difference=(worst if same_rows else None),
+                    solution_within_tolerance=bool(same_rows and worst <= SOLUTION_TOL),
+                    tolerance=SOLUTION_TOL,
                     worst_at=worst_at,
                     # The maximum sits in the singular trailing-edge slivers of
                     # the aerofoil; the percentile shows the level everywhere
                     # else without special-casing a region.
                     p99_relative_solution_difference=(
-                        float(np.percentile(diffs, 99)) if diffs else 0.0),
+                        float(np.percentile(diffs, 99)) if diffs else None),
                     median_relative_solution_difference=(
-                        float(np.median(diffs)) if diffs else 0.0))
-    if ri:
-        out = os.path.join(os.path.dirname(args.out_csv), "rank_independence.json")
-        json.dump(ri, open(out, "w"), indent=2)
-        bad = [k for k, v in ri.items()
-               if not all(d["identical_geometry_and_order"] for d in v.values())]
-        worst = max(d["max_relative_solution_difference"]
-                    for v in ri.values() for d in v.values())
-        p99 = max(d["p99_relative_solution_difference"]
-                  for v in ri.values() for d in v.values())
-        print(f"wrote {out}: structure {'identical' if not bad else 'DIFFERS in ' + str(bad)}"
-              f", solution difference p99 {p99:.2e}, max {worst:.2e}")
+                        float(np.median(diffs)) if diffs else None))
+    out = os.path.join(os.path.dirname(args.out_csv), "rank_independence.json")
+    expected = sum(2 * (len(by_np) - 1) for by_np in runs.values())
+    entries = [d for v in ri.values() for d in v.values()]
+    summary = dict(
+        comparisons=len(entries),
+        comparisons_expected=expected,
+        # Written unconditionally, so a run that compared nothing overwrites a
+        # stale pass rather than leaving it in place for the submission gate.
+        all_comparisons_ran=len(entries) == expected and expected > 0,
+        structure_failures=[k for k, v in ri.items()
+                            if not all(d["identical_geometry_and_order"]
+                                       for d in v.values())],
+        solution_failures=[k for k, v in ri.items()
+                           if not all(d["solution_within_tolerance"] for d in v.values())],
+        solution_tolerance=SOLUTION_TOL,
+        max_relative_solution_difference=(
+            max(d["max_relative_solution_difference"] for d in entries) if entries else None),
+        p99_relative_solution_difference=(
+            max(d["p99_relative_solution_difference"] for d in entries) if entries else None),
+        note=("Solution columns are scaled by the RMS of that column, so the "
+              "difference is genuinely relative. Geometry columns must be "
+              "identical; solution columns must be within solution_tolerance."),
+        comparisons_detail=ri)
+    json.dump(summary, open(out, "w"), indent=2)
+    print(f"wrote {out}: {summary['comparisons']}/{expected} comparisons, "
+          f"structure {'ok' if not summary['structure_failures'] else 'FAILED'}, "
+          f"solution {'ok' if not summary['solution_failures'] else 'FAILED'}, "
+          f"max {summary['max_relative_solution_difference']}")
 
     rows = []
     for case, by_np in sorted(runs.items()):

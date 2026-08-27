@@ -218,9 +218,10 @@ The $L_2$ norm is volume weighted, i.e.\ it is the discrete $L_2(\Omega)$ norm
 of $\partial\mathbf{U}/\partial t$ divided by the domain volume. This matters on
 these meshes: an \emph{unweighted} root-mean-square over cells is dominated by a
 handful of degenerate sliver cells at the sharp aerofoil trailing edge --- on
-\code{NACA0012\_H2.cgns}, \sliverCells{} cells out of \nacaCells{} (mean area
-\sliverMeanArea{} against a median of \nacaMedianCellArea{}, together
-\sliverAreaFraction{} of the domain area) carry $90\%$ of it
+\code{NACA0012\_H2.cgns}, between \sliverCellsMin{} and \sliverCellsMax{} cells
+out of \nacaCells{} --- depending on the case, across the \sliverCases{} that
+share this mesh, and never more than \sliverAreaFractionMax{} of the domain
+area --- carry $90\%$ of it
 --- where the inviscid solution around a sharp trailing edge is genuinely
 singular and no scheme converges. Weighting by cell volume measures the physical
 rate of change of the solution instead of the rate of change in the smallest
@@ -535,7 +536,13 @@ across the face, and $\alpha=|\hat{\mathbf{n}}\cdot\nabla p|/|\nabla p|$
 measures how the face is oriented relative to the shock. A face that the shock
 crosses head-on has $\alpha=1$ and keeps the \emph{full} contact-resolving flux,
 so the shock itself stays sharp; a face lying in the front has $\alpha=0$ and is
-damped. The supersonic factor switches the fix off entirely in subsonic flow,
+damped. The clip at 1 matters at the calibrated strength: with $k=6$ it binds
+for $\alpha<\sqrt{1-1/6}=0.913$, so on the Mach 2 aerofoil about half of the
+faces the sensor selects sit at pure Rusanov rather than on a gentle ramp. $k$
+therefore sets how wide that saturated band is, and the fix is closer to a
+switch on the selected faces than to a proportional blend --- which is what the
+sensitivity study in \cref{tab:shockfix} measures and why the comparison there
+is against pure Rusanov rather than against intermediate strengths. The supersonic factor switches the fix off entirely in subsonic flow,
 where a shock cannot exist --- without it the pressure-gradient sensor also
 fires on the stagnation region of a stretched mesh, and the $M_\infty=0.15$ and
 cylinder results change in the fourth digit for no reason. With it, the cylinder and the $M_\infty=0.15$ laminar aerofoil rerun with
@@ -948,12 +955,17 @@ split:
 \item \code{surface.csv} and \code{surface\_cellcenter.csv} are gathered and
   then sorted by (patch, azimuth about the body centre), a key that has nothing
   to do with the partition. \code{tools/mpi\_study.py} compares them across the
-  rank study and writes the result to \code{report/rank\_independence.json}: in
-  all \rankComparisons{} comparisons the row count, the row order and every
-  geometric column are \emph{identical} (\rankStructureFailures{} failures), so
-  row $k$ of the file is the same boundary face at every rank count. The
-  solution columns cannot be bit-identical, because different rank counts take
-  slightly different LU-SGS paths and stop at different steps; they agree to
+  rank study and writes the result to \code{report/rank\_independence.json}. All
+  \rankComparisons{} of the \rankComparisonsExpected{} expected comparisons ran
+  --- the count is asserted, so a comparison that silently failed to execute
+  cannot be mistaken for one that passed --- and in every one the row count, the
+  row order and every geometric column are \emph{identical}
+  (\rankStructureFailures{} failures), so row $k$ of the file is the same
+  boundary face at every rank count. The solution columns cannot be
+  bit-identical, because different rank counts take slightly different LU-SGS
+  paths and stop at different steps, so they are held to a tolerance of
+  \rankSolutionTolerance{} instead, each column scaled by its own root-mean
+  square over the file (\rankSolutionFailures{} failures). They agree to
   \rankSolutionPNinetyNine{} at the 99th percentile. The single worst
   disagreement, \rankSolutionMax{}, is in \code{\rankWorstColumn} at
   $x=\rankWorstX$ --- the sharp trailing edge of the aerofoil, where the
@@ -1148,10 +1160,10 @@ friction on no-slip walls, near-zero normal velocity and negligible viscous
 force columns on slip walls, farfield uniformity, agreement between the last
 force row and the final state, that the maximum wall pressure coefficient
 respects the exact inviscid stagnation bound (isentropic below Mach 1,
-Rayleigh--Pitot above it) within a viscous allowance that scales like
-$Re^{-1/2}$, that the normal viscous traction on a no-slip wall is identically
-zero and that the pressure/skin-friction split sums to the reported $C_D$, and
-presence of separate Mach and pressure figures --- listed in
+Rayleigh--Pitot above it) within a viscous allowance $0.10+2Re^{-1/2}$, that the
+normal viscous traction on a no-slip wall is identically zero and that the
+pressure/skin-friction split sums to the reported $C_D$, and presence of
+separate Mach and pressure figures --- listed in
 the manifest \emph{and} present on disk --- for every case.
 \sanityFailures{} checks fail. The gate is not advisory: a case whose
 \code{run\_status.json} claims \code{converged} or
@@ -1160,6 +1172,22 @@ inconsistent and \code{scripts/check\_submission.sh} exits non-zero, so a
 failure cannot be quietly carried into the submission. Every failing check, if
 there were one, is named with its measured value in
 \code{report/sanity\_checks.json}.
+
+Two properties of the gate are worth stating rather than leaving implicit. The
+stagnation-pressure allowance is a permissive bound, not a prediction: the
+$Re^{-1/2}$ scaling is that of the boundary-layer displacement effect but the
+coefficient is not derived, so the check has very different margins on different
+cases --- the $Re=20$ cylinder measures a $\stagExcessCylinder\%$ excess against
+a $\stagAllowanceCylinder\%$ allowance, where the Mach 2 inviscid aerofoil
+measures $\stagExcessInvMachTwo\%$ against $\stagAllowanceInvMachTwo\%$. It is
+sized to catch a carbuncle, which overshoots by tens of per cent at any Reynolds
+number, and it did: the unfixed Mach 2 case measures
+$\shockFixCpExcessUnfixed\%$. Second, a check that stops running is otherwise
+indistinguishable from a check that passes, so the JSON records the inventory of
+checks per case kind and asserts that every case of a kind ran the same set
+(\code{all\_checks\_ran}: \sanityAllChecksRan). The case-definition file each
+case needs for its freestream conditions is itself a check, so a missing input
+path fails the gate instead of quietly shrinking it.
 
 \code{report/figure\_manifest.csv} maps every figure to its case, type, plotted
 variable and source data file; \code{report/run\_manifest.md} lists the exact

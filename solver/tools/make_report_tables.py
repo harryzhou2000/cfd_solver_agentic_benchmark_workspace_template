@@ -737,6 +737,14 @@ def main():
                 macro("sliverCells", f"{sl['num_cells']}")
                 macro("sliverMeanArea", sci(sl["mean_cell_area"], 1))
                 macro("sliverAreaFraction", sci(sl["area_fraction"], 1))
+            if "sliver_cells_min" in nm:
+                macro("sliverCellsMin", f"{nm['sliver_cells_min']}")
+                macro("sliverCellsMax", f"{nm['sliver_cells_max']}")
+                by = nm.get("sliver_residual_concentration_by_case", {})
+                if by:
+                    macro("sliverAreaFractionMax",
+                          sci(max(v["area_fraction"] for v in by.values()), 1))
+                    macro("sliverCases", f"{len(by)}")
         if cm:
             macro("cylinderMaxAspectRatio", f"{cm['max_aspect_ratio']:.0f}")
         li = F.get("aerofoil_final_residual_linf")
@@ -893,15 +901,15 @@ def main():
     ri = os.path.join(args.report, "rank_independence.json")
     if os.path.exists(ri):
         R = json.load(open(ri))
-        entries = [d for v in R.values() for d in v.values()]
-        macro("rankComparisons", str(len(entries)))
-        macro("rankStructureFailures",
-              str(sum(1 for d in entries if not d["identical_geometry_and_order"])))
-        macro("rankSolutionPNinetyNine",
-              sci(max(d["p99_relative_solution_difference"] for d in entries), 1))
-        macro("rankSolutionMax",
-              sci(max(d["max_relative_solution_difference"] for d in entries), 1))
-        w = max(entries, key=lambda d: d["max_relative_solution_difference"])
+        entries = [d for v in R["comparisons_detail"].values() for d in v.values()]
+        macro("rankComparisons", str(R["comparisons"]))
+        macro("rankComparisonsExpected", str(R["comparisons_expected"]))
+        macro("rankStructureFailures", str(len(R["structure_failures"])))
+        macro("rankSolutionFailures", str(len(R["solution_failures"])))
+        macro("rankSolutionTolerance", sci(R["solution_tolerance"], 0))
+        macro("rankSolutionPNinetyNine", sci(R["p99_relative_solution_difference"], 1))
+        macro("rankSolutionMax", sci(R["max_relative_solution_difference"], 1))
+        w = max(entries, key=lambda d: d["max_relative_solution_difference"] or 0.0)
         if w.get("worst_at"):
             macro("rankWorstColumn", esc(str(w["worst_at"]["column"])))
             macro("rankWorstX", f"{w['worst_at']['x']:.4f}")
@@ -927,6 +935,19 @@ def main():
         macro("sanityCases", f"{sc['num_cases']}")
         total = sum(len(c["checks"]) for c in sc["cases"])
         macro("sanityTotalChecks", f"{total}")
+        macro("sanityAllChecksRan", "yes" if sc.get("all_checks_ran") else "no")
+        # The stagnation-pressure bound is deliberately permissive at low
+        # Reynolds number; quoting the measured excess next to the allowance
+        # shows how much room the check actually leaves.
+        for c in sc["cases"]:
+            for k in c["checks"]:
+                if k["name"] != "wall_cp_within_stagnation_bound":
+                    continue
+                tag = ("Cylinder" if "cylinder" in c["case_id"] and "re200" not in c["case_id"]
+                       else "InvMachTwo" if c["case_id"] == "naca0012_m200_inviscid" else None)
+                if tag:
+                    macro("stagExcess" + tag, f"{100.0 * k['value']['relative_excess']:.1f}")
+                    macro("stagAllowance" + tag, f"{100.0 * k['value']['allowance']:.0f}")
 
     tdir = os.path.join(args.report, "tables")
     os.makedirs(tdir, exist_ok=True)
