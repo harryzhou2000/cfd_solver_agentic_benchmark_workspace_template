@@ -86,7 +86,7 @@ void Solver::compute_gradients() {
 }
 
 void Solver::compute_limiter() {
-    double rs = recon_ramp_;
+    double recon_scale = recon_ramp_;
     for (int ci = 0; ci < num_owned_; ci++) {
         auto& cell = lm_->mesh.cells[ci];
         Vec4 Umax = U_[ci], Umin = U_[ci];
@@ -111,7 +111,7 @@ void Solver::compute_limiter() {
                 phi = std::min(phi, std::max(std::min(r, 1.0), 0.0));
             }
         }
-        limiter_phi_[ci] = phi * rs;
+        limiter_phi_[ci] = phi * recon_scale;
     }
 }
 
@@ -222,11 +222,9 @@ Vec4 Solver::viscous_flux(int fi) const {
 }
 
 Vec4 Solver::farfield_flux(int fi) const {
-    auto& face = lm_->mesh.faces[fi];
     Vec4 Uf = config_.freestream.state(config_.gas);
-    int ci = face.left_cell;
-    Vec4 UL = (ci >= 0) ? U_[ci] : Uf;
-    return rusanov_flux(UL, Uf, face.normal);
+    Vec4 UL = reconstruct_left(fi);
+    return roe_flux(UL, Uf, lm_->mesh.faces[fi].normal);
 }
 
 Vec4 Solver::slip_wall_flux(int fi) const {
@@ -292,7 +290,7 @@ void Solver::compute_residual() {
         } else {
             Vec4 UL = reconstruct_left(fi);
             Vec4 UR = reconstruct_right(fi);
-            flux = rusanov_flux(UL, UR, face.normal);
+            flux = roe_flux(UL, UR, face.normal);
             Vec4 fv = Vec4::Zero();
             if (config_.physics_mode == PhysicsMode::LAMINAR) fv = viscous_flux(fi);
             Vec4 net = (flux - fv) * face.area;
@@ -439,26 +437,13 @@ SolverStats Solver::run(const std::string& output_dir) {
         int max_steps = config_.run_control.max_steps;
         double target_reduction = config_.run_control.residual_reduction_target;
 
-        double prev_res = 1e30;
-        double best_res = 1e30;
-        int stall_count = 0;
-        bool phase2 = false;
         for (step = 1; step <= max_steps; step++) {
             double cfl;
-            if (!phase2) {
-                if (ramp_steps > 0 && step <= ramp_steps) {
-                    double frac = (double)(step-1) / ramp_steps;
-                    cfl = config_.run_control.cfl_initial + frac*(cfl_max - config_.run_control.cfl_initial);
-                } else cfl = cfl_max;
-                recon_ramp_ = 0.0;
-            } else {
-                cfl = 10.0;
-                recon_ramp_ = 1.0;
-            }
-            if (!phase2 && step > ramp_steps && best_res < res0) {
-                phase2 = true;
-                if (rank_ == 0) fprintf(stderr, "Switching to phase 2 (second-order, CFL=10) at step %d\n", step);
-            }
+            if (ramp_steps > 0 && step <= ramp_steps) {
+                double frac = (double)(step-1) / ramp_steps;
+                cfl = config_.run_control.cfl_initial + frac*(cfl_max - config_.run_control.cfl_initial);
+            } else cfl = cfl_max;
+            recon_ramp_ = std::min(1.0, 20.0 / std::max(cfl, 1.0));
 
             halo_.exchange(U_);
             compute_gradients();
