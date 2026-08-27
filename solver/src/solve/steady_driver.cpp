@@ -624,7 +624,12 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
         "%d; the best state has been restored and is what is reported and written out",
         last_residual, last_residual / best_residual, best_residual, best_step);
     logInfo(fallback);
-    outcome.notes += "  " + fallback;
+    // The note recorded at termination describes the state the march STOPPED at,
+    // which is no longer the state being reported.  Prefix the fallback so the
+    // note reads in the right order and cannot be quoted misleadingly: the
+    // reported residual and step are the restored ones, and the superseded
+    // termination note follows for the record.
+    outcome.notes = fallback + "  (superseded termination note: " + outcome.notes + ")";
     outcome.final_step = best_step;
     last_residual = best_residual;
   }
