@@ -337,7 +337,7 @@ SteadyResult runSteady(LocalMesh& lm,
             // Use frozen states_ref for LU-SGS off-diagonal lambda to guarantee diagonal
             // dominance throughout inner iterations (current states can have large delta_U
             // that inflates lambda and breaks convergence during vortex shedding / BL formation).
-            lusgsSolve(lm, cfg, residuals_cur, sr_frozen, states_ref, dt_local, gamma, mu, mach_ref_lm, dU);
+            lusgsSolve(lm, cfg, residuals_cur, sr_frozen, states_ref, dt_local, gamma, mu, mach_ref_lm, comm, dU);
 
             // Accumulate correction
            for (int i = 0; i < n_owned; i++)

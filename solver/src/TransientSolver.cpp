@@ -201,7 +201,7 @@ TransientResult runTransient(LocalMesh& lm,
             // Use frozen states_ref for LU-SGS off-diagonal lambda to guarantee diagonal
             // dominance throughout inner iterations -- current states accumulate large
             // delta_U during vortex shedding, inflating lambda and stalling convergence.
-            lusgsSolve(lm, cfg, residuals, sr_frozen, states_ref, dt_local, gamma, mu, 0.0, dU);
+            lusgsSolve(lm, cfg, residuals, sr_frozen, states_ref, dt_local, gamma, mu, 0.0, comm, dU);
 
             // Accumulate correction
             for (int i = 0; i < n_owned; i++)
