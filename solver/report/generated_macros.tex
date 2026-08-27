@@ -1,14 +1,231 @@
+\newcommand{\partRefCase}{naca0012\_m015\_inviscid}
+\newcommand{\partRefRanks}{8}
 \newcommand{\partEdgeCut}{439}
 \newcommand{\partLoadBalance}{1.0154}
 \newcommand{\partMinOwned}{2552}
 \newcommand{\partMaxOwned}{2642}
+\newcommand{\mpiMaxRelCdCyl}{$3.9\times 10^{-6}$}
+\newcommand{\mpiMaxAbsCdCyl}{$7.9\times 10^{-6}$}
+\newcommand{\mpiCdCyl}{2.0176}
+\newcommand{\mpiSpeedupTwoCyl}{2.03}
+\newcommand{\mpiSpeedupFourCyl}{3.65}
+\newcommand{\mpiEfficiencyFourCyl}{91}
+\newcommand{\mpiSpeedupEightCyl}{2.35}
+\newcommand{\mpiMaxRelCdNaca}{$1.1\times 10^{-2}$}
+\newcommand{\mpiMaxAbsCdNaca}{$1.1\times 10^{-5}$}
+\newcommand{\mpiCdNaca}{0.0010}
+\newcommand{\mpiSpeedupTwoNaca}{1.94}
+\newcommand{\mpiSpeedupFourNaca}{3.44}
+\newcommand{\mpiEfficiencyFourNaca}{86}
+\newcommand{\mpiSpeedupEightNaca}{2.18}
+\newcommand{\mpiMaxImbalance}{1.5}
+\newcommand{\cfThirtyChordLamMZeroOneFive}{0.0169}
+\newcommand{\separationXLamMZeroOneFive}{0.90}
+\newcommand{\cpMinLamMZeroOneFive}{-0.381}
+\newcommand{\cdpLamMZeroOneFive}{0.0191}
+\newcommand{\cdfLamMZeroOneFive}{0.0343}
+\newcommand{\machMaxLamMZeroOneFive}{0.17}
+\newcommand{\supersonicCellsLamMZeroOneFive}{0}
+\newcommand{\cfThirtyChordLamMZeroEightZero}{0.0146}
+\newcommand{\separationXLamMZeroEightZero}{0.55}
+\newcommand{\cpMinLamMZeroEightZero}{-0.609}
+\newcommand{\cdpLamMZeroEightZero}{0.0462}
+\newcommand{\cdfLamMZeroEightZero}{0.0307}
+\newcommand{\machMaxLamMZeroEightZero}{1.06}
+\newcommand{\supersonicCellsLamMZeroEightZero}{518}
+\newcommand{\cfThirtyChordLamMTwoZeroZero}{0.0212}
+\newcommand{\separationXLamMTwoZeroZero}{0.00}
+\newcommand{\cpMinLamMTwoZeroZero}{-0.114}
+\newcommand{\cdpLamMTwoZeroZero}{0.0971}
+\newcommand{\cdfLamMTwoZeroZero}{0.0413}
+\newcommand{\machMaxLamMTwoZeroZero}{2.12}
+\newcommand{\supersonicCellsLamMTwoZeroZero}{8230}
+\newcommand{\cfThirtyChordInvMZeroOneFive}{0.0000}
+\newcommand{\separationXInvMZeroOneFive}{none}
+\newcommand{\cpMinInvMZeroOneFive}{-1.069}
+\newcommand{\cdpInvMZeroOneFive}{0.0010}
+\newcommand{\cdfInvMZeroOneFive}{0.0000}
+\newcommand{\machMaxInvMZeroOneFive}{0.18}
+\newcommand{\supersonicCellsInvMZeroOneFive}{0}
+\newcommand{\cfThirtyChordInvMZeroEightZero}{0.0000}
+\newcommand{\separationXInvMZeroEightZero}{none}
+\newcommand{\cpMinInvMZeroEightZero}{-0.932}
+\newcommand{\cdpInvMZeroEightZero}{0.0085}
+\newcommand{\cdfInvMZeroEightZero}{0.0000}
+\newcommand{\machMaxInvMZeroEightZero}{1.29}
+\newcommand{\supersonicCellsInvMZeroEightZero}{3449}
+\newcommand{\cfThirtyChordInvMTwoZeroZero}{0.0000}
+\newcommand{\separationXInvMTwoZeroZero}{none}
+\newcommand{\cpMinInvMTwoZeroZero}{-0.349}
+\newcommand{\cdpInvMTwoZeroZero}{0.0919}
+\newcommand{\cdfInvMTwoZeroZero}{0.0000}
+\newcommand{\machMaxInvMTwoZeroZero}{2.41}
+\newcommand{\supersonicCellsInvMTwoZeroZero}{18490}
+\newcommand{\blasiusCfThirty}{0.0171}
+\newcommand{\cflSuppliedDeviation}{0.58}
+\newcommand{\cflProductionDeviation}{0.031}
+\newcommand{\cflSuppliedWall}{19.6}
+\newcommand{\cflProductionWall}{3.5}
+\newcommand{\cflSuppliedInner}{147}
+\newcommand{\cflProductionInner}{30}
+\newcommand{\cflSpreadAtLooseTarget}{0.31}
+\newcommand{\cflSpreadAtTightTarget}{$1.6\times 10^{-4}$}
+\newcommand{\mmsOrderSecond}{2.30}
+\newcommand{\mmsOrderSecondLimited}{2.03}
+\newcommand{\mmsOrderFirst}{0.92}
+\newcommand{\truncOrderSecond}{1.33}
+\newcommand{\truncOrderFirst}{0.54}
+\newcommand{\freestreamResidual}{$2.73\times 10^{-10}$}
+\newcommand{\linearGradientError}{$7.97\times 10^{-8}$}
+\newcommand{\linearReconError}{$6.66\times 10^{-16}$}
+\newcommand{\stFft}{0.1859}
+\newcommand{\stZc}{0.1857}
+\newcommand{\meanCdReTwoHundred}{1.2661}
+\newcommand{\clAmpReTwoHundred}{0.5745}
+\newcommand{\clRmsReTwoHundred}{0.4069}
+\newcommand{\cdAmpReTwoHundred}{0.0280}
+\newcommand{\sheddingPeriods}{27}
+\newcommand{\meanPressureDragReTwoHundred}{1.0243}
+\newcommand{\meanViscousDragReTwoHundred}{0.2417}
 \newcommand{\nacaCells}{20816}
 \newcommand{\nacaFaces}{36498}
 \newcommand{\nacaNodes}{15682}
 \newcommand{\nacaBFaces}{484}
-\newcommand{\cdNacaZeroZeroOneTwoMZeroOneFiveInviscid}{-0.00072}
-\newcommand{\clNacaZeroZeroOneTwoMZeroOneFiveInviscid}{+0.00027}
-\newcommand{\ordersNacaZeroZeroOneTwoMZeroOneFiveInviscid}{3.80}
-\newcommand{\wallNacaZeroZeroOneTwoMZeroOneFiveInviscid}{183}
-\newcommand{\numCases}{1}
-\newcommand{\numFailedCases}{1}
+\newcommand{\cylCells}{10185}
+\newcommand{\cylFaces}{20180}
+\newcommand{\cylNodes}{9995}
+\newcommand{\cylBFaces}{120}
+\newcommand{\cylZones}{2}
+\newcommand{\cdNacaZeroZeroOneTwoMZeroOneFiveInviscid}{0.00103}
+\newcommand{\clNacaZeroZeroOneTwoMZeroOneFiveInviscid}{+0.00015}
+\newcommand{\ordersNacaZeroZeroOneTwoMZeroOneFiveInviscid}{4.32}
+\newcommand{\wallNacaZeroZeroOneTwoMZeroOneFiveInviscid}{25}
+\newcommand{\cdNacaZeroZeroOneTwoMZeroEightZeroInviscid}{0.00854}
+\newcommand{\clNacaZeroZeroOneTwoMZeroEightZeroInviscid}{-0.00113}
+\newcommand{\ordersNacaZeroZeroOneTwoMZeroEightZeroInviscid}{4.02}
+\newcommand{\wallNacaZeroZeroOneTwoMZeroEightZeroInviscid}{146}
+\newcommand{\cdNacaZeroZeroOneTwoMTwoZeroZeroInviscid}{0.09192}
+\newcommand{\clNacaZeroZeroOneTwoMTwoZeroZeroInviscid}{+0.00080}
+\newcommand{\ordersNacaZeroZeroOneTwoMTwoZeroZeroInviscid}{3.07}
+\newcommand{\wallNacaZeroZeroOneTwoMTwoZeroZeroInviscid}{18}
+\newcommand{\cdNacaZeroZeroOneTwoMZeroOneFiveLaminarReFiveZeroZeroZero}{0.05339}
+\newcommand{\clNacaZeroZeroOneTwoMZeroOneFiveLaminarReFiveZeroZeroZero}{-0.00119}
+\newcommand{\ordersNacaZeroZeroOneTwoMZeroOneFiveLaminarReFiveZeroZeroZero}{6.08}
+\newcommand{\wallNacaZeroZeroOneTwoMZeroOneFiveLaminarReFiveZeroZeroZero}{43}
+\newcommand{\cdNacaZeroZeroOneTwoMZeroEightZeroLaminarReFiveZeroZeroZero}{0.07691}
+\newcommand{\clNacaZeroZeroOneTwoMZeroEightZeroLaminarReFiveZeroZeroZero}{+0.00163}
+\newcommand{\ordersNacaZeroZeroOneTwoMZeroEightZeroLaminarReFiveZeroZeroZero}{4.76}
+\newcommand{\wallNacaZeroZeroOneTwoMZeroEightZeroLaminarReFiveZeroZeroZero}{83}
+\newcommand{\cdNacaZeroZeroOneTwoMTwoZeroZeroLaminarReFiveZeroZeroZero}{0.13840}
+\newcommand{\clNacaZeroZeroOneTwoMTwoZeroZeroLaminarReFiveZeroZeroZero}{+0.00013}
+\newcommand{\ordersNacaZeroZeroOneTwoMTwoZeroZeroLaminarReFiveZeroZeroZero}{5.44}
+\newcommand{\wallNacaZeroZeroOneTwoMTwoZeroZeroLaminarReFiveZeroZeroZero}{187}
+\newcommand{\cdCylinderMZeroOneZeroLaminarReTwoZero}{2.01762}
+\newcommand{\clCylinderMZeroOneZeroLaminarReTwoZero}{+0.00064}
+\newcommand{\ordersCylinderMZeroOneZeroLaminarReTwoZero}{5.37}
+\newcommand{\wallCylinderMZeroOneZeroLaminarReTwoZero}{44}
+\newcommand{\cdCylinderMZeroOneZeroLaminarReTwoZeroZero}{1.26606}
+\newcommand{\clCylinderMZeroOneZeroLaminarReTwoZeroZero}{+0.00173}
+\newcommand{\ordersCylinderMZeroOneZeroLaminarReTwoZeroZero}{6.29}
+\newcommand{\wallCylinderMZeroOneZeroLaminarReTwoZeroZero}{2311}
+\newcommand{\numCases}{8}
+\newcommand{\numFailedCases}{0}
+\newcommand{\cdFirstOrderLaminar}{0.06801}
+\newcommand{\cdfFirstOrderLaminar}{0.03968}
+\newcommand{\cdpFirstOrderLaminar}{0.02833}
+\newcommand{\cdFirstOrderExcess}{27}
+\newcommand{\cdReTwoHundredSupplied}{0.937914}
+\newcommand{\cdReTwoHundredProduction}{0.937905}
+\newcommand{\cdReTwoHundredSettingsDiff}{$9.78\times 10^{-6}$}
+\newcommand{\wallReTwoHundredSupplied}{605}
+\newcommand{\wallReTwoHundredProduction}{176}
+\newcommand{\innerReTwoHundredSupplied}{122}
+\newcommand{\innerReTwoHundredProduction}{33}
+\newcommand{\tReTwoHundredCrosscheck}{20}
+\newcommand{\restartMaxDifference}{exactly zero}
+\newcommand{\restartPassed}{yes}
+\newcommand{\cdFrozenMachZeroEight}{0.008541}
+\newcommand{\cdUnfrozenMachZeroEight}{0.008692}
+\newcommand{\cdFreezeDiffPctMachZeroEight}{1.76}
+\newcommand{\residualStallUnfrozenMachZeroEight}{$1.4\times 10^{-3}$}
+\newcommand{\stepsUnfrozenMachZeroEight}{20000}
+\newcommand{\cdScatterPctMachZeroEight}{0.13}
+\newcommand{\cdDriftPctMachZeroEight}{0.25}
+\newcommand{\freezeStepMachZeroEight}{9000}
+\newcommand{\cdFrozenMachTwo}{0.09192}
+\newcommand{\cdUnfrozenMachTwo}{0.09192}
+\newcommand{\cdFreezeDiffPctMachTwo}{0.00}
+\newcommand{\residualStallUnfrozenMachTwo}{$8.6\times 10^{-4}$}
+\newcommand{\stepsUnfrozenMachTwo}{2554}
+\newcommand{\cdScatterPctMachTwo}{0.44}
+\newcommand{\cdDriftPctMachTwo}{0.30}
+\newcommand{\freezeStepMachTwo}{15000}
+\newcommand{\unitTestCases}{20}
+\newcommand{\unitTestFailures}{0}
+\newcommand{\unitTestAssertions}{270}
+\newcommand{\unitAssertionFailures}{0}
+\newcommand{\nacaMaxAspectRatio}{2821}
+\newcommand{\nacaMedianCellArea}{$5.9\times 10^{-6}$}
+\newcommand{\nacaMinCellArea}{$1.5\times 10^{-9}$}
+\newcommand{\meshAsymUpperCells}{1206}
+\newcommand{\meshAsymLowerCells}{1222}
+\newcommand{\meshAsymFractionPct}{38}
+\newcommand{\sliverCells}{232}
+\newcommand{\sliverMeanArea}{$9.9\times 10^{-9}$}
+\newcommand{\sliverAreaFraction}{$1.1\times 10^{-10}$}
+\newcommand{\cylinderMaxAspectRatio}{16}
+\newcommand{\linfPlateauMin}{15}
+\newcommand{\linfPlateauMax}{833}
+\newcommand{\blThicknessMachTwo}{0.062}
+\newcommand{\blOverHalfThickness}{1.18}
+\newcommand{\blasiusComputedCf}{0.01682}
+\newcommand{\blasiusReferenceCf}{0.01714}
+\newcommand{\blasiusDifferencePct}{1.9}
+\newcommand{\pitotCeilingMachTwo}{1.657}
+\newcommand{\shockFixCdFixed}{0.09192}
+\newcommand{\shockFixClFixed}{$8.0\times 10^{-4}$}
+\newcommand{\shockFixClPercentOfDragFixed}{0.9}
+\newcommand{\shockFixCpMaxFixed}{1.768}
+\newcommand{\shockFixCpExcessFixed}{7}
+\newcommand{\shockFixSymFixed}{$3.1\times 10^{-2}$}
+\newcommand{\shockFixCdUnfixed}{0.08789}
+\newcommand{\shockFixClUnfixed}{$4.6\times 10^{-3}$}
+\newcommand{\shockFixClPercentOfDragUnfixed}{5.2}
+\newcommand{\shockFixCpMaxUnfixed}{2.120}
+\newcommand{\shockFixCpExcessUnfixed}{28}
+\newcommand{\shockFixSymUnfixed}{$2.5\times 10^{-1}$}
+\newcommand{\shockFixCdRusanov}{0.09202}
+\newcommand{\shockFixClRusanov}{$6.0\times 10^{-5}$}
+\newcommand{\shockFixClPercentOfDragRusanov}{0.1}
+\newcommand{\shockFixCpMaxRusanov}{1.645}
+\newcommand{\shockFixCpExcessRusanov}{-1}
+\newcommand{\shockFixSymRusanov}{$3.7\times 10^{-3}$}
+\newcommand{\shockFixVsRusanovPct}{0.1}
+\newcommand{\shockFixVsUnfixedPct}{4.4}
+\newcommand{\shockFixStepRatio}{6.0}
+\newcommand{\symRmsLamMachTwo}{$1.0\times 10^{-2}$}
+\newcommand{\clAbsLamMachTwo}{$1.3\times 10^{-4}$}
+\newcommand{\symRmsInvMachTwo}{$3.1\times 10^{-2}$}
+\newcommand{\clAbsInvMachTwo}{$8.0\times 10^{-4}$}
+\newcommand{\shockFixDiffCylinder}{$4.0\times 10^{-7}$}
+\newcommand{\shockFixDiffSubsonicLaminar}{$2.3\times 10^{-6}$}
+\newcommand{\shockFixDiffTransonic}{$1.6\times 10^{-3}$}
+\newcommand{\shockFixInactiveMaxDiff}{$2.3\times 10^{-6}$}
+\newcommand{\shockFixInactiveCases}{2}
+\newcommand{\roePositivityFallbacks}{0}
+\newcommand{\roeStepsMachTwo}{2404}
+\newcommand{\roeOrdersMachTwo}{3.00}
+\newcommand{\cppLines}{6\,518}
+\newcommand{\pythonLines}{2\,716}
+\newcommand{\rankComparisons}{12}
+\newcommand{\rankStructureFailures}{0}
+\newcommand{\rankSolutionPNinetyNine}{$7.2\times 10^{-4}$}
+\newcommand{\rankSolutionMax}{$9.4\times 10^{-3}$}
+\newcommand{\rankWorstColumn}{cp}
+\newcommand{\rankWorstX}{1.0052}
+\newcommand{\reTwoHundredBelowSt}{2.2}
+\newcommand{\reTwoHundredBelowMeanCd}{4.1}
+\newcommand{\reTwoHundredBelowClAmp}{4.3}
+\newcommand{\sanityFailures}{0}
+\newcommand{\sanityCases}{8}
+\newcommand{\sanityTotalChecks}{118}

@@ -1,0 +1,217 @@
+{
+  "case_id": "naca0012_m015_laminar_re5000",
+  "description": "Truncation error of the finite-volume residual against the analytic flux divergence of a smooth manufactured Euler state, on internally generated mixed triangle/quadrilateral meshes of [0,1]^2 obtained by a smooth analytic distortion of a Cartesian grid (optional extra random node jitter through --mesh-jitter; the runs reported here use jitter 0). Cells near the boundary are excluded so the interior scheme is measured in isolation.",
+  "first_order_levels": [
+    {
+      "err_l1": 0.5804481152545568,
+      "err_l2": 0.7832513600523223,
+      "err_linf": 2.599327407734412,
+      "mean_h": 0.05006406000078471,
+      "n": 16,
+      "num_cells": 384,
+      "num_sampled": 126
+    },
+    {
+      "err_l1": 0.32761365704671574,
+      "err_l2": 0.5585450227098399,
+      "err_linf": 2.450088703174146,
+      "mean_h": 0.025248370100619578,
+      "n": 32,
+      "num_cells": 1536,
+      "num_sampled": 860
+    },
+    {
+      "err_l1": 0.22560286383235773,
+      "err_l2": 0.4683291893217442,
+      "err_linf": 2.408562575226231,
+      "mean_h": 0.012559353551814539,
+      "n": 64,
+      "num_cells": 6144,
+      "num_sampled": 4670
+    },
+    {
+      "err_l1": 0.1904917363879031,
+      "err_l2": 0.43475419658181436,
+      "err_linf": 2.405500331951792,
+      "mean_h": 0.006263825062561883,
+      "n": 128,
+      "num_cells": 24576,
+      "num_sampled": 21540
+    }
+  ],
+  "freestream_residual_linf": 2.726988849551085e-10,
+  "linear_gradient_max_error": 7.968867978686012e-08,
+  "linear_reconstruction_max_error": 6.661338147750939e-16,
+  "mesh_jitter_fraction": 0.0,
+  "mms_description": "Method of manufactured solutions: a C-infinity, compactly supported perturbation of the uniform state is used, so the manufactured state coincides with the freestream on the whole boundary and the ordinary characteristic farfield condition is exact. The steady problem with the analytic source term is solved to machine convergence and the error is measured against exact cell averages.",
+  "mms_first_order": [
+    {
+      "err_l1": 0.011812075004756025,
+      "err_l2": 0.0176355234372273,
+      "err_linf": 0.06528536058039698,
+      "mean_h": 0.05420372753747254,
+      "n": 16,
+      "num_cells": 384,
+      "residual_reduction_orders": 11.029270420263455,
+      "steps": 369
+    },
+    {
+      "err_l1": 0.006338957294663426,
+      "err_l2": 0.009607405036146443,
+      "err_linf": 0.03759475483404827,
+      "mean_h": 0.027110531285000995,
+      "n": 32,
+      "num_cells": 1536,
+      "residual_reduction_orders": 11.010248375117358,
+      "steps": 559
+    },
+    {
+      "err_l1": 0.0033891431243421337,
+      "err_l2": 0.005196429091981905,
+      "err_linf": 0.019987575361052796,
+      "mean_h": 0.013556366677718507,
+      "n": 64,
+      "num_cells": 6144,
+      "residual_reduction_orders": 11.012073571315854,
+      "steps": 869
+    },
+    {
+      "err_l1": 0.001755225561694145,
+      "err_l2": 0.0027111725780674207,
+      "err_linf": 0.011747196966902846,
+      "mean_h": 0.006778321514752455,
+      "n": 128,
+      "num_cells": 24576,
+      "residual_reduction_orders": 11.006131769173072,
+      "steps": 1428
+    }
+  ],
+  "mms_observed_order_first_order": 0.9156714393309185,
+  "mms_observed_order_second_order_limited": 2.0297398447673713,
+  "mms_observed_order_second_order_unlimited": 2.2984957594162956,
+  "mms_second_order_limited": [
+    {
+      "err_l1": 0.002967340764625024,
+      "err_l2": 0.0038090544746511297,
+      "err_linf": 0.014448912413673428,
+      "mean_h": 0.05420372753747254,
+      "n": 16,
+      "num_cells": 384,
+      "residual_reduction_orders": 11.010336313662698,
+      "steps": 345
+    },
+    {
+      "err_l1": 0.0005396815373003072,
+      "err_l2": 0.0007470454156341845,
+      "err_linf": 0.0035356484575985937,
+      "mean_h": 0.027110531285000995,
+      "n": 32,
+      "num_cells": 1536,
+      "residual_reduction_orders": 11.004694385136865,
+      "steps": 528
+    },
+    {
+      "err_l1": 0.00012676806351768919,
+      "err_l2": 0.00018626284142595555,
+      "err_linf": 0.0008363758703293148,
+      "mean_h": 0.013556366677718507,
+      "n": 64,
+      "num_cells": 6144,
+      "residual_reduction_orders": 11.010655751598744,
+      "steps": 861
+    },
+    {
+      "err_l1": 4.423270506278379e-05,
+      "err_l2": 6.782437504869302e-05,
+      "err_linf": 0.0004170100543963162,
+      "mean_h": 0.006778321514752455,
+      "n": 128,
+      "num_cells": 24576,
+      "residual_reduction_orders": 11.006806293969971,
+      "steps": 1431
+    }
+  ],
+  "mms_second_order_unlimited": [
+    {
+      "err_l1": 0.0029501386831306147,
+      "err_l2": 0.0037755248934520716,
+      "err_linf": 0.014129983789094568,
+      "mean_h": 0.05420372753747254,
+      "n": 16,
+      "num_cells": 384,
+      "residual_reduction_orders": 11.018334706428808,
+      "steps": 345
+    },
+    {
+      "err_l1": 0.0005276151568323345,
+      "err_l2": 0.0007326304939447301,
+      "err_linf": 0.0035189408590353102,
+      "mean_h": 0.027110531285000995,
+      "n": 32,
+      "num_cells": 1536,
+      "residual_reduction_orders": 11.005089224340729,
+      "steps": 528
+    },
+    {
+      "err_l1": 0.0001109963517279387,
+      "err_l2": 0.00016584352703481826,
+      "err_linf": 0.0008256547918973581,
+      "mean_h": 0.013556366677718507,
+      "n": 64,
+      "num_cells": 6144,
+      "residual_reduction_orders": 11.000571992997651,
+      "steps": 859
+    },
+    {
+      "err_l1": 2.452253245122728e-05,
+      "err_l2": 3.649893505371283e-05,
+      "err_linf": 0.00018614469367242336,
+      "mean_h": 0.006778321514752455,
+      "n": 128,
+      "num_cells": 24576,
+      "residual_reduction_orders": 11.00117196627023,
+      "steps": 1432
+    }
+  ],
+  "observed_order_first_order_l1": 0.5353955345262296,
+  "observed_order_second_order_l1": 1.3308798755519269,
+  "observed_order_second_order_l2": 1.1029611229943304,
+  "second_order_levels": [
+    {
+      "err_l1": 0.15884642755175132,
+      "err_l2": 0.1934720127394121,
+      "err_linf": 0.47100036116024063,
+      "mean_h": 0.05006406000078471,
+      "n": 16,
+      "num_cells": 384,
+      "num_sampled": 126
+    },
+    {
+      "err_l1": 0.05464606122837084,
+      "err_l2": 0.07747706970229587,
+      "err_linf": 0.2561514237253357,
+      "mean_h": 0.025248370100619578,
+      "n": 32,
+      "num_cells": 1536,
+      "num_sampled": 860
+    },
+    {
+      "err_l1": 0.019556513605718598,
+      "err_l2": 0.032906613281924936,
+      "err_linf": 0.14878488829887643,
+      "mean_h": 0.012559353551814539,
+      "n": 64,
+      "num_cells": 6144,
+      "num_sampled": 4670
+    },
+    {
+      "err_l1": 0.01031399690792411,
+      "err_l2": 0.02009323261742385,
+      "err_linf": 0.10242102882451154,
+      "mean_h": 0.006263825062561883,
+      "n": 128,
+      "num_cells": 24576,
+      "num_sampled": 21540
+    }
+  ]
+}

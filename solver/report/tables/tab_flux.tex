@@ -1,0 +1,19 @@
+% ---- Roe vs HLLC cross-check
+\footnotesize
+\begin{tabular}{llrrrrl}
+\toprule
+case & flux & $C_L$ & $C_D$ & residual orders & steps & status\\
+\midrule
+NACA0012 $M_\infty=0.15$ inviscid & hllc & +0.000147 & 0.001025 & 4.32 & 1864 & converged\\
+ & roe + Harten--Yee & +0.000053 & 0.001021 & 4.29 & 1894 & converged\\
+ & relative $C_D$ difference & & $4.53\times 10^{-3}$ & & & \\
+\midrule
+NACA0012 $M_\infty=2.0$ inviscid & hllc & +0.000797 & 0.091919 & 3.07 & 2554 & converged\\
+ & roe + Harten--Yee & +0.000500 & 0.091265 & 3.00 & 2404 & converged\\
+ & relative $C_D$ difference & & $7.11\times 10^{-3}$ & & & \\
+\midrule
+cylinder $M_\infty=0.1$ laminar $Re=20$ & hllc & +0.000643 & 2.017617 & 5.37 & 2806 & converged\\
+ & roe + Harten--Yee & +0.000654 & 2.017618 & 5.37 & 2805 & converged\\
+ & relative $C_D$ difference & & $4.12\times 10^{-7}$ & & & \\
+\bottomrule
+\end{tabular}

@@ -1,0 +1,1017 @@
+{
+  "generated_by": "tools/sanity_checks.py",
+  "cases": [
+    {
+      "case_id": "cylinder_m010_laminar_re20",
+      "convergence_status": "converged",
+      "completed": true,
+      "mpi_ranks": 8,
+      "final_cl": 0.0006431372122,
+      "final_cd": 2.017617016,
+      "mean_cd_last_quarter": 2.0244278779330487,
+      "cl_rms_last_quarter": 6.854342535994098e-05,
+      "residual_reduction_orders": 5.372517655973006,
+      "checks": [
+        {
+          "name": "field_positive_density",
+          "passed": true,
+          "detail": "minimum cell density in field_final.vtu",
+          "value": 0.9916961055696482
+        },
+        {
+          "name": "field_positive_pressure",
+          "passed": true,
+          "detail": "minimum cell pressure in field_final.vtu",
+          "value": 70.932345686199
+        },
+        {
+          "name": "field_all_finite",
+          "passed": true,
+          "detail": "all field variables are finite",
+          "value": null
+        },
+        {
+          "name": "surface_cp_varies",
+          "passed": true,
+          "detail": "range of C_p over the wall",
+          "value": 2.2616481117
+        },
+        {
+          "name": "wall_cp_within_stagnation_bound",
+          "passed": true,
+          "detail": "excess of the maximum wall C_p over the inviscid stagnation bound, against a Reynolds-dependent viscous allowance",
+          "value": {
+            "cp_max": 1.268337043,
+            "bound": 1.0025025006248671,
+            "relative_excess": 0.26517095190230083,
+            "allowance": 0.547213595499958
+          }
+        },
+        {
+          "name": "cylinder_positive_mean_drag",
+          "passed": true,
+          "detail": "mean C_D over the last quarter of the history",
+          "value": 2.0244278779330487
+        },
+        {
+          "name": "no_slip_wall_velocity_zero",
+          "passed": true,
+          "detail": "maximum reported wall speed on no-slip walls (exactly zero by construction of the boundary state)",
+          "value": 0.0
+        },
+        {
+          "name": "no_slip_skin_friction_nonzero",
+          "passed": true,
+          "detail": "maximum |C_f| on the wall",
+          "value": 0.7878985429
+        },
+        {
+          "name": "viscous_force_column_nonzero",
+          "passed": true,
+          "detail": "final viscous (skin-friction) drag coefficient",
+          "value": 0.7978020264
+        },
+        {
+          "name": "no_slip_normal_viscous_traction_zero",
+          "passed": true,
+          "detail": "|normal viscous drag| on no-slip walls",
+          "value": 5.243494213834306e-18
+        },
+        {
+          "name": "drag_split_sums_to_total",
+          "passed": true,
+          "detail": "pressure + skin-friction drag equals the total C_D",
+          "value": {
+            "sum": 2.0176170154,
+            "total": 2.017617016
+          }
+        },
+        {
+          "name": "final_force_row_matches_final_step",
+          "passed": true,
+          "detail": "last forces.csv step equals run_status final_step",
+          "value": {
+            "forces_step": 2806,
+            "final_step": 2806
+          }
+        },
+        {
+          "name": "farfield_uniform",
+          "passed": true,
+          "detail": "relative density variation in the outer 40% of the domain radius",
+          "value": 0.00038129372837276336
+        },
+        {
+          "name": "figures_mach_and_pressure_present",
+          "passed": true,
+          "detail": "figure manifest contains separate Mach and pressure entries",
+          "value": [
+            "force_coefficients",
+            "mach",
+            "mpi_rank_id",
+            "pressure",
+            "residual_l2",
+            "surface_cp_and_cf",
+            "velocity_magnitude",
+            "vorticity"
+          ]
+        }
+      ],
+      "all_checks_passed": true,
+      "status_consistent": true
+    },
+    {
+      "case_id": "cylinder_m010_laminar_re200",
+      "convergence_status": "statistically_periodic",
+      "completed": true,
+      "mpi_ranks": 8,
+      "final_cl": 0.2740840946,
+      "final_cd": 1.269829308,
+      "mean_cd_last_quarter": 1.2660991271583788,
+      "cl_rms_last_quarter": 0.40690327089208306,
+      "residual_reduction_orders": 6.294722344023135,
+      "checks": [
+        {
+          "name": "field_positive_density",
+          "passed": true,
+          "detail": "minimum cell density in field_final.vtu",
+          "value": 0.9886028431697313
+        },
+        {
+          "name": "field_positive_pressure",
+          "passed": true,
+          "detail": "minimum cell pressure in field_final.vtu",
+          "value": 70.70433652674711
+        },
+        {
+          "name": "field_all_finite",
+          "passed": true,
+          "detail": "all field variables are finite",
+          "value": null
+        },
+        {
+          "name": "surface_cp_varies",
+          "passed": true,
+          "detail": "range of C_p over the wall",
+          "value": 2.489899527
+        },
+        {
+          "name": "wall_cp_within_stagnation_bound",
+          "passed": true,
+          "detail": "excess of the maximum wall C_p over the inviscid stagnation bound, against a Reynolds-dependent viscous allowance",
+          "value": {
+            "cp_max": 1.040408979,
+            "bound": 1.0025025006248671,
+            "relative_excess": 0.037811854186403974,
+            "allowance": 0.2414213562373095
+          }
+        },
+        {
+          "name": "cylinder_positive_mean_drag",
+          "passed": true,
+          "detail": "mean C_D over the last quarter of the history",
+          "value": 1.2660991271583788
+        },
+        {
+          "name": "transient_unsteady_lift",
+          "passed": true,
+          "detail": "RMS of C_L over the last quarter of the history",
+          "value": 0.40690327089208306
+        },
+        {
+          "name": "transient_inner_target_met",
+          "passed": true,
+          "detail": "fraction of physical steps meeting the inner residual target",
+          "value": 1.0
+        },
+        {
+          "name": "transient_reached_final_time",
+          "passed": true,
+          "detail": "final physical time",
+          "value": 300.0
+        },
+        {
+          "name": "no_slip_wall_velocity_zero",
+          "passed": true,
+          "detail": "maximum reported wall speed on no-slip walls (exactly zero by construction of the boundary state)",
+          "value": 0.0
+        },
+        {
+          "name": "no_slip_skin_friction_nonzero",
+          "passed": true,
+          "detail": "maximum |C_f| on the wall",
+          "value": 0.3286253131
+        },
+        {
+          "name": "viscous_force_column_nonzero",
+          "passed": true,
+          "detail": "final viscous (skin-friction) drag coefficient",
+          "value": 0.2429526932
+        },
+        {
+          "name": "no_slip_normal_viscous_traction_zero",
+          "passed": true,
+          "detail": "|normal viscous drag| on no-slip walls",
+          "value": 1.255088244837895e-18
+        },
+        {
+          "name": "drag_split_sums_to_total",
+          "passed": true,
+          "detail": "pressure + skin-friction drag equals the total C_D",
+          "value": {
+            "sum": 1.2698293072,
+            "total": 1.269829308
+          }
+        },
+        {
+          "name": "final_force_row_matches_final_step",
+          "passed": true,
+          "detail": "last forces.csv step equals run_status final_step",
+          "value": {
+            "forces_step": 30000,
+            "final_step": 30000
+          }
+        },
+        {
+          "name": "farfield_uniform",
+          "passed": true,
+          "detail": "relative density variation in the outer 40% of the domain radius",
+          "value": 0.00025628142712879026
+        },
+        {
+          "name": "figures_mach_and_pressure_present",
+          "passed": true,
+          "detail": "figure manifest contains separate Mach and pressure entries",
+          "value": [
+            "force_coefficients",
+            "lift_drag_and_spectrum",
+            "mach",
+            "mpi_rank_id",
+            "pressure",
+            "residual_l2",
+            "surface_cp_and_cf",
+            "velocity_magnitude",
+            "vorticity"
+          ]
+        }
+      ],
+      "all_checks_passed": true,
+      "status_consistent": true
+    },
+    {
+      "case_id": "naca0012_m015_inviscid",
+      "convergence_status": "converged",
+      "completed": true,
+      "mpi_ranks": 8,
+      "final_cl": 0.0001467761733,
+      "final_cd": 0.001025439799,
+      "mean_cd_last_quarter": 0.0012492277706711563,
+      "cl_rms_last_quarter": 0.003547621943061193,
+      "residual_reduction_orders": 4.320988864026371,
+      "checks": [
+        {
+          "name": "field_positive_density",
+          "passed": true,
+          "detail": "minimum cell density in field_final.vtu",
+          "value": 0.9819023373707709
+        },
+        {
+          "name": "field_positive_pressure",
+          "passed": true,
+          "detail": "minimum cell pressure in field_final.vtu",
+          "value": 31.211335667755627
+        },
+        {
+          "name": "field_all_finite",
+          "passed": true,
+          "detail": "all field variables are finite",
+          "value": null
+        },
+        {
+          "name": "inviscid_total_enthalpy_uniform",
+          "passed": true,
+          "detail": "area-weighted RMS of |H-H_inf|/H_inf over the domain (pointwise max 5.079e-03)",
+          "value": 5.895989497972516e-07
+        },
+        {
+          "name": "surface_cp_varies",
+          "passed": true,
+          "detail": "range of C_p over the wall",
+          "value": 2.0724951430000003
+        },
+        {
+          "name": "wall_cp_within_stagnation_bound",
+          "passed": true,
+          "detail": "excess of the maximum wall C_p over the inviscid stagnation bound, against a Reynolds-dependent viscous allowance",
+          "value": {
+            "cp_max": 1.003102984,
+            "bound": 1.0056376633659232,
+            "relative_excess": -0.0025204698056349654,
+            "allowance": 0.1
+          }
+        },
+        {
+          "name": "naca_zero_lift_symmetry",
+          "passed": true,
+          "detail": "|C_L| at zero angle of attack",
+          "value": 0.0001467761733
+        },
+        {
+          "name": "naca_nontrivial_solution",
+          "passed": true,
+          "detail": "surface C_p range and |C_D| are not trivially zero",
+          "value": {
+            "cp_range": 2.0724951430000003,
+            "cd": 0.001025439799
+          }
+        },
+        {
+          "name": "slip_wall_normal_velocity_zero",
+          "passed": true,
+          "detail": "maximum |u.n| on slip walls, recomputed from surface.csv (limited by the 10-digit file precision)",
+          "value": 9.070261208776742e-11
+        },
+        {
+          "name": "slip_wall_tangential_velocity_nonzero",
+          "passed": true,
+          "detail": "maximum |u.t| on slip walls",
+          "value": 0.9989952239050659
+        },
+        {
+          "name": "inviscid_viscous_columns_negligible",
+          "passed": true,
+          "detail": "viscous force columns of the inviscid case",
+          "value": {
+            "viscous_drag": 0.0,
+            "viscous_lift": 0.0
+          }
+        },
+        {
+          "name": "final_force_row_matches_final_step",
+          "passed": true,
+          "detail": "last forces.csv step equals run_status final_step",
+          "value": {
+            "forces_step": 1864,
+            "final_step": 1864
+          }
+        },
+        {
+          "name": "farfield_uniform",
+          "passed": true,
+          "detail": "relative density variation in the outer 40% of the domain radius",
+          "value": 1.6469587133665238e-06
+        },
+        {
+          "name": "figures_mach_and_pressure_present",
+          "passed": true,
+          "detail": "figure manifest contains separate Mach and pressure entries",
+          "value": [
+            "force_coefficients",
+            "mach",
+            "mpi_rank_id",
+            "pressure",
+            "residual_l2",
+            "surface_cp",
+            "velocity_magnitude",
+            "vorticity"
+          ]
+        }
+      ],
+      "all_checks_passed": true,
+      "status_consistent": true
+    },
+    {
+      "case_id": "naca0012_m015_laminar_re5000",
+      "convergence_status": "converged",
+      "completed": true,
+      "mpi_ranks": 8,
+      "final_cl": -0.001185683423,
+      "final_cd": 0.05338745123,
+      "mean_cd_last_quarter": 0.05358174170048886,
+      "cl_rms_last_quarter": 0.0001955029916554819,
+      "residual_reduction_orders": 6.075659078463485,
+      "checks": [
+        {
+          "name": "field_positive_density",
+          "passed": true,
+          "detail": "minimum cell density in field_final.vtu",
+          "value": 0.9910505551184937
+        },
+        {
+          "name": "field_positive_pressure",
+          "passed": true,
+          "detail": "minimum cell pressure in field_final.vtu",
+          "value": 31.55526903080062
+        },
+        {
+          "name": "field_all_finite",
+          "passed": true,
+          "detail": "all field variables are finite",
+          "value": null
+        },
+        {
+          "name": "surface_cp_varies",
+          "passed": true,
+          "detail": "range of C_p over the wall",
+          "value": 1.4133151456000002
+        },
+        {
+          "name": "wall_cp_within_stagnation_bound",
+          "passed": true,
+          "detail": "excess of the maximum wall C_p over the inviscid stagnation bound, against a Reynolds-dependent viscous allowance",
+          "value": {
+            "cp_max": 1.031863785,
+            "bound": 1.0056376633659232,
+            "relative_excess": 0.02607909646730678,
+            "allowance": 0.12828427124746192
+          }
+        },
+        {
+          "name": "naca_zero_lift_symmetry",
+          "passed": true,
+          "detail": "|C_L| at zero angle of attack",
+          "value": -0.001185683423
+        },
+        {
+          "name": "naca_nontrivial_solution",
+          "passed": true,
+          "detail": "surface C_p range and |C_D| are not trivially zero",
+          "value": {
+            "cp_range": 1.4133151456000002,
+            "cd": 0.05338745123
+          }
+        },
+        {
+          "name": "no_slip_wall_velocity_zero",
+          "passed": true,
+          "detail": "maximum reported wall speed on no-slip walls (exactly zero by construction of the boundary state)",
+          "value": 0.0
+        },
+        {
+          "name": "no_slip_skin_friction_nonzero",
+          "passed": true,
+          "detail": "maximum |C_f| on the wall",
+          "value": 0.1479788511
+        },
+        {
+          "name": "viscous_force_column_nonzero",
+          "passed": true,
+          "detail": "final viscous (skin-friction) drag coefficient",
+          "value": 0.03432026526
+        },
+        {
+          "name": "no_slip_normal_viscous_traction_zero",
+          "passed": true,
+          "detail": "|normal viscous drag| on no-slip walls",
+          "value": 9.50970832438612e-20
+        },
+        {
+          "name": "drag_split_sums_to_total",
+          "passed": true,
+          "detail": "pressure + skin-friction drag equals the total C_D",
+          "value": {
+            "sum": 0.05338745123000001,
+            "total": 0.05338745123
+          }
+        },
+        {
+          "name": "final_force_row_matches_final_step",
+          "passed": true,
+          "detail": "last forces.csv step equals run_status final_step",
+          "value": {
+            "forces_step": 4663,
+            "final_step": 4663
+          }
+        },
+        {
+          "name": "farfield_uniform",
+          "passed": true,
+          "detail": "relative density variation in the outer 40% of the domain radius",
+          "value": 5.930229292224782e-05
+        },
+        {
+          "name": "figures_mach_and_pressure_present",
+          "passed": true,
+          "detail": "figure manifest contains separate Mach and pressure entries",
+          "value": [
+            "force_coefficients",
+            "mach",
+            "mpi_rank_id",
+            "pressure",
+            "residual_l2",
+            "surface_cp_and_cf",
+            "velocity_magnitude",
+            "vorticity"
+          ]
+        }
+      ],
+      "all_checks_passed": true,
+      "status_consistent": true
+    },
+    {
+      "case_id": "naca0012_m080_inviscid",
+      "convergence_status": "converged",
+      "completed": true,
+      "mpi_ranks": 8,
+      "final_cl": -0.001130801445,
+      "final_cd": 0.008540852492,
+      "mean_cd_last_quarter": 0.008526931019694494,
+      "cl_rms_last_quarter": 0.010503811206633672,
+      "residual_reduction_orders": 4.022521433319591,
+      "checks": [
+        {
+          "name": "field_positive_density",
+          "passed": true,
+          "detail": "minimum cell density in field_final.vtu",
+          "value": 0.6627380917919585
+        },
+        {
+          "name": "field_positive_pressure",
+          "passed": true,
+          "detail": "minimum cell pressure in field_final.vtu",
+          "value": 0.6500496503072457
+        },
+        {
+          "name": "field_all_finite",
+          "passed": true,
+          "detail": "all field variables are finite",
+          "value": null
+        },
+        {
+          "name": "inviscid_total_enthalpy_uniform",
+          "passed": true,
+          "detail": "area-weighted RMS of |H-H_inf|/H_inf over the domain (pointwise max 1.105e-01)",
+          "value": 6.587434216542627e-06
+        },
+        {
+          "name": "surface_cp_varies",
+          "passed": true,
+          "detail": "range of C_p over the wall",
+          "value": 2.1005876117
+        },
+        {
+          "name": "wall_cp_within_stagnation_bound",
+          "passed": true,
+          "detail": "excess of the maximum wall C_p over the inviscid stagnation bound, against a Reynolds-dependent viscous allowance",
+          "value": {
+            "cp_max": 1.168690605,
+            "bound": 1.1704018070505546,
+            "relative_excess": -0.0014620637461820098,
+            "allowance": 0.1
+          }
+        },
+        {
+          "name": "naca_zero_lift_symmetry",
+          "passed": true,
+          "detail": "|C_L| at zero angle of attack",
+          "value": -0.001130801445
+        },
+        {
+          "name": "naca_nontrivial_solution",
+          "passed": true,
+          "detail": "surface C_p range and |C_D| are not trivially zero",
+          "value": {
+            "cp_range": 2.1005876117,
+            "cd": 0.008540852492
+          }
+        },
+        {
+          "name": "slip_wall_normal_velocity_zero",
+          "passed": true,
+          "detail": "maximum |u.n| on slip walls, recomputed from surface.csv (limited by the 10-digit file precision)",
+          "value": 2.0491619512341686e-10
+        },
+        {
+          "name": "slip_wall_tangential_velocity_nonzero",
+          "passed": true,
+          "detail": "maximum |u.t| on slip walls",
+          "value": 1.1819831994164554
+        },
+        {
+          "name": "inviscid_viscous_columns_negligible",
+          "passed": true,
+          "detail": "viscous force columns of the inviscid case",
+          "value": {
+            "viscous_drag": 0.0,
+            "viscous_lift": 0.0
+          }
+        },
+        {
+          "name": "final_force_row_matches_final_step",
+          "passed": true,
+          "detail": "last forces.csv step equals run_status final_step",
+          "value": {
+            "forces_step": 9005,
+            "final_step": 9005
+          }
+        },
+        {
+          "name": "farfield_uniform",
+          "passed": true,
+          "detail": "relative density variation in the outer 40% of the domain radius",
+          "value": 0.00024794448321457035
+        },
+        {
+          "name": "figures_mach_and_pressure_present",
+          "passed": true,
+          "detail": "figure manifest contains separate Mach and pressure entries",
+          "value": [
+            "force_coefficients",
+            "mach",
+            "mpi_rank_id",
+            "pressure",
+            "residual_and_drag_limiter_study",
+            "residual_l2",
+            "surface_cp",
+            "velocity_magnitude",
+            "vorticity"
+          ]
+        }
+      ],
+      "all_checks_passed": true,
+      "status_consistent": true
+    },
+    {
+      "case_id": "naca0012_m080_laminar_re5000",
+      "convergence_status": "converged",
+      "completed": true,
+      "mpi_ranks": 8,
+      "final_cl": 0.00162798988,
+      "final_cd": 0.07691307251,
+      "mean_cd_last_quarter": 0.07715511609408301,
+      "cl_rms_last_quarter": 0.00035454121223470257,
+      "residual_reduction_orders": 4.762757558958635,
+      "checks": [
+        {
+          "name": "field_positive_density",
+          "passed": true,
+          "detail": "minimum cell density in field_final.vtu",
+          "value": 0.694844545661358
+        },
+        {
+          "name": "field_positive_pressure",
+          "passed": true,
+          "detail": "minimum cell pressure in field_final.vtu",
+          "value": 0.8118146161276238
+        },
+        {
+          "name": "field_all_finite",
+          "passed": true,
+          "detail": "all field variables are finite",
+          "value": null
+        },
+        {
+          "name": "surface_cp_varies",
+          "passed": true,
+          "detail": "range of C_p over the wall",
+          "value": 1.7969850457
+        },
+        {
+          "name": "wall_cp_within_stagnation_bound",
+          "passed": true,
+          "detail": "excess of the maximum wall C_p over the inviscid stagnation bound, against a Reynolds-dependent viscous allowance",
+          "value": {
+            "cp_max": 1.188447551,
+            "bound": 1.1704018070505546,
+            "relative_excess": 0.01541841770983014,
+            "allowance": 0.12828427124746192
+          }
+        },
+        {
+          "name": "naca_zero_lift_symmetry",
+          "passed": true,
+          "detail": "|C_L| at zero angle of attack",
+          "value": 0.00162798988
+        },
+        {
+          "name": "naca_nontrivial_solution",
+          "passed": true,
+          "detail": "surface C_p range and |C_D| are not trivially zero",
+          "value": {
+            "cp_range": 1.7969850457,
+            "cd": 0.07691307251
+          }
+        },
+        {
+          "name": "no_slip_wall_velocity_zero",
+          "passed": true,
+          "detail": "maximum reported wall speed on no-slip walls (exactly zero by construction of the boundary state)",
+          "value": 0.0
+        },
+        {
+          "name": "no_slip_skin_friction_nonzero",
+          "passed": true,
+          "detail": "maximum |C_f| on the wall",
+          "value": 0.1297945613
+        },
+        {
+          "name": "viscous_force_column_nonzero",
+          "passed": true,
+          "detail": "final viscous (skin-friction) drag coefficient",
+          "value": 0.03074809826
+        },
+        {
+          "name": "no_slip_normal_viscous_traction_zero",
+          "passed": true,
+          "detail": "|normal viscous drag| on no-slip walls",
+          "value": 5.0835683561316e-19
+        },
+        {
+          "name": "drag_split_sums_to_total",
+          "passed": true,
+          "detail": "pressure + skin-friction drag equals the total C_D",
+          "value": {
+            "sum": 0.07691307251,
+            "total": 0.07691307251
+          }
+        },
+        {
+          "name": "final_force_row_matches_final_step",
+          "passed": true,
+          "detail": "last forces.csv step equals run_status final_step",
+          "value": {
+            "forces_step": 8284,
+            "final_step": 8284
+          }
+        },
+        {
+          "name": "farfield_uniform",
+          "passed": true,
+          "detail": "relative density variation in the outer 40% of the domain radius",
+          "value": 0.0021144530522571796
+        },
+        {
+          "name": "figures_mach_and_pressure_present",
+          "passed": true,
+          "detail": "figure manifest contains separate Mach and pressure entries",
+          "value": [
+            "force_coefficients",
+            "mach",
+            "mpi_rank_id",
+            "pressure",
+            "residual_l2",
+            "surface_cp_and_cf",
+            "velocity_magnitude",
+            "vorticity"
+          ]
+        }
+      ],
+      "all_checks_passed": true,
+      "status_consistent": true
+    },
+    {
+      "case_id": "naca0012_m200_inviscid",
+      "convergence_status": "converged",
+      "completed": true,
+      "mpi_ranks": 8,
+      "final_cl": 0.0007966313108,
+      "final_cd": 0.091918568,
+      "mean_cd_last_quarter": 0.09179869983176837,
+      "cl_rms_last_quarter": 0.0008425995410275926,
+      "residual_reduction_orders": 3.0695200344097477,
+      "checks": [
+        {
+          "name": "field_positive_density",
+          "passed": true,
+          "detail": "minimum cell density in field_final.vtu",
+          "value": 0.0033596085187397235
+        },
+        {
+          "name": "field_positive_pressure",
+          "passed": true,
+          "detail": "minimum cell pressure in field_final.vtu",
+          "value": 0.004006522989018314
+        },
+        {
+          "name": "field_all_finite",
+          "passed": true,
+          "detail": "all field variables are finite",
+          "value": null
+        },
+        {
+          "name": "inviscid_total_enthalpy_uniform",
+          "passed": true,
+          "detail": "area-weighted RMS of |H-H_inf|/H_inf over the domain (pointwise max 2.744e+00)",
+          "value": 8.552679147915645e-05
+        },
+        {
+          "name": "surface_cp_varies",
+          "passed": true,
+          "detail": "range of C_p over the wall",
+          "value": 2.1174700462
+        },
+        {
+          "name": "wall_cp_within_stagnation_bound",
+          "passed": true,
+          "detail": "excess of the maximum wall C_p over the inviscid stagnation bound, against a Reynolds-dependent viscous allowance",
+          "value": {
+            "cp_max": 1.768340235,
+            "bound": 1.6573002902940415,
+            "relative_excess": 0.06700049795215901,
+            "allowance": 0.1
+          }
+        },
+        {
+          "name": "naca_zero_lift_symmetry",
+          "passed": true,
+          "detail": "|C_L| at zero angle of attack",
+          "value": 0.0007966313108
+        },
+        {
+          "name": "naca_nontrivial_solution",
+          "passed": true,
+          "detail": "surface C_p range and |C_D| are not trivially zero",
+          "value": {
+            "cp_range": 2.1174700462,
+            "cd": 0.091918568
+          }
+        },
+        {
+          "name": "slip_wall_normal_velocity_zero",
+          "passed": true,
+          "detail": "maximum |u.n| on slip walls, recomputed from surface.csv (limited by the 10-digit file precision)",
+          "value": 9.816331081324847e-11
+        },
+        {
+          "name": "slip_wall_tangential_velocity_nonzero",
+          "passed": true,
+          "detail": "maximum |u.t| on slip walls",
+          "value": 1.052338931927703
+        },
+        {
+          "name": "inviscid_viscous_columns_negligible",
+          "passed": true,
+          "detail": "viscous force columns of the inviscid case",
+          "value": {
+            "viscous_drag": 0.0,
+            "viscous_lift": 0.0
+          }
+        },
+        {
+          "name": "final_force_row_matches_final_step",
+          "passed": true,
+          "detail": "last forces.csv step equals run_status final_step",
+          "value": {
+            "forces_step": 2554,
+            "final_step": 2554
+          }
+        },
+        {
+          "name": "farfield_uniform",
+          "passed": true,
+          "detail": "relative density variation in the outer 40% of the domain radius",
+          "value": 0.01191296201835085
+        },
+        {
+          "name": "figures_mach_and_pressure_present",
+          "passed": true,
+          "detail": "figure manifest contains separate Mach and pressure entries",
+          "value": [
+            "force_coefficients",
+            "mach",
+            "mpi_rank_id",
+            "pressure",
+            "residual_l2",
+            "surface_cp",
+            "velocity_magnitude",
+            "vorticity"
+          ]
+        }
+      ],
+      "all_checks_passed": true,
+      "status_consistent": true
+    },
+    {
+      "case_id": "naca0012_m200_laminar_re5000",
+      "convergence_status": "converged",
+      "completed": true,
+      "mpi_ranks": 8,
+      "final_cl": 0.0001327769102,
+      "final_cd": 0.1383956331,
+      "mean_cd_last_quarter": 0.1379098662525364,
+      "cl_rms_last_quarter": 1.169491173979252e-05,
+      "residual_reduction_orders": 5.442232289813819,
+      "checks": [
+        {
+          "name": "field_positive_density",
+          "passed": true,
+          "detail": "minimum cell density in field_final.vtu",
+          "value": 0.413148286137949
+        },
+        {
+          "name": "field_positive_pressure",
+          "passed": true,
+          "detail": "minimum cell pressure in field_final.vtu",
+          "value": 0.1214719395006653
+        },
+        {
+          "name": "field_all_finite",
+          "passed": true,
+          "detail": "all field variables are finite",
+          "value": null
+        },
+        {
+          "name": "surface_cp_varies",
+          "passed": true,
+          "detail": "range of C_p over the wall",
+          "value": 1.7728578601999998
+        },
+        {
+          "name": "wall_cp_within_stagnation_bound",
+          "passed": true,
+          "detail": "excess of the maximum wall C_p over the inviscid stagnation bound, against a Reynolds-dependent viscous allowance",
+          "value": {
+            "cp_max": 1.658658882,
+            "bound": 1.6573002902940415,
+            "relative_excess": 0.0008197619429110092,
+            "allowance": 0.12828427124746192
+          }
+        },
+        {
+          "name": "naca_zero_lift_symmetry",
+          "passed": true,
+          "detail": "|C_L| at zero angle of attack",
+          "value": 0.0001327769102
+        },
+        {
+          "name": "naca_nontrivial_solution",
+          "passed": true,
+          "detail": "surface C_p range and |C_D| are not trivially zero",
+          "value": {
+            "cp_range": 1.7728578601999998,
+            "cd": 0.1383956331
+          }
+        },
+        {
+          "name": "no_slip_wall_velocity_zero",
+          "passed": true,
+          "detail": "maximum reported wall speed on no-slip walls (exactly zero by construction of the boundary state)",
+          "value": 0.0
+        },
+        {
+          "name": "no_slip_skin_friction_nonzero",
+          "passed": true,
+          "detail": "maximum |C_f| on the wall",
+          "value": 0.09170301857
+        },
+        {
+          "name": "viscous_force_column_nonzero",
+          "passed": true,
+          "detail": "final viscous (skin-friction) drag coefficient",
+          "value": 0.04133630457
+        },
+        {
+          "name": "no_slip_normal_viscous_traction_zero",
+          "passed": true,
+          "detail": "|normal viscous drag| on no-slip walls",
+          "value": 2.8850707678277443e-19
+        },
+        {
+          "name": "drag_split_sums_to_total",
+          "passed": true,
+          "detail": "pressure + skin-friction drag equals the total C_D",
+          "value": {
+            "sum": 0.1383956331,
+            "total": 0.1383956331
+          }
+        },
+        {
+          "name": "final_force_row_matches_final_step",
+          "passed": true,
+          "detail": "last forces.csv step equals run_status final_step",
+          "value": {
+            "forces_step": 18135,
+            "final_step": 18135
+          }
+        },
+        {
+          "name": "farfield_uniform",
+          "passed": true,
+          "detail": "relative density variation in the outer 40% of the domain radius",
+          "value": 0.018172145629214227
+        },
+        {
+          "name": "figures_mach_and_pressure_present",
+          "passed": true,
+          "detail": "figure manifest contains separate Mach and pressure entries",
+          "value": [
+            "force_coefficients",
+            "mach",
+            "mpi_rank_id",
+            "pressure",
+            "residual_l2",
+            "surface_cp_and_cf",
+            "velocity_magnitude",
+            "vorticity"
+          ]
+        }
+      ],
+      "all_checks_passed": true,
+      "status_consistent": true
+    }
+  ],
+  "num_cases": 8,
+  "num_failed_checks": 0,
+  "all_cases_pass": true,
+  "all_status_consistent": true
+}

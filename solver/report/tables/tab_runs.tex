@@ -1,9 +1,17 @@
 % ---- run status table
+\footnotesize
 \begin{tabular}{lrrrrrl}
 \toprule
 case & ranks & steps & $t_{\mathrm{final}}$ & residual & wall time & status\\
  & & & & orders & [s] & \\
 \midrule
-NACA0012 $M_\infty=0.15$ inviscid & 8 & 20000 & 0.0 & 3.80 & 183 & \textbf{\textsc{failed}}\\
+NACA0012 $M_\infty=0.15$ inviscid & 8 & 1864 & 0.0 & 4.32 & 25 & \textsc{converged}\\
+NACA0012 $M_\infty=0.80$ inviscid & 8 & 9005 & 0.0 & 4.02 & 146 & \textsc{converged}\\
+NACA0012 $M_\infty=2.0$ inviscid & 8 & 2554 & 0.0 & 3.07 & 18 & \textsc{converged}\\
+NACA0012 $M_\infty=0.15$ laminar $Re=5000$ & 8 & 4663 & 0.0 & 6.08 & 43 & \textsc{converged}\\
+NACA0012 $M_\infty=0.80$ laminar $Re=5000$ & 8 & 8284 & 0.0 & 4.76 & 83 & \textsc{converged}\\
+NACA0012 $M_\infty=2.0$ laminar $Re=5000$ & 8 & 18135 & 0.0 & 5.44 & 187 & \textsc{converged}\\
+cylinder $M_\infty=0.1$ laminar $Re=20$ & 8 & 2806 & 0.0 & 5.37 & 44 & \textsc{converged}\\
+cylinder $M_\infty=0.1$ laminar $Re=200$ & 8 & 30000 & 300.0 & 6.29 & 2311 & \textsc{stat.\ periodic}\\
 \bottomrule
 \end{tabular}

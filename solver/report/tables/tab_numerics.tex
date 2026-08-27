@@ -1,8 +1,16 @@
 % ---- production numerical settings actually used
+\footnotesize
 \begin{tabular}{lrrrrrl}
 \toprule
-case & max steps & CFL & ramp & inner & target & extra options\\
+case & steps used & CFL & ramp & inner & target & extra options\\
 \midrule
-NACA0012 $M_\infty=0.15$ inviscid & 20000 & 1--100 & 2000 & 3--50 & 0.01 & {\footnotesize --}\\
+NACA0012 $M_\infty=0.15$ inviscid & 1864 & 1--100 & 2000 & 3--50 & 0.01 & {\footnotesize --}\\
+NACA0012 $M_\infty=0.80$ inviscid & 9005 & 1--100 & 3000 & 3--50 & 0.01 & {\footnotesize --}\\
+NACA0012 $M_\infty=2.0$ inviscid & 2554 & 0.2--50 & 5000 & 3--80 & 0.01 & {\footnotesize --}\\
+NACA0012 $M_\infty=0.15$ laminar $Re=5000$ & 4663 & 1--100 & 5000 & 3--80 & 0.01 & {\footnotesize --}\\
+NACA0012 $M_\infty=0.80$ laminar $Re=5000$ & 8284 & 0.5--80 & 5000 & 3--80 & 0.01 & {\footnotesize --}\\
+NACA0012 $M_\infty=2.0$ laminar $Re=5000$ & 18135 & 0.2--50 & 7000 & 3--100 & 0.01 & {\footnotesize --}\\
+cylinder $M_\infty=0.1$ laminar $Re=20$ & 2806 & 1--100 & 3000 & 3--80 & 0.01 & {\footnotesize --}\\
+cylinder $M_\infty=0.1$ laminar $Re=200$ & 30000 & 1--1 & 0 & 5--1000 & 0.0001 & {\footnotesize --cfl-scale 30, --inner-target 1e-4}\\
 \bottomrule
 \end{tabular}

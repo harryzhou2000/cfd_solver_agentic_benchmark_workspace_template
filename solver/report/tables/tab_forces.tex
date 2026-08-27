@@ -1,8 +1,16 @@
 % ---- force coefficient table
-\begin{tabular}{lrrrrr}
+\footnotesize
+\begin{tabular}{lrrrrrl}
 \toprule
-case & $C_L$ & $C_D$ & $C_{D,p}$ & $C_{D,f}$ & $C_{m,z}$\\
+case & $C_L$ & $C_D$ & $C_{D,p}$ & $C_{D,f}$ & $C_{m,z}$ & status\\
 \midrule
-NACA0012 $M_\infty=0.15$ inviscid & +0.00027 & -0.00072 & -0.00072 & 0.00000 & +0.00007\\
+NACA0012 $M_\infty=0.15$ inviscid & +0.00015 & 0.00103 & 0.00103 & 0.00000 & +0.00006 & \textsc{converged}\\
+NACA0012 $M_\infty=0.80$ inviscid & -0.00113 & 0.00854 & 0.00854 & 0.00000 & -0.00014 & \textsc{converged}\\
+NACA0012 $M_\infty=2.0$ inviscid & +0.00080 & 0.09192 & 0.09192 & 0.00000 & +0.00019 & \textsc{converged}\\
+NACA0012 $M_\infty=0.15$ laminar $Re=5000$ & -0.00119 & 0.05339 & 0.01907 & 0.03432 & -0.00017 & \textsc{converged}\\
+NACA0012 $M_\infty=0.80$ laminar $Re=5000$ & +0.00163 & 0.07691 & 0.04616 & 0.03075 & +0.00016 & \textsc{converged}\\
+NACA0012 $M_\infty=2.0$ laminar $Re=5000$ & +0.00013 & 0.13840 & 0.09706 & 0.04134 & +0.00008 & \textsc{converged}\\
+cylinder $M_\infty=0.1$ laminar $Re=20$ & +0.00064 & 2.01762 & 1.21981 & 0.79780 & -0.00001 & \textsc{converged}\\
+cylinder $M_\infty=0.1$ laminar $Re=200$$^{\dagger}$ & +0.00173 & 1.26606 & 1.02432 & 0.24174 & +0.00002 & \textsc{stat.\ periodic}\\
 \bottomrule
 \end{tabular}

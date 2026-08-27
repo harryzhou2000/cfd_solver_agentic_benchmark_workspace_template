@@ -1,1 +1,17 @@
-\emph{(data not available)}
+% ---- MPI rank-count study
+\footnotesize
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+case & ranks & steps & wall [s] & speed-up & $C_L$ & $C_D$ & $\Delta C_D/C_D$ & edge cut & balance\\
+\midrule
+cylinder\_m010\_laminar\_re20 & 1 & 2803 & 42.4 & 1.00 & +0.000648 & 2.017610 & 0 & 0 & 1.0000\\
+cylinder\_m010\_laminar\_re20 & 2 & 2802 & 20.9 & 2.03 & +0.000647 & 2.017616 & $3.24\times 10^{-6}$ & 97 & 1.0003\\
+cylinder\_m010\_laminar\_re20 & 4 & 2805 & 11.6 & 3.65 & +0.000653 & 2.017618 & $3.91\times 10^{-6}$ & 282 & 1.0007\\
+cylinder\_m010\_laminar\_re20 & 8 & 2806 & 18.1 & 2.35 & +0.000643 & 2.017617 & $3.51\times 10^{-6}$ & 471 & 1.0070\\
+\midrule
+naca0012\_m015\_inviscid & 1 & 1906 & 52.3 & 1.00 & +0.000183 & 0.001014 & 0 & 0 & 1.0000\\
+naca0012\_m015\_inviscid & 2 & 1844 & 26.9 & 1.94 & +0.000197 & 0.001023 & $8.99\times 10^{-3}$ & 120 & 1.0001\\
+naca0012\_m015\_inviscid & 4 & 1894 & 15.2 & 3.44 & +0.000066 & 0.001021 & $6.72\times 10^{-3}$ & 241 & 1.0019\\
+naca0012\_m015\_inviscid & 8 & 1864 & 24.0 & 2.18 & +0.000147 & 0.001025 & $1.11\times 10^{-2}$ & 439 & 1.0154\\
+\bottomrule
+\end{tabular}
