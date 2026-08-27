@@ -404,7 +404,7 @@ void Solver::compute_forces(double& cl, double& cd, double& cmz,
                     Vec2 tang(face.normal.y(), -face.normal.x());
                     double ut = u*tang.x() + v*tang.y();
                     double tw = mu_ * ut / dist;
-                    Fxv = -tw*tang.x()*face.area; Fyv = -tw*tang.y()*face.area;
+                    Fxv = tw*tang.x()*face.area; Fyv = tw*tang.y()*face.area;
                 }
             }
             dp += Fxp*ca + Fyp*sa; lp += -Fxp*sa + Fyp*ca;

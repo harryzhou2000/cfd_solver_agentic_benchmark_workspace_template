@@ -20,7 +20,7 @@ plt.rcParams.update({
     'ytick.labelsize': 9,
     'figure.dpi': 150,
     'savefig.dpi': 150,
-    'savefig.bbox_inches': 'tight',
+    'savefig.bbox': 'tight',
     'lines.linewidth': 1.5,
     'grid.alpha': 0.3,
 })
