@@ -33,19 +33,27 @@ $\vVolumeClosure$, cell area against the boundary line integral
 $\vAreaLineIntegral$, exactness of the least-squares gradient on a linear field
 $\vLsqExactness$, a discrete conservation defect of $\vConservation$, and
 agreement of the analytic Jacobian-vector product with central finite differences
-to $\vJacobianFd$ over $\vJacobianStates$ random states. The slip-wall flux is
-exactly $[0,pn_x,pn_y,0]$, and force coefficients agree to within $\num{5e-4}$
-relative across $np=1,2,4,8$.
+to $\vJacobianFd$ over $\vJacobianStates$ random states. The slip-wall flux carries
+exactly zero mass and energy flux for any interior state, with the normal momentum
+equal to the wall pressure in the limit of vanishing wall-normal velocity
+(\cref{eq:slipflux}); force coefficients agree to within $\num{5e-4}$ relative across
+$np=1,2,4,8$.
 
-All eight required cases were run with the supplied production controls, and
-\cref{sec:results} reports each with the convergence status the solver itself
-recorded. Two defects found during preparation of this report are documented
-rather than hidden: a steady termination test that normalised residuals by the
-impulsive-start transient and could stop while forces were still moving
-(\cref{sec:stationarity}), and a latent sign error in the unused HLLC star state
-that is now covered by a dedicated regression test (\cref{sec:hllcbug}). Added
-dissipation on the linear waves, needed to suppress a stagnation-point
-checkerboard mode, is disclosed and quantified in \cref{sec:fluxes}.
+All eight required cases were run with the supplied production controls.
+\Cref{sec:results} reports each with the convergence status the solver itself
+recorded, and any case whose entry appears as \pending had not completed at the time
+this document was last compiled --- those entries are left visibly empty rather than
+filled with an estimate, so the tables state the completion status directly.
+
+Several defects found during preparation of this report are documented rather than
+hidden, and the convergence criterion in particular was corrected five times as
+successive cases exposed distinct ways for a naive test to be fooled
+(\cref{sec:stationarity}). A latent sign error in the unused HLLC star state is now
+covered by a dedicated regression test (\cref{sec:hllcbug}), as is the slip-wall flux
+property above, which an adversarial review found to have been asserted without ever
+being tested. Added dissipation on the linear waves, introduced to suppress a
+stagnation-point checkerboard mode, is disclosed and quantified in \cref{sec:fluxes}
+together with a controlled experiment showing it is \emph{not} needed for these cases.
 \end{abstract}
 
 \tableofcontents

@@ -350,12 +350,16 @@ domain. That is direct visual confirmation that the characteristic farfield of
 \cref{sec:bc} handles a strong shock correctly: a Dirichlet freestream condition
 on the outflow arc would reflect the shock and contaminate the near-body solution.
 
-\paragraph{This case is not converged, on two independent physical grounds.}
+\paragraph{Two pointwise physical checks, and what fixing the CFL degradation did to
+them.}
 \label{sec:m200asym}
-An audit of the surface output shows that the drag history of this case, discussed
-above as a limit cycle, was a misleading indicator. Two pointwise checks fail.
+An audit of an earlier run of this case found that its drag history, which looked like a
+converged limit cycle, was a misleading indicator: two pointwise checks on the surface
+output failed outright. Both checks are worth keeping in the report because they are
+independent of any convergence bookkeeping, and because the same two checks now show
+what the best-state restore of \cref{sec:naca} bought.
 
-First, \textbf{the solution exceeds a hard physical bound}. The highest pressure any
+The first is a \textbf{hard physical bound}. The highest pressure any
 point on a body in a steady $\Minf=2.0$ inviscid flow can reach is the pitot
 pressure behind a normal shock, which corresponds to
 \begin{equation}
@@ -363,25 +367,51 @@ pressure behind a normal shock, which corresponds to
   \qquad (\Minf=2.0,\ \gamma=1.4).
   \label{eq:pitot}
 \end{equation}
-The computed surface maximum is $C_p=2.1021$, and $9$ of the $404$ wall faces exceed
-\cref{eq:pitot}. No converged inviscid solution can do this, so the field must still
-be evolving regardless of what the integrated drag suggests.
+No converged inviscid solution may exceed it. The second is \textbf{up/down symmetry}:
+on a mesh whose geometry is symmetric to $10^{-14}$, the 202 upper/lower surface pairs
+matched by $x$ must carry equal $C_p$.
 
-Second, \textbf{the surface distribution is strongly asymmetric}. On a mesh whose
-geometry is symmetric to $10^{-14}$, the paired upper and lower surface points ---
-202 pairs matched by $x$ --- differ by up to $\Delta C_p=1.1965$, the worst case
-being $x/c=\num{0.00178}$ with $C_p=+1.7274$ above and $+0.5309$ below. The
-integrated lift remains small because these local asymmetries largely cancel in the
-integral, which is precisely the cancellation warned about in \cref{sec:naca}.
+Measured on the submitted \texttt{surface.csv} of each run, with
+\texttt{report/check\_m200\_physics.py}:
 
-Both checks were made on the submitted \texttt{surface.csv} and both are
-reproducible from it. The case is therefore being re-run under the corrected
-convergence criterion, and no convergence claim is made for it here. It is recorded
-in \cref{tab:runstatus} with whatever status the completed run reports. The
-farfield behaviour described above is unaffected --- it concerns the boundary
-treatment, not the state of convergence in the near field --- but the $C_p$
-distribution of \cref{fig:naca200inv-cp} should be read as a snapshot of an
-unconverged solution.
+\begin{center}
+\begin{tabular}{lrr}
+  \toprule
+  & Before (CFL-degraded state) & After (best state restored) \\
+  \midrule
+  Max surface $C_p$ & $2.1021$ & $1.6097$ \\
+  Relative to the bound $1.6573$ & $+26.8\,\%$ & $-2.9\,\%$ \\
+  Wall faces exceeding the bound & $9$ of $404$ & $\mathbf{0}$ of $404$ \\
+  Worst pair asymmetry $\Delta C_p$ & $1.1965$ & $0.1417$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Both failures were consequences of the same defect.} The earlier run
+reported the state the CFL ramp had degraded to, and in that state the leading-edge shock
+had been driven to a non-physical, asymmetric configuration. Restoring the best state by
+residual norm removes the bound violation entirely --- the maximum surface $C_p$ now sits
+$2.9\,\%$ \emph{below} the pitot ceiling, where a correctly captured bow shock should be
+--- and reduces the worst asymmetry by a factor of $8.4$.
+
+This is a useful cross-check on the fix, because the two tests know nothing about
+residual norms: they are statements about pressure and about geometry. That a change made
+for a convergence reason also repaired an independent physical defect is evidence the
+diagnosis was right.
+
+The residual asymmetry of $\Delta C_p=0.1417$, concentrated at $x/c=\num{0.0049}$ on the
+blunt leading edge, is \emph{not} explained away. It is an order of magnitude larger than
+the $\num{3.6e-3}$ seen on the subsonic inviscid case, so the supersonic leading edge
+remains the least symmetric region of any case here, and $C_L$ for this case should still
+not be read as evidence of symmetry preservation --- the integrated lift stays small
+because local asymmetries cancel, exactly the cancellation warned about in
+\cref{sec:naca}. The likely cause is that the captured shock position is resolved by only
+a few of the very small cells there, so it can settle a fraction of a cell differently on
+the two sides. A mesh-refinement study at the leading edge would test that, and is not
+available here.
+
+The farfield behaviour described above is unaffected by any of this, since it concerns
+the boundary treatment rather than the near-field state.
 
 \begin{figure}[htbp]
   \centering

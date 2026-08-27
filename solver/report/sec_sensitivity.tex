@@ -4,8 +4,10 @@
 Three scheme parameters were varied in controlled experiments to establish whether
 the reported forces depend on them. All variants were built from a separate copy of
 the source tree, so the production build was never modified; the baseline variant
-binary is byte-identical to the unmodified build of the same tree, which proves the
-instrumentation is a no-op at the baseline value. Every variant was run one at a
+binary is byte-identical to the unmodified build of the same tree, which confirms the
+instrumentation compiles away at the baseline value and so cannot have shifted the
+reference point of the sweep. It is not evidence about the instrumentation at other
+values, where the code does differ by construction. Every variant was run one at a
 time under the CPU quota of \cref{sec:quota}.
 
 \subsection{The linear-wave dissipation floor is unnecessary for these cases}

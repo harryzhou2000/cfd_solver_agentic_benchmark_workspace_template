@@ -38,8 +38,11 @@ out of sync with the interior scheme.
 
 A face is processed if either of its cells is owned by the current rank. Faces on
 a partition boundary are thus evaluated redundantly on both ranks, which is
-cheaper than communicating fluxes and guarantees that the two ranks compute
-bit-identical values from identical inputs.
+cheaper than communicating fluxes. Because both ranks execute the same operations in
+the same order on the same halo-exchanged inputs, they compute bit-identical values for
+that face. This is a statement about a single face evaluation only: the \emph{global}
+result still depends on rank count through the summation order of the reductions and
+the partition-dependent LU-SGS sweep order, as \cref{sec:mpi} sets out.
 
 \subsection{Second-Order Reconstruction}
 \label{sec:reconstruction}
@@ -217,8 +220,9 @@ exactly, enforcing $\partial T/\partial n=0$.
 ($\hat{a}^2\le0$, possible for a very strong expansion), the flux falls back to
 HLLC for that face, which is positivity preserving. This is reported in
 \texttt{metadata.json} as part of the flux description rather than hidden. In
-practice this path is never taken in any production run reported here: every case
-records zero positivity-fallback events. That has a consequence for what the
+practice this path is not taken: every completed production run records zero
+positivity-fallback events, so the reported results are pure Roe fluxes
+throughout. That has a consequence for what the
 production results can and cannot verify, discussed in \cref{sec:hllcbug}.
 
 \paragraph{Named dissipation and limiter parameters.} For completeness, the

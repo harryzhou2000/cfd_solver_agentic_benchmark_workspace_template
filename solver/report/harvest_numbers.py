@@ -333,7 +333,13 @@ def main():
         define("CdDrift" + key, num(cd_drift, 2) if finished else PENDING)
 
         if not finished:
-            filler = " & ".join([PENDING] + ["" for _ in range(5)])
+            # Fill the remaining cells with an em dash rather than leaving them
+            # blank.  A row of empty cells reads as missing data; an explicit dash
+            # beside the pending marker reads as "not yet measured", which is what
+            # is meant.  A spanning multicolumn cannot be used: these row files are
+            # pulled in with \input from inside a tabular, and TeX rejects
+            # \multicolumn as the first token of an input file in that position.
+            filler = " & ".join([PENDING] + ["---" for _ in range(5)])
             status_rows.append("%s & %s \\\\" % (label, filler))
             force_rows.append("%s & %s \\\\" % (label, filler))
             continue

@@ -96,7 +96,7 @@ probes.
     Jacobian product & \cref{eq:jacvec} vs central finite differences
       & $\vJacobianFd$ & $O(\sqrt{\varepsilon})$ \\
     Slip-wall flux & zero mass and energy flux (\cref{eq:slipflux})
-      & exact & exact \\
+      & $0$ & $0$ \\
     \bottomrule
   \end{tabular}
   \\[2pt]
@@ -116,7 +116,8 @@ A property that was both unverified and untrue was being presented as verified.
 
 What is now claimed and checked is the part that is true and that matters for
 conservation: the mass and energy components of the slip-wall flux are exactly zero, for
-every state probed, which is what guarantees that no mass or energy crosses a slip wall.
+every state probed, which is the property that keeps mass and energy from crossing a
+slip wall.
 The probe that establishes this links the solver's own library rather than
 reimplementing the flux, so it tests the shipped code
 (\texttt{report/check\_slip\_flux.sh}). Finding this required an adversarial reader to
@@ -758,9 +759,13 @@ the specific checks are worth recording:
   \item \texttt{MPI\_Allgather} and \texttt{MPI\_Allgatherv} appear only in
   setup code. Iteration-time exchange is neighbour-scoped \texttt{Isend}/%
   \texttt{Irecv} with receives posted first.
-  \item No identifiers, structure, or comment style from existing open-source CFD
-  codebases appear in the source; the finite-volume core, time integration and MPI
-  layer are original.
+  \item Originality: a search of the source for identifiers and naming conventions
+  characteristic of the widely used open-source compressible-flow codes returned no
+  matches, and the style is internally consistent and idiosyncratic throughout. The
+  finite-volume core, time integration and MPI layer are original work. This is the
+  result of a targeted search rather than an exhaustive comparison against all
+  existing codebases, which is not something a search can establish; it is stated with
+  that scope.
 \end{itemize}
 
 The audit also independently confirmed several correctness properties cited
