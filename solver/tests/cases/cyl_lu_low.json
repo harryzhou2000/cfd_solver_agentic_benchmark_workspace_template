@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "case_id": "cyl_lu_lowcfl",
+  "description": "Circular cylinder, Mach 0.1, laminar, Re 20",
+  "mesh": {
+    "file": "/workspace/cfd_solver_agentic_benchmark/inputs/meshes/CylinderB1.cgns",
+    "format": "CGNS",
+    "dimension": 2
+  },
+  "physics": {
+    "equations": "compressible_navier_stokes",
+    "mode": "laminar",
+    "reynolds": 20.0,
+    "viscosity_model": "constant"
+  },
+  "gas": {
+    "model": "calorically_perfect",
+    "gamma": 1.4,
+    "R": 1.0,
+    "prandtl": 0.72
+  },
+  "freestream": {
+    "mach": 0.1,
+    "aoa_degrees": 0.0,
+    "rho": 1.0,
+    "velocity_magnitude": 1.0,
+    "pressure": 71.42857142857142
+  },
+  "reference": {
+    "length": 1.0,
+    "area": 1.0,
+    "moment_center": [
+      0.0,
+      0.0
+    ],
+    "reynolds_length": 1.0
+  },
+  "boundary_conditions": {
+    "WALL": "no_slip_adiabatic_wall",
+    "FAR": "farfield"
+  },
+  "numerics_required": {
+    "spatial_order": 2,
+    "inviscid_flux": "approximate_riemann",
+    "viscous_flux": "required",
+    "main_time_method": "implicit",
+    "implicit_solver": "required"
+  },
+  "run_control": {
+    "type": "steady",
+    "max_steps": 50,
+    "residual_reduction_target": 5.0,
+    "cfl_initial": 0.3,
+    "cfl_max": 0.3,
+    "pseudo_cfl_ramp_steps": 1,
+    "min_inner_iterations": 1,
+    "max_inner_iterations": 1,
+    "inner_residual_reduction_target": 0.01
+  },
+  "outputs": {
+    "write_final_field": true,
+    "write_surface": true,
+    "write_forces_every": 1,
+    "write_residuals_every": 1
+  }
+}
