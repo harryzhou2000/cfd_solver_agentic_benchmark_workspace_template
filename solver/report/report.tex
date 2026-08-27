@@ -496,9 +496,10 @@ typical 961 inner iterations per step and hit the 1000-iteration cap on one
 of the three recorded steps (\texttt{inner\_target\_misses=1}). Raising the
 pseudo-CFL to 100 lets the physical term dominate the
 diagonal and restores convergence to roughly 48--174 inner iterations per
-step in production (\cref{sec:re200}). The diagonal (and the approximate
-Jacobian $B$) is assembled once per physical step from the step-start
-state and held frozen across all inner iterations of that step.
+step in production (\cref{sec:re200}). The diagonal is assembled once per
+physical step from the step-start state and held frozen across the inner
+iterations of that step; the off-diagonal approximate-Jacobian action is
+re-evaluated at the refreshed nonlinear state of each outer refresh.
 
 \paragraph{Startup perturbation.} To break the exact top-bottom symmetry of
 the initialized state, the free-stream direction is offset by
@@ -686,11 +687,11 @@ Case id & Ranks & Steps & Phys.\ time & Orders & Wall time [s] & Status \\
 \texttt{naca0012\_m015\_inviscid} & 8 & 1482 & 0 & 4.02 & 254.7 & converged \\
 \texttt{naca0012\_m080\_inviscid} & 8 & 2189 & 0 & 4.00 & 205.3 & converged \\
 \texttt{naca0012\_m200\_inviscid} & 8 & 2528 & 0 & 3.00 & 207.1 & converged \\
-\texttt{naca0012\_m015\_laminar\_re5000} & 8 & 1917 & 0 & 4.00 & 133.5 & converged \\
-\texttt{naca0012\_m080\_laminar\_re5000} & 8 & 8696 & 0 & 4.00 & 506.7 & converged \\
-\texttt{naca0012\_m200\_laminar\_re5000} & 8 & 37786 & 0 & 5.00 & 1229.3 & converged \\
-\texttt{cylinder\_m010\_laminar\_re20} & 8 & 2129 & 0 & 5.00 & 88.1 & converged \\
-\texttt{cylinder\_m010\_laminar\_re200} & 8 & 31233 & 300.0 & 3.06 & 3715.9 & statistically periodic \\
+\texttt{naca0012\_m015\_laminar\_re5000} & 8 & 1917 & 0 & 4.00 & 103.9 & converged \\
+\texttt{naca0012\_m080\_laminar\_re5000} & 8 & 8696 & 0 & 4.00 & 347.5 & converged \\
+\texttt{naca0012\_m200\_laminar\_re5000} & 8 & 37786 & 0 & 5.00 & 963.5 & converged \\
+\texttt{cylinder\_m010\_laminar\_re20} & 8 & 2129 & 0 & 5.00 & 100.1 & converged \\
+\texttt{cylinder\_m010\_laminar\_re200} & 8 & 31233 & 300.0 & 3.06 & 3720.3 & statistically periodic \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -853,7 +854,7 @@ full in \cref{sec:limitations}: an under-converged first run at the case-file
 3-order target, a diverged high-CFL debug continuation, and finally the
 production redo from the inviscid restart with \texttt{--cfl-max 5} and
 \texttt{--residual-target 5.0}. The redo converged cleanly: 37786 total steps
-(35258 after the restart), 5.00 orders of residual reduction, 1229 s wall
+(35258 after the restart), 5.00 orders of residual reduction, 963 s wall
 (\cref{fig:res-m200lam,fig:forces-m200lam}). The final drag $C_D=0.1315$
 ($C_D^{\rm pres}=0.0916$, $C_D^{\rm visc}=0.0400$) is stable to $10^{-4}$ over
 the last 500 steps, and $C_L=-7.1\times10^{-3}$. The drag is roughly $1.4\times$
@@ -915,7 +916,7 @@ physical steps) from the steady pseudo-converged initialization state
 (\cref{sec:time}), with the $2^\circ$ tapered startup perturbation. The run
 completed with \texttt{run\_status.json} reporting
 \texttt{convergence\_status=statistically\_periodic} ("post-transient periodic
-vortex shedding established"), final physical time $300.0$, 3715.9 s wall on
+vortex shedding established"), final physical time $300.0$, 3720.3 s wall on
 8 ranks. The two-level structure was exercised exactly as specified: inner
 defect-correction iterations converged the total (spatial $+$ physical-time)
 residual by the required $10^{-3}$ at \emph{every} step (zero
@@ -976,7 +977,7 @@ nevertheless identical across rank counts (1482 steps for the airfoil case,
 \caption{Rank study: final forces, steps, and wall times across MPI rank
 counts for \texttt{naca0012\_m015\_inviscid} and
 \texttt{cylinder\_m010\_laminar\_re20}, all from one back-to-back sweep on
-the shared host (load average 28--46 during the window). Wall times at these
+the shared host (load average 21--24 during the window). Wall times at these
 small mesh sizes are indicative rather than HPC-grade; force consistency and
 run-to-run determinism are the validation metrics.}
 \label{tab:rankstudy}
@@ -985,15 +986,15 @@ run-to-run determinism are the validation metrics.}
 \toprule
 Case & $np$ & Steps & Orders & $C_D$ & $C_L$ & Wall [s] \\
 \midrule
-\texttt{naca0012\_m015\_inviscid} & 1 & 1482 & 4.03 & 0.001705 & $-1.94\mathrm{e}{-4}$ & 51.4 \\
- & 2 & 1482 & 4.03 & 0.001702 & $-1.88\mathrm{e}{-4}$ & 27.3 \\
- & 4 & 1482 & 4.02 & 0.001693 & $-1.88\mathrm{e}{-4}$ & 15.9 \\
- & 8 & 1482 & 4.02 & 0.001696 & $-2.00\mathrm{e}{-4}$ & 22.6 \\
+\texttt{naca0012\_m015\_inviscid} & 1 & 1482 & 4.03 & 0.001705 & $-1.94\mathrm{e}{-4}$ & 49.2 \\
+ & 2 & 1482 & 4.03 & 0.001702 & $-1.88\mathrm{e}{-4}$ & 24.8 \\
+ & 4 & 1482 & 4.02 & 0.001693 & $-1.88\mathrm{e}{-4}$ & 13.6 \\
+ & 8 & 1482 & 4.02 & 0.001696 & $-2.00\mathrm{e}{-4}$ & 19.9 \\
 \midrule
-\texttt{cylinder\_m010\_laminar\_re20} & 1 & 2129 & 5.00 & 2.01895 & $5.63\mathrm{e}{-4}$ & 33.6 \\
- & 2 & 2129 & 5.00 & 2.01896 & $5.58\mathrm{e}{-4}$ & 17.7 \\
- & 4 & 2129 & 5.00 & 2.01895 & $5.51\mathrm{e}{-4}$ & 9.9 \\
- & 8 & 2129 & 5.00 & 2.01896 & $5.63\mathrm{e}{-4}$ & 16.6 \\
+\texttt{cylinder\_m010\_laminar\_re20} & 1 & 2129 & 5.00 & 2.01895 & $5.63\mathrm{e}{-4}$ & 32.4 \\
+ & 2 & 2129 & 5.00 & 2.01896 & $5.58\mathrm{e}{-4}$ & 16.9 \\
+ & 4 & 2129 & 5.00 & 2.01895 & $5.51\mathrm{e}{-4}$ & 9.3 \\
+ & 8 & 2129 & 5.00 & 2.01896 & $5.63\mathrm{e}{-4}$ & 15.8 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1016,17 +1017,17 @@ final forces to all printed digits --- demonstrating run-to-run determinism
 at fixed rank count and partition.
 
 \paragraph{Timing and load balance.} Within the sweep (one machine-load
-window), wall time scales from 51.4 s ($np=1$) to 15.9 s ($np=4$) for the
-airfoil --- a $3.2\times$ speedup, 81\% parallel efficiency --- and from
-33.6 s to 9.9 s for the cylinder ($3.4\times$, 85\%). At $np=8$ both cases
-run slightly slower than at $np=4$ (22.6 s and 16.6 s): with only
+window), wall time scales from 49.2 s ($np=1$) to 13.6 s ($np=4$) for the
+airfoil --- a $3.6\times$ speedup, 90\% parallel efficiency --- and from
+32.4 s to 9.3 s for the cylinder ($3.5\times$, 87\%). At $np=8$ both cases
+run slightly slower than at $np=4$ (19.9 s and 15.8 s): with only
 $\approx$2600 (airfoil) or 1300 (cylinder) owned cells per rank, the halo
 exchange and per-step \texttt{MPI\_Allreduce} latency are comparable to the
 compute, and the shared host adds noise at these runtimes. Load balance
 from the partition diagnostics is 1.03 or better at $np=8$
 (\cref{tab:partition}); communication volume remains small (edge cut
 $\le2.4\%$ of faces). For reference, the production $np=8$ runs recorded
-254.7 s (airfoil) and 88.1 s (cylinder) while sharing the host with three
+254.7 s (airfoil) and 100.1 s (cylinder) while sharing the host with three
 other production runs ---
 run-to-run timing variability on this shared host is exactly why the sweep
 timings above were all taken back-to-back.
@@ -1118,7 +1119,7 @@ continuation (\texttt{results/dbg\_m200lam\_continue/}) then diverged once the
 CFL ramp exceeded $\approx7$ (non-finite residual at step 47933, marked
 \texttt{failed}). The production redo used \texttt{--cfl-max 5} and
 \texttt{--residual-target 5.0} and converged to 5.00 orders in 37786 total
-steps (35258 after the restart), 1229 s, with $C_D=0.1315$ stable to
+steps (35258 after the restart), 963 s, with $C_D=0.1315$ stable to
 $10^{-4}$ over the last 500 steps. The lesson --- residual-orders alone are
 not a safe convergence criterion for restarted viscous cases --- is why the
 sanity checks of \cref{sec:output} include a force-plausibility window.

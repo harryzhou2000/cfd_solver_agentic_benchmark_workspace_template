@@ -10,11 +10,11 @@ below as executed (also stored per case in run_status.json).
 | naca0012_m015_inviscid | 8 | 1482 | 0.00 | 4.02 | 254.7 | converged | |
 | naca0012_m080_inviscid | 8 | 2189 | 0.00 | 4.00 | 205.3 | converged | |
 | naca0012_m200_inviscid | 8 | 2528 | 0.00 | 3.00 | 207.1 | converged | |
-| naca0012_m015_laminar_re5000 | 8 | 1917 | 0.00 | 4.00 | 133.5 | converged | |
-| naca0012_m080_laminar_re5000 | 8 | 8696 | 0.00 | 4.00 | 506.7 | converged |--restart results/naca0012_m080_inviscid/restart_final.bin --cfl-max 4 |
-| naca0012_m200_laminar_re5000 | 8 | 37786 | 0.00 | 5.00 | 1229.3 | converged |--restart results/naca0012_m200_inviscid/restart_final.bin --cfl-max 5 --residual-target 5.0 |
-| cylinder_m010_laminar_re20 | 8 | 2129 | 0.00 | 5.00 | 88.1 | converged | |
-| cylinder_m010_laminar_re200 | 8 | 31233 | 300.00 | 3.06 | 3715.9 | statistically_periodic |--restart results/cylinder_m010_laminar_re200_steadyinit/restart_final.bin --pert-aoa-deg 2.0 --pert-duration 10.0 |
+| naca0012_m015_laminar_re5000 | 8 | 1917 | 0.00 | 4.00 | 103.9 | converged | |
+| naca0012_m080_laminar_re5000 | 8 | 8696 | 0.00 | 4.00 | 347.5 | converged |--restart results/naca0012_m080_inviscid/restart_final.bin --cfl-max 4 |
+| naca0012_m200_laminar_re5000 | 8 | 37786 | 0.00 | 5.00 | 963.5 | converged |--restart results/naca0012_m200_inviscid/restart_final.bin --cfl-max 5 --residual-target 5.0 |
+| cylinder_m010_laminar_re20 | 8 | 2129 | 0.00 | 5.00 | 100.1 | converged | |
+| cylinder_m010_laminar_re200 | 8 | 31233 | 300.00 | 3.06 | 3720.3 | statistically_periodic |--restart results/cylinder_m010_laminar_re200_steadyinit/restart_final.bin --pert-aoa-deg 2.0 --pert-duration 10.0 |
 
 Base command for every case:
 

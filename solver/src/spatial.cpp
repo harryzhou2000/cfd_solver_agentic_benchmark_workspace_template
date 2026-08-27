@@ -319,8 +319,11 @@ void assemble_residual(const LocalMesh& m, const CaseFile& cs, FlowState& s,
           double gy = (s.gradW[c][7] - gas.R * T * s.gradW[c][1]) / (rho * gas.R);
           return std::pair<double, double>{gx, gy};
         };
-        auto gTL = cell_Tgrad(L, rhoL, TL);
-        auto gTR = cell_Tgrad(R, rhoR, TR);
+        // The cell identity needs the cell-center density, not the
+        // face-reconstructed rhoL/rhoR (those remain for the spectral
+        // radius below).
+        auto gTL = cell_Tgrad(L, s.W[L][0], TL);
+        auto gTR = cell_Tgrad(R, s.W[R][0], TR);
         double Tgx = 0.5 * (gTL.first + gTR.first);
         double Tgy = 0.5 * (gTL.second + gTR.second);
         {
