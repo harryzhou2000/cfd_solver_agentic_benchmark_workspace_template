@@ -48,6 +48,65 @@ a converged value.
   \input{tab_forces}
 \end{table}
 
+\subsection{How many digits of each coefficient are earned}
+\label{sec:digits}
+
+An adversarial review of the completed runs raised a question that deserves a direct
+answer rather than a defence: several cases were stopped while their drag history
+was still moving in one direction, so how much of each quoted coefficient is real?
+
+The question cannot be answered by the convergence status alone, because
+\emph{monotone motion and non-convergence are not the same thing}. What separates
+them is how the increments behave. Take the sub-block means of $C_D$ over the
+trailing window and difference them:
+
+\begin{itemize}
+  \item If the successive decrements shrink \textbf{geometrically}, with a roughly
+  constant ratio $r<1$, the iteration is in its asymptotic regime. The distance
+  still to be covered is the sum of the remaining geometric series,
+  $\Delta_{\infty}\approx d_{\text{last}}\,r/(1-r)$, which is bounded, small, and
+  computable. The run is converged, and the remaining error is quantifiable.
+  \item If the decrements are roughly \textbf{constant}, the solution is marching at
+  a steady rate and there is no asymptote in sight. That is an unfinished transient,
+  and no extrapolation of it is defensible.
+\end{itemize}
+
+This distinction is what the review's monotone-trend observation actually detects,
+and it separates the cases cleanly. For the cylinder at $\Reinf=20$ the sub-block
+decrements over the certifying window run
+\begin{center}
+  $-4.42,\ -3.63,\ -2.94,\ -2.22,\ -1.64,\ -1.18,\ -0.82,\ -0.55,\ -0.36$
+  \quad (units of $10^{-3}$),
+\end{center}
+with successive ratios $0.82, 0.81, 0.76, 0.74, 0.72, 0.70, 0.67, 0.65$. That is a
+clean geometric decay. Summing the tail gives a remaining change of
+$\num{-7.8e-4}$ and an asymptote of $2.0177$, bracketed between $2.0176$ and
+$2.0178$ across the range of observed ratios, against a reported
+$C_D=\cnsCdCylSteady$. The run is therefore converged to about $\num{6.5e-4}$ in $C_D$,
+or $0.03\,\%$: \textbf{three digits of this coefficient are earned and the fourth is
+not}, and it is quoted that way in \cref{sec:cyl20}.
+
+An independent corroboration falls out of the sensitivity study of
+\cref{sec:sensitivity}, which ran this case further, to $6.73$ residual orders, and
+obtained $C_D=\num{2.018119}$ --- between the reported value and the extrapolated
+asymptote, which is exactly where a longer run on a decaying tail should land. Two
+runs of different length and an extrapolation of a third agree on the first three
+digits and disagree in the fourth, which is a more useful statement of the
+uncertainty than any single run's trailing digits.
+
+By contrast, the case the review identified as the worst instance,
+\texttt{naca0012\_m200\_laminar\_re5000}, showed constant-rate motion with the
+additional pathology described in \cref{sec:cancellation}, and no extrapolation is
+offered for it. It is reported as not converged.
+
+The general policy adopted for this section follows from the above: coefficients are
+quoted to the precision the convergence evidence supports, an extrapolated asymptote
+and its bracket are given where the tail is demonstrably geometric, and the trailing
+digits produced by the solver are not reproduced merely because they exist. The
+script that performs the extrapolation is \texttt{report/extrapolate\_tail.py} and
+the window diagnostics are \texttt{report/check\_window.py}, both of which read only
+the submitted \texttt{forces.csv}.
+
 \subsection{NACA0012 Cases}
 \label{sec:naca}
 
