@@ -502,6 +502,7 @@ SolverStats Solver::run(const std::string& output_dir) {
 
         for (step = 1; step <= max_phys; step++) {
             physical_time = step * dt;
+            recon_ramp_ = std::min(1.0, (double)step / 500.0);
             U_nm1_ = U_n_; U_n_ = U_;
             int inner_iters = 0; double inner_res0 = -1; bool ic = false;
 
