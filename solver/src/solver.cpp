@@ -320,7 +320,7 @@ double Solver::viscous_spectral_radius(int ci) const {
     return mu_/rho * std::max(4.0/3.0, config_.gas.gamma/config_.gas.Pr) * fas / std::max(lm_->mesh.cells[ci].volume, 1e-30);
 }
 
-void Solver::lusgs_sweep(double cfl, const std::vector<Vec4>& rhs, std::vector<Vec4>& dU) {
+void Solver::lusgs_sweep(double cfl, const std::vector<Vec4>& rhs, std::vector<Vec4>& dU, double dt_phys_contrib) {
     double gamma = config_.gas.gamma;
     dU.assign(num_total_, Vec4::Zero());
 
@@ -329,7 +329,7 @@ void Solver::lusgs_sweep(double cfl, const std::vector<Vec4>& rhs, std::vector<V
         double vol = lm_->mesh.cells[ci].volume;
         double sr = spectral_radius(ci) + viscous_spectral_radius(ci);
         double dt_local = cfl * vol / std::max(sr, 1e-30);
-        D[ci] = vol / dt_local + sr;
+        D[ci] = vol / dt_local + sr + dt_phys_contrib * vol;
     }
 
     auto face_spec = [&](int fi, int nb) -> double {
@@ -517,7 +517,7 @@ SolverStats Solver::run(const std::string& output_dir) {
                 inner_iters = inner+1;
                 if (inner >= config_.run_control.min_inner_iterations-1 && inner_res0>1e-30 && rl2/inner_res0 < config_.run_control.inner_residual_reduction_target) { ic=true; break; }
                 double cfl = config_.run_control.cfl_initial;
-                std::vector<Vec4> dU; lusgs_sweep(cfl, residual_, dU);
+                std::vector<Vec4> dU; lusgs_sweep(cfl, residual_, dU, bdf_c / dt);
                 for (int ci = 0; ci < num_owned_; ci++) {
                     Vec4 Un = U_[ci]+dU[ci];
                     if (Un[0]>1e-14 && prim_pressure(Un, config_.gas.gamma)>1e-14) U_[ci] = Un;

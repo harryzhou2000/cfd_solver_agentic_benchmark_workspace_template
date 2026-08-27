@@ -53,7 +53,7 @@ private:
     Vec4 noslip_wall_flux(int fi) const;
     Vec4 noslip_viscous_flux(int fi) const;
 
-    void lusgs_sweep(double cfl, const std::vector<Vec4>& rhs, std::vector<Vec4>& dU);
+    void lusgs_sweep(double cfl, const std::vector<Vec4>& rhs, std::vector<Vec4>& dU, double dt_phys_contrib = 0.0);
     double spectral_radius(int ci) const;
     double viscous_spectral_radius(int ci) const;
 
