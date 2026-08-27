@@ -147,12 +147,14 @@ SteadyResult runSteady(LocalMesh& lm,
             computeResidual(ctx, residuals_ref, spectral_radii);
         }
 
-        // Low-Mach preconditioning (Bug C Fix): apply Turkel scaling to dt_local ONLY.
-        // sr_frozen keeps the full spectral radius (incl. viscous terms) for LU-SGS diagonal.
-        // Previously spectral_radii was mutated in place, crushing LU-SGS diagonal for Re=5000.
-        std::vector<double> sr_frozen = spectral_radii;  // full sr — LU-SGS diagonal stability
-        std::vector<double> dt_local(n_owned);
-        if (cfg.freestream.mach < 0.3 && mu > 0.0) {
+       // Low-Mach preconditioning (Bug C Fix): apply Turkel scaling to dt_local ONLY.
+       // sr_frozen keeps the full spectral radius (incl. viscous terms) for LU-SGS diagonal.
+       // Previously spectral_radii was mutated in place, crushing LU-SGS diagonal for Re=5000.
+       std::vector<double> sr_frozen = spectral_radii;  // full sr — LU-SGS diagonal stability
+       std::vector<double> dt_local(n_owned);
+       // Fix Q: disable Turkel for Re<100 cases — Turkel amplifies effective CFL from 0.1 to ~0.55,
+       // causing immediate initial-transient divergence (rhoE blows up in first step for re20).
+       if (cfg.freestream.mach < 0.3 && mu > 0.0 && !low_re_viscous_case) {
             double M_ref = cfg.freestream.mach;
             for (int i = 0; i < n_owned; i++) {
                 double sr = spectral_radii[i];
@@ -177,7 +179,7 @@ SteadyResult runSteady(LocalMesh& lm,
                 dt_local[i] = cfl * lm.cell_vol[i] / sr;
             }
         }
-        double mach_ref_lm = (cfg.freestream.mach < 0.3 && mu > 0.0) ? cfg.freestream.mach : 0.0;
+        double mach_ref_lm = (cfg.freestream.mach < 0.3 && mu > 0.0 && !low_re_viscous_case) ? cfg.freestream.mach : 0.0;
 
         // Compute outer spatial residual (R_ref) - the true convergence indicator.
         // last_res = ||R_ref|| is written to CSV; it should decrease to 0 at steady state.
