@@ -1,0 +1,262 @@
+{
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-05",
+  "tool_usage": {
+    "total": 885,
+    "by_tool": {
+      "Bash": 529,
+      "Read": 194,
+      "Edit": 96,
+      "Write": 22,
+      "ScheduleWakeup": 18,
+      "Agent": 11,
+      "Monitor": 10,
+      "ToolSearch": 4,
+      "TaskList": 1
+    },
+    "by_thread": {
+      "2321de15-3f5f-4550-9977-c94556f916d8": {
+        "Bash": 485,
+        "Read": 118,
+        "Write": 20,
+        "Edit": 47,
+        "ToolSearch": 4,
+        "Monitor": 10,
+        "Agent": 4,
+        "TaskList": 1,
+        "ScheduleWakeup": 18
+      },
+      "2321de15-3f5f-4550-9977-c94556f916d8:a112cad732172f124": {
+        "Read": 15,
+        "Bash": 4,
+        "Edit": 12
+      },
+      "2321de15-3f5f-4550-9977-c94556f916d8:a28a1e8edd9d9ae47": {
+        "Read": 26,
+        "Bash": 7,
+        "Edit": 10
+      },
+      "2321de15-3f5f-4550-9977-c94556f916d8:a963a2ed06c0bc4ac": {
+        "Agent": 1,
+        "Read": 5
+      },
+      "2321de15-3f5f-4550-9977-c94556f916d8:aafec472bcebf5a15": {
+        "Bash": 7,
+        "Write": 1,
+        "Agent": 1,
+        "Read": 2
+      },
+      "2321de15-3f5f-4550-9977-c94556f916d8:accaf8d04fffc59c9": {
+        "Read": 4,
+        "Bash": 11,
+        "Agent": 1
+      },
+      "2321de15-3f5f-4550-9977-c94556f916d8:ad009b40644dfed15": {
+        "Read": 13,
+        "Bash": 12,
+        "Agent": 3,
+        "Write": 1,
+        "Edit": 27
+      },
+      "2321de15-3f5f-4550-9977-c94556f916d8:ad7efb65d0c0bf4a4": {
+        "Read": 11,
+        "Bash": 3,
+        "Agent": 1
+      }
+    },
+    "subagent_spawns": 7,
+    "risk_context": []
+  },
+  "loc": {
+    "method": "git+file",
+    "git": {
+      "method": "git",
+      "repos": {
+        "workspace": {
+          "branch": "claude/generic/opus-05",
+          "commit": "4f1876ce6ce644ec3749aa1bd2549193397fc549",
+          "tracked_source_files": 12,
+          "tracked_source_lines": 3210,
+          "by_extension": {
+            "cmake": 64,
+            "cpp": 2316,
+            "h": 312,
+            "py": 518
+          },
+          "diff_vs_base": {
+            "added": 0,
+            "deleted": 0,
+            "base": "f5300b42ec736db136da4087a356e1094aa8b0a7"
+          }
+        },
+        "cfd_solver_agentic_benchmark": {
+          "branch": "HEAD",
+          "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+          "tracked_source_files": 1,
+          "tracked_source_lines": 324,
+          "by_extension": {
+            "py": 324
+          },
+          "diff_vs_base": null
+        }
+      },
+      "lines_total": 3534
+    },
+    "file": {
+      "method": "file",
+      "files": 13,
+      "lines": 3534,
+      "by_extension": {
+        "cmake": 64,
+        "cpp": 2316,
+        "h": 312,
+        "py": 842
+      }
+    }
+  },
+  "rule_violations": [
+    {
+      "category": "unauthorized_remote_mutations",
+      "severity": "high",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T04:08:42.984Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"git checkout -b solver/cfd-benchmark 2>&1\", \"description\": \"Create solver branch\"}"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T04:20:17.123Z",
+      "tool": "Bash",
+      "evidence": "\"command\": \"pkill -f \\\"cfd2d solve\\\" 2>/dev/null; sleep 1; pkill -9 -f \\\"cfd2d solve\\\" 2>/dev/null; echo \\\"killed\\\"\", \"description\": \"Kill running solver processes\"}"
+    },
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T04:51:55.172Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pip3 install matplotlib numpy pandas 2>&1 | tail -5\", \"description\": \"Install required Python packages\", \"timeout\": 120000}"
+    },
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T04:52:01.413Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pip3 install --break-system-packages matplotlib numpy pandas 2>&1 | tail -5\", \"description\": \"Install Python packages with system ov"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T04:59:25.501Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pkill -9 -f cfd2d 2>/dev/null; ps aux | grep cfd2d | grep -v grep | wc -l\", \"description\": \"Force kill any remaining solver proce"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T05:03:21.229Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pkill -9 -f cfd2d 2>/dev/null; rm -rf /workspace/solver/results/*/; mkdir -p /workspace/solver/results/{naca0012_m015_inviscid,na"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T05:19:07.752Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pkill -9 -f cfd2d 2>/dev/null; echo \\\"killed\\\"\", \"description\": \"Kill running solver processes\"}"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T05:39:28.819Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pgrep -f \\\"cfd2d\\\" 2>/dev/null && pkill -9 -f \\\"cfd2d\\\" 2>/dev/null; sleep 1; pgrep -f \\\"cfd2d\\\" 2>/dev/null || echo \\\"all clear\\\"\", \"description\": \"Force kill rem"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T05:39:34.115Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pkill -9 -f \\\"cfd2d\\\" 2>/dev/null; sleep 2; pgrep -f \\\"cfd2d\\\" 2>/dev/null || echo \\\"all clear\\\"\", \"description\": \"Force kill rem"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T05:45:42.792Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pkill -9 -f \\\"cfd2d\\\" 2>/dev/null; sleep 2; pgrep -c \\\"cfd2d\\\" 2>/dev/null || echo \\\"all killed\\\"\", \"description\": \"Force kill al"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T05:50:32.933Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pkill -9 -f \\\"cfd2d\\\" 2>/dev/null; sleep 1; pgrep -c \\\"cfd2d\\\" 2>/dev/null || echo \\\"all clear\\\"\", \"description\": \"Force kill rem"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T05:58:48.822Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pkill -9 -f cfd2d; sleep 1; ps aux | grep cfd2d | grep -v grep | wc -l\", \"description\": \"Force kill remaining cfd2d processes\"}"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T06:08:04.006Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pkill -9 -f cfd2d; sleep 1; ps aux | grep cfd2d | grep -v grep | wc -l\", \"description\": \"Force kill remaining processes\"}"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T06:10:10.657Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pkill -f run_np4.sh; pkill -9 -f cfd2d; sleep 2; ps aux | grep cfd2d | grep -v grep | wc -l\", \"description\": \"Kill all solver processes\"}"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T06:10:27.034Z",
+      "tool": "Bash",
+      "evidence": " aux | grep cfd2d | grep -v grep | awk '{print $2}' | xargs kill -9 2>/dev/null; sleep 2; ps aux | grep cfd2d | grep -v grep | wc -l\", \"description\": \"Kill specific PIDs\"}"
+    },
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T07:36:27.745Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pip install scipy 2>&1 | tail -3\", \"description\": \"Install scipy\", \"timeout\": 120000}"
+    },
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "2321de15-3f5f-4550-9977-c94556f916d8",
+      "timestamp": "2026-08-27T07:36:33.729Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pip install --break-system-packages scipy 2>&1 | tail -3\", \"description\": \"Install scipy with system packages override\", \"timeout\":"
+    }
+  ],
+  "provenance": {
+    "claude_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-05/.sessions/claude",
+    "selected_roots": [
+      "2321de15-3f5f-4550-9977-c94556f916d8"
+    ],
+    "generated_at": "2026-08-27T13:40:14.246319+00:00",
+    "num_threads": 8
+  }
+}
