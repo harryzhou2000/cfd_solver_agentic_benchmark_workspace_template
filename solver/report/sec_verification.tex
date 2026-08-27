@@ -676,6 +676,62 @@ with a different statistic. A convergence criterion is not a formula to be tight
 until the cases pass; it is a hypothesis about the solution's asymptotic behaviour, and
 it has to be tested against the behaviour actually observed.
 
+\subsubsection{The criterion refusing a case, measured live}
+\label{sec:criterionworks}
+
+A criterion developed by fixing the cases that failed it invites an obvious objection:
+that it has been tuned until the available runs pass, and would pass anything. The best
+available answer is a case it is refusing, measured while the run is in progress rather
+than reconstructed afterwards.
+
+\texttt{naca0012\_m200\_laminar\_re5000} --- the case whose component cancellation
+started this investigation --- provides one. At step \num{13144} of its \num{50000}-step
+budget, the three tests disagree in a fully diagnostic way:
+
+\begin{center}
+\begin{tabular}{llr}
+  \toprule
+  Test & Measurement & Verdict \\
+  \midrule
+  Trailing-window span & $\num{8.42e-4}$ against tolerance $\num{1.29e-3}$
+    & \textbf{passes} \\
+  Sub-block monotonicity & $0.127744 \to 0.128503$, increasing $9$ of $9$
+    & fails \\
+  Decrement decay ratio & $0.988$, essentially no decay & fails \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{The span test alone would certify this run.} Its ratio to tolerance is
+$0.655$, a comfortable pass --- which is to say the pre-fix criterion would accept, right
+now, a run whose drag is unambiguously still developing. What stops it is the decay
+ratio: at $0.988$ the increments are barely shrinking, so the geometric tail sums to
+$\num{6.6e-3}$ of remaining $C_D$ movement, or $5.1\,\%$ of the current value, implying
+an asymptote near $0.135$ against a current $0.1285$.
+
+Set that against the cylinder of \cref{sec:digits}, whose ratio is $0.733$ and whose
+remaining movement is $0.049\,\%$. Both figures come from the same measurement applied to
+the same quantity; they differ by three orders of magnitude in consequence. That is what
+makes the discriminator usable: converged and unconverged runs are separated by a wide
+margin on a measured scalar, not by a judgement about how a plot looks.
+
+The residual for this case is meanwhile at $4.64$ orders against a target of $3.00$, so
+the residual criterion has been satisfied for a long time and it is the force criterion
+alone holding the run open. That is the third occasion on which the two tests have
+disagreed informatively, and the reverse of the original defect: here the residual is the
+optimistic measure and the forces the honest one.
+
+The physical picture is consistent with a slow but genuine approach rather than a
+misbehaving computation. Sampled every \num{1500} steps the drag runs
+$0.784, 0.040, 0.056, 0.085, 0.106, 0.116, 0.123, 0.126, 0.129$; the first value is an
+impulsive-start artifact dominated by viscous drag of $0.776$, and thereafter the
+\emph{pressure} drag does the climbing ($0.007\to0.089$) while the viscous part has been
+nearly flat since step \num{3000} ($0.025\to0.040$). A supersonic laminar case whose shock
+system is still strengthening over the forward section is exactly what that signature
+describes, and the extrapolated $0.135$ is about three times the subsonic laminar total,
+which is plausible for wave drag plus skin friction. The case is not wrong; it is slow,
+and the criterion is reporting that rather than concealing it.
+
 \subsection{A latent sign error in the unused HLLC star state}
 \label{sec:hllcbug}
 

@@ -19,6 +19,11 @@ def load_cd(path):
     rows = list(csv.DictReader(open(path)))
     clean = []
     for r in rows:
+        # A row can be short if the file is read while the solver is mid-write;
+        # DictReader fills the missing trailing fields with None.  Drop those
+        # rather than crashing, so this can be run against a live run.
+        if any(r.get(k) in (None, "") for k in ("step", "cd", "pressure_drag", "viscous_drag")):
+            continue
         if clean and int(clean[-1]["step"]) == int(r["step"]):
             continue  # duplicated final step: keep the in-loop row
         clean.append(r)
