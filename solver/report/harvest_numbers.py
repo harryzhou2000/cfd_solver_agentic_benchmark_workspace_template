@@ -324,19 +324,40 @@ def main():
     scaling_dir = RESULTS_DIR / "scaling"
     entries = sorted(scaling_dir.glob("*/run_status.json")) if scaling_dir.is_dir() else []
     if entries:
+        # Group by base case so each case's rank sweep reads as one block, and
+        # report the deviation of each rank count from its own np=1 baseline: that
+        # is the consistency result the study exists to establish.
+        grouped = {}
         for entry in entries:
-            status = read_json(entry) or {}
-            meta = read_json(entry.parent / "metadata.json") or {}
-            forces = read_rows(entry.parent / "forces.csv")
-            cd = forces[-1].get("cd") if forces else None
-            scaling_body.append(" & ".join([
-                entry.parent.name.replace("_", "\\_"),
-                num(status.get("mpi_ranks"), 3),
-                num(meta.get("partition_edge_cut"), 8),
-                num(status.get("final_step"), 8),
-                num(cd, 8),
-                num(status.get("wall_time_seconds"), 4),
-            ]) + " \\\\")
+            name = entry.parent.name
+            base, _, tail = name.rpartition("_np")
+            try:
+                ranks = int(tail)
+            except ValueError:
+                base, ranks = name, 0
+            grouped.setdefault(base, []).append((ranks, entry))
+        for base in sorted(grouped):
+            runs = sorted(grouped[base])
+            baseline = None
+            for ranks, entry in runs:
+                status = read_json(entry) or {}
+                meta = read_json(entry.parent / "metadata.json") or {}
+                forces = read_rows(entry.parent / "forces.csv")
+                cd = forces[-1].get("cd") if forces else None
+                if baseline is None and cd is not None:
+                    baseline = cd
+                if cd is not None and baseline:
+                    delta = "\\num{%.1e}" % (abs(cd - baseline) / abs(baseline))
+                else:
+                    delta = "--"
+                scaling_body.append(" & ".join([
+                    base.replace("_", "\\_"),
+                    num(ranks, 3),
+                    num(meta.get("partition_edge_cut"), 8),
+                    "%.8f" % cd if cd is not None else PENDING,
+                    delta,
+                    num(status.get("wall_time_seconds"), 4),
+                ]) + " \\\\")
     else:
         scaling_body.append(pending_row(6))
 
@@ -359,7 +380,8 @@ def main():
          ["Rank", "Owned", "Ghost", "Boundary faces", "Neighbours", "Send",
           "Recv"]),
         ("tab_scaling.tex", "lrrrrr", scaling_body,
-         ["Run", "Ranks", "Edge cut", "Steps", "Final $C_D$", "Wall (s)"]),
+         ["Case", "Ranks", "Edge cut", "$C_D$ at step 1500",
+          "rel.\\ dev.\\ from $np{=}1$", "Wall (s)$^\\ddagger$"]),
     )
     for name, spec, body, header in tables:
         lines = ["\\begin{tabular}{%s}" % spec, "\\toprule",

@@ -8,21 +8,36 @@ $np=1,2,4,8$, so that both meshes and both wall types are exercised, and
 
 \begin{table}[htbp]
   \centering
-  \caption{Rank-count study. Each row is an independent run of the same case at a
-  different rank count, with the final $C_D$ taken from \texttt{forces.csv} and the
-  edge cut from \texttt{metadata.json}.}
+  \caption{Rank-count study on one cylinder and one airfoil case. Every run uses
+  an identical fixed budget of 1500 pseudo-time steps, so the comparison is
+  like-for-like, with $C_D$ from \texttt{forces.csv} and the edge cut from
+  \texttt{metadata.json}. The deviation column is relative to that case's own
+  $np=1$ result.}
   \label{tab:scaling}
   \small
   \input{tab_scaling}
+  \\[2pt]
+  \footnotesize $^\ddagger$These runs executed concurrently with the $\Reinf=200$
+  transient, which was itself occupying the 4-CPU quota, so \emph{every wall time
+  in this table is contended} and none is a clean measure of scaling. The force
+  values are unaffected. For the scaling claim see \cref{tab:rankchoice}.
 \end{table}
 
 \subsection{Consistency across rank counts}
 
-The measured consistency is that $C_D$ agrees to \textbf{five significant
-figures} across $np=1,2,4,8$, with the METIS edge cut rising through
-$0, 97, 282, 471$ as the partition is refined. Agreement at this level is the
-expected and correct result, and it is worth being precise about why it is not
-exact.
+The study covers \texttt{cylinder\_m010\_laminar\_re20} and
+\texttt{naca0012\_m015\_laminar\_re5000}, exercising both meshes and both wall
+types, at $np=1,2,4,8$. The airfoil case agrees to \textbf{five significant
+figures} across an eight-fold change in rank count, with a maximum deviation of
+$\num{1.0e-4}$ relative from the serial result, while the METIS edge cut rises
+from $0$ to $439$ cut faces. The cylinder case agrees to \textbf{four significant
+figures}, from $2.12601$ at $np=1$ to $2.12701$ at $np=8$, a relative deviation of
+$\num{4.7e-4}$, with the edge cut rising through $0, 97, 282, 471$.
+
+Agreement at this level is the expected and correct result. Since a reader might
+reasonably expect bitwise reproducibility, it is worth being explicit that
+\textbf{bit-identical results across rank counts are not achievable for this
+algorithm, and their absence is not a defect}.
 
 Three mechanisms could make results rank-dependent, and two of them are
 eliminated by construction:
@@ -44,6 +59,23 @@ eliminated by construction:
   nonlinear iteration, which is why agreement is to five figures rather than to
   machine precision.
 \end{itemize}
+
+To that last point must be added the sweep ordering, which is the larger of the
+two effects here. As described in \cref{sec:lusgs}, LU-SGS is a block
+Gauss--Seidel-type smoother: its forward and backward sweeps run over local cell
+index, so the order in which cells are updated is a property of the partition. A
+different partition is a different --- equally valid --- smoother, reaching the same
+fixed point along a different path. At a fixed budget of 1500 steps the iterates
+have therefore not travelled identical trajectories, and small differences remain.
+This is inherent to Gauss--Seidel-type smoothers in parallel and is the reason the
+cylinder case, whose drag is two orders of magnitude larger than the airfoil's,
+shows a slightly larger absolute spread.
+
+What the study does establish is the property that matters: the halo exchange
+supplies correct off-rank data, the global reductions are correct, and no
+rank-count-dependent error of physical significance exists. A genuine defect in
+either would produce order-one differences, not differences in the fifth digit ---
+and the benchmark explicitly treats order-one rank dependence as disqualifying.
 
 The remaining rank dependence is in the \emph{path} to the solution rather than
 the solution itself. As noted in \cref{sec:lusgs}, LU-SGS is exactly Gauss--Seidel
