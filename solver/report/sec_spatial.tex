@@ -257,11 +257,12 @@ is genuinely there.
 
 The honest concern is that at $\Reinf=5000$ this numerical dissipation competes
 with the physical viscosity, so a fraction of the computed skin friction could in
-principle be an artefact of the floor rather than of $\mu$. To test this rather
-than assert it, the floor coefficient was varied on the cylinder $\Reinf=20$ case,
-where the drag is known independently from the literature; the sensitivity of
-$C_D$ to the floor is reported in \cref{sec:cyl20}. The coefficient
-$\pLinearFloor$ was chosen as the smallest value that reliably suppresses the
-checkerboard mode, and reducing it further changes the drag only within the
-convergence tolerance --- which is the evidence that the computed forces are set by
-the physics and not by this parameter.
+principle be an artefact of the floor rather than of $\mu$. That concern was tested
+rather than argued away, by sweeping the coefficient in controlled experiments.
+\Cref{sec:floorsens} reports the outcome in full, and it does not support the
+design choice: the floor changes $C_D$ by $0.021\,\%$ on the cylinder, and
+disabling it entirely produces no checkerboard mode even on the zero-incidence
+inviscid airfoil, where the entropy and shear eigenvalues vanish on the stagnation
+streamline and no physical viscosity is present to damp a carbuncle. The floor is
+therefore retained as a safeguard for conditions not exercised here, and no result
+in this report depends on it.

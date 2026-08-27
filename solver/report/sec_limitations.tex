@@ -53,14 +53,17 @@ thicker there than on the body. This affects the sharpness of the contours in
 \cref{fig:naca200inv-field} more than it affects the integrated forces, since the
 pressure jump across the shock is captured conservatively even when it is spread.
 
-\paragraph{Second-order accuracy is argued, not measured by refinement.} The
-evidence for second order given here is structural and diagnostic: exact recovery
-of linear-field gradients ($\vLsqExactness$), the verified analytic Jacobian, and
-the counts of positivity fallbacks showing that the second-order path is active in
-production. A grid-convergence study on a sequence of systematically refined
-meshes would be the direct demonstration, but only one mesh per geometry was
-supplied, so the observed order of accuracy is not established here. This is a gap
-in the verification, and it is better stated than glossed over.
+\paragraph{The observed order of accuracy is not measured.} The evidence for
+second order here is structural, diagnostic and comparative: exact recovery of
+linear-field gradients ($\vLsqExactness$), the verified analytic Jacobian, the
+positivity-fallback counts showing the second-order path is active in production,
+and the first-versus-second-order comparison of \cref{sec:ordersens}, where first
+order inflates cylinder drag by $60.5\,\%$ and out of the literature range. That
+last result demonstrates the reconstruction does substantial work, but it is not
+the same thing as measuring a convergence rate. A grid-convergence study on a
+sequence of systematically refined meshes would establish the observed order
+directly; only one mesh per geometry was supplied, so that measurement is absent.
+This remains a gap in the verification and is better stated than glossed over.
 
 \paragraph{Vorticity is a derived quantity.} The vorticity written to the field
 file and plotted in \cref{fig:cyl200-wake} is computed from the same
@@ -84,6 +87,10 @@ GMRES outer Krylov solve preconditioned by the present LU-SGS operator, to
 decouple outer convergence from the CFL cap; generate a refined mesh family to
 measure the observed order of accuracy directly; and refine the airfoil meshes
 normal to the wall so the $\Reinf=5000$ skin friction becomes mesh-independent.
+One further experiment is specifically indicated by \cref{sec:floorsens}: repeat
+the linear-wave floor sweep on the $\Minf=0.80$ and $\Minf=2.0$ cases, which is
+the regime where the Roe carbuncle is actually notorious and the only place the
+floor might prove necessary.
 
 \section{Conclusions}
 \label{sec:conclusions}

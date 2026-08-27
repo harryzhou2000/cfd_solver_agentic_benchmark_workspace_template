@@ -502,16 +502,14 @@ of comparable magnitude with pressure somewhat larger, which is what the
 computation produces. The near-zero lift confirms that the symmetric solution
 branch has been preserved.
 
-This case also serves as the sensitivity test for the added linear-wave
-dissipation disclosed in \cref{sec:lineardissipation}, because its drag is known
-independently from the literature. Varying the floor coefficient of
-\cref{eq:floor} between $\pLinearFloor$, $0.01$ and $0$ changes the computed $C_D$
-only within the convergence tolerance of the case, while the value $0$ permits the
-stagnation-point checkerboard mode that prevents convergence on the airfoil
-cases. The computed drag is therefore set by the physical viscosity and the
-pressure distribution, not by the dissipation floor --- which is the evidence
-needed to treat the $\Reinf=5000$ friction results as physical rather than as an
-artefact of the numerics.
+Because its drag is known independently from the literature, this case is also the
+reference point for the sensitivity study of \cref{sec:sensitivity}. Three results
+there bear on how much confidence the value above deserves: the linear-wave
+dissipation floor changes $C_D$ by only $0.021\,\%$ (\cref{tab:floorsweep}), the
+Venkatakrishnan constant by $0.81\,\%$ over a full decade, and running the same
+case first order instead of second inflates $C_D$ by $60.5\,\%$ to $3.24$, well
+outside the literature range. The computed drag is therefore set by the physics and
+by the second-order reconstruction, not by the tuned parameters.
 
 \Cref{fig:cyl20-hist} shows the residual and force histories, and
 \cref{fig:cyl20-field} the pressure, Mach, velocity-magnitude and wall-$C_p$
