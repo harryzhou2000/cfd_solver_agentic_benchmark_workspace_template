@@ -680,7 +680,16 @@ def main():
             stats = shedding_stats(forces)
             for field, digits in SHED_FIELDS:
                 define("Shed" + camel(field), num(stats.get(field), digits))
-            tool = transient_status(case_dir / "forces.csv")
+            # The analysis window is stated in the prose as the second half of the
+            # record, so it is passed explicitly rather than left to the tool's own
+            # default of the last 60 %.  Deriving it from the recorded physical time
+            # keeps the two in step if the record length ever changes; hard-coding the
+            # start time would be a hand-written number that could silently drift from
+            # the sentence describing it.
+            half_time = None
+            if isinstance(status.get("final_physical_time"), (int, float)):
+                half_time = 0.5 * float(status["final_physical_time"])
+            tool = transient_status(case_dir / "forces.csv", start=half_time)
             if tool:
                 define("ShedStrouhal", num(tool.get("strouhal"), 4))
                 define("ShedPeriod", num(tool.get("period"), 5))

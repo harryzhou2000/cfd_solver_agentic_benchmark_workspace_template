@@ -1099,6 +1099,15 @@ on every physical step with zero misses. This case is presented as a complete fi
 result rather than an honest partial, and the shedding statistics below are measured on
 the full record.
 
+One counting caveat for anyone reusing \texttt{forces.csv} for this case: it holds
+$\num{30001}$ data rows for $\num{30000}$ physical steps. The transient driver appends the
+final force row after the loop has already written it at the last step, so the file ends
+with a byte-exact duplicate of the step-$\num{30000}$ row. No value is affected and the
+final row still corresponds to the written field, but the file should not be described as
+holding exactly one row per physical step, and a row count is not a step count. This is the
+transient counterpart of the steady duplication discussed in \cref{sec:histwrinkle}, with
+the difference that here the two rows are identical rather than two evaluations of one step.
+
 \paragraph{The integration method is what it claims to be, checked from the output.} Four
 properties of \emph{how} this case is integrated were verified by reading
 \texttt{forces.csv} and \texttt{residuals.csv} rather than by inspecting the driver
