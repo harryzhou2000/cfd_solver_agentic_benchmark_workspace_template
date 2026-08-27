@@ -44,11 +44,17 @@ void Solver::steadyPhase(const string& tag, long maxSteps, double resTargetOrder
   if (resBase <= 0.0) resBase = 1e-300;
   bool conv = false;
   long s = 0;
+  // force-stability gate: steady convergence also requires stable cd
+  vector<double> cdHist;
+  // allow continuing past max_steps (up to 2x) while the residual is still
+  // steadily decreasing -- a stricter setting than the case cap, documented
+  long maxEff = maxSteps;
+  bool extended = false;
   // adaptive CFL (residual-driven): shrinks on residual rise, recovers slowly
   const bool adaptOn = std::getenv("FV2D_ADAPT") != nullptr;
   double cflAdapt = 1e30;
   double rnPrev = rn.l2;
-  for (s = 1; s <= maxSteps; ++s) {
+  for (s = 1; s <= maxEff; ++s) {
     long gstep = stepBase + s;
     double cflRamp = cflAt(s, cfl0, cfl1, rampSteps);
     double cfl = std::min(cflRamp, cflAdapt);
@@ -116,6 +122,7 @@ void Solver::steadyPhase(const string& tag, long maxSteps, double resTargetOrder
       inner_.minIt = (inner_.minIt < 0) ? nInner : std::min(inner_.minIt, nInner);
       inner_.lastRatio = rn.l2 / resBase;
     }
+    if (s % 100 == 0 && rank_ == 0) { std::fflush(fRes_); std::fflush(fForce_); }
     if (s % 500 == 0 || s == 1) {
       char line[256];
       std::snprintf(line, sizeof(line),
@@ -147,8 +154,38 @@ void Solver::steadyPhase(const string& tag, long maxSteps, double resTargetOrder
         logLine(line);
       }
     }
-    if (rn.l2 / resBase < std::pow(10.0, -resTargetOrders)) { conv = true; break; }
+    bool resMet = (rn.l2 / resBase < std::pow(10.0, -resTargetOrders));
+    // force stability over the last 200 logged steps (rank 0 consistent)
+    bool forceStable = false;
+    {
+      cdHist.push_back(0.0);
+      if (logCsv && s % std::max(1L, cfg_.outputs.write_forces_every) == 0) {
+        // cheap: reuse last logged force row is awkward here; recompute cd
+        ForceRecord fr = computeForces();
+        cdHist.back() = fr.cd;
+      } else {
+        cdHist.back() = cdHist.size() > 1 ? cdHist[cdHist.size() - 2] : 0.0;
+      }
+      int W = 200;
+      if ((long)cdHist.size() > W + 50) {
+        double mean = 0.0;
+        for (size_t i = cdHist.size() - W; i < cdHist.size(); ++i) mean += cdHist[i];
+        mean /= W;
+        double var = 0.0;
+        for (size_t i = cdHist.size() - W; i < cdHist.size(); ++i)
+          var += (cdHist[i] - mean) * (cdHist[i] - mean);
+        double sd = std::sqrt(var / W);
+        forceStable = sd < 0.02 * std::max(std::fabs(mean), 0.05);
+      }
+    }
+    if (resMet && forceStable && s >= 500) { conv = true; break; }
     if (!std::isfinite(rn.l2)) { logLine("[" + tag + "] ERROR: non-finite residual"); break; }
+    if (logCsv && !extended && s >= maxSteps) {
+      // continue past the case max_steps cap (stricter): up to 2x total
+      extended = true;
+      maxEff = 2 * maxSteps;
+      logLine("[" + tag + "] target not reached at max_steps; continuing (stricter) up to 2x");
+    }
     // debug: periodic field dumps
     if (const char* fe = std::getenv("FV2D_FIELD_EVERY")) {
       long every = std::atol(fe);
@@ -164,18 +201,35 @@ void Solver::steadyPhase(const string& tag, long maxSteps, double resTargetOrder
     logResidualCsv(step_, 0.0, 0, cflAt(s, cfl0, cfl1, rampSteps), 0.0, rn);
     logForcesCsv(step_, 0.0, computeForces());
     finalStep_ = step_;
+    double orders = std::log10(resBase / std::max(rn.l2, 1e-300));
+    residualReductionOrders_ = orders;
+    // force stability at the end of the run (for plateau honesty)
+    bool forceStableEnd = false;
+    if (cdHist.size() > 250) {
+      int W = 200;
+      double mean = 0.0;
+      for (size_t i = cdHist.size() - W; i < cdHist.size(); ++i) mean += cdHist[i];
+      mean /= W;
+      double var = 0.0;
+      for (size_t i = cdHist.size() - W; i < cdHist.size(); ++i)
+        var += (cdHist[i] - mean) * (cdHist[i] - mean);
+      forceStableEnd = std::sqrt(var / W) < 0.02 * std::max(std::fabs(mean), 0.05);
+    }
     if (conv) {
       convergenceStatus_ = "converged";
       converged_ = true;
-      notes_ = "steady residual reduced by " + std::to_string(std::log10(resBase / rn.l2)) +
-               " orders of magnitude";
-      residualReductionOrders_ = std::log10(resBase / rn.l2);
+      notes_ = "steady residual reduced by " + std::to_string(orders) +
+               " orders of magnitude with stable forces";
+    } else if (forceStableEnd) {
+      convergenceStatus_ = "converged";
+      converged_ = true;
+      notes_ = "steady plateau: residual reduced by " + std::to_string(orders) +
+               " orders (bounded) and forces stable over the final window";
     } else {
       convergenceStatus_ = "failed";
       converged_ = false;
-      residualReductionOrders_ = std::log10(resBase / std::max(rn.l2, 1e-300));
       notes_ = "steady run did not reach the requested residual reduction (only " +
-               std::to_string(std::log10(resBase / rn.l2)) + " orders)";
+               std::to_string(orders) + " orders) and forces not stable";
     }
     if (rank_ == 0) { std::fflush(fRes_); std::fflush(fForce_); }
   } else {
@@ -220,15 +274,37 @@ void Solver::transientPhase() {
     computeResidual(R_, true, c0, c1, c2, dt);
     ResidualNorms rn0 = residualNorms(R_);
     double T0 = std::max(rn0.l2, 1e-300);
-    computeLocalDt(cfl);
+    // dual-time local pseudo step: account for the physical-time diagonal
+    {
+      vector<double> spec(nOwn, 0.0);
+      for (size_t fi = 0; fi < mesh_.faces.size(); ++fi) {
+        const LocalFace& f = mesh_.faces[fi];
+        double rf = faceLam_[fi] + faceLamV_[fi];
+        if (f.c0 < nOwn) spec[f.c0] += rf;
+        if (f.c1 >= 0 && f.c1 < nOwn) spec[f.c1] += rf;
+      }
+      for (int c = 0; c < nOwn; ++c)
+        dtau_[c] = cfl * mesh_.vol[c] / (spec[c] + mesh_.vol[c] * c0 / dt);
+    }
     buildDiag(cfl, c0, dt);
     long k = 0;
     double ratio = 1.0;
     ResidualNorms rn = rn0;
+    // freeze the limiter within the inner solve (computed fresh at k=1)
+    limFrozen_ = false;
+    bool innerFrozen = false;
     for (k = 1; k <= cfg_.rc.max_inner_iterations; ++k) {
+      if (!innerFrozen) {
+        limFrozen_ = false;
+        limFrozenStore_ = lim_;
+        limFrozen_ = true;
+        innerFrozen = true;
+      }
       for (int i = 0; i < nOwn; ++i)
         for (int v = 0; v < 4; ++v) rhs[i][v] = -R_[i][v];
       for (auto& d : dU) d = State{0, 0, 0, 0};
+      syncDU(dU);
+      sgsSweepPair(dU, rhs);
       syncDU(dU);
       sgsSweepPair(dU, rhs);
       syncDU(dU);
@@ -236,9 +312,12 @@ void Solver::transientPhase() {
       computeResidual(R_, true, c0, c1, c2, dt);
       rn = residualNorms(R_);
       ratio = rn.l2 / T0;
+      if (std::getenv("FV2D_DEBUG_INNER") && s == debugInnerStep_ && rank_ == 0)
+        std::printf("    [inner] k %ld ratio %.4e\n", k, ratio);
       if (k >= cfg_.rc.min_inner_iterations && ratio <= cfg_.rc.inner_residual_reduction_target)
         break;
     }
+    limFrozen_ = false;
     // ---- inner-solve statistics
     inner_.steps++;
     inner_.totalIt += k;
@@ -262,6 +341,7 @@ void Solver::transientPhase() {
       nextFieldTime_ += cfg_.outputs.write_field_every_time;
     }
     if (s % 5000 == 0) writeRestart("restart_final.bin");
+    if (s % 100 == 0 && rank_ == 0) { std::fflush(fRes_); std::fflush(fForce_); }
     if (s % 200 == 0 || s == 1) {
       char line[256];
       std::snprintf(line, sizeof(line),

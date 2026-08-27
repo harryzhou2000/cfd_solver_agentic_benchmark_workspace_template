@@ -1,0 +1,104 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\title{An MPI-Parallel Unstructured Finite-Volume Solver for the\\
+Compressible Navier--Stokes Equations: Benchmark Report}
+\author{fv2d solver team}
+\date{\today}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present a 2-D unstructured finite-volume solver for the compressible
+Navier--Stokes equations of a calorically perfect gas, with MPI domain
+decomposition based on METIS graph partitioning and neighbor-scoped halo
+exchange. The solver uses weighted least-squares linear reconstruction with
+Barth--Jespersen limiting, Roe/Rusanov Riemann fluxes, an LU-SGS implicit
+pseudo-time solver with analytic split-flux Jacobians, and a BDF2 dual-time
+integrator for transient cases. We report results for six NACA0012 cases
+(inviscid and laminar, Mach 0.15/0.8/2.0) and two cylinder cases (laminar,
+Re 20 steady and Re 200 vortex shedding).
+\end{abstract}
+
+\section{Governing equations and gas model}
+We solve the conservative compressible Navier--Stokes equations in 2-D,
+\begin{equation}
+\frac{\partial \mathbf{U}}{\partial t}
++ \frac{\partial \mathbf{F}^{i}}{\partial x}
++ \frac{\partial \mathbf{G}^{i}}{\partial y}
+= \frac{\partial \mathbf{F}^{v}}{\partial x}
++ \frac{\partial \mathbf{G}^{v}}{\partial y},
+\qquad \mathbf{U} = [\rho,\rho u,\rho v,\rho E]^T,
+\end{equation}
+with inviscid fluxes
+\begin{equation}
+\mathbf{F}^{i} = [\rho u,\ \rho u^2+p,\ \rho u v,\ u(\rho E+p)]^T, \quad
+\mathbf{G}^{i} = [\rho v,\ \rho u v,\ \rho v^2+p,\ v(\rho E+p)]^T,
+\end{equation}
+Newtonian viscous stresses and Fourier heat conduction,
+\begin{equation}
+\tau_{xx}=2\mu u_x-\tfrac{2}{3}\mu(u_x+v_y),\quad
+\tau_{yy}=2\mu v_y-\tfrac{2}{3}\mu(u_x+v_y),\quad
+\tau_{xy}=\mu(u_y+v_x),\quad \mathbf{q}=-k\nabla T,\quad k=\frac{\mu c_p}{Pr},
+\end{equation}
+and the calorically perfect gas model
+\begin{equation}
+p=(\gamma-1)\rho e,\qquad E=e+\tfrac{1}{2}(u^2+v^2),\qquad a=\sqrt{\gamma p/\rho}.
+\end{equation}
+All cases use nondimensional freestream $\rho_\infty=1$, $|\mathbf{V}_\infty|=1$,
+$p_\infty = 1/(\gamma M_\infty^2)$, $\gamma=1.4$, $R=1$, $Pr=0.72$; the laminar
+cases use constant viscosity $\mu = \rho_\infty U_\infty L_{ref}/Re$.
+
+\section{Discretization}
+\subsection{Finite-volume scheme}
+Cell-centered finite volumes on mixed triangular/quadrilateral meshes. For each
+cell $i$,
+\begin{equation}
+\frac{d\mathbf{U}_i}{dt} = -\frac{1}{V_i}\sum_{f\in\partial i}
+\left(\mathbf{F}^{i}_f - \mathbf{F}^{v}_f\right) A_f,
+\end{equation}
+with face fluxes evaluated from limited linear reconstruction. Inviscid fluxes
+use the Roe approximate Riemann solver with a Harten entropy fix (steady cases)
+or the Rusanov/local Lax--Friedrichs flux with dissipation scale 1.0 (Re 200
+transient, per the case specification).
+\subsection{Reconstruction and limiting}
+Primitive variables $(\rho,u,v,p)$ are reconstructed with weighted
+least-squares gradients (stencil: face neighbors plus mirrored boundary ghost
+points), limited with a Barth--Jespersen limiter and positivity floors on
+reconstructed density and pressure. A residual-triggered first-order startup
+phase is used for robustness; production runs are second-order in smooth
+regions. Viscous face gradients use the corrected average of cell gradients.
+\subsection{Boundary conditions}
+Farfield: characteristic (Riemann-invariant) boundary state. Slip wall:
+pressure-only flux $[0, p n_x, p n_y, 0]^T$. No-slip adiabatic wall: mirrored
+ghost velocity with adiabatic temperature, pressure flux, and wall shear from
+one-sided corrected gradients. Surface output reports boundary-condition
+values (zero velocity at no-slip walls, tangential-preserving at slip walls).
+\section{Implicit solvers and time integration}
+Steady cases march in pseudo time with local steps from the case CFL ramp,
+including convective and viscous spectral radii. Each nonlinear step applies
+several LU-SGS relaxation pairs; the off-diagonal blocks use the analytic
+split flux Jacobians $A^{\pm}=\tfrac{1}{2}(A_n \pm \lambda_f I)$ (verified
+against finite differences), with block-Jacobi coupling across ranks. The
+transient Re 200 case uses BDF2 physical-time integration with a true two-level
+structure: an outer physical-time loop with frozen $U^n$, $U^{n-1}$ histories
+and an inner nonlinear loop of LU-SGS relaxations on the total transient
+residual (target ratio $10^{-3}$).
+\section{MPI parallelization}
+The cell adjacency graph is partitioned with METIS k-way (serial preprocessing
+on rank 0); each rank stores only its owned cells plus one layer of ghost cells.
+Halo exchange of states, gradients/limiters, and corrections uses neighbor
+Isend/Irecv; residual and force norms use MPI reductions. Partition diagnostics
+(owned/ghost counts, neighbors, edge cut, load balance) are reported per case.
+\section{Results}
+%CASE_SECTIONS%
+\section{MPI rank-count comparison}
+%MPI_SECTION%
+\section{Convergence and limitations}
+%LIMITATIONS%
+\end{document}

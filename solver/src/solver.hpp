@@ -55,6 +55,7 @@ private:
   bool secondOrderEnabled_ = false;
   double switchOrders_ = 1.5;  // FV2D_SWITCH_ORDERS; 1e30 disables 2nd order
   long switchStep_ = 300;      // FV2D_SWITCH_STEP: earliest 2nd-order switch
+  long debugInnerStep_ = 50;   // FV2D_DEBUG_INNER_STEP
   long freezeStep_ = 1000000000;  // FV2D_FREEZE_STEP: force limiter freeze
   bool freezeOnNextResidual_ = false;
   Prim fs_;  // freestream primitive state

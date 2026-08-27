@@ -398,7 +398,8 @@ void Solver::writeMetadataJson() {
   md["time_integrator"] = cfg_.transient() ? "bdf2_dual_time" : "implicit_euler_pseudo_time";
   md["implicit_solver"] = "scalar_lusgs_symmetric_gauss_seidel_block_jacobi_across_ranks";
   md["reconstruction"] = "weighted_least_squares_linear";
-  md["limiter"] = "barth_jespersen_with_positivity_floors";
+  md["limiter"] = (venkatK_ > 0.0) ? "venkatakrishnan_with_positivity_floors"
+                                   : "barth_jespersen_with_positivity_floors";
   md["spatial_order_claimed"] = 2;
   md["positivity_preservation"] = "limiter_floors_and_update_backtracking";
   md["wall_boundary_output_semantics"] = "boundary_value";
@@ -536,7 +537,6 @@ void Solver::readRestart(const string& path) {
 }
 
 void Solver::finalizeOutputs() {
-  residualReductionOrders_ = 0.0;
   writeSurfaceCsv();
   writeFieldVtk(outdir_ + "/field_final.vtk");
   writeRestart("restart_final.bin");
