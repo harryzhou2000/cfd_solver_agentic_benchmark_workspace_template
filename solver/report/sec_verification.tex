@@ -392,9 +392,12 @@ on that case it did not. The force integral now applies the limiter factor, whic
 the consistent choice on its own merits: no other part of the scheme uses an
 unlimited extrapolation, and the limiter is precisely what keeps a reconstruction
 bounded near a shock, so integrating an unlimited one was least defensible exactly
-where it mattered most. After the change the same check gives $\num{1.84e-3}$
-relative on that case, a factor of $27$ improvement, with the remainder attributable to
-the script's arc-length approximation.
+where it mattered most. After the change the same check on that case agrees to
+$\cnsReintPdRelNacaSupLam$ relative --- machine precision, and more than ten orders of
+magnitude better than the pre-fix $\num{4.95e-2}$. An intermediate draft credited the fix
+with only a factor of $27$, to $\num{1.84e-3}$, and attributed the remainder to the
+solver; that residual was in fact the checking script's own arc-length error, and it
+vanished when the reconstruction was made exact.
 
 \paragraph{Which measure to quote, and a caution that outlived its own table.} While the
 checking script still carried its approximate arc length, an intermediate draft argued that
