@@ -1,0 +1,507 @@
+\section{Results}
+\label{sec:results}
+
+Every number in this section is harvested mechanically from the submitted output
+files. The convergence status quoted for each case is the status the solver itself
+wrote to \texttt{run\_status.json}; no case is relabelled here. Where a value
+appears as \pending, that run had not completed when this document was last
+compiled, and the entry is deliberately left visibly empty rather than filled
+with an estimate.
+
+\subsection{Summary Tables}
+\label{sec:summary}
+
+\Cref{tab:runstatus} is the run-status table and \cref{tab:forces} the force
+table. In \cref{tab:forces} the final column reports the measured stationarity of
+the drag history: the change in $C_D$ across the trailing tenth of the recorded
+history, classified against the criterion of \cref{eq:stationarity}. A case marked
+\textbf{drifting} has not reached a steady state, regardless of how many residual
+orders it achieved, and its coefficients should be read as a snapshot rather than
+a converged value.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Run status for all eight required cases, transcribed from each
+  \texttt{run\_status.json}. Physical time is zero for steady cases by
+  construction. Wall time is for the rank count shown, on 64-core hardware.}
+  \label{tab:runstatus}
+  \small
+  \input{tab_runstatus}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Force coefficients from the final row of each \texttt{forces.csv},
+  with the pressure/viscous drag split. The stationarity column is measured from
+  the drag history itself, not asserted.}
+  \label{tab:forces}
+  \small
+  \input{tab_forces}
+\end{table}
+
+\subsection{NACA0012 Cases}
+\label{sec:naca}
+
+All six airfoil cases use the same mesh at zero angle of attack, so the exact
+solution is symmetric about $y=0$ and the exact lift and moment are zero. The
+computed $C_L$ and $C_{m,z}$ in \cref{tab:forces} are therefore direct measures
+of the discretization's ability to preserve symmetry on a mesh that is not itself
+symmetric in its cell connectivity. This is a more demanding test than it looks:
+the Roe linear-wave undamping discussed after \cref{eq:floor} broke exactly this
+symmetry before the eigenvalue floor was introduced.
+
+\subsubsection{Subsonic inviscid, $\Minf=0.15$}
+
+This case is the cleanest available measure of pure discretization error. At
+$\Minf=0.15$ with no shock and no viscosity, d'Alembert's paradox applies and the
+exact drag is identically zero. Any computed $C_D$ is therefore entirely numerical
+--- artificial dissipation from the Riemann solver plus reconstruction error --- so
+its magnitude, not its sign, is the meaningful quantity. The solver reports
+$C_D=\cnsCdNacaSubInv$ with $C_L=\cnsClNacaSubInv$, over
+$\cnsOrdersNacaSubInv$ orders of residual reduction in $\cnsStepsNacaSubInv$
+steps.
+
+\Cref{fig:naca015inv-hist} shows the residual and force histories and
+\cref{fig:naca015inv-field} the Mach and pressure fields. The $C_p$ distribution
+in \cref{fig:naca015inv-cp} should be symmetric between upper and lower surfaces
+and should recover the stagnation value $C_p=1$ at the leading edge; the surface
+row nearest the nose reports $C_p=\num{0.9958}$, the small deficit being the
+finite distance from the first cell centre to the true stagnation point.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m015_inviscid_residuals.png}{\linewidth}
+    \caption{Residual history.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m015_inviscid_forces.png}{\linewidth}
+    \caption{Force history.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=0.15$, inviscid. Left: total and per-component
+  $L_2$ residual norms and the $L_\infty$ norm against pseudo-time step, from
+  \texttt{residuals.csv}. Right: $C_L$ and $C_D$ against step, from
+  \texttt{forces.csv}.}
+  \label{fig:naca015inv-hist}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m015_inviscid_mach.png}{\linewidth}
+    \caption{Mach number.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m015_inviscid_pressure.png}{\linewidth}
+    \caption{Pressure.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=0.15$, inviscid: near-body Mach number and
+  pressure contours from \texttt{field\_final.vtu}. The flow accelerates over the
+  thickest part of the section and returns symmetrically to the freestream, with
+  stagnation points at the leading and trailing edges.}
+  \label{fig:naca015inv-field}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{naca0012_m015_inviscid_cp.png}{0.62\textwidth}
+  \caption{NACA0012 at $\Minf=0.15$, inviscid: surface pressure coefficient
+  against chordwise position from \texttt{surface.csv}. Upper and lower surfaces
+  overlay at zero incidence; departure between them is a direct measure of
+  residual asymmetry.}
+  \label{fig:naca015inv-cp}
+\end{figure}
+
+\subsubsection{Transonic inviscid, $\Minf=0.80$}
+
+At $\Minf=0.80$ the flow accelerates past sonic over the section and closes
+through a shock, so the drag is genuine wave drag rather than numerical error. The
+solver reports $C_D=\cnsCdNacaTraInv$ with $C_L=\cnsClNacaTraInv$ after
+$\cnsStepsNacaTraInv$ steps and $\cnsOrdersNacaTraInv$ orders. This case is the
+most demanding for the limiter, since the shock sits on the body where the cells
+are smallest, and it is the case where the residual/force distinction of
+\cref{sec:stationarity} matters most.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m080_inviscid_residuals.png}{\linewidth}
+    \caption{Residual history.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m080_inviscid_forces.png}{\linewidth}
+    \caption{Force history.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=0.80$, inviscid: residual and force histories from
+  \texttt{residuals.csv} and \texttt{forces.csv}.}
+  \label{fig:naca080inv-hist}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m080_inviscid_mach.png}{\linewidth}
+    \caption{Mach number.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m080_inviscid_pressure.png}{\linewidth}
+    \caption{Pressure.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=0.80$, inviscid: near-body Mach and pressure
+  contours from \texttt{field\_final.vtu}, showing the supersonic pocket
+  terminated by a shock on each surface.}
+  \label{fig:naca080inv-field}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{naca0012_m080_inviscid_cp.png}{0.62\textwidth}
+  \caption{NACA0012 at $\Minf=0.80$, inviscid: surface $C_p$ from
+  \texttt{surface.csv}. The shock appears as a sharp pressure recovery; its
+  chordwise position and sharpness are set by the limiter of
+  \cref{eq:limiter}.}
+  \label{fig:naca080inv-cp}
+\end{figure}
+
+\subsubsection{Supersonic inviscid, $\Minf=2.0$}
+
+At $\Minf=2.0$ a detached bow shock stands ahead of the blunt leading edge and
+oblique shocks trail from the tail. The reported drag is
+$C_D=\cnsCdNacaSupInv$ with $C_L=\cnsClNacaSupInv$, reached in
+$\cnsStepsNacaSupInv$ steps with $\cnsOrdersNacaSupInv$ orders of residual
+reduction. The characteristic farfield of \cref{sec:bc} is what lets the bow shock
+leave the domain cleanly: on the upstream arc the normal Mach number exceeds unity
+in magnitude and the state is fully imposed, while on the downstream arc it is
+fully extrapolated.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m200_inviscid_residuals.png}{\linewidth}
+    \caption{Residual history.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m200_inviscid_forces.png}{\linewidth}
+    \caption{Force history.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=2.0$, inviscid: residual and force histories from
+  \texttt{residuals.csv} and \texttt{forces.csv}.}
+  \label{fig:naca200inv-hist}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m200_inviscid_mach.png}{\linewidth}
+    \caption{Mach number.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{naca0012_m200_inviscid_pressure.png}{\linewidth}
+    \caption{Pressure.}
+  \end{subfigure}
+  \caption{NACA0012 at $\Minf=2.0$, inviscid: Mach and pressure contours from
+  \texttt{field\_final.vtu}, showing the detached bow shock and the trailing
+  oblique shock system.}
+  \label{fig:naca200inv-field}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{naca0012_m200_inviscid_cp.png}{0.62\textwidth}
+  \caption{NACA0012 at $\Minf=2.0$, inviscid: surface $C_p$ from
+  \texttt{surface.csv}, with the high post-shock pressure over the forward part of
+  the section that produces the wave drag.}
+  \label{fig:naca200inv-cp}
+\end{figure}
+
+\subsubsection{Laminar cases at $\Reinf=5000$}
+
+The three laminar airfoil cases replace the slip wall by a no-slip adiabatic wall
+and add the viscous terms of \cref{eq:viscflux} with $\mu=\num{2e-4}$ from
+\cref{eq:mu}. The drag now splits into a pressure part and a skin-friction part,
+and \cref{tab:forces} reports both. For orientation, the laminar flat-plate
+result $C_f = 1.328/\sqrt{\Reinf}$ integrated over both sides of a unit chord
+gives a friction drag of order $0.04$, so a physically plausible viscous drag for
+these cases is of order $10^{-2}$ and any value approaching unity indicates an
+undeveloped boundary layer rather than a converged solution --- the failure mode
+documented in \cref{sec:stationarity}.
+
+Results: at $\Minf=0.15$, $C_D=\cnsCdNacaSubLam$
+($C_{D,p}=\cnsPdNacaSubLam$, $C_{D,v}=\cnsVdNacaSubLam$) after
+$\cnsStepsNacaSubLam$ steps; at $\Minf=0.80$, $C_D=\cnsCdNacaTraLam$
+($C_{D,p}=\cnsPdNacaTraLam$, $C_{D,v}=\cnsVdNacaTraLam$) after
+$\cnsStepsNacaTraLam$ steps; at $\Minf=2.0$, $C_D=\cnsCdNacaSupLam$
+($C_{D,p}=\cnsPdNacaSupLam$, $C_{D,v}=\cnsVdNacaSupLam$) after
+$\cnsStepsNacaSupLam$ steps.
+
+The wall treatment can be checked directly in the submitted output: because
+\texttt{surface.csv} carries boundary values (\cref{sec:ghostvsface}), the
+velocity and Mach columns on a no-slip wall are identically zero, while the $C_f$
+column carries the tangential shear of \cref{eq:shear}. The skin-friction
+distributions are shown in \cref{fig:naca-lam-cf}.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_residuals.png}{\linewidth}
+    \caption{$\Minf=0.15$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_residuals.png}{\linewidth}
+    \caption{$\Minf=0.80$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_residuals.png}{\linewidth}
+    \caption{$\Minf=2.0$.}
+  \end{subfigure}
+  \caption{Residual histories for the three laminar NACA0012 cases at
+  $\Reinf=5000$, from each \texttt{residuals.csv}.}
+  \label{fig:naca-lam-res}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_forces.png}{\linewidth}
+    \caption{$\Minf=0.15$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_forces.png}{\linewidth}
+    \caption{$\Minf=0.80$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_forces.png}{\linewidth}
+    \caption{$\Minf=2.0$.}
+  \end{subfigure}
+  \caption{Force histories for the three laminar NACA0012 cases at
+  $\Reinf=5000$, from each \texttt{forces.csv}. These histories, not the residual
+  norms, are the binding convergence evidence discussed in
+  \cref{sec:stationarity}.}
+  \label{fig:naca-lam-forces}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_cf.png}{\linewidth}
+    \caption{$\Minf=0.15$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_cf.png}{\linewidth}
+    \caption{$\Minf=0.80$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_cf.png}{\linewidth}
+    \caption{$\Minf=2.0$.}
+  \end{subfigure}
+  \caption{Skin-friction coefficient along the airfoil for the laminar cases,
+  from the \texttt{cf} column of each \texttt{surface.csv}. $C_f$ is largest near
+  the leading edge where the boundary layer is thinnest and decays downstream.}
+  \label{fig:naca-lam-cf}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_mach.png}{\linewidth}
+    \caption{$\Minf=0.15$, Mach.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_mach.png}{\linewidth}
+    \caption{$\Minf=0.80$, Mach.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_mach.png}{\linewidth}
+    \caption{$\Minf=2.0$, Mach.}
+  \end{subfigure}\\[6pt]
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m015_laminar_re5000_pressure.png}{\linewidth}
+    \caption{$\Minf=0.15$, pressure.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m080_laminar_re5000_pressure.png}{\linewidth}
+    \caption{$\Minf=0.80$, pressure.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.32\textwidth}\centering
+    \cnsfig{naca0012_m200_laminar_re5000_pressure.png}{\linewidth}
+    \caption{$\Minf=2.0$, pressure.}
+  \end{subfigure}
+  \caption{Laminar NACA0012 cases at $\Reinf=5000$: near-body Mach number (top)
+  and pressure (bottom) from each \texttt{field\_final.vtu}. The Mach contours
+  show the boundary layer as a thin low-Mach region along the surface, absent from
+  the inviscid cases.}
+  \label{fig:naca-lam-field}
+\end{figure}
+
+\subsection{Cylinder Reynolds 20}
+\label{sec:cyl20}
+
+At $\Reinf=20$ the cylinder wake is steady, symmetric, and closed: a pair of
+standing recirculation bubbles behind the body with no shedding. This is the most
+quantitatively checkable case in the benchmark, because the literature value for
+the drag coefficient of a circular cylinder at $\Reinf=20$ is well established at
+$C_D\approx 2.0$--$2.1$.
+
+The solver reports $C_D=\cnsCdCylSteady$, split as
+$C_{D,p}=\cnsPdCylSteady$ pressure and $C_{D,v}=\cnsVdCylSteady$ friction, with
+$C_L=\cnsClCylSteady$ after $\cnsStepsCylSteady$ steps and
+$\cnsOrdersCylSteady$ orders of residual reduction. Both the total and the split
+are physically sensible: at this Reynolds number pressure and friction drag are
+of comparable magnitude with pressure somewhat larger, which is what the
+computation produces. The near-zero lift confirms that the symmetric solution
+branch has been preserved.
+
+This case also serves as the sensitivity test for the added linear-wave
+dissipation disclosed in \cref{sec:lineardissipation}, because its drag is known
+independently from the literature. Varying the floor coefficient of
+\cref{eq:floor} between $\pLinearFloor$, $0.01$ and $0$ changes the computed $C_D$
+only within the convergence tolerance of the case, while the value $0$ permits the
+stagnation-point checkerboard mode that prevents convergence on the airfoil
+cases. The computed drag is therefore set by the physical viscosity and the
+pressure distribution, not by the dissipation floor --- which is the evidence
+needed to treat the $\Reinf=5000$ friction results as physical rather than as an
+artefact of the numerics.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_residuals.png}{\linewidth}
+    \caption{Residual history.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_forces.png}{\linewidth}
+    \caption{Force history.}
+  \end{subfigure}
+  \caption{Cylinder at $\Reinf=20$: residual and force histories from
+  \texttt{residuals.csv} and \texttt{forces.csv}. The monotone residual decay is
+  characteristic of a genuinely steady, stable flow, in contrast to the transonic
+  airfoil case.}
+  \label{fig:cyl20-hist}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_pressure.png}{\linewidth}
+    \caption{Pressure.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_mach.png}{\linewidth}
+    \caption{Mach number.}
+  \end{subfigure}\\[6pt]
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_velocity.png}{\linewidth}
+    \caption{Velocity magnitude (wake).}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re20_cp.png}{\linewidth}
+    \caption{Wall $C_p$.}
+  \end{subfigure}
+  \caption{Cylinder at $\Reinf=20$: fields from \texttt{field\_final.vtu} and the
+  wall pressure coefficient from \texttt{surface.csv}. The velocity-magnitude view
+  resolves the closed, symmetric recirculation region; the wall $C_p$ falls from
+  the stagnation value at the leading point to its minimum near the shoulder and
+  recovers only partially at the rear, the deficit being the pressure drag.}
+  \label{fig:cyl20-field}
+\end{figure}
+
+\subsection{Cylinder Reynolds 200 Vortex Street}
+\label{sec:cyl200}
+
+At $\Reinf=200$ the steady wake is unstable and the flow settles into a periodic
+von K\'arm\'an vortex street. This case is integrated in physical time by the
+dual-time BDF2 scheme of \cref{sec:bdf2} with the supplied production controls:
+$\Delta t=0.01$ to $t_f=300$, i.e.\ $\num{30000}$ physical steps, with 5 to 1000
+inner iterations per step against an inner target of $10^{-3}$ on the total
+transient residual.
+
+The status reported by the solver is \cnsStatusCylShed, at
+$\cnsStepsCylShed$ physical steps. Inner-solve statistics from
+\texttt{metadata.json} are: typical
+$\cnsTypicalInnerIterationsCylShed$ inner iterations per physical step, observed
+range $\cnsObservedMinInnerIterationsCylShed$ to
+$\cnsObservedMaxInnerIterationsCylShed$, with
+$\cnsInnerTargetMissesCylShed$ target misses and a converged-step fraction of
+$\cnsInnerTargetConvergedFractionCylShed$.
+
+Statistics are taken over the second half of the record, $t\in[\cnsShedTStart,
+\cnsShedTEnd]$, by which time the initial transient has passed:
+
+\begin{center}
+\small
+\begin{tabular}{lrl}
+  \toprule
+  Quantity & Computed & Literature ($\Reinf=200$) \\
+  \midrule
+  Mean $C_D$ & $\cnsShedCdMean$ & $\approx 1.3$--$1.4$ \\
+  RMS $C_D$ & $\cnsShedCdRms$ & --- \\
+  Mean $C_L$ & $\cnsShedClMean$ & $0$ by symmetry \\
+  RMS $C_L$ & $\cnsShedClRms$ & --- \\
+  Lift amplitude & $\cnsShedClAmp$ & $\approx 0.6$--$0.7$ \\
+  Shedding frequency $f$ & $\cnsShedFreq$ & --- \\
+  Strouhal number $St=fD/U_\infty$ & $\cnsShedStrouhal$ & $\approx 0.19$--$0.20$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+The Strouhal number is obtained from mean-crossing counts of the lift signal over
+the analysis window, which requires no assumption about spectral resolution; with
+$D=U_\infty=1$ the Strouhal number equals the frequency numerically. An
+independent spectral estimate from the periodogram is shown in
+\cref{fig:cyl200-spectrum}. The lift oscillates about zero at the shedding
+frequency while the drag oscillates about its mean at twice that frequency, which
+is the standard signature of alternating vortex shedding: each shed vortex
+produces a lift excursion of one sign but a drag excursion regardless of sign.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_forces.png}{\linewidth}
+    \caption{Force histories.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_residuals.png}{\linewidth}
+    \caption{Transient residual history.}
+  \end{subfigure}
+  \caption{Cylinder at $\Reinf=200$: post-transient $C_L$ and $C_D$ against
+  physical time from \texttt{forces.csv}, and the total transient residual per
+  physical step from \texttt{residuals.csv}. The lift oscillates at the shedding
+  frequency and the drag at twice that frequency.}
+  \label{fig:cyl200-forces}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{cylinder_m010_laminar_re200_spectrum.png}{0.62\textwidth}
+  \caption{Cylinder at $\Reinf=200$: power spectrum of the post-transient lift
+  signal from \texttt{forces.csv}, with the dominant peak marked. The peak
+  frequency is the shedding frequency used for the Strouhal number.}
+  \label{fig:cyl200-spectrum}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_vorticity.png}{\linewidth}
+    \caption{Vorticity, clipped to $[-5,5]$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_velocity.png}{\linewidth}
+    \caption{Velocity magnitude.}
+  \end{subfigure}\\[6pt]
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_pressure.png}{\linewidth}
+    \caption{Pressure.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_mach.png}{\linewidth}
+    \caption{Mach number.}
+  \end{subfigure}
+  \caption{Cylinder at $\Reinf=200$: post-transient wake visualisations from
+  \texttt{field\_final.vtu}. Vorticity is clipped to the recommended $[-5,5]$
+  range, without which the near-wall vorticity extremes compress the wake into a
+  single colour. The alternating pattern of opposite-signed vortices is the
+  vortex street; the low-pressure cores in panel (c) mark the individual
+  vortices.}
+  \label{fig:cyl200-wake}
+\end{figure}

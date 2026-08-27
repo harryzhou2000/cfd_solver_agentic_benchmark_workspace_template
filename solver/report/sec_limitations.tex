@@ -1,0 +1,117 @@
+\section{Limitations and Failure Analysis}
+\label{sec:limitations}
+
+This section lists what is genuinely unresolved. Items that were found and fixed
+are described in their own sections and are not repeated here as if they were
+still open.
+
+\paragraph{Free-stream preservation is not exact.} The uniform-flow check reaches
+$O(10^{-11})$ rather than the requested $10^{-12}$, and the solver emits a warning
+on every run. The cause is identified: the least-squares normal matrix
+\cref{eq:normaleq} is poorly conditioned on the most stretched wall cells (aspect
+ratios of order $10^3$), so the computed gradient of a constant field is not
+exactly zero. The residual level involved is far below any converged residual, so
+it does not affect the reported results, but it does place a floor on the
+attainable residual and is the first thing that would need attention before
+chasing deeper convergence. A weighted QR solve, or scaling the stencil offsets
+before forming the normal equations, would improve it.
+
+\paragraph{Residual convergence is limited by the smallest wall cells.} On these
+meshes the residual norm is dominated by a handful of cells at the body surface
+with volumes of order $10^{-8}$ against a domain area of order $10^4$. In the
+transonic case the limiter of \cref{eq:limiter} switches state repeatedly in those
+cells as the shock foot adjusts, which prevents the last order or two of residual
+reduction even after the integrated forces have stopped changing. The honest
+description is a residual plateau with converged forces, and
+\cref{tab:runstatus,tab:forces} report the achieved residual reduction and the
+measured force stationarity separately so the two cannot be conflated. This is
+also the motivation for the criterion of \cref{eq:stationarity}.
+
+\paragraph{LU-SGS degrades at high CFL.} The spectral radius of the SGS iteration
+approaches unity as $\mathrm{CFL}\to\infty$, so at the ramped targets of
+\cref{tab:controls} the inner solve of \cref{eq:steadysystem} reaches its
+iteration bound with the linear residual only partially reduced. The available
+remedies are more inner sweeps (expensive) or a lower CFL cap (slower outer
+convergence). What was deliberately \emph{not} done is inflating the diagonal to
+make the reported inner ratio look better, which as noted in \cref{sec:lusgs}
+produces a number that is meaningless. A matrix-free GMRES with the present
+operator as preconditioner would be the natural improvement.
+
+\paragraph{Boundary-layer resolution at $\Reinf=5000$.} The supplied NACA mesh was
+not built for viscous computation at this Reynolds number. With
+$\mu=\num{2e-4}$ the laminar boundary layer near the trailing edge has a thickness
+of order $10^{-2}$ chords, spanned by only a few cells over much of the chord. The
+skin-friction distributions of \cref{fig:naca-lam-cf} should therefore be read as
+under-resolved, and the friction drag in \cref{tab:forces} carries a
+correspondingly larger discretization error than the pressure drag. Mesh
+refinement normal to the wall, not a solver change, is what this needs.
+
+\paragraph{Shock capturing is monotone but diffuse.} The Venkatakrishnan limiter
+smears a shock over two to three cells. At $\Minf=2.0$ the bow shock stands off
+the leading edge in a region of relatively coarse cells, so the captured shock is
+thicker there than on the body. This affects the sharpness of the contours in
+\cref{fig:naca200inv-field} more than it affects the integrated forces, since the
+pressure jump across the shock is captured conservatively even when it is spread.
+
+\paragraph{Second-order accuracy is argued, not measured by refinement.} The
+evidence for second order given here is structural and diagnostic: exact recovery
+of linear-field gradients ($\vLsqExactness$), the verified analytic Jacobian, and
+the counts of positivity fallbacks showing that the second-order path is active in
+production. A grid-convergence study on a sequence of systematically refined
+meshes would be the direct demonstration, but only one mesh per geometry was
+supplied, so the observed order of accuracy is not established here. This is a gap
+in the verification, and it is better stated than glossed over.
+
+\paragraph{Vorticity is a derived quantity.} The vorticity written to the field
+file and plotted in \cref{fig:cyl200-wake} is computed from the same
+least-squares velocity gradients used by the viscous flux, so it inherits their
+accuracy. It is adequate for identifying and counting vortices, and hence for the
+Strouhal estimate, but it is not a high-order vorticity reconstruction and its
+peak values near the wall should not be read quantitatively.
+
+\paragraph{Two-dimensionality of the $\Reinf=200$ wake.} The computation is
+two-dimensional by construction. A real cylinder wake at $\Reinf=200$ is already
+weakly three-dimensional, so the computed lift amplitude is expected to exceed the
+experimental value even when the Strouhal number agrees well. This is a limitation
+of the problem statement rather than of the solver, but it matters when comparing
+the amplitude in \cref{sec:cyl200} against experiment.
+
+\subsection{What would be done next}
+
+In priority order: replace the least-squares normal-equation solve with a scaled
+QR factorisation to recover exact free-stream preservation; add a matrix-free
+GMRES outer Krylov solve preconditioned by the present LU-SGS operator, to
+decouple outer convergence from the CFL cap; generate a refined mesh family to
+measure the observed order of accuracy directly; and refine the airfoil meshes
+normal to the wall so the $\Reinf=5000$ skin friction becomes mesh-independent.
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+An original second-order finite-volume solver for the two-dimensional compressible
+Navier--Stokes equations has been implemented, verified, and applied to all eight
+required benchmark cases. The discretization is a cell-centred conservative finite
+volume scheme with inverse-distance least-squares primitive reconstruction, a
+Venkatakrishnan limiter, and a Roe flux whose Harten--Hyman entropy fix is extended
+to the linear waves --- an extension that proved necessary, not decorative, because
+the undamped entropy and shear waves at stagnation points otherwise stall the
+steady residual and break symmetry. Steady cases use an implicit pseudo-time march
+with local time stepping and a matrix-free LU-SGS inner solve; the vortex-shedding
+case uses a true dual-time BDF2 scheme with frozen history levels and an outer
+physical-time loop. Parallelism is METIS $k$-way partitioning of the cell dual
+graph with neighbour-scoped halo exchange, with no full-mesh or full-state
+replication during iterations.
+
+The verification evidence is quantitative and is collected in
+\cref{tab:verification}: geometric identities at machine precision, exact
+least-squares gradients for linear fields, discrete conservation at
+$\vConservation$, and an analytic Jacobian confirmed against finite differences.
+Force coefficients agree to five significant figures across $np=1,2,4,8$.
+
+The most useful methodological result is negative and is documented in
+\cref{sec:stationarity}: normalising the steady convergence test by the
+impulsive-start residual can terminate a run while its forces are still moving,
+producing results that look converged and are not. Requiring force stationarity as
+well as residual reduction fixed this, and the affected cases were re-run. The
+per-case status in \cref{tab:runstatus} is reported exactly as the solver recorded
+it.

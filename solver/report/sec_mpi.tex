@@ -1,0 +1,98 @@
+\section{MPI Parallelization and METIS Partitioning}
+\label{sec:mpi}
+
+\subsection{Cell dual graph and METIS}
+
+The mesh is read and partitioned once, during setup. The partitioning graph is
+the \emph{cell dual graph}: each cell is a vertex, and every interior face
+contributes one undirected edge between its two cells. Boundary faces contribute
+no edge. The graph is built in compressed adjacency form (\texttt{xadj},
+\texttt{adjncy}) by counting degrees, prefix-summing, then filling.
+
+Partitioning calls \texttt{METIS\_PartGraphKway} with $n_{\mathrm{con}}=1$,
+zero-based numbering, a fixed random seed of \num{12345} so that a clean checkout
+reproduces the partition exactly, and \texttt{METIS\_OPTION\_CONTIG} requested to
+prefer contiguous parts. If the contiguity constraint causes METIS to fail, the
+call is retried without it and the fallback is logged; a genuine METIS failure is
+a fatal error. The reported objective value is the edge cut recorded in
+\texttt{metadata.json}. This is real graph partitioning, not a geometric split:
+the metadata value \texttt{metis\_kway} corresponds directly to this call.
+
+\subsection{Rank-local mesh and ghost construction}
+
+After partitioning, each rank builds a mesh containing only what it needs:
+
+\begin{itemize}
+  \item its \textbf{owned} cells, numbered $[0,N_{\mathrm{own}})$;
+  \item a layer of \textbf{ghost} cells, numbered $[N_{\mathrm{own}},N_{\mathrm{own}}+N_{\mathrm{ghost}})$,
+  being exactly those off-rank cells that share a face with an owned cell;
+  \item the faces incident on any owned cell, with left/right indices remapped to
+  local numbering;
+  \item the geometry, gradient stencils and boundary tags for those entities.
+\end{itemize}
+
+No rank ever stores the global cell list, the global face list, or the global
+conservative state during iterations. Correspondingly,
+\texttt{metadata.json} reports
+\texttt{full\_state\_replication\_during\_iterations} and
+\texttt{full\_mesh\_replication\_during\_iterations} as \texttt{false}.
+
+Ghost ownership is resolved once at setup by a single collective exchange of the
+requested global cell identifiers, after which each rank knows precisely which of
+its owned cells to send to which neighbour, in an order shared by both sides. That
+shared ordering is what allows the iteration-time exchange to be a plain
+contiguous buffer copy with no index metadata on the wire. This collective appears
+only in preprocessing; it is not part of the iteration loop.
+
+\subsection{Halo exchange}
+
+Iteration-time communication is neighbour-scoped point-to-point. For each
+exchange the receives are posted first with \texttt{MPI\_Irecv}, the send buffers
+are packed and sent with \texttt{MPI\_Isend}, a single \texttt{MPI\_Waitall}
+completes all of them, and the received data is unpacked into the ghost slots.
+The metadata field \texttt{halo\_exchange} is
+\texttt{neighbor\_isend\_irecv}. There is no \texttt{MPI\_Allgather} of state at
+any point in the iteration.
+
+Each residual evaluation performs a fixed, small number of exchanges:
+
+\begin{enumerate}
+  \item the conservative state (once per residual evaluation, by the driver);
+  \item the primitive gradients, $4\times2=8$ components, needed for
+  reconstruction from the far side of a partition face and for the viscous face
+  gradient;
+  \item the limiter factors, 4 components, so a partition-boundary face
+  reconstructs exactly as it would in serial.
+\end{enumerate}
+
+The last two are the reason a partitioned second-order run reproduces the serial
+answer: the far-side cell has not only its state but also its gradient and its
+limiter value, so \cref{eq:recon} evaluates identically on both sides of a cut.
+Each LU-SGS sweep additionally exchanges the current increment
+$\Delta\mathbf{U}$.
+
+Global reductions are used only where they are physically required: one
+\texttt{MPI\_Allreduce} for the residual norms (component sums, volume, and a max
+for the $L_\infty$ norm), one for the six force accumulators, and one for the
+linear-residual ratio of \cref{eq:linres}. Output is written by rank 0 from
+reduced data, so file contents do not depend on rank count except through
+floating-point summation order.
+
+\subsection{Partition diagnostics}
+
+\Cref{tab:partition} reports the per-rank decomposition actually used during the
+iterations of a representative $np=8$ production run
+(\cnsPartitionCase), taken from the submitted
+\texttt{partition\_diagnostics.csv}. The load-balance ratio, defined as
+$\max_r N_{\mathrm{own},r}/\overline{N_{\mathrm{own}}}$, is
+$\cnsPartitionBalance$.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Per-rank partition diagnostics for \cnsPartitionCase{} at $np=8$,
+  from \texttt{partition\_diagnostics.csv}. Send and receive counts are the
+  number of cell records moved per halo exchange.}
+  \label{tab:partition}
+  \small
+  \input{tab_partition}
+\end{table}

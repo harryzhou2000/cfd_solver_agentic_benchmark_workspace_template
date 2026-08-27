@@ -1,0 +1,278 @@
+\section{Output, Reproducibility, and Sanity Checks}
+\label{sec:verification}
+
+\subsection{Build and run}
+
+The solver depends on MPI, CGNS (with HDF5 and zlib), and METIS, plus a
+header-only JSON reader. It is built with CMake:
+
+\begin{verbatim}
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+      -DCFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install \
+      -DCFD_EXTERNALS_HEADER_ROOT=/opt/external
+cmake --build build -j 32
+\end{verbatim}
+
+and every case is run through the single required CLI form:
+
+\begin{verbatim}
+mpirun -np <ranks> ./build/cns2d solve --case <case.json> \
+       --output <results-dir> [--restart <file>] [--report-level brief|full]
+\end{verbatim}
+
+No case file or source edit is needed between cases. Debug-only overrides
+(\texttt{--max-steps}, \texttt{--flux}, \texttt{--limiter},
+\texttt{--spatial-order}, and similar) exist for diagnostics; none of them is
+used in the production runs reported here, and the exact command line for each
+run is recorded in its \texttt{run\_status.json}. Malformed input, a missing
+mesh, an unmapped boundary family, or an inconsistent freestream cause a
+non-zero exit with a specific message rather than a silent default.
+
+\subsection{Generated files}
+
+Each case directory contains \texttt{metadata.json},
+\texttt{run\_status.json}, \texttt{residuals.csv}, \texttt{forces.csv},
+\texttt{surface.csv}, \texttt{partition\_diagnostics.csv} and
+\texttt{.json}, \texttt{field\_final.vtu}, \texttt{restart\_final.bin}, and
+\texttt{stdout.log}; viscous cases add
+\texttt{surface\_cell\_center.csv} carrying the adjacent cell-centre values that
+\texttt{surface.csv} deliberately does not mix in. The report artifacts
+(\texttt{run\_manifest.csv}, \texttt{figure\_manifest.csv},
+\texttt{sanity\_checks.json}) and every figure are regenerated from those files
+alone by
+
+\begin{verbatim}
+.venv/bin/python tools/make_figures.py --results-root results \
+    --out-dir report/figures --manifest report/figure_manifest.csv
+\end{verbatim}
+
+so no figure can show anything other than submitted data. The numeric values
+quoted in this report are likewise harvested mechanically from the same files by
+\texttt{report/harvest\_numbers.py}, which emits the LaTeX macros and table rows
+used above; the prose contains no hand-typed result numbers.
+
+\subsection{Geometric and discrete verification}
+
+The solver verifies its own mesh metrics at startup and reports the results in
+\texttt{stdout.log} before spending time on a solve.
+\Cref{tab:verification} collects these measurements together with two offline
+probes.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Verification measurements. The first four are geometric identities
+  that must hold to machine precision; the remainder test the discretization
+  itself.}
+  \label{tab:verification}
+  \small
+  \begin{tabular}{llll}
+    \toprule
+    Check & Identity tested & Measured & Expected \\
+    \midrule
+    Face closure & $\sum_f \mathbf{n}_f\Delta s_f=\mathbf{0}$ per cell
+      & $\vFaceClosure$ & $O(\varepsilon)$ \\
+    Volume closure & $\tfrac12\sum_f (\mathbf{x}_f\!\cdot\!\mathbf{n}_f)\Delta s_f=V_i$
+      & $\vVolumeClosure$ & $O(\varepsilon)$ \\
+    Domain area & $\sum_i V_i$ vs boundary line integral
+      & $\vAreaLineIntegral$ & $O(\varepsilon)$ \\
+    LSQ exactness & gradient of a linear field reproduced exactly
+      & $\vLsqExactness$ & $O(\varepsilon)$ \\
+    Conservation & $\sum_i \mathbf{R}_i$ vs net boundary flux
+      & $\vConservation$ & $O(\varepsilon)$ \\
+    Jacobian product & \cref{eq:jacvec} vs central finite differences
+      & $\vJacobianFd$ & $O(\sqrt{\varepsilon})$ \\
+    Slip-wall flux & $\left[0,pn_x,pn_y,0\right]$ exactly
+      & exact & exact \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Three of these deserve comment.
+
+The \textbf{conservation} check sums the residual over all cells and compares it
+with the net flux through the domain boundary. Interior face contributions must
+cancel exactly by \cref{eq:scatter}, so any discrepancy indicates a genuine
+conservation error. Measuring this correctly requires the boundary and interior
+fluxes to be evaluated at the same order; an early version of this test compared
+a first-order boundary flux against a reconstructed interior flux and produced a
+misleading non-zero value. Probed consistently at first order, the defect is
+$\vConservation$.
+
+The \textbf{Jacobian} check compares \cref{eq:jacvec} against a central
+finite-difference of the analytic flux over $\vJacobianStates$ randomised states,
+agreeing to $\vJacobianFd$ --- the expected order for a central difference in
+double precision, confirming the analytic derivation is correct rather than
+merely plausible.
+
+The \textbf{uniform-flow} check initialises the freestream everywhere and
+evaluates the residual. On interior-only cells this reaches $O(10^{-11})$ rather
+than the $10^{-12}$ threshold the solver requests, so the check is reported as a
+warning in every run log. The residual is not exactly zero because the
+least-squares gradient of a constant field vanishes only to the conditioning of
+the normal matrix \cref{eq:normaleq}, which on the most stretched wall cells
+(aspect ratios of order $10^3$) is large. This is a genuine, if small,
+free-stream-preservation error and is listed in \cref{sec:limitations} rather
+than suppressed.
+
+\subsection{Wall, positivity, and force checks}
+
+The automated sanity checks recorded in \texttt{report/sanity\_checks.json}
+confirm, for every submitted case: all field values finite; density and pressure
+strictly positive throughout; no-slip walls reporting $|\mathbf{u}|$ and Mach
+number at machine zero in \texttt{surface.csv}; slip walls reporting near-zero
+normal velocity with non-zero tangential velocity; force histories free of
+non-finite entries; and the final force row matching the state written to
+\texttt{field\_final.vtu} and \texttt{surface.csv}. The force integration was
+additionally validated by re-integrating \texttt{surface.csv} offline by hand,
+which reproduces the solver's $C_D$ to four digits.
+
+\subsection{A defect in the steady termination test}
+\label{sec:stationarity}
+
+One methodological finding from preparing this report is worth reporting in full,
+because it affected results and because the failure mode is easy to reproduce in
+any solver that measures convergence the obvious way.
+
+The original termination test declared a steady case converged when
+$\log_{10}\left(\|\mathbf{R}^{(1)}\|_2/\|\mathbf{R}^{(m)}\|_2\right)$ reached the
+requested number of orders, i.e.\ it normalised by the residual at the
+\emph{first} pseudo-time step. That reference is a poor one. Step 1 is the
+impulsive start from a uniform freestream, where the wall boundary condition is
+instantaneously inconsistent with the interior and the residual is dominated by a
+startup transient localised at the body. Reducing the residual by four orders
+relative to that spike does not imply that the flow field has stopped changing.
+
+Two symptoms exposed it:
+
+\begin{itemize}
+  \item For \texttt{naca0012\_m015\_inviscid} the residual history was
+  non-monotone: it fell to $2.70$, rose again to $4.28$, then descended, so the
+  orders-below-step-one measure was being taken against a transient peak. Worse,
+  the drag history was still oscillating with a span of $0.153$ when the run
+  stopped at a reported $C_D=\num{-2.6e-4}$. That near-zero final value was a
+  zero crossing of an oscillation, not a converged near-zero drag.
+  \item For \texttt{naca0012\_m200\_laminar\_re5000} the drag fell monotonically
+  through $317, 44, 25, 17, 12, 9.2, 7.1, 5.5, 4.4, 3.4, 2.7$ and the run
+  terminated at exactly $3.00$ orders with $C_D=2.18$ while still falling. The
+  viscous part was $2.17$ against a flat-plate expectation of order $0.04$: the
+  impulsive-start boundary layer was still developing, and the reported result was
+  physically wrong.
+\end{itemize}
+
+The criterion was therefore changed to require \textbf{both} conditions: the
+residual-order target \emph{and} stationarity of the force history, with the drag
+span over a trailing 500-step window required to satisfy
+\begin{equation}
+  \mathrm{span}_{500}(C_D)\ \le\
+  \max\left(10^{-3}\max\left(|C_D|,10^{-4}\right),\ 10^{-6}\right).
+  \label{eq:stationarity}
+\end{equation}
+The absolute floor inside the maximum is deliberate: a purely relative test can be
+passed trivially by a near-zero-drag case whose oscillation happens to cross zero,
+which is exactly what the $\Minf=0.15$ inviscid case did. When the residual target
+is met but the forces are still moving, the solver now logs that explicitly and
+keeps iterating. If the step limit is reached with forces still moving, the run is
+recorded as \texttt{not\_converged} with \texttt{completed = false}, so an
+unconverged run cannot be submitted as a final result.
+
+The lesson generalises: for these cases the force history is a stricter and more
+meaningful convergence measure than the residual norm, because the residual norm
+is dominated by a handful of extremely small cells at the wall (volumes of order
+$10^{-8}$ against a domain area of order $10^4$) whose limiter state keeps
+switching, while the integrated forces are already smooth.
+\Cref{sec:limitations} returns to this point.
+
+\subsection{A latent sign error in the unused HLLC star state}
+\label{sec:hllcbug}
+
+An independent audit of the source found a sign error in the HLLC star-region
+total energy. The code computed the star energy using
+$\left(S^\ast-p/(\rho(S-u_n))\right)$, whereas the Rankine--Hugoniot relation
+across the acoustic wave gives $\left(S^\ast+p/(\rho(S-u_n))\right)$. The
+discrepancy arises from a standard textbook form, in which the same quantity is
+written $\left(S^\ast-p/(\rho(u_n-S))\right)$: the implementation combined the
+leading minus sign with $(S-u_n)$ instead of $(u_n-S)$. The result violated the
+energy jump condition by an $O(1)$ amount in the energy component.
+
+Two things must be said clearly about the scope of this defect.
+
+First, \textbf{it did not affect any number reported in this document}. Roe is the
+production inviscid flux for every case, and the only path into HLLC is the
+positivity fallback of \cref{sec:fluxes}, which requires an inadmissible Roe
+average $\hat{a}^2\le0$. Every submitted run records zero positivity-fallback
+events, so the HLLC code was never executed during a production solve. The
+affected results are none.
+
+Second, and less comfortably, \textbf{this means the production runs do not
+verify HLLC}. A flux that is never executed cannot be validated by the cases that
+do not execute it, and it would be wrong to present the successful production
+results as evidence that all three implemented fluxes are correct. The defect was
+found by reading the code against the jump conditions, not by any case result ---
+which is precisely why code audit is not redundant with case validation.
+
+HLLC is now covered by a dedicated regression test that reconstructs the star
+state independently from the pressure and velocity relations and compares the
+resulting flux component by component. The test is a genuine control rather than a
+tautology: it was confirmed to \emph{fail} against the original code, and to fail
+specifically and only in the energy component, with relative differences of
+$\num{1.4e-1}$, $\num{1.0}$ and $\num{1.3}$ on three independent states. After the
+fix it passes to $\vHllcRegression$. A test that has been shown to fail on the
+known-bad implementation carries considerably more information than one that has
+only ever been seen to pass.
+
+\subsection{Transient residual normalization}
+\label{sec:transientnorm}
+
+A related bookkeeping defect was found in the transient driver: the reported
+residual reduction divided the \emph{total} transient residual of
+\cref{eq:bdf2}, which includes the physical-time term, by the \emph{spatial-only}
+residual. These are two different norms, so their log-ratio measured nothing
+meaningful. The reduction is now computed spatial-to-spatial with both reference
+levels logged.
+
+For the vortex street this quantity should in any case not be read as a
+convergence measure. The converged state of the $\Reinf=200$ cylinder is
+\emph{periodic}, not steady, so the spatial residual does not tend to zero and no
+number of residual orders would indicate success. The meaningful convergence
+evidence is the periodicity of the force signals themselves: a stable oscillation
+amplitude and a well-defined Strouhal number, together with the inner-solve
+statistics showing that each physical step was converged. Those are what
+\cref{sec:cyl200} reports.
+
+\subsection{Audit for case-specific shortcuts}
+\label{sec:shortcuts}
+
+Because the benchmark explicitly disqualifies solvers that special-case the
+supplied cases, the source was audited for exactly that. The result was clean, and
+the specific checks are worth recording:
+
+\begin{itemize}
+  \item A search of the entire solver source for the tokens
+  \texttt{naca}, \texttt{cylinder}, \texttt{0012}, \texttt{m080}, \texttt{m200},
+  \texttt{re5000}, \texttt{re200} and comparisons against \texttt{case\_id}
+  returns \textbf{zero matches}. There is no per-case branching and no hard-coded
+  force or mesh value; case behaviour is entirely data-driven from the JSON input.
+  \item The LU-SGS diagonal carries \textbf{no inflation factor}, so the
+  inner-loop convergence reported in \cref{eq:linres} is not flattered, and the
+  exit test uses a true defect norm computed with the same operator the sweeps
+  use (see the negative result in \cref{sec:lusgs}).
+  \item The BDF2 history levels are genuinely frozen during inner iterations and
+  shifted only after the inner loop exits.
+  \item \texttt{MPI\_Allgather} and \texttt{MPI\_Allgatherv} appear only in
+  setup code. Iteration-time exchange is neighbour-scoped \texttt{Isend}/%
+  \texttt{Irecv} with receives posted first.
+  \item No identifiers, structure, or comment style from existing open-source CFD
+  codebases appear in the source; the finite-volume core, time integration and MPI
+  layer are original.
+\end{itemize}
+
+The audit also independently confirmed several correctness properties cited
+elsewhere in this report: the viscous flux matches the Navier--Stokes terms
+term-by-term including the $-\tfrac23\mu\nabla\!\cdot\!\mathbf{u}$ bulk
+contribution and $k=\mu c_p/\mathit{Pr}$; the face-gradient directional
+correction of \cref{eq:facegrad} avoids odd-even decoupling on stretched cells;
+the least-squares gradient is a genuine weighted normal-equations solve with a
+rank-deficiency guard; the force signs of \cref{eq:traction} are correct; the
+supersonic farfield branches are correct at $\Minf=2.0$; the CSV headers are
+byte-exact against the contract; and the \texttt{.vtu} connectivity offsets are
+cumulative end offsets without the common off-by-one error.

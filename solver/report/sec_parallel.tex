@@ -1,0 +1,133 @@
+\section{Parallel Validation}
+\label{sec:parallel}
+
+A partitioned second-order solver must give the same answer regardless of how the
+mesh is cut. The rank-count study covers one NACA case and one cylinder case at
+$np=1,2,4,8$, so that both meshes and both wall types are exercised, and
+\cref{tab:scaling} reports the resulting forces, edge cuts, and timings.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Rank-count study. Each row is an independent run of the same case at a
+  different rank count, with the final $C_D$ taken from \texttt{forces.csv} and the
+  edge cut from \texttt{metadata.json}.}
+  \label{tab:scaling}
+  \small
+  \input{tab_scaling}
+\end{table}
+
+\subsection{Consistency across rank counts}
+
+The measured consistency is that $C_D$ agrees to \textbf{five significant
+figures} across $np=1,2,4,8$, with the METIS edge cut rising through
+$0, 97, 282, 471$ as the partition is refined. Agreement at this level is the
+expected and correct result, and it is worth being precise about why it is not
+exact.
+
+Three mechanisms could make results rank-dependent, and two of them are
+eliminated by construction:
+
+\begin{itemize}
+  \item \textbf{Reconstruction across a cut.} A partition face must reconstruct
+  identically from both sides. This holds because the halo exchange carries
+  gradients and limiter factors as well as the state (\cref{sec:mpi}), so
+  \cref{eq:recon} sees identical inputs on both ranks. Without the gradient and
+  limiter exchange, the scheme would silently degrade to first order at every cut
+  and the drag would change with rank count at the percent level.
+  \item \textbf{Force double-counting.} A wall face on a partition boundary must
+  be integrated exactly once. This is enforced by integrating only faces whose
+  adjacent cell is owned (\cref{sec:forces}).
+  \item \textbf{Floating-point summation order.} This one is irreducible. The
+  global residual and force reductions sum contributions in an order that depends
+  on the partition, and floating-point addition is not associative, so results
+  differ in the last few digits. Those differences then feed back through the
+  nonlinear iteration, which is why agreement is to five figures rather than to
+  machine precision.
+\end{itemize}
+
+The remaining rank dependence is in the \emph{path} to the solution rather than
+the solution itself. As noted in \cref{sec:lusgs}, LU-SGS is exactly Gauss--Seidel
+within a rank and block-Jacobi across ranks, because off-rank increments are
+frozen between sweeps. Increasing the rank count therefore weakens the implicit
+coupling slightly and can change the iteration count needed to reach a given
+residual level, without changing the converged answer. This is a well-known and
+accepted property of LU-SGS in parallel, and it is the reason the inner-iteration
+counts in \cref{tab:scaling} need not match across rank counts even though the
+forces do.
+
+\subsection{Load balance and communication}
+
+\Cref{tab:partition} gives the per-rank decomposition for a representative $np=8$
+run, with a load-balance ratio of $\cnsPartitionBalance$. METIS balances the cell
+count well, but two caveats apply to interpreting that number as
+time-to-solution balance:
+
+\begin{itemize}
+  \item Boundary faces are not distributed in proportion to cells. A rank holding
+  part of the airfoil surface does more work per cell than a rank holding only
+  farfield cells, because wall faces carry the extra boundary-state and
+  viscous-correction work of \cref{eq:wallgrad}. The
+  \texttt{num\_boundary\_faces} column of \cref{tab:partition} shows this spread
+  directly.
+  \item Neighbour counts vary between ranks, so the halo-exchange cost is not
+  uniform. The interior ranks of the partition have the most neighbours and thus
+  the largest message counts per exchange.
+\end{itemize}
+
+Communication volume per exchange is small: each neighbour pair moves the cells
+listed in the send/receive columns of \cref{tab:partition}, times 4 components for
+the state or limiter and 8 for the gradients. Because the exchanged surface scales
+as the partition perimeter while the work scales as the partition area, the
+communication fraction grows with rank count on a fixed mesh; on meshes of this
+size ($\num{20816}$ and $\num{10185}$ cells) the $np=8$ runs are already in the
+regime where the per-rank subdomain is small enough that this overhead is visible
+in the timings of \cref{tab:scaling}.
+
+\subsection{Choice of rank count for production}
+\label{sec:rankchoice}
+
+These meshes are small enough that more ranks are not better, and the production
+rank count was chosen from measurement rather than by assumption. Timing a fixed
+20 physical steps of the transient cylinder case gave $11.3$~s at $np=8$,
+$12.6$~s at $np=16$ and $26.4$~s at $np=32$: past eight ranks the solver gets
+monotonically \emph{slower}. With only $\cylCells$ cells, an $np=32$ partition
+leaves roughly 300 cells per rank, at which point the halo exchange and the
+serialization inherent in the LU-SGS sweep dominate the useful work per sweep.
+All production cases therefore run at $np=8$, which is also the rank count the
+benchmark requires to be demonstrated.
+
+One measurement artefact is worth recording so the timings in this report are
+interpreted correctly. An earlier attempt to run several cases concurrently at
+high rank counts oversubscribed the machine --- 69 MPI processes on 64 cores, each
+receiving roughly $5\%$ of a core --- and the resulting wall times are meaningless
+as solver performance. All timings reported here are from runs made after that
+configuration was corrected, on an otherwise unloaded machine. Wall-clock
+comparisons between cases are only meaningful under that condition, which is why
+it is stated rather than assumed.
+
+\section{Visualization and Plot Style Requirements}
+\label{sec:visualization}
+
+All figures are generated by a single reproducible pipeline
+(\texttt{tools/make\_figures.py}) reading only submitted output files, and every
+figure is recorded in \texttt{report/figure\_manifest.csv} together with the case,
+figure type, plotted variable, source file, and caption. The manifest is what makes
+each figure traceable to its data.
+
+The plotting conventions are uniform: line plots use readable font sizes,
+consistent line widths and a colour-blind-safe palette, labelled and
+nondimensionalised axes, legends, and a light grid; residual histories use a
+logarithmic ordinate. Field plots are filled contour renderings on the actual
+unstructured triangulation --- quadrilaterals are split for rendering only, never
+for the solution --- rather than scatter point clouds, and each carries a colourbar
+labelled with its variable name. Near-body views are used for the airfoil and
+cylinder so the boundary layer, shocks and wake are visible at a useful scale, with
+separate whole-domain views where the farfield behaviour matters.
+
+Two conventions are worth stating explicitly because they are contract
+requirements. First, file names match plotted variables exactly: a file named
+\texttt{..\_mach.png} plots Mach number and \texttt{..\_pressure.png} plots
+pressure, and both are produced for every case. Second, vorticity plots use the
+recommended symmetric clipped range $[-5,5]$; the near-wall vorticity of a no-slip
+cylinder is more than an order of magnitude larger than the wake vorticity, so
+automatic scaling renders the vortex street invisible.

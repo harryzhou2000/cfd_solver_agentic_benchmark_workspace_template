@@ -1,0 +1,66 @@
+\documentclass[11pt]{article}
+\input{preamble}
+\input{numbers}
+\input{numbers_auto}
+
+\title{2-D Unstructured Compressible Navier--Stokes Solver\\Benchmark Report}
+\author{\texttt{cns2d} --- submitted solver}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report documents \texttt{cns2d}, an original cell-centred finite-volume
+solver for the two-dimensional compressible Navier--Stokes equations on mixed
+unstructured meshes, written in C++17 with MPI and METIS. The spatial
+discretization is second order through piecewise-linear inverse-distance
+least-squares reconstruction of the primitive variables with a Venkatakrishnan
+limiter; the inviscid flux is a Roe flux with a Harten--Hyman entropy fix
+extended to the linear waves, with HLLC and Rusanov also implemented and HLLC
+serving as a positivity fallback. Viscous terms use the Newtonian stress tensor
+and Fourier heat flux built from the same least-squares gradients. Steady cases
+are advanced by an implicit pseudo-time march with local time stepping and a
+matrix-free LU-SGS inner solve; the vortex-shedding case uses a true dual-time
+BDF2 scheme with an outer physical-time loop and frozen history levels. The mesh
+is partitioned once with METIS $k$-way on the cell dual graph, and
+iteration-time communication is strictly neighbour-scoped point-to-point halo
+exchange: no rank holds the full mesh or the full conservative state during
+iterations.
+
+Verification is quantitative: face-closure error $\vFaceClosure$, volume closure
+$\vVolumeClosure$, cell area against the boundary line integral
+$\vAreaLineIntegral$, exactness of the least-squares gradient on a linear field
+$\vLsqExactness$, a discrete conservation defect of $\vConservation$, and
+agreement of the analytic Jacobian-vector product with central finite differences
+to $\vJacobianFd$ over $\vJacobianStates$ random states. The slip-wall flux is
+exactly $[0,pn_x,pn_y,0]$, and force coefficients agree to five significant
+figures across $np=1,2,4,8$.
+
+All eight required cases were run with the supplied production controls, and
+\cref{sec:results} reports each with the convergence status the solver itself
+recorded. Two defects found during preparation of this report are documented
+rather than hidden: a steady termination test that normalised residuals by the
+impulsive-start transient and could stop while forces were still moving
+(\cref{sec:stationarity}), and a latent sign error in the unused HLLC star state
+that is now covered by a dedicated regression test (\cref{sec:hllcbug}). Added
+dissipation on the linear waves, needed to suppress a stagnation-point
+checkerboard mode, is disclosed and quantified in \cref{sec:fluxes}.
+\end{abstract}
+
+\tableofcontents
+\clearpage
+
+\input{sec_intro}
+\input{sec_equations}
+\input{sec_mesh}
+\input{sec_spatial}
+\input{sec_bc}
+\input{sec_implicit}
+\input{sec_mpi}
+\input{sec_verification}
+\input{sec_results}
+\input{sec_parallel}
+\input{sec_limitations}
+
+\end{document}

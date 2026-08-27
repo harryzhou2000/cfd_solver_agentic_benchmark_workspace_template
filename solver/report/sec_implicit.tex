@@ -1,0 +1,214 @@
+\section{Implicit and Transient Time Integration}
+\label{sec:implicit}
+
+\subsection{Steady pseudo-time march}
+
+Steady cases solve $\mathbf{R}(\mathbf{U})=\mathbf{0}$ by a backward-Euler
+pseudo-time march. Linearising \cref{eq:fv} about the current iterate gives, at
+each pseudo-time step, the linear system
+\begin{equation}
+  \left(\frac{V_i}{\Delta\tau_i}\mathbf{I}
+  +\frac{\partial\mathbf{R}}{\partial\mathbf{U}}\right)\Delta\mathbf{U}
+  =\mathbf{R}(\mathbf{U}^m),
+  \qquad
+  \mathbf{U}^{m+1}=\mathbf{U}^m+\Delta\mathbf{U}.
+  \label{eq:steadysystem}
+\end{equation}
+The pseudo-time step is local to each cell and set from the convective and
+viscous spectral radii accumulated during the residual evaluation,
+\begin{equation}
+  \Delta\tau_i=\frac{\mathrm{CFL}\cdot V_i}
+  {\displaystyle\sum_{f\in\partial\Omega_i}\left(|u_n|+a\right)_f\Delta s_f
+  \;+\;C_v\sum_{f\in\partial\Omega_i}\frac{\mu_f}{\rho_f}
+  \frac{\Delta s_f^2}{V_i}},
+  \label{eq:dtau}
+\end{equation}
+with $C_v=4$ for the viscous contribution. Local time stepping lets the tiny
+wall cells and the huge farfield cells advance at their own stable rates, which
+is what makes a mesh with a cell-volume range of roughly ten orders of magnitude
+tractable at all.
+
+The CFL number is ramped geometrically in log space from
+\texttt{cfl\_initial} to \texttt{cfl\_max} over
+\texttt{pseudo\_cfl\_ramp\_steps},
+\begin{equation}
+  \mathrm{CFL}(m)=\mathrm{CFL}_0
+  \left(\frac{\mathrm{CFL}_{\max}}{\mathrm{CFL}_0}\right)^{m/M_{\mathrm{ramp}}},
+  \label{eq:ramp}
+\end{equation}
+capped at $\mathrm{CFL}_{\max}$ thereafter. The supplied case values are used
+without modification; \cref{tab:controls} lists them.
+
+A residual-based safeguard multiplies the ramped CFL by an adaptive factor. If a
+step increases the residual by more than $30\%$, or produces a non-finite
+residual, the step is rejected, the previous accepted state is restored, and the
+factor is cut to $0.35$ of its value; after a successful step the factor recovers
+by $6\%$ up to unity. Rejected-step counts are reported. This is a robustness
+device, not an accuracy device: it changes only the path to the steady state.
+
+\subsection{LU-SGS inner solve and the Jacobian approximation}
+\label{sec:lusgs}
+
+\Cref{eq:steadysystem} is solved approximately by symmetric Gauss--Seidel sweeps
+(LU-SGS); a block-Jacobi variant is also available. The Jacobian is never
+assembled. The diagonal is the scalar
+\begin{equation}
+  D_i=\frac{V_i}{\Delta\tau_i}
+  +\frac12\sum_{f\in\partial\Omega_i}\left(|u_n|+a\right)_f\Delta s_f
+  +\sum_{f\in\partial\Omega_i}\left(\frac{\mu}{\rho}\right)_f\frac{\Delta s_f^2}{V_i},
+  \label{eq:diag}
+\end{equation}
+where the factor $\tfrac12$ is the upwind split of the face dissipation between
+the two adjacent cells. The off-diagonal action on a neighbour is the
+scalar-dissipation upwind approximation
+\begin{equation}
+  \mathbf{O}_{ij}\Delta\mathbf{U}_j=\frac{\Delta s_f}{2}
+  \left[\mathbf{A}_j(\mathbf{n})\Delta\mathbf{U}_j
+  -\lambda_j\Delta\mathbf{U}_j\right],
+  \qquad
+  \lambda_j=|u_{n,j}|+a_j+\frac{2\mu}{\rho_j\,\|\Delta\mathbf{x}\|},
+  \label{eq:offdiag}
+\end{equation}
+with the last term present only for viscous runs. Crucially,
+$\mathbf{A}_j(\mathbf{n})\Delta\mathbf{U}_j$ is the \emph{exact analytic}
+Jacobian-vector product of the Euler normal flux, evaluated matrix-free: no
+$4\times4$ block is ever stored. Writing $\mathrm{d}(\rho u_n)=u_n\,\mathrm{d}\rho+\rho\,\mathrm{d}u_n$
+and $\mathrm{d}p=(\gamma-1)\left[\mathrm{d}(\rho E)-\tfrac12|\mathbf{u}|^2\mathrm{d}\rho-\rho(u\,\mathrm{d}u+v\,\mathrm{d}v)\right]$,
+the product is
+\begin{equation}
+  \mathbf{A}(\mathbf{n})\,\mathrm{d}\mathbf{U}=
+  \begin{bmatrix}
+    \mathrm{d}(\rho u_n)\\
+    \mathrm{d}(\rho u_n)u+\rho u_n\,\mathrm{d}u+\mathrm{d}p\,n_x\\
+    \mathrm{d}(\rho u_n)v+\rho u_n\,\mathrm{d}v+\mathrm{d}p\,n_y\\
+    \mathrm{d}u_n(\rho E+p)+u_n\left(\mathrm{d}(\rho E)+\mathrm{d}p\right)
+  \end{bmatrix}.
+  \label{eq:jacvec}
+\end{equation}
+This product is verified against central finite differences to $\vJacobianFd$
+over $\vJacobianStates$ randomised states (\cref{sec:verification}).
+
+Each sweep refreshes the ghost increments once, then performs a forward pass over
+ascending local cell index and a backward pass over descending index. Between
+refreshes the off-rank coupling is frozen, which makes the scheme exactly
+block-Jacobi across ranks and pure LU-SGS within a rank --- so the iteration count
+can depend mildly on the partition even though the converged answer does not.
+
+The inner iteration is monitored by the true linear residual of the system it is
+solving,
+\begin{equation}
+  r_{\mathrm{lin}}=
+  \frac{\left\|\mathbf{R}-\left(D\,\Delta\mathbf{U}+\mathbf{O}\,\Delta\mathbf{U}\right)\right\|_2}
+       {\left\|\mathbf{R}\right\|_2},
+  \label{eq:linres}
+\end{equation}
+evaluated with the same matrix-free operator the sweeps use and volume-normalised
+like the nonlinear norms. Sweeps are added in small blocks, within the case-file
+bounds, until $r_{\mathrm{lin}}$ meets the case target or fails to improve by more
+than $2\%$ in three consecutive blocks. The increment is deliberately \emph{not}
+reset between blocks --- an early version did reset it, which silently discarded
+all previous work and capped the achievable inner convergence.
+
+One negative result is worth recording, because it is a tempting shortcut.
+Inflating the diagonal by a factor $\beta>1$ makes the sweeps look dramatically
+better: at $\beta=2$ the reported ratio reached $\num{2.2e-16}$. That number is
+meaningless, because it measures a different (easier) system than the one being
+solved; the true residual ratio of \cref{eq:linres} was $0.82$. The diagonal is
+therefore left at its consistent value \cref{eq:diag}, and the slow-but-honest
+convergence of SGS at high CFL is accepted instead.
+
+\subsection{Convergence criteria}
+\label{sec:criteria}
+
+All reported residual norms are volume-weighted root-mean-square rates of change
+of the cell average, globally MPI-reduced:
+\begin{equation}
+  \|\mathbf{R}\|_2=\left(\frac{\sum_i \sum_k
+  \left(R_{i,k}/V_i\right)^2 V_i}{\sum_i V_i}\right)^{1/2},
+  \qquad
+  \|\mathbf{R}\|_\infty=\max_{i,k}\left|R_{i,k}/V_i\right| .
+  \label{eq:norms}
+\end{equation}
+Dividing by the cell volume converts the integral residual into a rate, which
+makes the norm independent of local cell size and therefore comparable across
+meshes and rank counts. \Cref{sec:stationarity} describes the termination test
+built on these norms, and the defect that had to be fixed in it.
+
+\subsection{Transient dual-time BDF2 for the vortex street}
+\label{sec:bdf2}
+
+The $\Reinf=200$ cylinder is integrated in physical time by a genuine two-loop
+dual-time scheme. The outer loop steps physical time with second-order backward
+differences; the inner loop drives the resulting nonlinear system to convergence
+at each physical step.
+
+With $a_0=\tfrac32,\ a_1=-2,\ a_2=\tfrac12$ the BDF2 residual is
+\begin{equation}
+  \mathbf{R}^\ast(\mathbf{U}^{n+1})=\mathbf{R}(\mathbf{U}^{n+1})
+  -\frac{V_i}{\Delta t}\left(a_0\mathbf{U}^{n+1}+a_1\mathbf{U}^{n}+a_2\mathbf{U}^{n-1}\right),
+  \label{eq:bdf2}
+\end{equation}
+and the inner iteration solves $\mathbf{R}^\ast=\mathbf{0}$ with the same LU-SGS
+machinery, using the diagonal
+\begin{equation}
+  D_i^\ast=\frac{V_i}{\Delta\tau_i}+\frac{a_0 V_i}{\Delta t}
+  +\frac12\sum_f\left(|u_n|+a\right)_f\Delta s_f+\dots,
+  \label{eq:bdf2diag}
+\end{equation}
+i.e.\ carrying \emph{both} the pseudo-time and the physical-time term, so each
+inner iteration is a Newton-like step on the time-accurate system rather than a
+pseudo-time march with a source term. The first physical step uses the
+self-starting BDF1 coefficients $a_0=1,a_1=-1,a_2=0$.
+
+Two properties required by the benchmark hold explicitly in the implementation:
+
+\begin{enumerate}
+  \item $\mathbf{U}^{n}$ and $\mathbf{U}^{n-1}$ are stored in separate arrays and
+  are \textbf{frozen throughout all inner iterations} for $\mathbf{U}^{n+1}$.
+  Only the $\mathbf{U}^{n+1}$ iterate changes inside the inner loop.
+  \item The history is shifted ($\mathbf{U}^{n-1}\!\leftarrow\!\mathbf{U}^{n}$,
+  $\mathbf{U}^{n}\!\leftarrow\!\mathbf{U}^{n+1}$) only \textbf{after} the inner
+  solve for that physical step has been accepted.
+\end{enumerate}
+
+The inner loop terminates when the total transient residual $\|\mathbf{R}^\ast\|_2$
+has fallen by the case target relative to its value at the first inner iteration
+of that physical step, subject to the minimum iteration count. The convergence
+measure is the \emph{total} residual including the physical-time term, as the
+benchmark specifies, not the spatial residual alone. Per-step inner counts, target
+misses and the final ratio are accumulated and reported in
+\texttt{metadata.json}.
+
+The run is declared \texttt{statistically\_periodic} only if it reaches the
+requested horizon \emph{and} the inner solve converged on at least $95\%$ of
+physical steps. A run that reaches the final time while frequently missing the
+inner target is an under-converged dual-time solve and is reported as
+\texttt{failed} rather than presented as a usable transient.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Production run controls. Every value is taken from the supplied case
+  file and used unmodified; no case uses a loosened setting.}
+  \label{tab:controls}
+  \small
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Case group & Max steps & $\mathrm{CFL}_0$ & $\mathrm{CFL}_{\max}$
+      & Ramp steps & Inner \\
+    \midrule
+    NACA inviscid $\Minf=0.15$ & \num{20000} & 1.0 & 100 & \num{2000} & 3--50 \\
+    NACA inviscid $\Minf=0.80$ & \num{30000} & 1.0 & 100 & \num{3000} & 3--50 \\
+    NACA inviscid $\Minf=2.0$ & \num{40000} & 0.2 & 50 & \num{5000} & 3--80 \\
+    NACA laminar $\Minf=0.15$ & \num{40000} & 1.0 & 100 & \num{5000} & 3--80 \\
+    NACA laminar $\Minf=0.80$ & \num{40000} & 0.5 & 80 & \num{5000} & 3--80 \\
+    NACA laminar $\Minf=2.0$ & \num{50000} & 0.2 & 50 & \num{7000} & 3--100 \\
+    Cylinder $\Reinf=20$ & \num{30000} & 1.0 & 100 & \num{3000} & 3--80 \\
+    Cylinder $\Reinf=200$ & \num{30000} & 1.0 & 1.0 & 0 & 5--1000 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+For the transient case the supplied production settings are used exactly:
+$\Delta t=0.01$, $t_f=300.0$ ($\num{30000}$ physical steps), inner iteration
+bounds $5$--$1000$, inner target $10^{-3}$ on the total transient residual, and a
+fixed pseudo-time CFL of $1.0$.

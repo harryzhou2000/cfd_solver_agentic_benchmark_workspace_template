@@ -1,0 +1,107 @@
+\section{Governing Equations and Nondimensionalization}
+\label{sec:equations}
+
+The solver advances the conservative state
+\begin{equation}
+  \mathbf{U}=[\rho,\ \rho u,\ \rho v,\ \rho E]^T
+\end{equation}
+according to the two-dimensional compressible Navier--Stokes equations in
+conservative form,
+\begin{equation}
+  \frac{\partial \mathbf{U}}{\partial t}
+  +\frac{\partial \mathbf{F}^i}{\partial x}
+  +\frac{\partial \mathbf{G}^i}{\partial y}
+  =\frac{\partial \mathbf{F}^v}{\partial x}
+  +\frac{\partial \mathbf{G}^v}{\partial y}.
+  \label{eq:ns}
+\end{equation}
+The inviscid fluxes are
+\begin{equation}
+  \mathbf{F}^i=\begin{bmatrix}\rho u\\ \rho u^2+p\\ \rho uv\\ u(\rho E+p)\end{bmatrix},
+  \qquad
+  \mathbf{G}^i=\begin{bmatrix}\rho v\\ \rho uv\\ \rho v^2+p\\ v(\rho E+p)\end{bmatrix}.
+  \label{eq:invflux}
+\end{equation}
+
+\subsection{Perfect-gas closure}
+
+The gas is calorically perfect,
+\begin{equation}
+  p=(\gamma-1)\rho e,\qquad
+  E=e+\tfrac12\left(u^2+v^2\right),\qquad
+  a=\sqrt{\gamma p/\rho},
+\end{equation}
+with $T=p/(\rho R)$, total enthalpy $H=E+p/\rho$, and
+$c_p=\gamma R/(\gamma-1)$. The case files set $\gamma=1.4$, $R=1$ and
+$\mathit{Pr}=0.72$. Because these are case inputs rather than hard-coded
+constants, the temperature scale is fixed by the case: the subsonic airfoil
+cases have $p_\infty=\num{31.746}$ with $\rho_\infty=1$, hence
+$T_\infty=\num{31.746}$.
+
+\subsection{Nondimensionalization and reference quantities}
+
+All cases are posed directly in nondimensional variables through the
+freestream: $\rho_\infty=1$, $|\mathbf{u}_\infty|=1$, and a pressure chosen so
+that the stated Mach number is reproduced, $p_\infty=1/(\gamma \Minf^2)$. The
+reference length is the chord (airfoil) or the diameter (cylinder), both unity.
+The solver does not assume this normalization: it reads $\rho_\infty$,
+$|\mathbf{u}_\infty|$ and $p_\infty$ from the case file, forms
+$a_\infty=\sqrt{\gamma p_\infty/\rho_\infty}$, and \emph{verifies} that
+$|\mathbf{u}_\infty|/a_\infty$ matches the stated Mach number to a relative
+tolerance of $10^{-6}$, aborting with a diagnostic if the case file is
+internally inconsistent. The freestream direction follows the angle of attack,
+$\hat{\mathbf{d}}=(\cos\alpha,\sin\alpha)$; all benchmark cases use
+$\alpha=0$.
+
+The dynamic pressure is $q_\infty=\tfrac12\rho_\infty|\mathbf{u}_\infty|^2$
+and force coefficients follow the case reference area $A_{\text{ref}}$ and
+length $L_{\text{ref}}$:
+\begin{equation}
+  C_D=\frac{\mathbf{F}\cdot\hat{\mathbf{d}}}{q_\infty A_{\text{ref}}},\qquad
+  C_L=\frac{\mathbf{F}\cdot\hat{\mathbf{l}}}{q_\infty A_{\text{ref}}},\qquad
+  C_{m,z}=\frac{M_z}{q_\infty A_{\text{ref}} L_{\text{ref}}},
+  \label{eq:coeffs}
+\end{equation}
+with $\hat{\mathbf{l}}=(-\sin\alpha,\cos\alpha)$ the lift direction, so a
+nonzero angle of attack is handled correctly. The wall distributions reported
+in \texttt{surface.csv} are $C_p=(p-p_\infty)/q_\infty$ and
+$C_f=\tau_t/q_\infty$, where $\tau_t$ is the \emph{tangential} component of the
+viscous traction (\cref{sec:forces}).
+
+\subsection{Viscous closure}
+
+For laminar cases the Newtonian stress tensor is
+\begin{equation}
+  \tau_{xx}=2\mu\frac{\partial u}{\partial x}-\frac{2}{3}\mu\,\nabla\!\cdot\!\mathbf{u},
+  \quad
+  \tau_{yy}=2\mu\frac{\partial v}{\partial y}-\frac{2}{3}\mu\,\nabla\!\cdot\!\mathbf{u},
+  \quad
+  \tau_{xy}=\mu\left(\frac{\partial u}{\partial y}+\frac{\partial v}{\partial x}\right),
+  \label{eq:stress}
+\end{equation}
+with $\nabla\!\cdot\!\mathbf{u}=\partial_x u+\partial_y v$, and the heat flux is
+Fourier, $\mathbf{q}=-k\nabla T$ with $k=\mu c_p/\mathit{Pr}$. The viscous
+normal flux assembled at a face with unit normal $\mathbf{n}$ is
+\begin{equation}
+  \mathbf{F}^v\!\cdot\!\mathbf{n}=
+  \begin{bmatrix}
+    0\\
+    \tau_{xx}n_x+\tau_{xy}n_y\\
+    \tau_{xy}n_x+\tau_{yy}n_y\\
+    u\left(\tau_{xx}n_x+\tau_{xy}n_y\right)+v\left(\tau_{xy}n_x+\tau_{yy}n_y\right)
+      +k\,\nabla T\!\cdot\!\mathbf{n}
+  \end{bmatrix}.
+  \label{eq:viscflux}
+\end{equation}
+All benchmark cases specify a constant viscosity, obtained directly from the
+Reynolds number,
+\begin{equation}
+  \mu=\frac{\rho_\infty |\mathbf{u}_\infty| L_{\text{ref}}}{\Reinf},
+  \label{eq:mu}
+\end{equation}
+so $\Reinf=5000$ gives $\mu=\num{2e-4}$, and the cylinder cases give
+$\mu=\num{5e-2}$ ($\Reinf=20$) and $\mu=\num{5e-3}$ ($\Reinf=200$). A
+Sutherland law referenced to the freestream temperature is implemented and
+selectable per case, but no benchmark case uses it. In inviscid mode $\mu$ and
+$k$ are identically zero and the viscous face work is skipped entirely rather
+than multiplied by zero.
