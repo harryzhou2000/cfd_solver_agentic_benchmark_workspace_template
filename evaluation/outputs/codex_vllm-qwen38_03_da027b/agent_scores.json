@@ -1,0 +1,355 @@
+{
+  "schema": "agent_scores",
+  "contestant": "03",
+  "evaluated_at": "2026-08-28T01:00:00+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": "Curated source and incomplete canonical delivery reviewed."
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "01a01ec1-85e2-7480-b3c7-c5fe9504ac9b",
+      "01a0283e-5d68-7bc2-87d5-f3d7371d1c27"
+    ],
+    "execution_date": "2026-08-20 through 2026-08-26",
+    "started_at": "2026-08-20T10:40:25.210000+00:00",
+    "ended_at": "2026-08-26T05:54:48.693000+00:00",
+    "time_basis": "selected bundled root UTC timestamps",
+    "rationale": "Blocked initial root plus its substantive completion continuation; both local trees included.",
+    "contestant_final_response_status": "absent",
+    "contestant_final_response_absence_reason": "Two selected Codex continuation roots have no unambiguous single terminal root."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Source exists."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Partial runner."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 3,
+          "notes": "Large recovery history excluded."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "No authorship investigation."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Partial evidence."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "No canonical package."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Recovery indicates instability."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "Canonical validator fails missing metadata."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 2,
+          "notes": "Extensive raw recovery history."
+        }
+      ],
+      "overall_score": 2.73,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 3,
+          "notes": "Source evidence."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Partial."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 3,
+          "notes": "Partial."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Partial."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Partial."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 3,
+          "notes": "Partial."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Partial."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Partial."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Partial."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "No canonical Re200 package."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 1,
+          "notes": "No canonical MPI evidence."
+        }
+      ],
+      "overall_score": 2.62,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 0,
+          "notes": "Expected canonical directories missing."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 0,
+          "notes": "Validator stops at missing metadata."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 0,
+          "notes": "No canonical eight-case delivery."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 0,
+          "notes": "No verified canonical results."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "Partial report figures."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "Report exists but references excluded/raw evidence."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 1,
+          "notes": "Recovery archive excluded from tip."
+        }
+      ],
+      "overall_score": 0.65,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 35,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 5,
+        "notes": "Partial source."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 4,
+        "notes": "Partial."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 6,
+        "notes": "Partial source."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 3,
+        "notes": "Unverified."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 3,
+        "notes": "Unverified."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 4,
+        "notes": "No canonical delivery."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 1,
+        "notes": "No canonical evidence."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 0,
+        "notes": "Missing canonical package directories."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Partial report."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Recovery tooling."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 0,
+      "notes": "Canonical directory missing."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 0,
+      "notes": "Canonical directory missing."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 0,
+      "notes": "Canonical directory missing."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 0,
+      "notes": "Canonical directory missing."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 0,
+      "notes": "Canonical directory missing."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 0,
+      "notes": "Canonical directory missing."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 0,
+      "notes": "Canonical directory missing."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 0,
+      "notes": "Canonical directory missing; not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "No contestant final response was extractable for multi-root Codex selection.",
+    "No evaluator build or MPI rerun.",
+    "Re200 was not rerun.",
+    "Validator proves the canonical paths are missing."
+  ]
+}
