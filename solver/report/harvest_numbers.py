@@ -204,6 +204,10 @@ def main():
 
     for field, _digits in SHED_FIELDS:
         define("Shed" + camel(field), PENDING)
+    define("ShedSaturated", PENDING)
+    define("ShedCycles", PENDING)
+    for _case_id, key, _label in CASES:
+        define("PhysTime" + key, PENDING)
     for _case_id, key, _label in CASES:
         for field, _digits in META_FIELDS:
             define(camel(field) + key, PENDING)
@@ -229,6 +233,8 @@ def main():
                status.get("convergence_status", PENDING).replace("_", "\\_")
                if finished else PENDING)
         define("Steps" + key, num(status.get("final_step"), 8) if finished else PENDING)
+        define("PhysTime" + key,
+               num(status.get("final_physical_time"), 5) if finished else PENDING)
         define("Orders" + key,
                num(status.get("residual_reduction_orders"), 3) if finished else PENDING)
         define("Wall" + key, num(status.get("wall_time_seconds"), 4) if finished else PENDING)
@@ -281,6 +287,14 @@ def main():
             stats = shedding_stats(forces)
             for field, digits in SHED_FIELDS:
                 define("Shed" + camel(field), num(stats.get(field), digits))
+            # A frequency estimate is only meaningful if the analysis window
+            # actually contains several completed shedding cycles.  Below a few
+            # cycles the "frequency" is an artefact of the window length.
+            freq = stats.get("freq")
+            span = ((stats.get("t_end") or 0.0) - (stats.get("t_start") or 0.0))
+            cycles = freq * span if (freq and span > 0.0) else 0.0
+            define("ShedCycles", num(cycles, 3) if cycles else PENDING)
+            define("ShedSaturated", "yes" if cycles >= 5.0 else "no")
 
         for field, digits in META_FIELDS:
             define(camel(field) + key, num(meta.get(field), digits))

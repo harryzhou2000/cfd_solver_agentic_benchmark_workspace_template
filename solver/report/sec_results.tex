@@ -573,17 +573,41 @@ $\Delta t=0.01$ to $t_f=300$, i.e.\ $\num{30000}$ physical steps, with 5 to 1000
 inner iterations per step against an inner target of $10^{-3}$ on the total
 transient residual.
 
-The status reported by the solver is \cnsStatusCylShed, at
-$\cnsStepsCylShed$ physical steps. Inner-solve statistics from
-\texttt{metadata.json} are: typical
-$\cnsTypicalInnerIterationsCylShed$ inner iterations per physical step, observed
-range $\cnsObservedMinInnerIterationsCylShed$ to
+\paragraph{Completion requirement.} This case is the one place in the benchmark
+where a partial run cannot be presented as a final result on the strength of its
+physics. The submission contract requires the transient to reach
+$\num{30000}$ physical steps and $t=300$; a run that stops earlier is an
+incomplete transient regardless of how clean its wake looks, and is reported as
+such here. The solver's own status label is
+\texttt{statistically\_periodic}, which it applies only once the horizon is
+reached and the inner solve converged on at least $95\,\%$ of physical steps.
+
+The status reported by the solver for the submitted run is
+\cnsStatusCylShed, at $\cnsStepsCylShed$ physical steps and physical time
+$t=\cnsPhysTimeCylShed$. Inner-solve statistics from \texttt{metadata.json} are:
+typical $\cnsTypicalInnerIterationsCylShed$ inner iterations per physical step,
+observed range $\cnsObservedMinInnerIterationsCylShed$ to
 $\cnsObservedMaxInnerIterationsCylShed$, with
 $\cnsInnerTargetMissesCylShed$ target misses and a converged-step fraction of
 $\cnsInnerTargetConvergedFractionCylShed$.
 
-Statistics are taken over the second half of the record, $t\in[\cnsShedTStart,
-\cnsShedTEnd]$, by which time the initial transient has passed:
+\paragraph{Development of the instability.} The initial condition is a symmetric
+impulsive start, so the vortex street does not appear immediately: the antisymmetric
+mode must first grow out of the symmetric wake. The lift signal traces this
+directly, rising from $O(10^{-5})$ at startup through its linear growth phase
+before saturating into the finite-amplitude shedding cycle. With
+$St\approx0.19$ the shedding period is about $5.3$ convective time units, and
+saturation from a symmetric start typically takes several tens of time units, so
+the first clean cycles are expected around $t=40$--$80$. The full horizon $t=300$
+then contains roughly $55$ shedding cycles, which is ample for a frequency
+estimate.
+
+\paragraph{Shedding statistics.} The quantities below are computed over the second
+half of the available record, $t\in[\cnsShedTStart, \cnsShedTEnd]$, so that the
+initial transient is excluded. They are meaningful only if that window lies within
+a saturated shedding regime; where the run did not reach saturation, the entries
+are marked as unavailable rather than filled with numbers that would describe a
+developing transient.
 
 \begin{center}
 \small
@@ -601,6 +625,13 @@ Statistics are taken over the second half of the record, $t\in[\cnsShedTStart,
   \bottomrule
 \end{tabular}
 \end{center}
+
+The analysis window contains $\cnsShedCycles$ shedding cycles, and the
+saturated-regime test (at least five completed cycles in the window) returns
+\textbf{\cnsShedSaturated}. That qualifier governs how the table above should be
+read: with fewer than a few cycles a nominal frequency estimate is an artefact of
+the window length rather than a property of the flow, so the Strouhal figure is
+only quotable when the test passes.
 
 The Strouhal number is obtained from mean-crossing counts of the lift signal over
 the analysis window, which requires no assumption about spectral resolution; with
