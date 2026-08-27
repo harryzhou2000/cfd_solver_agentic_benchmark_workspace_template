@@ -114,10 +114,26 @@ int runSolve(const CommandLineOptions &options, MPI_Comm comm, int rank) {
   // Verify the mesh metrics and free-stream preservation before spending time on
   // a solve.  A geometric inconsistency is reported here rather than surfacing
   // later as a residual that will not converge.
+  //
+  // --report-level selects how much of this is printed: 'full' reports every
+  // measured quantity, while 'brief' prints only a pass/fail summary and any
+  // warning.  The checks themselves always run; only the reporting differs, so
+  // the level can never change the computed result.
   {
     const GeometryVerification verification =
         verifyMeshGeometry(context.mesh(), context.flow(), context.assembler(), context.halo());
-    logInfo(describeVerification(verification));
+    if (options.report_level == ReportLevel::kFull) {
+      logInfo(describeVerification(verification));
+    } else {
+      // The wording matches describeVerification: hard geometric identities that
+      // no valid mesh may violate already threw, so reaching here means the mesh
+      // is usable.  'passed' additionally requires exact uniform-flow
+      // preservation, which these stretched meshes miss at the 1e-11 level, and
+      // that is reported as CHECK rather than as a failure.
+      logInfo(formatString("mesh verification: %s (run with --report-level full for the "
+                           "individual measured quantities)",
+                           verification.passed ? "PASS" : "CHECK"));
+    }
     // Re-establish the initial state, which the verification overwrote.
     context.initializeState();
   }
