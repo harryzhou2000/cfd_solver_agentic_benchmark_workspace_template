@@ -222,6 +222,23 @@ this figure, because the state never stops moving.
 
 \Cref{fig:naca200inv-hist} gives the residual and force histories for this case.
 
+\Cref{fig:naca200inv-farfield} shows the whole-domain Mach field, which is
+included for a specific verification reason rather than for display. It shows the
+detached bow shock standing ahead of the leading edge and then passing out through
+the farfield boundary without a reflected disturbance travelling back into the
+domain. That is direct visual confirmation that the characteristic farfield of
+\cref{sec:bc} handles a strong shock correctly: a Dirichlet freestream condition
+on the outflow arc would reflect the shock and contaminate the near-body solution.
+
+\begin{figure}[htbp]
+  \centering
+  \cnsfig{naca0012_m200_inviscid_mach_farfield.png}{0.66\textwidth}
+  \caption{NACA0012 at $\Minf=2.0$, inviscid: whole-domain Mach number from
+  \texttt{field\_final.vtu}. The bow shock leaves through the farfield boundary
+  cleanly, with no reflection propagating back towards the body.}
+  \label{fig:naca200inv-farfield}
+\end{figure}
+
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}{0.49\textwidth}\centering
@@ -320,6 +337,28 @@ to $\cnsVdNacaTraLam$ at $\Minf=0.80$ and $\cnsVdNacaSupLam$ at $\Minf=2.0$.
 Both are lower than the subsonic value, as expected --- compressibility and
 viscous heating raise the wall temperature, which lowers the near-wall density and
 thins the momentum-carrying part of the layer, reducing the wall shear.
+
+It matters that \cref{eq:blasius} is compared against the \emph{viscous component
+alone}, $\cnsVdNacaSubLam$, and never against the total
+$C_D=\cnsCdNacaSubLam$. Flat-plate theory models skin friction only; the
+remaining $\cnsPdNacaSubLam$ is pressure drag, which it does not describe at all.
+
+\paragraph{The viscous pressure drag is physical, not numerical.} That
+$\cnsPdNacaSubLam$ of pressure drag deserves a comment, because inviscid theory
+says it should be zero: d'Alembert's paradox applies to a symmetric section at
+zero incidence in subsonic flow. It is nonzero here for a physical reason. The
+boundary layer displaces the outer flow, so the trailing-edge pressure does not
+fully recover to its leading-edge value, leaving a net streamwise pressure force.
+This is genuine viscous-pressure (form) drag.
+
+The two runs already in hand quantify that claim without any further computation.
+The $\Minf=0.15$ \emph{inviscid} case on the same mesh gives
+$C_D=\cnsCdNacaSubInv$, and since it has no viscosity and no shock, that value is
+entirely discretization error --- the numerical noise floor of this mesh at this
+Mach number. The viscous pressure drag exceeds it by roughly a factor of
+$18$. A physical effect an order of magnitude above the noise floor measured on
+the identical mesh is a much stronger statement than either number alone, and it
+is available at no extra cost.
 
 Convergence for the three laminar cases is shown in \cref{fig:naca-lam-res} and
 the corresponding force histories in \cref{fig:naca-lam-forces}; the latter are
