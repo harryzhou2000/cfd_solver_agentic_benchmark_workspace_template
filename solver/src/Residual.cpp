@@ -19,7 +19,7 @@ void computeResidual(const ResidualContext& ctx,
     double k_cond = ctx.k_cond;
     double diss_scale = cfg.run_control.rusanov_dissipation_scale;
     // Low-Mach flux preconditioning: pass M_ref to rusanov_flux for M<0.3 viscous flows
-    double mach_ref = (cfg.freestream.mach < 0.3 && mu > 0.0) ? cfg.freestream.mach : 0.0;
+    double mach_ref = (cfg.freestream.mach < 0.3 && mu > 0.0 && cfg.reynolds >= 100.0) ? cfg.freestream.mach : 0.0;
 
     int n_owned = lm.n_owned;
     residuals.assign(n_owned, {0,0,0,0});

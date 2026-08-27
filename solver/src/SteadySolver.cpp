@@ -416,9 +416,18 @@ SteadyResult runSteady(LocalMesh& lm,
             states[i] = candidate;
         }
 
-        // Fix O: removed isothermal energy fix (was resetting rhoE to T_ref every step,
-        // creating an artificial energy source term that prevented the energy equation from
-        // converging -- specifically causes residual to grow 362x for re20/re200 low-Mach cases).
+        // Fix R: restore isothermal fix ONLY for Re<100 low-Mach cases.
+        if (mu > 0.0 && cfg.freestream.mach < 0.3 && low_re_viscous_case) {
+            double T_ref = p_inf / (rho_inf * R_gas);
+            for (int i = 0; i < n_owned; i++) {
+                double rho_i = states[i][0];
+                if (rho_i < 1e-14) continue;
+                double ui = states[i][1] / rho_i;
+                double vi = states[i][2] / rho_i;
+                double p_iso = rho_i * R_gas * T_ref;
+                states[i][3] = rho_i * (p_iso / ((gamma - 1.0) * rho_i) + 0.5*(ui*ui + vi*vi));
+            }
+        }
 
         // Write outer spatial residual (R_ref) to CSV for true convergence history
         if (step % rc.write_residuals_every == 0 || step == 1) {
