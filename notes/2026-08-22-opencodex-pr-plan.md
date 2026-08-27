@@ -118,6 +118,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - D — PR #2527 (feat/auto-review-model-override): listed as PR D per user
   request. Bot findings fixed and landed on head 1a51fd461: GET /api/providers
   exposes autoReviewModel/autoReviewModelOverrides; canonical openai rejects the
+
   fields explicitly on POST/PATCH (with a canonical-seeded regression); the
   trusted openai-api rebuild keeps the configured override (regression added).
   The earlier flash/terra audit items were already addressed on the head
@@ -128,3 +129,20 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - C #2355 remains draft only for maintainer-sponsored on the auth-api re-anchor
   hunk; full Summary/Test plan body is prepared at /tmp/body-c-full.md and will
   be published once the label lands.
+
+
+## Status 2026-08-26 (evening) - convergence round
+
+- Base: upstream/dev @ 779b6090c (unchanged all day).
+- D #2527 head e72184984: fixed native-row override preservation (1efe18b54) and wrong-shaped routed overrides -> null (e72184984). Gates green, CodeRabbit pass, 0 unresolved threads, ready. Runtime CI (Cross-platform CI + React Doctor) is action_required pending workflow approval on the fork PR.
+- B #2351 head a6f7f4088: fixed read-side recovery deleting in-flight audit markers (1ed2305ce), boundAuditDetail truncation bound and parseable-invalid marker deletion (614fbe98f), and pending-marker root shape validation for JSON null (a6f7f4088). Local 59 pass / 0 fail, typecheck/diff-check clean. CodeRabbit pass, 0 unresolved threads, ready; runtime CI action_required.
+- A #2350 head 199df4fd8: ready, gates green, CodeRabbit pass, 0 unresolved threads; runtime CI action_required.
+- C #2355 head 0596a4631: still draft, intake: hygiene-blocked (unsponsored_surface via src/codex/auth-api.ts); awaiting maintainer-sponsored.
+
+## Status 2026-08-27 - rebase round on newest dev
+
+- Base advanced: upstream/dev @ 5dfee1a05 -> a57b9620a (CI/docs/version-line only; no overlap with A/B/C/D files).
+- A #2350 head 481da60ad: rebased onto 5dfee1a05 (chose to keep stable vs re-rebasing onto a57b9620a since the newer commits are CI/docs-only; A is approved-head, gates green, CodeRabbit pass). Re-ticked/undrafted after gate re-draft; posted one @Ingwannu re-review/CI-approval ping (2026-08-27).
+- B #2351 head 81a764898: rebased onto a57b9620a; local 59 + 201 + 33 + 32 pass, typecheck/diff-check clean; pushed, body updated, ready, CodeRabbit resumed (pass).
+- C #2355 head fd2e244aa: rebased onto a57b9620a; local 42 + 16 (GUI contracts) pass, typecheck/diff-check clean; pushed, body unticked, stays draft/hygiene-blocked pending maintainer-sponsored.
+- D #2527 head 7de4d3e37: rebased onto a57b9620a, then fixed Ingwannu's validation-order blocker: wrong-shaped native overrides (numeric/object/blank string) are normalized before the native-row preservation branch; undefined/null native shapes stay canonical (preserves sync/converge byte identity); native-row regressions added. Local 230 + 24 + 77 pass, typecheck/diff-check clean; pushed, body updated (126 pass), ready, CodeRabbit resumed; @Ingwannu reply posted with fix summary. All review threads on A/B/C/D resolved.
