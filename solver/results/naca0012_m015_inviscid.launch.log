@@ -6,12 +6,16 @@ Authorization required, but no authorization protocol specified
 
 Authorization required, but no authorization protocol specified
 
-[cns2d] cns2d 1.0.0 (git 26ef1cb80b86)
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+[cns2d] cns2d 1.0.0 (git cc42ab4facfd)
 [cns2d] command: /workspace/solver/build/cns2d solve --case /workspace/cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_inviscid.json --output /workspace/solver/results/naca0012_m015_inviscid --log-every 250
 [cns2d] case: naca0012_m015_inviscid -- NACA0012, AoA 0 deg, Mach 0.15, inviscid
 [cns2d] case file: /workspace/cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_inviscid.json
 [cns2d] mesh file: /workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns
-[cns2d] MPI ranks: 2
+[cns2d] MPI ranks: 4
 [cns2d] boundary family 'bc-2' -> farfield
 [cns2d] boundary family 'bc-4' -> slip_wall
 [cns2d] CGNS mesh '/workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns': base 'Base' (cell dim 2, phys dim 3), 1 zone(s)
@@ -24,38 +28,37 @@ Authorization required, but no authorization protocol specified
     BC 'bc-4' family 'bc-4' location 'EdgeCenter' pset 'PointRange' range 20897..21300
 [cns2d] global mesh: 15682 nodes (0 zone-interface node pairs fused, max merge distance 0), 20816 cells (10752 tri, 10064 quad), 36498 faces (36014 interior, 484 boundary)
   boundary families: 'bc-2' (80 faces) 'bc-4' (404 faces)
-[cns2d] partitioning: metis_kway into 2 part(s), edge cut 120
+[cns2d] partitioning: metis_kway into 4 part(s), edge cut 241
 [cns2d] physics: inviscid (viscosity and heat conduction identically zero)
-[cns2d] rank 0/2: 10407 owned cells, 120 ghost cells, 17682 faces, 227 boundary faces, 1 neighbour rank(s)
-[cns2d] partitioner: metis_kway, global edge cut 120
+[cns2d] rank 0/4: 5214 owned cells, 114 ghost cells, 9534 faces, 119 boundary faces, 3 neighbour rank(s)
+[cns2d] partitioner: metis_kway, global edge cut 241
 [cns2d] numerics: roe inviscid flux (harten_hyman_entropy_fix), piecewise-linear least-squares reconstruction, venkatakrishnan limiter, lu_sgs_simplified_jacobian, viscous terms disabled
 [cns2d] initial state set to freestream: rho=1 u=1 v=0 p=31.746 (M=0.15)
 [cns2d][warn] mesh verification: uniform-flow residual on interior-only cells is 5.145e-09 (expected < 1e-12); the interior scheme does not preserve a uniform state exactly
-[cns2d] mesh verification: face-closure error 1.025e-16, volume-closure error 1.090e-10, total area 20085.4463 (boundary integral 20085.4463, mismatch 6.158e-15), linear-gradient error 1.428e-10, conservation defect 1.999e-17, uniform-flow residual 5.145e-09 on 19848 interior-only cells -- CHECK
+[cns2d] mesh verification: face-closure error 1.025e-16, volume-closure error 1.090e-10, total area 20085.4463 (boundary integral 20085.4463, mismatch 4.166e-15), linear-gradient error 1.428e-10, conservation defect 1.225e-18, uniform-flow residual 5.145e-09 on 19848 interior-only cells -- CHECK
 [cns2d] initial state set to freestream: rho=1 u=1 v=0 p=31.746 (M=0.15)
 [cns2d] steady run: max_steps=20000, target=4.00 orders, CFL 1 -> 100 over 2000 steps, inner iterations 3..50 (target ratio 1.00e-02)
   step       1  res  9.05057e+01  (- 0.00 orders)  cfl    1.000  inner    3 (ratio 1.93e-05)  cd   -0.000000  cl    0.000000  rej 0
-           dominant residual: var rhoE at (1.0053, 0.00014774), cell volume 1.500e-09, boundary bc-4
-  step     250  res  4.01939e+00  (- 1.35 orders)  cfl    1.774  inner    3 (ratio 2.54e-04)  cd   -0.116894  cl    0.010482  rej 0
-           dominant residual: var rhoE at (0.092694, 0.045543), cell volume 2.405e-08, boundary bc-4
-  step     500  res  3.02868e+00  (- 1.48 orders)  cfl    3.155  inner    3 (ratio 2.83e-03)  cd    0.063367  cl    0.014559  rej 0
+           dominant residual: var rhoE at (0.0032102, 0.0098442), cell volume 4.703e-09, boundary bc-4
+  step     250  res  4.01922e+00  (- 1.35 orders)  cfl    1.774  inner    3 (ratio 2.54e-04)  cd   -0.116732  cl    0.010982  rej 0
+           dominant residual: var rhoE at (0.070993, 0.041089), cell volume 2.048e-08, boundary bc-4
+  step     500  res  3.02792e+00  (- 1.48 orders)  cfl    3.155  inner    3 (ratio 2.82e-03)  cd    0.063649  cl    0.018376  rej 0
            dominant residual: var rhoE at (0.23321, 0.058896), cell volume 5.207e-08, boundary bc-4
-  step     750  res  2.71540e+00  (- 1.52 orders)  cfl    5.610  inner    3 (ratio 3.87e-03)  cd   -0.018632  cl   -0.012598  rej 0
-           dominant residual: var rhoE at (0.93897, 0.0095136), cell volume 1.806e-08, boundary bc-4
-  step    1000  res  2.35236e+00  (- 1.59 orders)  cfl    9.977  inner    5 (ratio 1.27e-03)  cd   -0.106004  cl    0.000291  rej 0
-           dominant residual: var rhoE at (0.092694, 0.045543), cell volume 2.405e-08, boundary bc-4
-  step    1250  res  7.98527e-01  (- 2.05 orders)  cfl   17.742  inner    7 (ratio 8.57e-03)  cd   -0.063001  cl    0.000591  rej 1
-           dominant residual: var rhoE at (0.98837, 0.0028819), cell volume 5.315e-09, boundary bc-4
-  step    1500  res  1.45297e-01  (- 2.79 orders)  cfl   31.550  inner    7 (ratio 8.42e-03)  cd    0.000760  cl   -0.003140  rej 2
-           dominant residual: var rhoE at (0.89532, 0.015059), cell volume 2.837e-08, boundary bc-4
-[cns2d] residual target of 4.00 orders reached at step 1602, but C_D is still moving by 4.159e-01 over the last 500 steps (tolerance 2.376e-03); continuing until the forces are stationary
-  step    1750  res  7.83016e-03  (- 4.06 orders)  cfl   44.266  inner   13 (ratio 9.10e-03)  cd    0.000639  cl    0.000030  rej 6
-           dominant residual: var rhoE at (0.97707, 0.0044352), cell volume 7.572e-09, boundary bc-4
-  step    2000  res  1.88415e-03  (- 4.68 orders)  cfl    1.774  inner    3 (ratio 9.43e-04)  cd    0.001073  cl    0.000116  rej 15
-           dominant residual: var rhoE at (0.48511, 0.053851), cell volume 7.038e-08, boundary bc-4
-  step    2250  res  1.40930e-03  (- 4.81 orders)  cfl    2.366  inner    3 (ratio 2.12e-03)  cd    0.001016  cl    0.000151  rej 21
-           dominant residual: var rhoE at (0.8716, 0.017956), cell volume 3.352e-08, boundary bc-4
-[cns2d] residual reduced by 4.94 orders (target 4.00) after 2398 pseudo-time steps; C_D = 0.000962 holds a bounded oscillation of 1.315e-04 peak to peak whose mean drifts by only 3.385e-06 between successive 500-step windows, so the mean force is converged even though the solution is a small limit cycle rather than a fixed point
-[cns2d] final state: residual 1.266522e-03, C_D = 0.000960 (pressure 0.000960 + viscous 0.000000), C_L = 0.000156, C_mz = 0.000068
-[cns2d] run finished: status 'converged', 2398 steps, t = 0, 4.85 residual orders, 303.2 s wall time
-[cns2d] notes: residual reduced by 4.94 orders (target 4.00) after 2398 pseudo-time steps; C_D = 0.000962 holds a bounded oscillation of 1.315e-04 peak to peak whose mean drifts by only 3.385e-06 between successive 500-step windows, so the mean force is converged even though the solution is a small limit cycle rather than a fixed point
+  step     750  res  2.73364e+00  (- 1.52 orders)  cfl    5.610  inner    3 (ratio 3.85e-03)  cd   -0.019697  cl   -0.023997  rej 0
+           dominant residual: var rhoE at (0.8437, 0.021264), cell volume 3.837e-08, boundary bc-4
+  step    1000  res  2.36663e+00  (- 1.58 orders)  cfl    9.977  inner    5 (ratio 1.28e-03)  cd   -0.102372  cl    0.016829  rej 0
+           dominant residual: var rhoE at (0.038697, 0.031809), cell volume 1.218e-08, boundary bc-4
+  step    1250  res  1.14213e+00  (- 1.90 orders)  cfl   17.742  inner    7 (ratio 7.25e-03)  cd    0.082732  cl   -0.020031  rej 2
+           dominant residual: var rhoE at (0.54134, 0.050148), cell volume 7.019e-08, boundary bc-4
+  step    1500  res  1.44578e-01  (- 2.80 orders)  cfl   12.395  inner    5 (ratio 1.62e-03)  cd   -0.001860  cl   -0.003067  rej 4
+           dominant residual: var rhoE at (0.8437, 0.021264), cell volume 3.837e-08, boundary bc-4
+[cns2d] residual target of 4.00 orders reached at step 1629, but C_D is still moving by 4.252e-01 over the last 500 steps (tolerance 2.383e-03); continuing until the forces are stationary
+  step    1750  res  8.08498e-03  (- 4.05 orders)  cfl   17.425  inner    7 (ratio 5.37e-03)  cd    0.000444  cl    0.000036  rej 8
+           dominant residual: var rhoE at (0.31155, 0.059976), cell volume 6.152e-08, boundary bc-4
+  step    2000  res  1.33071e-03  (- 4.83 orders)  cfl    1.181  inner    3 (ratio 1.93e-04)  cd    0.000993  cl    0.000137  rej 16
+           dominant residual: var rhoE at (0.010488, 0.017427), cell volume 5.388e-09, boundary bc-4
+[cns2d] residual reduced by 4.73 orders (target 4.00) after 2225 pseudo-time steps; C_D = 0.001001 holds a bounded oscillation of 1.273e-03 peak to peak whose mean drifts by only 2.966e-06 between successive 500-step windows, so the mean force is converged even though the solution is a small limit cycle rather than a fixed point
+[cns2d] the march ended at residual 1.6963e-03, a factor 3.42 above the best value 4.9670e-04 reached at step 1861; the best state has been restored and is what is reported and written out
+[cns2d] final state: residual 4.966995e-04, C_D = 0.000988 (pressure 0.000988 + viscous 0.000000), C_L = 0.000138, C_mz = 0.000064
+[cns2d] run finished: status 'converged', 1861 steps, t = 0, 5.26 residual orders, 20.2 s wall time
+[cns2d] notes: the march ended at residual 1.6963e-03, a factor 3.42 above the best value 4.9670e-04 reached at step 1861; the best state has been restored and is what is reported and written out  (superseded termination note: residual reduced by 4.73 orders (target 4.00) after 2225 pseudo-time steps; C_D = 0.001001 holds a bounded oscillation of 1.273e-03 peak to peak whose mean drifts by only 2.966e-06 between successive 500-step windows, so the mean force is converged even though the solution is a small limit cycle rather than a fixed point)

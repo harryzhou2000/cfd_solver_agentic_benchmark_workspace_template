@@ -1,9 +1,9 @@
-[cns2d] cns2d 1.0.0 (git 26ef1cb80b86)
+[cns2d] cns2d 1.0.0 (git cc42ab4facfd)
 [cns2d] command: /workspace/solver/build/cns2d solve --case /workspace/cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re20.json --output /workspace/solver/results/cylinder_m010_laminar_re20 --log-every 250
 [cns2d] case: cylinder_m010_laminar_re20 -- Circular cylinder, Mach 0.1, laminar, Re 20
 [cns2d] case file: /workspace/cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re20.json
 [cns2d] mesh file: /workspace/cfd_solver_agentic_benchmark/inputs/meshes/CylinderB1.cgns
-[cns2d] MPI ranks: 2
+[cns2d] MPI ranks: 4
 [cns2d] boundary family 'FAR' -> farfield
 [cns2d] boundary family 'WALL' -> no_slip_adiabatic_wall
 [cns2d] CGNS mesh '/workspace/cfd_solver_agentic_benchmark/inputs/meshes/CylinderB1.cgns': base 'Base' (cell dim 2, phys dim 2), 2 zone(s)
@@ -39,38 +39,38 @@
     connectivity '1to1Connection:con-6' (Abutting1to1, Vertex) -> zone 'dom-1', 21 matched nodes
 [cns2d] global mesh: 9995 nodes (320 zone-interface node pairs fused, max merge distance 0), 10185 cells (500 tri, 9685 quad), 20180 faces (20060 interior, 120 boundary)
   boundary families: 'WALL' (100 faces) 'FAR' (20 faces)
-[cns2d] partitioning: metis_kway into 2 part(s), edge cut 97
+[cns2d] partitioning: metis_kway into 4 part(s), edge cut 282
 [cns2d] physics: laminar, Re = 20, constant mu = 5.000000e-02 (rho_inf*U_inf*L_ref/Re), Pr = 0.72
-[cns2d] rank 0/2: 5091 owned cells, 95 ghost cells, 10164 faces, 100 boundary faces, 1 neighbour rank(s)
-[cns2d] partitioner: metis_kway, global edge cut 97
+[cns2d] rank 0/4: 2544 owned cells, 149 ghost cells, 5129 faces, 46 boundary faces, 3 neighbour rank(s)
+[cns2d] partitioner: metis_kway, global edge cut 282
 [cns2d] numerics: roe inviscid flux (harten_hyman_entropy_fix), piecewise-linear least-squares reconstruction, venkatakrishnan limiter, lu_sgs_simplified_jacobian, viscous terms enabled
 [cns2d] initial state set to freestream: rho=1 u=1 v=0 p=71.4286 (M=0.1)
 [cns2d][warn] mesh verification: uniform-flow residual on interior-only cells is 2.123e-11 (expected < 1e-12); the interior scheme does not preserve a uniform state exactly
-[cns2d] mesh verification: face-closure error 1.020e-16, volume-closure error 4.757e-13, total area 123606.0129 (boundary integral 123606.0129, mismatch 9.418e-16), linear-gradient error 3.137e-13, conservation defect 5.731e-04, uniform-flow residual 2.123e-11 on 9945 interior-only cells -- CHECK
+[cns2d] mesh verification: face-closure error 1.020e-16, volume-closure error 4.757e-13, total area 123606.0129 (boundary integral 123606.0129, mismatch 2.355e-16), linear-gradient error 3.137e-13, conservation defect 5.731e-04, uniform-flow residual 2.123e-11 on 9945 interior-only cells -- CHECK
 [cns2d] initial state set to freestream: rho=1 u=1 v=0 p=71.4286 (M=0.1)
 [cns2d] steady run: max_steps=30000, target=5.00 orders, CFL 1 -> 100 over 3000 steps, inner iterations 3..80 (target ratio 1.00e-02)
-  step       1  res  2.12400e+01  (- 0.00 orders)  cfl    1.000  inner    3 (ratio 9.68e-06)  cd  156.952427  cl    0.000000  rej 0
+  step       1  res  2.12400e+01  (- 0.00 orders)  cfl    1.000  inner    3 (ratio 9.74e-06)  cd  156.952427  cl    0.000000  rej 0
            dominant residual: var rhoE at (0.50051, -0.015729), cell volume 6.295e-05, boundary WALL
-  step     250  res  2.47688e+00  (- 0.93 orders)  cfl    1.466  inner    3 (ratio 8.58e-05)  cd   26.634470  cl    0.001638  rej 0
-           dominant residual: var rhoE at (-0.50051, -0.015729), cell volume 6.295e-05, boundary WALL
-  step     500  res  2.62302e+00  (- 0.91 orders)  cfl    2.151  inner    3 (ratio 3.63e-04)  cd   -6.589899  cl    0.008290  rej 0
+  step     250  res  2.47646e+00  (- 0.93 orders)  cfl    1.466  inner    3 (ratio 9.05e-05)  cd   26.635707  cl    0.002009  rej 0
+           dominant residual: var rhoE at (0.50051, -0.015729), cell volume 6.295e-05, boundary WALL
+  step     500  res  2.62286e+00  (- 0.91 orders)  cfl    2.151  inner    3 (ratio 3.69e-04)  cd   -6.596744  cl    0.006505  rej 0
            dominant residual: var rhoE at (0.50051, 0.015729), cell volume 6.295e-05, boundary WALL
-  step     750  res  7.83032e-01  (- 1.43 orders)  cfl    3.157  inner    3 (ratio 9.91e-04)  cd   -0.491062  cl   -0.005084  rej 0
-           dominant residual: var rhoE at (-0.50051, 0.015729), cell volume 6.295e-05, boundary WALL
-  step    1000  res  4.23959e-01  (- 1.70 orders)  cfl    4.634  inner    3 (ratio 4.04e-03)  cd    1.415786  cl   -0.001197  rej 0
+  step     750  res  7.84885e-01  (- 1.43 orders)  cfl    3.157  inner    3 (ratio 1.00e-03)  cd   -0.489850  cl   -0.004869  rej 0
+           dominant residual: var rhoE at (-0.44618, -0.22734), cell volume 6.295e-05, boundary WALL
+  step    1000  res  4.23668e-01  (- 1.70 orders)  cfl    4.634  inner    3 (ratio 4.09e-03)  cd    1.401118  cl   -0.002317  rej 0
            dominant residual: var rhoE at (0.50051, 0.015729), cell volume 6.295e-05, boundary WALL
-  step    1250  res  7.62497e-02  (- 2.44 orders)  cfl    6.802  inner    5 (ratio 7.79e-04)  cd    2.170343  cl    0.001252  rej 0
-           dominant residual: var rhoE at (0.48869, 0.10924), cell volume 6.295e-05, boundary WALL
-  step    1500  res  1.51892e-02  (- 3.15 orders)  cfl    9.985  inner    5 (ratio 4.23e-03)  cd    2.126347  cl    0.001405  rej 0
-           dominant residual: var rhoE at (-0.015729, 0.50051), cell volume 6.295e-05, boundary WALL
-  step    1750  res  1.77941e-03  (- 4.08 orders)  cfl   14.655  inner    5 (ratio 9.87e-03)  cd    2.068082  cl    0.000714  rej 0
-           dominant residual: var rhoE at (0.13971, 0.48087), cell volume 6.295e-05, boundary WALL
-  step    2000  res  4.23559e-04  (- 4.70 orders)  cfl   21.511  inner    7 (ratio 8.87e-03)  cd    2.033864  cl    0.000493  rej 0
+  step    1250  res  7.68291e-02  (- 2.44 orders)  cfl    6.802  inner    3 (ratio 9.94e-03)  cd    2.170398  cl    0.002179  rej 0
+           dominant residual: var rhoE at (0.50051, 0.015729), cell volume 6.295e-05, boundary WALL
+  step    1500  res  1.47518e-02  (- 3.16 orders)  cfl    9.985  inner    5 (ratio 4.36e-03)  cd    2.126522  cl    0.001370  rej 0
+           dominant residual: var rhoE at (-0.015729, -0.50051), cell volume 6.295e-05, boundary WALL
+  step    1750  res  1.82293e-03  (- 4.07 orders)  cfl   14.655  inner    7 (ratio 3.02e-03)  cd    2.068260  cl    0.000680  rej 0
+           dominant residual: var rhoE at (0.10924, -0.48869), cell volume 6.295e-05, boundary WALL
+  step    2000  res  4.23991e-04  (- 4.70 orders)  cfl   21.511  inner    7 (ratio 9.19e-03)  cd    2.033995  cl    0.000520  rej 0
            dominant residual: var rhoE at (0.047125, -0.49853), cell volume 6.295e-05, boundary WALL
-[cns2d] residual target of 5.00 orders reached at step 2145, but C_D is still moving by 6.748e-02 over the last 500 steps (tolerance 2.092e-02); continuing until the forces are stationary
-  step    2250  res  1.13641e-04  (- 5.27 orders)  cfl   31.574  inner    9 (ratio 7.75e-03)  cd    2.020753  cl    0.000409  rej 0
+[cns2d] residual target of 5.00 orders reached at step 2145, but C_D is still moving by 6.779e-02 over the last 500 steps (tolerance 2.092e-02); continuing until the forces are stationary
+  step    2250  res  1.14120e-04  (- 5.27 orders)  cfl   31.574  inner    9 (ratio 8.01e-03)  cd    2.020786  cl    0.000389  rej 0
            dominant residual: var rhoE at (0.047125, -0.49853), cell volume 6.295e-05, boundary WALL
-[cns2d] residual reduced by 5.84 orders (target 5.00) after 2449 pseudo-time steps, with C_D = 2.018377 stationary to 2.034e-02 (tolerance 2.039e-02) over the last 500 steps.  The window is still monotone with decrements decaying at a ratio of 0.733 per sub-block, so this is an asymptotic approach rather than a fixed point already reached: the geometric tail gives an estimated 9.89e-04 of C_D movement remaining (0.049 % ), i.e. an asymptote near 2.017388.  C_D is therefore converged to about 9.9e-04 and no more digits than that are earned.
-[cns2d] final state: residual 3.052730e-05, C_D = 2.018372 (pressure 1.220902 + viscous 0.797470), C_L = 0.000517, C_mz = -0.000002
-[cns2d] run finished: status 'converged', 2449 steps, t = 0, 5.84 residual orders, 145.3 s wall time
-[cns2d] notes: residual reduced by 5.84 orders (target 5.00) after 2449 pseudo-time steps, with C_D = 2.018377 stationary to 2.034e-02 (tolerance 2.039e-02) over the last 500 steps.  The window is still monotone with decrements decaying at a ratio of 0.733 per sub-block, so this is an asymptotic approach rather than a fixed point already reached: the geometric tail gives an estimated 9.89e-04 of C_D movement remaining (0.049 % ), i.e. an asymptote near 2.017388.  C_D is therefore converged to about 9.9e-04 and no more digits than that are earned.
+[cns2d] residual reduced by 5.85 orders (target 5.00) after 2450 pseudo-time steps, with C_D = 2.018379 stationary to 2.037e-02 (tolerance 2.039e-02) over the last 500 steps.  The window is still monotone with decrements decaying at a ratio of 0.736 per sub-block, so this is an asymptotic approach rather than a fixed point already reached: the geometric tail gives an estimated 1.03e-03 of C_D movement remaining (0.051 % ), i.e. an asymptote near 2.017348.  C_D is therefore converged to about 1.0e-03 and no more digits than that are earned.
+[cns2d] final state: residual 2.928962e-05, C_D = 2.018374 (pressure 1.220905 + viscous 0.797470), C_L = 0.000490, C_mz = -0.000001
+[cns2d] run finished: status 'converged', 2450 steps, t = 0, 5.86 residual orders, 13.7 s wall time
+[cns2d] notes: residual reduced by 5.85 orders (target 5.00) after 2450 pseudo-time steps, with C_D = 2.018379 stationary to 2.037e-02 (tolerance 2.039e-02) over the last 500 steps.  The window is still monotone with decrements decaying at a ratio of 0.736 per sub-block, so this is an asymptotic approach rather than a fixed point already reached: the geometric tail gives an estimated 1.03e-03 of C_D movement remaining (0.051 % ), i.e. an asymptote near 2.017348.  C_D is therefore converged to about 1.0e-03 and no more digits than that are earned.
