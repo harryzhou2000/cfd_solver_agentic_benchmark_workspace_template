@@ -50,6 +50,49 @@ driver scripts that produced the submitted runs are kept under \texttt{scratch/}
 referenced from the README, since a pointer to the script that was actually run is worth
 more than a retyped command that may drift from it.
 
+\subsubsection{Provenance of each result, and a build bug that falsified it}
+\label{sec:provenancestamp}
+
+Every \texttt{metadata.json} records the git revision of the source that produced it, so a
+reader can check out the exact tree behind any number in this report. That mechanism was
+broken in a way worth documenting, because the failure was silent and the reported value
+was not merely stale but actively wrong.
+
+The revision was captured once at CMake \emph{configure} time and never refreshed, so every
+result --- all eight production cases and the whole rank-count study --- recorded a revision
+that predated the solver source entirely. It pointed at a documentation commit containing no
+solver at all. A reader following it would have found nothing that could have produced these
+results, which is worse than a stale hash: it is a reproducibility claim that fails on the
+first thing anyone would try.
+
+Two fixes were needed, and the second is the instructive one:
+\begin{enumerate}
+  \item The revision is now re-stamped on \emph{every} build rather than at configure time,
+  and a worktree carrying uncommitted tracked changes is stamped \texttt{<rev>-dirty}, so a
+  result built from uncommitted code cannot be attributed to a clean commit.
+  \item The first attempt \textbf{appeared to work and did not}. The stamp target had no
+  ordering relationship to the library, so it ran \emph{concurrently} with compilation: a
+  changed revision reached the binary only on the \emph{following} build, leaving the
+  generated header saying one thing and the compiled binary containing another. It was
+  corrected by making the compilation depend on the stamp target so the stamp completes
+  first.
+\end{enumerate}
+
+The way the second bug was caught is the part that generalises. Inspecting the generated
+header would have shown the correct revision and passed --- the header was right; the binary
+was wrong. It was found only by \emph{running the solver and comparing the}
+\texttt{metadata.json} \emph{it wrote against the header}, which is the only check that
+exercises the path the results actually take. Verifying an intermediate artifact is not the
+same as verifying the output, and a concurrency bug in a build graph is invisible to the
+former.
+
+The re-stamped revision is recorded in \texttt{run\_manifest.csv} alongside every case. The
+solver source was unchanged across this correction --- \texttt{git diff} over \texttt{src/}
+is empty between the previous binary and the corrected one --- so no coefficient, convergence
+status, or figure in this report is affected. Only the recorded identity of the build
+changed, which is precisely the point: the numbers were always right and their provenance was
+not.
+
 \subsection{Generated files}
 
 Each case directory contains \texttt{metadata.json},

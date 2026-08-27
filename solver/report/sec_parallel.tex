@@ -17,10 +17,11 @@ $np=1,2,4,8$, so that both meshes and both wall types are exercised, and
   \small
   \input{tab_scaling}
   \\[2pt]
-  \footnotesize $^\ddagger$These runs executed concurrently with the $\Reinf=200$
-  transient, which was itself occupying the 4-CPU quota, so \emph{every wall time
-  in this table is contended} and none is a clean measure of scaling. The force
-  values are unaffected. For the scaling claim see \cref{tab:rankchoice}.
+  \footnotesize $^\ddagger$Wall times are as recorded by the solver itself in each run's
+  \texttt{run\_status.json}. An earlier version of this study ran concurrently with the
+  $\Reinf=200$ transient and its timings were contended; the study was re-run with the
+  machine otherwise idle, so these are clean measurements. The force values were unaffected
+  by the contention either way, since they do not depend on elapsed time.
 \end{table}
 
 \subsection{Consistency across rank counts}
@@ -191,6 +192,17 @@ processes share four CPUs, so each is descheduled roughly half the time while
 still paying the full halo-exchange and synchronisation cost. It is not evidence
 of a communication bottleneck in the solver, and it would be wrong to read it as
 such.
+
+\paragraph{The same shape appears independently on two other configurations.} The
+rank-count study of \cref{tab:scaling} was re-run with the machine otherwise idle, and its
+timings reproduce this curve on a different case, a different mesh and a different physics
+mode from \cref{tab:rankchoice}: monotone speedup through $np=4$ followed by regression at
+$np=8$, with speedups at the optimum of $3.9\times$ for the cylinder at $\Reinf=20$ and
+$4.4\times$ for the $\Reinf=5000$ airfoil. Three independent measurements --- a transient
+and two steady cases, on both meshes and both wall types --- put the optimum at $np=4$ and
+show the same $np=8$ regression. That the optimum tracks the CPU allowance rather than the
+mesh size or the physics is the strongest available evidence that the quota is what sets
+it.
 
 All production cases therefore run at $np=4$, sequentially, one case at a time.
 The benchmark also asks for an $np=8$ demonstration, which is included in the
