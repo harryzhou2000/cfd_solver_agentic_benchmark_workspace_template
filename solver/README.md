@@ -70,7 +70,11 @@ mpirun -np 8 ./build/cfd2d solve \
     --output results/naca0012_m015_inviscid
 ```
 
-`./build/cfd2d help` lists every option. All eight benchmark cases run with the
+`./build/cfd2d help` lists every option. Two numerical safeguards are on by
+default and can be switched off from the command line: the multidimensional
+shock fix (`--shock-fix 0`) and limiter freezing (`--freeze-limiter-step 0`).
+Both are recorded in `metadata.json`, and the report quantifies what each is
+worth. All eight benchmark cases run with the
 same executable and the same options; the differences come from the case JSON
 files. The only per-case command-line options used for the submitted results
 are documented in `report/run_manifest.md` and in the report:
@@ -104,7 +108,7 @@ preservation and linear-reconstruction exactness checks on the supplied mesh.
 | Test | What it covers |
 |---|---|
 | `ctest -R unit` | polygon geometry, equation of state, all three Riemann solvers (including exactness of the Roe flux across a stationary Rankine–Hugoniot shock), the wall-flux identities, the farfield freestream-preservation property, the Newtonian stress/adiabatic viscous flux, and both limiter functions |
-| `ctest -R mpi_consistency` | runs the same case on 1, 2 and 4 ranks and checks partition completeness, non-empty symmetric halos and agreement of the global residual and force coefficients |
+| `ctest -R mpi_consistency` | runs the same case on 1, 2 and 4 ranks and checks partition completeness, non-empty symmetric halos, agreement of the global residual and force coefficients, and determinism of `field_final.vtu` (identical point/connectivity blocks, cells in global id order, every point referenced, every field finite) |
 | `./build/cfd2d verify` | order of accuracy, freestream preservation, linear-reconstruction exactness |
 
 ### MPI notes
@@ -126,14 +130,16 @@ scripts/run_all.sh steady        # 7 steady cases at np=8    -> results/
 scripts/run_all.sh transient     # cylinder Re 200 at np=8   -> results/
 scripts/run_all.sh mpi           # rank study np = 1,2,4,8   -> studies/mpi/
 scripts/run_all.sh verify        # flux and limiter checks   -> studies/verify/
-scripts/run_verify_extra.sh      # Roe at Mach 2, restart round trip
+scripts/run_verify_extra.sh      # Roe at Mach 2, shock-fix invariance, restart
 scripts/run_cfl_study.sh         # dual-time CFL/target study -> studies/cflstudy/
 
 scripts/make_report.sh           # verification, figures, manifests, LaTeX report
 scripts/check_submission.sh      # benchmark validator + stricter self-checks
 ```
 
-`results/` contains exactly the eight required case directories. The transient
+`results/` contains exactly the eight required case directories. Every one of
+them is produced by the same build with the same numerics; `check_submission.sh`
+verifies that, so a set mixing results from two builds cannot be submitted. The transient
 case additionally writes `results/cylinder_m010_laminar_re200/fields/` with the
 snapshot every `write_field_every_time = 1.0` requested by the case file (300
 files, about 330 MB); those are present on disk but are excluded from git
