@@ -258,6 +258,37 @@ non-finite entries; and the final force row matching the state written to
 additionally validated by re-integrating \texttt{surface.csv} offline, described
 next.
 
+Two of those are worth giving as measurements rather than as assertions, because the
+distinction between a slip and a no-slip wall is exactly the sort of thing a report can
+claim without having checked. Read directly from the submitted \texttt{surface.csv}:
+\begin{itemize}
+  \item on all three no-slip cases the maximum wall speed is \textbf{exactly}
+  $0.000\mathrm{e}{+}00$ --- not small, identically zero, because the face state imposes it
+  (\cref{eq:noslipface});
+  \item on the three slip cases the maximum $|\mathbf{V}\!\cdot\!\mathbf{n}|$ is
+  \num{9.7e-14}, \num{1.7e-13} and \num{1.4e-13} while the maximum tangential speed is
+  $0.9985$, $1.0889$ and $1.0417$ --- the normal component annihilated to round-off with the
+  tangential component fully retained, which is the defining property of a slip wall.
+\end{itemize}
+The values written are boundary-face values, and the cell-centre values a reader might
+otherwise confuse them with are in a separate documented \texttt{surface\_cell\_center.csv}.
+
+\paragraph{Error handling on malformed input.} The required CLI reports failures rather than
+proceeding on bad data. Five classes were exercised --- a missing case file, a missing
+required argument, a JSON document lacking a required object, a nonexistent mesh path, and an
+invalid \texttt{--report-level} value --- and each exits with status $2$ and a message naming
+the specific problem. That is the \emph{bad input} code of the exit-status contract above,
+distinct from the code for a numerically failed run, so a caller can tell a malformed case
+from a diverged one.
+
+\paragraph{The \texttt{.vtu} output was checked by parsing it, not by inspection.} Reading
+each \texttt{field\_final.vtu} back confirms: a single \texttt{Piece}; ASCII only, with no
+appended binary section; cell types drawn exactly from $\{5,9\}$, the triangle and
+quadrilateral codes; connectivity offsets strictly increasing as cumulative \emph{end}
+offsets; points written as three components with $z$ identically zero; and all eight required
+cell arrays present. Verifying this by reading the file the writer produced, rather than by
+reviewing the writer, is the same principle as \cref{sec:onelesson}.
+
 \subsubsection{Independent re-integration of the surface data}
 \label{sec:reintegrate}
 
@@ -881,6 +912,15 @@ different rank count. Both runs converged by every criterion the solver applies:
 \end{tabular}
 \end{center}
 
+\noindent The $np=4$ run is the submitted result. The $np=2$ run is a superseded
+configuration retained here as a measurement, not presented as a result, and it is
+recoverable: at commit \texttt{50959dd} the file
+\texttt{results/naca0012\_m200\_laminar\_re5000/metadata.json} records
+\texttt{mpi\_ranks} $=2$ and \texttt{partition\_edge\_cut} $=120$, and its
+\texttt{forces.csv} ends at step \num{48319} with $C_D=0.1376427940$. Both figures below
+are therefore checkable rather than merely asserted, which matters because this pair is the
+only direct evidence for the reproducibility bound quoted at the end of this subsection.
+
 \noindent The two results differ by $\num{5.02e-4}$, or $\num{3.65e-3}$ relative --- which is
 \textbf{35 times} the remaining movement the $np=4$ run reports for itself and \textbf{73
 times} that of the $np=2$ run. Neither run is wrong. The tail estimate bounds how much
@@ -1053,6 +1093,23 @@ the specific checks are worth recording:
   \item \texttt{MPI\_Allgather} and \texttt{MPI\_Allgatherv} appear only in
   setup code. Iteration-time exchange is neighbour-scoped \texttt{Isend}/%
   \texttt{Irecv} with receives posted first.
+  \item Every collective in the codebase was located and classified, not just the
+  \texttt{Allgather} family: each \texttt{MPI\_Gather}, \texttt{MPI\_Gatherv} and
+  \texttt{MPI\_Bcast} occurs in surface output, restart, \texttt{.vtu} writing or partition
+  diagnostics --- all I/O paths, none in the iteration. The iteration loop uses only
+  neighbour-scoped \texttt{Isend}/\texttt{Irecv}/\texttt{Waitall} plus eleven
+  \texttt{MPI\_Allreduce} calls for residual norms and force accumulators, which are
+  reductions of scalars and are physically required rather than a replication of state.
+  \item Mesh reading is generic: no mesh filename appears anywhere in the source, and the
+  reader iterates the CGNS zone, section and boundary-condition counts rather than assuming
+  a fixed structure, which is what allows one code path to handle a single-zone
+  \texttt{PhysicalDimension} $=3$ airfoil mesh and a two-zone $=2$ cylinder mesh
+  (\cref{sec:mesh}).
+  \item Dimensionality and variable count are symbolic (\texttt{kDim},
+  \texttt{kNumVars}) throughout rather than written as bare literals in loop bounds, and the
+  boundary-condition dispatch has a single documented extension point. Neither is exercised
+  by this benchmark, but both were checked because a report claiming a general
+  finite-volume framework should be able to substantiate it.
   \item Originality: a search of the source for identifiers and naming conventions
   characteristic of the widely used open-source compressible-flow codes returned no
   matches, and the style is internally consistent and idiosyncratic throughout. The
