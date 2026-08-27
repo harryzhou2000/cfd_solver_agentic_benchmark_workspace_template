@@ -10,7 +10,7 @@ Authorization required, but no authorization protocol specified
 
 Authorization required, but no authorization protocol specified
 
-[cns2d] cns2d 1.0.0 (git 26ef1cb80b86)
+[cns2d] cns2d 1.0.0 (git a7363bb64c7f)
 [cns2d] command: ./build/cns2d solve --case ../cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re20.json --output results/scaling/cylinder_m010_laminar_re20_np2 --max-steps 1500 --log-every 500
 [cns2d] case: cylinder_m010_laminar_re20 -- Circular cylinder, Mach 0.1, laminar, Re 20
 [cns2d] case file: /workspace/cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re20.json
@@ -63,17 +63,18 @@ Authorization required, but no authorization protocol specified
 [cns2d] steady run: max_steps=1500, target=5.00 orders, CFL 1 -> 100 over 3000 steps, inner iterations 3..80 (target ratio 1.00e-02)
   step       1  res  2.12400e+01  (- 0.00 orders)  cfl    1.000  inner    3 (ratio 9.68e-06)  cd  156.952427  cl    0.000000  rej 0
            dominant residual: var rhoE at (0.50051, -0.015729), cell volume 6.295e-05, boundary WALL
-  step     500  res  2.62302e+00  (- 0.91 orders)  cfl    2.151  inner    3 (ratio 3.63e-04)  cd   -6.733708  cl    0.008015  rej 0
+  step     500  res  2.62302e+00  (- 0.91 orders)  cfl    2.151  inner    3 (ratio 3.63e-04)  cd   -6.589899  cl    0.008290  rej 0
            dominant residual: var rhoE at (0.50051, 0.015729), cell volume 6.295e-05, boundary WALL
-  step    1000  res  4.23959e-01  (- 1.70 orders)  cfl    4.634  inner    3 (ratio 4.04e-03)  cd    1.393453  cl   -0.001304  rej 0
+  step    1000  res  4.23959e-01  (- 1.70 orders)  cfl    4.634  inner    3 (ratio 4.04e-03)  cd    1.415786  cl   -0.001197  rej 0
            dominant residual: var rhoE at (0.50051, 0.015729), cell volume 6.295e-05, boundary WALL
   step    1500  res  1.51892e-02  (- 3.15 orders)  cfl    9.985  inner    5 (ratio 4.23e-03)  cd    2.126347  cl    0.001405  rej 0
            dominant residual: var rhoE at (-0.015729, 0.50051), cell volume 6.295e-05, boundary WALL
-[cns2d] reached the step limit (1500) with the residual reduced by only 3.15 orders (target 5.00) and C_D = 2.126347 still moving by 1.681e+00 over the last 500 steps (tolerance 3.110e-02); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard
-[cns2d] final state: residual 1.539990e-02, C_D = 2.126111 (pressure 1.277290 + viscous 0.848820), C_L = 0.001397, C_mz = -0.000066
+[cns2d] reached the step limit (1500) with the residual reduced by only 3.15 orders (target 5.00) and C_D = 2.126347 still moving by 1.660e+00 over the last 500 steps (tolerance 3.114e-02); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard
+[cns2d] the march ended at residual 1.5189e-02, a factor 2.57 above the best value 5.9204e-03 reached at step 1472; the best state has been restored and is what is reported and written out
+[cns2d] final state: residual 5.920382e-03, C_D = 2.136705 (pressure 1.283493 + viscous 0.853212), C_L = 0.001607, C_mz = -0.000077
 [cns2d][error][rank 1] the run did not complete successfully; results are marked failed
-[cns2d] run finished: status 'not_converged', 1500 steps, t = 0, 3.14 residual orders, 27.7 s wall time
-[cns2d] notes: reached the step limit (1500) with the residual reduced by only 3.15 orders (target 5.00) and C_D = 2.126347 still moving by 1.681e+00 over the last 500 steps (tolerance 3.110e-02); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard
+[cns2d] run finished: status 'not_converged', 1472 steps, t = 0, 3.55 residual orders, 12.4 s wall time
+[cns2d] notes: the march ended at residual 1.5189e-02, a factor 2.57 above the best value 5.9204e-03 reached at step 1472; the best state has been restored and is what is reported and written out  (superseded termination note: reached the step limit (1500) with the residual reduced by only 3.15 orders (target 5.00) and C_D = 2.126347 still moving by 1.660e+00 over the last 500 steps (tolerance 3.114e-02); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard)
 [cns2d][error][rank 0] the run did not complete successfully; results are marked failed
 --------------------------------------------------------------------------
 Primary job  terminated normally, but 1 process returned
@@ -83,6 +84,6 @@ a non-zero exit code. Per user-direction, the job has been aborted.
 mpirun detected that one or more processes exited with non-zero status, thus causing
 the job to be terminated. The first process to do so was:
 
-  Process name: [[30439,1],1]
+  Process name: [[60410,1],1]
   Exit code:    3
 --------------------------------------------------------------------------

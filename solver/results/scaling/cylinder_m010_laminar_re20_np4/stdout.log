@@ -1,4 +1,4 @@
-[cns2d] cns2d 1.0.0 (git 26ef1cb80b86)
+[cns2d] cns2d 1.0.0 (git a7363bb64c7f)
 [cns2d] command: ./build/cns2d solve --case ../cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re20.json --output results/scaling/cylinder_m010_laminar_re20_np4 --max-steps 1500 --log-every 500
 [cns2d] case: cylinder_m010_laminar_re20 -- Circular cylinder, Mach 0.1, laminar, Re 20
 [cns2d] case file: /workspace/cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re20.json
@@ -51,14 +51,15 @@
 [cns2d] steady run: max_steps=1500, target=5.00 orders, CFL 1 -> 100 over 3000 steps, inner iterations 3..80 (target ratio 1.00e-02)
   step       1  res  2.12400e+01  (- 0.00 orders)  cfl    1.000  inner    3 (ratio 9.74e-06)  cd  156.952427  cl    0.000000  rej 0
            dominant residual: var rhoE at (0.50051, -0.015729), cell volume 6.295e-05, boundary WALL
-  step     500  res  2.62286e+00  (- 0.91 orders)  cfl    2.151  inner    3 (ratio 3.69e-04)  cd   -6.740273  cl    0.006260  rej 0
+  step     500  res  2.62286e+00  (- 0.91 orders)  cfl    2.151  inner    3 (ratio 3.69e-04)  cd   -6.596744  cl    0.006505  rej 0
            dominant residual: var rhoE at (0.50051, 0.015729), cell volume 6.295e-05, boundary WALL
-  step    1000  res  4.23668e-01  (- 1.70 orders)  cfl    4.634  inner    3 (ratio 4.09e-03)  cd    1.379485  cl   -0.002395  rej 0
+  step    1000  res  4.23668e-01  (- 1.70 orders)  cfl    4.634  inner    3 (ratio 4.09e-03)  cd    1.401118  cl   -0.002317  rej 0
            dominant residual: var rhoE at (0.50051, 0.015729), cell volume 6.295e-05, boundary WALL
   step    1500  res  1.47518e-02  (- 3.16 orders)  cfl    9.985  inner    5 (ratio 4.36e-03)  cd    2.126522  cl    0.001370  rej 0
            dominant residual: var rhoE at (-0.015729, -0.50051), cell volume 6.295e-05, boundary WALL
-[cns2d] reached the step limit (1500) with the residual reduced by only 3.16 orders (target 5.00) and C_D = 2.126522 still moving by 1.702e+00 over the last 500 steps (tolerance 3.117e-02); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard
-[cns2d] final state: residual 1.496760e-02, C_D = 2.126355 (pressure 1.277439 + viscous 0.848916), C_L = 0.001362, C_mz = -0.000054
-[cns2d] run finished: status 'not_converged', 1500 steps, t = 0, 3.15 residual orders, 16.5 s wall time
-[cns2d] notes: reached the step limit (1500) with the residual reduced by only 3.16 orders (target 5.00) and C_D = 2.126522 still moving by 1.702e+00 over the last 500 steps (tolerance 3.117e-02); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard
+[cns2d] reached the step limit (1500) with the residual reduced by only 3.16 orders (target 5.00) and C_D = 2.126522 still moving by 1.682e+00 over the last 500 steps (tolerance 3.121e-02); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard
+[cns2d] the march ended at residual 1.4752e-02, a factor 2.34 above the best value 6.2941e-03 reached at step 1472; the best state has been restored and is what is reported and written out
+[cns2d] final state: residual 6.294109e-03, C_D = 2.136913 (pressure 1.283574 + viscous 0.853339), C_L = 0.001637, C_mz = -0.000066
+[cns2d] run finished: status 'not_converged', 1472 steps, t = 0, 3.53 residual orders, 6.2 s wall time
+[cns2d] notes: the march ended at residual 1.4752e-02, a factor 2.34 above the best value 6.2941e-03 reached at step 1472; the best state has been restored and is what is reported and written out  (superseded termination note: reached the step limit (1500) with the residual reduced by only 3.16 orders (target 5.00) and C_D = 2.126522 still moving by 1.682e+00 over the last 500 steps (tolerance 3.121e-02); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard)
 [cns2d][error][rank 0] the run did not complete successfully; results are marked failed
