@@ -187,8 +187,11 @@ SteadyResult runSteady(LocalMesh& lm,
        if (!res0_set) { res0_global = outer_res_l2; res0_set = true; }
        StateVec last_res = outer_res_l2;  // outer R_ref for convergence tracking and CSV
 
+       // Fix L: During 2nd-order ramp, suppress CFL reductions.
+       bool in_2nd_order_ramp = (step > first_order_steps && step <= first_order_steps + second_order_ramp_steps);
+
        // Build 5: divergence detection; supersonic inviscid needs 2 consecutive spikes
-        if (step > 5 && prev_outer_res > 0 && outer_res_norm > 10.0 * prev_outer_res) {
+        if (!in_2nd_order_ramp && step > 5 && prev_outer_res > 0 && outer_res_norm > 10.0 * prev_outer_res) {
             consec_div_steps++;
             if (mu <= 0.0 && cfg.freestream.mach > 1.0) {
                 if (consec_div_steps >= 2) {
@@ -207,7 +210,7 @@ SteadyResult runSteady(LocalMesh& lm,
         double outer_res_before = prev_outer_res;
         outer_res_decreased = (outer_res_before <= 0 || outer_res_norm <= outer_res_before);
         prev_outer_res = outer_res_norm;
-        if (step > first_order_steps && outer_res_before > 0 && outer_res_norm > 1.1 * outer_res_before) {
+        if (!in_2nd_order_ramp && step > first_order_steps && outer_res_before > 0 && outer_res_norm > 1.1 * outer_res_before) {
             consec_growth++;
             if (consec_growth >= 3) {
                 double growth_penalty = (mu <= 0.0 && cfg.freestream.mach > 1.0) ? 0.8 : 0.5;
@@ -350,7 +353,10 @@ SteadyResult runSteady(LocalMesh& lm,
        // Adaptive CFL: reduce when inner loop failed to converge (Build 4)
        if (inner_count >= max_inner) {
            // Fix K: gentler 0.85x penalty for normal cases; 0.5x for Re<100
-           double cfl_inner_penalty = (mu > 0.0) ? 0.5 : 0.85;
+           double cfl_inner_penalty;
+           if (in_2nd_order_ramp) { cfl_inner_penalty = 0.95; }
+           else if (mu > 0.0) { cfl_inner_penalty = 0.5; }
+           else { cfl_inner_penalty = 0.85; }
            cfl_effective = std::max(cfl_effective * cfl_inner_penalty, cfl_effective_init);
         } else if (inner_count < max_inner / 2 && outer_res_decreased) {
             // Fix E: only boost CFL if Fix D is NOT currently active.
