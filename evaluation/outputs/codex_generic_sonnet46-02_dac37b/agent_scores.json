@@ -1,0 +1,358 @@
+{
+  "schema": "agent_scores",
+  "contestant": "sonnet46-02",
+  "evaluated_at": "2026-08-27T15:13:24.004709+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": null
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "01a03d82-f3a0-7493-b962-06cedb6fdd56"
+    ],
+    "execution_date": "2026-08-26",
+    "started_at": "2026-08-26T09:59:53.541000+00:00",
+    "ended_at": "2026-08-27T02:41:15.165000+00:00",
+    "time_basis": "selected bundled Codex root UTC rollout timestamps",
+    "rationale": "Selected root 01a03d82-f3a0-7493-b962-06cedb6fdd56 is the sole long benchmark session; workspace-local .sessions only."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Source/build documentation present; no evaluator rebuild."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Solve CLI and output writer inspected."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Organized C++ solver modules."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "No direct internal copied-core evidence."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "No two-filename-only mesh dispatch found."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "METIS/neighbor halo/allreduce source evidence."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Input validation and positivity handling exist."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 3.5,
+          "notes": "Readable result tests and validator evidence."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 3.5,
+          "notes": "Curation excludes raw results at final tip."
+        }
+      ],
+      "overall_score": 3.92,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Governing equations/source are consistent."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS/mixed-mesh geometry paths present."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Conservative residual assembly source-backed."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Rusanov flux source-backed."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Farfield/slip/no-slip paths present."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "Green-Gauss reconstruction and limiter present."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Venkatakrishnan and fallback path present."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 3.5,
+          "notes": "Full traction force integration is not tangential skin friction."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "LU-SGS pseudo-time implementation present."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "BDF2 two-loop evidence and delivered inner controls."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 3.5,
+          "notes": "Only NACA np2/8 comparison, no cylinder two-rank comparison."
+        }
+      ],
+      "overall_score": 3.91,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 4,
+          "notes": "Packages structurally complete."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Explicit all-case/report examiner pass."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 2,
+          "notes": "M015 false converged status is a DQ status mismatch."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 3.5,
+          "notes": "Re200 periodic evidence readable; M015 force history not steady."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Required visual coverage readable."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 3.5,
+          "notes": "Coverage strong but report admits M015 plateau while status calls converged."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 4,
+          "notes": "Manifest links figures to raw sources."
+        }
+      ],
+      "overall_score": 3.55,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 80.0,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Build/CLI/output implementation present; no independent build."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 8.5,
+        "notes": "CGNS/mixed geometry and adjacency source paths."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 12.5,
+        "notes": "Residual/BC core present, with simple Rusanov accuracy limit."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 8.5,
+        "notes": "Second-order reconstruction/limiter source-backed."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 7.5,
+        "notes": "Viscous implementation present but force traction is not tangential skin-friction split."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 12.5,
+        "notes": "Implicit/BDF2 core and Re200 inner evidence; horizon/reduction discrepancy deducted."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 7.5,
+        "notes": "METIS/halo/reductions, but limited rank comparison evidence."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 7,
+        "notes": "M015 marked successful despite underconverged/unstable delivered result."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Strong report coverage but status/report contradiction."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Modular but 2-D-specific architecture."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 1,
+      "notes": "1.69 orders at 20k with unstable late forces; falsely marked converged."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 4,
+      "notes": "Readable converged inviscid result."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 4,
+      "notes": "Readable converged supersonic inviscid result."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 4,
+      "notes": "Readable laminar result."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 4,
+      "notes": "Readable laminar result."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 3.5,
+      "notes": "Readable result with limited convergence/force credibility."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 4.5,
+      "notes": "Credible steady cylinder result."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 3.5,
+      "notes": "Periodic BDF2 evidence but 30001/t=300.01 and zero recorded reduction; not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "metadata.json marks incomplete/failed runs as successful",
+        "evidence": "M0.15 is completed/converged at 1.69 orders after 20000 steps with unstable late forces; report admits plateau under-convergence and source accepts any reduction above one order as converged.",
+        "found": true
+      }
+    ]
+  },
+  "limitations": [
+    "No evaluator rerun or clean build.",
+    "Re200 was not rerun.",
+    "Structural validator pass does not validate M015 convergence credibility."
+  ]
+}
