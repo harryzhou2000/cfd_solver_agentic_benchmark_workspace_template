@@ -39,6 +39,31 @@ guarantee: the largest \emph{usable} CFL is a property of the scheme and the mes
 and a ramp that ignores whether the residual is still falling can undo its own
 progress.
 
+With the fallback in place this case reports $3.92$ orders rather than $2.89$, so what
+two earlier drafts described as a plateau an order short of target is in fact a near-miss
+of the target caused by the ramp. \Cref{sec:naca} gives the full sequence. The limitation
+that remains is real but narrower than first stated: the ramp is open-loop, and a CFL
+schedule that responded to whether the residual was still falling would not need a
+best-state fallback to protect it from itself.
+
+\paragraph{A process failure in the run harness, recorded because it nearly corrupted
+results.} During the re-runs required by the convergence fixes above, a termination
+signal matched an outer wrapper script but orphaned the inner loop, so a subsequent
+relaunch had two independent streams iterating the same seven cases into the same output
+directories concurrently. The symptom was visible in the progress log --- cases completing
+in an order the launching script does not use --- and the affected outputs were discarded
+rather than harvested.
+
+This is worth recording for two reasons. First, it is a reminder that results written
+into a shared directory carry no record of which process wrote them, so a concurrent
+writer produces files that are individually well-formed and collectively meaningless.
+Second, it is the reason this report's harvesting script enforces a trusted-after
+timestamp: every case whose \texttt{run\_status.json} predates the cutoff is reported as
+still in progress rather than as a result, which is what turned a potential silent
+corruption into a visible gap. The cutoff was raised five times during preparation as
+successive fixes superseded earlier runs, and each raise was accompanied by re-running
+every affected case with a single identical binary.
+
 \paragraph{LU-SGS degrades at high CFL.} The spectral radius of the SGS iteration
 approaches unity as $\mathrm{CFL}\to\infty$, so at the ramped targets of
 \cref{tab:controls} the inner solve of \cref{eq:steadysystem} reaches its

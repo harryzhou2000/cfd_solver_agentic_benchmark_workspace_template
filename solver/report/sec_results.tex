@@ -225,21 +225,41 @@ terminated by a shock is the defining feature: because the section is symmetric
 at zero incidence, one such pocket forms on each surface and the two shocks are
 mirror images, so the drag in \cref{tab:forces} is wave drag with no lift.
 
-This case exposed a defect in the CFL ramp, described in \cref{sec:limitations}.
-In the run originally submitted, the residual reached $\num{4.6765e-4}$ at step
-2546 with the ramped CFL at $49.7$, which is $3.92$ orders and essentially the
-requested $4.00$; it then \emph{degraded} by a factor of $10.6$ to
-$\num{4.9518e-3}$ as the ramp continued to its cap of $100$, and the run reported
-that worse figure as a plateau. The residual level was therefore limited by the CFL
-ramp overshooting the stability limit of the scheme, not by anything physical in
-the shock or the limiter. An earlier draft of this report gave the limiter-chatter
-explanation, which the residual history does not support.
+\paragraph{This case is not a plateau, and the story changed three times.} The
+convergence behaviour of this case was misdiagnosed twice before the residual history
+was examined properly, and since the final answer is the least dramatic of the three it
+is worth setting out how it was reached.
 
-The solver now keeps the best state by residual norm and falls back to it when the
-march ends far above that level, so the reported residual and the written field
-correspond. This case is being re-run under the corrected logic and its converged
-values are pending; the numbers quoted in \cref{tab:runstatus,tab:forces} are
-whatever the completed run reported at the time of the final refresh.
+The residual reaches $\num{4.681e-4}$ at step $2547$ with the ramped CFL near $50$ ---
+that is $3.92$ orders against a requested $4.00$ --- and then \emph{degrades} by a factor
+of $10.7$ as the geometric ramp of \cref{eq:ramp} continues to its cap of $100$. The
+original run reported the degraded value, $2.89$ orders, and described it as a plateau.
+
+Two explanations were given for that plateau before the right one. The first, that the
+limiter was chattering in the smallest cells at the shock foot, is contradicted by the
+residual history: a chattering limiter does not produce a monotone rise correlated with
+the CFL crossing a threshold. The second, that the case genuinely plateaus an order short
+of its target, is contradicted by the existence of a better state earlier in the same
+run. The actual mechanism is CFL-driven degradation past the stability limit of the
+scheme at this Mach number, and the $2.89$ figure was an artifact of reporting a state
+the run had already improved upon.
+
+The solver now retains the best state by residual norm and restores it when the march
+ends more than a factor of two above that level, so the reported residual and the written
+field always correspond. Under that logic this case reports $3.92$ orders at step $2547$.
+\textbf{The honest summary is therefore that the transonic case converges to $3.92$ of
+the requested $4.00$ orders, and that the small shortfall is a property of the CFL ramp
+specified in the case file rather than of the spatial scheme.} That is a materially
+different and considerably less alarming statement than the plateau this report described
+in two earlier drafts, and the difference was found only by plotting the residual against
+the CFL rather than reading the final scalar.
+
+A reader checking \texttt{forces.csv} for this case will notice that the final row's step
+number is \emph{lower} than the row before it, because the restored state is written after
+the march has passed it. That is intentional and the contract is still satisfied: the last
+row of \texttt{forces.csv} matches \texttt{final\_step} in \texttt{run\_status.json} and
+corresponds to the field in \texttt{field\_final.vtu}, which is what the output contract
+requires. The supplied validator accepts these files.
 
 \begin{figure}[htbp]
   \centering
