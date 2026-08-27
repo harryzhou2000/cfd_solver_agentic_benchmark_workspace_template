@@ -96,9 +96,18 @@ def field_contour(ax, mesh, values, window=None, levels=60, cmap="viridis",
         for c in getattr(cf, "collections", []):
             c.set_edgecolor("face")
     if lines:
-        ax.tricontour(tri, np.clip(nodal, vmin, vmax),
-                      levels=np.linspace(vmin, vmax, lines), colors=line_color,
-                      linewidths=line_width, alpha=0.6)
+        # Contour lines are drawn over the interior of the plotted range only.
+        # The data is clipped to [vmin, vmax], and on these cases the outermost
+        # bands are large, nearly uniform plateaus -- the undisturbed freestream
+        # and the no-slip wall.  A contour requested there traces the ragged
+        # edge of the plateau and fills the picture with lines that carry no
+        # information; the filled bands already show where the plateau ends.
+        inset = 0.15 * (vmax - vmin)
+        lo_l, hi_l = vmin + inset, vmax - inset
+        if hi_l > lo_l:
+            ax.tricontour(tri, np.clip(nodal, vmin, vmax),
+                          levels=np.linspace(lo_l, hi_l, lines),
+                          colors=line_color, linewidths=line_width, alpha=0.6)
     if window is not None:
         ax.set_xlim(window[0], window[1])
         ax.set_ylim(window[2], window[3])

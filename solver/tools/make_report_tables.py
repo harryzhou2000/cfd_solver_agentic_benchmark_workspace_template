@@ -833,6 +833,17 @@ def main():
             macro("shockFixVsUnfixedPct", f"{100.0 * abs(fx[0] - un[0]) / abs(fx[0]):.1f}")
             macro("shockFixStepRatio", f"{un[1] / max(fx[1], 1):.1f}")
 
+    # Upper/lower surface asymmetry of the symmetric cases, whose exact value is
+    # zero, quoted in the results and limitations sections.
+    for cid, tag in (("naca0012_m200_laminar_re5000", "LamMachTwo"),
+                     ("naca0012_m200_inviscid", "InvMachTwo")):
+        if cid not in cases:
+            continue
+        f = surface_facts(cases[cid]["dir"])
+        if f:
+            macro("symRms" + tag, sci(f["sym_rms"], 1))
+            macro("clAbs" + tag, sci(abs(float(cases[cid]["meta"]["final_cl"])), 1))
+
     # Cases where the sensor must be inactive: the run with --shock-fix 0 has to
     # reproduce the production run exactly.
     inv = []

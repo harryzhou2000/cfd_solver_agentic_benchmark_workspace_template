@@ -314,12 +314,12 @@ def main():
                    r"Mach number $M$",
                    f"Mach-number contours near the body for {cid}, from the final field file."
                    + clip_note,
-                   near, body=body, cmap="turbo", lines=18, clip=clip)
+                   near, body=body, cmap="turbo", lines=12, clip=clip)
         plot_field(mesh, mesh.cell_data["Pressure"], cid, args.out, man, "pressure", "pressure",
                    r"static pressure $p$",
                    f"Static-pressure contours near the body for {cid}, from the final field file."
                    + clip_note,
-                   near, body=body, cmap="plasma", lines=18, clip=clip)
+                   near, body=body, cmap="plasma", lines=12, clip=clip)
         plot_field(mesh, mesh.cell_data["VelocityMagnitude"], cid, args.out, man,
                    "velocity_magnitude", "velocity_magnitude",
                    r"velocity magnitude $|\mathbf{u}|/U_\infty$",
