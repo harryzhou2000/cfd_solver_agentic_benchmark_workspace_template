@@ -133,8 +133,21 @@ def main():
     T = []          # current table buffer
 
     def flush(name):
+        # Size every generated table by its column count: these are wide
+        # numerical tables and the default 10 pt overruns the text block.
         nonlocal T
-        tables[name] = list(T)
+        body = list(T)
+        if not any(l.startswith(r"\small") or l.startswith(r"\footnotesize") for l in body):
+            ncol = 0
+            for l in body:
+                m = re.match(r"\\begin\{tabular\}\{([^}]*)\}", l)
+                if m:
+                    ncol = sum(1 for ch in m.group(1) if ch in "lrc")
+                    break
+            size = r"\footnotesize" if ncol >= 6 else r"\small"
+            insert = next((i for i, l in enumerate(body) if l.startswith(r"\begin{tabular}")), 0)
+            body.insert(insert, size)
+        tables[name] = body
         T = []
 
     def macro(name, value):
@@ -193,10 +206,13 @@ def main():
         j = json.load(open(os.path.join(CASE_DIR, cid + ".json")))
         bc = [v for k, v in j["boundary_conditions"].items() if v != "farfield"]
         re_num = j["physics"].get("reynolds", 0.0)
-        T.append(rf"{PRETTY[cid]} & {esc(os.path.basename(j['mesh']['file']))} & "
+        mesh_name = os.path.basename(j["mesh"]["file"]).replace(".cgns", "")
+        wall = {"no_slip_adiabatic_wall": "no-slip adiabatic",
+                "slip_wall": "slip"}.get(bc[0] if bc else "", bc[0] if bc else "--")
+        T.append(rf"{PRETTY[cid]} & {esc(mesh_name)} & "
                  rf"{j['freestream']['mach']:g} & {j['freestream']['aoa_degrees']:g}$^\circ$ & "
                  rf"{('--' if not re_num else f'{re_num:g}')} & "
-                 rf"{int(c['meta']['num_cells_global'])} & {esc(bc[0] if bc else '--')}\\")
+                 rf"{int(c['meta']['num_cells_global'])} & {esc(wall)}\\")
     T.append(r"\bottomrule")
     T.append(r"\end{tabular}")
     flush("cases")
@@ -335,19 +351,21 @@ def main():
         flux_rows.append((PRETTY[cid], c["meta"], c["status"], am, astatus))
     if flux_rows:
         T.append(r"% ---- Roe vs HLLC cross-check")
-        T.append(r"\begin{tabular}{llrrrr}")
+        T.append(r"\begin{tabular}{llrrrrl}")
         T.append(r"\toprule")
-        T.append(r"case & flux & $C_L$ & $C_D$ & residual orders & steps\\")
+        T.append(r"case & flux & $C_L$ & $C_D$ & residual orders & steps & status\\")
         T.append(r"\midrule")
         for name, m1, s1, m2, s2 in flux_rows:
             T.append(rf"{name} & {esc(m1['inviscid_flux'])} & {float(m1['final_cl']):+.6f} & "
                      rf"{float(m1['final_cd']):.6f} & "
-                     rf"{float(s1['residual_reduction_orders']):.2f} & {int(s1['final_step'])}\\")
+                     rf"{float(s1['residual_reduction_orders']):.2f} & {int(s1['final_step'])} & "
+                     rf"{esc(s1['convergence_status'])}\\")
             T.append(rf" & {esc(m2['inviscid_flux'])} + Harten--Yee & {float(m2['final_cl']):+.6f} & "
                      rf"{float(m2['final_cd']):.6f} & "
-                     rf"{float(s2['residual_reduction_orders']):.2f} & {int(s2['final_step'])}\\")
+                     rf"{float(s2['residual_reduction_orders']):.2f} & {int(s2['final_step'])} & "
+                     rf"{esc(s2['convergence_status'])}\\")
             rel = abs(float(m1['final_cd']) - float(m2['final_cd'])) / max(abs(float(m1['final_cd'])), 1e-30)
-            T.append(rf" & relative $C_D$ difference & & {sci(rel, 2)} & & \\")
+            T.append(rf" & relative $C_D$ difference & & {sci(rel, 2)} & & & \\")
             T.append(r"\midrule")
         T[-1] = r"\bottomrule"
         T.append(r"\end{tabular}")
@@ -841,6 +859,14 @@ def main():
             with open(os.path.join("tools", fn)) as fh:
                 plines += sum(1 for _ in fh)
     macro("pythonLines", f"{plines:,}".replace(",", r"\,"))
+
+    # ------------------------------------------------ rank-independent output
+    ri = os.path.join(args.report, "rank_independence.json")
+    if os.path.exists(ri):
+        R = json.load(open(ri))
+        pairs = [ok for v in R.values() for ok in v.values()]
+        macro("rankIdenticalComparisons", str(len(pairs)))
+        macro("rankIdenticalFailures", str(sum(1 for x in pairs if not x)))
 
     # Sanity-check summary
     sp = os.path.join(args.report, "sanity_checks.json")

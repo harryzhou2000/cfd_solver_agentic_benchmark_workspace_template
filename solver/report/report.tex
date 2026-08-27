@@ -17,6 +17,9 @@
   {\fbox{\parbox[c][0.35\linewidth][c]{#1}{\centering\ttfamily\small
     MISSING FIGURE\\\detokenize{#2}}}}}
 \newcommand{\code}[1]{\texttt{\small #1}}
+% Typewriter text does not hyphenate and the file paths quoted throughout are
+% long, so TeX is given extra stretch before it declares a line overfull.
+\emergencystretch=3em
 % Include a generated table, or a visible placeholder if it has not been built.
 \newcommand{\gtable}[1]{%
   \IfFileExists{tables/#1.tex}{\input{tables/#1}}%
@@ -911,6 +914,29 @@ information is written for every case to
 visualised in the \code{*\_partition.png} figures, which colour each cell by the
 rank that owned it during the run.
 
+\subsection{Rank-independent output}
+\label{sec:rankindependent}
+Every file a run produces is written by rank~0 from globally reduced or globally
+ordered data, so its contents do not depend on how the mesh happened to be
+split:
+\begin{itemize}
+\item \code{residuals.csv} and \code{forces.csv} carry values that have already
+  been through \code{MPI\_Allreduce}, so they are rank-independent by
+  construction.
+\item \code{surface.csv} and \code{surface\_cellcenter.csv} are gathered and
+  then sorted by (patch, azimuth about the body centre), a key that has nothing
+  to do with the partition. \code{tools/mpi\_study.py} compares them byte for
+  byte across the rank study and writes the result to
+  \code{report/rank\_independence.json}: of \rankIdenticalComparisons{}
+  comparisons, \rankIdenticalFailures{} differ.
+\item \code{field\_final.vtu} is sorted by global cell id after the gather, so
+  cell $k$ of the file is the same mesh cell at every rank count and two runs
+  can be compared row for row. The one deliberate exception is the
+  \code{RankId} field, whose whole purpose is to record the partition.
+\item \code{restart\_final.bin} is written in global cell order, which is what
+  lets a state written on 8 ranks be reloaded on 4 (\cref{sec:output}).
+\end{itemize}
+
 \section{Verification}
 \label{sec:verification}
 
@@ -1059,8 +1085,17 @@ positive mean drag for the cylinders, unsteady lift for the transient case,
 the inner-target converged fraction, near-zero wall velocity and non-zero skin
 friction on no-slip walls, near-zero normal velocity and negligible viscous
 force columns on slip walls, farfield uniformity, agreement between the last
-force row and the final state, and presence of separate Mach and pressure
-entries in the figure manifest. \sanityFailures{} checks fail.
+force row and the final state, that the normal viscous traction on a no-slip
+wall is identically zero and that the pressure/skin-friction split sums to the
+reported $C_D$, and presence of separate Mach and pressure figures --- listed in
+the manifest \emph{and} present on disk --- for every case.
+\sanityFailures{} checks fail. The gate is not advisory: a case whose
+\code{run\_status.json} claims \code{converged} or
+\code{statistically\_periodic} while any of its checks fails is reported as
+inconsistent and \code{scripts/check\_submission.sh} exits non-zero, so a
+failure cannot be quietly carried into the submission. Every failing check, if
+there were one, is named with its measured value in
+\code{report/sanity\_checks.json}.
 
 \code{report/figure\_manifest.csv} maps every figure to its case, type, plotted
 variable and source data file; \code{report/run\_manifest.md} lists the exact
@@ -1068,7 +1103,11 @@ command, rank count, step count, wall time and status of every submitted run.
 
 Two conventions in \code{metadata.json} are worth stating explicitly.
 \code{git\_revision} is the repository revision captured when CMake was
-configured, not necessarily the revision of the final commit. The effective
+configured, not necessarily the revision of the final commit;
+\code{scripts/check\_submission.sh} asserts that all eight cases carry the
+\emph{same} revision, flux, limiter and shock-fix setting, so a submission that
+mixed results from two builds of the solver would be rejected rather than
+quietly shipped. The effective
 pseudo-time CFL of a run is recorded separately from the case-file value
 (\code{cfl\_scale}, \code{effective\_cfl\_initial}, \code{effective\_cfl\_max}),
 so a run that deviates from the case schedule is visible in the metadata and not

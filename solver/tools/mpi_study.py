@@ -45,6 +45,29 @@ def main():
         print(f"no rank-study runs found under {args.root}")
         return 1
 
+    # Rank-independent output discipline: the files that are supposed to be
+    # identical at every rank count are compared byte for byte, and the field
+    # file (which carries a deliberately rank-dependent RankId array) is
+    # compared cell by cell after both have been sorted by global cell id.
+    identical = {}
+    for case, by_np in sorted(runs.items()):
+        ref_np = min(by_np)
+        base = by_np[ref_np]["dir"]
+        for np_, r in sorted(by_np.items()):
+            if np_ == ref_np:
+                continue
+            for fn in ("surface.csv", "surface_cellcenter.csv"):
+                a, b = os.path.join(base, fn), os.path.join(r["dir"], fn)
+                if not (os.path.exists(a) and os.path.exists(b)):
+                    continue
+                same = open(a, "rb").read() == open(b, "rb").read()
+                identical.setdefault(f"{case}:{fn}", {})[f"np{ref_np}_vs_np{np_}"] = bool(same)
+    if identical:
+        out = os.path.join(os.path.dirname(args.out_csv), "rank_independence.json")
+        json.dump(identical, open(out, "w"), indent=2)
+        bad = [k for k, v in identical.items() if not all(v.values())]
+        print(f"wrote {out}: {'all identical' if not bad else 'DIFFERENCES in ' + str(bad)}")
+
     rows = []
     for case, by_np in sorted(runs.items()):
         ref_np = min(by_np)

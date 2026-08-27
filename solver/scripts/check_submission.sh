@@ -49,11 +49,27 @@ for cid in required:
         check(f"{cid}: numerics_required satisfied",
               m.get("numerics_required_satisfied", True) is True)
 
+# Every submitted case must come from one build of the solver: a mixed set,
+# where some cases predate a numerics change, would be silently inconsistent.
+builds = {}
+for cid in required:
+    f = os.path.join("results", cid, "metadata.json")
+    if os.path.exists(f):
+        m = json.load(open(f))
+        builds[cid] = (m.get("solver_version"), m.get("git_revision"),
+                       m.get("inviscid_flux"), m.get("shock_fix"),
+                       m.get("shock_fix_strength"), m.get("reconstruction"),
+                       m.get("limiter"))
+check("all cases produced by the same solver build and numerics",
+      len(set(builds.values())) <= 1,
+      "; ".join(f"{k}={v}" for k, v in sorted(builds.items())) if len(set(builds.values())) > 1 else "")
+
 for p in ["report/report.tex", "report/report.pdf", "report/figures",
           "report/figure_manifest.csv", "report/sanity_checks.json",
           "report/run_manifest.csv", "report/run_manifest.md",
           "report/verification.json", "report/mpi_study.csv",
-          "report/shedding_analysis.json"]:
+          "report/shedding_analysis.json", "report/mesh_facts.json",
+          "report/rank_independence.json", "report/unit_tests.log"]:
     check(f"report artefact {p}", os.path.exists(p))
 
 if os.path.exists("report/sanity_checks.json"):
@@ -86,6 +102,11 @@ if os.path.exists("report/figure_manifest.csv"):
     listed = {r["figure_file"] for r in rows}
     check("every figure used by the report is in the manifest",
           used <= listed, ",".join(sorted(used - listed))[:120])
+
+if os.path.exists("report/rank_independence.json"):
+    ri = json.load(open("report/rank_independence.json"))
+    bad = [k for k, v in ri.items() if not all(v.values())]
+    check("rank-independent surface output", not bad, ",".join(bad[:3]))
 
 if os.path.exists("studies/restart/restart_check.json"):
     rc = json.load(open("studies/restart/restart_check.json"))

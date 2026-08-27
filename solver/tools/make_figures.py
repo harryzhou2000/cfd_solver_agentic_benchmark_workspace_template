@@ -41,7 +41,15 @@ class Manifest:
         self.rows.append(dict(figure_file=figure_file, case_id=case_id, figure_type=figure_type,
                               variable=variable, source_file=source_file, caption=caption))
 
-    def write(self, path):
+    def write(self, path, merge=False):
+        # When only a subset of cases was regenerated, keep the rows of the
+        # cases that were not touched: overwriting the manifest with just this
+        # invocation's rows would silently truncate it.
+        if merge and os.path.exists(path):
+            mine = {r["figure_file"] for r in self.rows}
+            with open(path, newline="") as f:
+                keep = [r for r in csv.DictReader(f) if r["figure_file"] not in mine]
+            self.rows = sorted(self.rows + keep, key=lambda r: r["figure_file"])
         os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         with open(path, "w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=["figure_file", "case_id", "figure_type", "variable",
@@ -372,7 +380,7 @@ def main():
         if os.path.exists(os.path.join(args.out, fn)):
             man.add(fn, cid, ftype, var, src, cap)
 
-    man.write(args.manifest)
+    man.write(args.manifest, merge=bool(args.cases))
     print(f"[figures] wrote {len(man.rows)} figures and {args.manifest}")
 
 
