@@ -122,6 +122,12 @@ most demanding for the limiter, since the shock sits on the body where the cells
 are smallest, and it is the case where the residual/force distinction of
 \cref{sec:stationarity} matters most.
 
+\Cref{fig:naca080inv-hist} shows the convergence and force histories and
+\cref{fig:naca080inv-field} the resulting fields. The supersonic pocket
+terminated by a shock is the defining feature: because the section is symmetric
+at zero incidence, one such pocket forms on each surface and the two shocks are
+mirror images, so the drag in \cref{tab:forces} is wave drag with no lift.
+
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}{0.49\textwidth}\centering
@@ -173,6 +179,8 @@ reduction. The characteristic farfield of \cref{sec:bc} is what lets the bow sho
 leave the domain cleanly: on the upstream arc the normal Mach number exceeds unity
 in magnitude and the state is fully imposed, while on the downstream arc it is
 fully extrapolated.
+
+\Cref{fig:naca200inv-hist} gives the residual and force histories for this case.
 
 \begin{figure}[htbp]
   \centering
@@ -239,6 +247,14 @@ The wall treatment can be checked directly in the submitted output: because
 velocity and Mach columns on a no-slip wall are identically zero, while the $C_f$
 column carries the tangential shear of \cref{eq:shear}. The skin-friction
 distributions are shown in \cref{fig:naca-lam-cf}.
+
+Convergence for the three laminar cases is shown in \cref{fig:naca-lam-res} and
+the corresponding force histories in \cref{fig:naca-lam-forces}; the latter are
+the binding evidence, for the reasons given in \cref{sec:stationarity}. The
+surface pressure distributions are collected in \cref{fig:naca-lam-cp} and the
+fields in \cref{fig:naca-lam-field}, where the boundary layer appears as a thin
+low-Mach layer hugging the surface that is absent from the corresponding inviscid
+cases.
 
 \begin{figure}[htbp]
   \centering
@@ -385,6 +401,13 @@ pressure distribution, not by the dissipation floor --- which is the evidence
 needed to treat the $\Reinf=5000$ friction results as physical rather than as an
 artefact of the numerics.
 
+\Cref{fig:cyl20-hist} shows the residual and force histories, and
+\cref{fig:cyl20-field} the pressure, Mach, velocity-magnitude and wall-$C_p$
+views. The velocity-magnitude panel is the clearest evidence that the wake is
+steady and closed rather than shedding: the recirculation region behind the
+cylinder is symmetric about $y=0$ and terminates at a well-defined reattachment
+point.
+
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}{0.49\textwidth}\centering
@@ -475,6 +498,8 @@ independent spectral estimate from the periodogram is shown in
 frequency while the drag oscillates about its mean at twice that frequency, which
 is the standard signature of alternating vortex shedding: each shed vortex
 produces a lift excursion of one sign but a drag excursion regardless of sign.
+This behaviour is visible directly in \cref{fig:cyl200-forces}, and the wake
+structure producing it in \cref{fig:cyl200-wake}.
 
 \begin{figure}[htbp]
   \centering
