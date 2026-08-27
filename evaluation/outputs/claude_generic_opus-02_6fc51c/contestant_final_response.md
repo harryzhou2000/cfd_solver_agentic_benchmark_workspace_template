@@ -1,0 +1,1 @@
+Stopped the stale monitor. All background tasks are now cleared. The benchmark is fully complete — all 8 cases + 2 scaling cases + report pass validation, and everything is committed at `2d1d0ba`.

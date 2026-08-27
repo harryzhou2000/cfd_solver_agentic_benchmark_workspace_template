@@ -40,7 +40,7 @@ checklist so concurrent historical entries remain untouched.
 | Status | Workspace | Exact label | Initial provenance | Result branch | Run ID / score / DQ | Gates | Notes |
 |---|---|---|---|---|---|---|---|
 | [x] | `workspace/claude/generic/opus-01` | `opus-01` | `claude/generic/init` at `ecf774c1…` | `claude/generic/opus-01` | `claude_generic_opus-01_9a712c`; 97/100; DQ=false | check + check-complete pass | Submission `8dae7ba6…`; selected Claude root `3a8e…` with five persisted subagents; raw packages/PDF excluded at result tip; no Re200 rerun. |
-| [ ] | `workspace/claude/generic/opus-02` | `opus-02` | pre-run snapshot present | pending frozen branch check | — | — | Manual Claude root selection required. |
+| [x] | `workspace/claude/generic/opus-02` | `opus-02` | `claude/generic/init` at `ecf774c1…` | `claude/generic/opus-02` | `claude_generic_opus-02_6fc51c`; 86/100; DQ=false | check + check-complete pass | Submission `6ed4241…`; sole Claude root `5e6d…`; unreferenced figures and raw packages excluded; no Re200 rerun. |
 | [ ] | `workspace/claude/generic/opus-04` | `opus-04` | pre-run snapshot present | pending frozen branch check | — | — | Manual Claude root selection required. |
 | [ ] | `workspace/claude/generic/opus-05` | `opus-05` | pre-run snapshot present | pending frozen branch check | — | — | Manual Claude root selection required. |
 | [ ] | `workspace/claude/generic/opus-07` | `opus-07` | pre-run snapshot present | pending frozen branch check | — | — | Manual Claude root selection required. |
