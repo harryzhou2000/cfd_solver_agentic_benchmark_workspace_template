@@ -1,16 +1,41 @@
 {
   "cylinder_m010_laminar_re20": {
-    "all_passed": false,
-    "sanity_check_error": {
-      "detail": "ValueError: Some errors were detected !\n    Line #930 (got 4 columns instead of 9)",
-      "pass": false,
-      "value": null
+    "all_passed": true,
+    "cp_variation_along_wall": {
+      "detail": "std(cp) over 100 wall rows = 0.610977",
+      "pass": true,
+      "value": 0.6109774811030687
+    },
+    "cylinder_positive_mean_drag": {
+      "detail": "mean cd over second half of history = 0.885094",
+      "pass": true,
+      "value": 0.8850942920696473
+    },
+    "mach_pressure_figures_mapped": {
+      "detail": "cylinder_m010_laminar_re20_mach.png -> mach, cylinder_m010_laminar_re20_pressure.png -> pressure in manifest",
+      "pass": true,
+      "value": 1.0
+    },
+    "noslip_wall_velocity_and_cf": {
+      "detail": "max wall |u|,|v| = 0 (limit 1e-6); max |cf| = 0.295551 (must be > 0)",
+      "pass": true,
+      "value": 0.0
+    },
+    "positive_density_pressure": {
+      "detail": "min density=0.991114, min pressure=70.8115",
+      "pass": true,
+      "value": 0.9911136031150818
+    },
+    "status_not_failed": {
+      "detail": "convergence_status='converged', completed=True; final results must be 'converged'/'statistically_periodic' with completed=true",
+      "pass": true,
+      "value": 1.0
     }
   },
   "cylinder_m010_laminar_re200": {
     "all_passed": false,
     "sanity_check_error": {
-      "detail": "ValueError: Some errors were detected !\n    Line #1359 (got 7 columns instead of 9)",
+      "detail": "ValueError: Some errors were detected !\n    Line #12359 (got 3 columns instead of 9)",
       "pass": false,
       "value": null
     }
@@ -140,11 +165,41 @@
     }
   },
   "naca0012_m080_laminar_re5000": {
-    "all_passed": false,
-    "sanity_check_error": {
-      "detail": "ValueError: Some errors were detected !\n    Line #47230 (got 2 columns instead of 9)",
-      "pass": false,
-      "value": null
+    "all_passed": true,
+    "cp_variation_along_wall": {
+      "detail": "std(cp) over 404 wall rows = 0.383568",
+      "pass": true,
+      "value": 0.38356819984574053
+    },
+    "mach_pressure_figures_mapped": {
+      "detail": "naca0012_m080_laminar_re5000_mach.png -> mach, naca0012_m080_laminar_re5000_pressure.png -> pressure in manifest",
+      "pass": true,
+      "value": 1.0
+    },
+    "naca_near_zero_cl": {
+      "detail": "mean |cl| over final 10% of history = 0.00359854 (limit 0.01)",
+      "pass": true,
+      "value": 0.0035985357051748794
+    },
+    "naca_nontrivial_drag_cp": {
+      "detail": "mean |cd| (final 10%) = 0.0653986; std(cp) = 0.383568",
+      "pass": true,
+      "value": 0.06539857131286474
+    },
+    "noslip_wall_velocity_and_cf": {
+      "detail": "max wall |u|,|v| = 0 (limit 1e-6); max |cf| = 0.0309153 (must be > 0)",
+      "pass": true,
+      "value": 0.0
+    },
+    "positive_density_pressure": {
+      "detail": "min density=0.722173, min pressure=0.865471",
+      "pass": true,
+      "value": 0.7221727967262268
+    },
+    "status_not_failed": {
+      "detail": "convergence_status='converged', completed=True; final results must be 'converged'/'statistically_periodic' with completed=true",
+      "pass": true,
+      "value": 1.0
     }
   },
   "naca0012_m200_inviscid": {
