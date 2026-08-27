@@ -1,0 +1,40 @@
+[cns2d] cns2d 1.0.0 (git 26ef1cb80b86)
+[cns2d] command: /workspace/solver/build/cns2d solve --case /workspace/cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_inviscid.json --output /workspace/solver/results/naca0012_m015_inviscid --log-every 250
+[cns2d] case: naca0012_m015_inviscid -- NACA0012, AoA 0 deg, Mach 0.15, inviscid
+[cns2d] case file: /workspace/cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_inviscid.json
+[cns2d] mesh file: /workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns
+[cns2d] MPI ranks: 2
+[cns2d] boundary family 'bc-2' -> farfield
+[cns2d] boundary family 'bc-4' -> slip_wall
+[cns2d] CGNS mesh '/workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns': base 'Base' (cell dim 2, phys dim 3), 1 zone(s)
+  zone 'dom-1': 15682 nodes, 20816 cells
+    section 'TriElements': TRI_3 x 10752 (elements 1..10752)
+    section 'QuadElements': QUAD_4 x 10064 (elements 10753..20816)
+    section 'bc-2': BAR_2 x 80 (elements 20817..20896)
+    section 'bc-4': BAR_2 x 404 (elements 20897..21300)
+    BC 'bc-2' family 'bc-2' location 'EdgeCenter' pset 'PointRange' range 20817..20896
+    BC 'bc-4' family 'bc-4' location 'EdgeCenter' pset 'PointRange' range 20897..21300
+[cns2d] global mesh: 15682 nodes (0 zone-interface node pairs fused, max merge distance 0), 20816 cells (10752 tri, 10064 quad), 36498 faces (36014 interior, 484 boundary)
+  boundary families: 'bc-2' (80 faces) 'bc-4' (404 faces)
+[cns2d] partitioning: metis_kway into 2 part(s), edge cut 120
+[cns2d] physics: inviscid (viscosity and heat conduction identically zero)
+[cns2d] rank 0/2: 10407 owned cells, 120 ghost cells, 17682 faces, 227 boundary faces, 1 neighbour rank(s)
+[cns2d] partitioner: metis_kway, global edge cut 120
+[cns2d] numerics: roe inviscid flux (harten_hyman_entropy_fix), piecewise-linear least-squares reconstruction, venkatakrishnan limiter, lu_sgs_simplified_jacobian, viscous terms disabled
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=31.746 (M=0.15)
+[cns2d][warn] mesh verification: uniform-flow residual on interior-only cells is 5.145e-09 (expected < 1e-12); the interior scheme does not preserve a uniform state exactly
+[cns2d] mesh verification: face-closure error 1.025e-16, volume-closure error 1.090e-10, total area 20085.4463 (boundary integral 20085.4463, mismatch 6.158e-15), linear-gradient error 1.428e-10, conservation defect 1.999e-17, uniform-flow residual 5.145e-09 on 19848 interior-only cells -- CHECK
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=31.746 (M=0.15)
+[cns2d] steady run: max_steps=20000, target=4.00 orders, CFL 1 -> 100 over 2000 steps, inner iterations 3..50 (target ratio 1.00e-02)
+  step       1  res  9.05057e+01  (- 0.00 orders)  cfl    1.000  inner    3 (ratio 1.93e-05)  cd   -0.000000  cl    0.000000  rej 0
+           dominant residual: var rhoE at (1.0053, 0.00014774), cell volume 1.500e-09, boundary bc-4
+  step     250  res  4.01939e+00  (- 1.35 orders)  cfl    1.774  inner    3 (ratio 2.54e-04)  cd   -0.116894  cl    0.010482  rej 0
+           dominant residual: var rhoE at (0.092694, 0.045543), cell volume 2.405e-08, boundary bc-4
+  step     500  res  3.02868e+00  (- 1.48 orders)  cfl    3.155  inner    3 (ratio 2.83e-03)  cd    0.063367  cl    0.014559  rej 0
+           dominant residual: var rhoE at (0.23321, 0.058896), cell volume 5.207e-08, boundary bc-4
+  step     750  res  2.71540e+00  (- 1.52 orders)  cfl    5.610  inner    3 (ratio 3.87e-03)  cd   -0.018632  cl   -0.012598  rej 0
+           dominant residual: var rhoE at (0.93897, 0.0095136), cell volume 1.806e-08, boundary bc-4
+  step    1000  res  2.35236e+00  (- 1.59 orders)  cfl    9.977  inner    5 (ratio 1.27e-03)  cd   -0.106004  cl    0.000291  rej 0
+           dominant residual: var rhoE at (0.092694, 0.045543), cell volume 2.405e-08, boundary bc-4
+  step    1250  res  7.98527e-01  (- 2.05 orders)  cfl   17.742  inner    7 (ratio 8.57e-03)  cd   -0.063001  cl    0.000591  rej 1
+           dominant residual: var rhoE at (0.98837, 0.0028819), cell volume 5.315e-09, boundary bc-4

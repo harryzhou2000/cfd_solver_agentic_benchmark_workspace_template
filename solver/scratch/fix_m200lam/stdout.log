@@ -1,0 +1,44 @@
+[cns2d] cns2d 1.0.0 (git 26ef1cb80b86)
+[cns2d] command: ./build/cns2d solve --case ../cfd_solver_agentic_benchmark/inputs/cases/naca0012_m200_laminar_re5000.json --output scratch/fix_m200lam --max-steps 6000 --log-every 1500
+[cns2d] case: naca0012_m200_laminar_re5000 -- NACA0012, AoA 0 deg, Mach 2.0, laminar, Re 5000
+[cns2d] case file: /workspace/cfd_solver_agentic_benchmark/inputs/cases/naca0012_m200_laminar_re5000.json
+[cns2d] mesh file: /workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns
+[cns2d] MPI ranks: 2
+[cns2d] boundary family 'bc-2' -> farfield
+[cns2d] boundary family 'bc-4' -> no_slip_adiabatic_wall
+[cns2d] CGNS mesh '/workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns': base 'Base' (cell dim 2, phys dim 3), 1 zone(s)
+  zone 'dom-1': 15682 nodes, 20816 cells
+    section 'TriElements': TRI_3 x 10752 (elements 1..10752)
+    section 'QuadElements': QUAD_4 x 10064 (elements 10753..20816)
+    section 'bc-2': BAR_2 x 80 (elements 20817..20896)
+    section 'bc-4': BAR_2 x 404 (elements 20897..21300)
+    BC 'bc-2' family 'bc-2' location 'EdgeCenter' pset 'PointRange' range 20817..20896
+    BC 'bc-4' family 'bc-4' location 'EdgeCenter' pset 'PointRange' range 20897..21300
+[cns2d] global mesh: 15682 nodes (0 zone-interface node pairs fused, max merge distance 0), 20816 cells (10752 tri, 10064 quad), 36498 faces (36014 interior, 484 boundary)
+  boundary families: 'bc-2' (80 faces) 'bc-4' (404 faces)
+[cns2d] partitioning: metis_kway into 2 part(s), edge cut 120
+[cns2d] physics: laminar, Re = 5000, constant mu = 2.000000e-04 (rho_inf*U_inf*L_ref/Re), Pr = 0.72
+[cns2d] rank 0/2: 10407 owned cells, 120 ghost cells, 17682 faces, 227 boundary faces, 1 neighbour rank(s)
+[cns2d] partitioner: metis_kway, global edge cut 120
+[cns2d] numerics: roe inviscid flux (harten_hyman_entropy_fix), piecewise-linear least-squares reconstruction, venkatakrishnan limiter, lu_sgs_simplified_jacobian, viscous terms enabled
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=0.178571 (M=2)
+[cns2d][warn] mesh verification: uniform-flow residual on interior-only cells is 5.022e-11 (expected < 1e-12); the interior scheme does not preserve a uniform state exactly
+[cns2d] mesh verification: face-closure error 1.025e-16, volume-closure error 1.090e-10, total area 20085.4463 (boundary integral 20085.4463, mismatch 6.158e-15), linear-gradient error 1.428e-10, conservation defect 1.491e-01, uniform-flow residual 5.022e-11 on 19848 interior-only cells -- CHECK
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=0.178571 (M=2)
+[cns2d] steady run: max_steps=6000, target=3.00 orders, CFL 0.2 -> 50 over 7000 steps, inner iterations 3..100 (target ratio 1.00e-02)
+  step       1  res  3.66198e+02  (- 0.00 orders)  cfl    0.200  inner    3 (ratio 3.25e-10)  cd  317.604780  cl   -0.000231  rej 0
+           dominant residual: var rhou at (0.5273, 0.051134), cell volume 7.052e-08, boundary bc-4
+[cns2d] residual target of 3.00 orders reached at step 1094, but C_D is still moving by 5.028e+00 over the last 500 steps (tolerance 7.209e-02); continuing until the forces are stationary
+  step    1500  res  1.57757e-01  (- 3.37 orders)  cfl    0.652  inner    3 (ratio 8.52e-07)  cd    0.781471  cl    0.000000  rej 0
+           dominant residual: var rhou at (0.45703, 0.055459), cell volume 1.543e-07, boundary no
+  step    3000  res  5.53703e-02  (- 3.82 orders)  cfl    2.130  inner    3 (ratio 2.25e-04)  cd    0.039046  cl    0.000001  rej 0
+           dominant residual: var rhoE at (0.75416, 0.031168), cell volume 5.388e-08, boundary bc-4
+  step    4500  res  4.07704e-02  (- 3.95 orders)  cfl    6.954  inner    3 (ratio 6.98e-03)  cd    0.055128  cl   -0.000204  rej 0
+           dominant residual: var rhoE at (0.63627, 0.042546), cell volume 6.583e-08, boundary bc-4
+  step    6000  res  3.00155e-02  (- 4.09 orders)  cfl   22.702  inner    7 (ratio 2.92e-03)  cd    0.084426  cl   -0.000864  rej 0
+           dominant residual: var rhoE at (0.54134, 0.050148), cell volume 7.019e-08, boundary bc-4
+[cns2d] reached the step limit (6000) with the residual reduced by only 4.09 orders (target 3.00) and C_D = 0.084426 still moving by 9.401e-03 over the last 500 steps (tolerance 8.443e-04); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard
+[cns2d] final state: residual 3.000974e-02, C_D = 0.084444 (pressure 0.053106 + viscous 0.031338), C_L = -0.000864, C_mz = 0.000279
+[cns2d] run finished: status 'not_converged', 6000 steps, t = 0, 4.09 residual orders, 770.9 s wall time
+[cns2d] notes: reached the step limit (6000) with the residual reduced by only 4.09 orders (target 3.00) and C_D = 0.084426 still moving by 9.401e-03 over the last 500 steps (tolerance 8.443e-04); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard
+[cns2d][error][rank 0] the run did not complete successfully; results are marked failed

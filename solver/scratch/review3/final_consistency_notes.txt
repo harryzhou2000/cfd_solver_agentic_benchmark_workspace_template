@@ -1,0 +1,55 @@
+REVIEW3 FINAL CONSISTENCY PASS - evidence notes (read-only audit)
+
+DANGLING REFS: none. 94 unique ref targets all resolve against 119 labels.
+report.log has zero "undefined"/"multiply defined" warnings.
+
+MISSING FIGURE FILES (used via \cnsfig but absent from report/figures/):
+  cylinder_m010_laminar_re200_mach.png      sec_results.tex:1035
+  cylinder_m010_laminar_re200_pressure.png  sec_results.tex:1031
+  cylinder_m010_laminar_re200_velocity.png  sec_results.tex:1027
+  cylinder_m010_laminar_re200_vorticity.png sec_results.tex:1023
+  -> all four in fig:cyl200-wake; also absent from figure_manifest.csv (0 hits each)
+
+PRESENT BUT UNUSED (21 files) incl. cylinder_m010_laminar_re20_cf.png,
+  all *_vorticity.png for NACA, all *_velocity.png for NACA, most *_mach_farfield.png
+
+UNREFERENCED LABEL: fig:naca080inv-cp IS referenced (sec_results.tex:633). Clean.
+
+PENDING MACROS IN BODY PROSE (steady cases, not just transient):
+  transonic inviscid: cnsCdNacaTraInv/cnsClNacaTraInv/cnsStepsNacaTraInv/cnsOrdersNacaTraInv (sec_results.tex:221-222)
+  supersonic inviscid: cnsCdNacaSupInv/cnsClNacaSupInv/cnsStepsNacaSupInv/cnsOrdersNacaSupInv (sec_results.tex:314-315)
+  all 3 laminar NACA: Cd/Pd/Vd/Steps (sec_results.tex:447-453)
+  BLASIUS ANCHOR: cnsVdNacaSubLam pending at sec_results.tex:473,517 but prose asserts "agree to 2.4%"
+  tab_runstatus.tex + tab_forces.tex: 7 of 8 rows are \pending with EMPTY trailing cells
+
+CONTRADICTION 1 (abstract vs body): report.tex:36-37 "The slip-wall flux is exactly
+  [0,p n_x,p n_y,0]" vs sec_bc.tex:52,56,91 and sec_verification.tex:109-118 which
+  explicitly retract exactly that claim.
+CONTRADICTION 2: sec_verification.tex:99 tab:verification slip-wall row Measured="exact"
+  Expected="exact" - identity column says zero mass+energy only, but "exact" restates
+  the retracted framing.
+
+TRANSONIC 3.92/4.00: consistent everywhere. 2.89 appears only as explicitly-labelled
+  superseded history (sec_results.tex:241,249; sec_limitations.tex:42; sec_verification.tex:347).
+  "limiter chatter" only as refuted (sec_results.tex:244; sec_limitations.tex:20-21,29).
+  sec_spatial.tex:122 chatter mention is generic mechanism, not this case. CLEAN.
+
+RE200 SHEDDING: "from below"/"still saturating" only as explicitly-corrected draft
+  inference (sec_results.tex:836-839 "That inference was wrong"). Flat limit cycle with
+  standing 4%/5% gaps at sec_results.tex:862-869. CLEAN.
+
+CYLINDER CD: 2.018 (3 sig digits) in tab_forces.tex:11 + numbers_auto.tex:192, asymptote
+  2.0174/2.0177 at sec_results.tex:95,102. 6-digit 2.018119 appears ONLY in
+  sec_sensitivity.tex:32,116,132,144 as a longer 6.73-order sensitivity run - different
+  run, disclosed as such at sec_results.tex:104-107. CLEAN (but see note on 'seven digits').
+
+BLASIUS: paired with viscous component only, explicit at sec_results.tex:516-519.
+  2.4% as computed, 3.0-3.2% extrapolated (sec_results.tex:501-503). Task brief says
+  "0.036667"/"2.38%" but report rounds to 2.4% and value is macro-pending. CLEAN on pairing.
+
+WINDOW 500/600: production criterion 500 (sec_verification.tex:399-401,447);
+  600 appears once at sec_verification.tex:437 explicitly labelled one-off diagnostic. CLEAN.
+
+RE200 RUN STATE: results/cylinder_m010_laminar_re200 has no run_status.json,
+  forces.csv tail = step 25589, t=255.89 of 300. Suite genuinely mid-run.
+

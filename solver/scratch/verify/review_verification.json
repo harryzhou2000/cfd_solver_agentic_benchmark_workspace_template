@@ -1,0 +1,709 @@
+{
+  "meta": {
+    "verifier": "/root/report_author/verify_review_numbers",
+    "timestamp_utc": "2026-08-27T10:35Z",
+    "review_file": "/workspace/solver/scratch/review/PHYSICS_REVIEW.md",
+    "generation_policy": "results/ was being overwritten by a live re-run during verification. results/ is git-tracked, so the OLD generation the review examined was recovered from git commit 605a981 into /workspace/solver/scratch/verify/old_gen/ (verified byte-identical to git HEAD blobs). A raw disk snapshot was also taken at /workspace/solver/scratch/verify/snapshot/.",
+    "generation_map": {
+      "OLD_gen_source": "git 605a981 == HEAD blob for the 6 naca cases; cylinder_m010_laminar_re20 on disk was overwritten by the new run at 10:21:46",
+      "cylinder_m010_laminar_re20": "NEW on disk (run_status mtime 2026-08-27T10:21:46) -> OLD recovered from git",
+      "naca0012_m015_inviscid": "MID-WRITE on disk during verification (forces.csv/residuals.csv mtime 10:24:19+, run_status.json still 07:59:40 = OLD). Treated as mid-write; OLD used from git.",
+      "naca0012_m015_laminar_re5000": "OLD still on disk (08:02:30)",
+      "naca0012_m080_inviscid": "OLD still on disk (08:00:47)",
+      "naca0012_m080_laminar_re5000": "OLD still on disk (08:03:26)",
+      "naca0012_m200_inviscid": "OLD still on disk (08:01:37)",
+      "naca0012_m200_laminar_re5000": "OLD still on disk (08:04:01)",
+      "cylinder_m010_laminar_re200": "still running, excluded"
+    },
+    "window_convention": "in-loop rows only = drop the duplicated final CSV row (keep first occurrence of the final step). raw = take last N rows of the file as written."
+  },
+  "claims": {
+    "A_drift_cancellation": {
+      "verdict": "VERIFIED (absolute numbers exact); percentages depend on normalization - both the review's and /root's figures are the SAME window, differing only in denominator",
+      "case": "naca0012_m200_laminar_re5000",
+      "generation": "OLD (git 605a981)",
+      "window_definition_that_reproduces": "in-loop rows only, W=500: current window steps 3147-3646, previous window steps 2647-3146",
+      "measured": {
+        "pressure_drag_mean_prev": 0.0132426,
+        "pressure_drag_mean_now": 0.01641241,
+        "d_pressure_drag": 0.003169816,
+        "d_pressure_pct_of_prev": 23.937,
+        "d_pressure_pct_of_now": 19.314,
+        "viscous_drag_mean_prev": 0.02736702,
+        "viscous_drag_mean_now": 0.02416652,
+        "d_viscous_drag": -0.003200498,
+        "d_viscous_pct_of_prev": -11.695,
+        "d_viscous_pct_of_now": -13.244,
+        "d_cd": -3.068166e-05,
+        "d_cd_pct": -0.076,
+        "ratio_sum_abs_components_over_net": 207.6,
+        "ratio_abs_dpressure_over_net": 103.3
+      },
+      "reconciliation": {
+        "review_claim_pressure_+19.3pct_viscous_-13.2pct": "VERIFIED as percentages of the CURRENT (now) window mean: +19.314% and -13.244%",
+        "root_claim_pressure_+24.0pct_viscous_-1.9pct_net_0.08pct": "pressure +24.0% VERIFIED as pct of PREVIOUS window mean (+23.937%); net 0.08% VERIFIED (0.076%); viscous -1.9% NOT REPRODUCED under any window/normalization tried (measured -11.7% of prev / -13.2% of now)",
+        "absolute_deltas": "both sets share the same absolute deltas +3.170e-03 and -3.200e-03, and the same net -3.068e-05, so they are the same window",
+        "207x_factor": "VERIFIED = (|dP|+|dV|)/|dCd| = 207.6. Note: |dP|/|dCd| alone is 103.3, so the 207x figure is the SUM of both component motions over the net."
+      },
+      "monotone_subblocks": {
+        "verdict": "VERIFIED strictly monotone RISING across all ten 50-step sub-blocks, 0 violations",
+        "block_means": [
+          0.039211,
+          0.039409,
+          0.039629,
+          0.03989,
+          0.04022,
+          0.04062,
+          0.04105,
+          0.04148,
+          0.041913,
+          0.042368
+        ],
+        "first_to_last_inloop": "0.03921 -> 0.04237",
+        "first_to_last_raw_incl_duplicate": "0.03921 -> 0.04238",
+        "note": "The review's quoted endpoint 0.04238 reproduces only with the duplicated final row INCLUDED (raw, steps 3148-3646). In-loop-only gives 0.04237. Both are monotone."
+      },
+      "evidence": [
+        "/workspace/solver/scratch/verify/old_gen/naca0012_m200_laminar_re5000/forces.csv"
+      ]
+    },
+    "B_which_cases_mid_drift": {
+      "verdict": "VERIFIED exactly as claimed: 5 monotone, 2 non-monotone",
+      "generation": "OLD (git 605a981)",
+      "window": "in-loop rows only, trailing 500 steps, ten 50-step sub-blocks",
+      "per_case": {
+        "naca0012_m080_inviscid": {
+          "trend": "monotone FALLING",
+          "violations": 0,
+          "window_steps": "2997-3496",
+          "block_means": [
+            0.008742,
+            0.008739,
+            0.008736,
+            0.008735,
+            0.008734,
+            0.008733,
+            0.008732,
+            0.008731,
+            0.008731,
+            0.008731
+          ],
+          "block_span": 1.069e-05
+        },
+        "naca0012_m015_laminar_re5000": {
+          "trend": "monotone FALLING",
+          "violations": 0,
+          "window_steps": "3340-3839",
+          "block_means": [
+            0.055686,
+            0.055589,
+            0.055506,
+            0.055434,
+            0.055373,
+            0.055322,
+            0.055279,
+            0.055244,
+            0.055215,
+            0.055191
+          ],
+          "block_span": 0.0004948
+        },
+        "naca0012_m080_laminar_re5000": {
+          "trend": "monotone RISING",
+          "violations": 0,
+          "window_steps": "4140-4639",
+          "block_means": [
+            0.08099,
+            0.081071,
+            0.081141,
+            0.081202,
+            0.081253,
+            0.081294,
+            0.081327,
+            0.081351,
+            0.081366,
+            0.081375
+          ],
+          "block_span": 0.0003853
+        },
+        "naca0012_m200_laminar_re5000": {
+          "trend": "monotone RISING",
+          "violations": 0,
+          "window_steps": "3147-3646",
+          "block_means": [
+            0.039211,
+            0.039409,
+            0.039629,
+            0.03989,
+            0.04022,
+            0.04062,
+            0.04105,
+            0.04148,
+            0.041913,
+            0.042368
+          ],
+          "block_span": 0.003157
+        },
+        "cylinder_m010_laminar_re20": {
+          "trend": "monotone FALLING",
+          "violations": 0,
+          "window_steps": "1951-2450",
+          "block_means": [
+            2.036325,
+            2.031906,
+            2.028229,
+            2.025303,
+            2.023088,
+            2.02145,
+            2.020272,
+            2.019452,
+            2.0189,
+            2.01853
+          ],
+          "block_span": 0.0178
+        },
+        "naca0012_m015_inviscid": {
+          "trend": "NON-monotone (genuine limit cycle)",
+          "violations": 3,
+          "window_steps": "1726-2225",
+          "block_means": [
+            0.00099,
+            0.001015,
+            0.001004,
+            0.000995,
+            0.000996,
+            0.000999,
+            0.001003,
+            0.001009,
+            0.001012,
+            0.001011
+          ],
+          "block_span": 2.541e-05
+        },
+        "naca0012_m200_inviscid": {
+          "trend": "NON-monotone (genuine limit cycle)",
+          "violations": 3,
+          "window_steps": "4407-4906",
+          "block_means": [
+            0.087927,
+            0.087992,
+            0.088001,
+            0.087952,
+            0.087967,
+            0.088014,
+            0.087968,
+            0.088082,
+            0.087902,
+            0.08803
+          ],
+          "block_span": 0.0001793
+        }
+      },
+      "m080_laminar_component_check": {
+        "review_claim": "pressure -1.786%, viscous +7.229%, net +1.148%, components 3.1x the sum",
+        "verdict": "VERIFIED (as pct of the CURRENT window mean)",
+        "d_pressure": -0.0009785748,
+        "d_pressure_pct_of_now": -1.7859,
+        "d_pressure_pct_of_prev": -1.7546,
+        "d_viscous": 0.001911476,
+        "d_viscous_pct_of_now": 7.2289,
+        "d_viscous_pct_of_prev": 7.7922,
+        "d_cd": 0.0009329013,
+        "d_cd_pct_of_now": 1.1484,
+        "d_cd_pct_of_prev": 1.1617,
+        "ratio": 3.1
+      }
+    },
+    "C_force_window_length": {
+      "verdict": "PARTIALLY VERIFIED - all four constant VALUES are correct as claimed, but the review's cited LINE NUMBER for kForceWindow is stale (actual line 76, not 64). The report's 600-step figure is NOT wrong: it is explicitly labelled a one-off diagnostic and the production 500 is stated correctly alongside it.",
+      "kForceWindow": {
+        "value": 500,
+        "claimed_line": "src/solve/steady_driver.cpp:64",
+        "actual_line": "src/solve/steady_driver.cpp:76",
+        "verbatim": "constexpr std::size_t kForceWindow = 500;",
+        "note": "line 64 currently holds 'int best_step = 0;' - the review's line number is stale because commit 436138f inserted the best-state block above it"
+      },
+      "kCdRelTol": {
+        "value": 0.01,
+        "line": 88,
+        "verbatim": "constexpr Real kCdRelTol = 1.0e-2;  // 1 % of the prevailing drag level"
+      },
+      "kCdAbsTol": {
+        "value": 1e-05,
+        "line": 89,
+        "verbatim": "constexpr Real kCdAbsTol = 1.0e-5;  // 0.1 drag counts, in absolute terms"
+      },
+      "kCdDriftRelTol": {
+        "value": 0.001,
+        "line": 102,
+        "verbatim": "constexpr Real kCdDriftRelTol = 1.0e-3;  // 0.1 % drift of the window mean"
+      },
+      "kTrendBlocks": {
+        "value": 10,
+        "line": 115,
+        "verbatim": "constexpr std::size_t kTrendBlocks = 10;"
+      },
+      "span_branch": {
+        "line": 357,
+        "logic": "cd_tol_window = max(kCdRelTol*cd_mag, kCdAbsTol); forces_stationary = cd_span_window <= cd_tol_window",
+        "spans": "one 500-step window"
+      },
+      "drift_branch": {
+        "lines": "361-405",
+        "logic": "only evaluated if !forces_stationary AND previous_window_cd.size()==500; compares mean of current 500 against mean of preceding 500",
+        "spans": "two consecutive 500-step windows = 1000 steps of history",
+        "extra_gates_added_by_436138f": [
+          "components_settled (pressure AND viscous drift each within tol)",
+          "!cd_monotone_trend (ten 50-step sub-blocks must not be strictly monotone)"
+        ]
+      },
+      "run_status_notes_say_500": {
+        "naca0012_m080_inviscid": "'over the last 500 steps' PRESENT",
+        "naca0012_m015_laminar_re5000": "'over the last 500 steps' PRESENT",
+        "naca0012_m080_laminar_re5000": "'over the last 500 steps' PRESENT",
+        "cylinder_m010_laminar_re20": "'over the last 500 steps' PRESENT",
+        "naca0012_m015_inviscid": "NOT present - limit-cycle wording: 'between successive 500-step windows'",
+        "naca0012_m200_inviscid": "NOT present - limit-cycle wording: 'between successive 500-step windows'",
+        "naca0012_m200_laminar_re5000": "NOT present - limit-cycle wording: 'between successive 500-step windows'",
+        "summary": "All 7 notes reference 500. 4 use 'over the last 500 steps' (span branch); 3 use 'between successive 500-step windows' (drift/limit-cycle branch)."
+      },
+      "report_600_step_claim": {
+        "verdict": "NOT WRONG - the report already discloses 600 as a one-off diagnostic, explicitly distinguished from the production 500",
+        "location": "/workspace/solver/report/sec_verification.tex:329",
+        "verbatim": "measured over a 600-step tail during the investigation; the production window is the 500 steps of \\cref{eq:stationarity}, and the distinction does not affect the argument, since the span is flat in the window length here.",
+        "production_window_stated_at": "/workspace/solver/report/sec_verification.tex:291 'span over a trailing 500-step window'",
+        "action": "no correction needed; the 600 refers only to the m015_inviscid tolerance-calibration diagnostic"
+      },
+      "DISCREPANCY_FOUND": {
+        "status": "RETRACTED BY ME ON RE-CHECK - NOT a report error",
+        "what_I_initially_suspected": "that report/sec_verification.tex:293-294 stated the production tolerance as max(1e-3*max(|Cd|,1e-4),1e-6) while the code ships 1e-2/1e-5",
+        "why_it_is_not_an_error": "The report presents the tolerance in TWO equations and is explicit about which is which. eq:stationarity at report/sec_verification.tex:292-296 is the FIRST (too-strict) version, and the narrative at :319-320 says so ('The initial version required...'). eq:stationarity2 at report/sec_verification.tex:338-341 states the CALIBRATED production tolerance as max(1e-2*|Cd|, 1e-5), described at :342 as '1% relative with an absolute floor of about 0.1 drag counts'. That matches the shipped constants kCdRelTol=1e-2 (src/solve/steady_driver.cpp:88) and kCdAbsTol=1e-5 (:89) exactly.",
+        "git_corroboration": "git log -S'kCdRelTol' shows the constants were introduced as 1.0e-3 / 1.0e-6 in commit 97f3725 and later relaxed to 1.0e-2 / 1.0e-5, exactly the two-stage history the report narrates.",
+        "numerical_confirmation": "1e-2 * cd_mag reproduces both shipped tolerances: m015_laminar 1e-2*5.573773e-02 = 5.573773e-04 vs run_status 5.574e-04; cylinder 1e-2*2.038772e+00 = 2.038772e-02 vs run_status 2.039e-02.",
+        "residual_nitpick": "The only wording imprecision is that :291 introduces eq:stationarity as 'the drag span over a trailing 500-step window required to satisfy' without yet flagging that this first form was superseded 45 lines later. A reader stopping at :296 would take the 1e-3/1e-6 form as production. Optional clarity fix, not a factual error."
+      }
+    },
+    "D_duplicated_final_row": {
+      "verdict": "VERIFIED - all 7 cases, both files, duplicate final step with different values",
+      "generation": "OLD (git 605a981)",
+      "per_case": {
+        "naca0012_m015_inviscid": {
+          "forces_rows": 2226,
+          "final_step": 2225,
+          "cd_rel_diff": 0.0002474,
+          "residual_rel_diff": 0.04618
+        },
+        "naca0012_m080_inviscid": {
+          "forces_rows": 3497,
+          "final_step": 3496,
+          "cd_rel_diff": 3.541e-06,
+          "residual_rel_diff": 0.009513
+        },
+        "naca0012_m200_inviscid": {
+          "forces_rows": 4907,
+          "final_step": 4906,
+          "cd_rel_diff": 0.002708,
+          "residual_rel_diff": 0.02921
+        },
+        "naca0012_m015_laminar_re5000": {
+          "forces_rows": 3840,
+          "final_step": 3839,
+          "cd_rel_diff": 6.99e-06,
+          "residual_rel_diff": 0.01176
+        },
+        "naca0012_m080_laminar_re5000": {
+          "forces_rows": 4640,
+          "final_step": 4639,
+          "cd_rel_diff": 6.318e-07,
+          "residual_rel_diff": 0.0008253
+        },
+        "naca0012_m200_laminar_re5000": {
+          "forces_rows": 3647,
+          "final_step": 3646,
+          "cd_rel_diff": 0.0002301,
+          "residual_rel_diff": 0.000258
+        },
+        "cylinder_m010_laminar_re20": {
+          "forces_rows": 2451,
+          "final_step": 2450,
+          "cd_rel_diff": 2.071e-06,
+          "residual_rel_diff": 0.01451
+        }
+      },
+      "concrete_example": {
+        "case": "naca0012_m200_laminar_re5000",
+        "file": "forces.csv",
+        "row_penultimate_in_loop": {
+          "step": 3646,
+          "cd": 0.04260216412921,
+          "pressure_drag": 0.01854192028271,
+          "viscous_drag": 0.0240602438465
+        },
+        "row_final_post_loop": {
+          "step": 3646,
+          "cd": 0.04261196585578,
+          "pressure_drag": 0.01855165326926,
+          "viscous_drag": 0.02406031258652
+        },
+        "delta_cd": 9.80172657e-06,
+        "delta_pressure_drag": 9.73298655e-06,
+        "delta_viscous_drag": 6.874002e-08
+      },
+      "source_explanation": {
+        "in_loop_writer": "src/solve/steady_driver.cpp:291-293 - writes when step % write_forces_every == 0 || step==1 || step==max_steps, using last_forces from the in-loop computeForces at :292",
+        "post_loop_writer": "src/solve/steady_driver.cpp:654-655 - const ForceResult final_forces = computeForces(...); writer.appendForces(outcome.final_step, 0.0, final_forces);",
+        "why_values_differ": "src/solve/steady_driver.cpp:632-634 comment: 'Recompute the residual and forces from the FINAL state so the last force row matches surface.csv and field_final.vtu exactly.' The post-loop pass calls context.syncState() at :634 and re-evaluates the assembler at :637 before recomputing, so gradients/limiter factors are refreshed from the synced final state. It can also restore the best state first (:620-630), in which case the second row belongs to a DIFFERENT step's field entirely.",
+        "residual_row_writer": "in-loop src/solve/steady_driver.cpp:288, post-loop :652 (note :646 sets inner_iter=0 and :648 sets dt=0.0, so the duplicate residual row is identifiable by inner_iter==0)"
+      },
+      "downstream_bias": {
+        "verdict": "NOT cosmetic for naive trailing-window statistics",
+        "mechanism": "including the duplicate shifts a trailing 500-row window by one sample (steps 3148-3646 instead of 3147-3646)",
+        "concrete_impact_m200_laminar": {
+          "d_cd_inloop": -3.068166e-05,
+          "d_cd_raw_incl_dup": -1.055383e-05,
+          "factor": 2.9,
+          "comment": "the net drift changes by a factor of 2.9 purely from the one-sample shift, and the 207x cancellation ratio becomes 602x"
+        },
+        "report_already_discloses": "/workspace/solver/report/sec_verification.tex:226-237"
+      },
+      "new_generation_check": "cylinder_m010_laminar_re20 (NEW, completed 10:21:46) also shows the duplicate. naca0012_m015_inviscid was mid-write during verification (forces.csv growing, run_status.json not yet rewritten) - not assessed for the new generation."
+    },
+    "E_surface_vs_forces_wall_pressure": {
+      "verdict": "FIX IS REAL AND PRESENT IN SOURCE, but NOT YET VERIFIED IN DATA - report as FIXED-IN-SOURCE, DISCREPANCY STILL PRESENT IN SHIPPED RESULTS",
+      "review_path_error": "the review cites src/io/surface_output.cpp which DOES NOT EXIST; the actual surface writer is src/post/surface_output.cpp (called from src/io/output_writer.cpp:106)",
+      "current_source_state": {
+        "forces_cpp": {
+          "file": "src/post/forces.cpp",
+          "lines": "55-58",
+          "verbatim": "const Real *phi = assembler.limiterFactors().cell(c); ... Real p_wall = wc[kPrimP] + phi[kPrimP] * (gc[kPrimP * kDim + 0] * delta.x + gc[kPrimP * kDim + 1] * delta.y);",
+          "limiter_applied": true
+        },
+        "surface_output_cpp": {
+          "file": "src/post/surface_output.cpp",
+          "lines": "46-49",
+          "verbatim": "const Real *phi = assembler.limiterFactors().cell(c); ... if (!reconstructPrimitive(wc, gc, phi, delta, w_face))",
+          "limiter_applied": true
+        },
+        "conclusion": "BOTH call sites now apply the same limiter factors phi from assembler.limiterFactors().cell(c) over the same delta = face centroid - cell centroid. The reconstructions are now consistent.",
+        "caveat": "surface_output.cpp:46-48 leaves dead code 'const Real phi_one[kNumVars] = {1.0,1.0,1.0,1.0}; (void)phi_one;' - harmless but worth removing",
+        "additional_difference": "surface.csv reports the PHYSICAL boundary state after boundaryFaceState() is applied (src/post/surface_output.cpp:55-56), whereas forces.cpp integrates the reconstructed p_wall directly. For a no-slip adiabatic wall pressure is unchanged by the BC, so this does not affect pressure drag."
+      },
+      "commit": {
+        "sha": "fd799fc",
+        "message": "fix(solver): apply limiter factors in the wall-pressure force integral",
+        "files_changed": "solver/src/post/forces.cpp only (12 insertions, 1 deletion)",
+        "claimed_post_fix": "surface 0.011789 vs forces 0.011767, 1.84e-03 relative"
+      },
+      "independent_reintegration": {
+        "method": "Cd_p = sum(cp * nx * ds) over wall faces, ds = half the distance between the two angular neighbours of each face centroid (arc-length approximation), AoA=0, ref_area=1.0 from the case JSON. Compared against the LAST forces.csv row (the post-loop row that the contract says must match surface.csv).",
+        "method_limitation": "the arc-length ds is my own reconstruction, not the solver's face areas, so a floor of order 1e-3 relative is expected from this approximation alone; differences at or below ~2e-3 are NOT evidence of solver inconsistency",
+        "OLD_generation": {
+          "naca0012_m200_laminar_re5000": {
+            "surface_pd": 0.01947,
+            "forces_pd": 0.018552,
+            "rel_diff": 0.04951
+          },
+          "naca0012_m015_inviscid": {
+            "surface_pd": 0.000954,
+            "forces_pd": 0.001008,
+            "rel_diff": 0.05311
+          },
+          "naca0012_m080_inviscid": {
+            "surface_pd": 0.008708,
+            "forces_pd": 0.008731,
+            "rel_diff": 0.002669
+          },
+          "naca0012_m200_inviscid": {
+            "surface_pd": 0.087996,
+            "forces_pd": 0.088017,
+            "rel_diff": 0.000235
+          },
+          "naca0012_m015_laminar_re5000": {
+            "surface_pd": 0.018485,
+            "forces_pd": 0.018514,
+            "rel_diff": 0.001573
+          },
+          "naca0012_m080_laminar_re5000": {
+            "surface_pd": 0.054222,
+            "forces_pd": 0.054158,
+            "rel_diff": 0.001189
+          },
+          "cylinder_m010_laminar_re20": {
+            "surface_pd": 1.2197,
+            "forces_pd": 1.220925,
+            "rel_diff": 0.001003
+          }
+        },
+        "review_claim_check": {
+          "4.85e-02_on_m200_laminar": "VERIFIED at 4.951e-02 (review said 4.85e-02; commit message said 4.95e-02, which matches my measurement)",
+          "le_1.8e-3_on_other_six": "REFUTED - naca0012_m015_inviscid shows 5.311e-02, comparable to the m200 laminar case, and m080_inviscid shows 2.669e-03. Only 4 of the other 6 are at or below 1.8e-3.",
+          "m015_inviscid_caveat": "this case terminates on a limit cycle whose peak-to-peak is 127% of its mean (report/sec_results.tex:467-469) and whose absolute drag is ~1e-3, so a 5e-2 RELATIVE difference here is 5.4e-05 ABSOLUTE and is dominated by the limit-cycle amplitude plus my arc-length error, not necessarily by the limiter inconsistency"
+        },
+        "NEW_generation": {
+          "cylinder_m010_laminar_re20": {
+            "surface_pd": 1.219698,
+            "forces_pd": 1.220902,
+            "rel_diff": 0.0009866,
+            "generation": "NEW (10:21:46)",
+            "note": "the only case fully regenerated by the new run at verification time; consistent with OLD (1.003e-03), i.e. this case was never affected by the limiter bug"
+          },
+          "naca0012_m200_laminar_re5000": "NOT yet regenerated at verification time - surface.csv and forces.csv still OLD (08:04:01), so the 4.95e-02 figure above is still the PRE-FIX data. The fix could NOT be confirmed in data for the case that actually exhibited the bug."
+        }
+      },
+      "recommendation": "Write this up as FIXED IN SOURCE (commit fd799fc, both call sites verified to use identical limited reconstruction) but state that the shipped results/ data for naca0012_m200_laminar_re5000 predates the fix and still shows 4.95e-02. Do NOT claim FIXED-AND-VERIFIED from data until that case is regenerated and re-integrated. The re-run in progress should supply it."
+    },
+    "F_residual_rose_above_minimum": {
+      "verdict": "VERIFIED in substance; the review's exact final values come from the DUPLICATED final row, not the in-loop row",
+      "generation": "OLD (git 605a981)",
+      "naca0012_m080_inviscid": {
+        "step1_residual": 3.851999,
+        "min_residual": 0.0004676533,
+        "min_step": 2546,
+        "orders_at_min": 3.9158,
+        "review_claimed_min": "4.67653e-04 at step 2546 (3.92 orders) - VERIFIED exactly",
+        "final_residual_inloop": 0.004999343,
+        "final_over_best_inloop": 10.6903,
+        "orders_final_inloop": 2.8868,
+        "final_residual_duplicate_row": 0.004951787,
+        "final_over_best_duplicate": 10.5886,
+        "orders_final_duplicate": 2.8909,
+        "review_claimed_final": "4.95179e-03 (2.89 orders), final/best = 10.59",
+        "review_matches": "the DUPLICATE (post-loop) row: 4.951787e-03 and 10.5886 -> 10.59",
+        "cfl_at_min": 49.7355,
+        "cfl_at_final": 100.0,
+        "cfl_crossing_50": {
+          "first_step_cfl_ge_50": 2550,
+          "cfl": 50.0418,
+          "residual": 0.0004690449
+        },
+        "cfl_ramp_correlation": [
+          {
+            "step": 2500,
+            "cfl": 46.3447,
+            "inner": 15,
+            "resid": 0.00047938
+          },
+          {
+            "step": 2546,
+            "cfl": 49.7355,
+            "inner": 15,
+            "resid": 0.0004676533
+          },
+          {
+            "step": 2550,
+            "cfl": 50.0418,
+            "inner": 15,
+            "resid": 0.0004690449
+          },
+          {
+            "step": 2600,
+            "cfl": 54.0339,
+            "inner": 17,
+            "resid": 0.001084707
+          },
+          {
+            "step": 2650,
+            "cfl": 58.3445,
+            "inner": 17,
+            "resid": 0.004490713
+          },
+          {
+            "step": 2700,
+            "cfl": 62.999,
+            "inner": 19,
+            "resid": 0.004587463
+          }
+        ],
+        "cfl_claim_verdict": "VERIFIED - the minimum sits at CFL 49.74 (step 2546), the residual turns up as CFL crosses 50 at step 2550, and inner iterations rise 15 -> 17 -> 19 exactly as the review describes"
+      },
+      "naca0012_m200_inviscid": {
+        "step1_residual": 1.445266,
+        "min_residual": 0.001834624,
+        "min_step": 4854,
+        "orders_at_min": 2.8964,
+        "review_claimed_min": "1.83e-03 at step 4854 - VERIFIED",
+        "final_residual_inloop": 0.006636137,
+        "final_over_best_inloop": 3.6172,
+        "final_residual_duplicate_row": 0.006442322,
+        "final_over_best_duplicate": 3.5115,
+        "review_claimed": "best 1.83e-03, final 6.44e-03, ratio 3.51",
+        "review_matches": "the DUPLICATE row: 6.442322e-03 and 3.5115 -> 3.51",
+        "cfl_at_min": 8.7975,
+        "cfl_at_final": 33.5759,
+        "cfl_50_claim": "NOT APPLICABLE to this case - CFL never reaches 50 here (final CFL 33.58); the review only asserted the CFL~50 correlation for m080_inviscid"
+      },
+      "commit_436138f_best_state_logic": {
+        "verdict": "VERIFIED - logic exists in current source with threshold factor exactly 2.0",
+        "capture": {
+          "file": "src/solve/steady_driver.cpp",
+          "lines": "202-207",
+          "verbatim": "if (best_residual < 0.0 || norms.l2 < best_residual) { best_residual = norms.l2; best_step = step; for (Index c = 0; c < num_owned; ++c) U_best.set(c, U.get(c)); have_best_state = true; }"
+        },
+        "restore": {
+          "file": "src/solve/steady_driver.cpp",
+          "line": 620,
+          "verbatim": "if (have_best_state && best_residual > 0.0 && last_residual > 2.0 * best_residual) {",
+          "threshold_factor": 2.0
+        },
+        "restore_actions": {
+          "lines": "621-629",
+          "detail": "copies U_best back into U (:621), appends a fallback sentence to outcome.notes (:627), sets outcome.final_step = best_step (:628) and last_residual = best_residual (:629)"
+        },
+        "declaration_lines": {
+          "U_best": "src/solve/steady_driver.cpp:62",
+          "best_residual": 63,
+          "best_step": 64,
+          "have_best_state": 65
+        },
+        "note": "line 64 is 'int best_step = 0;' - this is what now occupies the line the review cited for kForceWindow, confirming the review's line numbers predate commit 436138f"
+      }
+    },
+    "G_tolerance_met_by_a_hair": {
+      "verdict": "VERIFIED - both ratios reproduce. Note the review's cylinder SPAN digits come from the raw (duplicate-included) window while its ratio matches the in-loop convention; see per-case detail.",
+      "generation": "OLD (git 605a981)",
+      "naca0012_m015_laminar_re5000": {
+        "notes_span": 0.0005568,
+        "notes_tol": 0.0005574,
+        "notes_ratio": 0.9989,
+        "recomputed_span": 0.0005568046,
+        "recomputed_cd_mag": 0.05573773,
+        "recomputed_tol": 0.0005573773,
+        "recomputed_ratio": 0.998972,
+        "window_steps": "3340-3839",
+        "review_claimed_ratio": 0.999,
+        "agreement": "exact"
+      },
+      "cylinder_m010_laminar_re20": {
+        "notes_span": 0.02037,
+        "notes_tol": 0.02039,
+        "recomputed_span": 0.02037279,
+        "recomputed_cd_mag": 2.038772,
+        "recomputed_tol": 0.02038772,
+        "recomputed_ratio": 0.999268,
+        "window_steps": "1951-2450",
+        "review_claimed": "span 2.0269e-02 vs tol 2.0389e-02, ratio 0.9993",
+        "discrepancy": "RESOLVED, not a transcription slip. The review's span 2.0269e-02 is EXACTLY the raw-window value (last 500 rows of the file as written, i.e. INCLUDING the duplicated final row, steps 1952-2450): 2.026948e-02. The in-loop convention (duplicate dropped, steps 1951-2450) gives 2.037279e-02, which is what run_status.json reports (2.037e-02). So the review computed the span with the duplicate included while comparing it against the solver's own tolerance, mixing conventions; its RATIO 0.9993 nonetheless matches the in-loop ratio 0.999268 because the tolerance is set by cd_mag, which is nearly identical under both conventions.",
+        "note": "run_status.json notes for the OLD generation say span 2.037e-02 tolerance 2.039e-02, consistent with my recomputation",
+        "recomputed_span_inloop": 0.02037279,
+        "recomputed_span_raw_incl_duplicate": 0.02026948,
+        "window_steps_inloop": "1951-2450",
+        "window_steps_raw": "1952-2450",
+        "ratio_using_raw_span": 0.9942004304551955
+      },
+      "interpretation": "both cases passed the span branch with less than 0.1% margin, i.e. by a hair - VERIFIED"
+    },
+    "H_blasius_operand_still_moving": {
+      "verdict": "BLOCK MEANS VERIFIED EXACTLY; the -0.99% extrapolation reproduces; the '3.4%' degradation figure is OVERSTATED - I measure 3.0-3.2%",
+      "case": "naca0012_m015_laminar_re5000",
+      "generation": "OLD (git 605a981)",
+      "window": "in-loop rows only, final 1500 steps = steps 2340-3839, six blocks of 250",
+      "block_means_5dp": [
+        0.04502,
+        0.04107,
+        0.03888,
+        0.03772,
+        0.03707,
+        0.03676
+      ],
+      "block_means_exact": [
+        0.04502443,
+        0.04107497,
+        0.0388849,
+        0.03771553,
+        0.03707488,
+        0.03675634
+      ],
+      "review_claimed": [
+        0.04502,
+        0.04108,
+        0.03888,
+        0.03772,
+        0.03707,
+        0.03676
+      ],
+      "block_mean_agreement": "5 of 6 match to 5 decimal places under the in-loop convention. Block 2: I measure 0.04107497 -> 0.04107, the review quotes 0.04108. Neither convention reproduces 0.04108 exactly: raw (duplicate included) gives 0.04106330 -> 0.04106, which is further from the review's value. The review's block-2 digit is therefore a rounding/transcription artifact of about 1e-5, immaterial to the trend argument. All other five blocks reproduce exactly under in-loop.",
+      "successive_diffs": [
+        -0.003949,
+        -0.00219,
+        -0.001169,
+        -0.000641,
+        -0.000319
+      ],
+      "diff_ratios": [
+        0.5545,
+        0.5339,
+        0.5479,
+        0.4972
+      ],
+      "extrapolation": {
+        "model": "geometric (Aitken-style) series: the successive block-to-block decrements fall by a near-constant ratio r ~ 0.53, so the remaining decrement is summed as d_next/(1-r) with d_next = last_diff * r",
+        "justification": "the four measured decrement ratios are 0.5545, 0.5339, 0.5479, 0.4972 - tightly clustered near 0.53, which is what makes a geometric model defensible over this window",
+        "variants": [
+          {
+            "r": 0.5334,
+            "basis": "mean of the four measured ratios",
+            "asymptote": 0.03639,
+            "change_from_last_block_pct": -0.9906
+          },
+          {
+            "r": 0.4972,
+            "basis": "last measured ratio",
+            "asymptote": 0.03644,
+            "change_from_last_block_pct": -0.857
+          },
+          {
+            "r": 0.5,
+            "basis": "round value",
+            "asymptote": 0.03644,
+            "change_from_last_block_pct": -0.8666
+          },
+          {
+            "r": 0.5545,
+            "basis": "largest measured ratio",
+            "asymptote": 0.03636,
+            "change_from_last_block_pct": -1.0788
+          }
+        ],
+        "review_claim_-0.99pct": "VERIFIED for r = mean of the four ratios (0.5334): -0.9906%, and asymptote 0.03639 vs review's 'about 0.03630'",
+        "sensitivity": "across the defensible range of r (0.497 to 0.555) the extrapolated change spans -0.86% to -1.08%, and the asymptote spans 0.03636 to 0.03644. So the -0.99% is robust to about +/-0.11 percentage points, but it is a MODELLING ASSUMPTION, not a measurement."
+      },
+      "blasius_comparison": {
+        "blasius_reference": 0.037562,
+        "formula": "2*1.328/sqrt(5000)",
+        "reported_solver_value": 0.03667,
+        "reported_macro": "\\cnsVdNacaSubLam at report/numbers_auto.tex:176",
+        "current_error_vs_blasius_pct": 2.381,
+        "report_states": "2.4% at report/sec_results.tex:428",
+        "extrapolated_errors": [
+          {
+            "r": 0.5334,
+            "asymptote": 0.03639,
+            "error_pct": 3.119
+          },
+          {
+            "r": 0.4972,
+            "asymptote": 0.03644,
+            "error_pct": 2.986
+          },
+          {
+            "r": 0.5545,
+            "asymptote": 0.03636,
+            "error_pct": 3.199
+          }
+        ],
+        "review_claimed_degradation": "2.38% -> about 3.4%",
+        "verdict": "the 2.38% baseline is VERIFIED exactly. The 3.4% endpoint is NOT reproducible: the same geometric extrapolation the review used for -0.99% yields 3.12%, and the full defensible range is 2.99-3.20%. To reach 3.4% would require an asymptote near 0.03628, below every variant I can justify from these ratios.",
+        "honest_statement": "the Blasius agreement would degrade from 2.38% to roughly 3.0-3.2% if the run were iterated to the extrapolated asymptote, and that asymptote is a geometric-series assumption rather than an observed value"
+      },
+      "caveat": "the last block mean (0.036756) is itself ABOVE the final in-loop row (0.036667), so the instantaneous final value already sits below the last block mean; the trend is real and the operand is demonstrably still moving",
+      "block_means_raw_convention": [
+        0.0450038,
+        0.0410633,
+        0.03887859,
+        0.03771214,
+        0.03707306,
+        0.03675551
+      ]
+    }
+  }
+}
