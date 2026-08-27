@@ -99,8 +99,8 @@ def main():
                      label=case)
         axes[2].plot(nps, gh, marker="^", color=SERIES[i], label=f"{case}: ghost cells")
         axes[2].plot(nps, ec, marker="v", ls="--", color=SERIES[i], label=f"{case}: edge cut")
-    axes[0].plot([1, 8], [1, 8], "k:", lw=1.0, label="ideal")
-    axes[0].axvline(4, color="0.5", lw=0.8, ls="-.")
+    axes[0].plot([1, 8], [1, 8], "k:", lw=1.2, label="ideal")
+    axes[0].axvline(4, color="0.5", lw=1.1, ls="-.")
     axes[0].text(4.05, 1.05, "4-CPU quota", fontsize=8, color="0.35", rotation=90,
                  va="bottom")
     axes[0].set_xlabel("MPI ranks")

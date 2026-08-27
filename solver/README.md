@@ -75,13 +75,17 @@ same executable and the same options; the differences come from the case JSON
 files. The only per-case command-line options used for the submitted results
 are documented in `report/run_manifest.md` and in the report:
 
-* `--freeze-limiter-step 15000` for the two Mach 2 cases (holds the limiter
-  fixed once the shock system has settled, removing the limit cycle caused by
-  the non-differentiable min/max stencil);
 * `--cfl-scale 30 --inner-target 1e-4` for the Reynolds 200 transient
   (a larger *pseudo*-time CFL with a ten-times **stricter** inner convergence
   target than the supplied one; §7 of the report shows this converges the same
   BDF2 problem more tightly and more cheaply).
+
+Limiter freezing is automatic and uniform: every steady run holds the limiter
+values fixed from pseudo-time step `3 * pseudo_cfl_ramp_steps` (taken from the
+case file), which removes the residual limit cycle caused by the
+non-differentiable min/max stencil on the shock cases. The limiter is *frozen,
+not disabled* — the frozen values keep multiplying the reconstruction. Use
+`--freeze-limiter-step 0` to switch the behaviour off.
 
 Other subcommands:
 
@@ -116,10 +120,14 @@ a 4-CPU cgroup quota, so pinning ranks to cores collapses performance and the
 python3 -m venv .venv && . .venv/bin/activate && pip install numpy matplotlib scipy
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
 
-scripts/run_all.sh steady        # 7 steady cases at np=8   -> results/
+scripts/run_everything.sh        # every run below, in dependency order
+#   or individually:
+scripts/run_all.sh steady        # 7 steady cases at np=8    -> results/
 scripts/run_all.sh transient     # cylinder Re 200 at np=8   -> results/
 scripts/run_all.sh mpi           # rank study np = 1,2,4,8   -> studies/mpi/
-scripts/run_all.sh verify        # flux/limiter/dual-time    -> studies/verify/
+scripts/run_all.sh verify        # flux and limiter checks   -> studies/verify/
+scripts/run_verify_extra.sh      # Roe at Mach 2, restart round trip
+scripts/run_cfl_study.sh         # dual-time CFL/target study -> studies/cflstudy/
 
 scripts/make_report.sh           # verification, figures, manifests, LaTeX report
 .venv/bin/python ../cfd_solver_agentic_benchmark/examiner/validate_outputs.py \
@@ -179,6 +187,15 @@ or a subsonic inlet is a local change. Transport is behind `TransportModel`
 (constant and Sutherland laws are implemented), which is where a turbulent
 eddy-viscosity contribution from a RANS model would enter. No solver logic
 branches on `case_id`.
+
+## Notes on metadata
+
+`metadata.json` records `git_revision` as the repository revision captured when
+CMake was configured, and `solver_version` from `CMakeLists.txt`. The effective
+pseudo-time CFL of a run is recorded separately from the case-file value
+(`cfl_scale`, `effective_cfl_initial`, `effective_cfl_max`), so a run that
+deviates from the case schedule is visible in the metadata and not only in the
+recorded command line.
 
 ## Originality
 

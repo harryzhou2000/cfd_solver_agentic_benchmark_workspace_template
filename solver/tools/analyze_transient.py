@@ -127,7 +127,7 @@ def main():
         axes[0].set_title("post-transient lift oscillation")
         axes[0].legend()
         axes[1].plot(ts[w], cds[w], color=SERIES[1], label=r"$C_D$")
-        axes[1].axhline(result["mean_cd"], color="k", ls="--", lw=0.9,
+        axes[1].axhline(result["mean_cd"], color="k", ls="--", lw=1.2,
                         label=fr"mean $C_D={result['mean_cd']:.4f}$")
         axes[1].set_xlabel(r"$t\,U_\infty/D$")
         axes[1].set_ylabel(r"$C_D$")
@@ -135,7 +135,7 @@ def main():
         axes[1].legend()
         sel = (freq > 0) & (freq < 1.0)
         axes[2].semilogy(freq[sel], spec[sel] / spec[sel].max(), color=SERIES[2])
-        axes[2].axvline(f_fft, color="k", ls="--", lw=0.9,
+        axes[2].axvline(f_fft, color="k", ls="--", lw=1.2,
                         label=fr"$f={f_fft:.4f}$, $St={st_fft:.4f}$")
         axes[2].set_xlabel(r"frequency $f\,D/U_\infty$")
         axes[2].set_ylabel("normalised $|\\hat{C_L}|$")

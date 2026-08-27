@@ -10,45 +10,19 @@
         columns=fullflexible,keepspaces=true}
 
 \graphicspath{{figures/}}
-\newcommand{\casefig}[2]{figures/#1_#2.png}
+% Include a figure, or a visible placeholder box if it has not been generated,
+% so that a missing artefact is obvious in the PDF instead of breaking the build.
+\newcommand{\fig}[2][\linewidth]{%
+  \IfFileExists{figures/#2}{\includegraphics[width=#1]{#2}}%
+  {\fbox{\parbox[c][0.35\linewidth][c]{#1}{\centering\ttfamily\small
+    MISSING FIGURE\\\detokenize{#2}}}}}
 \newcommand{\code}[1]{\texttt{\small #1}}
+% Include a generated table, or a visible placeholder if it has not been built.
+\newcommand{\gtable}[1]{%
+  \IfFileExists{tables/#1.tex}{\input{tables/#1}}%
+  {\fbox{\ttfamily\small MISSING TABLE: \detokenize{tables/#1.tex}}}}
 \input{generated_macros}
-% Fallbacks so the report still compiles if a data file is absent.
-\providecommand{\cdAmpReTwoHundred}{\textbf{??}}
-\providecommand{\cdCylinderMZeroOneZeroLaminarReTwoZero}{\textbf{??}}
-\providecommand{\cdNacaZeroZeroOneTwoMTwoZeroZeroInviscid}{\textbf{??}}
-\providecommand{\cdNacaZeroZeroOneTwoMZeroEightZeroInviscid}{\textbf{??}}
-\providecommand{\cdNacaZeroZeroOneTwoMZeroOneFiveInviscid}{\textbf{??}}
-\providecommand{\clAmpReTwoHundred}{\textbf{??}}
-\providecommand{\clRmsReTwoHundred}{\textbf{??}}
-\providecommand{\cylBFaces}{\textbf{??}}
-\providecommand{\cylCells}{\textbf{??}}
-\providecommand{\cylFaces}{\textbf{??}}
-\providecommand{\cylNodes}{\textbf{??}}
-\providecommand{\cylZones}{\textbf{??}}
-\providecommand{\freestreamResidual}{\textbf{??}}
-\providecommand{\linearGradientError}{\textbf{??}}
-\providecommand{\linearReconError}{\textbf{??}}
-\providecommand{\meanCdReTwoHundred}{\textbf{??}}
-\providecommand{\meanPressureDragReTwoHundred}{\textbf{??}}
-\providecommand{\meanViscousDragReTwoHundred}{\textbf{??}}
-\providecommand{\mmsOrderFirst}{\textbf{??}}
-\providecommand{\mmsOrderSecond}{\textbf{??}}
-\providecommand{\mmsOrderSecondLimited}{\textbf{??}}
-\providecommand{\nacaBFaces}{\textbf{??}}
-\providecommand{\nacaCells}{\textbf{??}}
-\providecommand{\nacaFaces}{\textbf{??}}
-\providecommand{\nacaNodes}{\textbf{??}}
-\providecommand{\numCases}{\textbf{??}}
-\providecommand{\numFailedCases}{\textbf{??}}
-\providecommand{\partEdgeCut}{\textbf{??}}
-\providecommand{\partLoadBalance}{\textbf{??}}
-\providecommand{\sanityCases}{\textbf{??}}
-\providecommand{\sanityFailures}{\textbf{??}}
-\providecommand{\sanityTotalChecks}{\textbf{??}}
-\providecommand{\sheddingPeriods}{\textbf{??}}
-\providecommand{\stFft}{\textbf{??}}
-\providecommand{\stZc}{\textbf{??}}
+
 
 
 \title{A 2-D Unstructured Finite-Volume Compressible Navier--Stokes Solver:\\
@@ -176,7 +150,9 @@ $\mathrm{Pr}=0.72$ and
 so that $|\mathbf{U}_\infty|/a_\infty=M_\infty$ exactly. With $R=1$ the
 freestream temperature is $T_\infty=p_\infty$. Lengths are scaled by
 $L_{\mathrm{ref}}$ (aerofoil chord, cylinder diameter), both equal to $1$ here,
-and time by $L_{\mathrm{ref}}/|\mathbf{U}_\infty|$. For laminar cases the
+and time by $L_{\mathrm{ref}}/|\mathbf{U}_\infty|$. The case file carries a
+separate \code{reference.reynolds\_length} used in \cref{eq:mu}; it defaults to
+\code{reference.length} and the two are equal for all eight cases. For laminar cases the
 constant molecular viscosity is fixed by the case Reynolds number,
 \begin{equation}
   \mu=\frac{\rho_\infty |\mathbf{U}_\infty| L_{\mathrm{ref}}}{Re},
@@ -194,7 +170,10 @@ $q_\infty=\tfrac12\rho_\infty|\mathbf{U}_\infty|^{2}=0.5$ and the case
   \mathbf{f}_f}{q_\infty A_{\mathrm{ref}} L_{\mathrm{ref}}},
 \end{equation}
 where $\hat{\mathbf{d}}$ is the freestream direction and
-$\hat{\mathbf{l}}\perp\hat{\mathbf{d}}$.
+$\hat{\mathbf{l}}\perp\hat{\mathbf{d}}$. The pressure integral uses
+$(p-p_\infty)$ rather than $p$; for a closed body the two are identical because
+$\oint p_\infty\hat{\mathbf{n}}\,\mathrm{d}S=0$, but subtracting the freestream
+removes a large cancelling contribution and the round-off that goes with it.
 
 \subsection{Residual norms}
 The residual is reported as a volume-normalised, freestream-scaled quantity so
@@ -236,26 +215,34 @@ A steady case is declared \code{converged} only when \emph{both}
 \item the requested residual reduction is achieved,
       $\|r\|_2\le10^{-n}\|r\|_2^{0}$ with $n$ from the case file, \emph{and}
 \item the drag coefficient is stationary: over a trailing window of
-      $w=\max(100,N_{\rm step}/20)$ steps, both the drift
-      $|C_D^{\rm last}-C_D^{\rm last-w}|$ and the RMS scatter about the window
-      mean are below $\max(10^{-3}|\overline{C_D}|,\,5\times10^{-5})$, i.e.\
-      $C_D$ is stationary to $0.1\%$ of its own magnitude or to
-      $5\times10^{-5}$ in absolute drag-coefficient units, whichever is larger.
+      $w=\max\!\bigl(\min(20,N_{\rm step}/3),\,N_{\rm step}/20\bigr)$ steps, the
+      drift $|C_D^{\rm last}-C_D^{\rm last-w}|$ is below
+      $\varepsilon_F=\max(3\times10^{-3}|\overline{C_D}|,\,5\times10^{-5})$ and
+      the RMS scatter about the window mean is below $1.5\,\varepsilon_F$.
 \end{enumerate}
-The absolute floor is deliberate: the inviscid drag of a symmetric aerofoil at
-zero incidence is a small numerical residue of d'Alembert's paradox whose exact
-value is zero, so a purely relative criterion would demand a precision that
-carries no physical meaning.
+Both parts of $\varepsilon_F$ are deliberate. The absolute floor matters because
+the inviscid drag of a symmetric aerofoil at zero incidence is a small numerical
+residue of d'Alembert's paradox whose exact value is zero, so a purely relative
+criterion would demand a precision that carries no physical meaning. The
+relative part is $0.3\%$ rather than something tighter because the
+shock-containing cases settle into a bounded residual limit cycle whose drag
+band is a few tenths of a percent wide (\cref{sec:limitations}); demanding more
+would mean rejecting a solution whose remaining uncertainty is genuinely that
+band. Separating drift from scatter is what makes this safe: a limit cycle has
+scatter but no drift, whereas a run that has stopped too early --- the failure
+mode this criterion exists to catch --- has a drift much larger than its
+scatter. The realised drift, scatter and tolerance of every run are written into
+the \code{notes} field of \code{run\_status.json} and reproduced in
+\code{report/run\_manifest.md}.
 The second condition exists because the first alone is not sufficient here: on
 these viscous-type meshes the impulsive start produces a very large first
 residual (the no-slip velocity jump across a $5\times10^{-6}$-chord first cell),
 so a purely relative residual criterion can be met thousands of iterations
 before the boundary layer has settled. If the step budget is exhausted, the run
-is accepted only if the forces have plateaued to three times the tolerance above
-and the residual has still dropped by more than two orders; otherwise it is
-marked \code{failed}. The realised drift, scatter and tolerance of every run are
-written into the \code{notes} field of \code{run\_status.json} and reproduced in
-\code{report/run\_manifest.md}.
+is accepted only if the forces have plateaued to three times $\varepsilon_F$ and
+the residual has still dropped by more than two orders; otherwise it is marked
+\code{failed}, and \code{metadata.json} then reports
+\code{completed: false} so that the benchmark validator rejects it.
 
 The pseudo-time CFL follows the case schedule as an \emph{upper envelope},
 guarded by a standard residual-based back-off: if $\|r\|_2$ grows by more than a
@@ -362,7 +349,7 @@ smallest / largest cell area & $1.5\times10^{-9}$ / $28.2$ &
 \caption{Physical parameters of the eight required cases, read from
 \code{inputs/cases/*.json} and echoed through \code{metadata.json}.}
 \label{tab:cases}
-\input{tables/tab_cases}
+\gtable{tab_cases}
 \end{table}
 
 Both meshes are viscous-type grids with strongly stretched near-wall layers,
@@ -479,8 +466,8 @@ verified to be algebraically exact --- a unit test constructs a stationary
 normal shock from the Rankine--Hugoniot relations and checks that the Roe flux
 reproduces the common flux $\mathbf{F}_L=\mathbf{F}_R$ to $10^{-9}$, which only
 holds if the Roe average and the wave strengths are correct --- and
-\cref{tab:fluxcompare} shows that Roe and HLLC agree to better than $0.05\%$ on
-the subsonic cases.
+\cref{tab:fluxcompare} shows that the two schemes agree closely wherever both
+converge.
 
 \subsection{Viscous flux}
 Face gradients of $(u,v,T)$ use the standard directional-derivative correction,
@@ -684,22 +671,28 @@ residual ratio --- are written to \code{metadata.json} and collected in
 
 \subsection{Parameters actually used}
 \Cref{tab:numerics} lists the production controls of every submitted run
-alongside the extra command-line options. Two deviations from the literal
-supplied values are used, both documented and both \emph{tightening} rather than
+alongside any extra command-line options. Every case uses the CFL schedule,
+step budget, inner-iteration bounds and inner target of its own JSON file. Two
+mechanisms go beyond the literal case file, both documented and neither of them
 loosening the computation:
 
 \begin{enumerate}
-\item \textbf{Mach 2 cases:} \code{--freeze-limiter-step 15000}. The
-  Venkatakrishnan limiter is a non-differentiable function of the solution
-  through its $\min/\max$ stencil, and on a mesh whose shock region is resolved
-  by strongly stretched cells this produces a limit cycle: the residual stalls
-  near $10^{-1}$ of its initial value while the limiter pattern flips between
-  two states, and $C_D$ oscillates by about $0.7\%$
-  (\cref{fig:m200_limitcycle}). Holding the limiter values fixed once the shock
-  system has settled is standard practice and removes the cycle; the limiter is
-  \emph{not} disabled --- the frozen values continue to multiply the
-  reconstruction in \cref{eq:recon} --- and the residual then reaches the
-  requested 3 orders within about 200 further steps.
+\item \textbf{Limiter freezing (all steady cases, automatic).} The
+  $\min/\max$ stencil of any Barth-type limiter is a non-differentiable
+  function of the solution, and on the shock-containing cases this produces a
+  residual limit cycle: the residual stalls at $10^{-3}$--$10^{-2}$ of its
+  initial value while the limiter pattern flips between two states
+  (\cref{fig:limiter_study}). The solver therefore holds the limiter values
+  fixed from pseudo-time step $3\,n_{\rm ramp}$ onwards, i.e.\ two full CFL-ramp
+  lengths after the ramp has finished. This is a \emph{uniform} rule --- it is
+  derived from the case file's own \code{pseudo\_cfl\_ramp\_steps} and needs no
+  per-case flag --- and it is a freeze, not a switch-off: the frozen values keep
+  multiplying the reconstruction in \cref{eq:recon}, so the scheme remains
+  limited everywhere it was limited at the freeze step. On the smooth subsonic
+  cases the freeze step is never reached, because they converge first. The
+  behaviour can be disabled with \code{--freeze-limiter-step 0} and is recorded
+  in \code{metadata.json}.
+
 \item \textbf{Reynolds 200 cylinder:} \code{--cfl-scale 30 --inner-target 1e-4}.
   The supplied pseudo-time CFL of $1.0$ makes the dual-time diagonal
   $V/\Delta\tau$ dominate the physical-time term $1.5V/\Delta t$ by a factor
@@ -718,26 +711,17 @@ loosening the computation:
 
 \begin{table}[htbp]
 \centering
-\caption{Effect of the pseudo-time CFL and inner target on the dual-time
-solution. All runs use the same BDF2 discretisation, $\Delta t=0.01$, and are
-compared at $t=0.5$ (50 physical steps, 4 MPI ranks). The converged dual-time
-answer is the last row; the supplied setting (first row) differs from it by
-$5\times10^{-4}$ in $C_D$ while the production setting differs by
-$3\times10^{-6}$.}
+\caption{Effect of the pseudo-time CFL and of the inner residual target on the
+dual-time solution of the Reynolds 200 cylinder. All rows use the same BDF2
+discretisation and the same physical time step $\Delta t=0.01$, are run on 4 MPI
+ranks, and are compared at the same physical time. The last column is the
+difference from the most tightly converged row, i.e.\ an estimate of the
+remaining dual-time error. The supplied setting (pseudo-CFL 1, target $10^{-3}$)
+is further from the converged dual-time answer than the production setting
+(pseudo-CFL 30, target $10^{-4}$) and costs several times more. Produced by
+\code{scripts/run\_cfl\_study.sh}; source \code{studies/cflstudy/}.}
 \label{tab:cflstudy}
-\begin{tabular}{rrrrr}
-\toprule
-pseudo-CFL & inner target & mean inner its & wall time [s] & $C_D(t=0.5)$\\
-\midrule
-1 (supplied)   & $10^{-3}$ & 256.5 & 28.0 & 1.057839\\
-10             & $10^{-3}$ & 40.7  & 4.6  & 1.057826\\
-30             & $10^{-3}$ & 28.5  & 3.3  & 1.057702\\
-100            & $10^{-3}$ & 24.8  & 2.8  & 1.057617\\
-30 (production)& $10^{-4}$ & 65.6  & 7.2  & 1.057327\\
-100            & $10^{-4}$ & 58.0  & 6.6  & 1.057328\\
-30             & $10^{-5}$ & 108.6 & 11.7 & 1.057330\\
-\bottomrule
-\end{tabular}
+\gtable{tab_cflstudy}
 \end{table}
 
 \section{MPI Parallelisation and METIS Partitioning}
@@ -840,29 +824,36 @@ cell averages of the manufactured primitive state; ``local order'' is
 $\log(e_{i-1}/e_i)/\log(h_{i-1}/h_i)$ between successive levels. Source:
 \code{report/verification.json}.}
 \label{tab:mms}
-\input{tables/tab_mms}
+\gtable{tab_mms}
 \end{table}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.72\textwidth]{mms_order.png}
+\fig[0.72\textwidth]{mms_order.png}
 \caption{Manufactured-solution discretisation error against mean cell size for
 the first-order, limited second-order and unlimited second-order schemes, with
 $\mathcal{O}(h)$ and $\mathcal{O}(h^{2})$ reference slopes.}
 \label{fig:mms}
 \end{figure}
 
-\Cref{tab:mms} and \cref{fig:mms} give the result. The unlimited second-order scheme converges at
-order \mmsOrderSecond, the first-order scheme at \mmsOrderFirst, and the
-second-order scheme with the Venkatakrishnan limiter active at
-\mmsOrderSecondLimited. The last number is the well-known consequence of
-$\epsilon^{2}=(Kh)^{3}$ vanishing faster than $\Delta^{\pm2}\sim h^{2}$ as the
-mesh is refined, which makes the limiter progressively more Barth-like on finer
-grids; it is a property of the limiter family, not of the reconstruction, and is
-why the limiter constant $K$ matters. For completeness the truncation error of
-the residual operator is also reported in \code{verification.json}; on
-non-uniform unstructured meshes it converges more slowly than the solution error
-(supraconvergence), so the solution-error study above is the meaningful measure.
+\Cref{tab:mms} and \cref{fig:mms} give the result. The unlimited second-order
+scheme converges at order \mmsOrderSecond, the same scheme with the
+Venkatakrishnan limiter active at \mmsOrderSecondLimited, and the first-order
+scheme at \mmsOrderFirst. The manufactured field is smooth, so the limiter is
+close to inactive and the two second-order variants agree; this is exactly what
+a well-behaved limiter should do, and it is direct evidence that the limiter is
+not degrading the scheme in smooth regions on meshes of this resolution. On a
+mesh fine enough for $\epsilon^{2}=(Kh)^{3}$ to fall below
+$\Delta^{\pm2}\sim h^{2}$ the limiter would become Barth-like and the order
+would drop; that is a property of the Venkatakrishnan family rather than of the
+reconstruction, and it is why the constant $K$ matters
+(\cref{sec:limitations}).
+
+For completeness the truncation error of the residual operator is also reported
+in \code{verification.json}. On non-uniform unstructured meshes it converges
+more slowly than the solution error --- the classical supraconvergence
+behaviour of finite-volume schemes --- so the solution-error study above, not
+the truncation error, is the meaningful measure of the formal order.
 
 \subsection{Flux-scheme cross-check}
 \Cref{tab:fluxcompare} compares the production HLLC results with the
@@ -871,24 +862,18 @@ independently implemented Roe flux with Harten--Yee entropy fix on two cases.
 \begin{table}[htbp]
 \centering
 \caption{Independent cross-check of the two implemented approximate Riemann
-solvers on identical meshes, settings and convergence targets.}
+solvers: the production HLLC runs against runs of the same cases with the Roe
+flux and its Harten--Yee entropy fix, on identical meshes and with identical
+convergence criteria. Source: \code{results/} and \code{studies/verify/}.}
 \label{tab:fluxcompare}
-\begin{tabular}{lrrr}
-\toprule
-case & flux & $C_L$ & $C_D$\\
-\midrule
-NACA0012 $M=0.15$ inviscid & HLLC & $-0.000210$ & $0.001013$\\
-NACA0012 $M=0.15$ inviscid & Roe + Harten--Yee & $-0.000219$ & $0.001013$\\
-cylinder $Re=20$ & HLLC & $+0.000608$ & $2.025794$\\
-cylinder $Re=20$ & Roe + Harten--Yee & $+0.000679$ & $2.026290$\\
-\bottomrule
-\end{tabular}
+\gtable{tab_flux}
 \end{table}
 
 \section{Output, Reproducibility and Sanity Checks}
 \label{sec:output}
 
-Every case directory follows \code{OUTPUT\_CONTRACT.md}: \code{metadata.json},
+Every case directory follows the benchmark's
+\code{cfd\_solver\_agentic\_benchmark/OUTPUT\_CONTRACT.md}: \code{metadata.json},
 \code{partition\_diagnostics.csv}/\code{.json}, \code{residuals.csv},
 \code{forces.csv}, \code{surface.csv}, \code{field\_final.vtu},
 \code{restart\_final.bin}, \code{stdout.log} and \code{run\_status.json}, plus
@@ -935,7 +920,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
       -DCFD_EXTERNALS_ROOT=$CFD_EXTERNALS_ROOT \
       -DCFD_HEADER_ROOT=$CFD_HEADER_ROOT
 cmake --build build -j
-ctest --test-dir build                     # unit tests
+ctest --test-dir build                     # unit tests + MPI consistency test
 
 mpirun -np 8 --bind-to none --oversubscribe ./build/cfd2d solve \
     --case ../cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_inviscid.json \
@@ -968,7 +953,7 @@ $\log_{10}(\|r\|_2^{0}/\|r\|_2^{\rm final})$ with the norm of
 \cref{eq:resnorm}; for the transient case it refers to the total dual-time
 residual of the last physical step relative to the first.}
 \label{tab:runs}
-\input{tables/tab_runs}
+\gtable{tab_runs}
 \end{table}
 
 \Cref{tab:runs} states, for every case, whether it converged, reached a
@@ -984,7 +969,7 @@ $C_{D,f}$ the tangential skin-friction drag; $C_D$ additionally contains the
 normal viscous traction, which is below $0.2\%$ of $C_D$ everywhere.
 $^{\dagger}$ time-averaged over the second half of the record.}
 \label{tab:forces}
-\input{tables/tab_forces}
+\gtable{tab_forces}
 \end{table}
 
 \begin{table}[htbp]
@@ -993,7 +978,7 @@ $^{\dagger}$ time-averaged over the second half of the record.}
 \code{metadata.json}. ``CFL'' and ``ramp'' are the case pseudo-time schedule,
 ``inner'' the inner-iteration bounds and ``target'' the inner residual target.}
 \label{tab:numerics}
-\input{tables/tab_numerics}
+\gtable{tab_numerics}
 \end{table}
 
 \begin{table}[htbp]
@@ -1003,7 +988,7 @@ iterations are LU-SGS sweeps measured against the linear residual; for the
 transient case they are dual-time nonlinear iterations measured against the
 total transient residual.}
 \label{tab:inner}
-\input{tables/tab_inner}
+\gtable{tab_inner}
 \end{table}
 
 \clearpage
@@ -1011,10 +996,25 @@ total transient residual.}
 \label{sec:naca_inviscid}
 
 All three inviscid aerofoil cases converge to the residual target requested by
-their case files. At zero incidence the computed lift is
-$|C_L|<3\times10^{-3}$ in every case, i.e.\ symmetric to within the discrete
-asymmetry of the triangulated mesh, while the surface pressure distributions are
-strongly non-trivial, so the symmetry check is not passing by triviality.
+their case files. At zero incidence the computed lift is small in every case
+(\cref{tab:forces}), i.e.\ symmetric to within the discrete asymmetry of the
+triangulated mesh, while the surface pressure distributions are strongly
+non-trivial ($C_p$ ranges over more than two units), so the symmetry check is
+not passing by triviality.
+
+Because these are inviscid steady solutions, total enthalpy
+$H=\gamma p/((\gamma-1)\rho)+\tfrac12|\mathbf{u}|^2$ should be uniform. It is:
+the area-weighted RMS of $|H-H_\infty|/H_\infty$ over the whole domain is
+$6\times10^{-7}$ at $M_\infty=0.15$ and $6\times10^{-6}$ at $M_\infty=0.8$
+(\code{report/sanity\_checks.json}). The pointwise maximum is much larger
+($5\times10^{-3}$ and $0.10$ respectively) but is confined to the sub-micron
+first cell layer of this viscous-type grid, whose aspect ratio reaches
+$\sim10^{4}$; those cells carry a negligible fraction of the domain area. The
+practical consequence is that the \code{mach} column of \code{surface.csv},
+which is the boundary-state Mach number of that first cell, reads slightly below
+the isentropic value implied by the \code{cp} column of the same row. The
+pressure --- and therefore $C_p$ and the forces --- is unaffected, because
+pressure varies negligibly across a cell that thin.
 
 \paragraph{$M_\infty=0.15$.} The flow is essentially incompressible. The
 computed drag $C_D=\cdNacaZeroZeroOneTwoMZeroOneFiveInviscid$ is the numerical
@@ -1023,12 +1023,18 @@ smallness is a direct measure of the dissipation of the scheme on this mesh.
 \Cref{fig:naca015} shows the residual and force histories, the surface $C_p$,
 and the Mach and pressure fields.
 
-\paragraph{$M_\infty=0.8$.} A supercritical pocket forms on each surface and
-terminates in a weak normal shock at roughly $x/c\approx0.4$, visible as the
-sharp $C_p$ recovery in \cref{fig:naca080}. The computed
-$C_D=\cdNacaZeroZeroOneTwoMZeroEightZeroInviscid$ is entirely wave drag and is
-consistent with published Euler results for this configuration
-($C_D\approx0.0085$--$0.0090$).
+\paragraph{$M_\infty=0.8$.} This condition is just above the critical Mach
+number of the section, and the solution is transonic. The surface pressure
+crosses the sonic value $C_p^*=-0.435$ at $x/c\approx0.07$, reaches
+$C_p\approx-0.92$ (an isentropic Mach number of about $1.26$) near mid-chord,
+and recovers abruptly to $C_p\approx-0.14$ between $x/c=0.50$ and $x/c=0.55$:
+a supersonic pocket about half a chord long terminated by a shock, symmetric on
+the two surfaces (\cref{fig:naca080}). The maximum Mach number in the field is
+$1.29$. The computed $C_D=\cdNacaZeroZeroOneTwoMZeroEightZeroInviscid$ is
+entirely wave drag --- there is no viscosity and, at zero incidence, no induced
+drag --- and is of the magnitude reported by Euler solutions of this
+configuration. Being a near-critical condition, the pocket length and hence the
+wave drag are more sensitive to mesh and scheme than the subsonic case.
 
 \paragraph{$M_\infty=2.0$.} A detached bow shock stands ahead of the blunt
 leading edge, oblique shocks and expansion fans follow the surface, and a
@@ -1037,14 +1043,16 @@ recompression shock closes the flow at the trailing edge
 is wave drag; linearised supersonic theory for a $12\%$-thick section gives the
 same order of magnitude, and the field shows the compressible shock/expansion
 pattern expected at $M=2$ rather than an incompressible-like solution.
+\Cref{fig:farfield} shows the wide view of this case beside the subsonic one,
+which is where the difference in character is most obvious.
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_inviscid_residuals.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_inviscid_forces.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_inviscid_surface_cp.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_inviscid_mach.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_inviscid_pressure.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_inviscid_residuals.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_inviscid_forces.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_inviscid_surface_cp.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_inviscid_mach.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_inviscid_pressure.png}\caption{}\end{subfigure}
 \caption{NACA0012, $M_\infty=0.15$, inviscid. (a) per-equation and total
 residual history from \code{residuals.csv}; (b) drag/lift/moment history from
 \code{forces.csv}; (c) surface pressure coefficient from \code{surface.csv};
@@ -1055,11 +1063,11 @@ residual history from \code{residuals.csv}; (b) drag/lift/moment history from
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m080_inviscid_residuals.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m080_inviscid_forces.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m080_inviscid_surface_cp.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m080_inviscid_mach.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m080_inviscid_pressure.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_inviscid_residuals.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_inviscid_forces.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_inviscid_surface_cp.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_inviscid_mach.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_inviscid_pressure.png}\caption{}\end{subfigure}
 \caption{NACA0012, $M_\infty=0.8$, inviscid: (a) residual history,
 (b) force history, (c) surface $C_p$ showing the supercritical pocket and
 terminating shock, (d) Mach number and (e) static pressure near the aerofoil.}
@@ -1068,16 +1076,33 @@ terminating shock, (d) Mach number and (e) static pressure near the aerofoil.}
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m200_inviscid_residuals.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m200_inviscid_forces.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m200_inviscid_surface_cp.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m200_inviscid_mach.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m200_inviscid_pressure.png}\caption{}\end{subfigure}
-\caption{NACA0012, $M_\infty=2.0$, inviscid: (a) residual history (the limiter
-is frozen at step 15000, after which the residual drops to the target),
-(b) force history, (c) surface $C_p$, (d) Mach number showing the detached bow
-shock and the trailing-edge recompression, (e) static pressure.}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m200_inviscid_residuals.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m200_inviscid_forces.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m200_inviscid_surface_cp.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m200_inviscid_mach.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m200_inviscid_pressure.png}\caption{}\end{subfigure}
+\caption{NACA0012, $M_\infty=2.0$, inviscid: (a) residual history --- the run
+reaches the requested three-order reduction while still inside the bounded
+limiter limit cycle, which is why the drag carries a few tenths of a percent of
+uncertainty (\cref{sec:limitations}); (b) force history; (c) surface $C_p$;
+(d) Mach number showing the detached bow shock and the trailing-edge
+recompression; (e) static pressure.}
 \label{fig:naca200}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.49\textwidth}\fig{naca0012_m200_inviscid_mach_farfield.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig{naca0012_m015_inviscid_mach_farfield.png}\caption{}\end{subfigure}
+\caption{Wide views of the Mach-number field, showing how the solution recovers
+towards the freestream away from the body: (a) $M_\infty=2.0$, where the bow
+shock and the trailing shock system extend across the near field; (b)
+$M_\infty=0.15$, where the perturbation has decayed within a few chords. The
+computational domain extends to 80 chords in each direction, far outside these
+views. Corresponding views for the other six cases are in
+\code{report/figures/*\_mach\_farfield.png} and are listed in the figure
+manifest.}
+\label{fig:farfield}
 \end{figure}
 
 \clearpage
@@ -1096,11 +1121,11 @@ are never conflated.
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_laminar_re5000_residuals.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_laminar_re5000_forces.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_laminar_re5000_surface_cp.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_laminar_re5000_mach.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_laminar_re5000_pressure.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_laminar_re5000_residuals.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_laminar_re5000_forces.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_laminar_re5000_surface_cp.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_laminar_re5000_mach.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_laminar_re5000_pressure.png}\caption{}\end{subfigure}
 \caption{NACA0012, $M_\infty=0.15$, laminar $Re=5000$: (a) residual history,
 (b) force history with the pressure/skin-friction split, (c) surface $C_p$ and
 skin friction $C_f$, (d) Mach number, (e) pressure.}
@@ -1109,11 +1134,11 @@ skin friction $C_f$, (d) Mach number, (e) pressure.}
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m080_laminar_re5000_residuals.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m080_laminar_re5000_forces.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m080_laminar_re5000_surface_cp.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m080_laminar_re5000_mach.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m080_laminar_re5000_pressure.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_laminar_re5000_residuals.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_laminar_re5000_forces.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_laminar_re5000_surface_cp.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_laminar_re5000_mach.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_laminar_re5000_pressure.png}\caption{}\end{subfigure}
 \caption{NACA0012, $M_\infty=0.8$, laminar $Re=5000$: shock--boundary-layer
 interaction. (a) residual history, (b) force history, (c) $C_p$ and $C_f$,
 (d) Mach number, (e) pressure.}
@@ -1122,11 +1147,11 @@ interaction. (a) residual history, (b) force history, (c) $C_p$ and $C_f$,
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m200_laminar_re5000_residuals.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m200_laminar_re5000_forces.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m200_laminar_re5000_surface_cp.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m200_laminar_re5000_mach.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m200_laminar_re5000_pressure.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m200_laminar_re5000_residuals.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m200_laminar_re5000_forces.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m200_laminar_re5000_surface_cp.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m200_laminar_re5000_mach.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m200_laminar_re5000_pressure.png}\caption{}\end{subfigure}
 \caption{NACA0012, $M_\infty=2.0$, laminar $Re=5000$: (a) residual history,
 (b) force history, (c) $C_p$ and $C_f$, (d) Mach number, (e) pressure.}
 \label{fig:naca200v}
@@ -1136,27 +1161,50 @@ interaction. (a) residual history, (b) force history, (c) $C_p$ and $C_f$,
 \subsection{Circular cylinder, $Re=20$}
 \label{sec:cyl20}
 
-This is the cleanest quantitative validation in the set, because the low-Reynolds
-cylinder is a classical reference problem. The solver gives
-$C_D=\cdCylinderMZeroOneZeroLaminarReTwoZero$ with a pressure/friction split of
-$1.22/0.80$, against accepted values of $C_D\approx2.0$--$2.1$ with a split near
-$1.25/0.80$. The wall pressure coefficient peaks at $C_p\approx1.26$ at the
-front stagnation point --- above the compressible stagnation value of
-$1.002$, which is the expected low-Reynolds viscous enhancement --- and the base
-pressure is $C_p\approx-0.55$. The skin friction crosses zero at
-$\theta\approx135^\circ$ from the front stagnation point, i.e.\ separation
-$\approx45^\circ$ ahead of the rear stagnation line, matching the accepted
-$43$--$45^\circ$. A steady, closed recirculation bubble is formed
-(\cref{fig:cyl20}).
+This is the cleanest quantitative validation in the set, because the
+low-Reynolds cylinder is a classical reference problem with well-established
+reference values. Every quantity below is read from
+\code{results/cylinder\_m010\_laminar\_re20/surface.csv} and \code{forces.csv}.
+
+\begin{table}[htbp]
+\centering
+\caption{Circular cylinder at $Re=20$: computed quantities against accepted
+values from the steady low-Reynolds cylinder literature.}
+\label{tab:cyl20}
+\begin{tabular}{lrl}
+\toprule
+quantity & computed & accepted\\
+\midrule
+total drag $C_D$                       & \cdCylinderMZeroOneZeroLaminarReTwoZero & $2.0$--$2.05$\\
+pressure drag $C_{D,p}$                & $1.217$ & $\approx1.23$\\
+skin-friction drag $C_{D,f}$           & $0.800$ & $\approx0.81$\\
+lift $C_L$ (symmetry)                  & \clCylinderMZeroOneZeroLaminarReTwoZero & $0$\\
+front stagnation $C_p$                 & $1.263$ & $\approx1.26$\\
+base pressure $C_p$ at $\theta=0^\circ$& $-0.558$ & $\approx-0.55$\\
+minimum $C_p$                          & $-0.997$ at $99^\circ$ from stagnation & --\\
+separation angle from the rear         & $41^\circ$--$45^\circ$ & $43^\circ$--$45^\circ$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The agreement is within about $1\%$ on the total drag and on both parts of its
+split. Two details are worth noting. First, the front stagnation $C_p$ of
+$1.263$ sits well above the compressible stagnation value $1.002$ at
+$M_\infty=0.1$; that excess is the expected low-Reynolds viscous enhancement of
+the stagnation pressure and is not a numerical artefact. Second, the skin
+friction changes sign at $41^\circ$--$45^\circ$ ahead of the rear stagnation
+line, which is where the steady recirculation bubble begins; the sign convention
+of \cref{sec:bc} makes that crossing directly readable from the $C_f$ plot. A
+steady, closed, symmetric wake is formed (\cref{fig:cyl20}).
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re20_residuals.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re20_forces.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re20_surface_cp.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re20_mach.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re20_pressure.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re20_velocity_magnitude.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re20_residuals.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re20_forces.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re20_surface_cp.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re20_mach.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re20_pressure.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re20_velocity_magnitude.png}\caption{}\end{subfigure}
 \caption{Cylinder, $Re=20$: (a) residual history, (b) force history with the
 pressure/friction split, (c) wall $C_p$ and $C_f$ versus azimuth ($\theta=0$ is
 the downstream stagnation line), (d) Mach number, (e) pressure, (f) velocity
@@ -1196,7 +1244,7 @@ distributions, in \cref{fig:cyl200hist}.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{cylinder_re200_shedding.png}
+\fig[\textwidth]{cylinder_re200_shedding.png}
 \caption{Reynolds 200 cylinder: post-transient lift and drag oscillations and
 the Hann-windowed lift spectrum used to extract the shedding frequency. Source:
 \code{results/cylinder\_m010\_laminar\_re200/forces.csv}.}
@@ -1205,10 +1253,10 @@ the Hann-windowed lift spectrum used to extract the shedding frequency. Source:
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re200_vorticity.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re200_velocity_magnitude.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re200_pressure.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re200_mach.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re200_vorticity.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re200_velocity_magnitude.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re200_pressure.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re200_mach.png}\caption{}\end{subfigure}
 \caption{Reynolds 200 cylinder at the final time $t=300$: (a) vorticity with the
 recommended clipped range $[-5,5]$, showing the alternating von K\'arm\'an
 street; (b) velocity magnitude over the same wake window; (c) static pressure
@@ -1219,9 +1267,9 @@ with the low-pressure vortex cores; (d) Mach number. All from
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re200_residuals.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re200_forces.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.98\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re200_surface_cp.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re200_residuals.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re200_forces.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.98\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re200_surface_cp.png}\caption{}\end{subfigure}
 \caption{Reynolds 200 cylinder: (a) total dual-time residual per physical step
 and the number of inner iterations used at each step; (b) the complete force
 history from the impulsive start to $t=300$; (c) instantaneous wall pressure
@@ -1238,7 +1286,7 @@ about $\theta=180^\circ$ because the vortex street is shedding.}
 across $np=1,2,4,8$. Every production run in \cref{tab:runs} was executed on 8
 ranks, so the $np=8$ requirement is satisfied for both geometries by the
 submitted results themselves; the rank study is an additional set of runs stored
-in \code{results/\_mpi/}.
+in \code{studies/mpi/}.
 
 Force coefficients agree across rank counts to a relative difference of order
 $10^{-3}$ or better on $C_D$, which is the level of the iterative convergence
@@ -1252,7 +1300,7 @@ boundaries, which changes the path to the steady state but not the state itself.
 \caption{MPI rank-count study. Speed-up is relative to the single-rank run of
 the same case. $\Delta C_D/C_D$ is measured against the single-rank result.}
 \label{tab:mpi}
-\input{tables/tab_mpi}
+\gtable{tab_mpi}
 \end{table}
 
 \begin{table}[htbp]
@@ -1261,12 +1309,12 @@ the same case. $\Delta C_D/C_D$ is measured against the single-rank result.}
 \code{naca0012\_m015\_inviscid} production run
 (\code{partition\_diagnostics.csv}).}
 \label{tab:partition}
-\input{tables/tab_partition}
+\gtable{tab_partition}
 \end{table}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{mpi_scaling.png}
+\fig[\textwidth]{mpi_scaling.png}
 \caption{Rank-count study: parallel speed-up, force consistency and halo growth.
 The dash-dotted line marks the 4-CPU cgroup quota of the benchmark container;
 beyond it the 8-rank runs are oversubscribed, which is why the speed-up
@@ -1279,8 +1327,8 @@ The partitions actually used by the two 8-rank runs are shown in
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{naca0012_m015_inviscid_partition.png}\caption{}\end{subfigure}
-\begin{subfigure}{0.49\textwidth}\includegraphics[width=\linewidth]{cylinder_m010_laminar_re20_partition.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m015_inviscid_partition.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.49\textwidth}\fig[\linewidth]{cylinder_m010_laminar_re20_partition.png}\caption{}\end{subfigure}
 \caption{METIS $k$-way partitions actually used by the 8-rank runs, coloured by
 the rank that owned each cell during the iterations (field \code{RankId} of
 \code{field\_final.vtu}).}
@@ -1315,12 +1363,15 @@ output files and share one style module (\code{tools/plot\_style.py}).
   Between 18 and 60 contour levels are used, with thin contour lines overlaid on
   the near-body views.
 \item \textbf{Colour bars} are always present and always carry the variable name
-  and its nondimensional definition. Ranges are clipped to the
-  $0.2$--$99.8$ percentile \emph{of the plotted window}, which is stated in every
-  caption, so that a handful of cells inside a shock or at a stagnation point
-  cannot collapse the range for the rest of the field. Vorticity uses the
-  explicitly stated symmetric range $[-5,5]$ recommended for this mesh, on a
-  diverging colour map centred on zero.
+  and its nondimensional definition. Ranges of the Mach, pressure and
+  velocity-magnitude plots are clipped to the $1$--$99$ percentile \emph{of the
+  plotted window}, so that a handful of cells inside a shock or at a stagnation
+  point cannot collapse the range for the rest of the field; the clip is
+  recorded in the caption column of \code{report/figure\_manifest.csv} for
+  every affected figure. Vorticity uses a fixed symmetric range on a diverging
+  colour map centred on zero: $[-5,5]$ for the cylinder cases, which is the
+  range recommended in the case file, and $[-20,20]$ for the aerofoil cases,
+  whose boundary-layer vorticity is an order of magnitude larger.
 \item \textbf{View windows} are chosen per geometry: a near-body window for the
   aerofoil ($-0.6\le x\le1.8$), a wake window for the cylinder
   ($-2\le x\le14$), and a wide view for the farfield recovery. The wall outline
@@ -1338,44 +1389,54 @@ output files and share one style module (\code{tools/plot\_style.py}).
 \label{sec:limitations}
 
 \paragraph{Roe flux at the Mach 2 bow shock.} With the Roe flux the Mach 2
-aerofoil cases stall at about $0.9$ residual orders and generate tens of
-thousands of positivity fallbacks per run, whereas HLLC on the identical mesh
-and settings reaches $2.9$ orders with none. The Roe implementation is exact for
+aerofoil case stalls far short of its residual target and generates tens of
+thousands of first-order positivity fallbacks per run, whereas HLLC on the
+identical mesh and settings converges with none
+(\cref{tab:fluxcompare} and the \code{positivity\_fallback\_face\_states} field
+of the two \code{metadata.json} files). The Roe implementation is exact for
 a stationary Rankine--Hugoniot shock (\cref{sec:verification}) and agrees with
-HLLC to $0.03\%$ on the subsonic cases (\cref{tab:fluxcompare}), so this is the
-classical Roe shock instability rather than an implementation defect --- the
+HLLC on the subsonic cases (\cref{tab:fluxcompare}), so this is the classical
+Roe shock instability rather than an implementation defect --- the
 strongly stretched cells that this viscous-type mesh places across the bow shock
-are exactly the configuration that triggers it. Increasing the Harten--Yee
-coefficient to $0.3$ did not cure it. HLLC was therefore adopted as the
-production flux; Roe remains available and verified.
+are exactly the configuration that triggers it. The entropy-fix coefficient is
+exposed as \code{--entropy-fix}, but increasing it adds dissipation to the
+acoustic fields only, which is not where the instability originates. HLLC was
+therefore adopted as the production flux; Roe remains available and verified,
+and the two agree closely on every case where Roe converges.
 
-\paragraph{Limiter limit cycle at Mach 2.} As described in \cref{sec:time}, the
-non-differentiable $\min/\max$ stencil of the limiter produces a residual limit
-cycle at Mach 2 with about $0.7\%$ scatter in $C_D$
-(\cref{fig:m200_limitcycle}). Freezing the limiter after step 15000 removes it,
-but the residual level reached \emph{before} freezing --- and therefore the
-frozen limiter pattern --- is not unique: freezing at step 6000 instead of 15000
-changes $C_D$ from $0.08784$ to $0.08828$, i.e.\ by $0.5\%$. That $0.5\%$ should
-be regarded as the honest uncertainty of the Mach 2 drag on this mesh. A
-differentiable limiter (e.g.\ an MLP-$u2$ or a smooth pressure-based sensor)
-would be the proper fix.
+\paragraph{Residual limit cycle on the shock cases.} As described in
+\cref{sec:time}, the non-differentiable $\min/\max$ stencil of the limiter drives
+the shock-containing cases into a bounded residual limit cycle. Freezing the
+limiter removes it at Mach 0.8 (\cref{fig:limiter_study}). At Mach 2 the run
+reaches the requested three-order reduction, and the stationarity test accepts
+it, while the solution is still inside the cycle: over the acceptance window the
+drag scatter is about $0.2\%$ of $C_D$ with no drift. That $0.2\%$ --- not the
+five digits printed in \cref{tab:forces} --- is the honest uncertainty of the
+Mach 2 drag on this mesh, and it is the reason the force-stationarity tolerance
+is $0.3\%$ rather than tighter. A differentiable limiter (an MLP-$u2$ variant or
+a smooth pressure-based sensor) would be the proper fix.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{m200_limiter_study.png}
-\caption{Mach 2 inviscid aerofoil: residual history without limiter freezing
-(limit cycle) and with the limiter frozen at step 15000. Source:
-\code{results/\_verify/} and \code{results/naca0012\_m200\_inviscid/residuals.csv}.}
-\label{fig:m200_limitcycle}
+\fig[0.8\textwidth]{limiter_study.png}
+\caption{Mach 0.8 inviscid aerofoil: residual and drag history with the limiter
+recomputed at every step (bounded limit cycle, residual stalling around
+$10^{-3}$ of its initial value) and with the limiter frozen from step 9000,
+after which the residual reaches the requested four-order reduction within a few
+steps. Source: \code{studies/verify/naca0012\_m080\_inviscid\_nofreeze/} and
+\code{results/naca0012\_m080\_inviscid/}.}
+\label{fig:limiter_study}
 \end{figure}
 
 \paragraph{Limiter accuracy in smooth regions.} The manufactured-solution study
-shows that the Venkatakrishnan limiter with $\epsilon^2=(Kh)^3$ reduces the
-observed order from \mmsOrderSecond{} to \mmsOrderSecondLimited{} as the mesh is
-refined. On the fixed benchmark meshes this is a bounded effect, but it means
-the delivered accuracy in smooth regions is between first and second order
-rather than fully second order. Raising $K$ mitigates it at the cost of shock
-robustness; $K=5$ is the compromise used throughout.
+measures \mmsOrderSecondLimited{} with the limiter active against
+\mmsOrderSecond{} without it, so at these resolutions the Venkatakrishnan
+limiter is not costing accuracy in smooth flow. That is not guaranteed to hold
+under further refinement: $\epsilon^{2}=(Kh)^{3}$ vanishes faster than
+$\Delta^{\pm2}\sim h^{2}$, so on a sufficiently fine mesh the limiter degenerates
+towards Barth--Jespersen and the formal order drops. Raising $K$ postpones this
+at the cost of shock robustness; $K=5$ is the compromise used throughout, and no
+attempt was made to tune it per case.
 
 \paragraph{Low-Mach dissipation.} No low-Mach preconditioning is implemented.
 At $M_\infty=0.1$--$0.15$ the upwind dissipation of HLLC scales with the

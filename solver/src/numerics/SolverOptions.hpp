@@ -34,7 +34,10 @@ struct SolverOptions {
   Real viscous_dt_factor = 4.0;      // weight of the viscous spectral radius in dtau
   Real positivity_floor = 1.0e-10;   // relative to freestream rho / p
   int max_update_backtracks = 8;
-  int limiter_freeze_step = -1;      // freeze the limiter from this step on (-1 = never)
+  // Step from which the limiter values are held fixed.  -1 selects the
+  // automatic rule (three CFL-ramp lengths for steady runs, never for
+  // transient runs); 0 disables freezing; a positive value sets it explicitly.
+  int limiter_freeze_step = -1;
   std::string field_format = "vtu";
   int field_precision = 32;          // 32 or 64 bit floats in the VTU payload
   bool write_intermediate_fields = true;

@@ -78,7 +78,7 @@ def plot_residuals(case_dir, cid, meta, out, man):
     names = [("rho", r"$\rho$"), ("rhou", r"$\rho u$"), ("rhov", r"$\rho v$"),
              ("rhoE", r"$\rho E$")]
     for i, (k, lbl) in enumerate(names):
-        ax.semilogy(x, np.maximum(res[k], 1e-300), color=SERIES[i], lw=1.2, label=lbl)
+        ax.semilogy(x, np.maximum(res[k], 1e-300), color=SERIES[i], lw=1.3, label=lbl)
     ax.semilogy(x, np.maximum(res["residual_l2"], 1e-300), color="k", lw=1.8,
                 label=r"total $L_2$")
     ax.set_xlabel(xlabel)
@@ -87,7 +87,11 @@ def plot_residuals(case_dir, cid, meta, out, man):
     ax.legend(ncol=2, loc="best")
     if transient:
         ax2 = axes[1]
-        ax2.plot(res["physical_time"], res["inner_iter"], color=SERIES[0], lw=1.0)
+        ax2.plot(res["physical_time"], res["inner_iter"], color=SERIES[0], lw=1.2,
+                 label="inner iterations")
+        ax2.axhline(float(np.mean(res["inner_iter"][1:])), color="k", ls="--", lw=0.9,
+                    label=fr"mean {np.mean(res['inner_iter'][1:]):.1f}")
+        ax2.legend()
         ax2.set_xlabel(xlabel)
         ax2.set_ylabel("inner iterations per physical step")
         ax2.set_title(f"{cid}: dual-time inner iterations")
@@ -107,7 +111,7 @@ def plot_forces(case_dir, cid, meta, out, man):
     xlabel = r"physical time $t\,U_\infty/L_{\mathrm{ref}}$" if transient else "pseudo-time step"
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.0))
     axes[0].plot(x, fc["cd"], color=SERIES[1], label=r"$C_D$ (total)")
-    axes[0].plot(x, fc["pressure_drag"], color=SERIES[0], ls="--", lw=1.1,
+    axes[0].plot(x, fc["pressure_drag"], color=SERIES[0], ls="--", lw=1.3,
                  label=r"$C_{D,p}$ (pressure)")
     if np.max(np.abs(fc["viscous_drag"])) > 1e-12:
         axes[0].plot(x, fc["viscous_drag"], color=SERIES[2], ls=":", lw=1.3,
@@ -117,7 +121,7 @@ def plot_forces(case_dir, cid, meta, out, man):
     axes[0].set_title(f"{cid}: drag history")
     axes[0].legend()
     axes[1].plot(x, fc["cl"], color=SERIES[0], label=r"$C_L$")
-    axes[1].plot(x, fc["cmz"], color=SERIES[3], lw=1.1, label=r"$C_{m,z}$")
+    axes[1].plot(x, fc["cmz"], color=SERIES[3], lw=1.3, label=r"$C_{m,z}$")
     axes[1].set_xlabel(xlabel)
     axes[1].set_ylabel(r"$C_L$, $C_{m,z}$")
     axes[1].set_title(f"{cid}: lift and moment history")
@@ -168,7 +172,7 @@ def plot_surface_naca(case_dir, cid, meta, out, man, viscous):
                                (lower, "lower surface", SERIES[1], "s")):
             o = np.argsort(xc[sel])
             ax.plot(xc[sel][o], cf[sel][o], color=c, marker=m, ms=2.4, lw=1.2, label=lbl)
-        ax.axhline(0.0, color="k", lw=0.7, ls="--")
+        ax.axhline(0.0, color="k", lw=1.1, ls="--", label="separation ($C_f=0$)")
         ax.set_xlabel(r"$x/c$")
         ax.set_ylabel(r"skin-friction coefficient $C_f$")
         ax.set_title(f"{cid}: skin-friction distribution")
@@ -195,15 +199,20 @@ def plot_surface_cylinder(case_dir, cid, meta, out, man, viscous):
     o = np.argsort(theta)
     fig, axes = plt.subplots(1, 2 if viscous else 1, figsize=(11 if viscous else 6.0, 4.2))
     axes = np.atleast_1d(axes)
-    axes[0].plot(theta[o], cp[o], color=SERIES[0], marker="o", ms=2.6, lw=1.3)
+    axes[0].plot(theta[o], cp[o], color=SERIES[0], marker="o", ms=2.6, lw=1.3,
+                 label=r"$C_p$ (wall value)")
+    axes[0].axhline(0.0, color="k", lw=0.8, ls=":")
+    axes[0].legend()
     axes[0].set_xlabel(r"azimuth $\theta$ [deg] (0$^\circ$ = rear stagnation line, downstream)")
     axes[0].set_ylabel(r"pressure coefficient $C_p$")
     axes[0].set_title(f"{cid}: wall pressure coefficient")
     axes[0].set_xlim(0, 360)
     axes[0].set_xticks(np.arange(0, 361, 45))
     if viscous:
-        axes[1].plot(theta[o], cf[o], color=SERIES[1], marker="s", ms=2.6, lw=1.3)
-        axes[1].axhline(0.0, color="k", lw=0.7, ls="--")
+        axes[1].plot(theta[o], cf[o], color=SERIES[1], marker="s", ms=2.6, lw=1.3,
+                     label=r"$C_f$ (tangential wall traction)")
+        axes[1].axhline(0.0, color="k", lw=0.9, ls="--", label="separation ($C_f=0$)")
+        axes[1].legend()
         axes[1].set_xlabel(r"azimuth $\theta$ [deg]")
         axes[1].set_ylabel(r"skin-friction coefficient $C_f$")
         axes[1].set_title(f"{cid}: wall skin friction")
@@ -279,9 +288,8 @@ def main():
         # so that a couple of cells inside a shock or at the stagnation point
         # cannot collapse the range for the rest of the field.  Stated in the
         # caption, as required by the visualisation guidelines.
-        clip = (0.2, 99.8)
-        clip_note = (" Colour range clipped to the 0.2--99.8 percentile of the plotted "
-                     "window.")
+        clip = (1.0, 99.0)
+        clip_note = (" Colour range clipped to the 1--99 percentile of the plotted window.")
         plot_field(mesh, mesh.cell_data["Mach"], cid, args.out, man, "mach", "mach",
                    r"Mach number $M$",
                    f"Mach-number contours near the body for {cid}, from the final field file."
@@ -298,12 +306,12 @@ def main():
                    f"Velocity-magnitude contours for {cid} over the wake window." + clip_note,
                    wake, body=body, cmap="viridis", lines=0, clip=clip)
         vort = mesh.cell_data["Vorticity"]
-        clip = 5.0 if is_cyl else 20.0
+        vort_clip = 5.0 if is_cyl else 20.0
         plot_field(mesh, vort, cid, args.out, man, "vorticity", "vorticity",
                    r"vorticity $\omega_z L_{\mathrm{ref}}/U_\infty$",
-                   f"Vorticity contours for {cid}, clipped to $[{-clip:g},{clip:g}]$ so that the "
-                   f"wake structure is visible.",
-                   wake, body=body, cmap="RdBu_r", vmin=-clip, vmax=clip)
+                   f"Vorticity contours for {cid}, clipped to the symmetric range "
+                   f"$[{-vort_clip:g},{vort_clip:g}]$ so that the wake structure is visible.",
+                   wake, body=body, cmap="RdBu_r", vmin=-vort_clip, vmax=vort_clip)
 
         # Whole-domain overview so the farfield treatment can be inspected.
         wide_win = (-25, 45, -25, 25) if is_cyl else (-12, 20, -12, 12)
@@ -333,11 +341,12 @@ def main():
          "results/cylinder_m010_laminar_re200/forces.csv",
          "Post-transient lift and drag oscillations and the Hann-windowed lift spectrum used "
          "to extract the shedding frequency and Strouhal number."),
-        ("m200_limiter_study.png", "naca0012_m200_inviscid", "line",
+        ("limiter_study.png", "naca0012_m080_inviscid", "line",
          "residual_and_drag_limiter_study",
-         "results/naca0012_m200_inviscid/residuals.csv",
-         "Mach 2 aerofoil: residual and drag history with the limiter recomputed every step "
-         "(limit cycle) and with the limiter frozen from step 15000."),
+         "results/naca0012_m080_inviscid/residuals.csv",
+         "Mach 0.8 aerofoil: residual and drag history with the limiter recomputed at every "
+         "step (bounded limit cycle) and with the limiter frozen from step 9000, after which "
+         "the residual reaches the requested four-order reduction."),
         ("mms_order.png", "verification", "line", "manufactured_solution_error",
          "report/verification.json",
          "Manufactured-solution discretisation error against mean cell size for the "

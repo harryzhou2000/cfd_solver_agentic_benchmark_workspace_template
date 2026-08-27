@@ -19,9 +19,12 @@ $PY tools/analyze_transient.py --case-dir $R/cylinder_m010_laminar_re200 \
     --case-json $CASES/cylinder_m010_laminar_re200.json \
     --out-figure $REP/figures/cylinder_re200_shedding.png \
     --out-json $REP/shedding_analysis.json --start-fraction 0.5 > /dev/null || true
-$PY tools/limiter_study.py --frozen $R/naca0012_m200_inviscid \
-    --free studies/verify/naca0012_m200_inviscid_nofreeze --freeze-step 15000 \
-    --out $REP/figures/m200_limiter_study.png || true
+# The Mach 0.8 case is the one where limiter freezing is decisive: it converges
+# within a few steps of the freeze point, whereas the unfrozen run limit-cycles.
+$PY tools/limiter_study.py --frozen $R/naca0012_m080_inviscid \
+    --free studies/verify/naca0012_m080_inviscid_nofreeze --freeze-step 9000 \
+    --case-label "NACA0012 \$M_\\infty=0.8\$" \
+    --out $REP/figures/limiter_study.png || true
 $PY tools/plot_verification.py --json $REP/verification.json \
     --out $REP/figures/mms_order.png || true
 $PY tools/make_figures.py --results $R --out $REP/figures --manifest $REP/figure_manifest.csv

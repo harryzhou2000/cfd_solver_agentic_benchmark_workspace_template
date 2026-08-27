@@ -220,7 +220,10 @@ CaseConfig CaseConfig::loadFromFile(const std::string& path) {
     c.run.residual_reduction_target = getOr<Real>(r, "residual_reduction_target", 4.0);
     c.run.time_step = getOr<Real>(r, "time_step", 0.0);
     c.run.final_time = getOr<Real>(r, "final_time", 0.0);
-    const std::string ti = lower(getOr<std::string>(r, "time_integrator", std::string("bdf2_or_trapezoidal")));
+    // "bdf2_or_trapezoidal" means either second-order method is acceptable; we
+    // default to BDF2 and let --time-integrator select the trapezoidal rule.
+    const std::string ti =
+        lower(getOr<std::string>(r, "time_integrator", std::string("bdf2_or_trapezoidal")));
     if (ti.find("trapezoid") != std::string::npos && ti.find("bdf2") == std::string::npos) {
       c.run.time_integrator = TimeIntegratorType::kTrapezoidal;
     } else {

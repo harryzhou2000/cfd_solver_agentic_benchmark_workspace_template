@@ -11,14 +11,12 @@ R=results
 S=studies
 NP=${NP:-8}
 
-# Options shared by every case.  Two groups of cases additionally need a
-# documented deviation (see README.md and section 7 of the report): the Mach 2
-# cases freeze the limiter once the shock system has settled, and the Reynolds
-# 200 dual-time run uses a larger pseudo-time CFL with a stricter inner target.
+# Options shared by every case.  The only documented deviation from the case
+# files is for the Reynolds 200 dual-time run, which uses a larger pseudo-time
+# CFL with a stricter inner residual target (see README.md and section 7 of the
+# report).  Limiter freezing is automatic and uniform (three CFL-ramp lengths)
+# and therefore needs no per-case flag.
 COMMON="--progress-every 2000"
-# The Mach 2 cases hold the limiter fixed once the shock system has settled,
-# which removes the limit cycle of the non-differentiable min/max stencil.
-FREEZE_M200="--freeze-limiter-step 15000"
 # The Re 200 dual-time run uses a larger pseudo-time CFL together with a
 # *stricter* inner residual target than the supplied values; see report.
 RE200_OPTS="--cfl-scale 30 --inner-target 1e-4"
@@ -28,11 +26,11 @@ run() { scripts/run_case.sh "$@" 2>&1 | grep -v "Authorization required" || true
 if [ "$MODE" = steady ] || [ "$MODE" = production ] || [ "$MODE" = all ]; then
   run naca0012_m015_inviscid        $NP $R/naca0012_m015_inviscid        $COMMON
   run naca0012_m080_inviscid        $NP $R/naca0012_m080_inviscid        $COMMON
-  run naca0012_m200_inviscid        $NP $R/naca0012_m200_inviscid        $COMMON $FREEZE_M200
+  run naca0012_m200_inviscid        $NP $R/naca0012_m200_inviscid        $COMMON
   run cylinder_m010_laminar_re20    $NP $R/cylinder_m010_laminar_re20    $COMMON
   run naca0012_m015_laminar_re5000  $NP $R/naca0012_m015_laminar_re5000  $COMMON
   run naca0012_m080_laminar_re5000  $NP $R/naca0012_m080_laminar_re5000  $COMMON
-  run naca0012_m200_laminar_re5000  $NP $R/naca0012_m200_laminar_re5000  $COMMON $FREEZE_M200
+  run naca0012_m200_laminar_re5000  $NP $R/naca0012_m200_laminar_re5000  $COMMON
 fi
 
 if [ "$MODE" = transient ] || [ "$MODE" = production ] || [ "$MODE" = all ]; then
@@ -50,9 +48,11 @@ if [ "$MODE" = verify ] || [ "$MODE" = all ]; then
   # Flux-scheme cross-check: Roe with Harten-Yee entropy fix vs HLLC.
   run naca0012_m015_inviscid     4 $S/verify/naca0012_m015_inviscid_roe  $COMMON --flux roe
   run cylinder_m010_laminar_re20 4 $S/verify/cylinder_m010_laminar_re20_roe $COMMON --flux roe
-  # Mach 2 without limiter freezing, to document the limit cycle.
+  # Mach 2 and Mach 0.8 without limiter freezing, to document the limit cycle.
   run naca0012_m200_inviscid     4 $S/verify/naca0012_m200_inviscid_nofreeze $COMMON \
-      --max-steps 20000
+      --max-steps 20000 --freeze-limiter-step 0
+  run naca0012_m080_inviscid     4 $S/verify/naca0012_m080_inviscid_nofreeze $COMMON \
+      --max-steps 20000 --freeze-limiter-step 0
   # First-order reference, to show what the linear reconstruction buys.
   run naca0012_m015_laminar_re5000 4 $S/verify/naca0012_m015_laminar_re5000_o1 \
       $COMMON --first-order --max-steps 20000

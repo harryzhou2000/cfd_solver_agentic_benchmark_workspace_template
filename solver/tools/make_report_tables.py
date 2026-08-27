@@ -17,6 +17,18 @@ import sys
 
 import numpy as np
 
+# LaTeX / package commands that look like our macros but are not.
+LATEX_BUILTINS = {
+    "providecommand", "newcommand", "includegraphics", "graphicspath", "documentclass",
+    "usepackage", "tableofcontents", "hspace", "vspace", "linewidth", "textwidth",
+    "toprule", "midrule", "bottomrule", "maketitle", "subsection", "subsubsection",
+    "tabular", "lstset", "detokenize", "IfFileExists", "parbox", "fbox", "mathbf",
+    "mathrm", "mathcal", "textbf", "textit", "texttt", "textsc", "footnotesize",
+    "clearpage", "newpage", "centering", "caption", "label", "cref", "Cref", "ref",
+    "input", "section", "paragraph", "emph", "code", "fig", "gtable", "mathsf",
+    "colon", "infty", "partial", "nabla", "cdot", "quad", "qquad", "hline",
+}
+
 CASE_DIR = os.environ.get("CFD_CASE_DIR",
                           "../cfd_solver_agentic_benchmark/inputs/cases")
 
@@ -164,10 +176,10 @@ def main():
     for cid, c in cases.items():
         j = json.load(open(os.path.join(CASE_DIR, cid + ".json")))
         bc = [v for k, v in j["boundary_conditions"].items() if v != "farfield"]
-        re = j["physics"].get("reynolds", 0.0)
+        re_num = j["physics"].get("reynolds", 0.0)
         T.append(rf"{PRETTY[cid]} & {esc(os.path.basename(j['mesh']['file']))} & "
                  rf"{j['freestream']['mach']:g} & {j['freestream']['aoa_degrees']:g}$^\circ$ & "
-                 rf"{('--' if not re else f'{re:g}')} & "
+                 rf"{('--' if not re_num else f'{re_num:g}')} & "
                  rf"{int(c['meta']['num_cells_global'])} & {esc(bc[0] if bc else '--')}\\")
     T.append(r"\bottomrule")
     T.append(r"\end{tabular}")
@@ -269,11 +281,74 @@ def main():
             last = r["case_id"]
             T.append(rf"{esc(r['case_id'])} & {r['mpi_ranks']} & {float(r['wall_time_s']):.1f} & "
                      rf"{float(r['speedup']):.2f} & {float(r['cl']):+.6f} & "
-                     rf"{float(r['cd']):.6f} & {fmt(float(r['cd_rel_diff_vs_np1']), 2)} & "
+                     rf"{float(r['cd']):.6f} & {fmt(float(r.get('cd_rel_diff_vs_ref', r.get('cd_rel_diff_vs_np1', 0.0))), 2)} & "
                      rf"{r['edge_cut']} & {float(r['load_balance']):.4f}\\")
         T.append(r"\bottomrule")
         T.append(r"\end{tabular}")
         flush("mpi")
+
+    # ------------------------------------------------------------------ flux cross-check
+    # Pairs each production (HLLC) run with the Roe run of the same case in
+    # studies/verify, so the comparison table is generated from submitted data.
+    flux_rows = []
+    for cid, c in cases.items():
+        alt = os.path.join("studies", "verify", cid + "_roe")
+        if not os.path.exists(os.path.join(alt, "metadata.json")):
+            continue
+        am = json.load(open(os.path.join(alt, "metadata.json")))
+        astatus = json.load(open(os.path.join(alt, "run_status.json")))
+        flux_rows.append((PRETTY[cid], c["meta"], c["status"], am, astatus))
+    if flux_rows:
+        T.append(r"% ---- Roe vs HLLC cross-check")
+        T.append(r"\begin{tabular}{llrrrr}")
+        T.append(r"\toprule")
+        T.append(r"case & flux & $C_L$ & $C_D$ & residual orders & steps\\")
+        T.append(r"\midrule")
+        for name, m1, s1, m2, s2 in flux_rows:
+            T.append(rf"{name} & {esc(m1['inviscid_flux'])} & {float(m1['final_cl']):+.6f} & "
+                     rf"{float(m1['final_cd']):.6f} & "
+                     rf"{float(s1['residual_reduction_orders']):.2f} & {int(s1['final_step'])}\\")
+            T.append(rf" & {esc(m2['inviscid_flux'])} + Harten--Yee & {float(m2['final_cl']):+.6f} & "
+                     rf"{float(m2['final_cd']):.6f} & "
+                     rf"{float(s2['residual_reduction_orders']):.2f} & {int(s2['final_step'])}\\")
+            rel = abs(float(m1['final_cd']) - float(m2['final_cd'])) / max(abs(float(m1['final_cd'])), 1e-30)
+            T.append(rf" & relative $C_D$ difference & & {fmt(rel, 2)} & & \\")
+            T.append(r"\midrule")
+        T[-1] = r"\bottomrule"
+        T.append(r"\end{tabular}")
+        flush("flux")
+
+    # ------------------------------------------------------------------ dual-time CFL study
+    cflroot = os.path.join("studies", "cflstudy")
+    if os.path.isdir(cflroot):
+        entries = []
+        for d in sorted(os.listdir(cflroot)):
+            mp = os.path.join(cflroot, d, "metadata.json")
+            if not os.path.exists(mp):
+                continue
+            mm = json.load(open(mp))
+            ss = json.load(open(os.path.join(cflroot, d, "run_status.json")))
+            ff = load_csv(os.path.join(cflroot, d, "forces.csv"))
+            entries.append((float(mm["effective_cfl_max"]),
+                            float(mm["inner_residual_reduction_target"]),
+                            float(mm["observed_mean_inner_iterations"]),
+                            float(ss["wall_time_seconds"]), float(ff["cd"][-1]),
+                            float(ss["final_physical_time"])))
+        if entries:
+            entries.sort(key=lambda e: (-e[1], e[0]))
+            ref = min(entries, key=lambda e: e[1])[4]   # tightest inner target
+            T.append(r"% ---- dual-time CFL / inner-target study")
+            T.append(r"\begin{tabular}{rrrrrr}")
+            T.append(r"\toprule")
+            T.append(r"pseudo-CFL & inner target & mean inner its & wall time [s] & "
+                     r"$C_D(t=" + f"{entries[0][5]:g}" + r")$ & $|\Delta C_D|$ vs.\ tightest\\")
+            T.append(r"\midrule")
+            for cfl, tgt, mean_it, wall, cdv, _t in entries:
+                T.append(rf"{cfl:g} & {fmt(tgt,0)} & {mean_it:.1f} & {wall:.1f} & {cdv:.6f} & "
+                         rf"{fmt(abs(cdv-ref),1)}\\")
+            T.append(r"\bottomrule")
+            T.append(r"\end{tabular}")
+            flush("cflstudy")
 
     # ------------------------------------------------------------------ verification
     vpath = os.path.join(args.report, "verification.json")
@@ -377,10 +452,28 @@ def main():
     bad = [l for l in M if not re.match(r"^\\newcommand\{\\[A-Za-z]+\}", l)]
     if bad:
         raise SystemExit("generated macro names must be purely alphabetic: " + str(bad[:3]))
-    for name in ("runs", "cases", "forces", "numerics", "inner", "partition", "mpi", "mms"):
+    for name in ("runs", "cases", "forces", "numerics", "inner", "partition", "mpi", "mms",
+                 "flux", "cflstudy"):
         p = os.path.join(tdir, f"tab_{name}.tex")
         if not os.path.exists(p):
             open(p, "w").write(r"\emph{(data not available)}" + "\n")
+    # Any macro the report uses but this run could not populate gets a visible
+    # "??" fallback, so a missing data file shows up in the PDF instead of
+    # breaking the build.
+    tex_path = os.path.join(args.report, "report.tex")
+    if os.path.exists(tex_path):
+        defined = {re.match(r"\\newcommand\{\\([A-Za-z]+)\}", l).group(1) for l in M}
+        body = open(tex_path).read()
+        used = set(re.findall(r"\\([a-zA-Z]+)", body))
+        candidates = sorted(m for m in used
+                            if m not in defined and m[0].islower()
+                            and any(c.isupper() for c in m) and len(m) > 3
+                            and m not in LATEX_BUILTINS)
+        if candidates:
+            M.append("% fallbacks for macros this run could not populate")
+            M += [rf"\providecommand{{\{m}}}{{\textbf{{??}}}}" for m in candidates]
+            print(f"  {len(candidates)} macro(s) not populated: {', '.join(candidates[:6])}"
+                  + (" ..." if len(candidates) > 6 else ""))
     open(os.path.join(args.report, "generated_macros.tex"), "w").write("\n".join(M) + "\n")
     print(f"wrote {tdir}/tab_*.tex ({len(tables)} tables) and "
           f"generated_macros.tex ({len(M)} macros)")

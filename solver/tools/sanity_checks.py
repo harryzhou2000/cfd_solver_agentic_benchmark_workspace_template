@@ -32,6 +32,15 @@ def load_csv(path):
     return out
 
 
+CASE_DIR = os.environ.get("CFD_CASE_DIR",
+                          "../cfd_solver_agentic_benchmark/inputs/cases")
+
+
+def case_json(cid):
+    p = os.path.join(CASE_DIR, cid + ".json")
+    return json.load(open(p)) if os.path.exists(p) else None
+
+
 def check(name, passed, detail, value=None):
     return dict(name=name, passed=bool(passed), detail=detail, value=value)
 
@@ -56,6 +65,26 @@ def analyse_case(cdir, cid, manifest_vars):
                         "minimum cell pressure in field_final.vtu", float(p.min())))
     finite = all(np.all(np.isfinite(v)) for v in mesh.cell_data.values())
     checks.append(check("field_all_finite", finite, "all field variables are finite"))
+
+    # Total-enthalpy conservation.  For steady inviscid flow H must be uniform;
+    # the area-weighted RMS measures that over the domain, while the pointwise
+    # maximum is reported for information because it is dominated by the
+    # sub-micron first cell layer of these viscous-type grids.
+    if not viscous:
+        gam = 1.4
+        area = mesh.cell_areas()
+        vel2 = mesh.cell_data["VelocityX"] ** 2 + mesh.cell_data["VelocityY"] ** 2
+        H = gam * p / ((gam - 1.0) * rho) + 0.5 * vel2
+        cj = case_json(cid)
+        pinf = float(cj["freestream"]["pressure"]) if cj else float(np.median(p))
+        rinf = float(cj["freestream"]["rho"]) if cj else 1.0
+        uinf = float(cj["freestream"]["velocity_magnitude"]) if cj else 1.0
+        Hinf = gam * pinf / ((gam - 1.0) * rinf) + 0.5 * uinf ** 2
+        rel = np.abs(H - Hinf) / Hinf
+        arms = float(np.sqrt((area * rel ** 2).sum() / area.sum()))
+        checks.append(check("inviscid_total_enthalpy_uniform", arms < 1.0e-3,
+                            "area-weighted RMS of |H-H_inf|/H_inf over the domain "
+                            f"(pointwise max {rel.max():.3e})", arms))
 
     cp = surface["cp"]
     checks.append(check("surface_cp_varies", float(cp.max() - cp.min()) > 0.05,
@@ -98,7 +127,8 @@ def analyse_case(cdir, cid, manifest_vars):
     uref = 1.0
     if viscous:
         checks.append(check("no_slip_wall_velocity_zero", float(speed.max()) < 1.0e-10 * uref,
-                            "maximum reported wall speed on no-slip walls", float(speed.max())))
+                            "maximum reported wall speed on no-slip walls (exactly zero by "
+                            "construction of the boundary state)", float(speed.max())))
         checks.append(check("no_slip_skin_friction_nonzero",
                             float(np.max(np.abs(surface["cf"]))) > 1.0e-4,
                             "maximum |C_f| on the wall", float(np.max(np.abs(surface["cf"])))))
@@ -109,8 +139,11 @@ def analyse_case(cdir, cid, manifest_vars):
     else:
         un = np.abs(u * nx + v * ny)
         ut = np.abs(u * ny - v * nx)
-        checks.append(check("slip_wall_normal_velocity_zero", float(un.max()) < 1.0e-10 * uref,
-                            "maximum |u.n| on slip walls", float(un.max())))
+        # surface.csv is written with 10 significant digits, so the round-off
+        # floor of a value reconstructed from the file is ~1e-10 of |u|.
+        checks.append(check("slip_wall_normal_velocity_zero", float(un.max()) < 1.0e-8 * uref,
+                            "maximum |u.n| on slip walls, recomputed from surface.csv "
+                            "(limited by the 10-digit file precision)", float(un.max())))
         checks.append(check("slip_wall_tangential_velocity_nonzero", float(ut.max()) > 1.0e-2,
                             "maximum |u.t| on slip walls", float(ut.max())))
         checks.append(check("inviscid_viscous_columns_negligible",

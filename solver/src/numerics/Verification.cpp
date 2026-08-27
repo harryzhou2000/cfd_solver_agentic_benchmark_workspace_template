@@ -70,9 +70,10 @@ ConsVec manufacturedFluxY(Real x, Real y, Real gamma) {
           w[2] * (w[0] * E + w[3])};
 }
 
-// Analytic divergence of the inviscid flux, evaluated by high-order-accurate
-// central differences of the closed-form flux (step chosen so that truncation
-// and round-off are both far below the discretisation error being measured).
+// Divergence of the inviscid flux of the manufactured state, evaluated by
+// second-order central differences of the closed-form flux.  With h = 1e-5 the
+// truncation error is ~1e-10 and the round-off ~1e-11 of the flux scale, i.e.
+// ten orders below the discretisation errors being measured.
 ConsVec analyticDivergence(Real x, Real y, Real gamma) {
   const Real h = 1.0e-5;
   const ConsVec fxp = manufacturedFluxX(x + h, y, gamma);
@@ -241,9 +242,36 @@ OrderLevel measureLevel(int n, const SolverOptions& opts, MPI_Comm comm, Real ji
 }
 
 
-// Exact cell average of the manufactured state, by a 3-point quadrature on each
-// triangle of the polygon (degree-2 exact, so the quadrature error is far below
-// the discretisation error being measured).
+// Cell average of a pointwise function, by a 3-point (edge-midpoint)
+// quadrature on each triangle of the polygon.  The rule is exact for
+// quadratics, so its error is far below the discretisation error being
+// measured.  Both the manufactured state (for the error norm) and the source
+// term (for the discrete equation) use it, which keeps the two consistent.
+template <typename F>
+auto cellAverage(const LocalMesh& m, Index c, F f) -> decltype(f(0.0, 0.0)) {
+  const Index* nodes = m.cellNodePtr(c);
+  const int n = m.cellSize(c);
+  auto acc = f(m.cell_center[c][0], m.cell_center[c][1]);
+  for (auto& v : acc) v = 0.0;
+  Real area_tot = 0.0;
+  for (int k = 1; k < n - 1; ++k) {
+    const Index a = nodes[0], b = nodes[k], d = nodes[k + 1];
+    const Real ax = m.x[a], ay = m.y[a];
+    const Real bx = m.x[b], by = m.y[b];
+    const Real dx = m.x[d], dy = m.y[d];
+    const Real area = 0.5 * std::abs((bx - ax) * (dy - ay) - (dx - ax) * (by - ay));
+    const Real qx[3] = {0.5 * (ax + bx), 0.5 * (bx + dx), 0.5 * (dx + ax)};
+    const Real qy[3] = {0.5 * (ay + by), 0.5 * (by + dy), 0.5 * (dy + ay)};
+    for (int q = 0; q < 3; ++q) {
+      const auto val = f(qx[q], qy[q]);
+      for (std::size_t v = 0; v < acc.size(); ++v) acc[v] += (area / 3.0) * val[v];
+    }
+    area_tot += area;
+  }
+  for (auto& v : acc) v /= std::max(area_tot, 1e-300);
+  return acc;
+}
+
 PrimVec exactCellAverage(const LocalMesh& m, Index c) {
   const Index* nodes = m.cellNodePtr(c);
   const int n = m.cellSize(c);
@@ -299,9 +327,11 @@ MmsLevel mmsLevel(int n, const SolverOptions& opts, MPI_Comm comm, Real jitter) 
 
   const std::size_t nt = static_cast<std::size_t>(lmesh.numTotalCells()) * kNVar;
   std::vector<Real> du(nt, 0.0), rhs(nt, 0.0), source(nt, 0.0);
+  const Real gam = cfg.gas.gamma;
   for (Index c = 0; c < lmesh.num_owned; ++c) {
-    const ConsVec d = analyticDivergence(lmesh.cell_center[c][0], lmesh.cell_center[c][1],
-                                         cfg.gas.gamma);
+    const ConsVec d = cellAverage(lmesh, c, [gam](Real x, Real y) {
+      return analyticDivergence(x, y, gam);
+    });
     for (int k = 0; k < kNVar; ++k) source[c * kNVar + k] = lmesh.cell_volume[c] * d[k];
   }
 
@@ -499,12 +529,14 @@ VerificationReport runVerification(int levels, int base, const std::string* case
       op.initializeFreestream();
       op.evaluateResidual();
       Real worst = 0.0;
-      const Real scale = cfg.freestream.rho * cfg.freestreamSoundSpeed();
+      // Same per-equation scaling as the solver's residual norm.
+      const Real rinf = cfg.freestream.rho, ainf = cfg.freestreamSoundSpeed();
+      const Real sk[kNVar] = {rinf, rinf * ainf, rinf * ainf, rinf * ainf * ainf};
       for (Index c = 0; c < lmesh.num_owned; ++c) {
         if (touches_boundary[c]) continue;
         for (int k = 0; k < kNVar; ++k)
           worst = std::max(worst, std::abs(op.residual()[c * kNVar + k]) /
-                                      (lmesh.cell_volume[c] * scale));
+                                      (lmesh.cell_volume[c] * sk[k]));
       }
       rep.freestream_residual_linf = globalMax(worst, comm);
     }

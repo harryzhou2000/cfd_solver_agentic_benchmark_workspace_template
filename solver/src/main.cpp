@@ -67,11 +67,15 @@ const char* kUsage =
     "  --limiter venkatakrishnan|barth|none   (default venkatakrishnan)\n"
     "  --venk-k <x>                     Venkatakrishnan constant (default 5)\n"
     "  --first-order                    disable linear reconstruction (debug only)\n"
-    "  --freeze-limiter-step <n>        hold the limiter fixed from step n on, to remove the\n"
+    "  --freeze-limiter-step <n>        hold the limiter fixed from step n on (default: three\n"
+    "                                   CFL-ramp lengths; 0 disables). Removes the residual\n"
     "                                   limit cycle of the non-differentiable min/max stencil\n"
     "  --inner-sweeps <n>               LU-SGS sweeps per transient inner iteration (default 2)\n"
     "  --cfl-scale <x>                  multiplies the case CFL schedule (default 1)\n"
     "  --no-adaptive-cfl                disable the residual-based CFL back-off safeguard\n"
+    "  --time-integrator bdf2|trapezoidal  second-order physical-time scheme for transient\n"
+    "                                   runs (default bdf2; the supplied case files accept\n"
+    "                                   either)\n"
     "  --inner-target <x>               override run_control.inner_residual_reduction_target\n"
     "                                   (only a stricter, i.e. smaller, value is accepted)\n"
     "  --max-steps <n>                  override run_control.max_steps (debug)\n"
@@ -144,6 +148,7 @@ SolverOptions buildOptions(const CliArgs& a) {
   o.inner_sweeps = static_cast<int>(optInt(a, "inner-sweeps", o.inner_sweeps));
   CFD_CHECK(o.inner_sweeps >= 1, "--inner-sweeps must be >= 1");
   o.limiter_freeze_step = static_cast<int>(optInt(a, "freeze-limiter-step", -1));
+  CFD_CHECK(o.limiter_freeze_step >= -1, "--freeze-limiter-step must be >= 0 (0 disables)");
   o.cfl_scale = optReal(a, "cfl-scale", o.cfl_scale);
   o.adaptive_cfl = a.opts.find("no-adaptive-cfl") == a.opts.end();
   CFD_CHECK(o.cfl_scale > 0.0, "--cfl-scale must be positive");
@@ -257,6 +262,12 @@ int runSolve(const CliArgs& a) {
   SolverOptions options = buildOptions(a);
   if (a.opts.count("max-steps")) cfg.run.max_steps = static_cast<int>(optInt(a, "max-steps", 0));
   if (a.opts.count("final-time")) cfg.run.final_time = optReal(a, "final-time", 0.0);
+  if (a.opts.count("time-integrator")) {
+    const std::string ti = opt(a, "time-integrator");
+    if (ti == "bdf2") cfg.run.time_integrator = TimeIntegratorType::kBdf2;
+    else if (ti == "trapezoidal") cfg.run.time_integrator = TimeIntegratorType::kTrapezoidal;
+    else CFD_THROW("unknown --time-integrator '" << ti << "' (bdf2|trapezoidal)");
+  }
   if (a.opts.count("inner-target")) {
     const Real t = optReal(a, "inner-target", cfg.run.inner_residual_reduction_target);
     CFD_CHECK(t > 0.0 && t <= cfg.run.inner_residual_reduction_target,
@@ -411,9 +422,7 @@ int runSolve(const CliArgs& a) {
         << " entropy_fix=" << options.entropy_fix
         << " reconstruction=" << (options.second_order ? "linear_least_squares" : "first_order")
         << " limiter=" << toString(options.limiter) << " (K=" << options.venkatakrishnan_k << ")"
-        << (options.limiter_freeze_step > 0
-                ? " frozen_from_step=" + std::to_string(options.limiter_freeze_step)
-                : "")
+        << (options.limiter_freeze_step == 0 ? " limiter_freezing=off" : "")
         << " implicit=lu_sgs_matrix_free\n";
 
   RunResult result;
@@ -491,7 +500,13 @@ int runSolve(const CliArgs& a) {
                                : "first_order";
     md["limiter"] = toString(options.limiter);
     md["limiter_constant_K"] = options.venkatakrishnan_k;
-    md["limiter_freeze_step"] = options.limiter_freeze_step;
+    md["limiter_freeze_step_option"] = options.limiter_freeze_step;
+    md["limiter_freeze_step"] =
+        (cfg.run.type == RunType::kTransient)
+            ? 0
+            : (options.limiter_freeze_step >= 0
+                   ? options.limiter_freeze_step
+                   : (cfg.run.pseudo_cfl_ramp_steps > 0 ? 3 * cfg.run.pseudo_cfl_ramp_steps : 0));
     md["spatial_order_claimed"] = options.second_order ? 2 : 1;
     md["numerics_required_satisfied"] = numerics_ok;
     md["positivity_preservation"] =

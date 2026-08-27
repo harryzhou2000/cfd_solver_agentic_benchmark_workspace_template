@@ -117,6 +117,8 @@ if(DOCTEST_INCLUDE_DIR)
   target_include_directories(cfd2d_tests PRIVATE ${DOCTEST_INCLUDE_DIR})
   target_link_libraries(cfd2d_tests PRIVATE cfd2d_core)
   add_test(NAME unit COMMAND cfd2d_tests)
+else()
+  message(STATUS "doctest not found; unit tests disabled")
 endif()
 
 # Parallel-consistency regression test (needs mpirun and the Python venv).
@@ -125,8 +127,6 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/tests/mpi_consistency.sh)
            COMMAND ${CMAKE_SOURCE_DIR}/tests/mpi_consistency.sh
            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
   set_tests_properties(mpi_consistency PROPERTIES TIMEOUT 900)
-else()
-  message(STATUS "doctest not found; unit tests disabled")
 endif()
 
 # CGNS structure dump helper used while developing the mesh reader.

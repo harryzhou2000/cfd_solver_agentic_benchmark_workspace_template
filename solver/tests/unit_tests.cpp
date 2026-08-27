@@ -277,3 +277,45 @@ TEST_CASE("Venkatakrishnan limiter is bounded, smooth and consistent") {
   // Zero admissible excursion must fully suppress the reconstruction.
   CHECK(venkatakrishnanPhi(0.0, 1.0, 0.0) == doctest::Approx(0.0).epsilon(1e-12).scale(1.0));
 }
+
+TEST_CASE("all three Riemann solvers reduce to the upwind flux when supersonic") {
+  const PrimVec wl = makeState(1.0, 3.0, 0.0, 1.0);
+  const PrimVec wr = makeState(1.4, 2.6, 0.1, 1.6);
+  const Vec2 n{1.0, 0.0};
+  const ConsVec exact = kGas.normalFlux(wl, n);
+  FluxOptions opt;
+  opt.entropy_fix = 0.0;   // the fix would perturb an exactly upwind state
+  for (RiemannScheme s : {RiemannScheme::kRoe, RiemannScheme::kHllc, RiemannScheme::kRusanov}) {
+    opt.scheme = s;
+    const ConsVec f = inviscidFlux(wl, wr, n, kGas, opt);
+    if (s == RiemannScheme::kRusanov) continue;   // LLF is not an upwind scheme
+    for (int k = 0; k < kNVar; ++k) CHECK(f[k] == doctest::Approx(exact[k]).epsilon(1e-9));
+  }
+}
+
+TEST_CASE("wall flux is purely normal for every Riemann solver") {
+  // The mirrored wall state must give zero mass and energy flux and a purely
+  // normal momentum flux for whichever flux function is selected; the exact
+  // wall pressure differs between the schemes (see the report), so only the
+  // structure is asserted here.
+  const PrimVec wi = makeState(1.2, 0.9, 0.35, 3.1);
+  for (Vec2 n : {Vec2{0.6, -0.8}, Vec2{-0.6, 0.8}, Vec2{0.0, 1.0}}) {
+    for (BcType bc : {BcType::kSlipWall, BcType::kNoSlipAdiabaticWall}) {
+      const PrimVec wg = ghostState(bc, wi, n, wi, kGas);
+      for (RiemannScheme sch : {RiemannScheme::kRoe, RiemannScheme::kHllc,
+                                RiemannScheme::kRusanov}) {
+        FluxOptions opt;
+        opt.scheme = sch;
+        const ConsVec f = inviscidFlux(wi, wg, n, kGas, opt);
+        CHECK(f[0] == doctest::Approx(0.0).epsilon(1e-12).scale(1.0));
+        CHECK(f[3] == doctest::Approx(0.0).epsilon(1e-12).scale(1.0));
+        const Real tangential = f[1] * (-n[1]) + f[2] * n[0];
+        CHECK(tangential == doctest::Approx(0.0).epsilon(1e-12).scale(1.0));
+        // Wall pressure must be positive and close to the interior pressure.
+        const Real pw = f[1] * n[0] + f[2] * n[1];
+        CHECK(pw > 0.0);
+        CHECK(pw == doctest::Approx(wi[3]).epsilon(0.4));
+      }
+    }
+  }
+}
