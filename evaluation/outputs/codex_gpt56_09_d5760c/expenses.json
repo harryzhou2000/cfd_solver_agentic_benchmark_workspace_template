@@ -1,0 +1,180 @@
+{
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/09",
+  "time_seconds": {
+    "goal_time": 34703.0,
+    "wall_time": 34716.7,
+    "started_at": "2026-08-16T09:40:24.573000+00:00",
+    "ended_at": "2026-08-16T19:19:01.264000+00:00",
+    "by_root_thread": {
+      "01a009f1-0252-7e80-acd4-2783b82d1076": {
+        "status": "complete",
+        "time_used_seconds": 34703,
+        "tokens_used": 4578383
+      }
+    },
+    "by_root_tree": {
+      "01a009f1-0252-7e80-acd4-2783b82d1076": {
+        "status": "complete",
+        "goal_time_seconds": 34703,
+        "goal_tokens": 4578383,
+        "threads": 5,
+        "tokens_used": 322712982,
+        "state_tokens_inherited_inclusive": 322857868,
+        "model": "gpt-5.6-luna"
+      }
+    }
+  },
+  "tokens": {
+    "total": 322712982,
+    "by_model": {
+      "gpt-5.6-luna": {
+        "input": 307496033,
+        "cached_input": 303362048,
+        "non_cached_input": 4133985,
+        "output": 445675,
+        "reasoning_output": 164773,
+        "total": 307941708,
+        "fallback_tokens": 0
+      },
+      "gpt-5.6-terra": {
+        "input": 14721892,
+        "cached_input": 13410560,
+        "non_cached_input": 1311332,
+        "output": 49382,
+        "reasoning_output": 17914,
+        "total": 14771274,
+        "fallback_tokens": 0
+      }
+    },
+    "by_thread": {
+      "01a009f1-0252-7e80-acd4-2783b82d1076": {
+        "model": "gpt-5.6-luna",
+        "is_subagent": false,
+        "source": "rollout_cumulative",
+        "tokens": {
+          "gpt-5.6-luna": {
+            "input": 307496033,
+            "cached": 303362048,
+            "non_cached": 4133985,
+            "output": 445675,
+            "reasoning_output": 164773,
+            "total": 307941708
+          }
+        },
+        "total": 307941708,
+        "inherited_baseline_tokens": 0,
+        "fallback_model_tokens": 0
+      },
+      "01a009f1-dea3-7243-b2d5-30d71d007d86": {
+        "model": "gpt-5.6-terra",
+        "is_subagent": true,
+        "source": "rollout_fork_delta",
+        "tokens": {
+          "gpt-5.6-terra": {
+            "input": 251490,
+            "cached": 204032,
+            "non_cached": 47458,
+            "output": 2368,
+            "reasoning_output": 178,
+            "total": 253858
+          }
+        },
+        "total": 253858,
+        "inherited_baseline_tokens": 31906,
+        "fallback_model_tokens": 0
+      },
+      "01a009f1-ec83-7ed2-afab-78d221330b16": {
+        "model": "gpt-5.6-terra",
+        "is_subagent": true,
+        "source": "rollout_fork_delta",
+        "tokens": {
+          "gpt-5.6-terra": {
+            "input": 3837604,
+            "cached": 3335168,
+            "non_cached": 502436,
+            "output": 14047,
+            "reasoning_output": 4631,
+            "total": 3851651
+          }
+        },
+        "total": 3851651,
+        "inherited_baseline_tokens": 48263,
+        "fallback_model_tokens": 0
+      },
+      "01a009f1-fad9-7133-ba44-56956b570bc8": {
+        "model": "gpt-5.6-terra",
+        "is_subagent": true,
+        "source": "rollout_fork_delta",
+        "tokens": {
+          "gpt-5.6-terra": {
+            "input": 4492209,
+            "cached": 4188160,
+            "non_cached": 304049,
+            "output": 16877,
+            "reasoning_output": 7901,
+            "total": 4509086
+          }
+        },
+        "total": 4509086,
+        "inherited_baseline_tokens": 64717,
+        "fallback_model_tokens": 0
+      },
+      "01a00a0d-f66e-7a40-9e76-b1646ad558b3": {
+        "model": "gpt-5.6-terra",
+        "is_subagent": true,
+        "source": "rollout_fork_delta",
+        "tokens": {
+          "gpt-5.6-terra": {
+            "input": 6140589,
+            "cached": 5683200,
+            "non_cached": 457389,
+            "output": 16090,
+            "reasoning_output": 5204,
+            "total": 6156679
+          }
+        },
+        "total": 6156679,
+        "inherited_baseline_tokens": 0,
+        "fallback_model_tokens": 0
+      }
+    },
+    "main_vs_subagent": {
+      "main": 307941708,
+      "subagent": 14771274
+    },
+    "fallback_tokens": 0,
+    "discrepancy_notes": [
+      "thread 01a009f1-dea3-7243-b2d5-30d71d007d86: ignored inherited-inclusive state token counter 285764; rollout-owned usage is 253858",
+      "thread 01a009f1-ec83-7ed2-afab-78d221330b16: ignored inherited-inclusive state token counter 3899914; rollout-owned usage is 3851651",
+      "thread 01a009f1-fad9-7133-ba44-56956b570bc8: ignored inherited-inclusive state token counter 4573803; rollout-owned usage is 4509086"
+    ],
+    "accounting_note": "Cached/input/output splits come from thread-owned rollout counter deltas. Fork replay is excluded at the first child-owned task boundary. Each delta is attributed to the most recent owned turn_context or thread_settings_applied model; only deltas before an explicit owned model event use the thread database model. Fork state counters are diagnostic only. A standalone root may retain the legacy state-counter scaling fallback when its rollout ends before the persisted root total."
+  },
+  "cost_estimate_usd": {
+    "total": 39.9287,
+    "by_model": {
+      "gpt-5.6-luna": {
+        "usd": 33.7725,
+        "tokens": 307941708,
+        "pricing": "metadata"
+      },
+      "gpt-5.6-terra": {
+        "usd": 6.1562,
+        "tokens": 14771274,
+        "pricing": "metadata"
+      }
+    },
+    "unpriced_tokens": 0,
+    "estimate": true,
+    "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/09/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/09/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/09/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/09/.sessions/codex/sessions",
+    "fetched_at": "2026-08-27T15:27:34.538658+00:00",
+    "num_threads": 5,
+    "num_roots": 1
+  }
+}
