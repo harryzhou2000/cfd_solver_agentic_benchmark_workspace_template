@@ -475,10 +475,13 @@ Measured on the submitted \texttt{surface.csv} of each run, with
   \toprule
   & $\Minf=2.0$ inviscid & $\Minf=2.0$ laminar \\
   \midrule
-  Max surface $C_p$ & $2.1434$ & $1.5847$ \\
-  Relative to the bound $1.6573$ & $\mathbf{+29.3\,\%}$ & $-4.4\,\%$ \\
-  Wall faces exceeding the bound & $\mathbf{9}$ of $404$ & $0$ of $404$ \\
-  Worst pair asymmetry $\Delta C_p$ & $\mathbf{1.2440}$ & $0.1554$ \\
+  Max surface $C_p$ & $\cnsMaxWallCpNacaSupInv$ & $\cnsMaxWallCpNacaSupLam$ \\
+  Relative to the bound $\cnsPitotCpNacaSupInv$ & $\mathbf{+29.3\,\%}$ & $-4.4\,\%$ \\
+  Wall faces exceeding the bound
+    & $\mathbf{\cnsFacesOverPitotNacaSupInv}$ of $\cnsNumWallFacesNacaSupInv$
+    & $\cnsFacesOverPitotNacaSupLam$ of $\cnsNumWallFacesNacaSupLam$ \\
+  Worst pair asymmetry $\Delta C_p$
+    & $\mathbf{\cnsWorstPairAsymNacaSupInv}$ & $\cnsWorstPairAsymNacaSupLam$ \\
   \bottomrule
 \end{tabular}
 \end{center}
@@ -490,6 +493,39 @@ geometry and the flux; they differ only in the presence of physical viscosity. S
 failures cannot be attributed to the mesh, to the Mach number, or to the pitot reference
 being wrong --- the same reference applied to the same mesh at the same Mach number is
 satisfied with $4.4\,\%$ margin by the laminar run.
+
+One qualification on that contrast: the laminar case's worst pair asymmetry of
+$\cnsWorstPairAsymNacaSupLam$ is
+\emph{far smaller}, by a factor of $8$, but it is not zero. Why it is nonzero has not been
+analysed here, so it is offered as the better-behaved case rather than as a symmetric one.
+
+\paragraph{The violation is localised, which matters for how far to distrust the solution.}
+``$\cnsFacesOverPitotNacaSupInv$ of $\cnsNumWallFacesNacaSupInv$ faces exceed a physical
+bound'' invites the worry that the whole surface
+solution is unreliable. It is not: locating the offending faces shows a tightly confined
+defect.
+\begin{itemize}
+  \item All nine lie between $x=\cnsOverPitotXMinNacaSupInv$ and
+  $x=\cnsOverPitotXMaxNacaSupInv$ --- the first $0.18\,\%$ of a
+  chord that extends to $x=1.0053$. The remaining $395$ faces, covering more than
+  $99.8\,\%$ of the surface, satisfy the bound.
+  \item $\cnsOverPitotUpperNacaSupInv$ of the nine are on the \emph{upper} surface. At zero
+  incidence that
+  one-sidedness is itself the defect signature: a symmetric configuration has no physical
+  reason to prefer a side.
+  \item The excess peaks \emph{inside} the cluster rather than at the nose --- $+0.4861$ at
+  $x=0.000439$, against $+0.2669$ on the nose face itself --- which is not the profile of a
+  stagnation-point resolution error, since that would be largest where the stagnation
+  pressure is highest.
+\end{itemize}
+
+This also resolves an apparent contradiction in the case's own diagnostics: how the
+integrated forces can be stationary while the field is demonstrably not converged. Nine
+faces among the smallest cells on the body carry almost no area weight, so a substantial
+local error in them moves the integrated coefficients very little. A stationary force
+history and a locally unconverged field are entirely compatible, and this case is the
+report's clearest demonstration of why pointwise checks are worth running alongside
+integral ones.
 
 What distinguishes them is that physical viscosity damps the leading-edge cells. With no
 viscosity, the shock position in cells of volume $\num{4.7e-9}$ is set by the limiter

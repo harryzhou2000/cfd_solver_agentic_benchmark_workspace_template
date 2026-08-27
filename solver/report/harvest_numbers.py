@@ -342,6 +342,46 @@ def main():
                     define("StagCp" + key, num(cp0, 7))
                     define("NoseCpDeficitPct" + key,
                            num(100.0 * (cp0 - nose_cp) / cp0, 3))
+
+            # Pointwise wall diagnostics.  These are harvested rather than written by
+            # hand because a superseded hand-written value survived into prose four
+            # times during preparation, twice inverting the conclusion it supported.
+            # For a supersonic case the attainable ceiling is the PITOT value behind a
+            # normal shock, not the isentropic stagnation value, which is 47 % higher at
+            # M = 2 and would mask a real bound violation.
+            try:
+                cps = [(float(r["x"]), float(r["y"]), float(r["cp"])) for r in surface]
+            except (KeyError, TypeError, ValueError):
+                cps = []
+            if cps:
+                define("MaxWallCp" + key, num(max(c for _, _, c in cps), 7))
+                # Upper/lower asymmetry on an x-matched pair, exact for a symmetric body.
+                up = sorted((x, c) for x, y, c in cps if y > 0.0)
+                lo_ = sorted((x, c) for x, y, c in cps if y < 0.0)
+                worst_pair = 0.0
+                for xu, cu in up:
+                    if not lo_:
+                        break
+                    xl, cl_ = min(lo_, key=lambda t: abs(t[0] - xu))
+                    if abs(xl - xu) < 1.0e-9:
+                        worst_pair = max(worst_pair, abs(cu - cl_))
+                if worst_pair > 0.0:
+                    define("WorstPairAsym" + key, num(worst_pair, 6))
+            if cps and isinstance(mach_inf, (int, float)) and float(mach_inf) > 1.0:
+                g = 1.4
+                m2 = float(mach_inf) ** 2
+                a = ((g + 1.0) ** 2 * m2 / (4.0 * g * m2 - 2.0 * (g - 1.0))) ** (g / (g - 1.0))
+                b = (1.0 - g + 2.0 * g * m2) / (g + 1.0)
+                pitot = (a * b - 1.0) / (0.5 * g * m2)
+                over = [(x, y, c) for x, y, c in cps if c > pitot]
+                define("PitotCp" + key, num(pitot, 7))
+                define("FacesOverPitot" + key, num(len(over), 4))
+                define("NumWallFaces" + key, num(len(cps), 5))
+                if over:
+                    define("OverPitotXMin" + key, num(min(x for x, _, _ in over), 6))
+                    define("OverPitotXMax" + key, num(max(x for x, _, _ in over), 6))
+                    define("OverPitotUpper" + key,
+                           num(sum(1 for _, y, _ in over if y > 0.0), 3))
         if stale and status:
             print("  SKIPPING STALE: %s (predates trusted cutoff)" % case_id)
         cd = last.get("cd")

@@ -71,6 +71,20 @@ def main(case_dir):
     print("faces exceeding the ceiling  %d" % len(over))
     print("faces exceeding isentropic   %d" % len([c for _, _, c in cp if c > isen]))
 
+    if over:
+        xs = [x for x, _, _ in over]
+        chord = max(x for x, _, _ in cp)
+        upper = [1 for _, y, _ in over if y > 0.0]
+        worst = max(over, key=lambda t: t[2])
+        print("  violating faces span x       %.6f .. %.6f" % (min(xs), max(xs)))
+        print("  that is the first            %.3f %% of the chord (body to x=%.4f)"
+              % (100.0 * max(xs) / chord, chord))
+        print("  on the upper surface         %d of %d" % (sum(upper), len(over)))
+        print("  worst excess                 +%.6f at x=%.6f (Cp %.6f)"
+              % (worst[2] - limit, worst[0], worst[2]))
+        nose = min(over, key=lambda t: t[0])
+        print("  excess at the nose face      +%.6f at x=%.6f" % (nose[2] - limit, nose[0]))
+
     # Pair upper and lower surface points by x.
     up = sorted([(x, c) for x, y, c in cp if y > 0.0])
     lo = sorted([(x, c) for x, y, c in cp if y < 0.0])
