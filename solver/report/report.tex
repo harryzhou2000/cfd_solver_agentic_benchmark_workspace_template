@@ -26,18 +26,18 @@ nonlinear inner iterations for the vortex-shedding case. Meshes are
 partitioned with METIS k-way graph partitioning; production runs use 8 MPI
 ranks with neighbor-scoped halo exchange and no full-state replication.
 All eight required cases completed successfully:
-$C_D=0.00253$ ($M0.15$ inviscid), $0.00867$ ($M0.8$ inviscid), $0.0883$
-($M2.0$ inviscid, documented plateau at 2.26 orders), $0.0733$ ($M0.15$
-laminar), $0.0701$ ($M0.8$ laminar), $0.1350$ ($M2.0$ laminar, after a
+$C_D=0.00170$ ($M0.15$ inviscid), $0.00868$ ($M0.8$ inviscid), $0.0917$
+($M2.0$ inviscid), $0.0738$ ($M0.15$
+laminar), $0.0701$ ($M0.8$ laminar), $0.1315$ ($M2.0$ laminar, after a
 documented escalation: inviscid restart, CFL cap 5, residual target deepened
-to 5 orders), and $C_D=2.020$ for the cylinder at $Re=20$ (literature
+to 5 orders), and $C_D=2.019$ for the cylinder at $Re=20$ (literature
 $\approx2.0$--$2.1$). The cylinder $Re=200$ BDF2 run ($\Delta t=0.01$,
 $t_f=300$) reached a statistically periodic vortex street: post-transient
 ($t\ge150$) mean $C_D=1.262$, mean $C_L\approx0$ with oscillation half-range
-$\approx0.56$, and Strouhal number $St=0.187$ from a windowed FFT of the lift
+$\approx0.57$, and Strouhal number $St=0.187$ from a windowed FFT of the lift
 history. All eight cases pass the automated physics/contract sanity checks
 (\cref{sec:output}). Known
-limitations --- the inviscid residual plateau from limiter cycling, the
+limitations --- a spurious inviscid drag floor from limiter dissipation, the
 CFL-cap escalation of the high-Mach laminar cases, and an initially
 under-converged $M2.0$ laminar run that was caught by force-plausibility
 checks and redone --- are discussed openly in \cref{sec:limitations}.
@@ -254,7 +254,7 @@ per-face fallback triggers only near the $M2.0$ shocks.
 
 \subsection{Limiter and Positivity Control}
 \label{sec:limiter}
-The default limiter is the Venkatakrishnan smooth limiter. For each cell,
+The default limiter is a Venkatakrishnan-type smooth limiter. For each cell,
 stencil extrema $W^{\min}_v,W^{\max}_v$ are taken over neighbors and boundary
 virtual values; per face, with $d_2=\nabla W_{v,i}\cdot(\mathbf x_f-\mathbf x_i)$
 and $d_1=W^{\max}_v-W_{v,i}$ if $d_2>0$ else $W^{\min}_v-W_{v,i}$,
@@ -265,7 +265,9 @@ and $d_1=W^{\max}_v-W_{v,i}$ if $d_2>0$ else $W^{\min}_v-W_{v,i}$,
 \epsilon^2=(K h)^3,\quad h=\sqrt{\mathrm{vol}_i},\quad K=5,
 \]
 clipped to $[0,1]$ and minimized over faces, $\phi_i=\min_f\phi_f$ per
-variable. Barth--Jespersen limiting ($\phi_f=\min(1,d_1/d_2)$) is available
+variable. (The numerator carries $2\epsilon^2$, twice the canonical VK95
+coefficient, which makes the limiter marginally less restrictive in the
+smooth-transition regime.) Barth--Jespersen limiting ($\phi_f=\min(1,d_1/d_2)$) is available
 via \texttt{--limiter barth}, and an unlimited first-order mode via
 \texttt{--limiter none}; all production runs use the Venkatakrishnan default.
 Faces with $|d_2|\le 10^{-14}(|W_{v,i}|+1)$ skip limiting.
@@ -398,7 +400,7 @@ defect correction converges to the solution of $(D+B)\Delta U=-R$ rather than
 to a single sweep. Inner iterations stop when the RMS ratio
 $\|r_A\|/\|r_{A,0}\|\le$ \texttt{inner\_residual\_reduction\_target}, subject
 to the case-file minimum/maximum bounds. Observed inner-iteration counts are
-modest --- typical values 3.0--12.5 per pseudo step across the production
+modest --- typical values 3.0--8.2 per pseudo step across the production
 steady cases, with a 100\% inner-target hit rate in every converged run
 (\texttt{inner\_target\_converged\_fraction=1.0} in all metadata).
 
@@ -493,8 +495,10 @@ stalls --- a debug run at pseudo-CFL 1 (\texttt{results/dbg\_inner/}) needed a
 typical 961 inner iterations per step and hit the 1000-iteration cap on one
 of the three recorded steps (\texttt{inner\_target\_misses=1}). Raising the
 pseudo-CFL to 100 lets the physical term dominate the
-diagonal and restored convergence to roughly 54--132 inner iterations per
-step in production (\cref{sec:re200}).
+diagonal and restores convergence to roughly 48--174 inner iterations per
+step in production (\cref{sec:re200}). The diagonal (and the approximate
+Jacobian $B$) is assembled once per physical step from the step-start
+state and held frozen across all inner iterations of that step.
 
 \paragraph{Startup perturbation.} To break the exact top-bottom symmetry of
 the initialized state, the free-stream direction is offset by
@@ -552,8 +556,9 @@ the k-way structure of a long thin C-grid domain.
 \caption{Partition diagnostics from \texttt{partition\_diagnostics.csv} for
 the production $np=8$ runs: owned/ghost cells, neighbor-rank count, and halo
 send/receive cell counts per rank (the CSV also records per-rank boundary-face
-counts). Receive counts equal the ghost counts; send counts differ by at most
-one on three ranks (a boundary-ownership asymmetry in the diagnostic), with
+counts). Receive counts equal the ghost counts; send counts differ by at
+most two on seven of the sixteen rank entries (a boundary-ownership
+asymmetry in the diagnostic), with
 matching buffer sizes by construction. Load balance is max/min owned cells;
 edge cut is the number of partitioned faces.}
 \label{tab:partition}
@@ -653,8 +658,9 @@ $Re=200$). The per-case values these checks consume appear in
 \label{sec:results}
 All numbers below are read from the run artifacts (\texttt{run\_status.json},
 \texttt{forces.csv}, \texttt{residuals.csv}, \texttt{surface.csv}) under
-\texttt{solver/results/}. All eight required cases have completed: seven
-converged (one at a documented plateau), and the $Re=200$ vortex-shedding
+\texttt{solver/results/}. All eight required cases have completed: the seven
+steady cases converged to their residual targets, and the $Re=200$
+vortex-shedding
 case reached \texttt{statistically\_periodic} at $t=300$.
 
 \subsection{Summary Tables}
@@ -662,26 +668,29 @@ case reached \texttt{statistically\_periodic} at $t=300$.
 \centering
 \caption{Run status for the eight required cases (from
 \texttt{run\_status.json}). All runs used $np=8$ MPI ranks. Residual
-reduction is in orders of magnitude of the combined L2 residual; "plateau"
-marks the documented-plateau stop of \cref{sec:time}. Step counters for the
-restarted runs continue from the restart source (2205 / 40000 / 1262 for the
+reduction is in orders of magnitude of the combined L2 residual --- for the
+transient $Re=200$ row it is $-\log_{10}$ of the final inner-loop residual
+ratio, i.e.\ the per-step nonlinear convergence depth, not a run-wide
+reduction. Step counters for the
+restarted runs continue from the restart source (2189 / 2528 / 1233 for the
 $M0.8$ inviscid, $M2.0$ inviscid, and $Re=200$ steady-init states
 respectively); the $Re=200$ row executed 30000 physical steps
-($\Delta t=0.01$) after its steady initialization.}
+($\Delta t=0.01$) after its steady initialization. Wall times are measured
+on a shared host under competing load and are indicative only.}
 \label{tab:status}
 {\footnotesize\setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lrrrrrl@{}}
 \toprule
 Case id & Ranks & Steps & Phys.\ time & Orders & Wall time [s] & Status \\
 \midrule
-\texttt{naca0012\_m015\_inviscid} & 8 & 1470 & 0 & 4.10 & 16.8 & converged \\
-\texttt{naca0012\_m080\_inviscid} & 8 & 2205 & 0 & 4.00 & 195.4 & converged \\
-\texttt{naca0012\_m200\_inviscid} & 8 & 40000 & 0 & 2.26 & 2894.7 & converged (plateau) \\
-\texttt{naca0012\_m015\_laminar\_re5000} & 8 & 1939 & 0 & 4.01 & 155.2 & converged \\
-\texttt{naca0012\_m080\_laminar\_re5000} & 8 & 8710 & 0 & 4.00 & 134.1 & converged \\
-\texttt{naca0012\_m200\_laminar\_re5000} & 8 & 76601 & 0 & 5.00 & 930.1 & converged \\
-\texttt{cylinder\_m010\_laminar\_re20} & 8 & 2226 & 0 & 5.00 & 148.2 & converged \\
-\texttt{cylinder\_m010\_laminar\_re200} & 8 & 31262 & 300.0 & 3.04 & 3872.6 & statistically periodic \\
+\texttt{naca0012\_m015\_inviscid} & 8 & 1482 & 0 & 4.02 & 254.7 & converged \\
+\texttt{naca0012\_m080\_inviscid} & 8 & 2189 & 0 & 4.00 & 205.3 & converged \\
+\texttt{naca0012\_m200\_inviscid} & 8 & 2528 & 0 & 3.00 & 207.1 & converged \\
+\texttt{naca0012\_m015\_laminar\_re5000} & 8 & 1917 & 0 & 4.00 & 133.5 & converged \\
+\texttt{naca0012\_m080\_laminar\_re5000} & 8 & 8696 & 0 & 4.00 & 506.7 & converged \\
+\texttt{naca0012\_m200\_laminar\_re5000} & 8 & 37786 & 0 & 5.00 & 1229.3 & converged \\
+\texttt{cylinder\_m010\_laminar\_re20} & 8 & 2129 & 0 & 5.00 & 88.1 & converged \\
+\texttt{cylinder\_m010\_laminar\_re200} & 8 & 31233 & 300.0 & 3.06 & 3715.9 & statistically periodic \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -698,14 +707,14 @@ post-transient window $t\ge150$ (last row otherwise).}
 \toprule
 Case id & $C_D$ & $C_L$ & $C_{m_z}$ & $C_D^{\rm pres}$ & $C_D^{\rm visc}$ & Notes \\
 \midrule
-\texttt{naca0012\_m015\_inviscid} & 0.00253 & $-9.28\mathrm{e}{-4}$ & $-4.97\mathrm{e}{-4}$ & 0.00253 & 0 & 4.10 orders \\
-\texttt{naca0012\_m080\_inviscid} & 0.00867 & $2.17\mathrm{e}{-3}$ & $4.61\mathrm{e}{-4}$ & 0.00867 & 0 & 4.00 orders \\
-\texttt{naca0012\_m200\_inviscid} & 0.08827 & $-3.36\mathrm{e}{-3}$ & $7.47\mathrm{e}{-4}$ & 0.08827 & 0 & plateau, 2.26 orders \\
-\texttt{naca0012\_m015\_laminar\_re5000} & 0.07332 & $2.02\mathrm{e}{-3}$ & $6.80\mathrm{e}{-4}$ & 0.01446 & 0.05886 & 4.01 orders \\
-\texttt{naca0012\_m080\_laminar\_re5000} & 0.07010 & $1.34\mathrm{e}{-3}$ & $2.16\mathrm{e}{-4}$ & 0.03983 & 0.03027 & 4.00 orders \\
-\texttt{naca0012\_m200\_laminar\_re5000} & 0.13504 & $-1.52\mathrm{e}{-3}$ & $2.32\mathrm{e}{-4}$ & 0.09445 & 0.04059 & 5.00 orders, escalated \\
-\texttt{cylinder\_m010\_laminar\_re20} & 2.02039 & $3.57\mathrm{e}{-4}$ & $2.53\mathrm{e}{-5}$ & 1.22004 & 0.80035 & 5.00 orders \\
-\texttt{cylinder\_m010\_laminar\_re200} & 1.2616 & $-3\mathrm{e}{-5}$ & $1.97\mathrm{e}{-5}$ & 1.0200 & 0.2416 & $t\ge150$ means; $St=0.187$ \\
+\texttt{naca0012\_m015\_inviscid} & 0.00170 & $-2.00\mathrm{e}{-4}$ & $-1.47\mathrm{e}{-5}$ & 0.00170 & 0 & 4.02 orders \\
+\texttt{naca0012\_m080\_inviscid} & 0.00868 & $1.39\mathrm{e}{-3}$ & $3.88\mathrm{e}{-4}$ & 0.00868 & 0 & 4.00 orders \\
+\texttt{naca0012\_m200\_inviscid} & 0.09166 & $-3.15\mathrm{e}{-5}$ & $2.27\mathrm{e}{-4}$ & 0.09166 & 0 & 3.00 orders \\
+\texttt{naca0012\_m015\_laminar\_re5000} & 0.07384 & $8.17\mathrm{e}{-4}$ & $2.85\mathrm{e}{-4}$ & 0.01424 & 0.05960 & 4.00 orders \\
+\texttt{naca0012\_m080\_laminar\_re5000} & 0.07008 & $7.57\mathrm{e}{-4}$ & $1.54\mathrm{e}{-4}$ & 0.03981 & 0.03028 & 4.00 orders \\
+\texttt{naca0012\_m200\_laminar\_re5000} & 0.13154 & $-7.08\mathrm{e}{-3}$ & $1.33\mathrm{e}{-3}$ & 0.09158 & 0.03996 & 5.00 orders, escalated \\
+\texttt{cylinder\_m010\_laminar\_re20} & 2.01896 & $5.63\mathrm{e}{-4}$ & $-4.92\mathrm{e}{-6}$ & 1.21907 & 0.79989 & 5.00 orders \\
+\texttt{cylinder\_m010\_laminar\_re200} & 1.2615 & $-9.9\mathrm{e}{-4}$ & $3.01\mathrm{e}{-5}$ & 1.0199 & 0.2416 & $t\ge150$ means; $St=0.187$ \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -716,14 +725,14 @@ All six airfoil cases share the \texttt{NACA0012\_H2} mesh (20816 cells) at
 zero angle of attack, so symmetry about the chord line is an exact property of
 the continuous problems and a direct check on the solutions.
 
-\paragraph{$M0.15$ inviscid.} The run converged in 1470 pseudo steps to 4.10
+\paragraph{$M0.15$ inviscid.} The run converged in 1482 pseudo steps to 4.02
 orders of residual reduction (\cref{fig:res-m015inv,fig:forces-m015inv}). The
-final drag $C_D=0.00253$ is the spurious (numerical) drag level of the
+final drag $C_D=0.00170$ is the spurious (numerical) drag level of the
 second-order scheme on this mesh --- in inviscid subsonic flow at zero AoA the
-physical drag is zero (d'Alembert) --- and $C_L=-9.3\times10^{-4}$ bounds the
+physical drag is zero (d'Alembert) --- and $C_L=-2.0\times10^{-4}$ bounds the
 departure from symmetry. The surface $C_p$ (\cref{fig:cp-m015inv}) is
 symmetric to within the line width, with the stagnation value
-$C_p\approx1.018$ slightly above the incompressible value of 1 as expected at
+$C_p\approx1.009$ slightly above the incompressible value of 1 as expected at
 $M=0.15$; the Mach and pressure fields
 (\cref{fig:mach-m015inv,fig:pres-m015inv}) show the smooth low-speed
 acceleration over the nose.
@@ -741,17 +750,15 @@ acceleration over the nose.
 \label{fig:m015inv}
 \end{figure}
 
-\paragraph{$M0.8$ inviscid.} Converged in 2205 steps to 4.00 orders
+\paragraph{$M0.8$ inviscid.} Converged in 2189 steps to 4.00 orders
 (\cref{fig:res-m080inv}); the force history (\cref{fig:forces-m080inv})
-settles to $C_D=0.00867$, the wave drag of the transonic shock system, with
-$C_L=2.2\times10^{-3}$. The $C_p$ distribution (\cref{fig:cp-m080inv}) shows
+settles to $C_D=0.00868$, the wave drag of the transonic shock system, with
+$C_L=1.4\times10^{-3}$. The $C_p$ distribution (\cref{fig:cp-m080inv}) shows
 the shock pressure jump at mid-chord on both surfaces, symmetric as expected
 at $\alpha=0$; the Mach and pressure contours
 (\cref{fig:mach-m080inv,fig:pres-m080inv}) show the supersonic pocket
 terminating in a near-normal shock above and below the airfoil. The Harten
-entropy fix keeps the Roe flux non-oscillatory through the shock, and the
-late-time limiter cycling that caps further residual reduction at
-$\approx4$ orders is discussed in \cref{sec:limitations}.
+entropy fix keeps the Roe flux non-oscillatory through the shock.
 
 \begin{figure}[htbp]
 \centering
@@ -766,18 +773,18 @@ $\approx4$ orders is discussed in \cref{sec:limitations}.
 \label{fig:m080inv}
 \end{figure}
 
-\paragraph{$M2.0$ inviscid.} This case ran to its 40000-step cap and stopped
-at the documented plateau: 2.26 orders of residual reduction with the mean
-drag drift below $10^{-3}$ over the trailing window
-(\cref{fig:res-m200inv,fig:forces-m200inv}). The final $C_D=0.0883$ is the
-bow-shock wave drag; $C_L=-3.4\times10^{-3}$. The surface $C_p$
+\paragraph{$M2.0$ inviscid.} This case converges to its 3-order case-file
+target in 2528 steps
+(\cref{fig:res-m200inv,fig:forces-m200inv}). The final $C_D=0.0917$ is the
+bow-shock wave drag; $C_L=-3.2\times10^{-5}$, essentially symmetric. The
+surface $C_p$
 (\cref{fig:cp-m200inv}) shows the strong leading-edge compression followed by
 expansion over the forebody, and the Mach/pressure fields
 (\cref{fig:mach-m200inv,fig:pres-m200inv}) show the detached bow shock ahead
-of the nose with the shock/expansion system along the airfoil. The residual
-does not reach the 3-order case-file target because the limiter cycles near
-the shocks; the plateau stop with stable forces is the documented behavior
-allowed by the task.
+of the nose with the shock/expansion system along the airfoil. An earlier
+build of the solver stalled below the target on this case (a missing halo
+exchange in the steady inner solve, since fixed); the shipped solver reaches
+the target directly.
 
 \begin{figure}[htbp]
 \centering
@@ -792,10 +799,10 @@ allowed by the task.
 \label{fig:m200inv}
 \end{figure}
 
-\paragraph{$M0.15$ laminar, $Re=5000$.} Converged in 1939 steps to 4.01
+\paragraph{$M0.15$ laminar, $Re=5000$.} Converged in 1917 steps to 4.00
 orders from a cold start (\cref{fig:res-m015lam,fig:forces-m015lam}). The drag
-$C_D=0.0733$ is dominated by skin friction: $C_D^{\rm visc}=0.0589$ versus
-$C_D^{\rm pres}=0.0145$, as expected for a low-speed laminar airfoil at zero
+$C_D=0.0738$ is dominated by skin friction: $C_D^{\rm visc}=0.0596$ versus
+$C_D^{\rm pres}=0.0142$, as expected for a low-speed laminar airfoil at zero
 lift. The surface figure (\cref{fig:cp-m015lam}) adds the skin-friction
 distribution $C_f$, symmetric upper/lower, with the leading-edge peak and
 monotone decay toward the trailing edge; the Mach and pressure fields
@@ -818,7 +825,7 @@ layer and weak wake.
 \paragraph{$M0.8$ laminar, $Re=5000$.} This case was restarted from the
 converged $M0.8$ inviscid state with the pseudo-CFL capped at 4 (supplied:
 $0.5\to80$ cold start) after a higher-CFL instability was observed
-(\cref{sec:limitations}); it converged in 8710 total steps (6505 after the
+(\cref{sec:limitations}); it converged in 8696 total steps (6507 after the
 restart) to 4.00 orders measured against the restart baseline
 (\cref{fig:res-m080lam,fig:forces-m080lam}). The drag $C_D=0.0701$ splits into
 $C_D^{\rm pres}=0.0398$ (shock-induced pressure drag) and
@@ -845,11 +852,11 @@ This case has the most involved run history of the benchmark, documented in
 full in \cref{sec:limitations}: an under-converged first run at the case-file
 3-order target, a diverged high-CFL debug continuation, and finally the
 production redo from the inviscid restart with \texttt{--cfl-max 5} and
-\texttt{--residual-target 5.0}. The redo converged cleanly: 76601 total steps
-(36601 after the restart), 5.00 orders of residual reduction, 930 s wall
-(\cref{fig:res-m200lam,fig:forces-m200lam}). The final drag $C_D=0.1350$
-($C_D^{\rm pres}=0.0944$, $C_D^{\rm visc}=0.0406$) is stable to $10^{-4}$ over
-the last 500 steps, and $C_L=-1.5\times10^{-3}$. The drag is roughly $1.5\times$
+\texttt{--residual-target 5.0}. The redo converged cleanly: 37786 total steps
+(35258 after the restart), 5.00 orders of residual reduction, 1229 s wall
+(\cref{fig:res-m200lam,fig:forces-m200lam}). The final drag $C_D=0.1315$
+($C_D^{\rm pres}=0.0916$, $C_D^{\rm visc}=0.0400$) is stable to $10^{-4}$ over
+the last 500 steps, and $C_L=-7.1\times10^{-3}$. The drag is roughly $1.4\times$
 the inviscid wave drag: the bow shock pressure rise
 (\cref{fig:cp-m200lam,fig:pres-m200lam}) dominates, with the laminar
 boundary layer visible in the Mach field (\cref{fig:mach-m200lam}) and the
@@ -871,12 +878,12 @@ redo with CFL cap 5 and 5-order residual target).}
 
 \subsection{Cylinder Reynolds 20}
 \label{sec:re20}
-The steady laminar cylinder case converged in 2226 pseudo steps to 5.00 orders
+The steady laminar cylinder case converged in 2129 pseudo steps to 5.00 orders
 of residual reduction (\cref{fig:res-re20,fig:forces-re20}). The final drag
-$C_D=2.020$ ($C_D^{\rm pres}=1.220$, $C_D^{\rm visc}=0.800$) sits inside the
+$C_D=2.019$ ($C_D^{\rm pres}=1.219$, $C_D^{\rm visc}=0.800$) sits inside the
 literature range $\approx2.0$--$2.1$ for steady laminar flow past a circular
-cylinder at $Re=20$, and $C_L=3.6\times10^{-4}$ with
-$C_{m_z}=2.5\times10^{-5}$ confirm the top-bottom symmetry of the solution.
+cylinder at $Re=20$, and $C_L=5.6\times10^{-4}$ with
+$C_{m_z}=-4.9\times10^{-6}$ confirm the top-bottom symmetry of the solution.
 The surface distribution (\cref{fig:cp-re20}) shows the stagnation pressure at
 the front point and the low, nearly constant base pressure over the separated
 rear, with $C_f$ vanishing at the separation points; the pressure, Mach, and
@@ -908,12 +915,12 @@ physical steps) from the steady pseudo-converged initialization state
 (\cref{sec:time}), with the $2^\circ$ tapered startup perturbation. The run
 completed with \texttt{run\_status.json} reporting
 \texttt{convergence\_status=statistically\_periodic} ("post-transient periodic
-vortex shedding established"), final physical time $300.0$, 3872.6 s wall on
+vortex shedding established"), final physical time $300.0$, 3715.9 s wall on
 8 ranks. The two-level structure was exercised exactly as specified: inner
 defect-correction iterations converged the total (spatial $+$ physical-time)
 residual by the required $10^{-3}$ at \emph{every} step (zero
 \texttt{inner\_target} misses, \texttt{inner\_target\_converged\_fraction}
-$=1.0$; final ratios $7$--$10\times10^{-4}$), with 54--132 inner iterations
+$=1.0$; logged ratios $6.6$--$10\times10^{-4}$), with 48--174 inner iterations
 per step, mean 87 (\cref{fig:res-re200}).\par}
 
 The force history (\cref{fig:forces-re200}) shows the perturbation-induced
@@ -924,12 +931,12 @@ and $C_D(t)$ over $t\ge150$ from \texttt{forces.csv} via
 \texttt{tools/cfdplot.py} \texttt{spectral\_stats}: the dominant lift
 frequency is $f=0.1867$, i.e.\ Strouhal $St=fD/U=0.187$ ($D=U=1$), the mean
 drag is $C_D=1.262$ (pressure $1.020$ $+$ viscous $0.242$), the mean lift is
-$C_L=-3\times10^{-5}$, the lift oscillates with half-range $\approx0.56$
+$C_L=-9.9\times10^{-4}$, the lift oscillates with half-range $\approx0.57$
 (peak-to-peak $\approx1.13$; the windowed-FFT amplitude returned by
-\texttt{spectral\_stats} is $1.10$), and the drag oscillation has FFT
-amplitude $0.048$ at twice the lift frequency ($f=0.373$) --- the expected
+\texttt{spectral\_stats} is $0.55$), and the drag oscillation has FFT
+amplitude $0.024$ at twice the lift frequency ($f=0.373$) --- the expected
 drag pulse twice per shedding cycle. The mean moment coefficient is
-$C_{m_z}=1.97\times10^{-5}$. These values are consistent with the literature
+$C_{m_z}=3.0\times10^{-5}$. These values are consistent with the literature
 for laminar vortex shedding at $Re=200$ ($St\approx0.19$--$0.21$, mean
 $C_D\approx1.3$--$1.4$); the wake vorticity (\cref{fig:vort-re200}, clipped to
 $[-5,5]$ per the case-file recommendation) and the pressure and velocity
@@ -959,17 +966,17 @@ sweep (\texttt{tools/rank\_sweep.sh}, outputs under
 Every rank count re-partitions the mesh (edge cut rises with $np$: 122 at
 $np=2$ to 422 at $np=8$ for the airfoil), so the SGS sweep order and the
 approximate
-Jacobian differ slightly between rank counts; the iteration counts to reach
-the 4--5 order targets therefore differ slightly (1470--1482 steps for the
-airfoil case, 2129--2226 for the cylinder case), but the converged states
-agree as follows.\par}
+Jacobian differ slightly between rank counts; with the halo-consistent
+inner solve the step counts to reach the 4--5 order targets are
+nevertheless identical across rank counts (1482 steps for the airfoil case,
+2129 for the cylinder case), and the converged states agree as follows.\par}
 
 \begin{table}[htbp]
 \centering
 \caption{Rank study: final forces, steps, and wall times across MPI rank
 counts for \texttt{naca0012\_m015\_inviscid} and
 \texttt{cylinder\_m010\_laminar\_re20}, all from one back-to-back sweep on
-the shared host (load average 23--37 during the window). Wall times at these
+the shared host (load average 28--46 during the window). Wall times at these
 small mesh sizes are indicative rather than HPC-grade; force consistency and
 run-to-run determinism are the validation metrics.}
 \label{tab:rankstudy}
@@ -978,47 +985,49 @@ run-to-run determinism are the validation metrics.}
 \toprule
 Case & $np$ & Steps & Orders & $C_D$ & $C_L$ & Wall [s] \\
 \midrule
-\texttt{naca0012\_m015\_inviscid} & 1 & 1482 & 4.03 & 0.001705 & $-1.94\mathrm{e}{-4}$ & 57.6 \\
- & 2 & 1471 & 4.00 & 0.002467 & $-2.48\mathrm{e}{-3}$ & 37.0 \\
- & 4 & 1474 & 4.05 & $-2.89\mathrm{e}{-4}$ & $-1.30\mathrm{e}{-3}$ & 14.6 \\
- & 8 & 1470 & 4.10 & 0.002527 & $-9.28\mathrm{e}{-4}$ & 20.7 \\
+\texttt{naca0012\_m015\_inviscid} & 1 & 1482 & 4.03 & 0.001705 & $-1.94\mathrm{e}{-4}$ & 51.4 \\
+ & 2 & 1482 & 4.03 & 0.001702 & $-1.88\mathrm{e}{-4}$ & 27.3 \\
+ & 4 & 1482 & 4.02 & 0.001693 & $-1.88\mathrm{e}{-4}$ & 15.9 \\
+ & 8 & 1482 & 4.02 & 0.001696 & $-2.00\mathrm{e}{-4}$ & 22.6 \\
 \midrule
-\texttt{cylinder\_m010\_laminar\_re20} & 1 & 2129 & 5.00 & 2.01895 & $5.63\mathrm{e}{-4}$ & 34.4 \\
- & 2 & 2144 & 5.00 & 2.01920 & $4.99\mathrm{e}{-4}$ & 17.9 \\
- & 4 & 2173 & 5.00 & 2.01951 & $-1.58\mathrm{e}{-4}$ & 10.3 \\
- & 8 & 2226 & 5.00 & 2.02039 & $3.57\mathrm{e}{-4}$ & 13.6 \\
+\texttt{cylinder\_m010\_laminar\_re20} & 1 & 2129 & 5.00 & 2.01895 & $5.63\mathrm{e}{-4}$ & 33.6 \\
+ & 2 & 2129 & 5.00 & 2.01896 & $5.58\mathrm{e}{-4}$ & 17.7 \\
+ & 4 & 2129 & 5.00 & 2.01895 & $5.51\mathrm{e}{-4}$ & 9.9 \\
+ & 8 & 2129 & 5.00 & 2.01896 & $5.63\mathrm{e}{-4}$ & 16.6 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \paragraph{Force consistency.} For the cylinder case the final drag agrees
-across rank counts to within $1.4\times10^{-3}$ in $C_D$ (0.07\%) and lift to
-$\pm6\times10^{-4}$ --- the partitioning changes only the convergence path,
+across rank counts to within $4\times10^{-6}$ in $C_D$ (relative
+$2\times10^{-6}$) and lift to $\pm3\times10^{-5}$ --- the partitioning
+changes only the convergence path,
 not the converged state. For the inviscid airfoil case the absolute drag is
 itself only $\mathcal O(10^{-3})$ (spurious inviscid drag, \cref{sec:naca});
-the rank-to-rank scatter ($-2.9\times10^{-4}$ to $2.5\times10^{-3}$) is of the
-same order as the discretization/convergence error at 4 orders of residual
-reduction, and the lift scatter is $\pm1.3\times10^{-3}$ about the mean. There
+the rank-to-rank scatter ($1.693\times10^{-3}$ to $1.705\times10^{-3}$) is
+below one percent of that floor,
+and the lift scatter is $\pm6\times10^{-6}$ about the mean. There
 is no systematic
 rank-dependent drift in either case, consistent with the global-id-ordered,
 rank-count-independent restart files and the no-replication assertions of
 \cref{sec:mpi}. Moreover, the $np=8$ sweep runs reproduce the production
-$np=8$ runs exactly --- identical step counts (1470 and 2226) and identical
+$np=8$ runs exactly --- identical step counts (1482 and 2129) and identical
 final forces to all printed digits --- demonstrating run-to-run determinism
 at fixed rank count and partition.
 
 \paragraph{Timing and load balance.} Within the sweep (one machine-load
-window), wall time scales from 57.6 s ($np=1$) to 14.6 s ($np=4$) for the
-airfoil --- a $3.9\times$ speedup, 99\% parallel efficiency --- and from
-34.4 s to 10.3 s for the cylinder ($3.3\times$, 84\%). At $np=8$ both cases
-run slightly slower than at $np=4$ (20.7 s and 13.6 s): with only
+window), wall time scales from 51.4 s ($np=1$) to 15.9 s ($np=4$) for the
+airfoil --- a $3.2\times$ speedup, 81\% parallel efficiency --- and from
+33.6 s to 9.9 s for the cylinder ($3.4\times$, 85\%). At $np=8$ both cases
+run slightly slower than at $np=4$ (22.6 s and 16.6 s): with only
 $\approx$2600 (airfoil) or 1300 (cylinder) owned cells per rank, the halo
 exchange and per-step \texttt{MPI\_Allreduce} latency are comparable to the
 compute, and the shared host adds noise at these runtimes. Load balance
 from the partition diagnostics is 1.03 or better at $np=8$
 (\cref{tab:partition}); communication volume remains small (edge cut
 $\le2.4\%$ of faces). For reference, the production $np=8$ runs recorded
-16.8 s (airfoil) and 148.2 s (cylinder) at times of heavier machine load ---
+254.7 s (airfoil) and 88.1 s (cylinder) while sharing the host with three
+other production runs ---
 run-to-run timing variability on this shared host is exactly why the sweep
 timings above were all taken back-to-back.
 
@@ -1054,7 +1063,7 @@ from the run artifacts and are listed with their source files in
 \section{Code Organization and Extensibility}
 \label{sec:code}
 The solver is split into single-responsibility modules
-(	exttt{src/}): \texttt{mesh.cpp} (CGNS import, cell/face geometry),
+(\texttt{src/}): \texttt{mesh.cpp} (CGNS import, cell/face geometry),
 \texttt{partition.cpp} (METIS graph partitioning, ghost layer, halo plan,
 per-rank partition cache), \texttt{spatial.cpp} (least-squares gradients,
 limiters, inviscid/viscous flux assembly, boundary conditions),
@@ -1077,15 +1086,16 @@ volumes rather than 2-D-specific formulas.
 
 \section{Limitations and Failure Analysis}
 \label{sec:limitations}
-\paragraph{Inviscid residual plateau.} The three inviscid cases reach
-4.0--4.1 orders of residual reduction and then plateau: the Venkatakrishnan
-limiter cycles near the shocks (and, at $M0.15$, near the stagnation region),
-so the residual stops decreasing although the forces are stable. The $M2.0$
-inviscid case plateaus earlier, at 2.26 orders, again with stable forces; it
-was stopped at its 40000-step cap and marked converged under the
-documented-plateau criterion allowed by the task ($\ge2$ orders $+$ force
-drift $<10^{-3}$). Machine-zero steady residuals would require a more
-shock-robust limiting strategy or a converged frozen-limiter pass.
+\paragraph{Spurious inviscid drag floor.} In inviscid subsonic flow at zero
+angle of attack the physical drag vanishes (d'Alembert), yet the $M0.15$
+inviscid case converges with $C_D=0.0017$: limiter dissipation near the
+stagnation region and mild grid skewness break the exact fore-aft
+cancellation. The value sets the drag floor of this mesh/scheme combination
+for smooth inviscid flow; the transonic and supersonic inviscid wave drags
+are well above it. An earlier solver build stalled below the $M2.0$ inviscid
+residual target (a missing halo exchange of the inner-solve increment across
+partition boundaries, since fixed); the shipped solver converges to all
+supplied inviscid targets directly.
 
 \paragraph{High-Mach laminar escalation.} The $M0.8$ and $M2.0$ laminar cases
 could not be run cold at their supplied CFL schedules: the
@@ -1107,8 +1117,8 @@ misreported as successful had the force level not been checked. A debug
 continuation (\texttt{results/dbg\_m200lam\_continue/}) then diverged once the
 CFL ramp exceeded $\approx7$ (non-finite residual at step 47933, marked
 \texttt{failed}). The production redo used \texttt{--cfl-max 5} and
-\texttt{--residual-target 5.0} and converged to 5.00 orders in 76601 total
-steps (36601 after the restart), 930 s, with $C_D=0.1350$ stable to
+\texttt{--residual-target 5.0} and converged to 5.00 orders in 37786 total
+steps (35258 after the restart), 1229 s, with $C_D=0.1315$ stable to
 $10^{-4}$ over the last 500 steps. The lesson --- residual-orders alone are
 not a safe convergence criterion for restarted viscous cases --- is why the
 sanity checks of \cref{sec:output} include a force-plausibility window.
@@ -1123,12 +1133,28 @@ amplitudes carry a few-percent window-to-window variability; a longer
 integration would tighten them.
 
 \paragraph{Further improvements with more time.} (i) A shock-robust or
-frozen-limiter variant to push the inviscid cases past the plateau;
+frozen-limiter variant to reduce the spurious inviscid drag floor further;
 (ii) mesh refinement in the airfoil boundary layer and cylinder wake to reduce
 the spurious inviscid drag floor and tighten the $Re=200$ statistics (a longer
 time window would also tighten the FFT frequency resolution, currently
 $\Delta f\approx1/150$); (iii) replacing the simplified Rusanov Jacobian
 with a Roe-consistent Jacobian in the inner solve to cut inner iterations at
 high Mach.
+
+\end{document}
+\paragraph{Implementation notes.} Three disclosures that do not affect the
+reported numbers. (i) The case-file keys \texttt{inner\_residual\_norm} and
+\texttt{bdf2\_history\_update} are parsed but not branched on: the only
+implemented inner norm is the required
+\texttt{total\_spatial\_plus\_physical\_time}, and the only history-update
+point is \texttt{after\_inner\_convergence}. (ii) For the transient run
+the \texttt{residuals.csv} \texttt{cfl} column records the pseudo-CFL
+actually used ($100$), not the case-file steady-CFL recommendation.
+(iii) The least-squares
+moment matrix is guarded by an absolute $10^{-12}$ diagonal regularization
+for degenerate stencils, and the viscous temperature gradient uses the exact
+calorically-perfect identity
+$\nabla T=(\nabla p-R\,T\,\nabla\rho)/(\rho R)$ with cell-side
+densities and temperatures.
 
 \end{document}

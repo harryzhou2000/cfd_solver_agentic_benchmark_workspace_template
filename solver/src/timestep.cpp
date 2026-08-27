@@ -230,9 +230,12 @@ void sgs_sweep_pair(SolverContext& ctx, const std::vector<double>& diag,
   ctx.halo.exchange(m, &dU[0][0], 4);
 }
 
-// Positivity-safeguarded conservative update.
-void apply_update(SolverContext& ctx, const std::vector<Vec4>& dU) {
+// Positivity-safeguarded conservative update. Returns the number of cells
+// whose update was dropped entirely (backtracking exhausted), so callers
+// can log the masked partial update instead of hiding it.
+int apply_update(SolverContext& ctx, const std::vector<Vec4>& dU) {
   const GasModel& gas = ctx.cs->gas;
+  int skipped = 0;
   for (int i = 0; i < ctx.mesh.n_owned; ++i) {
     Vec4 Un = add4(ctx.st.U[i], dU[i]);
     Vec4 W = cons_to_prim(Un, gas);
@@ -248,10 +251,14 @@ void apply_update(SolverContext& ctx, const std::vector<Vec4>& dU) {
       Un = add4(ctx.st.U[i], scale4(dU[i], scale));
       W = cons_to_prim(Un, gas);
     }
-    if (tries >= 30) continue;  // skip the update for this cell
+    if (tries >= 30) {
+      ++skipped;  // skip the update for this cell; caller logs it
+      continue;
+    }
     ctx.st.U[i] = Un;
     (void)W;
   }
+  return skipped;
 }
 
 }  // namespace
@@ -285,11 +292,15 @@ RunResult run_steady(SolverContext& ctx, OutputContext& out, long start_step) {
 
   std::deque<double> recent_cd, recent_l2;
   long step = start_step;
+  const int res_every = std::max(1, cs.outputs.write_residuals_every);
+  const int force_every = std::max(1, cs.outputs.write_forces_every);
   auto log_row = [&](long s, int inner_used, double cfl) {
-    write_residual_row(out, s, 0.0, inner_used, cfl, norms.dt_min, norms.per_eq,
-                       norms.l2, norms.linf);
-    write_force_row(out, s, 0.0, fc.cl, fc.cd, fc.cmz, fc.pressure_drag,
-                    fc.viscous_drag, fc.pressure_lift, fc.viscous_lift);
+    if (s % res_every == 0)
+      write_residual_row(out, s, 0.0, inner_used, cfl, norms.dt_min,
+                         norms.per_eq, norms.l2, norms.linf);
+    if (s % force_every == 0)
+      write_force_row(out, s, 0.0, fc.cl, fc.cd, fc.cmz, fc.pressure_drag,
+                      fc.viscous_drag, fc.pressure_lift, fc.viscous_lift);
   };
   log_row(step, 0, rc.cfl_initial);
   recent_cd.push_back(fc.cd);
@@ -298,6 +309,7 @@ RunResult run_steady(SolverContext& ctx, OutputContext& out, long start_step) {
   bool failed = false, converged = false;
   int inner_used_last = 0;
   long last_logged = start_step;
+  double last_cfl = rc.cfl_initial;
   for (step = start_step + 1; step <= start_step + rc.max_steps; ++step) {
     const double ramp_frac =
         std::min(1.0, static_cast<double>(step - start_step - 1) /
@@ -326,6 +338,9 @@ RunResult run_steady(SolverContext& ctx, OutputContext& out, long start_step) {
       for (auto& d : corr) d = Vec4{};
       sgs_sweep_pair(ctx, diag, rhs, corr, true);
       for (int i = 0; i < ctx.mesh.n_owned; ++i) iadd4(dU[i], corr[i]);
+      // Synchronize dU across the halo before refreshing the linear
+      // residual; apply_approx_jacobian reads dU at ghost cells.
+      ctx.halo.exchange(ctx.mesh, &dU[0][0], 4);
       // Refresh the true linear residual.
       apply_approx_jacobian(ctx, diag, dU, rA);
       for (int i = 0; i < ctx.mesh.n_owned; ++i) iadd4(rA[i], ctx.st.R[i]);
@@ -343,21 +358,29 @@ RunResult run_steady(SolverContext& ctx, OutputContext& out, long start_step) {
     inner_used_last = inner;
     res.inner.add(inner, ratio <= rc.inner_residual_reduction_target, ratio);
 
-    apply_update(ctx, dU);
+    int skipped = apply_update(ctx, dU);
+    if (skipped > 0) {
+      char sbuf[160];
+      std::snprintf(sbuf, sizeof(sbuf),
+                    "step %ld: positivity backtracking skipped %d cell update(s)",
+                    step, skipped);
+      out.log(sbuf);
+    }
     ctx.eval_residual(o, fl);
     norms = ctx.global_norms();
     fc = ctx.reduce_forces(fl);
-    log_row(step, inner_used_last, cfl);
-    last_logged = step;
-    recent_cd.push_back(fc.cd);
-    recent_l2.push_back(norms.l2);
-    if (recent_cd.size() > 2000) { recent_cd.pop_front(); recent_l2.pop_front(); }
-
     if (ctx.st.non_finite || !std::isfinite(norms.l2)) {
       failed = true;
       out.log("ERROR: non-finite residual detected; marking case failed");
       break;
     }
+    log_row(step, inner_used_last, cfl);
+    last_logged = step;
+    last_cfl = cfl;
+    recent_cd.push_back(fc.cd);
+    recent_l2.push_back(norms.l2);
+    if (recent_cd.size() > 2000) { recent_cd.pop_front(); recent_l2.pop_front(); }
+
     double orders = std::log10(base_l2 / std::max(norms.l2, 1e-300));
     if (step % 500 == 0) {
       char buf[256];
@@ -370,6 +393,18 @@ RunResult run_steady(SolverContext& ctx, OutputContext& out, long start_step) {
       converged = true;
       break;
     }
+  }
+
+  // Guarantee final-state CSV rows regardless of output cadence, so the
+  // last rows always correspond to the final field/surface state.
+  if (!failed) {
+    if (last_logged % res_every != 0)
+      write_residual_row(out, last_logged, 0.0, inner_used_last, last_cfl,
+                         norms.dt_min, norms.per_eq, norms.l2, norms.linf);
+    if (last_logged % force_every != 0)
+      write_force_row(out, last_logged, 0.0, fc.cl, fc.cd, fc.cmz,
+                      fc.pressure_drag, fc.viscous_drag, fc.pressure_lift,
+                      fc.viscous_lift);
   }
 
   res.final_step = last_logged;
@@ -425,10 +460,15 @@ RunResult run_transient(SolverContext& ctx, OutputContext& out, long start_step,
   std::vector<Vec4> F(ctx.mesh.n_owned, Vec4{});
   std::vector<double> diag(ctx.mesh.n_owned, 0.0);
 
-  // History arrays (owned cells): U_n, U_nm1 already sized in init().
-  for (int i = 0; i < ctx.mesh.n_owned; ++i) {
-    ctx.U_n[i] = ctx.st.U[i];
-    ctx.U_nm1[i] = ctx.st.U[i];
+  // History arrays (owned cells). Cold start: zero-acceleration history
+  // U_n = U_nm1 = U. Restart: main() has already loaded the saved BDF2
+  // history from a 3-state restart file, or set the zero-acceleration
+  // history for a 1-state (steady) restart file -- never overwrite it here.
+  if (start_step == 0) {
+    for (int i = 0; i < ctx.mesh.n_owned; ++i) {
+      ctx.U_n[i] = ctx.st.U[i];
+      ctx.U_nm1[i] = ctx.st.U[i];
+    }
   }
 
   ForceSums fl;
@@ -449,7 +489,8 @@ RunResult run_transient(SolverContext& ctx, OutputContext& out, long start_step,
     ctx.eval_residual(o, fl);
     ResidualNorms norms = ctx.global_norms();
     ForceCoeffs fc0 = ctx.reduce_forces(fl);
-    write_residual_row(out, start_step, start_time, 0, rc.cfl_initial, dt,
+    write_residual_row(out, start_step, start_time, 0,
+                       ctx.cfg.transient_pseudo_cfl, dt,
                        norms.per_eq, norms.l2, norms.linf);
     write_force_row(out, start_step, start_time, fc0.cl, fc0.cd, fc0.cmz,
                     fc0.pressure_drag, fc0.viscous_drag, fc0.pressure_lift,
@@ -458,6 +499,10 @@ RunResult run_transient(SolverContext& ctx, OutputContext& out, long start_step,
 
   bool failed = false;
   long step = start_step;
+  long last_row_step = start_step;
+  const int res_every = std::max(1, cs.outputs.write_residuals_every);
+  const int force_every = std::max(1, cs.outputs.write_forces_every);
+  int inner_last = 0;
   ForceCoeffs fc;
   ResidualNorms fnorms;
   for (long n = 1; n <= nsteps; ++n) {
@@ -511,6 +556,7 @@ RunResult run_transient(SolverContext& ctx, OutputContext& out, long start_step,
     std::vector<Vec4> corr(ctx.mesh.n_cells, Vec4{});
     const int spk = std::max(1, ctx.cfg.transient_sweeps_per_inner);
     int inner = 0;  // total SGS sweep pairs this step (reported statistic)
+    int skipped_step = 0;  // cells whose update was dropped by backtracking
     double ratio = 1.0;
     bool hit = false;
     while (inner < rc.max_inner_iterations) {
@@ -528,7 +574,7 @@ RunResult run_transient(SolverContext& ctx, OutputContext& out, long start_step,
       }
       // Outer refresh of the true nonlinear BDF residual at U + dU.
       double ra = global_rms(ctx.comm, ctx.mesh.n_owned, rA);
-      apply_update(ctx, dU);
+      skipped_step += apply_update(ctx, dU);
       for (auto& d : dU) d = Vec4{};
       ctx.halo.exchange(ctx.mesh, &dU[0][0], 4);
       ctx.eval_residual(o, fl);
@@ -548,6 +594,7 @@ RunResult run_transient(SolverContext& ctx, OutputContext& out, long start_step,
     hit = hit || (inner >= rc.min_inner_iterations &&
                   ratio <= rc.inner_residual_reduction_target);
     res.inner.add(inner, hit, ratio);
+    inner_last = inner;
 
     // Accept: update physical-time histories (frozen during inner loop).
     for (int i = 0; i < ctx.mesh.n_owned; ++i) {
@@ -556,18 +603,27 @@ RunResult run_transient(SolverContext& ctx, OutputContext& out, long start_step,
     }
 
     fc = ctx.reduce_forces(fl);
-    write_residual_row(out, step, t, inner, rc.cfl_initial, dt, fnorms.per_eq,
-                       fnorms.l2, fnorms.linf);
-    write_force_row(out, step, t, fc.cl, fc.cd, fc.cmz, fc.pressure_drag,
-                    fc.viscous_drag, fc.pressure_lift, fc.viscous_lift);
-    late_cl.push_back(fc.cl);
-    if (late_cl.size() > 6000) late_cl.pop_front();
-
+    if (skipped_step > 0) {
+      char sbuf[160];
+      std::snprintf(sbuf, sizeof(sbuf),
+                    "step %ld: positivity backtracking skipped %d cell update(s)",
+                    step, skipped_step);
+      out.log(sbuf);
+    }
     if (ctx.st.non_finite || !std::isfinite(fnorms.l2)) {
       failed = true;
       out.log("ERROR: non-finite transient residual; marking case failed");
       break;
     }
+    if (step % res_every == 0)
+      write_residual_row(out, step, t, inner, ctx.cfg.transient_pseudo_cfl, dt,
+                         fnorms.per_eq, fnorms.l2, fnorms.linf);
+    if (step % force_every == 0)
+      write_force_row(out, step, t, fc.cl, fc.cd, fc.cmz, fc.pressure_drag,
+                      fc.viscous_drag, fc.pressure_lift, fc.viscous_lift);
+    last_row_step = step;
+    late_cl.push_back(fc.cl);
+    if (late_cl.size() > 6000) late_cl.pop_front();
     if (n % 500 == 0) {
       char buf[256];
       std::snprintf(buf, sizeof(buf),
@@ -589,8 +645,23 @@ RunResult run_transient(SolverContext& ctx, OutputContext& out, long start_step,
                     ctx.U_n, ctx.U_nm1, 3);
   }
 
-  res.final_step = step;
-  res.final_time = start_time + (step - start_step) * dt;
+  // Guarantee final-state CSV rows regardless of output cadence, so the
+  // last rows always correspond to the final field/surface state.
+  if (!failed) {
+    const double tfinal = start_time + (step - start_step) * dt;
+    if (step % res_every != 0)
+      write_residual_row(out, step, tfinal, inner_last,
+                         ctx.cfg.transient_pseudo_cfl, dt, fnorms.per_eq,
+                         fnorms.l2, fnorms.linf);
+    if (step % force_every != 0)
+      write_force_row(out, step, tfinal, fc.cl, fc.cd, fc.cmz,
+                      fc.pressure_drag, fc.viscous_drag, fc.pressure_lift,
+                      fc.viscous_lift);
+    last_row_step = step;
+  }
+
+  res.final_step = failed ? last_row_step : step;
+  res.final_time = start_time + (res.final_step - start_step) * dt;
   res.last_forces = fc;
   res.inner.finalize();
   res.n_physical_steps = static_cast<int>(step - start_step);

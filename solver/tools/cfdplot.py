@@ -113,7 +113,8 @@ def spectral_stats(time: np.ndarray, sig: np.ndarray, t_start: float):
     win = np.hanning(n)
     spec = np.fft.rfft(s0 * win)
     freqs = np.fft.rfftfreq(n, d=dt)
-    amp_spec = 2.0 * np.abs(spec) / (np.sum(win) * 0.5)
+    # One-sided amplitude of a real peak: A = 2|X_k| / sum(win).
+    amp_spec = 2.0 * np.abs(spec) / np.sum(win)
     k = int(np.argmax(np.abs(spec[1:])) + 1)
     return {"mean": float(np.mean(s)), "amplitude": float(amp_spec[k]),
             "frequency": float(freqs[k])}

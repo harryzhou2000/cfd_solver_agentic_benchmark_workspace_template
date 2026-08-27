@@ -359,31 +359,6 @@ void write_restart(OutputContext& oc, const LocalMesh& m, const std::string& fil
           static_cast<std::streamsize>(states.size() * sizeof(double)));
 }
 
-bool read_restart(const std::string& filename, int n_cells_global, long& step,
-                  double& time, std::vector<Vec4>& U, std::vector<Vec4>& U_n,
-                  std::vector<Vec4>& U_nm1, int& n_states) {
-  std::ifstream f(filename, std::ios::binary);
-  if (!f) return false;
-  char magic[16];
-  f.read(magic, 16);
-  if (std::strncmp(magic, "CFDRST01", 8) != 0) return false;
-  int64_t step64, nc64;
-  int32_t ns32;
-  f.read(reinterpret_cast<char*>(&step64), 8);
-  f.read(reinterpret_cast<char*>(&time), 8);
-  f.read(reinterpret_cast<char*>(&nc64), 8);
-  f.read(reinterpret_cast<char*>(&ns32), 4);
-  if (nc64 != n_cells_global)
-    throw std::runtime_error("restart cell count mismatch");
-  step = step64;
-  n_states = ns32;
-  std::vector<double> states(static_cast<size_t>(nc64) * 4 * n_states);
-  f.read(reinterpret_cast<char*>(states.data()),
-         static_cast<std::streamsize>(states.size() * sizeof(double)));
-  if (!f) return false;
-  return true;
-}
-
 void write_partition_diagnostics(OutputContext& oc, const LocalMesh& m,
                                  const PartitionInfo& info) {
   std::string row = partition_diagnostics_csv(m, info);

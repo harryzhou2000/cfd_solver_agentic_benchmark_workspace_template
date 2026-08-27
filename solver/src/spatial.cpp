@@ -314,8 +314,9 @@ void assemble_residual(const LocalMesh& m, const CaseFile& cs, FlowState& s,
         auto gv = face_grad(2, s.W[L][2], s.W[R][2]);
         // T gradient from primitive gradients at each cell, then corrected.
         auto cell_Tgrad = [&](int c, double rho, double T) {
-          double gx = (s.gradW[c][6] - T * s.gradW[c][0]) / (rho * gas.R);
-          double gy = (s.gradW[c][7] - T * s.gradW[c][1]) / (rho * gas.R);
+          // From p = rho R T: grad T = (grad p - R T grad rho) / (rho R).
+          double gx = (s.gradW[c][6] - gas.R * T * s.gradW[c][0]) / (rho * gas.R);
+          double gy = (s.gradW[c][7] - gas.R * T * s.gradW[c][1]) / (rho * gas.R);
           return std::pair<double, double>{gx, gy};
         };
         auto gTL = cell_Tgrad(L, rhoL, TL);
@@ -407,15 +408,15 @@ void assemble_residual(const LocalMesh& m, const CaseFile& cs, FlowState& s,
           double ty = txy * nx + tyy * ny;
           double tn = tx * nx + ty * ny;
           double ttx = tx - tn * nx, tty = ty - tn * ny;  // tangential traction
-          fs.fx_p += pw * nx * A;
-          fs.fy_p += pw * ny * A;
           fs.fx_v -= ttx * A;
           fs.fy_v -= tty * A;
           double rx = m.face_cx[f] - cs.ref.moment_center[0];
           double ry = m.face_cy[f] - cs.ref.moment_center[1];
-          fs.mz_p += (rx * (pw * ny) - ry * (pw * nx)) * A;
           fs.mz_v -= (rx * tty - ry * ttx) * A;
-        } else if (bc == BCType::SlipWall) {
+        }
+        if (bc == BCType::NoSlipAdiabaticWall || bc == BCType::SlipWall) {
+          // Pressure forces/moments accumulate for every wall type,
+          // independent of the viscous-mode flag.
           fs.fx_p += pw * nx * A;
           fs.fy_p += pw * ny * A;
           double rx = m.face_cx[f] - cs.ref.moment_center[0];

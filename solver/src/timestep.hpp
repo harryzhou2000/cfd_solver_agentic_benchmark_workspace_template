@@ -74,7 +74,7 @@ struct SolverContext {
 };
 
 struct RunResult {
-  int final_step = 0;
+  long final_step = 0;
   double final_time = 0.0;
   std::string status = "failed";
   double residual_reduction = 0.0;

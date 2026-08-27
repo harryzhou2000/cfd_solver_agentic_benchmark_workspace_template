@@ -45,10 +45,6 @@ void write_restart(OutputContext& oc, const LocalMesh& m, const std::string& fil
                    long step, double time, const std::vector<Vec4>& U,
                    const std::vector<Vec4>& U_n, const std::vector<Vec4>& U_nm1,
                    int n_states);
-bool read_restart(const std::string& filename, int n_cells_global, long& step,
-                  double& time, std::vector<Vec4>& U, std::vector<Vec4>& U_n,
-                  std::vector<Vec4>& U_nm1, int& n_states);
-
 void write_partition_diagnostics(OutputContext& oc, const LocalMesh& m,
                                  const PartitionInfo& info);
 

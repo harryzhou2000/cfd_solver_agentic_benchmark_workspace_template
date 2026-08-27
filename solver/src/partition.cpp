@@ -46,6 +46,8 @@ template <typename T>
 void read_vec(std::ifstream& f, std::vector<T>& v, size_t n) {
   v.resize(n);
   f.read(reinterpret_cast<char*>(v.data()), static_cast<std::streamsize>(n * sizeof(T)));
+  if (!f)
+    throw std::runtime_error("truncated or corrupt partition file (read_vec)");
 }
 
 struct PartHeader {
@@ -381,8 +383,12 @@ LocalMesh load_local_partition(const std::string& out_dir, int rank, int n_ranks
   for (int i = 0; i < h.n_bc_names; ++i) {
     int32_t len = 0;
     f.read(reinterpret_cast<char*>(&len), sizeof(len));
+    if (!f || len < 0 || len > 1024)
+      throw std::runtime_error("truncated or corrupt partition file (bc name)");
     std::string nm(len, ' ');
     f.read(nm.data(), len);
+    if (!f)
+      throw std::runtime_error("truncated or corrupt partition file (bc name)");
     lm.bc_names.push_back(nm);
   }
   read_vec(f, lm.cell_global, lm.n_cells);

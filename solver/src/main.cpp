@@ -84,6 +84,8 @@ int selftest() {
   //    Check F_diff = 0.5(FL+FR) - F_roe equals |A|dU/2 via finite diff of F.
   {
     Vec4 UL = prim_to_cons(WL, gas), UR = prim_to_cons(WR, gas);
+    (void)UL;
+    (void)UR;
     Vec4 FL = inviscid_flux_phys(WL, n12[0], n12[1], gas);
     Vec4 FR = inviscid_flux_phys(WR, n12[0], n12[1], gas);
     Vec4 jump;  // dissipation part
@@ -252,9 +254,14 @@ int main(int argc, char** argv) {
       ctx.cs = &cs;
       ctx.cfg = cfg;
       std::string perr;
-      if (!cfd::preprocess_partition(cs.mesh_file, nranks, out_dir, &perr) &&
-          !perr.empty())
-        throw std::runtime_error(perr);
+      // Rank 0 preprocesses; a concurrent remove_all/rebuild from every
+      // rank would race on a stale cache. Others wait at the barrier.
+      if (rank == 0) {
+        if (!cfd::preprocess_partition(cs.mesh_file, nranks, out_dir, &perr) &&
+            !perr.empty())
+          throw std::runtime_error(perr);
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
       ctx.mesh = cfd::load_local_partition(out_dir, rank, nranks, ctx.pinfo);
       ctx.init();
       {
@@ -476,16 +483,22 @@ int main(int argc, char** argv) {
       cfd::ForceSums fl;
       ctx.eval_residual(fo, fl);
     }
-    if (cs.outputs.write_surface) {
+    // Never write final field/surface/restart artifacts from a non-finite
+    // state: the CSV history up to the last good step plus run_status.json
+    // is the honest record then. A run that failed only a diagnostic check
+    // (e.g. periodicity not yet established on a short run) has a finite
+    // state whose restart remains the legitimate continuation seed.
+    const bool ok = !ctx.st.non_finite;
+    if (cs.outputs.write_surface && ok) {
       auto rows = cfd::compute_surface_rows(ctx.mesh, cs, ctx.st, fo);
       cfd::write_surface_csv(oc, ctx.mesh, rows);
     }
-    if (cs.outputs.write_final_field)
+    if (cs.outputs.write_final_field && ok)
       cfd::write_field_vtu(oc, ctx.mesh, cs, ctx.st, "field_final.vtu");
-    if (cs.run.type == "transient")
+    if (cs.run.type == "transient" && ok)
       cfd::write_restart(oc, ctx.mesh, "restart_final.bin", res.final_step,
                          res.final_time, ctx.st.U, ctx.U_n, ctx.U_nm1, 3);
-    else
+    else if (ok)
       cfd::write_restart(oc, ctx.mesh, "restart_final.bin", res.final_step,
                          res.final_time, ctx.st.U, ctx.st.U, ctx.st.U, 1);
     cfd::write_partition_diagnostics(oc, ctx.mesh, ctx.pinfo);
@@ -570,7 +583,10 @@ int main(int argc, char** argv) {
           ? "residual target or documented plateau reached; final force row "
             "matches final field/surface state"
           : res.status == "statistically_periodic"
-          ? "post-transient periodic vortex shedding established"
+          ? "post-transient periodic vortex shedding established; "
+            "residual_reduction_orders for transient runs is "
+            "-log10(final inner-loop residual ratio), i.e. the per-step "
+            "nonlinear convergence depth, not a run-wide reduction"
           : "run did not meet the convergence/periodicity criteria";
       cfd::write_json_file(out_dir + "/run_status.json", rs.dump(2));
 
