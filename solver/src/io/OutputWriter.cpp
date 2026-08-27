@@ -145,9 +145,12 @@ void writeVtu(const std::string& path, const SpatialOperator& op, int precision_
   // The gather concatenates the ranks' owned cells, so without this the cell
   // ordering of the file would depend on the rank count and on how METIS
   // happened to split the mesh.  Sorting by the global cell id makes the file
-  // rank-independent: run on any number of ranks, every array below is written
-  // in the same order, and two runs can be compared row for row.  RankId is the
-  // one field that is deliberately still rank-dependent; it is a diagnostic.
+  // rank-independent: run on any number of ranks, every cell array below is
+  // written in the same order, and two runs can be compared row for row.
+  // RankId is the one field that is deliberately still rank-dependent; it is a
+  // diagnostic.  Only the per-cell arrays are permuted: all_ngid/all_nxy are a
+  // *deduplicated* node list per rank, not a per-cell-node list, and are
+  // handled by the point assembly below.
   {
     const std::size_t nc = all_npts.size();
     std::vector<std::size_t> perm(nc), start(nc);
@@ -157,42 +160,42 @@ void writeVtu(const std::string& path, const SpatialOperator& op, int precision_
       return all_cd[a * nfields + 10] < all_cd[b * nfields + 10];
     });
     std::vector<int> npts_s(nc);
-    std::vector<long long> conn_s, ngid_s;
-    std::vector<double> nxy_s, cd_s(all_cd.size());
+    std::vector<long long> conn_s;
+    std::vector<double> cd_s(all_cd.size());
     conn_s.reserve(all_conn.size());
-    ngid_s.reserve(all_ngid.size());
-    nxy_s.reserve(all_nxy.size());
     for (std::size_t k = 0; k < nc; ++k) {
       const std::size_t c = perm[k];
       const int n = all_npts[c];
       npts_s[k] = n;
-      for (int j = 0; j < n; ++j) {
-        conn_s.push_back(all_conn[start[c] + j]);
-        ngid_s.push_back(all_ngid[start[c] + j]);
-        nxy_s.push_back(all_nxy[2 * (start[c] + j)]);
-        nxy_s.push_back(all_nxy[2 * (start[c] + j) + 1]);
-      }
+      conn_s.insert(conn_s.end(), all_conn.begin() + start[c], all_conn.begin() + start[c] + n);
       std::copy_n(&all_cd[c * nfields], nfields, &cd_s[k * nfields]);
     }
+    CFD_CHECK(conn_s.size() == all_conn.size(), "field output: connectivity lost in reordering");
     all_npts.swap(npts_s);
     all_conn.swap(conn_s);
-    all_ngid.swap(ngid_s);
-    all_nxy.swap(nxy_s);
     all_cd.swap(cd_s);
   }
 
-  // --- assemble a unique point list ---
+  // --- assemble a unique point list, numbered by global node id ---
+  // Ranks that share a node each report it, so the gathered list has
+  // duplicates; and its order depends on the partition.  Numbering the unique
+  // nodes by their global id removes both problems, so the point block is the
+  // same at every rank count too.
+  std::map<long long, std::pair<double, double>> unique_nodes;
+  CFD_CHECK(all_nxy.size() == 2 * all_ngid.size(),
+            "field output: node coordinate and id arrays disagree");
+  for (std::size_t i = 0; i < all_ngid.size(); ++i)
+    unique_nodes.emplace(all_ngid[i], std::make_pair(all_nxy[2 * i], all_nxy[2 * i + 1]));
+
   std::unordered_map<long long, int> pid;
-  pid.reserve(all_ngid.size() * 2);
+  pid.reserve(unique_nodes.size() * 2);
   std::vector<double> px, py;
-  px.reserve(all_ngid.size());
-  py.reserve(all_ngid.size());
-  for (std::size_t i = 0; i < all_ngid.size(); ++i) {
-    auto it = pid.find(all_ngid[i]);
-    if (it != pid.end()) continue;
-    pid.emplace(all_ngid[i], static_cast<int>(px.size()));
-    px.push_back(all_nxy[2 * i]);
-    py.push_back(all_nxy[2 * i + 1]);
+  px.reserve(unique_nodes.size());
+  py.reserve(unique_nodes.size());
+  for (const auto& kv : unique_nodes) {
+    pid.emplace(kv.first, static_cast<int>(px.size()));
+    px.push_back(kv.second.first);
+    py.push_back(kv.second.second);
   }
   const std::size_t npoints = px.size();
   const std::size_t ncells = all_npts.size();
