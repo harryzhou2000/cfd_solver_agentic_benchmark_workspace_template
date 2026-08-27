@@ -473,6 +473,12 @@ int runSolve(const CliArgs& a) {
     md["solver_name"] = kSolverName;
     md["solver_version"] = kSolverVersion;
     md["git_revision"] = std::string(kGitRevision).empty() ? json(nullptr) : json(kGitRevision);
+    // The git revision is captured when CMake configures, so it cannot tell two
+    // builds of the same checkout apart.  The compile timestamp of this
+    // translation unit can, which is what makes the "all cases came from one
+    // build" check in scripts/check_submission.sh mean something.
+    md["build_timestamp"] = std::string(__DATE__) + " " + __TIME__;
+    md["build_type"] = kBuildType;
     md["mpi_ranks"] = size;
     md["mesh_file"] = cfg.mesh_file;
     md["num_cells_global"] = lmesh.global_num_cells;

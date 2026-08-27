@@ -57,6 +57,7 @@ for cid in required:
     if os.path.exists(f):
         m = json.load(open(f))
         builds[cid] = (m.get("solver_version"), m.get("git_revision"),
+                       m.get("build_timestamp"), m.get("build_type"),
                        m.get("inviscid_flux"), m.get("shock_fix"),
                        m.get("shock_fix_strength"), m.get("reconstruction"),
                        m.get("limiter"))

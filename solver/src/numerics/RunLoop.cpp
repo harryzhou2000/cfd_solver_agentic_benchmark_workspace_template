@@ -313,7 +313,13 @@ RunResult runTransient(SpatialOperator& op, ImplicitSolver& solver, const std::s
 
   RunResult out;
   std::vector<Real> cl_hist, cd_hist;
-  Real t = start_time;
+  // The physical time is recomputed from the step count rather than
+  // accumulated.  Adding dt thirty thousand times drifts by ~1e-10, which is
+  // harmless physically but leaves the final time a hair short of the requested
+  // horizon and puts that drift into every row of every output file.
+  const long long step0 = start_step;
+  const Real t0 = start_time;
+  Real t = t0;
   long long step = start_step;
 
   if (std::filesystem::exists(outdir)) {
@@ -400,8 +406,8 @@ RunResult runTransient(SpatialOperator& op, ImplicitSolver& solver, const std::s
     std::copy(un.begin(), un.end(), unm1.begin());
     std::copy(op.U().begin(), op.U().end(), un.begin());
     if (trapezoidal) std::copy(op.residual().begin(), op.residual().end(), rn.begin());
-    t += dt;
     ++step;
+    t = t0 + static_cast<Real>(step - step0) * dt;
     out.inner.add(inner_done, inner_converged, ratio);
 
     const ForceReport f = computeForces(op);
