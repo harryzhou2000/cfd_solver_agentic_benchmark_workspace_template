@@ -516,26 +516,43 @@ expected nor meaningful. Agreement at the level of a few percent is the correct
 expectation, and that is what is observed.
 
 \paragraph{The operand is still moving, and by how much.} One caveat belongs with this
-comparison, because without it the headline figure is a function of when the run was
-stopped. The viscous drag for this case was still falling when the run terminated: its
-sub-block means over the final 1500 steps run
-\begin{center}
-  $0.04502,\ 0.04107,\ 0.03888,\ 0.03772,\ 0.03707,\ 0.03676$.
-\end{center}
-The decrements decay geometrically with tightly clustered ratios
-($0.554, 0.534, 0.548, 0.497$), so by the criterion of \cref{sec:digits} this is an
-asymptotic approach with a computable remainder rather than an unfinished transient.
-Summing the geometric tail gives an asymptote near $\num{0.03639}$, about $1\,\%$ below
-the value at termination.
+comparison, because without it the headline figure is partly a function of when the run
+was stopped. The viscous drag was still falling at termination, with decrements that
+decay geometrically --- so by the criterion of \cref{sec:digits} this is an asymptotic
+approach with a computable remainder, not an unfinished transient, and the remainder can
+be estimated.
 
-Against \cref{eq:blasius} that asymptote corresponds to agreement of about
-$3.1\,\%$ rather than $2.4\,\%$, and across the full range of ratios the extrapolation
-supports ($r\in[0.497,0.555]$) the figure spans $3.0\,\%$ to $3.2\,\%$. So the honest
-statement is that this comparison agrees to $2.4\,\%$ as computed and would settle near
-$3\,\%$ with further iteration --- still a few percent, still the right conclusion, but
-the reader should know that the more precise-looking $2.4\,\%$ is the better of the two
-and that it owes some of its closeness to the stopping point. The extrapolated figure is
-a geometric-model estimate, not a measurement, and is quoted as a range for that reason.
+How large the remainder is depends on the window used to estimate the decay, and rather
+than pick the flattering one the sweep is given
+(\texttt{report/blasius\_sensitivity.py}):
+
+\begin{center}
+\begin{tabular}{rrrr}
+  \toprule
+  Window (steps) & Decay ratio & Asymptote & Below \cref{eq:blasius} \\
+  \midrule
+  \num{500} & $0.844$ & \num{0.036512} & $2.79\,\%$ \\
+  \num{1000} & $0.735$ & \num{0.036488} & $2.86\,\%$ \\
+  \num{1500} & $0.667$ & \num{0.036444} & $2.98\,\%$ \\
+  \num{2000} & $0.593$ & \num{0.036420} & $3.04\,\%$ \\
+  \num{3000} & $0.486$ & \num{0.036353} & $3.22\,\%$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The estimated asymptote is stable to about $\num{1.6e-4}$, or $0.4\,\%$ of
+itself, across a six-fold change in window length; the implied agreement with Blasius
+ranges from $2.8\,\%$ to $3.2\,\%$. Longer windows reach further back into the faster
+decay and so extrapolate slightly further, which is why the figure drifts in one
+direction rather than scattering.
+
+The honest summary is therefore: \textbf{$2.4\,\%$ as computed, and $2.8$--$3.2\,\%$ if
+iterated to the estimated asymptote}. The conclusion --- agreement at the level of a few
+percent, which is what a $12\,\%$-thick section compared against flat-plate theory can
+support --- is unchanged either way. But the more precise-looking $2.4\,\%$ is the better
+of the two figures and owes part of its closeness to the stopping point, which a reader
+is entitled to know. The extrapolated range is a geometric-model estimate rather than a
+measurement, and is quoted as a range for that reason.
 
 The compressible cases behave consistently with this picture: viscous drag falls
 to $\cnsVdNacaTraLam$ at $\Minf=0.80$ and $\cnsVdNacaSupLam$ at $\Minf=2.0$.
