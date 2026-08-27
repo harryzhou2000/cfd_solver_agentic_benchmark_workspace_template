@@ -713,39 +713,93 @@ ratio: at $0.988$ the increments are barely shrinking, so the geometric tail sum
 $\num{6.6e-3}$ of remaining $C_D$ movement, or $5.1\,\%$ of the current value, implying
 an asymptote near $0.135$ against a current $0.1285$.
 
+\subsubsection{An extrapolation is only as good as its conditioning}
+\label{sec:conditioning}
+
 Repeating the measurement as the run continued shows the discriminator tracking a real
-quantity rather than thresholding noise, and also exposes the limit of the extrapolation:
+quantity rather than thresholding noise. It also refutes a claim made about the
+extrapolation in an earlier draft --- that its asymptote was stable and therefore
+trustworthy --- and the refutation is the sharpest of the lessons in this sequence.
 
-\begin{center}
-\begin{tabular}{rrrrr}
-  \toprule
-  Step & Decay ratio & $C_D$ & Remaining & Implied asymptote \\
-  \midrule
-  \num{13144} & $0.988$ & $0.1285$ & $5.1\,\%$ & $0.1351$ \\
-  \num{16000} & $0.990$ & $0.1320$ & $3.1\,\%$ & $0.1361$ \\
-  \num{22355} & $0.993$ & $0.1351$ & $1.6\,\%$ & $0.1372$ \\
-  \bottomrule
-\end{tabular}
-\end{center}
+\begin{table}[htbp]
+  \centering
+  \caption{The same geometric-tail extrapolation applied to
+  \texttt{naca0012\_m200\_laminar\_re5000} at four points during one run. The remaining
+  fraction falls, so the run is converging; but the implied asymptote climbs, and the
+  amplification factor $r/(1-r)$ that multiplies the fitted ratio's error grows with it.}
+  \label{tab:conditioning}
+  \small
+  \begin{tabular}{rrrrrr}
+    \toprule
+    Step & Ratio $r$ & $C_D$ & Remaining & Implied asymptote & $r/(1-r)$ \\
+    \midrule
+    \num{13144} & $0.988$ & $0.1285$ & $5.10\,\%$ & $0.1351$ & $82$ \\
+    \num{16000} & $0.990$ & $0.1320$ & $3.10\,\%$ & $0.1361$ & $100$ \\
+    \num{22355} & $0.993$ & $0.1351$ & $1.60\,\%$ & $0.1372$ & $142$ \\
+    \num{25307} & $0.994$ & $0.1358$ & $1.21\,\%$ & $0.1374$ & $165$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-\noindent The remaining fraction falls steadily, from $5.1\,\%$ to $1.6\,\%$, so the run
-is genuinely converging and the criterion's refusal weakens as it should rather than
-latching. But the \emph{implied asymptote is itself creeping upward}, from $0.1351$ to
-$0.1372$ across the three estimates, and each estimate is overtaken by the actual $C_D$
-of a later one --- the step-\num{13144} extrapolation predicted $0.1351$, which is
-precisely the value measured at step \num{22355}, where the extrapolation has moved on to
-$0.1372$.
+Two opposite trends run through \cref{tab:conditioning}. The remaining fraction falls
+from $5.10\,\%$ to $1.21\,\%$, so the run is genuinely converging and the criterion's
+refusal weakens as it should rather than latching. But \textbf{every estimate is overtaken
+by the measured value of a later one}: the step-\num{13144} extrapolation predicted
+$0.1351$, which is exactly the $C_D$ measured at step \num{22355}; that step's prediction
+of $0.1372$ is nearly the $0.1358$ already measured at \num{25307}. The asymptote is not
+stable --- it climbs monotonically, and it will continue to.
 
-That is worth stating plainly because it bounds what the extrapolation is worth. A
-geometric model fitted to a tail with ratio $0.993$ is extremely sensitive to the fitted
-ratio: at $r=0.993$ the tail sum is $r/(1-r)\approx142$ times the last increment, so a
-one-percent error in $r$ moves the asymptote by roughly $15\,\%$ of the remaining
-distance. The extrapolated figures above should therefore be read as \textbf{lower bounds
-on the remaining movement}, not as predictions of the converged value. The honest use of
-the decay ratio is as a \emph{classifier} --- $0.993$ is not converged, $0.733$ is --- and
-the report uses it that way. Where an asymptote is quoted as a number, as for the cylinder
-in \cref{sec:digits}, the ratio is well away from unity and the tail sum is
-correspondingly insensitive.
+The reason is conditioning, and it is worth making quantitative because it decides when an
+extrapolation may be quoted at all. The geometric tail sum is
+\begin{equation}
+  \Delta_\infty = d_{\text{last}}\,\frac{r}{1-r},
+  \label{eq:tailsum}
+\end{equation}
+so the fitted ratio's error is amplified by $r/(1-r)$. That factor is $82$ at the start of
+\cref{tab:conditioning} and $165$ at the end: \textbf{the extrapolation gets worse as the
+run proceeds}, because $r$ itself creeps towards unity. An estimator that degrades with
+more data is not an estimator.
+
+Contrast the cylinder of \cref{sec:digits}, where $r=0.733$ gives an amplification of
+only $2.7$. Same formula, same code, two orders of magnitude difference in conditioning ---
+which is precisely why that case's asymptote of $2.0177$ is quoted as a number while this
+one's is not.
+
+\paragraph{Consequences for how the report uses the decay ratio.} The ratio is used as a
+\textbf{classifier}, not an estimator: $0.994$ is not converged, $0.733$ is, and that
+judgement is robust because it depends on which side of the threshold $r$ falls rather than
+on its precise value. A tail figure is quoted as a number only where the amplification is
+small. Where the solver prints a tail estimate for a case whose ratio is near unity ---
+as it does for this case --- that number is a \textbf{lower bound on the remaining
+movement} and must not be quoted as a predicted converged value, including when read
+directly out of \texttt{run\_status.json}.
+
+This was found by checking the report's own extrapolation against data that arrived later,
+which is the only way it could have been found: at any single point the fit looks
+excellent, with the ratios agreeing to three decimal places across all nine sub-blocks.
+A well-fitting model of an ill-conditioned quantity is still ill-conditioned.
+
+\paragraph{A silent fallback that produced a plausible wrong answer.} One further defect
+belongs here, because it was caught by reading the rendered table rather than the code and
+because its failure mode is the dangerous kind. The stationarity label in
+\cref{tab:forces} is derived by parsing the solver's own termination note for the branch
+it took. The $\Reinf=200$ transient's note contains neither of the phrases that chain
+looks for, so it fell through to a fallback that recomputed a \emph{steady} drift
+statistic --- and duly labelled the benchmark's one correct transient result
+``drifting''.
+
+That label was category-wrong rather than numerically wrong. A von K\'arm\'an street's
+drag is \emph{supposed} to oscillate; there is no fixed point for a steady stationarity
+test to find, so applying one to a periodic flow cannot produce a meaningful answer. The
+classifier now has an explicit transient branch and reports periodicity, with the
+convergence evidence coming from \cref{tab:saturation} instead.
+
+The lesson is about the fallback rather than the label: a silent fallback that produces a
+\emph{plausible} wrong answer is more dangerous than one that fails loudly, because
+nothing draws attention to it. A printed ``drifting'' with a percentage beside
+it looks like a measurement. It would have survived any check that asked whether the
+table was populated, and was found only by asking whether each value made sense for the
+case it described.
 
 Set that against the cylinder of \cref{sec:digits}, whose ratio is $0.733$ and whose
 remaining movement is $0.049\,\%$. Both figures come from the same measurement applied to
