@@ -460,6 +460,28 @@ adverse one aft, and a finite leading-edge radius, so exact agreement is neither
 expected nor meaningful. Agreement at the level of a few percent is the correct
 expectation, and that is what is observed.
 
+\paragraph{The operand is still moving, and by how much.} One caveat belongs with this
+comparison, because without it the headline figure is a function of when the run was
+stopped. The viscous drag for this case was still falling when the run terminated: its
+sub-block means over the final 1500 steps run
+\begin{center}
+  $0.04502,\ 0.04107,\ 0.03888,\ 0.03772,\ 0.03707,\ 0.03676$.
+\end{center}
+The decrements decay geometrically with tightly clustered ratios
+($0.554, 0.534, 0.548, 0.497$), so by the criterion of \cref{sec:digits} this is an
+asymptotic approach with a computable remainder rather than an unfinished transient.
+Summing the geometric tail gives an asymptote near $\num{0.03639}$, about $1\,\%$ below
+the value at termination.
+
+Against \cref{eq:blasius} that asymptote corresponds to agreement of about
+$3.1\,\%$ rather than $2.4\,\%$, and across the full range of ratios the extrapolation
+supports ($r\in[0.497,0.555]$) the figure spans $3.0\,\%$ to $3.2\,\%$. So the honest
+statement is that this comparison agrees to $2.4\,\%$ as computed and would settle near
+$3\,\%$ with further iteration --- still a few percent, still the right conclusion, but
+the reader should know that the more precise-looking $2.4\,\%$ is the better of the two
+and that it owes some of its closeness to the stopping point. The extrapolated figure is
+a geometric-model estimate, not a measurement, and is quoted as a range for that reason.
+
 The compressible cases behave consistently with this picture: viscous drag falls
 to $\cnsVdNacaTraLam$ at $\Minf=0.80$ and $\cnsVdNacaSupLam$ at $\Minf=2.0$.
 Both are lower than the subsonic value, as expected --- compressibility and

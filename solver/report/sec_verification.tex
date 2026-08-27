@@ -193,8 +193,8 @@ checking script against the solver's face-centroid values.
 
 \paragraph{One case where the check initially failed, and why.} On
 \texttt{naca0012\_m200\_laminar\_re5000} the same procedure disagreed by
-$\num{4.85e-2}$ relative in the pressure component --- nearly $5\,\%$, far outside
-the $\num{1.8e-3}$ seen on the other six cases. The cause was a genuine
+$\num{4.95e-2}$ relative in the pressure component --- nearly $5\,\%$. The cause was a
+genuine
 inconsistency between two call sites in the solver, not a defect in the checking
 script. The force integral reconstructed the wall pressure with an \emph{unlimited}
 linear extrapolation $p_w = p_i + \nabla p_i\cdot\boldsymbol{\delta}$, while
@@ -204,6 +204,19 @@ wall face the two differ. On six cases the limiter is inactive on essentially ev
 wall face and the discrepancy is invisible; on the $\Minf=2.0$ laminar airfoil the
 limiter is active on the leading-edge cells, and there it is not.
 
+It is worth being precise about the "invisible on six cases" claim, because a first
+pass at it was wrong and the correction is instructive. The re-integration is not
+uniformly tight on the other six in \emph{relative} terms: the $\Minf=0.15$ inviscid
+case shows $\num{5.3e-2}$ relative, larger even than the case with the real bug. That
+figure is an artifact of dividing by a near-zero drag --- in absolute terms the
+discrepancy is $\num{5.4e-5}$, and this is the limit-cycle case whose peak-to-peak
+oscillation is $127\,\%$ of its own mean, so a relative measure of anything is
+meaningless for it. The correct statement is that the discrepancy is at or below the
+checking script's own arc-length noise floor of about $\num{1e-3}$ absolute on every
+case except the $\Minf=2.0$ laminar airfoil, where it was a genuine solver
+inconsistency. Quoting a relative bound across cases whose drags differ by two orders
+of magnitude was the error.
+
 This mattered beyond the size of the number, because the output contract requires
 the final force row to correspond to the state written to \texttt{surface.csv}, and
 on that case it did not. The force integral now applies the limiter factor, which is
@@ -211,8 +224,8 @@ the consistent choice on its own merits: no other part of the scheme uses an
 unlimited extrapolation, and the limiter is precisely what keeps a reconstruction
 bounded near a shock, so integrating an unlimited one was least defensible exactly
 where it mattered most. After the change the same check gives $\num{1.84e-3}$
-relative on that case, a factor of $27$ improvement and now in line with the other
-six, with the remainder attributable to the script's arc-length approximation.
+relative on that case, a factor of $27$ improvement, with the remainder attributable to
+the script's arc-length approximation.
 
 Two things are worth stating plainly about this finding. First, it changes reported
 numbers: the pressure drag of the $\Minf=2.0$ laminar case moves by about $5\,\%$,
@@ -450,28 +463,42 @@ very trailing window the run certified as a converged limit cycle,
   \toprule
   Quantity & Change over the window & Relative \\
   \midrule
-  Pressure drag $C_{D,p}$ & $+\num{3.170e-3}$ & $+19.3\,\%$ \\
-  Viscous drag $C_{D,v}$ & $-\num{3.200e-3}$ & $-13.2\,\%$ \\
+  Pressure drag $C_{D,p}$ & $+\num{3.169816e-3}$ & $+19.3\,\%$ \\
+  Viscous drag $C_{D,v}$ & $-\num{3.200498e-3}$ & $-13.2\,\%$ \\
   \midrule
   Total $C_D$ & $-\num{3.068e-5}$ & $-0.08\,\%$ \\
   \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent so the individual components were moving by roughly \emph{two hundred
-times} the drift of their sum, and the sum slipped under a drift tolerance of
-$\num{4.06e-5}$. A boundary layer that is still thickening while the shock system
-ahead of it is still strengthening produces precisely this signature: the two drag
-contributions change in opposite senses and their sum is momentarily flat.
+\noindent The percentages are referred to the means over the window being tested; the
+same absolute changes referred to the preceding window read $+23.9\,\%$ and
+$-11.7\,\%$, which is worth stating because a relative drift figure is meaningless
+without saying which window normalises it. Either way the combined component motion,
+$(|\Delta C_{D,p}|+|\Delta C_{D,v}|)/|\Delta C_D|$, is a factor of $208$ larger than the
+drift of the sum, and the sum slipped under a drift tolerance of $\num{4.06e-5}$. A
+boundary layer that is still thickening while the shock system ahead of it is still
+strengthening produces precisely this signature: the two drag contributions change in
+opposite senses and their sum is momentarily flat.
 
 A second, independent symptom confirms that this was a developing solution and not
 an oscillation. Splitting the certifying window into ten sub-blocks and taking the
 mean of each, the total drag was \emph{strictly monotone} across all ten,
-increasing from $\num{0.03921}$ to $\num{0.04238}$. A genuine limit cycle orbits its
+increasing from $\num{0.03921}$ to $\num{0.04237}$, with not one of the nine
+comparisons out of order. A genuine limit cycle orbits its
 mean, so its sub-block means are not monotone; a monotone march is the signature of
 an unfinished transient. The two cases legitimately classified as limit cycles in
 \cref{sec:limitcycle} both have non-monotone sub-blocks, so the test separates them
 cleanly.
+
+One detail of this measurement is worth recording because it caught out two independent
+analyses of the same data. The quoted figures depend on whether the duplicated final row
+of \texttt{forces.csv} is included, since including it shifts the trailing window by one
+sample. On this case that shift changes the net drift from $\num{-3.068e-5}$ to
+$\num{-1.055e-5}$, a factor of $2.9$, and correspondingly inflates the cancellation ratio
+from $208$ to $602$. The figures above use the in-loop rows with the duplicate dropped.
+A one-sample convention is not normally worth a sentence, but here it moves a headline
+ratio by a factor of three.
 
 Two additional conditions were therefore added to the drift branch, and both must
 hold before a limit cycle may be declared:
