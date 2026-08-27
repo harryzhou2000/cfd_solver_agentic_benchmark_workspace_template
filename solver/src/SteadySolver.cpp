@@ -67,13 +67,10 @@ SteadyResult runSteady(LocalMesh& lm,
     StateVec res0_global = {0,0,0,0};
     bool res0_set = false;
     double cfl = cfl0;
-    // For very low-Re viscous cases (Re<100) the BL is stiff; allow CFL to self-regulate
-    // below cfl0 so the solver can settle at the stable CFL rather than sticking at the
-    // floor. Bak1 cylinder_re20 converged at CFL~0.1 with this lower floor enabled.
+    // cfl_effective_init: use the case-specified cfl0 for all cases.
+    // The earlier artificial cap to 0.1 for Re<100 prevented convergence because
+    // Fix D holds CFL at the floor permanently when residuals are non-monotone.
     double cfl_effective_init = cfl0;
-    if (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) {
-        cfl_effective_init = std::min(cfl0, 0.1);
-    }
      double cfl_effective = cfl_effective_init;  // adaptive CFL tracker
     double prev_outer_res = 0.0;               // outer residual tracker
     double min_outer_res_ever = std::numeric_limits<double>::max();  // Fix D
@@ -332,7 +329,10 @@ SteadyResult runSteady(LocalMesh& lm,
             }
 
             // LU-SGS: D * dU = -R_total
-            lusgsSolve(lm, cfg, residuals_cur, sr_frozen, states, dt_local, gamma, mu, mach_ref_lm, dU);
+            // Use frozen states_ref for LU-SGS off-diagonal lambda to guarantee diagonal
+            // dominance throughout inner iterations (current states can have large delta_U
+            // that inflates lambda and breaks convergence during vortex shedding / BL formation).
+            lusgsSolve(lm, cfg, residuals_cur, sr_frozen, states_ref, dt_local, gamma, mu, mach_ref_lm, dU);
 
             // Accumulate correction
            for (int i = 0; i < n_owned; i++)
@@ -368,8 +368,6 @@ SteadyResult runSteady(LocalMesh& lm,
        if (inner_count >= max_inner) {
            // Inviscid high-Mach (M>0.8): be slightly less conservative to allow shock progress
            accept_scale = (mu <= 0.0 && cfg.freestream.mach > 0.8) ? 0.4 : 0.1;
-       } else if (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) {
-            accept_scale = 0.1;  // Strong damping for very low-Re cases
        } else {
            accept_scale = 1.0;
        }
