@@ -1676,9 +1676,11 @@ the rank that owned each cell during the iterations (field \code{RankId} of
 but is limited to a 4-CPU cgroup quota (\code{cpu.max} $=400000/100000$).
 Speed-up is therefore meaningful only up to $np=4$, where it reaches
 $\mpiSpeedupFourCyl\times$ (cylinder) and $\mpiSpeedupFourNaca\times$
-(aerofoil); the $np=8$ runs place two ranks on every available CPU and are
-consequently \emph{slower} in wall-clock time than $np=1$ while performing the
-same work and producing the same answer. Open MPI is also launched with
+(aerofoil) --- $\mpiEfficiencyFourCyl\%$ and $\mpiEfficiencyFourNaca\%$ of the
+four CPUs the container is actually allowed. Beyond that there is nothing left to win: the $np=8$ runs place two
+ranks on every available CPU and fall back to
+$\mpiSpeedupEightCyl\times$ and $\mpiSpeedupEightNaca\times$ while performing
+the same work and producing the same answer. Open MPI is also launched with
 \code{--bind-to none}, because its default core pinning collapses performance
 under such a quota; this was measured during development and is the reason
 \code{scripts/env.sh} sets \code{MPIRUN\_FLAGS} as it does. The host is shared, so the wall-clock column of \cref{tab:mpi} carries

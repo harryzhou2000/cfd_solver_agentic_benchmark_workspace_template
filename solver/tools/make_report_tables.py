@@ -332,9 +332,12 @@ def main():
             macro("mpiMaxRelCd" + tag, sci(rel, 1))
             macro("mpiMaxAbsCd" + tag, sci(absd, 1))
             macro("mpiCd" + tag, f"{float(rr[0]['cd']):.4f}")
-            sp4 = [float(x["speedup"]) for x in rr if int(x["mpi_ranks"]) == 4]
-            if sp4:
-                macro("mpiSpeedupFour" + tag, f"{sp4[0]:.2f}")
+            for nr, word in ((2, "Two"), (4, "Four"), (8, "Eight")):
+                sp = [float(x["speedup"]) for x in rr if int(x["mpi_ranks"]) == nr]
+                if sp:
+                    macro("mpiSpeedup" + word + tag, f"{sp[0]:.2f}")
+                    if nr == 4:
+                        macro("mpiEfficiencyFour" + tag, f"{100.0 * sp[0] / 4.0:.0f}")
         macro("mpiMaxImbalance",
               f"{100.0 * (max(float(r['load_balance']) for r in rows) - 1.0):.1f}")
 
