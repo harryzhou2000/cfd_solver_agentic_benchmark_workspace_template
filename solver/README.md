@@ -32,6 +32,8 @@ JSON input. To run every required case with production settings:
 
     .venv/bin/python tools/run_all_cases.py --np 8
 
+tools/run_all_cases.py applies the documented per-case production settings (Rusanov flux + Venkatakrishnan limiter + a conservative pseudo-CFL cap for the stiff low-Mach cylinder Re 20 case; Venkatakrishnan for the transonic laminar M0.8 case) via runtime CLI/env options -- no solver-code edits between cases. The exact command and MPI rank count for each submitted result are recorded in report/run_manifest.csv; build/fv2d from the current source reproduces every submitted result.
+
 ## Python environment (plotting / validation / report automation)
 
     cd solver
