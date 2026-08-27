@@ -67,26 +67,24 @@ SteadyResult runSteady(LocalMesh& lm,
     StateVec res0_global = {0,0,0,0};
     bool res0_set = false;
     double cfl = cfl0;
-    // Fix C: lower initial CFL for very low-Re viscous cases (Re < 100)
-    double cfl_effective_init = (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0)
-                                ? std::min(cfl0, 0.01) : cfl0;
-   double cfl_effective = cfl_effective_init;  // adaptive CFL tracker
-   // Fix I: allow Fix D to reduce CFL well below initial value
-    // For viscous cases: allow very low floor (need aggressive reduction for BL stability)
-    // For inviscid cases: floor at initial CFL to prevent CFL crashing below starting value
-    double cfl_recovery_floor = (mu > 0.0)
-        ? std::max(cfl_effective_init * 0.01, 0.001)
-        : cfl_effective_init;
+    // Re<100 cap raised to 0.1 (was 0.01) — effective CFL per step = 0.1*accept_scale, 10x faster
+    double cfl_effective_init = (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? std::min(cfl0, 0.1) : cfl0;
+     double cfl_effective = cfl_effective_init;  // adaptive CFL tracker
     double prev_outer_res = 0.0;               // outer residual tracker
     double min_outer_res_ever = std::numeric_limits<double>::max();  // Fix D
-    int fix_d_consecutive = 0;  // Fix J: reset baseline after prolonged Fix D
-   // Fix B: longer first-order startup for Re<100 (need more steps for BL establishment)
+    int consec_growth = 0;                     // Build 6: gradual divergence tracker
+    bool outer_res_decreased = true;           // for Fix E: did residual drop this step?
+      // Fix B: longer first-order startup for Re<100 (need more steps for BL establishment)
     // For inviscid: 100 steps of first-order to allow transonic shocks to form stably
-    const int first_order_steps = (mu > 0.0) ? ((cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 2000 : 500) : 100;
+    const int first_order_steps = (mu > 0.0) ? ((cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 2000 : 500) : 500;
+    // Gradual 2nd-order limiter ramp
+    const int second_order_ramp_steps = 300;
+    int fix_d_grace_until = 0;
 
     SteadyResult result;
     result.final_step = 0;
     result.converged = false;
+    int consec_div_steps = 0;
 
     std::vector<StateGrad> grads;
     std::vector<std::array<double,4>> limiters;
@@ -114,9 +112,12 @@ SteadyResult runSteady(LocalMesh& lm,
         else
             prim_grads.assign(n_total, {GradVec{0,0}, GradVec{0,0}, GradVec{0,0}});
         computeLimiters(lm, states, grads, limiters);
-        // Fix B: zero limiters during first-order startup phase
+        // Fix B: zero limiters during first-order; ramp to full 2nd-order
         if (step <= first_order_steps) {
             for (auto& lim : limiters) lim.fill(0.0);
+        } else if (step <= first_order_steps + second_order_ramp_steps) {
+            double ramp_s = double(step - first_order_steps) / double(second_order_ramp_steps);
+            for (auto& lim : limiters) for (auto& l : lim) l *= ramp_s;
         }
 
         // Compute REFERENCE residual (frozen at start of outer step)
@@ -125,14 +126,37 @@ SteadyResult runSteady(LocalMesh& lm,
             computeResidual(ctx, residuals_ref, spectral_radii);
         }
 
-        // Frozen pseudo-time step parameters
+        // Low-Mach preconditioning (Bug C Fix): apply Turkel scaling to dt_local ONLY.
+        // sr_frozen keeps the full spectral radius (incl. viscous terms) for LU-SGS diagonal.
+        // Previously spectral_radii was mutated in place, crushing LU-SGS diagonal for Re=5000.
+        std::vector<double> sr_frozen = spectral_radii;  // full sr — LU-SGS diagonal stability
         std::vector<double> dt_local(n_owned);
-        for (int i = 0; i < n_owned; i++) {
-            double sr = spectral_radii[i];
-            if (sr < 1e-30) sr = 1e-30;
-            dt_local[i] = cfl * lm.cell_vol[i] / sr;
+        if (cfg.freestream.mach < 0.3 && mu > 0.0) {
+            double M_ref = cfg.freestream.mach;
+            for (int i = 0; i < n_owned; i++) {
+                double sr = spectral_radii[i];
+                if (sr < 1e-30) sr = 1e-30;
+                double rho_i = states[i][0];
+                double p_i = pressure(states[i], gamma);
+                if (rho_i > 1e-14 && p_i > 1e-14) {
+                    double a_i = std::sqrt(gamma * p_i / rho_i);
+                    double u_i = states[i][1] / rho_i;
+                    double v_i = states[i][2] / rho_i;
+                    double spd = std::sqrt(u_i*u_i + v_i*v_i) + 1e-10;
+                    double a_prec = std::max(spd, M_ref * a_i);
+                    double scale = (spd + a_prec) / (spd + a_i);
+                    sr = std::max(sr * scale, 1e-30);
+                }
+                dt_local[i] = cfl * lm.cell_vol[i] / sr;
+            }
+        } else {
+            for (int i = 0; i < n_owned; i++) {
+                double sr = spectral_radii[i];
+                if (sr < 1e-30) sr = 1e-30;
+                dt_local[i] = cfl * lm.cell_vol[i] / sr;
+            }
         }
-        std::vector<double> sr_frozen = spectral_radii;
+        double mach_ref_lm = (cfg.freestream.mach < 0.3 && mu > 0.0) ? cfg.freestream.mach : 0.0;
 
         // Compute outer spatial residual (R_ref) - the true convergence indicator.
         // last_res = ||R_ref|| is written to CSV; it should decrease to 0 at steady state.
@@ -142,22 +166,53 @@ SteadyResult runSteady(LocalMesh& lm,
        if (!res0_set) { res0_global = outer_res_l2; res0_set = true; }
        StateVec last_res = outer_res_l2;  // outer R_ref for convergence tracking and CSV
 
-       // Build 5: Outer residual divergence detection
+       // Build 5: divergence detection; supersonic inviscid needs 2 consecutive spikes
         if (step > 5 && prev_outer_res > 0 && outer_res_norm > 10.0 * prev_outer_res) {
-            cfl_effective = std::max(cfl_effective * 0.7, cfl_recovery_floor);
+            consec_div_steps++;
+            if (mu <= 0.0 && cfg.freestream.mach > 1.0) {
+                if (consec_div_steps >= 2) {
+                    cfl_effective = std::max(cfl_effective * 0.8, cfl_effective_init);
+                    consec_div_steps = 0;
+                }
+            } else {
+                cfl_effective = std::max(cfl_effective * 0.7, cfl_effective_init);
+                consec_div_steps = 0;
+            }
+        } else {
+            consec_div_steps = 0;
         }
+        // Build 6: gradual divergence detection.
+        // Save prior-step residual BEFORE updating prev_outer_res.
+        double outer_res_before = prev_outer_res;
+        outer_res_decreased = (outer_res_before <= 0 || outer_res_norm <= outer_res_before);
         prev_outer_res = outer_res_norm;
+        if (step > first_order_steps && outer_res_before > 0 && outer_res_norm > 1.1 * outer_res_before) {
+            consec_growth++;
+            if (consec_growth >= 3) {
+                double growth_penalty = (mu <= 0.0 && cfg.freestream.mach > 1.0) ? 0.8 : 0.5;
+                cfl_effective = std::max(cfl_effective * growth_penalty, cfl_effective_init);
+                consec_growth = 0;
+                // End grace period so Fix D can act immediately
+                if (step <= fix_d_grace_until) fix_d_grace_until = step - 1;
+            }
+        } else {
+            if (consec_growth > 0) consec_growth--;
+        }
         // Fix D: Track historical min; gently reduce CFL when residual drifts above 2x min.
-        bool fix_d_reduced = false;
         if (outer_res_norm < min_outer_res_ever) {
             min_outer_res_ever = outer_res_norm;
-        } else if (step > 30 && min_outer_res_ever > 0 && outer_res_norm > 5.0 * min_outer_res_ever) {
-            cfl_effective = std::max(cfl_effective * 0.97, cfl_recovery_floor);
-            fix_d_reduced = true;  // Fix F: suppress CFL boost this step
-            fix_d_consecutive++;
-            if (fix_d_consecutive > 300) { min_outer_res_ever = outer_res_norm; fix_d_consecutive = 0; }
+        } else if (step > 30 && (step > fix_d_grace_until || outer_res_norm > 5.0 * min_outer_res_ever) && min_outer_res_ever > 0 && outer_res_norm > 2.0 * min_outer_res_ever) {
+            // Supersonic inviscid needs CFL >= 5 to converge; cfl_effective_init=0.2 is too low.
+            // Without this floor, Fix D collapses CFL to 0.2 while Fix E is blocked, causing stagnation.
+            double fix_d_floor = (mu <= 0.0 && cfg.freestream.mach > 1.0)
+                ? std::max(cfl_effective_init, 5.0) : cfl_effective_init;
+            cfl_effective = std::max(cfl_effective * 0.97, fix_d_floor);
         }
-        if (!fix_d_reduced) fix_d_consecutive = 0;
+        // Reset baseline at second-order transition — prevents Fix D over-reacting to expected residual jump
+        if (step == first_order_steps + 1) {
+            min_outer_res_ever = outer_res_norm;
+            fix_d_grace_until = step + second_order_ramp_steps;
+        }
 
         // Save reference states for frozen-RHS inner loop
         std::vector<StateVec> states_ref = states;
@@ -201,25 +256,17 @@ SteadyResult runSteady(LocalMesh& lm,
 
             // For viscous cases: update grads+prim_grads each inner iter (mirrors TransientSolver)
             // to prevent frozen-gradient instability as the boundary layer develops.
-            // Fix G: for very low-Re (Re<100), freeze prim_grads inside inner loop to prevent
-            // nonlinear viscous feedback that drives divergence in strongly-viscous cases.
-            bool very_low_re = (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0);
-            if (mu > 0.0 && !very_low_re) {
+            if (mu > 0.0) {
                 computeGradients(lm, states, grads);
                 computePrimGradients(lm, states, gamma, R_gas, prim_grads);
-                // Fix A: update limiters each inner iter to eliminate frozen-limiter mismatch
+                // Fix A: update limiters each inner iter; ramp to full 2nd-order
                 computeLimiters(lm, states, grads, limiters);
                 if (step <= first_order_steps) {
                     for (auto& lim : limiters) lim.fill(0.0);
+                } else if (step <= first_order_steps + second_order_ramp_steps) {
+                    double ramp_s = double(step - first_order_steps) / double(second_order_ramp_steps);
+                    for (auto& lim : limiters) for (auto& l : lim) l *= ramp_s;
                 }
-            } else if (very_low_re) {
-                // Keep prim_grads frozen at outer-step values; only update grads/limiters
-                computeGradients(lm, states, grads);
-                computeLimiters(lm, states, grads, limiters);
-                if (step <= first_order_steps) {
-                    for (auto& lim : limiters) lim.fill(0.0);
-                }
-                // prim_grads remain frozen from outer-step start
             }
 
             // Compute spatial residual with updated grads (limiters still frozen from outer step)
@@ -247,7 +294,7 @@ SteadyResult runSteady(LocalMesh& lm,
             }
 
             // LU-SGS: D * dU = -R_total
-            lusgsSolve(lm, cfg, residuals_cur, sr_frozen, states, dt_local, gamma, mu, dU);
+            lusgsSolve(lm, cfg, residuals_cur, sr_frozen, states, dt_local, gamma, mu, mach_ref_lm, dU);
 
             // Accumulate correction
            for (int i = 0; i < n_owned; i++)
@@ -258,18 +305,21 @@ SteadyResult runSteady(LocalMesh& lm,
        // Adaptive CFL: reduce when inner loop failed to converge (Build 4)
        if (inner_count >= max_inner) {
            // Fix K: gentler 0.85x penalty for normal cases; 0.5x for Re<100
-           double cfl_inner_penalty = (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 0.5 : 0.85;
+           double cfl_inner_penalty = (mu > 0.0) ? 0.5 : 0.85;
            cfl_effective = std::max(cfl_effective * cfl_inner_penalty, cfl_effective_init);
-        } else if (inner_count < max_inner / 2) {
-            // Fix E: freeze CFL during first-order startup for very low-Re (prevents CFL crossing 0.012 instability threshold)
-            if (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0 && step <= first_order_steps) {
-                cfl_effective = cfl_effective_init;  // freeze CFL during startup for low-Re
-            } else if (!fix_d_reduced) {
-                // Fix F: suppress CFL boost when Fix D is actively reducing CFL (prevents 1.1x boost negating 0.97x reduction)
-                double cfl_boost = (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 1.01 : 1.1;
+        } else if (inner_count < max_inner / 2 && outer_res_decreased) {
+            // Fix E: only boost CFL if Fix D is NOT currently active.
+            // Fix D (0.97x) and Fix E (1.2x) cancel each other, keeping CFL stuck at max
+            // when outer residuals oscillate above 2x min — typical for supersonic oscillation.
+            bool fix_d_active = (step > 30 && step > fix_d_grace_until
+                                 && min_outer_res_ever > 0
+                                 && outer_res_norm > 2.0 * min_outer_res_ever);
+            if (!fix_d_active) {
+                double cfl_boost = (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 1.02
+                                 : (mu <= 0.0 && cfg.freestream.mach > 1.0) ? 1.2
+                                 : 1.1;
                 cfl_effective = std::min(cfl_effective * cfl_boost, cfl_max);
             }
-            // If fix_d_reduced: don't boost, CFL stays at its reduced value
         }
         // Fix H: clamp cfl_effective to the ramp cap so Fix D (0.97x) actually reduces
         // the used CFL (without this, cfl_effective >> cfl_ramp makes Fix D irrelevant)
@@ -278,9 +328,10 @@ SteadyResult runSteady(LocalMesh& lm,
       // always use 0.1 to prevent overshooting the high-viscosity BL.
        double accept_scale;
        if (inner_count >= max_inner) {
-           accept_scale = 0.1;
+           // Inviscid high-Mach (M>0.8): be slightly less conservative to allow shock progress
+           accept_scale = (mu <= 0.0 && cfg.freestream.mach > 0.8) ? 0.4 : 0.1;
        } else if (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) {
-            accept_scale = 0.5;  // Fix L: moderate damping for low-Re convergence
+            accept_scale = 0.1;  // Strong damping for very low-Re cases
        } else {
            accept_scale = 1.0;
        }
@@ -306,6 +357,20 @@ SteadyResult runSteady(LocalMesh& lm,
                     candidate = states_ref[i];
             }
             states[i] = candidate;
+        }
+
+        // Isothermal energy fix: low-Mach viscous cases, first-order phase only
+        // At M<0.3, dT/T_inf=O(M^2)<1% so isothermal is exact to <1%
+        if (mu > 0.0 && cfg.freestream.mach < 0.3 && step <= first_order_steps) {
+            double T_ref = p_inf / (rho_inf * R_gas);
+            for (int i = 0; i < n_owned; i++) {
+                double rho_i = states[i][0];
+                if (rho_i < 1e-14) continue;
+                double ui = states[i][1] / rho_i;
+                double vi = states[i][2] / rho_i;
+                double p_iso = rho_i * R_gas * T_ref;
+                states[i][3] = rho_i * (p_iso / ((gamma - 1.0) * rho_i) + 0.5*(ui*ui + vi*vi));
+            }
         }
 
         // Write outer spatial residual (R_ref) to CSV for true convergence history
