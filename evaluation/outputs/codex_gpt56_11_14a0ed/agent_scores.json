@@ -1,0 +1,351 @@
+{
+  "schema": "agent_scores",
+  "contestant": "11",
+  "evaluated_at": "2026-08-27T16:00:00+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": "Incomplete delivered workspace reviewed without reruns."
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "01a01331-a6fb-7b42-ba7a-3962c08b26ba"
+    ],
+    "execution_date": "2026-08-18 through 2026-08-19",
+    "started_at": "2026-08-18T04:47:02.723000+00:00",
+    "ended_at": "2026-08-19T04:43:58.217000+00:00",
+    "time_basis": "selected bundled root timestamps",
+    "rationale": "Only substantive workspace-local Codex root; no descendants."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "CMake source submitted."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "Partial runner only."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 3,
+          "notes": "Compact solver layout."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "No authorship assessment."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Case files used."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "No submitted MPI production evidence."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Line search present."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "No contract-complete output."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 3,
+          "notes": "Committed source readable."
+        }
+      ],
+      "overall_score": 2.55,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 3,
+          "notes": "Partial solver implementation."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Preprocessing exists."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 3,
+          "notes": "Finite-volume source present."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 2,
+          "notes": "Limited verification."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 2,
+          "notes": "Limited verification."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 2,
+          "notes": "Limited verification."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 2,
+          "notes": "Limited verification."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Newtonian/Fourier commit."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Line-search update present."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 0,
+          "notes": "No Re200 delivery."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 1,
+          "notes": "No production MPI result."
+        }
+      ],
+      "overall_score": 2.19,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 0,
+          "notes": "Only two ignored directories; no required raw package set."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 0,
+          "notes": "Validator stops at missing metadata."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 0,
+          "notes": "Six required cases and canonical report absent."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 0,
+          "notes": "No verified production evidence."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 1,
+          "notes": "Smoke report is not a canonical submission report."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 1,
+          "notes": "Only smoke report exists."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 1,
+          "notes": "Partial tooling only."
+        }
+      ],
+      "overall_score": 0.35,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 26,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 4,
+        "notes": "Source but no complete contract."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 4,
+        "notes": "Partial mesh handling."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 5,
+        "notes": "Partial source evidence."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 2,
+        "notes": "Unverified production scheme."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 4,
+        "notes": "Committed viscous implementation."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 4,
+        "notes": "Steady update work; no transient delivery."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 1,
+        "notes": "No credible production MPI result."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 0,
+        "notes": "Required package set absent."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 1,
+        "notes": "Smoke report only."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 1,
+        "notes": "Basic scripts only."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 0,
+      "notes": "Missing valid metadata."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 0,
+      "notes": "Absent."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 0,
+      "notes": "Absent."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 0,
+      "notes": "Absent."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 0,
+      "notes": "Absent."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 0,
+      "notes": "Absent."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 0,
+      "notes": "Missing valid metadata."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 0,
+      "notes": "Absent; not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "No evaluator build or solver rerun.",
+    "Re200 was not rerun.",
+    "Only two ignored, incomplete result directories and a smoke report were present."
+  ]
+}
