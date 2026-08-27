@@ -158,9 +158,50 @@ on rank 0); each rank stores only its owned cells plus one layer of ghost cells.
 Halo exchange of states, gradients/limiters, and corrections uses neighbor
 Isend/Irecv; residual and force norms use MPI reductions. Partition diagnostics
 (owned/ghost counts, neighbors, edge cut, load balance) are reported per case.
+\section{Cases and computational setup}
+Table~\ref{tab:cases} lists the eight required cases. The NACA0012 cases use the
+\texttt{NACA0012\_H2.cgns} mesh (20{,}816 mixed tri/quad cells, farfield at
+$|x|,|y|\le 80$); the cylinder cases use \texttt{CylinderB1.cgns} (10{,}185
+cells, two CGNS zones joined by five 1-to-1 interfaces, farfield at
+$|x|,|y|\le 200$). All NACA cases are at zero angle of attack.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{llllll}
+\toprule
+Case & $M_\infty$ & $Re$ & viscous & transient & cells \\
+\midrule
+naca0012\_m015\_inviscid & 0.15 & -- & no & no & 20816 \\
+naca0012\_m080\_inviscid & 0.80 & -- & no & no & 20816 \\
+naca0012\_m200\_inviscid & 2.00 & -- & no & no & 20816 \\
+naca0012\_m015\_laminar\_re5000 & 0.15 & 5000 & yes & no & 20816 \\
+naca0012\_m080\_laminar\_re5000 & 0.80 & 5000 & yes & no & 20816 \\
+naca0012\_m200\_laminar\_re5000 & 2.00 & 5000 & yes & no & 20816 \\
+cylinder\_m010\_laminar\_re20 & 0.10 & 20 & yes & no & 10185 \\
+cylinder\_m010\_laminar\_re200 & 0.10 & 200 & yes & BDF2, $\Delta t=0.01$, $t_f=300$ & 10185 \\
+\bottomrule
+\end{tabular}
+\caption{Required benchmark cases and their physical parameters.}
+\label{tab:cases}
+\end{table}
+
 \section{Results}
 \input{generated_summary_table.tex}
 \input{generated_case_sections.tex}
+\section{Verification and sanity checks}
+Several independent checks support correctness. (i) The analytic split-flux
+Jacobians $A^\pm$ used by LU-SGS are verified against finite/complex
+differences in \texttt{tools/test\_jac.cpp}. (ii) Mesh integrity is checked by
+\texttt{tools/sym\_check.cpp} (reflection symmetry of both meshes about $y=0$,
+mean mirror gap $\sim2\times10^{-5}$) and \texttt{tools/wall\_check.cpp}
+(near-wall first-cell height $\approx10^{-3}$, resolving the laminar boundary
+layer). (iii) A machine-readable physics sanity gate
+(\texttt{report/sanity\_checks.json}) verifies positive density/pressure,
+near-zero NACA lift by symmetry, non-trivial drag and $C_p$ variation,
+positive cylinder mean drag, nonzero Re 200 unsteady lift, near-zero no-slip
+wall velocity with nonzero skin friction, negligible inviscid viscous forces,
+and correct Mach/pressure figure mapping. (iv) The MPI rank-count study above
+confirms results do not change by an order-one amount across rank counts.
+
 \section{MPI rank-count comparison}
 \input{generated_mpi_section.tex}
 \section{Convergence and limitations}
@@ -214,4 +255,17 @@ wake. These per-case solver settings are recorded in each metadata.json.
   corrected gradients; on the coarsest wake cells this is first-order accurate.
 \end{itemize}
 
+\section{Conclusion}
+We have presented an original MPI-parallel unstructured finite-volume solver for
+the 2-D compressible Navier--Stokes equations and applied it to all eight
+benchmark cases. The solver uses METIS $k$-way partitioning with neighbor-scoped
+halo exchange, weighted least-squares second-order reconstruction with
+Barth--Jespersen and Venkatakrishnan limiters, Roe and Rusanov approximate
+Riemann fluxes, an LU-SGS implicit pseudo-time solver with analytic Jacobians,
+and a true BDF2 dual-time transient integrator. All six NACA cases and the
+cylinder Re 20 case converge to steady states; the cylinder Re 200 case reaches
+a statistically periodic vortex street. The main limitation is low-Mach-number
+dissipation, which under-predicts drag magnitudes on the $M_\infty=0.1$ cylinder
+cases while preserving the correct flow structure; a low-Mach flux correction is
+identified as future work.
 \end{document}
