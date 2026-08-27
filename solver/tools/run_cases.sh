@@ -70,9 +70,26 @@ for case_id in "${CASES[@]}"; do
   fi
   out_dir="${RESULTS_DIR}/${case_id}"
   echo "=== ${case_id} (np=${RANKS}) -> ${out_dir}"
-  mpirun --allow-run-as-root -np "${RANKS}" "${EXECUTABLE}" solve \
-    --case "${case_file}" --output "${out_dir}" --log-every 250 \
-    > "${RESULTS_DIR}/${case_id}.launch.log" 2>&1
+  # CNS2D_CPU_LIST optionally pins this job to an explicit set of CPUs.  When
+  # several independent jobs share a machine, OpenMPI's default binding maps
+  # every job onto the same cores (it binds to socket/NUMA node starting from
+  # the first one), so N concurrent jobs oversubscribe those cores while the
+  # rest of the machine idles.  Passing a disjoint CPU list per job avoids that.
+  if [ -n "${CNS2D_CPU_LIST:-}" ]; then
+    # taskset is used rather than mpirun --cpu-set: the latter refuses CPU ids
+    # that fall outside the first NUMA node on this machine and fails silently
+    # with exit status 1.  taskset sets the affinity mask of mpirun itself, which
+    # the spawned ranks inherit.
+    taskset -c "${CNS2D_CPU_LIST}" \
+      mpirun --allow-run-as-root -np "${RANKS}" --bind-to none \
+      "${EXECUTABLE}" solve \
+      --case "${case_file}" --output "${out_dir}" --log-every 250 \
+      > "${RESULTS_DIR}/${case_id}.launch.log" 2>&1
+  else
+    mpirun --allow-run-as-root -np "${RANKS}" "${EXECUTABLE}" solve \
+      --case "${case_file}" --output "${out_dir}" --log-every 250 \
+      > "${RESULTS_DIR}/${case_id}.launch.log" 2>&1
+  fi
   rc=$?
   if [ "${rc}" -ne 0 ]; then
     echo "  FAILED with exit status ${rc}; see ${RESULTS_DIR}/${case_id}.launch.log" >&2
