@@ -305,6 +305,51 @@ void testBoundaryConditions() {
     checkClose(Wb[kPrimRho], Wi[kPrimRho], 1e-14, "slip wall preserves density");
   }
 
+  // Slip-wall FLUX, as opposed to the ghost state above.  The property that
+  // matters for conservation is that no mass and no energy cross a slip wall,
+  // and that holds exactly for any interior state.
+  //
+  // The normal momentum flux is NOT exactly the wall pressure unless the
+  // interior normal velocity already vanishes: the mirrored ghost state has
+  // delta u_n = -2 u_n, so the acoustic amplitudes in the Roe dissipation do not
+  // cancel in the normal-momentum component and contribute an excess that grows
+  // with u_n.  That excess acts as a restoring force driving u_n to zero, which
+  // is the intended behaviour of a ghost-state wall, and it vanishes on a
+  // converged solution where u_n is at round-off.  This test pins both facts so
+  // the distinction cannot be misreported again.
+  {
+    const struct { Real u, v, nx, ny; } cases[] = {
+        {0.3, 0.1, 0.0, 1.0},
+        {0.9, -0.2, 0.6, 0.8},
+        {0.5, 0.4, 0.7071067811865476, 0.7071067811865476},
+        {1.0, 0.0, 0.0, 1.0},
+    };
+    for (const auto &c : cases) {
+      const Vec2 n{c.nx, c.ny};
+      const PrimVec Wi{1.0, c.u, c.v, 1.0};
+      const ConsVec Ui = gas.consFromPrim(Wi);
+      const ConsVec Ub = slipWallState(Ui, n);
+      const PrimVec Wb = gas.primFromCons(Ub);
+      Real smax = 0.0;
+      const ConsVec f = riemannFlux(RiemannFluxType::kRoeEntropyFix, gas, Wi, Wb, n, 1.0, smax);
+      checkClose(f[kRho], 0.0, 1e-15, "slip wall flux carries no mass");
+      checkClose(f[kRhoE], 0.0, 1e-15, "slip wall flux carries no energy");
+    }
+    // With the normal velocity already at round-off, the normal momentum flux is
+    // the wall pressure to machine precision.
+    {
+      const Vec2 n{0.0, 1.0};
+      const PrimVec Wi{1.0, 1.0, 1.0e-13, 1.0};
+      const ConsVec Ui = gas.consFromPrim(Wi);
+      const ConsVec Ub = slipWallState(Ui, n);
+      const PrimVec Wb = gas.primFromCons(Ub);
+      Real smax = 0.0;
+      const ConsVec f = riemannFlux(RiemannFluxType::kRoeEntropyFix, gas, Wi, Wb, n, 1.0, smax);
+      checkClose(f[kRhoU] * n.x + f[kRhoV] * n.y, Wi[kPrimP], 1e-12,
+                 "slip wall normal momentum flux equals p when u_n is at round-off");
+    }
+  }
+
   // No-slip adiabatic wall: exactly zero velocity, interior pressure.
   {
     const PrimVec Wi{1.3, 0.5, -0.2, 3.0};
