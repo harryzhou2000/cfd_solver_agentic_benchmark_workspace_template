@@ -198,6 +198,28 @@ leave the domain cleanly: on the upstream arc the normal Mach number exceeds uni
 in magnitude and the state is fully imposed, while on the downstream arc it is
 fully extrapolated.
 
+This case requires more care in reporting than the other two, because its
+converged state is a small \emph{limit cycle} rather than a fixed point. As
+established in \cref{sec:limitcycle}, the drag settles into a bounded oscillation
+about a constant mean instead of approaching a single value: the trailing-window
+span is independent of window length over a factor of twenty in window size, while
+the window mean is constant to $\num{4.4e-5}$ relative. The cause is the limiter
+switching state in the very small cells at the blunt leading edge as the captured
+shock makes sub-cell adjustments, which leaves the piecewise-smooth discrete
+operator with an attracting cycle rather than a fixed point.
+
+The appropriate way to state such a result is the mean together with the
+amplitude, so the quoted precision matches what the solution actually possesses:
+\begin{equation}
+  C_D = 0.0880 \pm 0.0007 \qquad (\Minf=2.0,\ \text{inviscid}),
+  \label{eq:m200drag}
+\end{equation}
+the uncertainty being half the peak-to-peak oscillation, about $1.3\,\%$ of $C_D$.
+Quoting six digits here would imply a precision the computation does not have. Note
+in particular that \textbf{the number of significant digits is limited by the limit
+cycle, not by the residual level}: driving the residual lower would not sharpen
+this figure, because the state never stops moving.
+
 \Cref{fig:naca200inv-hist} gives the residual and force histories for this case.
 
 \begin{figure}[htbp]

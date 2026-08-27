@@ -242,6 +242,93 @@ this calibration the residual target was again met while the force test failed,
 but this time the force test was the one at fault. The two criteria are genuinely
 independent measures, and neither is a proxy for the other.
 
+\subsubsection{A case with no fixed point: the supersonic limit cycle}
+\label{sec:limitcycle}
+
+The third and most instructive failure of naive convergence testing appeared on
+\texttt{naca0012\_m200\_inviscid}. With the calibrated tolerance of
+\cref{eq:stationarity2} the case ran its full \num{40000} steps and still reported
+\texttt{not\_converged}: the residual reached $2.34$ of the requested $3.00$
+orders and the trailing drag span was $\num{1.226e-3}$ against a tolerance of
+$\num{8.86e-4}$. Rather than relax the tolerance again, the drag history itself
+was examined across trailing windows of very different lengths.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Trailing-window statistics of $C_D$ for
+  \texttt{naca0012\_m200\_inviscid} over the last \num{40000}-step history. The
+  span is essentially independent of window length while the mean is constant to
+  $\num{4.4e-5}$ relative --- the signature of a bounded oscillation, not a
+  developing transient.}
+  \label{tab:limitcycle}
+  \small
+  \begin{tabular}{rrrr}
+    \toprule
+    Window (steps) & Mean $C_D$ & Span & Std.\ dev. \\
+    \midrule
+    \num{500} & \num{0.08800673} & \num{1.2261e-3} & \num{2.982e-4} \\
+    \num{2000} & \num{0.08800867} & \num{1.3135e-3} & \num{3.103e-4} \\
+    \num{5000} & \num{0.08800787} & \num{1.3135e-3} & \num{3.040e-4} \\
+    \num{10000} & \num{0.08800981} & \num{1.3172e-3} & \num{3.020e-4} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\Cref{tab:limitcycle} settles the question. A developing transient would show a
+span that shrinks as the window shortens, because a drifting signal covers less
+ground over fewer steps. Here the span is the same to two significant figures
+whether measured over 500 steps or \num{10000}, while the window mean is constant
+to $\num{4.4e-5}$ relative; splitting the final \num{10000} steps in half gives
+means differing by only $\num{-3.88e-6}$ absolute, or $\num{4.4e-5}$ relative.
+The signal is not converging to a value: it is orbiting one.
+
+The explanation is that \textbf{the discrete system has no exact fixed point for
+this case}. The limiter of \cref{eq:limiter} is not a smooth function of the
+state --- it involves minima over faces and a switch on the sign of the
+extrapolation increment --- so the discrete residual operator is only piecewise
+smooth. At a blunt supersonic leading edge resolved by cells of volume
+$\num{4.7e-9}$ (the dominant-residual diagnostic locates the worst cell at
+$x=\num{0.0032}$, $y=\num{0.0098}$, on the airfoil surface), the shock position
+makes sub-cell adjustments that flip the limiter state back and forth. Instead of
+a fixed point, the iteration has a small attracting cycle. No amount of further
+iteration removes it, and no residual-based criterion can, because the residual
+cannot go to zero if the state never stops moving.
+
+A span-only stationarity test cannot distinguish orbiting a fixed mean from
+drifting towards one. A second, independent test was therefore added: the drift of
+the trailing-window \emph{mean} against the mean of the preceding window, with
+tolerance $\max\!\left(10^{-3}|\overline{C_D}|,\,10^{-5}\right)$. Either condition
+now establishes stationarity,
+\begin{equation}
+  \underbrace{\mathrm{span}(C_D)\le\varepsilon_{\mathrm{span}}}_{\text{fixed point}}
+  \quad\text{or}\quad
+  \underbrace{\left|\overline{C_D}^{\,k}-\overline{C_D}^{\,k-1}\right|
+  \le\varepsilon_{\mathrm{mean}}}_{\text{limit cycle}},
+  \label{eq:stationarity3}
+\end{equation}
+and --- importantly --- \textbf{the two outcomes are reported differently}. A limit
+cycle is a different physical claim from a fixed point, and the solver does not
+present one as the other. Its own note for this run states that $C_D$ holds a
+bounded oscillation of $1.33\,\%$ peak to peak whose mean drifts by only
+$\num{8.409e-6}$ between successive windows, that the mean force is converged, and
+that the solution is a small limit cycle rather than a fixed point.
+
+The practical consequence for how this result is quoted is discussed in
+\cref{sec:naca}: for a case whose solution is a cycle, the meaningful report is the
+mean drag together with the oscillation amplitude, not six digits the solution does
+not possess.
+
+\paragraph{Three distinct failure modes.} Taken together, this case and the two
+preceding subsections make the same methodological point three different ways. A
+naive convergence test failed on the transonic case because the residual was
+normalised by an impulsive-start transient; on the subsonic inviscid case because
+an absolute tolerance demanded more precision than the discretization possesses
+for a near-zero drag; and on the supersonic case because a span test cannot
+recognise a bounded oscillation. All three were found by examining the force
+histories directly rather than by trusting a single scalar summary, which is the
+argument for reporting convergence as a measured property of the history rather
+than as a boolean.
+
 \subsection{A latent sign error in the unused HLLC star state}
 \label{sec:hllcbug}
 
