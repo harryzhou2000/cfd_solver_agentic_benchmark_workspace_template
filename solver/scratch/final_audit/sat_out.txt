@@ -1,0 +1,21 @@
+rows 30001 t range 0.01 300.0
+header ['step', 'physical_time', 'cl', 'cd', 'cmz', 'pressure_drag', 'viscous_drag', 'pressure_lift', 'viscous_lift']
+
+--- FINAL RECORD (t_end=300.0000) ---
+t>=16.8   St=0.1811 T=5.5203 spread=2.2583 ratio=40.91% meanCD=1.2292 amp=0.5307 cyc=50.9
+t>=30     St=0.1827 T=5.4730 spread=0.2207 ratio=4.03% meanCD=1.2417 amp=0.5307 cyc=48.8
+t>=40     St=0.1829 T=5.4681 spread=0.0620 ratio=1.13% meanCD=1.2455 amp=0.5307 cyc=47.3
+t>=60     St=0.1829 T=5.4664 spread=0.0024 ratio=0.04% meanCD=1.2466 amp=0.5307 cyc=43.8
+
+--- report claim vs final-record recompute ---
+t>=16.8   claim St/T/spr/CD = 0.1666 6.0023 2.2324 1.1173 | mine = 0.1811 5.5203 2.2583 1.2292 | relerr = 8.7e-02 8.0e-02 1.2e-02 1.0e-01
+t>=30     claim St/T/spr/CD = 0.1796 5.5667 0.1947 1.1928 | mine = 0.1827 5.4730 0.2207 1.2417 | relerr = 1.7e-02 1.7e-02 1.3e-01 4.1e-02
+t>=40     claim St/T/spr/CD = 0.1816 5.5078 0.0360 1.2276 | mine = 0.1829 5.4681 0.0620 1.2455 | relerr = 7.0e-03 7.2e-03 7.2e-01 1.5e-02
+t>=60     claim St/T/spr/CD = 0.1830 5.4652 0.0022 1.2468 | mine = 0.1829 5.4664 0.0024 1.2466 | relerr = 3.5e-04 2.2e-04 7.2e-02 1.4e-04
+
+--- TRUNCATION SCAN: t_end that reproduces rows 1-3 to <0.1%% ---
+REPRODUCES for t_end in [54.45, 54.95]  (11 sample points)
+at t_end=54.70:
+  t>=16.8   St=0.1666 T=6.0023 spread=2.2324 ratio=37.19% meanCD=1.1171
+  t>=30     St=0.1796 T=5.5667 spread=0.1947 ratio=3.50% meanCD=1.1927
+  t>=40     St=0.1816 T=5.5078 spread=0.0360 ratio=0.65% meanCD=1.2275
