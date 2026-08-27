@@ -41,10 +41,21 @@ ForceResult computeForces(const DistributedMesh &mesh, const FlowContext &flow,
     // --- pressure force ---------------------------------------------------
     // Reconstruct the wall pressure from the adjacent cell so the integrand is
     // second-order accurate, consistent with the flux evaluation.
+    //
+    // The LIMITER FACTORS MUST BE APPLIED HERE.  The scheme never uses an
+    // unlimited extrapolation anywhere else: the flux evaluation, the boundary
+    // states and surface.csv all reconstruct with the limiter, and the limiter is
+    // what keeps the reconstruction bounded near a shock.  Integrating an
+    // unlimited extrapolation gave a force that did not correspond to the
+    // surface.csv the contract requires it to match -- agreement to 1e-12 on
+    // smooth cases but 4.9 % on the M 2.0 laminar airfoil, where the limiter is
+    // active on the leading-edge cells.
     const Real *wc = W.cell(c);
     const Real *gc = grad.cell(c);
+    const Real *phi = assembler.limiterFactors().cell(c);
     const Vec2 delta = f.geom.centroid - cells[static_cast<std::size_t>(c)].centroid;
-    Real p_wall = wc[kPrimP] + gc[kPrimP * kDim + 0] * delta.x + gc[kPrimP * kDim + 1] * delta.y;
+    Real p_wall = wc[kPrimP] + phi[kPrimP] * (gc[kPrimP * kDim + 0] * delta.x +
+                                              gc[kPrimP * kDim + 1] * delta.y);
     if (!(p_wall > 0.0)) p_wall = wc[kPrimP];
 
     // Pressure force on the body, referenced to the freestream pressure so a
