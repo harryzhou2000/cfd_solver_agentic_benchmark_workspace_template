@@ -18,6 +18,9 @@ cd "$(dirname "$0")"
 CNS_HARVEST_MIN_MTIME="$(date -d "$CNS_TRUSTED_AFTER" +%s)" \
   ../.venv/bin/python harvest_numbers.py
 
+CNS_HARVEST_MIN_MTIME="$(date -d "$CNS_TRUSTED_AFTER" +%s)" \
+  ../.venv/bin/python make_artifacts.py
+
 latexmk -pdf -interaction=nonstopmode report.tex > /dev/null 2>&1 || true
 
 printf 'pdflatex errors: %s\n' "$(grep -ac '^!' report.log || true)"
