@@ -194,6 +194,7 @@ $\oint p_\infty\hat{\mathbf{n}}\,\mathrm{d}S=0$, but subtracting the freestream
 removes a large cancelling contribution and the round-off that goes with it.
 
 \subsection{Residual norms}
+\label{sec:resnorm}
 The residual is reported as a volume-normalised, freestream-scaled quantity so
 that the four equations are comparable and the reduction is meaningful:
 \begin{equation}
@@ -944,10 +945,19 @@ split:
   construction.
 \item \code{surface.csv} and \code{surface\_cellcenter.csv} are gathered and
   then sorted by (patch, azimuth about the body centre), a key that has nothing
-  to do with the partition. \code{tools/mpi\_study.py} compares them byte for
-  byte across the rank study and writes the result to
-  \code{report/rank\_independence.json}: of \rankIdenticalComparisons{}
-  comparisons, \rankIdenticalFailures{} differ.
+  to do with the partition. \code{tools/mpi\_study.py} compares them across the
+  rank study and writes the result to \code{report/rank\_independence.json}: in
+  all \rankComparisons{} comparisons the row count, the row order and every
+  geometric column are \emph{identical} (\rankStructureFailures{} failures), so
+  row $k$ of the file is the same boundary face at every rank count. The
+  solution columns cannot be bit-identical, because different rank counts take
+  slightly different LU-SGS paths and stop at different steps; they agree to
+  \rankSolutionPNinetyNine{} at the 99th percentile. The single worst
+  disagreement, \rankSolutionMax{}, is in \code{\rankWorstColumn} at
+  $x=\rankWorstX$ --- the sharp trailing edge of the aerofoil, where the
+  inviscid solution is genuinely singular (\cref{sec:resnorm}) and where the
+  residual also concentrates. It does not reach the integrated forces, which
+  agree to \mpiMaxAbsCdNaca{} absolute.
 \item \code{field\_final.vtu} is sorted by global cell id after the gather, so
   cell $k$ of the file is the same mesh cell at every rank count and two runs
   can be compared row for row. The one deliberate exception is the

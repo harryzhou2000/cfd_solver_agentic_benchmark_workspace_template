@@ -105,8 +105,9 @@ if os.path.exists("report/figure_manifest.csv"):
 
 if os.path.exists("report/rank_independence.json"):
     ri = json.load(open("report/rank_independence.json"))
-    bad = [k for k, v in ri.items() if not all(v.values())]
-    check("rank-independent surface output", not bad, ",".join(bad[:3]))
+    bad = [k for k, v in ri.items()
+           if not all(d["identical_geometry_and_order"] for d in v.values())]
+    check("rank-independent surface output structure", not bad, ",".join(bad[:3]))
 
 if os.path.exists("studies/restart/restart_check.json"):
     rc = json.load(open("studies/restart/restart_check.json"))

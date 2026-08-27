@@ -869,9 +869,18 @@ def main():
     ri = os.path.join(args.report, "rank_independence.json")
     if os.path.exists(ri):
         R = json.load(open(ri))
-        pairs = [ok for v in R.values() for ok in v.values()]
-        macro("rankIdenticalComparisons", str(len(pairs)))
-        macro("rankIdenticalFailures", str(sum(1 for x in pairs if not x)))
+        entries = [d for v in R.values() for d in v.values()]
+        macro("rankComparisons", str(len(entries)))
+        macro("rankStructureFailures",
+              str(sum(1 for d in entries if not d["identical_geometry_and_order"])))
+        macro("rankSolutionPNinetyNine",
+              sci(max(d["p99_relative_solution_difference"] for d in entries), 1))
+        macro("rankSolutionMax",
+              sci(max(d["max_relative_solution_difference"] for d in entries), 1))
+        w = max(entries, key=lambda d: d["max_relative_solution_difference"])
+        if w.get("worst_at"):
+            macro("rankWorstColumn", esc(str(w["worst_at"]["column"])))
+            macro("rankWorstX", f"{w['worst_at']['x']:.4f}")
 
     # Sanity-check summary
     sp = os.path.join(args.report, "sanity_checks.json")

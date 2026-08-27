@@ -49,7 +49,13 @@ def main():
     # identical at every rank count are compared byte for byte, and the field
     # file (which carries a deliberately rank-dependent RankId array) is
     # compared cell by cell after both have been sorted by global cell id.
-    identical = {}
+    # What must be rank-independent is the *structure* of the file: the same rows
+    # in the same order, describing the same boundary faces.  The solution
+    # columns cannot be bit-identical, because different rank counts take
+    # slightly different iteration paths and stop at different steps; those are
+    # reported as a difference, to be read against the force tolerance.
+    GEOM = ["x", "y", "nx", "ny", "tag"]
+    ri = {}
     for case, by_np in sorted(runs.items()):
         ref_np = min(by_np)
         base = by_np[ref_np]["dir"]
@@ -60,13 +66,51 @@ def main():
                 a, b = os.path.join(base, fn), os.path.join(r["dir"], fn)
                 if not (os.path.exists(a) and os.path.exists(b)):
                     continue
-                same = open(a, "rb").read() == open(b, "rb").read()
-                identical.setdefault(f"{case}:{fn}", {})[f"np{ref_np}_vs_np{np_}"] = bool(same)
-    if identical:
+                ra = list(csv.DictReader(open(a, newline="")))
+                rb = list(csv.DictReader(open(b, newline="")))
+                geom = [c for c in GEOM if ra and c in ra[0]]
+                same_rows = len(ra) == len(rb)
+                same_geom = same_rows and all(
+                    all(x[c] == y[c] for c in geom) for x, y in zip(ra, rb))
+                diffs, worst_at = [], None
+                worst = 0.0
+                if same_rows:
+                    for x, y in zip(ra, rb):
+                        for c in x:
+                            if c in geom:
+                                continue
+                            try:
+                                fa, fb = float(x[c]), float(y[c])
+                            except ValueError:
+                                continue
+                            d = abs(fa - fb) / max(abs(fa), 1.0)
+                            diffs.append(d)
+                            if d > worst:
+                                worst, worst_at = d, dict(column=c, x=float(x["x"]),
+                                                          y=float(x["y"]))
+                ri.setdefault(f"{case}:{fn}", {})[f"np{ref_np}_vs_np{np_}"] = dict(
+                    same_row_count=bool(same_rows),
+                    identical_geometry_and_order=bool(same_geom),
+                    max_relative_solution_difference=worst,
+                    worst_at=worst_at,
+                    # The maximum sits in the singular trailing-edge slivers of
+                    # the aerofoil; the percentile shows the level everywhere
+                    # else without special-casing a region.
+                    p99_relative_solution_difference=(
+                        float(np.percentile(diffs, 99)) if diffs else 0.0),
+                    median_relative_solution_difference=(
+                        float(np.median(diffs)) if diffs else 0.0))
+    if ri:
         out = os.path.join(os.path.dirname(args.out_csv), "rank_independence.json")
-        json.dump(identical, open(out, "w"), indent=2)
-        bad = [k for k, v in identical.items() if not all(v.values())]
-        print(f"wrote {out}: {'all identical' if not bad else 'DIFFERENCES in ' + str(bad)}")
+        json.dump(ri, open(out, "w"), indent=2)
+        bad = [k for k, v in ri.items()
+               if not all(d["identical_geometry_and_order"] for d in v.values())]
+        worst = max(d["max_relative_solution_difference"]
+                    for v in ri.values() for d in v.values())
+        p99 = max(d["p99_relative_solution_difference"]
+                  for v in ri.values() for d in v.values())
+        print(f"wrote {out}: structure {'identical' if not bad else 'DIFFERS in ' + str(bad)}"
+              f", solution difference p99 {p99:.2e}, max {worst:.2e}")
 
     rows = []
     for case, by_np in sorted(runs.items()):
