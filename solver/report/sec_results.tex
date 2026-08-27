@@ -505,11 +505,21 @@ position is set by cells of volume $\num{5.4e-8}$ at the leading edge, and a bou
 layer on the same surface that must develop through those cells. The residual target is
 not the difficulty --- the residual passes $3.00$ orders early and reaches $4.78$ --- the
 difficulty is that the pressure drag continues to build as the shock system strengthens
-over the forward section, long after the residual has stopped being informative. If the
-run reaches its step limit with the forces still developing it is reported as
-\texttt{not\_converged} and \textbf{no converged coefficient is claimed for it}; the
-value above is then a snapshot of a developing solution, quoted for completeness rather
-than as a result.
+over the forward section, long after the residual has stopped being informative. It took
+$\num{48319}$ pseudo-time steps and $6947\,\mathrm{s}$ --- an order of magnitude more
+steps than any other case --- and the force criterion held it open for the whole of that
+march. \Cref{sec:criterionworks} gives the measurements.
+
+The result is physically coherent, which is the point worth making after the history this
+case has had. Its drag is roughly $2.5$ times the $\Minf=0.15$ laminar value and is now
+dominated by \emph{pressure} drag, $\cnsPdNacaSupLam$ against $\cnsVdNacaSupLam$ viscous.
+That is the expected supersonic signature: wave drag from the bow shock is the leading
+contribution and skin friction is secondary. The viscous part, $\cnsVdNacaSupLam$, remains
+below the subsonic value for the compressibility reason given above. Compare this with the
+$C_D=2.176$ that the defective termination test originally reported for this case, in which
+the viscous part alone was $2.17$ against a flat-plate expectation of order $0.04$: the
+difference between that figure and this one is the whole of the convergence investigation
+in \cref{sec:stationarity}.
 
 The wall treatment can be checked directly in the submitted output: because
 \texttt{surface.csv} carries boundary values (\cref{sec:ghostvsface}), the

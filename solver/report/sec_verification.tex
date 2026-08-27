@@ -42,6 +42,14 @@ Build and run instructions, dependency versions, per-case outputs, the test suit
 the Python tooling and a ten-step reproduce-from-clean-checkout sequence are
 documented in \texttt{README.md} at the root of the solver tree.
 
+Those instructions were \emph{verified} rather than assumed: a completely fresh
+out-of-tree build was configured and compiled from the source alone, and the resulting
+test binary passes all $139$ checks. The build tree is therefore a generated artifact
+reproducible from source, and is excluded from version control on that basis. The two
+driver scripts that produced the submitted runs are kept under \texttt{scratch/} and
+referenced from the README, since a pointer to the script that was actually run is worth
+more than a retyped command that may drift from it.
+
 \subsection{Generated files}
 
 Each case directory contains \texttt{metadata.json},
@@ -692,8 +700,8 @@ its fix to be over-read.
 
 A criterion developed by fixing the cases that failed it invites an obvious objection:
 that it has been tuned until the available runs pass, and would pass anything. The best
-available answer is a case it is refusing, measured while the run is in progress rather
-than reconstructed afterwards.
+available answer is a case it refused for most of a long run and then admitted on
+evidence, measured as the run proceeded rather than reconstructed afterwards.
 
 \texttt{naca0012\_m200\_laminar\_re5000} --- the case whose component cancellation
 started this investigation --- provides one. At step \num{13144} of its \num{50000}-step
@@ -714,11 +722,18 @@ budget, the three tests disagree in a fully diagnostic way:
 \end{center}
 
 \noindent \textbf{The span test alone would certify this run.} Its ratio to tolerance is
-$0.655$, a comfortable pass --- which is to say the pre-fix criterion would accept, right
-now, a run whose drag is unambiguously still developing. What stops it is the decay
-ratio: at $0.988$ the increments are barely shrinking, so the geometric tail sums to
-$\num{6.6e-3}$ of remaining $C_D$ movement, or $5.1\,\%$ of the current value, implying
-an asymptote near $0.135$ against a current $0.1285$.
+$0.655$, a comfortable pass --- which is to say the pre-fix criterion would have accepted,
+at step \num{13144}, a run whose drag was unambiguously still developing. What stopped it
+is the decay ratio: at $0.988$ the increments were barely shrinking, so the geometric tail
+summed to $\num{6.6e-3}$ of remaining $C_D$ movement, or $5.1\,\%$ of the value at that
+point.
+
+That refusal was correct. The run continued to step \num{48319} --- more than three and a
+half times as far --- and its drag rose from $0.1285$ to $0.137643$, a further $7.1\,\%$.
+A criterion that had stopped at step \num{13144} would have reported a drag $7\,\%$ below
+the converged value, on a case whose residual had already exceeded its target by more than
+an order and a half. This is the single clearest demonstration in the report that the
+residual is not a sufficient convergence measure for these cases.
 
 \subsubsection{An extrapolation is only as good as its conditioning}
 \label{sec:conditioning}
@@ -731,9 +746,11 @@ trustworthy --- and the refutation is the sharpest of the lessons in this sequen
 \begin{table}[htbp]
   \centering
   \caption{The same geometric-tail extrapolation applied to
-  \texttt{naca0012\_m200\_laminar\_re5000} at four points during one run. The remaining
-  fraction falls, so the run is converging; but the implied asymptote climbs, and the
-  amplification factor $r/(1-r)$ that multiplies the fitted ratio's error grows with it.}
+  \texttt{naca0012\_m200\_laminar\_re5000} through one complete run. For most of the march
+  the remaining fraction falls while the implied asymptote \emph{climbs} and the
+  amplification factor $r/(1-r)$ grows --- an estimator getting worse with more data. At
+  the end the ratio collapses and with it the amplification, which is the point at which
+  the extrapolation becomes trustworthy and the criterion releases the run.}
   \label{tab:conditioning}
   \small
   \begin{tabular}{rrrrrr}
@@ -744,17 +761,22 @@ trustworthy --- and the refutation is the sharpest of the lessons in this sequen
     \num{16000} & $0.990$ & $0.1320$ & $3.10\,\%$ & $0.1361$ & $100$ \\
     \num{22355} & $0.993$ & $0.1351$ & $1.60\,\%$ & $0.1372$ & $142$ \\
     \num{25307} & $0.994$ & $0.1358$ & $1.21\,\%$ & $0.1374$ & $165$ \\
+    \num{37012} & $0.9959$ & $0.137145$ & $0.59\,\%$ & --- & $245$ \\
+    \midrule
+    \num{48319} & $\mathbf{0.919}$ & $0.137643$ & $\mathbf{0.005\,\%}$ & $0.13765$
+      & $\mathbf{11}$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Two opposite trends run through \cref{tab:conditioning}. The remaining fraction falls
-from $5.10\,\%$ to $1.21\,\%$, so the run is genuinely converging and the criterion's
-refusal weakens as it should rather than latching. But \textbf{every estimate is overtaken
-by the measured value of a later one}: the step-\num{13144} extrapolation predicted
-$0.1351$, which is exactly the $C_D$ measured at step \num{22355}; that step's prediction
-of $0.1372$ is nearly the $0.1358$ already measured at \num{25307}. The asymptote is not
-stable --- it climbs monotonically, and it will continue to.
+Two opposite trends run through the first five rows of \cref{tab:conditioning}. The
+remaining fraction falls from $5.10\,\%$ to $0.59\,\%$, so the run is genuinely converging
+and the criterion's refusal weakens as it should rather than latching. But
+\textbf{every intermediate estimate is overtaken by the measured value of a later one}:
+the step-\num{13144} extrapolation predicted $0.1351$, which is exactly the $C_D$ measured
+at step \num{22355}; that step's prediction of $0.1372$ is nearly the $0.1358$ already
+measured at \num{25307}. Through that whole phase the asymptote climbs monotonically
+rather than settling.
 
 The reason is conditioning, and it is worth making quantitative because it decides when an
 extrapolation may be quoted at all. The geometric tail sum is
@@ -762,24 +784,42 @@ extrapolation may be quoted at all. The geometric tail sum is
   \Delta_\infty = d_{\text{last}}\,\frac{r}{1-r},
   \label{eq:tailsum}
 \end{equation}
-so the fitted ratio's error is amplified by $r/(1-r)$. That factor is $82$ at the start of
-\cref{tab:conditioning} and $165$ at the end: \textbf{the extrapolation gets worse as the
-run proceeds}, because $r$ itself creeps towards unity. An estimator that degrades with
-more data is not an estimator.
+so the fitted ratio's error is amplified by $r/(1-r)$. That factor grows from $82$ to $245$
+across the intermediate rows: \textbf{the extrapolation gets worse as the run proceeds},
+because $r$ itself creeps towards unity. An estimator that degrades with more data is not
+an estimator.
 
-Contrast the cylinder of \cref{sec:digits}, where $r=0.733$ gives an amplification of
-only $2.7$. Same formula, same code, two orders of magnitude difference in conditioning ---
-which is precisely why that case's asymptote of $2.0177$ is quoted as a number while this
-one's is not.
+\paragraph{How it ended, and why that completes the argument.} The run converged at step
+\num{48319}. The decay ratio did not drift gently down --- it \emph{collapsed}, from
+$0.9959$ to $0.919$, and the remaining movement fell with it from $0.59\,\%$ to
+$0.005\,\%$. The amplification factor fell from $245$ to $11$ in the same step.
+
+So the criterion released this run on evidence rather than on a timeout: it refused while
+the tail was long, and admitted the case when the tail collapsed, roughly \num{1700} steps
+short of the step limit it would otherwise have hit. Had it been a disguised step-count
+cutoff it would have fired at \num{50000} regardless.
+
+The conditioning argument is vindicated rather than contradicted by this ending. The
+intermediate extrapolations, at amplifications of $82$ to $245$, were indeed only lower
+bounds --- the step-\num{13144} prediction of $0.1351$ was overtaken, as above. The final
+extrapolation, at amplification $11$, is well conditioned and is quotable: the run reports
+$C_D=0.137643$ with an estimated $\num{6.9e-6}$ still to come, so
+\textbf{$C_D=0.13764$} is the honest figure and no further digits are earned. Same
+formula throughout; it became trustworthy exactly when its conditioning improved.
+
+Contrast the cylinder of \cref{sec:digits}, where $r=0.733$ gives an amplification of only
+$2.7$. Across the three regimes --- $2.7$, $11$, and $245$ --- the same expression is
+respectively excellent, usable, and worthless, which is why the amplification factor and
+not the quality of the fit is what decides whether an extrapolated number may be printed.
 
 \paragraph{Consequences for how the report uses the decay ratio.} The ratio is used as a
-\textbf{classifier}, not an estimator: $0.994$ is not converged, $0.733$ is, and that
-judgement is robust because it depends on which side of the threshold $r$ falls rather than
-on its precise value. A tail figure is quoted as a number only where the amplification is
-small. Where the solver prints a tail estimate for a case whose ratio is near unity ---
-as it does for this case --- that number is a \textbf{lower bound on the remaining
-movement} and must not be quoted as a predicted converged value, including when read
-directly out of \texttt{run\_status.json}.
+\textbf{classifier}, not an estimator: $0.994$ is not converged, $0.919$ and $0.733$ are,
+and that judgement is robust because it depends on which side of the threshold $r$ falls
+rather than on its precise value. A tail figure is quoted as a number only where the
+amplification is small. Where the solver prints a tail estimate for a case whose ratio is
+near unity, that number is a \textbf{lower bound on the remaining movement} and must not
+be quoted as a predicted converged value, including when read directly out of
+\texttt{run\_status.json}.
 
 This was found by checking the report's own extrapolation against data that arrived later,
 which is the only way it could have been found: at any single point the fit looks
