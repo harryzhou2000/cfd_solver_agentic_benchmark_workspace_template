@@ -1,0 +1,1619 @@
+{
+  "codex": {
+    "present": true,
+    "source_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02/.sessions/codex/sessions",
+    "thread_count": 26,
+    "subagent_count": 25,
+    "root_count": 1,
+    "roots": [
+      {
+        "thread_id": "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+        "model": "internal_anth_eccn/us-aws-anthropic-eccn-claude-opus-5",
+        "thread_count": 26,
+        "started_at": "2026-08-26T09:55:45.930000+00:00",
+        "ended_at": "2026-08-26T21:44:24.373000+00:00",
+        "rollout_bytes": 42026086
+      }
+    ],
+    "rollout_bytes_total": 42026086,
+    "missing_rollouts": [],
+    "source": "project"
+  },
+  "opencode": {
+    "present": false,
+    "session_count": 0
+  },
+  "analysis": {
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "window": {
+      "start": "2026-08-26T09:55:45.930000+00:00",
+      "end": "2026-08-26T21:44:24.373000+00:00"
+    },
+    "idle_exclusion": {
+      "method": "merged timeline over main thread/session and all subagents; gaps with no events anywhere exceed the threshold and are excluded",
+      "gap_count": 0,
+      "gaps": [],
+      "idle_seconds_total": 0
+    },
+    "permission_waits": {
+      "method": "heuristic",
+      "explicit_approval_events_found": false,
+      "ask_tool_events_found": 0,
+      "candidate_gaps": [],
+      "candidate_count": 0,
+      "policy_observed": [
+        "never",
+        "reviewer=user"
+      ],
+      "limitations": [
+        "codex rollouts contain no explicit approval-request/response event types (verified by scanning all local sessions); permission-blocked idle cannot be distinguished from user-away time with certainty",
+        "candidates are gaps > idle threshold between a tool/turn boundary and a user message / new turn in approval-aware threads; expect false positives when the user stepped away"
+      ]
+    },
+    "buckets": [
+      {
+        "bucket_index": 0,
+        "start": "2026-08-26T09:55:45.930000+00:00",
+        "end": "2026-08-26T10:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 7774244,
+          "cached_input": 7296042,
+          "cache_write": 477992,
+          "non_cached_input": 478202,
+          "output": 290024,
+          "reasoning_output": 0,
+          "total": 8064268
+        },
+        "cache": {
+          "cached_tokens": 7296042,
+          "input_tokens": 7774244,
+          "hit_ratio": 0.9385
+        },
+        "tools": {
+          "total": 119,
+          "by_tool": {
+            "exec": 106,
+            "spawn_agent": 6,
+            "wait_agent": 6,
+            "list_agents": 1
+          },
+          "by_category": {
+            "shell": 106,
+            "collaboration": 13
+          }
+        },
+        "turns": {
+          "thread_goal_updated": 1,
+          "task_started": 5,
+          "task_complete": 2
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03d88-baf8-7d90-b6d3-c74f725084db",
+          "01a03d89-88ac-7b20-b745-f348c991525c",
+          "01a03d8a-9a29-7df1-96e8-56ab452aa079",
+          "01a03d9a-4b01-7ed3-b08a-ee069a1205aa"
+        ],
+        "active_entity_count": 5
+      },
+      {
+        "bucket_index": 1,
+        "start": "2026-08-26T10:25:45.930000+00:00",
+        "end": "2026-08-26T10:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 13715115,
+          "cached_input": 13077095,
+          "cache_write": 637834,
+          "non_cached_input": 638020,
+          "output": 271458,
+          "reasoning_output": 0,
+          "total": 13986573
+        },
+        "cache": {
+          "cached_tokens": 13077095,
+          "input_tokens": 13715115,
+          "hit_ratio": 0.9535
+        },
+        "tools": {
+          "total": 99,
+          "by_tool": {
+            "exec": 87,
+            "wait_agent": 6,
+            "spawn_agent": 4,
+            "list_agents": 2
+          },
+          "by_category": {
+            "shell": 87,
+            "collaboration": 12
+          }
+        },
+        "turns": {
+          "task_complete": 2,
+          "task_started": 1
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03d88-baf8-7d90-b6d3-c74f725084db",
+          "01a03d9a-4b01-7ed3-b08a-ee069a1205aa",
+          "01a03db2-c741-7040-9f6b-a7bb1b63312b"
+        ],
+        "active_entity_count": 4
+      },
+      {
+        "bucket_index": 2,
+        "start": "2026-08-26T10:55:45.930000+00:00",
+        "end": "2026-08-26T11:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 21735501,
+          "cached_input": 21522446,
+          "cache_write": 212885,
+          "non_cached_input": 213055,
+          "output": 182917,
+          "reasoning_output": 0,
+          "total": 21918418
+        },
+        "cache": {
+          "cached_tokens": 21522446,
+          "input_tokens": 21735501,
+          "hit_ratio": 0.9902
+        },
+        "tools": {
+          "total": 86,
+          "by_tool": {
+            "exec": 79,
+            "wait_agent": 4,
+            "spawn_agent": 2,
+            "list_agents": 1
+          },
+          "by_category": {
+            "shell": 79,
+            "collaboration": 7
+          }
+        },
+        "turns": {
+          "task_started": 1
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03db2-c741-7040-9f6b-a7bb1b63312b",
+          "01a03db8-4570-7cb3-b647-7df61090d47c"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 3,
+        "start": "2026-08-26T11:25:45.930000+00:00",
+        "end": "2026-08-26T11:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 39729992,
+          "cached_input": 39463582,
+          "cache_write": 266146,
+          "non_cached_input": 266410,
+          "output": 123697,
+          "reasoning_output": 0,
+          "total": 39853689
+        },
+        "cache": {
+          "cached_tokens": 39463582,
+          "input_tokens": 39729992,
+          "hit_ratio": 0.9933
+        },
+        "tools": {
+          "total": 134,
+          "by_tool": {
+            "exec": 123,
+            "list_agents": 3,
+            "followup_task": 2,
+            "wait": 2,
+            "spawn_agent": 2,
+            "interrupt_agent": 1,
+            "wait_agent": 1
+          },
+          "by_category": {
+            "shell": 123,
+            "collaboration": 11
+          }
+        },
+        "turns": {
+          "turn_aborted": 1,
+          "task_started": 1,
+          "task_complete": 1
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03db2-c741-7040-9f6b-a7bb1b63312b",
+          "01a03db8-4570-7cb3-b647-7df61090d47c"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 4,
+        "start": "2026-08-26T11:55:45.930000+00:00",
+        "end": "2026-08-26T12:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 16102647,
+          "cached_input": 15768148,
+          "cache_write": 334275,
+          "non_cached_input": 334499,
+          "output": 133079,
+          "reasoning_output": 0,
+          "total": 16235726
+        },
+        "cache": {
+          "cached_tokens": 15768148,
+          "input_tokens": 16102647,
+          "hit_ratio": 0.9792
+        },
+        "tools": {
+          "total": 129,
+          "by_tool": {
+            "exec": 119,
+            "spawn_agent": 5,
+            "list_agents": 3,
+            "send_message": 1,
+            "wait": 1
+          },
+          "by_category": {
+            "shell": 119,
+            "collaboration": 10
+          }
+        },
+        "turns": {
+          "task_complete": 1,
+          "task_started": 2
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03db2-c741-7040-9f6b-a7bb1b63312b",
+          "01a03dfb-ce38-7841-ac40-e01c1b7e22bc",
+          "01a03dfc-9244-7723-974d-0e2912b4ab68"
+        ],
+        "active_entity_count": 4
+      },
+      {
+        "bucket_index": 5,
+        "start": "2026-08-26T12:25:45.930000+00:00",
+        "end": "2026-08-26T12:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 21808287,
+          "cached_input": 21683126,
+          "cache_write": 124869,
+          "non_cached_input": 125161,
+          "output": 176944,
+          "reasoning_output": 0,
+          "total": 21985231
+        },
+        "cache": {
+          "cached_tokens": 21683126,
+          "input_tokens": 21808287,
+          "hit_ratio": 0.9943
+        },
+        "tools": {
+          "total": 150,
+          "by_tool": {
+            "exec": 140,
+            "wait": 8,
+            "wait_agent": 2
+          },
+          "by_category": {
+            "shell": 140,
+            "collaboration": 10
+          }
+        },
+        "turns": {},
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03dfb-ce38-7841-ac40-e01c1b7e22bc",
+          "01a03dfc-9244-7723-974d-0e2912b4ab68"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 6,
+        "start": "2026-08-26T12:55:45.930000+00:00",
+        "end": "2026-08-26T13:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 31510858,
+          "cached_input": 30600120,
+          "cache_write": 910404,
+          "non_cached_input": 910738,
+          "output": 87707,
+          "reasoning_output": 0,
+          "total": 31598565
+        },
+        "cache": {
+          "cached_tokens": 30600120,
+          "input_tokens": 31510858,
+          "hit_ratio": 0.9711
+        },
+        "tools": {
+          "total": 170,
+          "by_tool": {
+            "exec": 150,
+            "wait": 12,
+            "wait_agent": 4,
+            "send_message": 3,
+            "list_agents": 1
+          },
+          "by_category": {
+            "shell": 150,
+            "collaboration": 20
+          }
+        },
+        "turns": {},
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03dfb-ce38-7841-ac40-e01c1b7e22bc",
+          "01a03dfc-9244-7723-974d-0e2912b4ab68"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 7,
+        "start": "2026-08-26T13:25:45.930000+00:00",
+        "end": "2026-08-26T13:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 43574526,
+          "cached_input": 43007384,
+          "cache_write": 566782,
+          "non_cached_input": 567142,
+          "output": 87622,
+          "reasoning_output": 0,
+          "total": 43662148
+        },
+        "cache": {
+          "cached_tokens": 43007384,
+          "input_tokens": 43574526,
+          "hit_ratio": 0.987
+        },
+        "tools": {
+          "total": 178,
+          "by_tool": {
+            "exec": 153,
+            "wait": 13,
+            "send_message": 6,
+            "wait_agent": 4,
+            "spawn_agent": 2
+          },
+          "by_category": {
+            "shell": 153,
+            "collaboration": 25
+          }
+        },
+        "turns": {},
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03dfb-ce38-7841-ac40-e01c1b7e22bc",
+          "01a03dfc-9244-7723-974d-0e2912b4ab68"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 8,
+        "start": "2026-08-26T13:55:45.930000+00:00",
+        "end": "2026-08-26T14:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 38691443,
+          "cached_input": 38106807,
+          "cache_write": 584358,
+          "non_cached_input": 584636,
+          "output": 59012,
+          "reasoning_output": 0,
+          "total": 38750455
+        },
+        "cache": {
+          "cached_tokens": 38106807,
+          "input_tokens": 38691443,
+          "hit_ratio": 0.9849
+        },
+        "tools": {
+          "total": 142,
+          "by_tool": {
+            "exec": 120,
+            "wait": 10,
+            "send_message": 7,
+            "wait_agent": 5
+          },
+          "by_category": {
+            "shell": 120,
+            "collaboration": 22
+          }
+        },
+        "turns": {},
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03dfb-ce38-7841-ac40-e01c1b7e22bc",
+          "01a03dfc-9244-7723-974d-0e2912b4ab68"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 9,
+        "start": "2026-08-26T14:25:45.930000+00:00",
+        "end": "2026-08-26T14:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 43399766,
+          "cached_input": 42780030,
+          "cache_write": 619446,
+          "non_cached_input": 619736,
+          "output": 64093,
+          "reasoning_output": 0,
+          "total": 43463859
+        },
+        "cache": {
+          "cached_tokens": 42780030,
+          "input_tokens": 43399766,
+          "hit_ratio": 0.9857
+        },
+        "tools": {
+          "total": 142,
+          "by_tool": {
+            "exec": 131,
+            "wait": 6,
+            "wait_agent": 2,
+            "send_message": 2,
+            "followup_task": 1
+          },
+          "by_category": {
+            "shell": 131,
+            "collaboration": 11
+          }
+        },
+        "turns": {
+          "task_complete": 2,
+          "task_started": 1
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03dfb-ce38-7841-ac40-e01c1b7e22bc",
+          "01a03dfc-9244-7723-974d-0e2912b4ab68"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 10,
+        "start": "2026-08-26T14:55:45.930000+00:00",
+        "end": "2026-08-26T15:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 29583154,
+          "cached_input": 28599533,
+          "cache_write": 983435,
+          "non_cached_input": 983621,
+          "output": 42023,
+          "reasoning_output": 0,
+          "total": 29625177
+        },
+        "cache": {
+          "cached_tokens": 28599533,
+          "input_tokens": 29583154,
+          "hit_ratio": 0.9668
+        },
+        "tools": {
+          "total": 91,
+          "by_tool": {
+            "exec": 76,
+            "wait": 9,
+            "wait_agent": 3,
+            "send_message": 2,
+            "followup_task": 1
+          },
+          "by_category": {
+            "shell": 76,
+            "collaboration": 15
+          }
+        },
+        "turns": {
+          "task_complete": 1,
+          "task_started": 1
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03dfb-ce38-7841-ac40-e01c1b7e22bc"
+        ],
+        "active_entity_count": 2
+      },
+      {
+        "bucket_index": 11,
+        "start": "2026-08-26T15:25:45.930000+00:00",
+        "end": "2026-08-26T15:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 31949679,
+          "cached_input": 31867135,
+          "cache_write": 82348,
+          "non_cached_input": 82544,
+          "output": 47397,
+          "reasoning_output": 0,
+          "total": 31997076
+        },
+        "cache": {
+          "cached_tokens": 31867135,
+          "input_tokens": 31949679,
+          "hit_ratio": 0.9974
+        },
+        "tools": {
+          "total": 99,
+          "by_tool": {
+            "exec": 96,
+            "spawn_agent": 1,
+            "send_message": 1,
+            "wait_agent": 1
+          },
+          "by_category": {
+            "shell": 96,
+            "collaboration": 3
+          }
+        },
+        "turns": {
+          "task_complete": 1,
+          "task_started": 1
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03dfb-ce38-7841-ac40-e01c1b7e22bc",
+          "01a03ec0-bee8-71f2-ba33-87d62ad95299"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 12,
+        "start": "2026-08-26T15:55:45.930000+00:00",
+        "end": "2026-08-26T16:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 25485765,
+          "cached_input": 24245124,
+          "cache_write": 1240419,
+          "non_cached_input": 1240641,
+          "output": 116311,
+          "reasoning_output": 0,
+          "total": 25602076
+        },
+        "cache": {
+          "cached_tokens": 24245124,
+          "input_tokens": 25485765,
+          "hit_ratio": 0.9513
+        },
+        "tools": {
+          "total": 110,
+          "by_tool": {
+            "exec": 99,
+            "wait_agent": 5,
+            "spawn_agent": 3,
+            "send_message": 2,
+            "wait": 1
+          },
+          "by_category": {
+            "shell": 99,
+            "collaboration": 11
+          }
+        },
+        "turns": {
+          "task_complete": 2,
+          "task_started": 1
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03ec0-bee8-71f2-ba33-87d62ad95299",
+          "01a03ecc-ac6e-7ec2-8d38-4c2aa69f40a1"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 13,
+        "start": "2026-08-26T16:25:45.930000+00:00",
+        "end": "2026-08-26T16:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 41386569,
+          "cached_input": 41078183,
+          "cache_write": 308088,
+          "non_cached_input": 308386,
+          "output": 91466,
+          "reasoning_output": 0,
+          "total": 41478035
+        },
+        "cache": {
+          "cached_tokens": 41078183,
+          "input_tokens": 41386569,
+          "hit_ratio": 0.9925
+        },
+        "tools": {
+          "total": 164,
+          "by_tool": {
+            "exec": 156,
+            "spawn_agent": 5,
+            "list_agents": 3
+          },
+          "by_category": {
+            "shell": 156,
+            "collaboration": 8
+          }
+        },
+        "turns": {
+          "task_complete": 1,
+          "task_started": 3
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03efa-9bcb-7da0-b0c1-cf56491c6ec6",
+          "01a03efb-79c2-7df3-a83a-03522f2aa29b"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 14,
+        "start": "2026-08-26T16:55:45.930000+00:00",
+        "end": "2026-08-26T17:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 13692022,
+          "cached_input": 13304463,
+          "cache_write": 387315,
+          "non_cached_input": 387559,
+          "output": 160297,
+          "reasoning_output": 0,
+          "total": 13852319
+        },
+        "cache": {
+          "cached_tokens": 13304463,
+          "input_tokens": 13692022,
+          "hit_ratio": 0.9717
+        },
+        "tools": {
+          "total": 123,
+          "by_tool": {
+            "exec": 112,
+            "spawn_agent": 7,
+            "wait_agent": 3,
+            "list_agents": 1
+          },
+          "by_category": {
+            "shell": 112,
+            "collaboration": 11
+          }
+        },
+        "turns": {
+          "task_complete": 4,
+          "task_started": 4
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03efa-9bcb-7da0-b0c1-cf56491c6ec6",
+          "01a03efb-79c2-7df3-a83a-03522f2aa29b",
+          "01a03f11-c46a-7200-99b0-9a4d20c63eed",
+          "01a03f12-8b34-7833-ba86-0dfa8c1b811e"
+        ],
+        "active_entity_count": 5
+      },
+      {
+        "bucket_index": 15,
+        "start": "2026-08-26T17:25:45.930000+00:00",
+        "end": "2026-08-26T17:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 31897968,
+          "cached_input": 31158237,
+          "cache_write": 739421,
+          "non_cached_input": 739731,
+          "output": 181639,
+          "reasoning_output": 0,
+          "total": 32079607
+        },
+        "cache": {
+          "cached_tokens": 31158237,
+          "input_tokens": 31897968,
+          "hit_ratio": 0.9768
+        },
+        "tools": {
+          "total": 149,
+          "by_tool": {
+            "exec": 144,
+            "list_agents": 2,
+            "wait_agent": 2,
+            "followup_task": 1
+          },
+          "by_category": {
+            "shell": 144,
+            "collaboration": 5
+          }
+        },
+        "turns": {
+          "task_complete": 6,
+          "task_started": 4
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03f11-c46a-7200-99b0-9a4d20c63eed",
+          "01a03f12-8b34-7833-ba86-0dfa8c1b811e"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 16,
+        "start": "2026-08-26T17:55:45.930000+00:00",
+        "end": "2026-08-26T18:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 38402062,
+          "cached_input": 38309930,
+          "cache_write": 91912,
+          "non_cached_input": 92132,
+          "output": 54002,
+          "reasoning_output": 0,
+          "total": 38456064
+        },
+        "cache": {
+          "cached_tokens": 38309930,
+          "input_tokens": 38402062,
+          "hit_ratio": 0.9976
+        },
+        "tools": {
+          "total": 106,
+          "by_tool": {
+            "exec": 105,
+            "wait": 1
+          },
+          "by_category": {
+            "shell": 105,
+            "collaboration": 1
+          }
+        },
+        "turns": {
+          "task_complete": 4,
+          "task_started": 4
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884"
+        ],
+        "active_entity_count": 1
+      },
+      {
+        "bucket_index": 17,
+        "start": "2026-08-26T18:25:45.930000+00:00",
+        "end": "2026-08-26T18:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 28287255,
+          "cached_input": 27712544,
+          "cache_write": 574509,
+          "non_cached_input": 574711,
+          "output": 82058,
+          "reasoning_output": 0,
+          "total": 28369313
+        },
+        "cache": {
+          "cached_tokens": 27712544,
+          "input_tokens": 28287255,
+          "hit_ratio": 0.9797
+        },
+        "tools": {
+          "total": 113,
+          "by_tool": {
+            "exec": 103,
+            "wait_agent": 6,
+            "spawn_agent": 4
+          },
+          "by_category": {
+            "shell": 103,
+            "collaboration": 10
+          }
+        },
+        "turns": {
+          "task_complete": 4,
+          "task_started": 6
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03f5e-c97e-7cf1-89a8-b07ebe051e5a",
+          "01a03f60-a879-78c2-9d2b-b42c8db220d0"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 18,
+        "start": "2026-08-26T18:55:45.930000+00:00",
+        "end": "2026-08-26T19:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 17303977,
+          "cached_input": 16587367,
+          "cache_write": 716416,
+          "non_cached_input": 716610,
+          "output": 104499,
+          "reasoning_output": 0,
+          "total": 17408476
+        },
+        "cache": {
+          "cached_tokens": 16587367,
+          "input_tokens": 17303977,
+          "hit_ratio": 0.9586
+        },
+        "tools": {
+          "total": 98,
+          "by_tool": {
+            "exec": 87,
+            "wait_agent": 6,
+            "spawn_agent": 4,
+            "list_agents": 1
+          },
+          "by_category": {
+            "shell": 87,
+            "collaboration": 11
+          }
+        },
+        "turns": {
+          "task_complete": 5,
+          "task_started": 5
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03f5e-c97e-7cf1-89a8-b07ebe051e5a",
+          "01a03f60-a879-78c2-9d2b-b42c8db220d0",
+          "01a03f7c-885d-7b91-b76b-429e405545e7",
+          "01a03f7d-2d38-7da1-8fd1-1b3ba3b8fd96",
+          "01a03f84-49e6-7571-a510-b4472b3a8557"
+        ],
+        "active_entity_count": 6
+      },
+      {
+        "bucket_index": 19,
+        "start": "2026-08-26T19:25:45.930000+00:00",
+        "end": "2026-08-26T19:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 9635505,
+          "cached_input": 9134412,
+          "cache_write": 500867,
+          "non_cached_input": 501093,
+          "output": 104321,
+          "reasoning_output": 0,
+          "total": 9739826
+        },
+        "cache": {
+          "cached_tokens": 9134412,
+          "input_tokens": 9635505,
+          "hit_ratio": 0.948
+        },
+        "tools": {
+          "total": 110,
+          "by_tool": {
+            "exec": 100,
+            "spawn_agent": 3,
+            "wait_agent": 3,
+            "send_message": 2,
+            "list_agents": 1,
+            "interrupt_agent": 1
+          },
+          "by_category": {
+            "shell": 100,
+            "collaboration": 10
+          }
+        },
+        "turns": {
+          "task_complete": 3,
+          "turn_aborted": 1,
+          "task_started": 2
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03f7c-885d-7b91-b76b-429e405545e7",
+          "01a03f84-49e6-7571-a510-b4472b3a8557",
+          "01a03f8c-9a19-7792-a74f-702e3309ac98",
+          "01a03f9c-0deb-70c2-ae84-95c4e402647d"
+        ],
+        "active_entity_count": 5
+      },
+      {
+        "bucket_index": 20,
+        "start": "2026-08-26T19:55:45.930000+00:00",
+        "end": "2026-08-26T20:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 8451341,
+          "cached_input": 8166082,
+          "cache_write": 285111,
+          "non_cached_input": 285259,
+          "output": 75315,
+          "reasoning_output": 0,
+          "total": 8526656
+        },
+        "cache": {
+          "cached_tokens": 8166082,
+          "input_tokens": 8451341,
+          "hit_ratio": 0.9662
+        },
+        "tools": {
+          "total": 74,
+          "by_tool": {
+            "exec": 71,
+            "wait_agent": 2,
+            "spawn_agent": 1
+          },
+          "by_category": {
+            "shell": 71,
+            "collaboration": 3
+          }
+        },
+        "turns": {
+          "task_started": 1
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03fb0-f96f-7990-8965-e0c4e11b7d75"
+        ],
+        "active_entity_count": 2
+      },
+      {
+        "bucket_index": 21,
+        "start": "2026-08-26T20:25:45.930000+00:00",
+        "end": "2026-08-26T20:55:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 14269411,
+          "cached_input": 13578804,
+          "cache_write": 690407,
+          "non_cached_input": 690607,
+          "output": 130325,
+          "reasoning_output": 0,
+          "total": 14399736
+        },
+        "cache": {
+          "cached_tokens": 13578804,
+          "input_tokens": 14269411,
+          "hit_ratio": 0.9516
+        },
+        "tools": {
+          "total": 97,
+          "by_tool": {
+            "exec": 90,
+            "wait_agent": 3,
+            "spawn_agent": 2,
+            "followup_task": 1,
+            "list_agents": 1
+          },
+          "by_category": {
+            "shell": 90,
+            "collaboration": 7
+          }
+        },
+        "turns": {
+          "task_complete": 3,
+          "task_started": 2
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03fb0-f96f-7990-8965-e0c4e11b7d75",
+          "01a03fc2-6ba2-7691-88eb-99ad51634a43"
+        ],
+        "active_entity_count": 3
+      },
+      {
+        "bucket_index": 22,
+        "start": "2026-08-26T20:55:45.930000+00:00",
+        "end": "2026-08-26T21:25:45.930000+00:00",
+        "active_seconds": 1800.0,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 19031065,
+          "cached_input": 18920783,
+          "cache_write": 110072,
+          "non_cached_input": 110282,
+          "output": 44937,
+          "reasoning_output": 0,
+          "total": 19076002
+        },
+        "cache": {
+          "cached_tokens": 18920783,
+          "input_tokens": 19031065,
+          "hit_ratio": 0.9942
+        },
+        "tools": {
+          "total": 104,
+          "by_tool": {
+            "exec": 100,
+            "spawn_agent": 2,
+            "wait": 1,
+            "wait_agent": 1
+          },
+          "by_category": {
+            "shell": 100,
+            "collaboration": 4
+          }
+        },
+        "turns": {
+          "task_complete": 1,
+          "task_started": 2
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03fef-43d9-78c2-b500-ac86dd1deaac"
+        ],
+        "active_entity_count": 2
+      },
+      {
+        "bucket_index": 23,
+        "start": "2026-08-26T21:25:45.930000+00:00",
+        "end": "2026-08-26T21:44:24.373000+00:00",
+        "active_seconds": 1118.4,
+        "idle_seconds": 0.0,
+        "active": true,
+        "tokens": {
+          "input": 19079817,
+          "cached_input": 18471270,
+          "cache_write": 608337,
+          "non_cached_input": 608547,
+          "output": 47949,
+          "reasoning_output": 0,
+          "total": 19127766
+        },
+        "cache": {
+          "cached_tokens": 18471270,
+          "input_tokens": 19079817,
+          "hit_ratio": 0.9681
+        },
+        "tools": {
+          "total": 101,
+          "by_tool": {
+            "exec": 95,
+            "wait": 2,
+            "spawn_agent": 2,
+            "wait_agent": 1,
+            "update_goal": 1
+          },
+          "by_category": {
+            "shell": 95,
+            "collaboration": 5,
+            "planning": 1
+          }
+        },
+        "turns": {
+          "task_complete": 2,
+          "task_started": 1
+        },
+        "active_entities": [
+          "01a03d7e-99c6-7d13-ae48-99ca3c243884",
+          "01a03fef-43d9-78c2-b500-ac86dd1deaac",
+          "01a03ffb-3571-7483-9282-ef0dfc5da92f"
+        ],
+        "active_entity_count": 3
+      }
+    ],
+    "whole_session_stats": {
+      "tokens": {
+        "input": 606497969,
+        "cached_input": 594438647,
+        "cache_write": 12053648,
+        "non_cached_input": 12059322,
+        "output": 2759092,
+        "reasoning_output": 0,
+        "total": 609257061,
+        "total_from_root_trees": 609257061,
+        "total_from_all_sessions": null
+      },
+      "cache": {
+        "cached_tokens": 594438647,
+        "input_tokens": 606497969,
+        "hit_ratio": 0.9801
+      },
+      "tools": {
+        "total": 2888,
+        "by_tool": {
+          "exec": 2642,
+          "wait_agent": 70,
+          "wait": 66,
+          "spawn_agent": 55,
+          "send_message": 26,
+          "list_agents": 20,
+          "followup_task": 6,
+          "interrupt_agent": 2,
+          "update_goal": 1
+        },
+        "by_category": {
+          "shell": 2642,
+          "collaboration": 245,
+          "planning": 1
+        }
+      },
+      "turns": {
+        "thread_goal_updated": 1,
+        "task_started": 48,
+        "task_complete": 46,
+        "turn_aborted": 2
+      },
+      "activity": {
+        "active_seconds": 42518.4,
+        "wall_seconds": 42518.4,
+        "idle_seconds": 0.0
+      },
+      "per_entity": {
+        "01a03d7e-99c6-7d13-ae48-99ca3c243884": {
+          "kind": "codex_thread",
+          "is_subagent": false,
+          "events": 5626,
+          "tokens_total_subtree": 398987376,
+          "tools": {
+            "exec": 1360,
+            "spawn_agent": 19,
+            "wait_agent": 46,
+            "list_agents": 6,
+            "followup_task": 5,
+            "wait": 11,
+            "send_message": 13,
+            "update_goal": 1
+          },
+          "first_event": "2026-08-26T09:55:45.930000+00:00",
+          "last_event": "2026-08-26T21:44:24.373000+00:00",
+          "rollout_bytes": 15803959
+        },
+        "01a03d88-baf8-7d90-b6d3-c74f725084db": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 189,
+          "tokens_total_subtree": 4686446,
+          "tools": {
+            "exec": 30,
+            "spawn_agent": 2,
+            "wait_agent": 6,
+            "list_agents": 1
+          },
+          "first_event": "2026-08-26T10:06:06.174000+00:00",
+          "last_event": "2026-08-26T10:50:26.446000+00:00",
+          "rollout_bytes": 941858
+        },
+        "01a03d89-88ac-7b20-b745-f348c991525c": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 129,
+          "tokens_total_subtree": 1391536,
+          "tools": {
+            "exec": 30,
+            "spawn_agent": 2,
+            "list_agents": 1
+          },
+          "first_event": "2026-08-26T10:06:58.816000+00:00",
+          "last_event": "2026-08-26T10:19:08.001000+00:00",
+          "rollout_bytes": 716673
+        },
+        "01a03d8a-9a29-7df1-96e8-56ab452aa079": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 148,
+          "tokens_total_subtree": 2396566,
+          "tools": {
+            "exec": 29,
+            "spawn_agent": 1
+          },
+          "first_event": "2026-08-26T10:08:08.829000+00:00",
+          "last_event": "2026-08-26T10:21:53.020000+00:00",
+          "rollout_bytes": 1332243
+        },
+        "01a03d9a-4b01-7ed3-b08a-ee069a1205aa": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 118,
+          "tokens_total_subtree": 1609301,
+          "tools": {
+            "exec": 23,
+            "spawn_agent": 2
+          },
+          "first_event": "2026-08-26T10:25:17.166000+00:00",
+          "last_event": "2026-08-26T10:46:05.248000+00:00",
+          "rollout_bytes": 806465
+        },
+        "01a03db2-c741-7040-9f6b-a7bb1b63312b": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 263,
+          "tokens_total_subtree": 8071879,
+          "tools": {
+            "exec": 50,
+            "spawn_agent": 3,
+            "list_agents": 3,
+            "wait_agent": 4,
+            "interrupt_agent": 1,
+            "followup_task": 1
+          },
+          "first_event": "2026-08-26T10:52:01.801000+00:00",
+          "last_event": "2026-08-26T12:03:21.919000+00:00",
+          "rollout_bytes": 1300279
+        },
+        "01a03db8-4570-7cb3-b647-7df61090d47c": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 162,
+          "tokens_total_subtree": 3291187,
+          "tools": {
+            "exec": 29,
+            "spawn_agent": 1,
+            "list_agents": 1
+          },
+          "first_event": "2026-08-26T10:58:01.915000+00:00",
+          "last_event": "2026-08-26T11:40:28.114000+00:00",
+          "rollout_bytes": 1240200
+        },
+        "01a03dfb-ce38-7841-ac40-e01c1b7e22bc": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 1310,
+          "tokens_total_subtree": 72472446,
+          "tools": {
+            "exec": 288,
+            "spawn_agent": 3,
+            "list_agents": 1,
+            "wait": 40,
+            "send_message": 2
+          },
+          "first_event": "2026-08-26T12:11:47.909000+00:00",
+          "last_event": "2026-08-26T15:26:37.709000+00:00",
+          "rollout_bytes": 3312583
+        },
+        "01a03dfc-9244-7723-974d-0e2912b4ab68": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 1314,
+          "tokens_total_subtree": 79912536,
+          "tools": {
+            "exec": 323,
+            "spawn_agent": 1,
+            "list_agents": 2,
+            "wait": 14,
+            "send_message": 10
+          },
+          "first_event": "2026-08-26T12:12:38.008000+00:00",
+          "last_event": "2026-08-26T14:41:16.818000+00:00",
+          "rollout_bytes": 3102566
+        },
+        "01a03ec0-bee8-71f2-ba33-87d62ad95299": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 189,
+          "tokens_total_subtree": 2913122,
+          "tools": {
+            "exec": 33,
+            "spawn_agent": 1,
+            "wait": 1,
+            "wait_agent": 3
+          },
+          "first_event": "2026-08-26T15:46:54.619000+00:00",
+          "last_event": "2026-08-26T16:15:01.022000+00:00",
+          "rollout_bytes": 846486
+        },
+        "01a03ecc-ac6e-7ec2-8d38-4c2aa69f40a1": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 134,
+          "tokens_total_subtree": 1528823,
+          "tools": {
+            "exec": 24,
+            "spawn_agent": 2
+          },
+          "first_event": "2026-08-26T15:59:56.214000+00:00",
+          "last_event": "2026-08-26T16:13:36.619000+00:00",
+          "rollout_bytes": 592727
+        },
+        "01a03efa-9bcb-7da0-b0c1-cf56491c6ec6": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 192,
+          "tokens_total_subtree": 2805880,
+          "tools": {
+            "exec": 42,
+            "spawn_agent": 2,
+            "list_agents": 1,
+            "wait_agent": 2
+          },
+          "first_event": "2026-08-26T16:50:06.728000+00:00",
+          "last_event": "2026-08-26T17:04:17.631000+00:00",
+          "rollout_bytes": 880583
+        },
+        "01a03efb-79c2-7df3-a83a-03522f2aa29b": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 126,
+          "tokens_total_subtree": 2335712,
+          "tools": {
+            "exec": 22,
+            "spawn_agent": 1,
+            "list_agents": 1
+          },
+          "first_event": "2026-08-26T16:51:03.431000+00:00",
+          "last_event": "2026-08-26T17:01:52.124000+00:00",
+          "rollout_bytes": 1109958
+        },
+        "01a03f11-c46a-7200-99b0-9a4d20c63eed": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 220,
+          "tokens_total_subtree": 4857693,
+          "tools": {
+            "exec": 36,
+            "spawn_agent": 4,
+            "list_agents": 2,
+            "wait_agent": 2
+          },
+          "first_event": "2026-08-26T17:15:24.418000+00:00",
+          "last_event": "2026-08-26T17:46:28.139000+00:00",
+          "rollout_bytes": 1066423
+        },
+        "01a03f12-8b34-7833-ba86-0dfa8c1b811e": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 124,
+          "tokens_total_subtree": 1731526,
+          "tools": {
+            "exec": 22,
+            "spawn_agent": 2
+          },
+          "first_event": "2026-08-26T17:16:15.233000+00:00",
+          "last_event": "2026-08-26T17:41:22.111000+00:00",
+          "rollout_bytes": 1141043
+        },
+        "01a03f5e-c97e-7cf1-89a8-b07ebe051e5a": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 148,
+          "tokens_total_subtree": 1797153,
+          "tools": {
+            "exec": 27,
+            "spawn_agent": 1,
+            "wait_agent": 4
+          },
+          "first_event": "2026-08-26T18:39:32.107000+00:00",
+          "last_event": "2026-08-26T19:01:23.529000+00:00",
+          "rollout_bytes": 533053
+        },
+        "01a03f60-a879-78c2-9d2b-b42c8db220d0": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 132,
+          "tokens_total_subtree": 1032986,
+          "tools": {
+            "exec": 31,
+            "spawn_agent": 2
+          },
+          "first_event": "2026-08-26T18:41:34.815000+00:00",
+          "last_event": "2026-08-26T18:57:36.443000+00:00",
+          "rollout_bytes": 725637
+        },
+        "01a03f7c-885d-7b91-b76b-429e405545e7": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 115,
+          "tokens_total_subtree": 1139390,
+          "tools": {
+            "exec": 15,
+            "spawn_agent": 2,
+            "wait_agent": 3,
+            "interrupt_agent": 1,
+            "send_message": 1
+          },
+          "first_event": "2026-08-26T19:12:01.820000+00:00",
+          "last_event": "2026-08-26T19:27:56.613000+00:00",
+          "rollout_bytes": 402319
+        },
+        "01a03f7d-2d38-7da1-8fd1-1b3ba3b8fd96": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 65,
+          "tokens_total_subtree": 457984,
+          "tools": {
+            "exec": 15
+          },
+          "first_event": "2026-08-26T19:12:43.815000+00:00",
+          "last_event": "2026-08-26T19:15:42.022000+00:00",
+          "rollout_bytes": 367206
+        },
+        "01a03f84-49e6-7571-a510-b4472b3a8557": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 42,
+          "tokens_total_subtree": 305635,
+          "tools": {
+            "exec": 7
+          },
+          "first_event": "2026-08-26T19:20:30.021000+00:00",
+          "last_event": "2026-08-26T19:27:34.030000+00:00",
+          "rollout_bytes": 408009
+        },
+        "01a03f8c-9a19-7792-a74f-702e3309ac98": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 170,
+          "tokens_total_subtree": 3235059,
+          "tools": {
+            "exec": 36
+          },
+          "first_event": "2026-08-26T19:29:34.509000+00:00",
+          "last_event": "2026-08-26T19:43:38.736000+00:00",
+          "rollout_bytes": 1105773
+        },
+        "01a03f9c-0deb-70c2-ae84-95c4e402647d": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 117,
+          "tokens_total_subtree": 1146574,
+          "tools": {
+            "exec": 24,
+            "spawn_agent": 1
+          },
+          "first_event": "2026-08-26T19:46:27.134000+00:00",
+          "last_event": "2026-08-26T19:51:56.024000+00:00",
+          "rollout_bytes": 378377
+        },
+        "01a03fb0-f96f-7990-8965-e0c4e11b7d75": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 158,
+          "tokens_total_subtree": 2600465,
+          "tools": {
+            "exec": 31
+          },
+          "first_event": "2026-08-26T20:09:18.024000+00:00",
+          "last_event": "2026-08-26T20:25:57.701000+00:00",
+          "rollout_bytes": 1943395
+        },
+        "01a03fc2-6ba2-7691-88eb-99ad51634a43": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 225,
+          "tokens_total_subtree": 5196818,
+          "tools": {
+            "exec": 45,
+            "spawn_agent": 1,
+            "list_agents": 1
+          },
+          "first_event": "2026-08-26T20:28:21.366000+00:00",
+          "last_event": "2026-08-26T20:51:44.953000+00:00",
+          "rollout_bytes": 1113537
+        },
+        "01a03fef-43d9-78c2-b500-ac86dd1deaac": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 175,
+          "tokens_total_subtree": 1612349,
+          "tools": {
+            "exec": 34,
+            "spawn_agent": 1
+          },
+          "first_event": "2026-08-26T21:17:20.380000+00:00",
+          "last_event": "2026-08-26T21:26:56.114000+00:00",
+          "rollout_bytes": 419215
+        },
+        "01a03ffb-3571-7483-9282-ef0dfc5da92f": {
+          "kind": "codex_thread",
+          "is_subagent": true,
+          "events": 171,
+          "tokens_total_subtree": 1740619,
+          "tools": {
+            "exec": 36,
+            "spawn_agent": 1
+          },
+          "first_event": "2026-08-26T21:30:23.043000+00:00",
+          "last_event": "2026-08-26T21:38:07.485000+00:00",
+          "rollout_bytes": 435519
+        }
+      },
+      "accounting_notes": [
+        "codex: fork replay is excluded at each child-owned task boundary; run totals sum only root and subagent-owned counter deltas. Bucket totals are per-owned-event total_token_usage deltas (cache-hit history is per submission; duplicate streaming ticks are excluded)."
+      ]
+    }
+  },
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02",
+  "discovered_at": "2026-08-27T15:06:23.084106+00:00",
+  "sources": [
+    {
+      "id": "project_codex",
+      "kind": "project",
+      "harness": "codex",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02/.sessions/codex",
+      "reachable": true,
+      "sessions_found": 26,
+      "note": "workspace-bundled .sessions/codex copy"
+    },
+    {
+      "id": "project_opencode",
+      "kind": "project",
+      "harness": "opencode",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02/.sessions/opencode-data/opencode/opencode.db",
+      "reachable": false,
+      "sessions_found": 0,
+      "note": "workspace-bundled .sessions/opencode-data/opencode DB"
+    },
+    {
+      "id": "project_claude",
+      "kind": "project",
+      "harness": "claude",
+      "root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02/.sessions/claude",
+      "reachable": true,
+      "sessions_found": 0,
+      "note": "workspace-bundled .sessions/claude project JSONL"
+    }
+  ],
+  "selected_source": "project",
+  "selection": {
+    "method": "script_discovery + agent classification",
+    "roots": [
+      "01a03d7e-99c6-7d13-ae48-99ca3c243884"
+    ],
+    "harness": "codex",
+    "questions": [],
+    "notes": [
+      "the evaluation agent classifies which sessions belong to the contestant run; unextractable choices are surfaced as questions"
+    ]
+  },
+  "env_snapshot": {
+    "captured": true,
+    "path": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02/.eval/env_snapshot.json",
+    "sha256": "f513e965f424587e997a0d1f28f5c35f098d8595183b9c65f88be6b677348374"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02/.sessions/codex/state_5.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02/.sessions/codex/sessions",
+    "opencode_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02/.sessions/opencode-data/opencode/opencode.db",
+    "claude_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus5-02/.sessions/claude",
+    "session_source": "project",
+    "harness": "codex",
+    "bucket_seconds": 1800,
+    "idle_gap_seconds": 600,
+    "generated_at": "2026-08-27T15:06:23.084126+00:00"
+  }
+}

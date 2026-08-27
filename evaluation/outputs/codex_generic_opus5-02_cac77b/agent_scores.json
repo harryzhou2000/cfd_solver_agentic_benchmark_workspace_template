@@ -1,0 +1,352 @@
+{
+  "schema": "agent_scores",
+  "contestant": "opus5-02",
+  "evaluated_at": "2026-08-27T15:03:04.774217+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": null
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "01a03d7e-99c6-7d13-ae48-99ca3c243884"
+    ],
+    "execution_date": "2026-08-26",
+    "started_at": "2026-08-26T09:55:45.930000+00:00",
+    "ended_at": "2026-08-26T21:44:24.373000+00:00",
+    "time_basis": "UTC timestamps from the manually selected bundled Codex root rollout",
+    "rationale": "Selected workspace-local Codex root 01a03d7e-99c6-7d13-ae48-99ca3c243884 because it owns the benchmark implementation and 25 named subagents spanning mesh, solver, report, results, and audits. Extraction is confined to this workspace .sessions bundle; Docker cwd /workspace was rebased only to the bundled rollout. Terminal text uses the last non-null persisted task_complete message, with source/message hashes in metadata."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4.5,
+          "notes": "Documented wrapper build and full contract artifacts; evaluator did not rebuild."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Required solve CLI and explicit invalid-input handling are source-backed."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4.5,
+          "notes": "Clear separation of physics, mesh, MPI, numerics, and I/O."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4.5,
+          "notes": "No direct internal copied-core evidence; trust policy excludes web search."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Generic case-file paths; no mesh-name-only dispatch found."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4.5,
+          "notes": "METIS ownership, neighbor halos, and reductions are source-backed."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 4.5,
+          "notes": "Validation, positivity handling, and explicit error paths are present."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 4.5,
+          "notes": "Extensive submitted verification claims; not independently rerun."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4.5,
+          "notes": "Curated tip excludes raw artifacts and retains source/report figures."
+        }
+      ],
+      "overall_score": 4.59,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 5,
+          "notes": "Report/source agree on conservative nondimensional Euler/NS formulation."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "CGNS mixed/multizone import and adjacency paths are source-backed."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4.5,
+          "notes": "Conservative residual assembly inspected."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4.5,
+          "notes": "HLLC production flux plus Roe/Rusanov alternatives are implemented."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4.5,
+          "notes": "Characteristic farfield, slip, and no-slip wall paths inspected."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "LS reconstruction is present, but limiter freezes and terminal first-order cells limit production evidence."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Venkat/Barth and positivity exist; production freeze/fallback is documented."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 4.5,
+          "notes": "Newtonian/Fourier terms, wall outputs, and force split are source/result backed."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4.5,
+          "notes": "CFL local pseudo-time and LU-SGS are implemented."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 4.5,
+          "notes": "Re200 raw result reaches t=300 with BDF2 and 99.44% inner target success."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4.5,
+          "notes": "METIS/ghost/neighbor exchange source and rank-consistency evidence; timing is unusable for scaling."
+        }
+      ],
+      "overall_score": 4.5,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "All eight readable raw packages have required contract artifacts."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Explicit examiner invocation passes all eight packages and report."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 4,
+          "notes": "Seven steady cases converge and Re200 is periodic, with material Re200 accuracy deficits."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Re200 St, drag, and lift-amplitude shortfalls are measured and disclosed."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 4.5,
+          "notes": "79 named report figures and manifest are readable."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 4.5,
+          "notes": "Detailed report is candid; clean-tip rank-study regeneration inconsistency remains."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 4,
+          "notes": "Committed generated rank table is readable, but its raw rank-study inputs are excluded at tip."
+        }
+      ],
+      "overall_score": 4.45,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 92.5,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 9.5,
+        "notes": "Strong documented build/CLI/output delivery; no evaluator clean build."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 10,
+        "notes": "CGNS, mixed/multizone geometry, and adjacency source paths verified."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 14.5,
+        "notes": "Conservative residual, approximate fluxes, and boundary conditions verified in source."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Production limiter freezes and terminal first-order cells limit second-order credit."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 9.5,
+        "notes": "Viscous gradients, stress/heat, walls, and force split are present."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 14.5,
+        "notes": "Implicit/LU-SGS and full BDF2 Re200 run, with nonzero misses and known underprediction."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 9.5,
+        "notes": "METIS/halo/reductions and rank consistency; unstable wall times cannot establish scaling."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Cases complete, but Re200 materially underpredicts shedding metrics."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 4.5,
+        "notes": "Strong figure/report analysis; raw rank-study reproducibility conflict deducted."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4.5,
+        "notes": "Modular seams are clear, while geometry remains 2-D."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 4.5,
+      "notes": "4.19 orders; low-Mach inviscid force result is credible."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 4,
+      "notes": "4.43 orders, but production limiter freezing and stated leading-edge artifacts."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 3.5,
+      "notes": "3.14 orders with 2.55% terminal first-order cells and documented CFL deviation."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 4.5,
+      "notes": "4.20 orders and credible laminar force/surface result."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 4,
+      "notes": "4.00 orders but production limiter freeze."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 4,
+      "notes": "3.69 orders and 2.67% terminal first-order cells."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 4.5,
+      "notes": "5.006 orders, credible steady wake and Cd 2.028."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 3.5,
+      "notes": "Complete t=300 BDF2 periodic result, but material St/drag/lift deficits; not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "No evaluator clean build or MPI rerun was performed.",
+    "Rank-study raw inputs are excluded at the curated result tip although generated rank tables remain committed.",
+    "Re200 has documented 7-10% Strouhal, about 7% drag, and 25-30% lift-amplitude deficits.",
+    "Production limiter freezes and terminal first-order fallback cells limit formal second-order evidence."
+  ]
+}
