@@ -1104,9 +1104,12 @@ positive mean drag for the cylinders, unsteady lift for the transient case,
 the inner-target converged fraction, near-zero wall velocity and non-zero skin
 friction on no-slip walls, near-zero normal velocity and negligible viscous
 force columns on slip walls, farfield uniformity, agreement between the last
-force row and the final state, that the normal viscous traction on a no-slip
-wall is identically zero and that the pressure/skin-friction split sums to the
-reported $C_D$, and presence of separate Mach and pressure figures --- listed in
+force row and the final state, that the maximum wall pressure coefficient
+respects the exact inviscid stagnation bound (isentropic below Mach 1,
+Rayleigh--Pitot above it) within a viscous allowance that scales like
+$Re^{-1/2}$, that the normal viscous traction on a no-slip wall is identically
+zero and that the pressure/skin-friction split sums to the reported $C_D$, and
+presence of separate Mach and pressure figures --- listed in
 the manifest \emph{and} present on disk --- for every case.
 \sanityFailures{} checks fail. The gate is not advisory: a case whose
 \code{run\_status.json} claims \code{converged} or

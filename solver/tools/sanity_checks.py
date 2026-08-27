@@ -47,6 +47,7 @@ def check(name, passed, detail, value=None):
 
 def analyse_case(cdir, cid, manifest_vars):
     meta = json.load(open(os.path.join(cdir, "metadata.json")))
+    case = case_json(cid)
     status = json.load(open(os.path.join(cdir, "run_status.json")))
     forces = load_csv(os.path.join(cdir, "forces.csv"))
     surface = load_csv(os.path.join(cdir, "surface.csv"))
@@ -95,6 +96,39 @@ def analyse_case(cdir, cid, manifest_vars):
     tail = slice(max(1, int(0.75 * len(forces["cd"]))), None)
     cd_mean = float(np.mean(forces["cd"][tail]))
     cl_rms = float(np.std(forces["cl"][tail]))
+
+    # Exact upper bound on the wall pressure.  No point on a body can carry more
+    # stagnation pressure than the freestream can deliver: isentropically below
+    # Mach 1, and through a normal shock (Rayleigh-Pitot) above it.  A captured
+    # shock on a mesh this stretched overshoots the bound by a few per cent; a
+    # carbuncle overshoots it by tens of per cent, which is what this catches.
+    # The viscous cases are allowed a little more, because a low-Reynolds
+    # boundary layer genuinely raises the stagnation pressure above the
+    # inviscid value.
+    mach_inf = float(case["freestream"]["mach"]) if case else 0.0
+    gam = float(case["gas"]["gamma"]) if case else 1.4
+    m2 = mach_inf * mach_inf
+    if mach_inf > 1.0:
+        p0 = (((gam + 1) ** 2 * m2 / (4 * gam * m2 - 2 * (gam - 1))) ** (gam / (gam - 1))
+              * (1 - gam + 2 * gam * m2) / (gam + 1))
+    else:
+        p0 = (1.0 + 0.5 * (gam - 1) * m2) ** (gam / (gam - 1))
+    if case:
+        cp_bound = (p0 - 1.0) / (0.5 * gam * m2)
+        excess = (float(cp.max()) - cp_bound) / cp_bound
+        # The bound is inviscid.  A boundary layer genuinely raises the
+        # stagnation pressure above it, by an amount that scales with the
+        # displacement thickness and therefore like Re^{-1/2}; the coefficient
+        # below is deliberately permissive, because this check exists to catch
+        # a carbuncle (tens of per cent at any Reynolds number), not to measure
+        # the viscous correction.
+        re_num = float(case["physics"].get("reynolds", 0.0) or 0.0)
+        allowance = 0.10 + (2.0 / np.sqrt(re_num) if (viscous and re_num > 0) else 0.0)
+        checks.append(check("wall_cp_within_stagnation_bound", excess < allowance,
+                            "excess of the maximum wall C_p over the inviscid stagnation "
+                            "bound, against a Reynolds-dependent viscous allowance",
+                            dict(cp_max=float(cp.max()), bound=cp_bound,
+                                 relative_excess=excess, allowance=allowance)))
 
     if not is_cyl:
         # Symmetric airfoil at zero incidence: lift must be negligible but the
