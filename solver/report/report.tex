@@ -30,13 +30,13 @@ iterations.
 
 Verification is quantitative, and the figures below are the worst across the two
 supplied meshes rather than the better of them: face-closure error
-$\vFaceClosureWorst$, volume closure $\vVolumeClosureWorst$, cell area against the
-boundary line integral $\vAreaLineIntegralWorst$, and the least-squares gradient of a
-linear field reproduced to $\vLsqExactnessWorst$ --- near round-off on the cylinder
-mesh at $\vLsqExactnessCyl$, and $\vLsqExactnessNaca$ on the airfoil mesh that carries
+$\cnsFaceClosureWorst$, volume closure $\cnsVolumeClosureWorst$, cell area against the
+boundary line integral $\cnsAreaMismatchWorst$, and the least-squares gradient of a
+linear field reproduced to $\cnsLsqLinearGradientWorst$ --- near round-off on the cylinder
+mesh at $\cnsLsqLinearGradientCyl$, and $\cnsLsqLinearGradientNaca$ on the airfoil mesh that carries
 six of the eight cases, so the gradient operator is accurate rather than exact and
 \cref{sec:meshverif} reports both. The discrete residual telescopes against the net
-boundary flux to $\vConservationWorstInviscid$ on the inviscid cases, where that probe
+boundary flux to $\cnsConservationWorstInviscid$ on the inviscid cases, where that probe
 is self-consistent; \cref{sec:conservationprobe} explains why the figure is not
 meaningful on the viscous ones. The analytic Jacobian-vector product agrees with central
 finite differences to $\vJacobianFd$ over $\vJacobianStates$ random states. The

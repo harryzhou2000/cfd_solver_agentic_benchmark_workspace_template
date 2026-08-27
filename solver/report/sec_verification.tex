@@ -139,17 +139,17 @@ probes.
     Check & Identity tested & CylinderB1 & NACA0012\_H2 \\
     \midrule
     Face closure & $\sum_f \mathbf{n}_f\Delta s_f=\mathbf{0}$ per cell
-      & $\vFaceClosureCyl$ & $\vFaceClosureNaca$ \\
+      & $\cnsFaceClosureCyl$ & $\cnsFaceClosureNaca$ \\
     Volume closure & $\tfrac12\sum_f (\mathbf{x}_f\!\cdot\!\mathbf{n}_f)\Delta s_f=V_i$
-      & $\vVolumeClosureCyl$ & $\vVolumeClosureNaca$ \\
+      & $\cnsVolumeClosureCyl$ & $\cnsVolumeClosureNaca$ \\
     Domain area & $\sum_i V_i$ vs boundary line integral
-      & $\vAreaLineIntegralCyl$ & $\vAreaLineIntegralNaca$ \\
+      & $\cnsAreaMismatchCyl$ & $\cnsAreaMismatchNaca$ \\
     LSQ gradient & gradient of a linear field reproduced
-      & $\vLsqExactnessCyl$ & $\vLsqExactnessNaca$ \\
+      & $\cnsLsqLinearGradientCyl$ & $\cnsLsqLinearGradientNaca$ \\
     \midrule
     \multicolumn{4}{l}{\emph{Discretization probes, independent of mesh}} \\
     Conservation$^\dagger$ & $\sum_i \mathbf{R}_i$ vs net boundary flux
-      & \multicolumn{2}{l}{$\vConservationWorstInviscid$ (inviscid cases)} \\
+      & \multicolumn{2}{l}{$\cnsConservationWorstInviscid$ (inviscid cases)} \\
     Jacobian product & \cref{eq:jacvec} vs central finite differences
       & \multicolumn{2}{l}{$\vJacobianFd$, expected $O(\sqrt{\varepsilon})$} \\
     Slip-wall flux & zero mass and energy flux (\cref{eq:slipflux})
@@ -164,15 +164,46 @@ probes.
 \paragraph{The gradient operator is accurate, not exact, and the two meshes differ
 sharply.} The LSQ row is the one where reporting a single number would have been
 misleading, and an earlier version of this report did exactly that. It quoted
-$\vLsqExactnessCyl$ --- the cylinder value --- as though it were global, and the abstract
+$\cnsLsqLinearGradientCyl$ --- the cylinder value --- as though it were global, and the abstract
 described it with the word ``exactness''. The airfoil mesh, which carries six of the eight
-cases, measures $\vLsqExactnessNaca$: a factor of $455$ worse, and eleven orders above
+cases, measures $\cnsLsqLinearGradientNaca$: a factor of $455$ worse, and eleven orders above
 round-off rather than at it. The reconstruction of a linear field is therefore
 \emph{accurate} on that mesh rather than exact, and the residue is consistent with the
 conditioning of the weighted normal equations on its highly stretched leading-edge cells,
 where aspect ratios reach the thousands. Nothing downstream depends on the stronger claim,
 but quoting the better of two measured values as if it covered both is precisely the
 failure mode this report documents elsewhere, and it is corrected here by reporting both.
+
+\paragraph{The fix was to remove the possibility, not just the number.} Correcting the
+values would have left the mechanism in place, so the whole family is now harvested from
+the solver's own mesh-verification line in each run's \texttt{stdout.log} rather than
+maintained by hand. Three properties of that harvest are what make it a fix:
+
+\begin{itemize}
+  \item \textbf{Grouped by mesh, with the grouping asserted.} Mesh identity is taken from
+  \texttt{mesh\_file} in \texttt{metadata.json}, not inferred from the case name, so the
+  grouping follows what the solver actually read. Face closure, volume closure, area
+  mismatch and linear-gradient error are pure mesh properties, so all
+  $\cnsMeshCasesNaca$ cases on \texttt{\cnsMeshNameNaca} and both on
+  \texttt{\cnsMeshNameCyl} must report identical values; the harvester refuses to emit
+  anything if a group disagrees internally. That assertion, rather than the automation,
+  is what would have caught the original defect.
+  \item \textbf{Conservation defect grouped by physics, not by mesh}, because it tracks
+  viscosity rather than geometry for the reason given in \cref{sec:conservationprobe}. The
+  inviscid and viscous figures carry separate macro names so that no later edit can
+  average two incommensurable quantities into one meaningless number.
+  \item \textbf{Subject to the same staleness cutoff as the JSON artifacts}, so a
+  superseded log cannot leak a number past the cutoff merely because it is parsed from
+  text rather than from JSON.
+\end{itemize}
+
+The assertion was verified by making it fail: perturbing one NACA case's
+linear-gradient figure in a copy of the results tree causes the harvest to abort with a
+non-zero status and a message naming the disagreeing case, rather than silently adopting
+one member's value. As with the HLLC regression test of \cref{sec:hllcbug} and the
+slip-wall test above, a check whose failure mode has been demonstrated is evidence, while
+one that has only ever passed is an assumption --- and an assertion nobody has seen fire is
+the easiest kind to get quietly wrong.
 
 The slip-wall row deserves a note, because an earlier version of this table claimed more
 than the code delivers. It asserted the full identity
@@ -238,15 +269,15 @@ flux, so the two sides are not measuring the same operator. The consequence is s
   \toprule
   Cases & Probe self-consistent? & Reported defect \\
   \midrule
-  Three NACA inviscid & yes & \num{1.2e-18} to $\vConservationWorstInviscid$ \\
-  Three NACA laminar & no & \num{3.0e-3} to $\vConservationWorstAll$ \\
+  Three NACA inviscid & yes & \num{1.2e-18} to $\cnsConservationWorstInviscid$ \\
+  Three NACA laminar & no & \num{3.0e-3} to $\cnsConservationWorstViscous$ \\
   Two cylinder laminar & no & \num{5.7e-5} to \num{5.7e-4} \\
   \bottomrule
 \end{tabular}
 \end{center}
 
 \noindent The honest statement is therefore narrower than the one this report previously
-made. \emph{Discrete conservation is verified to $\vConservationWorstInviscid$ on the
+made. \emph{Discrete conservation is verified to $\cnsConservationWorstInviscid$ on the
 three inviscid cases, in the first-order configuration.} On the viscous cases the printed
 figure measures the inviscid-versus-viscous mismatch in the probe rather than any property
 of the solver, and it should not be read as a conservation error --- nor as a verification.

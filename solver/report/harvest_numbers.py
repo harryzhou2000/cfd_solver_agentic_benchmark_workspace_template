@@ -68,7 +68,11 @@ def transient_status(forces_path, start=None):
     return stats
 
 REPORT_DIR = Path(__file__).resolve().parent
-RESULTS_DIR = REPORT_DIR.parent / "results"
+#: Overridable so the mesh-group assertion below can be exercised against a
+#: deliberately perturbed copy of the results tree.  An assertion that has never
+#: been shown to fire is an assertion nobody has tested.
+RESULTS_DIR = Path(os.environ.get("CNS_RESULTS_DIR")) if os.environ.get("CNS_RESULTS_DIR") \
+    else REPORT_DIR.parent / "results"
 #: Supplied case inputs, read only for values that originate there (the
 #: freestream Mach number) rather than being recorded in metadata.json.
 CASES_DIR = Path("/workspace/cfd_solver_agentic_benchmark/inputs/cases")
@@ -164,6 +168,45 @@ def num(value, digits=6):
     if not math.isfinite(value):
         return PENDING
     return "\\num{%.*g}" % (digits, value)
+
+
+#: The solver prints one mesh-verification line per run before it starts solving.
+#: These six quantities were hand-maintained constants in numbers.tex until a late
+#: audit found that three of them described only ONE of the two supplied meshes while
+#: being quoted as global -- and in each case the value quoted was the flattering one.
+#: They are parsed here so a re-run cannot silently invalidate them.
+MESH_VERIF_FIELDS = (
+    ("face_closure", r"face-closure error ([0-9.eE+-]+)"),
+    ("volume_closure", r"volume-closure error ([0-9.eE+-]+)"),
+    ("area_mismatch", r"mismatch ([0-9.eE+-]+)\)"),
+    ("lsq_linear_gradient", r"linear-gradient error ([0-9.eE+-]+)"),
+    ("conservation_defect", r"conservation defect ([0-9.eE+-]+)"),
+    ("uniform_flow", r"uniform-flow residual ([0-9.eE+-]+)"),
+)
+
+#: Which of the above are pure properties of the MESH.  Every case sharing a mesh must
+#: report bit-identical values for these, and the harvester asserts it: a group that
+#: disagrees internally is a real defect, and failing loudly is the point of the check.
+MESH_ONLY_FIELDS = ("face_closure", "volume_closure", "area_mismatch",
+                    "lsq_linear_gradient")
+
+
+def parse_mesh_verification(log_path):
+    """Pull the six mesh-verification figures out of a run's stdout.log."""
+    try:
+        text = log_path.read_text(errors="replace")
+    except OSError:
+        return None
+    line = next((ln for ln in text.splitlines()
+                 if "mesh verification:" in ln and "face-closure" in ln), None)
+    if line is None:
+        return None
+    out = {}
+    for name, pattern in MESH_VERIF_FIELDS:
+        m = re.search(pattern, line)
+        if m:
+            out[name] = float(m.group(1))
+    return out or None
 
 
 def reintegrate(surface, area_ref):
@@ -797,6 +840,93 @@ def main():
         partition_body.append(pending_row(7))
         define("PartitionCase", PENDING)
         define("PartitionBalance", PENDING)
+
+    # ---- mesh-verification constants -------------------------------------
+    #
+    # Grouped by MESH rather than by case, because face closure, volume closure,
+    # area mismatch and linear-gradient error are properties of a mesh and nothing
+    # else.  The mesh identity is taken from metadata.json's mesh_file rather than
+    # inferred from the case name, so the grouping follows what the solver actually
+    # read.  Each group is then ASSERTED to be internally identical; if it is not,
+    # the harvester fails loudly rather than silently choosing one member's value,
+    # which is exactly the failure this whole family suffered from.
+    #
+    # The conservation defect is deliberately NOT grouped by mesh, because it is not
+    # a mesh property: the probe that measures it disables second-order
+    # reconstruction but leaves the VISCOUS flux active, while its independently
+    # recomputed boundary term calls only the inviscid Riemann flux.  On a viscous
+    # case the two sides therefore measure different operators and the reported
+    # defect rises to O(1e-1); on an inviscid case they agree and the figure is a
+    # real telescoping measurement at O(1e-17).  The macros keep the two apart so a
+    # future editor cannot innocently average them into a single meaningless number.
+    by_mesh = {}
+    inviscid_defects = []
+    viscous_defects = []
+    uniform_all = []
+    for case_id, _key, _label in CASES:
+        vcase_dir = RESULTS_DIR / case_id
+        log_path = vcase_dir / "stdout.log"
+        # Same staleness gate as the JSON artifacts: a superseded log must not leak a
+        # number past the cutoff just because it is parsed from text rather than JSON.
+        if is_stale(log_path):
+            continue
+        verif = parse_mesh_verification(log_path)
+        if not verif:
+            continue
+        vmeta = read_json(vcase_dir / "metadata.json") or {}
+        mesh_name = str(vmeta.get("mesh_file", "")).rsplit("/", 1)[-1]
+        if mesh_name.endswith(".cgns"):
+            mesh_name = mesh_name[:-5]
+        if not mesh_name:
+            continue
+        by_mesh.setdefault(mesh_name, []).append((case_id, verif))
+        if "conservation_defect" in verif:
+            # Inviscid cases are the ones where the probe is self-consistent.
+            viscous = "laminar" in case_id
+            if viscous:
+                viscous_defects.append((verif["conservation_defect"], case_id))
+            else:
+                inviscid_defects.append((verif["conservation_defect"], case_id))
+        if "uniform_flow" in verif:
+            uniform_all.append((verif["uniform_flow"], case_id))
+
+    mesh_keys = {"CylinderB1": "Cyl", "NACA0012_H2": "Naca"}
+    for mesh_name in sorted(by_mesh):
+        members = by_mesh[mesh_name]
+        suffix = mesh_keys.get(mesh_name) or (re.sub(r"[^A-Za-z]", "", mesh_name) or "Mesh")
+        for field in MESH_ONLY_FIELDS:
+            values = [(v[field], c) for c, v in members if field in v]
+            if not values:
+                continue
+            distinct = sorted({v for v, _ in values})
+            if len(distinct) > 1:
+                raise SystemExit(
+                    "mesh-verification disagreement on %s for mesh %s: %s\n"
+                    "These are pure mesh properties, so every case sharing a mesh\n"
+                    "must report the same value.  A disagreement is a real defect,\n"
+                    "not a rounding artifact, and must be investigated rather than\n"
+                    "averaged away."
+                    % (field, mesh_name,
+                       ", ".join("%s=%.6e" % (c, v) for v, c in values)))
+            define(camel(field) + suffix, num(distinct[0], 3))
+        define("MeshCases" + suffix, num(len(members), 3))
+        define("MeshName" + suffix, mesh_name.replace("_", "\\_"))
+
+    flat = [m for members in by_mesh.values() for m in members]
+    for field in MESH_ONLY_FIELDS:
+        allv = [v[field] for _c, v in flat if field in v]
+        if allv:
+            define(camel(field) + "Worst", num(max(allv), 3))
+    if inviscid_defects:
+        define("ConservationWorstInviscid", num(max(v for v, _ in inviscid_defects), 3))
+        define("ConservationBestInviscid", num(min(v for v, _ in inviscid_defects), 3))
+        define("ConservationInviscidCases", num(len(inviscid_defects), 3))
+    if viscous_defects:
+        define("ConservationWorstViscous", num(max(v for v, _ in viscous_defects), 3))
+        define("ConservationBestViscous", num(min(v for v, _ in viscous_defects), 3))
+    if uniform_all:
+        define("UniformFlowWorst", num(max(v for v, _ in uniform_all), 4))
+        define("UniformFlowBest", num(min(v for v, _ in uniform_all), 4))
 
     # ---- rank-count scaling study ----------------------------------------
     scaling_body = []
