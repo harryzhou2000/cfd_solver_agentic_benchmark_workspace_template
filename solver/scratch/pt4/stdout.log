@@ -1,0 +1,35 @@
+[cns2d] cns2d 1.0.0 (git 26ef1cb80b86)
+[cns2d] command: ./build/cns2d solve --case ../cfd_solver_agentic_benchmark/inputs/cases/naca0012_m080_inviscid.json --output scratch/pt4 --max-steps 3
+[cns2d] case: naca0012_m080_inviscid -- NACA0012, AoA 0 deg, Mach 0.8, inviscid
+[cns2d] case file: /workspace/cfd_solver_agentic_benchmark/inputs/cases/naca0012_m080_inviscid.json
+[cns2d] mesh file: /workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns
+[cns2d] MPI ranks: 8
+[cns2d] boundary family 'bc-2' -> farfield
+[cns2d] boundary family 'bc-4' -> slip_wall
+[cns2d] CGNS mesh '/workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns': base 'Base' (cell dim 2, phys dim 3), 1 zone(s)
+  zone 'dom-1': 15682 nodes, 20816 cells
+    section 'TriElements': TRI_3 x 10752 (elements 1..10752)
+    section 'QuadElements': QUAD_4 x 10064 (elements 10753..20816)
+    section 'bc-2': BAR_2 x 80 (elements 20817..20896)
+    section 'bc-4': BAR_2 x 404 (elements 20897..21300)
+    BC 'bc-2' family 'bc-2' location 'EdgeCenter' pset 'PointRange' range 20817..20896
+    BC 'bc-4' family 'bc-4' location 'EdgeCenter' pset 'PointRange' range 20897..21300
+[cns2d] global mesh: 15682 nodes (0 zone-interface node pairs fused, max merge distance 0), 20816 cells (10752 tri, 10064 quad), 36498 faces (36014 interior, 484 boundary)
+  boundary families: 'bc-2' (80 faces) 'bc-4' (404 faces)
+[cns2d] partitioning: metis_kway into 8 part(s), edge cut 439
+[cns2d] physics: inviscid (viscosity and heat conduction identically zero)
+[cns2d] rank 0/8: 2626 owned cells, 136 ghost cells, 4737 faces, 47 boundary faces, 6 neighbour rank(s)
+[cns2d] partitioner: metis_kway, global edge cut 439
+[cns2d] numerics: roe inviscid flux (harten_hyman_entropy_fix), piecewise-linear least-squares reconstruction, venkatakrishnan limiter, lu_sgs_simplified_jacobian, viscous terms disabled
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=1.11607 (M=0.8)
+[cns2d][warn] mesh verification: uniform-flow residual on interior-only cells is 1.434e-10 (expected < 1e-12); the interior scheme does not preserve a uniform state exactly
+[cns2d] mesh verification: face-closure error 1.025e-16, volume-closure error 1.090e-10, total area 20085.4463 (boundary integral 20085.4463, mismatch 1.449e-15), linear-gradient error 1.428e-10, conservation defect 2.879e-17, uniform-flow residual 1.434e-10 on 19848 interior-only cells -- CHECK
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=1.11607 (M=0.8)
+[cns2d] steady run: max_steps=3, target=4.00 orders, CFL 1 -> 100 over 3000 steps, inner iterations 3..50 (target ratio 1.00e-02)
+  step       1  res  3.85200e+00  (- 0.00 orders)  cfl    1.000  inner    3 (ratio 6.90e-05)  cd    0.000000  cl    0.000000  rej 0
+           dominant residual: var rhoE at (0.75416, 0.031168), cell volume 5.388e-08, boundary bc-4
+[cns2d] reached the step limit (3) with the residual reduced by only 0.13 orders (target 4.00) and C_D = 0.113585 still moving by 0.000e+00 over the last 500 steps (tolerance 0.000e+00); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard
+[cns2d] final state: residual 2.514108e+00, C_D = 0.154619 (pressure 0.154619 + viscous 0.000000), C_L = 0.000000, C_mz = 0.000000
+[cns2d] run finished: status 'not_converged', 3 steps, t = 0, 0.19 residual orders, 19.2 s wall time
+[cns2d] notes: reached the step limit (3) with the residual reduced by only 0.13 orders (target 4.00) and C_D = 0.113585 still moving by 0.000e+00 over the last 500 steps (tolerance 0.000e+00); this run is NOT a converged steady state; 0 step(s) rejected by the CFL safeguard
+[cns2d][error][rank 0] the run did not complete successfully; results are marked failed

@@ -1,0 +1,42 @@
+*** Begin Patch
+*** Add File: /workspace/solver/report/numbers.tex
++% ---------------------------------------------------------------------------
++% numbers.tex -- machine-refreshable numeric facts used by report.tex.
++%
++% Every macro here is either (a) a measured verification number, or (b) a
++% per-case result harvested from results/<case>/{run_status,metadata}.json and
++% forces.csv.  Prose in report.tex never hard-codes a number: it cites these
++% macros, so refreshing results cannot leave a stale figure in the text.
++%
++% Cases whose production run had not finished when this file was written expand
++% to \pending, which typesets as a visible marker rather than a plausible
++% looking placeholder value.
++% ---------------------------------------------------------------------------
++
++\newcommand{\pending}{\textit{[run in progress]}}
++
++% ---- verification measurements (mesh_verification + offline probes) --------
++\newcommand{\vFaceClosure}{1.0\times10^{-16}}
++\newcommand{\vVolumeClosure}{1.1\times10^{-10}}
++\newcommand{\vAreaLineIntegral}{1.4\times10^{-14}}
++\newcommand{\vLsqExactness}{3.1\times10^{-13}}
++\newcommand{\vConservation}{9.2\times10^{-17}}
++\newcommand{\vJacobianFd}{1.7\times10^{-8}}
++\newcommand{\vJacobianStates}{20\,000}
++
++% ---- mesh sizes -----------------------------------------------------------
++\newcommand{\nacaNodes}{15\,682}
++\newcommand{\nacaCells}{20\,816}
++\newcommand{\nacaTri}{10\,752}
++\newcommand{\nacaQuad}{10\,064}
++\newcommand{\nacaFaces}{36\,498}
++\newcommand{\nacaBoundaryFaces}{484}
++\newcommand{\nacaWallEdges}{404}
++\newcommand{\nacaFarEdges}{80}
++\newcommand{\cylNodes}{9\,995}
++\newcommand{\cylCells}{10\,185}
++\newcommand{\cylFaces}{20\,180}
++\newcommand{\cylBoundaryFaces}{120}
++\newcommand{\cylWallEdges}{100}
++\newcommand{\cylFarEdges}{20}
+*** End Patch

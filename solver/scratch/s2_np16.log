@@ -1,0 +1,124 @@
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+[cns2d] cns2d 1.0.0 (git 26ef1cb80b86)
+[cns2d] command: ./build/cns2d solve --case ../cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re200.json --output scratch/s2_np16 --final-time 0.5 --log-every 100 --no-intermediate-fields
+[cns2d] case: cylinder_m010_laminar_re200 -- Circular cylinder, Mach 0.1, laminar, Re 200, unsteady vortex shedding
+[cns2d] case file: /workspace/cfd_solver_agentic_benchmark/inputs/cases/cylinder_m010_laminar_re200.json
+[cns2d] mesh file: /workspace/cfd_solver_agentic_benchmark/inputs/meshes/CylinderB1.cgns
+[cns2d] MPI ranks: 16
+[cns2d] boundary family 'FAR' -> farfield
+[cns2d] boundary family 'WALL' -> no_slip_adiabatic_wall
+[cns2d] CGNS mesh '/workspace/cfd_solver_agentic_benchmark/inputs/meshes/CylinderB1.cgns': base 'Base' (cell dim 2, phys dim 2), 2 zone(s)
+  zone 'dom-1': 7079 nodes, 6901 cells
+    section 'TriElements': TRI_3 x 64 (elements 1..64)
+    section 'QuadElements': QUAD_4 x 6837 (elements 65..6901)
+    section 'WALL': BAR_2 x 100 (elements 6902..7001)
+    section 'con-2': BAR_2 x 20 (elements 7002..7021)
+    section 'con-3': BAR_2 x 120 (elements 7022..7141)
+    section 'con-4': BAR_2 x 40 (elements 7142..7181)
+    section 'con-5': BAR_2 x 120 (elements 7182..7301)
+    section 'con-6': BAR_2 x 20 (elements 7302..7321)
+    BC 'WALL' family 'WALL' location 'EdgeCenter' pset 'PointRange' range 6902..7001
+    connectivity '1to1Connection:con-2' (Abutting1to1, Vertex) -> zone 'dom-2', 21 matched nodes
+    connectivity '1to1Connection:con-3' (Abutting1to1, Vertex) -> zone 'dom-2', 121 matched nodes
+    connectivity '1to1Connection:con-4' (Abutting1to1, Vertex) -> zone 'dom-2', 41 matched nodes
+    connectivity '1to1Connection:con-5' (Abutting1to1, Vertex) -> zone 'dom-2', 121 matched nodes
+    connectivity '1to1Connection:con-6' (Abutting1to1, Vertex) -> zone 'dom-2', 21 matched nodes
+  zone 'dom-2': 3236 nodes, 3284 cells
+    section 'TriElements': TRI_3 x 436 (elements 1..436)
+    section 'QuadElements': QUAD_4 x 2848 (elements 437..3284)
+    section 'FAR': BAR_2 x 20 (elements 3285..3304)
+    section 'con-2': BAR_2 x 20 (elements 3305..3324)
+    section 'con-3': BAR_2 x 120 (elements 3325..3444)
+    section 'con-4': BAR_2 x 40 (elements 3445..3484)
+    section 'con-5': BAR_2 x 120 (elements 3485..3604)
+    section 'con-6': BAR_2 x 20 (elements 3605..3624)
+    BC 'FAR' family 'FAR' location 'EdgeCenter' pset 'PointRange' range 3285..3304
+    connectivity '1to1Connection:con-2' (Abutting1to1, Vertex) -> zone 'dom-1', 21 matched nodes
+    connectivity '1to1Connection:con-3' (Abutting1to1, Vertex) -> zone 'dom-1', 121 matched nodes
+    connectivity '1to1Connection:con-4' (Abutting1to1, Vertex) -> zone 'dom-1', 41 matched nodes
+    connectivity '1to1Connection:con-5' (Abutting1to1, Vertex) -> zone 'dom-1', 121 matched nodes
+    connectivity '1to1Connection:con-6' (Abutting1to1, Vertex) -> zone 'dom-1', 21 matched nodes
+[cns2d] global mesh: 9995 nodes (320 zone-interface node pairs fused, max merge distance 0), 10185 cells (500 tri, 9685 quad), 20180 faces (20060 interior, 120 boundary)
+  boundary families: 'WALL' (100 faces) 'FAR' (20 faces)
+[cns2d] partitioning: metis_kway into 16 part(s), edge cut 715
+[cns2d] physics: laminar, Re = 200, constant mu = 5.000000e-03 (rho_inf*U_inf*L_ref/Re), Pr = 0.72
+[cns2d] rank 0/16: 630 owned cells, 88 ghost cells, 1274 faces, 0 boundary faces, 5 neighbour rank(s)
+[cns2d] partitioner: metis_kway, global edge cut 715
+[cns2d] numerics: roe inviscid flux (harten_hyman_entropy_fix), piecewise-linear least-squares reconstruction, venkatakrishnan limiter, lu_sgs_simplified_jacobian, viscous terms enabled
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=71.4286 (M=0.1)
+[cns2d][warn] mesh verification: uniform-flow residual on interior-only cells is 2.123e-11 (expected < 1e-12); the interior scheme does not preserve a uniform state exactly
+[cns2d] mesh verification: face-closure error 1.020e-16, volume-closure error 4.757e-13, total area 123606.0129 (boundary integral 123606.0129, mismatch 3.532e-16), linear-gradient error 3.137e-13, conservation defect 5.731e-05, uniform-flow residual 2.123e-11 on 9945 interior-only cells -- CHECK
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=71.4286 (M=0.1)
+[cns2d] transient run: dt=0.01, final_time=0.5 (50 physical steps), inner iterations 5..1000, inner target 1.00e-03 on the total transient residual, pseudo-CFL 1 -> 1
+  step      1  t     0.010  inner  131 (ratio 9.92e-04)  cd  30.951520  cl    0.000001
+[cns2d] final transient state: t = 0.5000, C_D = 1.073431, C_L = -0.001122
+[cns2d] transient residual reference levels: total transient residual at the first inner iteration 1.999583e+01, spatial-only residual after the first physical step 1.798093e+00, spatial-only residual at the final step 6.070265e-01 (the two spatial values are the like-for-like pair used for the reported reduction; an unsteady vortex street is not expected to reduce it)
+[cns2d] run finished: status 'statistically_periodic', 50 steps, t = 0.5, 0.47 residual orders, 233.6 s wall time
+[cns2d] notes: reached t = 0.50 in 50 physical steps of dt = 0.01; inner iterations min/mean/max = 64/101.3/133, inner target 1.0e-03 met on 100.00% of steps (0 misses)
