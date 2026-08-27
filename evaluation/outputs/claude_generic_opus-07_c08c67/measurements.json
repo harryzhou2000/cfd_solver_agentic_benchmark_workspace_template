@@ -1,0 +1,142 @@
+{
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-07",
+  "tool_usage": {
+    "total": 592,
+    "by_tool": {
+      "Bash": 475,
+      "Edit": 39,
+      "Read": 30,
+      "Write": 19,
+      "Monitor": 13,
+      "TaskUpdate": 9,
+      "TaskCreate": 5,
+      "ToolSearch": 1,
+      "Agent": 1
+    },
+    "by_thread": {
+      "1ea2a29d-fc1b-49fd-908c-7e44a712e3b6": {
+        "Bash": 443,
+        "Read": 21,
+        "ToolSearch": 1,
+        "TaskCreate": 5,
+        "TaskUpdate": 9,
+        "Write": 17,
+        "Edit": 39,
+        "Agent": 1,
+        "Monitor": 13
+      },
+      "1ea2a29d-fc1b-49fd-908c-7e44a712e3b6:a6cb5d1f979ebfc2e": {
+        "Read": 9,
+        "Bash": 32,
+        "Write": 2
+      }
+    },
+    "subagent_spawns": 1,
+    "risk_context": []
+  },
+  "loc": {
+    "method": "git+file",
+    "git": {
+      "method": "git",
+      "repos": {
+        "workspace": {
+          "branch": "claude/generic/opus-07",
+          "commit": "eaae575d90bfb39a57702e0fcb8dc5e98163568f",
+          "tracked_source_files": 12,
+          "tracked_source_lines": 3360,
+          "by_extension": {
+            "cmake": 42,
+            "cpp": 2565,
+            "h": 302,
+            "py": 451
+          },
+          "diff_vs_base": {
+            "added": 0,
+            "deleted": 0,
+            "base": "48e321c0b3b309ee104294ae1fa9912fd59ec28c"
+          }
+        },
+        "cfd_solver_agentic_benchmark": {
+          "branch": "HEAD",
+          "commit": "1bc6580b84825037bbeac097ede1b2226d8185d1",
+          "tracked_source_files": 1,
+          "tracked_source_lines": 324,
+          "by_extension": {
+            "py": 324
+          },
+          "diff_vs_base": null
+        }
+      },
+      "lines_total": 3684
+    },
+    "file": {
+      "method": "file",
+      "files": 13,
+      "lines": 3684,
+      "by_extension": {
+        "cmake": 42,
+        "cpp": 2565,
+        "h": 302,
+        "py": 775
+      }
+    }
+  },
+  "rule_violations": [
+    {
+      "category": "unauthorized_remote_mutations",
+      "severity": "high",
+      "thread_id": "1ea2a29d-fc1b-49fd-908c-7e44a712e3b6",
+      "timestamp": "2026-08-27T04:22:38.223Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"git checkout -b solver/cfd2d 2>&1\", \"description\": \"Create new branch for solver work\"}"
+    },
+    {
+      "category": "network_access",
+      "severity": "medium",
+      "thread_id": "1ea2a29d-fc1b-49fd-908c-7e44a712e3b6",
+      "timestamp": "2026-08-27T05:59:44.930Z",
+      "tool": "Bash",
+      "evidence": "er && python3 -m venv .venv && source .venv/bin/activate && pip install numpy matplotlib 2>&1 | tail -5\", \"description\": \"Create Python venv and install dependencies\", \"timeout\": 60000}"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "1ea2a29d-fc1b-49fd-908c-7e44a712e3b6",
+      "timestamp": "2026-08-27T06:41:11.446Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"# Kill all solver processes\\npkill -9 -f \\\"cfd2d\\\" 2>/dev/null\\nsleep 3\\necho \\\"All killed\\\"\\nps aux | grep \\\"[c]fd2d\\\" | wc -l\", \"description\": \"Kill all sol"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "1ea2a29d-fc1b-49fd-908c-7e44a712e3b6",
+      "timestamp": "2026-08-27T06:41:33.607Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"pkill -9 -f \\\"mpirun\\\" 2>/dev/null; sleep 3; ps aux | grep \\\"[c]fd2d\\\\|[m]pirun\\\" | wc -l\", \"description\": \"Kill mpirun too\"}"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "1ea2a29d-fc1b-49fd-908c-7e44a712e3b6",
+      "timestamp": "2026-08-27T06:41:46.370Z",
+      "tool": "Bash",
+      "evidence": "ux | grep \\\"[c]fd2d\\\\|[m]pirun\\\" | awk '{print $2}' | xargs kill -9 2>/dev/null; sleep 3\\nps aux | grep \\\"[c]fd2d\\\\|[m]pirun\\\" | grep -v grep | wc -l\", \"description\": \"Force kill remaining"
+    },
+    {
+      "category": "suspicious_patterns",
+      "severity": "medium",
+      "thread_id": "1ea2a29d-fc1b-49fd-908c-7e44a712e3b6",
+      "timestamp": "2026-08-27T06:56:10.833Z",
+      "tool": "Bash",
+      "evidence": "{\"command\": \"# Kill the hung M080 laminar processes\\npkill -9 -f \\\"naca0012_m080_laminar_re5000\\\" 2>/dev/null; sleep 2\\nps aux | grep \\\"cfd2d\\\" | grep -v grep | wc -l\\necho \\\"remaini"
+    }
+  ],
+  "provenance": {
+    "claude_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-07/.sessions/claude",
+    "selected_roots": [
+      "1ea2a29d-fc1b-49fd-908c-7e44a712e3b6"
+    ],
+    "generated_at": "2026-08-27T13:45:20.646650+00:00",
+    "num_threads": 2
+  }
+}
