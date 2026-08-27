@@ -492,9 +492,24 @@ Results: at $\Minf=0.15$, $C_D=\cnsCdNacaSubLam$
 ($C_{D,p}=\cnsPdNacaSubLam$, $C_{D,v}=\cnsVdNacaSubLam$) after
 $\cnsStepsNacaSubLam$ steps; at $\Minf=0.80$, $C_D=\cnsCdNacaTraLam$
 ($C_{D,p}=\cnsPdNacaTraLam$, $C_{D,v}=\cnsVdNacaTraLam$) after
-$\cnsStepsNacaTraLam$ steps; at $\Minf=2.0$, $C_D=\cnsCdNacaSupLam$
-($C_{D,p}=\cnsPdNacaSupLam$, $C_{D,v}=\cnsVdNacaSupLam$) after
-$\cnsStepsNacaSupLam$ steps.
+$\cnsStepsNacaTraLam$ steps.
+
+\paragraph{The supersonic laminar case is the hardest in the set.} At $\Minf=2.0$ the
+solver reports $C_D=\cnsCdNacaSupLam$ ($C_{D,p}=\cnsPdNacaSupLam$,
+$C_{D,v}=\cnsVdNacaSupLam$) after $\cnsStepsNacaSupLam$ steps, and the status recorded
+for it in \cref{tab:runstatus} is \cnsStatusNacaSupLam{} --- which must be read together
+with \cref{sec:criterionworks}, where this case is the worked example.
+
+It combines the two things that make a steady solve slow: a strong bow shock whose
+position is set by cells of volume $\num{5.4e-8}$ at the leading edge, and a boundary
+layer on the same surface that must develop through those cells. The residual target is
+not the difficulty --- the residual passes $3.00$ orders early and reaches $4.78$ --- the
+difficulty is that the pressure drag continues to build as the shock system strengthens
+over the forward section, long after the residual has stopped being informative. If the
+run reaches its step limit with the forces still developing it is reported as
+\texttt{not\_converged} and \textbf{no converged coefficient is claimed for it}; the
+value above is then a snapshot of a developing solution, quoted for completeness rather
+than as a result.
 
 The wall treatment can be checked directly in the submitted output: because
 \texttt{surface.csv} carries boundary values (\cref{sec:ghostvsface}), the
