@@ -12,7 +12,7 @@
 # Raise the cutoff, never lower it, when further re-runs supersede earlier ones.
 set -e
 
-CNS_TRUSTED_AFTER="2026-08-27 07:58:00"
+CNS_TRUSTED_AFTER="2026-08-27 10:38:00"
 cd "$(dirname "$0")"
 
 CNS_HARVEST_MIN_MTIME="$(date -d "$CNS_TRUSTED_AFTER" +%s)" \

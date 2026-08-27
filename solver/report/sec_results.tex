@@ -54,6 +54,9 @@ a converged value.
 An adversarial review of the completed runs raised a question that deserves a direct
 answer rather than a defence: several cases were stopped while their drag history
 was still moving in one direction, so how much of each quoted coefficient is real?
+The answer turned out to require a distinction the solver was not making, and it now
+makes it and reports the result, so this subsection describes a criterion in the code
+rather than a post-hoc analysis of it.
 
 The question cannot be answered by the convergence status alone, because
 \emph{monotone motion and non-convergence are not the same thing}. What separates
@@ -79,25 +82,44 @@ decrements over the certifying window run
   \quad (units of $10^{-3}$),
 \end{center}
 with successive ratios $0.82, 0.81, 0.76, 0.74, 0.72, 0.70, 0.67, 0.65$. That is a
-clean geometric decay. Summing the tail gives a remaining change of
-$\num{-7.8e-4}$ and an asymptote of $2.0177$, bracketed between $2.0176$ and
-$2.0178$ across the range of observed ratios, against a reported
-$C_D=\cnsCdCylSteady$. The run is therefore converged to about $\num{6.5e-4}$ in $C_D$,
-or $0.03\,\%$: \textbf{three digits of this coefficient are earned and the fourth is
-not}, and it is quoted that way in \cref{sec:cyl20}.
+clean geometric decay, with a mean ratio of $0.733$.
 
-An independent corroboration falls out of the sensitivity study of
-\cref{sec:sensitivity}, which ran this case further, to $6.73$ residual orders, and
-obtained $C_D=\num{2.018119}$ --- between the reported value and the extrapolated
-asymptote, which is exactly where a longer run on a decaying tail should land. Two
-runs of different length and an extrapolation of a third agree on the first three
-digits and disagree in the fourth, which is a more useful statement of the
-uncertainty than any single run's trailing digits.
+The solver now performs this estimate itself and states the resulting precision in its
+own termination note, so the figure quoted here is the solver's rather than an external
+reconstruction of it: the geometric tail gives $\num{9.89e-4}$ of $C_D$ movement
+remaining, or $0.049\,\%$, for an asymptote near $2.0174$. \textbf{Three digits of this
+coefficient are earned and the fourth is not}, and it is quoted that way in
+\cref{sec:cyl20}.
+
+That figure has two independent corroborations, which is why it is quoted with
+confidence. First, the extrapolation script written for this report, working only from
+the submitted \texttt{forces.csv} and knowing nothing of the solver's internals,
+independently gives an asymptote of $2.0177$ bracketed between $2.0176$ and $2.0178$
+across the range of observed ratios --- agreeing with the solver's own estimate to
+$\num{3e-4}$. Second, the sensitivity study of \cref{sec:sensitivity} ran this case
+further, to $6.73$ residual orders, and obtained $C_D=\num{2.018119}$, which sits
+between the reported value and the extrapolated asymptote, exactly where a longer run
+on a decaying tail is required to land. Two runs of different length and two
+independent extrapolations agree on the first three digits and disagree in the fourth,
+which is a more useful statement of the uncertainty than any single run's trailing
+digits.
 
 By contrast, the case the review identified as the worst instance,
-\texttt{naca0012\_m200\_laminar\_re5000}, showed constant-rate motion with the
-additional pathology described in \cref{sec:cancellation}, and no extrapolation is
-offered for it. It is reported as not converged.
+\texttt{naca0012\_m200\_laminar\_re5000}, fails this test decisively: its decrement
+ratios are $1.11, 1.27, 0.86, 0.85, 1.04, 1.03, 1.00, 0.99$ with a mean of $1.019$, so
+the increments are not decaying at all and the tail sum diverges. There is no asymptote
+to extrapolate to, and none is offered. Combined with the component cancellation of
+\cref{sec:cancellation}, that case is reported as not converged.
+
+The contrast between mean ratios of $0.733$ and $1.019$ is what makes the discriminator
+usable rather than merely descriptive: the two cases are separated by a wide margin on a
+single measured quantity, not by a judgement call. It is worth being explicit that this
+vindicates part of the review's finding and corrects part of it. The review was right
+that a monotone certifying window is a warning sign and right that
+\texttt{naca0012\_m200\_laminar\_re5000} was not converged. It was wrong to conclude
+that all monotone cases were unconverged: a monotone approach with geometrically
+decaying increments is the normal, correct behaviour of a converging iteration, and a
+criterion that rejected it would reject good runs along with bad ones.
 
 The general policy adopted for this section follows from the above: coefficients are
 quoted to the precision the convergence evidence supports, an extrapolated asymptote

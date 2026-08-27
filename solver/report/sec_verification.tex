@@ -236,6 +236,20 @@ the duplicate and shift the window by one sample, so the window figures quoted i
 used for this report drops the duplicate; the same convention is needed to reproduce
 the numbers exactly.
 
+The same two-evaluation structure explains a discrepancy a careful reader will find
+between two numbers the solver reports for the same run. For
+\texttt{naca0012\_m015\_inviscid} the termination note states $4.94$ orders while the
+machine-readable \texttt{residual\_reduction\_orders} field records $4.854$. Both are
+correct for what they measure: the note quotes the in-loop residual at the step where
+the convergence test fired ($\num{1.0390e-3}$, giving $4.9401$ orders against the
+step-1 value of $90.506$), while the field quotes the post-loop re-evaluation from the
+final written state ($\num{1.2665e-3}$, giving $4.8541$). The recorded field is the
+more conservative of the two and is the one that corresponds to the submitted
+\texttt{field\_final.vtu}, which is the right choice; every figure in this report is
+taken from that field rather than from the note. The gap is a reminder that a residual
+is a property of a state, so quoting one without saying which state it belongs to is
+incomplete.
+
 \subsection{A defect in the steady termination test}
 \label{sec:stationarity}
 
@@ -472,25 +486,72 @@ With these in place the case correctly reports \texttt{not\_converged}, its
 sub-blocks still monotone, rather than being certified on a coincidence of
 cancellation.
 
-\paragraph{Four distinct failure modes.} Taken together, this case and the three
-preceding subsections make the same methodological point four different ways. A
-naive convergence test failed on the transonic case because the residual was
-normalised by an impulsive-start transient; on the subsonic inviscid case because
-an absolute tolerance demanded more precision than the discretization possesses
-for a near-zero drag; on the supersonic inviscid case because a span test cannot
-recognise a bounded oscillation; and on the supersonic laminar case because a test
-applied to an integrated sum cannot see its components moving apart underneath it.
-All four were found by examining the force histories directly rather than by
-trusting a single scalar summary, which is the argument for reporting convergence
-as a measured property of the history rather than as a boolean.
+\subsubsection{A tolerance cleared by a hair on a still-marching signal}
+\label{sec:hairsbreadth}
 
-The progression is also a caution about the fix-and-move-on reflex. Each of the
-first three repairs was correct and each introduced or left standing a blind spot
-that only appeared when a different case was examined, or when someone examined the
-same case with a different statistic. The general lesson is that a convergence
-criterion is not a formula to be tightened until the cases pass; it is a hypothesis
-about the solution's asymptotic behaviour, and it has to be tested against the
-behaviour actually observed.
+Closing the cancellation hole in the drift branch left the same class of hole open in
+the \emph{other} branch. The component and monotone tests of \cref{sec:cancellation}
+were reached only when the span test had already failed, so a case that passed on span
+never reached them at all.
+
+The cylinder at $\Reinf=20$ did exactly that. It certified as converged with a
+trailing-window drag span of $\num{2.034e-2}$ against a tolerance of $\num{2.039e-2}$
+--- clearing the bar by one part in $450$ --- while its ten sub-block means marched
+monotonically downwards through the entire window, from $2.0363$ to $2.0185$. A
+tolerance met to three digits on a signal moving steadily in one direction is a
+coincidence of stopping time rather than evidence of stationarity: fifty more steps
+would have changed the verdict. The same case had cleared the same tolerance by a
+comparable hair on each of the two preceding attempts, at ratios $0.9993$ and
+$0.9978$, which is the tell that the margin was not meaningful.
+
+\paragraph{The fix must not reject correct behaviour.} The obvious repair --- refuse any
+monotone window --- would be wrong, and getting this right is the most useful part of the
+episode. A converging iteration \emph{normally} approaches its fixed point monotonically.
+Rejecting monotone windows outright would reject well-converged runs along with
+unfinished ones, trading a false-positive problem for a false-negative one.
+
+What separates the two is not the direction of the motion but the behaviour of its
+increments, as set out in \cref{sec:digits}: geometrically decaying increments mean an
+asymptotic approach whose remaining distance is bounded and computable, while roughly
+constant increments mean an unfinished transient with no asymptote in sight. The
+cylinder's decrements decay at a mean ratio of $0.733$ per sub-block; the
+$\Minf=2.0$ laminar airfoil's sit at $1.019$, not decaying at all. The trend test is
+now computed once and consulted by \emph{both} branches, and a monotone window is
+admitted only when its decrements decay (ratio below $0.92$) and the geometric-tail
+estimate of the remaining movement is itself within tolerance.
+
+The solver additionally now reports the tail estimate in its own termination note, so it
+states how many digits of each coefficient are earned rather than leaving that to be
+reconstructed downstream. \Cref{sec:digits} quotes those statements and checks them
+against an independent extrapolation.
+
+\paragraph{Five distinct failure modes.} Taken together, this case and the preceding
+subsections make the same methodological point five different ways. A naive convergence
+test failed
+\begin{enumerate}
+  \item on the transonic case, because the residual was normalised by an
+  impulsive-start transient;
+  \item on the subsonic inviscid case, because an absolute floor demanded more precision
+  than the discretization possesses for a near-zero drag;
+  \item on the supersonic inviscid case, because a span test cannot recognise a bounded
+  oscillation;
+  \item on the supersonic laminar case, because a test applied to an integrated sum
+  cannot see its components moving apart underneath it; and
+  \item on the cylinder, because a span tolerance can be cleared by a hair while the
+  signal is still marching.
+\end{enumerate}
+All five were found by examining the force histories directly rather than by trusting a
+single scalar summary, which is the argument for reporting convergence as a measured
+property of the history rather than as a boolean.
+
+The sixth insight is the one that closes the sequence: the repair for the fifth failure
+must not discard the legitimately-converged monotone approaches, which requires
+distinguishing decay from constancy rather than merely detecting motion. Each of the
+first five repairs was individually correct and each left or created a blind spot that
+appeared only when a different case was examined, or when the same case was examined
+with a different statistic. A convergence criterion is not a formula to be tightened
+until the cases pass; it is a hypothesis about the solution's asymptotic behaviour, and
+it has to be tested against the behaviour actually observed.
 
 \subsection{A latent sign error in the unused HLLC star state}
 \label{sec:hllcbug}
