@@ -809,6 +809,7 @@ def main():
         T.append(r"\bottomrule")
         T.append(r"\end{tabular}")
         flush("shockfix")
+        by_key = {}
         for lbl, key in (("HLLC + shock fix (production)", "Fixed"),
                          ("HLLC, fix disabled", "Unfixed"), ("Rusanov", "Rusanov")):
             for l, d, f in sf_rows:
@@ -824,6 +825,13 @@ def main():
                 macro("shockFixCpExcess" + key,
                       f"{100.0 * (f['cp_max'] - ceiling) / ceiling:.0f}")
                 macro("shockFixSym" + key, sci(f["sym_rms"], 1))
+                by_key[key] = (cd_, int(json.load(open(os.path.join(
+                    d, "run_status.json")))["final_step"]))
+        if {"Fixed", "Unfixed", "Rusanov"} <= set(by_key):
+            fx, un, ru = by_key["Fixed"], by_key["Unfixed"], by_key["Rusanov"]
+            macro("shockFixVsRusanovPct", f"{100.0 * abs(fx[0] - ru[0]) / abs(fx[0]):.1f}")
+            macro("shockFixVsUnfixedPct", f"{100.0 * abs(fx[0] - un[0]) / abs(fx[0]):.1f}")
+            macro("shockFixStepRatio", f"{un[1] / max(fx[1], 1):.1f}")
 
     # Cases where the sensor must be inactive: the run with --shock-fix 0 has to
     # reproduce the production run exactly.

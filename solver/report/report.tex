@@ -1825,9 +1825,13 @@ tenth of their own size (\code{tools/mesh\_facts.py}), so a perfectly symmetric
 scheme run on this mesh would still produce a nonzero $C_L$. The remainder is
 under-resolution of the stand-off region. A pure Rusanov run, which cannot
 carbuncle at all, gives $\shockFixCpMaxRusanov$ and \shockFixSymRusanov{} rms
-(\cref{tab:shockfix}); the fact that its drag, \shockFixCdRusanov{}, agrees with
-the fixed HLLC value \shockFixCdFixed{} to well under a percent is the reason
-the fixed value is quoted as the answer. The proper cure would be a mesh with a
+(\cref{tab:shockfix}). Two independent stabilisations agreeing is the strongest
+evidence available here that the fixed answer is the right one: Rusanov's drag,
+\shockFixCdRusanov{}, and the fixed HLLC value, \shockFixCdFixed{}, differ by
+$\shockFixVsRusanovPct\%$, while the unfixed run sits $\shockFixVsUnfixedPct\%$
+away at \shockFixCdUnfixed{}. The carbuncle also costs convergence: the unfixed
+case needs $\shockFixStepRatio$ times as many pseudo-time steps to satisfy the
+same criterion. The proper cure would be a mesh with a
 resolved nose radius, or a rotated-hybrid Riemann solver in which the
 shock-normal direction is detected per face rather than blended for.
 
