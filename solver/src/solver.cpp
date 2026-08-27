@@ -443,7 +443,7 @@ SolverStats Solver::run(const std::string& output_dir) {
                 double frac = (double)(step-1) / ramp_steps;
                 cfl = config_.run_control.cfl_initial + frac*(cfl_max - config_.run_control.cfl_initial);
             } else cfl = cfl_max;
-            recon_ramp_ = std::min(1.0, 20.0 / std::max(cfl, 1.0));
+            recon_ramp_ = (step <= max_steps * 3 / 4) ? 0.0 : std::min(1.0, (double)(step - max_steps*3/4) / std::max(max_steps/8, 500));
 
             halo_.exchange(U_);
             compute_gradients();
@@ -478,7 +478,7 @@ SolverStats Solver::run(const std::string& output_dir) {
                 writer_.write_residual(step, physical_time, 1, cfl, 0, res_comp, res_l2, res_linf);
             if (rank_ == 0 && step % config_.write_forces_every == 0)
                 writer_.write_force(step, physical_time, cl_v, cd_v, cmz, pd, vd, pl, vl);
-            if (rank_ == 0 && step % 1000 == 0) {
+            if (rank_ == 0 && (step <= 5 || step % 100 == 0)) {
                 double red = (res0>1e-30) ? std::log10(res0/std::max(res_l2,1e-30)) : 0;
                 fprintf(stderr, "Step %6d CFL=%8.2f Res=%.4e Red=%.2f CD=%.6f CL=%.6f\n", step, cfl, res_l2, red, cd_v, cl_v);
             }

@@ -134,6 +134,7 @@ LocalMesh build_local_mesh(const Mesh& global_mesh,
         lm.mesh.boundary_groups.push_back(lbg);
     }
 
+    int dbg_skip156 = 0, dbg_bc_faces = 0, dbg_orphan_faces = 0;
     for (int fi = 0; fi < (int)global_mesh.faces.size(); fi++) {
         auto& gf = global_mesh.faces[fi];
         int gl = gf.left_cell, gr = gf.right_cell;
@@ -153,7 +154,11 @@ LocalMesh build_local_mesh(const Mesh& global_mesh,
         if (left_local) lf.left_cell = global_to_local_cell[gl];
         if (right_local) lf.right_cell = global_to_local_cell.count(gr) ? global_to_local_cell[gr] : -1;
 
+        if (lf.is_boundary) dbg_bc_faces++;
+        if (!lf.is_boundary && gr < 0) dbg_orphan_faces++;
+
         if (!lf.is_boundary && lf.left_cell >= 0 && lf.right_cell < 0 && !right_local) {
+            dbg_skip156++;
             continue;
         }
         if (!lf.is_boundary && lf.right_cell >= 0 && lf.left_cell < 0 && !left_local) {
