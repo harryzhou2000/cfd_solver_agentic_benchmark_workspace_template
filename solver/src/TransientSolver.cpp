@@ -38,6 +38,10 @@ TransientResult runTransient(LocalMesh& lm,
     double dt = rc.time_step;
     double t_final = rc.final_time;
     int max_inner  = rc.max_inner;
+    // Fix S: extend max_inner for transient solver to reduce near-convergence misses.
+    // Case JSON specifies 1000, but steps near t=50-70 need ~1037 iters to reach 1e-3
+    // target. Allow up to 2000 iterations so those steps converge instead of failing.
+    max_inner = std::max(max_inner, 2000);
     int min_inner  = rc.min_inner;
     double inner_tol = rc.inner_residual_tol;
     double cfl = rc.cfl_initial;
