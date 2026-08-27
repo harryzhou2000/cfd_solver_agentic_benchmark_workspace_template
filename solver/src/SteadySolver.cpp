@@ -359,7 +359,12 @@ SteadyResult runSteady(LocalMesh& lm,
            else if (mu > 0.0) { cfl_inner_penalty = 0.5; }
            else { cfl_inner_penalty = 0.85; }
            cfl_effective = std::max(cfl_effective * cfl_inner_penalty, cfl_effective_init);
-        } else if (inner_count < max_inner / 2 && outer_res_decreased) {
+        // Fix P: also allow CFL boost for viscous cases when residual is within 1.5x of
+        // historical minimum -- outer_res_decreased can be stuck False when residual flatlines,
+        // permanently blocking Fix E and stalling m200_laminar CFL at 8.31.
+        } else if (inner_count < max_inner / 2 &&
+                   (outer_res_decreased ||
+                    (mu > 0.0 && outer_res_norm <= 1.5 * min_outer_res_ever))) {
             // Fix E: only boost CFL if Fix D is NOT currently active.
             // Fix D (0.97x) and Fix E (1.2x) cancel each other, keeping CFL stuck at max
             // when outer residuals oscillate above 2x min — typical for supersonic oscillation.
@@ -409,19 +414,9 @@ SteadyResult runSteady(LocalMesh& lm,
             states[i] = candidate;
         }
 
-        // Isothermal energy fix: low-Mach viscous cases, permanent
-        // At M<0.3, dT/T_inf=O(M^2)<9% so isothermal is a valid approximation
-        if (mu > 0.0 && cfg.freestream.mach < 0.3) {
-            double T_ref = p_inf / (rho_inf * R_gas);
-            for (int i = 0; i < n_owned; i++) {
-                double rho_i = states[i][0];
-                if (rho_i < 1e-14) continue;
-                double ui = states[i][1] / rho_i;
-                double vi = states[i][2] / rho_i;
-                double p_iso = rho_i * R_gas * T_ref;
-                states[i][3] = rho_i * (p_iso / ((gamma - 1.0) * rho_i) + 0.5*(ui*ui + vi*vi));
-            }
-        }
+        // Fix O: removed isothermal energy fix (was resetting rhoE to T_ref every step,
+        // creating an artificial energy source term that prevented the energy equation from
+        // converging -- specifically causes residual to grow 362x for re20/re200 low-Mach cases).
 
         // Write outer spatial residual (R_ref) to CSV for true convergence history
         if (step % rc.write_residuals_every == 0 || step == 1) {

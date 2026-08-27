@@ -1,0 +1,47 @@
+=== CFD Benchmark Report Generation Status ===
+Generated: 2026-08-27
+
+Successfully generated figures (22):
+  OK: naca0012_m015_inviscid_mach.png generated
+  OK: naca0012_m015_inviscid_pressure.png generated
+  OK: naca0012_m015_inviscid_residuals.png generated
+  OK: naca0012_m015_inviscid_forces.png generated
+  OK: naca0012_m080_inviscid_mach.png generated
+  OK: naca0012_m080_inviscid_pressure.png generated
+  OK: naca0012_m080_inviscid_residuals.png generated
+  OK: naca0012_m080_inviscid_forces.png generated
+  OK: naca0012_m200_inviscid_mach.png generated
+  OK: naca0012_m200_inviscid_pressure.png generated
+  OK: naca0012_m200_inviscid_residuals.png generated
+  OK: naca0012_m200_inviscid_forces.png generated
+  OK: naca0012_m015_laminar_re5000_residuals.png generated (partial)
+  OK: naca0012_m015_laminar_re5000_forces.png generated (partial)
+  OK: naca0012_m080_laminar_re5000_residuals.png generated (partial)
+  OK: naca0012_m080_laminar_re5000_forces.png generated (partial)
+  OK: naca0012_m200_laminar_re5000_residuals.png generated (partial)
+  OK: naca0012_m200_laminar_re5000_forces.png generated (partial)
+  OK: cylinder_m010_laminar_re20_residuals.png generated (partial)
+  OK: cylinder_m010_laminar_re20_forces.png generated (partial)
+  OK: cylinder_m010_laminar_re200_residuals.png generated (partial)
+  OK: cylinder_m010_laminar_re200_forces.png generated (partial)
+
+Errors (0):
+  None
+
+=== Artifacts ===
+run_manifest.csv: DONE (8 cases, parsed from run_status.json/residuals.csv)
+sanity_checks.json: DONE (final residuals, Cd, Cl for all cases)
+figure_manifest.csv: DONE (22 figure entries)
+report.tex: DONE (280 lines, complete LaTeX report)
+
+=== Approximate Completion ===
+Figures for completed cases (3 inviscid x 4 = 12): DONE
+Figures for partial cases (5 x 2 = 10): DONE
+Total figures: 22
+
+Notes:
+- VTU files for completed cases parsed successfully (20816 cells each)
+- Fields 'mach' and 'pressure' were pre-computed in VTU CellData
+- Partial cases (laminar/cylinder) had residuals.csv and forces.csv only (no VTU)
+- np=8 case: MPI init failure (BTL error); no field files available
+- Cylinder re200: 58 physical time steps, 14 VTU snapshots available

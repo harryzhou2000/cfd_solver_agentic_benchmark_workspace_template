@@ -1,0 +1,281 @@
+\\documentclass[11pt,a4paper]{article}
+\\usepackage[margin=1in]{geometry}
+\\usepackage{amsmath,amssymb}
+\\usepackage{graphicx}
+\\usepackage{booktabs}
+\\usepackage{float}
+\\usepackage{caption}
+\\usepackage{subcaption}
+\\usepackage{longtable}
+\\usepackage{hyperref}
+
+\\title{2D Compressible Flow CFD Solver Benchmark Report}
+\\author{CFD Solver v1.0.0 (git: 20c70b26f1ec)}
+\\date{2026-08-27}
+
+\\begin{document}
+\\maketitle
+
+\\begin{abstract}
+This report presents benchmark validation of a 2D compressible flow CFD solver
+using a cell-centred finite-volume method on unstructured meshes. Three NACA 0012
+inviscid cases at M=0.15, M=0.80, M=2.00 converged with 3-4 orders of residual
+reduction. Laminar viscous cases (Re=5000) and cylinder cases (Re=20, Re=200)
+were still running at report time.
+\\end{abstract}
+
+\\tableofcontents
+\\newpage
+
+\\section{Governing Equations}
+
+\\subsection{2D Euler Equations (Inviscid)}
+The 2D Euler equations in conservation form:
+\\begin{equation}
+  \\frac{\\partial \\mathbf{U}}{\\partial t}
+  + \\frac{\\partial \\mathbf{F}}{\\partial x}
+  + \\frac{\\partial \\mathbf{G}}{\\partial y} = 0
+\\end{equation}
+The ideal-gas equation of state:  = (\\gamma-1)(\\rho E - \\frac{1}{2}\\rho|v|^2)$, $\\gamma=1.4$.
+
+\\subsection{2D Compressible Navier-Stokes}
+Viscous flux terms added; Stokes hypothesis, Fourier heat flux, Pr=0.72.
+
+\\subsection{Nondimensionalization}
+Length by chord c, density by rho\_inf, velocity by a\_inf, pressure by rho\_inf a\_inf^2.
+
+\\section{Numerical Methods}
+
+\\subsection{Cell-Centred Finite Volume Method}
+Cell-centred FV on unstructured CGNS meshes. 20816-cell NACA0012 H2 mesh used.
+
+\\subsection{Rusanov (Local Lax-Friedrichs) Inviscid Flux}
+lambda\_max = max(|u\_n\_L|+a\_L, |u\_n\_R|+a\_R).
+
+\\subsection{Second-Order Spatial Reconstruction}
+Piecewise-linear least-squares with Barth-Jespersen limiting.
+
+\\subsection{LU-SGS Implicit Pseudo-Time Integration}
+Large CFL ramp-up without assembling a global matrix. 1% inner residual target.
+
+\\subsection{MPI Parallelism and METIS Partitioning}
+METIS k-way partitioning; non-blocking MPI isend/irecv halo exchange.
+
+\\section{Results}
+
+\\subsection{NACA 0012 Inviscid Cases (Completed)}
+All three inviscid cases converged on NACA0012\_H2.cgns (20816 cells).
+
+\\subsubsection{M = 0.15 Subsonic Inviscid}
+\\begin{figure}[H]
+  \\centering
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m015_inviscid_mach.png}
+    \\caption{Mach number field}
+  \\end{subfigure}\\hfill
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m015_inviscid_pressure.png}
+    \\caption{Pressure field}
+  \\end{subfigure}
+  \\caption{NACA 0012 M=0.15 subsonic: Mach and pressure contours.}
+\\end{figure}
+\\begin{figure}[H]
+  \\centering
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m015_inviscid_residuals.png}
+    \\caption{Convergence (4.01 orders, 857 steps)}
+  \\end{subfigure}\\hfill
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m015_inviscid_forces.png}
+    \\caption{Cd/Cl history}
+  \\end{subfigure}
+  \\caption{NACA 0012 M=0.15 subsonic convergence history.}
+\\end{figure}
+Final: Cd=8.13e-4, wall time 1001 s, 4.01 orders residual reduction.
+
+\\subsubsection{M = 0.80 Transonic Inviscid}
+\\begin{figure}[H]
+  \\centering
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m080_inviscid_mach.png}
+    \\caption{Mach number field}
+  \\end{subfigure}\\hfill
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m080_inviscid_pressure.png}
+    \\caption{Pressure field}
+  \\end{subfigure}
+  \\caption{NACA 0012 M=0.80 transonic: Mach and pressure contours.}
+\\end{figure}
+\\begin{figure}[H]
+  \\centering
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m080_inviscid_residuals.png}
+    \\caption{Convergence (4.0 orders, 974 steps)}
+  \\end{subfigure}\\hfill
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m080_inviscid_forces.png}
+    \\caption{Cd/Cl history}
+  \\end{subfigure}
+  \\caption{NACA 0012 M=0.80 transonic convergence history.}
+\\end{figure}
+Final: Cd=5.10e-2, wall time 1857 s, 4.0 orders residual reduction.
+
+\\subsubsection{M = 2.00 Supersonic Inviscid}
+\\begin{figure}[H]
+  \\centering
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m200_inviscid_mach.png}
+    \\caption{Mach number field}
+  \\end{subfigure}\\hfill
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m200_inviscid_pressure.png}
+    \\caption{Pressure field}
+  \\end{subfigure}
+  \\caption{NACA 0012 M=2.00 supersonic: Mach and pressure contours.}
+\\end{figure}
+\\begin{figure}[H]
+  \\centering
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m200_inviscid_residuals.png}
+    \\caption{Convergence (3.0 orders, 831 steps)}
+  \\end{subfigure}\\hfill
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m200_inviscid_forces.png}
+    \\caption{Cd/Cl history}
+  \\end{subfigure}
+  \\caption{NACA 0012 M=2.00 supersonic convergence history.}
+\\end{figure}
+Final: Cd=9.38e-2, wall time 1170 s, 3.0 orders residual reduction.
+
+\\subsection{Laminar NACA 0012 Cases (Partial)}
+Three NS cases at Re=5000 running at report time.
+\\begin{figure}[H]
+  \\centering
+  \\begin{subfigure}[b]{0.32\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m015_laminar_re5000_residuals.png}
+    \\caption{M=0.15}
+  \\end{subfigure}
+  \\begin{subfigure}[b]{0.32\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m080_laminar_re5000_residuals.png}
+    \\caption{M=0.80}
+  \\end{subfigure}
+  \\begin{subfigure}[b]{0.32\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m200_laminar_re5000_residuals.png}
+    \\caption{M=2.00}
+  \\end{subfigure}
+  \\caption{Laminar Re=5000 partial residual histories.}
+\\end{figure}
+\\begin{figure}[H]
+  \\centering
+  \\begin{subfigure}[b]{0.32\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m015_laminar_re5000_forces.png}
+    \\caption{M=0.15}
+  \\end{subfigure}
+  \\begin{subfigure}[b]{0.32\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m080_laminar_re5000_forces.png}
+    \\caption{M=0.80}
+  \\end{subfigure}
+  \\begin{subfigure}[b]{0.32\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/naca0012_m200_laminar_re5000_forces.png}
+    \\caption{M=2.00}
+  \\end{subfigure}
+  \\caption{Laminar Re=5000 partial force histories.}
+\\end{figure}
+
+\\subsection{Cylinder Laminar Cases (Partial)}
+\\subsubsection{Cylinder Re=20 (Stokes Regime, Steady)}
+Re=20 is below vortex-shedding onset; steady symmetric wake expected. 2234 steps available.
+\\subsubsection{Cylinder Re=200 (Karman Vortex Street, Unsteady)}
+Re=200 is in the Karman vortex-street regime. 58 time steps at snapshot time.
+VTU snapshots at 100-step intervals available for vortex-street visualisation.
+\\begin{figure}[H]
+  \\centering
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/cylinder_m010_laminar_re20_residuals.png}
+    \\caption{Re=20 (2234 steps)}
+  \\end{subfigure}\\hfill
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/cylinder_m010_laminar_re200_residuals.png}
+    \\caption{Re=200 (58 steps)}
+  \\end{subfigure}
+  \\caption{Cylinder laminar partial residual histories.}
+\\end{figure}
+\\begin{figure}[H]
+  \\centering
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/cylinder_m010_laminar_re20_forces.png}
+    \\caption{Re=20 force history}
+  \\end{subfigure}\\hfill
+  \\begin{subfigure}[b]{0.48\\textwidth}
+    \\includegraphics[width=\\linewidth]{figures/cylinder_m010_laminar_re200_forces.png}
+    \\caption{Re=200 force history}
+  \\end{subfigure}
+  \\caption{Cylinder laminar partial force histories.}
+\\end{figure}
+
+\\section{MPI Comparison}
+The np=8 case failed due to an MPI init error in the container (BTL shared-memory unavailable).
+This is an environment-level issue, not a solver defect.
+The np=1 reference: 857 steps, 1001 s. Expected strong-scaling: near-linear speedup
+with METIS minimising communication; efficiency decreases slowly as np grows.
+
+\\section{Convergence Analysis}
+
+\\begin{table}[H]
+  \\centering
+  \\caption{Convergence summary for completed inviscid cases}
+  \\begin{tabular}{lrrrcc}
+    \\toprule
+    Case & Steps & Orders & Cd & Cl & Wall (s) \\\\
+    \\midrule
+    M=0.15 inviscid & 857 & 4.01 & 8.13e-4 & ~0 & 1001 \\\\
+    M=0.80 inviscid & 974 & 4.00 & 5.10e-2 & ~0 & 1857 \\\\
+    M=2.00 inviscid & 831 & 3.00 & 9.38e-2 & ~0 & 1170 \\\\
+    \\bottomrule
+  \\end{tabular}
+\\end{table}
+
+Subsonic M=0.15: smooth flow, CFL ramps to ~43, 4.01 orders in 857 steps.
+Transonic M=0.80: mixed flow with shocks, 4.00 orders, Cd~0.051 wave drag.
+Supersonic M=2.00: oblique shocks, 3.00 orders (expected reduction), Cd~0.094.
+
+\\section{Limitations}
+\\begin{enumerate}
+  \\item MPI multi-rank testing unavailable (container BTL error).
+  \\item Laminar/cylinder cases incomplete; no reference validation possible.
+  \\item No spatial order-of-accuracy verification performed.
+  \\item Supersonic convergence limited to 3 orders vs 4 for others.
+  \\item Single mesh per geometry; mesh dependence unknown.
+\\end{enumerate}
+
+\\appendix
+\\section{Run Manifest Summary}
+See run\_manifest.csv for complete data.
+
+\\begin{longtable}{lrrlr}
+  \\toprule
+  Case ID & Steps & Orders & Status & Wall (s) \\\\
+  \\midrule
+  \\endhead
+  naca0012\_m015\_inviscid & 857 & 4.01 & converged & 1001 \\\\
+  naca0012\_m080\_inviscid & 974 & 4.00 & converged & 1857 \\\\
+  naca0012\_m200\_inviscid & 831 & 3.00 & converged & 1170 \\\\
+  naca0012\_m015\_laminar\_re5000 & 265 & -- & running & -- \\\\
+  naca0012\_m080\_laminar\_re5000 & 943 & -- & running & -- \\\\
+  naca0012\_m200\_laminar\_re5000 & 583 & -- & running & -- \\\\
+  cylinder\_m010\_laminar\_re20 & 2234 & -- & running & -- \\\\
+  cylinder\_m010\_laminar\_re200 & 58 & -- & running & -- \\\\
+  \\bottomrule
+\\end{longtable}
+
+\\section{Software Environment}
+\\begin{itemize}
+  \\item Solver: cfd\_solver v1.0.0, git 20c70b26f1ec
+  \\item Mesh: NACA0012\_H2.cgns (20816 cells)
+  \\item Partitioner: METIS k-way
+  \\item Inviscid flux: Rusanov (local Lax-Friedrichs)
+  \\item Reconstruction: piecewise-linear LS + Barth-Jespersen limiter
+  \\item Implicit solver: LU-SGS pseudo-time
+\\end{itemize}
+
+\\end{document}
