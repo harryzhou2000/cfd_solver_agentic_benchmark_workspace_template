@@ -1,0 +1,83 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 4.5,
+      "notes": "All eight selected final packages meet required schema and file checks."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 5.0,
+      "notes": "Explicit evaluator validator command passed for all eight final directories and report."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 4.5,
+      "notes": "Eight reported production cases are readable and status-consistent; Re200 has production-horizon transient evidence."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 4.0,
+      "notes": "Forces, positivity checks, Re200 shedding, and np=1/8 comparisons are credible, with unverified independent reruns and damped production settings limiting confidence."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 4.5,
+      "notes": "Opened report PDF and representative M2 Mach/Re200 vorticity figures; fields are labeled continuous mesh visualizations."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 4.0,
+      "notes": "The 41-page report is detailed and candid about reconstruction blending, but does not disclose the M2 inviscid CFD_GRAD_DAMP=0.5 production setting."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 4.0,
+      "notes": "Figure manifest maps figures to raw result files and report builds; raw source data is deliberately uncommitted and therefore not reproducible from result-tip Git alone."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report figures do not correspond to submitted field/CSV outputs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete or failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Debug outputs presented as final case results",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 4.38
+}

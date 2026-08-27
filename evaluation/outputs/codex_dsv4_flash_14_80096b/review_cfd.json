@@ -1,0 +1,116 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 4.5,
+      "notes": "Report and source consistently state conservative compressible Navier-Stokes equations and nondimensional gas model."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 4.5,
+      "notes": "CGNS reader, mixed unstructured geometry, cell-face graph, and boundary family handling are implemented and described."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 4.5,
+      "notes": "Source assembles face conservative residuals with global norms; results are consistent with a functioning residual path."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 4.5,
+      "notes": "Rusanov and Roe entropy-fix implementations are present and production commands select them by case."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 4.5,
+      "notes": "Farfield, slip, and no-slip adiabatic treatments are implemented; surface sanity checks show required wall behavior."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 3.5,
+      "notes": "Green-Gauss reconstruction is active, but three production commands use CFD_RECON_SCALE=0.5, an explicitly documented first-order blend."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 4.5,
+      "notes": "Venkatakrishnan/Barth limiting and positive-state fallback are in source and metadata."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 4.5,
+      "notes": "Newtonian/Fourier fluxes and wall-force split are implemented; delivered wall checks pass."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 4.0,
+      "notes": "Local-CFL LU-SGS is implemented, but steady metadata reports fixed budgets/zero observed inner statistics rather than richer measured convergence accounting."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 4.5,
+      "notes": "Re200 metadata records true frozen-history BDF2 dual time, t=300, 30,000 steps, 11-308 inner iterations, and zero target misses."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 4.5,
+      "notes": "Source and delivered rank diagnostics support METIS ownership/ghost partitions and neighbor-scoped communication."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Solver uses explicit time stepping only",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Normal viscous traction mislabeled as skin friction",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 4.36
+}

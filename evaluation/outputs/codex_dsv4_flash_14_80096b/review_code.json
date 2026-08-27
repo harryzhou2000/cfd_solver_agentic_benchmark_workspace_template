@@ -1,0 +1,112 @@
+{
+  "review_area": "code_review",
+  "title": "Code review scorecard",
+  "points": [
+    {
+      "id": "code.build",
+      "title": "Build system and reproducibility",
+      "weight": 0.15,
+      "score": 4.5,
+      "notes": "CMake source and the terminal-run verification show a documented clean configure/build using CFD_EXTERNALS_ROOT; no independent clean-container rebuild was performed by this evaluator."
+    },
+    {
+      "id": "code.cli",
+      "title": "CLI and error handling",
+      "weight": 0.1,
+      "score": 4.5,
+      "notes": "Terminal session evidence records a successful MPI smoke solve, restart, and clear nonzero missing-case error; production CLI packages also validate structurally."
+    },
+    {
+      "id": "code.organization",
+      "title": "Code organization and extensibility",
+      "weight": 0.12,
+      "score": 4.5,
+      "notes": "Separated C++ configuration, CGNS reader, mesh, partition, numerics, solver and I/O units support maintenance and extension."
+    },
+    {
+      "id": "code.originality",
+      "title": "Originality and license compliance",
+      "weight": 0.15,
+      "score": 4.0,
+      "notes": "Internal source and session evidence support a self-contained implementation; trust policy prohibits external similarity investigation."
+    },
+    {
+      "id": "code.hardcoding",
+      "title": "No hard-coded case logic",
+      "weight": 0.08,
+      "score": 4.5,
+      "notes": "Case JSON controls and boundary mapping are source-driven; no two-filename-only dispatch was found."
+    },
+    {
+      "id": "code.mpi",
+      "title": "MPI correctness",
+      "weight": 0.15,
+      "score": 4.5,
+      "notes": "METIS graph partitioning, rank-local structures, MPI_Isend/Irecv halo exchange, and MPI_Allreduce reductions are present; report documents np=1/8 comparison."
+    },
+    {
+      "id": "code.robustness",
+      "title": "Robustness and memory sanity",
+      "weight": 0.08,
+      "score": 4.0,
+      "notes": "Input/error handling, positivity floors, and restart are evidenced; evaluator did not execute an additional immutable scratch rerun."
+    },
+    {
+      "id": "code.testing",
+      "title": "Testing and validation evidence",
+      "weight": 0.1,
+      "score": 4.5,
+      "notes": "Session-side build/CLI verification plus all eight delivered packages and report sanity checks provide strong, though not independently rerun, validation evidence."
+    },
+    {
+      "id": "code.hygiene",
+      "title": "Code hygiene",
+      "weight": 0.07,
+      "score": 3.5,
+      "notes": "Result branch is curated, but the original workspace retains thousands of excluded raw/debug artifacts; this is history/evidence noise rather than a tip violation."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Existing solver executable called internally",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Force/residual files generated without solving",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Code only reads the two benchmark mesh filenames through hard-coded branches",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "MPI rank count changes results by order-one amounts for steady cases",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Explicit time stepping only (no implicit/steady capability claimed where required)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims algorithms that cannot be found in source",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete/failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Solver core, time integration, or MPI communication copied/adapted/wrapped from an existing open-source CFD codebase",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 4.31
+}
