@@ -23,19 +23,25 @@ set(CNS2D_EXTRA_RELEASE_FLAGS "-O3" CACHE STRING "Optimization flags appended fo
 
 # --- version / provenance --------------------------------------------------
 set(CNS2D_VERSION "1.0.0")
-# Record the git revision when available so metadata.json can identify the build.
-set(CNS2D_GIT_REVISION "")
-find_package(Git QUIET)
-if(Git_FOUND)
-  execute_process(
-    COMMAND "${GIT_EXECUTABLE}" rev-parse --short=12 HEAD
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    OUTPUT_VARIABLE CNS2D_GIT_REVISION
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_QUIET)
-endif()
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/generated/version.h" @ONLY)
+# Record the git revision so metadata.json can identify the build that produced a
+# result.  This is re-evaluated on EVERY build rather than only at configure
+# time: a revision captured once at configure time goes stale as soon as another
+# commit lands, which silently mislabels every subsequent result with the
+# revision the build directory happened to be created at.
+add_custom_target(cns2d_version ALL
+  BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/generated/version.h"
+  COMMAND "${CMAKE_COMMAND}"
+          -D "CNS2D_VERSION=${CNS2D_VERSION}"
+          -D "CNS2D_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+          -D "CNS2D_VERSION_IN=${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in"
+          -D "CNS2D_VERSION_OUT=${CMAKE_CURRENT_BINARY_DIR}/generated/version.h"
+          -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/StampVersion.cmake"
+  COMMENT "Stamping git revision into version.h"
+  VERBATIM)
+
+# Generate an initial copy at configure time so the first build has a header to
+# compile against even before the custom target runs.
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/StampVersion.cmake")
 
 # --- external roots --------------------------------------------------------
 if(NOT CFD_EXTERNALS_ROOT AND DEFINED ENV{CFD_EXTERNALS_ROOT})
