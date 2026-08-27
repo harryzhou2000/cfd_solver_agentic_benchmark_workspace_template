@@ -81,16 +81,29 @@ floating-point summation order.
 \subsection{Partition diagnostics}
 
 \Cref{tab:partition} reports the per-rank decomposition actually used during the
-iterations of a representative production run (\cnsPartitionCase), taken from the
-submitted \texttt{partition\_diagnostics.csv}. The load-balance ratio, defined as
+iterations, taken from the submitted \texttt{partition\_diagnostics.csv} of
+\cnsPartitionCase. The load-balance ratio, defined as
 $\max_r N_{\mathrm{own},r}/\overline{N_{\mathrm{own}}}$, is
 $\cnsPartitionBalance$.
+
+The highest available rank count is tabulated deliberately. A two-way split of a
+balanced mesh is trivially even and demonstrates nothing about the partitioner, whereas
+at eight ranks the structure is visible and non-trivial: owned-cell counts range over
+$1265$--$1282$ against a mean of $1273$, giving the balance ratio above; neighbour
+counts vary from $3$ to $7$, reflecting genuinely irregular partition shapes rather than
+slabs; and four of the eight ranks own \emph{no} boundary faces at all, being interior
+partitions of the domain. That last point is a useful check in itself --- a geometric
+or index-order split of this mesh would give every rank a share of the outer boundary,
+so its absence is consistent with the graph-based decomposition claimed in
+\cref{sec:mpi}.
 
 \begin{table}[htbp]
   \centering
   \caption{Per-rank partition diagnostics for \cnsPartitionCase{}, from the
   submitted \texttt{partition\_diagnostics.csv}. Send and receive counts are the
-  number of cell records moved per halo exchange.}
+  number of cell records moved per halo exchange. Send and receive counts differ by
+  rank because the halo relationship is not symmetric in cell count: a rank may need
+  more cells from its neighbours than they need from it.}
   \label{tab:partition}
   \small
   \input{tab_partition}

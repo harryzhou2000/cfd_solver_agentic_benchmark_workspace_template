@@ -444,18 +444,42 @@ def main():
         for field, digits in META_FIELDS:
             define(camel(field) + key, num(meta.get(field), digits))
 
-    # ---- per-rank partition table, from the np=8 production runs ----------
+    # ---- per-rank partition table ----------------------------------------
+    #
+    # Prefer the highest rank count available, because that is where load
+    # imbalance and the neighbour structure actually show: a 2-way split of a
+    # balanced mesh is trivially perfect and demonstrates nothing.  The rank-count
+    # study writes np=1/2/4/8 into results/scaling/<case>_np<N>/, so those are
+    # searched first and the production directories used only as a fallback.
     partition_rows = []
-    for case_id, _key, label in CASES:
-        path = RESULTS_DIR / case_id / "partition_diagnostics.csv"
-        rows = read_rows(path)
-        if not rows:
+    scaling_dirs = sorted(
+        (p for p in (RESULTS_DIR / "scaling").glob("*_np*")
+         if p.is_dir() and p.name.rsplit("_np", 1)[-1].isdigit()),
+        key=lambda p: int(p.name.rsplit("_np", 1)[-1]),
+        reverse=True,
+    )
+    for path_dir in scaling_dirs:
+        rows = read_rows(path_dir / "partition_diagnostics.csv")
+        if not rows or len(rows) < 4:
             continue
+        case_stem = path_dir.name.rsplit("_np", 1)[0]
+        nranks = path_dir.name.rsplit("_np", 1)[-1]
+        label = next((lb for cid, _k, lb in CASES if cid == case_stem), case_stem)
         owned = [r["num_cells_owned"] for r in rows]
-        if not owned:
-            continue
         mean = sum(owned) / len(owned)
-        partition_rows.append((label, rows, mean))
+        partition_rows.append(("%s, $np=%s$" % (label, nranks), rows, mean))
+        break
+    if not partition_rows:
+        for case_id, _key, label in CASES:
+            rows = read_rows(RESULTS_DIR / case_id / "partition_diagnostics.csv")
+            if not rows:
+                continue
+            owned = [r["num_cells_owned"] for r in rows]
+            if not owned:
+                continue
+            mean = sum(owned) / len(owned)
+            partition_rows.append((label, rows, sum(owned) / len(owned)))
+            break
 
     partition_body = []
     if partition_rows:
