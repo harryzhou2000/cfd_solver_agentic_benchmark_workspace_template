@@ -47,10 +47,12 @@ void lusgsSolve(const LocalMesh& lm,
         double a_eff = (mach_ref > 0.0)
                        ? std::max(std::abs(vn_f) + 1e-10, mach_ref * a_j)
                        : a_j;
-        // Use i_cell's own state and volume to match the diagonal: diagonal was built
-        // with visc_r[i] = mu/rho_i * area^2 / vol_i (not the neighbour's vol/rho).
+        // Use max(vol_i, vol_j) so the off-diagonal never exceeds either cell's diagonal
+        // contribution. This preserves diagonal dominance symmetrically in both sweep
+        // directions: forward (j<i, j may be tiny wall cell) and backward (j>i, same).
         double rho_i = states[i_cell][0];
-        double visc_lambda = (mu > 0.0) ? (mu / rho_i * area * area / lm.cell_vol[i_cell]) : 0.0;
+        double vol_face = std::max(lm.cell_vol[i_cell], lm.cell_vol[j]);
+        double visc_lambda = (mu > 0.0) ? (mu / rho_i * area * area / vol_face) : 0.0;
         return 0.5 * (std::abs(vn_f) + a_eff) * area + visc_lambda;
     };
 

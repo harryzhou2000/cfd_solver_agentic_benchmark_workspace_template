@@ -67,8 +67,13 @@ SteadyResult runSteady(LocalMesh& lm,
     StateVec res0_global = {0,0,0,0};
     bool res0_set = false;
     double cfl = cfl0;
-    // Trust the case file's cfl_initial; accept_scale=0.1 for Re<100 already provides damping
+    // For very low-Re viscous cases (Re<100) the BL is stiff; allow CFL to self-regulate
+    // below cfl0 so the solver can settle at the stable CFL rather than sticking at the
+    // floor. Bak1 cylinder_re20 converged at CFL~0.1 with this lower floor enabled.
     double cfl_effective_init = cfl0;
+    if (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) {
+        cfl_effective_init = std::min(cfl0, 0.1);
+    }
      double cfl_effective = cfl_effective_init;  // adaptive CFL tracker
     double prev_outer_res = 0.0;               // outer residual tracker
     double min_outer_res_ever = std::numeric_limits<double>::max();  // Fix D
@@ -247,8 +252,15 @@ SteadyResult runSteady(LocalMesh& lm,
                    }
                    double fp = pressure(candidate, gamma);
                    if (candidate[0] <= 1e-14 || fp <= 1e-14 ||
-                        candidate[0] > 50.0*rho_inf || fp > 200.0*p_inf)
+                        candidate[0] > 50.0*rho_inf || fp > 200.0*p_inf) {
                        candidate = states_ref[i];
+                       lam = 0.0;
+                   }
+                   // Keep delta_U consistent with the actually applied correction so the
+                   // pseudo-time term (V/dt)*delta_U matches the current state.  Without
+                   // this sync the inner residual doesn't reflect the true fixed-point
+                   // equation, causing inner iterations to stall even when the step is safe.
+                   for (int k=0; k<4; k++) delta_U[i][k] *= lam;
                }
                 states[i] = candidate;
             }

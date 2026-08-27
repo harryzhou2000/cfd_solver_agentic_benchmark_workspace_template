@@ -18,6 +18,8 @@ void computeResidual(const ResidualContext& ctx,
     double mu = ctx.mu;
     double k_cond = ctx.k_cond;
     double diss_scale = cfg.run_control.rusanov_dissipation_scale;
+    // Low-Mach flux preconditioning: pass M_ref to rusanov_flux for M<0.3 viscous flows
+    double mach_ref = (cfg.freestream.mach < 0.3 && mu > 0.0) ? cfg.freestream.mach : 0.0;
 
     int n_owned = lm.n_owned;
     residuals.assign(n_owned, {0,0,0,0});
@@ -46,7 +48,7 @@ void computeResidual(const ResidualContext& ctx,
         if (pL < 1e-14 || pR < 1e-14) { UL = states[L]; UR = states[R]; }
 
         // Inviscid flux
-        StateVec flux = rusanov_flux(UL, UR, nx, ny, gamma, diss_scale);
+        StateVec flux = rusanov_flux(UL, UR, nx, ny, gamma, diss_scale, mach_ref);
 
         // Viscous flux (if laminar)
         if (mu > 0.0) {
@@ -131,7 +133,7 @@ void computeResidual(const ResidualContext& ctx,
             double p_wall = pressure(U_int, gamma);
             flux = {0.0, p_wall * nx, p_wall * ny, 0.0};
         } else {
-            flux = rusanov_flux(U_int, U_ghost, nx, ny, gamma, diss_scale);
+            flux = rusanov_flux(U_int, U_ghost, nx, ny, gamma, diss_scale, mach_ref);
         }
 
         // Viscous flux at no-slip wall
