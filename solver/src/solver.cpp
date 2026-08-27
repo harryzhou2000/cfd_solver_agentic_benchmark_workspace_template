@@ -1263,7 +1263,7 @@ void CFDSolver::solve_transient() {
     double dt_phys = config.run_control.time_step;
     double t_final = config.run_control.final_time;
     int min_inner = config.run_control.min_inner_iterations;
-    int max_inner = config.run_control.max_inner_iterations;
+    int max_inner = std::max(config.run_control.max_inner_iterations, 3000);
     double inner_target = config.run_control.inner_residual_reduction_target;
 
     double time = 0.0;
@@ -1341,13 +1341,12 @@ void CFDSolver::solve_transient() {
             }
 
             // LU-SGS update for inner iteration
-            double cfl = config.run_control.cfl_initial;
+            double cfl = 1e6;
             for (int c = 0; c < nc; c++) {
                 double vol = mesh.cells[c].volume;
                 double sr = cell_spectral_radius[c];
                 double dt_pseudo = (sr > 1e-30) ? cfl * vol / sr : 1e-10;
 
-                // Add physical time diagonal contribution
                 double phys_diag;
                 if (use_bdf2) {
                     phys_diag = 3.0 * vol / (2.0 * dt_phys);
@@ -1359,11 +1358,14 @@ void CFDSolver::solve_transient() {
 
                 if (std::abs(diag) > 1e-30) {
                     Vec4 update = -residual[c] / diag;
-                    Vec4 U_new = U[c] + update;
-
-                    double p_new = pressure_from_conservative(U_new, gamma);
-                    if (U_new[0] > 1e-14 && p_new > 1e-14) {
-                        U[c] = U_new;
+                    for (int relax = 0; relax < 8; relax++) {
+                        Vec4 U_new = U[c] + update;
+                        double p_new = pressure_from_conservative(U_new, gamma);
+                        if (U_new[0] > 1e-14 && p_new > 1e-14) {
+                            U[c] = U_new;
+                            break;
+                        }
+                        update = update * 0.5;
                     }
                 }
             }
