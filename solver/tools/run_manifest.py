@@ -64,7 +64,15 @@ def main():
     md = os.path.splitext(args.out)[0] + ".md"
     with open(md, "w") as f:
         f.write("# Run Manifest\n\nEvery row is one solver invocation whose outputs are "
-                "included in this submission.\n\n")
+                "included in this submission. The eight `results/` rows are the benchmark "
+                "deliverables. The `studies/` rows are supporting runs cited by the report: "
+                "the MPI rank study, the flux and shock-fix cross-checks, the first-order and "
+                "unfrozen-limiter references, the dual-time parameter study and the restart "
+                "round trip. Several of those are deliberately cut short -- by `--final-time`, "
+                "`--max-steps` or, for the Roe Mach 2 reference, because the scheme under test "
+                "is the thing being characterised -- so they report `failed`, which here means "
+                "\"stopped before meeting the case convergence criterion\" and is the intended "
+                "outcome, not a defect.\n\n")
         f.write("| case | ranks | steps | t_final | residual orders | wall time [s] | C_L | C_D "
                 "| status |\n")
         f.write("|---|---:|---:|---:|---:|---:|---:|---:|---|\n")
