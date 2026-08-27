@@ -1,0 +1,352 @@
+{
+  "schema": "agent_scores",
+  "contestant": "opus5-01",
+  "evaluated_at": "2026-08-27T14:52:13.452177+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": null
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "01a03768-0f28-7781-b309-8273bce2a530"
+    ],
+    "execution_date": "2026-08-25",
+    "started_at": "2026-08-25T05:33:13.688000+00:00",
+    "ended_at": "2026-08-27T01:47:42.037000+00:00",
+    "time_basis": "UTC timestamp of the first persisted event in the manually selected root rollout",
+    "rationale": "Selected the workspace-local Codex root 01a03768-0f28-7781-b309-8273bce2a530: it begins with benchmark implementation and owns 59 named subagent threads spanning mesh, solver, report, results, and completion audits. Excluded no independent root candidates. Database cwd is the Docker path /workspace; all telemetry was rebased only within this workspace .sessions bundle."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4.5,
+          "notes": "Documented CMake build and clean-clone evidence; evaluator did not independently rebuild."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Required solve CLI, validation, and explicit bad-input paths are implemented."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4.5,
+          "notes": "Clear physics, mesh, numerics, I/O, MPI, and driver separation."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4.5,
+          "notes": "No direct internal evidence of copied core; trust policy excludes web comparison."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Case configuration drives behavior; no case-name solver branches found."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4.5,
+          "notes": "METIS partitioning, neighbor nonblocking halos, reductions, and rank studies are present."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 4.5,
+          "notes": "Input validation, positivity guard, and explicit errors are implemented."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 4.5,
+          "notes": "Eight committed test sources and documented clean-clone results; not rerun by evaluator."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4.5,
+          "notes": "Result/build artifacts excluded at curated tip; report source and figures remain reproducible."
+        }
+      ],
+      "overall_score": 4.59,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 5,
+          "notes": "Report/source consistently state conservative perfect-gas Euler/NS formulation."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4.5,
+          "notes": "CGNS unstructured mixed-cell reading and cylinder zone welding are implemented; scope remains 2-D."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4.5,
+          "notes": "Conservative FV assembly is implemented and reported consistently."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4.5,
+          "notes": "Roe-Harten-Yee is production default, with selectable HLLC/Rusanov."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4.5,
+          "notes": "Farfield, slip, and no-slip adiabatic wall paths are source-backed."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4.5,
+          "notes": "Least-squares reconstruction is active in production."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4.5,
+          "notes": "Venkatakrishnan limiter and measured positivity fallbacks are documented."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 4.5,
+          "notes": "Newtonian/Fourier viscous discretization and force split are source/report backed."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4.5,
+          "notes": "CFL-controlled implicit steady march and LU-SGS are implemented."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 4.5,
+          "notes": "Re200 raw deliverables show BDF2 dual time, t=300, and all inner targets met."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4.5,
+          "notes": "METIS ownership/ghost design and neighbor exchange; independent MPI rerun not performed."
+        }
+      ],
+      "overall_score": 4.53,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "All eight raw case packages contain required contract artifacts."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Explicit eight-case plus report examiner invocation passed."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 4,
+          "notes": "All cases complete; M2 inviscid ends at a documented 2.55-order plateau."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 4.5,
+          "notes": "Rank evidence and plausible fields; Re200 St/Cd are modestly low and honestly disclosed."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "63 manifest-linked figures include required Mach, pressure, and wake views."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Comprehensive report explicitly identifies M2 plateau and Re200 resolution limitations."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 5,
+          "notes": "Figure generators and manifests trace report values to raw delivery files."
+        }
+      ],
+      "overall_score": 4.72,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 91,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Strong documented build, CLI, schemas, and errors; clean build not independently run."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Real CGNS, mixed cells, adjacency, and zone weld; generalized breadth not independently exercised."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 14,
+        "notes": "Conservative residual, Roe-Harten-Yee, and wall/farfield source paths verified."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 9,
+        "notes": "LSQ/Venkat production reconstruction with measured fallback disclosure."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Viscous gradients, stress/heat flux, wall treatment, and force split are documented."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 14,
+        "notes": "CFL/LU-SGS and true BDF2 two-loop Re200 implementation; scalar approximation limits fidelity."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 9,
+        "notes": "METIS, neighbor exchange, reductions, and rank-count artifacts; no evaluator MPI rerun."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 9,
+        "notes": "All cases validate; M2 plateau is credible but below nominal residual target."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Reproducible, traceable 63-figure report with candid limitations."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Modular EOS/BC organization; mesh geometry remains explicitly 2-D."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 4.5,
+      "notes": "Validated complete package and plausible converged low-Mach inviscid field."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 4.5,
+      "notes": "Validated complete package and plausible converged transonic inviscid field."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 3.5,
+      "notes": "Readable shock field and settled drag, but stops at a 2.55-order plateau after 40000 steps."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 4.5,
+      "notes": "Validated complete laminar result with credible wall/force evidence."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 4.5,
+      "notes": "Validated complete laminar result with credible wall/force evidence."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 4.5,
+      "notes": "Validated complete laminar supersonic result with credible field evidence."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 4.5,
+      "notes": "Validated steady wake; drag 2.018 is within stated reference range."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 4.5,
+      "notes": "Raw t=300/30000-step BDF2 result has 46 cycles and all inner targets met; coarse wake lowers St/Cd."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "No evaluator clean-build or MPI rerun was performed; documented reproduction and rank evidence were inspected only.",
+    "NACA M2 inviscid stopped at a certified 2.55-order residual plateau rather than its nominal target.",
+    "Re200 wake resolution is limited: reported St=0.1824 and mean Cd=1.2359 are modestly low and the report discloses this.",
+    "The solver and geometry abstractions are 2-D."
+  ]
+}

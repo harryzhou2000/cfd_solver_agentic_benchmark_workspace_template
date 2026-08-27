@@ -114,7 +114,12 @@ def classify(path_text: str) -> str | None:
         for i, part in enumerate(directory_parts)
     ):
         return "raw/generated/build directory"
-    if basename in FORBIDDEN_BASENAMES or RESTART_OR_FIELD.match(basename):
+    # Match data artifacts, not legitimate implementation or report-source
+    # names such as ``restart_io.cpp`` and ``field_numbers.tex``.
+    source_or_tex_suffixes = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".tex"}
+    if basename in FORBIDDEN_BASENAMES or (
+        RESTART_OR_FIELD.match(basename) and suffix not in source_or_tex_suffixes
+    ):
         return "raw solver result or restart/field artifact"
     if basename.endswith((".run.xml", ".synctex.gz")):
         return "prohibited LaTeX build artifact"
