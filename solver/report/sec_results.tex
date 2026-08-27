@@ -33,10 +33,15 @@ a converged value.
 \begin{table}[htbp]
   \centering
   \caption{Force coefficients from the final row of each \texttt{forces.csv}, with
-  the pressure/viscous drag split. The final column records which of the two
-  stationarity branches of \cref{eq:stationarity3} the run satisfied --- a fixed
-  point, or a limit cycle whose mean is converged --- taken from the solver's own
-  termination record rather than re-derived. For limit cycles the oscillation
+  the pressure/viscous drag split. The final column records how the run established
+  stationarity, taken from the solver's own termination record rather than
+  re-derived, and distinguishes three outcomes: a \emph{fixed point} reached within
+  the span tolerance; a \emph{limit cycle} whose mean is converged but whose state
+  keeps oscillating; and an \emph{asymptotic} approach, still monotone at
+  termination but with geometrically decaying increments, for which the quoted
+  $\pm$ is the solver's estimate of the $C_D$ movement still remaining and therefore
+  the precision of the coefficient (see \cref{sec:digits}). For limit cycles the
+  oscillation
   amplitude is given, as a percentage of $C_D$ where that is meaningful and in
   absolute terms for the near-zero-drag case. \textbf{For the limit-cycle rows the
   quoted $C_D$ is a single-instant snapshot and its trailing digits are not

@@ -371,6 +371,18 @@ def main():
                     note = "cycle, %.1f\\%% p--p" % (100.0 * st["span_rel"])
                 else:
                     note = "cycle, p--p \\num{%.0e}" % st["span"]
+        elif "asymptotic approach" in notes:
+            # The solver distinguishes a fixed point already reached from a monotone
+            # asymptotic approach whose remaining movement it estimates from the
+            # decay of the sub-block decrements.  Those are different claims and the
+            # table must not collapse them: quoting "fixed point" for a window that
+            # is still monotone would assert more than the run established.  The
+            # remaining movement is the honest precision of the coefficient, so it
+            # is what the table reports.
+            note = "asymptotic"
+            m = re.search(r"estimated ([0-9.eE+-]+) of C_D movement remaining", notes)
+            if m:
+                note = "asymptotic, $\\pm$\\num{%s}" % m.group(1)
         elif "stationary to" in notes:
             note = "fixed point"
         elif "still moving" in notes or "not_converged" in notes:
