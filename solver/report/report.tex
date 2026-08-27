@@ -1,0 +1,306 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,subcaption,hyperref}
+\usepackage{cleveref}
+\usepackage{float}
+\graphicspath{{figures/}}
+
+\title{2-D Unstructured Compressible Navier--Stokes Solver\\Benchmark Report}
+\author{CFD2D Solver}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report documents a cell-centered finite-volume solver for the 2-D compressible
+Navier--Stokes equations on unstructured meshes. The solver uses the Roe approximate
+Riemann solver with Harten--Yee entropy fix, second-order least-squares reconstruction
+with Barth--Jespersen limiting, LU-SGS implicit time integration, and METIS graph
+partitioning for MPI parallelism. Eight benchmark cases are computed: three inviscid
+NACA\,0012 cases (Mach 0.15, 0.8, 2.0), three laminar NACA\,0012 cases (Re\,5000),
+a steady cylinder at Re\,20, and a transient vortex-shedding cylinder at Re\,200 using
+BDF2 time integration.
+\end{abstract}
+
+\section{Introduction}
+The benchmark requires building a complete 2-D unstructured CFD solver from scratch,
+running all supplied test cases, and reporting results with convergence evidence, field
+visualizations, and MPI scaling data. The solver must use C++17, MPI domain decomposition,
+and produce machine-readable outputs per the output contract.
+
+\section{Governing Equations and Nondimensionalization}
+The conservative state vector is
+\[
+\mathbf{U} = [\rho,\, \rho u,\, \rho v,\, \rho E]^T.
+\]
+The 2-D compressible Navier--Stokes equations in conservative form are
+\[
+\frac{\partial \mathbf{U}}{\partial t}
++ \frac{\partial \mathbf{F}^i}{\partial x}
++ \frac{\partial \mathbf{G}^i}{\partial y}
+= \frac{\partial \mathbf{F}^v}{\partial x}
++ \frac{\partial \mathbf{G}^v}{\partial y},
+\]
+with inviscid fluxes
+\[
+\mathbf{F}^i = \begin{bmatrix} \rho u \\ \rho u^2 + p \\ \rho uv \\ u(\rho E + p) \end{bmatrix}, \qquad
+\mathbf{G}^i = \begin{bmatrix} \rho v \\ \rho uv \\ \rho v^2 + p \\ v(\rho E + p) \end{bmatrix}.
+\]
+The calorically perfect gas closure is
+\[
+p = (\gamma - 1)\rho e, \quad E = e + \tfrac{1}{2}(u^2 + v^2), \quad a = \sqrt{\gamma p / \rho}.
+\]
+with $\gamma = 1.4$, $R = 1.0$, and $\Pr = 0.72$.
+
+For viscous cases, the Newtonian stress tensor components are
+\[
+\tau_{xx} = 2\mu u_x - \tfrac{2}{3}\mu(u_x + v_y), \quad
+\tau_{yy} = 2\mu v_y - \tfrac{2}{3}\mu(u_x + v_y), \quad
+\tau_{xy} = \mu(u_y + v_x),
+\]
+with Fourier heat flux $\mathbf{q} = -k\nabla T$, $k = \mu c_p / \Pr$.
+Constant viscosity is set from the Reynolds number: $\mu = \rho_\infty U_\infty L_\mathrm{ref} / \text{Re}$.
+
+The nondimensional reference quantities are: $\rho_\mathrm{ref} = 1$, $U_\mathrm{ref} = 1$,
+$L_\mathrm{ref} = 1$, and $p_\mathrm{ref} = \rho_\mathrm{ref} / (\gamma M^2)$.
+Force coefficients use dynamic pressure $q_\infty = \frac{1}{2}\rho_\infty U_\infty^2$.
+
+\section{Meshes, Boundary Tags, and Case Inputs}
+Two unstructured CGNS meshes are provided:
+\begin{itemize}
+\item \textbf{NACA0012\_H2.cgns}: Single zone, 15\,682 nodes, 20\,816 cells (10\,752 triangles
+  + 10\,064 quadrilaterals). Boundary families: \texttt{bc-2} (farfield, 80 edges),
+  \texttt{bc-4} (airfoil, 404 edges).
+\item \textbf{CylinderB1.cgns}: Two zones (dom-1: 7\,079 nodes/6\,901 cells, dom-2: 3\,236
+  nodes/3\,284 cells), merged into a single mesh of approximately 10\,185 cells.
+  Boundary families: \texttt{WALL} (cylinder, 100 edges), \texttt{FAR} (farfield, 20 edges).
+  Inter-zone connectivity sections are stitched by node-coordinate matching.
+\end{itemize}
+
+\begin{table}[H]\centering\small
+\caption{Case summary with boundary conditions and run controls.}
+\begin{tabular}{llllll}
+\toprule
+Case ID & Mode & Mach & BC mapping & Run type & Key controls \\
+\midrule
+naca0012\_m015\_inviscid & Inviscid & 0.15 & bc-2$\to$farfield, bc-4$\to$slip\_wall & Steady & 20k steps, CFL 1$\to$100 \\
+naca0012\_m080\_inviscid & Inviscid & 0.80 & bc-2$\to$farfield, bc-4$\to$slip\_wall & Steady & 30k steps, CFL 1$\to$100 \\
+naca0012\_m200\_inviscid & Inviscid & 2.00 & bc-2$\to$farfield, bc-4$\to$slip\_wall & Steady & 40k steps, CFL 0.2$\to$50 \\
+naca0012\_m015\_lam\_re5k & Laminar & 0.15 & bc-2$\to$farfield, bc-4$\to$no\_slip & Steady & 40k steps, CFL 1$\to$100 \\
+naca0012\_m080\_lam\_re5k & Laminar & 0.80 & bc-2$\to$farfield, bc-4$\to$no\_slip & Steady & 40k steps, CFL 0.5$\to$80 \\
+naca0012\_m200\_lam\_re5k & Laminar & 2.00 & bc-2$\to$farfield, bc-4$\to$no\_slip & Steady & 50k steps, CFL 0.2$\to$50 \\
+cylinder\_re20 & Laminar & 0.10 & WALL$\to$no\_slip, FAR$\to$farfield & Steady & 30k steps, CFL 1$\to$100 \\
+cylinder\_re200 & Laminar & 0.10 & WALL$\to$no\_slip, FAR$\to$farfield & Transient & $\Delta t$=0.01, $t_f$=300 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Spatial Discretization}
+The solver uses a cell-centered finite-volume method on unstructured meshes.
+For each cell $i$ with volume $V_i$, the semi-discrete conservation law is
+\[
+V_i \frac{d\mathbf{U}_i}{dt} = -\sum_{f \in \text{faces}(i)}
+\left(\mathbf{F}^i_{f} - \mathbf{F}^v_{f}\right) A_f,
+\]
+where $A_f$ is the face length and the sum is over all faces of cell $i$ with
+outward-pointing normals.
+
+\subsection{Second-Order Reconstruction}
+Cell gradients are computed using a weighted least-squares method. For each cell $i$,
+the gradient $\nabla \mathbf{U}_i$ minimizes
+$\sum_j w_j^2 |\nabla\mathbf{U}_i \cdot \Delta\mathbf{r}_j - \Delta\mathbf{U}_j|^2$,
+where $j$ ranges over face neighbors and $w_j = 1/|\Delta\mathbf{r}_j|$.
+Face values are reconstructed as
+$\mathbf{U}_{i,f} = \mathbf{U}_i + \phi_i \nabla\mathbf{U}_i \cdot (\mathbf{r}_f - \mathbf{r}_i)$.
+
+\subsection{Limiter and Positivity Control}
+The Barth--Jespersen limiter computes $\phi_i \in [0,1]$ such that reconstructed
+values do not exceed the neighbor extrema:
+$\phi_i = \min_{f} \min\left(1, \frac{U_{\max/\min} - U_i}{\delta_f}\right)$,
+where $\delta_f$ is the reconstruction increment at face $f$.
+A positivity fallback reverts to first-order ($\phi_i = 0$) if reconstructed
+density or pressure becomes non-positive.
+
+\subsection{Inviscid and Viscous Fluxes}
+The Roe approximate Riemann solver is used for inviscid fluxes:
+$\hat{\mathbf{F}} = \frac{1}{2}(\mathbf{F}_L + \mathbf{F}_R) - \frac{1}{2}\sum_k |\hat{\lambda}_k| \hat{\alpha}_k \hat{\mathbf{r}}_k$,
+with Harten--Yee entropy fix $|\hat{\lambda}| = \max(|\lambda|, \epsilon)$
+where $\epsilon = 0.1 \hat{a}$.
+
+Viscous fluxes use face-averaged gradients with a correction for non-orthogonal meshes.
+The face gradient combines the cell-averaged gradient with a direct correction along the
+cell-to-cell direction.
+
+\section{Boundary Conditions}
+\begin{itemize}
+\item \textbf{Farfield:} Characteristic-based treatment using the Roe flux between
+  the reconstructed interior state and the freestream state.
+\item \textbf{Slip wall (inviscid):} Pressure-only flux $\mathbf{F}_\text{wall} = [0, p n_x, p n_y, 0]^T$,
+  reflecting the zero normal-velocity condition.
+\item \textbf{No-slip adiabatic wall:} Pressure flux plus viscous wall shear.
+  Wall velocity is set to zero for surface output. Adiabatic condition enforces
+  zero normal temperature gradient.
+\end{itemize}
+
+\section{Implicit and Transient Time Integration}
+\subsection{Steady-State Solver}
+The steady-state solver uses pseudo-time stepping with LU-SGS (Lower-Upper Symmetric
+Gauss-Seidel) implicit relaxation. The diagonal term is
+$D_i = V_i/\Delta t_i + \frac{1}{2}\sum_f \lambda_f A_f$,
+where $\lambda_f$ is the convective spectral radius at face $f$ and $\Delta t_i$ is
+the local pseudo time step determined by $\Delta t_i = \text{CFL} \cdot V_i / (\lambda_i^c + \lambda_i^v)$.
+CFL is ramped linearly from \texttt{cfl\_initial} to \texttt{cfl\_max} over the
+specified ramp steps.
+
+\subsection{BDF2 Transient Method}
+For the Re\,200 cylinder case, second-order backward differentiation (BDF2) is used:
+\[
+\frac{3\mathbf{U}^{n+1} - 4\mathbf{U}^n + \mathbf{U}^{n-1}}{2\Delta t}
+= -\frac{1}{V}\sum_f (\mathbf{F}^i - \mathbf{F}^v) A_f.
+\]
+The physical-time histories $\mathbf{U}^n$ and $\mathbf{U}^{n-1}$ are frozen during
+inner iterations for $\mathbf{U}^{n+1}$ and updated only after the inner solve converges.
+Inner iterations use LU-SGS with the total transient residual (spatial + temporal terms).
+Production settings: $\Delta t = 0.01$, $t_f = 300$, 5--1000 inner iterations,
+inner residual target $10^{-3}$.
+
+\section{MPI Parallelization and METIS Partitioning}
+The cell adjacency graph is partitioned using METIS \texttt{PartGraphKway}.
+Each rank owns a subset of cells plus ghost cells from face neighbors on other ranks.
+Halo exchange uses non-blocking \texttt{MPI\_Isend}/\texttt{MPI\_Irecv} for both
+conservative states and gradients. Global residual norms and force integrals use
+\texttt{MPI\_Allreduce}.
+The solver does not replicate the full mesh or full state on any rank during iterations.
+
+\section{Output, Reproducibility, and Sanity Checks}
+Build and run commands are documented in \texttt{README.md}. All Python scripts run
+in a local \texttt{.venv}. Generated figures trace to source CSV/VTK files via
+\texttt{figure\_manifest.csv}. Machine-readable \texttt{sanity\_checks.json} verifies
+positive density/pressure, wall velocity conditions, and force plausibility.
+
+\section{Results}
+
+\subsection{Summary Tables}
+\begin{table}[H]\centering\small
+\caption{Run status summary for all cases.}
+\label{tab:run_status}
+\begin{tabular}{lrrrrl}
+\toprule
+Case ID & Ranks & Steps & Wall Time (s) & Res. Reduction & Status \\
+\midrule
+\input{tables/run_status.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]\centering\small
+\caption{Final force coefficients for all cases.}
+\label{tab:forces}
+\begin{tabular}{lrrrrrr}
+\toprule
+Case ID & $C_D$ & $C_L$ & $C_m$ & $C_{D,p}$ & $C_{D,v}$ \\
+\midrule
+\input{tables/forces.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{NACA0012 Cases}
+% Inviscid M=0.15
+\begin{figure}[H]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m015_inviscid_residual.png}
+\includegraphics[width=0.48\textwidth]{naca0012_m015_inviscid_forces.png}
+\caption{Residual and force history for NACA\,0012, $M=0.15$, inviscid.}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m015_inviscid_mach_zoom.png}
+\includegraphics[width=0.48\textwidth]{naca0012_m015_inviscid_pressure_zoom.png}
+\caption{Mach and pressure contours (near-body): NACA\,0012, $M=0.15$, inviscid.}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.6\textwidth]{naca0012_m015_inviscid_cp.png}
+\caption{Surface $C_p$: NACA\,0012, $M=0.15$, inviscid.}
+\end{figure}
+
+% Inviscid M=0.8
+\begin{figure}[H]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m080_inviscid_mach_zoom.png}
+\includegraphics[width=0.48\textwidth]{naca0012_m080_inviscid_pressure_zoom.png}
+\caption{Mach and pressure contours (near-body): NACA\,0012, $M=0.8$, inviscid.}
+\end{figure}
+
+% Inviscid M=2.0
+\begin{figure}[H]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m200_inviscid_mach_zoom.png}
+\includegraphics[width=0.48\textwidth]{naca0012_m200_inviscid_pressure_zoom.png}
+\caption{Mach and pressure contours (near-body): NACA\,0012, $M=2.0$, inviscid.}
+\end{figure}
+
+% Laminar cases
+\begin{figure}[H]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m015_laminar_re5000_mach_zoom.png}
+\includegraphics[width=0.48\textwidth]{naca0012_m015_laminar_re5000_pressure_zoom.png}
+\caption{Mach and pressure contours (near-body): NACA\,0012, $M=0.15$, Re\,5000.}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m080_laminar_re5000_mach_zoom.png}
+\includegraphics[width=0.48\textwidth]{naca0012_m080_laminar_re5000_pressure_zoom.png}
+\caption{Mach and pressure contours (near-body): NACA\,0012, $M=0.8$, Re\,5000.}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.48\textwidth]{naca0012_m200_laminar_re5000_mach_zoom.png}
+\includegraphics[width=0.48\textwidth]{naca0012_m200_laminar_re5000_pressure_zoom.png}
+\caption{Mach and pressure contours (near-body): NACA\,0012, $M=2.0$, Re\,5000.}
+\end{figure}
+
+\subsection{Cylinder Reynolds 20}
+\begin{figure}[H]\centering
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re20_residual.png}
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re20_forces.png}
+\caption{Residual and force history for cylinder, Re\,20.}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re20_mach_zoom.png}
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re20_pressure_zoom.png}
+\caption{Mach and pressure contours (near-body): cylinder, Re\,20.}
+\end{figure}
+
+\subsection{Cylinder Reynolds 200 Vortex Street}
+\begin{figure}[H]\centering
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re200_residual.png}
+\includegraphics[width=0.48\textwidth]{cylinder_m010_laminar_re200_forces.png}
+\caption{Residual and force history for cylinder, Re\,200.}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{cylinder_m010_laminar_re200_mach_zoom.png}
+\caption{Mach contour (wake region): cylinder, Re\,200 vortex street.}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{cylinder_m010_laminar_re200_velocityx_zoom.png}
+\caption{Velocity-$x$ contour (wake region): cylinder, Re\,200 vortex street.}
+\end{figure}
+
+\section{Parallel Validation}
+Rank-count comparison tests were run for NACA\,0012 $M=0.15$ inviscid and
+cylinder Re\,20 at $n_p = 4$ and $n_p = 8$.
+
+\section{Limitations and Failure Analysis}
+\begin{itemize}
+\item The Barth--Jespersen limiter provides minimum acceptable oscillation control;
+  Venkatakrishnan or MLP limiting would improve smooth-region accuracy.
+\item The LU-SGS implicit solver uses a simplified scalar spectral-radius Jacobian
+  approximation. A block or matrix-free approach would improve convergence rates.
+\item The viscous gradient correction uses a simple direct correction along the
+  cell-to-cell direction; a diamond-path or iterative correction would be more
+  accurate on highly skewed meshes.
+\end{itemize}
+
+\end{document}
