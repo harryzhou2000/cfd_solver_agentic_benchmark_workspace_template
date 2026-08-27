@@ -1019,3 +1019,39 @@ rank-deficiency guard; the force signs of \cref{eq:traction} are correct; the
 supersonic farfield branches are correct at $\Minf=2.0$; the CSV headers are
 byte-exact against the contract; and the \texttt{.vtu} connectivity offsets are
 cumulative end offsets without the common off-by-one error.
+
+\subsection{What the defects in this section have in common}
+\label{sec:onelesson}
+
+Four of the defects documented above share one structure, and stating it is more useful
+than the four descriptions separately. In each case a check existed, passed, and was
+inspecting something \textbf{one step removed} from the thing being claimed:
+
+\begin{itemize}
+  \item The slip-wall test (\cref{sec:reintegrate}) checked the ghost \emph{state} ---
+  its normal velocity, its preserved thermodynamics --- and never formed the \emph{flux}
+  that the report's claim was about. The state was correct; the claim about the flux was
+  false.
+  \item The revision stamp (\cref{sec:provenancestamp}) could be verified by reading the
+  generated header, which was correct, while the \emph{binary} carried a different value.
+  \item The stationarity label (\cref{sec:conditioning}) was derived by parsing the
+  solver's note \emph{string} rather than reading the branch the solver took, so an
+  unmatched string fell through to a wrong-but-plausible answer.
+  \item The pending-macro checker read the \emph{first} definition of each macro rather
+  than the effective last one, and so reported gaps in a document that had none.
+\end{itemize}
+
+In every instance the proxy was easier to inspect than the output, which is exactly why it
+was chosen, and in every instance the two disagreed. The general rule this report has
+converged on is therefore: \textbf{verify the artifact the claim is about, by the path the
+results actually take}. Re-integrating the submitted \texttt{surface.csv} rather than
+trusting the force integral, probing the shipped library rather than a reimplementation of
+it, comparing a written \texttt{metadata.json} against the header, and reading the rendered
+table rather than the source that generated it are all applications of the same rule, and
+each of them found something.
+
+The corollary is less comfortable and worth stating too: a check that has only ever passed
+is weak evidence, because a check inspecting the wrong thing passes just as readily as one
+inspecting the right thing. The tests cited with most confidence in this report are the ones
+demonstrated to fail on known-bad input --- the HLLC negative control of \cref{sec:hllcbug},
+and the convergence criterion refusing a case in \cref{sec:criterionworks}.

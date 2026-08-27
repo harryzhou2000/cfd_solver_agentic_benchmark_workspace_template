@@ -18,7 +18,9 @@ $np=1,2,4,8$, so that both meshes and both wall types are exercised, and
   \input{tab_scaling}
   \\[2pt]
   \footnotesize $^\ddagger$Wall times are as recorded by the solver itself in each run's
-  \texttt{run\_status.json}. An earlier version of this study ran concurrently with the
+  \texttt{run\_status.json}, and are therefore solve-only: they exclude process startup and
+  MPI teardown, which are not properties of the solver. An earlier version of this study ran
+  concurrently with the
   $\Reinf=200$ transient and its timings were contended; the study was re-run with the
   machine otherwise idle, so these are clean measurements. The force values were unaffected
   by the contention either way, since they do not depend on elapsed time.
