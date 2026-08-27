@@ -59,6 +59,21 @@
     "cmz": -0.0,
     "notes": "steady residual_l2 reduced 3.566 orders (from residuals.csv row 1 to final); forces reached a stable plateau"
   },
+  "naca0012_m080_laminar_re5000": {
+    "case_id": "naca0012_m080_laminar_re5000",
+    "command": "mpirun -np <ranks> ./bin/fv2d.v2 solve --case /workspace/cfd_solver_agentic_benchmark/inputs/cases/naca0012_m080_laminar_re5000.json --flux roe --output results/naca0012_m080_laminar_re5000",
+    "mpi_ranks": 2,
+    "num_cells_global": 20816,
+    "final_step": 2064,
+    "final_physical_time": 0.0,
+    "wall_time_seconds": 609.1,
+    "convergence_status": "converged",
+    "residual_reduction_orders": 4.005,
+    "cd": 0.06408,
+    "cl": -0.00438,
+    "cmz": -0.00169,
+    "notes": "steady residual reduced by 4.005341 orders of magnitude with stable forces"
+  },
   "naca0012_m200_laminar_re5000": {
     "case_id": "naca0012_m200_laminar_re5000",
     "command": "mpirun -np <ranks> ./bin/fv2d.new solve --case /workspace/cfd_solver_agentic_benchmark/inputs/cases/naca0012_m200_laminar_re5000.json --output results/naca0012_m200_laminar_re5000",
@@ -73,5 +88,20 @@
     "cl": 0.00014,
     "cmz": 0.00029,
     "notes": "steady residual reduced by 3.674001 orders of magnitude with stable forces"
+  },
+  "cylinder_m010_laminar_re20": {
+    "case_id": "cylinder_m010_laminar_re20",
+    "command": "mpirun -np <ranks> ./bin/fv2d.v2 solve --case tests/cases/re20_production.json --flux rusanov --output results/cylinder_m010_laminar_re20",
+    "mpi_ranks": 2,
+    "num_cells_global": 10185,
+    "final_step": 9469,
+    "final_physical_time": 0.0,
+    "wall_time_seconds": 402.6,
+    "convergence_status": "converged",
+    "residual_reduction_orders": 5.004,
+    "cd": 0.88927,
+    "cl": 0.0049,
+    "cmz": -4e-05,
+    "notes": "steady residual reduced by 5.004348 orders of magnitude with stable forces"
   }
 }

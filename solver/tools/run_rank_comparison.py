@@ -28,13 +28,18 @@ def make_variant(base_json, steps, out_path):
     return out_path
 
 
-def run_one(variant_json, np_, out_dir):
+def run_one(variant_json, np_, out_dir, flux=None, venkat=False):
     os.makedirs(out_dir, exist_ok=True)
     cmd = ["mpirun", "-np", str(np_), FV2D, "solve", "--case", variant_json,
            "--output", out_dir]
+    if flux:
+        cmd += ["--flux", flux]
+    env = dict(os.environ)
+    if venkat:
+        env["FV2D_VENKAT"] = "1.0"
     t0 = time.time()
     with open(os.path.join(out_dir, "rankcmp_stdout.log"), "w") as fh:
-        subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT, check=True)
+        subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT, check=True, env=env)
     return time.time() - t0
 
 
@@ -56,6 +61,8 @@ def main():
     ap.add_argument("--ranks", type=int, nargs="+", default=[1, 2, 4, 8])
     ap.add_argument("--out-root", default=str(SOLVER_ROOT / "results_rankcmp"))
     ap.add_argument("--compare-step", type=int, default=None)
+    ap.add_argument("--flux", default=None)
+    ap.add_argument("--venkat", action="store_true")
     args = ap.parse_args()
     cmp_step = args.compare_step or args.steps
     root = Path(args.out_root) / args.tag
@@ -65,7 +72,7 @@ def main():
     rows = []
     for np_ in args.ranks:
         out_dir = str(root / f"np{np_}")
-        wall = run_one(variant, np_, out_dir)
+        wall = run_one(variant, np_, out_dir, flux=args.flux, venkat=args.venkat)
         fr = force_at_step(os.path.join(out_dir, "forces.csv"), cmp_step)
         rows.append({"np": np_, "wall_s": round(wall, 2),
                      "cl": float(fr["cl"]), "cd": float(fr["cd"]),

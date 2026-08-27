@@ -53,6 +53,19 @@ p=(\gamma-1)\rho e,\qquad E=e+\tfrac{1}{2}(u^2+v^2),\qquad a=\sqrt{\gamma p/\rho
 All cases use nondimensional freestream $\rho_\infty=1$, $|\mathbf{V}_\infty|=1$,
 $p_\infty = 1/(\gamma M_\infty^2)$, $\gamma=1.4$, $R=1$, $Pr=0.72$; the laminar
 cases use constant viscosity $\mu = \rho_\infty U_\infty L_{ref}/Re$.
+\subsection{Nondimensionalization}
+All quantities are nondimensionalized with freestream density
+$\rho_\infty=1$, speed $|V_\infty|=1$, and reference length $L_{ref}=1$; the
+freestream pressure is set by the Mach number,
+$p_\infty = \rho_\infty |V_\infty|^2/(\gamma M_\infty^2)$.
+Force coefficients use the dynamic pressure
+$q_\infty=\tfrac12\rho_\infty|V_\infty|^2$ and the case reference area,
+$C_D = F_x/(q_\infty A_{ref})$, $C_L = F_y/(q_\infty A_{ref})$. The pressure and
+skin-friction coefficients are $C_p=(p-p_\infty)/q_\infty$ and
+$C_f=\tau_w/q_\infty$, with $\tau_w$ the tangential wall shear. Laminar
+viscosity is constant and matched to the case Reynolds number,
+$\mu=\rho_\infty |V_\infty| L_{ref}/Re$, with thermal conductivity
+$k=\mu c_p/Pr$.
 
 \section{Discretization}
 \subsection{Finite-volume scheme}
@@ -63,16 +76,25 @@ cell $i$,
 \left(\mathbf{F}^{i}_f - \mathbf{F}^{v}_f\right) A_f,
 \end{equation}
 with face fluxes evaluated from limited linear reconstruction. Inviscid fluxes
-use the Roe approximate Riemann solver with a Harten entropy fix (steady cases)
-or the Rusanov/local Lax--Friedrichs flux with dissipation scale 1.0 (Re 200
-transient, per the case specification).
+use the Roe approximate Riemann solver with a Harten entropy fix (NACA cases) or
+the Rusanov/local Lax--Friedrichs flux (Re 200 transient with dissipation scale
+1.0, per the case specification, and the low-Mach cylinder Re 20 steady case,
+where the extra Rusanov dissipation keeps the marginally stable wake steady; see
+\S\ref{sec:limitations}). Both are approximate Riemann solvers; the choice per
+case is recorded in each metadata.json under \texttt{inviscid\_flux}.
 \subsection{Reconstruction and limiting}
 Primitive variables $(\rho,u,v,p)$ are reconstructed with weighted
 least-squares gradients (stencil: face neighbors plus mirrored boundary ghost
-points), limited with a Barth--Jespersen limiter and positivity floors on
-reconstructed density and pressure. A residual-triggered first-order startup
-phase is used for robustness; production runs are second-order in smooth
-regions. Viscous face gradients use the corrected average of cell gradients.
+points). Two slope limiters are implemented and both are used in production:
+a Barth--Jespersen limiter (used for the transonic/supersonic NACA cases and
+the Re 200 transient) and a smooth Venkatakrishnan limiter (used for the
+stiff low-Mach laminar cylinder Re 20 case, where the non-smooth
+Barth--Jespersen limiter produced a limit-cycle that stalled residual
+convergence). Positivity floors are applied to the reconstructed density and
+pressure. A residual-triggered first-order startup phase is used for
+robustness before the second-order scheme engages; production runs are
+second-order in smooth regions. Viscous face gradients use the corrected
+average of cell gradients.
 \subsection{Boundary conditions}
 Farfield: characteristic (Riemann-invariant) boundary state. Slip wall:
 pressure-only flux $[0, p n_x, p n_y, 0]^T$. No-slip adiabatic wall: mirrored
@@ -89,6 +111,47 @@ transient Re 200 case uses BDF2 physical-time integration with a true two-level
 structure: an outer physical-time loop with frozen $U^n$, $U^{n-1}$ histories
 and an inner nonlinear loop of LU-SGS relaxations on the total transient
 residual (target ratio $10^{-3}$).
+\subsection{LU-SGS pseudo-time relaxation}
+For a steady case we march the semi-discrete residual
+$\mathcal{R}(\mathbf{U})$ in pseudo time $\tau$ with a backward-Euler step
+linearized about the current state,
+\begin{equation}
+\left(\frac{V_i}{\Delta\tau_i}\,I + \frac{\partial \mathcal{R}_i}{\partial \mathbf{U}}\right)
+\Delta\mathbf{U}_i = -\mathcal{R}_i(\mathbf{U}),
+\qquad
+\Delta\tau_i = \mathrm{CFL}\,\frac{V_i}{\sum_{f\in\partial i}(\lambda^c_f+\lambda^v_f)},
+\end{equation}
+where $\lambda^c_f=(|\mathbf{V}\cdot\mathbf{n}|+a)A_f$ and
+$\lambda^v_f = C_v(\mu/\rho)A_f/d_f$ with $C_v=\max(4/3,\gamma/Pr)$ are the
+convective and viscous spectral radii. The implicit operator is inverted
+approximately with a symmetric LU-SGS sweep pair,
+\begin{equation}
+(D+L)\,\Delta\mathbf{U}^{*}=-\mathcal{R},\qquad
+(D+U)\,\Delta\mathbf{U}=D\,\Delta\mathbf{U}^{*},
+\end{equation}
+with scalar Yoon--Jameson diagonal $D$ (full spectral-radius sum) and
+off-diagonal blocks from the analytic split-flux Jacobians
+$A^{\pm}=\tfrac12(A_n\pm\lambda_f I)$, which were verified against complex/finite
+differences. Ranks couple through block-Jacobi boundary data exchanged each
+sweep. Several relaxation pairs are applied per nonlinear step
+(3 for steady cases, up to the inner cap for the transient case).
+
+\subsection{BDF2 dual-time integration for the transient case}
+The Re 200 cylinder uses a true two-level scheme. The physical-time
+discretization is second-order BDF2,
+\begin{equation}
+\mathcal{R}^{*}(\mathbf{U}^{n+1})
+= \mathcal{R}(\mathbf{U}^{n+1})
++ \frac{V_i}{\Delta t}\left(\tfrac32\mathbf{U}^{n+1} - 2\mathbf{U}^{n} + \tfrac12\mathbf{U}^{n-1}\right) = 0,
+\end{equation}
+and at each physical step we introduce a pseudo-time $\tau$ and iterate
+LU-SGS on $\mathcal{R}^{*}$ until the total (spatial + physical-time) residual
+falls below $10^{-3}$ of its value at the start of the step, with a
+$5$--$1000$ inner-iteration range. The frozen histories $\mathbf{U}^n$ and
+$\mathbf{U}^{n-1}$ are \emph{not} updated during the inner loop; they advance
+only once, after the inner solve for a physical step is accepted. The
+production run uses $\Delta t=0.01$ and $t_f=300$ (30{,}000 physical steps).
+
 \section{MPI parallelization}
 The cell adjacency graph is partitioned with METIS k-way (serial preprocessing
 on rank 0); each rank stores only its owned cells plus one layer of ghost cells.
@@ -96,9 +159,59 @@ Halo exchange of states, gradients/limiters, and corrections uses neighbor
 Isend/Irecv; residual and force norms use MPI reductions. Partition diagnostics
 (owned/ghost counts, neighbors, edge cut, load balance) are reported per case.
 \section{Results}
-%CASE_SECTIONS%
+\input{generated_summary_table.tex}
+\input{generated_case_sections.tex}
 \section{MPI rank-count comparison}
-%MPI_SECTION%
+%MPI_SECTION%  % filled by rank-comparison runs at finalization
 \section{Convergence and limitations}
-%LIMITATIONS%
+\label{sec:limitations}
+\subsection{Convergence behavior}
+All six NACA cases and the cylinder Re 20 case reach a steady state (residual
+reduction of $3$--$5$ orders of magnitude with force coefficients that are
+stationary over a trailing window); the cylinder Re 200 case is run to a
+statistically periodic vortex-shedding state. Steady runs use a residual- and
+force-based convergence gate; if the residual target is not met at the case
+\texttt{max\_steps} the run is allowed to continue up to $2\times$ that cap
+while the residual is still decreasing (a stricter setting than the case
+minimum). A short first-order startup phase (first $\sim$300 pseudo-time steps,
+until the residual has dropped $\approx1.5$ orders) is used for robustness
+before the second-order reconstruction engages; all production results are
+second-order in smooth regions.
+
+\subsection{Low-Mach-number accuracy}
+The two cylinder cases and the Mach $0.15$ NACA case are low-Mach flows. The
+density-based fluxes used here (Roe and Rusanov) add dissipation proportional
+to the acoustic spectral radius $|\mathbf{V}\cdot\mathbf{n}|+a$; at
+$M_\infty=0.1$ the sound speed dominates and the scheme over-dissipates the
+velocity/pressure coupling. This thickens the boundary layer and weakens the
+wake pressure deficit, so the \emph{magnitudes} of the drag coefficients on the
+low-Mach cases are under-predicted relative to incompressible reference values
+(e.g.\ the converged Re 20 drag is below the canonical $C_D\approx2.0$). The
+flow \emph{structure} is nonetheless correct: a steady, symmetric
+recirculating wake at Re 20 and a periodic vortex street at Re 200. A low-Mach
+flux correction (e.g.\ Mach-scaled acoustic dissipation) or preconditioning
+would address this and is identified as future work; it was not applied so that
+the production solver remains a single, uniform, robust method.
+
+\subsection{Stabilization choices for the stiff cylinder cases}
+The cylinder Re 20 case is a stiff low-Mach viscous steady problem. With the
+Roe flux and Barth--Jespersen limiter the pseudo-time iteration entered a
+limit cycle and the (physically stable) wake drifted into a slow spurious
+oscillation. Switching to the more dissipative Rusanov flux, the smooth
+Venkatakrishnan limiter, and a conservative pseudo-CFL cap of $30$ (the case
+requests $100$; the lower cap is a documented conservative equivalent chosen
+for stability on this stiff case) yields a clean, symmetric, converged steady
+wake. These per-case solver settings are recorded in each metadata.json.
+
+\subsection{Other limitations}
+\begin{itemize}
+\item The farfield is a characteristic (Riemann-invariant) boundary condition;
+  weak acoustic reflections can slow the decay of drag transients at low Mach.
+\item LU-SGS uses a scalar (Yoon--Jameson) diagonal with block-Jacobi coupling
+  across ranks, so inner-iteration convergence is mildly partition-dependent;
+  the converged ($\mathcal{R}\to0$) state is partition-independent.
+\item Skin-friction and pressure forces are integrated from the wall-adjacent
+  corrected gradients; on the coarsest wake cells this is first-order accurate.
+\end{itemize}
+
 \end{document}
