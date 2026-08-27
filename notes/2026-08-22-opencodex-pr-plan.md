@@ -182,3 +182,9 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - A #2350 head 5422a7728 / D #2527 head 6c22214bd: ready, gates green, CodeRabbit pass, 0 unresolved threads; Ingwannu re-review + fork CI approval pending (replied to all three).
 - C #2355 head 85ea3c3c2: rebased, 42+16 pass, draft; owner pinged once for maintainer-sponsored (UI + auth-api hunk).
 - Remaining external: Ingwannu re-approve A/B/D exact heads; lidge-jun sponsor C.
+
+## Status 2026-08-28 (second resumed round)
+
+- Upstream advanced again: d1def682d -> 50e955604 (openai forward cache options + moonshot schema bounds; touches A's adapter files but rebase was clean). Rebased all four branches; local suites green (A 122, B 326, D 333, C 58 incl. GUI contracts); privacy/version-line/typecheck clean.
+- C #2355: fixed a pre-existing test-isolation bug (present on the old head too): config-divergence tests leaked preserved-disk-only-provider state, so codex-plan re-anchor tests failed whenever the four C test files ran in one bun invocation. codex-plan beforeEach now resets resident identity + preserved providers (seams). Head 4d83100e7, 58/58 pass in one invocation. Still draft; owner pinged once for maintainer-sponsored (UI + auth-api).
+- A 8aaf52739 / B 66c8fb4cc / D 4449378ae: re-ticked and re-readied after the gate re-drafted on push; gates green, CodeRabbit pass (B resumed). Ingwannu re-review + fork CI approval still pending on new heads.
