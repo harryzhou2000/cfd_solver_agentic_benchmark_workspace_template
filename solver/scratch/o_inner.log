@@ -1,0 +1,52 @@
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+[cns2d] cns2d 1.0.0 (git 26ef1cb80b86)
+[cns2d] command: ./build/cns2d solve --case ../cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_inviscid.json --output scratch/o_inner --max-steps 3000 --log-every 250
+[cns2d] case: naca0012_m015_inviscid -- NACA0012, AoA 0 deg, Mach 0.15, inviscid
+[cns2d] case file: /workspace/cfd_solver_agentic_benchmark/inputs/cases/naca0012_m015_inviscid.json
+[cns2d] mesh file: /workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns
+[cns2d] MPI ranks: 1
+[cns2d] boundary family 'bc-2' -> farfield
+[cns2d] boundary family 'bc-4' -> slip_wall
+[cns2d] CGNS mesh '/workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns': base 'Base' (cell dim 2, phys dim 3), 1 zone(s)
+  zone 'dom-1': 15682 nodes, 20816 cells
+    section 'TriElements': TRI_3 x 10752 (elements 1..10752)
+    section 'QuadElements': QUAD_4 x 10064 (elements 10753..20816)
+    section 'bc-2': BAR_2 x 80 (elements 20817..20896)
+    section 'bc-4': BAR_2 x 404 (elements 20897..21300)
+    BC 'bc-2' family 'bc-2' location 'EdgeCenter' pset 'PointRange' range 20817..20896
+    BC 'bc-4' family 'bc-4' location 'EdgeCenter' pset 'PointRange' range 20897..21300
+[cns2d] global mesh: 15682 nodes (0 zone-interface node pairs fused, max merge distance 0), 20816 cells (10752 tri, 10064 quad), 36498 faces (36014 interior, 484 boundary)
+  boundary families: 'bc-2' (80 faces) 'bc-4' (404 faces)
+[cns2d] partitioning: metis_kway_single_part into 1 part(s), edge cut 0
+[cns2d] physics: inviscid (viscosity and heat conduction identically zero)
+[cns2d] rank 0/1: 20816 owned cells, 0 ghost cells, 36498 faces, 484 boundary faces, 0 neighbour rank(s)
+[cns2d] partitioner: metis_kway_single_part, global edge cut 0
+[cns2d] numerics: roe inviscid flux (harten_hyman_entropy_fix), piecewise-linear least-squares reconstruction, venkatakrishnan limiter, lu_sgs_simplified_jacobian, viscous terms disabled
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=31.746 (M=0.15)
+[cns2d][warn] mesh verification: uniform-flow residual on interior-only cells is 5.145e-09 (expected < 1e-12); the interior scheme does not preserve a uniform state exactly
+[cns2d] mesh verification: face-closure error 1.025e-16, volume-closure error 1.090e-10, total area 20085.4463 (boundary integral 20085.4463, mismatch 1.051e-14), linear-gradient error 1.428e-10, conservation defect 3.921e-03, uniform-flow residual 5.145e-09 on 19848 interior-only cells -- CHECK
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=31.746 (M=0.15)
+[cns2d] steady run: max_steps=3000, target=4.00 orders, CFL 1 -> 100 over 2000 steps, inner iterations 3..50 (target ratio 1.00e-02)
+  step       1  res  9.05057e+01  (- 0.00 orders)  cfl    1.000  inner    3 (ratio 1.93e-05)  cd    0.000000  cl    0.000000
+  step     250  res  4.02082e+00  (- 1.35 orders)  cfl    1.774  inner    3 (ratio 2.54e-04)  cd   -0.117215  cl    0.011499
+  step     500  res  3.03394e+00  (- 1.47 orders)  cfl    3.155  inner    3 (ratio 2.82e-03)  cd    0.062862  cl    0.020342
+  step     750  res  2.69609e+00  (- 1.53 orders)  cfl    5.610  inner    3 (ratio 4.01e-03)  cd   -0.015088  cl   -0.024143
+  step    1000  res  1.77137e+00  (- 1.71 orders)  cfl    9.977  inner    9 (ratio 6.06e-02)  cd    0.351831  cl   -0.029023
+  step    1250  res  2.08891e+00  (- 1.64 orders)  cfl   17.742  inner    9 (ratio 1.06e-01)  cd    0.054534  cl   -0.108656
+  step    1500  res  1.20661e+00  (- 1.88 orders)  cfl   31.550  inner    9 (ratio 1.76e-01)  cd    0.109653  cl   -0.137113
+  step    1750  res  1.04070e+00  (- 1.94 orders)  cfl   56.105  inner    9 (ratio 1.95e-01)  cd   -0.039134  cl    0.142059
+  step    2000  res  7.37491e-01  (- 2.09 orders)  cfl   99.770  inner    9 (ratio 2.28e-01)  cd   -0.026310  cl    0.122364
+  step    2250  res  3.92923e-01  (- 2.36 orders)  cfl  100.000  inner    9 (ratio 1.64e-01)  cd    0.028744  cl   -0.011492
+  step    2500  res  1.28796e-01  (- 2.85 orders)  cfl  100.000  inner    9 (ratio 3.18e-01)  cd    0.035483  cl   -0.085276
+  step    2750  res  2.32174e-01  (- 2.59 orders)  cfl  100.000  inner    9 (ratio 2.41e-01)  cd    0.015746  cl   -0.043899
+  step    3000  res  1.58747e-01  (- 2.76 orders)  cfl  100.000  inner    9 (ratio 1.83e-01)  cd   -0.003053  cl    0.017912
+[cns2d] final state: residual 1.471815e-01, C_D = -0.005043 (pressure -0.005043 + viscous 0.000000), C_L = 0.023455, C_mz = 0.010717
+[cns2d] run finished: status 'converged', 3000 steps, t = 0, 2.79 residual orders, 160.7 s wall time
+[cns2d] notes: reached the step limit (3000) with the residual reduced by 2.76 orders (target 4.00); forces stable, treated as a converged plateau

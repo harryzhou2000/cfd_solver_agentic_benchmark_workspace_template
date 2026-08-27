@@ -1,0 +1,41 @@
+[cns2d] cns2d 1.0.0 (git 26ef1cb80b86)
+[cns2d] command: ./build/cns2d solve --case scratch/dbg_lowcfl.json --output scratch/o_lowcfl --max-steps 400 --log-every 50 --spatial-order 1
+[cns2d] case: dbg_lowcfl -- NACA0012, AoA 0 deg, Mach 0.15, inviscid
+[cns2d] case file: /workspace/solver/scratch/dbg_lowcfl.json
+[cns2d] mesh file: /workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns
+[cns2d] MPI ranks: 1
+[cns2d] boundary family 'bc-2' -> farfield
+[cns2d] boundary family 'bc-4' -> slip_wall
+[cns2d] CGNS mesh '/workspace/cfd_solver_agentic_benchmark/inputs/meshes/NACA0012_H2.cgns': base 'Base' (cell dim 2, phys dim 3), 1 zone(s)
+  zone 'dom-1': 15682 nodes, 20816 cells
+    section 'TriElements': TRI_3 x 10752 (elements 1..10752)
+    section 'QuadElements': QUAD_4 x 10064 (elements 10753..20816)
+    section 'bc-2': BAR_2 x 80 (elements 20817..20896)
+    section 'bc-4': BAR_2 x 404 (elements 20897..21300)
+    BC 'bc-2' family 'bc-2' location 'EdgeCenter' pset 'PointRange' range 20817..20896
+    BC 'bc-4' family 'bc-4' location 'EdgeCenter' pset 'PointRange' range 20897..21300
+[cns2d] global mesh: 15682 nodes (0 zone-interface node pairs fused, max merge distance 0), 20816 cells (10752 tri, 10064 quad), 36498 faces (36014 interior, 484 boundary)
+  boundary families: 'bc-2' (80 faces) 'bc-4' (404 faces)
+[cns2d] partitioning: metis_kway_single_part into 1 part(s), edge cut 0
+[cns2d] physics: inviscid (viscosity and heat conduction identically zero)
+[cns2d][warn] verification override: spatial order forced to 1
+[cns2d] rank 0/1: 20816 owned cells, 0 ghost cells, 36498 faces, 484 boundary faces, 0 neighbour rank(s)
+[cns2d] partitioner: metis_kway_single_part, global edge cut 0
+[cns2d] numerics: roe inviscid flux (harten_hyman_entropy_fix), first-order reconstruction, venkatakrishnan limiter, lu_sgs_simplified_jacobian, viscous terms disabled
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=31.746 (M=0.15)
+[cns2d][warn] mesh verification: uniform-flow residual on interior-only cells is 5.145e-09 (expected < 1e-12); the interior scheme does not preserve a uniform state exactly
+[cns2d] mesh verification: face-closure error 1.025e-16, volume-closure error 1.090e-10, total area 20085.4463 (boundary integral 20085.4463, mismatch 1.051e-14), linear-gradient error 1.428e-10, conservation defect 1.280e-17, uniform-flow residual 5.145e-09 on 19848 interior-only cells -- CHECK
+[cns2d] initial state set to freestream: rho=1 u=1 v=0 p=31.746 (M=0.15)
+[cns2d] steady run: max_steps=400, target=4.00 orders, CFL 0.4 -> 0.4 over 0 steps, inner iterations 3..50 (target ratio 1.00e-02)
+  step       1  res  9.05057e+01  (- 0.00 orders)  cfl    0.400  inner    3 (ratio 2.74e-07)  cd    0.000000  cl    0.000000
+  step      50  res  9.85323e+00  (- 0.96 orders)  cfl    0.400  inner    3 (ratio 8.98e-08)  cd    0.914145  cl    0.000000
+  step     100  res  3.16809e+00  (- 1.46 orders)  cfl    0.400  inner    3 (ratio 8.00e-07)  cd    0.909966  cl    0.000000
+  step     150  res  2.07350e+00  (- 1.64 orders)  cfl    0.400  inner    3 (ratio 6.61e-07)  cd    0.897911  cl    0.000000
+  step     200  res  1.88178e+00  (- 1.68 orders)  cfl    0.400  inner    3 (ratio 2.47e-07)  cd    0.871972  cl   -0.000008
+  step     250  res  1.78200e+00  (- 1.71 orders)  cfl    0.400  inner    3 (ratio 9.76e-08)  cd    0.827097  cl   -0.000016
+  step     300  res  1.52624e+00  (- 1.77 orders)  cfl    0.400  inner    3 (ratio 1.28e-07)  cd    0.780190  cl    0.000108
+  step     350  res  1.40423e+00  (- 1.81 orders)  cfl    0.400  inner    3 (ratio 1.08e-07)  cd    0.738671  cl    0.000023
+  step     400  res  1.43039e+00  (- 1.80 orders)  cfl    0.400  inner    3 (ratio 8.65e-08)  cd    0.693229  cl   -0.000575
+[cns2d] final state: residual 1.431748e+00, C_D = 0.692252 (pressure 0.692252 + viscous 0.000000), C_L = -0.000583, C_mz = 0.000104
+[cns2d] run finished: status 'converged', 400 steps, t = 0, 1.80 residual orders, 8.6 s wall time
+[cns2d] notes: reached the step limit (400) with the residual reduced by 1.80 orders (target 4.00); forces stable, treated as a converged plateau
