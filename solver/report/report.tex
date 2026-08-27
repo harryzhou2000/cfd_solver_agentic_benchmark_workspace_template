@@ -1436,6 +1436,9 @@ laminar boundary layer is thick and the three cases behave quite differently.
   $\cdfLamMTwoZeroZero$.
 \end{description}
 
+The residual and force histories, surface distributions and fields of the three
+cases are in \cref{fig:naca015v,fig:naca080v,fig:naca200v}.
+
 Reported wall rows have exactly zero velocity, as required, while the adjacent
 cell-centre velocities in \code{surface\_cellcenter.csv} are finite --- the two
 are never conflated. \Cref{fig:nacavort} compares the vorticity fields of the
@@ -1507,7 +1510,8 @@ Source: \code{field\_final.vtu} of each case.}
 
 This is the cleanest quantitative validation in the set, because the
 low-Reynolds cylinder is a classical reference problem with well-established
-reference values~\cite{dennischang,tritton}. Every quantity below is read from
+reference values~\cite{dennischang,tritton}. \Cref{tab:cyl20} sets the computed
+quantities against them; every computed number in it is read from
 \code{results/cylinder\_m010\_laminar\_re20/surface.csv} and \code{forces.csv}.
 
 \begin{table}[htbp]
@@ -1522,7 +1526,8 @@ by \code{tools/make\_report\_tables.py}.}
 \end{table}
 
 The agreement is within $2\%$ on the total drag and on both parts of its
-split, and the separation angle falls in the accepted range. Two details are
+split, and the separation angle falls in the accepted range. The wake itself is
+shown in \cref{fig:cyl20}. Two details are
 worth noting. First, the front stagnation $C_p$ sits well above the compressible
 stagnation value of $1.002$ at $M_\infty=0.1$; that excess is the expected
 low-Reynolds viscous enhancement of the stagnation pressure and is not a
