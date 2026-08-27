@@ -40,7 +40,10 @@ void lusgsSolve(const LocalMesh& lm,
         double rho_i = states[i_cell][0];
         double vol_face = std::max(lm.cell_vol[i_cell], lm.cell_vol[j]);
         double visc_lambda = (mu > 0.0) ? (mu / rho_i * area * area / vol_face) : 0.0;
-        return 0.5 * (std::abs(vn_f) + a_eff) * area + visc_lambda;
+        double lambda_raw = 0.5 * (std::abs(vn_f) + a_eff) * area + visc_lambda;
+        // Fix T: cap off-diagonal to maintain diagonal dominance (prevents LU-SGS divergence)
+        double lambda_cap = diag[i_cell] / 8.0;
+        return std::min(lambda_raw, lambda_cap);
     };
 
     // Forward sweep: ghost cells always upper-triangle, never contribute here.

@@ -225,7 +225,13 @@ TransientResult runTransient(LocalMesh& lm,
         n_steps++;
 
         // Apply final correction -- damp by 0.5x when inner loop failed to converge
-        double accept_scale = (inner_count >= max_inner) ? 0.5 : 1.0;
+        // Fix T: use gentler damping when inner loop is nearly converged
+        double accept_scale;
+        if (inner_count >= max_inner) {
+            accept_scale = (last_inner_res_ratio < 0.01) ? 0.9 : 0.5;
+        } else {
+            accept_scale = 1.0;
+        }
         for (int i = 0; i < n_owned; i++) {
             // Per-cell bisect for the accepted physical state
             StateVec candidate = states_ref[i];

@@ -425,6 +425,19 @@ void OutputManager::writeFieldVTU(const std::vector<StateVec>& states, int step_
         rf.write(reinterpret_cast<const char*>(&n_owned), sizeof(int));
         for (int i = 0; i < n_owned; i++)
             rf.write(reinterpret_cast<const char*>(states[i].data()), 4*sizeof(double));
+        // Write restart manifest (rank 0 only, after barrier to ensure all bins are written)
+        MPI_Barrier(comm);
+        if (rank == 0) {
+            json manifest;
+            manifest["type"] = "restart_manifest";
+            manifest["mpi_ranks"] = n_ranks;
+            json files_arr = json::array();
+            for (int r = 0; r < n_ranks; r++)
+                files_arr.push_back("restart_final_rank" + std::to_string(r) + ".bin");
+            manifest["files"] = files_arr;
+            std::ofstream mf(output_dir + "/restart_final.json");
+            mf << manifest.dump(2) << "\n";
+        }
     }
 }
 

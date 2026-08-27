@@ -70,10 +70,7 @@ SteadyResult runSteady(LocalMesh& lm,
     // Re<100 viscous: cap initial CFL to 0.1 so the first few steps (starting from freestream)
     // don't apply huge corrections that blow up the residual.  Fix H2 (at step first_order_steps)
     // jumps CFL to cfl0 and simultaneously raises the Fix D floor so Fix D can't pull CFL back to 0.1.
-    double cfl_effective_init = cfl0;
-    if (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) {
-        cfl_effective_init = std::min(cfl0, 0.1);
-    }
+    double cfl_effective_init = cfl0;  // Fix T: removed Re<100 0.1 CFL cap (caused divergence)
     // Fix D minimum floor: starts at cfl_effective_init; bumped to cfl0 after first-order transition
     // for low-Re cases so Fix D cannot undo the Fix-H2 CFL jump.
     double cfl_fix_d_floor = cfl_effective_init;
@@ -92,13 +89,15 @@ SteadyResult runSteady(LocalMesh& lm,
     // Viscous M>=0.5 cases (Re>=100) also have transonic/supersonic shocks that destabilise
     // the 2nd-order transition — extend first-order phase the same way as inviscid cases.
     const bool viscous_shock_case   = (mu > 0.0) && (cfg.freestream.mach >= 0.5) && !low_re_viscous_case;
+    // Fix T: low-Mach viscous (M<0.3, Re>=100) needs extended startup like shock cases
+    const bool low_mach_viscous_case = (mu > 0.0) && (cfg.freestream.mach < 0.3) && !low_re_viscous_case;
     const bool any_shock_case = inviscid_shock_case || viscous_shock_case;
     const int first_order_steps = (mu > 0.0)
-        ? (low_re_viscous_case ? std::max(ramp_steps, 5000) :
-           viscous_shock_case  ? std::max(ramp_steps, 5000) : 500)
+        ? (low_re_viscous_case ? ramp_steps :
+           (viscous_shock_case || low_mach_viscous_case) ? std::max(ramp_steps, 5000) : 500)
         : (inviscid_shock_case ? std::max(ramp_steps, 5000) : 500);
     // Gradual 2nd-order limiter ramp (longer for shock/low-Re cases to avoid abrupt activation)
-    const int second_order_ramp_steps = (any_shock_case || low_re_viscous_case) ? 2000 : 300;
+    const int second_order_ramp_steps = (any_shock_case || low_re_viscous_case || low_mach_viscous_case) ? 2000 : 300;
     int fix_d_grace_until = 0;
 
     SteadyResult result;
@@ -212,7 +211,7 @@ SteadyResult runSteady(LocalMesh& lm,
         double outer_res_before = prev_outer_res;
         outer_res_decreased = (outer_res_before <= 0 || outer_res_norm <= outer_res_before);
         prev_outer_res = outer_res_norm;
-        if (!in_2nd_order_ramp && step > first_order_steps && outer_res_before > 0 && outer_res_norm > 1.1 * outer_res_before) {
+        if (step > first_order_steps && outer_res_before > 0 && outer_res_norm > 1.1 * outer_res_before) {
             consec_growth++;
             if (consec_growth >= 3) {
                 double growth_penalty = (mu <= 0.0 && cfg.freestream.mach > 1.0) ? 0.8 : 0.5;
@@ -241,7 +240,7 @@ SteadyResult runSteady(LocalMesh& lm,
             fix_d_grace_until = step + second_order_ramp_steps;
             // Fix G: reset adaptive CFL at 2nd-order transition so the limiter activates
             // gently at low CFL rather than at the high CFL steady state.
-            if (inviscid_shock_case || viscous_shock_case) {
+            if (inviscid_shock_case || viscous_shock_case || low_mach_viscous_case) {
                 cfl_effective = std::min(cfl_effective, std::max(cfl_effective_init * 5.0, 5.0));
             }
             // Fix H2: for Re<100 viscous cases, jump cfl_effective to cfl0 at the first-order
@@ -364,19 +363,24 @@ SteadyResult runSteady(LocalMesh& lm,
         // Fix P: also allow CFL boost for viscous cases when residual is within 1.5x of
         // historical minimum -- outer_res_decreased can be stuck False when residual flatlines,
         // permanently blocking Fix E and stalling m200_laminar CFL at 8.31.
-        } else if (inner_count < max_inner / 2 &&
+        } else if (inner_count < max_inner &&
                    (outer_res_decreased ||
-                    (mu > 0.0 && outer_res_norm <= 1.5 * min_outer_res_ever))) {
-            // Fix E: only boost CFL if Fix D is NOT currently active.
-            // Fix D (0.97x) and Fix E (1.2x) cancel each other, keeping CFL stuck at max
-            // when outer residuals oscillate above 2x min — typical for supersonic oscillation.
+                    (mu > 0.0 && outer_res_norm <= 2.5 * min_outer_res_ever))) {
+            // Fix E: boost CFL when inner loop converged (not hit max).
+            // Tiered: fast boost when inner iterations are few; slow recovery when many.
             bool fix_d_active = (step > 30 && step > fix_d_grace_until
                                  && min_outer_res_ever > 0
                                  && outer_res_norm > 2.0 * min_outer_res_ever);
             if (!fix_d_active) {
-                double cfl_boost = (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 1.02
-                                 : (mu <= 0.0 && cfg.freestream.mach > 1.0) ? 1.2
-                                 : 1.1;
+                double cfl_boost;
+                if (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0)
+                    cfl_boost = 1.02;  // slow ramp for Re<100
+                else if (mu <= 0.0 && cfg.freestream.mach > 1.0)
+                    cfl_boost = 1.2;   // fast ramp for supersonic inviscid
+                else if (inner_count < max_inner / 2)
+                    cfl_boost = 1.1;   // fast boost when inner converges quickly
+                else
+                    cfl_boost = 1.02;  // slow recovery when inner used many iterations
                 cfl_effective = std::min(cfl_effective * cfl_boost, cfl_max);
             }
         }
@@ -389,6 +393,9 @@ SteadyResult runSteady(LocalMesh& lm,
        if (inner_count >= max_inner) {
            // Inviscid high-Mach (M>0.8): be slightly less conservative to allow shock progress
            accept_scale = (mu <= 0.0 && cfg.freestream.mach > 0.8) ? 0.4 : 0.1;
+       } else if (low_re_viscous_case && step <= first_order_steps) {
+           // Fix T: Re<100 needs gentle 0.5x corrections during BL establishment
+           accept_scale = 0.5;
        } else {
            accept_scale = 1.0;
        }
@@ -416,18 +423,8 @@ SteadyResult runSteady(LocalMesh& lm,
             states[i] = candidate;
         }
 
-        // Fix R: restore isothermal fix ONLY for Re<100 low-Mach cases.
-        if (mu > 0.0 && cfg.freestream.mach < 0.3 && low_re_viscous_case) {
-            double T_ref = p_inf / (rho_inf * R_gas);
-            for (int i = 0; i < n_owned; i++) {
-                double rho_i = states[i][0];
-                if (rho_i < 1e-14) continue;
-                double ui = states[i][1] / rho_i;
-                double vi = states[i][2] / rho_i;
-                double p_iso = rho_i * R_gas * T_ref;
-                states[i][3] = rho_i * (p_iso / ((gamma - 1.0) * rho_i) + 0.5*(ui*ui + vi*vi));
-            }
-        }
+        // Fix T: removed isothermal Fix R - caused physically spurious CD for Re<100
+        // (isothermal forcing overrides rhoE each step causing artificial state drift)
 
         // Write outer spatial residual (R_ref) to CSV for true convergence history
         if (step % rc.write_residuals_every == 0 || step == 1) {

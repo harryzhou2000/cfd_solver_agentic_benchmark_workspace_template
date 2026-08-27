@@ -1,0 +1,34 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath,amssymb,graphicx,booktabs,hyperref,geometry}
+\geometry{margin=2.5cm}
+\title{2D Compressible CFD Solver Benchmark Report}
+\author{Automated CFD Benchmark}
+\date{\today}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\section{Governing Equations and Nondimensionalization}
+The solver integrates the 2D compressible Navier--Stokes equations:
+\[\frac{\partial \mathbf{U}}{\partial t} + \nabla \cdot (\mathbf{F}^c - \mathbf{F}^v) = 0\]
+where $\mathbf{U} = [\rho, \rho u, \rho v, \rho E]^T$.
+EOS:  = (\gamma-1)(\rho E - \frac{1}{2}\rho|\mathbf{u}|^2)$, $\gamma=1.4$.
+Variables nondimensionalized by $\rho_\infty$, \infty$, =1$.
+\section{Numerical Methods}
+\subsection{Inviscid Flux}
+Rusanov (Local Lax-Friedrichs) scheme. Turkel preconditioning for <0.3$, \geq 100$ viscous cases.
+\subsection{Viscous Flux}
+Average cell-gradient Green--Gauss method. Newtonian stress and Fourier heat flux.
+\subsection{Reconstruction}
+Piecewise-linear least-squares with Barth--Jespersen limiter.
+\subsection{Time Integration}
+Steady: pseudo-time LU-SGS with local time stepping, CFL ramp.
+Transient (Re~200): BDF2, $\Delta t=0.01$, frozen-history inner LU-SGS, tolerance 0^{-3}$.
+\subsection{MPI}
+METIS k-way partitioning. Non-blocking halo exchange. MPI\_Allreduce for reductions.
+\section{Boundary Conditions}
+\begin{itemize}
+\item \textbf{Farfield:} Riemann-based inflow/outflow.
+\item \textbf{Slip wall:} Zero normal velocity, zero-gradient pressure.
+\item \textbf{No-slip adiabatic wall:} $\mathbf{u}=0$, $\partial T/\partial n=0$.
+\end{itemize}
