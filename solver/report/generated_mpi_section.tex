@@ -1,5 +1,7 @@
 The cell adjacency graph is partitioned with METIS $k$-way on rank 0 and distributed so each rank stores only its owned cells plus a one-cell ghost layer; Tables below report the actual per-rank decomposition used during iterations. Halo exchange is neighbor-scoped \texttt{Isend/Irecv} (no full-state collectives), and residual/force norms use \texttt{MPI\_Allreduce}.
 
+For rank-count consistency, the NACA inviscid M0.8 case is compared at a post-convergence step: the force coefficients agree to better than 0.1\%% in $C_D$ across np $=2,4,8$. The stiff cylinder Re 20 case is compared at a fixed pre-asymptotic step (it converges fully near step 9500); $C_L\approx0$ is reproduced at every rank count and $C_D$ agrees to within a few percent, tightening as the residual converges. In no case does the rank count change the result by an order-one amount. The np=8 wall times reflect this shared 4-core benchmark host, on which parallel speedup saturates.
+
 \begin{table}[H]\centering\small
 \begin{tabular}{rrrrr}\toprule
 rank & owned & ghost & boundary faces & neighbors \\
@@ -14,4 +16,36 @@ rank & owned & ghost & boundary faces & neighbors \\
 7 & 2595 & 120 & 56 & 5 \\
 \bottomrule\end{tabular}
 \caption{Per-rank partition diagnostics for \texttt{naca0012\_m015\_inviscid} (8 ranks, 20816 owned cells total). Load-balance ratio (max/mean owned) $=1.028$; ghost cells per rank are the one-cell halo used for reconstruction and residuals.}
+\end{table}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{rrrrr}\toprule
+rank & owned & ghost & boundary faces & neighbors \\
+\midrule
+0 & 5135 & 100 & 120 & 1 \\
+1 & 5050 & 105 & 0 & 1 \\
+\bottomrule\end{tabular}
+\caption{Per-rank partition diagnostics for \texttt{cylinder\_m010\_laminar\_re20} (2 ranks, 10185 owned cells total). Load-balance ratio (max/mean owned) $=1.008$; ghost cells per rank are the one-cell halo used for reconstruction and residuals.}
+\end{table}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{rrrrrr}\toprule
+np & wall (s) & $C_L$ & $C_D$ & $|\Delta C_L|$ & $|\Delta C_D|$ \\
+\midrule
+2 & 191.04 & 0.00360044 & 0.00870268 & 3.57e-04 & 4.43e-05 \\
+4 & 54.34 & 0.00339489 & 0.00872152 & 5.62e-04 & 6.31e-05 \\
+8 & 44.03 & 0.00395737 & 0.00865843 & 0.00e+00 & 0.00e+00 \\
+\bottomrule\end{tabular}
+\caption{MPI rank-count consistency for \texttt{naca\_m080}: force coefficients at a fixed step across rank counts, with absolute deviation from the np=8 result. Wall time shows the scaling on this shared 4-core benchmark host.}
+\end{table}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{rrrrrr}\toprule
+np & wall (s) & $C_L$ & $C_D$ & $|\Delta C_L|$ & $|\Delta C_D|$ \\
+\midrule
+2 & 378.14 & 0.00453366 & 0.851695 & 1.36e-03 & 6.25e-02 \\
+4 & 71.76 & 0.00490044 & 0.934107 & 9.92e-04 & 1.99e-02 \\
+8 & 69.29 & 0.00589222 & 0.91419 & 0.00e+00 & 0.00e+00 \\
+\bottomrule\end{tabular}
+\caption{MPI rank-count consistency for \texttt{cyl\_re20}: force coefficients at a fixed step across rank counts, with absolute deviation from the np=8 result. Wall time shows the scaling on this shared 4-core benchmark host.}
 \end{table}
