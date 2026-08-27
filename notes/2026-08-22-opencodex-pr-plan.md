@@ -175,3 +175,10 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - Local validation: A 122 pass, B 62+201+33+32 pass, D 333 pass, C 42+16 pass; privacy scan + version-line + typecheck + diff-check clean on all.
 - Gates: A/B/D hygiene/enforce-target/label/resolve-pr all PASS and PRs are ready (4/4 checklist); runtime CI (Cross-platform/Service lifecycle/React Doctor) is action_required awaiting maintainer workflow approval. CodeRabbit: A pass, D pass (0 unresolved), B pending after resume.
 - Ingwannu reviewed the pre-rebase heads on all three (no new blockers; asked for rebase onto #2766 + drop bump) - replied on A/B/D confirming both are done. C rebased, owner pinged once for maintainer-sponsored (UI change authorization + auth-api hunk).
+
+## Status 2026-08-28 (final convergence round)
+
+- B #2351: fresh CodeRabbit review on the rebased head found a __proto__ audit-snapshot gap (copy functions dropped an own "__proto__" JSON key via prototype mutation). Fixed on 36d2ce9a5: redactSecrets plus every config-object copy in the audit path now use null-prototype records; regression added (JSON.parse('{"__proto__":...}') persists in fields/before/after). Local 63+201+33+32 pass, privacy clean, typecheck clean. Pushed, body updated, ready again; CodeRabbit re-reviewing; thread replied+resolved.
+- A #2350 head 5422a7728 / D #2527 head 6c22214bd: ready, gates green, CodeRabbit pass, 0 unresolved threads; Ingwannu re-review + fork CI approval pending (replied to all three).
+- C #2355 head 85ea3c3c2: rebased, 42+16 pass, draft; owner pinged once for maintainer-sponsored (UI + auth-api hunk).
+- Remaining external: Ingwannu re-approve A/B/D exact heads; lidge-jun sponsor C.
