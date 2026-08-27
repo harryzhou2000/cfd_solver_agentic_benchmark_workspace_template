@@ -868,6 +868,8 @@ def main():
         rm = json.load(open(roe2))
         macro("roePositivityFallbacks",
               f"{int(rm.get('positivity_fallback_face_states', 0)):,}".replace(",", r"\,"))
+        macro("roeStepsMachTwo",
+              f"{int(json.load(open(os.path.join(os.path.dirname(roe2), 'run_status.json')))['final_step'])}")
         macro("roeOrdersMachTwo",
               f"{float(json.load(open(os.path.join(os.path.dirname(roe2), 'run_status.json')))['residual_reduction_orders']):.2f}")
 

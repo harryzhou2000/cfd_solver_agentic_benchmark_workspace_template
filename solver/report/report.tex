@@ -494,15 +494,16 @@ the normal-momentum balance.
 \paragraph{Rusanov / local Lax--Friedrichs.} Provided with a configurable
 dissipation scale (the case file's \code{rusanov\_dissipation\_scale}).
 
-HLLC is the production default. The reason is documented in
-\cref{sec:limitations}: on this mesh the Roe flux suffers the classic
-shock instability at the Mach 2 bow shock. The Roe implementation itself is
-verified to be algebraically exact --- a unit test constructs a stationary
-normal shock from the Rankine--Hugoniot relations and checks that the Roe flux
-reproduces the common flux $\mathbf{F}_L=\mathbf{F}_R$ to $10^{-9}$, which only
-holds if the Roe average and the wave strengths are correct --- and
-\cref{tab:fluxcompare} shows that the two schemes agree closely wherever both
-converge.
+HLLC is the production default, for positivity rather than for accuracy: its
+wave-speed estimate keeps the intermediate states physical without help, where
+the Roe flux relies on the entropy fix and, at Mach 2, needed the shock fix
+below before it would converge at all. The Roe implementation is verified to be
+algebraically exact --- a unit test constructs a stationary normal shock from
+the Rankine--Hugoniot relations and checks that the Roe flux reproduces the
+common flux $\mathbf{F}_L=\mathbf{F}_R$ to $10^{-9}$, which only holds if the
+Roe average and the wave strengths are correct --- and \cref{tab:fluxcompare}
+shows that the two agree on every case tried, from $4\times10^{-7}$ relative in
+$C_D$ on the cylinder to $7\times10^{-3}$ at Mach 2.
 
 \paragraph{Multidimensional shock fix.} Resolving the contact wave is what makes
 Roe and HLLC accurate for boundary layers, and it is also what makes them
@@ -1079,14 +1080,32 @@ the truncation error, is the meaningful measure of the formal order.
 
 \subsection{Flux-scheme cross-check}
 \Cref{tab:fluxcompare} compares the production HLLC results with the
-independently implemented Roe flux with Harten--Yee entropy fix on two cases.
+independently implemented Roe flux with Harten--Yee entropy fix on three cases,
+one subsonic, one supersonic and one viscous. The two solvers share only the
+mesh, the reconstruction and the time integration; the flux itself is a separate
+derivation. They agree to $4\times10^{-7}$ relative in $C_D$ on the cylinder,
+$5\times10^{-3}$ on the subsonic aerofoil --- where $C_D$ is the $10^{-3}$
+spurious drag of a case whose exact drag is zero, so the absolute agreement is
+$5\times10^{-6}$ --- and $7\times10^{-3}$ at Mach 2, where the answer is set by a
+captured bow shock. A third, structurally different scheme, Rusanov, lands
+within $0.1\%$ of both at Mach 2 (\cref{tab:shockfix}). Three independent flux
+functions agreeing is the strongest evidence in this report that the residual
+assembly around them is correct.
+
+Both contact-resolving schemes need the shock fix of \cref{eq:shockfix} at Mach
+2. Without it the Roe run does not converge at all; with it, it converges in
+\roeStepsMachTwo{} steps with \roePositivityFallbacks{} positivity fallbacks, and
+the same fix takes HLLC from a $\shockFixCpExcessUnfixed\%$ stagnation-pressure
+overshoot to $\shockFixCpExcessFixed\%$. That one mechanism explains both
+schemes' behaviour is itself a check on the diagnosis.
 
 \begin{table}[htbp]
 \centering
-\caption{Independent cross-check of the two implemented approximate Riemann
-solvers: the production HLLC runs against runs of the same cases with the Roe
-flux and its Harten--Yee entropy fix, on identical meshes and with identical
-convergence criteria. Source: \code{results/} and \code{studies/verify/}.}
+\caption{Independent cross-check of the two contact-resolving approximate
+Riemann solvers: the production HLLC runs against runs of the same cases with
+the Roe flux and its Harten--Yee entropy fix, on identical meshes and with
+identical convergence criteria and shock fix. Source: \code{results/} and
+\code{studies/verify/}.}
 \label{tab:fluxcompare}
 \gtable{tab_flux}
 \end{table}
@@ -1811,22 +1830,6 @@ output files and share one style module (\code{tools/plot\_style.py}).
 \clearpage
 \section{Limitations and Failure Analysis}
 \label{sec:limitations}
-
-\paragraph{Roe flux at the Mach 2 bow shock.} With the Roe flux the Mach 2
-aerofoil case stalls far short of its residual target and generates
-\roePositivityFallbacks{} first-order positivity fallbacks, whereas HLLC on the
-identical mesh and settings converges with none
-(\cref{tab:fluxcompare} and the \code{positivity\_fallback\_face\_states} field
-of the two \code{metadata.json} files). The Roe implementation is exact for
-a stationary Rankine--Hugoniot shock (\cref{sec:verification}) and agrees with
-HLLC on the subsonic cases (\cref{tab:fluxcompare}), so this is the classical
-Roe shock instability rather than an implementation defect --- the
-strongly stretched cells that this viscous-type mesh places across the bow shock
-are exactly the configuration that triggers it. The entropy-fix coefficient is
-exposed as \code{--entropy-fix}, but increasing it adds dissipation to the
-acoustic fields only, which is not where the instability originates. HLLC was
-therefore adopted as the production flux; Roe remains available and verified,
-and the two agree closely on every case where Roe converges.
 
 \paragraph{Residual carbuncle at the Mach 2 stagnation point.} HLLC is not
 immune to the same class of instability, only less prone to it, and the shock
