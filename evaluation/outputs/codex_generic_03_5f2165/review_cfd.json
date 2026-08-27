@@ -1,0 +1,116 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 3,
+      "notes": "Conservative CFD intent documented."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "CGNS/METIS code paths found."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 2,
+      "notes": "Residual path exists but results fail."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 2,
+      "notes": "Rusanov present; no credible converged validation."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 1,
+      "notes": "Final response admits earlier boundary/force detection failure."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 2,
+      "notes": "Least-squares/limiter present, no production success."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 2,
+      "notes": "Positivity/limiter claims contradicted by instability history."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 1,
+      "notes": "Viscous cases failed."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 1,
+      "notes": "Source output identifies point-implicit local CFL, not credible LU-SGS."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 0,
+      "notes": "Re200 ends at step 218 / time 0, not a transient production run."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 3,
+      "notes": "METIS and MPI are present, but no rank-count results."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Solver uses explicit time stepping only",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Normal viscous traction mislabeled as skin friction",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 1.77
+}

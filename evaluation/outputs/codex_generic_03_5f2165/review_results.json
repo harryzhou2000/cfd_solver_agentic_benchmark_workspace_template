@@ -1,0 +1,83 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 1,
+      "notes": "Eight paths exist but final M015 status is invalid and no credible complete package."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 1,
+      "notes": "Explicit validator fails immediately on invalid not_converged status."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 0,
+      "notes": "Report manifest calls every steady run failed; Re200 only 10000 attempted steps and raw status ends at 218."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 0,
+      "notes": "No converged/settled production result; final response documents instability."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 2,
+      "notes": "Some rendered figures exist but most are unreferenced and report evidence is inconsistent."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 1,
+      "notes": "Run manifest candidly lists failures, but session final response repeatedly contradicts itself and report overclaims artifacts."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 1,
+      "notes": "Raw packages are not committed; figure/source traceability is incomplete."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report figures do not correspond to submitted field/CSV outputs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete or failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Debug outputs presented as final case results",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 0.8
+}
