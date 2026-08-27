@@ -14,8 +14,12 @@ import json
 import os
 import re
 import sys
+import sys
 
 import numpy as np
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from vtu_reader import read_vtu  # noqa: E402
 
 # LaTeX / package commands that look like our macros but are not.
 LATEX_BUILTINS = {
@@ -300,6 +304,23 @@ def main():
         T.append(r"\bottomrule")
         T.append(r"\end{tabular}")
         flush("mpi")
+        # Consistency and balance figures quoted in the prose, so that the text
+        # cannot drift away from the table above.
+        per_case = {}
+        for r in rows:
+            per_case.setdefault(r["case_id"], []).append(r)
+        for cid, rr in per_case.items():
+            tag = "Cyl" if "cylinder" in cid else "Naca"
+            rel = max(abs(float(x.get("cd_rel_diff_vs_ref", 0.0))) for x in rr)
+            absd = max(abs(float(x["cd"]) - float(rr[0]["cd"])) for x in rr)
+            macro("mpiMaxRelCd" + tag, sci(rel, 1))
+            macro("mpiMaxAbsCd" + tag, sci(absd, 1))
+            macro("mpiCd" + tag, f"{float(rr[0]['cd']):.4f}")
+            sp4 = [float(x["speedup"]) for x in rr if int(x["mpi_ranks"]) == 4]
+            if sp4:
+                macro("mpiSpeedupFour" + tag, f"{sp4[0]:.2f}")
+        macro("mpiMaxImbalance",
+              f"{100.0 * (max(float(r['load_balance']) for r in rows) - 1.0):.1f}")
 
     # ------------------------------------------------------------------ flux cross-check
     # Pairs each production (HLLC) run with the Roe run of the same case in
@@ -331,6 +352,83 @@ def main():
         T[-1] = r"\bottomrule"
         T.append(r"\end{tabular}")
         flush("flux")
+
+    # ------------------------------------------------------------------ laminar aerofoil diagnostics
+    for cid, tag in (("naca0012_m015_laminar_re5000", "LamMZeroOneFive"),
+                     ("naca0012_m080_laminar_re5000", "LamMZeroEightZero"),
+                     ("naca0012_m200_laminar_re5000", "LamMTwoZeroZero"),
+                     ("naca0012_m015_inviscid", "InvMZeroOneFive"),
+                     ("naca0012_m080_inviscid", "InvMZeroEightZero"),
+                     ("naca0012_m200_inviscid", "InvMTwoZeroZero")):
+        c = cases.get(cid)
+        if c is None:
+            continue
+        sf = c["surface"]
+        x, cpv, cfv, ny = sf["x"], sf["cp"], sf["cf"], sf["ny"]
+        chord = float(x.max() - x.min())
+        xc = (x - x.min()) / chord
+        up = ny < 0.0
+        o = np.argsort(xc[up])
+        xu, cfu = xc[up][o], cfv[up][o]
+        # skin friction at 30% chord, and the last upper-surface Cf sign change
+        i30 = int(np.argmin(np.abs(xu - 0.3)))
+        macro("cfThirtyChord" + tag, f"{cfu[i30]:.4f}")
+        z = np.where(np.diff(np.sign(cfu)) != 0)[0]
+        inner = [xu[i] for i in z if xu[i] < 0.99]
+        macro("separationX" + tag, f"{inner[0]:.2f}" if inner else "none")
+        macro("cpMin" + tag, f"{cpv.min():.3f}")
+        macro("cdp" + tag, f"{float(c['meta']['final_pressure_drag']):.4f}")
+        macro("cdf" + tag, f"{float(c['meta']['final_viscous_drag']):.4f}")
+        try:
+            mesh = read_vtu(os.path.join(c["dir"], "field_final.vtu"))
+            macro("machMax" + tag, f"{mesh.cell_data['Mach'].max():.2f}")
+            macro("supersonicCells" + tag, f"{int((mesh.cell_data['Mach'] > 1.0).sum())}")
+        except Exception:
+            pass
+    macro("blasiusCfThirty", f"{0.664 / np.sqrt(5000 * 0.3):.4f}")
+
+    # ------------------------------------------------------------------ Re20 validation
+    c20 = cases.get("cylinder_m010_laminar_re20")
+    if c20 is not None:
+        sf = c20["surface"]
+        x, y = sf["x"], sf["y"]
+        cp20, cf20 = sf["cp"], sf["cf"]
+        th = np.degrees(np.arctan2(y, x)) % 360.0
+        o = np.argsort(th)
+        ths, cfs = th[o], cf20[o]
+        zeros = [ths[i] for i in np.where(np.diff(np.sign(cfs)) != 0)[0]]
+        # separation measured from the rear stagnation line (theta = 0)
+        sep = sorted(min(z, 360.0 - z) for z in zeros)
+        i_front = int(np.argmin(np.abs(th - 180.0)))
+        i_rear = int(np.argmin(np.abs(th - 0.0)))
+        i_min = int(np.argmin(cp20))
+        m20 = c20["meta"]
+        T.append(r"% ---- Re 20 cylinder against literature")
+        T.append(r"\begin{tabular}{lrl}")
+        T.append(r"\toprule")
+        T.append(r"quantity & computed & accepted\\")
+        T.append(r"\midrule")
+        rows20 = [
+            (r"total drag $C_D$", f"{float(m20['final_cd']):.4f}", r"$2.0$--$2.05$"),
+            (r"pressure drag $C_{D,p}$", f"{float(m20['final_pressure_drag']):.4f}",
+             r"$\approx1.23$"),
+            (r"skin-friction drag $C_{D,f}$", f"{float(m20['final_viscous_drag']):.4f}",
+             r"$\approx0.81$"),
+            (r"lift $C_L$ (symmetry)", f"{float(m20['final_cl']):+.6f}", r"$0$"),
+            (r"front stagnation $C_p$", f"{cp20[i_front]:.4f}", r"$\approx1.26$"),
+            (r"base pressure $C_p$ at $\theta=0^\circ$", f"{cp20[i_rear]:.4f}",
+             r"$\approx-0.55$"),
+            (r"minimum $C_p$", f"{cp20[i_min]:.4f} at "
+             rf"${abs(180.0 - th[i_min]):.0f}^\circ$ from stagnation", r"--"),
+            (r"separation angle from the rear",
+             (rf"${sep[0]:.0f}^\circ$--${sep[-1]:.0f}^\circ$" if sep else "--"),
+             r"$43^\circ$--$45^\circ$"),
+        ]
+        for a, b, c in rows20:
+            T.append(rf"{a} & {b} & {c}\\")
+        T.append(r"\bottomrule")
+        T.append(r"\end{tabular}")
+        flush("cyl20")
 
     # ------------------------------------------------------------------ Re200 validation
     spath0 = os.path.join(args.report, "shedding_analysis.json")
@@ -550,6 +648,50 @@ def main():
         macro("restartMaxDifference", sci(worst, 1) if worst > 0 else "exactly zero")
         macro("restartPassed", "yes" if r.get("passed") else "no")
 
+    # ------------------------------------------------- limiter freeze comparison
+    # Every number the limitations section quotes about the residual limit cycle
+    # is derived here, so the prose cannot drift away from the runs.
+    FREEZE_PAIRS = [("naca0012_m080_inviscid", "MachZeroEight"),
+                    ("naca0012_m200_inviscid", "MachTwo")]
+    for cid, tag in FREEZE_PAIRS:
+        nf = os.path.join("studies", "verify", cid + "_nofreeze")
+        if cid not in cases or not os.path.exists(os.path.join(nf, "forces.csv")):
+            continue
+        cd_frozen = float(cases[cid]["forces"]["cd"][-1])
+        f_nf = load_csv(os.path.join(nf, "forces.csv"))
+        r_nf = load_csv(os.path.join(nf, "residuals.csv"))
+        cd_free = float(f_nf["cd"][-1])
+        macro("cdFrozen" + tag, f"{cd_frozen:.4g}")
+        macro("cdUnfrozen" + tag, f"{cd_free:.4g}")
+        macro("cdFreezeDiffPct" + tag,
+              f"{100.0 * abs(cd_free - cd_frozen) / max(abs(cd_frozen), 1e-30):.2f}")
+        rl = r_nf["residual_l2"]
+        macro("residualStallUnfrozen" + tag, sci(float(rl[-1]) / float(rl[0]), 1))
+        macro("stepsUnfrozen" + tag, f"{int(float(r_nf['step'][-1]))}")
+        # Scatter of the drag over the acceptance window of the production run.
+        cdp = cases[cid]["forces"]["cd"]
+        w = max(50, len(cdp) // 10)
+        seg = cdp[-w:]
+        macro("cdScatterPct" + tag,
+              f"{100.0 * float(np.std(seg)) / max(abs(float(np.mean(seg))), 1e-30):.2f}")
+        macro("freezeStep" + tag,
+              f"{int(cases[cid]['meta'].get('limiter_freeze_step', 0))}")
+
+    # --------------------------------------------------------- unit tests
+    # Parsed from the stored doctest summary so the report cannot claim a
+    # different number of tests than the ones that actually ran.
+    ut = os.path.join(args.report, "unit_tests.log")
+    if os.path.exists(ut):
+        txt = open(ut).read()
+        m1 = re.search(r"test cases:\s*(\d+)\s*\|\s*(\d+) passed\s*\|\s*(\d+) failed", txt)
+        m2 = re.search(r"assertions:\s*(\d+)\s*\|\s*(\d+) passed\s*\|\s*(\d+) failed", txt)
+        if m1:
+            macro("unitTestCases", m1.group(1))
+            macro("unitTestFailures", m1.group(3))
+        if m2:
+            macro("unitTestAssertions", m2.group(1))
+            macro("unitAssertionFailures", m2.group(3))
+
     # Sanity-check summary
     sp = os.path.join(args.report, "sanity_checks.json")
     if os.path.exists(sp):
@@ -568,8 +710,17 @@ def main():
     bad = [l for l in M if not re.match(r"^\\newcommand\{\\[A-Za-z]+\}", l)]
     if bad:
         raise SystemExit("generated macro names must be purely alphabetic: " + str(bad[:3]))
+    seen, dup = set(), []
+    for l in M:
+        nm = re.match(r"^\\newcommand\{\\([A-Za-z]+)\}", l).group(1)
+        if nm in seen:
+            dup.append(nm)
+        seen.add(nm)
+    if dup:
+        raise SystemExit("duplicate generated macro(s), LaTeX would reject them: "
+                         + ", ".join(sorted(set(dup))))
     for name in ("runs", "cases", "forces", "numerics", "inner", "partition", "mpi", "mms",
-                 "flux", "cflstudy", "re200"):
+                 "flux", "cflstudy", "re200", "cyl20"):
         p = os.path.join(tdir, f"tab_{name}.tex")
         if not os.path.exists(p):
             open(p, "w").write(r"\emph{(data not available)}" + "\n")

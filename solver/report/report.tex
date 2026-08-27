@@ -528,15 +528,27 @@ farfield is freestream-preserving.
 
 \paragraph{Slip wall.} The ghost state mirrors the normal velocity,
 $\mathbf{u}_g=\mathbf{u}_i-2(\mathbf{u}_i\cdot\hat{\mathbf{n}})\hat{\mathbf{n}}$,
-with $\rho$ and $p$ continuous. With this mirrored pair the Roe/HLLC flux
-returns \emph{exactly}
+with $\rho$ and $p$ continuous. With this mirrored pair \emph{every}
+implemented flux function returns a wall flux of the form
 \begin{equation}
-  \boldsymbol{\Phi}=[0,\ p_w n_x,\ p_w n_y,\ 0]^T,\qquad
-  p_w=p_i+\rho_i u_{n,i}^{2}+\rho_i \bar a\, u_{n,i},
+  \boldsymbol{\Phi}=[0,\ p_w n_x,\ p_w n_y,\ 0]^T,
   \label{eq:wallflux}
 \end{equation}
-i.e.\ zero mass and energy flux and a purely normal momentum flux whose acoustic
-correction drives $u_n\to0$. This is verified as an identity in the unit tests.
+i.e.\ zero mass flux, zero energy flux and a purely normal momentum flux; a unit
+test asserts exactly that structure for Roe, HLLC and Rusanov, for both wall
+types and several normal directions. The effective wall pressure depends on the
+flux function. For Roe it is
+\begin{equation}
+  p_w=p_i+\rho_i u_{n,i}^{2}+\rho_i \bar a\, u_{n,i},
+  \qquad \bar a^{2}=a_i^{2}+\tfrac{\gamma-1}{2}u_{n,i}^{2},
+  \label{eq:wallpressure}
+\end{equation}
+which a second unit test verifies as an algebraic identity; HLLC gives the same
+expression when $u_{n,i}\ge0$ and $p_w=p_i+\rho_i a_i u_{n,i}$ when
+$u_{n,i}<0$, because its wave-speed estimate then selects a different left
+state. In both cases the correction is proportional to $u_{n,i}$ and therefore
+acts to drive the normal velocity to zero, and both reduce to $p_w=p_i$ at
+convergence.
 The reported boundary value keeps the tangential velocity,
 $\mathbf{u}_b=\mathbf{u}_i-(\mathbf{u}_i\cdot\hat{\mathbf{n}})\hat{\mathbf{n}}$,
 so slip-wall rows in \code{surface.csv} have zero normal velocity and non-zero
@@ -548,16 +560,17 @@ and \cref{eq:wallflux} applies unchanged. Reversing the tangential velocity as
 well --- a tempting way to ``impose'' no slip --- would leave a spurious
 convective tangential momentum flux $\rho u_t u_n$ at the wall; this was
 measured during development and is why the mirrored-normal form is used. The
-no-slip condition is imposed through the viscous stress instead: the boundary
-value is $\mathbf{u}_b=\mathbf{0}$ with $p_b=p_i$ and $T_b=T_i$ (adiabatic), and
-the wall-normal velocity derivative in \cref{eq:facegrad} therefore becomes
-$-\mathbf{u}_c/|\mathbf{x}_f-\mathbf{x}_c|$. The adiabatic condition is enforced
-by dropping the heat-flux term entirely, so $\mathbf{q}\cdot\hat{\mathbf{n}}=0$
+no-slip condition is imposed through the viscous stress instead, which is built
+directly from the wall-normal velocity derivative as described below. The
+reported boundary value is $\mathbf{u}_b=\mathbf{0}$ with $p_b=p_i$ and
+$T_b=T_i$ (adiabatic); it enters the least-squares stencil, the force
+integration and the surface output. The adiabatic condition is enforced by
+dropping the heat-flux term entirely, so $\mathbf{q}\cdot\hat{\mathbf{n}}=0$
 identically, and the viscous energy flux vanishes because
-$\mathbf{u}_b=\mathbf{0}$. Wall rows in \code{surface.csv} therefore report
-exactly zero velocity and zero Mach number; the adjacent cell-centre values are
-written separately to \code{surface\_cellcenter.csv} so that the two can never
-be confused.
+$\mathbf{u}_b=\mathbf{0}$: the wall exchanges only momentum with the fluid.
+Wall rows in \code{surface.csv} therefore report exactly zero velocity and zero
+Mach number; the adjacent cell-centre values are written separately to
+\code{surface\_cellcenter.csv} so that the two can never be confused.
 
 \paragraph{Wall stress.} At a steady no-slip wall the viscous traction is
 \emph{purely tangential}, and the solver builds it that way rather than
@@ -834,7 +847,9 @@ Verification is independent of the benchmark cases and is produced by
 \code{cfd2d verify}, whose output is \code{report/verification.json}.
 
 \subsection{Unit tests}
-\code{ctest} runs 16 test cases covering polygon area/centroid and edge normals,
+\code{ctest} runs \unitTestCases{} test cases (\unitTestAssertions{}
+assertions, \unitTestFailures{} failing; \code{report/unit\_tests.log}) covering
+polygon area/centroid and edge normals,
 the equation-of-state round trip, consistency of all three Riemann solvers
 ($\boldsymbol{\Phi}(\mathbf{W},\mathbf{W})=\mathbf{F}(\mathbf{W})$), the exact
 upwind limit for supersonic states, exactness of the Roe flux across a
@@ -1034,9 +1049,11 @@ realised inner-iteration statistics.
 \begin{table}[htbp]
 \centering
 \caption{Force coefficients. $C_{D,p}$ is the pressure (form) drag and
-$C_{D,f}$ the tangential skin-friction drag; $C_D$ additionally contains the
-normal viscous traction, which is below $0.2\%$ of $C_D$ everywhere.
-$^{\dagger}$ time-averaged over the second half of the record.}
+$C_{D,f}$ the tangential skin-friction drag. $C_D$ is the total, which also
+contains the normal viscous traction; that term is identically zero on no-slip
+walls by \cref{eq:wallstress} and negligible elsewhere, so $C_D=C_{D,p}+C_{D,f}$
+to the digits shown. $^{\dagger}$ time-averaged over the second half of the
+record.}
 \label{tab:forces}
 \gtable{tab_forces}
 \end{table}
@@ -1183,27 +1200,31 @@ constant viscosity from \cref{eq:mu}, $\mu=2\times10^{-4}$. At $Re=5000$ the
 laminar boundary layer is thick and the three cases behave quite differently.
 
 \begin{description}
-\item[$M_\infty=0.15$] is the cleanest check. The computed skin friction matches
-  the Blasius flat-plate value where the pressure gradient is weak
-  ($C_f=0.0171$ at $x/c=0.3$ against $0.664/\sqrt{Re_x}=0.0171$), falls below it
-  under the adverse gradient aft of maximum thickness, and crosses zero at
-  $x/c\approx0.91$: laminar separation just ahead of the trailing edge, which is
-  what is expected at this Reynolds number. Upper and lower surfaces agree to
-  four digits.
-\item[$M_\infty=0.8$] never becomes supersonic \emph{on the surface}: the
-  minimum $C_p$ is $-0.41$ against the sonic value $C_p^*=-0.435$. The boundary
-  layer displaces the flow enough that the small supersonic region
-  ($M_{\max}=1.03$, 341 cells) sits off the wall rather than on it, and the
-  boundary layer separates at $x/c\approx0.53$. Compare the inviscid case at the
-  same Mach number, which has a half-chord supersonic pocket reaching $M=1.26$
-  on the surface: this is a genuine viscous--inviscid interaction, not a mesh
-  artefact.
+\item[$M_\infty=0.15$] is the cleanest check. Where the pressure gradient is
+  weak the computed skin friction agrees with the Blasius flat-plate value to
+  about $1\%$ ($C_f=\cfThirtyChordLamMZeroOneFive$ at $x/c=0.3$ against
+  $0.664/\sqrt{Re_x}=\blasiusCfThirty$); it falls below it under the adverse
+  gradient aft of maximum thickness, and crosses zero at
+  $x/c\approx\separationXLamMZeroOneFive$: laminar separation ahead of the
+  trailing edge, which is what is expected at this Reynolds number. Upper and
+  lower surfaces agree to four digits.
+\item[$M_\infty=0.8$] is transonic, but markedly less so than the inviscid case
+  at the same Mach number. The thick laminar boundary layer displaces the flow
+  and weakens the supersonic pocket: the minimum surface $C_p$ is
+  $\cpMinLamMZeroEightZero$ against $\cpMinInvMZeroEightZero$ inviscid (the
+  sonic value is $C_p^*=-0.435$), and the peak Mach number in the field drops
+  from $\machMaxInvMZeroEightZero$ to $\machMaxLamMZeroEightZero$. The boundary
+  layer separates at $x/c\approx\separationXLamMZeroEightZero$, immediately
+  downstream of where the pocket closes --- a weak but unmistakable
+  shock/boundary-layer interaction, and a genuine viscous--inviscid effect
+  rather than a mesh artefact.
 \item[$M_\infty=2.0$] is in the strong viscous-interaction regime. At $x/c=0.5$
   the boundary layer is about $0.08$ chords thick, comparable to the local
-  half-thickness of the section itself, so the effective body is markedly blunter
-  than the aerofoil. The consequence is visible in the force split: the pressure
-  drag rises from $\cdNacaZeroZeroOneTwoMTwoZeroZeroInviscid{}$ in the inviscid
-  case to $0.0967$ here, on top of a skin-friction drag of $0.0413$.
+  half-thickness of the section itself, so the effective body is markedly
+  blunter than the aerofoil. The consequence is visible in the force split: the
+  pressure drag rises from $\cdNacaZeroZeroOneTwoMTwoZeroZeroInviscid$ in the
+  inviscid case to $\cdpLamMTwoZeroZero$ here, on top of a skin-friction drag of
+  $\cdfLamMTwoZeroZero$.
 \end{description}
 
 Reported wall rows have exactly zero velocity, as required, while the adjacent
@@ -1282,33 +1303,23 @@ reference values~\cite{dennischang,tritton}. Every quantity below is read from
 \centering
 \caption{Circular cylinder at $Re=20$: computed quantities against accepted
 values from the steady low-Reynolds cylinder
-literature~\cite{dennischang,tritton}.}
+literature~\cite{dennischang,tritton}. Every computed number is read from
+\code{results/cylinder\_m010\_laminar\_re20/surface.csv} and \code{forces.csv}
+by \code{tools/make\_report\_tables.py}.}
 \label{tab:cyl20}
-\begin{tabular}{lrl}
-\toprule
-quantity & computed & accepted\\
-\midrule
-total drag $C_D$                       & \cdCylinderMZeroOneZeroLaminarReTwoZero & $2.0$--$2.05$\\
-pressure drag $C_{D,p}$                & $1.217$ & $\approx1.23$\\
-skin-friction drag $C_{D,f}$           & $0.800$ & $\approx0.81$\\
-lift $C_L$ (symmetry)                  & \clCylinderMZeroOneZeroLaminarReTwoZero & $0$\\
-front stagnation $C_p$                 & $1.263$ & $\approx1.26$\\
-base pressure $C_p$ at $\theta=0^\circ$& $-0.558$ & $\approx-0.55$\\
-minimum $C_p$                          & $-0.997$ at $99^\circ$ from stagnation & --\\
-separation angle from the rear         & $41^\circ$--$45^\circ$ & $43^\circ$--$45^\circ$\\
-\bottomrule
-\end{tabular}
+\gtable{tab_cyl20}
 \end{table}
 
 The agreement is within about $1\%$ on the total drag and on both parts of its
-split. Two details are worth noting. First, the front stagnation $C_p$ of
-$1.263$ sits well above the compressible stagnation value $1.002$ at
-$M_\infty=0.1$; that excess is the expected low-Reynolds viscous enhancement of
-the stagnation pressure and is not a numerical artefact. Second, the skin
-friction changes sign at $41^\circ$--$45^\circ$ ahead of the rear stagnation
-line, which is where the steady recirculation bubble begins; the sign convention
-of \cref{sec:bc} makes that crossing directly readable from the $C_f$ plot. A
-steady, closed, symmetric wake is formed (\cref{fig:cyl20}).
+split, and the separation angle falls in the accepted range. Two details are
+worth noting. First, the front stagnation $C_p$ sits well above the compressible
+stagnation value of $1.002$ at $M_\infty=0.1$; that excess is the expected
+low-Reynolds viscous enhancement of the stagnation pressure and is not a
+numerical artefact. Second, the skin friction changes sign a little over
+$40^\circ$ ahead of the rear stagnation line, which is where the steady
+recirculation bubble begins; the sign convention of \cref{sec:bc} makes that
+crossing directly readable from the $C_f$ plot. A steady, closed, symmetric wake
+is formed (\cref{fig:cyl20}).
 
 \begin{figure}[htbp]
 \centering
@@ -1422,17 +1433,21 @@ ranks, so the $np=8$ requirement is satisfied for both geometries by the
 submitted results themselves; the rank study is an additional set of runs stored
 in \code{studies/mpi/}.
 
-Force coefficients agree closely across rank counts. For the cylinder the
-relative difference in $C_D$ against the single-rank run is at most
-$2.4\times10^{-5}$; for the aerofoil it reaches $5.6\times10^{-3}$, but that is a
-relative measure of a drag coefficient of $10^{-3}$, so the \emph{absolute}
-disagreement is below $6\times10^{-6}$ --- far smaller than the
-$5\times10^{-5}$ force tolerance at which the runs were stopped. This is the
-level of the iterative convergence criterion rather than a partition effect: the
-residual assembly is partition-independent by construction (\cref{sec:mpi}), and
-the only rank-dependence is the lagged coupling of the LU-SGS sweeps across rank
+Force coefficients agree closely across rank counts. For the cylinder
+($C_D=\mpiCdCyl$) the relative difference against the single-rank run is at most
+\mpiMaxRelCdCyl. For the aerofoil the relative figure reaches \mpiMaxRelCdNaca,
+but that is a relative measure of a drag coefficient of $\mpiCdNaca$ --- the
+spurious drag of a symmetric, uncambered section at zero incidence in an
+inviscid flow, whose exact value is zero --- so the meaningful measure is the
+\emph{absolute} disagreement, \mpiMaxAbsCdNaca. Both are at the level of the
+iterative convergence criterion (the runs stop at a force drift of
+$5\times10^{-5}$) rather than a partition effect: the residual assembly is
+partition-independent by construction (\cref{sec:mpi}), and the only
+rank-dependence is the lagged coupling of the LU-SGS sweeps across rank
 boundaries, which changes the path to the steady state but not the state itself.
-Load balance stays within $1.5\%$ of perfect and the METIS edge cut grows
+The step counts in \cref{tab:mpi} show exactly that --- they differ by a few
+percent between rank counts while the converged forces do not. Load balance
+stays within $\mpiMaxImbalance\%$ of perfect and the METIS edge cut grows
 roughly linearly with the rank count, as expected for a two-dimensional
 partition.
 
@@ -1457,9 +1472,13 @@ the same case. $\Delta C_D/C_D$ is measured against the single-rank result.}
 \centering
 \fig[\textwidth]{mpi_scaling.png}
 \caption{Rank-count study: parallel speed-up, force consistency and halo growth.
-The dash-dotted line marks the 4-CPU cgroup quota of the benchmark container;
-beyond it the 8-rank runs are oversubscribed, which is why the speed-up
-saturates. Source: \code{report/mpi\_study.csv}.}
+In the left panel the dash-dotted line marks the 4-CPU cgroup quota of the
+benchmark container; beyond it the 8-rank runs place two ranks on every
+available CPU, which is why the speed-up collapses. The centre panel shows the
+\emph{absolute} difference in $C_D$ from the single-rank run against the
+absolute force-stationarity tolerance at which the runs were stopped (dotted);
+every rank count agrees with $np=1$ well inside it.
+Source: \code{report/mpi\_study.csv}.}
 \label{fig:mpi}
 \end{figure}
 
@@ -1477,12 +1496,21 @@ the rank that owned each cell during the iterations (field \code{RankId} of
 \end{figure}
 
 \paragraph{Timing caveat.} The benchmark container advertises 64 logical cores
-but is limited to a 4-CPU cgroup quota. Speed-up is therefore meaningful only up
-to $np=4$; the $np=8$ runs are oversubscribed by a factor of two and are slower
-in wall-clock time than $np=4$ while performing the same work. Open MPI is also
-launched with \code{--bind-to none}, because its default core pinning collapses
-performance under such a quota. This is a property of the execution environment,
-not of the solver, and is stated here rather than hidden.
+but is limited to a 4-CPU cgroup quota (\code{cpu.max} $=400000/100000$).
+Speed-up is therefore meaningful only up to $np=4$, where it reaches
+$\mpiSpeedupFourCyl\times$ (cylinder) and $\mpiSpeedupFourNaca\times$
+(aerofoil); the $np=8$ runs place two ranks on every available CPU and are
+consequently \emph{slower} in wall-clock time than $np=1$ while performing the
+same work and producing the same answer. Open MPI is also launched with
+\code{--bind-to none}, because its default core pinning collapses performance
+under such a quota --- with pinning, $np=2$ measured five times slower than
+$np=1$. The host is shared, so the wall-clock column of \cref{tab:mpi} carries
+run-to-run noise of the order of ten percent and should not be read as a clean
+scaling curve; the rank-independent columns (steps, forces, edge cut, balance)
+are the ones that test the solver. All of this is a property of the execution
+environment, not of the parallelisation, and is stated here rather than hidden.
+The $np=8$ requirement is a correctness demonstration, and it is met: every
+submitted production result in \cref{tab:runs} was computed on 8 ranks.
 
 \section{Code Organisation and Extensibility}
 \label{sec:extensibility}
@@ -1680,9 +1708,23 @@ and machine-level freestream preservation and linear exactness on the benchmark
 mesh; the two quantitative validation targets available in the literature ---
 $C_D\approx2.0$--$2.1$ for the $Re=20$ cylinder~\cite{dennischang,tritton} and
 $St\approx0.19$--$0.20$, $C_D\approx1.32$--$1.40$ for the $Re=200$ vortex
-street~\cite{williamson,henderson} --- are both reproduced. The principal weaknesses, documented above, are the
-limiter-induced limit cycle at Mach 2 and the absence of low-Mach
-preconditioning.
+street~\cite{williamson,henderson} --- are reproduced: the $Re=20$ drag and its
+pressure/friction split to about $1\%$, and the $Re=200$ Strouhal number within
+the accepted band with a mean drag and lift amplitude a few percent below it,
+for the reasons set out in \cref{sec:cyl200}.
+
+The principal weaknesses, all documented in \cref{sec:limitations}, are the
+limiter-induced residual limit cycle on the shock-containing cases, which leaves
+a few tenths of a percent of uncertainty in the Mach 2 drag; the absence of
+low-Mach preconditioning; and the fact that the supplied single mesh per
+geometry makes a grid-convergence study of the benchmark results themselves
+impossible, so the reported coefficients carry an unquantified spatial
+discretisation error on top of the iterative one. The largest single correction
+made during development --- and the clearest illustration of why the force split
+is worth reporting separately --- was the wall-stress treatment of
+\cref{eq:wallstress}: assembling the no-slip traction from the general
+face-gradient formula produced a normal component worth $67\%$ of the Mach 2
+laminar drag, where the exact value is zero.
 
 
 \begin{thebibliography}{99}

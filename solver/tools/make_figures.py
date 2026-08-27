@@ -81,6 +81,13 @@ def plot_residuals(case_dir, cid, meta, out, man):
         ax.semilogy(x, np.maximum(res[k], 1e-300), color=SERIES[i], lw=1.3, label=lbl)
     ax.semilogy(x, np.maximum(res["residual_l2"], 1e-300), color="k", lw=1.8,
                 label=r"total $L_2$")
+    # Mark the pseudo-time step at which the limiter values were frozen; on the
+    # shock cases the residual drops sharply there and the reader should be able
+    # to see that it is the freeze and not a coincidence.
+    fs = int(meta.get("limiter_freeze_step", 0) or 0)
+    if not transient and fs > 0 and fs < float(np.max(x)):
+        ax.axvline(fs, color="0.35", ls=":", lw=1.4,
+                   label=f"limiter frozen (step {fs})")
     ax.set_xlabel(xlabel)
     ax.set_ylabel(r"scaled residual $\|R/(V s_k)\|$")
     ax.set_title(f"{cid}: residual history")
@@ -157,10 +164,15 @@ def plot_surface_naca(case_dir, cid, meta, out, man, viscous):
     fig, axes = plt.subplots(1, 2 if viscous else 1, figsize=(11 if viscous else 6.0, 4.2))
     axes = np.atleast_1d(axes)
     ax = axes[0]
-    for sel, lbl, c, m in ((upper, "upper surface", SERIES[0], "o"),
-                           (lower, "lower surface", SERIES[1], "s")):
+    # At zero incidence the two surfaces coincide, so the lower surface is drawn
+    # dashed with open markers; a solid line hidden under it would look like a
+    # single curve and hide any upper/lower asymmetry.
+    STYLE = ((upper, "upper surface", SERIES[0], "o", "-", None),
+             (lower, "lower surface", SERIES[1], "s", "--", "none"))
+    for sel, lbl, c, m, ls, mfc in STYLE:
         o = np.argsort(xc[sel])
-        ax.plot(xc[sel][o], cp[sel][o], color=c, marker=m, ms=2.4, lw=1.2, label=lbl)
+        ax.plot(xc[sel][o], cp[sel][o], color=c, marker=m, ms=2.8, lw=1.2, ls=ls,
+                markerfacecolor=mfc, markevery=3, label=lbl)
     ax.invert_yaxis()
     ax.set_xlabel(r"$x/c$")
     ax.set_ylabel(r"pressure coefficient $C_p$")
@@ -168,10 +180,10 @@ def plot_surface_naca(case_dir, cid, meta, out, man, viscous):
     ax.legend()
     if viscous:
         ax = axes[1]
-        for sel, lbl, c, m in ((upper, "upper surface", SERIES[0], "o"),
-                               (lower, "lower surface", SERIES[1], "s")):
+        for sel, lbl, c, m, ls, mfc in STYLE:
             o = np.argsort(xc[sel])
-            ax.plot(xc[sel][o], cf[sel][o], color=c, marker=m, ms=2.4, lw=1.2, label=lbl)
+            ax.plot(xc[sel][o], cf[sel][o], color=c, marker=m, ms=2.8, lw=1.2, ls=ls,
+                    markerfacecolor=mfc, markevery=3, label=lbl)
         ax.axhline(0.0, color="k", lw=1.1, ls="--", label="separation ($C_f=0$)")
         ax.set_xlabel(r"$x/c$")
         ax.set_ylabel(r"skin-friction coefficient $C_f$")
@@ -331,11 +343,15 @@ def main():
 
     # Register the cross-case figures produced by the other tools, so that every
     # figure referenced by the report is traceable through the manifest.
+    fm = os.path.join(args.results, "naca0012_m080_inviscid", "metadata.json")
+    freeze_m080 = (int(json.load(open(fm)).get("limiter_freeze_step", 0) or 0)
+                   if os.path.exists(fm) else 0)
     extra = [
         ("mpi_scaling.png", "mpi_rank_study", "line", "parallel_speedup_and_force_consistency",
          "report/mpi_study.csv",
-         "MPI rank-count study: parallel speed-up, relative drag difference against the "
-         "single-rank run, halo size and METIS edge cut."),
+         "MPI rank-count study: parallel speed-up, absolute drag difference against the "
+         "single-rank run compared with the force-stationarity tolerance, halo size and "
+         "METIS edge cut."),
         ("cylinder_re200_shedding.png", "cylinder_m010_laminar_re200", "line",
          "lift_drag_and_spectrum",
          "results/cylinder_m010_laminar_re200/forces.csv",
@@ -345,8 +361,8 @@ def main():
          "residual_and_drag_limiter_study",
          "results/naca0012_m080_inviscid/residuals.csv",
          "Mach 0.8 aerofoil: residual and drag history with the limiter recomputed at every "
-         "step (bounded limit cycle) and with the limiter frozen from step 9000, after which "
-         "the residual reaches the requested four-order reduction."),
+         f"step (bounded limit cycle) and with the limiter frozen from step {freeze_m080}, "
+         "after which the residual reaches the requested four-order reduction."),
         ("mms_order.png", "verification", "line", "manufactured_solution_error",
          "report/verification.json",
          "Manufactured-solution discretisation error against mean cell size for the "

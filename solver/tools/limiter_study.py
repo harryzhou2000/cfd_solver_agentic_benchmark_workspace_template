@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Mach 2 limiter limit-cycle figure: residual and drag history with and
+"""Limiter limit-cycle figure: residual and drag history with and
 without limiter freezing."""
 
 from __future__ import annotations
 
 import argparse
+import json
 import csv
 import os
 import sys
@@ -28,10 +29,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--frozen", required=True, help="run with --freeze-limiter-step")
     ap.add_argument("--free", required=True, help="run without limiter freezing")
-    ap.add_argument("--freeze-step", type=int, default=15000)
+    ap.add_argument("--freeze-step", type=int, default=-1,
+                    help="pseudo-time step at which the limiter was frozen; "
+                         "read from the frozen run's metadata.json when omitted")
     ap.add_argument("--case-label", default="shock case")
     ap.add_argument("--out", default="report/figures/limiter_study.png")
     args = ap.parse_args()
+
+    if args.freeze_step < 0:
+        meta = json.load(open(os.path.join(args.frozen, "metadata.json")))
+        args.freeze_step = int(meta.get("limiter_freeze_step", 0) or 0)
 
     apply_style()
     sf, rf, cf = load(args.frozen)

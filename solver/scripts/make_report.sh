@@ -8,6 +8,8 @@ REP=report
 
 rm -f $REP/figures/*.png
 set -x
+# Unit tests, so the report's test counts are traceable to a stored log.
+./build/cfd2d_tests 2>&1 | tee $REP/unit_tests.log | tail -3
 # Order-of-accuracy / freestream / linear-exactness verification.
 source scripts/env.sh
 mpirun -np 4 $MPIRUN_FLAGS ./build/cfd2d verify --levels 4 --base 16 \
@@ -22,7 +24,7 @@ $PY tools/analyze_transient.py --case-dir $R/cylinder_m010_laminar_re200 \
 # The Mach 0.8 case is the one where limiter freezing is decisive: it converges
 # within a few steps of the freeze point, whereas the unfrozen run limit-cycles.
 $PY tools/limiter_study.py --frozen $R/naca0012_m080_inviscid \
-    --free studies/verify/naca0012_m080_inviscid_nofreeze --freeze-step 9000 \
+    --free studies/verify/naca0012_m080_inviscid_nofreeze \
     --case-label "NACA0012 \$M_\\infty=0.8\$" \
     --out $REP/figures/limiter_study.png || true
 $PY tools/plot_verification.py --json $REP/verification.json \
@@ -32,7 +34,7 @@ $PY tools/sanity_checks.py --results $R --manifest $REP/figure_manifest.csv \
     --out $REP/sanity_checks.json
 sanity=$?
 $PY tools/run_manifest.py --results $R --out $REP/run_manifest.csv \
-    --extra $(ls -d studies/mpi/*/ studies/verify/*/ 2>/dev/null | tr '\n' ' ')
+    --extra $(ls -d studies/mpi/*/ studies/verify/*/ studies/cflstudy/*/ studies/restart/*/ 2>/dev/null | tr '\n' ' ')
 $PY tools/make_report_tables.py --results $R --report $REP
 set +x
 if [ "${sanity:-0}" -ne 0 ]; then

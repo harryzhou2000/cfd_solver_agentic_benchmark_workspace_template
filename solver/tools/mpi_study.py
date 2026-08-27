@@ -95,8 +95,14 @@ def main():
         gh = np.array([sum(x["num_cells_ghost"] for x in by_np[n]["part"]["ranks"])
                        for n in nps])
         axes[0].plot(nps, t[0] / t, marker="o", color=SERIES[i], label=case)
-        axes[1].plot(nps, np.abs(cd - cd[0]) / abs(cd[0]) + 1e-16, marker="s", color=SERIES[i],
-                     label=case)
+        # The reference rank count is its own reference, so its difference is
+        # identically zero and is omitted rather than drawn at a fake floor.
+        # The difference is shown in ABSOLUTE form so that it can be compared
+        # with the absolute force-drift tolerance at which the runs stop; a
+        # relative measure would exaggerate the aerofoil, whose inviscid drag
+        # is itself only 1e-3.
+        axes[1].plot(nps[1:], np.abs(cd[1:] - cd[0]), marker="s",
+                     color=SERIES[i], label=case)
         axes[2].plot(nps, gh, marker="^", color=SERIES[i], label=f"{case}: ghost cells")
         axes[2].plot(nps, ec, marker="v", ls="--", color=SERIES[i], label=f"{case}: edge cut")
     axes[0].plot([1, 8], [1, 8], "k:", lw=1.2, label="ideal")
@@ -109,8 +115,11 @@ def main():
     axes[0].legend(fontsize=8)
     axes[1].set_yscale("log")
     axes[1].set_xlabel("MPI ranks")
-    axes[1].set_ylabel(r"$|C_D(p)-C_D(p_{\mathrm{ref}})|/|C_D(p_{\mathrm{ref}})|$")
-    axes[1].set_title("force consistency across rank counts")
+    axes[1].set_ylabel(r"$|C_D(p)-C_D(p_{\mathrm{ref}})|$")
+    axes[1].set_title(r"force consistency across rank counts")
+    axes[1].axhline(5.0e-5, color="0.4", ls=":", lw=1.2)
+    axes[1].text(2.05, 5.6e-5, "force-stationarity tolerance", fontsize=7, color="0.35")
+    axes[1].set_ylim(1e-7, 2e-4)
     axes[1].legend(fontsize=8)
     axes[2].set_yscale("log")
     axes[2].set_xlabel("MPI ranks")

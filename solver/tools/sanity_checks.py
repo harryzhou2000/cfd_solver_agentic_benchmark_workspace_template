@@ -136,6 +136,18 @@ def analyse_case(cdir, cid, manifest_vars):
                             abs(float(forces["viscous_drag"][-1])) > 1.0e-6,
                             "final viscous (skin-friction) drag coefficient",
                             float(forces["viscous_drag"][-1])))
+        # At a steady no-slip wall the viscous traction is purely tangential
+        # (div u = 0 and d(u_t)/dt = 0 there), so the normal viscous force must
+        # vanish; a non-zero value would indicate a wall-gradient defect.
+        nvd = abs(float(meta.get("final_normal_viscous_drag", 0.0)))
+        checks.append(check("no_slip_normal_viscous_traction_zero",
+                            nvd < 1.0e-12 * max(abs(cd_last), 1.0),
+                            "|normal viscous drag| on no-slip walls", nvd))
+        split = float(forces["pressure_drag"][-1]) + float(forces["viscous_drag"][-1])
+        checks.append(check("drag_split_sums_to_total",
+                            abs(split - cd_last) < 1.0e-9 * max(abs(cd_last), 1.0),
+                            "pressure + skin-friction drag equals the total C_D",
+                            dict(sum=split, total=cd_last)))
     else:
         un = np.abs(u * nx + v * ny)
         ut = np.abs(u * ny - v * nx)
@@ -198,10 +210,14 @@ def main():
     ap.add_argument("--out", default="report/sanity_checks.json")
     args = ap.parse_args()
 
+    # Only figures that are BOTH listed in the manifest and present on disk
+    # count; a stale manifest entry must not be able to satisfy the check.
     manifest_vars = {}
+    figdir = os.path.join(os.path.dirname(args.manifest), "figures")
     if os.path.exists(args.manifest):
         for row in csv.DictReader(open(args.manifest, newline="")):
-            manifest_vars.setdefault(row["case_id"], set()).add(row["variable"])
+            if os.path.exists(os.path.join(figdir, row["figure_file"])):
+                manifest_vars.setdefault(row["case_id"], set()).add(row["variable"])
 
     cases = sorted(d for d in os.listdir(args.results)
                    if os.path.isdir(os.path.join(args.results, d)) and not d.startswith("_"))
