@@ -207,8 +207,13 @@ def _graphics_references(sources: list[tuple[str, str]], report_root: str) -> se
             if not target or target.startswith("/") or "\\" in target:
                 continue
             for graphics_dir in graphics_dirs:
+                # TeX input files commonly retain the main report's graphics
+                # search root.  In particular, generated/*.tex fragments use
+                # `figures/...`, which resolves beside report.tex rather than
+                # beside the generated fragment itself.
+                base_dir = report_root if not graphics_dir and target.startswith("figures/") else source_dir
                 candidate = posixpath.normpath(
-                    posixpath.join(source_dir, graphics_dir, target)
+                    posixpath.join(base_dir, graphics_dir, target)
                 )
                 if candidate.startswith(report_root + "/"):
                     references.add(candidate)
