@@ -78,7 +78,8 @@ def main():
         fl = read_last_csv(cdir / "forces.csv")
         row = {
             "case_id": cid,
-            "command": rs.get("command", ""),
+            "command": str(rs.get("command", "")).replace(
+                "-np <ranks>", "-np %d" % int(rs.get("mpi_ranks", meta.get("mpi_ranks", 0)))),
             "mpi_ranks": rs.get("mpi_ranks", meta.get("mpi_ranks", "")),
             "num_cells_global": meta.get("num_cells_global", ""),
             "final_step": rs.get("final_step", ""),
