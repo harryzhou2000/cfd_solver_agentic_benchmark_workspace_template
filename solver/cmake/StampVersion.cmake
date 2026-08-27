@@ -52,11 +52,4 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -E compare_files
 if(NOT cns2d_version_differs EQUAL 0)
   execute_process(COMMAND "${CMAKE_COMMAND}" -E copy
                           "${CNS2D_VERSION_OUT}.tmp" "${CNS2D_VERSION_OUT}")
-  # Touch the sources that embed the revision so the change cannot be missed.
-  foreach(src "${CNS2D_SOURCE_DIR}/src/io/output_writer.cpp"
-              "${CNS2D_SOURCE_DIR}/src/main.cpp")
-    if(EXISTS "${src}")
-      execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${src}")
-    endif()
-  endforeach()
 endif()

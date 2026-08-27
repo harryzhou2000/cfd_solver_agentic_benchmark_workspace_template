@@ -188,12 +188,19 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
   target_compile_options(cns2d_core PRIVATE ${CNS2D_EXTRA_RELEASE_FLAGS})
 endif()
 
+# The revision stamp must complete BEFORE anything that embeds it is compiled.
+# Without this the stamp target and the compilation run concurrently, so a
+# changed revision only reaches the binary on the following build -- which is
+# exactly how every result came to be labelled with a stale commit.
+add_dependencies(cns2d_core cns2d_version)
+
 # --- executables -----------------------------------------------------------
 add_executable(cns2d src/main.cpp)
 target_link_libraries(cns2d PRIVATE cns2d_core)
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
   target_compile_options(cns2d PRIVATE ${CNS2D_EXTRA_RELEASE_FLAGS})
 endif()
+add_dependencies(cns2d cns2d_version)
 
 add_executable(cns2d_tests tests/unit_tests.cpp)
 target_link_libraries(cns2d_tests PRIVATE cns2d_core)
