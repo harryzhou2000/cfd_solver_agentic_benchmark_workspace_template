@@ -123,6 +123,24 @@ reimplementing the flux, so it tests the shipped code
 attempt the check the text claimed had been done, which is a useful reminder that
 "checked numerically" is itself a claim requiring evidence.
 
+The gap has since been closed at the source. A regression test was added to the unit
+suite --- taking it from $130$ to $139$ checks, all passing --- which pins both facts
+separately: exactly zero mass and energy flux for four arbitrary interior states, and
+normal momentum equal to the wall pressure to $10^{-12}$ when the interior normal
+velocity is at round-off. The distinction therefore cannot be misreported again without
+a test failing.
+
+It is worth being explicit that the test was written \emph{because} the review found the
+claim unverified, not before. A verification suite that grows in response to an
+adversarial reading is more trustworthy than one that appears complete from the start,
+for the same reason the negative control in \cref{sec:hllcbug} matters: a test whose
+failure mode has been demonstrated is evidence, while a test that has only ever passed
+is an assertion. The identity was independently reproduced by a second probe at a
+different reference pressure, which found the same structure --- mass and energy exactly
+zero, normal-momentum excess growing with $u_n$ and exactly zero at
+$u_n=\num{1e-13}$ --- confirming that the round-off-level normal velocity of the
+converged solutions leaves the reported forces untouched.
+
 Three of these deserve comment.
 
 The \textbf{conservation} check sums the residual over all cells and compares it

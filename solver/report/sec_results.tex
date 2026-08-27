@@ -867,14 +867,25 @@ $\overline{C_D}=1.247$ against $1.3$--$1.4$.
 
 \textbf{Those gaps are therefore standing discrepancies of the computed limit cycle,
 not transient undershoot that more marching will close.} A shortfall of about $4\,\%$
-in $St$ and $5\,\%$ in mean drag, both in the same direction, is what one expects from
-a two-dimensional laminar computation of this flow on a mesh of this resolution:
-\cref{sec:limitations} discusses the under-resolution of the wake and the absence of a
-mesh-refinement study, either of which would be the place to look. Reporting the trend
-as evidence that the answer would improve on completion would have been a
-misrepresentation, and it is corrected here rather than left standing because the
-distinction is exactly the one this report insists on elsewhere: a trend measured
-across windows that share data is not a trend in the underlying quantity.
+in $St$ and $5\,\%$ in mean drag are quoted as such.
+
+That both errors have the \emph{same sign} is itself informative rather than incidental.
+A simultaneous under-prediction of shedding frequency and mean drag is the expected
+signature of a two-dimensional laminar computation of this flow on a single unrefined
+mesh. The physical wake at $\Reinf=200$ is weakly three-dimensional --- spanwise
+instability of the shed vortices sets in near this Reynolds number --- and a strictly
+two-dimensional calculation cannot represent it. Numerical dissipation on an unrefined
+wake mesh acts in the same direction, weakening the shed vortices, which lowers both the
+base-pressure deficit that sets the drag and the frequency at which the wake sheds.
+\Cref{sec:limitations} records the absence of a grid-convergence study as the first thing
+that would need doing to separate the mesh contribution from the dimensional one.
+
+A $4$--$5\,\%$ standing discrepancy with a credible physical cause is a more useful
+result than a claim of agreement the computation has not earned. Reporting the nested-window
+trend as evidence that the answer would improve on completion would have been the latter,
+and it is corrected rather than left standing because the distinction is exactly the one
+this report insists on elsewhere: a trend measured across windows that share data is not
+a trend in the underlying quantity.
 
 \paragraph{The individual vortices are resolved.} An oscillating integrated force
 is necessary but not sufficient evidence of a vortex street: a global mode could in
