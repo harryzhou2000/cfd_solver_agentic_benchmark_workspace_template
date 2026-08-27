@@ -24,6 +24,48 @@ import json
 import math
 from pathlib import Path
 import os
+import re
+import subprocess
+
+
+def transient_status(forces_path, start=None):
+    """Parse tools/transient_status.py output into a dict.
+
+    The shedding statistics quoted in the report come from that tool rather than
+    from a second implementation here, so the report and the run-time diagnostics
+    cannot disagree.
+    """
+    tool = REPORT_DIR.parent / "tools" / "transient_status.py"
+    python = REPORT_DIR.parent / ".venv" / "bin" / "python"
+    if not tool.exists() or not python.exists():
+        return {}
+    cmd = [str(python), str(tool), "--forces", str(forces_path)]
+    if start is not None:
+        cmd += ["--start", str(start)]
+    try:
+        out = subprocess.run(cmd, capture_output=True, text=True, timeout=180).stdout
+    except Exception:
+        return {}
+    patterns = {
+        "period": r"mean period\s*=\s*([0-9.eE+-]+)",
+        "spread": r"spread\s+([0-9.eE+-]+)\s+over",
+        "estimates": r"over\s+(\d+)\s+estimates",
+        "strouhal": r"Strouhal St\s*=\s*([0-9.eE+-]+)",
+        "cycles": r"completed cycles in window\s*=\s*([0-9.eE+-]+)",
+        "cl_amp": r"C_L\s+amplitude\s*=\s*\+/-([0-9.eE+-]+)",
+        "cl_rms": r"rms\s+([0-9.eE+-]+)\)",
+        "cd_mean": r"C_D\s+mean\s*=\s*([0-9.eE+-]+)",
+        "cd_ptp": r"peak-to-peak\s+([0-9.eE+-]+)",
+        "t_end": r"record: t = [0-9.eE+-]+ \.\. ([0-9.eE+-]+)",
+        "t_start": r"analysis window: t >=\s*([0-9.eE+-]+)",
+    }
+    stats = {}
+    for key, pattern in patterns.items():
+        match = re.search(pattern, out)
+        if match:
+            stats[key] = float(match.group(1))
+    stats["saturated"] = "PASS" in out
+    return stats
 
 REPORT_DIR = Path(__file__).resolve().parent
 RESULTS_DIR = REPORT_DIR.parent / "results"
@@ -206,6 +248,8 @@ def main():
         define("Shed" + camel(field), PENDING)
     define("ShedSaturated", PENDING)
     define("ShedCycles", PENDING)
+    for extra in ("Period", "Spread", "Estimates", "CdPtp", "SpreadPct"):
+        define("Shed" + extra, PENDING)
     for _case_id, key, _label in CASES:
         define("PhysTime" + key, PENDING)
     for _case_id, key, _label in CASES:
@@ -284,17 +328,33 @@ def main():
         ]) + " \\\\")
 
         if key == "CylShed":
+            # Shedding statistics come from tools/transient_status.py so the report
+            # and the run-time diagnostics cannot disagree; the local
+            # shedding_stats() is kept only for the mean/RMS force values.
             stats = shedding_stats(forces)
             for field, digits in SHED_FIELDS:
                 define("Shed" + camel(field), num(stats.get(field), digits))
-            # A frequency estimate is only meaningful if the analysis window
-            # actually contains several completed shedding cycles.  Below a few
-            # cycles the "frequency" is an artefact of the window length.
-            freq = stats.get("freq")
-            span = ((stats.get("t_end") or 0.0) - (stats.get("t_start") or 0.0))
-            cycles = freq * span if (freq and span > 0.0) else 0.0
-            define("ShedCycles", num(cycles, 3) if cycles else PENDING)
-            define("ShedSaturated", "yes" if cycles >= 5.0 else "no")
+            tool = transient_status(case_dir / "forces.csv")
+            if tool:
+                define("ShedStrouhal", num(tool.get("strouhal"), 4))
+                define("ShedPeriod", num(tool.get("period"), 5))
+                define("ShedSpread", num(tool.get("spread"), 3))
+                define("ShedEstimates", num(tool.get("estimates"), 4))
+                define("ShedCycles", num(tool.get("cycles"), 3))
+                define("ShedClAmp", num(tool.get("cl_amp"), 4))
+                define("ShedClRms", num(tool.get("cl_rms"), 4))
+                define("ShedCdMean", num(tool.get("cd_mean"), 5))
+                define("ShedCdPtp", num(tool.get("cd_ptp"), 4))
+                define("ShedTStart", num(tool.get("t_start"), 5))
+                define("ShedTEnd", num(tool.get("t_end"), 5))
+                define("ShedSaturated", "PASS" if tool.get("saturated") else "FAIL")
+                # Relative spread of the individual period estimates: the sharpest
+                # available indicator that the signal is a genuine limit cycle
+                # rather than a signal still passing through linear growth.
+                period = tool.get("period")
+                spread = tool.get("spread")
+                if period and spread is not None:
+                    define("ShedSpreadPct", num(100.0 * spread / period, 3))
 
         for field, digits in META_FIELDS:
             define(camel(field) + key, num(meta.get(field), digits))

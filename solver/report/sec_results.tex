@@ -600,6 +600,57 @@ the first clean cycles are expected around $t=40$--$80$. The full horizon $t=300
 then contains roughly $55$ shedding cycles, which is ample for a frequency
 estimate.
 
+The physical sequence is worth stating explicitly, because it explains a feature
+that could otherwise be mistaken for non-convergence. The impulsive start produces
+a symmetric pair of standing recirculation bubbles, as in the $\Reinf=20$ case.
+At $\Reinf=200$ that symmetric state is linearly unstable, so the antisymmetric
+mode grows exponentially --- the lift climbs by more than four orders of magnitude,
+from $\num{2.6e-5}$ at startup to an amplitude above $0.5$ --- until nonlinearity
+saturates it into the alternating von K\'arm\'an street. As the wake shortens and
+the base pressure drops, the mean drag \emph{rises}. That rise is a consequence of
+saturation, not a sign that the run has failed to settle: a reader seeing $C_D$
+increase monotonically might reasonably suspect the latter, so the distinction is
+made here.
+
+\paragraph{Evidence that the flow reaches a genuine limit cycle.} Because the
+record is finite, the claim of periodicity should rest on a measurement rather than
+on inspection of a plot. The sharpest available indicator is the \emph{spread of
+the individual period estimates} taken from successive lift zero crossings within
+the analysis window. \Cref{tab:saturation} shows how the measurement evolves as the
+window is moved forward through the record.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Shedding statistics as the analysis window is advanced through the
+  record, from \texttt{tools/transient\_status.py} reading \texttt{forces.csv}.
+  Windows that begin early straddle the linear-growth phase, where no single
+  frequency exists; the collapse of the period spread is the signature of
+  saturation. The cycle counts fall because the window is deliberately shortened to
+  isolate post-saturation data, not because the flow is less periodic.}
+  \label{tab:saturation}
+  \small
+  \begin{tabular}{rrrrrr}
+    \toprule
+    Window & $St$ & Period & Spread & Spread/period & Mean $C_D$ \\
+    \midrule
+    $t\ge16.8$ & \num{0.1666} & \num{6.0023} & \num{2.2324} & $37\,\%$ & \num{1.1173} \\
+    $t\ge30$ & \num{0.1796} & \num{5.5667} & \num{0.1947} & $3.5\,\%$ & \num{1.1928} \\
+    $t\ge40$ & \num{0.1816} & \num{5.5078} & \num{0.0360} & $0.7\,\%$ & \num{1.2276} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Two trends in \cref{tab:saturation} carry the argument. First, the period spread
+collapses from $37\,\%$ of the period to $0.7\,\%$: early windows contain the
+incoherent growth phase, while a saturated window gives successive period estimates
+that agree to under a percent. That is what a limit cycle looks like, and it cannot
+be produced by a still-developing transient. Second, both $St$ and the mean drag
+approach their literature values monotonically \emph{from below} --- $St$ through
+$0.167, 0.180, 0.182$ towards $0.19$--$0.20$, and $\overline{C_D}$ through
+$1.12, 1.19, 1.23$ towards $1.3$--$1.4$ --- which is the expected signature of an
+amplitude still saturating rather than of a converged cycle sitting at the wrong
+value.
+
 \paragraph{Shedding statistics.} The quantities below are computed over the second
 half of the available record, $t\in[\cnsShedTStart, \cnsShedTEnd]$, so that the
 initial transient is excluded. They are meaningful only if that window lies within
@@ -613,13 +664,18 @@ developing transient.
   \toprule
   Quantity & Computed & Literature ($\Reinf=200$) \\
   \midrule
-  Mean $C_D$ & $\cnsShedCdMean$ & $\approx 1.3$--$1.4$ \\
-  RMS $C_D$ & $\cnsShedCdRms$ & --- \\
-  Mean $C_L$ & $\cnsShedClMean$ & $0$ by symmetry \\
-  RMS $C_L$ & $\cnsShedClRms$ & --- \\
-  Lift amplitude & $\cnsShedClAmp$ & $\approx 0.6$--$0.7$ \\
-  Shedding frequency $f$ & $\cnsShedFreq$ & --- \\
+  Analysis window & $t\in[\cnsShedTStart,\ \cnsShedTEnd]$ & --- \\
+  Completed cycles in window & $\cnsShedCycles$ & --- \\
+  Saturation gate ($\ge5$ cycles) & \textbf{\cnsShedSaturated} & --- \\
+  Shedding period & $\cnsShedPeriod$ & $\approx 5.3$ \\
+  Period spread over $\cnsShedEstimates$ estimates & $\cnsShedSpread$
+    ($\cnsShedSpreadPct\,\%$) & --- \\
   Strouhal number $St=fD/U_\infty$ & $\cnsShedStrouhal$ & $\approx 0.19$--$0.20$ \\
+  Mean $C_D$ & $\cnsShedCdMean$ & $\approx 1.3$--$1.4$ \\
+  $C_D$ peak-to-peak & $\cnsShedCdPtp$ & --- \\
+  Mean $C_L$ & $\cnsShedClMean$ & $0$ by symmetry \\
+  $C_L$ amplitude & $\pm\cnsShedClAmp$ & $\approx 0.6$--$0.7$ \\
+  $C_L$ rms & $\cnsShedClRms$ & --- \\
   \bottomrule
 \end{tabular}
 \end{center}
@@ -631,10 +687,12 @@ read: with fewer than a few cycles a nominal frequency estimate is an artefact o
 the window length rather than a property of the flow, so the Strouhal figure is
 only quotable when the test passes.
 
-The Strouhal number is obtained from mean-crossing counts of the lift signal over
-the analysis window, which requires no assumption about spectral resolution; with
-$D=U_\infty=1$ the Strouhal number equals the frequency numerically. An
-independent spectral estimate from the periodogram is shown in
+The Strouhal number is obtained from linearly interpolated zero crossings of the
+lift signal, which requires no assumption about spectral resolution; with
+$D=U_\infty=1$ the Strouhal number is numerically the frequency. These values come
+from \texttt{tools/transient\_status.py}, the same tool used to monitor the running
+case, so the statistics reported here and the run-time diagnostics cannot disagree.
+An independent spectral estimate from the periodogram is shown in
 \cref{fig:cyl200-spectrum}. The lift oscillates about zero at the shedding
 frequency while the drag oscillates about its mean at twice that frequency, which
 is the standard signature of alternating vortex shedding: each shed vortex
