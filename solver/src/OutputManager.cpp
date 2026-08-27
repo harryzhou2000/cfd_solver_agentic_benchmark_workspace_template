@@ -103,8 +103,8 @@ Forces OutputManager::computeForces(const std::vector<StateVec>& states,
         // Pressure force (positive = outward normal direction)
         // Force on surface = -p * n * area (pressure acts inward on fluid)
         // Drag/lift on body = integral of p * n  (outward from body = inward to fluid)
-        double Fp_x = p * nx * area;
-        double Fp_y = p * ny * area;
+        double Fp_x = (p - p_inf) * nx * area;
+        double Fp_y = (p - p_inf) * ny * area;
         // Decompose into drag (freestream direction) and lift (perpendicular)
         // Drag = Fx * cos(aoa) + Fy * sin(aoa)
         // Lift = -Fx * sin(aoa) + Fy * cos(aoa)
@@ -443,6 +443,10 @@ void OutputManager::writeFieldVTU(const std::vector<StateVec>& states, int step_
 
 void OutputManager::writeMetadata(bool completed, const std::string& conv_status,
                                    double residual_reduction, int final_step, double final_time) {
+    // Global cell/face counts via reduction -- ALL ranks must participate
+    int global_cells = 0;
+    MPI_Allreduce(&lm.n_owned, &global_cells, 1, MPI_INT, MPI_SUM, comm);
+
     if (rank != 0) return;
 
     auto now = std::chrono::system_clock::now();
@@ -497,8 +501,6 @@ void OutputManager::writeMetadata(bool completed, const std::string& conv_status
     meta["convergence_status"] = conv_status;
 
     // Global cell/face counts via reduction
-    int global_cells = 0, global_faces = 0;
-    MPI_Allreduce(&lm.n_owned, &global_cells, 1, MPI_INT, MPI_SUM, comm);
     meta["num_cells_global"] = global_cells;
 
     std::ofstream f(output_dir + "/metadata.json");

@@ -82,16 +82,22 @@ void computeResidual(const ResidualContext& ctx,
         double vnL = std::abs(uL*nx + vL*ny) + aL;
         double vnR = std::abs(uR*nx + vR*ny) + aR;
         double smax = std::max(vnL, vnR) * area;
-        // Accumulate spectral radii: sum_f lambda_f * A_f  (units m^2/s)
+        // Accumulate spectral radii: convective + viscous + thermal (Fix U)
+        if (L < n_owned) spectral_radii[L] += smax;
+        if (R < n_owned) spectral_radii[R] += smax;
         if (mu > 0.0) {
             double volL = lm.cell_vol[L], volR = lm.cell_vol[R];
             double visc_rL = mu/rhoL * area * area / volL;
             double visc_rR = mu/rhoR * area * area / volR;
-            if (L < n_owned) spectral_radii[L] += smax + visc_rL;
-            if (R < n_owned) spectral_radii[R] += smax + visc_rR;
-        } else {
-            if (L < n_owned) spectral_radii[L] += smax;
-            if (R < n_owned) spectral_radii[R] += smax;
+            if (L < n_owned) spectral_radii[L] += visc_rL;
+            if (R < n_owned) spectral_radii[R] += visc_rR;
+            if (k_cond > 0.0) {
+                double cv = R_gas / (gamma - 1.0);
+                double therm_rL = k_cond / (rhoL * cv) * area * area / volL;
+                double therm_rR = k_cond / (rhoR * cv) * area * area / volR;
+                if (L < n_owned) spectral_radii[L] += therm_rL;
+                if (R < n_owned) spectral_radii[R] += therm_rR;
+            }
         }
     }
 
@@ -162,6 +168,10 @@ void computeResidual(const ResidualContext& ctx,
         // (critical for high-viscosity / low-Re cases with anisotropic wall cells)
         if (mu > 0.0 && bc == BcType::NoSlipAdiabaticWall) {
             spectral_radii[cell] += mu / rho * area * area / lm.cell_vol[cell];
+            if (k_cond > 0.0) {
+                double cv = R_gas / (gamma - 1.0);
+                spectral_radii[cell] += k_cond / (rho * cv) * area * area / lm.cell_vol[cell];
+            }
         }
     }
 }

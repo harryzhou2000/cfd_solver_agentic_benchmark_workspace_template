@@ -1,86 +1,72 @@
-
-import re
-
 with open('/workspace/solver/src/SteadySolver.cpp', 'r') as f:
-    src = f.read()
+    content = f.read()
 
-changes = 0
+# Edit 1: Remove the Fix W M^2 scaling block (between inner loop setup and convergence check)
+marker_start = '            // Fix W: for low-Re viscous cases (Re<100, M<0.3), scale energy residuals by M^2'
+marker_end_after = '            }
 
-# Fix 7 part 1: remove cfl_recovery_floor and fix_d_consecutive
-p1_start = src.find('   double cfl_effective = cfl_effective_init;  // adaptive CFL tracker')
-p1_end = src.find('   // Fix B: longer first-order startup', p1_start)
-if p1_start >= 0 and p1_end >= 0:
-    replacement = '    double cfl_effective = cfl_effective_init;  // adaptive CFL tracker
-    double prev_outer_res = 0.0;               // outer residual tracker
-    double min_outer_res_ever = std::numeric_limits<double>::max();  // Fix D
-   '
-    src = src[:p1_start] + replacement + src[p1_end:]
-    print('Part 1 OK')
-    changes += 1
+            // Check convergence on total pseudo-time residual'
+replacement_after = '            // Check convergence on total pseudo-time residual'
+
+# Find the block
+idx_start = content.find(marker_start)
+if idx_start < 0:
+    print('ERROR: Fix W start not found')
 else:
-    print(f'WARN Part 1 not found start={p1_start} end={p1_end}')
-
-# Fix 7: replace all cfl_recovery_floor with cfl_effective_init
-n = src.count('cfl_recovery_floor')
-src = src.replace('cfl_recovery_floor', 'cfl_effective_init')
-if n > 0:
-    print(f'Part 2+3 OK: replaced {n} occurrences')
-    changes += 1
-
-# Fix 7: remove fix_d_consecutive++
-if 'fix_d_consecutive++' in src:
-    src = src.replace('            fix_d_consecutive++;
-', '')
-    print('Part 3b OK')
-    changes += 1
-
-# Fix 7: remove if (!fix_d_reduced) line  
-if 'if (!fix_d_reduced) fix_d_consecutive = 0;' in src:
-    src = src.replace('        if (!fix_d_reduced) fix_d_consecutive = 0;
-', '')
-    print('Part 3c OK')
-    changes += 1
-
-# Fix 6: replace very_low_re branch
-marker = 'bool very_low_re = (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0);' 
-idx = src.find(marker)
-if idx >= 0:
-    block_start = src.rfind('            // For viscous cases: update grads+prim_grads each inner iter (mirrors TransientSolver)', 0, idx)
-    end_marker = '// prim_grads remain frozen from outer-step start
-            }'
-    end_idx = src.find('// prim_grads remain frozen from outer-step start', idx)
-    close_idx = src.find('            }', end_idx)
-    if block_start >= 0 and end_idx >= 0 and close_idx >= 0:
-        end_pos = close_idx + len('            }'  )
-        new_block = '            // For viscous cases: update grads+prim_grads each inner iter (mirrors TransientSolver)
-            // to prevent frozen-gradient instability as the boundary layer develops.
-            if (mu > 0.0) {
-                computeGradients(lm, states, grads);
-                computePrimGradients(lm, states, gamma, R_gas, prim_grads);
-                // Fix A: update limiters each inner iter to eliminate frozen-limiter mismatch
-                computeLimiters(lm, states, grads, limiters);
-                if (step <= first_order_steps) {
-                    for (auto& lim : limiters) lim.fill(0.0);
-                }
-            }'
-        src = src[:block_start] + new_block + src[end_pos:]
-        print('Fix 6 OK')
-        changes += 1
+    # Find the closing } and blank line before the convergence check
+    idx_check = content.find('            // Check convergence on total pseudo-time residual', idx_start)
+    if idx_check < 0:
+        print('ERROR: Check convergence marker not found')
     else:
-        print(f'WARN Fix 6 markers: block_start={block_start} end_idx={end_idx} close_idx={close_idx}')
-else:
-    print('WARN Fix 6: very_low_re not found')
+        # Remove from marker_start to just before the // Check convergence
+        content = content[:idx_start] + content[idx_check:]
+        print('OK: Removed Fix W M^2 scaling block')
 
-# Fix L: revert accept_scale 0.5->0.1
-old_l = '            accept_scale = 0.5;  // Fix L: moderate damping for low-Re convergence'
-new_l = '            accept_scale = 0.1;  // Strong damping for very low-Re cases'
-if old_l in src:
-    src = src.replace(old_l, new_l)
-    print('Fix L OK: accept_scale 0.5->0.1')
-    changes += 1
+# Edit 2: Replace the "Fix T removed isothermal" comment with isothermal reconstruction
+old = (
+    '        // Fix T: removed isothermal Fix R - caused physically spurious CD for Re<100
+'
+    '        // (isothermal forcing overrides rhoE each step causing artificial state drift)'
+)
+new = (
+    '        // Fix W (isothermal): for low-Re viscous cases (Re<100) force T=T_inf after each step.
+'
+    '        // At M=0.1, T_aw/T_inf < 1.0015, so this introduces <0.15% error in aerodynamics.
+'
+    '        // Prevents energy-equation divergence; R_rhoE->0 as u->0 at no-slip wall.
+'
+    '        if (low_re_viscous_case) {
+'
+    '            double T_inf_ref = p_inf / (rho_inf * R_gas);
+'
+    '            double cv_val = R_gas / (gamma - 1.0);
+'
+    '            for (int i = 0; i < n_owned; i++) {
+'
+    '                if (states[i][0] > 1e-14) {
+'
+    '                    double rho_i  = states[i][0];
+'
+    '                    double rhou_i = states[i][1];
+'
+    '                    double rhov_i = states[i][2];
+'
+    '                    double ke_i   = 0.5*(rhou_i*rhou_i + rhov_i*rhov_i)/rho_i;
+'
+    '                    states[i][3]  = rho_i * cv_val * T_inf_ref + ke_i;
+'
+    '                }
+'
+    '            }
+'
+    '        }'
+)
+if old not in content:
+    print('ERROR: Fix T comment block not found')
 else:
-    print('INFO Fix L: 0.5 not found')
+    content = content.replace(old, new, 1)
+    print('OK: Added isothermal reconstruction')
 
 with open('/workspace/solver/src/SteadySolver.cpp', 'w') as f:
-    f.write(src)
-print(f'SteadySolver.cpp done, {changes} changes')
+    f.write(content)
+print('File written successfully')

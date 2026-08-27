@@ -103,6 +103,18 @@ TransientResult runTransient(LocalMesh& lm,
         if (mu > 0.0) { computePrimGradients(lm, states_ref, gamma, R_gas, prim_grads); haloExchangePrimGrads(prim_grads, lm, comm); }
         else prim_grads.assign(n_total, {GradVec{0,0}, GradVec{0,0}, GradVec{0,0}});
         computeLimiters(lm, states_ref, grads, limiters);
+        // Fix V: first-order warm-up for viscous low-Mach transient cases prevents
+        // acoustic pressure blow-up during the initial impulsive start transient
+        // (instability observed at step ~82 for cylinder Re=200 M=0.1).
+        bool low_mach_visc_trans = (cfg.freestream.mach < 0.3) && (mu > 0.0);
+        int fo_trans_steps = low_mach_visc_trans ? 300 : 0;
+        int ramp_trans_steps = low_mach_visc_trans ? 100 : 0;
+        if (step <= fo_trans_steps) {
+            for (auto& lim : limiters) lim.fill(0.0);
+        } else if (step <= fo_trans_steps + ramp_trans_steps) {
+            double ramp = double(step - fo_trans_steps) / ramp_trans_steps;
+            for (auto& lim : limiters) for (double& v : lim) v *= ramp;
+        }
 
         // Compute frozen spectral radii and CFL-based pseudo-time step
         {
