@@ -57,6 +57,13 @@ RunOutcome runTransient(SolverContext &context, OutputWriter &writer) {
   int step = 0;
   ForceResult last_forces;
   Real first_step_residual = 0.0;
+  // (Total transient residual at the first inner iteration of step 1; retained
+  // for the diagnostic log line only -- see the note on residual_reduction_orders.)
+  // Spatial-only residual at the first physical step, recorded so that the
+  // reduction reported at the end compares like with like.  The inner-loop
+  // residual includes the BDF2 physical-time term and is therefore a different
+  // norm; dividing one by the other would be meaningless.
+  Real first_step_spatial_residual = 0.0;
   int next_field_index = 1;
   Real next_field_time = rc.time_step > 0.0 ? input.outputs.write_field_every_time : 0.0;
   bool diverged = false;
@@ -170,6 +177,11 @@ RunOutcome runTransient(SolverContext &context, OutputWriter &writer) {
     {
       ResidualDiagnostics diag;
       assembler.evaluate(U, spatial_residual, halo, diag);
+      if (step == 1) {
+        // Spatial-only norm at the end of the first accepted physical step,
+        // which is the like-for-like reference for the final spatial residual.
+        first_step_spatial_residual = context.computeNorms(spatial_residual).l2;
+      }
       for (Index c = 0; c < num_owned; ++c) {
         const Real volume = mesh.cells()[static_cast<std::size_t>(c)].volume;
         const Real *rs = spatial_residual.cell(c);
@@ -224,7 +236,9 @@ RunOutcome runTransient(SolverContext &context, OutputWriter &writer) {
   if (step > num_physical_steps) step = num_physical_steps;
   outcome.final_step = step;
   outcome.final_physical_time = physical_time;
-  outcome.initial_residual = first_step_residual;
+  // Reported initial residual is the spatial-only norm, consistent with
+  // outcome.final_residual and with residual_reduction_orders above.
+  outcome.initial_residual = first_step_spatial_residual;
 
   if (diverged) {
     outcome.completed = false;
@@ -238,9 +252,20 @@ RunOutcome runTransient(SolverContext &context, OutputWriter &writer) {
     assembler.evaluate(U, spatial_residual, halo, diag);
     const ResidualNorms norms = context.computeNorms(spatial_residual);
     outcome.final_residual = norms.l2;
+    // Residual reduction for a transient run compares the SPATIAL residual at
+    // the first accepted physical step with the spatial residual at the final
+    // step.  Comparing against first_step_residual (the total transient residual
+    // including the BDF2 physical-time term) would divide two different norms and
+    // report a meaningless number.
+    //
+    // For a vortex street this quantity is not expected to decrease at all: the
+    // flow is genuinely unsteady and the converged answer is a periodic state,
+    // not a steady one.  It is reported for completeness and interpreted in the
+    // report, where the physical convergence measure is the periodicity of the
+    // lift/drag signals rather than any residual reduction.
     outcome.residual_reduction_orders =
-        (first_step_residual > 0.0 && norms.l2 > 0.0)
-            ? std::log10(first_step_residual / norms.l2)
+        (first_step_spatial_residual > 0.0 && norms.l2 > 0.0)
+            ? std::log10(first_step_spatial_residual / norms.l2)
             : 0.0;
 
     const ForceResult final_forces = computeForces(mesh, context.flow(), assembler, U, context.comm());
@@ -248,6 +273,12 @@ RunOutcome runTransient(SolverContext &context, OutputWriter &writer) {
     writer.appendForces(outcome.final_step, physical_time, final_forces);
     logInfo(formatString("final transient state: t = %.4f, C_D = %.6f, C_L = %.6f", physical_time,
                          final_forces.cd, final_forces.cl));
+    logInfo(formatString(
+        "transient residual reference levels: total transient residual at the first inner iteration "
+        "%.6e, spatial-only residual after the first physical step %.6e, spatial-only residual at "
+        "the final step %.6e (the two spatial values are the like-for-like pair used for the "
+        "reported reduction; an unsteady vortex street is not expected to reduce it)",
+        first_step_residual, first_step_spatial_residual, norms.l2));
   }
 
   // A transient vortex-street run is 'statistically_periodic' when it reached the

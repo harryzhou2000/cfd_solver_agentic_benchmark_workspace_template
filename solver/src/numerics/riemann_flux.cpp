@@ -136,7 +136,14 @@ ConsVec hllcFlux(const PerfectGas &gas, const PrimVec &WL, const PrimVec &WR, Ve
     // Rotate the star velocity back to Cartesian components.
     Us[kRhoU] = coef * (sStar * n.x + ut * tx);
     Us[kRhoV] = coef * (sStar * n.y + ut * ty);
-    Us[kRhoE] = coef * (e_total + (sStar - un) * (sStar - p / (rho * (s - un))));
+    // Star-region total energy from the Rankine-Hugoniot jump across the
+    // acoustic wave.  Writing A = rho*(s - un), the relation reduces to
+    //   e* = e + (sStar - un) * (sStar + p / A).
+    // Note the sign convention: Toro states this as (sStar - p/(rho*(un - s))),
+    // which is the same expression because (un - s) = -(s - un).  Mixing the two
+    // forms -- using a minus sign together with (s - un) -- violates the energy
+    // jump condition by an O(1) amount, so the sign is spelled out here.
+    Us[kRhoE] = coef * (e_total + (sStar - un) * (sStar + p / (rho * (s - un))));
     return Us;
   };
 

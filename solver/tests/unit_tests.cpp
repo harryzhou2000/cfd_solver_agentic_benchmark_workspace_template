@@ -184,6 +184,95 @@ void testRiemannFluxes() {
     const ConsVec f = riemannFlux(RiemannFluxType::kRoeEntropyFix, gas, WL, WR, n, 1.0, s);
     for (int k = 0; k < kNumVars; ++k) check(std::isfinite(f[k]), "sonic Roe flux finite");
   }
+
+  // 6. HLLC star state must satisfy the Rankine-Hugoniot conditions across the
+  //    acoustic waves.  This is checked by reconstructing the star state
+  //    independently here -- from the pressure/velocity relations rather than
+  //    from the solver's own expression -- and comparing the resulting flux.
+  //
+  //    The energy component is the one that is easy to get wrong: the star
+  //    energy is  e* = e + (S* - un) * (S* + p / (rho * (S - un))).  Toro writes
+  //    the same quantity as (S* - p / (rho * (un - S))); combining the minus
+  //    sign with (S - un) instead of (un - S) breaks the energy jump condition
+  //    by an O(1) amount while leaving mass and momentum untouched, so only an
+  //    energy-aware test detects it.
+  {
+    const std::vector<std::pair<PrimVec, PrimVec>> pairs = {
+        {PrimVec{1.0, 0.4, 0.15, 1.0}, PrimVec{0.35, -0.25, -0.1, 0.35}},
+        {PrimVec{1.2, -0.3, 0.05, 0.9}, PrimVec{0.8, 0.6, 0.2, 1.4}},
+        {PrimVec{2.0, 0.1, -0.4, 3.0}, PrimVec{0.5, 0.2, 0.3, 0.4}},
+    };
+    const Vec2 n{0.6, 0.8};
+    const Real tx = -n.y;
+    const Real ty = n.x;
+    for (std::size_t i = 0; i < pairs.size(); ++i) {
+      const PrimVec &WL = pairs[i].first;
+      const PrimVec &WR = pairs[i].second;
+      Real smax = 0.0;
+      const ConsVec f = riemannFlux(RiemannFluxType::kHllc, gas, WL, WR, n, 1.0, smax);
+      const std::string tag = " (pair " + std::to_string(i) + ")";
+
+      // Independent reconstruction of the HLLC wave speeds (same estimates the
+      // solver uses, recomputed here from the primitive states).
+      const Real rhoL = WL[kPrimRho];
+      const Real rhoR = WR[kPrimRho];
+      const Real pL = WL[kPrimP];
+      const Real pR = WR[kPrimP];
+      const Real unL = WL[kPrimU] * n.x + WL[kPrimV] * n.y;
+      const Real unR = WR[kPrimU] * n.x + WR[kPrimV] * n.y;
+      const Real utL = WL[kPrimU] * tx + WL[kPrimV] * ty;
+      const Real utR = WR[kPrimU] * tx + WR[kPrimV] * ty;
+      const Real aL = gas.soundSpeed(rhoL, pL);
+      const Real aR = gas.soundSpeed(rhoR, pR);
+      const Real sqL = std::sqrt(rhoL);
+      const Real sqR = std::sqrt(rhoR);
+      const Real inv = 1.0 / (sqL + sqR);
+      const Real unT = (sqL * unL + sqR * unR) * inv;
+      const Real utT = (sqL * utL + sqR * utR) * inv;
+      const Real hT = (sqL * gas.totalEnthalpy(rhoL, WL[kPrimU], WL[kPrimV], pL) +
+                       sqR * gas.totalEnthalpy(rhoR, WR[kPrimU], WR[kPrimV], pR)) * inv;
+      const Real aT = std::sqrt((1.4 - 1.0) * (hT - 0.5 * (unT * unT + utT * utT)));
+      const Real sL = std::min(unL - aL, unT - aT);
+      const Real sR = std::max(unR + aR, unT + aT);
+      check(sL < 0.0 && sR > 0.0, "hllc test state is subsonic" + tag);
+      const Real sStar = (pR - pL + rhoL * unL * (sL - unL) - rhoR * unR * (sR - unR)) /
+                         (rhoL * (sL - unL) - rhoR * (sR - unR));
+
+      // Star state built from the Rankine-Hugoniot relations, written in the
+      // (un - S) convention so it is an genuinely independent expression.
+      const bool left = (sStar >= 0.0);
+      const Real rho = left ? rhoL : rhoR;
+      const Real un = left ? unL : unR;
+      const Real ut = left ? utL : utR;
+      const Real pk = left ? pL : pR;
+      const Real sk = left ? sL : sR;
+      const PrimVec &WK = left ? WL : WR;
+      const Real coef = rho * (sk - un) / (sk - sStar);
+      const Real eK = gas.totalEnergy(rho, WK[kPrimU], WK[kPrimV], pk);
+      ConsVec Us{};
+      Us[kRho] = coef;
+      Us[kRhoU] = coef * (sStar * n.x + ut * tx);
+      Us[kRhoV] = coef * (sStar * n.y + ut * ty);
+      Us[kRhoE] = coef * (eK - (sStar - un) * (pk / (rho * (un - sk)) - sStar));
+      const ConsVec fK = eulerNormalFlux(gas, WK, n);
+      const ConsVec UK = gas.consFromPrim(WK);
+      for (int k = 0; k < kNumVars; ++k) {
+        const Real expect = fK[k] + sk * (Us[k] - UK[k]);
+        checkClose(f[k], expect, 1e-11,
+                   "hllc rankine-hugoniot star flux component " + std::to_string(k) + tag);
+      }
+      // The star pressure implied by the momentum jump must be positive and the
+      // star density must be positive, which fails loudly if the energy term is
+      // inconsistent with the rest of the star state.
+      const Real p_star = pk + rho * (un - sk) * (un - sStar);
+      check(p_star > 0.0, "hllc star pressure positive" + tag);
+      check(Us[kRho] > 0.0, "hllc star density positive" + tag);
+      // Star total energy must exceed the kinetic energy, i.e. the implied
+      // internal energy is positive.
+      const Real ke = 0.5 * (Us[kRhoU] * Us[kRhoU] + Us[kRhoV] * Us[kRhoV]) / Us[kRho];
+      check(Us[kRhoE] > ke, "hllc star internal energy positive" + tag);
+    }
+  }
 }
 
 // --- boundary conditions --------------------------------------------------

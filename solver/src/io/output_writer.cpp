@@ -110,11 +110,13 @@ void OutputWriter::writeFinalState(int step, Real physical_time) {
   if (is_root_) {
     std::ofstream os(joinPath(output_dir_, "surface.csv"), std::ios::trunc);
     if (!os.good()) throw CnsError("cannot open surface.csv in " + output_dir_);
-    // The contract header, followed by documented extra columns that expose the
-    // adjacent cell-centre values so boundary and cell-centre data can never be
-    // confused with each other.
-    os << "x,y,nx,ny,pressure,cp,cf,rho,u,v,mach,tag";
-    os << ",cell_center_u,cell_center_v,cell_center_mach,tangential_wall_shear\n";
+    // surface.csv carries EXACTLY the contract header: the u/v/mach columns are
+    // the boundary-condition values (zero velocity on a no-slip wall, zero
+    // normal velocity on a slip wall).  The adjacent cell-centre values are
+    // written to the companion file surface_cell_center.csv instead of extra
+    // columns here, so the two can never be confused yet the contract header
+    // stays byte-exact.
+    os << "x,y,nx,ny,pressure,cp,cf,rho,u,v,mach,tag\n";
     for (const SurfaceRow &r : rows) {
       const std::string tag_name =
           (r.tag >= 0 && static_cast<std::size_t>(r.tag) < tag_names.size())
@@ -122,12 +124,28 @@ void OutputWriter::writeFinalState(int step, Real physical_time) {
               : std::string("unknown");
       os << num(r.x) << ',' << num(r.y) << ',' << num(r.nx) << ',' << num(r.ny) << ','
          << num(r.pressure) << ',' << num(r.cp) << ',' << num(r.cf) << ',' << num(r.rho) << ','
-         << num(r.u) << ',' << num(r.v) << ',' << num(r.mach) << ',' << tag_name << ','
-         << num(r.cell_u) << ',' << num(r.cell_v) << ',' << num(r.cell_mach) << ','
-         << num(r.tangential_shear) << '\n';
+         << num(r.u) << ',' << num(r.v) << ',' << num(r.mach) << ',' << tag_name << '\n';
     }
     if (rows.empty()) {
       throw CnsError("no wall boundary faces were found; surface.csv would be empty");
+    }
+
+    // Companion file: adjacent cell-centre values and the raw wall shear, so the
+    // report can compare boundary values against near-wall cell averages
+    // explicitly rather than implying that one is the other.
+    std::ofstream cc(joinPath(output_dir_, "surface_cell_center.csv"), std::ios::trunc);
+    if (!cc.good()) throw CnsError("cannot open surface_cell_center.csv in " + output_dir_);
+    cc << "x,y,nx,ny,cell_center_u,cell_center_v,cell_center_mach,tangential_wall_shear,"
+          "boundary_u,boundary_v,boundary_mach,tag\n";
+    for (const SurfaceRow &r : rows) {
+      const std::string tag_name =
+          (r.tag >= 0 && static_cast<std::size_t>(r.tag) < tag_names.size())
+              ? tag_names[static_cast<std::size_t>(r.tag)]
+              : std::string("unknown");
+      cc << num(r.x) << ',' << num(r.y) << ',' << num(r.nx) << ',' << num(r.ny) << ','
+         << num(r.cell_u) << ',' << num(r.cell_v) << ',' << num(r.cell_mach) << ','
+         << num(r.tangential_shear) << ',' << num(r.u) << ',' << num(r.v) << ',' << num(r.mach)
+         << ',' << tag_name << '\n';
     }
   }
 
