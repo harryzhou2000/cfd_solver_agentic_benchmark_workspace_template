@@ -77,7 +77,7 @@ probes.
       & $\vAreaLineIntegral$ & $O(\varepsilon)$ \\
     LSQ exactness & gradient of a linear field reproduced exactly
       & $\vLsqExactness$ & $O(\varepsilon)$ \\
-    Conservation & $\sum_i \mathbf{R}_i$ vs net boundary flux
+    Conservation$^\dagger$ & $\sum_i \mathbf{R}_i$ vs net boundary flux
       & $\vConservation$ & $O(\varepsilon)$ \\
     Jacobian product & \cref{eq:jacvec} vs central finite differences
       & $\vJacobianFd$ & $O(\sqrt{\varepsilon})$ \\
@@ -85,6 +85,9 @@ probes.
       & exact & exact \\
     \bottomrule
   \end{tabular}
+  \\[2pt]
+  \footnotesize $^\dagger$Measured in the first-order configuration; see the
+  discussion below for why this scope matters.
 \end{table}
 
 Three of these deserve comment.
@@ -92,11 +95,25 @@ Three of these deserve comment.
 The \textbf{conservation} check sums the residual over all cells and compares it
 with the net flux through the domain boundary. Interior face contributions must
 cancel exactly by \cref{eq:scatter}, so any discrepancy indicates a genuine
-conservation error. Measuring this correctly requires the boundary and interior
-fluxes to be evaluated at the same order; an early version of this test compared
-a first-order boundary flux against a reconstructed interior flux and produced a
-misleading non-zero value. Probed consistently at first order, the defect is
-$\vConservation$.
+conservation error.
+
+The scope of this measurement needs to be stated carefully, because it is easy to
+overclaim. Measuring it meaningfully requires the boundary and interior fluxes to
+be evaluated at the same order. An early version of the test compared a
+first-order boundary flux against a reconstructed interior state, which is an
+inconsistent comparison and produced a meaningless non-zero number. The honest
+statement of the corrected result is therefore: \emph{discrete conservation is
+verified to $\vConservation$ in the first-order configuration}. It is not a
+demonstration that the second-order scheme is conservative to that tolerance.
+
+What the first-order result does establish is that the flux-scatter machinery of
+\cref{eq:scatter} --- the face loop, the sign convention, the ownership rules that
+decide which rank accumulates which face --- is exactly conservative. Since
+second-order reconstruction changes only the \emph{states} handed to the flux
+function and not how the resulting flux is distributed between the two adjacent
+cells, telescoping of interior contributions is a structural property that holds
+at either order. That is a sound argument, but it is an argument, and it is
+reported as such rather than as a measurement.
 
 The \textbf{Jacobian} check compares \cref{eq:jacvec} against a central
 finite-difference of the analytic flux over $\vJacobianStates$ randomised states,

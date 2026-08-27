@@ -86,24 +86,65 @@ in the timings of \cref{tab:scaling}.
 \subsection{Choice of rank count for production}
 \label{sec:rankchoice}
 
-These meshes are small enough that more ranks are not better, and the production
-rank count was chosen from measurement rather than by assumption. Timing a fixed
-20 physical steps of the transient cylinder case gave $11.3$~s at $np=8$,
-$12.6$~s at $np=16$ and $26.4$~s at $np=32$: past eight ranks the solver gets
-monotonically \emph{slower}. With only $\cylCells$ cells, an $np=32$ partition
-leaves roughly 300 cells per rank, at which point the halo exchange and the
-serialization inherent in the LU-SGS sweep dominate the useful work per sweep.
-All production cases therefore run at $np=8$, which is also the rank count the
-benchmark requires to be demonstrated.
+These meshes are small enough that more ranks are not automatically better, and
+the production rank count was chosen from measurement. Timing a fixed 50 physical
+steps of the transient cylinder case, with each rank count pinned to its own set
+of distinct physical cores, gave the results in \cref{tab:rankchoice}.
 
-One measurement artefact is worth recording so the timings in this report are
-interpreted correctly. An earlier attempt to run several cases concurrently at
-high rank counts oversubscribed the machine --- 69 MPI processes on 64 cores, each
-receiving roughly $5\%$ of a core --- and the resulting wall times are meaningless
-as solver performance. All timings reported here are from runs made after that
-configuration was corrected, on an otherwise unloaded machine. Wall-clock
-comparisons between cases are only meaningful under that condition, which is why
-it is stated rather than assumed.
+\begin{table}[htbp]
+  \centering
+  \caption{Wall time for 50 physical steps of the $\Reinf=200$ transient at three
+  rank counts, each pinned to disjoint physical cores. The $np=16$ measurement
+  overlapped with unrelated compilation load and is an upper bound rather than a
+  precise figure.}
+  \label{tab:rankchoice}
+  \small
+  \begin{tabular}{rrrl}
+    \toprule
+    Ranks & Cells/rank & Wall time (s) & Measurement quality \\
+    \midrule
+    4 & $\approx 2550$ & 65.8 & clean \\
+    8 & $\approx 1270$ & 61.2 & clean \\
+    16 & $\approx 640$ & $\le 233.6$ & upper bound, contended \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The defensible conclusion is narrow, so it is worth stating precisely: $np=8$ is
+at or near the optimum for a mesh of $\cylCells$ cells, and increasing the rank
+count beyond it brings no benefit and can hurt substantially. The $np=16$ figure
+should not be read as a precise regression factor, because that measurement was
+contended. The mechanism is nonetheless clear --- at $np=16$ each rank holds only
+a few hundred cells, so the halo exchange and the serialization inherent in the
+LU-SGS sweep begin to dominate the useful work per sweep. All production cases
+therefore run at $np=8$, which is also the rank count the benchmark requires to
+be demonstrated.
+
+\subsection{Process binding: a practical lesson}
+\label{sec:binding}
+
+Two hardware and scheduling details materially affected measured performance, and
+both are worth recording because neither is obvious.
+
+First, the machine's topology is easy to misread. It presents 64 logical CPUs, but
+these are 32 physical cores across two sockets, each core carrying a hyperthread
+sibling at \texttt{CPU+32}. Treating the machine as 64 independent cores
+oversubscribes it by a factor of two.
+
+Second, and more damaging, OpenMPI's default binding policy places every
+independent \texttt{mpirun} job on the same cores, starting from the first NUMA
+node. Several concurrent jobs therefore pile onto one node's CPUs while the rest
+of the machine sits idle: at one point 28 processes were sharing a single NUMA
+node's CPUs at roughly $7\%$ of a core each. This does not appear as an error, only
+as uniformly terrible performance, and it invalidated an entire earlier set of
+timings. The fix was to pin each job to a disjoint set of physical cores with
+\texttt{taskset}. Notably \texttt{mpirun -{}-cpu-set} was not usable for this: it
+fails silently with exit status 1 for CPU ids outside the first NUMA node, even
+for a trivial command such as \texttt{hostname}.
+
+All timings reported in this document were measured after this was corrected, with
+each job on dedicated cores. Wall-clock comparisons are only meaningful under that
+condition, which is why the condition is stated rather than assumed.
 
 \section{Visualization and Plot Style Requirements}
 \label{sec:visualization}
