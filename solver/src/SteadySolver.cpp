@@ -359,9 +359,9 @@ SteadyResult runSteady(LocalMesh& lm,
             states[i] = candidate;
         }
 
-        // Isothermal energy fix: low-Mach viscous cases, first-order phase only
-        // At M<0.3, dT/T_inf=O(M^2)<1% so isothermal is exact to <1%
-        if (mu > 0.0 && cfg.freestream.mach < 0.3 && step <= first_order_steps) {
+        // Isothermal energy fix: low-Mach viscous cases, permanent
+        // At M<0.3, dT/T_inf=O(M^2)<9% so isothermal is a valid approximation
+        if (mu > 0.0 && cfg.freestream.mach < 0.3) {
             double T_ref = p_inf / (rho_inf * R_gas);
             for (int i = 0; i < n_owned; i++) {
                 double rho_i = states[i][0];
