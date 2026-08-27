@@ -81,9 +81,15 @@ SteadyResult runSteady(LocalMesh& lm,
     bool outer_res_decreased = true;           // for Fix E: did residual drop this step?
       // Fix B: longer first-order startup for Re<100 (need more steps for BL establishment)
     // For inviscid: 100 steps of first-order to allow transonic shocks to form stably
-    const int first_order_steps = (mu > 0.0) ? ((cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 2000 : 500) : 500;
-    // Gradual 2nd-order limiter ramp
-    const int second_order_ramp_steps = 300;
+    // Fix G: for M>=0.5 inviscid (transonic/supersonic shock) cases the Barth-Jespersen
+    // limiter activates abruptly at the 1st->2nd-order transition and causes residual spikes
+    // preventing convergence.  Extend the first-order phase so the shock fully establishes.
+    const bool inviscid_shock_case = (mu <= 0.0) && (cfg.freestream.mach >= 0.5);
+    const int first_order_steps = (mu > 0.0)
+        ? ((cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 2000 : 500)
+        : (inviscid_shock_case ? std::max(ramp_steps, 5000) : 500);
+    // Gradual 2nd-order limiter ramp (longer for shock cases to avoid abrupt activation)
+    const int second_order_ramp_steps = inviscid_shock_case ? 2000 : 300;
     int fix_d_grace_until = 0;
 
     SteadyResult result;
@@ -218,6 +224,11 @@ SteadyResult runSteady(LocalMesh& lm,
         if (step == first_order_steps + 1) {
             min_outer_res_ever = outer_res_norm;
             fix_d_grace_until = step + second_order_ramp_steps;
+            // Fix G: reset adaptive CFL at 2nd-order transition so the limiter activates
+            // gently at low CFL rather than at the high CFL steady state.
+            if (inviscid_shock_case) {
+                cfl_effective = std::min(cfl_effective, std::max(cfl_effective_init * 5.0, 5.0));
+            }
         }
 
         // Save reference states for frozen-RHS inner loop
