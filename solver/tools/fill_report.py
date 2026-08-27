@@ -46,9 +46,17 @@ def case_section(cid, e, figs):
     cd = e.get("cd", ""); cl = e.get("cl", "")
     np_ = e.get("mpi_ranks", "")
     wall = e.get("wall_time_seconds", "")
-    summ = ("\\noindent Status: \\textbf{%s}. Final $C_D=%s$, $C_L=%s$, "
-            "residual reduction %s orders over %s steps (np=%s, %.0f s).\n"
-            % (status, fmt(cd,5), fmt(cl,5), orders, steps, np_, float(wall or 0)))
+    if e.get("strouhal") is not None:
+        summ = ("\\noindent Status: \\textbf{%s}. Post-transient vortex shedding: "
+                "Strouhal $St=%s$, mean $C_D=%s$, lift amplitude $\\Delta C_L=%s$. "
+                "%s physical steps to $t=%s$ (np=%s, %.0f s).\n"
+                % (status, fmt(e.get("strouhal"),4), fmt(e.get("mean_cd_posttransient"),4),
+                   fmt(e.get("cl_amplitude"),4), steps, fmt(e.get("final_physical_time"),1),
+                   np_, float(wall or 0)))
+    else:
+        summ = ("\\noindent Status: \\textbf{%s}. Final $C_D=%s$, $C_L=%s$, "
+                "residual reduction %s orders over %s steps (np=%s, %.0f s).\n"
+                % (status, fmt(cd,5), fmt(cl,5), orders, steps, np_, float(wall or 0)))
     t.append(summ)
     # residual + forces
     if "%s_residual.png" % cid in figs:
