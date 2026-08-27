@@ -1,0 +1,351 @@
+{
+  "schema": "agent_scores",
+  "contestant": "opus46-02",
+  "evaluated_at": "2026-08-27T14:46:13.141927+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": null
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "01a0367d-d349-7061-afc5-967548eecef7"
+    ],
+    "execution_date": "2026-08-25",
+    "started_at": "2026-08-25T01:19:34.641000+00:00",
+    "ended_at": "2026-08-25T03:33:46.516000+00:00",
+    "time_basis": "UTC selected root.",
+    "rationale": "Workspace-local root 01a0367d plus 16 descendants is the benchmark tree."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Source/build present; no independent rebuild."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Individual case CLI outputs validate."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Modular source layout."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "No external solver found; no external search."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Input driven."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "METIS/MPI source; np8 artifacts."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Final contract/report inconsistency."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Agent testing evidence, final report broken."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 2,
+          "notes": "Raw/build artifacts required curation."
+        }
+      ],
+      "overall_score": 3.6,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Equations/source."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS/geometry modules."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "FV source and individual outputs."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Rusanov/Roe source."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "BC source, no detailed physical review."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 2,
+          "notes": "Terminal response admits first-order disabled reconstruction."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Limiter source."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "Terminal admits viscous flux disabled."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "LU-SGS source."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "Final manifest pending Re200; no completion credit."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS/MPI source."
+        }
+      ],
+      "overall_score": 3.16,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 3,
+          "notes": "Individual cases validate but complete report contract fails."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 2,
+          "notes": "Full explicit validator fails figure manifest."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 2,
+          "notes": "Final manifest has two pending cases."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "No credible Re200 result; M2 laminar pending."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Figures exist but manifest broken."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "Repeated contradictory final claims."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 1,
+          "notes": "Figure source mapping broken and raw data excluded."
+        }
+      ],
+      "overall_score": 2.3,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 48,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 6,
+        "notes": "Source/individual package evidence, complete contract fails."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 7,
+        "notes": "CGNS/geometry source."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 9,
+        "notes": "FV/BC source."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 4,
+        "notes": "First-order reconstruction admitted."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 3,
+        "notes": "Viscous disabled per terminal evidence."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 5,
+        "notes": "LU-SGS source but Re200 pending."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 7,
+        "notes": "MPI source/np8 artifacts."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 2,
+        "notes": "Incomplete M2 laminar/Re200."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 1,
+        "notes": "Broken figure manifest and contradictory claims."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Modular organization."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 3,
+      "notes": "Individual validator passes but report contract broken."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 3,
+      "notes": "Individual validator passes but report contract broken."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 3,
+      "notes": "Individual validator passes but report contract broken."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 3,
+      "notes": "Individual validator passes but report contract broken."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 3,
+      "notes": "Individual validator passes but report contract broken."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 0,
+      "notes": "Final manifest explicitly pending."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 3,
+      "notes": "Individual validator passes but no physical confirmation."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 0,
+      "notes": "Final manifest explicitly pending; not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "No rerun; Re200 was not rerun.",
+    "Raw packages/PDF excluded from curated tip.",
+    "run_identity.json and contestant_final_response.md are unindexed sidecars not validated by cfdeval check."
+  ]
+}
