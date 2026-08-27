@@ -16,6 +16,24 @@ from cfdeval.sessions import CodexThreadEvents, analyze_opencode, whole_stats
 
 
 class SessionIsolationTests(unittest.TestCase):
+    def test_terminal_response_ignores_trailing_null_task_complete(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            rollout = Path(tmp) / "rollout-root.jsonl"
+            rows = [
+                {"timestamp": "2026-01-01T00:00:01Z", "type": "event_msg",
+                 "payload": {"type": "task_complete", "last_agent_message": "first"}},
+                {"timestamp": "2026-01-01T00:00:02Z", "type": "event_msg",
+                 "payload": {"type": "task_complete", "last_agent_message": "terminal"}},
+                {"timestamp": "2026-01-01T00:00:03Z", "type": "event_msg",
+                 "payload": {"type": "task_complete", "last_agent_message": None}},
+            ]
+            rollout.write_text("\n".join(json.dumps(row) for row in rows) + "\n")
+            response = cd.final_response(str(rollout))
+            self.assertEqual(response["status"], "complete")
+            self.assertEqual(response["text"], "terminal")
+            self.assertEqual(response["timestamp"], "2026-01-01T00:00:02Z")
+            self.assertEqual(response["part_count"], 1)
+
     def test_owned_rollout_usage_is_attributed_across_model_switches(self):
         with tempfile.TemporaryDirectory() as tmp:
             rollout = Path(tmp) / "rollout-root.jsonl"

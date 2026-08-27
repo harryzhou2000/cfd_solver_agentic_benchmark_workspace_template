@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import re
 import sqlite3
@@ -232,6 +233,37 @@ def iter_session_records(rollout_path):
                 yield json.loads(line)
             except json.JSONDecodeError:
                 continue
+
+
+def final_response(rollout_path: str | None) -> dict:
+    """Extract the last persisted non-null root terminal message.
+
+    Some legacy Codex rollouts record completion in ``event_msg/task_complete``
+    rather than a final-channel response_item, and append bookkeeping completion
+    records whose ``last_agent_message`` is null.  Preserve the last actual
+    message in chronological stored order; never fall back outside the bundled
+    rollout.
+    """
+    selected = None
+    for rec in iter_session_records(rollout_path):
+        payload = rec.get("payload") or {}
+        if (rec.get("type") == "event_msg" and payload.get("type") == "task_complete"
+                and isinstance(payload.get("last_agent_message"), str)
+                and payload["last_agent_message"]):
+            selected = rec
+    if selected is None:
+        return {"status": "absent", "reason": "no persisted non-null task_complete message"}
+    text = selected["payload"]["last_agent_message"]
+    source_bytes = Path(rollout_path).read_bytes() if rollout_path else b""
+    message_bytes = text.encode("utf-8")
+    return {
+        "status": "complete", "text": text,
+        "source": str(rollout_path),
+        "source_sha256": hashlib.sha256(source_bytes).hexdigest(),
+        "message_sha256": hashlib.sha256(message_bytes).hexdigest(),
+        "timestamp": selected.get("timestamp"), "part_count": 1,
+        "rule": "last_non_null_task_complete_message",
+    }
 
 
 def _usage_fields(raw: dict | None) -> dict:

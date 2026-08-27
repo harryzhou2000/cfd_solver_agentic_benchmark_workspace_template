@@ -226,6 +226,27 @@ def _graphics_references(sources: list[tuple[str, str]], report_root: str) -> se
                         references.add(candidate + ".png")
                         references.add(candidate + ".pdf")
 
+        # Some reports deliberately wrap \includegraphics in a guarded macro
+        # so an incomplete run renders a labelled placeholder rather than an
+        # opaque TeX failure.  Follow the concrete arguments only when the
+        # same source defines the conventional report-local wrapper.
+        guarded = re.search(
+            r"\\newcommand\s*\{\\figIfExists\}.*?\\IfFileExists\s*\{figures/#1\}"
+            r".*?\\includegraphics",
+            normalized,
+            flags=re.DOTALL,
+        )
+        if guarded:
+            for call in re.finditer(r"\\figIfExists\s*\{([^{}]+)\}", normalized):
+                target = call.group(1).strip()
+                if not target or target.startswith("/") or "\\" in target:
+                    continue
+                candidate = posixpath.normpath(
+                    posixpath.join(report_root, "figures", target)
+                )
+                if candidate.startswith(report_root + "/"):
+                    references.add(candidate)
+
         # A common report-local helper wraps \includegraphics in a four-argument
         # subfigure macro: \subp{width}{figure-stem}{caption}{label}.  The
         # second argument remains a concrete committed figure dependency even

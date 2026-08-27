@@ -316,6 +316,19 @@ def main(argv: list[str] | None = None) -> int:
         if final_response["status"] == "complete":
             (out_dir / "contestant_final_response.md").write_text(
                 final_response["text"], encoding="utf-8")
+    if harness == "codex":
+        selected_roots = parsed_roots or []
+        if len(selected_roots) == 1:
+            threads = cd.load_threads(paths["state_db"])
+            cd.rebase_rollout_paths(threads, paths["sessions_root"])
+            final_response = cd.final_response(
+                (threads.get(selected_roots[0]) or {}).get("rollout_path"))
+            metadata.setdefault("codex", {})["final_response"] = {
+                key: value for key, value in final_response.items() if key != "text"}
+            (out_dir / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
+            if final_response["status"] == "complete":
+                (out_dir / "contestant_final_response.md").write_text(
+                    final_response["text"], encoding="utf-8")
     if harness == "opencode":
         expenses = expense_tools.opencode_expense_facts(
             metadata, str(ws), args.cost_metadata)
