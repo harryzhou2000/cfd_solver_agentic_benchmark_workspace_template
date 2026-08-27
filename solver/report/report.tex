@@ -28,16 +28,23 @@ iteration-time communication is strictly neighbour-scoped point-to-point halo
 exchange: no rank holds the full mesh or the full conservative state during
 iterations.
 
-Verification is quantitative: face-closure error $\vFaceClosure$, volume closure
-$\vVolumeClosure$, cell area against the boundary line integral
-$\vAreaLineIntegral$, exactness of the least-squares gradient on a linear field
-$\vLsqExactness$, a discrete conservation defect of $\vConservation$, and
-agreement of the analytic Jacobian-vector product with central finite differences
-to $\vJacobianFd$ over $\vJacobianStates$ random states. The slip-wall flux carries
-exactly zero mass and energy flux for any interior state, with the normal momentum
-equal to the wall pressure in the limit of vanishing wall-normal velocity
-(\cref{eq:slipflux}); force coefficients agree to within $\num{5e-4}$ relative across
-$np=1,2,4,8$.
+Verification is quantitative, and the figures below are the worst across the two
+supplied meshes rather than the better of them: face-closure error
+$\vFaceClosureWorst$, volume closure $\vVolumeClosureWorst$, cell area against the
+boundary line integral $\vAreaLineIntegralWorst$, and the least-squares gradient of a
+linear field reproduced to $\vLsqExactnessWorst$ --- near round-off on the cylinder
+mesh at $\vLsqExactnessCyl$, and $\vLsqExactnessNaca$ on the airfoil mesh that carries
+six of the eight cases, so the gradient operator is accurate rather than exact and
+\cref{sec:meshverif} reports both. The discrete residual telescopes against the net
+boundary flux to $\vConservationWorstInviscid$ on the inviscid cases, where that probe
+is self-consistent; \cref{sec:conservationprobe} explains why the figure is not
+meaningful on the viscous ones. The analytic Jacobian-vector product agrees with central
+finite differences to $\vJacobianFd$ over $\vJacobianStates$ random states. The
+slip-wall flux carries exactly zero mass and energy flux for any interior state, with the
+normal momentum equal to the wall pressure in the limit of vanishing wall-normal velocity
+(\cref{eq:slipflux}). Drag agrees to $\num{2.4e-4}$ relative across $np=1,2,4,8$, and the
+near-zero lift and moment agree to $\num{7.6e-4}$ of the drag in absolute terms
+(\cref{sec:rankconsistency}).
 
 All eight required cases were run to completion with the supplied production controls,
 and all eight are reported by the solver as \texttt{converged} or

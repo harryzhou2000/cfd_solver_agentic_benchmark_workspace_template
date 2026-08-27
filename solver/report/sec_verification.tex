@@ -117,6 +117,7 @@ quoted in this report are likewise harvested mechanically from the same files by
 used above; the prose contains no hand-typed result numbers.
 
 \subsection{Geometric and discrete verification}
+\label{sec:meshverif}
 
 The solver verifies its own mesh metrics at startup and reports the results in
 \texttt{stdout.log} before spending time on a solve.
@@ -125,35 +126,53 @@ probes.
 
 \begin{table}[htbp]
   \centering
-  \caption{Verification measurements. The first four are geometric identities
-  that must hold to machine precision; the remainder test the discretization
-  itself.}
+  \caption{Verification measurements. The first four are geometric identities that must
+  hold to machine precision; the remainder test the discretization itself. The two
+  supplied meshes are reported separately, because each geometric quantity is a property
+  of a mesh and the two differ by up to three orders of magnitude --- CylinderB1 carries
+  the two cylinder cases and NACA0012\_H2 the other six. Every figure is the value the
+  solver printed to \texttt{stdout.log} for the submitted runs.}
   \label{tab:verification}
   \small
   \begin{tabular}{llll}
     \toprule
-    Check & Identity tested & Measured & Expected \\
+    Check & Identity tested & CylinderB1 & NACA0012\_H2 \\
     \midrule
     Face closure & $\sum_f \mathbf{n}_f\Delta s_f=\mathbf{0}$ per cell
-      & $\vFaceClosure$ & $O(\varepsilon)$ \\
+      & $\vFaceClosureCyl$ & $\vFaceClosureNaca$ \\
     Volume closure & $\tfrac12\sum_f (\mathbf{x}_f\!\cdot\!\mathbf{n}_f)\Delta s_f=V_i$
-      & $\vVolumeClosure$ & $O(\varepsilon)$ \\
+      & $\vVolumeClosureCyl$ & $\vVolumeClosureNaca$ \\
     Domain area & $\sum_i V_i$ vs boundary line integral
-      & $\vAreaLineIntegral$ & $O(\varepsilon)$ \\
-    LSQ exactness & gradient of a linear field reproduced exactly
-      & $\vLsqExactness$ & $O(\varepsilon)$ \\
+      & $\vAreaLineIntegralCyl$ & $\vAreaLineIntegralNaca$ \\
+    LSQ gradient & gradient of a linear field reproduced
+      & $\vLsqExactnessCyl$ & $\vLsqExactnessNaca$ \\
+    \midrule
+    \multicolumn{4}{l}{\emph{Discretization probes, independent of mesh}} \\
     Conservation$^\dagger$ & $\sum_i \mathbf{R}_i$ vs net boundary flux
-      & $\vConservation$ & $O(\varepsilon)$ \\
+      & \multicolumn{2}{l}{$\vConservationWorstInviscid$ (inviscid cases)} \\
     Jacobian product & \cref{eq:jacvec} vs central finite differences
-      & $\vJacobianFd$ & $O(\sqrt{\varepsilon})$ \\
+      & \multicolumn{2}{l}{$\vJacobianFd$, expected $O(\sqrt{\varepsilon})$} \\
     Slip-wall flux & zero mass and energy flux (\cref{eq:slipflux})
-      & $0$ & $0$ \\
+      & \multicolumn{2}{l}{exactly $0$} \\
     \bottomrule
   \end{tabular}
   \\[2pt]
-  \footnotesize $^\dagger$Measured in the first-order configuration; see the
-  discussion below for why this scope matters.
+  \footnotesize $^\dagger$Quoted on the inviscid cases only, where the probe is
+  self-consistent; see \cref{sec:conservationprobe}.
 \end{table}
+
+\paragraph{The gradient operator is accurate, not exact, and the two meshes differ
+sharply.} The LSQ row is the one where reporting a single number would have been
+misleading, and an earlier version of this report did exactly that. It quoted
+$\vLsqExactnessCyl$ --- the cylinder value --- as though it were global, and the abstract
+described it with the word ``exactness''. The airfoil mesh, which carries six of the eight
+cases, measures $\vLsqExactnessNaca$: a factor of $455$ worse, and eleven orders above
+round-off rather than at it. The reconstruction of a linear field is therefore
+\emph{accurate} on that mesh rather than exact, and the residue is consistent with the
+conditioning of the weighted normal equations on its highly stretched leading-edge cells,
+where aspect ratios reach the thousands. Nothing downstream depends on the stronger claim,
+but quoting the better of two measured values as if it covered both is precisely the
+failure mode this report documents elsewhere, and it is corrected here by reporting both.
 
 The slip-wall row deserves a note, because an earlier version of this table claimed more
 than the code delivers. It asserted the full identity
@@ -195,19 +214,48 @@ converged solutions leaves the reported forces untouched.
 
 Three of these deserve comment.
 
+\label{sec:conservationprobe}
 The \textbf{conservation} check sums the residual over all cells and compares it
 with the net flux through the domain boundary. Interior face contributions must
 cancel exactly by \cref{eq:scatter}, so any discrepancy indicates a genuine
 conservation error.
 
 The scope of this measurement needs to be stated carefully, because it is easy to
-overclaim. Measuring it meaningfully requires the boundary and interior fluxes to
-be evaluated at the same order. An early version of the test compared a
-first-order boundary flux against a reconstructed interior state, which is an
-inconsistent comparison and produced a meaningless non-zero number. The honest
-statement of the corrected result is therefore: \emph{discrete conservation is
-verified to $\vConservation$ in the first-order configuration}. It is not a
-demonstration that the second-order scheme is conservative to that tolerance.
+overclaim, and the scoping has had to be tightened twice. Measuring it meaningfully
+requires the boundary and interior fluxes to be evaluated at the same order. An early
+version of the test compared a first-order boundary flux against a reconstructed interior
+state, which is an inconsistent comparison and produced a meaningless non-zero number.
+The probe therefore disables second-order reconstruction before measuring.
+
+\textbf{But it does not disable the viscous flux, and its boundary term is inviscid.}
+That is the second inconsistency, of exactly the same kind as the first, and it is visible
+in the submitted logs. The interior assembly includes the viscous residual on a viscous
+case, while the independently recomputed boundary term calls only the inviscid Riemann
+flux, so the two sides are not measuring the same operator. The consequence is stark:
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Cases & Probe self-consistent? & Reported defect \\
+  \midrule
+  Three NACA inviscid & yes & \num{1.2e-18} to $\vConservationWorstInviscid$ \\
+  Three NACA laminar & no & \num{3.0e-3} to $\vConservationWorstAll$ \\
+  Two cylinder laminar & no & \num{5.7e-5} to \num{5.7e-4} \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The honest statement is therefore narrower than the one this report previously
+made. \emph{Discrete conservation is verified to $\vConservationWorstInviscid$ on the
+three inviscid cases, in the first-order configuration.} On the viscous cases the printed
+figure measures the inviscid-versus-viscous mismatch in the probe rather than any property
+of the solver, and it should not be read as a conservation error --- nor as a verification.
+A previous draft quoted $\vConservationProbe$, a figure from an offline first-order probe
+that is not the value of any submitted case; the numbers above are recomputable from the
+eight \texttt{stdout.log} files with a single \texttt{grep}, which the probe value was
+not. Where a reader can check a number themselves, that is the number to print.
+
+It is not a demonstration that the second-order scheme is conservative to that tolerance.
 
 What the first-order result does establish is that the flux-scatter machinery of
 \cref{eq:scatter} --- the face loop, the sign convention, the ownership rules that

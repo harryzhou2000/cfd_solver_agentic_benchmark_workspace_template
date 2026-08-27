@@ -9,11 +9,40 @@
 \newcommand{\pending}{\textbf{\textit{[run in progress]}}}
 
 % ---- verification measurements --------------------------------------------
-\newcommand{\vFaceClosure}{1.0\times10^{-16}}
-\newcommand{\vVolumeClosure}{1.1\times10^{-10}}
-\newcommand{\vAreaLineIntegral}{1.4\times10^{-14}}
-\newcommand{\vLsqExactness}{3.1\times10^{-13}}
-\newcommand{\vConservation}{9.2\times10^{-17}}
+%
+% These are MESH properties, and there are two meshes: CylinderB1 carries the two
+% cylinder cases and NACA0012_H2 carries the other six.  Each geometric quantity
+% therefore has exactly TWO values, not one, and every one of these figures is
+% harvested from the solver's own mesh-verification line in the eight stdout.log
+% files (scratch/mainverify/verif_constants.py).  An earlier version of this file
+% quoted a single value per quantity, taking whichever mesh measured better; for
+% the LSQ gradient that meant quoting 3.1e-13 from the cylinder while the mesh
+% carrying six of the eight cases measures 1.4e-10, a factor of 455 worse.  The
+% pairs below are the honest form and the WorstOf macros are what the prose
+% quotes when it needs one number to cover all eight submitted runs.
+\newcommand{\vFaceClosureCyl}{1.02\times10^{-16}}
+\newcommand{\vFaceClosureNaca}{1.03\times10^{-16}}
+\newcommand{\vFaceClosureWorst}{1.0\times10^{-16}}
+\newcommand{\vVolumeClosureCyl}{4.8\times10^{-13}}
+\newcommand{\vVolumeClosureNaca}{1.1\times10^{-10}}
+\newcommand{\vVolumeClosureWorst}{1.1\times10^{-10}}
+\newcommand{\vAreaLineIntegralCyl}{2.4\times10^{-16}}
+\newcommand{\vAreaLineIntegralNaca}{4.2\times10^{-15}}
+\newcommand{\vAreaLineIntegralWorst}{4.2\times10^{-15}}
+\newcommand{\vLsqExactnessCyl}{3.1\times10^{-13}}
+\newcommand{\vLsqExactnessNaca}{1.4\times10^{-10}}
+\newcommand{\vLsqExactnessWorst}{1.4\times10^{-10}}
+%
+% The conservation defect is NOT a pure mesh property: it is measured by a probe
+% that disables second-order reconstruction but leaves the viscous flux active,
+% while its independent boundary term calls only the inviscid flux.  On the three
+% NACA laminar cases that mismatch dominates and the reported defect rises to
+% O(1e-1).  The inviscid cases, where the two terms are consistent, are the ones
+% that actually measure telescoping.
+\newcommand{\vConservationInviscid}{1.8\times10^{-17}}
+\newcommand{\vConservationWorstInviscid}{1.8\times10^{-17}}
+\newcommand{\vConservationWorstAll}{1.5\times10^{-1}}
+\newcommand{\vConservationProbe}{9.2\times10^{-17}}
 \newcommand{\vJacobianFd}{1.7\times10^{-8}}
 \newcommand{\vJacobianStates}{20\,000}
 \newcommand{\vHllcRegression}{10^{-11}}

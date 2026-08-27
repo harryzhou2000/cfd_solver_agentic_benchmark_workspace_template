@@ -375,6 +375,7 @@ def main():
     macros = []
     status_rows = []
     force_rows = []
+    saturation_rows = []
 
     def define(name, value):
         macros.append("\\def\\cns%s{%s}" % (name, value))
@@ -703,6 +704,31 @@ def main():
                 define("ShedTStart", num(tool.get("t_start"), 5))
                 define("ShedTEnd", num(tool.get("t_end"), 5))
                 define("ShedSaturated", "PASS" if tool.get("saturated") else "FAIL")
+                # Saturation-evidence table: the same measurement at a sequence of
+                # window starts, emitted as complete rows.  These were hand-typed
+                # from a mid-run snapshot at t=54.8 and three of the four rows went
+                # stale when the run completed to t=300, so the whole table is now
+                # regenerated from the final record.  The argument rests on the
+                # collapse of the period spread, which is why the spread and its
+                # percentage are both emitted.
+                sat_rows = []
+                for start in (16.8, 30.0, 40.0, 60.0):
+                    w = transient_status(case_dir / "forces.csv", start=start)
+                    if not w:
+                        continue
+                    per = w.get("period")
+                    spr = w.get("spread")
+                    pct = (100.0 * spr / per) if (per and spr is not None) else None
+                    sat_rows.append(" & ".join([
+                        "$t\\ge %g$" % start,
+                        num(w.get("strouhal"), 4),
+                        num(per, 5),
+                        num(spr, 3),
+                        (num(pct, 2) + "\\,\\%") if pct is not None else "---",
+                        num(w.get("cd_mean"), 5),
+                    ]) + " \\\\")
+                if sat_rows:
+                    saturation_rows.extend(sat_rows)
                 # Relative spread of the individual period estimates: the sharpest
                 # available indicator that the signal is a genuine limit cycle
                 # rather than a signal still passing through linear growth.
@@ -792,6 +818,12 @@ def main():
         for base in sorted(grouped):
             runs = sorted(grouped[base])
             baseline = None
+            base_all = {}
+            dev = {"cd": 0.0, "cl": 0.0, "cmz": 0.0}
+            worst_cd_rel = 0.0
+            worst_cd_ranks = None
+            cds = []
+            cuts = []
             for ranks, entry in runs:
                 status = read_json(entry) or {}
                 meta = read_json(entry.parent / "metadata.json") or {}
@@ -799,6 +831,30 @@ def main():
                 cd = forces[-1].get("cd") if forces else None
                 if baseline is None and cd is not None:
                     baseline = cd
+                # Rank-consistency spread, harvested for all three coefficients.
+                # C_L and C_mz are near zero by symmetry on these cases, so their
+                # RELATIVE deviations are large (up to 0.4) for a reason that has
+                # nothing to do with the halo exchange; the meaningful measure for
+                # them is the absolute deviation normalised by the drag, which is
+                # the one O(1) coefficient available.  Quoting a single relative
+                # bound for "force coefficients" is false for two of the three.
+                if forces:
+                    for field in dev:
+                        val = forces[-1].get(field)
+                        if not isinstance(val, (int, float)):
+                            continue
+                        if field not in base_all:
+                            base_all[field] = val
+                            continue
+                        dev[field] = max(dev[field], abs(val - base_all[field]))
+                if cd is not None and baseline and abs(cd - baseline) / abs(baseline) > worst_cd_rel:
+                    worst_cd_rel = abs(cd - baseline) / abs(baseline)
+                    worst_cd_ranks = ranks
+                if cd is not None:
+                    cds.append(cd)
+                cut = meta.get("partition_edge_cut")
+                if isinstance(cut, (int, float)):
+                    cuts.append(int(cut))
                 if cd is not None and baseline:
                     delta = "\\num{%.1e}" % (abs(cd - baseline) / abs(baseline))
                 else:
@@ -811,6 +867,23 @@ def main():
                     delta,
                     num(status.get("wall_time_seconds"), 4),
                 ]) + " \\\\")
+            skey = "CylScal" if base.startswith("cylinder") else "NacaScal"
+            if baseline:
+                define("ScalCdWorstRel" + skey, num(worst_cd_rel, 3))
+                if worst_cd_ranks is not None:
+                    define("ScalCdWorstRanks" + skey, num(worst_cd_ranks, 3))
+                for field, mac in (("cd", "Cd"), ("cl", "Cl"), ("cmz", "Cmz")):
+                    define("ScalAbsDev" + mac + skey, num(dev[field], 3))
+                    define("ScalDevOverCd" + mac + skey,
+                           num(dev[field] / abs(baseline), 3))
+                    if base_all.get(field):
+                        define("ScalRelDev" + mac + skey,
+                               num(dev[field] / abs(base_all[field]), 3))
+            if cds:
+                define("ScalCdMin" + skey, num(min(cds), 9))
+                define("ScalCdMax" + skey, num(max(cds), 9))
+            if cuts:
+                define("ScalCutMax" + skey, num(max(cuts), 6))
     else:
         scaling_body.append(pending_row(6))
 
@@ -835,6 +908,8 @@ def main():
         ("tab_scaling.tex", "lrrrrr", scaling_body,
          ["Case", "Ranks", "Edge cut", "$C_D$ at step 1500",
           "rel.\\ dev.\\ from $np{=}1$", "Wall (s)$^\\ddagger$"]),
+        ("tab_saturation.tex", "lrrrrr", saturation_rows or [pending_row(6)],
+         ["Window", "$St$", "Period", "Spread", "Spread/period", "Mean $C_D$"]),
     )
     for name, spec, body, header in tables:
         lines = ["\\begin{tabular}{%s}" % spec, "\\toprule",

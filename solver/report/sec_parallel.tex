@@ -27,18 +27,66 @@ $np=1,2,4,8$, so that both meshes and both wall types are exercised, and
 \end{table}
 
 \subsection{Consistency across rank counts}
+\label{sec:rankconsistency}
 
 The study covers \texttt{cylinder\_m010\_laminar\_re20} and
 \texttt{naca0012\_m015\_laminar\_re5000}, exercising both meshes and both wall
-types, at $np=1,2,4,8$. Stated conservatively, the force coefficients agree to
-\textbf{within $\num{5e-4}$ relative} across an eight-fold change in rank count,
-the worst case being $\num{4.7e-4}$ for the cylinder at $np=8$. Per case: the
-airfoil agrees to five significant figures with a maximum deviation of
-$\num{1.0e-4}$ while its edge cut rises from $0$ to $439$ cut faces, and the
-cylinder agrees to four significant figures, from $2.12601$ at $np=1$ to
-$2.12701$ at $np=8$, with the edge cut rising through $0, 97, 282, 471$. Quoting a
-single figure of five significant digits for both cases would overstate the
-cylinder result.
+types, at $np=1,2,4,8$.
+
+\textbf{The drag agrees to $\cnsScalCdWorstRelCylScal$ relative across an eight-fold change
+in rank count}, that being the cylinder's worst deviation from its own $np=1$ value; the
+airfoil is tighter at $\cnsScalCdWorstRelNacaScal$. The cylinder runs from
+$\cnsScalCdMinCylScal$ to $\cnsScalCdMaxCylScal$ while its edge cut rises through $0, 97,
+282, \cnsScalCutMaxCylScal$ cut faces, and the airfoil from $\cnsScalCdMinNacaScal$ to
+$\cnsScalCdMaxNacaScal$ with its cut rising to $\cnsScalCutMaxNacaScal$. So the airfoil
+holds five significant figures and the cylinder four, and quoting a single five-figure
+claim for both would overstate the cylinder.
+
+\paragraph{The claim has to name which coefficient, because it is false for the other two.}
+An earlier version of this section, and of the abstract, said that ``force coefficients''
+agree to $\num{5e-4}$ relative. That is true of $C_D$ and false of $C_L$ and $C_{m,z}$,
+whose relative deviations reach $\cnsScalRelDevClNacaScal$ and
+$\cnsScalRelDevCmzCylScal$ --- the latter nearly $40\,\%$. The reason is not a defect in
+the parallel implementation, and the numbers make that clear once they are put the right
+way round:
+
+\begin{center}
+\begin{tabular}{llrrr}
+  \toprule
+  Case & Coefficient & Abs.\ deviation & Relative to itself & Relative to $C_D$ \\
+  \midrule
+  Cylinder $\Reinf=20$ & $C_D$ & $\cnsScalAbsDevCdCylScal$
+    & $\cnsScalRelDevCdCylScal$ & $\cnsScalDevOverCdCdCylScal$ \\
+   & $C_L$ & $\cnsScalAbsDevClCylScal$
+    & $\cnsScalRelDevClCylScal$ & $\cnsScalDevOverCdClCylScal$ \\
+   & $C_{m,z}$ & $\cnsScalAbsDevCmzCylScal$
+    & $\mathbf{\cnsScalRelDevCmzCylScal}$ & $\cnsScalDevOverCdCmzCylScal$ \\
+  \midrule
+  NACA $\Minf=0.15$ lam. & $C_D$ & $\cnsScalAbsDevCdNacaScal$
+    & $\cnsScalRelDevCdNacaScal$ & $\cnsScalDevOverCdCdNacaScal$ \\
+   & $C_L$ & $\cnsScalAbsDevClNacaScal$
+    & $\mathbf{\cnsScalRelDevClNacaScal}$ & $\cnsScalDevOverCdClNacaScal$ \\
+   & $C_{m,z}$ & $\cnsScalAbsDevCmzNacaScal$
+    & $\cnsScalRelDevCmzNacaScal$ & $\cnsScalDevOverCdCmzNacaScal$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The absolute deviations of all three coefficients are within a factor of
+$40$ of each other, between $\num{1.2e-5}$ and $\num{5.1e-4}$. What differs by four orders
+of magnitude is the \emph{denominator}: both bodies are symmetric at zero incidence, so
+$C_L$ and $C_{m,z}$ are near zero --- $C_L$ is $\num{1.6e-3}$ on the cylinder and
+$\num{1.1e-3}$ on the airfoil, small but not exactly zero --- and dividing a small absolute
+change by an almost-vanishing quantity manufactures a large ratio. A relative measure is
+simply not informative for a coefficient whose true value is near zero, the same point
+\cref{sec:reintegrate} makes about the near-zero-drag case.
+
+\textbf{Normalised by the one coefficient that is $O(1)$ for each case, every component of
+both cases agrees to $\cnsScalDevOverCdClNacaScal$ or better}, and five of the six to better
+than $\num{3e-4}$. That statement covers all three coefficients rather than one, and it is
+the form this report uses. The relative figures are given above rather than omitted, because
+a reader who computes them will find them and is owed the explanation rather than left to
+wonder what was left out.
 
 Agreement at this level is the expected and correct result. Since a reader might
 reasonably expect bitwise reproducibility, it is worth being explicit that

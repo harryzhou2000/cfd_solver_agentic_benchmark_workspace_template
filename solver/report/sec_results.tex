@@ -1187,26 +1187,21 @@ window is moved forward through the record.
   Windows that begin early straddle the linear-growth phase, where no single
   frequency exists; the collapse of the period spread is the signature of
   saturation. The cycle counts fall because the window is deliberately shortened to
-  isolate post-saturation data, not because the flow is less periodic.}
+  isolate post-saturation data, not because the flow is less periodic. All rows are
+  measured on the completed $t=300$ record; an earlier version of this table was taken
+  from a mid-run snapshot at $t=54.8$ and three of its four rows did not survive the run's
+  completion.}
   \label{tab:saturation}
   \small
-  \begin{tabular}{rrrrrr}
-    \toprule
-    Window & $St$ & Period & Spread & Spread/period & Mean $C_D$ \\
-    \midrule
-    $t\ge16.8$ & \num{0.1666} & \num{6.0023} & \num{2.2324} & $37\,\%$ & \num{1.1173} \\
-    $t\ge30$ & \num{0.1796} & \num{5.5667} & \num{0.1947} & $3.5\,\%$ & \num{1.1928} \\
-    $t\ge40$ & \num{0.1816} & \num{5.5078} & \num{0.0360} & $0.7\,\%$ & \num{1.2276} \\
-    $t\ge60$ & \num{0.1830} & \num{5.4652} & \num{0.0022} & $0.04\,\%$ & \num{1.2468} \\
-    \bottomrule
-  \end{tabular}
+  \input{tab_saturation}
 \end{table}
 
-The argument rests on the first column of trends: the period spread collapses from
-$37\,\%$ of the period to $\num{0.04}\,\%$. Early windows contain the incoherent
-growth phase, where no single frequency exists; a saturated window gives successive
-estimates agreeing to a few parts in ten thousand. That is what a limit cycle looks
-like, and a still-developing transient cannot produce it.
+The argument rests on one column: the period spread collapses by nearly three orders of
+magnitude as the growth phase is excluded, from $41\,\%$ of the period to
+$0.044\,\%$. Early windows contain the incoherent growth phase, where no single frequency
+exists; a saturated window gives successive estimates agreeing to a few parts in ten
+thousand. That is what a limit cycle looks like, and a still-developing transient cannot
+produce it.
 
 \paragraph{A trend that is an artifact of nested windows.} An earlier draft drew a
 second conclusion from \cref{tab:saturation}: that $St$ and $\overline{C_D}$ approach
@@ -1410,12 +1405,26 @@ structure producing it in \cref{fig:cyl200-wake}.
   \begin{subfigure}{0.49\textwidth}\centering
     \cnsfig{cylinder_m010_laminar_re200_mach.png}{\linewidth}
     \caption{Mach number.}
+  \end{subfigure}\\[6pt]
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_cp.png}{\linewidth}
+    \caption{Wall $C_p$ at $t=300$.}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}\centering
+    \cnsfig{cylinder_m010_laminar_re200_cf.png}{\linewidth}
+    \caption{Wall $C_f$ at $t=300$.}
   \end{subfigure}
   \caption{Cylinder at $\Reinf=200$: post-transient wake visualisations from
   \texttt{field\_final.vtu}. Vorticity is clipped to the recommended $[-5,5]$
   range, without which the near-wall vorticity extremes compress the wake into a
   single colour. The alternating pattern of opposite-signed vortices is the
   vortex street; the low-pressure cores in panel (c) mark the individual
-  vortices.}
+  vortices. Panels (e) and (f) give the wall distributions from \texttt{surface.csv} at the
+  final instant. Unlike the $\Reinf=20$ case of \cref{fig:cyl20-field} these are
+  \emph{not} symmetric about the flow direction: the instantaneous shedding phase loads one
+  side more than the other, which is the surface signature of the same asymmetry that
+  produces the oscillating lift. Being an instantaneous snapshot of a periodic flow, they
+  should be read together with the force history of \cref{fig:cyl200-forces} rather than as a
+  converged steady distribution.}
   \label{fig:cyl200-wake}
 \end{figure}

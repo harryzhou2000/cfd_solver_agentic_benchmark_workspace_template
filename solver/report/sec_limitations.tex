@@ -91,8 +91,9 @@ thicker there than on the body. This affects the sharpness of the contours in
 pressure jump across the shock is captured conservatively even when it is spread.
 
 \paragraph{The observed order of accuracy is not measured.} The evidence for
-second order here is structural, diagnostic and comparative: exact recovery of
-linear-field gradients ($\vLsqExactness$), the verified analytic Jacobian, the
+second order here is structural, diagnostic and comparative: recovery of
+linear-field gradients to $\vLsqExactnessCyl$ on the cylinder mesh and
+$\vLsqExactnessNaca$ on the airfoil mesh, the verified analytic Jacobian, the
 positivity-fallback counts showing the second-order path is active in production,
 and the first-versus-second-order comparison of \cref{sec:ordersens}, where first
 order inflates cylinder drag by $60.5\,\%$ and out of the literature range. That
@@ -163,10 +164,13 @@ graph with neighbour-scoped halo exchange, with no full-mesh or full-state
 replication during iterations.
 
 The verification evidence is quantitative and is collected in
-\cref{tab:verification}: geometric identities at machine precision, exact
-least-squares gradients for linear fields, discrete conservation at
-$\vConservation$, and an analytic Jacobian confirmed against finite differences.
-Force coefficients agree to within $\num{5e-4}$ relative across $np=1,2,4,8$.
+\cref{tab:verification}: geometric identities at machine precision, least-squares
+gradients of linear fields recovered to between $\vLsqExactnessCyl$ and
+$\vLsqExactnessNaca$ depending on the mesh, discrete conservation at
+$\vConservationWorstInviscid$ on the inviscid cases, and an analytic Jacobian confirmed
+against finite differences. Drag agrees to $\num{2.4e-4}$ relative across $np=1,2,4,8$,
+with the near-zero lift and moment agreeing to $\num{7.6e-4}$ of the drag in absolute
+terms (\cref{sec:rankconsistency}).
 
 The most useful methodological result is negative and is documented in
 \cref{sec:stationarity}: normalising the steady convergence test by the
