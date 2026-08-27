@@ -288,6 +288,39 @@ velocity and Mach columns on a no-slip wall are identically zero, while the $C_f
 column carries the tangential shear of \cref{eq:shear}. The skin-friction
 distributions are shown in \cref{fig:naca-lam-cf}.
 
+\paragraph{An absolute check against Blasius theory.} The $\Minf=0.15$ case
+admits the most stringent validation available anywhere in this benchmark,
+because it can be compared against a closed-form result rather than a range. At
+low Mach number the boundary layer on a thin section is approximately that of a
+flat plate, for which the Blasius solution gives the friction drag coefficient of
+a plate wetted on both sides as
+\begin{equation}
+  C_{D,f}=\frac{2\times1.328}{\sqrt{\Reinf}}
+  =\frac{2.656}{\sqrt{5000}}=\num{0.037562}.
+  \label{eq:blasius}
+\end{equation}
+The solver's computed viscous drag for this case is
+$C_{D,v}=\cnsVdNacaSubLam$, obtained by integrating the tangential wall shear of
+\cref{eq:shear} over the $\nacaWallEdges$ wall faces of an unstructured mesh.
+The two agree to $2.4\,\%$.
+
+This deserves emphasis because of what it tests: not a plausibility range, but an
+absolute comparison against analytic theory of a quantity assembled from the
+least-squares gradients, the wall-normal gradient correction of
+\cref{eq:wallgrad}, the tangential projection of \cref{eq:shear}, and the
+parallel force reduction. An error in any one of those would show up here. It is
+equally important not to overclaim: a NACA0012 is not a flat plate. It has
+$12\,\%$ thickness, a favourable pressure gradient over the forward section and an
+adverse one aft, and a finite leading-edge radius, so exact agreement is neither
+expected nor meaningful. Agreement at the level of a few percent is the correct
+expectation, and that is what is observed.
+
+The compressible cases behave consistently with this picture: viscous drag falls
+to $\cnsVdNacaTraLam$ at $\Minf=0.80$ and $\cnsVdNacaSupLam$ at $\Minf=2.0$.
+Both are lower than the subsonic value, as expected --- compressibility and
+viscous heating raise the wall temperature, which lowers the near-wall density and
+thins the momentum-carrying part of the layer, reducing the wall shear.
+
 Convergence for the three laminar cases is shown in \cref{fig:naca-lam-res} and
 the corresponding force histories in \cref{fig:naca-lam-forces}; the latter are
 the binding evidence, for the reasons given in \cref{sec:stationarity}. The
