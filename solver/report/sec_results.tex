@@ -23,7 +23,8 @@ a converged value.
   \centering
   \caption{Run status for all eight required cases, transcribed from each
   \texttt{run\_status.json}. Physical time is zero for steady cases by
-  construction. Wall time is for the rank count shown, on 64-core hardware.}
+  construction. Wall time is for the rank count shown, under the 4-CPU container
+  quota described in \cref{sec:quota}.}
   \label{tab:runstatus}
   \small
   \input{tab_runstatus}
@@ -127,6 +128,23 @@ are smallest, and it is the case where the residual/force distinction of
 terminated by a shock is the defining feature: because the section is symmetric
 at zero incidence, one such pocket forms on each surface and the two shocks are
 mirror images, so the drag in \cref{tab:forces} is wave drag with no lift.
+
+This case terminates through the \emph{plateau} path rather than by reaching the
+requested residual reduction, and that distinction is reported rather than
+smoothed over. The residual falls $\cnsOrdersNacaTraInv$ orders against a
+requested $4.00$, then stops improving, while the drag becomes and stays
+stationary. The solver's own note for the run records the reasoning: the residual
+plateaued with $C_D$ stationary to $\num{1.232e-5}$ against a tolerance of
+$\num{8.743e-5}$ over the trailing 500 steps.
+
+The mechanism is the one described in \cref{sec:limitations}: the residual norm is
+dominated by the smallest cells on the airfoil surface, exactly where the shock
+foot sits, and the limiter of \cref{eq:limiter} keeps switching state there as the
+shock position makes sub-cell adjustments. Those switches keep the residual norm
+from falling further while changing nothing physical, which is why the forces are
+converged to five digits while the residual is not. The honest description is a
+converged plateau at $\cnsOrdersNacaTraInv$ orders with demonstrated force
+stationarity --- not a run that met the $4.00$-order target.
 
 \begin{figure}[htbp]
   \centering

@@ -57,9 +57,9 @@ forces do.
 
 \subsection{Load balance and communication}
 
-\Cref{tab:partition} gives the per-rank decomposition for a representative $np=8$
-run, with a load-balance ratio of $\cnsPartitionBalance$. METIS balances the cell
-count well, but two caveats apply to interpreting that number as
+\Cref{tab:partition} gives the per-rank decomposition for a representative
+production run, with a load-balance ratio of $\cnsPartitionBalance$. METIS
+balances the cell count well, but two caveats apply to interpreting that number as
 time-to-solution balance:
 
 \begin{itemize}
@@ -78,73 +78,111 @@ Communication volume per exchange is small: each neighbour pair moves the cells
 listed in the send/receive columns of \cref{tab:partition}, times 4 components for
 the state or limiter and 8 for the gradients. Because the exchanged surface scales
 as the partition perimeter while the work scales as the partition area, the
-communication fraction grows with rank count on a fixed mesh; on meshes of this
-size ($\num{20816}$ and $\num{10185}$ cells) the $np=8$ runs are already in the
-regime where the per-rank subdomain is small enough that this overhead is visible
-in the timings of \cref{tab:scaling}.
+communication fraction grows with rank count on a fixed mesh. On meshes of this
+size ($\num{20816}$ and $\num{10185}$ cells) that trend is present but is not what
+limits the runs reported here: as \cref{sec:quota} shows, the binding constraint is
+the 4-CPU container quota, and the $np=8$ regression in \cref{tab:rankchoice} is
+oversubscription rather than communication cost.
 
-\subsection{Choice of rank count for production}
+\subsection{The execution environment constrains the parallel study}
+\label{sec:quota}
+
+Any parallel measurement in this report must be read against one environmental
+fact, without which the numbers are unintelligible: \textbf{the container is
+limited to 4 CPUs by a cgroup quota}. The control file
+\texttt{/sys/fs/cgroup/cpu.max} reads \texttt{400000 100000}, that is a 400\,\%
+share of one CPU period, and the limit applies to the \emph{total} CPU consumed by
+all processes in the container simultaneously.
+
+This is actively misleading to detect, which is why it is worth recording. The
+usual indicators all suggest a large machine: \texttt{nproc} reports 64, and
+\texttt{lscpu} shows 32 physical cores across two sockets with two threads each.
+Nothing in that output hints at the cap. It was confirmed by summing the CPU
+percentages of all solver processes during a run, which totalled $400.4\,\%$ ---
+exactly the quota.
+
+The consequence is that a run at any rank count above four does not use more
+hardware; it merely divides the same four CPUs among more processes, adding
+communication and synchronisation for nothing. Two earlier sets of scaling timings
+taken before this was understood were measuring contention against the quota
+rather than the solver, and have been discarded rather than reported. They are
+mentioned here only because discarding them is itself part of an honest account of
+the measurement process.
+
+\subsection{Rank-count scaling under the 4-CPU quota}
 \label{sec:rankchoice}
 
-These meshes are small enough that more ranks are not automatically better, and
-the production rank count was chosen from measurement. Timing a fixed 50 physical
-steps of the transient cylinder case, with each rank count pinned to its own set
-of distinct physical cores, gave the results in \cref{tab:rankchoice}.
+With the quota understood, the scaling measurement becomes meaningful. Each rank
+count below was timed on the $\Reinf=200$ transient over 30 physical steps, run
+one job at a time with nothing else executing, so the full quota was available to
+the job being measured.
 
 \begin{table}[htbp]
   \centering
-  \caption{Wall time for 50 physical steps of the $\Reinf=200$ transient at three
-  rank counts, each pinned to disjoint physical cores. The $np=16$ measurement
-  overlapped with unrelated compilation load and is an upper bound rather than a
-  precise figure.}
+  \caption{Wall time for 30 physical steps of the $\Reinf=200$ transient, one job
+  at a time with the full 4-CPU quota available. Speedup is relative to $np=1$.}
   \label{tab:rankchoice}
   \small
   \begin{tabular}{rrrl}
     \toprule
-    Ranks & Cells/rank & Wall time (s) & Measurement quality \\
+    Ranks & Wall time (s) & Speedup & Regime \\
     \midrule
-    4 & $\approx 2550$ & 65.8 & clean \\
-    8 & $\approx 1270$ & 61.2 & clean \\
-    16 & $\approx 640$ & $\le 233.6$ & upper bound, contended \\
+    1 & 50.7 & 1.00 & serial baseline \\
+    2 & 18.3 & 2.77 & superlinear (cache) \\
+    4 & 9.8 & 5.17 & optimum, matches the quota \\
+    8 & 12.2 & 4.16 & quota oversubscribed \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-The defensible conclusion is narrow, so it is worth stating precisely: $np=8$ is
-at or near the optimum for a mesh of $\cylCells$ cells, and increasing the rank
-count beyond it brings no benefit and can hurt substantially. The $np=16$ figure
-should not be read as a precise regression factor, because that measurement was
-contended. The mechanism is nonetheless clear --- at $np=16$ each rank holds only
-a few hundred cells, so the halo exchange and the serialization inherent in the
-LU-SGS sweep begin to dominate the useful work per sweep. All production cases
-therefore run at $np=8$, which is also the rank count the benchmark requires to
-be demonstrated.
+Three features of \cref{tab:rankchoice} are worth explaining, because each says
+something different about the solver.
 
-\subsection{Process binding: a practical lesson}
+The \textbf{optimum at $np=4$} coincides exactly with the CPU allowance, which is
+the expected result and confirms that the quota, not the mesh size or the
+communication pattern, sets the useful rank count here.
+
+The \textbf{speedup of 5.17 on 4 CPUs is superlinear}, and the jump from $np=1$ to
+$np=2$ is $2.77$ rather than $2$. This is a working-set effect rather than an
+anomaly: a single rank sweeps the entire $\cylCells$-cell mesh, whose state,
+gradients and limiter arrays together exceed cache, while each rank of a
+two-way partition works on roughly half the data and reuses it far more
+effectively across the gradient, limiter and flux passes of one residual
+evaluation. The LU-SGS sweeps, which touch the same arrays repeatedly, amplify the
+effect.
+
+The \textbf{regression at $np=8$} is oversubscription of the quota: eight
+processes share four CPUs, so each is descheduled roughly half the time while
+still paying the full halo-exchange and synchronisation cost. It is not evidence
+of a communication bottleneck in the solver, and it would be wrong to read it as
+such.
+
+All production cases therefore run at $np=4$, sequentially, one case at a time.
+The benchmark also asks for an $np=8$ demonstration, which is included in the
+rank-count study of \cref{tab:scaling}; under this quota $np=8$ is a correctness
+and consistency demonstration rather than a performance one.
+
+\subsection{Process binding: a secondary effect}
 \label{sec:binding}
 
-Two hardware and scheduling details materially affected measured performance, and
-both are worth recording because neither is obvious.
+A second scheduling problem was found on the way to the quota finding. It is real
+and worth recording, but it is secondary: fixing it helped, yet no amount of
+binding can overcome a 4-CPU cap.
 
-First, the machine's topology is easy to misread. It presents 64 logical CPUs, but
-these are 32 physical cores across two sockets, each core carrying a hyperthread
-sibling at \texttt{CPU+32}. Treating the machine as 64 independent cores
-oversubscribes it by a factor of two.
+OpenMPI's default binding policy places every independent \texttt{mpirun} job on
+the same cores, starting from the first NUMA node. Concurrent jobs therefore pile
+onto one node's CPUs while the remaining CPUs appear idle; at one point 28
+processes were sharing a single NUMA node's CPUs at roughly $7\,\%$ of a core
+each. This produces no error message, only uniformly poor performance, which is
+what made it easy to misattribute to the solver. The fix was to pin each job to a
+disjoint set of physical cores with \texttt{taskset}. Notably
+\texttt{mpirun -{}-cpu-set} was not usable: it fails silently with exit status 1
+for CPU ids outside the first NUMA node, even for a trivial command such as
+\texttt{hostname}.
 
-Second, and more damaging, OpenMPI's default binding policy places every
-independent \texttt{mpirun} job on the same cores, starting from the first NUMA
-node. Several concurrent jobs therefore pile onto one node's CPUs while the rest
-of the machine sits idle: at one point 28 processes were sharing a single NUMA
-node's CPUs at roughly $7\%$ of a core each. This does not appear as an error, only
-as uniformly terrible performance, and it invalidated an entire earlier set of
-timings. The fix was to pin each job to a disjoint set of physical cores with
-\texttt{taskset}. Notably \texttt{mpirun -{}-cpu-set} was not usable for this: it
-fails silently with exit status 1 for CPU ids outside the first NUMA node, even
-for a trivial command such as \texttt{hostname}.
-
-All timings reported in this document were measured after this was corrected, with
-each job on dedicated cores. Wall-clock comparisons are only meaningful under that
-condition, which is why the condition is stated rather than assumed.
+The combination of these two effects explains the earlier unexplained slowdowns:
+attempts at $np=16$ and $np=24$ were four- to six-fold oversubscribed against the
+quota while also competing for a single NUMA node.
 
 \section{Visualization and Plot Style Requirements}
 \label{sec:visualization}
