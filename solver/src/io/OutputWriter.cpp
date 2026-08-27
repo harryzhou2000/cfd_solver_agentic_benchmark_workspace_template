@@ -141,6 +141,46 @@ void writeVtu(const std::string& path, const SpatialOperator& op, int precision_
   std::vector<double> all_cd = gatherv(celldata, MPI_DOUBLE, comm, rank, size);
   if (rank != 0) return;
 
+  // --- put the cells back into global order ---
+  // The gather concatenates the ranks' owned cells, so without this the cell
+  // ordering of the file would depend on the rank count and on how METIS
+  // happened to split the mesh.  Sorting by the global cell id makes the file
+  // rank-independent: run on any number of ranks, every array below is written
+  // in the same order, and two runs can be compared row for row.  RankId is the
+  // one field that is deliberately still rank-dependent; it is a diagnostic.
+  {
+    const std::size_t nc = all_npts.size();
+    std::vector<std::size_t> perm(nc), start(nc);
+    std::size_t pos = 0;
+    for (std::size_t c = 0; c < nc; ++c) { perm[c] = c; start[c] = pos; pos += all_npts[c]; }
+    std::sort(perm.begin(), perm.end(), [&](std::size_t a, std::size_t b) {
+      return all_cd[a * nfields + 10] < all_cd[b * nfields + 10];
+    });
+    std::vector<int> npts_s(nc);
+    std::vector<long long> conn_s, ngid_s;
+    std::vector<double> nxy_s, cd_s(all_cd.size());
+    conn_s.reserve(all_conn.size());
+    ngid_s.reserve(all_ngid.size());
+    nxy_s.reserve(all_nxy.size());
+    for (std::size_t k = 0; k < nc; ++k) {
+      const std::size_t c = perm[k];
+      const int n = all_npts[c];
+      npts_s[k] = n;
+      for (int j = 0; j < n; ++j) {
+        conn_s.push_back(all_conn[start[c] + j]);
+        ngid_s.push_back(all_ngid[start[c] + j]);
+        nxy_s.push_back(all_nxy[2 * (start[c] + j)]);
+        nxy_s.push_back(all_nxy[2 * (start[c] + j) + 1]);
+      }
+      std::copy_n(&all_cd[c * nfields], nfields, &cd_s[k * nfields]);
+    }
+    all_npts.swap(npts_s);
+    all_conn.swap(conn_s);
+    all_ngid.swap(ngid_s);
+    all_nxy.swap(nxy_s);
+    all_cd.swap(cd_s);
+  }
+
   // --- assemble a unique point list ---
   std::unordered_map<long long, int> pid;
   pid.reserve(all_ngid.size() * 2);
@@ -296,7 +336,9 @@ void writeSurfaceCsv(const std::string& base_path, const SpatialOperator& op) {
     const double* r = &all[idx[k] * kCols];
     const int p = static_cast<int>(r[11]);
     const std::string tag = op.mesh().patch_names[p];
-    for (int c = 0; c < 11; ++c) out << r[c] << ",";
+    // Normalise negative zero: an inviscid case has cf == -0.0, which prints as
+    // "-0" and reads like a sign convention rather than an exact zero.
+    for (int c = 0; c < 11; ++c) out << (r[c] == 0.0 ? 0.0 : r[c]) << ",";
     out << tag << "\n";
     ex << r[0] << "," << r[1] << "," << r[2] << "," << r[3] << "," << tag << "," << r[12] << ","
        << r[13] << "," << r[14] << "," << r[8] << "," << r[9] << "," << r[4] << "\n";

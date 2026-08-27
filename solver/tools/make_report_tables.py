@@ -205,7 +205,7 @@ def main():
     T.append(r"% ---- production numerical settings actually used")
     T.append(r"\begin{tabular}{lrrrrrl}")
     T.append(r"\toprule")
-    T.append(r"case & max steps & CFL & ramp & inner & target & extra options\\")
+    T.append(r"case & steps used & CFL & ramp & inner & target & extra options\\")
     T.append(r"\midrule")
     for cid, c in cases.items():
         m = c["meta"]

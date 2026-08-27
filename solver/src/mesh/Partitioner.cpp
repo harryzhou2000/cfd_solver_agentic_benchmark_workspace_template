@@ -81,7 +81,10 @@ PartitionResult partitionMesh(const GlobalMesh& mesh, int nparts) {
   res.part.assign(static_cast<std::size_t>(nc), 0);
 
   if (nparts == 1) {
-    res.method = "metis_kway_single_rank";
+    // METIS is not called for a single part: the answer is the identity map.
+    // The label says so, so that metadata.json never claims a partitioning that
+    // did not happen.
+    res.method = "single_rank_no_partitioning";
     res.edge_cut = 0;
   } else {
     static_assert(sizeof(idx_t) == 4 || sizeof(idx_t) == 8, "unexpected METIS idx_t");
@@ -105,12 +108,14 @@ PartitionResult partitionMesh(const GlobalMesh& mesh, int nparts) {
 
     int st = METIS_PartGraphKway(&nvtxs, &ncon, xadj.data(), adjncy.data(), nullptr, nullptr,
                                  nullptr, &np, nullptr, nullptr, options, &objval, part.data());
-    res.method = "metis_kway";
+    res.method = "metis_kway_contiguous";
     if (st != METIS_OK) {
-      // Retry without the contiguity constraint before giving up.
+      // Retry without the contiguity constraint before giving up, and record
+      // which of the two attempts actually produced the partition.
       options[METIS_OPTION_CONTIG] = 0;
       st = METIS_PartGraphKway(&nvtxs, &ncon, xadj.data(), adjncy.data(), nullptr, nullptr,
                                nullptr, &np, nullptr, nullptr, options, &objval, part.data());
+      res.method = "metis_kway_noncontiguous";
     }
     CFD_CHECK(st == METIS_OK, "METIS_PartGraphKway failed with status " << st);
     for (Index c = 0; c < nc; ++c) res.part[c] = static_cast<int>(part[c]);
