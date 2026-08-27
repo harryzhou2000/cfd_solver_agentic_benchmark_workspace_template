@@ -18,7 +18,7 @@ We present a 2-D unstructured finite-volume solver for the compressible
 Navier--Stokes equations of a calorically perfect gas, with MPI domain
 decomposition based on METIS graph partitioning and neighbor-scoped halo
 exchange. The solver uses weighted least-squares linear reconstruction with
-Barth--Jespersen limiting, Roe/Rusanov Riemann fluxes, an LU-SGS implicit
+Barth--Jespersen and Venkatakrishnan limiting, Roe/Rusanov Riemann fluxes, an LU-SGS implicit
 pseudo-time solver with analytic split-flux Jacobians, and a BDF2 dual-time
 integrator for transient cases. We report results for six NACA0012 cases
 (inviscid and laminar, Mach 0.15/0.8/2.0) and two cylinder cases (laminar,
@@ -199,10 +199,10 @@ layer). (iii) A machine-readable physics sanity gate
 near-zero NACA lift by symmetry, non-trivial drag and $C_p$ variation,
 positive cylinder mean drag, nonzero Re 200 unsteady lift, near-zero no-slip
 wall velocity with nonzero skin friction, negligible inviscid viscous forces,
-and correct Mach/pressure figure mapping. (iv) The MPI rank-count study above
+and correct Mach/pressure figure mapping. (iv) The MPI rank-count study of \S\ref{sec:mpi}
 confirms results do not change by an order-one amount across rank counts.
 
-\section{MPI rank-count comparison}
+\section{MPI rank-count comparison}\label{sec:mpi}
 \input{generated_mpi_section.tex}
 \section{Convergence and limitations}
 \label{sec:limitations}
