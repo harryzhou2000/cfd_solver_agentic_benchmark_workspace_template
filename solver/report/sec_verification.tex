@@ -426,7 +426,11 @@ because the first choice was too strict the adjustment is documented here instea
 of being quietly absorbed.
 
 The initial version required the trailing-window drag span to satisfy
-$\max\!\left(10^{-3}\max(|C_D|,10^{-4}),\,10^{-6}\right)$. Under it,
+\begin{equation*}
+  \mathrm{span}_{500}(C_D)\ \le\
+  \max\!\left(10^{-3}\max\left(|C_D|,10^{-4}\right),\ 10^{-6}\right).
+\end{equation*}
+Under it,
 \texttt{naca0012\_m015\_inviscid} ran its full \num{20000} steps and terminated
 \texttt{not\_converged}. The revealing detail is \emph{which} test failed: the
 residual target was comfortably met, at 4.94 orders against a target of 4.00. Only
@@ -467,8 +471,8 @@ independent measures, and neither is a proxy for the other.
 \subsubsection{A case with no fixed point: the supersonic limit cycle}
 \label{sec:limitcycle}
 
-The third and most instructive failure of naive convergence testing appeared on
-\texttt{naca0012\_m200\_inviscid}. With the calibrated tolerance of
+The third and most instructive failure of naive convergence testing appeared on the
+supersonic inviscid airfoil case. With the calibrated tolerance of
 \cref{eq:stationarity2} the case ran its full \num{40000} steps and still reported
 \texttt{not\_converged}: the residual reached $2.34$ of the requested $3.00$
 orders and the trailing drag span was $\num{1.226e-3}$ against a tolerance of
@@ -723,8 +727,11 @@ optimistic measure and the forces the honest one.
 
 The physical picture is consistent with a slow but genuine approach rather than a
 misbehaving computation. Sampled every \num{1500} steps the drag runs
-$0.784, 0.040, 0.056, 0.085, 0.106, 0.116, 0.123, 0.126, 0.129$; the first value is an
-impulsive-start artifact dominated by viscous drag of $0.776$, and thereafter the
+\begin{center}
+  $0.784,\ 0.040,\ 0.056,\ 0.085,\ 0.106,\ 0.116,\ 0.123,\ 0.126,\ 0.129$,
+\end{center}
+where the first value is an
+impulsive-start artifact dominated by viscous drag of $0.776$. Thereafter the
 \emph{pressure} drag does the climbing ($0.007\to0.089$) while the viscous part has been
 nearly flat since step \num{3000} ($0.025\to0.040$). A supersonic laminar case whose shock
 system is still strengthening over the forward section is exactly what that signature

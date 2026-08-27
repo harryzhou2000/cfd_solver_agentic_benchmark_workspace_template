@@ -367,7 +367,15 @@ def main():
         # status.  The note text is therefore parsed for the branch the solver took,
         # and the local computation is used only as a fallback.
         notes = str(status.get("notes", ""))
-        if "bounded oscillation" in notes:
+        if key == "CylShed":
+            # The transient is periodic BY DESIGN, so the steady stationarity tests
+            # do not apply to it: a vortex street has no fixed point and its drag is
+            # supposed to oscillate.  Classifying it with the steady drift test
+            # labels a correct result "drifting", which is wrong and misleading.
+            # The meaningful statement is the solver's own transient verdict plus the
+            # measured periodicity, reported in the shedding table.
+            note = "periodic, see \\cref{tab:saturation}"
+        elif "bounded oscillation" in notes:
             note = "limit cycle"
             if st is not None:
                 # A peak-to-peak expressed as a percentage of a near-zero mean is
