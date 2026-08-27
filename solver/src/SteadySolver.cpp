@@ -67,8 +67,8 @@ SteadyResult runSteady(LocalMesh& lm,
     StateVec res0_global = {0,0,0,0};
     bool res0_set = false;
     double cfl = cfl0;
-    // Re<100 cap raised to 0.1 (was 0.01) — effective CFL per step = 0.1*accept_scale, 10x faster
-    double cfl_effective_init = (mu > 0.0 && cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? std::min(cfl0, 0.1) : cfl0;
+    // Trust the case file's cfl_initial; accept_scale=0.1 for Re<100 already provides damping
+    double cfl_effective_init = cfl0;
      double cfl_effective = cfl_effective_init;  // adaptive CFL tracker
     double prev_outer_res = 0.0;               // outer residual tracker
     double min_outer_res_ever = std::numeric_limits<double>::max();  // Fix D
@@ -202,10 +202,11 @@ SteadyResult runSteady(LocalMesh& lm,
         if (outer_res_norm < min_outer_res_ever) {
             min_outer_res_ever = outer_res_norm;
         } else if (step > 30 && (step > fix_d_grace_until || outer_res_norm > 5.0 * min_outer_res_ever) && min_outer_res_ever > 0 && outer_res_norm > 2.0 * min_outer_res_ever) {
-            // Supersonic inviscid needs CFL >= 5 to converge; cfl_effective_init=0.2 is too low.
-            // Without this floor, Fix D collapses CFL to 0.2 while Fix E is blocked, causing stagnation.
+            // Supersonic inviscid: higher CFL floor prevents Fix D from collapsing CFL into
+            // a limit cycle where Fix E is always blocked (floor=5 was insufficient — oscillation
+            // kept CFL exactly at 5.0 for 40000 steps with zero net progress).
             double fix_d_floor = (mu <= 0.0 && cfg.freestream.mach > 1.0)
-                ? std::max(cfl_effective_init, 5.0) : cfl_effective_init;
+                ? std::max(cfl_effective_init, 20.0) : cfl_effective_init;
             cfl_effective = std::max(cfl_effective * 0.97, fix_d_floor);
         }
         // Reset baseline at second-order transition — prevents Fix D over-reacting to expected residual jump
