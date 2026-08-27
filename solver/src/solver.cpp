@@ -224,7 +224,7 @@ Vec4 Solver::viscous_flux(int fi) const {
 Vec4 Solver::farfield_flux(int fi) const {
     Vec4 Uf = config_.freestream.state(config_.gas);
     Vec4 UL = reconstruct_left(fi);
-    return roe_flux(UL, Uf, lm_->mesh.faces[fi].normal);
+    return rusanov_flux(UL, Uf, lm_->mesh.faces[fi].normal);
 }
 
 Vec4 Solver::slip_wall_flux(int fi) const {
@@ -290,7 +290,7 @@ void Solver::compute_residual() {
         } else {
             Vec4 UL = reconstruct_left(fi);
             Vec4 UR = reconstruct_right(fi);
-            flux = roe_flux(UL, UR, face.normal);
+            flux = rusanov_flux(UL, UR, face.normal);
             Vec4 fv = Vec4::Zero();
             if (config_.physics_mode == PhysicsMode::LAMINAR) fv = viscous_flux(fi);
             Vec4 net = (flux - fv) * face.area;
@@ -478,7 +478,7 @@ SolverStats Solver::run(const std::string& output_dir) {
                 writer_.write_residual(step, physical_time, 1, cfl, 0, res_comp, res_l2, res_linf);
             if (rank_ == 0 && step % config_.write_forces_every == 0)
                 writer_.write_force(step, physical_time, cl_v, cd_v, cmz, pd, vd, pl, vl);
-            if (rank_ == 0 && (step <= 5 || step % 100 == 0)) {
+            if (rank_ == 0 && step % 1000 == 0) {
                 double red = (res0>1e-30) ? std::log10(res0/std::max(res_l2,1e-30)) : 0;
                 fprintf(stderr, "Step %6d CFL=%8.2f Res=%.4e Red=%.2f CD=%.6f CL=%.6f\n", step, cfl, res_l2, red, cd_v, cl_v);
             }
