@@ -16,16 +16,28 @@ attainable residual and is the first thing that would need attention before
 chasing deeper convergence. A weighted QR solve, or scaling the stencil offsets
 before forming the normal equations, would improve it.
 
-\paragraph{Residual convergence is limited by the smallest wall cells.} On these
-meshes the residual norm is dominated by a handful of cells at the body surface
-with volumes of order $10^{-8}$ against a domain area of order $10^4$. In the
-transonic case the limiter of \cref{eq:limiter} switches state repeatedly in those
-cells as the shock foot adjusts, which prevents the last order or two of residual
-reduction even after the integrated forces have stopped changing. The honest
-description is a residual plateau with converged forces, and
-\cref{tab:runstatus,tab:forces} report the achieved residual reduction and the
-measured force stationarity separately so the two cannot be conflated. This is
-also the motivation for the criterion of \cref{eq:stationarity}.
+\paragraph{The CFL ramp can overshoot the stability limit and lose convergence.}
+An earlier draft of this report attributed the transonic residual plateau to
+limiter chatter in the smallest wall cells. \textbf{That explanation was wrong},
+and the correction is instructive enough to record rather than quietly replace.
+
+Examining the residual history of \texttt{naca0012\_m080\_inviscid} shows the
+residual reaching $\num{4.6765e-4}$ at step 2546 with the ramped CFL at $49.7$ ---
+that is $3.92$ orders, essentially the requested $4.00$ --- and then \emph{degrading}
+to $\num{4.9518e-3}$ by step 3496 as the ramp pushed the CFL to its cap of $100$.
+The run therefore discarded slightly more than one order of convergence and
+reported the worse figure. The mechanism is not limiter chatter but CFL-driven
+degradation past the stability limit of the scheme at this Mach number: the
+geometric ramp of \cref{eq:ramp} continues to its cap regardless of whether the
+iteration is still contracting.
+
+The solver now retains the best state by residual norm and restores it if the march
+ends more than a factor of two above that level, recording the fallback in the run
+notes so that the reported residual and the written field always correspond. The
+broader lesson is that a CFL cap taken from a case file is an input, not a
+guarantee: the largest \emph{usable} CFL is a property of the scheme and the mesh,
+and a ramp that ignores whether the residual is still falling can undo its own
+progress.
 
 \paragraph{LU-SGS degrades at high CFL.} The spectral radius of the SGS iteration
 approaches unity as $\mathrm{CFL}\to\infty$, so at the ramped targets of

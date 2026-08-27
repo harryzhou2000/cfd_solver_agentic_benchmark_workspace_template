@@ -49,11 +49,18 @@ a converged value.
 
 All six airfoil cases use the same mesh at zero angle of attack, so the exact
 solution is symmetric about $y=0$ and the exact lift and moment are zero. The
-computed $C_L$ and $C_{m,z}$ in \cref{tab:forces} are therefore direct measures
-of the discretization's ability to preserve symmetry on a mesh that is not itself
-symmetric in its cell connectivity. This is a more demanding test than it looks:
-the Roe linear-wave undamping discussed after \cref{eq:floor} broke exactly this
-symmetry before the eigenvalue floor was introduced.
+computed $C_L$ and $C_{m,z}$ in \cref{tab:forces} are therefore measures of the
+discretization's ability to preserve symmetry on a mesh that is not itself
+symmetric in its cell connectivity.
+
+One caveat must be attached to that statement immediately, because a near-zero
+integrated $C_L$ is a weaker test than it appears. Lift is an \emph{integral} of the
+surface pressure difference, so equal and opposite local asymmetries cancel in it. A
+small $C_L$ is therefore necessary but not sufficient for a symmetric solution, and
+the pointwise surface distribution is the stronger check. \Cref{sec:m200asym}
+reports a case where the integrated lift is small while the local surface
+distribution is badly asymmetric, so $C_L$ alone should not be read as evidence of
+symmetry preservation for the supersonic case.
 
 \subsubsection{Subsonic inviscid, $\Minf=0.15$}
 
@@ -133,22 +140,21 @@ terminated by a shock is the defining feature: because the section is symmetric
 at zero incidence, one such pocket forms on each surface and the two shocks are
 mirror images, so the drag in \cref{tab:forces} is wave drag with no lift.
 
-This case terminates through the \emph{plateau} path rather than by reaching the
-requested residual reduction, and that distinction is reported rather than
-smoothed over. The residual falls $\cnsOrdersNacaTraInv$ orders against a
-requested $4.00$, then stops improving, while the drag becomes and stays
-stationary. The solver's own note for the run records the reasoning: the residual
-plateaued with $C_D$ stationary to $\num{1.232e-5}$ against a tolerance of
-$\num{8.743e-5}$ over the trailing 500 steps.
+This case exposed a defect in the CFL ramp, described in \cref{sec:limitations}.
+In the run originally submitted, the residual reached $\num{4.6765e-4}$ at step
+2546 with the ramped CFL at $49.7$, which is $3.92$ orders and essentially the
+requested $4.00$; it then \emph{degraded} by a factor of $10.6$ to
+$\num{4.9518e-3}$ as the ramp continued to its cap of $100$, and the run reported
+that worse figure as a plateau. The residual level was therefore limited by the CFL
+ramp overshooting the stability limit of the scheme, not by anything physical in
+the shock or the limiter. An earlier draft of this report gave the limiter-chatter
+explanation, which the residual history does not support.
 
-The mechanism is the one described in \cref{sec:limitations}: the residual norm is
-dominated by the smallest cells on the airfoil surface, exactly where the shock
-foot sits, and the limiter of \cref{eq:limiter} keeps switching state there as the
-shock position makes sub-cell adjustments. Those switches keep the residual norm
-from falling further while changing nothing physical, which is why the forces are
-converged to five digits while the residual is not. The honest description is a
-converged plateau at $\cnsOrdersNacaTraInv$ orders with demonstrated force
-stationarity --- not a run that met the $4.00$-order target.
+The solver now keeps the best state by residual norm and falls back to it when the
+march ends far above that level, so the reported residual and the written field
+correspond. This case is being re-run under the corrected logic and its converged
+values are pending; the numbers quoted in \cref{tab:runstatus,tab:forces} are
+whatever the completed run reported at the time of the final refresh.
 
 \begin{figure}[htbp]
   \centering
@@ -233,6 +239,39 @@ the farfield boundary without a reflected disturbance travelling back into the
 domain. That is direct visual confirmation that the characteristic farfield of
 \cref{sec:bc} handles a strong shock correctly: a Dirichlet freestream condition
 on the outflow arc would reflect the shock and contaminate the near-body solution.
+
+\paragraph{This case is not converged, on two independent physical grounds.}
+\label{sec:m200asym}
+An audit of the surface output shows that the drag history of this case, discussed
+above as a limit cycle, was a misleading indicator. Two pointwise checks fail.
+
+First, \textbf{the solution exceeds a hard physical bound}. The highest pressure any
+point on a body in a steady $\Minf=2.0$ inviscid flow can reach is the pitot
+pressure behind a normal shock, which corresponds to
+\begin{equation}
+  C_{p,\max}=\frac{p_{t2}/p_\infty-1}{\tfrac12\gamma \Minf^2}=1.6573
+  \qquad (\Minf=2.0,\ \gamma=1.4).
+  \label{eq:pitot}
+\end{equation}
+The computed surface maximum is $C_p=2.1021$, and $9$ of the $404$ wall faces exceed
+\cref{eq:pitot}. No converged inviscid solution can do this, so the field must still
+be evolving regardless of what the integrated drag suggests.
+
+Second, \textbf{the surface distribution is strongly asymmetric}. On a mesh whose
+geometry is symmetric to $10^{-14}$, the paired upper and lower surface points ---
+202 pairs matched by $x$ --- differ by up to $\Delta C_p=1.1965$, the worst case
+being $x/c=\num{0.00178}$ with $C_p=+1.7274$ above and $+0.5309$ below. The
+integrated lift remains small because these local asymmetries largely cancel in the
+integral, which is precisely the cancellation warned about in \cref{sec:naca}.
+
+Both checks were made on the submitted \texttt{surface.csv} and both are
+reproducible from it. The case is therefore being re-run under the corrected
+convergence criterion, and no convergence claim is made for it here. It is recorded
+in \cref{tab:runstatus} with whatever status the completed run reports. The
+farfield behaviour described above is unaffected --- it concerns the boundary
+treatment, not the state of convergence in the near field --- but the $C_p$
+distribution of \cref{fig:naca200inv-cp} should be read as a snapshot of an
+unconverged solution.
 
 \begin{figure}[htbp]
   \centering
