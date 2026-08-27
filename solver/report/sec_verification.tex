@@ -1098,8 +1098,11 @@ the specific checks are worth recording:
   \texttt{MPI\_Bcast} occurs in surface output, restart, \texttt{.vtu} writing or partition
   diagnostics --- all I/O paths, none in the iteration. The iteration loop uses only
   neighbour-scoped \texttt{Isend}/\texttt{Irecv}/\texttt{Waitall} plus eleven
-  \texttt{MPI\_Allreduce} calls for residual norms and force accumulators, which are
-  reductions of scalars and are physically required rather than a replication of state.
+  \texttt{MPI\_Allreduce} calls in the whole codebase. Those eleven are accounted for:
+  five in mesh verification (setup-time geometric sums), two in the solver context for the
+  residual norms, and one each for the force accumulators, the LU-SGS linear-residual ratio,
+  the halo-exchange consistency check, and the exit-status reduction in \texttt{main}. All
+  are reductions of a handful of scalars, physically required, and none replicates state.
   \item Mesh reading is generic: no mesh filename appears anywhere in the source, and the
   reader iterates the CGNS zone, section and boundary-condition counts rather than assuming
   a fixed structure, which is what allows one code path to handle a single-zone
