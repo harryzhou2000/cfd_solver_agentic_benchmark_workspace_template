@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "case_id": "cyl_re200_smoke",
+  "description": "Circular cylinder, Mach 0.1, laminar, Re 200, unsteady vortex shedding",
+  "mesh": {
+    "file": "/workspace/cfd_solver_agentic_benchmark/inputs/meshes/CylinderB1.cgns",
+    "format": "CGNS",
+    "dimension": 2
+  },
+  "physics": {
+    "equations": "compressible_navier_stokes",
+    "mode": "laminar",
+    "reynolds": 200.0,
+    "viscosity_model": "constant"
+  },
+  "gas": {
+    "model": "calorically_perfect",
+    "gamma": 1.4,
+    "R": 1.0,
+    "prandtl": 0.72
+  },
+  "freestream": {
+    "mach": 0.1,
+    "aoa_degrees": 0.0,
+    "rho": 1.0,
+    "velocity_magnitude": 1.0,
+    "pressure": 71.42857142857142
+  },
+  "reference": {
+    "length": 1.0,
+    "area": 1.0,
+    "moment_center": [
+      0.0,
+      0.0
+    ],
+    "reynolds_length": 1.0
+  },
+  "boundary_conditions": {
+    "WALL": "no_slip_adiabatic_wall",
+    "FAR": "farfield"
+  },
+  "numerics_required": {
+    "spatial_order": 2,
+    "inviscid_flux": "approximate_riemann",
+    "viscous_flux": "required",
+    "main_time_method": "implicit",
+    "transient_order": 2,
+    "implicit_solver": "required"
+  },
+  "run_control": {
+    "type": "transient",
+    "time_integrator": "bdf2_or_trapezoidal",
+    "time_step": 0.01,
+    "final_time": 2.0,
+    "min_inner_iterations": 5,
+    "max_inner_iterations": 1000,
+    "inner_residual_reduction_target": 0.001,
+    "inner_residual_norm": "total_spatial_plus_physical_time",
+    "bdf2_history_update": "after_inner_convergence",
+    "cfl_initial": 1.0,
+    "cfl_max": 1.0,
+    "pseudo_cfl_ramp_steps": 0,
+    "rusanov_dissipation_scale": 1.0,
+    "steady_init_steps": 500
+  },
+  "outputs": {
+    "write_final_field": true,
+    "write_surface": true,
+    "write_forces_every": 1,
+    "write_residuals_every": 1,
+    "write_field_every_time": 1.0,
+    "wake_visualization": "vorticity_or_velocity",
+    "recommended_vorticity_clip_range": [
+      -5.0,
+      5.0
+    ]
+  }
+}
