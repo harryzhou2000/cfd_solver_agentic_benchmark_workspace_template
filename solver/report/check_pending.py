@@ -12,8 +12,15 @@ import re
 
 REPORT_DIR = "/workspace/solver/report/"
 
+# Macros are pre-defined to the pending marker and then overwritten by a later
+# \def once the run has finished, so only the LAST definition of each name is the
+# effective one.  Taking the first would report every pre-defined macro as
+# pending and produce false alarms.
 auto = open(REPORT_DIR + "numbers_auto.tex").read()
-pending = set(re.findall(r"\\def\\(cns\w+)\{\\pending\}", auto))
+effective = {}
+for name, value in re.findall(r"\\def\\(cns\w+)\{(.*)\}", auto):
+    effective[name] = value
+pending = {n for n, v in effective.items() if v.strip() == r"\pending"}
 
 body_files = sorted(glob.glob(REPORT_DIR + "sec_*.tex")) + [REPORT_DIR + "report.tex"]
 hits = {}
