@@ -23,6 +23,10 @@ run cylinder_m010_laminar_re20 4 $S/verify/cylinder_m010_laminar_re20_noshockfix
     $COMMON --shock-fix 0
 run naca0012_m015_laminar_re5000 4 $S/verify/naca0012_m015_laminar_re5000_noshockfix \
     $COMMON --shock-fix 0
+# The transonic case does contain a shock, so this one quantifies the effect
+# rather than asserting there is none.
+run naca0012_m080_inviscid 4 $S/verify/naca0012_m080_inviscid_noshockfix \
+    $COMMON --shock-fix 0
 
 # Restart round trip: continue the converged Mach 0.15 case from its restart
 # file for a few steps and check that the forces are unchanged.  The run itself

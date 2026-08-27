@@ -825,12 +825,17 @@ def main():
     # Cases where the sensor must be inactive: the run with --shock-fix 0 has to
     # reproduce the production run exactly.
     inv = []
-    for cid in ("cylinder_m010_laminar_re20", "naca0012_m015_laminar_re5000"):
+    for cid, tag in (("cylinder_m010_laminar_re20", "Cylinder"),
+                     ("naca0012_m015_laminar_re5000", "SubsonicLaminar"),
+                     ("naca0012_m080_inviscid", "Transonic")):
         d0 = os.path.join("studies", "verify", cid + "_noshockfix")
         if cid in cases and os.path.exists(os.path.join(d0, "metadata.json")):
             a = float(cases[cid]["meta"]["final_cd"])
             b = float(json.load(open(os.path.join(d0, "metadata.json")))["final_cd"])
-            inv.append(abs(a - b) / max(abs(a), 1e-30))
+            rel = abs(a - b) / max(abs(a), 1e-30)
+            macro("shockFixDiff" + tag, sci(rel, 1) if rel > 0 else "exactly zero")
+            if tag != "Transonic":
+                inv.append(rel)
     if inv:
         macro("shockFixInactiveMaxDiff", sci(max(inv), 1))
         macro("shockFixInactiveCases", str(len(inv)))
