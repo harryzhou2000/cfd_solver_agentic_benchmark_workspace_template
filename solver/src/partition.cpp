@@ -209,11 +209,17 @@ LocalMesh build_local_mesh(const Mesh& global_mesh,
         auto& send = sr.first;
         std::sort(send.begin(), send.end());
         send.erase(std::unique(send.begin(), send.end()), send.end());
+        std::sort(send.begin(), send.end(), [&](int a, int b) {
+            return lm.local_to_global_cell[a] < lm.local_to_global_cell[b];
+        });
         he.send_cells = send;
 
         auto& recv = sr.second;
         std::sort(recv.begin(), recv.end());
         recv.erase(std::unique(recv.begin(), recv.end()), recv.end());
+        std::sort(recv.begin(), recv.end(), [&](int a, int b) {
+            return lm.local_to_global_cell[a] < lm.local_to_global_cell[b];
+        });
         he.recv_cells = recv;
 
         lm.halos.push_back(he);
