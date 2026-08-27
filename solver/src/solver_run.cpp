@@ -180,7 +180,7 @@ void Solver::steadyPhase(const string& tag, long maxSteps, double resTargetOrder
     }
     if (resMet && forceStable && s >= 500) { conv = true; break; }
     if (!std::isfinite(rn.l2)) { logLine("[" + tag + "] ERROR: non-finite residual"); break; }
-    if (logCsv && !extended && s >= maxSteps) {
+    if (logCsv && !extended && s >= maxSteps && !std::getenv("FV2D_NOEXTEND")) {
       // continue past the case max_steps cap (stricter): up to 2x total
       extended = true;
       maxEff = 2 * maxSteps;

@@ -38,11 +38,26 @@ JSON input. To run every required case with production settings:
     python3 -m venv .venv
     ./.venv/bin/pip install numpy matplotlib
 
-Use .venv/bin/python for every script:
+Use .venv/bin/python for every script. The full post-processing and report
+pipeline is:
 
-    .venv/bin/python tools/plot_case.py --case-dir results/<case> --figdir report/figures
-    .venv/bin/python tools/make_figure_manifest.py report/figures
-    .venv/bin/python tools/sanity_check.py results
+    # per-case figures (residual/forces/surface_cp/mach/pressure/vorticity)
+    .venv/bin/python tools/plot_case.py --case-dir results/<case> --out-dir report/figures
+    # figure manifest mapping every figure to its source file/variable
+    .venv/bin/python tools/make_figure_manifest.py --figures-dir report/figures --out report/figure_manifest.csv
+    # physics sanity gate -> report/sanity_checks.json
+    .venv/bin/python tools/sanity_check.py --results-root results --out report/sanity_checks.json --figures-dir report/figures --manifest report/figure_manifest.csv
+    # run manifest + per-case summary + Re200 Strouhal analysis
+    .venv/bin/python tools/build_report_data.py --results-root results --report-dir report
+    # MPI rank-count consistency/timing comparison
+    .venv/bin/python tools/run_rank_comparison.py --case <case.json> --tag <label> --steps 1500 --ranks 1 2 4 8
+    # regenerate the report results/tables from data and compile the PDF
+    .venv/bin/python tools/fill_report.py --report-dir report --analysis-json report/analysis.json
+    cd report && pdflatex report.tex
+
+Utility C++ tools: tools/test_jac.cpp (Jacobian finite-difference check),
+tools/probe_mesh.cpp (CGNS structure), tools/sym_check.cpp (mesh reflection
+symmetry), tools/wall_check.cpp (near-wall first-cell height).
 
 ## Layout
 

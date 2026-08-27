@@ -1,0 +1,17 @@
+The cell adjacency graph is partitioned with METIS $k$-way on rank 0 and distributed so each rank stores only its owned cells plus a one-cell ghost layer; Tables below report the actual per-rank decomposition used during iterations. Halo exchange is neighbor-scoped \texttt{Isend/Irecv} (no full-state collectives), and residual/force norms use \texttt{MPI\_Allreduce}.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{rrrrr}\toprule
+rank & owned & ghost & boundary faces & neighbors \\
+\midrule
+0 & 2597 & 105 & 59 & 3 \\
+1 & 2585 & 97 & 71 & 2 \\
+2 & 2675 & 53 & 80 & 3 \\
+3 & 2587 & 152 & 39 & 6 \\
+4 & 2592 & 131 & 50 & 5 \\
+5 & 2595 & 99 & 59 & 2 \\
+6 & 2590 & 88 & 70 & 2 \\
+7 & 2595 & 120 & 56 & 5 \\
+\bottomrule\end{tabular}
+\caption{Per-rank partition diagnostics for \texttt{naca0012\_m015\_inviscid} (8 ranks, 20816 owned cells total). Load-balance ratio (max/mean owned) $=1.028$; ghost cells per rank are the one-cell halo used for reconstruction and residuals.}
+\end{table}
