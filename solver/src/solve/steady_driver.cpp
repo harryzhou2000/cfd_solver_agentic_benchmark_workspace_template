@@ -51,6 +51,18 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
   Real previous_accepted_residual = -1.0;
   long long rejected_steps = 0;
   bool have_accepted_state = false;
+  // Best state seen so far.  The rejection test above only catches a step that
+  // makes the residual abruptly worse; a slow degradation as the CFL ramp pushes
+  // past the stability limit of the scheme accumulates without ever tripping it.
+  // On the transonic case the residual reached 4.68e-04 at step 2546 with CFL
+  // 49.7 and then degraded to 4.95e-03 by step 3496 at CFL 100, so the run ended
+  // an order of magnitude ABOVE its own best value and reported the worse number.
+  // Keeping the best state means the reported result is never worse than what the
+  // run actually achieved.
+  StateField U_best(mesh.numLocal());
+  Real best_residual = -1.0;
+  int best_step = 0;
+  bool have_best_state = false;
 
   // Convergence bookkeeping: a run is declared converged when the residual has
   // dropped by the requested number of orders, or when it has plateaued with
@@ -88,6 +100,24 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
   // different physical statement from a converged fixed point and the report
   // must not present one as the other.
   constexpr Real kCdDriftRelTol = 1.0e-3;  // 0.1 % drift of the window mean
+  // The drift test is applied to the pressure and viscous drag SEPARATELY as
+  // well as to their sum.  Drift of a sum can be small while its components move
+  // in opposite directions: on the M 2.0 laminar airfoil the pressure drag rose
+  // 24 % and the viscous drag fell 1.9 % across a window whose NET drift was
+  // 0.08 %, so a sum-only test certified a run whose components were moving by
+  // two hundred times the net.  A converged steady state requires every
+  // component to have settled, not merely their sum.
+  //
+  // A monotone trend test is applied as well: a genuine limit cycle oscillates
+  // about its mean, so its sub-block means are not monotone, whereas a run still
+  // developing produces a strictly monotone march.  This distinguishes the two
+  // cases that the drift test alone conflates.
+  constexpr std::size_t kTrendBlocks = 10;
+  std::vector<Real> recent_pressure_drag;
+  std::vector<Real> recent_viscous_drag;
+  std::vector<Real> previous_window_pressure;
+  std::vector<Real> previous_window_viscous;
+  bool cd_monotone_trend = false;
   Real cd_drift_window = 0.0;
   bool forces_limit_cycle = false;
   std::vector<Real> previous_window_cd;
@@ -152,6 +182,14 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
       outcome.initial_residual = initial_residual;
     }
     last_residual = norms.l2;
+
+    // Record the best state seen so far, by residual norm.
+    if (best_residual < 0.0 || norms.l2 < best_residual) {
+      best_residual = norms.l2;
+      best_step = step;
+      for (Index c = 0; c < num_owned; ++c) U_best.set(c, U.get(c));
+      have_best_state = true;
+    }
 
     const Real cfl =
         cfl_scale * rampedCfl(rc.cfl_initial, rc.cfl_max, rc.pseudo_cfl_ramp_steps, step - 1);
@@ -281,6 +319,8 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
     // Requiring the integrated forces to be constant as well is what actually
     // establishes a steady state, so both tests must pass together.
     recent_cd.push_back(last_forces.cd);
+    recent_pressure_drag.push_back(last_forces.pressure_drag);
+    recent_viscous_drag.push_back(last_forces.viscous_drag);
     if (recent_cd.size() > kForceWindow) {
       // The value leaving the trailing window is kept in the previous window, so
       // the mean of the window before this one is available for the drift test.
@@ -289,6 +329,14 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
         previous_window_cd.erase(previous_window_cd.begin());
       }
       recent_cd.erase(recent_cd.begin());
+      previous_window_pressure.push_back(recent_pressure_drag.front());
+      previous_window_viscous.push_back(recent_viscous_drag.front());
+      if (previous_window_pressure.size() > kForceWindow) {
+        previous_window_pressure.erase(previous_window_pressure.begin());
+        previous_window_viscous.erase(previous_window_viscous.begin());
+      }
+      recent_pressure_drag.erase(recent_pressure_drag.begin());
+      recent_viscous_drag.erase(recent_viscous_drag.begin());
     }
     forces_stationary = false;
     forces_limit_cycle = false;
@@ -318,7 +366,44 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
         cd_drift_window = std::abs(mean_now - mean_prev);
         const Real drift_tol =
             std::max(kCdDriftRelTol * std::max(std::abs(mean_now), std::abs(mean_prev)), kCdAbsTol);
-        if (cd_drift_window <= drift_tol) {
+
+        // Component drift, so that opposing motions cannot cancel.
+        auto mean_of = [](const std::vector<Real> &v) {
+          Real s = 0.0;
+          for (const Real x : v) s += x;
+          return s / static_cast<Real>(v.size());
+        };
+        const Real p_now = mean_of(recent_pressure_drag);
+        const Real p_prev = mean_of(previous_window_pressure);
+        const Real v_now = mean_of(recent_viscous_drag);
+        const Real v_prev = mean_of(previous_window_viscous);
+        const Real p_drift = std::abs(p_now - p_prev);
+        const Real v_drift = std::abs(v_now - v_prev);
+        const Real p_tol =
+            std::max(kCdDriftRelTol * std::max(std::abs(p_now), std::abs(p_prev)), kCdAbsTol);
+        const Real v_tol =
+            std::max(kCdDriftRelTol * std::max(std::abs(v_now), std::abs(v_prev)), kCdAbsTol);
+        const bool components_settled = (p_drift <= p_tol) && (v_drift <= v_tol);
+
+        // Monotone-trend test over sub-blocks of the trailing window.  An
+        // oscillation about a fixed mean is not monotone; a developing solution
+        // is.  Only the former may be called a converged limit cycle.
+        const std::size_t block = kForceWindow / kTrendBlocks;
+        bool rising = true;
+        bool falling = true;
+        for (std::size_t b = 0; b + 1 < kTrendBlocks; ++b) {
+          Real m0 = 0.0;
+          Real m1 = 0.0;
+          for (std::size_t i = 0; i < block; ++i) {
+            m0 += recent_cd[b * block + i];
+            m1 += recent_cd[(b + 1) * block + i];
+          }
+          if (!(m1 > m0)) rising = false;
+          if (!(m1 < m0)) falling = false;
+        }
+        cd_monotone_trend = rising || falling;
+
+        if (cd_drift_window <= drift_tol && components_settled && !cd_monotone_trend) {
           forces_stationary = true;
           forces_limit_cycle = true;
         }
@@ -454,6 +539,23 @@ RunOutcome runSteady(SolverContext &context, OutputWriter &writer) {
     outcome.completed = false;
     context.syncState();
     return outcome;
+  }
+
+  // If the march ended materially above its own best residual -- which happens
+  // when the CFL ramp pushes past the stability limit of the scheme late in the
+  // run -- fall back to the best state, and say so.  Reporting the degraded final
+  // state would understate the convergence actually achieved, and reporting the
+  // best residual while writing the degraded field would be inconsistent.
+  if (have_best_state && best_residual > 0.0 && last_residual > 2.0 * best_residual) {
+    for (Index c = 0; c < num_owned; ++c) U.set(c, U_best.get(c));
+    const std::string fallback = formatString(
+        "the march ended at residual %.4e, a factor %.2f above the best value %.4e reached at step "
+        "%d; the best state has been restored and is what is reported and written out",
+        last_residual, last_residual / best_residual, best_residual, best_step);
+    logInfo(fallback);
+    outcome.notes += "  " + fallback;
+    outcome.final_step = best_step;
+    last_residual = best_residual;
   }
 
   // Recompute the residual and forces from the FINAL state so the last force row
