@@ -85,11 +85,12 @@ SteadyResult runSteady(LocalMesh& lm,
     // limiter activates abruptly at the 1st->2nd-order transition and causes residual spikes
     // preventing convergence.  Extend the first-order phase so the shock fully establishes.
     const bool inviscid_shock_case = (mu <= 0.0) && (cfg.freestream.mach >= 0.5);
+    const bool low_re_viscous_case  = (mu > 0.0) && (cfg.reynolds > 0.0) && (cfg.reynolds < 100.0);
     const int first_order_steps = (mu > 0.0)
-        ? ((cfg.reynolds > 0.0 && cfg.reynolds < 100.0) ? 2000 : 500)
+        ? (low_re_viscous_case ? std::max(ramp_steps, 5000) : 500)
         : (inviscid_shock_case ? std::max(ramp_steps, 5000) : 500);
-    // Gradual 2nd-order limiter ramp (longer for shock cases to avoid abrupt activation)
-    const int second_order_ramp_steps = inviscid_shock_case ? 2000 : 300;
+    // Gradual 2nd-order limiter ramp (longer for shock/low-Re cases to avoid abrupt activation)
+    const int second_order_ramp_steps = (inviscid_shock_case || low_re_viscous_case) ? 2000 : 300;
     int fix_d_grace_until = 0;
 
     SteadyResult result;
@@ -228,6 +229,14 @@ SteadyResult runSteady(LocalMesh& lm,
             // gently at low CFL rather than at the high CFL steady state.
             if (inviscid_shock_case) {
                 cfl_effective = std::min(cfl_effective, std::max(cfl_effective_init * 5.0, 5.0));
+            }
+            // Fix H2: for Re<100 viscous cases, jump cfl_effective to cfl0 (case-specified)
+            // at the first-order transition. The CFL was held at 0.1 during the BL build-up
+            // phase, and Fix D prevents Fix E from ramping CFL when residuals grow. Jumping to
+            // cfl0 (=1.0 for cylinder cases) matches the empirically observed optimal CFL for
+            // convergence of the wake in the post-build-up phase.
+            if (low_re_viscous_case) {
+                cfl_effective = std::max(cfl_effective, cfl0);
             }
         }
 
