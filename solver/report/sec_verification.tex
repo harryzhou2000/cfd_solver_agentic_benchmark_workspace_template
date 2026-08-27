@@ -713,6 +713,40 @@ ratio: at $0.988$ the increments are barely shrinking, so the geometric tail sum
 $\num{6.6e-3}$ of remaining $C_D$ movement, or $5.1\,\%$ of the current value, implying
 an asymptote near $0.135$ against a current $0.1285$.
 
+Repeating the measurement as the run continued shows the discriminator tracking a real
+quantity rather than thresholding noise, and also exposes the limit of the extrapolation:
+
+\begin{center}
+\begin{tabular}{rrrrr}
+  \toprule
+  Step & Decay ratio & $C_D$ & Remaining & Implied asymptote \\
+  \midrule
+  \num{13144} & $0.988$ & $0.1285$ & $5.1\,\%$ & $0.1351$ \\
+  \num{16000} & $0.990$ & $0.1320$ & $3.1\,\%$ & $0.1361$ \\
+  \num{22355} & $0.993$ & $0.1351$ & $1.6\,\%$ & $0.1372$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The remaining fraction falls steadily, from $5.1\,\%$ to $1.6\,\%$, so the run
+is genuinely converging and the criterion's refusal weakens as it should rather than
+latching. But the \emph{implied asymptote is itself creeping upward}, from $0.1351$ to
+$0.1372$ across the three estimates, and each estimate is overtaken by the actual $C_D$
+of a later one --- the step-\num{13144} extrapolation predicted $0.1351$, which is
+precisely the value measured at step \num{22355}, where the extrapolation has moved on to
+$0.1372$.
+
+That is worth stating plainly because it bounds what the extrapolation is worth. A
+geometric model fitted to a tail with ratio $0.993$ is extremely sensitive to the fitted
+ratio: at $r=0.993$ the tail sum is $r/(1-r)\approx142$ times the last increment, so a
+one-percent error in $r$ moves the asymptote by roughly $15\,\%$ of the remaining
+distance. The extrapolated figures above should therefore be read as \textbf{lower bounds
+on the remaining movement}, not as predictions of the converged value. The honest use of
+the decay ratio is as a \emph{classifier} --- $0.993$ is not converged, $0.733$ is --- and
+the report uses it that way. Where an asymptote is quoted as a number, as for the cylinder
+in \cref{sec:digits}, the ratio is well away from unity and the tail sum is
+correspondingly insensitive.
+
 Set that against the cylinder of \cref{sec:digits}, whose ratio is $0.733$ and whose
 remaining movement is $0.049\,\%$. Both figures come from the same measurement applied to
 the same quantity; they differ by three orders of magnitude in consequence. That is what
