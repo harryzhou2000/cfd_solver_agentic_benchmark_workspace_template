@@ -10,7 +10,8 @@ import os
 
 FIELDS = ["case_id", "command", "mpi_ranks", "steps", "final_physical_time",
           "residual_reduction_orders", "wall_time_seconds", "cl", "cd",
-          "convergence_status", "notes"]
+          "convergence_status", "solver_version", "git_revision", "inviscid_flux",
+          "reconstruction", "limiter", "shock_fix_strength", "notes"]
 
 
 def main():
@@ -45,6 +46,14 @@ def main():
             "cl": float(m.get("final_cl") or 0.0),
             "cd": float(m.get("final_cd") or 0.0),
             "convergence_status": s["convergence_status"],
+            # Recorded per run so the manifest itself shows that every submitted
+            # result came from the same build with the same numerics.
+            "solver_version": m.get("solver_version", ""),
+            "git_revision": m.get("git_revision", ""),
+            "inviscid_flux": m.get("inviscid_flux", ""),
+            "reconstruction": m.get("reconstruction", ""),
+            "limiter": m.get("limiter", ""),
+            "shock_fix_strength": m.get("shock_fix_strength", ""),
             "notes": s["notes"],
         })
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)

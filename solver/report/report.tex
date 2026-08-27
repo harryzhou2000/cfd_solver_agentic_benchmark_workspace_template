@@ -1143,7 +1143,11 @@ there were one, is named with its measured value in
 
 \code{report/figure\_manifest.csv} maps every figure to its case, type, plotted
 variable and source data file; \code{report/run\_manifest.md} lists the exact
-command, rank count, step count, wall time and status of every submitted run.
+command, rank count, step count, wall time and status of every submitted run,
+and the CSV form adds the solver version, the git revision and the numerical
+settings (flux, reconstruction, limiter, shock-fix strength) each run was
+produced with, so the provenance of every number is recoverable from the
+submission alone.
 
 Two conventions in \code{metadata.json} are worth stating explicitly.
 \code{git\_revision} is the repository revision captured when CMake was
