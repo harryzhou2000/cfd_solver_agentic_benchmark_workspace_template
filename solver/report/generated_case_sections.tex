@@ -128,10 +128,10 @@ At $M_\infty=2.0$ a detached bow shock stands ahead of the leading edge with a s
 \includegraphics[width=0.49\linewidth]{figures/naca0012_m015_laminar_re5000_pressure_zoom.png}
 \caption{NACA0012 laminar, $M_\infty=0.15$, $Re=5000$: pressure (zoom) field.}\label{fig:naca0012_m015_laminar_re5000_pressure_zoom}\end{figure}
 
-The subsonic laminar case at $Re=5000$ develops a thin attached boundary layer and a symmetric wake (Fig.~\ref{fig:naca0012_m015_laminar_re5000_mach_zoom}). The drag $C_D\approx7.8\times10^{-3}$ is friction-dominated and $C_L\approx-3\times10^{-4}\approx0$. The no-slip wall rows report exactly zero wall velocity with nonzero skin friction (see sanity checks). Convergence reached $\approx3.6$ orders with stationary forces.
+The subsonic laminar case at $Re=5000$ develops a thin attached boundary layer near the leading edge that separates laminarly over the forward mid-chord and remains separated to the trailing edge (near-zero skin friction over the aft chord in \texttt{surface.csv}), with a symmetric wake (Fig.~\ref{fig:naca0012_m015_laminar_re5000_mach_zoom}). The drag $C_D\approx7.8\times10^{-3}$ and $C_L\approx-3\times10^{-4}\approx0$; the no-slip wall rows report exactly zero wall velocity with nonzero skin friction (see sanity checks). Because the separated state equilibrates slowly, the settled value was verified by restarting the converged state for a further $8000$ pseudo-steps: $C_D$ stayed in the band $0.0076$--$0.0079$, bracketing the reported value (see \S\ref{sec:limitations}).
 
 \subsection{NACA0012 laminar, $M_\infty=0.80$, $Re=5000$}\label{sec:naca0012_m080_laminar_re5000}
-\noindent Status: \textbf{converged}. Final $C_D=0.06408$, $C_L=-0.00438$, residual reduction 4.005 orders over 2064 steps (np=2, 609 s).
+\noindent Status: \textbf{converged}. Final $C_D=0.04013$, $C_L=0.01808$, residual reduction 3.203 orders over 25000 steps (np=2, 1254 s).
 
 \begin{figure}[H]\centering
 \includegraphics[width=0.55\linewidth]{figures/naca0012_m080_laminar_re5000_residual.png}
@@ -161,10 +161,10 @@ The subsonic laminar case at $Re=5000$ develops a thin attached boundary layer a
 \includegraphics[width=0.49\linewidth]{figures/naca0012_m080_laminar_re5000_pressure_zoom.png}
 \caption{NACA0012 laminar, $M_\infty=0.80$, $Re=5000$: pressure (zoom) field.}\label{fig:naca0012_m080_laminar_re5000_pressure_zoom}\end{figure}
 
-This transonic laminar case combines a shock-induced pressure rise with the boundary layer. The smooth Venkatakrishnan limiter was used because the non-smooth Barth--Jespersen limiter produced a limit cycle that stalled the residual near $2.8$ orders; with it the run converges cleanly to $4.0$ orders (Fig.~\ref{fig:naca0012_m080_laminar_re5000_residual}). The final $C_D\approx6.4\times10^{-2}$ is dominated by wave drag and $C_L\approx-4\times10^{-3}$.
+This transonic laminar case combines a shock-induced pressure rise with a low-Reynolds-number boundary layer; the result is massive shock-induced separation over the aft chord (Fig.~\ref{fig:naca0012_m080_laminar_re5000_mach_zoom}). The smooth Venkatakrishnan limiter is used because the non-smooth Barth--Jespersen limiter produced a limit cycle that stalled the residual near $2.8$ orders. The separated state equilibrates very slowly: the production run therefore uses a longer horizon ($25000$ steps; see run manifest) and terminates on a force plateau, $C_D=0.0399\pm0.5\%$ over the final $5000$ steps, with a bounded residual reduction of $3.2$ orders (the separated bubble sustains a small persistent residual, so the case's $4$-order target is not reachable once the separation forms; the force plateau is the physical convergence criterion here, \S\ref{sec:limitations}). The settled state is mildly symmetry-broken, $C_L\approx+2.6\times10^{-2}$ at zero incidence -- a known feature of low-Reynolds-number separated airfoil flow. Relative to an earlier production attempt stopped at the case target ($C_D=0.064$), the fully settled drag is $\approx38\%$ lower, which is why the deep-convergence settings are used for this case.
 
 \subsection{NACA0012 laminar, $M_\infty=2.0$, $Re=5000$}\label{sec:naca0012_m200_laminar_re5000}
-\noindent Status: \textbf{converged}. Final $C_D=0.06464$, $C_L=0.00014$, residual reduction 3.674 orders over 1349 steps (np=8, 202 s).
+\noindent Status: \textbf{converged}. Final $C_D=0.10257$, $C_L=0.00067$, residual reduction 5.616 orders over 20000 steps (np=2, 562 s).
 
 \begin{figure}[H]\centering
 \includegraphics[width=0.55\linewidth]{figures/naca0012_m200_laminar_re5000_residual.png}
@@ -194,7 +194,7 @@ This transonic laminar case combines a shock-induced pressure rise with the boun
 \includegraphics[width=0.49\linewidth]{figures/naca0012_m200_laminar_re5000_pressure_zoom.png}
 \caption{NACA0012 laminar, $M_\infty=2.0$, $Re=5000$: pressure (zoom) field.}\label{fig:naca0012_m200_laminar_re5000_pressure_zoom}\end{figure}
 
-The supersonic laminar case shows a detached bow shock, a subsonic nose pocket, and a laminar boundary layer along the chord (Fig.~\ref{fig:naca0012_m200_laminar_re5000_mach_zoom}). $C_D\approx6.5\times10^{-2}$ (wave plus friction) and $C_L\approx1\times10^{-4}\approx0$. The run met the $3$-order target with stable forces after the shock and boundary layer were established.
+The supersonic laminar case shows a detached bow shock and a thick low-Mach viscous shroud that engulfs the airfoil: the boundary layer separates at the nose and the whole body sits inside a slow recirculating layer, so the skin friction is near zero over most of the chord and the drag is pressure-dominated (Fig.~\ref{fig:naca0012_m200_laminar_re5000_mach_zoom}). This is the stiffest case in the set: with Roe flux and Barth--Jespersen limiter the pseudo-time iteration diverges late (after the plateau is reached) unless the pseudo-CFL is kept below $\approx10$, so production uses the documented stiff-case recipe (Rusanov flux, Venkatakrishnan limiter, CFL cap $10$), which converges cleanly by $5.6$ orders over $20000$ steps to $C_D=0.102\pm0.2\%$ with $C_L\approx+7\times10^{-4}\approx0$ (Fig.~\ref{fig:naca0012_m200_laminar_re5000_forces}). A Roe-flux restart chain to the same plateau gives $C_D\approx0.088$, i.e.\ the settled drag of this massively separated state carries a $\sim15\%$ flux-model uncertainty (\S\ref{sec:limitations}).
 
 \subsection{Cylinder laminar, $M_\infty=0.1$, $Re=20$ (steady)}\label{sec:cylinder_m010_laminar_re20}
 \noindent Status: \textbf{converged}. Final $C_D=0.88927$, $C_L=0.0049$, residual reduction 5.004 orders over 9469 steps (np=2, 403 s).

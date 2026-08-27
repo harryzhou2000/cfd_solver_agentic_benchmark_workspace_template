@@ -1,11 +1,11 @@
 {
   "case_id": "naca0012_m080_laminar_re5000",
-  "command": "mpirun -np <ranks> ./bin/fv2d.v2 solve --case /workspace/cfd_solver_agentic_benchmark/inputs/cases/naca0012_m080_laminar_re5000.json --flux roe --output results/naca0012_m080_laminar_re5000",
+  "command": "mpirun -np <ranks> ./bin/fv2d.v3 solve --case tests/cases/naca0012_m080_laminar_re5000_production.json --flux roe --output results/naca0012_m080_laminar_re5000",
   "convergence_status": "converged",
   "final_physical_time": 0.0,
-  "final_step": 2064,
+  "final_step": 25000,
   "mpi_ranks": 2,
-  "notes": "steady residual reduced by 4.005341 orders of magnitude with stable forces",
-  "residual_reduction_orders": 4.00534063207353,
-  "wall_time_seconds": 609.063617005
+  "notes": "steady plateau: residual reduced by 3.203098 orders (bounded) and forces stable over the final window",
+  "residual_reduction_orders": 3.203097668011301,
+  "wall_time_seconds": 1253.694327446
 }

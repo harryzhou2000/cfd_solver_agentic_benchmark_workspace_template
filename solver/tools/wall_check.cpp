@@ -34,7 +34,8 @@ int main(int argc, char** argv) {
         if (et == BAR_2 || npe == 2) { // boundary bar elements
           std::vector<cgsize_t> cn(nelt * 2);
           cg_elements_read(fn, b, z, s, cn.data(), nullptr);
-          bool isWall = std::string(sn).find("WALL") != std::string::npos;
+          const char* pat = argc > 2 ? argv[2] : "WALL";
+          bool isWall = std::string(sn).find(pat) != std::string::npos;
           if (isWall) for (cgsize_t i = 0; i < nelt; ++i) wallEdges.push_back({cn[2*i]-1, cn[2*i+1]-1});
           continue;
         }

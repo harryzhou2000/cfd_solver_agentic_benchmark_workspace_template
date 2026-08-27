@@ -32,7 +32,7 @@ JSON input. To run every required case with production settings:
 
     .venv/bin/python tools/run_all_cases.py --np 8
 
-tools/run_all_cases.py applies the documented per-case production settings (Rusanov flux + Venkatakrishnan limiter + a conservative pseudo-CFL cap for the stiff low-Mach cylinder Re 20 case; Venkatakrishnan for the transonic laminar M0.8 case) via runtime CLI/env options -- no solver-code edits between cases. The exact command and MPI rank count for each submitted result are recorded in report/run_manifest.csv; build/fv2d from the current source reproduces every submitted result.
+tools/run_all_cases.py applies the documented per-case production settings via runtime CLI/env options -- no solver-code edits between cases: Rusanov flux + Venkatakrishnan limiter + conservative pseudo-CFL caps for the stiff cases (cylinder Re 20; Mach-2 laminar), Venkatakrishnan for the transonic laminar M0.8 case, and long-horizon deep-convergence run-control overrides for the laminar NACA cases whose separated states settle slowly (see report sec. limitations). The exact command and MPI rank count for each submitted result are recorded in report/run_manifest.csv; build/fv2d from the current source reproduces every submitted result.
 
 ## Python environment (plotting / validation / report automation)
 
@@ -80,7 +80,8 @@ symmetry), tools/wall_check.cpp (near-wall first-cell height).
   Barth-Jespersen limiter (Venkatakrishnan available), positivity floors on
   density/pressure and relative update clipping.
 - Rusanov (LLF) and Roe (Harten entropy fix) Riemann fluxes; production steady
-  cases use Roe; the Re 200 transient uses Rusanov with dissipation scale 1.0
+  cases use Roe except the stiff cylinder Re 20 and Mach-2 laminar cases and the
+  Re 200 transient, which use Rusanov with dissipation scale 1.0
   as specified in the case file.
 - Characteristic farfield BC; pressure-flux slip wall; mirrored-state no-slip
   adiabatic wall with corrected-average face gradients for viscous terms.

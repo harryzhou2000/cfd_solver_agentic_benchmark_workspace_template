@@ -35,19 +35,44 @@ ALL_CASES = [
 PER_CASE = {
     "cylinder_m010_laminar_re20": {"flux": "rusanov", "env": {"FV2D_VENKAT": "1.0"},
                                     "cfl_max": 30.0},  # conservative cap for stiff low-Mach case
-    "naca0012_m080_laminar_re5000": {"flux": "roe", "env": {"FV2D_VENKAT": "1.0"}},
+    # Deep-convergence laminar NACA settings: these cases settle to massively
+    # separated states whose force coefficients drift slowly long after the
+    # case residual target is met; production therefore uses a longer horizon
+    # with a higher target so the run ends on the force plateau (documented in
+    # report sec. limitations). CFL caps are conservative stability equivalents.
+    "naca0012_m080_laminar_re5000": {"flux": "roe",
+                                     "env": {"FV2D_VENKAT": "1.0", "FV2D_NOEXTEND": "1"},
+                                     "np": 2,
+                                     "rc": {"max_steps": 25000, "residual_reduction_target": 6.0,
+                                            "cfl_initial": 0.5, "cfl_max": 50.0,
+                                            "pseudo_cfl_ramp_steps": 8000}},
+    # Mach-2 laminar is the stiffest case: Roe+Barth enters a late limit-cycle
+    # instability near the separated plateau, so production uses the documented
+    # stiff-case recipe (Rusanov + Venkatakrishnan, conservative CFL cap).
+    "naca0012_m200_laminar_re5000": {"flux": "rusanov",
+                                     "env": {"FV2D_VENKAT": "1.0", "FV2D_NOEXTEND": "1"},
+                                     "np": 2,
+                                     "rc": {"max_steps": 20000, "residual_reduction_target": 6.0,
+                                            "cfl_initial": 0.2, "cfl_max": 10.0,
+                                            "pseudo_cfl_ramp_steps": 3000}},
     "cylinder_m010_laminar_re200": {"flux": "rusanov"},  # transient production flux
 }
 
 
-def _variant_case(case_id, cfl_max):
-    """Write a case JSON identical to the supplied one but with a conservative
-    pseudo-CFL cap (a documented stricter/stable equivalent)."""
+def _variant_case(case_id, rc_overrides):
+    """Write a case JSON identical to the supplied one but with documented
+    run-control overrides (e.g. a conservative pseudo-CFL cap chosen for
+    stability on a stiff case, or a longer horizon to reach a force plateau).
+    rc_overrides may be a float (cfl_max only, legacy form) or a dict of
+    run_control keys."""
     d = json.load(open(CASES_DIR / f"{case_id}.json"))
     mesh = d["mesh"]["file"]
     if not mesh.startswith("/"):
         d["mesh"]["file"] = str((CASES_DIR.parent / "meshes" / Path(mesh).name).resolve())
-    d["run_control"]["cfl_max"] = cfl_max
+    if isinstance(rc_overrides, dict):
+        d["run_control"].update(rc_overrides)
+    else:
+        d["run_control"]["cfl_max"] = rc_overrides
     out = SOLVER_ROOT / "tests" / "cases" / f"{case_id}_production.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     json.dump(d, open(out, "w"), indent=2)
@@ -58,7 +83,10 @@ def run_case(case_id, np_, tag=None, extra_env=None):
     out = RESULTS / (case_id if tag is None else f"{case_id}_np{np_}" if tag == "np" else f"{case_id}_{tag}")
     out.mkdir(parents=True, exist_ok=True)
     pc = PER_CASE.get(case_id, {})
-    case_path = _variant_case(case_id, pc["cfl_max"]) if "cfl_max" in pc else (CASES_DIR / f"{case_id}.json")
+    if tag is None and "np" in pc:
+        np_ = pc["np"]
+    rc_ov = pc.get("rc", pc.get("cfl_max"))
+    case_path = _variant_case(case_id, rc_ov) if rc_ov is not None else (CASES_DIR / f"{case_id}.json")
     cmd = ["mpirun", "-np", str(np_), str(FV2D), "solve", "--case",
            str(case_path), "--output", str(out)]
     if pc.get("flux"):
