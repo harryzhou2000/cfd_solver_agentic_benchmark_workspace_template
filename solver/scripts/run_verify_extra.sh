@@ -9,7 +9,10 @@ S=studies
 COMMON="--progress-every 5000"
 run() { scripts/run_case.sh "$@" 2>&1 | grep -v "Authorization required" || true; }
 
-run naca0012_m200_inviscid 4 $S/verify/naca0012_m200_inviscid_roe $COMMON --flux roe
+# The Roe run cannot converge on this case (see the report), so it is capped
+# well past the point where its residual has plateaued.
+run naca0012_m200_inviscid 4 $S/verify/naca0012_m200_inviscid_roe $COMMON --flux roe \
+    --max-steps 15000
 
 # Restart round trip: continue the converged Mach 0.15 case from its restart
 # file for a few steps and check that the forces are unchanged.  The run itself

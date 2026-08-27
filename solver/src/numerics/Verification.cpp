@@ -273,27 +273,7 @@ auto cellAverage(const LocalMesh& m, Index c, F f) -> decltype(f(0.0, 0.0)) {
 }
 
 PrimVec exactCellAverage(const LocalMesh& m, Index c) {
-  const Index* nodes = m.cellNodePtr(c);
-  const int n = m.cellSize(c);
-  PrimVec acc{};
-  Real area_tot = 0.0;
-  for (int k = 1; k < n - 1; ++k) {
-    const Index a = nodes[0], b = nodes[k], d = nodes[k + 1];
-    const Real ax = m.x[a], ay = m.y[a];
-    const Real bx = m.x[b], by = m.y[b];
-    const Real dx = m.x[d], dy = m.y[d];
-    const Real area = 0.5 * std::abs((bx - ax) * (dy - ay) - (dx - ax) * (by - ay));
-    // Midpoints of the triangle edges: exact for quadratics.
-    const Real qx[3] = {0.5 * (ax + bx), 0.5 * (bx + dx), 0.5 * (dx + ax)};
-    const Real qy[3] = {0.5 * (ay + by), 0.5 * (by + dy), 0.5 * (dy + ay)};
-    for (int q = 0; q < 3; ++q) {
-      const PrimVec w = manufactured(qx[q], qy[q]);
-      for (int v = 0; v < kNVar; ++v) acc[v] += (area / 3.0) * w[v];
-    }
-    area_tot += area;
-  }
-  for (int v = 0; v < kNVar; ++v) acc[v] /= std::max(area_tot, 1e-300);
-  return acc;
+  return cellAverage(m, c, [](Real x, Real y) { return manufactured(x, y); });
 }
 
 // Solve the steady manufactured problem

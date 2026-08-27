@@ -28,7 +28,7 @@ from vtu_reader import read_vtu  # noqa: E402
 
 # View windows: (xmin, xmax, ymin, ymax)
 NACA_NEAR = (-0.6, 1.8, -0.9, 0.9)
-NACA_WIDE = (-3.0, 5.0, -2.5, 2.5)
+NACA_WAKE = (-0.4, 2.8, -0.7, 0.7)
 CYL_NEAR = (-2.0, 6.0, -2.5, 2.5)
 CYL_WAKE = (-2.0, 14.0, -3.5, 3.5)
 
@@ -282,7 +282,7 @@ def main():
 
         mesh = read_vtu(os.path.join(cdir, "field_final.vtu"))
         near = CYL_NEAR if is_cyl else NACA_NEAR
-        wake = CYL_WAKE if is_cyl else NACA_WIDE
+        wake = CYL_WAKE if is_cyl else NACA_WAKE
 
         # Clip the colour range to the 0.2-99.8 percentile of the plotted window
         # so that a couple of cells inside a shock or at the stagnation point

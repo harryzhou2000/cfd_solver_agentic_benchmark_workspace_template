@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 
 RC = {
@@ -114,7 +115,15 @@ def draw_body(ax, surface_xy, color="k", lw=1.2):
 
 
 def add_colorbar(fig, mappable, ax, label):
-    cb = fig.colorbar(mappable, ax=ax, pad=0.02, fraction=0.046)
+    """Colour bar tied to the height of the (equal-aspect) axes.
+
+    ``fig.colorbar(..., ax=ax)`` sizes the bar from the figure, which leaves it
+    much taller than an equal-aspect field plot; ``make_axes_locatable`` ties it
+    to the axes instead.
+    """
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="3.5%", pad=0.12)
+    cb = fig.colorbar(mappable, cax=cax)
     cb.set_label(label)
     cb.ax.tick_params(labelsize=9)
     return cb

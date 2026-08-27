@@ -377,7 +377,32 @@ void SpatialOperator::evaluateResidual() {
     ConsVec flux = inviscidFlux(wi, wg, n, gas_, flux_opt_);
 
     Real tx = 0.0, ty = 0.0;
-    if (viscous && bc != BcType::kSlipWall) {
+    if (viscous && bc == BcType::kNoSlipAdiabaticWall) {
+      // Exact steady no-slip wall stress.  With u = 0 everywhere on the wall
+      // the tangential derivative of the tangential velocity vanishes, and
+      // continuity (rho div u + u . grad rho = 0 with u = 0) forces div u = 0
+      // there.  Hence tau_nn = tau_tt = 0 and the wall traction is purely the
+      // shear mu du_t/dn, with no normal component at all.  Building it from
+      // the wall-normal derivative directly is exact and robust, whereas
+      // assembling it from the general face-gradient formula lets the
+      // tangential part of the cell-centre least-squares gradient leak into
+      // div u; on cells whose aspect ratio reaches 1e4 that leakage is not
+      // small.
+      const PrimVec wcc{w_[c * kNVar], w_[c * kNVar + 1], w_[c * kNVar + 2], w_[c * kNVar + 3]};
+      const Vec2 dvec = mesh_.bface_center[b] - mesh_.cell_center[c];
+      const Real dn = std::max(std::abs(dot(dvec, n)), 1e-300);
+      const Vec2 uc{wcc[1], wcc[2]};
+      const Real un_c = dot(uc, n);
+      const Vec2 ut_c{uc[0] - un_c * n[0], uc[1] - un_c * n[1]};
+      const Real T_w = wcc[3] / (wcc[0] * Rgas);   // adiabatic wall
+      const Real mu = transport_.viscosity(T_w);
+      // d(u_t)/dn = (0 - u_t,cell)/dn, and tau.n = mu d(u_t)/dn.
+      tx = -mu * ut_c[0] / dn;
+      ty = -mu * ut_c[1] / dn;
+      // Adiabatic and stationary wall: no heat flux and no work term.
+      flux[1] -= tx;
+      flux[2] -= ty;
+    } else if (viscous && bc != BcType::kSlipWall) {
       const PrimVec wcc{w_[c * kNVar], w_[c * kNVar + 1], w_[c * kNVar + 2], w_[c * kNVar + 3]};
       PrimVec wb{};
       for (int k = 0; k < kNVar; ++k) wb[k] = bstate_[b * kNVar + k];
@@ -392,8 +417,7 @@ void SpatialOperator::evaluateResidual() {
       const Real T = p_f / (rho_f * Rgas);
       const Real mu = transport_.viscosity(T);
       const Real kcond = mu * cp / pr;
-      const bool adiabatic = (bc == BcType::kNoSlipAdiabaticWall);
-      const ConsVec fv = viscousNormalFlux(vg, mu, kcond, wb[1], wb[2], n, adiabatic);
+      const ConsVec fv = viscousNormalFlux(vg, mu, kcond, wb[1], wb[2], n, false);
       for (int k = 0; k < kNVar; ++k) flux[k] -= fv[k];
       tx = fv[1];
       ty = fv[2];

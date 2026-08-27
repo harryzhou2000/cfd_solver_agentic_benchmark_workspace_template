@@ -53,12 +53,12 @@ uses a true dual-time BDF2 scheme with an outer physical-time loop, frozen
 histories and inner nonlinear iterations. A method-of-manufactured-solutions
 study measures a discretisation-error order of \mmsOrderSecond{} for the
 unlimited second-order scheme against \mmsOrderFirst{} for the first-order
-scheme. Of the eight required cases, \numCases{} produced a complete result
-package and \numFailedCases{} are marked failed. The Reynolds 20 cylinder gives $C_D=\cdCylinderMZeroOneZeroLaminarReTwoZero$,
+scheme. \numCases{} of the eight required cases produced a complete result package, with
+\numFailedCases{} marked failed. The Reynolds 20 cylinder gives $C_D=\cdCylinderMZeroOneZeroLaminarReTwoZero$,
 in agreement with the accepted value of $2.0$--$2.1$, and the Reynolds 200
 cylinder develops a vortex street with Strouhal number \stFft{} and mean drag
-\meanCdReTwoHundred. All \sanityTotalChecks{} automated physics sanity checks
-over \sanityCases{} cases pass.
+\meanCdReTwoHundred. Of \sanityTotalChecks{} automated physics sanity
+checks over \sanityCases{} cases, \sanityFailures{} fail.
 \end{abstract}
 
 \tableofcontents
@@ -214,24 +214,26 @@ A steady case is declared \code{converged} only when \emph{both}
 \begin{enumerate}
 \item the requested residual reduction is achieved,
       $\|r\|_2\le10^{-n}\|r\|_2^{0}$ with $n$ from the case file, \emph{and}
-\item the drag coefficient is stationary: over a trailing window of
-      $w=\max\!\bigl(\min(20,N_{\rm step}/3),\,N_{\rm step}/20\bigr)$ steps, the
-      drift $|C_D^{\rm last}-C_D^{\rm last-w}|$ is below
-      $\varepsilon_F=\max(3\times10^{-3}|\overline{C_D}|,\,5\times10^{-5})$ and
-      the RMS scatter about the window mean is below $1.5\,\varepsilon_F$.
+\item the drag coefficient is stationary, tested as a \emph{trend} rather than
+      a point-to-point difference: with $w=\max(50,N_{\rm step}/10)$, the mean of
+      $C_D$ over the last $w$ steps must differ from its mean over the preceding
+      $w$ steps by less than
+      $\varepsilon_F=\max(3\times10^{-3}|\overline{C_D}|,\,5\times10^{-5})$, and
+      the RMS scatter within the last window must be below $3\varepsilon_F$.
 \end{enumerate}
-Both parts of $\varepsilon_F$ are deliberate. The absolute floor matters because
-the inviscid drag of a symmetric aerofoil at zero incidence is a small numerical
-residue of d'Alembert's paradox whose exact value is zero, so a purely relative
-criterion would demand a precision that carries no physical meaning. The
-relative part is $0.3\%$ rather than something tighter because the
-shock-containing cases settle into a bounded residual limit cycle whose drag
-band is a few tenths of a percent wide (\cref{sec:limitations}); demanding more
-would mean rejecting a solution whose remaining uncertainty is genuinely that
-band. Separating drift from scatter is what makes this safe: a limit cycle has
-scatter but no drift, whereas a run that has stopped too early --- the failure
-mode this criterion exists to catch --- has a drift much larger than its
-scatter. The realised drift, scatter and tolerance of every run are written into
+Every part of this is deliberate. Comparing two window \emph{means} averages out
+the bounded oscillation that the shock cases settle into while still detecting a
+slow monotone drift, which is the failure mode the test exists to catch: a
+viscous case can meet a relative residual target thousands of iterations before
+its boundary layer has settled, with $C_D$ still falling by tens of percent. A
+single point-to-point difference is far noisier and lets such a case through.
+The absolute floor in $\varepsilon_F$ matters because the inviscid drag of a
+symmetric aerofoil at zero incidence is a small numerical residue of d'Alembert's
+paradox whose exact value is zero, so a purely relative criterion would demand a
+precision that carries no physical meaning. The relative part is $0.3\%$ rather
+than something tighter because the shock-containing cases genuinely carry an
+uncertainty of that order (\cref{sec:limitations}), and the scatter bound is
+looser than the trend bound for the same reason. The realised drift, scatter and tolerance of every run are written into
 the \code{notes} field of \code{run\_status.json} and reproduced in
 \code{report/run\_manifest.md}.
 The second condition exists because the first alone is not sufficient here: on
@@ -401,10 +403,16 @@ with the limiter $\phi_c\in[0,1]^4$ defined per variable. Reconstruction is
 active in every production run reported here; the only first-order fallback is
 the positivity guard described below, and its activation count is written into
 \code{metadata.json} for every case (field
-\code{positivity\_fallback\_face\_states}).
+\code{positivity\_fallback\_face\_states}). That it is genuinely active is
+easy to check: rerunning the $M_\infty=0.15$ laminar case with
+\code{--first-order} raises the drag from
+\cdNacaZeroZeroOneTwoMZeroOneFiveLaminarReFiveZeroZeroZero{} to
+\cdFirstOrderLaminar{}, i.e.\ by \cdFirstOrderExcess\%, because the first-order
+scheme cannot resolve the boundary layer on this mesh
+(\code{studies/verify/naca0012\_m015\_laminar\_re5000\_o1}).
 
 \subsection{Limiter and positivity}
-The default limiter is Venkatakrishnan's,
+The default limiter is Venkatakrishnan's~\cite{venkat},
 \begin{equation}
   \phi=\min_{f\in\partial c}\frac{1}{\Delta^{-}}
   \frac{(\Delta^{+2}+\epsilon^{2})\Delta^{-}+2\Delta^{-2}\Delta^{+}}
@@ -419,7 +427,7 @@ $\epsilon^{2}=(Kh_c)^{3}\,s_v^{2}$ with $h_c=\sqrt{V_c}$, $K=5$ by default and
 $s_v$ a freestream reference magnitude of variable $v$; the extra $s_v^2$ makes
 $\epsilon^2$ dimensionally consistent with $\Delta^{\pm 2}$, which the usual
 form implicitly assumes by working with $O(1)$ variables. Barth--Jespersen
-limiting ($\phi=\min(1,\Delta^{+}/\Delta^{-})$) is available with
+limiting~\cite{barth} ($\phi=\min(1,\Delta^{+}/\Delta^{-})$) is available with
 \code{--limiter barth}, and \code{--limiter none} disables limiting for
 verification purposes.
 
@@ -434,7 +442,7 @@ Both counters are reported.
 Three approximate Riemann solvers are implemented in
 \code{src/physics/FluxInviscid.hpp}.
 
-\paragraph{Roe with Harten--Yee entropy fix.}
+\paragraph{Roe with Harten--Yee entropy fix~\cite{roe1981,hartenyee}.}
 The Roe-averaged state is formed with the usual $\sqrt{\rho}$ weighting, the
 jump is decomposed into the four waves
 \begin{equation}
@@ -451,7 +459,8 @@ $\delta=\varepsilon(|u_n|+a)$ with $\varepsilon=0.1$, is applied to the two
 acoustic (genuinely nonlinear) fields only, not to the linearly degenerate
 entropy and shear waves.
 
-\paragraph{HLLC.} Wave speeds use the Einfeldt--Batten estimate
+\paragraph{HLLC~\cite{toro}.} Wave speeds use the Einfeldt--Batten
+estimate~\cite{batten}
 $S_L=\min(u_{n,L}-a_L,\bar u_n-\bar a)$, $S_R=\max(u_{n,R}+a_R,\bar u_n+\bar a)$
 with the Roe average for the bar quantities, and the contact speed follows from
 the normal-momentum balance.
@@ -550,6 +559,29 @@ exactly zero velocity and zero Mach number; the adjacent cell-centre values are
 written separately to \code{surface\_cellcenter.csv} so that the two can never
 be confused.
 
+\paragraph{Wall stress.} At a steady no-slip wall the viscous traction is
+\emph{purely tangential}, and the solver builds it that way rather than
+assembling it from the general face-gradient formula. The reason is exact: with
+$\mathbf{u}=\mathbf{0}$ everywhere on the wall, the tangential derivative of the
+tangential velocity vanishes, and continuity
+$\rho\,\nabla\!\cdot\!\mathbf{u}+\mathbf{u}\cdot\nabla\rho=0$ with
+$\mathbf{u}=\mathbf{0}$ gives $\nabla\!\cdot\!\mathbf{u}=0$ there. In wall
+coordinates that leaves $\tau_{nn}=\tau_{tt}=0$ and only
+\begin{equation}
+  \boldsymbol{\tau}\cdot\hat{\mathbf{n}}
+   =\mu\frac{\partial u_t}{\partial n}\hat{\mathbf{t}}
+   =-\frac{\mu}{d_n}\,\mathbf{u}_{t,c},
+  \qquad d_n=(\mathbf{x}_f-\mathbf{x}_c)\cdot\hat{\mathbf{n}},
+  \label{eq:wallstress}
+\end{equation}
+with $\mathbf{u}_{t,c}$ the tangential cell-centre velocity. Assembling the same
+quantity from the general formula instead lets the tangential part of the
+cell-centre least-squares gradient leak into the discrete
+$\nabla\!\cdot\!\mathbf{u}$, and on cells whose aspect ratio reaches $10^{4}$
+that leakage is not small: it produced a spurious normal traction worth $67\%$
+of the drag of the Mach 2 laminar case, where the exact value is zero. Farfield
+faces still use the general formula.
+
 \paragraph{Force decomposition.} With $\hat{\mathbf{n}}$ the outward normal of
 the \emph{fluid} domain, the traction the fluid exerts on the body is
 $\mathbf{T}=p\hat{\mathbf{n}}-\boldsymbol{\tau}\cdot\hat{\mathbf{n}}$. The
@@ -616,7 +648,9 @@ $\mathbf{U}_j+\Delta\mathbf{U}_j$ is not a physical state. The system is then
 relaxed with symmetric Gauss--Seidel sweeps (forward followed by backward) over
 the rank-local cells, which are renumbered with reverse Cuthill--McKee inside
 each partition to shorten the dependency chains. This is the classical
-Yoon--Jameson LU-SGS in matrix-free form.
+Yoon--Jameson LU-SGS~\cite{yoonjameson} in matrix-free form; the spectral-radius
+estimates and the local time step follow the standard forms collected by
+Blazek~\cite{blazek}.
 
 Local pseudo-time steps come from the same spectral radii,
 \begin{equation}
@@ -640,7 +674,8 @@ written to \code{surface.csv}, \code{field\_final.vtu} and
 \code{restart\_final.bin}.
 
 \subsection{Transient path: dual-time BDF2}
-The Reynolds 200 cylinder uses a genuine two-level loop. The outer loop advances
+The Reynolds 200 cylinder uses a genuine two-level dual-time
+loop~\cite{jameson1991}. The outer loop advances
 physical time with
 \begin{equation}
   \mathbf{R}^{*}(\mathbf{U}^{n+1})
@@ -700,12 +735,28 @@ loosening the computation:
   degenerates into a slow pseudo-time march and needs $\sim250$ iterations per
   physical step. Raising the pseudo-time CFL changes only the convergence
   \emph{rate} of the inner problem, never its converged solution.
-  \Cref{tab:cflstudy} demonstrates this: over the same 50 physical steps,
-  pseudo-CFL $1$, $10$, $30$ and $100$ give $C_D$ agreeing to five digits, and
-  the production setting (CFL 30 with a ten-times stricter inner target
-  $10^{-4}$) is closer to the fully converged dual-time answer than the literal
-  supplied setting is, at a quarter of the cost. The physical time step
-  ($\Delta t=0.01$), the final time ($t_f=300$), the inner-iteration bounds
+  \Cref{tab:cflstudy} separates the two effects. At the \emph{supplied} inner
+  target of $10^{-3}$, raising the pseudo-CFL from 1 to 100 changes $C_D$ by
+  \cflSpreadAtLooseTarget\% and the cost by an order of magnitude: a relative
+  reduction of the first inner residual does not by itself pin the answer, so
+  the supplied target leaves a visible dual-time error. Tightening the target to
+  $10^{-4}$ removes almost all of that spread --- pseudo-CFL 30 and 100 then
+  agree to \cflSpreadAtTightTarget{} --- and $10^{-5}$ removes the rest. Measured
+  against that most tightly converged row, the literal supplied setting is
+  \cflSuppliedDeviation\% off and the production setting
+  \cflProductionDeviation\% off, while costing \cflSuppliedWall\,s against
+  \cflProductionWall\,s and \cflSuppliedInner{} against \cflProductionInner{}
+  inner iterations per physical step. As an
+  independent check on a much longer interval, running the case to
+  $t=\tReTwoHundredCrosscheck$ with the literal supplied controls gives
+  $C_D=\cdReTwoHundredSupplied$ against $\cdReTwoHundredProduction$ with the
+  production controls --- a relative difference of
+  \cdReTwoHundredSettingsDiff{} --- while taking
+  \wallReTwoHundredSupplied\,s instead of \wallReTwoHundredProduction\,s and
+  \innerReTwoHundredSupplied{} instead of \innerReTwoHundredProduction{} inner
+  iterations per physical step
+  (\code{studies/verify/cylinder\_m010\_laminar\_re200\_*}). The physical time
+  step ($\Delta t=0.01$), the final time ($t_f=300$), the inner-iteration bounds
   ($5$--$1000$) and the frozen-history rule are all exactly as supplied.
 \end{enumerate}
 
@@ -729,7 +780,7 @@ is further from the converged dual-time answer than the production setting
 
 \subsection{Preprocessing and distribution}
 Rank 0 reads the CGNS file, builds the face topology and the cell adjacency
-(dual) graph in CSR form, and calls \code{METIS\_PartGraphKway} with
+(dual) graph in CSR form, and calls \code{METIS\_PartGraphKway}~\cite{karypis} with
 \code{METIS\_OBJTYPE\_CUT}, contiguity requested and a fixed seed, so the
 partition is deterministic and reproducible. The cells of each part are then
 renumbered with reverse Cuthill--McKee. For every rank $r$ the preprocessing
@@ -804,7 +855,8 @@ least-squares reconstruction is exact for linear data, which is the algebraic
 prerequisite for second-order accuracy.
 
 \subsection{Order of accuracy}
-The formal order is measured with the method of manufactured solutions on a
+The formal order is measured with the method of manufactured
+solutions~\cite{roache} on a
 sequence of internally generated meshes of $[0,1]^2$. Each mesh mixes
 quadrilaterals and triangles in a chequerboard pattern and is a smooth analytic
 distortion of a Cartesian grid, so it is genuinely unstructured and non-uniform.
@@ -839,8 +891,12 @@ $\mathcal{O}(h)$ and $\mathcal{O}(h^{2})$ reference slopes.}
 \Cref{tab:mms} and \cref{fig:mms} give the result. The unlimited second-order
 scheme converges at order \mmsOrderSecond, the same scheme with the
 Venkatakrishnan limiter active at \mmsOrderSecondLimited, and the first-order
-scheme at \mmsOrderFirst. The manufactured field is smooth, so the limiter is
-close to inactive and the two second-order variants agree; this is exactly what
+scheme at \mmsOrderFirst. The second-order figure exceeds two: on a smoothly
+mapped mesh with a smooth solution the leading truncation terms partially
+cancel, and finite-volume schemes are known to superconverge in that situation,
+so the measurement should be read as ``at least second order'' rather than as a
+sharp exponent. The manufactured field is smooth, so the limiter is close to
+inactive and the two second-order variants agree; this is exactly what
 a well-behaved limiter should do, and it is direct evidence that the limiter is
 not degrading the scheme in smooth regions on meshes of this resolution. On a
 mesh fine enough for $\epsilon^{2}=(Kh)^{3}$ to fall below
@@ -852,7 +908,7 @@ reconstruction, and it is why the constant $K$ matters
 For completeness the truncation error of the residual operator is also reported
 in \code{verification.json}. On non-uniform unstructured meshes it converges
 more slowly than the solution error --- the classical supraconvergence
-behaviour of finite-volume schemes --- so the solution-error study above, not
+behaviour of finite-volume schemes~\cite{supraconv} --- so the solution-error study above, not
 the truncation error, is the meaningful measure of the formal order.
 
 \subsection{Flux-scheme cross-check}
@@ -891,6 +947,10 @@ global id; this is an output-time operation and does not violate the
 no-replication requirement during iterations. The restart file stores the
 conservative state (and, for transient runs, both BDF2 history levels) in global
 cell order, so a run can be restarted on a different number of ranks.
+\code{scripts/run\_verify\_extra.sh} exercises exactly that: the converged
+$M_\infty=0.15$ inviscid case is written on 8 ranks and reloaded on 4, and the
+force coefficients recomputed from the reloaded state differ from the originals
+by \restartMaxDifference{} (\code{studies/restart/restart\_check.json}).
 
 \code{report/sanity\_checks.json} is produced by \code{tools/sanity\_checks.py}
 and contains \sanityTotalChecks{} checks over \sanityCases{} cases:
@@ -906,6 +966,15 @@ entries in the figure manifest. \sanityFailures{} checks fail.
 \code{report/figure\_manifest.csv} maps every figure to its case, type, plotted
 variable and source data file; \code{report/run\_manifest.md} lists the exact
 command, rank count, step count, wall time and status of every submitted run.
+
+Two conventions in \code{metadata.json} are worth stating explicitly.
+\code{git\_revision} is the repository revision captured when CMake was
+configured, not necessarily the revision of the final commit. The effective
+pseudo-time CFL of a run is recorded separately from the case-file value
+(\code{cfl\_scale}, \code{effective\_cfl\_initial}, \code{effective\_cfl\_max}),
+so a run that deviates from the case schedule is visible in the metadata and not
+only in the recorded command line; likewise \code{limiter\_freeze\_step} records
+the step actually used, alongside the command-line option that produced it.
 
 \subsection{Build and run commands}
 The solver is built and run with the following commands; \code{CFD\_EXTERNALS\_ROOT}
@@ -1033,7 +1102,7 @@ the two surfaces (\cref{fig:naca080}). The maximum Mach number in the field is
 $1.29$. The computed $C_D=\cdNacaZeroZeroOneTwoMZeroEightZeroInviscid$ is
 entirely wave drag --- there is no viscosity and, at zero incidence, no induced
 drag --- and is of the magnitude reported by Euler solutions of this
-configuration. Being a near-critical condition, the pocket length and hence the
+configuration~\cite{agard}. Being a near-critical condition, the pocket length and hence the
 wave drag are more sensitive to mesh and scheme than the subsonic case.
 
 \paragraph{$M_\infty=2.0$.} A detached bow shock stands ahead of the blunt
@@ -1111,13 +1180,39 @@ manifest.}
 
 The viscous aerofoil cases use the no-slip adiabatic wall on \code{bc-4} and
 constant viscosity from \cref{eq:mu}, $\mu=2\times10^{-4}$. At $Re=5000$ the
-laminar boundary layer is thick and, at zero incidence, separates near the
-trailing edge; the skin-friction distributions in
-\cref{fig:naca015v,fig:naca080v,fig:naca200v} show $C_f$ falling from its
-leading-edge peak and approaching (or crossing) zero towards the trailing edge.
+laminar boundary layer is thick and the three cases behave quite differently.
+
+\begin{description}
+\item[$M_\infty=0.15$] is the cleanest check. The computed skin friction matches
+  the Blasius flat-plate value where the pressure gradient is weak
+  ($C_f=0.0171$ at $x/c=0.3$ against $0.664/\sqrt{Re_x}=0.0171$), falls below it
+  under the adverse gradient aft of maximum thickness, and crosses zero at
+  $x/c\approx0.91$: laminar separation just ahead of the trailing edge, which is
+  what is expected at this Reynolds number. Upper and lower surfaces agree to
+  four digits.
+\item[$M_\infty=0.8$] never becomes supersonic \emph{on the surface}: the
+  minimum $C_p$ is $-0.41$ against the sonic value $C_p^*=-0.435$. The boundary
+  layer displaces the flow enough that the small supersonic region
+  ($M_{\max}=1.03$, 341 cells) sits off the wall rather than on it, and the
+  boundary layer separates at $x/c\approx0.53$. Compare the inviscid case at the
+  same Mach number, which has a half-chord supersonic pocket reaching $M=1.26$
+  on the surface: this is a genuine viscous--inviscid interaction, not a mesh
+  artefact.
+\item[$M_\infty=2.0$] is in the strong viscous-interaction regime. At $x/c=0.5$
+  the boundary layer is about $0.08$ chords thick, comparable to the local
+  half-thickness of the section itself, so the effective body is markedly blunter
+  than the aerofoil. The consequence is visible in the force split: the pressure
+  drag rises from $\cdNacaZeroZeroOneTwoMTwoZeroZeroInviscid{}$ in the inviscid
+  case to $0.0967$ here, on top of a skin-friction drag of $0.0413$.
+\end{description}
+
 Reported wall rows have exactly zero velocity, as required, while the adjacent
 cell-centre velocities in \code{surface\_cellcenter.csv} are finite --- the two
-are never conflated.
+are never conflated. \Cref{fig:nacavort} compares the vorticity fields of the
+three cases, which is the clearest single view of how the boundary layer and
+wake change with Mach number. Velocity-magnitude, wide-view and partition plots
+of every case are also generated and registered in the figure manifest, although
+they are not all reproduced here.
 
 \begin{figure}[htbp]
 \centering
@@ -1139,9 +1234,12 @@ skin friction $C_f$, (d) Mach number, (e) pressure.}
 \begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_laminar_re5000_surface_cp.png}\caption{}\end{subfigure}
 \begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_laminar_re5000_mach.png}\caption{}\end{subfigure}
 \begin{subfigure}{0.49\textwidth}\fig[\linewidth]{naca0012_m080_laminar_re5000_pressure.png}\caption{}\end{subfigure}
-\caption{NACA0012, $M_\infty=0.8$, laminar $Re=5000$: shock--boundary-layer
-interaction. (a) residual history, (b) force history, (c) $C_p$ and $C_f$,
-(d) Mach number, (e) pressure.}
+\caption{NACA0012, $M_\infty=0.8$, laminar $Re=5000$. (a) residual history,
+(b) force history, (c) $C_p$ and $C_f$, (d) Mach number, (e) pressure. Unlike
+the inviscid case at the same Mach number, the surface never becomes
+supersonic: the thick laminar boundary layer displaces the flow so that the
+small supersonic region ($M_{\max}=1.03$) sits off the wall, and the boundary
+layer separates at $x/c\approx0.53$ under the resulting adverse gradient.}
 \label{fig:naca080v}
 \end{figure}
 
@@ -1157,19 +1255,34 @@ interaction. (a) residual history, (b) force history, (c) $C_p$ and $C_f$,
 \label{fig:naca200v}
 \end{figure}
 
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.32\textwidth}\fig{naca0012_m015_laminar_re5000_vorticity.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.32\textwidth}\fig{naca0012_m080_laminar_re5000_vorticity.png}\caption{}\end{subfigure}
+\begin{subfigure}{0.32\textwidth}\fig{naca0012_m200_laminar_re5000_vorticity.png}\caption{}\end{subfigure}
+\caption{Vorticity $\omega_z L_{\mathrm{ref}}/U_\infty$ of the three laminar
+aerofoil cases, clipped to $[-20,20]$: (a) $M_\infty=0.15$, (b) $M_\infty=0.8$,
+(c) $M_\infty=2.0$. The two boundary layers of opposite sign leave the trailing
+edge and merge into the wake; the wake is thickest at $M_\infty=0.8$, where the
+shock separates the boundary layer at mid-chord, and thinnest at $M_\infty=2.0$.
+Source: \code{field\_final.vtu} of each case.}
+\label{fig:nacavort}
+\end{figure}
+
 \clearpage
 \subsection{Circular cylinder, $Re=20$}
 \label{sec:cyl20}
 
 This is the cleanest quantitative validation in the set, because the
 low-Reynolds cylinder is a classical reference problem with well-established
-reference values. Every quantity below is read from
+reference values~\cite{dennischang,tritton}. Every quantity below is read from
 \code{results/cylinder\_m010\_laminar\_re20/surface.csv} and \code{forces.csv}.
 
 \begin{table}[htbp]
 \centering
 \caption{Circular cylinder at $Re=20$: computed quantities against accepted
-values from the steady low-Reynolds cylinder literature.}
+values from the steady low-Reynolds cylinder
+literature~\cite{dennischang,tritton}.}
 \label{tab:cyl20}
 \begin{tabular}{lrl}
 \toprule
@@ -1229,12 +1342,33 @@ Analysis over the second half of the record ($t\in[150,300]$, performed by
 \stFft{} (spectral peak) and \stZc{} (mean of \sheddingPeriods{} lift
 up-crossing intervals), i.e.\ a Strouhal number $St=fD/U_\infty=\stFft$,
 against the accepted experimental and numerical value of $0.19$--$0.20$ at
-$Re=200$. The mean drag is $C_D=\meanCdReTwoHundred$ (accepted
-$1.32$--$1.40$), split into $C_{D,p}=\meanPressureDragReTwoHundred$ and
+$Re=200$~\cite{williamson,henderson}. The mean drag is $C_D=\meanCdReTwoHundred$ (accepted
+$1.32$--$1.40$~\cite{henderson,williamson}), split into $C_{D,p}=\meanPressureDragReTwoHundred$ and
 $C_{D,f}=\meanViscousDragReTwoHundred$, and the lift oscillates with amplitude
 $\clAmpReTwoHundred$ (RMS $\clRmsReTwoHundred$) against an accepted amplitude of
 $0.6$--$0.7$. The drag oscillates at twice the lift frequency with amplitude
 $\cdAmpReTwoHundred$, as it must for a symmetric body.
+
+\begin{table}[htbp]
+\centering
+\caption{Circular cylinder at $Re=200$: computed post-transient quantities,
+averaged over $t\in[150,300]$, against accepted values for the two-dimensional
+laminar vortex street~\cite{williamson,henderson}. Source:
+\code{report/shedding\_analysis.json}, computed from
+\code{results/cylinder\_m010\_laminar\_re200/forces.csv}.}
+\label{tab:re200}
+\gtable{tab_re200}
+\end{table}
+
+\Cref{tab:re200} collects the comparison. The Strouhal number is within the
+accepted band; the mean drag and the lift amplitude sit a few percent below it.
+Three effects contribute in that direction and none of them is a defect of the
+scheme: the reference values are for incompressible flow while these
+computations are at $M_\infty=0.1$, which lowers the drag slightly; the upwind
+dissipation of HLLC is not low-Mach preconditioned (\cref{sec:limitations}), so
+it is larger than it would be at the same cell size in an incompressible solver;
+and the supplied mesh coarsens quickly downstream, so the shed vortices lose
+strength as they convect. The deficit is reported rather than tuned away.
 
 The post-transient force records and the lift spectrum used for this analysis
 are shown in \cref{fig:cyl200shed}; the wake structure at the final time is
@@ -1288,12 +1422,19 @@ ranks, so the $np=8$ requirement is satisfied for both geometries by the
 submitted results themselves; the rank study is an additional set of runs stored
 in \code{studies/mpi/}.
 
-Force coefficients agree across rank counts to a relative difference of order
-$10^{-3}$ or better on $C_D$, which is the level of the iterative convergence
-tolerance rather than a partition effect: the residual assembly is
-partition-independent by construction (\cref{sec:mpi}), and the only
-rank-dependence is the lagged coupling of the LU-SGS sweeps across rank
+Force coefficients agree closely across rank counts. For the cylinder the
+relative difference in $C_D$ against the single-rank run is at most
+$2.4\times10^{-5}$; for the aerofoil it reaches $5.6\times10^{-3}$, but that is a
+relative measure of a drag coefficient of $10^{-3}$, so the \emph{absolute}
+disagreement is below $6\times10^{-6}$ --- far smaller than the
+$5\times10^{-5}$ force tolerance at which the runs were stopped. This is the
+level of the iterative convergence criterion rather than a partition effect: the
+residual assembly is partition-independent by construction (\cref{sec:mpi}), and
+the only rank-dependence is the lagged coupling of the LU-SGS sweeps across rank
 boundaries, which changes the path to the steady state but not the state itself.
+Load balance stays within $1.5\%$ of perfect and the METIS edge cut grows
+roughly linearly with the rank count, as expected for a two-dimensional
+partition.
 
 \begin{table}[htbp]
 \centering
@@ -1342,6 +1483,60 @@ in wall-clock time than $np=4$ while performing the same work. Open MPI is also
 launched with \code{--bind-to none}, because its default core pinning collapses
 performance under such a quota. This is a property of the execution environment,
 not of the solver, and is stated here rather than hidden.
+
+\section{Code Organisation and Extensibility}
+\label{sec:extensibility}
+
+The solver is about 6300 lines of C++ split into seven modules with one
+responsibility each: \code{core/} (types, case-file parsing and validation,
+logging), \code{mesh/} (CGNS import, global mesh, METIS partitioner,
+distributor, rank-local mesh), \code{parallel/} (halo exchange and reductions),
+\code{physics/} (equation of state, transport, Riemann solvers, viscous flux,
+boundary conditions), \code{numerics/} (gradients, limiters, residual assembly,
+LU-SGS, the steady and transient drivers, verification), \code{io/} and
+\code{post/}. No file exceeds 660 lines. The Python post-processing is a further
+2000 lines under \code{tools/}, none of which participates in the solve.
+
+The seams that matter for the extensions the task asks about are:
+
+\begin{description}
+\item[Dimension and variable count.] \code{kDim} and \code{kNVar} are the only
+  place where ``two-dimensional, four equations'' is written down
+  (\code{src/core/Types.hpp}). The partitioner, distributor, halo exchange,
+  least-squares stencils, limiter and implicit solver are all written against
+  them and against a general polygonal cell, not against a fixed cell type. What
+  a 3-D extension genuinely requires is a polyhedral face/cell topology in
+  \code{GlobalMesh}/\code{LocalMesh} and the 3-D CGNS element mapping; the
+  numerics interfaces above them do not change. That is a real piece of work,
+  not a recompile, and the report does not claim otherwise.
+\item[Equation of state.] Everything thermodynamic goes through the small
+  \code{PerfectGas} interface (\code{pressure}, \code{soundSpeed},
+  \code{temperature}, \code{toPrimitive}, \code{toConservative},
+  \code{normalFlux}, \code{totalEnthalpy}). A real-gas or Cantera-backed model
+  is a sibling class with the same members; Cantera is already available in the
+  environment and linked-in support would not touch the residual assembly.
+\item[Boundary conditions.] Each type is two pure functions --- the exterior
+  state for the Riemann solver and the physical boundary value --- selected by
+  an enumerator parsed from the case file. Adding an isothermal wall, a subsonic
+  inlet or a pressure outlet is one enumerator plus one branch in each function,
+  with no change anywhere else.
+\item[Transport and turbulence.] \code{TransportModel} already carries constant
+  and Sutherland laws behind a single \code{viscosity(T)} call. A RANS eddy
+  viscosity enters at exactly that point plus one extra transported variable,
+  which is what \code{kNVar} controls.
+\item[Fluxes and limiters.] The Riemann solver and the limiter are selected by
+  enumerator at run time and are pure functions of their arguments
+  (\code{FluxInviscid.hpp}, \code{Limiter.hpp}), which is why the flux
+  cross-check of \cref{tab:fluxcompare} and the limiter comparison of
+  \cref{tab:mms} are single command-line switches rather than rebuilds.
+\end{description}
+
+Nothing in \code{src/} branches on a case identifier, a mesh file name or a
+boundary-family name: a repository-wide search for the eight case ids, the two
+mesh file names and the four family names of the supplied meshes returns matches
+only in comments and in the \code{case\_id} metadata label. Case differences
+come exclusively from the JSON inputs and from the documented command-line
+options listed in \cref{tab:numerics}.
 
 \section{Visualisation and Plot-Style Conventions}
 \label{sec:vis}
@@ -1407,13 +1602,23 @@ and the two agree closely on every case where Roe converges.
 \paragraph{Residual limit cycle on the shock cases.} As described in
 \cref{sec:time}, the non-differentiable $\min/\max$ stencil of the limiter drives
 the shock-containing cases into a bounded residual limit cycle. Freezing the
-limiter removes it at Mach 0.8 (\cref{fig:limiter_study}). At Mach 2 the run
+limiter removes it at Mach 0.8 (\cref{fig:limiter_study}): the frozen run reaches
+the requested four orders within a few steps of the freeze point, whereas the
+unfrozen run stalls at $1.3\times10^{-3}$ of its initial residual for the whole
+20000-step budget. The two differ by $1.4\%$ in $C_D$ ($0.008543$ frozen against
+$0.008664$ unfrozen), which is a direct measure of how much the limit cycle
+biases the unconverged answer; the frozen value is the converged one and is what
+\cref{tab:forces} reports. At Mach 2 the run
 reaches the requested three-order reduction, and the stationarity test accepts
 it, while the solution is still inside the cycle: over the acceptance window the
-drag scatter is about $0.2\%$ of $C_D$ with no drift. That $0.2\%$ --- not the
-five digits printed in \cref{tab:forces} --- is the honest uncertainty of the
-Mach 2 drag on this mesh, and it is the reason the force-stationarity tolerance
-is $0.3\%$ rather than tighter. A differentiable limiter (an MLP-$u2$ variant or
+drag scatter is about $0.2\%$ of $C_D$ with no drift. Continuing the same case
+without limiter freezing to the full 20000-step budget
+(\code{studies/verify/naca0012\_m200\_inviscid\_nofreeze}) leaves $C_D$ at
+$0.08809$ against $0.08799$ for the accepted production run --- a $0.12\%$
+difference, inside that band. That few tenths of a percent --- not the five
+digits printed in \cref{tab:forces} --- is the honest uncertainty of the Mach 2
+drag on this mesh, and it is the reason the force-stationarity tolerance is
+$0.3\%$ rather than tighter. A differentiable limiter (an MLP-$u2$ variant or
 a smooth pressure-based sensor) would be the proper fix.
 
 \begin{figure}[htbp]
@@ -1432,7 +1637,7 @@ steps. Source: \code{studies/verify/naca0012\_m080\_inviscid\_nofreeze/} and
 measures \mmsOrderSecondLimited{} with the limiter active against
 \mmsOrderSecond{} without it, so at these resolutions the Venkatakrishnan
 limiter is not costing accuracy in smooth flow. That is not guaranteed to hold
-under further refinement: $\epsilon^{2}=(Kh)^{3}$ vanishes faster than
+under further refinement: $\epsilon^{2}=(Kh_c)^{3}s_v^{2}$ vanishes faster than
 $\Delta^{\pm2}\sim h^{2}$, so on a sufficiently fine mesh the limiter degenerates
 towards Barth--Jespersen and the formal order drops. Raising $K$ postpones this
 at the cost of shock robustness; $K=5$ is the compromise used throughout, and no
@@ -1473,10 +1678,66 @@ statistically periodic results for all \numCases{} required benchmark cases with
 discretisation order of \mmsOrderSecond{} for the unlimited second-order scheme
 and machine-level freestream preservation and linear exactness on the benchmark
 mesh; the two quantitative validation targets available in the literature ---
-$C_D\approx2.0$--$2.1$ for the $Re=20$ cylinder and
-$St\approx0.19$--$0.20$, $C_D\approx1.32$--$1.40$ for the $Re=200$ vortex street
---- are both reproduced. The principal weaknesses, documented above, are the
+$C_D\approx2.0$--$2.1$ for the $Re=20$ cylinder~\cite{dennischang,tritton} and
+$St\approx0.19$--$0.20$, $C_D\approx1.32$--$1.40$ for the $Re=200$ vortex
+street~\cite{williamson,henderson} --- are both reproduced. The principal weaknesses, documented above, are the
 limiter-induced limit cycle at Mach 2 and the absence of low-Mach
 preconditioning.
+
+
+\begin{thebibliography}{99}
+\bibitem{roe1981} P.~L. Roe.
+  Approximate Riemann solvers, parameter vectors, and difference schemes.
+  \emph{Journal of Computational Physics}, 43(2):357--372, 1981.
+\bibitem{hartenyee} A.~Harten and H.~C. Yee.
+  Implicit TVD schemes for hyperbolic conservation laws in curvilinear
+  coordinates. \emph{AIAA Journal}, 25(2):266--274, 1987.
+\bibitem{toro} E.~F. Toro, M.~Spruce and W.~Speares.
+  Restoration of the contact surface in the HLL-Riemann solver.
+  \emph{Shock Waves}, 4(1):25--34, 1994.
+\bibitem{batten} P.~Batten, N.~Clarke, C.~Lambert and D.~M. Causon.
+  On the choice of wavespeeds for the HLLC Riemann solver.
+  \emph{SIAM Journal on Scientific Computing}, 18(6):1553--1570, 1997.
+\bibitem{barth} T.~J. Barth and D.~C. Jespersen.
+  The design and application of upwind schemes on unstructured meshes.
+  AIAA Paper 89-0366, 1989.
+\bibitem{venkat} V.~Venkatakrishnan.
+  Convergence to steady state solutions of the Euler equations on unstructured
+  grids with limiters. \emph{Journal of Computational Physics},
+  118(1):120--130, 1995.
+\bibitem{yoonjameson} S.~Yoon and A.~Jameson.
+  Lower-upper symmetric-Gauss-Seidel method for the Euler and Navier-Stokes
+  equations. \emph{AIAA Journal}, 26(9):1025--1026, 1988.
+\bibitem{jameson1991} A.~Jameson.
+  Time dependent calculations using multigrid, with applications to unsteady
+  flows past airfoils and wings. AIAA Paper 91-1596, 1991.
+\bibitem{blazek} J.~Blazek.
+  \emph{Computational Fluid Dynamics: Principles and Applications}.
+  Butterworth-Heinemann, 3rd edition, 2015.
+\bibitem{roache} P.~J. Roache.
+  \emph{Verification and Validation in Computational Science and Engineering}.
+  Hermosa Publishers, 1998.
+\bibitem{karypis} G.~Karypis and V.~Kumar.
+  A fast and high quality multilevel scheme for partitioning irregular graphs.
+  \emph{SIAM Journal on Scientific Computing}, 20(1):359--392, 1998.
+\bibitem{dennischang} S.~C.~R. Dennis and G.-Z. Chang.
+  Numerical solutions for steady flow past a circular cylinder at Reynolds
+  numbers up to 100. \emph{Journal of Fluid Mechanics}, 42(3):471--489, 1970.
+\bibitem{tritton} D.~J. Tritton.
+  Experiments on the flow past a circular cylinder at low Reynolds numbers.
+  \emph{Journal of Fluid Mechanics}, 6(4):547--567, 1959.
+\bibitem{williamson} C.~H.~K. Williamson.
+  Vortex dynamics in the cylinder wake.
+  \emph{Annual Review of Fluid Mechanics}, 28:477--539, 1996.
+\bibitem{henderson} R.~D. Henderson.
+  Details of the drag curve near the onset of vortex shedding.
+  \emph{Physics of Fluids}, 7(9):2102--2104, 1995.
+\bibitem{agard} AGARD.
+  Test cases for inviscid flow field methods. AGARD Advisory Report AR-211,
+  1985.
+\bibitem{supraconv} B.~Diskin and J.~L. Thomas.
+  Accuracy of gradient reconstruction on grids with high aspect ratio.
+  NIA Report 2008-12, National Institute of Aerospace, 2008.
+\end{thebibliography}
 
 \end{document}

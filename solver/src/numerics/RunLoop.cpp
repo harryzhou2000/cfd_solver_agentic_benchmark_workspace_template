@@ -83,21 +83,25 @@ struct Stationarity {
 // drag of a symmetric aerofoil at zero incidence is a small numerical residue
 // of d'Alembert's paradox (its exact value is zero), so a purely relative
 // criterion would demand a precision that carries no physical meaning.
+// Two-window trend test.  The mean over the last window is compared with the
+// mean over the window before it: averaging removes the limit-cycle noise that
+// the shock cases settle into, while still detecting a slow monotone drift --
+// which is the failure mode this test exists to catch, because a viscous case
+// can meet a relative residual target thousands of iterations before its
+// boundary layer has settled.  The scatter is reported and bounded separately
+// and is allowed to be larger, since a bounded oscillation is acceptable.
 Stationarity forceStationarity(const std::vector<Real>& h, Real rel_tol, Real abs_floor) {
   Stationarity st;
   const std::size_t n = h.size();
-  if (n < 50) return st;   // too little history to judge stationarity at all
-  st.window = std::max<std::size_t>(std::min<std::size_t>(20, n / 3), n / 20);
-  if (n <= st.window + 1) return st;
-  const Real mean = meanOf(h, n - st.window, n);
-  const Real tol = std::max(rel_tol * std::abs(mean), abs_floor);
-  st.drift = std::abs(h[n - 1] - h[n - 1 - st.window]);
-  st.scatter = rmsAbout(h, n - st.window, n, mean);
+  st.window = std::max<std::size_t>(50, n / 10);
+  if (n < 3 * st.window) return st;   // too little history to judge a trend
+  const Real mean_recent = meanOf(h, n - st.window, n);
+  const Real mean_before = meanOf(h, n - 2 * st.window, n - st.window);
+  const Real tol = std::max(rel_tol * std::abs(mean_recent), abs_floor);
+  st.drift = std::abs(mean_recent - mean_before);
+  st.scatter = rmsAbout(h, n - st.window, n, mean_recent);
   st.tolerance = tol;
-  // The drift measures a trend and the scatter measures noise; a bounded limit
-  // cycle is acceptable as long as it is not drifting, so the scatter is
-  // allowed to be half again as large as the drift tolerance.
-  st.stationary = (st.drift < tol) && (st.scatter < 1.5 * tol);
+  st.stationary = (st.drift < tol) && (st.scatter < 3.0 * tol);
   return st;
 }
 
@@ -237,10 +241,10 @@ RunResult runSteady(SpatialOperator& op, ImplicitSolver& solver, const std::stri
     out.convergence_status = "converged";
     std::ostringstream os;
     os << "residual reduction target (" << rc.residual_reduction_target
-       << " orders) reached and the drag coefficient is stationary over the last "
-       << stat.window << " steps (drift " << std::scientific << std::setprecision(2)
-       << stat.drift << ", scatter " << stat.scatter << ", tolerance " << stat.tolerance
-       << " in C_D units). CFL safeguard back-offs: " << cfl_backoffs << ".";
+       << " orders) reached and the drag coefficient is stationary: over two "
+          "consecutive windows of " << stat.window << " steps the mean C_D moved by " << std::scientific << std::setprecision(2)
+       << stat.drift << " (window scatter " << stat.scatter << ", tolerance "
+       << stat.tolerance << " in C_D units). CFL safeguard back-offs: " << cfl_backoffs << ".";
     out.notes = os.str();
   } else {
     // max_steps was exhausted: accept the run only if the forces have genuinely

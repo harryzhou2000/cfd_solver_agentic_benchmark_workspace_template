@@ -76,17 +76,29 @@ def load_csv(path):
     return out
 
 
+def sci(x, n=2):
+    """Always-scientific formatter, for quantities that span many decades."""
+    if x is None:
+        return "--"
+    if x == 0:
+        return "0"
+    s = f"{x:.{n}e}"
+    m, e = s.split("e")
+    return rf"${m}\times 10^{{{int(e)}}}$"
+
+
 def fmt(x, n=4):
+    """Fixed-point when that shows at least two significant digits, else
+    scientific.  The switch is tied to the requested number of decimals so a
+    value like 2.4e-3 printed with two decimals does not come out as 0.00."""
     if x is None:
         return "--"
     if isinstance(x, str):
         return esc(x)
     if x == 0:
         return "0"
-    if abs(x) < 1e-3 or abs(x) >= 1e5:
-        s = f"{x:.{n}e}"
-        m, e = s.split("e")
-        return rf"${m}\times 10^{{{int(e)}}}$"
+    if abs(x) < 10.0 ** (-(n - 1)) or abs(x) >= 1e5:
+        return sci(x, max(n, 2))
     return f"{x:.{n}f}"
 
 
@@ -269,9 +281,9 @@ def main():
     if os.path.exists(mpi_csv):
         rows = list(csv.DictReader(open(mpi_csv, newline="")))
         T.append(r"% ---- MPI rank-count study")
-        T.append(r"\begin{tabular}{lrrrrrrrr}")
+        T.append(r"\begin{tabular}{lrrrrrrrrr}")
         T.append(r"\toprule")
-        T.append(r"case & ranks & wall [s] & speed-up & $C_L$ & $C_D$ & "
+        T.append(r"case & ranks & steps & wall [s] & speed-up & $C_L$ & $C_D$ & "
                  r"$\Delta C_D/C_D$ & edge cut & balance\\")
         T.append(r"\midrule")
         last = None
@@ -279,9 +291,11 @@ def main():
             if last is not None and r["case_id"] != last:
                 T.append(r"\midrule")
             last = r["case_id"]
-            T.append(rf"{esc(r['case_id'])} & {r['mpi_ranks']} & {float(r['wall_time_s']):.1f} & "
+            T.append(rf"{esc(r['case_id'])} & {r['mpi_ranks']} & {int(float(r['steps']))} & "
+                     rf"{float(r['wall_time_s']):.1f} & "
                      rf"{float(r['speedup']):.2f} & {float(r['cl']):+.6f} & "
-                     rf"{float(r['cd']):.6f} & {fmt(float(r.get('cd_rel_diff_vs_ref', r.get('cd_rel_diff_vs_np1', 0.0))), 2)} & "
+                     rf"{float(r['cd']):.6f} & "
+                     rf"{sci(float(r.get('cd_rel_diff_vs_ref', 0.0)), 2)} & "
                      rf"{r['edge_cut']} & {float(r['load_balance']):.4f}\\")
         T.append(r"\bottomrule")
         T.append(r"\end{tabular}")
@@ -312,11 +326,41 @@ def main():
                      rf"{float(m2['final_cd']):.6f} & "
                      rf"{float(s2['residual_reduction_orders']):.2f} & {int(s2['final_step'])}\\")
             rel = abs(float(m1['final_cd']) - float(m2['final_cd'])) / max(abs(float(m1['final_cd'])), 1e-30)
-            T.append(rf" & relative $C_D$ difference & & {fmt(rel, 2)} & & \\")
+            T.append(rf" & relative $C_D$ difference & & {sci(rel, 2)} & & \\")
             T.append(r"\midrule")
         T[-1] = r"\bottomrule"
         T.append(r"\end{tabular}")
         flush("flux")
+
+    # ------------------------------------------------------------------ Re200 validation
+    spath0 = os.path.join(args.report, "shedding_analysis.json")
+    if os.path.exists(spath0):
+        sa0 = json.load(open(spath0))
+        T.append(r"% ---- Re 200 vortex street against literature")
+        T.append(r"\begin{tabular}{lrl}")
+        T.append(r"\toprule")
+        T.append(r"quantity & computed & accepted\\")
+        T.append(r"\midrule")
+        rows = [
+            (r"Strouhal number $St=fD/U_\infty$ (spectral peak)",
+             f"{sa0['strouhal_fft']:.4f}", r"$0.19$--$0.20$"),
+            (r"Strouhal number (lift up-crossings)",
+             (f"{sa0['strouhal_zero_crossing']:.4f}"
+              if sa0.get("strouhal_zero_crossing") else "--"), r"$0.19$--$0.20$"),
+            (r"mean drag $\overline{C_D}$", f"{sa0['mean_cd']:.4f}", r"$1.32$--$1.40$"),
+            (r"\quad pressure part", f"{sa0['mean_pressure_drag']:.4f}", r"--"),
+            (r"\quad skin-friction part", f"{sa0['mean_viscous_drag']:.4f}", r"--"),
+            (r"lift amplitude", f"{sa0['cl_amplitude']:.4f}", r"$0.60$--$0.69$"),
+            (r"lift RMS", f"{sa0['cl_rms']:.4f}", r"$0.42$--$0.49$"),
+            (r"drag oscillation amplitude", f"{sa0['cd_amplitude']:.4f}", r"--"),
+            (r"mean lift (symmetry)", f"{sa0['mean_cl']:+.5f}", r"$0$"),
+            (r"shedding cycles analysed", f"{sa0['num_periods_detected']}", r"--"),
+        ]
+        for a, b, c in rows:
+            T.append(rf"{a} & {b} & {c}\\")
+        T.append(r"\bottomrule")
+        T.append(r"\end{tabular}")
+        flush("re200")
 
     # ------------------------------------------------------------------ dual-time CFL study
     cflroot = os.path.join("studies", "cflstudy")
@@ -344,11 +388,41 @@ def main():
                      r"$C_D(t=" + f"{entries[0][5]:g}" + r")$ & $|\Delta C_D|$ vs.\ tightest\\")
             T.append(r"\midrule")
             for cfl, tgt, mean_it, wall, cdv, _t in entries:
-                T.append(rf"{cfl:g} & {fmt(tgt,0)} & {mean_it:.1f} & {wall:.1f} & {cdv:.6f} & "
-                         rf"{fmt(abs(cdv-ref),1)}\\")
+                T.append(rf"{cfl:g} & {sci(tgt,0)} & {mean_it:.1f} & {wall:.1f} & {cdv:.6f} & "
+                         rf"{sci(abs(cdv-ref),2)}\\")
             T.append(r"\bottomrule")
             T.append(r"\end{tabular}")
             flush("cflstudy")
+            byname = {}
+            for d in sorted(os.listdir(cflroot)):
+                mp = os.path.join(cflroot, d, "metadata.json")
+                if os.path.exists(mp):
+                    byname[d] = (json.load(open(mp)),
+                                 json.load(open(os.path.join(cflroot, d, "run_status.json"))),
+                                 load_csv(os.path.join(cflroot, d, "forces.csv")))
+            ref_name = "cfl30_t1em5"
+            if ref_name in byname:
+                cd_ref = float(byname[ref_name][2]["cd"][-1])
+                def dev(name):
+                    return abs(float(byname[name][2]["cd"][-1]) - cd_ref) / abs(cd_ref)
+                if "cfl1_t1em3" in byname and "cfl30_t1em4" in byname:
+                    macro("cflSuppliedDeviation", f"{100 * dev('cfl1_t1em3'):.2f}")
+                    macro("cflProductionDeviation", f"{100 * dev('cfl30_t1em4'):.3f}")
+                    macro("cflSuppliedWall", f"{byname['cfl1_t1em3'][1]['wall_time_seconds']:.1f}")
+                    macro("cflProductionWall",
+                          f"{byname['cfl30_t1em4'][1]['wall_time_seconds']:.1f}")
+                    macro("cflSuppliedInner",
+                          f"{byname['cfl1_t1em3'][0]['observed_mean_inner_iterations']:.0f}")
+                    macro("cflProductionInner",
+                          f"{byname['cfl30_t1em4'][0]['observed_mean_inner_iterations']:.0f}")
+                if "cfl100_t1em3" in byname:
+                    a = float(byname["cfl1_t1em3"][2]["cd"][-1])
+                    b = float(byname["cfl100_t1em3"][2]["cd"][-1])
+                    macro("cflSpreadAtLooseTarget", f"{100 * abs(a - b) / abs(a):.2f}")
+                if "cfl100_t1em4" in byname and "cfl30_t1em4" in byname:
+                    a = float(byname["cfl30_t1em4"][2]["cd"][-1])
+                    b = float(byname["cfl100_t1em4"][2]["cd"][-1])
+                    macro("cflSpreadAtTightTarget", sci(abs(a - b) / abs(a), 1))
 
     # ------------------------------------------------------------------ verification
     vpath = os.path.join(args.report, "verification.json")
@@ -369,7 +443,7 @@ def main():
                     order = (f"{np.log(lv[i-1]['err_l1'] / l['err_l1']) / np.log(lv[i-1]['mean_h'] / l['mean_h']):.2f}")
                 name = label if i == 0 else ""
                 T.append(rf"{name} & {l['num_cells']} & {l['mean_h']:.4f} & "
-                         rf"{fmt(l['err_l1'], 3)} & {fmt(l['err_l2'], 3)} & {order}\\")
+                         rf"{sci(l['err_l1'], 3)} & {sci(l['err_l2'], 3)} & {order}\\")
             T.append(r"\midrule")
         T[-1] = r"\bottomrule"
         T.append(r"\end{tabular}")
@@ -380,9 +454,9 @@ def main():
         macro("truncOrderSecond", f"{v['observed_order_second_order_l1']:.2f}")
         macro("truncOrderFirst", f"{v['observed_order_first_order_l1']:.2f}")
         if "freestream_residual_linf" in v:
-            macro("freestreamResidual", fmt(v["freestream_residual_linf"], 2))
-            macro("linearGradientError", fmt(v["linear_gradient_max_error"], 2))
-            macro("linearReconError", fmt(v["linear_reconstruction_max_error"], 2))
+            macro("freestreamResidual", sci(v["freestream_residual_linf"], 2))
+            macro("linearGradientError", sci(v["linear_gradient_max_error"], 2))
+            macro("linearReconError", sci(v["linear_reconstruction_max_error"], 2))
 
     # ------------------------------------------------------------------ Strouhal
     spath = os.path.join(args.report, "shedding_analysis.json")
@@ -434,6 +508,48 @@ def main():
                     if c["status"]["convergence_status"] == "failed")
         macro("numFailedCases", f"{nfail}")
 
+    # First-order reference run: shows what the linear reconstruction buys.
+    o1 = os.path.join("studies", "verify", "naca0012_m015_laminar_re5000_o1")
+    base = cases.get("naca0012_m015_laminar_re5000")
+    if base is not None and os.path.exists(os.path.join(o1, "metadata.json")):
+        m1 = json.load(open(os.path.join(o1, "metadata.json")))
+        macro("cdFirstOrderLaminar", f"{float(m1['final_cd']):.5f}")
+        macro("cdfFirstOrderLaminar", f"{float(m1['final_viscous_drag']):.5f}")
+        macro("cdpFirstOrderLaminar", f"{float(m1['final_pressure_drag']):.5f}")
+        rel = (float(m1["final_cd"]) - float(base["meta"]["final_cd"])) / \
+            float(base["meta"]["final_cd"])
+        macro("cdFirstOrderExcess", f"{100.0 * rel:.0f}")
+
+    # Re 200 dual-time settings cross-check at the same physical time.
+    a = os.path.join("studies", "verify", "cylinder_m010_laminar_re200_suppliedcfl")
+    b = os.path.join("studies", "verify", "cylinder_m010_laminar_re200_prodcfl20")
+    if os.path.exists(os.path.join(a, "metadata.json")) and \
+            os.path.exists(os.path.join(b, "metadata.json")):
+        ma = json.load(open(os.path.join(a, "metadata.json")))
+        mb = json.load(open(os.path.join(b, "metadata.json")))
+        sa = json.load(open(os.path.join(a, "run_status.json")))
+        sb = json.load(open(os.path.join(b, "run_status.json")))
+        macro("cdReTwoHundredSupplied", f"{float(ma['final_cd']):.6f}")
+        macro("cdReTwoHundredProduction", f"{float(mb['final_cd']):.6f}")
+        macro("cdReTwoHundredSettingsDiff",
+              fmt(abs(float(ma["final_cd"]) - float(mb["final_cd"])) /
+                  abs(float(ma["final_cd"])), 1))
+        macro("wallReTwoHundredSupplied", f"{float(sa['wall_time_seconds']):.0f}")
+        macro("wallReTwoHundredProduction", f"{float(sb['wall_time_seconds']):.0f}")
+        macro("innerReTwoHundredSupplied",
+              f"{float(ma['observed_mean_inner_iterations']):.0f}")
+        macro("innerReTwoHundredProduction",
+              f"{float(mb['observed_mean_inner_iterations']):.0f}")
+        macro("tReTwoHundredCrosscheck", f"{float(sa['final_physical_time']):g}")
+
+    # Restart round trip.
+    rc = os.path.join("studies", "restart", "restart_check.json")
+    if os.path.exists(rc):
+        r = json.load(open(rc))
+        worst = max(v["abs_difference"] for k, v in r.items() if isinstance(v, dict))
+        macro("restartMaxDifference", sci(worst, 1) if worst > 0 else "exactly zero")
+        macro("restartPassed", "yes" if r.get("passed") else "no")
+
     # Sanity-check summary
     sp = os.path.join(args.report, "sanity_checks.json")
     if os.path.exists(sp):
@@ -453,7 +569,7 @@ def main():
     if bad:
         raise SystemExit("generated macro names must be purely alphabetic: " + str(bad[:3]))
     for name in ("runs", "cases", "forces", "numerics", "inner", "partition", "mpi", "mms",
-                 "flux", "cflstudy"):
+                 "flux", "cflstudy", "re200"):
         p = os.path.join(tdir, f"tab_{name}.tex")
         if not os.path.exists(p):
             open(p, "w").write(r"\emph{(data not available)}" + "\n")

@@ -134,7 +134,12 @@ scripts/make_report.sh           # verification, figures, manifests, LaTeX repor
        results/* --report report
 ```
 
-`results/` contains exactly the eight required case directories. Supporting
+`results/` contains exactly the eight required case directories. The transient
+case additionally writes `results/cylinder_m010_laminar_re200/fields/` with the
+snapshot every `write_field_every_time = 1.0` requested by the case file (300
+files, about 330 MB); those are present on disk but are excluded from git
+because they are regenerable intermediate output. The required
+`field_final.vtu` of every case is tracked. Supporting
 runs that are not benchmark deliverables (the MPI rank study and the numerical
 cross-checks) live under `studies/`, so `validate_outputs.py results/*` sees
 only the submitted cases.
