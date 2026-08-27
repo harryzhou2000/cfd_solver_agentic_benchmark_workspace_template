@@ -30,17 +30,46 @@ def pitot_cp(minf=MINF, gamma=GAMMA):
     return (pt2 - 1.0) / (0.5 * gamma * minf * minf)
 
 
+def pitot_cp_rayleigh(minf=MINF, gamma=GAMMA):
+    """Same ceiling from the closed-form Rayleigh pitot formula, as a cross-check.
+
+    p02/p1 = [ (g+1)^2 M^2 / (4 g M^2 - 2(g-1)) ]^(g/(g-1)) * (1 - g + 2 g M^2)/(g+1)
+
+    This is algebraically equivalent to composing the normal-shock jump with the
+    isentropic stagnation relation, but it is a different expression, so agreement
+    between the two is a real check on the arithmetic rather than a restatement.
+    """
+    m2 = minf * minf
+    g = gamma
+    a = ((g + 1.0) ** 2 * m2 / (4.0 * g * m2 - 2.0 * (g - 1.0))) ** (g / (g - 1.0))
+    b = (1.0 - g + 2.0 * g * m2) / (g + 1.0)
+    return (a * b - 1.0) / (0.5 * g * m2)
+
+
+def isentropic_cp0(minf=MINF, gamma=GAMMA):
+    """The WRONG reference for a supersonic blunt body, computed to quantify why."""
+    m2 = minf * minf
+    return ((1.0 + 0.5 * (gamma - 1.0) * m2) ** (gamma / (gamma - 1.0)) - 1.0) / (0.5 * gamma * m2)
+
+
 def main(case_dir):
     rows = [r for r in csv.DictReader(open(case_dir + "/surface.csv"))]
     cp = [(float(r["x"]), float(r["y"]), float(r["cp"])) for r in rows]
     limit = pitot_cp()
+    limit_x = pitot_cp_rayleigh()
+    isen = isentropic_cp0()
     over = [(x, y, c) for x, y, c in cp if c > limit]
     cmax = max(c for _, _, c in cp)
     print("faces                        %d" % len(cp))
-    print("pitot ceiling C_p,max        %.4f" % limit)
+    print("pitot ceiling C_p,max        %.6f" % limit)
+    print("  same via Rayleigh pitot    %.6f  (rel diff %.2e)"
+          % (limit_x, abs(limit - limit_x) / limit))
+    print("isentropic Cp0 (WRONG here)  %.6f  (overstates by %.1f %%)"
+          % (isen, 100.0 * (isen / limit - 1.0)))
     print("observed max C_p             %.4f  (%+.1f %% of ceiling)"
           % (cmax, 100.0 * (cmax / limit - 1.0)))
     print("faces exceeding the ceiling  %d" % len(over))
+    print("faces exceeding isentropic   %d" % len([c for _, _, c in cp if c > isen]))
 
     # Pair upper and lower surface points by x.
     up = sorted([(x, c) for x, y, c in cp if y > 0.0])
