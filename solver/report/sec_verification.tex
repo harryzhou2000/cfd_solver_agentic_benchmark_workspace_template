@@ -95,7 +95,7 @@ probes.
       & $\vConservation$ & $O(\varepsilon)$ \\
     Jacobian product & \cref{eq:jacvec} vs central finite differences
       & $\vJacobianFd$ & $O(\sqrt{\varepsilon})$ \\
-    Slip-wall flux & $\left[0,pn_x,pn_y,0\right]$ exactly
+    Slip-wall flux & zero mass and energy flux (\cref{eq:slipflux})
       & exact & exact \\
     \bottomrule
   \end{tabular}
@@ -103,6 +103,25 @@ probes.
   \footnotesize $^\dagger$Measured in the first-order configuration; see the
   discussion below for why this scope matters.
 \end{table}
+
+The slip-wall row deserves a note, because an earlier version of this table claimed more
+than the code delivers. It asserted the full identity
+$\mathbf{H}^{\mathrm{wall}}=[0,pn_x,pn_y,0]$ as an exactly verified property. Two things
+were wrong with that. First, the identity does not hold exactly in the normal-momentum
+component when the wall-normal velocity is non-zero, for the reason set out at
+\cref{eq:slipflux}. Second, and worse, no test in the suite evaluated the flux at all:
+the unit tests check the ghost \emph{state} --- that it has zero mean normal velocity and
+preserves density, pressure and tangential velocity --- but never form the flux from it.
+A property that was both unverified and untrue was being presented as verified.
+
+What is now claimed and checked is the part that is true and that matters for
+conservation: the mass and energy components of the slip-wall flux are exactly zero, for
+every state probed, which is what guarantees that no mass or energy crosses a slip wall.
+The probe that establishes this links the solver's own library rather than
+reimplementing the flux, so it tests the shipped code
+(\texttt{report/check\_slip\_flux.sh}). Finding this required an adversarial reader to
+attempt the check the text claimed had been done, which is a useful reminder that
+"checked numerically" is itself a claim requiring evidence.
 
 Three of these deserve comment.
 

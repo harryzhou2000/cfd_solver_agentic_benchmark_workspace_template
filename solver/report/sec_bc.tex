@@ -42,15 +42,54 @@ and total energy,
   \label{eq:slipghost}
 \end{equation}
 which is consistent because reflection leaves $|\mathbf{u}|$ unchanged. Feeding
-\cref{eq:slipghost} to the Roe flux gives, for identical left and right
-thermodynamic states, exactly
+\cref{eq:slipghost} to the Roe flux gives
 \begin{equation}
-  \mathbf{H}^{\mathrm{wall}}=\left[0,\ p\,n_x,\ p\,n_y,\ 0\right]^T,
+  \mathbf{H}^{\mathrm{wall}}=\left[0,\ p\,n_x + \varepsilon n_x,\
+  p\,n_y + \varepsilon n_y,\ 0\right]^T,
+  \qquad \varepsilon \to 0 \ \text{ as } u_n\to0,
   \label{eq:slipflux}
 \end{equation}
-i.e.\ zero mass flux, zero energy flux, and a pure pressure force. This identity
-is checked numerically as part of the verification suite
-(\cref{sec:verification}).
+that is, \textbf{exactly} zero mass flux and \textbf{exactly} zero energy flux, with a
+normal force that reduces to the pure pressure force $p\mathbf{n}$ only in the limit of
+vanishing normal velocity.
+
+An earlier draft of this report stated \cref{eq:slipflux} as an exact identity with
+$\varepsilon\equiv0$, and that was wrong; the correction is recorded here rather than
+quietly made because the claim had also been listed as a verified check. The mirrored
+state has a normal-velocity jump of $\Delta u_n=-2u_n$, so the acoustic wave amplitudes
+in the Roe dissipation do not vanish and their contributions do not cancel in the
+normal-momentum component. Probing the solver's own \texttt{roeFlux} with the mirrored
+state (via \texttt{report/check\_slip\_flux.sh}, which links the shipped library rather
+than reimplementing it) gives, for $p=0.7143$:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+  \toprule
+  Interior state, normal & Mass & Normal mom. & Energy & $u_n$ \\
+  \midrule
+  $\mathbf{V}=(0.3,0.1)$, $\mathbf{n}=+y$ & $0$ & $0.8244$ & $0$ & $0.100$ \\
+  $\mathbf{V}=(0.9,-0.2)$, $\mathbf{n}=(0.6,0.8)$ & \num{-2.8e-17} & $1.2441$ & $0$ & $0.380$ \\
+  $\mathbf{V}=(1,0)$, $\mathbf{n}=+y$ & \num{-5.4e-17} & $0.7143$ & \num{-1.7e-16} & $0$ \\
+  $\mathbf{V}=0$ & $0$ & $0.7143$ & $0$ & $0$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The two rows with $u_n=0$ --- a purely tangential flow and a stagnation point
+--- return the pressure exactly. The rows with $u_n\ne0$ carry an excess that grows with
+$u_n$. The mass and energy components are exactly zero in every case, which is the part
+of the identity that matters for conservation: no mass or energy crosses a slip wall
+regardless of the iterate.
+
+The practical significance is small but should be stated rather than assumed. On a
+converged solution the wall condition is satisfied, so $u_n$ at a slip wall is at
+machine level --- the sanity checks record a maximum $|u_n|$ of
+$\num{1.0e-13}$, $\num{1.4e-13}$ and $\num{1.9e-13}$ on the three inviscid cases --- and
+the excess is correspondingly negligible in the reported forces. The discrepancy is a
+property of \emph{intermediate} iterates, where it acts as a restoring term driving
+$u_n$ towards zero, which is the intended behaviour of a ghost-state wall treatment.
+What is \emph{not} justified is calling the identity exact, and it is no longer claimed
+as such here or in \cref{sec:verification}.
 
 The corresponding face state removes the normal velocity entirely,
 $\mathbf{u}^{\mathrm{face}}=\mathbf{u}-(\mathbf{u}\!\cdot\!\mathbf{n})\mathbf{n}$,
@@ -66,16 +105,29 @@ that the arithmetic face average of the interior and ghost velocities is exactly
 zero. The face state imposes the wall condition directly: zero velocity,
 interior pressure ($\partial p/\partial n=0$), and interior temperature
 (adiabatic, $\partial T/\partial n=0$), with the density following from the
-equation of state so that the wall state is thermodynamically consistent rather
-than an ad-hoc copy,
+equation of state,
 \begin{equation}
   \mathbf{u}^{\mathrm{face}}=\mathbf{0},\quad
   p^{\mathrm{face}}=p_i,\quad
   T^{\mathrm{face}}=T_i,\quad
   \rho^{\mathrm{face}}=\frac{p^{\mathrm{face}}}{R\,T^{\mathrm{face}}},\quad
-  (\rho E)^{\mathrm{face}}=\frac{p^{\mathrm{face}}}{\gamma-1}.
+  (\rho e)^{\mathrm{face}}=\frac{p^{\mathrm{face}}}{\gamma-1}.
   \label{eq:noslipface}
 \end{equation}
+
+Two points of honesty about \cref{eq:noslipface}. First, with $p^{\mathrm{face}}=p_i$
+and $T^{\mathrm{face}}=T_i$ the equation of state returns the interior density
+bit-for-bit, so writing $\rho=p/(RT)$ is a statement of \emph{why} the wall density
+equals the interior density rather than a computation that produces a different value;
+the code says as much in a comment at the same line. It is the correct form because it
+is what makes the adiabatic assumption explicit and would give the right answer if
+either the pressure or the temperature condition were changed, but no claim of
+sophistication over a copy is intended. Second, the total energy is written here as
+$\rho e$ rather than $\rho E$ because the velocity is zero: the general definition of
+\cref{sec:equations} includes the kinetic term, which vanishes at a no-slip wall, and
+using the same symbol for the reduced quantity would be inconsistent with the rest of
+the report.
+
 Because the surface output uses this state, the reported wall velocity and Mach
 number are identically zero to machine precision. The adiabatic condition is
 additionally enforced on the flux by projecting the normal component out of

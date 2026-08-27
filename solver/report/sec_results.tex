@@ -826,17 +826,55 @@ window is moved forward through the record.
   \end{tabular}
 \end{table}
 
-Two trends in \cref{tab:saturation} carry the argument. First, the period spread
-collapses from $37\,\%$ of the period to $\num{0.04}\,\%$, the last figure being
-the agreement of thirteen independent period estimates within one window. Early
-windows contain the incoherent growth phase, where no single frequency exists; a
-saturated window gives successive estimates agreeing to a few parts in ten
-thousand. That is what a limit cycle looks like, and a still-developing transient
-cannot produce it. Second, both $St$ and the mean drag approach their literature
-values monotonically \emph{from below} --- $St$ through $0.167, 0.180, 0.182,
-0.183$ towards $0.19$--$0.20$, and $\overline{C_D}$ through $1.12, 1.19, 1.23,
-1.25$ towards $1.3$--$1.4$ --- which is the expected signature of an amplitude
-still saturating, rather than of a converged cycle sitting at the wrong value.
+The argument rests on the first column of trends: the period spread collapses from
+$37\,\%$ of the period to $\num{0.04}\,\%$. Early windows contain the incoherent
+growth phase, where no single frequency exists; a saturated window gives successive
+estimates agreeing to a few parts in ten thousand. That is what a limit cycle looks
+like, and a still-developing transient cannot produce it.
+
+\paragraph{A trend that is an artifact of nested windows.} An earlier draft drew a
+second conclusion from \cref{tab:saturation}: that $St$ and $\overline{C_D}$ approach
+their literature values monotonically \emph{from below}, and that this indicated an
+amplitude still saturating which further marching would carry closer to the literature
+figures. \textbf{That inference was wrong}, and the correction matters because it
+changes what the reader should expect from a completed run.
+
+The windows in \cref{tab:saturation} are nested: each begins later than the last but
+all end at the end of the record, so they share the same saturated tail and differ only
+in how much of the growth phase they still include. A monotone trend across nested
+windows therefore measures the progressive exclusion of the growth phase, not any
+evolution of the converged state. The correct test uses \emph{non-overlapping} late
+windows, and on those the quantities are flat rather than climbing:
+
+\begin{center}
+\begin{tabular}{lrrr}
+  \toprule
+  Window & $St$ & $\overline{C_D}$ & Period spread \\
+  \midrule
+  $t\in[60,100]$ & \num{0.1830} & \num{1.2466} & --- \\
+  $t\in[100,140]$ & \num{0.1829} & \num{1.2470} & --- \\
+  $t\in[140,180]$ & \num{0.1829} & \num{1.2466} & --- \\
+  $t\in[180,220]$ & \num{0.1829} & \num{1.2462} & --- \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Over $160$ convective time units and some $30$ shedding cycles, $St$ is
+constant at $0.1829$ and $\overline{C_D}$ constant to $\num{8e-4}$. The lift amplitude
+is likewise flat at $\pm0.530$. The cycle is converged, and it is converged at
+$St=0.183$ against a literature range of $0.19$--$0.20$ and
+$\overline{C_D}=1.247$ against $1.3$--$1.4$.
+
+\textbf{Those gaps are therefore standing discrepancies of the computed limit cycle,
+not transient undershoot that more marching will close.} A shortfall of about $4\,\%$
+in $St$ and $5\,\%$ in mean drag, both in the same direction, is what one expects from
+a two-dimensional laminar computation of this flow on a mesh of this resolution:
+\cref{sec:limitations} discusses the under-resolution of the wake and the absence of a
+mesh-refinement study, either of which would be the place to look. Reporting the trend
+as evidence that the answer would improve on completion would have been a
+misrepresentation, and it is corrected here rather than left standing because the
+distinction is exactly the one this report insists on elsewhere: a trend measured
+across windows that share data is not a trend in the underlying quantity.
 
 \paragraph{The individual vortices are resolved.} An oscillating integrated force
 is necessary but not sufficient evidence of a vortex street: a global mode could in
@@ -852,9 +890,23 @@ The count carries an order-of-magnitude consistency check with the measured
 frequency, which is the reason to quote it. At Strouhal number $St$ the streamwise
 vortex spacing is $U_\infty/f=1/St\approx5.5$ diameters, and the sign alternates
 every half spacing, predicting roughly $5$ reversals over the $14$-diameter sampled
-extent against the $6$--$9$ observed. That is the same order with a modest excess,
-attributable to the wake not being exactly aligned with the sampling line and to
-the vortices being closer together before they have convected and spread.
+extent. The primary measurement gives $9$, $10$ and $14$ on the three lines, so the
+observed counts exceed the prediction by a factor of about two to three; the
+independent reimplementation described below gives $6$, $7$ and $9$, an excess of
+$20$--$80\,\%$. Quoting only the second set would understate the discrepancy, so both
+are given: the honest statement is that prediction and measurement agree in order of
+magnitude, with the measurement running high by a factor between one and three
+depending on the counting procedure.
+
+The excess is expected in this direction. The prediction assumes a single row of
+alternating cores exactly on the sampling line and a spacing fixed at its
+far-wake value, whereas the sampling line crosses a wake that meanders laterally, and
+the cores are closer together near the body than after they have convected and spread.
+Both effects add reversals. What the check establishes is that the number of cores in
+the near wake is consistent with the measured shedding frequency to within a small
+integer factor --- enough to rule out a global oscillation with no resolved cores,
+which is the alternative it exists to exclude, and not enough to serve as a
+quantitative validation.
 
 This must be read as a consistency check rather than a precise measurement, and the
 reason is worth stating because it is a genuine weakness of the diagnostic. The
@@ -911,9 +963,17 @@ The Strouhal number is obtained from linearly interpolated zero crossings of the
 lift signal, which requires no assumption about spectral resolution; with
 $D=U_\infty=1$ the Strouhal number is numerically the frequency. These values come
 from \texttt{tools/transient\_status.py}, the same tool used to monitor the running
-case, so the statistics reported here and the run-time diagnostics cannot disagree.
-An independent spectral estimate from the periodogram is shown in
-\cref{fig:cyl200-spectrum}. The lift oscillates about zero at the shedding
+case, so the statistics reported here are the ones the run-time diagnostics reported.
+
+A second tool, an FFT-based estimator, was used earlier in the run to produce the
+periodogram of \cref{fig:cyl200-spectrum}, and it must not be read as an independent
+confirmation of the table: it was last run at $t\approx11$, deep in the growth phase,
+where it returned $St=0.228$ and $\overline{C_D}=1.05$. Those figures describe a
+pre-saturation record and are superseded by the zero-crossing values quoted above,
+which are measured on the saturated window. The spectrum figure is retained because it
+shows a single dominant peak rather than a broadband signal, which is a qualitative
+statement that survives the frequency shift, but the numerical values in the table
+come from one authority only. The lift oscillates about zero at the shedding
 frequency while the drag oscillates about its mean at twice that frequency, which
 is the standard signature of alternating vortex shedding: each shed vortex
 produces a lift excursion of one sign but a drag excursion regardless of sign.

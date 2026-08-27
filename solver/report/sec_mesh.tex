@@ -5,9 +5,13 @@
 
 Meshes are read through the CGNS mid-level library. The reader walks every base
 and every zone, accepts \texttt{Unstructured} zones only, and reads the
-coordinate arrays \texttt{CoordinateX}/\texttt{CoordinateY}. Both supplied
-meshes declare \texttt{PhysicalDimension} $=3$ with a nominally zero
-\texttt{CoordinateZ}, which is read and discarded. Element sections are scanned
+coordinate arrays \texttt{CoordinateX}/\texttt{CoordinateY}. The two supplied meshes
+differ here, which is why the reader cannot assume either layout:
+\texttt{NACA0012\_H2.cgns} declares \texttt{PhysicalDimension} $=3$ and carries a
+nominally zero \texttt{CoordinateZ}, which is read and discarded, while
+\texttt{CylinderB1.cgns} declares \texttt{PhysicalDimension} $=2$ and has no $z$
+coordinate at all. Both declare \texttt{CellDimension} $=2$. The solver logs the
+declared dimensions for each mesh it opens. Element sections are scanned
 for the supported two-dimensional element types \texttt{TRI\_3} and
 \texttt{QUAD\_4}, which become cells, and \texttt{BAR\_2}, which becomes a
 boundary edge. No structured-grid or single-element-type assumption is made
@@ -57,8 +61,12 @@ Cell area and centroid come from the shoelace formula over the vertex loop,
   \label{eq:shoelace}
 \end{equation}
 which is exact for both triangles and quadrilaterals and needs no subdivision.
-Every cell in both meshes is stored counter-clockwise, so all signed areas are
-positive; a negative area is treated as a fatal mesh error. In two dimensions a
+Cell node ordering is \emph{normalised} rather than assumed: any cell whose signed
+area comes out negative has its node list reversed, and the number of reorientations
+is logged. Only a zero or degenerate area is fatal, since that cannot be repaired by
+reordering. For both supplied meshes the reorientation count is zero --- every cell
+is already stored counter-clockwise --- so the normalisation is a no-op here, but the
+reader does not depend on that being true. In two dimensions a
 face is a straight segment from $\mathbf{x}_a$ to $\mathbf{x}_b$, so its length
 $\Delta s$ (the two-dimensional analogue of face area) and unit normal are
 \begin{equation}
