@@ -343,6 +343,27 @@ def main():
                     define("NoseCpDeficitPct" + key,
                            num(100.0 * (cp0 - nose_cp) / cp0, 3))
 
+        # Tail-estimate figures parsed from the solver's OWN termination note, so the
+        # report cannot disagree with the note it attributes them to.  Re-deriving them
+        # here would create a second authority for one quantity; four stale hand-written
+        # values during preparation are the argument for parsing rather than retyping.
+        if finished:
+            note_text = str(status.get("notes", ""))
+            m = re.search(r"decaying at a ratio of ([0-9.]+) per sub-block", note_text)
+            if m:
+                define("DecayRatio" + key, num(float(m.group(1)), 4))
+                r_ = float(m.group(1))
+                if 0.0 < r_ < 1.0:
+                    define("DecayAmp" + key, num(r_ / (1.0 - r_), 3))
+            m = re.search(r"estimated ([0-9.eE+-]+) of C_D movement remaining \(([0-9.]+)",
+                          note_text)
+            if m:
+                define("TailRemaining" + key, "\\num{%s}" % m.group(1))
+                define("TailRemainingPct" + key, num(float(m.group(2)), 3))
+            m = re.search(r"asymptote near ([0-9]+\.[0-9]+)", note_text)
+            if m:
+                define("TailAsymptote" + key, num(float(m.group(1)), 7))
+
             # Pointwise wall diagnostics.  These are harvested rather than written by
             # hand because a superseded hand-written value survived into prose four
             # times during preparation, twice inverting the conclusion it supported.

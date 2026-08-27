@@ -345,7 +345,7 @@ looks worst. Repeating the check on the post-fix runs gives
   Case & From \texttt{surface.csv} & From \texttt{forces.csv} & Absolute & Relative \\
   \midrule
   Cylinder $\Reinf=20$ & $1.219698$ & $1.220902$ & \num{1.20e-3} & \num{9.87e-4} \\
-  NACA $\Minf=0.15$ inv. & $0.000913$ & $0.000960$ & \num{4.69e-5} & \num{4.88e-2} \\
+  NACA $\Minf=0.15$ inv. & $0.000913$ & $\cnsCdNacaSubInv$ & \num{4.69e-5} & \num{4.88e-2} \\
   NACA $\Minf=0.80$ inv. & $0.008752$ & $0.008771$ & \num{1.97e-5} & \num{2.25e-3} \\
   \bottomrule
 \end{tabular}
@@ -391,19 +391,14 @@ the duplicate and shift the window by one sample, so the window figures quoted i
 used for this report drops the duplicate; the same convention is needed to reproduce
 the numbers exactly.
 
-The same two-evaluation structure explains a discrepancy a careful reader will find
-between two numbers the solver reports for the same run. For
-\texttt{naca0012\_m015\_inviscid} the termination note states $4.94$ orders while the
-machine-readable \texttt{residual\_reduction\_orders} field records $4.854$. Both are
-correct for what they measure: the note quotes the in-loop residual at the step where
-the convergence test fired ($\num{1.0390e-3}$, giving $4.9401$ orders against the
-step-1 value of $90.506$), while the field quotes the post-loop re-evaluation from the
-final written state ($\num{1.2665e-3}$, giving $4.8541$). The recorded field is the
-more conservative of the two and is the one that corresponds to the submitted
-\texttt{field\_final.vtu}, which is the right choice; every figure in this report is
-taken from that field rather than from the note. The gap is a reminder that a residual
-is a property of a state, so quoting one without saying which state it belongs to is
-incomplete.
+The same two-evaluation structure means a run's termination note and its machine-readable
+\texttt{residual\_reduction\_orders} field can differ: the note quotes the in-loop residual
+at the step where the convergence test fired, while the field quotes the post-loop
+re-evaluation from the state actually written out. Where the two differ the field is the
+conservative one and is the one corresponding to the submitted \texttt{field\_final.vtu}, so
+it is what this report quotes throughout --- every residual figure here is harvested from
+that field rather than parsed from the note. The general point is that a residual is a
+property of a state, so quoting one without saying which state it belongs to is incomplete.
 
 \paragraph{A history that is not monotone in the step number.} One further consequence of
 the best-state fallback of \cref{sec:naca} deserves flagging for anyone reusing these
@@ -723,8 +718,9 @@ What separates the two is not the direction of the motion but the behaviour of i
 increments, as set out in \cref{sec:digits}: geometrically decaying increments mean an
 asymptotic approach whose remaining distance is bounded and computable, while roughly
 constant increments mean an unfinished transient with no asymptote in sight. The
-cylinder's decrements decay at a mean ratio of $0.733$ per sub-block; the
-$\Minf=2.0$ laminar airfoil's sit at $1.019$, not decaying at all. The trend test is
+cylinder's decrements decay at a mean ratio of $\cnsDecayRatioCylSteady$ per sub-block,
+while the same case earlier in its march sat at $0.994$, barely decaying at all
+(\cref{sec:conditioning}). The trend test is
 now computed once and consulted by \emph{both} branches, and a monotone window is
 admitted only when its decrements decay (ratio below $0.92$) and the geometric-tail
 estimate of the remaining movement is itself within tolerance.
@@ -984,11 +980,14 @@ it looks like a measurement. It would have survived any check that asked whether
 table was populated, and was found only by asking whether each value made sense for the
 case it described.
 
-Set that against the cylinder of \cref{sec:digits}, whose ratio is $0.733$ and whose
-remaining movement is $0.049\,\%$. Both figures come from the same measurement applied to
-the same quantity; they differ by three orders of magnitude in consequence. That is what
-makes the discriminator usable: converged and unconverged runs are separated by a wide
-margin on a measured scalar, not by a judgement about how a plot looks.
+Set that against the cylinder of \cref{sec:digits}, whose ratio is
+$\cnsDecayRatioCylSteady$ and whose remaining movement is
+$\cnsTailRemainingPctCylSteady\,\%$. Both figures come from the same measurement applied to
+the same quantity, and the amplification they imply differs by a factor of
+$60$. That is what makes the discriminator usable: the verdict rests on a measured scalar
+rather than on a judgement about how a plot looks. As \cref{sec:digits} sets out, the
+separation is graded rather than bimodal --- what matters is the amplification $r/(1-r)$,
+not which side of unity the ratio falls on.
 
 The residual for this case is meanwhile at $4.64$ orders against a target of $3.00$, so
 the residual criterion has been satisfied for a long time and it is the force criterion

@@ -10,6 +10,22 @@ reference point of the sweep. It is not evidence about the instrumentation at ot
 values, where the code does differ by construction. Every variant was run one at a
 time under the CPU quota of \cref{sec:quota}.
 
+\paragraph{Which revisions these variants were built from.} The twelve sweep runs predate
+the submitted binary and it is worth being specific rather than saying only ``a separate copy
+of the source tree'', which a reader would reasonably take to mean the same revision. The
+dissipation-floor group was built at \texttt{97f37254d00c}, the spatial-order and
+limiter-parameter groups at \texttt{26ef1cb80b86}, and the submitted production results at
+\texttt{cc42ab4facfd}.
+
+What licenses the comparison is that the intervening commits did not touch the discretization
+these sweeps probe. That argument is strongest for the floor group, where the baseline binary
+was shown byte-identical to an unmodified build of its own tree, and weaker for the
+order and limiter groups, where no such control was run. The conclusions those two groups
+support are correspondingly coarse --- a $60\,\%$ drag difference between first and second
+order, and a $0.81\,\%$ spread over a decade of the limiter constant --- and neither depends
+on a digit that a revision difference could plausibly move. They are reported as
+order-of-magnitude sensitivities, which is all they are used for.
+
 \subsection{The linear-wave dissipation floor is unnecessary for these cases}
 \label{sec:floorsens}
 
@@ -143,10 +159,18 @@ direction: a larger $K$ widens the smooth-region threshold of
 
 The variant binaries were configured and built from a separate copy of the source
 tree through an independent CMake configure. The floor-$\pLinearFloor$ variant
-reproduces $C_D=\num{2.018119}$ for the cylinder $\Reinf=20$ case, agreeing with
-the production binary to seven digits at matched conditions. This is an
-independent reproduction of the headline cylinder result rather than a re-reading
-of the same output files.
+reproduces $C_D=\num{2.018119}$ for the cylinder $\Reinf=20$ case, agreeing to seven digits
+with a production-configuration probe run under the same conditions --- second-order,
+terminating at step $2783$. This is an independent reproduction of the cylinder result
+rather than a re-reading of the same output files.
+
+One clarification so the comparison can be checked: that seven-digit agreement is against
+the matched probe, \emph{not} against the submitted run in \cref{tab:forces}. The submitted
+run converges at step $\cnsStepsCylSteady$ to $C_D=\cnsCdCylSteady$, a slightly different
+point on the same decaying tail, so a reader comparing $2.018119$ against the results table
+will find agreement to four digits rather than seven. Both statements are true of different
+run lengths, and \cref{sec:digits} explains why the fourth digit is where they part company:
+the cylinder's tail still has $\cnsTailRemainingCylSteady$ of movement left at termination.
 
 All force values quoted in this report are machine-extracted from the submitted
 CSV and JSON outputs rather than transcribed by hand --- both for the tables

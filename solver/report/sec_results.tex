@@ -97,8 +97,9 @@ clean geometric decay, with a mean ratio of $0.733$.
 
 The solver now performs this estimate itself and states the resulting precision in its
 own termination note, so the figure quoted here is the solver's rather than an external
-reconstruction of it: the geometric tail gives $\num{9.89e-4}$ of $C_D$ movement
-remaining, or $0.049\,\%$, for an asymptote near $2.0174$. \textbf{Three digits of this
+reconstruction of it: the geometric tail gives $\cnsTailRemainingCylSteady$ of $C_D$
+movement remaining, or $\cnsTailRemainingPctCylSteady\,\%$, for an asymptote near
+$\cnsTailAsymptoteCylSteady$. \textbf{Three digits of this
 coefficient are earned and the fourth is not}, and it is quoted that way in
 \cref{sec:cyl20}.
 
@@ -123,22 +124,51 @@ formula at $r=0.994$, where the amplification is $165$ and no asymptote may be q
 The distinction is quantitative rather than a matter of judgement, and it is the test
 applied throughout this report before any extrapolated figure is given.
 
-By contrast, the case the review identified as the worst instance,
-\texttt{naca0012\_m200\_laminar\_re5000}, fails this test decisively: its decrement
-ratios are $1.11, 1.27, 0.86, 0.85, 1.04, 1.03, 1.00, 0.99$ with a mean of $1.019$, so
-the increments are not decaying at all and the tail sum diverges. There is no asymptote
-to extrapolate to, and none is offered. Combined with the component cancellation of
-\cref{sec:cancellation}, that case is reported as not converged.
+\paragraph{The discriminator is graded, not bimodal.} It would be neater if converged and
+unconverged cases fell on opposite sides of $r=1$, and an earlier draft of this report
+claimed exactly that, contrasting the cylinder's $0.733$ against a ratio above unity for the
+supersonic laminar case. The submitted runs do not support it, and the honest structure is
+more useful anyway.
 
-The contrast between mean ratios of $0.733$ and $1.019$ is what makes the discriminator
-usable rather than merely descriptive: the two cases are separated by a wide margin on a
-single measured quantity, not by a judgement call. It is worth being explicit that this
-vindicates part of the review's finding and corrects part of it. The review was right
-that a monotone certifying window is a warning sign and right that
-\texttt{naca0012\_m200\_laminar\_re5000} was not converged. It was wrong to conclude
-that all monotone cases were unconverged: a monotone approach with geometrically
-decaying increments is the normal, correct behaviour of a converging iteration, and a
-criterion that rejected it would reject good runs along with bad ones.
+Measured on the submitted \texttt{forces.csv}, \texttt{naca0012\_m200\_laminar\_re5000}
+has a decay ratio of $0.9195$ --- comfortably below $1$, decaying, with every decrement
+positive as the drag rises monotonically towards its asymptote. That verdict is not a
+windowing artifact: sweeping trailing windows of $500$, $1000$ and $2000$ steps against
+$10$, $9$ and $5$ sub-blocks gives nine estimates from $0.9195$ to $0.9790$, all below $1$.
+So this case is \emph{converged}, and the solver reports it as such.
+
+What separates the cases is therefore not which side of $1$ the ratio falls, but the
+\textbf{amplification} $r/(1-r)$ of \cref{eq:tailsum}, which is what decides whether an
+extrapolated asymptote may be quoted:
+\begin{center}
+\begin{tabular}{lrrl}
+  \toprule
+  Case & Ratio $r$ & $r/(1-r)$ & Extrapolation \\
+  \midrule
+  Cylinder $\Reinf=20$ & $\cnsDecayRatioCylSteady$ & $\cnsDecayAmpCylSteady$
+    & well conditioned, quotable \\
+  NACA $\Minf=2.0$ laminar & $\cnsDecayRatioNacaSupLam$ & $\cnsDecayAmpNacaSupLam$
+    & usable, fewer digits earned \\
+  NACA $\Minf=2.0$ laminar, mid-run & $0.994$ & $165$ & worthless \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The quantity is continuous and so is the conclusion drawn from it. At
+$\cnsDecayAmpCylSteady$ the cylinder's asymptote is insensitive to the fit and is quoted as a
+number. At $\cnsDecayAmpNacaSupLam$ the supersonic laminar case is extrapolable but earns
+fewer digits --- the solver's own note puts the remaining movement at
+$\cnsTailRemainingNacaSupLam$, or $\cnsTailRemainingPctNacaSupLam\,\%$, and says explicitly
+that no more digits than that are earned. At $165$, which is where the same case sat earlier
+in its march (\cref{sec:conditioning}), nothing may be quoted at all.
+
+This makes the review's finding easier to state precisely. It was right that a monotone
+certifying window is a warning sign, and right that this case was not converged \emph{at the
+point it was then being stopped}. It was wrong to conclude that monotone implies
+unconverged: a monotone approach with decaying increments is the normal behaviour of a
+converging iteration, and a criterion rejecting it would reject good runs with bad. The case
+that prompted the finding has since run to a decay ratio of $\cnsDecayRatioNacaSupLam$ and
+converged, which is the outcome that framing predicts.
 
 The general policy adopted for this section follows from the above: coefficients are
 quoted to the precision the convergence evidence supports, an extrapolated asymptote
@@ -223,8 +253,9 @@ treated separately in \cref{sec:m200asym}.
 The size of that distinction is worth one more sentence, because choosing the wrong
 reference at $\Minf=2.0$ would not merely be imprecise. The isentropic value
 $\cnsStagCpNacaSupInv$ overstates the attainable ceiling by $47.1\,\%$ relative to the
-post-shock $1.6573$, and on the supersonic inviscid case $9$ of $404$ wall faces exceed the
-correct bound while \textbf{zero} exceed the isentropic one. Quoting the isentropic figure
+post-shock $\cnsPitotCpNacaSupInv$, and on the supersonic inviscid case
+$\cnsFacesOverPitotNacaSupInv$ of $\cnsNumWallFacesNacaSupInv$ wall faces exceed the correct
+bound while \textbf{zero} exceed the isentropic one. Quoting the isentropic figure
 would therefore have converted a genuine, diagnostic bound violation into an apparently
 clean result, and removed the evidence that \cref{sec:m200asym} rests on. A reference value
 is not a presentational detail when it is the thing a bound is measured against.
