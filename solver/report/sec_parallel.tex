@@ -86,9 +86,9 @@ within a rank and block-Jacobi across ranks, because off-rank increments are
 frozen between sweeps. Increasing the rank count therefore weakens the implicit
 coupling slightly and can change the iteration count needed to reach a given
 residual level, without changing the converged answer. This is a well-known and
-accepted property of LU-SGS in parallel, and it is the reason the inner-iteration
-counts in \cref{tab:scaling} need not match across rank counts even though the
-forces do.
+accepted property of LU-SGS in parallel, and it is the reason the per-step
+inner-iteration counts recorded in each run's \texttt{residuals.csv} need not match
+across rank counts even though the converged forces do.
 
 \subsection{Load balance and communication}
 

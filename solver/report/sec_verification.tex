@@ -194,12 +194,15 @@ Two symptoms exposed it:
   the drag history was still oscillating with a span of $0.153$ when the run
   stopped at a reported $C_D=\num{-2.6e-4}$. That near-zero final value was a
   zero crossing of an oscillation, not a converged near-zero drag.
-  \item For \texttt{naca0012\_m200\_laminar\_re5000} the drag fell monotonically
-  through $317, 44, 25, 17, 12, 9.2, 7.1, 5.5, 4.4, 3.4, 2.7$ and the run
-  terminated at exactly $3.00$ orders with $C_D=2.18$ while still falling. The
-  viscous part was $2.17$ against a flat-plate expectation of order $0.04$: the
-  impulsive-start boundary layer was still developing, and the reported result was
-  physically wrong.
+  \item For \texttt{naca0012\_m200\_laminar\_re5000} the drag fell monotonically,
+  sampled every 100 steps as
+  \begin{center}
+    $317,\ 44,\ 25,\ 17,\ 12,\ 9.2,\ 7.1,\ 5.5,\ 4.4,\ 3.4,\ 2.7$,
+  \end{center}
+  and the run terminated at exactly $3.00$ orders with $C_D=2.18$ while still
+  falling. The viscous part was $2.17$ against a flat-plate expectation of order
+  $0.04$: the impulsive-start boundary layer was still developing, and the reported
+  result was physically wrong.
 \end{itemize}
 
 The criterion was therefore changed to require \textbf{both} conditions: the
@@ -425,10 +428,14 @@ the specific checks are worth recording:
   \texttt{re5000}, \texttt{re200} and comparisons against \texttt{case\_id}
   returns \textbf{zero matches}. There is no per-case branching and no hard-coded
   force or mesh value; case behaviour is entirely data-driven from the JSON input.
-  \item The LU-SGS diagonal carries \textbf{no inflation factor}, so the
-  inner-loop convergence reported in \cref{eq:linres} is not flattered, and the
-  exit test uses a true defect norm computed with the same operator the sweeps
-  use (see the negative result in \cref{sec:lusgs}).
+  \item The LU-SGS diagonal carries \textbf{no inflation factor in production
+  runs} ($\beta=1$): the driver passes $V_i/\Delta\tau_i$ with no multiplier, so the
+  inner-loop convergence reported in \cref{eq:linres} is not flattered, and the exit
+  test uses a true defect norm computed with the same operator the sweeps use. The
+  scaling hook exists in the implicit-solver interface and was used for the
+  diagnostic experiment reported in \cref{sec:lusgs}, where inflating the diagonal
+  was found to produce a meaningless inner-residual ratio; it is not used by any
+  submitted run.
   \item The BDF2 history levels are genuinely frozen during inner iterations and
   shifted only after the inner loop exits.
   \item \texttt{MPI\_Allgather} and \texttt{MPI\_Allgatherv} appear only in

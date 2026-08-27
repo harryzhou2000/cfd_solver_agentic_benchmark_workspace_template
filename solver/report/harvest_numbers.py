@@ -100,21 +100,21 @@ def pending_row(columns):
 #: case id, LaTeX macro suffix, human label for tables
 CASES = [
     ("naca0012_m015_inviscid", "NacaSubInv",
-     "NACA0012 $M_\\infty\\!=\\!0.15$ inviscid"),
+     "NACA $M{=}0.15$ inv."),
     ("naca0012_m080_inviscid", "NacaTraInv",
-     "NACA0012 $M_\\infty\\!=\\!0.80$ inviscid"),
+     "NACA $M{=}0.80$ inv."),
     ("naca0012_m200_inviscid", "NacaSupInv",
-     "NACA0012 $M_\\infty\\!=\\!2.0$ inviscid"),
+     "NACA $M{=}2.0$ inv."),
     ("naca0012_m015_laminar_re5000", "NacaSubLam",
-     "NACA0012 $M_\\infty\\!=\\!0.15$ laminar"),
+     "NACA $M{=}0.15$ lam."),
     ("naca0012_m080_laminar_re5000", "NacaTraLam",
-     "NACA0012 $M_\\infty\\!=\\!0.80$ laminar"),
+     "NACA $M{=}0.80$ lam."),
     ("naca0012_m200_laminar_re5000", "NacaSupLam",
-     "NACA0012 $M_\\infty\\!=\\!2.0$ laminar"),
+     "NACA $M{=}2.0$ lam."),
     ("cylinder_m010_laminar_re20", "CylSteady",
-     "Cylinder $M_\\infty\\!=\\!0.1$ $Re\\!=\\!20$"),
+     "Cyl.\\ $Re{=}20$"),
     ("cylinder_m010_laminar_re200", "CylShed",
-     "Cylinder $M_\\infty\\!=\\!0.1$ $Re\\!=\\!200$"),
+     "Cyl.\\ $Re{=}200$"),
 ]
 
 
@@ -368,9 +368,9 @@ def main():
                 # meaningless (it can exceed 100 %), so for those cases the
                 # amplitude is quoted in absolute terms instead.
                 if st["span_rel"] <= 0.5:
-                    note = "limit cycle (%.1f\\%% p--p)" % (100.0 * st["span_rel"])
+                    note = "cycle, %.1f\\%% p--p" % (100.0 * st["span_rel"])
                 else:
-                    note = "limit cycle (p--p \\num{%.1e})" % st["span"]
+                    note = "cycle, p--p \\num{%.0e}" % st["span"]
         elif "stationary to" in notes:
             note = "fixed point"
         elif "still moving" in notes or "not_converged" in notes:

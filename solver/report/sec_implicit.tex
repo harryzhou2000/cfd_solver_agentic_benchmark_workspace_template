@@ -88,6 +88,19 @@ the product is
 This product is verified against central finite differences to $\vJacobianFd$
 over $\vJacobianStates$ randomised states (\cref{sec:verification}).
 
+It is worth being precise about what is exact here and what is not, because the
+metadata records the solver as \texttt{lu\_sgs\_simplified\_jacobian} and the two
+statements must not look contradictory. The \emph{flux Jacobian-vector product}
+\cref{eq:jacvec} is exact and analytic. The \emph{overall implicit operator} is
+nonetheless a simplified Jacobian: the diagonal \cref{eq:diag} is a scalar rather
+than a $4\times4$ block, and the off-diagonal action \cref{eq:offdiag} combines the
+exact product with a scalar-dissipation term instead of the true upwind flux
+linearisation. That approximation is deliberate and standard for LU-SGS --- it is
+what makes the sweeps matrix-free --- and it affects only the rate of convergence to
+the steady state, not the steady state itself, because the converged solution is
+determined by $\mathbf{R}(\mathbf{U})=\mathbf{0}$ and not by the operator used to get
+there.
+
 Each sweep refreshes the ghost increments once, then performs a forward pass over
 ascending local cell index and a backward pass over descending index. Between
 refreshes the off-rank coupling is frozen, which makes the scheme exactly

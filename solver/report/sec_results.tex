@@ -26,7 +26,7 @@ a converged value.
   construction. Wall time is for the rank count shown, under the 4-CPU container
   quota described in \cref{sec:quota}.}
   \label{tab:runstatus}
-  \small
+  \footnotesize
   \input{tab_runstatus}
 \end{table}
 
@@ -38,9 +38,13 @@ a converged value.
   point, or a limit cycle whose mean is converged --- taken from the solver's own
   termination record rather than re-derived. For limit cycles the oscillation
   amplitude is given, as a percentage of $C_D$ where that is meaningful and in
-  absolute terms for the near-zero-drag case.}
+  absolute terms for the near-zero-drag case. \textbf{For the limit-cycle rows the
+  quoted $C_D$ is a single-instant snapshot and its trailing digits are not
+  significant}; the meaningful statement for those cases is the mean plus amplitude,
+  given in \cref{eq:m200drag} for $\Minf=2.0$ inviscid and in
+  \cref{sec:naca} for the others.}
   \label{tab:forces}
-  \small
+  \footnotesize
   \input{tab_forces}
 \end{table}
 
@@ -395,13 +399,23 @@ fully recover to its leading-edge value, leaving a net streamwise pressure force
 This is genuine viscous-pressure (form) drag.
 
 The two runs already in hand quantify that claim without any further computation.
-The $\Minf=0.15$ \emph{inviscid} case on the same mesh gives
-$C_D=\cnsCdNacaSubInv$, and since it has no viscosity and no shock, that value is
-entirely discretization error --- the numerical noise floor of this mesh at this
-Mach number. The viscous pressure drag exceeds it by roughly a factor of
-$18$. A physical effect an order of magnitude above the noise floor measured on
-the identical mesh is a much stronger statement than either number alone, and it
-is available at no extra cost.
+The $\Minf=0.15$ \emph{inviscid} case on the same mesh has no viscosity and no
+shock, so its entire drag is discretization error --- the numerical noise floor of
+this mesh at this Mach number.
+
+That floor must itself be quoted as a cycle rather than as a number, for exactly the
+reason set out in \cref{sec:limitcycle}: this case terminates on a limit cycle whose
+peak-to-peak amplitude is larger than its own mean. Over the trailing 500 steps the
+inviscid drag has mean $\num{0.001003}$ and spans $\num{0.000370}$ to
+$\num{0.001643}$, a peak-to-peak of $127\,\%$ of the mean. The viscous pressure drag
+therefore exceeds the noise floor by a factor of $18$ measured against the window
+mean, with the ratio spanning $11$ to $50$ across the cycle. Quoting the single
+figure of $18$ from one arbitrary sample of an oscillation would apply a standard
+this report criticises elsewhere.
+
+Even at the least favourable point in the cycle the margin is a factor of $11$, so
+the conclusion is unaffected: the viscous pressure drag is an order of magnitude
+above the discretization noise of the identical mesh, and is therefore physical.
 
 Convergence for the three laminar cases is shown in \cref{fig:naca-lam-res} and
 the corresponding force histories in \cref{fig:naca-lam-forces}; the latter are
@@ -737,7 +751,7 @@ are marked as unavailable rather than filled with numbers that would describe a
 developing transient.
 
 \begin{center}
-\small
+\footnotesize
 \begin{tabular}{lrl}
   \toprule
   Quantity & Computed & Literature ($\Reinf=200$) \\
@@ -746,7 +760,7 @@ developing transient.
   Completed cycles in window & $\cnsShedCycles$ & --- \\
   Saturation gate ($\ge5$ cycles) & \textbf{\cnsShedSaturated} & --- \\
   Shedding period & $\cnsShedPeriod$ & $\approx 5.3$ \\
-  Period spread over $\cnsShedEstimates$ estimates & $\cnsShedSpread$
+  Period spread ($\cnsShedEstimates$ estimates) & $\cnsShedSpread$
     ($\cnsShedSpreadPct\,\%$) & --- \\
   Strouhal number $St=fD/U_\infty$ & $\cnsShedStrouhal$ & $\approx 0.19$--$0.20$ \\
   Mean $C_D$ & $\cnsShedCdMean$ & $\approx 1.3$--$1.4$ \\
