@@ -1,0 +1,108 @@
+{
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/07",
+  "time_seconds": {
+    "goal_time": 25525.0,
+    "wall_time": 25546.8,
+    "started_at": "2026-08-26T09:31:36.565000+00:00",
+    "ended_at": "2026-08-26T16:37:23.338000+00:00",
+    "by_root_thread": {
+      "01a03d68-6067-7e23-9e07-14204c3074f3": {
+        "status": "complete",
+        "time_used_seconds": 25525,
+        "tokens_used": 4330256
+      }
+    },
+    "by_root_tree": {
+      "01a03d68-6067-7e23-9e07-14204c3074f3": {
+        "status": "complete",
+        "goal_time_seconds": 25525,
+        "goal_tokens": 4330256,
+        "threads": 2,
+        "tokens_used": 160579799,
+        "state_tokens_inherited_inclusive": 160579799,
+        "model": "internal_eccn/nvidia-moonshotai-eccn-kimi-k3"
+      }
+    }
+  },
+  "tokens": {
+    "total": 160579799,
+    "by_model": {
+      "internal_eccn/nvidia-moonshotai-eccn-kimi-k3": {
+        "input": 160032589,
+        "cached_input": 156075791,
+        "non_cached_input": 3956798,
+        "output": 547210,
+        "reasoning_output": 261403,
+        "total": 160579799,
+        "fallback_tokens": 0
+      }
+    },
+    "by_thread": {
+      "01a03d68-6067-7e23-9e07-14204c3074f3": {
+        "model": "internal_eccn/nvidia-moonshotai-eccn-kimi-k3",
+        "is_subagent": false,
+        "source": "rollout_cumulative",
+        "tokens": {
+          "internal_eccn/nvidia-moonshotai-eccn-kimi-k3": {
+            "input": 157134013,
+            "cached": 153296017,
+            "non_cached": 3837996,
+            "output": 493766,
+            "reasoning_output": 249420,
+            "total": 157627779
+          }
+        },
+        "total": 157627779,
+        "inherited_baseline_tokens": 0,
+        "fallback_model_tokens": 0
+      },
+      "01a03db0-775d-7420-9aed-e61c392c44b6": {
+        "model": "internal_eccn/nvidia-moonshotai-eccn-kimi-k3",
+        "is_subagent": true,
+        "source": "rollout_fork_delta",
+        "tokens": {
+          "internal_eccn/nvidia-moonshotai-eccn-kimi-k3": {
+            "input": 2898576,
+            "cached": 2779774,
+            "non_cached": 118802,
+            "output": 53444,
+            "reasoning_output": 11983,
+            "total": 2952020
+          }
+        },
+        "total": 2952020,
+        "inherited_baseline_tokens": 0,
+        "fallback_model_tokens": 0
+      }
+    },
+    "main_vs_subagent": {
+      "main": 157627779,
+      "subagent": 2952020
+    },
+    "fallback_tokens": 0,
+    "discrepancy_notes": [],
+    "accounting_note": "Cached/input/output splits come from thread-owned rollout counter deltas. Fork replay is excluded at the first child-owned task boundary. Each delta is attributed to the most recent owned turn_context or thread_settings_applied model; only deltas before an explicit owned model event use the thread database model. Fork state counters are diagnostic only. A standalone root may retain the legacy state-counter scaling fallback when its rollout ends before the persisted root total."
+  },
+  "cost_estimate_usd": {
+    "total": null,
+    "by_model": {
+      "internal_eccn/nvidia-moonshotai-eccn-kimi-k3": {
+        "usd": null,
+        "tokens": 160579799,
+        "pricing": "unresolved"
+      }
+    },
+    "unpriced_tokens": 160579799,
+    "estimate": true,
+    "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/07/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/07/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/07/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/07/.sessions/codex/sessions",
+    "fetched_at": "2026-08-27T16:02:16.439060+00:00",
+    "num_threads": 2,
+    "num_roots": 1
+  }
+}
