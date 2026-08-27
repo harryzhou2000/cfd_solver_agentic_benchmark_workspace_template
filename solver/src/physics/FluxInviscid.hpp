@@ -5,9 +5,14 @@
 // supplied aerofoil mesh; Roe with a Harten-Yee entropy fix and Rusanov (local
 // Lax-Friedrichs) are selectable from the command line and are used to
 // cross-check the flux implementation (see the report).
+//
+// Both contact-resolving schemes are combined with a multidimensional shock fix
+// (shockFixWeight below), because resolving the contact wave is exactly what
+// makes them vulnerable to the carbuncle instability at a strong bow shock.
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 
 #include "core/Types.hpp"
 #include "physics/PerfectGas.hpp"
@@ -20,7 +25,55 @@ struct FluxOptions {
   RiemannScheme scheme = RiemannScheme::kRoe;
   Real entropy_fix = 0.10;   // Harten-Yee delta as a fraction of (|un|+a)
   Real dissipation_scale = 1.0;    // multiplies the Rusanov jump term
+  Real shock_fix = 1.0;      // strength of the multidimensional shock fix, 0 disables
 };
+
+// Weight of the Rusanov blend used by the multidimensional shock fix.
+//
+// A contact-resolving flux (Roe, HLLC) carries almost no dissipation in the
+// direction *along* a captured shock, so a transverse perturbation of the shock
+// front is not damped and grows into the carbuncle: on the Mach 2 aerofoil the
+// leading-edge surface pressure reaches 1.29 times the Rayleigh-Pitot limit and
+// the solution of a symmetric problem loses its symmetry.  The cure is to add
+// Rusanov dissipation on the faces that lie *inside* a strong shock layer and
+// are nearly parallel to it, and only there.  Two dimensionless measures select
+// those faces:
+//
+//   sigma = |grad p| h / p    strength of the pressure gradient across a cell,
+//                             O(1) inside a captured strong shock and O(h)
+//                             wherever the flow is smooth;
+//   alpha = |n . grad p / |grad p||   alignment of the face with the shock:
+//                             1 for a face the shock crosses head-on, 0 for a
+//                             face lying in the shock front.
+//
+// A third factor switches the fix off wherever the flow is subsonic, since a
+// shock cannot exist there.
+//
+// The blend is proportional to the strength and to (1 - alpha^2), so faces that
+// resolve the shock keep the full contact-resolving flux and stay sharp, while
+// the faces along the front - the ones that feed the instability - are damped.
+// The sensor is built from face-averaged quantities that are identical on both
+// sides of a partition cut, so the fix does not break partition independence.
+inline Real shockFixWeight(const Vec2& n, const Vec2& gradp, Real p, Real h, Real mach,
+                           Real k) {
+  if (k <= 0.0 || p <= 0.0 || h <= 0.0) return 0.0;
+  // A shock needs supersonic flow upstream of it, so the fix is switched off
+  // entirely in subsonic flow.  Without this guard the pressure-gradient sensor
+  // also fires on the stagnation region of a stretched mesh, where the gradient
+  // is large but there is no shock and no instability to cure.
+  const Real sonic = std::min(Real(1), std::max(Real(0), (mach - Real(0.95)) / Real(0.10)));
+  if (sonic <= 0.0) return 0.0;
+  const Real gn = std::sqrt(gradp[0] * gradp[0] + gradp[1] * gradp[1]);
+  if (gn <= 0.0) return 0.0;
+  const Real sigma = gn * h / p;
+  // Dead band, so that smooth compressions and the acoustic field are untouched.
+  constexpr Real kOn = 0.25, kFull = 0.75;
+  const Real strength = std::min(Real(1), std::max(Real(0), (sigma - kOn) / (kFull - kOn)));
+  if (strength <= 0.0) return 0.0;
+  const Real alpha = std::abs(n[0] * gradp[0] + n[1] * gradp[1]) / gn;
+  const Real transverse = Real(1) - alpha * alpha;
+  return std::min(Real(1), k * sonic * strength * transverse);
+}
 
 // Maximum signal speed used for local time stepping and the implicit diagonal.
 inline Real convectiveSpectralRadius(const PrimVec& w, const Vec2& n, const PerfectGas& gas) {
@@ -162,13 +215,19 @@ inline ConsVec rusanovFlux(const PrimVec& wl, const PrimVec& wr, const Vec2& n,
 }
 
 inline ConsVec inviscidFlux(const PrimVec& wl, const PrimVec& wr, const Vec2& n,
-                            const PerfectGas& gas, const FluxOptions& opt) {
+                            const PerfectGas& gas, const FluxOptions& opt,
+                            Real rusanov_blend = 0.0) {
+  ConsVec f{};
   switch (opt.scheme) {
-    case RiemannScheme::kRoe: return roeFlux(wl, wr, n, gas, opt);
-    case RiemannScheme::kHllc: return hllcFlux(wl, wr, n, gas, opt);
+    case RiemannScheme::kRoe: f = roeFlux(wl, wr, n, gas, opt); break;
+    case RiemannScheme::kHllc: f = hllcFlux(wl, wr, n, gas, opt); break;
     case RiemannScheme::kRusanov: return rusanovFlux(wl, wr, n, gas, opt);
   }
-  return rusanovFlux(wl, wr, n, gas, opt);
+  if (rusanov_blend > 0.0) {
+    const ConsVec g = rusanovFlux(wl, wr, n, gas, opt);
+    for (int v = 0; v < kNVar; ++v) f[v] += rusanov_blend * (g[v] - f[v]);
+  }
+  return f;
 }
 
 inline const char* toString(RiemannScheme s) {

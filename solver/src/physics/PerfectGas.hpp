@@ -26,6 +26,10 @@ class PerfectGas {
     return (gamma_ - 1.0) * (u[3] - ke);
   }
   Real soundSpeed(Real rho, Real p) const { return std::sqrt(gamma_ * p / rho); }
+  // Mach number of a primitive state laid out as [rho, u, v, p].
+  Real mach(const Real* w) const {
+    return std::sqrt(w[1] * w[1] + w[2] * w[2]) / soundSpeed(w[0], w[3]);
+  }
   Real temperature(Real rho, Real p) const { return p / (rho * R_); }
   // Total enthalpy H = E + p/rho.
   Real totalEnthalpy(Real rho, Real p, Real q2) const {

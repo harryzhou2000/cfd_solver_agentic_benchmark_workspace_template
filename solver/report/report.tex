@@ -55,7 +55,7 @@ study measures a discretisation-error order of \mmsOrderSecond{} for the
 unlimited second-order scheme against \mmsOrderFirst{} for the first-order
 scheme. \numCases{} of the eight required cases produced a complete result package, with
 \numFailedCases{} marked failed. The Reynolds 20 cylinder gives $C_D=\cdCylinderMZeroOneZeroLaminarReTwoZero$,
-in agreement with the accepted value of $2.0$--$2.1$, and the Reynolds 200
+in agreement with the accepted value of $2.0$--$2.05$, and the Reynolds 200
 cylinder develops a vortex street with Strouhal number \stFft{} and mean drag
 \meanCdReTwoHundred. Of \sanityTotalChecks{} automated physics sanity
 checks over \sanityCases{} cases, \sanityFailures{} fail.
@@ -199,14 +199,18 @@ The $L_2$ norm is volume weighted, i.e.\ it is the discrete $L_2(\Omega)$ norm
 of $\partial\mathbf{U}/\partial t$ divided by the domain volume. This matters on
 these meshes: an \emph{unweighted} root-mean-square over cells is dominated by a
 handful of degenerate sliver cells at the sharp aerofoil trailing edge --- on
-\code{NACA0012\_H2.cgns}, 46 cells out of \nacaCells{} (mean area
-$4.7\times10^{-9}$ against a median of $5.9\times10^{-6}$) carry $90\%$ of it
+\code{NACA0012\_H2.cgns}, \sliverCells{} cells out of \nacaCells{} (mean area
+\sliverMeanArea{} against a median of \nacaMedianCellArea{}, together
+\sliverAreaFraction{} of the domain area) carry $90\%$ of it
 --- where the inviscid solution around a sharp trailing edge is genuinely
 singular and no scheme converges. Weighting by cell volume measures the physical
 rate of change of the solution instead of the rate of change in the smallest
 cell. The $L_\infty$ column keeps that behaviour visible rather than hiding it:
-it stalls at $\mathcal{O}(10^{3}$--$10^{4})$ on the aerofoil cases and its
-location is written into the field files as the \code{ScaledResidual} variable.
+it plateaus between \linfPlateauMin{} and \linfPlateauMax{} on the aerofoil
+cases, and its location is written into the field files as the
+\code{ScaledResidual} variable, so a reader can see for themselves that it sits
+in the trailing-edge slivers. All of these numbers are computed by
+\code{tools/mesh\_facts.py} from the submitted field files.
 
 \subsection{Convergence criteria for steady cases}
 \label{sec:convcrit}
@@ -314,8 +318,11 @@ divergence theorem,
   \label{eq:divcheck}
 \end{equation}
 and aborts if the worst relative error exceeds $10^{-9}$; the observed value is
-$\sim10^{-10}$ on both meshes, which is the floating-point cancellation floor of
-the thin near-wall cells (aspect ratios up to $\sim10^{3}$).
+$1.1\times10^{-10}$ on the aerofoil mesh and $4.8\times10^{-13}$ on the cylinder
+mesh. The difference between the two is the floating-point cancellation floor of
+the thin near-wall cells: the aerofoil mesh reaches an aspect ratio of
+\nacaMaxAspectRatio{} (longest over shortest edge) where the cylinder mesh stays
+below \cylinderMaxAspectRatio{}.
 
 \subsection{The two meshes and the eight cases}
 \Cref{tab:mesh} summarises what the reader finds in the two CGNS files, and
@@ -478,6 +485,67 @@ holds if the Roe average and the wave strengths are correct --- and
 \cref{tab:fluxcompare} shows that the two schemes agree closely wherever both
 converge.
 
+\paragraph{Multidimensional shock fix.} Resolving the contact wave is what makes
+Roe and HLLC accurate for boundary layers, and it is also what makes them
+vulnerable to the carbuncle instability: inside a captured strong shock, a
+contact-resolving flux supplies almost no dissipation \emph{along} the front, so
+a transverse perturbation of the shock is not damped. Left alone this is not a
+cosmetic problem. On the Mach 2 aerofoil it drove the leading-edge surface
+pressure to $C_p=\shockFixCpMaxUnfixed$ against the Rayleigh--Pitot ceiling of
+$\pitotCeilingMachTwo$ --- a supersonic body cannot produce more stagnation
+pressure than a normal shock --- and broke the symmetry of a symmetric problem
+badly enough to give $|C_L|=$~\shockFixClUnfixed{} where the exact value is zero
+(\cref{tab:shockfix}).
+
+The cure implemented here blends the flux towards Rusanov, but only on the faces
+that feed the instability. Three dimensionless factors multiply:
+\begin{equation}
+  \omega=\min\Bigl(1,\;
+    k\,\underbrace{\Bigl[\tfrac{M-0.95}{0.10}\Bigr]_0^1}_{\text{supersonic}}\;
+    \underbrace{\Bigl[\tfrac{\sigma-0.25}{0.50}\Bigr]_0^1}_{\text{shock strength}}\;
+    \underbrace{(1-\alpha^{2})}_{\text{transverse}}\Bigr),
+  \qquad
+  \boldsymbol{\Phi}=(1-\omega)\boldsymbol{\Phi}_{\rm HLLC}
+                    +\omega\,\boldsymbol{\Phi}_{\rm Rusanov},
+  \label{eq:shockfix}
+\end{equation}
+where $[\cdot]_0^1$ clips to $[0,1]$, $M=\max(M_L,M_R)$,
+$\sigma=|\nabla p|\,|\mathbf{x}_R-\mathbf{x}_L|/p$ is the relative pressure jump
+across the face, and $\alpha=|\hat{\mathbf{n}}\cdot\nabla p|/|\nabla p|$
+measures how the face is oriented relative to the shock. A face that the shock
+crosses head-on has $\alpha=1$ and keeps the \emph{full} contact-resolving flux,
+so the shock itself stays sharp; a face lying in the front has $\alpha=0$ and is
+damped. The supersonic factor switches the fix off entirely in subsonic flow,
+where a shock cannot exist --- without it the pressure-gradient sensor also
+fires on the stagnation region of a stretched mesh, and the $M_\infty=0.15$ and
+cylinder results change in the fourth digit for no reason. With it they are
+unchanged to every digit written out (\cref{tab:shockfix}).
+
+The pressure gradient is the same halo-exchanged least-squares gradient used for
+the reconstruction, and every quantity in \cref{eq:shockfix} is face-averaged,
+so the blended flux is identical on the two ranks that share a cut face and the
+fix does not disturb partition independence. The strength $k$ is the one
+calibration constant; the default $k=6$ was fixed by requiring that the computed
+stagnation pressure not exceed the Rayleigh--Pitot value by more than a few per
+cent, and \code{--shock-fix 0} disables the fix. Because the sensor is off
+wherever the flow is subsonic or the pressure gradient is smooth, it has no
+effect at all on five of the eight cases.
+
+\begin{table}[htbp]
+\centering
+\caption{Multidimensional shock fix on the Mach 2 aerofoil. $C_L$ is exactly
+zero for this symmetric section at zero incidence, and $C_p^{\max}$ cannot
+exceed the Rayleigh--Pitot value, so both columns are absolute error measures.
+The last column is the rms difference between the upper and lower surface $C_p$
+distributions, which is likewise zero for the exact solution. Rusanov does not
+resolve the contact wave and is therefore immune to the instability, at the cost
+of dissipation everywhere else; the shock fix recovers most of its robustness
+while keeping HLLC away from the shock. Source: \code{results/} and
+\code{studies/verify/}.}
+\label{tab:shockfix}
+\gtable{tab_shockfix}
+\end{table}
+
 \subsection{Viscous flux}
 Face gradients of $(u,v,T)$ use the standard directional-derivative correction,
 which removes the odd--even decoupling of a plain average and remains
@@ -590,9 +658,12 @@ coordinates that leaves $\tau_{nn}=\tau_{tt}=0$ and only
 with $\mathbf{u}_{t,c}$ the tangential cell-centre velocity. Assembling the same
 quantity from the general formula instead lets the tangential part of the
 cell-centre least-squares gradient leak into the discrete
-$\nabla\!\cdot\!\mathbf{u}$, and on cells whose aspect ratio reaches $10^{4}$
-that leakage is not small: it produced a spurious normal traction worth $67\%$
-of the drag of the Mach 2 laminar case, where the exact value is zero. Farfield
+$\nabla\!\cdot\!\mathbf{u}$, and on cells whose aspect ratio reaches
+\nacaMaxAspectRatio{} that leakage is not small: during development it produced
+a spurious normal traction worth about two thirds of the drag of the Mach 2
+laminar case, where the exact value is zero. With \cref{eq:wallstress} the
+normal viscous traction is identically zero, and \code{sanity\_checks.json}
+asserts that on every viscous case. Farfield
 faces still use the general formula.
 
 \paragraph{Force decomposition.} With $\hat{\mathbf{n}}$ the outward normal of
@@ -728,7 +799,7 @@ loosening the computation:
 \item \textbf{Limiter freezing (all steady cases, automatic).} The
   $\min/\max$ stencil of any Barth-type limiter is a non-differentiable
   function of the solution, and on the shock-containing cases this produces a
-  residual limit cycle: the residual stalls at $10^{-3}$--$10^{-2}$ of its
+  residual limit cycle: the residual stalls at a few times $10^{-3}$ of its
   initial value while the limiter pattern flips between two states
   (\cref{fig:limiter_study}). The solver therefore holds the limiter values
   fixed from pseudo-time step $3\,n_{\rm ramp}$ onwards, i.e.\ two full CFL-ramp
@@ -745,8 +816,8 @@ loosening the computation:
   The supplied pseudo-time CFL of $1.0$ makes the dual-time diagonal
   $V/\Delta\tau$ dominate the physical-time term $1.5V/\Delta t$ by a factor
   $\Delta t/(1.5\Delta\tau)\sim30$ in the near-wall cells, so the inner loop
-  degenerates into a slow pseudo-time march and needs $\sim250$ iterations per
-  physical step. Raising the pseudo-time CFL changes only the convergence
+  degenerates into a slow pseudo-time march and needs
+  \cflSuppliedInner{} iterations per physical step on average. Raising the pseudo-time CFL changes only the convergence
   \emph{rate} of the inner problem, never its converged solution.
   \Cref{tab:cflstudy} separates the two effects. At the \emph{supplied} inner
   target of $10^{-3}$, raising the pseudo-CFL from 1 to 100 changes $C_D$ by
@@ -879,9 +950,22 @@ The manufactured state is a $C^\infty$, compactly supported perturbation of a
 uniform $M\approx0.42$ flow; because the support does not reach the boundary,
 the manufactured state coincides with the freestream there and the ordinary
 characteristic farfield condition is exact, so the measured error is purely the
-interior discretisation error. The analytic flux divergence is added as a source
-term, the steady problem is converged by eleven orders, and the solution is
-compared with \emph{exact cell averages} obtained by quadrature.
+interior discretisation error. The flux divergence of the manufactured state is
+added as a source term, the steady problem is converged by eleven orders, and the solution is
+compared with \emph{cell averages}, not point values, obtained by the same
+three-point edge-midpoint quadrature on each sub-triangle that produces the
+source term. Two consequences are worth stating plainly. The quadrature is exact
+only for quadratics, so it contributes its own error --- measured at
+$1.6\times10^{-4}$ on the coarsest level and $1.3\times10^{-7}$ on the finest,
+i.e.\ converging faster than the discretisation error it is used to measure, but
+not zero. And the flux divergence that forms the source term is evaluated by
+second-order central differences with a step of $10^{-5}$ rather than
+symbolically; its worst-case error over the levels used is $2\times10^{-8}$,
+three orders below the finest discretisation error in \cref{tab:mms}. What
+matters is that the \emph{same} quadrature is used for the source term and for
+the error: a source term built from centroid point values would be inconsistent
+with a cell-averaged error at $\mathcal{O}(h^{2})$ and would corrupt the
+measured order.
 
 \begin{table}[htbp]
 \centering
@@ -1095,7 +1179,8 @@ $6\times10^{-7}$ at $M_\infty=0.15$ and $6\times10^{-6}$ at $M_\infty=0.8$
 (\code{report/sanity\_checks.json}). The pointwise maximum is much larger
 ($5\times10^{-3}$ and $0.10$ respectively) but is confined to the sub-micron
 first cell layer of this viscous-type grid, whose aspect ratio reaches
-$\sim10^{4}$; those cells carry a negligible fraction of the domain area. The
+\nacaMaxAspectRatio{}; those cells carry a negligible fraction of the domain
+area. The
 practical consequence is that the \code{mach} column of \code{surface.csv},
 which is the boundary-state Mach number of that first cell, reads slightly below
 the isentropic value implied by the \code{cp} column of the same row. The
@@ -1111,8 +1196,9 @@ and the Mach and pressure fields.
 
 \paragraph{$M_\infty=0.8$.} This condition is just above the critical Mach
 number of the section, and the solution is transonic. The surface pressure
-crosses the sonic value $C_p^*=-0.435$ at $x/c\approx0.07$, reaches
-$C_p\approx-0.92$ (an isentropic Mach number of about $1.26$) near mid-chord,
+crosses the sonic value $C_p^*=-0.435$ at $x/c\approx0.065$, reaches
+$C_p=\cpMinInvMZeroEightZero{}$ (an isentropic Mach number of $1.26$) near
+mid-chord,
 and recovers abruptly to $C_p\approx-0.14$ between $x/c=0.50$ and $x/c=0.55$:
 a supersonic pocket about half a chord long terminated by a shock, symmetric on
 the two surfaces (\cref{fig:naca080}). The maximum Mach number in the field is
@@ -1131,6 +1217,21 @@ same order of magnitude, and the field shows the compressible shock/expansion
 pattern expected at $M=2$ rather than an incompressible-like solution.
 \Cref{fig:farfield} shows the wide view of this case beside the subsonic one,
 which is where the difference in character is most obvious.
+
+Two exact properties make this the sharpest plausibility check in the set, and
+both are reported rather than assumed. The section is symmetric at zero
+incidence, so $C_L$ must vanish; the computed value is \shockFixClFixed{}, i.e.\
+\shockFixClPercentOfDragFixed\% of $C_D$. And no point on the body can carry more
+stagnation pressure than a normal shock at $M_\infty=2$ delivers, which caps the
+surface pressure coefficient at $\pitotCeilingMachTwo$; the computed maximum is
+$\shockFixCpMaxFixed$. That the peak still exceeds the ceiling by
+$\shockFixCpExcessFixed\%$ is a genuine, disclosed discretisation error: the bow
+shock stands off the leading edge by a fraction of the nose radius and is
+captured across cells whose wall-normal size is $5\times10^{-6}$ chords, so the
+stagnation streamline is under-resolved. Without the shock fix of
+\cref{eq:shockfix} the same two errors are \shockFixClUnfixed{} and
+$\shockFixCpMaxUnfixed$ (\cref{tab:shockfix}), which is why the fix is on by
+default.
 
 \begin{figure}[htbp]
 \centering
@@ -1202,8 +1303,8 @@ laminar boundary layer is thick and the three cases behave quite differently.
 \begin{description}
 \item[$M_\infty=0.15$] is the cleanest check. Where the pressure gradient is
   weak the computed skin friction agrees with the Blasius flat-plate value to
-  about $1\%$ ($C_f=\cfThirtyChordLamMZeroOneFive$ at $x/c=0.3$ against
-  $0.664/\sqrt{Re_x}=\blasiusCfThirty$); it falls below it under the adverse
+  \blasiusDifferencePct\% ($C_f=\cfThirtyChordLamMZeroOneFive$ at $x/c=0.3$
+  against $0.664/\sqrt{Re_x}=\blasiusCfThirty$); it falls below it under the adverse
   gradient aft of maximum thickness, and crosses zero at
   $x/c\approx\separationXLamMZeroOneFive$: laminar separation ahead of the
   trailing edge, which is what is expected at this Reynolds number. Upper and
@@ -1219,7 +1320,8 @@ laminar boundary layer is thick and the three cases behave quite differently.
   shock/boundary-layer interaction, and a genuine viscous--inviscid effect
   rather than a mesh artefact.
 \item[$M_\infty=2.0$] is in the strong viscous-interaction regime. At $x/c=0.5$
-  the boundary layer is about $0.08$ chords thick, comparable to the local
+  the boundary layer is $\delta_{99}=\blThicknessMachTwo$ chords thick
+  (\code{tools/mesh\_facts.py}), i.e.\ \blOverHalfThickness{} times the local
   half-thickness of the section itself, so the effective body is markedly
   blunter than the aerofoil. The consequence is visible in the force split: the
   pressure drag rises from $\cdNacaZeroZeroOneTwoMTwoZeroZeroInviscid$ in the
@@ -1259,8 +1361,10 @@ skin friction $C_f$, (d) Mach number, (e) pressure.}
 (b) force history, (c) $C_p$ and $C_f$, (d) Mach number, (e) pressure. Unlike
 the inviscid case at the same Mach number, the surface never becomes
 supersonic: the thick laminar boundary layer displaces the flow so that the
-small supersonic region ($M_{\max}=1.03$) sits off the wall, and the boundary
-layer separates at $x/c\approx0.53$ under the resulting adverse gradient.}
+small supersonic region ($M_{\max}=\machMaxLamMZeroEightZero$) sits off the
+wall, and the boundary layer separates at
+$x/c\approx\separationXLamMZeroEightZero$ under the resulting adverse
+gradient.}
 \label{fig:naca080v}
 \end{figure}
 
@@ -1310,7 +1414,7 @@ by \code{tools/make\_report\_tables.py}.}
 \gtable{tab_cyl20}
 \end{table}
 
-The agreement is within about $1\%$ on the total drag and on both parts of its
+The agreement is within $2\%$ on the total drag and on both parts of its
 split, and the separation angle falls in the accepted range. Two details are
 worth noting. First, the front stagnation $C_p$ sits well above the compressible
 stagnation value of $1.002$ at $M_\infty=0.1$; that excess is the expected
@@ -1440,8 +1544,10 @@ but that is a relative measure of a drag coefficient of $\mpiCdNaca$ --- the
 spurious drag of a symmetric, uncambered section at zero incidence in an
 inviscid flow, whose exact value is zero --- so the meaningful measure is the
 \emph{absolute} disagreement, \mpiMaxAbsCdNaca. Both are at the level of the
-iterative convergence criterion (the runs stop at a force drift of
-$5\times10^{-5}$) rather than a partition effect: the residual assembly is
+iterative convergence criterion --- the runs stop when the mean $C_D$ moves by
+less than $\max(5\times10^{-5},\,3\times10^{-3}|C_D|)$ between two consecutive
+windows, which is $5\times10^{-5}$ for this aerofoil case and
+$6.1\times10^{-3}$ for the cylinder --- rather than a partition effect: the residual assembly is
 partition-independent by construction (\cref{sec:mpi}), and the only
 rank-dependence is the lagged coupling of the LU-SGS sweeps across rank
 boundaries, which changes the path to the steady state but not the state itself.
@@ -1503,8 +1609,8 @@ $\mpiSpeedupFourCyl\times$ (cylinder) and $\mpiSpeedupFourNaca\times$
 consequently \emph{slower} in wall-clock time than $np=1$ while performing the
 same work and producing the same answer. Open MPI is also launched with
 \code{--bind-to none}, because its default core pinning collapses performance
-under such a quota --- with pinning, $np=2$ measured five times slower than
-$np=1$. The host is shared, so the wall-clock column of \cref{tab:mpi} carries
+under such a quota; this was measured during development and is the reason
+\code{scripts/env.sh} sets \code{MPIRUN\_FLAGS} as it does. The host is shared, so the wall-clock column of \cref{tab:mpi} carries
 run-to-run noise of the order of ten percent and should not be read as a clean
 scaling curve; the rank-independent columns (steps, forces, edge cut, balance)
 are the ones that test the solver. All of this is a property of the execution
@@ -1515,7 +1621,7 @@ submitted production result in \cref{tab:runs} was computed on 8 ranks.
 \section{Code Organisation and Extensibility}
 \label{sec:extensibility}
 
-The solver is about 6300 lines of C++ split into seven modules with one
+The solver is \cppLines{} lines of C++ split into seven modules with one
 responsibility each: \code{core/} (types, case-file parsing and validation,
 logging), \code{mesh/} (CGNS import, global mesh, METIS partitioner,
 distributor, rank-local mesh), \code{parallel/} (halo exchange and reductions),
@@ -1523,7 +1629,9 @@ distributor, rank-local mesh), \code{parallel/} (halo exchange and reductions),
 boundary conditions), \code{numerics/} (gradients, limiters, residual assembly,
 LU-SGS, the steady and transient drivers, verification), \code{io/} and
 \code{post/}. No file exceeds 660 lines. The Python post-processing is a further
-2000 lines under \code{tools/}, none of which participates in the solve.
+\pythonLines{} lines under \code{tools/}, none of which participates in the
+solve. Both counts are produced by \code{tools/make\_report\_tables.py} from the
+tree itself.
 
 The seams that matter for the extensions the task asks about are:
 
@@ -1583,8 +1691,9 @@ output files and share one style module (\code{tools/plot\_style.py}).
   the \emph{actual} mesh: every cell is split into triangles from its own
   connectivity, and cell values are moved to the nodes by area-weighted
   averaging. No interpolation grid and no scatter plot is used anywhere.
-  Between 18 and 60 contour levels are used, with thin contour lines overlaid on
-  the near-body views.
+  Every filled contour plot uses 60 levels, and the near-body Mach and pressure
+  views additionally carry 18 thin contour lines so that the shape of the
+  isolines is readable and not only the colour.
 \item \textbf{Colour bars} are always present and always carry the variable name
   and its nondimensional definition. Ranges of the Mach, pressure and
   velocity-magnitude plots are clipped to the $1$--$99$ percentile \emph{of the
@@ -1612,8 +1721,8 @@ output files and share one style module (\code{tools/plot\_style.py}).
 \label{sec:limitations}
 
 \paragraph{Roe flux at the Mach 2 bow shock.} With the Roe flux the Mach 2
-aerofoil case stalls far short of its residual target and generates tens of
-thousands of first-order positivity fallbacks per run, whereas HLLC on the
+aerofoil case stalls far short of its residual target and generates
+\roePositivityFallbacks{} first-order positivity fallbacks, whereas HLLC on the
 identical mesh and settings converges with none
 (\cref{tab:fluxcompare} and the \code{positivity\_fallback\_face\_states} field
 of the two \code{metadata.json} files). The Roe implementation is exact for
@@ -1627,26 +1736,52 @@ acoustic fields only, which is not where the instability originates. HLLC was
 therefore adopted as the production flux; Roe remains available and verified,
 and the two agree closely on every case where Roe converges.
 
+\paragraph{Residual carbuncle at the Mach 2 stagnation point.} HLLC is not
+immune to the same class of instability, only less prone to it, and the shock
+fix of \cref{eq:shockfix} suppresses rather than eliminates it. After the fix
+the Mach 2 leading-edge pressure coefficient is $\shockFixCpMaxFixed$ against
+the Rayleigh--Pitot ceiling of $\pitotCeilingMachTwo$ --- an excess of
+$\shockFixCpExcessFixed\%$, down from $\shockFixCpExcessUnfixed\%$ without it
+--- and the upper/lower surface $C_p$ distributions still differ by
+\shockFixSymFixed{} rms where the exact difference is zero. Part of that
+residual asymmetry is not the scheme's fault: the supplied mesh is not exactly
+mirror-symmetric at the leading edge. Within $|x|<0.02c$ it carries
+\meshAsymUpperCells{} cells above the axis against \meshAsymLowerCells{} below
+it, and \meshAsymFractionPct\% of the upper cells have no mirror closer than a
+tenth of their own size (\code{tools/mesh\_facts.py}), so a perfectly symmetric
+scheme run on this mesh would still produce a nonzero $C_L$. The remainder is
+under-resolution of the stand-off region. A pure Rusanov run, which cannot
+carbuncle at all, gives $\shockFixCpMaxRusanov$ and \shockFixSymRusanov{} rms
+(\cref{tab:shockfix}); the fact that its drag, \shockFixCdRusanov{}, agrees with
+the fixed HLLC value \shockFixCdFixed{} to well under a percent is the reason
+the fixed value is quoted as the answer. The proper cure would be a mesh with a
+resolved nose radius, or a rotated-hybrid Riemann solver in which the
+shock-normal direction is detected per face rather than blended for.
+
 \paragraph{Residual limit cycle on the shock cases.} As described in
 \cref{sec:time}, the non-differentiable $\min/\max$ stencil of the limiter drives
 the shock-containing cases into a bounded residual limit cycle. Freezing the
 limiter removes it at Mach 0.8 (\cref{fig:limiter_study}): the frozen run reaches
 the requested four orders within a few steps of the freeze point, whereas the
-unfrozen run stalls at $1.3\times10^{-3}$ of its initial residual for the whole
-20000-step budget. The two differ by $1.4\%$ in $C_D$ ($0.008543$ frozen against
-$0.008664$ unfrozen), which is a direct measure of how much the limit cycle
-biases the unconverged answer; the frozen value is the converged one and is what
-\cref{tab:forces} reports. At Mach 2 the run
-reaches the requested three-order reduction, and the stationarity test accepts
-it, while the solution is still inside the cycle: over the acceptance window the
-drag scatter is about $0.2\%$ of $C_D$ with no drift. Continuing the same case
-without limiter freezing to the full 20000-step budget
+unfrozen run stalls at \residualStallUnfrozenMachZeroEight{} of its initial
+residual for the whole \stepsUnfrozenMachZeroEight-step budget and its drag is
+still drifting upwards when that budget runs out. The two differ by
+\cdFreezeDiffPctMachZeroEight\% in $C_D$ (\cdFrozenMachZeroEight{} frozen
+against \cdUnfrozenMachZeroEight{} unfrozen), which is a direct measure of how
+much the limit cycle biases the unconverged answer; the frozen value is the
+converged one and is what \cref{tab:forces} reports. At Mach 2 the run reaches
+the requested three-order reduction, and the stationarity test accepts it, while
+the solution is still inside the cycle: over the acceptance window the drag
+scatter is \cdScatterPctMachTwo\% of $C_D$ and the window-to-window drift is
+\cdDriftPctMachTwo\%. Continuing the same case without limiter freezing to the
+full \stepsUnfrozenMachTwo-step budget
 (\code{studies/verify/naca0012\_m200\_inviscid\_nofreeze}) leaves $C_D$ at
-$0.08809$ against $0.08799$ for the accepted production run --- a $0.12\%$
-difference, inside that band. That few tenths of a percent --- not the five
-digits printed in \cref{tab:forces} --- is the honest uncertainty of the Mach 2
-drag on this mesh, and it is the reason the force-stationarity tolerance is
-$0.3\%$ rather than tighter. A differentiable limiter (an MLP-$u2$ variant or
+\cdUnfrozenMachTwo{} against \cdFrozenMachTwo{} for the accepted production
+run --- a \cdFreezeDiffPctMachTwo\% difference, inside that band. A few tenths
+of a percent --- not the five digits printed in \cref{tab:forces} --- is
+therefore the honest uncertainty of the Mach 2 drag on this mesh, and it is the
+reason the force-stationarity tolerance is $0.3\%$ of $|C_D|$ rather than
+tighter. A differentiable limiter (an MLP-$u2$ variant or
 a smooth pressure-based sensor) would be the proper fix.
 
 \begin{figure}[htbp]
@@ -1706,10 +1841,10 @@ statistically periodic results for all \numCases{} required benchmark cases with
 discretisation order of \mmsOrderSecond{} for the unlimited second-order scheme
 and machine-level freestream preservation and linear exactness on the benchmark
 mesh; the two quantitative validation targets available in the literature ---
-$C_D\approx2.0$--$2.1$ for the $Re=20$ cylinder~\cite{dennischang,tritton} and
+$C_D\approx2.0$--$2.05$ for the $Re=20$ cylinder~\cite{dennischang,tritton} and
 $St\approx0.19$--$0.20$, $C_D\approx1.32$--$1.40$ for the $Re=200$ vortex
 street~\cite{williamson,henderson} --- are reproduced: the $Re=20$ drag and its
-pressure/friction split to about $1\%$, and the $Re=200$ Strouhal number within
+pressure/friction split to within $2\%$, and the $Re=200$ Strouhal number within
 the accepted band with a mean drag and lift amplitude a few percent below it,
 for the reasons set out in \cref{sec:cyl200}.
 

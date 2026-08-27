@@ -15,6 +15,7 @@ source scripts/env.sh
 mpirun -np 4 $MPIRUN_FLAGS ./build/cfd2d verify --levels 4 --base 16 \
     --case $CASES/naca0012_m015_laminar_re5000.json --out $REP/verification.json \
     2>/dev/null | tee $REP/verification.log
+$PY tools/mesh_facts.py --results $R --out $REP/mesh_facts.json || true
 $PY tools/mpi_study.py --root studies/mpi --out-csv $REP/mpi_study.csv \
     --out-figure $REP/figures/mpi_scaling.png || true
 $PY tools/analyze_transient.py --case-dir $R/cylinder_m010_laminar_re200 \

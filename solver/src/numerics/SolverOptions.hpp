@@ -18,6 +18,13 @@ struct SolverOptions {
   // Roe shock instability that appears at the Mach 2 bow shock on this mesh.
   RiemannScheme flux = RiemannScheme::kHllc;
   Real entropy_fix = 0.10;
+  // Multidimensional shock fix: blends the contact-resolving flux towards
+  // Rusanov on faces lying inside and along a strong shock, which is where the
+  // carbuncle instability originates.  0 disables it.  The default was
+  // calibrated on the Mach 2 aerofoil by requiring that the computed stagnation
+  // pressure not exceed the Rayleigh-Pitot value; see the sensitivity study in
+  // the report.
+  Real shock_fix = 6.0;
   LimiterType limiter = LimiterType::kVenkatakrishnan;
   Real venkatakrishnan_k = 5.0;
   bool second_order = true;

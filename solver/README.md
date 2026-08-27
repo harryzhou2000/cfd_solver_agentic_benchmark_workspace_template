@@ -20,7 +20,7 @@ task; see `report/report.pdf` for the full technical report and results.
 | Parallel | neighbour-scoped `MPI_Isend`/`MPI_Irecv` halo exchange of state, gradients and limiters; global reductions for residuals/forces |
 | Reconstruction | piecewise-linear, inverse-distance-weighted least-squares gradients of the primitive variables |
 | Limiter | Venkatakrishnan (default, `K=5`) or Barth–Jespersen, with a first-order positivity fallback |
-| Inviscid flux | HLLC (default), Roe with Harten–Yee entropy fix, or Rusanov/LLF |
+| Inviscid flux | HLLC (default), Roe with Harten–Yee entropy fix, or Rusanov/LLF, with a multidimensional shock fix that blends towards Rusanov only on faces lying *along* a strong shock (carbuncle suppression) |
 | Viscous flux | Newtonian stress + Fourier heat flux from corrected face gradients of `(u,v,T)` |
 | Boundary conditions | characteristic farfield, mirrored slip wall, no-slip adiabatic wall |
 | Steady solve | implicit backward Euler in local pseudo time with a CFL ramp and a residual-based CFL back-off safeguard |
@@ -130,8 +130,7 @@ scripts/run_verify_extra.sh      # Roe at Mach 2, restart round trip
 scripts/run_cfl_study.sh         # dual-time CFL/target study -> studies/cflstudy/
 
 scripts/make_report.sh           # verification, figures, manifests, LaTeX report
-.venv/bin/python ../cfd_solver_agentic_benchmark/examiner/validate_outputs.py \
-       results/* --report report
+scripts/check_submission.sh      # benchmark validator + stricter self-checks
 ```
 
 `results/` contains exactly the eight required case directories. The transient
@@ -155,8 +154,10 @@ Python tooling (all under `.venv`):
 | `tools/mpi_study.py` | rank-count timing and consistency tables/figure |
 | `tools/sanity_checks.py` | `report/sanity_checks.json` physics gate |
 | `tools/run_manifest.py` | `report/run_manifest.csv` and `report/run_manifest.md` |
+| `scripts/check_submission.sh` | runs `examiner/validate_outputs.py` plus completeness, honesty and traceability checks |
 | `tools/plot_verification.py` | manufactured-solution convergence figure |
 | `tools/limiter_study.py` | Mach 2 limiter limit-cycle figure |
+| `tools/mesh_facts.py` | mesh/flow facts quoted in the report (cell sizes, aspect ratios, sliver residual concentration, boundary-layer thickness) |
 
 Python dependencies: `numpy`, `matplotlib`, `scipy`.
 

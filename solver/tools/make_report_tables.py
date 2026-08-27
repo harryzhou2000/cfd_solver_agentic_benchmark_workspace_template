@@ -674,6 +674,9 @@ def main():
         seg = cdp[-w:]
         macro("cdScatterPct" + tag,
               f"{100.0 * float(np.std(seg)) / max(abs(float(np.mean(seg))), 1e-30):.2f}")
+        prev = cdp[-2 * w:-w] if len(cdp) >= 2 * w else seg
+        macro("cdDriftPct" + tag,
+              f"{100.0 * abs(float(np.mean(seg)) - float(np.mean(prev))) / max(abs(float(np.mean(seg))), 1e-30):.2f}")
         macro("freezeStep" + tag,
               f"{int(cases[cid]['meta'].get('limiter_freeze_step', 0))}")
 
@@ -691,6 +694,153 @@ def main():
         if m2:
             macro("unitTestAssertions", m2.group(1))
             macro("unitAssertionFailures", m2.group(3))
+
+    # ------------------------------------------------------- mesh and flow facts
+    mf = os.path.join(args.report, "mesh_facts.json")
+    if os.path.exists(mf):
+        F = json.load(open(mf))
+        nm = F["meshes"].get("naca")
+        cm = F["meshes"].get("cylinder")
+        if nm:
+            macro("nacaMaxAspectRatio", f"{nm['max_aspect_ratio']:.0f}")
+            macro("nacaMedianCellArea", sci(nm["median_cell_area"], 1))
+            macro("nacaMinCellArea", sci(nm["min_cell_area"], 1))
+            ms = nm.get("leading_edge_mirror_symmetry")
+            if ms:
+                macro("meshAsymUpperCells", f"{ms['num_upper']}")
+                macro("meshAsymLowerCells", f"{ms['num_lower']}")
+                macro("meshAsymFractionPct",
+                      f"{100.0 * ms['fraction_without_close_mirror']:.0f}")
+            sl = nm.get("sliver_residual_concentration")
+            if sl:
+                macro("sliverCells", f"{sl['num_cells']}")
+                macro("sliverMeanArea", sci(sl["mean_cell_area"], 1))
+                macro("sliverAreaFraction", sci(sl["area_fraction"], 1))
+        if cm:
+            macro("cylinderMaxAspectRatio", f"{cm['max_aspect_ratio']:.0f}")
+        li = F.get("aerofoil_final_residual_linf")
+        if li:
+            macro("linfPlateauMin", f"{li['min']:.0f}")
+            macro("linfPlateauMax", f"{li['max']:.0f}")
+        bl = F["cases"].get("naca0012_m200_laminar_re5000", {}).get("boundary_layer")
+        if bl:
+            macro("blThicknessMachTwo", f"{bl['delta99']:.3f}")
+            macro("blOverHalfThickness", f"{bl['delta99_over_half_thickness']:.2f}")
+        bz = F["cases"].get("naca0012_m015_laminar_re5000", {}).get("blasius")
+        if bz:
+            macro("blasiusComputedCf", f"{bz['computed_cf']:.5f}")
+            macro("blasiusReferenceCf", f"{bz['blasius_cf']:.5f}")
+            macro("blasiusDifferencePct", f"{100.0 * bz['relative_difference']:.1f}")
+
+    # ------------------------------------------------ multidimensional shock fix
+    # Mach 2 aerofoil with the fix on (production), off, and with Rusanov, which
+    # is immune to the carbuncle because it does not resolve the contact wave.
+    # The Rayleigh-Pitot ceiling is the largest stagnation pressure a normal
+    # shock at this Mach number can produce, so a wall C_p above it is a
+    # discretisation artefact by definition.
+    def surface_facts(d):
+        sp = os.path.join(d, "surface.csv")
+        if not os.path.exists(sp):
+            return None
+        rows = list(csv.DictReader(open(sp, newline="")))
+        x = np.array([float(r["x"]) for r in rows])
+        cp = np.array([float(r["cp"]) for r in rows])
+        ny = np.array([float(r["ny"]) for r in rows])
+        up = ny < 0.0
+        xu, cu = x[up], cp[up]
+        xl, cl = x[~up], cp[~up]
+        o = np.argsort(xu); xu, cu = xu[o], cu[o]
+        o = np.argsort(xl); xl, cl = xl[o], cl[o]
+        dif = np.abs(cu - np.interp(xu, xl, cl))
+        return dict(cp_max=float(cp.max()),
+                    sym_rms=float(np.sqrt((dif**2).mean())),
+                    sym_max=float(dif.max()))
+
+    def pitot_cp(mach, gamma=1.4):
+        m2 = mach * mach
+        ratio = (((gamma + 1) ** 2 * m2 / (4 * gamma * m2 - 2 * (gamma - 1)))
+                 ** (gamma / (gamma - 1)) * (1 - gamma + 2 * gamma * m2) / (gamma + 1))
+        return (ratio - 1.0) / (0.5 * gamma * m2)
+
+    SF = [("HLLC + shock fix (production)", os.path.join(args.results, "naca0012_m200_inviscid")),
+          ("HLLC, fix disabled", os.path.join("studies", "verify",
+                                              "naca0012_m200_inviscid_noshockfix")),
+          ("Rusanov", os.path.join("studies", "verify", "naca0012_m200_inviscid_rusanov"))]
+    sf_rows = [(lbl, d, surface_facts(d)) for lbl, d in SF]
+    sf_rows = [(l, d, f) for l, d, f in sf_rows
+               if f is not None and os.path.exists(os.path.join(d, "metadata.json"))]
+    if sf_rows:
+        ceiling = pitot_cp(2.0)
+        macro("pitotCeilingMachTwo", f"{ceiling:.3f}")
+        T.append(r"% ---- multidimensional shock fix, Mach 2 aerofoil")
+        T.append(r"\begin{tabular}{lrrrrr}")
+        T.append(r"\toprule")
+        T.append(r"variant & $C_D$ & $|C_L|$ & $C_p^{\max}$ & upper/lower $C_p$ rms & steps\\")
+        T.append(r"\midrule")
+        for lbl, d, f in sf_rows:
+            m = json.load(open(os.path.join(d, "metadata.json")))
+            st = json.load(open(os.path.join(d, "run_status.json")))
+            T.append(rf"{esc(lbl)} & {float(m['final_cd']):.5f} & "
+                     rf"{sci(abs(float(m['final_cl'])), 1)} & {f['cp_max']:.3f} & "
+                     rf"{sci(f['sym_rms'], 1)} & {int(st['final_step'])}\\")
+        T.append(rf"\midrule\multicolumn{{3}}{{l}}{{\emph{{Rayleigh--Pitot ceiling}}}} & "
+                 rf"{ceiling:.3f} & \multicolumn{{2}}{{l}}{{\emph{{exact upper bound}}}}\\")
+        T.append(r"\bottomrule")
+        T.append(r"\end{tabular}")
+        flush("shockfix")
+        for lbl, key in (("HLLC + shock fix (production)", "Fixed"),
+                         ("HLLC, fix disabled", "Unfixed"), ("Rusanov", "Rusanov")):
+            for l, d, f in sf_rows:
+                if l != lbl:
+                    continue
+                m = json.load(open(os.path.join(d, "metadata.json")))
+                cd_ = float(m["final_cd"])
+                cl_ = abs(float(m["final_cl"]))
+                macro("shockFixCd" + key, f"{cd_:.5f}")
+                macro("shockFixCl" + key, sci(cl_, 1))
+                macro("shockFixClPercentOfDrag" + key, f"{100.0 * cl_ / abs(cd_):.1f}")
+                macro("shockFixCpMax" + key, f"{f['cp_max']:.3f}")
+                macro("shockFixCpExcess" + key,
+                      f"{100.0 * (f['cp_max'] - ceiling) / ceiling:.0f}")
+                macro("shockFixSym" + key, sci(f["sym_rms"], 1))
+
+    # Cases where the sensor must be inactive: the run with --shock-fix 0 has to
+    # reproduce the production run exactly.
+    inv = []
+    for cid in ("cylinder_m010_laminar_re20", "naca0012_m015_laminar_re5000"):
+        d0 = os.path.join("studies", "verify", cid + "_noshockfix")
+        if cid in cases and os.path.exists(os.path.join(d0, "metadata.json")):
+            a = float(cases[cid]["meta"]["final_cd"])
+            b = float(json.load(open(os.path.join(d0, "metadata.json")))["final_cd"])
+            inv.append(abs(a - b) / max(abs(a), 1e-30))
+    if inv:
+        macro("shockFixInactiveMaxDiff", sci(max(inv), 1))
+        macro("shockFixInactiveCases", str(len(inv)))
+
+    # ------------------------------------------- Roe Mach 2 failure diagnostics
+    roe2 = os.path.join("studies", "verify", "naca0012_m200_inviscid_roe", "metadata.json")
+    if os.path.exists(roe2):
+        rm = json.load(open(roe2))
+        macro("roePositivityFallbacks",
+              f"{int(rm.get('positivity_fallback_face_states', 0)):,}".replace(",", r"\,"))
+        macro("roeOrdersMachTwo",
+              f"{float(json.load(open(os.path.join(os.path.dirname(roe2), 'run_status.json')))['residual_reduction_orders']):.2f}")
+
+    # ------------------------------------------------------------ code size
+    # Counted here rather than typed, so the figure cannot go stale.
+    nlines = 0
+    for root, _dirs, files in os.walk("src"):
+        for fn in files:
+            if fn.endswith((".cpp", ".hpp")):
+                with open(os.path.join(root, fn)) as fh:
+                    nlines += sum(1 for _ in fh)
+    macro("cppLines", f"{nlines:,}".replace(",", r"\,"))
+    plines = 0
+    for fn in sorted(os.listdir("tools")):
+        if fn.endswith(".py"):
+            with open(os.path.join("tools", fn)) as fh:
+                plines += sum(1 for _ in fh)
+    macro("pythonLines", f"{plines:,}".replace(",", r"\,"))
 
     # Sanity-check summary
     sp = os.path.join(args.report, "sanity_checks.json")
@@ -720,7 +870,7 @@ def main():
         raise SystemExit("duplicate generated macro(s), LaTeX would reject them: "
                          + ", ".join(sorted(set(dup))))
     for name in ("runs", "cases", "forces", "numerics", "inner", "partition", "mpi", "mms",
-                 "flux", "cflstudy", "re200", "cyl20"):
+                 "flux", "cflstudy", "re200", "cyl20", "shockfix"):
         p = os.path.join(tdir, f"tab_{name}.tex")
         if not os.path.exists(p):
             open(p, "w").write(r"\emph{(data not available)}" + "\n")

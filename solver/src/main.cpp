@@ -64,6 +64,9 @@ const char* kUsage =
     "  --report-level brief|full\n"
     "  --flux roe|hllc|rusanov          (default hllc)\n"
     "  --entropy-fix <x>                Harten-Yee coefficient (default 0.1)\n"
+    "  --shock-fix <x>                  multidimensional shock-fix strength; blends the\n"
+    "                                   contact-resolving flux towards Rusanov on faces\n"
+    "                                   lying along a strong shock (default 6, 0 disables)\n"
     "  --limiter venkatakrishnan|barth|none   (default venkatakrishnan)\n"
     "  --venk-k <x>                     Venkatakrishnan constant (default 5)\n"
     "  --first-order                    disable linear reconstruction (debug only)\n"
@@ -143,6 +146,7 @@ SolverOptions buildOptions(const CliArgs& a) {
   else CFD_THROW("unknown --limiter '" << lim << "' (venkatakrishnan|barth|none)");
 
   o.entropy_fix = optReal(a, "entropy-fix", o.entropy_fix);
+  o.shock_fix = optReal(a, "shock-fix", o.shock_fix);
   o.venkatakrishnan_k = optReal(a, "venk-k", o.venkatakrishnan_k);
   o.second_order = a.opts.find("first-order") == a.opts.end();
   o.inner_sweeps = static_cast<int>(optInt(a, "inner-sweeps", o.inner_sweeps));
@@ -420,6 +424,7 @@ int runSolve(const CliArgs& a) {
 
   LOG() << "numerics: flux=" << toString(options.flux)
         << " entropy_fix=" << options.entropy_fix
+        << " shock_fix=" << options.shock_fix
         << " reconstruction=" << (options.second_order ? "linear_least_squares" : "first_order")
         << " limiter=" << toString(options.limiter) << " (K=" << options.venkatakrishnan_k << ")"
         << (options.limiter_freeze_step == 0 ? " limiter_freezing=off" : "")
@@ -486,6 +491,10 @@ int runSolve(const CliArgs& a) {
     md["entropy_fix"] = (options.flux == RiemannScheme::kRoe && options.entropy_fix > 0.0)
                             ? json("harten_yee_acoustic_fields")
                             : json(nullptr);
+    md["shock_fix"] = options.shock_fix > 0.0
+                          ? json("multidimensional_pressure_gradient_rusanov_blend")
+                          : json(nullptr);
+    md["shock_fix_strength"] = options.shock_fix;
     md["viscous_flux"] = (cfg.mode == PhysicsMode::kLaminar)
                              ? "newtonian_stress_fourier_heat_flux_corrected_face_gradients"
                              : "disabled_inviscid_case";

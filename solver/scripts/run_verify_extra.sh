@@ -1,6 +1,7 @@
 #!/bin/bash
 # Additional cross-check runs that complete the verification study:
 #   * the Mach 2 case with the Roe flux, to quantify its shock instability;
+#   * two shock-free cases with the shock fix disabled, to show it is inactive;
 #   * a restart round trip, to show that restart_final.* reproduces the state.
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -13,6 +14,15 @@ run() { scripts/run_case.sh "$@" 2>&1 | grep -v "Authorization required" || true
 # well past the point where its residual has plateaued.
 run naca0012_m200_inviscid 4 $S/verify/naca0012_m200_inviscid_roe $COMMON --flux roe \
     --max-steps 15000
+
+# Shock-fix invariance: two subsonic/transonic cases with the fix switched off.
+# The sensor requires locally supersonic flow and a strong pressure gradient, so
+# these must reproduce the production runs; the report cites them as evidence
+# that the fix is inactive outside the strong-shock region.
+run cylinder_m010_laminar_re20 4 $S/verify/cylinder_m010_laminar_re20_noshockfix \
+    $COMMON --shock-fix 0
+run naca0012_m015_laminar_re5000 4 $S/verify/naca0012_m015_laminar_re5000_noshockfix \
+    $COMMON --shock-fix 0
 
 # Restart round trip: continue the converged Mach 0.15 case from its restart
 # file for a few steps and check that the forces are unchanged.  The run itself

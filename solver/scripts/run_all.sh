@@ -53,6 +53,12 @@ if [ "$MODE" = verify ] || [ "$MODE" = all ]; then
       --max-steps 20000 --freeze-limiter-step 0
   run naca0012_m080_inviscid     4 $S/verify/naca0012_m080_inviscid_nofreeze $COMMON \
       --max-steps 20000 --freeze-limiter-step 0
+  # Shock-fix cross-check: the same Mach 2 case with the multidimensional shock
+  # fix disabled (the carbuncle appears) and with Rusanov, which is immune to it.
+  run naca0012_m200_inviscid     4 $S/verify/naca0012_m200_inviscid_noshockfix $COMMON \
+      --shock-fix 0
+  run naca0012_m200_inviscid     4 $S/verify/naca0012_m200_inviscid_rusanov    $COMMON \
+      --flux rusanov
   # First-order reference, to show what the linear reconstruction buys.
   run naca0012_m015_laminar_re5000 4 $S/verify/naca0012_m015_laminar_re5000_o1 \
       $COMMON --first-order --max-steps 20000

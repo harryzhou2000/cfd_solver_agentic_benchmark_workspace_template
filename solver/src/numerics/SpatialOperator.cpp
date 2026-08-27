@@ -21,6 +21,7 @@ SpatialOperator::SpatialOperator(const LocalMesh& mesh, const CaseConfig& cfg,
   flux_opt_.scheme = opt_.flux;
   flux_opt_.entropy_fix = opt_.entropy_fix;
   flux_opt_.dissipation_scale = cfg_.run.rusanov_dissipation_scale;
+  flux_opt_.shock_fix = opt_.shock_fix;
 
   halo_.setup(mesh_, comm_);
 
@@ -329,7 +330,21 @@ void SpatialOperator::evaluateResidual() {
     PrimVec wl{}, wr{};
     safeState(l, mesh_.face_center[f], wl);
     safeState(r, mesh_.face_center[f], wr);
-    ConsVec flux = inviscidFlux(wl, wr, n, gas_, flux_opt_);
+    // Multidimensional shock fix.  The sensor uses face-averaged pressure and
+    // pressure gradient and the cell-centre separation, all of which are
+    // identical on the two ranks that share a cut face, so the blended flux is
+    // still partition-independent.
+    Real blend = 0.0;
+    if (flux_opt_.shock_fix > 0.0) {
+      const Real* gpl = &grad_[l * kNVar * kDim + 3 * kDim];
+      const Real* gpr = &grad_[r * kNVar * kDim + 3 * kDim];
+      const Vec2 gp{0.5 * (gpl[0] + gpr[0]), 0.5 * (gpl[1] + gpr[1])};
+      const Vec2 d = mesh_.cell_center[r] - mesh_.cell_center[l];
+      const Real ml = gas_.mach(&w_[l * kNVar]), mr = gas_.mach(&w_[r * kNVar]);
+      blend = shockFixWeight(n, gp, 0.5 * (w_[l * kNVar + 3] + w_[r * kNVar + 3]),
+                             norm(d), std::max(ml, mr), flux_opt_.shock_fix);
+    }
+    ConsVec flux = inviscidFlux(wl, wr, n, gas_, flux_opt_, blend);
 
     if (viscous) {
       const PrimVec wcl{w_[l * kNVar], w_[l * kNVar + 1], w_[l * kNVar + 2], w_[l * kNVar + 3]};
@@ -374,7 +389,15 @@ void SpatialOperator::evaluateResidual() {
       for (int k = 0; k < kNVar; ++k) bstate_[b * kNVar + k] = wb2[k];
     }
 
-    ConsVec flux = inviscidFlux(wi, wg, n, gas_, flux_opt_);
+    Real bblend = 0.0;
+    if (flux_opt_.shock_fix > 0.0) {
+      const Real* gpc = &grad_[c * kNVar * kDim + 3 * kDim];
+      const Vec2 gp{gpc[0], gpc[1]};
+      const Vec2 d = mesh_.bface_center[b] - mesh_.cell_center[c];
+      bblend = shockFixWeight(n, gp, w_[c * kNVar + 3], 2.0 * norm(d),
+                              gas_.mach(&w_[c * kNVar]), flux_opt_.shock_fix);
+    }
+    ConsVec flux = inviscidFlux(wi, wg, n, gas_, flux_opt_, bblend);
 
     Real tx = 0.0, ty = 0.0;
     if (viscous && bc == BcType::kNoSlipAdiabaticWall) {
