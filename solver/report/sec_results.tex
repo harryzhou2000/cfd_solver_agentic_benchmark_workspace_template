@@ -148,6 +148,28 @@ script that performs the extrapolation is \texttt{report/extrapolate\_tail.py} a
 the window diagnostics are \texttt{report/check\_window.py}, both of which read only
 the submitted \texttt{forces.csv}.
 
+\paragraph{Three different things limit precision, and each is quantified.} It is worth
+collecting them, because they are independent and a reader should know which applies where:
+
+\begin{itemize}
+  \item \textbf{Limit-cycle amplitude.} For $\Minf=2.0$ inviscid the solution is a bounded
+  oscillation, so no number of iterations produces more digits: the honest report is the mean
+  plus the amplitude, $C_D=0.0880\pm0.0007$ (\cref{sec:limitcycle}).
+  \item \textbf{Conditioning of the tail estimate.} For a monotone asymptotic approach the
+  remaining movement is computable, but only where the decay ratio is away from unity. At
+  $r=0.733$ the cylinder's asymptote is quotable; at $r=0.994$ nothing is
+  (\cref{sec:conditioning}).
+  \item \textbf{Partition sensitivity.} For the one case needing tens of thousands of
+  iterations, two rank counts give answers $\num{5.0e-4}$ apart, far more than either run's
+  own tail estimate, so its fourth digit is partition-dependent rather than converged
+  (\cref{sec:conditioning}).
+\end{itemize}
+
+None of the three is a defect; each is a property of the problem or the algorithm, measured
+rather than assumed. Their value is that they say where the reported digits come from, and
+by implication that the coefficients not carrying such a caveat are limited only by the
+convergence level stated beside them.
+
 \subsection{NACA0012 Cases}
 \label{sec:naca}
 

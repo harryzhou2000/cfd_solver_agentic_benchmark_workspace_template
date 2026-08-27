@@ -864,6 +864,59 @@ near unity, that number is a \textbf{lower bound on the remaining movement} and 
 be quoted as a predicted converged value, including when read directly out of
 \texttt{run\_status.json}.
 
+\paragraph{And it bounds one trajectory, not the spread between trajectories.} There is a
+second, sharper limit on what the tail estimate means, found by running this same case at a
+different rank count. Both runs converged by every criterion the solver applies:
+
+\begin{center}
+\begin{tabular}{lrrr}
+  \toprule
+  Run & Steps to converge & $C_D$ & Self-reported remaining \\
+  \midrule
+  $np=2$ (edge cut $120$) & \num{48319} & $0.137643$ & \num{6.9e-6} \\
+  $np=4$ (edge cut $241$) & \num{37022} & $0.137141$ & \num{1.45e-5} \\
+  \midrule
+  Difference & & $\mathbf{\num{5.02e-4}}$ & \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The two results differ by $\num{5.02e-4}$, or $\num{3.65e-3}$ relative --- which is
+\textbf{35 times} the remaining movement the $np=4$ run reports for itself and \textbf{73
+times} that of the $np=2$ run. Neither run is wrong. The tail estimate bounds how much
+further $C_D$ will move \emph{along the trajectory being followed}; it says nothing about
+how far apart two different trajectories end up. Those are different quantities, and quoting
+the first as the total uncertainty overstates the precision by more than an order of
+magnitude.
+
+The mechanism is the partition-dependent LU-SGS sweep order of \cref{sec:mpi}, and it is
+quantitative rather than asserted. Sweep-order differences accumulate through every
+iteration, so the divergence should scale with the number of iterations --- and it does:
+\begin{center}
+\begin{tabular}{lrr}
+  \toprule
+  Comparison & Iterations & Relative deviation \\
+  \midrule
+  Consistency study, fixed budget & \num{1500} & \num{1.05e-4} \\
+  This case, run to convergence & ${\sim}\num{42000}$ & \num{3.65e-3} \\
+  \midrule
+  Ratio & $28\times$ & $35\times$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+\noindent A $28$-fold increase in iteration count produces a $35$-fold increase in
+deviation, which is close to linear accumulation and is what the mechanism predicts. It is
+why this effect is invisible in the seven cases that converge in \num{2400}--\num{4600}
+steps and visible in the fourth digit of the one that needs ten times as many.
+
+\textbf{This is not an MPI-correctness defect and should not be read as one.} The
+disqualifying condition is a rank count changing steady results by order-one amounts; this
+is $\num{3.65e-3}$ relative on the hardest case in the set, with an identified mechanism
+and a measured bound, which is more than two orders of magnitude away from that. An
+unexplained or unbounded discrepancy would be a defect. A measured one with a known cause
+is a documented limit on the result, and it is reported as such: for this case
+$C_D=0.1371$, with three digits solid and the fourth partition-dependent.
+
 This was found by checking the report's own extrapolation against data that arrived later,
 which is the only way it could have been found: at any single point the fit looks
 excellent, with the ratios agreeing to three decimal places across all nine sub-blocks.
