@@ -1,0 +1,359 @@
+{
+  "schema": "agent_scores",
+  "contestant": "opus-03",
+  "evaluated_at": "2026-08-28T02:33:24.763516+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "claude",
+    "notes": null
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "067928d9-a740-48aa-8642-c7f6a09c7d77"
+    ],
+    "execution_date": "2026-08-26",
+    "started_at": "2026-08-26T09:26:45.938000+00:00",
+    "ended_at": "2026-08-27T15:31:11.018000+00:00",
+    "time_basis": "selected root transcript timestamps",
+    "contestant_final_response_status": "present",
+    "contestant_final_response_absence_reason": null,
+    "rationale": "The sole root starts with the benchmark goal, continues through implementation and all case work, has five persisted subagents, and ends with the submitted completion response."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "CMake source and a documented solver tree are present; evaluator did not repeat a clean binary build."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CLI parsing and case-file loading are implemented in source; all eight delivered packages structurally validate."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Solver separates mesh, solver, CGNS reader, scripts, and report components."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "No direct internal evidence of an external solver executable or wrapper was found; trust policy applied."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Case JSON is parsed for mesh, physics, controls, and BCs rather than branching only on two mesh names."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "METIS graph partitioning, ghost state exchange, and MPI reductions are implemented; rank results are reported."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 2,
+          "notes": "Re200 convergence logic relaxes the required target by 100x and force-marks max-inner exhaustion converged."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "MPI validation scripts and report evidence exist, but no independent clean rerun was needed for the decisive source finding."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 2,
+          "notes": "Raw result/log/data artifacts were committed during the run and required index-only curation; they remain preserved as workspace evidence."
+        }
+      ],
+      "overall_score": 3.75,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "Conservative state, gas closure, and residual assembly are visible in solver.cpp."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "CGNS reader, unstructured tri/quad connectivity, faces, geometry, and adjacency are implemented."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "Face residual assembly includes reconstructed inviscid and viscous contributions."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Rusanov flux is used for interior/farfield states."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "Slip and no-slip branches are present, but wall treatment is simplified pressure flux plus viscous contribution."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "Green-Gauss linear reconstruction is applied at faces with first-order positivity fallback."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Active Barth-Jespersen limiter is called before residual assembly in steady and transient loops."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Gradient-based viscous flux path exists, but the simplified wall handling limits confidence."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Diagonal pseudo-implicit updates and CFL controls exist; not a stronger coupled linear solve."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 1,
+          "notes": "BDF2 two-level structure exists, but production convergence is falsely accepted at 100x target or exhaustion."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS adjacency partitioning and neighbor ghost communication are present; report contains rank comparison."
+        }
+      ],
+      "overall_score": 3.42,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "All eight raw workspace packages and report satisfy the structural contract."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Explicit eight-case plus report validator command returned 0."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 2,
+          "notes": "All packages exist, but Re200 is not credible as successfully converged under its specified inner target."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Steady figures are readable; Re200 source convergence override materially limits physical-result credit."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Compiled 39-page report contains readable residual, force, Mach, pressure, and field figures."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "Report is extensive and buildable but repeats the invalid Re200 completion claim."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 3,
+          "notes": "Report figures are committed under report/figures, while raw manifest data required curation and is not in submission tip."
+        }
+      ],
+      "overall_score": 3.4,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 73,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 8,
+        "notes": "Build/CLI source and contract packages inspected; clean executable rerun not needed for the decisive finding."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 9,
+        "notes": "CGNS unstructured mesh, face construction, geometry, and adjacency source are present."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 12,
+        "notes": "Conservative Rusanov residual and BC branches exist; no-slip treatment is simplified."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Active Green-Gauss reconstruction, Barth-Jespersen limiter, and positivity fallback are source-visible."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 7,
+        "notes": "Viscous flux path exists, with limited confidence in wall treatment."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 6,
+        "notes": "BDF2/two-loop source exists but target is relaxed 100x and max-inner exhaustion is counted converged."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 9,
+        "notes": "METIS partition, halo exchange, reductions, and rank-study evidence are present."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 6,
+        "notes": "All packages validate, but Re200 result cannot receive claimed completion credit."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 3,
+        "notes": "39-page compiled report has broad coverage and figures, but is not honest about Re200 convergence."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 4,
+        "notes": "Modular mesh/solver/config organization leaves some extension space."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 4,
+      "notes": "Readable package passes validator; inner-target misses limit confidence."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 4,
+      "notes": "Readable package passes validator; residual target misses are documented in metadata."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 4,
+      "notes": "Readable validator-passing package and report figures."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 4,
+      "notes": "Readable validator-passing package and report coverage."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 4,
+      "notes": "Readable validator-passing package; some inner-target misses remain."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 4,
+      "notes": "Readable validator-passing package and visual evidence."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 4,
+      "notes": "Readable validator-passing steady package and reported wake figures."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 1,
+      "notes": "Package validates structurally, but source falsely counts a 100x-relaxed or exhausted inner solve as converged."
+    }
+  },
+  "disqualification": {
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "metadata claims incomplete or failed runs are successful",
+        "evidence": "solver.cpp transient loop accepts residual ratio < target*100 after inner>100 and force-marks max-inner exhaustion converged; terminal response and Re200 metadata claim complete success.",
+        "found": true
+      }
+    ]
+  },
+  "limitations": [
+    "No evaluator rerun was performed; Re200 was never rerun.",
+    "Raw result packages were evaluated in the workspace but excluded from the immutable curated submission tip."
+  ]
+}
