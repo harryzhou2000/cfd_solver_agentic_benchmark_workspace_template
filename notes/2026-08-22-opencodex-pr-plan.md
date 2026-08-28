@@ -247,3 +247,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 
 - CodeRabbit flagged that "ocx claude desktop import --apply" reuses applyProfile, which hard-coded the "ocx claude desktop apply" provenance for both setIntegrationEnabled and saveConfigPreservingClaudeCode. Fixed on 2cb348cd4: applyProfile accepts an optional ConfigMutationSource; import --apply passes the import source through; plain apply keeps the apply detail. claude-desktop-cli + audit + restore-back 58/58, typecheck clean. Thread replied, body updated, ready, CodeRabbit resumed.
 - A/D unchanged at f1d819be8 heads (82a9b6f26 / 92ae5a723), ready + green; C parked.
+
+## Status 2026-08-28 (B audit assertion fix)
+
+- CodeRabbit caught a flaw in the new test: re-enabling codex removes clientIntegrations, but the test asserted it was present. Fixed on 7e50fec2c to assert the snapshot records the removed key as null and the earlier disable row stores {codex:false}. Audit + claude-desktop-cli + restore-back 58/58. Thread replied; ready + resumed.
