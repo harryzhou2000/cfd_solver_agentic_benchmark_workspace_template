@@ -242,3 +242,8 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-28 (third rebase round)
 
 - Upstream dev advanced again 7794485cd -> f1d819be8 (dest CI honesty, 2 commits). All four rebased: A 82a9b6f26, B 6d615f4d8 (restore-back provenance fix carried), C 097981126, D 92ae5a723. Revalidated: A 122, B 51 (audit + cli-restore-back), C 58, D 344 + typecheck clean. Force-pushed; bodies updated to f1d819be8 + new heads; A/B/D ready + resumed; C draft.
+
+## Status 2026-08-28 (B CR finding on claude-desktop import provenance)
+
+- CodeRabbit flagged that "ocx claude desktop import --apply" reuses applyProfile, which hard-coded the "ocx claude desktop apply" provenance for both setIntegrationEnabled and saveConfigPreservingClaudeCode. Fixed on 2cb348cd4: applyProfile accepts an optional ConfigMutationSource; import --apply passes the import source through; plain apply keeps the apply detail. claude-desktop-cli + audit + restore-back 58/58, typecheck clean. Thread replied, body updated, ready, CodeRabbit resumed.
+- A/D unchanged at f1d819be8 heads (82a9b6f26 / 92ae5a723), ready + green; C parked.
