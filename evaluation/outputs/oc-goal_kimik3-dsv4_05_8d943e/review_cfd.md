@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-08-27T16:16:36.046324+00:00
+Generated: 2026-08-28T02:21:38.680820+00:00
 
 **Overall score: 4.46**
 

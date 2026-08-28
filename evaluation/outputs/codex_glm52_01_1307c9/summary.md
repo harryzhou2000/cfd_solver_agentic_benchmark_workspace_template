@@ -9,11 +9,12 @@
 ## Snapshot
 
 - Configs captured: no · sessions analyzed: no · env snapshot: no (run before agent started) · agent report/scores: no
+- Vendored report PDF: absent
 - Session analysis: 2026-07-31T16:30:04.065000+00:00 → 2026-07-31T19:01:52.944000+00:00; 6×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 136,301,271 (cache hit 0.994)
 
 ## Expenses
 
-- Goal time (codex): **9099 s**
+- Goal time: **9099 s**
 - Wall time: **9109 s**
 - Tokens: **136,301,271** (main 130,530,375 / subagents 5,770,896)
 
