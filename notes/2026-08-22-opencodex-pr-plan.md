@@ -208,3 +208,11 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - A #2350: ready, gates green, CR resume actioned, composition finding addressed by rebase (upstream composeProperties/intersectBound). Ingwannu pinged.
 - C #2355: parked on maintainer-sponsored; no new pings.
 - Manager notes committed locally (6468e9d), not pushed.
+
+## Status 2026-08-28 (fourth resumed round, final)
+
+- D #2527: CodeRabbit confirmed both threads resolved on head 774ce96b7 (casing precedence 3878120438; captured known-model snapshot 3878120570). CodeRabbit check pass, gates green, checklist 4/4, ready. Ingwannu pinged for re-review (5448798944). No remaining bot issues.
+- A #2350 / B #2351: ready, gates green, CodeRabbit pass, 0 unresolved threads; Ingwannu pinged. No remaining bot issues.
+- C #2355: parked on maintainer-sponsored (auth-api hunk + UI change); no new pings.
+- Remaining external only: Ingwannu re-review/approval for A/B/D exact heads, fork runtime CI workflow approval, lidge-jun sponsor for C.
+- Manager notes committed locally (aa841d9 + this addendum), not pushed.
