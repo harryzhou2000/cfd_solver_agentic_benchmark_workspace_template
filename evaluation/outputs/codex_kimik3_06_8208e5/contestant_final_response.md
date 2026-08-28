@@ -1,0 +1,12 @@
+The task is complete. This final turn closed out the audit-fix batch and revalidated everything end to end.
+
+**What was done**
+
+- Applied the remaining audit patches: deleted the dead/broken `read_restart` (output.cpp/hpp), added truncation guards to the partition-file loader, fixed the 2× FFT amplitude error in cfdplot.py, and fixed `cell_Tgrad` to use the exact identity ∇T=(∇p−RT∇ρ)/(ρR) with cell-center densities (audit #12, both the missing R factor and the face-vs-cell density).
+- Verified fix #1 (BDF2 restart history) with a dedicated A→B/C regression: restarted vs uninterrupted runs are **bit-identical in all forces** at every overlapping step, re-confirmed on the final binary.
+- Fix #2 (steady inner-solve halo exchange) shifted steady trajectories, so all 8 production cases plus the Re200 steady-init were rerun. Headline effect: **m200inv now converges to its 3-order target in 2528 steps** — the old "plateau at 2.26 orders" was the inner-solve halo inconsistency, not limiter cycling, and the report's plateau narrative was rewritten accordingly.
+- The cell-rho fix proved numerics-neutral at every quoted digit (m200lam cd identical, re20/re200 statistics identical), but the rank sweep was still rerun so the np8-vs-production determinism claim holds bit-for-bit — it does, and step counts are now **identical across np=1/2/4/8** (1482 airfoil, 2129 cylinder).
+- Regenerated all 43 figures, sanity_checks.json (all_ok), and run_manifest.md; updated every report number (status/forces/rank tables, per-case narratives, Re200 statistics with corrected amplitudes: cl amplitude 0.55 ≈ measured half-range 0.57, drag oscillation 0.024 at 2× the lift frequency), recompiled the PDF (24 pages, 0 errors/overfull), and the examiner validator passes all 8 case dirs plus the report.
+- Labeled the superseded/test artifact trees (`results_preaudit/`, `results/regt/`) with READMEs so the authoritative `results/` tree is unambiguous.
+
+Committed on `solver/attempt-k3` as `5501380` (audit fixes + full rerun) and `7b483d5` (cell-rho consistency + sweep v2). Final state: 7 steady cases converged to their residual targets, Re200 statistically_periodic at t=300 with St=0.187 and mean C_D=1.262, all contract/sanity/validator gates green, and every audit finding either fixed in the shipped code or explicitly disclosed in the report's implementation notes.

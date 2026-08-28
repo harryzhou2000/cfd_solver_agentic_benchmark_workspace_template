@@ -1,0 +1,352 @@
+{
+  "schema": "agent_scores",
+  "contestant": "06",
+  "evaluated_at": "2026-08-28T03:22:27.900518+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": "Immutable tip, source/report, workspace-local session tree, and eight explicit validator packages reviewed."
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "01a037b9-3a44-7213-9cfd-f76875b82b68"
+    ],
+    "execution_date": "2026-08-25",
+    "started_at": "2026-08-25T07:01:50.018000+00:00",
+    "ended_at": "2026-08-27T13:33:17.771000+00:00",
+    "time_basis": "selected bundled root UTC timestamps; database cwd /workspace mapped only to this workspace-local bundle",
+    "rationale": "Primary production root identified by initial benchmark task, continuity through implementation, all production runs, report work, and terminal audit completion; includes eight persisted descendants and excludes no independent roots."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "CMake source and documented build; not independently rebuilt."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Documented solve/gradcheck CLI and final validator evidence."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 5,
+          "notes": "Separated mesh, partition, spatial, time-step, output, and tools components."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "No external authorship investigation under trust policy; source is internally coherent."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Case files and generic mesh/tag handling; no case-name-only solver branches observed."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "METIS partitioning, neighbor halo exchange, and global reductions evidenced in source/report; no evaluator MPI rerun."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Positivity/fallback and audited restart/partition guards are documented."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "All eight delivered final packages and report pass explicit validator; regression and rank-study evidence delivered."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4,
+          "notes": "Curated immutable tip excludes raw outputs/build products; workspace evidence intentionally retained outside Git."
+        }
+      ],
+      "overall_score": 4.47,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 5,
+          "notes": "Report and source state conservative equations and nondimensionalization."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "CGNS unstructured mesh reader and geometry/adjacency implementation documented."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 5,
+          "notes": "Face-based conservative residual source and report evidence."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Roe flux with Harten entropy fix documented."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "Farfield, slip wall, and no-slip adiabatic treatments documented."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "Weighted least-squares linear reconstruction with diagnostic evidence."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Venkatakrishnan limiter and positivity fallback active in production claims."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Newtonian stress, Fourier heat flux, and tangential force split documented."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Local stepping/CFL ramp and SGS-style implicit defect correction documented."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Delivered Re200 report/metadata evidence supports BDF2 physical-time outer loop and converged inner controls; never rerun."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS plus neighbor communication/rank-study evidence; no evaluator MPI rerun."
+        }
+      ],
+      "overall_score": 4.46,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "All eight required package layouts pass validator."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Explicit validate_outputs.py invocation passed eight final case directories and report."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "Seven steady final packages reach stated targets; Re200 is statistically periodic at t=300 with no reported inner-target misses."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Delivered force/field/report and rank-study evidence is plausible; not independently rerun."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Visually reviewed 24-page workspace report includes histories and computed field views for all cases."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Report is technically detailed and discloses high-Mach control escalation and prior under-convergence."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 4,
+          "notes": "Figure manifest/report map figures to result files, but curation excludes raw results/manifest from immutable tip."
+        }
+      ],
+      "overall_score": 4.8,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 94,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 10,
+        "notes": "CMake/CLI source and eight-package validator pass; no clean evaluator rebuild."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 10,
+        "notes": "CGNS unstructured mesh/tag/geometry/adjacency source and report evidence."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 14,
+        "notes": "Conservative FV, Roe, farfield/slip/no-slip source evidence."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Weighted-LSQ second order, Venkat limiter, and positivity fallback documented."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 10,
+        "notes": "Unstructured gradients, Newtonian/Fourier terms, wall behavior, and force split documented."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 14,
+        "notes": "CFL/SGS and delivered BDF2 Re200 with t=300, 48--174 inner iterations, and zero misses."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 8,
+        "notes": "METIS, neighbor halo, reductions, output discipline, and delivered rank study; no evaluator MPI rerun."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Eight explicit validator packages; steady targets and delivered Re200 periodicity credible but not independently rerun."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 5,
+        "notes": "24-page report visually reviewed with field/force/residual plots, vortex analysis, limitations, and figures traceability."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Generic physics/BC/mesh organization supports extension."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 4.5,
+      "notes": "Delivered final package passes explicit validator and reaches stated steady target; result judged from submitted artifacts."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 4.5,
+      "notes": "Delivered final package passes explicit validator and reaches stated steady target; result judged from submitted artifacts."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 4.5,
+      "notes": "Delivered final package passes explicit validator and reaches stated steady target; result judged from submitted artifacts."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 4.5,
+      "notes": "Delivered final package passes explicit validator and reaches stated steady target; result judged from submitted artifacts."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 4.5,
+      "notes": "Delivered final package passes explicit validator and reaches stated steady target; result judged from submitted artifacts."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 4.5,
+      "notes": "Delivered final package passes explicit validator and reaches stated steady target; result judged from submitted artifacts."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 4.5,
+      "notes": "Delivered final package passes explicit validator and reaches stated steady target; result judged from submitted artifacts."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 4,
+      "notes": "Delivered t=300 statistically-periodic BDF2 result, inner target fraction 1.0 and St=0.187 in report; never rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "No evaluator clean build or MPI rerun was performed.",
+    "Cylinder Re200 was not rerun.",
+    "Structural validation and report/source review do not independently establish numerical accuracy.",
+    "Immutable curation removes raw results and generated figure inputs; the visually reviewed workspace PDF is frozen separately as report evidence."
+  ]
+}
