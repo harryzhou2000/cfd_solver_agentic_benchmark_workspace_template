@@ -24,12 +24,50 @@ terminal-response Markdown sidecars are unindexed.
 - Evaluating agent: Codex
 - Harness: claude
 
+## Authoritative scorecards
+
+### Review areas
+
+| Area | Weighted score | Evidence |
+|---|---:|---|
+| Code | 4.50/5 | CMake, modular source, CLI and delivered METIS/MPI evidence. |
+| CFD | 4.50/5 | CGNS/FV/Roe/Venkat/viscous/LU-SGS/BDF2 source and package evidence. |
+| Results | 4.50/5 | Eight packages validate, report/PDF and rank study are readable. |
+
+### 100-point rubric
+
+| Section | Score | Evidence |
+|---|---:|---|
+| Build, CLI, Output Contract | 10/10 | Documented source/CLI and all schemas validate. |
+| Mesh And Geometry | 10/10 | CGNS multi-zone geometry/graph source reviewed. |
+| Finite-Volume Residual And Boundary Conditions | 15/15 | FV/Roe/wall/farfield source paths present. |
+| Second-Order Spatial Scheme | 10/10 | Reconstruction, Venkat limiter and positivity source. |
+| Viscous Terms | 10/10 | Gradient Newton--Fourier and wall outputs. |
+| Implicit And Transient Methods | 15/15 | LU-SGS/BDF2 plus t=300 and inner evidence. |
+| MPI | 10/10 | METIS/neighbor exchange/reductions and rank evidence. |
+| Case Results And Validation | 9/10 | All validate; M2 plateau/Re200 underprediction disclosed. |
+| Report, Visualization, Analysis | 5/5 | Readable 32-page report with equations, fields and MPI analysis. |
+| Extensibility | 5/5 | Separated generic solver interfaces. |
+
+### Independent case results
+
+| Case | Score | Evidence |
+|---|---:|---|
+| M0.15 inviscid | 4.5/5 | Validator-passing converged package. |
+| M0.80 inviscid | 4.5/5 | Validator-passing converged package. |
+| M2 inviscid | 4/5 | Delivered bounded plateau, candidly disclosed. |
+| M0.15 laminar Re5000 | 4.5/5 | Validator-passing wall/friction evidence. |
+| M0.80 laminar Re5000 | 4.5/5 | Validator-passing wall/friction evidence. |
+| M2 laminar Re5000 | 4/5 | Delivered plateau limitation. |
+| Cylinder Re20 | 4.5/5 | Validator-passing steady wake/rank evidence. |
+| Cylinder Re200 | 4/5 | Delivered t=300 periodic package; dissipation limit disclosed. |
+
 ## Run summary (auto)
 
 - Workspace: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-10` branch `claude/generic/opus-10` commit `d25cd3cb7c1c75e75812670fd717eca3b61d68ce`
 - Benchmark submodule: 1bc6580b84825037bbeac097ede1b2226d8185d1
 - Session window: 2026-08-28T01:43:36.307000+00:00 → 2026-08-28T04:41:41.816000+00:00
-- Time: goal Nones, wall 10685.5s
+- Time: goal unavailable (Claude has no goal timer), wall 10685.5s
 - Tokens: 121,129,727 (main 119,862,076 / subagents 1,267,651); cost est. $76.37
 
 ### Session analysis (auto)

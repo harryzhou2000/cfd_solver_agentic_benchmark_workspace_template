@@ -24,12 +24,50 @@ response Markdown remain unindexed sidecars.
 - Evaluating agent: Codex
 - Harness: claude
 
+## Authoritative scorecards
+
+### Review areas
+
+| Area | Weighted score | Evidence |
+|---|---:|---|
+| Code | 4.00/5 | CMake/CLI, modular source and METIS/MPI paths; no clean evaluator rebuild. |
+| CFD | 4.00/5 | FV/Rusanov, Barth limiting, viscous terms, LU-SGS and BDF2 are source-evidenced. |
+| Results | 4.00/5 | Eight packages validate, while M2 laminar and Re20 values limit plausibility. |
+
+### 100-point rubric
+
+| Section | Score | Evidence |
+|---|---:|---|
+| Build, CLI, Output Contract | 10/10 | Documented CMake/CLI and schemas validate. |
+| Mesh And Geometry | 10/10 | CGNS, geometry and graph code reviewed. |
+| Finite-Volume Residual And Boundary Conditions | 15/15 | Conservative FV, flux and wall/farfield paths present. |
+| Second-Order Spatial Scheme | 9/10 | Green--Gauss/Barth/positivity source, no independent order test. |
+| Viscous Terms | 9/10 | Newton--Fourier source, anomalous laminar output retained. |
+| Implicit And Transient Methods | 14/15 | LU-SGS/BDF2 source and t=300 package, no rerun. |
+| MPI | 9/10 | METIS/neighbor exchange, no independent reproduction. |
+| Case Results And Validation | 6/10 | Structural pass but M2 laminar Cd -3.38 and Re20 Cd 2.99. |
+| Report, Visualization, Analysis | 4/5 | Readable 12-page report; physical limits reduce credit. |
+| Extensibility | 4/5 | Modular 2-D single-gas implementation. |
+
+### Independent case results
+
+| Case | Score | Evidence |
+|---|---:|---|
+| M0.15 inviscid | 4/5 | Validator-passing converged package. |
+| M0.80 inviscid | 4/5 | Validator-passing converged package. |
+| M2 inviscid | 4/5 | Validator-passing shock package, no rerun. |
+| M0.15 laminar Re5000 | 4/5 | Validator-passing package. |
+| M0.80 laminar Re5000 | 4/5 | Validator-passing package. |
+| M2 laminar Re5000 | 2/5 | Structural pass but Cd -3.38 is not credible. |
+| Cylinder Re20 | 3/5 | Structural pass but Cd 2.99 is materially high. |
+| Cylinder Re200 | 4/5 | Delivered t=300 periodic package, never rerun. |
+
 ## Run summary (auto)
 
 - Workspace: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-09` branch `claude/generic/opus-09` commit `7e16370db4546b8e957a612177f850742bf4b6f8`
 - Benchmark submodule: 1bc6580b84825037bbeac097ede1b2226d8185d1
 - Session window: 2026-08-28T01:41:57.259000+00:00 → 2026-08-28T04:55:22.374000+00:00
-- Time: goal Nones, wall 11605.1s
+- Time: goal unavailable (Claude has no goal timer), wall 11605.1s
 - Tokens: 50,513,895 (main 49,336,233 / subagents 1,177,662); cost est. $48.70
 
 ### Session analysis (auto)
