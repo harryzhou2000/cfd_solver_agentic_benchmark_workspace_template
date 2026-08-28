@@ -232,3 +232,9 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 
 - Upstream dev advanced 3b8a6ae5a -> 7794485cd (CLI gap closure + agent skill contract fixes). The gate un-ticked the latest-dev box again, so all four were rebased onto 7794485cd: A 3c7df08c7, B c8ebf3182, C 30fd6e36d, D 8d1b3b536. All rebases clean (CLI-only delta). Revalidated: A 122, B 120, C 58, D 344 + typecheck clean; force-pushed; bodies updated; A/B/D ready + resumed; C draft.
 - As of last poll: upstream/dev stable at 7794485cd; A and D CodeRabbit pass + all gates green; B CodeRabbit in progress; C parked on maintainer-sponsored.
+
+## Status 2026-08-28 (B CR findings on rebase range)
+
+- CodeRabbit reviewed B's rebase range (4d8420cd1..849110acf) and flagged 3 items in src/cli/dispatch.ts: (1) inline - restore-back branch recorded provenance "ocx inject" instead of "ocx restore back"; (2) outside-diff - emitBack always emits the skipped envelope for successful restore back --json; (3) outside-diff - integration usage text missing "native".
+- Fixed (1) on ca111fc66 with a regression (audit + cli-restore-back 51/51). Replied on the inline thread; replied on the PR that (2)/(3) are upstream CLI code that entered the review range via rebase and are NOT in the feature diff, so they were left for upstream (feature-only scope).
+- B pushed ca111fc66, body updated, ready, CodeRabbit resumed. A/D heads unchanged (3c7df08c7 / 8d1b3b536), dev stable at 7794485cd.
