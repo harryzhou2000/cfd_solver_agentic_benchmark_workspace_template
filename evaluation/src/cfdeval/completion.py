@@ -6,9 +6,11 @@ import argparse
 import hashlib
 import json
 import math
+import re
 from pathlib import Path
 
 from cfdeval import validation
+from cfdeval import report_pdf as report_pdf_tools
 
 
 EVALUATION_ROOT = Path(__file__).resolve().parents[2]
@@ -17,6 +19,7 @@ REQUIRED_INDEXED = {
     "summary.json", "metadata.json", "expenses.json", "measurements.json",
     "configs.json", "sessions.json", "env_snapshot.json", "agent_scores.json",
     "review_code.json", "review_cfd.json", "review_results.json",
+    "report_pdf.json",
 }
 AREA_CONFIGS = {
     "code_review": "review_points_code.json",
@@ -67,8 +70,10 @@ def completion_errors(folder: Path) -> list[str]:
     scores = _load(folder / "agent_scores.json", errors)
     index = _load(folder / "index.json", errors)
     metadata = _load(folder / "metadata.json", errors)
+    report_pdf = _load(folder / "report_pdf.json", errors)
+    run_identity = _load(folder / "run_identity.json", errors)
 
-    for name in ("run_identity.json", "agent_report.md"):
+    for name in ("agent_report.md",):
         path = folder / name
         if not path.is_file() or path.stat().st_size == 0:
             errors.append(f"missing or empty required sidecar: {name}")
@@ -101,6 +106,101 @@ def completion_errors(folder: Path) -> list[str]:
             valid, schema_errors = validation.validate_file(path, schema)
             if not valid:
                 errors.extend(f"{name}: {e}" for e in schema_errors[:10])
+
+    report_status = report_pdf.get("status")
+    if not str(report_pdf.get("evaluator") or "").strip():
+        errors.append("report_pdf.json evaluator is empty")
+    if not str(report_pdf.get("submission_commit") or "").strip():
+        errors.append("report_pdf.json submission_commit is empty")
+    pdf_path = folder / report_pdf_tools.REPORT_PDF
+    pdf_index = artifacts.get(report_pdf_tools.REPORT_PDF)
+    if report_status == "accepted":
+        approval = report_pdf.get("appropriateness") or {}
+        if (approval.get("approved") is not True
+                or approval.get("visually_reviewed") is not True
+                or approval.get("main_report_confirmed") is not True
+                or approval.get("readable") is not True
+                or not str(approval.get("notes") or "").strip()):
+            errors.append("report_pdf.json: accepted PDF lacks evaluator approval notes")
+        if report_pdf.get("submission_commit") != run_identity.get("submission_commit"):
+            errors.append(
+                "report_pdf.json submission_commit does not match run_identity.json")
+        source = report_pdf.get("source")
+        snap = report_pdf.get("snapshot")
+        if not isinstance(source, dict) or not isinstance(snap, dict):
+            errors.append("report_pdf.json accepted record requires source and snapshot objects")
+            source, snap = {}, {}
+        if source.get("mode") not in {"workspace_existing", "compiled_from_submission"}:
+            errors.append("report_pdf.json source mode is invalid")
+        if not str(source.get("report_tex") or "").strip():
+            errors.append("report_pdf.json source report_tex is empty")
+        else:
+            try:
+                report_pdf_tools.normalized_repo_path(source["report_tex"])
+            except ValueError as exc:
+                errors.append(f"report_pdf.json source report_tex is invalid: {exc}")
+        if source.get("mode") == "workspace_existing":
+            expected_pdf = str(Path(str(source.get("report_tex"))).with_suffix(".pdf"))
+            if source.get("workspace_relative_pdf") != expected_pdf:
+                errors.append(
+                    "workspace-existing report PDF is not the sibling of report_tex")
+            if source.get("build_command") is not None:
+                errors.append("workspace-existing report PDF must not record build_command")
+        if source.get("mode") == "compiled_from_submission" and not str(
+                source.get("build_command") or "").strip():
+            errors.append("compiled report PDF lacks its build command")
+        if (source.get("mode") == "compiled_from_submission"
+                and source.get("workspace_relative_pdf") is not None):
+            errors.append("compiled report PDF must not claim a workspace-relative PDF")
+        if snap.get("filename") != report_pdf_tools.REPORT_PDF:
+            errors.append("report_pdf.json snapshot filename must be report.pdf")
+        if snap.get("media_type") != report_pdf_tools.MEDIA_TYPE:
+            errors.append("report_pdf.json snapshot media_type must be application/pdf")
+        if snap.get("pdf_header_valid") is not True or snap.get("pdf_eof_valid") is not True:
+            errors.append("report_pdf.json snapshot PDF structural flags must be true")
+        if not pdf_path.is_file() or pdf_path.is_symlink():
+            errors.append("accepted report PDF is missing or not a regular snapshot file")
+        elif not isinstance(pdf_index, dict):
+            errors.append("index.json does not index accepted artifact: report.pdf")
+        else:
+            data = pdf_path.read_bytes()
+            digest = hashlib.sha256(data).hexdigest()
+            if pdf_index.get("sha256") != digest:
+                errors.append("index digest mismatch: report.pdf")
+            if pdf_index.get("bytes") != len(data):
+                errors.append("index byte count mismatch: report.pdf")
+            if pdf_index.get("artifact_kind") != "binary":
+                errors.append("report.pdf index artifact_kind must be binary")
+            if pdf_index.get("schema") is not None:
+                errors.append("report.pdf must be indexed as a binary artifact")
+            if pdf_index.get("media_type") != report_pdf_tools.MEDIA_TYPE:
+                errors.append("report.pdf index media_type must be application/pdf")
+            errors.extend(
+                f"report.pdf: {error}"
+                for error in report_pdf_tools.validate_pdf_bytes(data))
+            if snap.get("sha256") != digest or source.get("sha256") != digest:
+                errors.append("report_pdf.json digest does not match vendored report.pdf")
+            if not re.fullmatch(r"[0-9a-f]{64}", str(snap.get("sha256") or "")):
+                errors.append("report_pdf.json snapshot SHA-256 is malformed")
+            if snap.get("bytes") != len(data) or source.get("bytes") != len(data):
+                errors.append("report_pdf.json byte count does not match vendored report.pdf")
+    elif report_status == "absent":
+        approval = report_pdf.get("appropriateness") or {}
+        if (approval.get("approved") is not False
+                or approval.get("visually_reviewed") is not False
+                or approval.get("main_report_confirmed") is not False
+                or approval.get("readable") is not False
+                or not str(approval.get("notes") or "").strip()):
+            errors.append("report_pdf.json: absent report lacks an explicit reason")
+        if pdf_path.exists() or pdf_path.is_symlink() or pdf_index is not None:
+            errors.append("report_pdf.json says absent but report.pdf is present or indexed")
+        if report_pdf.get("source") is not None or report_pdf.get("snapshot") is not None:
+            errors.append("report_pdf.json absent record must have null source and snapshot")
+        if report_pdf.get("submission_commit") != run_identity.get("submission_commit"):
+            errors.append(
+                "report_pdf.json submission_commit does not match run_identity.json")
+    else:
+        errors.append("report_pdf.json status must be accepted or absent")
 
     score_areas = scores.get("scores") or {}
     for area, config_name in AREA_CONFIGS.items():

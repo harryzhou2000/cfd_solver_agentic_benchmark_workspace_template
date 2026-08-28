@@ -14,9 +14,11 @@
         "type": "object",
         "required": ["schema", "sha256"],
         "properties": {
-          "schema": { "type": "string" },
+          "artifact_kind": { "enum": ["json", "binary"] },
+          "schema": { "type": ["string", "null"] },
           "sha256": { "type": "string" },
-          "bytes": { "type": "integer" }
+          "bytes": { "type": "integer" },
+          "media_type": { "type": "string" }
         }
       }
     }

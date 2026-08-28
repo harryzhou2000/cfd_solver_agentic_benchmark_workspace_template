@@ -26,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from cfdeval import claude_data, codex_data as cd  # noqa: E402
-from cfdeval import expenses as expense_tools, recording, validation  # noqa: E402
+from cfdeval import expenses as expense_tools, recording, report_pdf, validation  # noqa: E402
 
 
 def _git(args: list[str], cwd: Path) -> str | None:
@@ -415,6 +415,11 @@ def main(argv: list[str] | None = None) -> int:
                      f"status={chk['metadata'].get('convergence_status')} "
                      f"csv={chk['csv_checks']}\n")
 
+    try:
+        report_pdf_status = json.loads(
+            (out_dir / report_pdf.REPORT_METADATA).read_text()).get("status", "unrecorded")
+    except (OSError, json.JSONDecodeError):
+        report_pdf_status = "unrecorded"
     summary = {
         "contestant": contestant,
         "expenses": expenses,
@@ -429,6 +434,7 @@ def main(argv: list[str] | None = None) -> int:
             "env_snapshot_captured": env_snap_captured,
             "agent_report": (out_dir / "agent_report.md").exists(),
             "agent_scores": (out_dir / "agent_scores.json").exists(),
+            "report_pdf": report_pdf_status,
             "contestant_final_response": (
                 {key: value for key, value in final_response.items() if key != "text"}
                 if final_response else None),
@@ -442,7 +448,7 @@ def main(argv: list[str] | None = None) -> int:
             "tools": ["extract_expenses.py", "extract_measurements.py",
                       "extract_metadata.py", "extract_configs.py",
                       "extract_sessions.py", "generate_review_forms.py",
-                      "summarize.py"],
+                      "summarize.py", "vendor_report_pdf.py"],
         },
     }
 
@@ -472,6 +478,8 @@ def main(argv: list[str] | None = None) -> int:
             "sessions.json": "sessions.schema.json",
             "env_snapshot.json": "env_snapshot.schema.json",
             "agent_scores.json": "agent_scores.schema.json",
+            "report_pdf.json": "report_pdf.schema.json",
+            "report.pdf": None,
         }.items() if (out_dir / n).exists()},
         tools=["cfdeval", "summarize.py", "extract_expenses.py",
                "extract_measurements.py", "extract_metadata.py",
@@ -513,6 +521,7 @@ def render_md(path: Path, s: dict, out_dir: Path) -> None:
         f"agent report/scores: {'yes' if snap.get('agent_report') else 'no'}"
         f"{' / yes' if snap.get('agent_scores') else ''}"
     )
+    lines.append(f"- Vendored report PDF: {snap.get('report_pdf', 'unrecorded')}")
     sessions_path = out_dir / "sessions.json"
     if sessions_path.exists():
         try:

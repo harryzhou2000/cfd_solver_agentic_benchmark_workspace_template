@@ -137,6 +137,15 @@ def main(argv: list[str] | None = None) -> int:
             sidecar = folder / f"{key}.json"
             if sidecar.exists():
                 summary[key] = json.loads(sidecar.read_text())
+        report_pdf_sidecar = folder / "report_pdf.json"
+        if report_pdf_sidecar.exists():
+            try:
+                report_pdf_status = json.loads(report_pdf_sidecar.read_text()).get("status")
+            except json.JSONDecodeError:
+                report_pdf_status = "unrecorded"
+            summary.setdefault("snapshot", {})["report_pdf"] = (
+                report_pdf_status if report_pdf_status in {"accepted", "absent"}
+                else "unrecorded")
         (summary_path).write_text(json.dumps(summary, indent=2) + "\n")
         mod.render_md(folder / "summary.md", summary, folder)
         print(f"refreshed {summary_path} and summary.md with recorded scores")
@@ -156,6 +165,8 @@ def main(argv: list[str] | None = None) -> int:
             "review_code.json": "review.schema.json",
             "review_cfd.json": "review.schema.json",
             "review_results.json": "review.schema.json",
+            "report_pdf.json": "report_pdf.schema.json",
+            "report.pdf": None,
         }
         existing = {n: s for n, s in index_artifacts.items()
                     if (folder / n).exists()}

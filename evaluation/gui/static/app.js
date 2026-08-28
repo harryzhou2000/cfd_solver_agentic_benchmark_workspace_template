@@ -1027,18 +1027,23 @@
     if (!pdf) {
       const search = detail.report_pdf_search || {};
       const expected = Array.isArray(search.expected_paths) ? search.expected_paths : [];
-      const diagnosis = search.workspace_found === false
+      const diagnosis = search.snapshot_status === "absent"
+        ? `The evaluator recorded no appropriate main report PDF: ${escapeHtml(search.snapshot_reason || "reason unavailable")}`
+        : search.snapshot_status === "invalid"
+          ? `The vendored report failed integrity checks: ${escapeHtml(search.snapshot_error || "unknown integrity failure")}`
+          : search.workspace_found === false
         ? "The matching contestant workspace could not be resolved."
         : expected.length
           ? `Tracked report source found. Expected compiled output: ${expected.map(path => `<code>${escapeHtml(path)}</code>`).join(", ")}.`
           : "No report PDF or tracked report TeX source was found in the matching workspace.";
-      panel.innerHTML = `<div class="env-notice"><strong>No workspace report PDF found.</strong>
-        <p>${diagnosis}</p>
-        <p>PDFs are viewed in place and are not copied into the evaluation snapshot.</p></div>`;
+      panel.innerHTML = `<div class="env-notice"><strong>No verified report PDF available.</strong>
+        <p>${diagnosis}</p></div>`;
       return;
     }
+    const source = pdf.source === "snapshot" ? "vendored snapshot" : "legacy workspace fallback";
     panel.innerHTML = `<div class="pdf-toolbar">
         <span class="mono">${escapeHtml(pdf.relative_path)}</span>
+        <span class="muted">${escapeHtml(source)}</span>
         <span class="muted">${escapeHtml(fmtBytes(pdf.bytes))}</span>
         <a class="btn" href="${escapeHtml(pdf.url)}" target="_blank" rel="noopener">Open PDF</a>
       </div>

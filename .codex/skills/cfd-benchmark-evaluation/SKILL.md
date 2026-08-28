@@ -30,7 +30,10 @@ record.
   logs, restarts, field files, or visualization working files. Permit curated
   PNG or PDF figure assets only under the report's figure directory so the
   report builds directly from the repository. A generated report PDF remains
-  prohibited.
+  prohibited on the contestant result branch. After visual review, vendor the
+  appropriate main report PDF separately as `report.pdf` in the manager-side
+  evaluation snapshot; that frozen rendering is evaluation evidence, not part
+  of the immutable contestant submission or run-ID hash.
 - Keep structural validation separate from source, physics, MPI, and report
   judgment. A passing validator is necessary, not sufficient.
 - Trust that submitted code and artifacts are the contestant's work. Do not
@@ -378,6 +381,72 @@ Never copy or commit `.sessions/`, session SQLite databases, rollout JSONL,
 auth/config state, or raw trajectories into the manager repository. Only
 small derived session metadata, documented excerpts required as evidence, and
 the contestant final-response sidecar belong in the snapshot.
+
+### Vendor the reviewed main report PDF
+
+Every completed snapshot must contain an indexed `report_pdf.json`. When an
+appropriate main report PDF exists, it must also contain the indexed binary
+`report.pdf`. The evaluator must open the PDF and verify all of the following
+before approving it:
+
+- it is the main benchmark report corresponding to the committed main TeX
+  source, not a field plot, rank-study figure, debug export, stale report, or
+  report from another run;
+- it renders and is readable through all pages, without missing/broken pages
+  or obvious missing-asset placeholders;
+- it is the same report whose quality and claims were evaluated.
+
+Do not infer appropriateness from the basename alone. If several plausible
+reports remain ambiguous, resolve them from the committed TeX entrypoint and
+the evaluated report evidence; ask the operator rather than guess when that is
+still insufficient.
+
+Prefer rebuilding the PDF in a sandboxed scratch checkout at the immutable
+submission commit, using only committed report sources and referenced figure
+assets. This directly verifies that the committed material can create the
+report. An existing workspace PDF may be used only when it is the sibling
+compiled output of the tracked main TeX source and the evaluator has visually
+confirmed it. Compilation failure or missing committed assets must remain an
+evaluation limitation; do not repair the report or add evaluator-created
+figures. Report compilation does not improve the contestant's report score.
+
+After review, vendor the PDF with the explicit approval tool:
+
+```bash
+python3 evaluation/tools/vendor_report_pdf.py \
+  --snapshot evaluation/outputs/<run-id> \
+  --workspace <workspace> \
+  --source <path-to-reviewed-main-report.pdf> \
+  --source-mode workspace_existing \
+  --source-tex <repo-relative-main-report.tex> \
+  --evaluator <evaluator-name> \
+  --notes '<what was opened and why it is the appropriate main report>' \
+  --approved --visually-reviewed --main-report-confirmed --readable
+```
+
+For a clean build from the immutable submission, instead use
+`--source-mode compiled_from_submission` and record the exact build command
+with `--build-command`. The tool binds the record to the snapshot's
+`run_identity.json` submission commit, rejects symlinks and malformed PDFs,
+copies exact bytes to `report.pdf`, and writes hashes/provenance to
+`report_pdf.json`. It never changes the run ID.
+
+When no appropriate main report can be produced or identified, record explicit
+absence rather than copying a nearby PDF:
+
+```bash
+python3 evaluation/tools/vendor_report_pdf.py \
+  --snapshot evaluation/outputs/<run-id> \
+  --evaluator <evaluator-name> \
+  --absent-reason '<specific missing, ambiguous, or failed-build evidence>'
+```
+
+An absence record is not itself a new score deduction; preserve the existing
+evidence-backed report judgment. Rerun `record_agent_results.py` afterward so
+the JSON sidecar and accepted PDF are indexed. Generated main-report PDFs stay
+forbidden on contestant result branches but are committed in the manager
+snapshot. Never copy any other PDFs, raw visualization files, or report build
+intermediates. The snapshot PDF limit is 100 MiB.
 
 `run_identity.json` is the authoritative identity/provenance sidecar even in
 manager revisions whose `index.json` schema does not yet enumerate it. Record
@@ -886,6 +955,11 @@ uv run cfdeval check-complete outputs/<run-id>
 the three review scorecards and evidence notes, weighted overalls, all rubric
 sections, eight numeric 0-5 case-score entries, DQ verdict, answered metadata questions,
 identity/report/final-response sidecars, and required indexed artifacts.
+It also requires an indexed `report_pdf.json`; an accepted record must have an
+indexed, digest-matching `report.pdf` with explicit visual/main-report/readable
+approval, while an absent record must give a concrete reason and contain no
+PDF. A vendored PDF integrity failure is a blocker and must never silently
+fall back to the contestant workspace.
 `record_agent_results.py` runs this gate and exits nonzero when anything is
 incomplete. Do not bypass it, do not commit a snapshot as complete after it
 fails, and do not mark its checklist item complete.

@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vendored contestant report PDF provenance",
+  "type": "object",
+  "required": [
+    "schema_version", "status", "recorded_at", "evaluator",
+    "submission_commit", "source", "snapshot", "appropriateness"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "status": { "enum": ["accepted", "absent"] },
+    "recorded_at": { "type": "string", "minLength": 1 },
+    "evaluator": { "type": "string", "minLength": 1 },
+    "submission_commit": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": ["object", "null"],
+      "properties": {
+        "mode": { "enum": ["workspace_existing", "compiled_from_submission"] },
+        "report_tex": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "workspace_relative_pdf": { "type": ["string", "null"] },
+        "build_command": { "type": ["string", "null"] }
+      },
+      "required": [
+        "mode", "report_tex", "sha256", "bytes",
+        "workspace_relative_pdf", "build_command"
+      ],
+      "additionalProperties": false
+    },
+    "snapshot": {
+      "type": ["object", "null"],
+      "properties": {
+        "filename": { "const": "report.pdf" },
+        "media_type": { "const": "application/pdf" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "pdf_header_valid": { "const": true },
+        "pdf_eof_valid": { "const": true }
+      },
+      "required": [
+        "filename", "media_type", "sha256", "bytes",
+        "pdf_header_valid", "pdf_eof_valid"
+      ],
+      "additionalProperties": false
+    },
+    "appropriateness": {
+      "type": "object",
+      "properties": {
+        "approved": { "type": "boolean" },
+        "visually_reviewed": { "type": "boolean" },
+        "main_report_confirmed": { "type": "boolean" },
+        "readable": { "type": "boolean" },
+        "notes": { "type": "string", "minLength": 1 }
+      },
+      "required": [
+        "approved", "visually_reviewed", "main_report_confirmed", "readable", "notes"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "accepted" } } },
+      "then": {
+        "properties": {
+          "submission_commit": { "type": "string", "minLength": 1 },
+          "source": { "type": "object" },
+          "snapshot": { "type": "object" },
+          "appropriateness": {
+            "properties": {
+              "approved": { "const": true },
+              "visually_reviewed": { "const": true },
+              "main_report_confirmed": { "const": true },
+              "readable": { "const": true }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "source": { "type": "null" },
+          "snapshot": { "type": "null" },
+          "appropriateness": {
+            "properties": {
+              "approved": { "const": false },
+              "visually_reviewed": { "const": false },
+              "main_report_confirmed": { "const": false },
+              "readable": { "const": false }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

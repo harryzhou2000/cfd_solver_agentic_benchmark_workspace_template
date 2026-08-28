@@ -70,6 +70,9 @@ The generated summary keeps them separable:
 8. `contestant_final_response.md` — exact credential-redacted terminal Claude
    prose when a completed, unambiguous response exists (unindexed Markdown;
    provenance is retained in `metadata.json`).
+9. `report_pdf.json` and, when accepted, `report.pdf` — evaluator-reviewed
+   main report rendering with immutable-submission provenance, exact digest,
+   or an explicit absence reason. The PDF is indexed as binary evidence.
 
 All JSON artifacts validate against the schemas in `evaluation/schemas/`
 and are format-checked by `cfdeval check` / `tools/check_result.py`; the

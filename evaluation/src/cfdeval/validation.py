@@ -101,9 +101,20 @@ def check_cli(argv: list[str] | None = None) -> int:
     index = json.loads((folder / "index.json").read_text())
     ok = True
     for name, meta in sorted(index.get("artifacts", {}).items()):
+        from pathlib import PurePosixPath
+        rel = PurePosixPath(name)
+        if (not name or rel.is_absolute() or ".." in rel.parts
+                or len(rel.parts) != 1 or rel.as_posix() != name):
+            print(f"FAIL  {name}: artifact name is not a safe top-level filename")
+            ok = False
+            continue
         f = folder / name
-        if not f.exists():
+        if not f.exists() or not f.is_file() or f.is_symlink():
             print(f"FAIL  {name}: artifact missing")
+            ok = False
+            continue
+        if meta.get("bytes") is not None and meta.get("bytes") != f.stat().st_size:
+            print(f"FAIL  {name}: byte count mismatch")
             ok = False
             continue
         digest = hashlib.sha256(f.read_bytes()).hexdigest()
@@ -111,9 +122,38 @@ def check_cli(argv: list[str] | None = None) -> int:
             print(f"FAIL  {name}: sha256 mismatch")
             ok = False
             continue
-        schema = schema_dir / meta["schema"]
+        kind = meta.get("artifact_kind", "json")
+        schema_name = meta.get("schema")
+        if kind == "binary":
+            if schema_name is not None:
+                print(f"FAIL  {name}: binary artifact must not declare a JSON schema")
+                ok = False
+                continue
+            media_type = meta.get("media_type")
+            if media_type != "application/pdf":
+                print(f"FAIL  {name}: schema-less artifact has unsupported media type")
+                ok = False
+                continue
+            from cfdeval.report_pdf import validate_pdf_bytes
+            pdf_errors = validate_pdf_bytes(f.read_bytes())
+            if pdf_errors:
+                print(f"FAIL  {name} (application/pdf): {'; '.join(pdf_errors)}")
+                ok = False
+            else:
+                print(f"OK    {name} (application/pdf)")
+            continue
+        if kind != "json":
+            print(f"FAIL  {name}: unsupported artifact kind {kind!r}")
+            ok = False
+            continue
+        if not isinstance(schema_name, str) or not schema_name:
+            print(f"FAIL  {name}: JSON artifact must declare a schema")
+            ok = False
+            continue
+        schema = schema_dir / schema_name
         if not schema.exists():
-            print(f"WARN  {name}: schema {meta['schema']} not found — skipped")
+            print(f"FAIL  {name}: schema {schema_name} not found")
+            ok = False
             continue
         valid, errors = validate_file(f, schema)
         if valid:

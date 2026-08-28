@@ -10,7 +10,7 @@ Endpoints:
   GET /api/snapshots              table rows, wrapped as {"snapshots": [...]}
   GET /api/snapshot/<contestant>   full detail payload
   GET /api/snapshot/<contestant>/file/<artifact>   raw artifact (md/json)
-  GET /api/snapshot/<contestant>/report-pdf       report PDF from matching workspace
+  GET /api/snapshot/<contestant>/report-pdf       verified snapshot/legacy report PDF
   GET /                           static GUI (index.html)
 
 The GUI is intentionally read-only: it never writes to snapshots or workspaces.
@@ -19,6 +19,7 @@ The GUI is intentionally read-only: it never writes to snapshots or workspaces.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -32,7 +33,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MANAGER_ROOT = ROOT.parent
 WORKSPACE_ROOT = MANAGER_ROOT / "workspace"
 sys.path.insert(0, str(ROOT / "src"))
-from cfdeval import query  # noqa: E402
+from cfdeval import query, report_pdf as report_pdf_tools  # noqa: E402
 
 
 SAFE_ARTIFACTS = (
@@ -41,7 +42,7 @@ SAFE_ARTIFACTS = (
     "env_snapshot.json", "agent_scores.json", "agent_report.md",
     "review_code.md", "review_code.json", "review_cfd.md", "review_cfd.json",
     "review_results.md", "review_results.json", "index.json",
-    "run_identity.json", "contestant_final_response.md",
+    "run_identity.json", "contestant_final_response.md", "report_pdf.json",
 )
 
 
@@ -127,11 +128,98 @@ def _tracked_report_tex_paths(workspace: Path, run_identity: dict | None) -> lis
     ))
 
 
-def report_pdf_search(workspace: Path | None, run_identity: dict | None = None) -> dict:
+def _snapshot_report_pdf_search(snapshot_folder: Path | None) -> dict:
+    """Verify a vendored report; only an unrecorded legacy snapshot may fall back."""
+    if snapshot_folder is None:
+        return {"status": "unrecorded", "report": None}
+    sidecar_path = snapshot_folder / report_pdf_tools.REPORT_METADATA
+    if not sidecar_path.is_file() or sidecar_path.is_symlink():
+        return {"status": "unrecorded", "report": None}
+    try:
+        sidecar_data = sidecar_path.read_bytes()
+        sidecar = json.loads(sidecar_data)
+        index = json.loads((snapshot_folder / "index.json").read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        return {"status": "invalid", "report": None, "error": str(exc)}
+    artifacts = index.get("artifacts") or {}
+    sidecar_entry = artifacts.get(report_pdf_tools.REPORT_METADATA)
+    if (not isinstance(sidecar_entry, dict)
+            or sidecar_entry.get("artifact_kind", "json") != "json"
+            or sidecar_entry.get("schema") != "report_pdf.schema.json"
+            or sidecar_entry.get("sha256") != hashlib.sha256(sidecar_data).hexdigest()
+            or sidecar_entry.get("bytes") != len(sidecar_data)):
+        return {"status": "invalid", "report": None,
+                "error": "report PDF provenance sidecar is unindexed or tampered"}
+    try:
+        identity = json.loads((snapshot_folder / "run_identity.json").read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        return {"status": "invalid", "report": None, "error": str(exc)}
+    if sidecar.get("submission_commit") != identity.get("submission_commit"):
+        return {"status": "invalid", "report": None,
+                "error": "report PDF provenance does not match run identity"}
+    status = sidecar.get("status")
+    if status == "absent":
+        if report_pdf_tools.REPORT_PDF in artifacts:
+            return {"status": "invalid", "report": None,
+                    "error": "absence record conflicts with indexed report.pdf"}
+        return {
+            "status": "absent", "report": None,
+            "reason": ((sidecar.get("appropriateness") or {}).get("notes")),
+        }
+    if status != "accepted":
+        return {"status": "invalid", "report": None,
+                "error": f"unknown report_pdf status: {status!r}"}
+    path = snapshot_folder / report_pdf_tools.REPORT_PDF
+    entry = artifacts.get(report_pdf_tools.REPORT_PDF)
+    if (not path.is_file() or path.is_symlink() or not isinstance(entry, dict)):
+        return {"status": "invalid", "report": None,
+                "error": "accepted vendored report is missing, symlinked, or unindexed"}
+    try:
+        data = path.read_bytes()
+    except OSError as exc:
+        return {"status": "invalid", "report": None, "error": str(exc)}
+    digest = hashlib.sha256(data).hexdigest()
+    snap = sidecar.get("snapshot") or {}
+    if (entry.get("artifact_kind") != "binary"
+            or entry.get("schema") is not None
+            or entry.get("media_type") != report_pdf_tools.MEDIA_TYPE
+            or entry.get("sha256") != digest
+            or entry.get("bytes") != len(data)
+            or snap.get("sha256") != digest
+            or snap.get("bytes") != len(data)
+            or report_pdf_tools.validate_pdf_bytes(data)):
+        return {"status": "invalid", "report": None,
+                "error": "vendored report PDF integrity metadata does not match"}
+    return {
+        "status": "accepted",
+        "report": {
+            "path": path,
+            "relative_path": report_pdf_tools.REPORT_PDF,
+            "bytes": len(data),
+            "source": "snapshot",
+        },
+    }
+
+
+def report_pdf_search(workspace: Path | None, run_identity: dict | None = None,
+                      snapshot_folder: Path | None = None) -> dict:
     """Resolve the report PDF and retain useful diagnostics when it is absent."""
+    snapshot = _snapshot_report_pdf_search(snapshot_folder)
+    if snapshot["status"] != "unrecorded":
+        return {
+            "report": snapshot.get("report"),
+            "snapshot_status": snapshot["status"],
+            "snapshot_error": snapshot.get("error"),
+            "snapshot_reason": snapshot.get("reason"),
+            "workspace_fallback": False,
+            "workspace_found": workspace is not None,
+            "expected_paths": [],
+            "tracked_tex_paths": [],
+        }
     if workspace is None:
         return {"report": None, "workspace_found": False, "expected_paths": [],
-                "tracked_tex_paths": []}
+                "tracked_tex_paths": [], "snapshot_status": "unrecorded",
+                "workspace_fallback": True}
 
     tex_paths = _tracked_report_tex_paths(workspace, run_identity)
     expected = [rel.with_suffix(".pdf") for rel in tex_paths]
@@ -176,20 +264,26 @@ def report_pdf_search(workspace: Path | None, run_identity: dict | None = None) 
             "workspace": str(workspace),
             "expected_paths": [rel.as_posix() for rel in expected],
             "tracked_tex_paths": [rel.as_posix() for rel in tex_paths],
+            "snapshot_status": "unrecorded",
+            "workspace_fallback": True,
         }
     _, path, rel, size = min(found, key=lambda item: item[0])
     return {
-        "report": {"path": path, "relative_path": rel, "bytes": size},
+        "report": {"path": path, "relative_path": rel, "bytes": size,
+                   "source": "workspace_legacy"},
         "workspace_found": True,
         "workspace": str(workspace),
         "expected_paths": [rel.as_posix() for rel in expected],
         "tracked_tex_paths": [rel.as_posix() for rel in tex_paths],
+        "snapshot_status": "unrecorded",
+        "workspace_fallback": True,
     }
 
 
-def find_report_pdf(workspace: Path | None, run_identity: dict | None = None) -> dict | None:
+def find_report_pdf(workspace: Path | None, run_identity: dict | None = None,
+                    snapshot_folder: Path | None = None) -> dict | None:
     """Find the report PDF tied to a submitted report source."""
-    return report_pdf_search(workspace, run_identity)["report"]
+    return report_pdf_search(workspace, run_identity, snapshot_folder)["report"]
 
 
 def snapshot_detail(folder: Path) -> dict:
@@ -216,7 +310,8 @@ def snapshot_detail(folder: Path) -> dict:
     configs = _load("configs.json")
     env_snap = _load("env_snapshot.json")
     run_identity = _load("run_identity.json")
-    report_search = report_pdf_search(workspace_for_snapshot(run_identity), run_identity)
+    report_search = report_pdf_search(
+        workspace_for_snapshot(run_identity), run_identity, folder)
     report_pdf = report_search["report"]
     expense_facts = expenses or summary.get("expenses") or {}
     metadata_facts = metadata or summary.get("metadata") or {}
@@ -259,6 +354,7 @@ def snapshot_detail(folder: Path) -> dict:
         "run_identity": run_identity,
         "report_pdf": ({"relative_path": report_pdf["relative_path"],
                         "bytes": report_pdf["bytes"],
+                        "source": report_pdf.get("source"),
                         "url": f"/api/snapshot/{urllib.parse.quote(folder.name, safe='')}/report-pdf"}
                        if report_pdf else None),
         "report_pdf_search": {key: value for key, value in report_search.items()
@@ -284,10 +380,14 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
-    def _file(self, path: Path, content_type: str) -> None:
+    def _file(self, path: Path, content_type: str,
+              inline_filename: str | None = None) -> None:
         data = path.read_bytes()
         self.send_response(200)
         self.send_header("Content-Type", content_type)
+        self.send_header("X-Content-Type-Options", "nosniff")
+        if inline_filename:
+            self.send_header("Content-Disposition", f'inline; filename="{inline_filename}"')
         self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
@@ -337,10 +437,13 @@ class Handler(BaseHTTPRequestHandler):
                         identity = json.loads((folder / "run_identity.json").read_text())
                     except (OSError, json.JSONDecodeError):
                         identity = None
-                    report = find_report_pdf(workspace_for_snapshot(identity), identity)
+                    report = find_report_pdf(
+                        workspace_for_snapshot(identity), identity, folder)
                     if not report:
-                        return self._not_found("workspace report PDF")
-                    return self._file(report["path"], "application/pdf")
+                        return self._not_found(
+                            "verified snapshot or legacy workspace report PDF")
+                    return self._file(
+                        report["path"], "application/pdf", "report.pdf")
             if path in ("/", "/index.html"):
                 static = Path(__file__).resolve().parent / "static" / "index.html"
                 if not static.exists():

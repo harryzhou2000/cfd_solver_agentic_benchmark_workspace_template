@@ -9,11 +9,51 @@ from pathlib import Path
 from unittest.mock import patch
 
 import server
-from cfdeval import codex_data, query, validation
+from cfdeval import codex_data, query, recording, report_pdf, validation
 from cfdeval.sessions import CodexThreadEvents
 
 
 class ReportPdfDiscoveryTests(unittest.TestCase):
+    PDF = b"%PDF-1.4\n1 0 obj <<>> endobj\n%%EOF\n"
+
+    def write_vendored(self, folder: Path, *, status: str = "accepted") -> None:
+        folder.mkdir(parents=True, exist_ok=True)
+        digest = __import__("hashlib").sha256(self.PDF).hexdigest()
+        if status == "accepted":
+            (folder / "report.pdf").write_bytes(self.PDF)
+            sidecar = {
+                "schema_version": "1.0", "status": "accepted",
+                "recorded_at": "2026-08-28T00:00:00Z", "evaluator": "terra",
+                "submission_commit": "1" * 40,
+                "source": {"mode": "compiled_from_submission",
+                           "report_tex": "report/report.tex", "sha256": digest,
+                           "bytes": len(self.PDF), "workspace_relative_pdf": None,
+                           "build_command": "latexmk -pdf report.tex"},
+                "snapshot": {"filename": "report.pdf", "media_type": "application/pdf",
+                             "sha256": digest, "bytes": len(self.PDF),
+                             "pdf_header_valid": True, "pdf_eof_valid": True},
+                "appropriateness": {"approved": True, "visually_reviewed": True,
+                                    "main_report_confirmed": True, "readable": True,
+                                    "notes": "Reviewed main report."},
+            }
+        else:
+            sidecar = {
+                "schema_version": "1.0", "status": "absent",
+                "recorded_at": "2026-08-28T00:00:00Z", "evaluator": "terra",
+                "submission_commit": "1" * 40, "source": None, "snapshot": None,
+                "appropriateness": {"approved": False, "visually_reviewed": False,
+                                    "main_report_confirmed": False, "readable": False,
+                                    "notes": "No appropriate main report exists."},
+            }
+        (folder / "report_pdf.json").write_text(json.dumps(sidecar))
+        (folder / "run_identity.json").write_text(json.dumps({
+            "submission_commit": "1" * 40,
+        }))
+        recording.write_index(
+            folder, "run", {"report_pdf.json": "report_pdf.schema.json",
+                            "report.pdf": None}, [],
+            Path(server.__file__).resolve().parents[1] / "schemas")
+
     def test_prefers_report_pdf_and_skips_build_and_venv(self):
         with tempfile.TemporaryDirectory() as raw:
             workspace = Path(raw)
@@ -80,6 +120,44 @@ class ReportPdfDiscoveryTests(unittest.TestCase):
                     "initial_branch": "../../escape/init",
                     "operator_number": "01",
                 }))
+
+    def test_vendored_snapshot_pdf_is_preferred_without_workspace(self):
+        with tempfile.TemporaryDirectory() as raw:
+            folder = Path(raw) / "snapshot"
+            self.write_vendored(folder)
+            found = server.report_pdf_search(None, None, folder)
+            self.assertEqual(found["snapshot_status"], "accepted")
+            self.assertEqual(found["report"]["source"], "snapshot")
+            self.assertEqual(found["report"]["path"], folder / "report.pdf")
+            detail = server.snapshot_detail(folder)
+            self.assertEqual(detail["report_pdf"]["source"], "snapshot")
+
+    def test_explicit_absence_suppresses_workspace_fallback(self):
+        with tempfile.TemporaryDirectory() as raw:
+            base = Path(raw)
+            workspace = base / "workspace"
+            workspace.mkdir()
+            (workspace / "report.pdf").write_bytes(self.PDF)
+            folder = base / "snapshot"
+            self.write_vendored(folder, status="absent")
+            found = server.report_pdf_search(workspace, None, folder)
+            self.assertIsNone(found["report"])
+            self.assertEqual(found["snapshot_status"], "absent")
+            self.assertFalse(found["workspace_fallback"])
+
+    def test_corrupt_vendored_pdf_fails_closed_without_workspace_fallback(self):
+        with tempfile.TemporaryDirectory() as raw:
+            base = Path(raw)
+            workspace = base / "workspace"
+            workspace.mkdir()
+            (workspace / "report.pdf").write_bytes(self.PDF)
+            folder = base / "snapshot"
+            self.write_vendored(folder)
+            (folder / "report.pdf").write_bytes(self.PDF + b"tamper")
+            found = server.report_pdf_search(workspace, None, folder)
+            self.assertIsNone(found["report"])
+            self.assertEqual(found["snapshot_status"], "invalid")
+            self.assertFalse(found["workspace_fallback"])
 
 
 class SnapshotProtocolTests(unittest.TestCase):
@@ -580,6 +658,8 @@ class SnapshotProtocolTests(unittest.TestCase):
         self.assertIn('state.columnFilters.push', app)
         self.assertIn('active.every(clause => matchesClause(row, clause))', app)
         self.assertIn('detail.report_pdf_search || {}', app)
+        self.assertIn('vendored snapshot', app)
+        self.assertIn('No verified report PDF available.', app)
         self.assertIn('id="add-filter-btn"', html)
         self.assertIn('id="column-filters"', html)
         self.assertIn('id="filter-status"', html)

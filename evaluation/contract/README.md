@@ -1,4 +1,4 @@
-# Evaluation Result Contract v1.0
+# Evaluation Result Contract v1.1
 
 This contract standardizes the **self-contained evaluation result folder**
 produced for each benchmark contestant run. A result folder is the single
@@ -29,6 +29,8 @@ agent_scores.json       # agent-driven evaluation scores (review areas + rubric)
 agent_report.md         # agent-driven evaluation report (narrative + evidence)
 run_identity.json       # canonical run ID and immutable Git identity sidecar
 contestant_final_response.md # exact attributed terminal response sidecar
+report.pdf              # evaluator-approved frozen main report rendering
+report_pdf.json         # PDF provenance/approval or explicit absence
 review_code.json|md     # code review scorecard
 review_cfd.json|md      # CFD methods review scorecard
 review_results.json|md  # result review scorecard (+ structural evidence)
@@ -42,8 +44,9 @@ review_results.json|md  # result review scorecard (+ structural evidence)
    `index.schema.json`). The schema version is recorded per artifact in
    `index.json`.
 2. **`index.json` is the integrity manifest**: it lists every artifact with
-   its schema reference and sha256 digest. A folder is contract-conformant
-   only if all digests match.
+   its kind, sha256 digest, byte count, and either a JSON schema reference or
+   binary media type. A folder is contract-conformant only if all digests and
+   byte counts match.
 3. **MD files are derived renderings** of the JSON artifacts — never edited
    by hand. Scores and notes are recorded in the `review_*.json` sidecars and
    rendered into the MD scorecards.
@@ -68,6 +71,11 @@ review_results.json|md  # result review scorecard (+ structural evidence)
    fills `agent_scores.json` (review-area scores + 100-point rubric +
    disqualification flags + metadata answers + session selection) and writes
    `agent_report.md`; `record_agent_results.py` validates and re-indexes.
+9. **The main report rendering is self-contained**: `report_pdf.json` is
+   required. An accepted record binds an exact, visually reviewed `report.pdf`
+   to the immutable submission; an absent record gives the specific reason no
+   appropriate report is available. The PDF is a binary index artifact and is
+   never part of the contestant result branch or run-ID hash.
 
 ## Fill, check, query
 

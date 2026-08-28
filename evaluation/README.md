@@ -22,6 +22,7 @@ all inputs are read-only and outputs land under `evaluation/outputs/`.
 | 8. Session discovery + 30-min-bucketed analysis: cache history, tokens, tool categories, idle exclusion, permission waits | [specs/sessions_spec.md](specs/sessions_spec.md) | workspace `.sessions/codex/` or `.sessions/opencode-data/opencode/opencode.db` |
 | 9. Environment snapshot captured before the agent runs (optional) | [specs/env_snapshot_spec.md](specs/env_snapshot_spec.md) | host/container, tool versions, proxy env, workspace git state |
 | 10. Agent-driven evaluation report + independent rubric, review-area, and eight per-case 0-5 scores stored in the snapshot | [specs/agent_evaluation_spec.md](specs/agent_evaluation_spec.md) | `agent_report.md`, `agent_scores.json` |
+| 11. Evaluator-approved main report PDF, or explicit absence | [contract/README.md](contract/README.md) | `report.pdf`, `report_pdf.json` |
 
 Root spec: [specs/summary_spec.md](specs/summary_spec.md). Output schema:
 [schemas/summary.schema.json](schemas/summary.schema.json).
@@ -71,6 +72,8 @@ This runs the whole pipeline and writes
   `.eval/env_snapshot.json`; see [specs/env_snapshot_spec.md](specs/env_snapshot_spec.md));
 - `agent_scores.json` + `agent_report.md` — agent-driven evaluation (see
   [specs/agent_evaluation_spec.md](specs/agent_evaluation_spec.md));
+- `report.pdf` + `report_pdf.json` — visually reviewed main report rendering
+  and provenance, or an explicit absence record;
 - `review_code.md|json`, `review_cfd.md|json`, `review_results.md|json` —
   blank scorecards for reviewers.
 
@@ -136,8 +139,9 @@ See [specs/agent_evaluation_spec.md](specs/agent_evaluation_spec.md).
 
 Local web GUI listing snapshots with key results and interactive detail views
 (identity, scores/DQ, execution date, summary, evaluator and contestant reports,
-bucketed sessions, metadata, configs, env). It can display a report PDF found
-in the matching `workspace/` repo in place; it does not serve PNGs or CFD field
+bucketed sessions, metadata, configs, env). It prefers the verified report PDF
+vendored in the snapshot; matching-workspace lookup remains only for legacy
+snapshots lacking `report_pdf.json`. It does not serve PNGs or CFD field
 artifacts:
 
 ```bash
