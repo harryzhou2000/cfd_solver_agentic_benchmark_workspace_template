@@ -23,10 +23,11 @@
     { key: "tokens",         label: "Total",        type: "tokens",  sortType: "num" },
     { key: "cost_usd",       label: "Cost",         type: "money",   sortType: "num" },
     { key: "subagents",      label: "Subagents",    type: "int",     sortType: "num" },
-    { key: "code_score",     label: "Code",         type: "score",   sortType: "num" },
-    { key: "cfd_score",      label: "CFD",          type: "score",   sortType: "num" },
-    { key: "result_score",   label: "Results",      type: "score",   sortType: "num" },
-    { key: "rubric_total",   label: "Rubric",       type: "int",     sortType: "num" },
+    { key: "report_pdf",     label: "Report PDF",   type: "pdf-status", sortType: "str" },
+    { key: "code_score",     label: "Code",         type: "score", scoreKind: "code", sortType: "num" },
+    { key: "cfd_score",      label: "CFD",          type: "score", scoreKind: "cfd", sortType: "num" },
+    { key: "result_score",   label: "Results",      type: "score", scoreKind: "results", sortType: "num" },
+    { key: "rubric_total",   label: "Rubric",       type: "rubric-score", scoreKind: "rubric", sortType: "num" },
     { key: "disqualified",   label: "DQ",           type: "dq",      sortType: "bool" },
     { key: "execution_date", label: "Execution",    type: "text",    sortType: "str" },
     { key: "cache_hit",      label: "Cache hit",    type: "pct",     sortType: "num" },
@@ -101,6 +102,28 @@
     if (!Number.isFinite(v)) return emDash;
     const bucket = Math.max(0, Math.min(5, Math.round(v)));
     return `<span class="case-score case-score-${bucket}" title="${escapeHtml(v)} out of 5">${escapeHtml(fmtCaseScore(v))}</span>`;
+  }
+
+  function scoreCell(kind, n, max) {
+    const label = kind === "cfd" ? "CFD" : kind === "results" ? "Results" :
+      kind === "rubric" ? "Rubric" : "Code";
+    const value = Number(n);
+    if (isNullish(n) || !Number.isFinite(value)) {
+      return `<span class="score-chip score-chip-${kind} score-unavailable" aria-label="${label} score unavailable" title="${label} score unavailable">${emDash}</span>`;
+    }
+    const formatted = kind === "rubric" ? fmtInt(value) : fmtScore(value);
+    return `<span class="score-chip score-chip-${kind}" aria-label="${label} score ${escapeHtml(formatted)} out of ${max}" title="${label}: ${escapeHtml(formatted)} out of ${max}">${escapeHtml(formatted)}</span>`;
+  }
+
+  function pdfStatusCell(status) {
+    const states = {
+      present: ["present", "pdf-present", "Verified report PDF is present in the indexed snapshot"],
+      absent: ["absent", "pdf-absent", "Snapshot explicitly records that no appropriate report PDF is available"],
+      invalid: ["invalid", "pdf-invalid", "Report PDF snapshot record is invalid or inconsistent"],
+      unrecorded: ["unrecorded", "pdf-unrecorded", "Snapshot has no indexed report PDF availability record"],
+    };
+    const [label, cls, title] = states[status] || states.unrecorded;
+    return `<span class="pill pdf-status ${cls}" aria-label="Report PDF ${label}" title="${title}">${label}</span>`;
   }
 
   function fmtPct(n) {
@@ -178,7 +201,9 @@
       case "duration":    return fmtDuration(v);
       case "tokens":      return fmtTokens(v);
       case "money":       return fmtMoney(v);
-      case "score":       return fmtScore(v);
+      case "score":       return scoreCell(col.scoreKind, v, 5);
+      case "rubric-score":return scoreCell(col.scoreKind, v, 100);
+      case "pdf-status":  return pdfStatusCell(v);
       case "case-score":  return caseScoreCell(v);
       case "pct":         return fmtPct(v);
       case "bool":        return boolPill(v);
@@ -429,7 +454,7 @@
         const classes = [];
         if (col.type === "num" || col.type === "duration" ||
                      col.type === "tokens" || col.type === "money" ||
-                     col.type === "score" || col.type === "pct" ||
+                     col.type === "score" || col.type === "rubric-score" || col.type === "pct" ||
                      col.type === "case-score" ||
                      col.type === "int") classes.push("num");
         if (col.type === "case-score") classes.push("case-col");

@@ -46,6 +46,72 @@ def load(folder: Path) -> dict:
     return {"index": index, "summary": summary}
 
 
+def snapshot_report_pdf_availability(folder: Path) -> str:
+    """Return the indexed snapshot PDF state without consulting a workspace.
+
+    ``present`` means the accepted provenance sidecar and vendored binary both
+    satisfy the current snapshot protocol. ``absent`` is reserved for an
+    explicit, indexed absence record. Malformed or contradictory records are
+    ``invalid``; snapshots predating the protocol are ``unrecorded``.
+    """
+    from cfdeval import report_pdf
+
+    metadata_path = folder / report_pdf.REPORT_METADATA
+    index_path = folder / "index.json"
+    if not metadata_path.is_file() or metadata_path.is_symlink():
+        return "unrecorded"
+    try:
+        metadata_bytes = metadata_path.read_bytes()
+        metadata = json.loads(metadata_bytes)
+        index = json.loads(index_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return "invalid"
+
+    artifacts = index.get("artifacts") or {}
+    metadata_entry = artifacts.get(report_pdf.REPORT_METADATA)
+    if (not isinstance(metadata_entry, dict)
+            or metadata_entry.get("artifact_kind", "json") != "json"
+            or metadata_entry.get("schema") != "report_pdf.schema.json"
+            or metadata_entry.get("sha256") != hashlib.sha256(metadata_bytes).hexdigest()
+            or metadata_entry.get("bytes") != len(metadata_bytes)):
+        return "invalid"
+
+    try:
+        identity = json.loads((folder / "run_identity.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        return "invalid"
+    if metadata.get("submission_commit") != identity.get("submission_commit"):
+        return "invalid"
+
+    status = metadata.get("status")
+    pdf_entry = artifacts.get(report_pdf.REPORT_PDF)
+    pdf_path = folder / report_pdf.REPORT_PDF
+    if status == "absent":
+        if pdf_entry is not None or pdf_path.exists() or pdf_path.is_symlink():
+            return "invalid"
+        return "absent"
+    if status != "accepted" or not isinstance(pdf_entry, dict):
+        return "invalid"
+    if not pdf_path.is_file() or pdf_path.is_symlink():
+        return "invalid"
+    try:
+        pdf_bytes = pdf_path.read_bytes()
+    except OSError:
+        return "invalid"
+    digest = hashlib.sha256(pdf_bytes).hexdigest()
+    snapshot = metadata.get("snapshot") or {}
+    if (pdf_entry.get("artifact_kind") != "binary"
+            or pdf_entry.get("schema") is not None
+            or pdf_entry.get("media_type") != report_pdf.MEDIA_TYPE
+            or pdf_entry.get("sha256") != digest
+            or pdf_entry.get("bytes") != len(pdf_bytes)
+            or snapshot.get("sha256") != digest
+            or snapshot.get("bytes") != len(pdf_bytes)
+            or report_pdf.validate_pdf_bytes(pdf_bytes)):
+        return "invalid"
+    return "present"
+
+
 def current_cost_estimate(expenses: dict) -> dict | None:
     """Reprice snapshot token facts against the manager's current price table."""
     by_model = (expenses.get("tokens") or {}).get("by_model") or {}
@@ -541,6 +607,7 @@ def row_for(folder: Path, summary: dict) -> dict:
         "codegraph": (ws.get("codegraph") or {}).get("exists"),
         "submodule": ((ws.get("benchmark_submodule") or {}).get("commit") or "?")[:12],
         "branch": c.get("branch"),
+        "report_pdf": snapshot_report_pdf_availability(folder),
     }
     case_scores = (agent_scores or {}).get("case_scores") or {}
     row.update({

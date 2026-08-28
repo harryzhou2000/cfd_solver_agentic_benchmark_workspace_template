@@ -159,6 +159,30 @@ class ReportPdfDiscoveryTests(unittest.TestCase):
             self.assertEqual(found["snapshot_status"], "invalid")
             self.assertFalse(found["workspace_fallback"])
 
+    def test_table_pdf_availability_uses_only_indexed_snapshot_protocol(self):
+        with tempfile.TemporaryDirectory() as raw:
+            base = Path(raw)
+            accepted = base / "accepted"
+            self.write_vendored(accepted)
+            self.assertEqual(query.snapshot_report_pdf_availability(accepted), "present")
+            self.assertEqual(query.row_for(accepted, {})["report_pdf"], "present")
+
+            absent = base / "absent"
+            self.write_vendored(absent, status="absent")
+            self.assertEqual(query.snapshot_report_pdf_availability(absent), "absent")
+
+            # A random workspace-like PDF without an indexed provenance record
+            # is deliberately not reported as available by the table protocol.
+            unrecorded = base / "unrecorded"
+            unrecorded.mkdir()
+            (unrecorded / "report.pdf").write_bytes(self.PDF)
+            (unrecorded / "index.json").write_text("{}")
+            self.assertEqual(
+                query.snapshot_report_pdf_availability(unrecorded), "unrecorded")
+
+            (accepted / "report.pdf").write_bytes(self.PDF + b"tampered")
+            self.assertEqual(query.snapshot_report_pdf_availability(accepted), "invalid")
+
 
 class SnapshotProtocolTests(unittest.TestCase):
     def test_stale_needs_input_status_is_complete_when_no_questions_remain(self):
@@ -646,6 +670,11 @@ class SnapshotProtocolTests(unittest.TestCase):
             "case_cyl_re20", "case_cyl_re200",
         ])
         self.assertIn('case "case-score":  return caseScoreCell(v);', app)
+        self.assertIn('{ key: "report_pdf",     label: "Report PDF",   type: "pdf-status"', app)
+        self.assertIn('case "pdf-status":  return pdfStatusCell(v);', app)
+        self.assertIn('case "score":       return scoreCell(col.scoreKind, v, 5);', app)
+        self.assertIn('case "rubric-score":return scoreCell(col.scoreKind, v, 100);', app)
+        self.assertIn('aria-label="${label} score ${escapeHtml(formatted)} out of ${max}"', app)
         self.assertIn('caseTag: "0012"', app)
         self.assertIn('caseTag: "Cyl"', app)
         self.assertIn('class="case-head"', app)
@@ -668,6 +697,10 @@ class SnapshotProtocolTests(unittest.TestCase):
         self.assertIn('width: 68px; min-width: 68px; max-width: 68px;', css)
         for score in range(6):
             self.assertIn(f'.case-score-{score}', css)
+        for kind in ("code", "cfd", "results", "rubric"):
+            self.assertIn(f'.score-chip-{kind}', css)
+        for state in ("present", "absent", "invalid", "unrecorded"):
+            self.assertIn(f'.pdf-{state}', css)
         self.assertIn('pill pill-status-blocked">yes</span>', app)
         self.assertIn('/static/app.js?v=', html)
         self.assertIn('/static/styles.css?v=', html)
