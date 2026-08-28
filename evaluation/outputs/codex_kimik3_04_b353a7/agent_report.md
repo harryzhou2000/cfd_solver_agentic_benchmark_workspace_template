@@ -4,7 +4,7 @@ Curated tip `f4ebc4345397502dac9aa1dc2ad0be101f6d9c4b` passed audit. The selecte
 
 ## Verdict
 
-**78/100; disqualified.** Trigger 7: steady statuses call outcomes converged while their own notes give below-target plateaus: Re20 2.11/5 orders, M0.15 inviscid 1.92/4, M0.80 inviscid 2.96/4, and M2 inviscid 1.76/3. The completed Re200 package was not rerun. Complete score layers and case scores are in `agent_scores.json`.
+**74/100; disqualified.** Trigger 7: steady statuses call outcomes converged while their own notes give below-target plateaus: Re20 2.11/5 orders, M0.15 inviscid 1.92/4, M0.80 inviscid 2.96/4, and M2 inviscid 1.76/3. The completed Re200 package was not rerun. The 2026-08-28 retrospective calibration corrected this stale prose total to the internally summed, authoritative `agent_scores.json` score; no contestant evidence or scorecard point changed.
 
 ## Integrity and limitations
 
