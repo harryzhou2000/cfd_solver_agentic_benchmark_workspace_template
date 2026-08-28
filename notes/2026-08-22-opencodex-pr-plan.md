@@ -251,3 +251,9 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-28 (B audit assertion fix)
 
 - CodeRabbit caught a flaw in the new test: re-enabling codex removes clientIntegrations, but the test asserted it was present. Fixed on 7e50fec2c to assert the snapshot records the removed key as null and the earlier disable row stores {codex:false}. Audit + claude-desktop-cli + restore-back 58/58. Thread replied; ready + resumed.
+
+## Status 2026-08-28 (final B state)
+
+- B head 7e50fec2c: gates green; claude-desktop + assertion threads confirmed resolved by CR; restore-back provenance thread has our fix reply and awaits CR confirmation; CodeRabbit check still in progress (queued/processing). PR ready.
+- A 82a9b6f26 / D 92ae5a723: ready, all gates green, CodeRabbit pass at f1d819be8. C parked on maintainer-sponsored. Upstream dev stable at f1d819be8.
+- Manager notes commits (local only): 6468e9d, aa841d9, 62ff1c2, b2229544, 5d1c8d2f, 099c4286, 44080243, 86cca01d.
