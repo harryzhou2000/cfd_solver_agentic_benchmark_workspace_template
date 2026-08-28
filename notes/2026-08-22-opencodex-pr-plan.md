@@ -227,3 +227,8 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - Upstream dev advanced 8d9e28692 -> 3b8a6ae5a (CLI/GUI parity, account attribution, new verbs, transport honesty). The readiness gate un-ticked the "latest dev" box on B (and would on all PRs), so all four branches were rebased onto 3b8a6ae5a: A 40da2debe, B 849110acf (writer-label fix carried), C d9b4de0ce, D a410f3420. C had one conflict in src/cli/index.ts (upstream added takeFlag import; kept both takeFlag and configDivergenceActionLine); resolved, rebase continued with GIT_EDITOR=true.
 - Validation after rebase: A 122/122 + typecheck, B 120/120 (audit/writer suites) + typecheck, C 42/42 + GUI contracts 16/16 + typecheck, D 344/344 + typecheck.
 - All four force-pushed (force-with-lease); bodies updated to 3b8a6ae5a + new heads; A/B/D re-readied + CodeRabbit resumed; C stays draft with body updated. Korean rebase note posted on B (5452682755).
+
+## Status 2026-08-28 (dev advanced again -> second rebase round)
+
+- Upstream dev advanced 3b8a6ae5a -> 7794485cd (CLI gap closure + agent skill contract fixes). The gate un-ticked the latest-dev box again, so all four were rebased onto 7794485cd: A 3c7df08c7, B c8ebf3182, C 30fd6e36d, D 8d1b3b536. All rebases clean (CLI-only delta). Revalidated: A 122, B 120, C 58, D 344 + typecheck clean; force-pushed; bodies updated; A/B/D ready + resumed; C draft.
+- As of last poll: upstream/dev stable at 7794485cd; A and D CodeRabbit pass + all gates green; B CodeRabbit in progress; C parked on maintainer-sponsored.
