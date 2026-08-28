@@ -1,0 +1,352 @@
+{
+  "schema": "agent_scores",
+  "contestant": "08",
+  "evaluated_at": "2026-08-28T03:30:00+00:00",
+  "evaluator": {
+    "agent": "codex",
+    "session_id": null,
+    "harness": "codex",
+    "notes": "Immutable tip, source/report, explicit validator, and workspace-local Codex tree reviewed."
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "roots": [
+      "01a04155-66b4-7dd1-9672-2fe9cfc28407"
+    ],
+    "execution_date": "2026-08-27",
+    "started_at": "2026-08-27T03:49:27.177000+00:00",
+    "ended_at": "2026-08-27T15:15:55.698000+00:00",
+    "time_basis": "selected workspace-local root UTC timestamps; stored cwd /workspace",
+    "rationale": "Primary root and its three descendants cover benchmark implementation through final audit."
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "CMake source."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Documented runner."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 5,
+          "notes": "Structured solver."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "No authorship investigation."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Case files."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "MPI source."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Guards."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "All packages validate."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4,
+          "notes": "Final audit clean."
+        }
+      ],
+      "overall_score": 4.47,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 5,
+          "notes": "Conservative source."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Unstructured mesh."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 5,
+          "notes": "FV residual."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Flux options."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 5,
+          "notes": "BC treatments."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "Second order."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "Limiter."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Laminar terms."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Implicit method."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Delivered Re200."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "MPI implementation."
+        }
+      ],
+      "overall_score": 4.46,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "Eight packages."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Explicit validator passed."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 5,
+          "notes": "Steady targets reached; Re200 periodic."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Delivered fields and rank evidence reviewed; some laminar results retain documented force-plateau/symmetry limitations; no rerun."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "37-page report visually reviewed with all-case field/history figures, though several low-contrast views limit interpretability."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Detailed report candidly documents slow force convergence and per-case control overrides."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 4,
+          "notes": "Sources/figures traceable."
+        }
+      ],
+      "overall_score": 4.35,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 91,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 10,
+        "notes": "CMake/CLI source and explicit eight-package validator pass; no clean evaluator rebuild."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 10,
+        "notes": "CGNS unstructured mesh/tag/geometry/adjacency source evidence."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 13,
+        "notes": "Conservative FV/Roe/BC source reviewed; full numerical accuracy not independently rerun."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Documented second-order reconstruction, limiter, and positivity controls."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Viscous/wall source and delivered outputs reviewed; limited independent verification."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 14,
+        "notes": "Implicit/BDF2 design and delivered Re200 evidence; Re200 never rerun."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 8,
+        "notes": "METIS/halo/reduction/rank evidence; no evaluator MPI rerun."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 8,
+        "notes": "All eight packages pass explicit validator; delivered laminar plateau limitations reduce credit."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 5,
+        "notes": "37-page readable report with fields/histories/vortex analysis and candid limitations."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 5,
+        "notes": "Generic mesh/BC/physics organization."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 4.5,
+      "notes": "Delivered package passed explicit validator; judged from submitted result evidence only."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 4.5,
+      "notes": "Delivered package passed explicit validator; judged from submitted result evidence only."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 4.5,
+      "notes": "Delivered package passed explicit validator; judged from submitted result evidence only."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 4.5,
+      "notes": "Delivered package passed explicit validator; judged from submitted result evidence only."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 4.5,
+      "notes": "Delivered package passed explicit validator; judged from submitted result evidence only."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 4.5,
+      "notes": "Delivered package passed explicit validator; judged from submitted result evidence only."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 4.5,
+      "notes": "Delivered package passed explicit validator; judged from submitted result evidence only."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 4,
+      "notes": "Delivered statistically periodic result assessed from artifacts only; never rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "No evaluator clean build or MPI rerun.",
+    "Re200 was not rerun.",
+    "Some final laminar results retain documented force-plateau/symmetry limitations.",
+    "Raw outputs/build artifacts were curated index-only."
+  ]
+}

@@ -14,7 +14,7 @@ seven do not.
 | [x] `codex_generic_sonnet46-01_ac6940`, 73/100, DQ=false | `workspace/codex/generic/sonnet46-01` | `sonnet46-01` | `codex/generic/init` | `8899f0006b15` | `codex_generic_sonnet46-01_ac6940` | Submission `058801f`; both gates pass. 2,928 raw/build/generated artifacts curated index-only; 11-page immutable report accepted; no Re200 rerun. |
 | [x] `codex_generic_sonnet5-01_540ddf`, 76/100, DQ=false | `workspace/codex/generic/sonnet5-01` | `sonnet5-01` | `codex/generic/init` | `f22bc25082be` | `codex_generic_sonnet5-01_540ddf` | Submission `4965edd`; both gates pass. Eight raw packages validate, but all-page immutable report has pervasive placeholders and PDF is explicitly absent; no Re200 rerun. |
 | [x] `codex_kimik3_06_8208e5`, 94/100, DQ=false | `workspace/codex/kimik3/06` | `06` | `codex/kimik3/init` | `7b483d5ffddec` | `codex_kimik3_06_8208e5` | Submission `60a2595`; both gates pass. Eight raw packages validate; the visually reviewed 24-page sibling main report PDF is accepted as frozen manager evidence; no Re200 rerun. |
-| [ ] | `workspace/codex/kimik3/08` | `08` | `codex/kimik3/init` | `97128af56dbe` | none | Root `done`; pre-run snapshot present. |
+| [x] `codex_kimik3_08_75b3dc`, 91/100, DQ=false | `workspace/codex/kimik3/08` | `08` | `codex/kimik3/init` | `97128af56dbe` | `codex_kimik3_08_75b3dc` | Submission `80fdf69`; both gates pass. 907 raw/build/generated paths curated index-only; eight raw packages validate and 37-page main report PDF accepted; no Re200 rerun. |
 
 No row may be marked complete until its distinct contestant submission and
 manager snapshot commits exist and both current completion gates pass. Re200
