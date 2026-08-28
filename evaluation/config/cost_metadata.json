@@ -3,13 +3,16 @@
   "unit": "per 1,000,000 tokens",
   "generated_for": "cfd_solver_agentic_benchmark evaluation",
   "note": "Centralized display-time cost metadata used by the evaluation pipeline and dashboard. Prices are USD per 1M tokens. The dashboard reprices immutable token facts from this current file; it does not trust historical snapshot estimates. Explicitly unresolved models are never priced from defaults. Cache reads use cached_input; cache writes use cache_write when present and otherwise the cache-miss/input rate.",
-  "retrieved_at": "2026-08-16",
+  "retrieved_at": "2026-08-28",
   "sources": {
     "openai_standard": "https://developers.openai.com/api/docs/pricing",
     "deepseek_off_peak": "https://api-docs.deepseek.com/quick_start/pricing",
     "minimax_standard": "https://platform.minimax.io/docs/guides/pricing-paygo",
     "blsc_harness_config": "docker/configs/opencode/opencode.jsonc",
-    "kimi_catalog": "opencodex/src/usage/expected-prices.ts"
+    "kimi_catalog": "opencodex/src/usage/expected-prices.ts",
+    "anthropic_official": "https://platform.claude.com/docs/en/about-claude/pricing",
+    "ocx_model_catalog": "opencodex/src/generated/model-metadata.ts",
+    "ocx_harness_config": "docker/configs/opencodex/config.json"
   },
   "defaults": {
     "input_per_mtok": 1.0,
@@ -63,6 +66,96 @@
       "pricing_status": "official-standard",
       "note": "Official OpenAI Standard price; retrieved 2026-08-16."
     },
+    "claude-opus-5": {
+      "input_per_mtok": 5.0,
+      "cached_input_per_mtok": 0.5,
+      "cache_write_per_mtok": 6.25,
+      "output_per_mtok": 25.0,
+      "estimate": true,
+      "pricing_status": "official-standard",
+      "note": "Official Anthropic standard API price. Cache write uses the published 5-minute rate; the separate 1-hour cache-write rate is not reconstructible from aggregate telemetry. Retrieved 2026-08-28."
+    },
+    "claude-opus-4-8": {
+      "input_per_mtok": 5.0,
+      "cached_input_per_mtok": 0.5,
+      "cache_write_per_mtok": 6.25,
+      "output_per_mtok": 25.0,
+      "estimate": true,
+      "pricing_status": "official-standard",
+      "note": "Official Anthropic standard API price. Cache write uses the published 5-minute rate; retrieved 2026-08-28."
+    },
+    "claude-opus-4-6": {
+      "input_per_mtok": 5.0,
+      "cached_input_per_mtok": 0.5,
+      "cache_write_per_mtok": 6.25,
+      "output_per_mtok": 25.0,
+      "estimate": true,
+      "pricing_status": "official-standard",
+      "note": "Official Anthropic standard API price. Cache write uses the published 5-minute rate; retrieved 2026-08-28."
+    },
+    "claude-sonnet-5": {
+      "input_per_mtok": 2.0,
+      "cached_input_per_mtok": 0.2,
+      "cache_write_per_mtok": 2.5,
+      "output_per_mtok": 10.0,
+      "estimate": true,
+      "pricing_status": "official-standard",
+      "note": "Official Anthropic standard API price. Cache write uses the published 5-minute rate; retrieved 2026-08-28."
+    },
+    "claude-sonnet-4-6": {
+      "input_per_mtok": 3.0,
+      "cached_input_per_mtok": 0.3,
+      "cache_write_per_mtok": 3.75,
+      "output_per_mtok": 15.0,
+      "estimate": true,
+      "pricing_status": "official-standard",
+      "note": "Official Anthropic standard API price. Cache write uses the published 5-minute rate; retrieved 2026-08-28."
+    },
+    "vllm/qwen3.8-27b-int8-w8a16-mtp": {
+      "input_per_mtok": 0.4,
+      "cached_input_per_mtok": 0.04,
+      "cache_write_per_mtok": 0.0,
+      "output_per_mtok": 3.0,
+      "estimate": true,
+      "pricing_status": "harness-config",
+      "note": "Exact local-vLLM accounting rate from the current vendored ocx harness modelCosts row. This is an operator accounting rate, not a public API tariff; retrieved 2026-08-28."
+    },
+    "xiaomi-mimo/mimo-v2.5": {
+      "input_per_mtok": 0.14,
+      "cached_input_per_mtok": 0.0028,
+      "cache_write_per_mtok": 0.0,
+      "output_per_mtok": 0.28,
+      "estimate": true,
+      "pricing_status": "ocx-catalog",
+      "note": "Current ocx Xiaomi model-catalog price for MiMo-V2.5; retrieved 2026-08-28."
+    },
+    "xiaomi-mimo/mimo-v2.5-pro": {
+      "input_per_mtok": 0.435,
+      "cached_input_per_mtok": 0.0036,
+      "cache_write_per_mtok": 0.0,
+      "output_per_mtok": 0.87,
+      "estimate": true,
+      "pricing_status": "ocx-catalog",
+      "note": "Current ocx Xiaomi model-catalog price for MiMo-V2.5-Pro; retrieved 2026-08-28."
+    },
+    "blsc/deepseek-v4-pro-0813": {
+      "input_per_mtok": 0.43,
+      "cached_input_per_mtok": 0.0036,
+      "cache_write_per_mtok": 0.86,
+      "output_per_mtok": 0.86,
+      "estimate": true,
+      "pricing_status": "harness-config",
+      "note": "Exact BLSC DeepSeek-V4-Pro-0813 rate from the current vendored ocx harness modelCosts row; retrieved 2026-08-28."
+    },
+    "internal_eccn/nvidia-moonshotai-eccn-kimi-k3": {
+      "input_per_mtok": 1.45,
+      "cached_input_per_mtok": 0.19,
+      "cache_write_per_mtok": 1.81,
+      "output_per_mtok": 7.25,
+      "estimate": true,
+      "pricing_status": "harness-config",
+      "note": "Exact internal ECCN Kimi-K3 accounting rate from the current vendored ocx harness modelCosts row; retrieved 2026-08-28."
+    },
     "gpt-5.3-codex-spark": {
       "pricing_status": "unresolved",
       "note": "Exact model is absent from the official OpenAI pricing page retrieved 2026-08-16; do not substitute gpt-5.3-codex."
@@ -110,6 +203,15 @@
       "estimate": true,
       "pricing_status": "verified-derived",
       "note": "verified-derived from opencodex expected-prices.ts Kimi official-pricing mapping; persisted OpenCode subscription cost may be zero"
+    },
+    "kimi-code/k3": {
+      "input_per_mtok": 3.0,
+      "cached_input_per_mtok": 0.3,
+      "cache_write_per_mtok": 3.0,
+      "output_per_mtok": 15.0,
+      "estimate": true,
+      "pricing_status": "verified-derived",
+      "note": "Current ocx expected-price overlay derived from the official Kimi K3 table; cache writes use the cache-miss input rate. Retrieved 2026-08-28."
     },
     "blsc/deepseek-v4-flash": {
       "input_per_mtok": 0.14,
