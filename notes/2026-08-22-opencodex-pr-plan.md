@@ -221,3 +221,9 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 
 - B #2351: lidge-jun (via grok-bot) posted a Korean priority review (53/80) at 08:57Z. Actionable gaps verified: api-keys.ts (4 saves), key-failover.ts (1), storage/policy.ts (2) still saved with the default internal label. Fixed on 4d8420cd1: api-key saves labeled surface "api" with per-operation detail; key-failover rotation and storage run-metadata commits labeled "internal" with detail; storage policy write labeled "api". Regressions added in config-mutation-audit.test.ts (45/45 pass; related writer suites 115/115; typecheck clean). Korean reply posted (5452563934) confirming verification, auth/redact coverage, split-campaign stance (close+reissue if split invalidates), and API-only GUI preference.
 - Gate re-drafted B after the push (delayed); body re-applied, PR re-readied, CodeRabbit resumed. Checks green; CodeRabbit still in progress as of this note.
+
+## Status 2026-08-28 (dev advanced -> full rebase round)
+
+- Upstream dev advanced 8d9e28692 -> 3b8a6ae5a (CLI/GUI parity, account attribution, new verbs, transport honesty). The readiness gate un-ticked the "latest dev" box on B (and would on all PRs), so all four branches were rebased onto 3b8a6ae5a: A 40da2debe, B 849110acf (writer-label fix carried), C d9b4de0ce, D a410f3420. C had one conflict in src/cli/index.ts (upstream added takeFlag import; kept both takeFlag and configDivergenceActionLine); resolved, rebase continued with GIT_EDITOR=true.
+- Validation after rebase: A 122/122 + typecheck, B 120/120 (audit/writer suites) + typecheck, C 42/42 + GUI contracts 16/16 + typecheck, D 344/344 + typecheck.
+- All four force-pushed (force-with-lease); bodies updated to 3b8a6ae5a + new heads; A/B/D re-readied + CodeRabbit resumed; C stays draft with body updated. Korean rebase note posted on B (5452682755).
