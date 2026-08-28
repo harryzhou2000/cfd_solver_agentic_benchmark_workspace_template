@@ -216,3 +216,8 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - C #2355: parked on maintainer-sponsored (auth-api hunk + UI change); no new pings.
 - Remaining external only: Ingwannu re-review/approval for A/B/D exact heads, fork runtime CI workflow approval, lidge-jun sponsor for C.
 - Manager notes committed locally (aa841d9 + this addendum), not pushed.
+
+## Status 2026-08-28 (maintainer review round)
+
+- B #2351: lidge-jun (via grok-bot) posted a Korean priority review (53/80) at 08:57Z. Actionable gaps verified: api-keys.ts (4 saves), key-failover.ts (1), storage/policy.ts (2) still saved with the default internal label. Fixed on 4d8420cd1: api-key saves labeled surface "api" with per-operation detail; key-failover rotation and storage run-metadata commits labeled "internal" with detail; storage policy write labeled "api". Regressions added in config-mutation-audit.test.ts (45/45 pass; related writer suites 115/115; typecheck clean). Korean reply posted (5452563934) confirming verification, auth/redact coverage, split-campaign stance (close+reissue if split invalidates), and API-only GUI preference.
+- Gate re-drafted B after the push (delayed); body re-applied, PR re-readied, CodeRabbit resumed. Checks green; CodeRabbit still in progress as of this note.
