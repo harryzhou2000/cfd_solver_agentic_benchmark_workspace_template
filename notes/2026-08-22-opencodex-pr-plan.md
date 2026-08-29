@@ -324,3 +324,10 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-29 (CodeRabbit converge)
 
 - B #2351 head 7cf07b56c: CodeRabbit SUCCESS, 0 unresolved threads, ready, MERGEABLE, gates green. D #2527 head f44cb3bef: CodeRabbit SUCCESS, 0 unresolved threads, draft (per Ingwannu until exact-head CI green), gates green; runtime matrix still needs fork workflow approval. A #2350 ready/clean. C #2355 draft/parked on maintainer-sponsored.
+
+## Status 2026-08-30 (rebase round 1d9b389c1 + branch correction)
+
+- Upstream dev advanced 64b994c0f -> 1d9b389c1 (identity-lookup budget #2926, replay-402 test #2922, Windows Desktop policy #2924). Rebased all four and pushed: A bfc71e82a, B f0fd41695, C 7283a4613, D 0dfd7baec.
+- IMPORTANT correction: A #2350's head branch is fix/annotate-empty-tool-outputs, NOT feat/provider-cost-overlay. A first rebase was pushed to feat/provider-cost-overlay (scratch branch for merged PRs #1010/#1390); restored that fork branch to 72b146bfd and rebased/pushed the real fix/annotate branch (bfc71e82a).
+- Validation: A 122/122 + typecheck + diff check; B 55/55 + typecheck; C 69/69 + GUI tsc + typecheck; D 387/387 + typecheck + diff check (network suites run escalated).
+- Gate re-drafts after pushes: B re-readied (body re-applied with 4/4 ticks); D kept draft per Ingwannu until exact-head CI green; C stays draft/parked (no maintainer ping).
