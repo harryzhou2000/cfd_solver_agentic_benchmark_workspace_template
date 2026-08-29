@@ -303,3 +303,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-29 (64b994c0f rebase round)
 
 - Upstream dev advanced 6906049c6 -> 64b994c0f (GUI test-constants fix #2915). All four rebased + typecheck clean: A c807b5812, B 16f5faaa0, C 520b59309, D d5fa3a36b; force-pushed; bodies updated; A/B/D ready + resumed; C stays draft. Dev is moving every ~10-20 min; each round is a mechanical rebase/ready cycle.
+
+## Status 2026-08-29 (stable-dev closeout)
+
+- Upstream/dev stable at 64b994c0f. A c807b5812 and B 16f5faaa0 ready, gates green, CodeRabbit pass. D d5fa3a36b re-readied after a delayed gate re-draft; CR resumed. C 520b59309 draft, parked. No new human comments (Ingwannu/lidge-jun silent since the pings).
