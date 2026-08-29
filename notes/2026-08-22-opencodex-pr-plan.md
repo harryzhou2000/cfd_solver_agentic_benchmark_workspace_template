@@ -340,3 +340,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-30 (steady-state round)
 
 - Upstream dev still 1d9b389c1. A ready/green, B ready/green, D draft/green (per Ingwannu), C draft/parked. Only CodeRabbit resume acknowledgements arrived; zero unresolved threads on A/B/D; no new human comments. No in-scope action remains; external gates unchanged (Ingwannu re-review + fork CI approval for A/B/D, maintainer-sponsored for C).
+
+## Status 2026-08-30 (steady-state round 2)
+
+- No change: upstream dev still 1d9b389c1; A/B ready/green, D draft/green, C draft/parked; zero new comments and zero unresolved threads. Still waiting on the same external gates.
