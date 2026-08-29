@@ -291,3 +291,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-29 (fe05b0ae2 rebase round)
 
 - Upstream dev advanced cfb70c972 -> fe05b0ae2 (single service/systemd launcher fix #2916). All four rebased: A 016b8c65e, B db40c3bfc, C 7a8b6edf2, D d31a281c6; force-pushed; bodies updated; A/B/D ready + resumed; C stays draft. Validation: A 122, B 125, C 71, D 353 + typecheck clean.
+
+## Status 2026-08-29 (a05dd252d rebase round)
+
+- Upstream dev advanced fe05b0ae2 -> a05dd252d (GLM-5.3-Flash effort ladder #2917). All four rebased: A 054fdc0e2, B a4f658c78, C 8722e5b79, D a75e7dc83; force-pushed; bodies updated; A/B/D ready + resumed; C stays draft. Validation: A 122, B 125, C 71 + typecheck clean (D typecheck clean; full suite verified on prior head, delta is providers-ladder only).
