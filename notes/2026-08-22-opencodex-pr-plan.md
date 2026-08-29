@@ -281,3 +281,9 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - D #2527: fully green on cfb70c972 (head 8abfb082f) - CodeRabbit pass, hygiene/enforce-target/label/resolve-pr pass, ready, Ingwannu pinged for re-review (5462993791). Blocker (release-document edit) resolved by dropping the devlog hunk; PR diff feature-only.
 - A #2350 / B #2351: ready on cfb70c972, gates green, CodeRabbit still in progress (queued). C #2355: rebased on cfb70c972 (8778a92d8), draft, parked on maintainer-sponsored.
 - Remaining: Ingwannu re-review A/B/D; CodeRabbit completion on A/B; lidge-jun sponsor for C.
+
+## Status 2026-08-29 (goal closeout)
+
+- A #2350 CodeRabbit pass on cfb70c972 head 7ca72754f; Ingwannu pinged (5463096265). B #2351 CodeRabbit pass on cfb70c972 head fe6a6a0a4; Ingwannu pinged (5463091800). D #2527 CodeRabbit pass on cfb70c972 head 8abfb082f; refresh note posted (5463096749). C #2355 rebased (8778a92d8), draft, parked.
+- Local validation this round: A 122, B 125, C 71, D 385 + typecheck clean. All four branches contain current upstream dev cfb70c972; checklists 4/4 on A/B/D, unticked on C.
+- No actionable bot comments remain; only external human gates (Ingwannu re-review A/B/D, fork runtime CI approval, lidge-jun sponsor for C).
