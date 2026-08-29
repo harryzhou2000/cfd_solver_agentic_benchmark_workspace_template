@@ -264,3 +264,10 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - Cleanup rebase: D replayed 13 feature commits onto 11d33597f; conflicts in src/server/auth-cors.ts resolved twice (keep upstream xaiResponsesXSearch check; refactor commit removes auto-review block); 7c818038f amended to drop the devlog hunk (file restored to upstream) and retitled "test(management): split synthetic token fixtures for privacy scan".
 - Head 5bf98ba0b: PR diff feature-only (no devlog/package.json); local suites 385/385 + typecheck clean; pushed; body updated; ready; CodeRabbit resumed; Ingwannu replied with the blocker resolution (5462993791).
 - Note: A/B/C are also behind 11d33597f from yesterday and will need the same rebase/ready cycle; C remains maintainer-sponsored-blocked.
+
+## Status 2026-08-29 (A/B/C rebase onto 11d33597f)
+
+- A rebased onto 11d33597f (conflicts: openai-responses xai import merge, auth-cors xaiResponsesXSearch + annotateEmptyToolOutputs guards, then annotate guard moved off auth surface). Head 644e33459, 122/122 + typecheck; body updated, ready, resumed.
+- B rebased onto 11d33597f cleanly. Head 08529f806, 125/125 + typecheck; body updated, ready, resumed.
+- C rebased onto 11d33597f (conflicts: status.ts imports + staleProcessState/configDivergence merge, cli-status-json imports). Head de01f78cb, 71/71 + typecheck; body updated; stays draft (maintainer-sponsored).
+- D head 5bf98ba0b ready on 11d33597f (blocker resolved, CR resumed). All remote fork branches had been force-moved by another process onto older devs; local rebases contain current dev and identical feature diffs, so they were force-pushed over the stale heads.
