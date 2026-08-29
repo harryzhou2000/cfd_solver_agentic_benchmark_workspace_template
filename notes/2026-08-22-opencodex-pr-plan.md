@@ -344,3 +344,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-30 (steady-state round 2)
 
 - No change: upstream dev still 1d9b389c1; A/B ready/green, D draft/green, C draft/parked; zero new comments and zero unresolved threads. Still waiting on the same external gates.
+
+## Status 2026-08-30 (steady-state round 3)
+
+- No change again: upstream dev still 1d9b389c1; A/B ready/green, D draft/green, C draft/parked; zero new comments and zero unresolved threads. External gates unchanged; no maintainer pings added.
