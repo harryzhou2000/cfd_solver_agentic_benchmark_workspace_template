@@ -275,3 +275,9 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-29 (cfb70c972 rebase)
 
 - Upstream dev advanced 11d33597f -> cfb70c972 (2 devlog doc commits only). All four rebased (A 7ca72754f, B fe6a6a0a4, C 8778a92d8, D 8abfb082f), force-pushed; bodies updated; A/B/D ready + resumed; C stays draft.
+
+## Status 2026-08-29 (round closeout)
+
+- D #2527: fully green on cfb70c972 (head 8abfb082f) - CodeRabbit pass, hygiene/enforce-target/label/resolve-pr pass, ready, Ingwannu pinged for re-review (5462993791). Blocker (release-document edit) resolved by dropping the devlog hunk; PR diff feature-only.
+- A #2350 / B #2351: ready on cfb70c972, gates green, CodeRabbit still in progress (queued). C #2355: rebased on cfb70c972 (8778a92d8), draft, parked on maintainer-sponsored.
+- Remaining: Ingwannu re-review A/B/D; CodeRabbit completion on A/B; lidge-jun sponsor for C.
