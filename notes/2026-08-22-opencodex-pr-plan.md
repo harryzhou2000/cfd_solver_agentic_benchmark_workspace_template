@@ -287,3 +287,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - A #2350 CodeRabbit pass on cfb70c972 head 7ca72754f; Ingwannu pinged (5463096265). B #2351 CodeRabbit pass on cfb70c972 head fe6a6a0a4; Ingwannu pinged (5463091800). D #2527 CodeRabbit pass on cfb70c972 head 8abfb082f; refresh note posted (5463096749). C #2355 rebased (8778a92d8), draft, parked.
 - Local validation this round: A 122, B 125, C 71, D 385 + typecheck clean. All four branches contain current upstream dev cfb70c972; checklists 4/4 on A/B/D, unticked on C.
 - No actionable bot comments remain; only external human gates (Ingwannu re-review A/B/D, fork runtime CI approval, lidge-jun sponsor for C).
+
+## Status 2026-08-29 (fe05b0ae2 rebase round)
+
+- Upstream dev advanced cfb70c972 -> fe05b0ae2 (single service/systemd launcher fix #2916). All four rebased: A 016b8c65e, B db40c3bfc, C 7a8b6edf2, D d31a281c6; force-pushed; bodies updated; A/B/D ready + resumed; C stays draft. Validation: A 122, B 125, C 71, D 353 + typecheck clean.
