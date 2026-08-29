@@ -299,3 +299,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-29 (6906049c6 rebase round)
 
 - Upstream dev advanced a05dd252d -> 6906049c6 (devlog + service schtasks CJK fix). All four rebased + typecheck clean: A 0e4af4e24, B fc923cb52, C 62b73302c, D dcf80f7bd; force-pushed; bodies updated; A/B/D ready + resumed; C stays draft.
+
+## Status 2026-08-29 (64b994c0f rebase round)
+
+- Upstream dev advanced 6906049c6 -> 64b994c0f (GUI test-constants fix #2915). All four rebased + typecheck clean: A c807b5812, B 16f5faaa0, C 520b59309, D d5fa3a36b; force-pushed; bodies updated; A/B/D ready + resumed; C stays draft. Dev is moving every ~10-20 min; each round is a mechanical rebase/ready cycle.
