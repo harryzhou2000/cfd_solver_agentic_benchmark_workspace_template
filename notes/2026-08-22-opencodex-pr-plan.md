@@ -307,3 +307,10 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-29 (stable-dev closeout)
 
 - Upstream/dev stable at 64b994c0f. A c807b5812 and B 16f5faaa0 ready, gates green, CodeRabbit pass. D d5fa3a36b re-readied after a delayed gate re-draft; CR resumed. C 520b59309 draft, parked. No new human comments (Ingwannu/lidge-jun silent since the pings).
+
+## Status 2026-08-29 (B/D maintainer-blocker fixes)
+
+- Ingwannu requested changes on B #2351 (15:18:56Z) and D #2527 (15:18:58Z).
+- B blocker: `releaseDrainedCodexAccountPin`'s `knownUnavailable` branch saved without source metadata. Fixed with `{surface:"internal", detail:"routing: clear unavailable codex account pin"}` (6d830b8e2) plus test fix 6fcc939cc (persist the ghost pin before the drained clear, then assert on-disk pin removal). Local: config-mutation-audit 47/47, claude-desktop-cli 7/7; the one cli-restore-back subprocess case fails only in this sandbox (coordinator-namespace ownership guard; path untouched by this PR). Typecheck + diff check clean. Pushed; Ingwannu reply 5463293489; outside-diff LRU note 5463293438; resumed.
+- D blocker: `routedProviderConfig` copied registry `autoReviewModelOverrides` only when the map was entirely undefined, discarding disjoint registry defaults. Fixed with a per-key merge (provider wins on overlap, registry defaults kept) plus a disjoint-key regression and a retained-sync validator call before serialization (ada0a3087). Local: auto-review 33/33, gather-authority 6/6, single-flight 9/9, codex-catalog 205/205, convergence + management + server-auth 125/125 (escalated), typecheck + diff check clean. Pushed; inline router thread replied (r3886971805) and resolved; body updated; Ingwannu reply 5463303138; PR kept in draft until exact-head CI is green; resumed.
+- A #2350 c807b5812 ready/clean, no action. C #2355 520b59309 draft, parked on maintainer-sponsored (hygiene/enforce-target failures expected without sponsor).
