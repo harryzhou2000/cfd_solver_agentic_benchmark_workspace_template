@@ -332,3 +332,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - Validation: A 122/122 + typecheck + diff check; B 55/55 + typecheck; C 69/69 + GUI tsc + typecheck; D 387/387 + typecheck + diff check (network suites run escalated).
 - Gate re-drafts after pushes: B re-readied (body re-applied with 4/4 ticks); D kept draft per Ingwannu until exact-head CI green; C stays draft/parked (no maintainer ping).
 - Final settle: A bfc71e82a ready (gate re-drafted twice after the push; re-readied), CodeRabbit SUCCESS, 0 unresolved threads, hygiene green, mergeable. B f0fd41695 ready, CodeRabbit SUCCESS, gates green. C 7283a4613 draft/parked (hygiene/enforce-target failures expected). D 0dfd7baec draft (last checklist box unticked so the gate stops auto-readying), CodeRabbit SUCCESS, 0 unresolved threads, hygiene/enforce green, mergeable; only exact-head runtime CI (fork approval) and Ingwannu remain.
+
+## Status 2026-08-30 (no-movement round)
+
+- Upstream dev unchanged at 1d9b389c1; no rebase needed. A was re-drafted by the gate with the checklist reset; re-applied ticked body and re-readied; now stable ready. B ready/green, D draft/green (per Ingwannu), C draft/parked. No new bot/human comments or unresolved threads on A/B/D. Remaining gates are external: Ingwannu re-review + fork runtime CI for A/B/D, maintainer-sponsored for C.
