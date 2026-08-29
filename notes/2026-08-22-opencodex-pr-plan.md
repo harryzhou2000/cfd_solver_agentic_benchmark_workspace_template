@@ -257,3 +257,10 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - B head 7e50fec2c: gates green; claude-desktop + assertion threads confirmed resolved by CR; restore-back provenance thread has our fix reply and awaits CR confirmation; CodeRabbit check still in progress (queued/processing). PR ready.
 - A 82a9b6f26 / D 92ae5a723: ready, all gates green, CodeRabbit pass at f1d819be8. C parked on maintainer-sponsored. Upstream dev stable at f1d819be8.
 - Manager notes commits (local only): 6468e9d, aa841d9, 62ff1c2, b2229544, 5d1c8d2f, 099c4286, 44080243, 86cca01d.
+
+## Status 2026-08-29 (D cleanup round)
+
+- Upstream dev advanced to 11d33597f. D head had been rebased by an earlier process onto an older dev and still carried the blocked commit 7c818038f (devlog release-provenance HTTPS edit + privacy-safe test fixture split).
+- Cleanup rebase: D replayed 13 feature commits onto 11d33597f; conflicts in src/server/auth-cors.ts resolved twice (keep upstream xaiResponsesXSearch check; refactor commit removes auto-review block); 7c818038f amended to drop the devlog hunk (file restored to upstream) and retitled "test(management): split synthetic token fixtures for privacy scan".
+- Head 5bf98ba0b: PR diff feature-only (no devlog/package.json); local suites 385/385 + typecheck clean; pushed; body updated; ready; CodeRabbit resumed; Ingwannu replied with the blocker resolution (5462993791).
+- Note: A/B/C are also behind 11d33597f from yesterday and will need the same rebase/ready cycle; C remains maintainer-sponsored-blocked.
