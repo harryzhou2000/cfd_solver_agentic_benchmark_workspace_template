@@ -320,3 +320,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - B #2351: CodeRabbit posted 4 new threads on head 6fcc939cc. Fixed on 7cf07b56c: setActiveCodexAccount derives audit detail from actual changes (selection vs pin-only clear vs combined); unavailable-case test persists the reauth pin before the clear so its disk assertion is load-bearing; duplicated comment removed; PUT /api/claude-code attribution regression added. Audit + claude-desktop 55/55, typecheck clean. All 4 threads replied + resolved; body updated; ready; resumed.
 - D #2527: CodeRabbit posted 1 new thread (registry autoReviewModel scalar fallback regression). Fixed on f44cb3bef: added the regression next to the map-merge test (29/29 auto-review, typecheck + diff check clean). Thread replied + resolved; body updated; stays draft until exact-head CI green; resumed.
 - A #2350 c807b5812 still ready/clean. C #2355 520b59309 still draft/parked.
+
+## Status 2026-08-29 (CodeRabbit converge)
+
+- B #2351 head 7cf07b56c: CodeRabbit SUCCESS, 0 unresolved threads, ready, MERGEABLE, gates green. D #2527 head f44cb3bef: CodeRabbit SUCCESS, 0 unresolved threads, draft (per Ingwannu until exact-head CI green), gates green; runtime matrix still needs fork workflow approval. A #2350 ready/clean. C #2355 draft/parked on maintainer-sponsored.
