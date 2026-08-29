@@ -271,3 +271,7 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - B rebased onto 11d33597f cleanly. Head 08529f806, 125/125 + typecheck; body updated, ready, resumed.
 - C rebased onto 11d33597f (conflicts: status.ts imports + staleProcessState/configDivergence merge, cli-status-json imports). Head de01f78cb, 71/71 + typecheck; body updated; stays draft (maintainer-sponsored).
 - D head 5bf98ba0b ready on 11d33597f (blocker resolved, CR resumed). All remote fork branches had been force-moved by another process onto older devs; local rebases contain current dev and identical feature diffs, so they were force-pushed over the stale heads.
+
+## Status 2026-08-29 (cfb70c972 rebase)
+
+- Upstream dev advanced 11d33597f -> cfb70c972 (2 devlog doc commits only). All four rebased (A 7ca72754f, B fe6a6a0a4, C 8778a92d8, D 8abfb082f), force-pushed; bodies updated; A/B/D ready + resumed; C stays draft.
