@@ -441,3 +441,9 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
   4. Catalog regressions: trusted openai-api rebuild drop + gatherRoutedModels custom-model drop (override -> undefined when setting removed).
   Updated old-signature callers in auto-review-model-override.test.ts. Validation: auto-review + codex-catalog + management-provider-validation 335/335, config 158/158, typecheck/diff clean. Thread replied+resolved (PRRT_kwDOS-0Gi86dg1RK). Ready, resumed (5468548593).
 - B #2351: head 665eeb21a (transientRetryOn5xx fix) still awaiting CodeRabbit review; gate keeps it draft + hygiene-blocked.
+
+## Status 2026-08-30 (D clean-review round)
+
+- D #2527: CodeRabbit reviewed 0f8a8b815 clean (12:07, len=0); body re-applied, re-readied. Remaining: Ingwannu review (CHANGES_REQUESTED is from earlier heads).
+- B #2351: CodeRabbit review of 665eeb21a still queued (~30 min); draft + hygiene-blocked; resume posted.
+- C #2355: parked at 33855f2b3.
