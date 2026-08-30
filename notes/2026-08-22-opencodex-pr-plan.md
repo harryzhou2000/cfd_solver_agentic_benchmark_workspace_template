@@ -400,3 +400,12 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 
 - All four PRs on current upstream dev (015fedb63). A #2350 ready + review-ready (head d996bb02e, CR clean on 76fdde86f; new head resume posted). B #2351 draft + hygiene-blocked (head 823b2d2d1; CR resume acknowledged 06:30, review pending; false-positive finding replied). C #2355 parked + hygiene-blocked (head 7c656940f). D #2527 draft (head 4b77da59f; CR resume acknowledged 06:31, review pending; Ingwannu CHANGES_REQUESTED remains).
 - No new Ingwannu comments. CodeRabbit reviews for the second-rebase heads are queued; nothing locally actionable until they land.
+
+## Status 2026-08-30 (rebase round f4d28626d)
+
+- Upstream dev advanced 015fedb63 -> f4d28626d (slug fix #2987: src/cli/models.ts + src/providers/slug-codec.ts + tests; no overlap). Rebased and force-pushed all four cleanly:
+  - A #2350 head d996bb02e -> 182d881db (318/318 + typecheck), ready, resumed (5467282306).
+  - B #2351 head 823b2d2d1 -> f9f9ec9ea (54/54 + typecheck), ready attempted (gate keeps hygiene-draft), resumed (5467284596).
+  - C #2355 head 7c656940f -> 54a7d1ea6 (58 root + 16 GUI + typecheck), body re-applied, parked.
+  - D #2527 head 4b77da59f -> c1cbf6733 (248/248 + typecheck), ready, resumed (5467290036).
+- CodeRabbit still has not posted reviews for the second-rebase heads; third-rebase resumes just posted. Ingwannu silent on 08-30 updates. All local actions current; external queue remains.
