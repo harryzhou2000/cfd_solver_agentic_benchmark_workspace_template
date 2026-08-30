@@ -415,3 +415,12 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - Verified B no longer carries the package.json bump Ingwannu cited on 08-27 (current diff has no package.json/bun.lock; changed files are audit/provenance sources + tests). A's diff has no restricted files (hygiene green).
 - All four PRs on upstream dev f4d28626d: A 182d881db (ready/review-ready, CR clean on prior head, resumed 07:03), B f9f9ec9ea (draft, hygiene unsponsored_surface, sponsorship asked once 5466892580, resumed 07:03), C 54a7d1ea6 (parked, hygiene-blocked), D c1cbf6733 (draft, resumed 07:04).
 - Blocking condition repeated for 3+ consecutive goal turns: CodeRabbit review queue for exact heads + Ingwannu sponsorship/re-review. No local action remains. Goal marked blocked.
+
+## Status 2026-08-30 (A landed; rebase round bb6a6fbdf)
+
+- A #2350 CLOSED/landed: lidge-jun landed it on dev via #2978 as 8fba9d1b8, all ten commits cherry-picked with authorship, label landed-via-maintainer. A is done; removed from active scope.
+- Upstream dev advanced to bb6a6fbdf (A + #2954/#2979/#2981/#2982/#2984/#2985/#2980/#2998). Rebased the remaining three:
+  - B #2351 head f9f9ec9ea -> 370a4468a (clean; config-mutation-audit 54/54 + API/routing/account 313/313, typecheck clean), pushed, body re-applied, resumed (5468392025).
+  - C #2355 head 54a7d1ea6 -> 33855f2b3 (clean; 58 root + 16 GUI + typecheck), body re-applied, parked.
+  - D #2527 head c1cbf6733 -> b13a7760b (conflicts in config.ts/derive.ts/router.ts/types/provider.ts, all additive; fixed a missing closure in derive seed+enrich, missing doc-comment opener in types, missing closure in router, and restored auto-review-before-seed validation order in provider-routes POST; 332/332 + typecheck + diff-check), pushed, body re-applied, resumed (5468428019).
+- Note: Bun 1.3.14 crashed once during the D batch (segfault) and left a stale test lock under /tmp/opencodex-test-runtime-1004/; removed the lock and reran suites individually.
