@@ -409,3 +409,9 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
   - C #2355 head 7c656940f -> 54a7d1ea6 (58 root + 16 GUI + typecheck), body re-applied, parked.
   - D #2527 head 4b77da59f -> c1cbf6733 (248/248 + typecheck), ready, resumed (5467290036).
 - CodeRabbit still has not posted reviews for the second-rebase heads; third-rebase resumes just posted. Ingwannu silent on 08-30 updates. All local actions current; external queue remains.
+
+## Status 2026-08-30 (blocked-audit round)
+
+- Verified B no longer carries the package.json bump Ingwannu cited on 08-27 (current diff has no package.json/bun.lock; changed files are audit/provenance sources + tests). A's diff has no restricted files (hygiene green).
+- All four PRs on upstream dev f4d28626d: A 182d881db (ready/review-ready, CR clean on prior head, resumed 07:03), B f9f9ec9ea (draft, hygiene unsponsored_surface, sponsorship asked once 5466892580, resumed 07:03), C 54a7d1ea6 (parked, hygiene-blocked), D c1cbf6733 (draft, resumed 07:04).
+- Blocking condition repeated for 3+ consecutive goal turns: CodeRabbit review queue for exact heads + Ingwannu sponsorship/re-review. No local action remains. Goal marked blocked.
