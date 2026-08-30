@@ -424,3 +424,10 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
   - C #2355 head 54a7d1ea6 -> 33855f2b3 (clean; 58 root + 16 GUI + typecheck), body re-applied, parked.
   - D #2527 head c1cbf6733 -> b13a7760b (conflicts in config.ts/derive.ts/router.ts/types/provider.ts, all additive; fixed a missing closure in derive seed+enrich, missing doc-comment opener in types, missing closure in router, and restored auto-review-before-seed validation order in provider-routes POST; 332/332 + typecheck + diff-check), pushed, body re-applied, resumed (5468428019).
 - Note: Bun 1.3.14 crashed once during the D batch (segfault) and left a stale test lock under /tmp/opencodex-test-runtime-1004/; removed the lock and reran suites individually.
+
+## Status 2026-08-30 (B/D CodeRabbit round after bb6a6fbdf rebase)
+
+- B #2351: CodeRabbit reviewed 370a4468a (11:33) and found transientRetryOn5xx (upstream #2981 field) is not validated at the management write boundary; invalid attempts could persist and fail the next load. Fixed: shared transientRetryOn5xxPolicyConfigError in src/config.ts (strict 1-10, unknown-key rejection, secret-name redaction), wired into providerManagementConfigError, unit + route regressions (POST 400, not persisted). Head 370a4468a -> 665eeb21a; management-provider 84/84, audit 54/54, typecheck/diff clean; ready, resumed (5468483438).
+- D #2527: head b13a7760b is ready (draft=false) after the bb6a6fbdf rebase with additive conflict resolutions; CR review of the new head still pending.
+- C #2355: parked at 33855f2b3.
+- A #2350: landed upstream via #2978 (closed); no further action.
