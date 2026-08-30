@@ -348,3 +348,11 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 ## Status 2026-08-30 (steady-state round 3)
 
 - No change again: upstream dev still 1d9b389c1; A/B ready/green, D draft/green, C draft/parked; zero new comments and zero unresolved threads. External gates unchanged; no maintainer pings added.
+
+## Status 2026-08-30 (rebase round 223a0a287 + maintainer engagement)
+
+- Upstream dev advanced 1d9b389c1 -> 223a0a287. Rebased all four and pushed: A 511d084ad, B 7192f8e5f, D 1e7d74a30, C f504e5c75.
+- Ingwannu engaged: D blocker confirmed resolved and asked to mark D ready for maintainer-sponsored runtime CI. C: asked to rebase onto current dev, resolve the GUI-locale/server overlaps deliberately, complete the 4/4 checklist, rerun focused suites, and re-request review.
+- Conflicts resolved: B src/lib/redact.ts (merged upstream exported SENSITIVE_KEY_PATTERN with apiKeyPool/oauthClientSecret), D src/codex/catalog/provider-fetch.ts (kept upstream discoveredHints + captured.knownModelIds), C tests/codex-plan.test.ts (kept upstream rotated-JWT describe + feature re-anchor regression). Verified all nine GUI locales retain dash.configDiverged.
+- Validation: A 122/122, B 55/55, D 387/387, C 56/56 + GUI 16/16 + GUI tsc; typecheck/diff-check clean on all.
+- All four marked ready with 4/4 checklists (gate re-drafts after pushes; re-readied), CodeRabbit resumed, Ingwannu replied on D (5466631400) and C (5466639478). Awaiting CodeRabbit/gates/runtime CI (fork approval needed).
