@@ -430,6 +430,11 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - B #2351: CodeRabbit reviewed 370a4468a (11:33) and found transientRetryOn5xx (upstream #2981 field) is not validated at the management write boundary; invalid attempts could persist and fail the next load. Fixed: shared transientRetryOn5xxPolicyConfigError in src/config.ts (strict 1-10, unknown-key rejection, secret-name redaction), wired into providerManagementConfigError, unit + route regressions (POST 400, not persisted). Head 370a4468a -> 665eeb21a; management-provider 84/84, audit 54/54, typecheck/diff clean; ready, resumed (5468483438).
 - D #2527: head b13a7760b is ready (draft=false) after the bb6a6fbdf rebase with additive conflict resolutions; CR review of the new head still pending.
 - C #2355: parked at 33855f2b3.
+
+## Status 2026-08-30 (B review-queue round)
+
+- B #2351: CodeRabbit acknowledged at 11:46:23 that the next review will verify the transientRetryOn5xx management validation/redaction/no-persistence behavior, but the review for 665eeb21a has not landed after ~1 hour. PR remains draft + hygiene-blocked. No further local action; do not re-resume (would spam).
+- D #2527: ready + review-ready at 0f8a8b815. C #2355: parked. A #2350: closed/landed. Upstream dev unchanged at bb6a6fbdf.
 - A #2350: landed upstream via #2978 (closed); no further action.
 
 ## Status 2026-08-30 (D four-finding round)
