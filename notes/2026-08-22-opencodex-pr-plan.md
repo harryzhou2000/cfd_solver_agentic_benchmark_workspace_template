@@ -431,3 +431,13 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - D #2527: head b13a7760b is ready (draft=false) after the bb6a6fbdf rebase with additive conflict resolutions; CR review of the new head still pending.
 - C #2355: parked at 33855f2b3.
 - A #2350: landed upstream via #2978 (closed); no further action.
+
+## Status 2026-08-30 (D four-finding round)
+
+- D #2527: CodeRabbit reviewed b13a7760b (11:51) with 4 findings, all fixed on 0f8a8b815:
+  1. autoReviewModelConfigError is provider-aware (rejects auto-review fields for canonical openai) and wired into the config schema per-provider loop (load-time fail-closed).
+  2. normalizeAutoReviewModelOverridesField rejects duplicate trimmed keys.
+  3. POST save flow captures autoReviewModel/autoReviewModelOverrides ownership before enrichment so unrelated overwrites preserve operator values (regression added).
+  4. Catalog regressions: trusted openai-api rebuild drop + gatherRoutedModels custom-model drop (override -> undefined when setting removed).
+  Updated old-signature callers in auto-review-model-override.test.ts. Validation: auto-review + codex-catalog + management-provider-validation 335/335, config 158/158, typecheck/diff clean. Thread replied+resolved (PRRT_kwDOS-0Gi86dg1RK). Ready, resumed (5468548593).
+- B #2351: head 665eeb21a (transientRetryOn5xx fix) still awaiting CodeRabbit review; gate keeps it draft + hygiene-blocked.
