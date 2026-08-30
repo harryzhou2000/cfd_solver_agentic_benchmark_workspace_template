@@ -369,3 +369,11 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - C #2355 head 3d276e41d: checklist 4/4 but hygiene fails unsponsored_surface because diff touches src/codex/auth-api.ts (restricted auth surface). Ingwannu asked (5466689954) for rebase/conflict resolution/checklist/focused suites/re-review; posted summary at 04:26:25Z (5466710657-ish) asking for exact-head CI + sponsorship. Parked; do not ping again yet.
 - D #2527 head d85d5141a: retired qwen3-coder:480b removed (CodeRabbit outside-diff finding on 1e7d74a30), regression added; body re-applied, ready, resumed (5466846002). Awaiting fresh CodeRabbit review + Ingwannu runtime CI sponsorship.
 - Environment: server-binding suites (EADDRINUSE in sandbox) must run with require_escalated; config-mutation-audit's management tests use handleManagementAPI directly and run in-sandbox.
+
+## Status 2026-08-30 (converged round, external gates only)
+
+- A #2350 head be47bb49f: CodeRabbit reviewed the new head with an empty body (no actionable comments); last inline thread (proxy raw trim) replied + resolved; POST null canonicalization + provider-overwrite preservation + retired-model removal all fixed with regressions. Ready, 4/4, 0 open threads. Remaining: Ingwannu re-review (his CHANGES_REQUESTED was on bfc71e82).
+- B #2351 head 98459b89c: CodeRabbit reviewed the new head twice with empty bodies (no actionable comments); both open threads (pool-route method, pin-only assertion) replied + resolved via GraphQL. Provenance fixes per Ingwannu's f0fd41695 review are in with behavior-level regressions. Gate keeps re-drafting because hygiene is unsponsored_surface (auth-api.ts / login-cli.ts / oauth-account-routes.ts); sponsorship asked once (5466892580). Remaining: Ingwannu sponsorship + re-review + exact-head runtime CI.
+- C #2355 head 3d276e41d: parked draft, hygiene unsponsored_surface (auth-api.ts); 4/4 ticks intact; Ingwannu asked at 04:26:25Z for exact-head CI + sponsorship. Remaining: Ingwannu.
+- D #2527 head d85d5141a: ready, review-ready label, 0 open threads, retired model removed. Remaining: Ingwannu/runtime CI sponsorship.
+- CodeRabbit empty-body reviews on exact heads carry no cr-comment markers, so the gate's "resolved all correct findings" box stays valid after re-ticking.
