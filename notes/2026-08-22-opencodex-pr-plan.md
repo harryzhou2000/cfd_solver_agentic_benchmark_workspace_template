@@ -377,3 +377,12 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - C #2355 head 3d276e41d: parked draft, hygiene unsponsored_surface (auth-api.ts); 4/4 ticks intact; Ingwannu asked at 04:26:25Z for exact-head CI + sponsorship. Remaining: Ingwannu.
 - D #2527 head d85d5141a: ready, review-ready label, 0 open threads, retired model removed. Remaining: Ingwannu/runtime CI sponsorship.
 - CodeRabbit empty-body reviews on exact heads carry no cr-comment markers, so the gate's "resolved all correct findings" box stays valid after re-ticking.
+
+## Status 2026-08-30 (rebase round 28c69b03a)
+
+- Upstream dev advanced 223a0a287 -> 28c69b03a (one test-only commit, tests/ocx-launcher-runtime.test.ts). Rebased all four cleanly:
+  - A #2350 head 2f96dc650 -> 76fdde86f: CodeRabbit found POST null was deleted before presence capture, so null could not act as an explicit clear (carry-over restored the old override). Fixed by capturing Object.hasOwn on body.provider before canonicalization; regressions: relay null clears existing true, DeepSeek null clears existing false and restores registry default true, raw persisted JSON verified via getConfigPath. Management 82/82, other suites 438/438. Ready, resumed (5467051983), thread replied+resolved.
+  - B #2351 head 98459b89c -> 737d43e70: CodeRabbit review on the rebased head has one finding (imports of clearAccountQuota/updateAccountQuota in config-mutation-audit.test.ts). False positive: auth-api.ts already re-exports both from ./quota (lines 78-84) and the suite passes 54/54; evidence reply posted (5467082566), no thread exists to resolve. Hygiene still unsponsored_surface; sponsorship ask stands.
+  - C #2355 head 3d276e41d -> 6f85efd08: validated 58 root + 16 GUI + both typechecks; body re-applied; parked draft (hygiene unsponsored_surface).
+  - D #2527 head d85d5141a -> 820390dc7: validated 327/327; body re-applied, resumed (5467023797), CR acknowledged resume (05:56:27); awaiting review.
+- Open external items: CodeRabbit reviews for B/C/D rebased heads (B reply posted, C parked, D resumed), Ingwannu re-reviews/sponsorship for all four.
