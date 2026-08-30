@@ -386,3 +386,12 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
   - C #2355 head 3d276e41d -> 6f85efd08: validated 58 root + 16 GUI + both typechecks; body re-applied; parked draft (hygiene unsponsored_surface).
   - D #2527 head d85d5141a -> 820390dc7: validated 327/327; body re-applied, resumed (5467023797), CR acknowledged resume (05:56:27); awaiting review.
 - Open external items: CodeRabbit reviews for B/C/D rebased heads (B reply posted, C parked, D resumed), Ingwannu re-reviews/sponsorship for all four.
+
+## Status 2026-08-30 (rebase round 015fedb63)
+
+- Upstream dev advanced 28c69b03a -> 015fedb63 (quota fix #2976: src/providers/quota.ts + tests/docs; no overlap with A/B/C/D). Rebased and force-pushed all four cleanly:
+  - A #2350 head 76fdde86f -> d996bb02e (validated 348/348 + typecheck), ready, resumed (5467154492).
+  - B #2351 head 737d43e70 -> 823b2d2d1 (config-mutation-audit 54/54 + typecheck), ready attempted (gate keeps it hygiene-drafted), resumed (5467156539).
+  - C #2355 head 6f85efd08 -> 7c656940f (58 root + 16 GUI + typecheck), body re-applied, parked.
+  - D #2527 head 820390dc7 -> 4b77da59f (248/248 + typecheck), ready, resumed (5467161575).
+- Ingwannu has not replied to the 08-30 updates yet; CodeRabbit reviews of the new heads are still queued (plan rate limits).
