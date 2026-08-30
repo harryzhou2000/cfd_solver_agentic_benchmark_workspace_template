@@ -395,3 +395,8 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
   - C #2355 head 6f85efd08 -> 7c656940f (58 root + 16 GUI + typecheck), body re-applied, parked.
   - D #2527 head 820390dc7 -> 4b77da59f (248/248 + typecheck), ready, resumed (5467161575).
 - Ingwannu has not replied to the 08-30 updates yet; CodeRabbit reviews of the new heads are still queued (plan rate limits).
+
+## Status 2026-08-30 (external-wait round after 015fedb63)
+
+- All four PRs on current upstream dev (015fedb63). A #2350 ready + review-ready (head d996bb02e, CR clean on 76fdde86f; new head resume posted). B #2351 draft + hygiene-blocked (head 823b2d2d1; CR resume acknowledged 06:30, review pending; false-positive finding replied). C #2355 parked + hygiene-blocked (head 7c656940f). D #2527 draft (head 4b77da59f; CR resume acknowledged 06:31, review pending; Ingwannu CHANGES_REQUESTED remains).
+- No new Ingwannu comments. CodeRabbit reviews for the second-rebase heads are queued; nothing locally actionable until they land.
