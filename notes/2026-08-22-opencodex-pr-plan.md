@@ -480,3 +480,15 @@ Blocked on maintainer-sponsored labels (external) plus CodeRabbit reviews that c
 - D #2527: CodeRabbit reviewed 0f8a8b815 clean (12:07, len=0); body re-applied, re-readied. Remaining: Ingwannu review (CHANGES_REQUESTED is from earlier heads).
 - B #2351: CodeRabbit review of 665eeb21a still queued (~30 min); draft + hygiene-blocked; resume posted.
 - C #2355: parked at 33855f2b3.
+
+## Status 2026-09-03 (CodeRabbit resume + dev ef086abb7 rebase round)
+
+- CodeRabbit now skips draft PRs ("Review skipped: draft pull request"), which explains the missing verdicts after the 12:26Z resumes.
+- Pre-rebase fix heads pushed and resumed: B 5c89f922b, C 210b72efc, D 7ba14fa35; all resumes acknowledged but no verdicts because the PRs were draft.
+- Rebased B/C/D onto upstream/dev ef086abb7 (8 commits, all clean):
+  - B #2351 -> 0fe3d2284 (config-mutation-audit 58/0, typecheck clean)
+  - C #2355 -> dafeb2950 (config-divergence 20/0 + codex-plan 14/0, typecheck clean)
+  - D #2527 -> 6ee99d544 (targeted canonical-openai carry-over regression 1/1, typecheck clean)
+- PR bodies updated for the rebased heads. D body gained a Co-authored-by trailer for #2631 (lidge-jun); D hygiene now fails only on unsponsored_surface.
+- B/D re-readied at ~13:27Z; CodeRabbit checks show "Review in progress" before the gate auto-drafted them again. C stayed parked; no further C resume spam after the 13:26Z rebase resume.
+- Pending: CodeRabbit verdicts for B 0fe3d2284 and D 6ee99d544; maintainer-sponsored labels for B/C/D.
