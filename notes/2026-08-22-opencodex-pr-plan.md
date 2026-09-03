@@ -513,3 +513,11 @@ Blocked on maintainer-sponsored labels (external) plus CodeRabbit reviews that c
 - C three CodeRabbit threads (10:01Z review) replied with fix evidence and resolved while C stays parked; gate keeps C's readiness boxes unticked while parked.
 - D CodeRabbit review clean on 6ee99d544; resume ack for rebased head 7d53b34f3.
 - Remaining external: Ingwannu re-review to clear older CHANGES_REQUESTED states and maintainer-sponsored labels for B/C/D.
+
+## Status 2026-09-03 (external blocker continuation)
+
+- No new maintainer or bot activity from 14:07Z through the 14:25Z check; upstream dev stable at 1cc2ff22d.
+- B #2351 (2cd706487): CodeRabbit review completed with no new findings; inline fix threads resolved.
+- D #2527 (7d53b34f3): re-readied for CodeRabbit; no new findings; earlier clean review stands.
+- C #2355 (eacfc2a4b): parked; three fix threads replied and resolved; gate keeps readiness boxes unticked while parked.
+- Only remaining blockers: maintainer-sponsored labels for B/C/D and Ingwannu re-review to clear older CHANGES_REQUESTED states. Local actions exhausted; no safe progress without external state change.
