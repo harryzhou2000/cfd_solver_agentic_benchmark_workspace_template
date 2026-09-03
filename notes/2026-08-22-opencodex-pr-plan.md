@@ -431,6 +431,15 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - D #2527: head b13a7760b is ready (draft=false) after the bb6a6fbdf rebase with additive conflict resolutions; CR review of the new head still pending.
 - C #2355: parked at 33855f2b3.
 
+## Status 2026-09-03 (blocked-audit round - B/C/D sponsor wait)
+
+- B #2351 (eacd9b5e6), C #2355 (54eac931d), D #2527 (d8da5443) remain one commit above upstream/dev 1aa839aa8; upstream unchanged.
+- All three labels: enhancement + intake: hygiene-blocked; no maintainer-sponsored applied. Hygiene/enforce-target gates fail on unsponsored_surface.
+- CodeRabbit: B full review announced 08:48 but never posted; resumes re-requested 09:12 (B 5523191520, D 5523192428); no ack/review output. B/D auto-draft again on each readiness toggle.
+- No maintainer/bot comments arrived since the D-fix round. Local actions exhausted: heads current, tests green, bodies/checklists current, B/D re-readied, C parked.
+
+Blocked on maintainer-sponsored labels (external) plus CodeRabbit reviews that cannot run on gate-drafted PRs.
+
 ## Status 2026-09-03 (B/C/D rebase + reviewer-fix round)
 
 - B #2351: rebased+squashed to eacd9b5e6 on upstream/dev 1aa839aa8; writer-attribution sweep completed (no generic default remains on production call sites); config-mutation-audit 56/0, management-provider-validation 99/0, cli-provider 32/0, client-connect 19/0, codex-auth-api 194/0; server-management-auth 38/2 with the two failures reproducing on pristine upstream dev. Body updated + one Ingwannu reply (5522700221). Draft/hygiene-blocked pending maintainer-sponsored.
