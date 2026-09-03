@@ -521,3 +521,11 @@ Blocked on maintainer-sponsored labels (external) plus CodeRabbit reviews that c
 - D #2527 (7d53b34f3): re-readied for CodeRabbit; no new findings; earlier clean review stands.
 - C #2355 (eacfc2a4b): parked; three fix threads replied and resolved; gate keeps readiness boxes unticked while parked.
 - Only remaining blockers: maintainer-sponsored labels for B/C/D and Ingwannu re-review to clear older CHANGES_REQUESTED states. Local actions exhausted; no safe progress without external state change.
+
+## Status 2026-09-04 (lesson-based audit round on dev 664d80c76)
+
+- Upstream dev advanced 1cc2ff22d -> 664d80c76 (2 GUI/meta commits); B/C/D rebased cleanly and re-audited against PR-history lessons (feature-only diff, non-vacuous regressions, exact audit details, redaction, boundary validation, resident/WHAM semantics, auto-review precedence/authority, no unrelated changes).
+- B #2351 -> 99d5cddbc: SOUND (config-mutation-audit 62/0 + boundary 1/0, typecheck clean).
+- C #2355 -> 4b6d667ae: SOUND (divergence+plan 34/0, GUI contracts 16/0, typecheck clean; one CLI env failure reproduces on clean dev).
+- D #2527 -> dc7b4358e: audit NEEDS-FIX -> six HTTP-layer regression tests in tests/management-provider-validation.test.ts called unimported rmSync (ReferenceError); replaced with the file's existing removeTreeWithRetry. auto-review 36/0, canonical-openai regression passes, typecheck clean.
+- Bodies updated; B/D re-readied and CodeRabbit resumed on new heads; C stays parked with body updated only. Remaining external blockers unchanged.
