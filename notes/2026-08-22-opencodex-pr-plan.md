@@ -502,3 +502,14 @@ Blocked on maintainer-sponsored labels (external) plus CodeRabbit reviews that c
   - Recovery unlink regression now plants a valid hash-matching marker (post-rename failure path) with a one-shot setConfigRecoveryMarkerUnlinkFailureForTests seam; row stays deduped and marker is removed on a later clean save.
   - config-mutation-audit 62/0, typecheck clean; audit passed; pushed; body updated; inline threads replied+resolved; CodeRabbit confirmed both findings addressed on eee5cfdf.
 - Remaining external blocker unchanged: maintainer-sponsored labels for B/C/D.
+
+## Status 2026-09-03 (dev 1cc2ff22d second rebase + thread convergence)
+
+- Upstream dev advanced to 1cc2ff22d (GUI quota-age PR only); B/C/D rebased and re-validated:
+  - B #2351 -> 2cd706487 (audit 62/0, typecheck)
+  - C #2355 -> eacfc2a4b (divergence 20/0 + codex-plan 14/0, typecheck)
+  - D #2527 -> 7d53b34f3 (targeted regression, typecheck)
+- B CodeRabbit fix threads replied and resolved; CodeRabbit confirmed both findings addressed on eee5cfdfe and resumed for rebased head 2cd706487.
+- C three CodeRabbit threads (10:01Z review) replied with fix evidence and resolved while C stays parked; gate keeps C's readiness boxes unticked while parked.
+- D CodeRabbit review clean on 6ee99d544; resume ack for rebased head 7d53b34f3.
+- Remaining external: Ingwannu re-review to clear older CHANGES_REQUESTED states and maintainer-sponsored labels for B/C/D.
