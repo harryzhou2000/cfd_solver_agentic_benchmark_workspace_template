@@ -431,6 +431,13 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - D #2527: head b13a7760b is ready (draft=false) after the bb6a6fbdf rebase with additive conflict resolutions; CR review of the new head still pending.
 - C #2355: parked at 33855f2b3.
 
+## Status 2026-09-03 (Ingwannu B/C/D exact-head round - fixes pushed)
+
+- B #2351: Ingwannu 09-05 review listed three blockers; fixed + audited. Head eacd9b5e6 -> b199737df (config-routes limit default 100, deleteCodexAccount ConfigMutationSource, PUT /api/providers audit source). Suites: audit 58/0, batch 10/0, auth-api 194/0, delete-atomicity 4/0; typecheck clean. Body updated, reply posted (5523894009), pushed.
+- C #2355: Ingwannu confirmed both correctness blockers fixed; requested checklist 4/4 + Ready. Body checklist ticked and PR marked ready (head unchanged 54eac931d). Gate auto-drafts while unsponsored_surface remains.
+- D #2527: Ingwannu 09-05 review listed four blockers; fixed + audited. Head d8da5443 -> e53aa3637 -> 1cf410098 (retain/Vertex membership, durable opencodex_auto_review_root marker, canonical slug stamping, POST live re-read for all carries). Suites: auto-review 36/0, catalog 269/0, batch 11/0, mgmt+convergence+gather+registry 172/0; typecheck clean. Body updated, reply posted (5523902067), pushed.
+- B/C/D marked ready again; hygiene gate auto-drafts each while maintainer-sponsored is absent.
+
 ## Status 2026-09-03 (blocked-audit round - B/C/D sponsor wait)
 
 - B #2351 (eacd9b5e6), C #2355 (54eac931d), D #2527 (d8da5443) remain one commit above upstream/dev 1aa839aa8; upstream unchanged.
