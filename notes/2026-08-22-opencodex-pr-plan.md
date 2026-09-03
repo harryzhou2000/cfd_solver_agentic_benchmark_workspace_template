@@ -431,6 +431,13 @@ the gate bot re-drafts after a body/push event; land C once sponsored.
 - D #2527: head b13a7760b is ready (draft=false) after the bb6a6fbdf rebase with additive conflict resolutions; CR review of the new head still pending.
 - C #2355: parked at 33855f2b3.
 
+## Status 2026-09-03 (B/C/D rebase + reviewer-fix round)
+
+- B #2351: rebased+squashed to eacd9b5e6 on upstream/dev 1aa839aa8; writer-attribution sweep completed (no generic default remains on production call sites); config-mutation-audit 56/0, management-provider-validation 99/0, cli-provider 32/0, client-connect 19/0, codex-auth-api 194/0; server-management-auth 38/2 with the two failures reproducing on pristine upstream dev. Body updated + one Ingwannu reply (5522700221). Draft/hygiene-blocked pending maintainer-sponsored.
+- C #2355: rebased+squashed to 54eac931d on upstream/dev 1aa839aa8; Ingwannu 09-01 gaps fixed (byte-identical re-anchor + GUI own-version fields) and docs-site note added; divergence 19/19, CLI 29/29, plan 14/14, GUI 16/16. Body updated + Ingwannu reply (5522273712); CodeRabbit resume ack (5522280265) but draft PR is not auto-reviewed. Draft/hygiene-blocked pending maintainer-sponsored.
+- D #2527: rebased+squashed (1fa020776 -> d8da5443) on upstream/dev 1aa839aa8; precedence fix (provider stamp > root fallback, removing root never wipes provider stamps) with e2e tests; CodeRabbit 09-03 findings fixed: PUT returns validated/normalized candidate, knownModelIds includes custom rows, root-selector provenance clears stale native copies, safeConfigDTO redacts credential-shaped auto-review values. Suites: auto-review 33/0, catalog 268/0, batch 10/0, management 103/0, convergence+gather+registry 69/0, typecheck/diff clean. Body updated; lidge-jun reply (5522494311) + sponsor ask (5522848779) + resume (5523050493). Draft/hygiene-blocked pending maintainer-sponsored for src/server/auth-cors.ts.
+- A #2350: closed/landed upstream; no action.
+
 ## Status 2026-08-30 (B review-queue round)
 
 - B #2351: CodeRabbit acknowledged at 11:46:23 that the next review will verify the transientRetryOn5xx management validation/redaction/no-persistence behavior, but the review for 665eeb21a has not landed after ~1 hour. PR remains draft + hygiene-blocked. No further local action; do not re-resume (would spam).
