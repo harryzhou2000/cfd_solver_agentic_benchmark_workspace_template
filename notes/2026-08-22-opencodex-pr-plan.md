@@ -492,3 +492,13 @@ Blocked on maintainer-sponsored labels (external) plus CodeRabbit reviews that c
 - PR bodies updated for the rebased heads. D body gained a Co-authored-by trailer for #2631 (lidge-jun); D hygiene now fails only on unsponsored_surface.
 - B/D re-readied at ~13:27Z; CodeRabbit checks show "Review in progress" before the gate auto-drafted them again. C stayed parked; no further C resume spam after the 13:26Z rebase resume.
 - Pending: CodeRabbit verdicts for B 0fe3d2284 and D 6ee99d544; maintainer-sponsored labels for B/C/D.
+
+## Status 2026-09-03 (CodeRabbit B-fix round on dev ef086abb7)
+
+- CodeRabbit skips draft PRs, so re-readying B/D is required to get checks running; the gate auto-drafts again a few minutes later. C stays parked.
+- D #2527 (6ee99d544): CodeRabbit review completed clean (~13:34Z), no actionable comments. Body checklist 4/4; only unsponsored_surface remains (coauthor trailer for #2631 added, hygiene now fails on sponsorship only).
+- B #2351: CodeRabbit review 5102567415 (13:34Z) had 2 inline findings + 1 outside-diff meta-muse item (upstream-owned, correctly skipped). Fixed on eee5cfdfe:
+  - Focused tests cover generic OAuth pool, keychain store/restore, expired GET/commit cleanup, and rotation abort with exact surface/detail assertions.
+  - Recovery unlink regression now plants a valid hash-matching marker (post-rename failure path) with a one-shot setConfigRecoveryMarkerUnlinkFailureForTests seam; row stays deduped and marker is removed on a later clean save.
+  - config-mutation-audit 62/0, typecheck clean; audit passed; pushed; body updated; inline threads replied+resolved; CodeRabbit confirmed both findings addressed on eee5cfdf.
+- Remaining external blocker unchanged: maintainer-sponsored labels for B/C/D.
