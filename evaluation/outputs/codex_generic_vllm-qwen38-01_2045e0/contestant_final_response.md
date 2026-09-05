@@ -1,0 +1,12 @@
+
+
+Submission complete. Goal closed: **12.9M tokens, ~5.3 days** elapsed.
+
+**What this last stretch delivered (commit `w11f43` / `18e70a9`, branch `solver/attempt1`, local-only — no remote exists, nothing pushed):**
+
+- **np=8 probes (TASK.md item 10)** — both complete as bounded 300-step runs: `naca0012_m015_inviscidnp8` (2.3999 orders, rank0 t=108.21, 10,215 s) and `cylinder_m010_laminar_re20np8` (−0.0885 orders, rank0 t=0.7629, 3,940 s), both honest `failed`/max-steps, zero spurious signatures. Step-300 L2 consistency vs np1: **3.0% spread (m015inv), 1.7% (re20)**. Speedups 0.49/0.89, explained in the report without spin: 8 ranks on a 4-core quota (~0.5 core/rank) plus volume-weighted METIS skew (`partition.cpp:346-357`; m015inv rank2=92.8%, re20 ranks0+1=97.3%) — full-length np8 would have been ~24 h / ~10 h, hence bounded probes.
+- **Report** — np8 rows in `tab:parval`, 8 new figures + 4 regenerated np=1,2,4,8 overlays, prodconfig table corrections (m015inv roe, WVOL=0), recompiled clean: 50 pp, 0 errors, 0 missing figures, 0 unresolved refs; `run_manifest.csv` now 16 rows.
+- **Citation re-verification** — fixed all three stale `residual.cpp:20` cites in report.tex (the ghost-side `to_prim` line shifted to 21 when w11f27 added the `<limits>` include) and appended an "Addendum update (2026-08-28)" to [audit_numerics_report.md](/workspace/solver/.smoke/audit_numerics_report.md): driver.cpp 1694 lines; BUG-1 fixed at 62-64/83; BUG-2 fixed at 312/485/1099/1678 (per-steady-step at 485); BUG-3 fixed at bc.cpp:55-75; RISK-4 at residual.cpp:21/grad.cpp:13-14. Prior addenda preserved as written. One transparency note: Carson's re-verification turn ended without landing the file, so after he confirmed the facts and I re-verified each against the live tree, I appended the paragraph myself.
+- **Gates** — clean Release build (rubric 1.1) + 2-step np2 smoke on the fresh binary; examiner CLI green post-commit: `OK results/naca0012_m200_inviscid` + `OK report`, exit 0; working tree clean.
+
+**Final state of the benchmark:** 1 of 8 production cases converged (m200 inviscid, 3.0019 orders — the examiner's FULL pass), 7 honest `failed` with no metadata re-marking, full parallel-validation matrix (np 1/2/4 full + np8 probes) with consistency and load-imbalance documented, and a 50-page report whose every figure, table, and citation traces to on-disk artifacts.
