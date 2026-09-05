@@ -15,14 +15,14 @@ byte-for-byte in the result branch and canonical run ID.
 
 | Status | Workspace | Label | Initial branch | Initial commit | Snapshot/result branch | Notes |
 |---|---|---|---|---|---|---|
-| [ ] | `workspace/claude/generic/opus-11` | `opus-11` | `claude/generic/init` | `ecf774c1ae14d5e9e1d11f67968bc48fdd2acf82` | pending | Claude telemetry must be selected exclusively from workspace `.sessions/claude`. |
-| [ ] | `workspace/claude/generic/sonnet-01` | `sonnet-01` | `claude/generic/init` | `ecf774c1ae14d5e9e1d11f67968bc48fdd2acf82` | pending | Claude telemetry must be selected exclusively from workspace `.sessions/claude`. |
-| [ ] | `workspace/codex/generic/glm53-01` | `glm53-01` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | pending | Select the Codex root manually from workspace-local `.sessions`. |
-| [ ] | `workspace/codex/generic/glm53-02` | `glm53-02` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | pending | Select the Codex root manually from workspace-local `.sessions`. |
-| [ ] | `workspace/codex/generic/glm53-03` | `glm53-03` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | pending | Select the Codex root manually from workspace-local `.sessions`. |
-| [ ] | `workspace/codex/generic/glm53-04` | `glm53-04` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | pending | Select the Codex root manually from workspace-local `.sessions`. |
-| [ ] | `workspace/codex/generic/sonnet5-02` | `sonnet5-02` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | pending | Select the Codex root manually from workspace-local `.sessions`. |
-| [ ] | `workspace/codex/generic/vllm-qwen38-01` | `vllm-qwen38-01` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | pending | Select the Codex root manually from workspace-local `.sessions`. |
+| [x] | `workspace/claude/generic/opus-11` | `opus-11` | `claude/generic/init` | `ecf774c1ae14d5e9e1d11f67968bc48fdd2acf82` | `claude_generic_opus-11_fe7eba`; `claude/generic/opus-11` | 92/100; DQ=false; submission `9965be8`; manager `ea0b26d0`. |
+| [x] | `workspace/claude/generic/sonnet-01` | `sonnet-01` | `claude/generic/init` | `ecf774c1ae14d5e9e1d11f67968bc48fdd2acf82` | `claude_generic_sonnet-01_96c411`; `claude/generic/sonnet-01` | 74/100; DQ=false; submission `64bbe10`; manager `ea0b26d0`; six failed packages. |
+| [x] | `workspace/codex/generic/glm53-01` | `glm53-01` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | `codex_generic_glm53-01_99a969`; `codex/generic/glm53-01` | 94/100; DQ=false; submission `b962bf5`; manager `ea0b26d0`. |
+| [x] | `workspace/codex/generic/glm53-02` | `glm53-02` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | `codex_generic_glm53-02_ff20c7`; `codex/generic/glm53-02` | 86/100; DQ=true trigger 7; submission `1bc8fb6`; manager `ea0b26d0`. |
+| [x] | `workspace/codex/generic/glm53-03` | `glm53-03` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | `codex_generic_glm53-03_d469fb`; `codex/generic/glm53-03` | 84/100; DQ=true trigger 7; submission `17724cd`; manager `ea0b26d0`. |
+| [x] | `workspace/codex/generic/glm53-04` | `glm53-04` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | `codex_generic_glm53-04_adde03`; `codex/generic/glm53-04` | 88/100; DQ=true trigger 7; submission `c06741d`; manager `ea0b26d0`. |
+| [x] | `workspace/codex/generic/sonnet5-02` | `sonnet5-02` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | `codex_generic_sonnet5-02_6c0ac0`; `codex/generic/sonnet5-02` | 83/100; DQ=false; submission `e49016d`; manager `ea0b26d0`; cylinder cases failed. |
+| [x] | `workspace/codex/generic/vllm-qwen38-01` | `vllm-qwen38-01` | `codex/generic/init` | `26ef1cb80b861688a4998d39431160a24ea1170a` | `codex_generic_vllm-qwen38-01_2045e0`; `codex/generic/vllm-qwen38-01` | 63/100; DQ=false; submission `e185a0a`; manager `ea0b26d0`; seven failed packages. |
 
 ## Calibration set
 
