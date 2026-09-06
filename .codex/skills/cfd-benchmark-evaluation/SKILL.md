@@ -877,6 +877,43 @@ eight case scores unless it independently compromises every case. Apply the
 existing evidence-escalation policy, including the absolute prohibition on
 rerunning Re200.
 
+### Post-processing floor for scores 3--5
+
+Post-processing is part of a complete case result, not merely report polish.
+A case may receive a score of **3 or above only when the contestant-delivered,
+readable evidence includes all of the following for that case**:
+
+- a numeric force summary appropriate to the case: at minimum reported final
+  or statistically summarized `C_L` and `C_D` (with the relevant mean,
+  amplitude, or variation when the flow is unsteady);
+- readable plotted histories that expose the run behaviour, including residual
+  progression and force/coefficients as appropriate to the case; and
+- readable computed-field contours suitable to the flow: Mach and/or pressure
+  for NACA cases, and a wake-revealing velocity, pressure, or vorticity contour
+  for cylinder cases.
+
+For cylinder Re200, the plotted histories must cover a late-time window and
+show the claimed lift/drag periodicity; the contour must show the wake, and
+the numeric summary must include a shedding quantity such as `St` or an
+equivalent period/frequency plus force statistics. A final scalar row, a bare
+CSV/VTU file, an unrendered plotting script, or an evaluator-created redraw
+does not satisfy this contestant-deliverable floor. Evaluator redraws can
+clarify solver functionality but cannot raise the contestant case-result score
+past a missing contestant post-processing deliverable.
+
+If any required numeric summary, history plot, or contour is absent,
+unreadable, mislabeled, or not traceable to that case, cap the case score at
+**2** even where raw data makes the underlying solver attempt plausible. For
+scores 3--5, say explicitly in the case note where each of the numeric values,
+histories, and contours was reviewed. Then distinguish the levels as follows:
+
+- `3`: all three deliverable classes are present and readable, but material
+  numerical, convergence, coverage, or presentation limitations remain;
+- `4`: all three classes are strong and substantially complete, with only
+  minor limitations;
+- `5`: all three classes are complete, traceable, contract-compliant, and
+  convincingly support a numerically credible result.
+
 When the report and solver disagree, state separate conclusions, for example:
 "solver functionality verified by evaluator steady rerun; contestant result
 missing and report receives no completion/visualization credit." Do not hide
