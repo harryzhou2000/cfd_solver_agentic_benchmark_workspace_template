@@ -4,7 +4,7 @@ Submission `codex/generic/vllm-qwen38-01` at `e185a0a43f42781f93348a4dc85c7f8aec
 
 ## Verdict
 
-**43/100; DQ=false.** One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata.
+**63/100; DQ=false.** One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata.
 
 ## Evidence
 

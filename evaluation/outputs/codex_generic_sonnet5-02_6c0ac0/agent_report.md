@@ -4,7 +4,7 @@ Submission `codex/generic/sonnet5-02` at `e49016dd97c7f3fe9ae2ae1978e8ff8b9aa507
 
 ## Verdict
 
-**73/100; DQ=false.** Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails.
+**83/100; DQ=false.** Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails.
 
 ## Evidence
 

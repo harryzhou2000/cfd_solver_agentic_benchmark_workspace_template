@@ -308,35 +308,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 4,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Report table records M0.15 inviscid converged at 3.97 orders; package passes validator, with no independent rerun."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Report table labels M0.80 inviscid converged at only 0.81 orders; this false-success evidence supports DQ 7."
     },
     "naca0012_m200_inviscid": {
       "score": 1,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Report table labels M2 inviscid converged at only 0.14 orders; this false-success evidence supports DQ 7."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 5,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Report table records M0.15 laminar converged at 4.00 orders; validator-passing package is credible."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 4,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Report table records M0.80 laminar converged at 3.87 orders; validator-passing package is credible with modest margin."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 4,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Report table records M2 laminar converged at 3.00 orders; validator-passing package is credible with modest margin."
     },
     "cylinder_m010_laminar_re20": {
       "score": 5,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Report identifies Re20 as converged at step 1415 with 5.00 orders and Cd=2.072; complete package passes validator."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 4,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "score": 2.0,
+      "notes": "Re200 score reduced 4.00 to 2.00: although status says statistically_periodic at t=300, report.tex says the run terminated at t=287 after inner failures beyond t\u2248267, no vortex shedding, lift amplitude\u22480, and Cd=4.07. Raw forces at t=300 are nearly constant (Cl\u2248-9.1e-4), so the periodic-status claim is not credible; no rerun."
     }
   },
   "disqualification": {
@@ -345,7 +345,7 @@
       {
         "id": 7,
         "text": "metadata/status marks incomplete or failed runs as successful",
-        "evidence": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders.",
+        "evidence": "Trigger 7: M0.80 and M2 inviscid are marked converged at 0.81 and 0.14 orders; Re200 is also marked statistically_periodic despite report.tex stating termination at t=287, inner failures after t\u2248267, no shedding and lift amplitude\u22480.",
         "found": true
       }
     ]

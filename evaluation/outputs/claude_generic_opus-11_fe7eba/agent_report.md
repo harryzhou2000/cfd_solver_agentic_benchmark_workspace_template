@@ -4,7 +4,7 @@ Submission `claude/generic/opus-11` at `9965be84b59114b4fb573a9253f9e14e24edfa94
 
 ## Verdict
 
-**96/100; DQ=false.** Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence.
+**92/100; DQ=false.** Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence.
 
 ## Evidence
 

@@ -4,7 +4,7 @@ Submission `claude/generic/sonnet-01` at `64bbe1075e1413091acf116733e27241441ed6
 
 ## Verdict
 
-**64/100; DQ=false.** Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata.
+**74/100; DQ=false.** Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata.
 
 ## Evidence
 
