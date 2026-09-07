@@ -310,36 +310,36 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 3,
-      "notes": "Historical directory validates; residual reduction is about 1.03 orders, adequate but limited."
+      "score": 2,
+      "notes": "NACA0012 M0.15 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Historical directory validates; residual reduction is about 1.03 orders, adequate but limited."
     },
     "naca0012_m080_inviscid": {
-      "score": 4,
-      "notes": "Historical directory validates with about 1.99 orders residual reduction."
+      "score": 2,
+      "notes": "NACA0012 M0.80 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Historical directory validates with about 1.99 orders residual reduction."
     },
     "naca0012_m200_inviscid": {
-      "score": 4,
-      "notes": "Historical directory validates with about 2.20 orders residual reduction."
+      "score": 2,
+      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Historical directory validates with about 2.20 orders residual reduction."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 2,
-      "notes": "Complete readable output, but negative/plateauing residual reduction within the 2,000-step cap is not credible convergence."
+      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Complete readable output, but negative/plateauing residual reduction within the 2,000-step cap is not credible convergence."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 2,
-      "notes": "Complete readable output, but negative/plateauing residual reduction within the 2,000-step cap is not credible convergence."
+      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Complete readable output, but negative/plateauing residual reduction within the 2,000-step cap is not credible convergence."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 2,
-      "notes": "Complete readable output, but negative/plateauing residual reduction within the 2,000-step cap is not credible convergence."
+      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Complete readable output, but negative/plateauing residual reduction within the 2,000-step cap is not credible convergence."
     },
     "cylinder_m010_laminar_re20": {
       "score": 2,
-      "notes": "Historical directory validates, but residual growth/plateau after 2,000 steps leaves major steady-convergence defect."
+      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Historical directory validates, but residual growth/plateau after 2,000 steps leaves major steady-convergence defect."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Reaches t=300 with figures, but fixed 10 inner iterations and final ratio 0.156 miss the 1e-3 target."
+      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 2 retained after the post-processing audit. Prior case judgment: Reaches t=300 with figures, but fixed 10 inner iterations and final ratio 0.156 miss the 1e-3 target."
     }
   },
   "disqualification": {
@@ -430,6 +430,7 @@
     "No clean evaluator build, steady rerun, or redraw was performed. Re200 was not rerun under mandatory prohibition.",
     "Historical raw artifacts are evaluated from immutable commit 52a1e520a92df0793499c5fa7888c576a7120d70 and intentionally excluded from submission commit 6b3765641f72df4042c151a3894389540f1d28f4.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars; structural checker does not validate them.",
-    "BLSC/GLM-5.2 context window is unknown from bundled evidence."
+    "BLSC/GLM-5.2 context window is unknown from bundled evidence.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

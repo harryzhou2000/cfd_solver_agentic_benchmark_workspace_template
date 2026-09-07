@@ -308,35 +308,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 4,
-      "notes": "Validator-valid, 4 orders status; residual/force credibility limited."
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=9.2e-5, CD=0.0617 at f679644:solver/report/report.tex:320; residual history f679644:solver/report/figures/naca0012_m015_inviscid_residuals.png (referenced at solver/report/report.tex:294); force history f679644:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:301); computed-field contour f679644:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/report.tex:308). Score 4 retained after the post-processing audit. Prior case judgment: Validator-valid, 4 orders status; residual/force credibility limited."
     },
     "naca0012_m080_inviscid": {
-      "score": 4,
-      "notes": "Validator-valid, near-zero lift and np8 comparison."
+      "score": 2,
+      "notes": "NACA0012 M0.80 inviscid: no committed case-specific numeric CL/CD summary; residual history f679644:solver/report/figures/naca0012_m080_inviscid_residuals.png (referenced at solver/report/report.tex:375); force history f679644:solver/report/figures/naca0012_m080_inviscid_forces.png (referenced at solver/report/report.tex:382); computed-field contour f679644:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/report.tex:389). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-valid, near-zero lift and np8 comparison."
     },
     "naca0012_m200_inviscid": {
       "score": 3,
-      "notes": "Validator-valid but report manifest says not converged."
+      "notes": "NACA0012 M2.00 inviscid: numeric CL=-1.6e-4, CD=0.092 at f679644:solver/report/report.tex:482; residual history f679644:solver/report/figures/naca0012_m200_inviscid_residuals.png (referenced at solver/report/report.tex:456); force history f679644:solver/report/figures/naca0012_m200_inviscid_forces.png (referenced at solver/report/report.tex:463); computed-field contour f679644:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/report.tex:470). Score 3 retained after the post-processing audit. Prior case judgment: Validator-valid but report manifest says not converged."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 4,
-      "notes": "Validator-valid, 4 orders status; no independent verification."
+      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=-1.1e-3, CD=0.583 at f679644:solver/report/report.tex:361; residual history f679644:solver/report/figures/naca0012_m015_laminar_re5000_residuals.png (referenced at solver/report/report.tex:335); force history f679644:solver/report/figures/naca0012_m015_laminar_re5000_forces.png (referenced at solver/report/report.tex:342); computed-field contour f679644:solver/report/figures/naca0012_m015_laminar_re5000_mach.png (referenced at solver/report/report.tex:349). Score 4 retained after the post-processing audit. Prior case judgment: Validator-valid, 4 orders status; no independent verification."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 4,
-      "notes": "Validator-valid, 4 orders status; no independent verification."
+      "score": 2,
+      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; residual history f679644:solver/report/figures/naca0012_m080_laminar_re5000_residuals.png (referenced at solver/report/report.tex:415); force history f679644:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:422); computed-field contour f679644:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/report.tex:429). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-valid, 4 orders status; no independent verification."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 2,
-      "notes": "Report manifest marks not converged; Cd about 3.15."
+      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Report manifest marks not converged; Cd about 3.15."
     },
     "cylinder_m010_laminar_re20": {
       "score": 2,
-      "notes": "Validator-valid but Cd about 7.23 is physically implausible."
+      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Validator-valid but Cd about 7.23 is physically implausible."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "t=300 package but Cd about 4.85 and near-zero lift do not support credible vortex street."
+      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 2 retained after the post-processing audit. Prior case judgment: t=300 package but Cd about 4.85 and near-zero lift do not support credible vortex street."
     }
   },
   "disqualification": {
@@ -346,6 +346,7 @@
   "limitations": [
     "No rerun; Re200 was not rerun.",
     "Raw packages/PDF excluded from curated tip.",
-    "run_identity.json and contestant_final_response.md are unindexed sidecars not validated by cfdeval check."
+    "run_identity.json and contestant_final_response.md are unindexed sidecars not validated by cfdeval check.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

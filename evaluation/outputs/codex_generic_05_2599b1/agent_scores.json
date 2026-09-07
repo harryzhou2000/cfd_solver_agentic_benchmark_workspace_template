@@ -308,35 +308,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "Declared output fails validator metadata partitioner."
+      "notes": "NACA0012 M0.15 inviscid: no committed case-specific numeric CL/CD summary; residual history d8491d9:solver/report/figures/naca0012_m015_inviscid_residuals.png (referenced at solver/report/report.tex:89); no committed/referenced force-history plot; computed-field contour d8491d9:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/report.tex:95). Score 1 retained after the post-processing audit. Prior case judgment: Declared output fails validator metadata partitioner."
     },
     "naca0012_m080_inviscid": {
       "score": 1,
-      "notes": "Declared output fails validator metadata partitioner."
+      "notes": "NACA0012 M0.80 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour d8491d9:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/report.tex:101). Score 1 retained after the post-processing audit. Prior case judgment: Declared output fails validator metadata partitioner."
     },
     "naca0012_m200_inviscid": {
       "score": 1,
-      "notes": "Declared output fails validator metadata partitioner."
+      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour d8491d9:solver/report/figures/naca0012_m200_inviscid_pressure.png (referenced at solver/report/report.tex:107). Score 1 retained after the post-processing audit. Prior case judgment: Declared output fails validator metadata partitioner."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
-      "notes": "Declared output fails validator metadata partitioner."
+      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Declared output fails validator metadata partitioner."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 1,
-      "notes": "Declared output fails validator metadata partitioner."
+      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Declared output fails validator metadata partitioner."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 0,
-      "notes": "Manifest marks failed and validator metadata invalid."
+      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Manifest marks failed and validator metadata invalid."
     },
     "cylinder_m010_laminar_re20": {
       "score": 1,
-      "notes": "Validator-invalid package and unrealistic drag."
+      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; residual history d8491d9:solver/report/figures/cylinder_m010_laminar_re20_residuals.png (referenced at solver/report/report.tex:131); no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Validator-invalid package and unrealistic drag."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "No credible vortex shedding; validator metadata invalid; not rerun."
+      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; force history d8491d9:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:146); no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: No credible vortex shedding; validator metadata invalid; not rerun."
     }
   },
   "disqualification": {
@@ -346,6 +346,7 @@
   "limitations": [
     "No rerun; Re200 was not rerun.",
     "Raw packages and PDF are excluded from the result tip.",
-    "run_identity.json and contestant_final_response.md are unindexed sidecars not validated by cfdeval check."
+    "run_identity.json and contestant_final_response.md are unindexed sidecars not validated by cfdeval check.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

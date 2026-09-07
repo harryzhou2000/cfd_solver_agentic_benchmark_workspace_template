@@ -316,35 +316,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "Report table and figures exist, but required package is absent and validator cannot read it."
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.002, CD=-0.015 at 0065953:solver/report/report.tex:83; residual history 0065953:solver/report/figures/naca0012_m015_inviscid_residual.png (referenced at solver/report/report.tex:103); force history 0065953:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:104); computed-field contour 0065953:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/report.tex:110). Score 1 retained after the post-processing audit. Prior case judgment: Report table and figures exist, but required package is absent and validator cannot read it."
     },
     "naca0012_m080_inviscid": {
       "score": 1,
-      "notes": "Report Mach/pressure images and table remain; no raw output."
+      "notes": "NACA0012 M0.80 inviscid: numeric CL=0., CD=0.198 at 0065953:solver/report/report.tex:122; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/report.tex:127). Score 1 retained after the post-processing audit. Prior case judgment: Report Mach/pressure images and table remain; no raw output."
     },
     "naca0012_m200_inviscid": {
       "score": 1,
-      "notes": "Report Mach/pressure images and table remain; no raw output."
+      "notes": "NACA0012 M2.00 inviscid: numeric CL=0., CD=0.030 at 0065953:solver/report/report.tex:133; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/report.tex:138). Score 1 retained after the post-processing audit. Prior case judgment: Report Mach/pressure images and table remain; no raw output."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
-      "notes": "Report images/table remain; no raw output."
+      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=0.046, CD=0.143 at 0065953:solver/report/report.tex:86; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/naca0012_m015_laminar_re5000_mach.png (referenced at solver/report/report.tex:149). Score 1 retained after the post-processing audit. Prior case judgment: Report images/table remain; no raw output."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 1,
-      "notes": "Report images/table remain; no raw output."
+      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.090, CD=0.067 at 0065953:solver/report/report.tex:87; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Report images/table remain; no raw output."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1,
-      "notes": "Report table only; no raw output or figures."
+      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=0.001, CD=0.652 at 0065953:solver/report/report.tex:88; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Report table only; no raw output or figures."
     },
     "cylinder_m010_laminar_re20": {
       "score": 1,
-      "notes": "Report Mach/pressure images/table remain; no raw output."
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-9.57, CD=-1.01 at 0065953:solver/report/report.tex:89; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/cylinder_m010_laminar_re20_mach.png (referenced at solver/report/report.tex:160). Score 1 retained after the post-processing audit. Prior case judgment: Report Mach/pressure images/table remain; no raw output."
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
-      "notes": "Report force/residual/Mach/velocity images and table remain; no readable delivered transient package, and it was not rerun."
+      "notes": "Cylinder M0.10 laminar Re200: numeric CL=1.16, CD=-1.10 at 0065953:solver/report/report.tex:90; residual history 0065953:solver/report/figures/cylinder_m010_laminar_re200_residual.png (referenced at solver/report/report.tex:174); force history 0065953:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:173); computed-field contour 0065953:solver/report/figures/cylinder_m010_laminar_re200_velocity_u.png (referenced at solver/report/report.tex:181); no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 1 retained after the post-processing audit. Prior case judgment: Report force/residual/Mach/velocity images and table remain; no readable delivered transient package, and it was not rerun."
     }
   },
   "disqualification": {
@@ -434,6 +434,7 @@
     "Original attempt commit contains no solver/results package, manifests, field files, logs or report PDF; validator failed on missing metadata before any case could be assessed.",
     "Report was compiled successfully in a disposable worktree at attempt commit be266cd; solver was not rebuilt because the external symlink is dangling.",
     "No Re200 rerun was performed.",
-    "contestant_final_response.md and run_identity.json are unindexed sidecars; their SHA-256 values are recorded in agent_report.md and cfdeval check does not validate them."
+    "contestant_final_response.md and run_identity.json are unindexed sidecars; their SHA-256 values are recorded in agent_report.md and cfdeval check does not validate them.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

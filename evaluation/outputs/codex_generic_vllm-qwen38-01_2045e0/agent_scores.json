@@ -308,35 +308,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "run_manifest.csv records failed at step 2500 with 2.73 orders and positivity/rollback events; partial recognizable attempt."
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.0155539, CD=0.0100452 at e185a0a:solver/report/report.tex:932; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: run_manifest.csv records failed at step 2500 with 2.73 orders and positivity/rollback events; partial recognizable attempt."
     },
     "naca0012_m080_inviscid": {
       "score": 1,
-      "notes": "run_manifest.csv records failed at step 15000 with 2.07 orders and 11988 positivity events; partial recognizable attempt."
+      "notes": "NACA0012 M0.80 inviscid: numeric CL=0.0559999, CD=0.0370178 at e185a0a:solver/report/report.tex:936; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: run_manifest.csv records failed at step 15000 with 2.07 orders and 11988 positivity events; partial recognizable attempt."
     },
     "naca0012_m200_inviscid": {
-      "score": 3,
-      "notes": "run_manifest.csv records the sole converged production case at step 5796 with 3.00 orders; readable evidence earns partial-to-adequate credit."
+      "score": 2,
+      "notes": "NACA0012 M2.00 inviscid: numeric CL=-0.0005543, CD=0.0931395 at e185a0a:solver/report/report.tex:939; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: run_manifest.csv records the sole converged production case at step 5796 with 3.00 orders; readable evidence earns partial-to-adequate credit."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
-      "notes": "run_manifest.csv records failed at step 791 with -0.91 orders and 7216 positivity events; partial unusable result."
+      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: run_manifest.csv records failed at step 791 with -0.91 orders and 7216 positivity events; partial unusable result."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 1,
-      "notes": "run_manifest.csv records failed at step 20000 with -3.45 orders and 40520 positivity events; partial unusable result."
+      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: run_manifest.csv records failed at step 20000 with -3.45 orders and 40520 positivity events; partial unusable result."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1,
-      "notes": "run_manifest.csv records failed at step 565 with 0.18 orders and 2806 positivity events; partial unusable result."
+      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: run_manifest.csv records failed at step 565 with 0.18 orders and 2806 positivity events; partial unusable result."
     },
     "cylinder_m010_laminar_re20": {
       "score": 1,
-      "notes": "Re20 is failed at step 1400 with 0.60 orders and implausible Cd=3.03; no credible final result."
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-0.37985, CD=3.02823 at e185a0a:solver/report/report.tex:1704; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Re20 is failed at step 1400 with 0.60 orders and implausible Cd=3.03; no credible final result."
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
-      "notes": "Re200 is failed at t=30 rather than t=300; report does not convert this partial transient into a valid result and no rerun is permitted."
+      "notes": "Cylinder M0.10 laminar Re200: numeric CL=-0.2338, CD=3.5369 at e185a0a:solver/report/report.tex:1540; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; shedding statistic St=0.16 at e185a0a:solver/report/report.tex:983; no committed/referenced late-time periodic-force plot. Score 1 retained after the post-processing audit. Prior case judgment: Re200 is failed at t=30 rather than t=300; report does not convert this partial transient into a valid result and no rerun is permitted."
     }
   },
   "disqualification": {
@@ -354,6 +354,7 @@
     "No evaluator rerun was performed; cylinder Re200 was never rerun.",
     "Structural validation is separate from substantive numerical scoring.",
     "Raw solver artifacts remain workspace evidence and were excluded from the curated submission tip.",
-    "run_identity.json and contestant_final_response.md are unindexed sidecars."
+    "run_identity.json and contestant_final_response.md are unindexed sidecars.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

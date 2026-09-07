@@ -308,35 +308,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 4,
-      "notes": "Readable validator-passing contestant result; limitations retained."
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=-0.00088, CD=0.0662 at 7e16370:solver/report/report.tex:288; residual history 7e16370:solver/report/figures/naca0012_m015_inviscid_residuals.png (referenced at solver/report/report.tex:174); force history 7e16370:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:180); computed-field contour 7e16370:solver/report/figures/naca0012_m015_inviscid_mach_zoom.png (referenced at solver/report/report.tex:186). Score 4 retained after the post-processing audit. Prior case judgment: Readable validator-passing contestant result; limitations retained."
     },
     "naca0012_m080_inviscid": {
-      "score": 4,
-      "notes": "Readable validator-passing contestant result; limitations retained."
+      "score": 2,
+      "notes": "NACA0012 M0.80 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 7e16370:solver/report/figures/naca0012_m080_inviscid_mach_zoom.png (referenced at solver/report/report.tex:204). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable validator-passing contestant result; limitations retained."
     },
     "naca0012_m200_inviscid": {
-      "score": 4,
-      "notes": "Readable validator-passing contestant result; limitations retained."
+      "score": 2,
+      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 7e16370:solver/report/figures/naca0012_m200_inviscid_mach_zoom.png (referenced at solver/report/report.tex:210). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable validator-passing contestant result; limitations retained."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 4,
-      "notes": "Readable validator-passing contestant result; limitations retained."
+      "score": 2,
+      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable validator-passing contestant result; limitations retained."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 4,
-      "notes": "Readable validator-passing contestant result; limitations retained."
+      "score": 2,
+      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable validator-passing contestant result; limitations retained."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 2,
-      "notes": "Readable validator-passing contestant result; limitations retained."
+      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Readable validator-passing contestant result; limitations retained."
     },
     "cylinder_m010_laminar_re20": {
       "score": 3,
-      "notes": "Readable validator-passing contestant result; limitations retained."
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-0.00078, CD=2.989 at 7e16370:solver/report/report.tex:290; residual history 7e16370:solver/report/figures/cylinder_m010_laminar_re20_residuals.png (referenced at solver/report/report.tex:220); force history 7e16370:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:226); computed-field contour 7e16370:solver/report/figures/cylinder_m010_laminar_re20_mach_zoom.png (referenced at solver/report/report.tex:232). Score 3 retained after the post-processing audit. Prior case judgment: Readable validator-passing contestant result; limitations retained."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 4,
-      "notes": "Readable validator-passing contestant result; limitations retained."
+      "score": 2,
+      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.30, CD=0.813 at 7e16370:solver/report/report.tex:247; residual history 7e16370:solver/report/figures/cylinder_m010_laminar_re200_residuals.png (referenced at solver/report/report.tex:261); force history 7e16370:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:255); computed-field contour 7e16370:solver/report/figures/cylinder_m010_laminar_re200_mach_zoom.png (referenced at solver/report/report.tex:267); no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable validator-passing contestant result; limitations retained."
     }
   },
   "disqualification": {
@@ -345,6 +345,7 @@
   },
   "limitations": [
     "No evaluator rerun; Re200 never rerun.",
-    "M2 laminar negative drag and Re20 Cd 2.99 limit plausibility."
+    "M2 laminar negative drag and Re20 Cd 2.99 limit plausibility.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

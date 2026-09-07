@@ -307,36 +307,36 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 4,
-      "notes": "Case validator OK."
+      "score": 2,
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=-0.0030, CD=0.0132 at 93e8729:solver/report/report.tex:529; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Case validator OK."
     },
     "naca0012_m080_inviscid": {
-      "score": 4,
-      "notes": "Case validator OK."
+      "score": 2,
+      "notes": "NACA0012 M0.80 inviscid: numeric CL=0.00120, CD=0.00706 at 93e8729:solver/report/report.tex:530; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Case validator OK."
     },
     "naca0012_m200_inviscid": {
-      "score": 4,
-      "notes": "Case validator OK."
+      "score": 2,
+      "notes": "NACA0012 M2.00 inviscid: numeric CL=-0.0007, CD=0.0919 at 93e8729:solver/report/report.tex:531; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Case validator OK."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 4,
-      "notes": "Case validator OK."
+      "score": 2,
+      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=-0.0032, CD=0.2285 at 93e8729:solver/report/report.tex:532; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Case validator OK."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 4,
-      "notes": "Case validator OK."
+      "score": 2,
+      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=0.0003, CD=0.0924 at 93e8729:solver/report/report.tex:533; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Case validator OK."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 4,
-      "notes": "Case validator OK."
+      "score": 2,
+      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=0.0000, CD=0.1131 at 93e8729:solver/report/report.tex:534; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Case validator OK."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 4,
-      "notes": "Case validator OK."
+      "score": 2,
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=0.0159, CD=2.959 at 93e8729:solver/report/report.tex:535; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Case validator OK."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Terminal response admits strict inner convergence failure; never rerun."
+      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.016, CD=1.906 at 93e8729:solver/report/report.tex:536; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; shedding statistic St=0.28, lift_amplitude=0.11 at 93e8729:solver/report/report.tex:26; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Terminal response admits strict inner convergence failure; never rerun."
     }
   },
   "disqualification": {
@@ -352,6 +352,7 @@
   },
   "limitations": [
     "Operator-authorized curated rewrite excluded all raw result/report data; case directories remained readable but report validation fails for missing run_manifest.csv.",
-    "Old audit-failing result commit 2376b11 is retained only as recovery provenance."
+    "Old audit-failing result commit 2376b11 is retained only as recovery provenance.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

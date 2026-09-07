@@ -417,40 +417,41 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "Package exists but run_status is failed, residual reduction is only 0.43 orders, and no credible completion."
+      "notes": "NACA0012 M0.15 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Package exists but run_status is failed, residual reduction is only 0.43 orders, and no credible completion."
     },
     "naca0012_m080_inviscid": {
       "score": 0,
-      "notes": "Required final package absent."
+      "notes": "NACA0012 M0.80 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required final package absent."
     },
     "naca0012_m200_inviscid": {
       "score": 1,
-      "notes": "Package exists but status is failed and residual reduction is -0.15 orders."
+      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Package exists but status is failed and residual reduction is -0.15 orders."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 0,
-      "notes": "Required final package absent."
+      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required final package absent."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 0,
-      "notes": "Required final package absent."
+      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required final package absent."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 0,
-      "notes": "Required final package absent."
+      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required final package absent."
     },
     "cylinder_m010_laminar_re20": {
       "score": 1,
-      "notes": "Package exists but status is failed; final Cd 23.16 and Cl 16.94 are not credible steady-cylinder results."
+      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Package exists but status is failed; final Cd 23.16 and Cl 16.94 are not credible steady-cylinder results."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Required transient final package, wake evidence, and periodicity statistics are absent; not rerun."
+      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; shedding statistic St=0.19 at 4733d43:solver/report/report.tex:233; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Required transient final package, wake evidence, and periodicity statistics are absent; not rerun."
     }
   },
   "limitations": [
     "No solver build or rerun was performed; Re200 was never rerun.",
     "Terminal final-response sidecar/hash extraction is intentionally left to the separate provenance step.",
-    "run_identity.json SHA-256 is f8f8977e63b5a1c42f8e28a30982cca3c22ae548f2e09908c37ea1820845ef71 and remains an unindexed sidecar."
+    "run_identity.json SHA-256 is f8f8977e63b5a1c42f8e28a30982cca3c22ae548f2e09908c37ea1820845ef71 and remains an unindexed sidecar.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

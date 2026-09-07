@@ -307,36 +307,36 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 4,
-      "notes": "Validator pass."
+      "score": 2,
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=2.80e-5, CD=7.047e-4 at 7b94179:solver/report/report.tex:381; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator pass."
     },
     "naca0012_m080_inviscid": {
       "score": 0,
-      "notes": "Missing/partial canonical contestant result; no rerun."
+      "notes": "NACA0012 M0.80 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Missing/partial canonical contestant result; no rerun."
     },
     "naca0012_m200_inviscid": {
       "score": 0,
-      "notes": "Missing/partial canonical contestant result; no rerun."
+      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Missing/partial canonical contestant result; no rerun."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 0,
-      "notes": "Missing/partial canonical contestant result; no rerun."
+      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Missing/partial canonical contestant result; no rerun."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 0,
-      "notes": "Missing/partial canonical contestant result; no rerun."
+      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Missing/partial canonical contestant result; no rerun."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 0,
-      "notes": "Missing/partial canonical contestant result; no rerun."
+      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Missing/partial canonical contestant result; no rerun."
     },
     "cylinder_m010_laminar_re20": {
       "score": 0,
-      "notes": "Missing/partial canonical contestant result; no rerun."
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-7.5e-4, CD=2.033 at 7b94179:solver/report/report.tex:385; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Missing/partial canonical contestant result; no rerun."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Missing/partial canonical contestant result; no rerun."
+      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Missing/partial canonical contestant result; no rerun."
     }
   },
   "disqualification": {
@@ -346,6 +346,7 @@
   "limitations": [
     "post_run reconstruction",
     "only M0.15 inviscid validator pass",
-    "Re200 failed short; no rerun"
+    "Re200 failed short; no rerun",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

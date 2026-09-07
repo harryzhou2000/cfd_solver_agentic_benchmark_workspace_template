@@ -309,36 +309,36 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 5,
-      "notes": "Validator passed; delivered inviscid case evidence is credible."
+      "score": 2,
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.0435, CD=0.0006 at 9772c16:solver/report/report.tex:231; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator passed; delivered inviscid case evidence is credible."
     },
     "naca0012_m080_inviscid": {
-      "score": 5,
-      "notes": "Validator passed; submitted transonic inviscid output credited."
+      "score": 2,
+      "notes": "NACA0012 M0.80 inviscid: numeric CL=0.0035, CD=0.0249 at 9772c16:solver/report/report.tex:232; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator passed; submitted transonic inviscid output credited."
     },
     "naca0012_m200_inviscid": {
-      "score": 5,
-      "notes": "Validator passed; submitted supersonic output credited."
+      "score": 2,
+      "notes": "NACA0012 M2.00 inviscid: numeric CL=-0.0006, CD=0.0949 at 9772c16:solver/report/report.tex:233; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator passed; submitted supersonic output credited."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 2,
-      "notes": "Validator passed, but terminal response documents spurious lift about 0.59."
+      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=0.5925, CD=0.0879 at 9772c16:solver/report/report.tex:234; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Validator passed, but terminal response documents spurious lift about 0.59."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 2,
-      "notes": "Validator passed; documented shock plateau and limited convergence."
+      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.0040, CD=0.1620 at 9772c16:solver/report/report.tex:235; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Validator passed; documented shock plateau and limited convergence."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 3,
-      "notes": "Validator passed; documented shock plateau, though force variation is limited."
+      "score": 2,
+      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.0171, CD=0.0812 at 9772c16:solver/report/report.tex:236; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator passed; documented shock plateau, though force variation is limited."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 5,
-      "notes": "Validator passed; steady cylinder case and MPI evidence credited."
+      "score": 2,
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-1.2106, CD=2.2435 at 9772c16:solver/report/report.tex:237; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator passed; steady cylinder case and MPI evidence credited."
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
-      "notes": "Reached t=300 with submitted BDF2 evidence but explicitly did not develop vortex shedding; not rerun."
+      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.1930, CD=1.0176 at 9772c16:solver/report/report.tex:238; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; shedding statistic lift_amplitude=0.0001 at 9772c16:solver/report/report.tex:275; no committed/referenced late-time periodic-force plot. Score 1 retained after the post-processing audit. Prior case judgment: Reached t=300 with submitted BDF2 evidence but explicitly did not develop vortex shedding; not rerun."
     }
   },
   "disqualification": {
@@ -349,6 +349,7 @@
     "Post-run provenance reconstruction only.",
     "Broken/legacy external was not repaired and no evaluator rerun occurred.",
     "Curated figures had only indirect TeX references and were excluded to satisfy immutable audit; submitted report does not build self-contained.",
-    "run_identity.json and final response sidecars are not index-validated."
+    "run_identity.json and final response sidecars are not index-validated.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

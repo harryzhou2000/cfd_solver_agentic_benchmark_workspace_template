@@ -310,35 +310,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 0,
-      "notes": "Explicit validator fails: metadata records convergence_status failed."
+      "notes": "NACA0012 M0.15 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Explicit validator fails: metadata records convergence_status failed."
     },
     "naca0012_m080_inviscid": {
-      "score": 3,
-      "notes": "Readable final output is among the six validator passes, but report validation/convergence claims are inaccurate."
+      "score": 2,
+      "notes": "NACA0012 M0.80 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable final output is among the six validator passes, but report validation/convergence claims are inaccurate."
     },
     "naca0012_m200_inviscid": {
-      "score": 3,
-      "notes": "Readable final output is among the six validator passes, with materially unreliable report traceability."
+      "score": 2,
+      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable final output is among the six validator passes, with materially unreliable report traceability."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
-      "notes": "Recognizable output, but terminal Cd about -636 is physically noncredible."
+      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Recognizable output, but terminal Cd about -636 is physically noncredible."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 3,
-      "notes": "Validator-passing readable output, but suite-wide report/convergence evidence prevents stronger credit."
+      "score": 2,
+      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-passing readable output, but suite-wide report/convergence evidence prevents stronger credit."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 3,
-      "notes": "Validator-passing readable output, but suite-wide report/convergence evidence prevents stronger credit."
+      "score": 2,
+      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-passing readable output, but suite-wide report/convergence evidence prevents stronger credit."
     },
     "cylinder_m010_laminar_re20": {
       "score": 0,
-      "notes": "Divergent np1 terminal residual 1.16233e14 and Cd 3.35506e8; np1_final is also explicitly failed."
+      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Divergent np1 terminal residual 1.16233e14 and Cd 3.35506e8; np1_final is also explicitly failed."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Reaches t=300, but only 3 inner iterations (max 20 versus required controls) and constant force tails do not establish shedding."
+      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 2 retained after the post-processing audit. Prior case judgment: Reaches t=300, but only 3 inner iterations (max 20 versus required controls) and constant force tails do not establish shedding."
     }
   },
   "disqualification": {
@@ -356,6 +356,7 @@
     "The original pre-run snapshot was unavailable; provenance was reconstructed post-run and explicitly labelled non-authoritative for environment facts.",
     "The primary root is an orphan bundled rollout, so primary-to-continuation ancestry is evidence-based rather than DB-verifiable.",
     "No clean build, solver rerun, MPI rerun, or evaluator redraw was performed under the authorized no-rerun/no-redraw decision.",
-    "Current index schema does not enumerate run_identity.json or contestant_final_response.md."
+    "Current index schema does not enumerate run_identity.json or contestant_final_response.md.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

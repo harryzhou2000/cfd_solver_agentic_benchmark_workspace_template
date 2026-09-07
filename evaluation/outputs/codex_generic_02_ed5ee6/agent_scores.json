@@ -308,35 +308,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 0,
-      "notes": "Missing metadata; no readable final package."
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.002361, CD=0.450249 at d477eaf:solver/report/report.tex:92; residual history d477eaf:solver/report/figures/naca0012_m015_inviscid_residuals.png (referenced at solver/report/report.tex:110); force history d477eaf:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:117); no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Missing metadata; no readable final package."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
-      "notes": "Structural package but about two orders reduction only."
+      "notes": "NACA0012 M0.80 inviscid: numeric CL=-0.010065, CD=0.047407 at d477eaf:solver/report/report.tex:94; residual history d477eaf:solver/report/figures/naca0012_m080_inviscid_residuals.png (referenced at solver/report/report.tex:196); force history d477eaf:solver/report/figures/naca0012_m080_inviscid_forces.png (referenced at solver/report/report.tex:203); no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Structural package but about two orders reduction only."
     },
     "naca0012_m200_inviscid": {
-      "score": 3,
-      "notes": "Structural package with 2.55 orders and plausible CD, limited validation."
+      "score": 2,
+      "notes": "NACA0012 M2.00 inviscid: numeric CL=-0.000221, CD=0.092024 at d477eaf:solver/report/report.tex:96; residual history d477eaf:solver/report/figures/naca0012_m200_inviscid_residuals.png (referenced at solver/report/report.tex:281); force history d477eaf:solver/report/figures/naca0012_m200_inviscid_forces.png (referenced at solver/report/report.tex:288); no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Structural package with 2.55 orders and plausible CD, limited validation."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
-      "notes": "Structural package but implausible CD about 0.91 and admitted gradient failures."
+      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=-0.000000, CD=0.909183 at d477eaf:solver/report/report.tex:93; residual history d477eaf:solver/report/figures/naca0012_m015_laminar_re5000_residuals.png (referenced at solver/report/report.tex:153); force history d477eaf:solver/report/figures/naca0012_m015_laminar_re5000_forces.png (referenced at solver/report/report.tex:160); no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Structural package but implausible CD about 0.91 and admitted gradient failures."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 1,
-      "notes": "Structural package but 1.51 orders and unverified viscous credibility."
+      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.000000, CD=0.208855 at d477eaf:solver/report/report.tex:95; residual history d477eaf:solver/report/figures/naca0012_m080_laminar_re5000_residuals.png (referenced at solver/report/report.tex:238); force history d477eaf:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:245); no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Structural package but 1.51 orders and unverified viscous credibility."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 2,
-      "notes": "Structural package but only 1.10 orders and no strong physical evidence."
+      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.000000, CD=0.121609 at d477eaf:solver/report/report.tex:97; residual history d477eaf:solver/report/figures/naca0012_m200_laminar_re5000_residuals.png (referenced at solver/report/report.tex:324); force history d477eaf:solver/report/figures/naca0012_m200_laminar_re5000_forces.png (referenced at solver/report/report.tex:331); no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Structural package but only 1.10 orders and no strong physical evidence."
     },
     "cylinder_m010_laminar_re20": {
       "score": 0,
-      "notes": "Admitted wrong/nonphysical cylinder drag; no credible steady result."
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-0.000800, CD=9.491077 at d477eaf:solver/report/report.tex:98; residual history d477eaf:solver/report/figures/cylinder_m010_laminar_re20_residuals.png (referenced at solver/report/report.tex:368); force history d477eaf:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:375); no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Admitted wrong/nonphysical cylinder drag; no credible steady result."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Does not reach t=300 and final response admits unfinished."
+      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Does not reach t=300 and final response admits unfinished."
     }
   },
   "disqualification": {
@@ -346,6 +346,7 @@
   "limitations": [
     "No evaluator rerun; Re200 was not rerun.",
     "Raw results and PDF are uncommitted workspace evidence excluded by curation.",
-    "run_identity.json and contestant_final_response.md are unindexed; cfdeval check does not validate them."
+    "run_identity.json and contestant_final_response.md are unindexed; cfdeval check does not validate them.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }

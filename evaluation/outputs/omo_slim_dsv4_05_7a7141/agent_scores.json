@@ -349,35 +349,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "Recognizable package exists, but metadata/run_status say failed and terminal response admits only 0.64 residual orders; not a completed credible case."
+      "notes": "NACA0012 M0.15 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Recognizable package exists, but metadata/run_status say failed and terminal response admits only 0.64 residual orders; not a completed credible case."
     },
     "naca0012_m080_inviscid": {
       "score": 0,
-      "notes": "Package is present but failed; residual history grows rather than demonstrating a credible converged final result."
+      "notes": "NACA0012 M0.80 inviscid: numeric CL=0.769, CD=0.070 at 308ffda:solver/report/report.tex:525; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Package is present but failed; residual history grows rather than demonstrating a credible converged final result."
     },
     "naca0012_m200_inviscid": {
       "score": 0,
-      "notes": "Package is present but failed, with strongly growing residual history and no credible completed result."
+      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Package is present but failed, with strongly growing residual history and no credible completed result."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 0,
-      "notes": "A structurally recognizable package exists, but metadata says failed and the delivered history becomes non-finite."
+      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: A structurally recognizable package exists, but metadata says failed and the delivered history becomes non-finite."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 0,
-      "notes": "Package is failed and its delivered residual/force history becomes non-finite."
+      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Package is failed and its delivered residual/force history becomes non-finite."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 0,
-      "notes": "Package is failed and its delivered residual/force history becomes non-finite."
+      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Package is failed and its delivered residual/force history becomes non-finite."
     },
     "cylinder_m010_laminar_re20": {
       "score": 0,
-      "notes": "Only partial stdout evidence exists; no required final case package or credible steady-wake result is delivered."
+      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Only partial stdout evidence exists; no required final case package or credible steady-wake result is delivered."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "No final transient package, periodicity/force evidence, or production controls evidence is delivered; it was not rerun."
+      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: No final transient package, periodicity/force evidence, or production controls evidence is delivered; it was not rerun."
     }
   },
   "disqualification": {
@@ -467,6 +467,7 @@
     "No solver case was rerun; cylinder Re200 was not rerun under the absolute policy.",
     "Evaluation uses the audit-clean curated submission 308ffdad and on-disk immutable contestant result/telemetry evidence; untracked raw outputs are not part of the result commit.",
     "No independent clean build was performed because it was unnecessary to resolve the failed submitted results.",
-    "Context-window values are unavailable in bundled project telemetry and no external source was queried."
+    "Context-window values are unavailable in bundled project telemetry and no external source was queried.",
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
   ]
 }
