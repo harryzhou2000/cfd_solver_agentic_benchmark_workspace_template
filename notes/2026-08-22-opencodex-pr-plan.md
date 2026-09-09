@@ -528,4 +528,11 @@ Blocked on maintainer-sponsored labels (external) plus CodeRabbit reviews that c
 - B #2351 -> 99d5cddbc: SOUND (config-mutation-audit 62/0 + boundary 1/0, typecheck clean).
 - C #2355 -> 4b6d667ae: SOUND (divergence+plan 34/0, GUI contracts 16/0, typecheck clean; one CLI env failure reproduces on clean dev).
 - D #2527 -> dc7b4358e: audit NEEDS-FIX -> six HTTP-layer regression tests in tests/management-provider-validation.test.ts called unimported rmSync (ReferenceError); replaced with the file's existing removeTreeWithRetry. auto-review 36/0, canonical-openai regression passes, typecheck clean.
-- Bodies updated; B/D re-readied and CodeRabbit resumed on new heads; C stays parked with body updated only. Remaining external blockers unchanged.
+ - Bodies updated; B/D re-readied and CodeRabbit resumed on new heads; C stays parked with body updated only. Remaining external blockers unchanged.
+
+## Triage 2026-09-09 (upstream dev 52ad82319)
+
+- #2351 config mutation audit: roadmap says NOT_NOW. Kept open/draft, not rebased; revive as a fresh focused PR if upstream prioritizes it.
+- #2355 config divergence warning: roadmap says DEFER. Kept open/draft, not rebased; if revived, do API/CLI first on current dev, GUI only after owner approval.
+- #2527 auto-review provider override: closed by maintainer as superseded by shipped global auto_review_model; the maintainer invited a focused follow-up for provider scope.
+- New local branch feat/provider-auto-review-model-override-v2, commit 8a0d94b0d on upstream dev 52ad82319: provider-level autoReviewModel and autoReviewModelOverrides implemented, audited, typecheck + focused suites + end-to-end convergence pass. Awaiting explicit authorization to push/open PR.
