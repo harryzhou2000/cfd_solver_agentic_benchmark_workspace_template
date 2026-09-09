@@ -536,3 +536,4 @@ Blocked on maintainer-sponsored labels (external) plus CodeRabbit reviews that c
 - #2355 config divergence warning: roadmap says DEFER. Kept open/draft, not rebased; if revived, do API/CLI first on current dev, GUI only after owner approval.
 - #2527 auto-review provider override: closed by maintainer as superseded by shipped global auto_review_model; the maintainer invited a focused follow-up for provider scope.
 - New local branch feat/provider-auto-review-model-override-v2, commit 8a0d94b0d on upstream dev 52ad82319: provider-level autoReviewModel and autoReviewModelOverrides implemented, audited, typecheck + focused suites + end-to-end convergence pass. Awaiting explicit authorization to push/open PR.
+- Final verification on feature head: full codex-catalog 319/0, full convergence 28/0, focused management/config-load suites pass, typecheck clean, git diff --check clean.
