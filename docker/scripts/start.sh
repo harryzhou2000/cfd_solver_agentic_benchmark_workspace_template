@@ -374,8 +374,13 @@ PYEOF
 )
     fi
     if [ -f "$HOME/.codex/auth.json" ]; then
-      touch "$CODEX_HOME_DIR/auth.json"   # non-credential placeholder; real file mounts over it
-      MOUNTS+=(-v "$HOME/.codex/auth.json:$IMG_HOME/.codex/auth.json:ro")
+      # Copy instead of binding the file: `codex login` replaces auth.json
+      # atomically, so a bind mount pins the OLD inode and a running container
+      # keeps a revoked token after the host re-logs in. A launch-time copy
+      # always carries the current credential and stays writable, so codex can
+      # persist token refreshes into this workspace's session bundle.
+      install -m 600 "$HOME/.codex/auth.json" "$CODEX_HOME_DIR/auth.json"
+      echo "  codex auth:   copied host auth.json into $CODEX_HOME_DIR (0600)"
     fi
     for f in auth.json account.json; do
       if [ -f "$HOME/.local/share/opencode/$f" ]; then

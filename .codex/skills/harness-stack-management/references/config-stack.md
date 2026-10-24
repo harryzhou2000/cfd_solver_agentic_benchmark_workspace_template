@@ -48,10 +48,15 @@ The goal plugin is pinned to `npm:opencode-goal-plugin@0.8.1` in
   `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` are forwarded too.
 - `--host-credentials` additionally reads the live host configs (opencode
   providers → `OPENCODE_API_KEY_<PROVIDER>`, opencodex providers →
-  `OPENCODEX_<PROVIDER>_API_KEY`) into container env and ro-mounts codex
-  `auth.json`, opencode `auth.json`/`account.json`, and Claude Code's
-  `~/.claude/.credentials.json` (OAuth). Nothing is written into the
-  workspace.
+  `OPENCODEX_<PROVIDER>_API_KEY`) into container env and ro-mounts opencode
+  `auth.json`/`account.json` and Claude Code's `~/.claude/.credentials.json`
+  (OAuth).
+- Codex `auth.json` is COPIED (0600) into the workspace session bundle at
+  launch instead of being ro-bound: `codex login` replaces the file
+  atomically, and a bind mount pins the old inode, so a running container
+  keeps a revoked token after a host re-login. The copy always carries the
+  current credential and stays writable so codex can persist token refreshes
+  in `$WS/.sessions/codex/` (git-excluded).
 - Codex auth is file-based (`auth.json`); there is no codex env-key path.
 
 ## Rules
