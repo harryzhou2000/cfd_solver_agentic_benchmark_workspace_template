@@ -19,8 +19,8 @@
 | Component | Pin |
 |---|---|
 | Base | ubuntu:24.04 |
-| opencode | 1.18.18 |
-| codex-cli | 0.149.1 |
+| opencode | 1.18.35 |
+| codex-cli | 0.164.0 |
 | claude-code | 2.1.241 (@anthropic-ai/claude-code, npm) |
 | Node.js | 24.18.0 |
 | bun | 1.3.14 |
