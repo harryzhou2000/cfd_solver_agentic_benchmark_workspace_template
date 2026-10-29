@@ -2,7 +2,11 @@
 
 This is a work-in-progress evidence ledger, not a completion claim. Passing structural gates or automated candidate triage do not establish calibrated scores. Reviewed means substantive manual review is complete across the applicable rubric, case results, scorecards and DQ evidence; corrected means a substantiated change passed both current gates. Partial items remain unreviewed for overall calibration. No unsteady or Re200 case has been rerun in this review.
 
-## 30-minute review checkpoint
+## Historical 30-minute review checkpoint
+
+The following paragraph describes the earlier checkpoint, not the current
+state. All three new submissions have since been recorded and committed as
+shown in the next table; the 03 DQ decision was reviewed and changed to false.
 
 The three new snapshot directories remain untracked working drafts. All three
 have provisional per-case evidence; the 01 and 02 rubric totals and DQ verdicts
@@ -15,7 +19,7 @@ viscous force while the integrated-force source path uses full stress traction;
 the possible magnitude has not been verified across cases. The review is
 incomplete and no manager snapshot for these three has been committed.
 
-## New submissions — partial, not scored
+## New submissions — reviewed and recorded
 
 | Run ID | Status | Evidence and remaining work |
 |---|---|---|
@@ -25,9 +29,23 @@ incomplete and no manager snapshot for these three has been committed.
 
 Result branches preserve contestant history, which contains prohibited generated files; curation removes those files from the tip index only. Raw workspace evidence is retained. All three new snapshots have now been reviewed, recorded and committed separately; the historic catalog table below remains explicitly partial.
 
-## Specific calibration finding
+## Historical calibration finding and subsequent correction
 
-`claude_generic_opus-04_616ae8` is **partial review, correction pending**. Its `agent_scores.json` gives 99/100 and case scores 2, but `agent_report.md` says 94/100 and each case 5. The current gates pass despite this mismatch. Case notes assert missing committed/referenced plots. At submission `c2fefc174dffcb7e5119e7ab54f971479d5dfe25`, `solver/report/report.tex:875` inputs committed `solver/report/generated/case_sections.tex`; lines 20–57 of that included file reference M0.15 inviscid residual, force, Mach and pressure plots, and those figure blobs are present. Thus the blanket missing-plot assertion is false for this case. All eight cases appear in the included source, but each figure, summary, validity and case level still need review before any score is changed. The indexed 42-page PDF was visually screened at pages 17–37: case-specific residual and force histories and computed-field contours are displayed for all eight cases; Re200 pages 35–37 include a late force panel and wake contours. Case-specific readability, summary values, full physical and traceability review remain pending. A dependency-aware candidate screen additionally flagged `codex_gpt56_04_1e36f2`, `codex_kimik3_04_b353a7`, `oc-goal_kimik3-dsv4_02_0ceb76`, `codex_dsv4_flash_03_294b64`, `codex_kimik3_07_f42559`, `codex_kimik3_05_382d41`, `codex_dsv4_flash_14_80096b`, `oc-goal_kimik3-dsv4_01_940dcb`, and `codex_gpt56_12_e9972d`; these are leads, not findings or justified score changes.
+The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2, while its report said 94/100 and each case 5. Its notes asserted that committed and referenced plots were missing, but at submission `c2fefc174dffcb7e5119e7ab54f971479d5dfe25`, `solver/report/report.tex:875` inputs committed `solver/report/generated/case_sections.tex`, which references figures that are present. After case-specific and full rubric review, commits `48281ae3` and `eebd7dea` corrected the case scores and calibrated the rubric to 92.5/100, DQ=false; both gates pass. The report contains the detailed evidence and limitations. A dependency-aware candidate screen additionally flagged `codex_gpt56_04_1e36f2`, `codex_kimik3_04_b353a7`, `oc-goal_kimik3-dsv4_02_0ceb76`, `codex_dsv4_flash_03_294b64`, `codex_kimik3_07_f42559`, `codex_kimik3_05_382d41`, `codex_dsv4_flash_14_80096b`, `oc-goal_kimik3-dsv4_01_940dcb`, and `codex_gpt56_12_e9972d`; these are leads, not findings or justified score changes.
+
+## Additional leads awaiting substantive review
+
+- `claude_generic_opus-02_6fc51c`: the Re200 case note says there is no
+  committed force summary or shedding statistic, but submission `6ed4241`
+  `report/report.tex:333–338` reports mean Cd, lift amplitude, and St, and
+  `:586` summarizes CL/CD. A readable late-time force plot and numerical
+  credibility remain separate requirements. The report says 86/100 while the
+  current scorecard says 82/100; its other overalls also differ.
+- A partial automated scan of explicit Code/CFD/Results overalls in reports
+  found 22 mismatched mentions among 32 mentions checked. It did not inspect
+  every report or determine the correct score. For example, `opus-05` reports
+  4.6/4.6/4.7 versus scorecard 5.0/4.92/5.0. Reconcile each when reviewing
+  its substantive evidence; do not mechanically substitute one for the other.
 
 ## Existing catalog status
 
