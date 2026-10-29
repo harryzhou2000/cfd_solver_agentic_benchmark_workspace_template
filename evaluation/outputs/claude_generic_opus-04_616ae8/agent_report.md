@@ -4,7 +4,7 @@ Submission `claude/generic/opus-04` at `c2fefc174dffcb7e5119e7ab54f971479d5dfe25
 
 Explicit validation passed the eight original packages and report. The submitted terminal response reports unit-test pass, 83/83 sanity checks, a 42-page report, and no active process. Source/report and raw contestant package evidence were inspected read-only; no evaluator rerun was performed and Re200 was not rerun.
 
-Rubric 94/100; Code 4.7/5, CFD 4.7/5, Results 4.8/5; every independent case is 5/5. No direct DQ evidence: source/report claims are internally consistent, and no wrapper, fake MPI, false status, or disabled production method was found.
+The recorded rubric is 99/100; recorded Code 5.0/5, CFD 4.92/5, Results 5.0/5. These overall scores and the prior DQ=false finding remain pending independent full calibration. A 2026-10-29 case-level review corrected the earlier retrospective assertion that case plots were absent: report.tex:875 inputs the committed generated/case_sections.tex, whose referenced figures appear in the indexed PDF. Each case score and its actual residual/force/contour evidence and limitations are recorded in agent_scores.json. The former report sentence claiming 94/100 and eight case scores of 5 was stale and is superseded.
 
 Session attribution: sole workspace-local Claude root `97fe589a-b6aa-442b-a602-beb5c56392a7`, UTC 2026-08-26T10:08:53.108Z–16:41:26.303Z, selected from its benchmark task continuity and deterministic terminal end_turn response.
 

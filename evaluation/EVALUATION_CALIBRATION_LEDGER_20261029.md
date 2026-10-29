@@ -36,7 +36,7 @@ Result branches preserve contestant history, which contains prohibited generated
 | `claude_generic_opus-01_9a712c` | unreviewed |
 | `claude_generic_opus-02_6fc51c` | unreviewed |
 | `claude_generic_opus-03_68c1ac` | unreviewed |
-| `claude_generic_opus-04_616ae8` | partial — see finding above |
+| `claude_generic_opus-04_616ae8` | partial — case scores corrected; overall rubric and reviews unreviewed |
 | `claude_generic_opus-05_21cf4d` | unreviewed |
 | `claude_generic_opus-06_40b02c` | unreviewed |
 | `claude_generic_opus-07_c08c67` | unreviewed |
@@ -126,3 +126,7 @@ Result branches preserve contestant history, which contains prohibited generated
 ## DQ mapping correction — glm52_01
 
 Prior flags 4 and 8 were incorrectly assigned. Immutable submission `17a5ef3c78cda02d6707e1f94858184060318216`, `solver/src/solver.cpp:55–62`, unconditionally marks a transient complete/statistically periodic; lines 743–748 cap inner iterations at 15 and 845–852 count a miss only for ratio >=1 rather than the 1e-3 target. The former report recorded last ratio 0.928488 and a 97.56% fraction, but the original raw metadata is currently unavailable. The source proves the success fraction uses the wrong threshold; it does not prove what fraction of steps missed the strict target. DQ remains true under trigger 7, not trigger 4 (steady MPI discrepancy). Seven absent report figures remain a report/visualization defect but do not alone prove trigger 8 (figures misrepresent outputs). Score unchanged; both gates passed after correction. Full independent rubric calibration remains pending.
+
+## Opus-04 case correction — 2026-10-29
+
+The eight former scores were all 2 from the false assertion that committed plots were missing. At immutable `c2fefc174dffcb7e5119e7ab54f971479d5dfe25`, `report.tex:875` inputs `generated/case_sections.tex`: histories and computed contours appear at lines 16/22/44, 78/84/106, 140/146/168, 205/211/239, 280/286/314, 355/361/389, 430/436/464 and 519/531/577 respectively, and rendered PDF pages 17–37 were reviewed. Each note records numeric forces, residual reduction and observed tail behavior; Re200 page 36 shows late lift and centered drag, page 37 the wake, and case_sections:509–511 reports St and force statistics. Changes in canonical task order: 2→3, 2→4, 2→4, 2→4, 2→3, 2→3, 2→4, 2→3. These independently assessed case scores do not alter the 100-point rubric. The rubric 99 and review areas remain unreviewed; the old report claim of 94 and eight 5s was stale and has been corrected to the recorded current values with that qualification. Both gates pass. No Re200 rerun.
