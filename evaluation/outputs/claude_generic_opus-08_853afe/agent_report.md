@@ -82,7 +82,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ false: no trigger was affirmatively established from direct internal evidence. The broken manifest and incomplete rendering are direct report/traceability deductions, not a separate deduction for PDF absence.
+DQ true: triggers 7 and 10 are supported by the source and original Re200 force history, as documented in the partial correction below. Full rubric and review-area calibration remains pending.
 
 ## Metadata answers & session selection
 
@@ -101,3 +101,8 @@ The raw packages are structurally complete, but the required committed report/fi
 - `run_identity.json` SHA-256: `636ee8630a22cecf202fdb95286485b1324f28756d1902270c9f99891e2bde77`.
 - `contestant_final_response.md` SHA-256: `bf085dbd202e74f5236c5d2bfc3a6b1ec104001320ce0180d37630f597cc3258`.
 - These are unindexed sidecars, so `cfdeval check` does not validate them.
+
+
+## Partial DQ and Re200 correction — 2026-10-29
+
+DQ changes from false to true on direct internal evidence for triggers 7 and 10. Immutable `solver.cpp:89–115` multiplies the limiter by `recon_ramp`; :446 sets this to zero through 75% of maximum steady steps and :505 holds it at zero throughout the transient. Every submitted steady run finishes before its ramp threshold (the case-specific step/max-step ratios are in the scorecard), so all eight production reconstructions are first order, although report.tex:105–115 and metadata claim second order. Separately solver.cpp:544 sets any nonfailed transient `statistically_periodic` without analyzing periodicity; metadata repeats completed/periodic. The original Re200 forces.csv over t≥180 has Cd=4.81532521–4.81532988 and Cl=−0.00143977449 to −0.00143974763 across 12,001 rows. The accepted PDF page 8 shows flat force histories and a steady-looking wake. This contradicts claimed shedding and supports DQ7; it is not a claim that the run did not execute. The Re200 case score changes 2→1 for a physically unusable shedding result and absent late-periodic evidence. A committed but unreferenced `solver/report/tables/forces.tex` gives final Cd=4.815325 and Cl=−0.001440, correcting the old blanket missing-numeric assertion without making that final row an unsteady summary. Other cases, rubric and review areas remain under review. No CFD rerun.

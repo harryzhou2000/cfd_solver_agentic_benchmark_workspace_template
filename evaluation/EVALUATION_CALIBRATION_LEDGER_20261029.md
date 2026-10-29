@@ -70,7 +70,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-05_21cf4d` | fully reviewed — 74.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-06_40b02c` | fully reviewed — 93/100, DQ=false; both gates pass |
 | `claude_generic_opus-07_c08c67` | unreviewed |
-| `claude_generic_opus-08_853afe` | unreviewed |
+| `claude_generic_opus-08_853afe` | partial — DQ 7/10 and Re200 case corrected; remaining scoring pending |
 | `claude_generic_opus-09_9cb2fc` | unreviewed |
 | `claude_generic_opus-10_f6b586` | unreviewed |
 | `claude_generic_opus-11_fe7eba` | unreviewed |
@@ -242,3 +242,8 @@ Opus-06 continuing source review: isolated immutable-source CMake build passed u
 ## Opus-06 full calibration — 2026-10-29
 
 Rubric 92→93/100; prior rubric awarded zero report/viz points based only on the immutable-only placeholder rebuild, overlooking the accepted contestant PDF. The calibrated report/viz section is 4/5, with the missing curated figure assets reflected separately in reproducibility. All 27 review points, ten rubric sections and DQ triggers now have specific evidence. Case scores in task order 2,2,2,2,2,2,2,2 → 2,3,3,4,4,4,4,4, with case figures and force tails recorded above. Rank-zero global preprocessing mesh is released before solve, solution/gradient/limiter halos are exchanged, and original np1/2/4/8 studies show closely agreeing forces. `Forces.cpp:35–73` separates pressure/tangential/normal traction; metadata near-zero normal is consistent with implemented wall treatment. `tab_mms.tex` limited reconstruction orders 2.46,2.09,1.52 qualify claims of uniform second-order accuracy. Clean immutable build and unit ctest pass in restricted scratch; MPI ctest stops before solver launch on unset LD_LIBRARY_PATH. DQ remains false; no CFD rerun, exhaustive pixel-to-field or external authorship audit. Both gates pass.
+
+
+## Opus-08 partial DQ and Re200 correction — 2026-10-29
+
+DQ false→true under triggers 7 and 10. Immutable 7bf03bc solver.cpp:89–115 multiplies limiter by recon_ramp; :446 keeps it zero for first 75% of maximum steady steps and :505 keeps it zero for all transient steps. Original production step/max pairs are M0.15 inv 7996/20000, M0.80 inv 4447/30000, M2 inv 2917/40000, M0.15 lam 3058/40000, M0.80 lam 6408/40000, M2 lam 760/50000, Re20 5254/30000: all end before the ramp. Report.tex:105–115 and metadata claim second order; all submitted production reconstruction is first order. solver.cpp:544 assigns statistically_periodic to nonfailed transient without checking periodicity, and metadata marks completed/periodic. Original Re200 t≥180 has 12,001 force rows, Cd=4.81532521–4.81532988 and Cl=−0.00143977449 to −0.00143974763; accepted PDF p8 shows flat forces and steady-looking wake. Re200 score 2→1 for missing shedding/physically unusable result. Committed but unreferenced tables/forces.tex supplies final force numbers, unlike old blanket absence note; final scalar is not an unsteady summary. PDF source and indexed SHA-256 fb87889af5d91eeda61e40fb9c169b9200de7635a434fdd98a5507d14dd65599 match, main TeX matches the immutable blob, and creation time falls inside contestant session. Remaining cases/rubric/areas pending; both gates pass, no CFD rerun.

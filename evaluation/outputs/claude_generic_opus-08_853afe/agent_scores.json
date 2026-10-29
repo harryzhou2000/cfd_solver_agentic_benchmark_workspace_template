@@ -337,13 +337,24 @@
       "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; residual history 7bf03bc:solver/report/figures/cylinder_m010_laminar_re20_residual.png (referenced at solver/report/report.tex:243); force history 7bf03bc:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:244); computed-field contour 7bf03bc:solver/report/figures/cylinder_m010_laminar_re20_mach_zoom.png (referenced at solver/report/report.tex:249). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable raw workspace package; report evidence is incomplete."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; residual history 7bf03bc:solver/report/figures/cylinder_m010_laminar_re200_residual.png (referenced at solver/report/report.tex:256); force history 7bf03bc:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:257); computed-field contour 7bf03bc:solver/report/figures/cylinder_m010_laminar_re200_velocityx_zoom.png (referenced at solver/report/report.tex:267); no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 2 retained after the post-processing audit. Prior case judgment: Readable raw workspace package; report evidence is incomplete."
+      "score": 1,
+      "notes": "Previous case score 2\u21921: original Re200 forces.csv over t\u2265180 has 12,001 rows with Cd=4.81532521\u20134.81532988 and Cl=\u22120.00143977449 to \u22120.00143974763; accepted contestant PDF p8 visibly shows flat force histories and a steady-looking wake rather than vortex shedding. Immutable solver.cpp:544 labels any nonfailed transient statistically_periodic, and metadata repeats completed=true/statistically_periodic; this is false for the delivered result. The late lift/drag periodic plot and St are absent. A committed but unreferenced tables/forces.tex has a final force row Cd=4.815325 and Cl=\u22120.001440; this corrects the prior blanket claim that no committed numeric values exist, without treating a final row as an unsteady statistical summary. No Re200 rerun."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "found": true,
+        "evidence": "Immutable 7bf03bc solver/src/solver.cpp:505\u2013544 sets statistically_periodic when no nonfinite residual occurs, without a shedding/periodicity test; output.cpp:373\u2013381 writes completed=true and that status. Original Re200 forces.csv t\u2265180 has 12,001 rows with Cd=4.81532521\u20134.81532988 and Cl=\u22120.00143977449 to \u22120.00143974763, not the claimed shedding. Accepted contestant PDF p8 visually shows flat force histories and a steady-looking wake. This is a false successful periodicity status, not a claim that the simulation was never executed."
+      },
+      {
+        "id": 10,
+        "found": true,
+        "evidence": "Immutable solver.cpp:89\u2013115 sets limiter_phi to the calculated limiter multiplied by recon_ramp; :446 sets recon_ramp=0 through 75% of max_steps for steady cases, :505 forces it to 0 throughout transient. Original final steps and case max_steps: M0.15 inv 7996/20000, M0.80 inv 4447/30000, M2 inv 2917/40000, M0.15 lam 3058/40000, M0.80 lam 6408/40000, M2 lam 760/50000, Re20 5254/30000; all end before the ramp begins. Thus all submitted production reconstructions were first order, despite report.tex:105\u2013115 and metadata claiming second order with limiter."
+      }
+    ]
   },
   "limitations": [
     "No evaluator solver rerun was performed; Re200 was never rerun.",
