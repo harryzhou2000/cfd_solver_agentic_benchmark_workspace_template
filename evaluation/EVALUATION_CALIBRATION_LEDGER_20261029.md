@@ -68,7 +68,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-03_68c1ac` | unreviewed |
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-05_21cf4d` | fully reviewed — 74.5/100, DQ=true; both gates pass |
-| `claude_generic_opus-06_40b02c` | partial — Re200 accepted PDF evidence corrected; remaining cases and source pending |
+| `claude_generic_opus-06_40b02c` | partial — all case evidence corrected; source/rubric/DQ pending |
 | `claude_generic_opus-07_c08c67` | unreviewed |
 | `claude_generic_opus-08_853afe` | unreviewed |
 | `claude_generic_opus-09_9cb2fc` | unreviewed |
@@ -231,3 +231,6 @@ Rubric 98→74.5/100; DQ remains true under the independently checkpointed TASK 
 ## Opus-06 partial Re200 correction — 2026-10-29
 
 Case 2→4: prior retrospective falsely asserted missing numeric summary, residual/force plots, wake contour, St and late lift/drag evidence. Immutable report.tex:1615 includes `tables/tab_re200.tex` with Cd=1.2661, mean Cl=0.00173, lift amplitude=0.5745 and St=0.1859. Accepted `workspace_existing` sibling PDF and indexed copy have SHA-256 7c6ee79768735da2201041340245629fc2c081caf7c338fcc056253eb7b86fa5; tracked TeX blob matches the submission and PDF creation occurred inside the selected contestant session. Direct visual inspection of PDF pp.36–37 confirms late lift/drag and wake plus residual/inner history. Original forces.csv t≥180 mean Cd=1.2661834, Cd range 1.237623–1.293897, lift range −0.572979–0.576326. Twenty-two linearly interpolated upward crossings of the t≥180 mean lift give 21 periods averaging 5.386263 and nondimensional frequency 0.185657, consistent with the reported crossing-based St=0.1857. These are contestant-delivered artifacts, not evaluator redraws. Missing curated figure assets still limit rebuilding the report from the committed source. Other cases, source, rubric and DQ remain unreviewed. Both gates pass; no Re200 rerun.
+
+
+Opus-06 seven steady case corrections: accepted contestant PDF pp.24–26,29–31,34 visibly show each case’s residual/force history and computed field, and immutable report.tex:1259,1277 inputs `tab_runs.tex`/`tab_forces.tex`. Prior missing-evidence notes were false for the delivered PDF. Scores in canonical steady order 2,2,2,2,2,2,2 → 2,3,3,4,4,4,4. M0.15 inviscid remains 2 due to tail Cd 0.0004077–0.00158987 versus final 0.00102544, not a missing-plot claim; other per-case force tails are in the scorecard. Missing curated figure assets remain a distinct reproducibility limitation. Source, rubric, review areas and DQ still pending. Both gates pass; no CFD rerun.
