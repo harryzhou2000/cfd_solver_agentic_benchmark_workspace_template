@@ -1,0 +1,112 @@
+{
+  "review_area": "code_review",
+  "title": "Code review scorecard",
+  "points": [
+    {
+      "id": "code.build",
+      "title": "Build system and reproducibility",
+      "weight": 0.15,
+      "score": 5,
+      "notes": "Clean immutable source CMake build exited 0 in network-disabled cfd-bench with configured external root; run 02 also uses its documented CFD_HEADER_ROOT. No host credentials or network exposed."
+    },
+    {
+      "id": "code.cli",
+      "title": "CLI and error handling",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Submitted run metadata and scripts record the required solve --case --output form; direct isolated invocation without a case exits nonzero with ERROR: --case is required. A full documented solve was not rerun because submitted results exist; standalone --help is rejected as missing case. Other malformed-input modes remain unverified."
+    },
+    {
+      "id": "code.organization",
+      "title": "Code organization and extensibility",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "CMakeLists.txt:28\u201337 separates configuration, reader, global/local mesh, partition, solver and output sources. Numerical physics remains largely concentrated in solver.cpp; documented reduced-slope and 2-D assumptions limit generalization."
+    },
+    {
+      "id": "code.originality",
+      "title": "Originality and license compliance",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "CMakeLists.txt builds the submitted C++ source and links MPI/CGNS/METIS/HDF5/zlib; direct source inspection found no invocation of an external CFD executable. Per trust policy no authorship or external similarity search was performed."
+    },
+    {
+      "id": "code.hardcoding",
+      "title": "No hard-coded case logic",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "case_config.cpp:70 resolves the supplied mesh path and :123\u2013124 parses boundary configuration; solver accepts configuration rather than two hard-coded mesh filenames. General arbitrary mesh compatibility remains unverified."
+    },
+    {
+      "id": "code.mpi",
+      "title": "MPI correctness",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "global_mesh.cpp:296 calls METIS; solver.cpp:231\u2013249 and :329\u2013349 exchange state and gradients with neighbors, :913\u2013915 and :1110 reduce residuals/forces. Submitted np=1/2/4/8 short continuation histories agree within 1e-9 in Cd for a cylinder and a NACA case; report.tex:248\u2013266 documents the shared-restart test and 4-CPU quota. It is not an independent full convergence comparison."
+    },
+    {
+      "id": "code.robustness",
+      "title": "Robustness and memory sanity",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "solver.cpp:524\u2013545 and :946\u2013969 apply reconstructed-state and update positivity safeguards. Production uses a first-order fallback and reduced slopes for stability, disclosed in report.tex:554\u2013567; malformed-input and resource-stress coverage remains incomplete."
+    },
+    {
+      "id": "code.testing",
+      "title": "Testing and validation evidence",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "report.tex:268\u2013287 describes uniform-field, linear-gradient and rank continuation checks; submitted eight result packages pass structural validation. Independent order-of-accuracy and full reruns were not performed."
+    },
+    {
+      "id": "code.hygiene",
+      "title": "Code hygiene",
+      "weight": 0.07,
+      "score": 4,
+      "notes": "Clean build succeeds with warnings for an unused function; CMakeLists.txt builds separated source units. Curation excluded generated artifacts from the result tip; preserved earlier contestant history retains those blobs."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Existing solver executable called internally",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Force/residual files generated without solving",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Code only reads the two benchmark mesh filenames through hard-coded branches",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "MPI rank count changes results by order-one amounts for steady cases",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Explicit time stepping only (no implicit/steady capability claimed where required)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims algorithms that cannot be found in source",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete/failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Solver core, time integration, or MPI communication copied/adapted/wrapped from an existing open-source CFD codebase",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.87
+}

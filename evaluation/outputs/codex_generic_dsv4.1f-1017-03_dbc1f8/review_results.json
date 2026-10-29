@@ -1,0 +1,83 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 5,
+      "notes": "Explicit official validator accepted the eight submitted workspace case directories and report; metadata, force/residual histories, surface, final VTK, partition diagnostics, restart and status files are present. Curation excluded generated data from the immutable tip while keeping original workspace evidence."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 5,
+      "notes": "Explicit official validator invocation on all eight canonical workspace result directories and the report exited 0. This confirms structure only, not physical correctness."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 4,
+      "notes": "All eight original result packages and report pass the structural validator. Re200 reaches t=300; its full-history force plot does not make late drag periodicity readable, and M0.15 inviscid uses disclosed first-order fallback."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Case-specific notes review forces and contours. M0.15 inviscid Cd=0.06636 with first-order fallback is materially dissipative; Re200 has a diffuse wake and low-amplitude lift, with no readable drag zoom. Steady rank comparisons are short continuations."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Main report PDF has case-specific residual, force, surface, Mach and pressure figures; Re200 wake view is present. Re200 force plot at report.tex:360 does not resolve the late drag oscillation on its full-time scale. Figure existence/appearance does not by itself establish source traceability."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 2,
+      "notes": "Report covers methods, cases, rank study and discloses M0.15 first-order fallback. It says viscous-force split uses only tangential traction (report.tex:292,312), while solver.cpp:586\u2013608,1082\u20131110 includes the full stress vector. It also describes a generic 0.5 slope while Re200 script/metadata use 0.8; late-time drag variation is unreadable in its figure."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 4,
+      "notes": "Submitted report/figure_manifest.csv maps images to per-case fields and histories; final force values checked against forces.csv. report.tex:26\u201327 and :554\u2013557 presents 0.5 as a generic production slope whereas Re200 script and metadata use 0.8; full figure-to-array quantitative verification was not performed."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report figures do not correspond to submitted field/CSV outputs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete or failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Debug outputs presented as final case results",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.7
+}

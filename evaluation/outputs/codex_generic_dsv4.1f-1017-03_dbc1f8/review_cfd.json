@@ -1,0 +1,116 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 4,
+      "notes": "report.tex:44\u201379 describes nondimensional compressible Navier\u2013Stokes; solver/src/common.h:24\u201327 and :53\u201369 define four conserved variables and perfect-gas conversion. Full independent derivation verification is not established."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 3.5,
+      "notes": "cgns_reader.cpp:34\u201358 loops unstructured zones and maps boundary edges; :115\u2013121 accepts TRI_3, QUAD_4, BAR_2 section types but rejects CGNS MIXED element sections. global_mesh.cpp:99\u2013190 constructs edge adjacency and polygon geometry; supplied packages exercise the meshes but general multi-zone/mixed layouts were not independently executed."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "solver.cpp:781\u2013820 assembles interior numerical and viscous face fluxes; :870\u2013874 adds equal-and-opposite interior contributions to owned cells. Supplied field and residual histories are available, but no independent convergence-order test was run."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "solver.cpp contains HLLC, Roe and Rusanov implementations, selected at :797\u2013799; metadata records HLLC for seven cases and Rusanov for the disclosed M0.15 first-order fallback. A complete independent flux verification was not run."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "solver.cpp:823\u2013867 handles farfield, slip and no-slip adiabatic wall fluxes; reported wall-state and surface files provide submitted checks. Independent analytical wall and farfield tests were not repeated."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 3,
+      "notes": "solver/src/solver.cpp:419\u2013478 assembles weighted least-squares gradients and :371\u2013410 reconstructs face states. Report.tex:554\u2013567 discloses production slope factor 0.5 and first-order fallback for M0.15 inviscid, materially limiting accuracy. This is implementation evidence rather than a measured convergence-order claim."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "solver/src/solver.cpp:508\u2013545 applies neighbor bounds, positivity floor and slope factors. Report.tex:563\u2013567 discloses the first-order M0.15 inviscid fallback and 0.5 production slope elsewhere; no claim of uniform full-order behavior is inferred."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "solver.cpp:800\u2013820 assembles Newtonian stress and Fourier heat flux; :586\u2013608 computes full stress-vector wall traction and :1082\u20131110 directly adds it to viscous forces without tangential projection. Report.tex:166\u2013167,292,312 incorrectly claims tangential-only traction. Surface Cf uses a separate projection. The magnitude of the normal contribution has not been independently quantified."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "solver.cpp:979\u20131024 implements implicit diagonal and LU-SGS machinery, with production steady point-implicit path described at report.tex:174\u2013184 and transient inner solve. CFL caps differ from supplied high maxima, disclosed in report; independent stability or order tests were not run."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "solver.cpp:879\u2013894 forms the BDF2 transient residual; :1359\u20131418 tests its reduction in the inner loop and shifts physical histories afterward. Submitted Re200 metadata records dt=0.01, t=300, min/max inner 5/300 and all steps meeting target, with force history covering t=0.01\u2013300. BDF2 is used at the first step with identical historical states (:169), an imperfect startup. Unforced result quality is a separate case judgment; no unsteady rerun."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "global_mesh.cpp:296 calls METIS; solver.cpp:231\u2013249 and :329\u2013349 exchange state and gradients with neighbors, :913\u2013915 and :1110 reduce residuals/forces. Submitted np=1/2/4/8 short continuation histories agree within 1e-9 in Cd for a cylinder and a NACA case; report.tex:248\u2013266 documents the shared-restart test and 4-CPU quota. It is not an independent full convergence comparison."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Solver uses explicit time stepping only",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Normal viscous traction mislabeled as skin friction",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.68
+}
