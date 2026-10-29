@@ -64,7 +64,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | Run ID | Review status |
 |---|---|
 | `claude_generic_opus-01_9a712c` | unreviewed |
-| `claude_generic_opus-02_6fc51c` | unreviewed |
+| `claude_generic_opus-02_6fc51c` | partial — source/build/validator and report review in progress; scoring and DQ pending |
 | `claude_generic_opus-03_68c1ac` | unreviewed |
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-05_21cf4d` | unreviewed |
