@@ -67,7 +67,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-02_6fc51c` | fully reviewed — 65.5/100, mandatory placeholder-result rejection; both gates pass |
 | `claude_generic_opus-03_68c1ac` | unreviewed |
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
-| `claude_generic_opus-05_21cf4d` | partial — DQ corrected for prohibited full-mesh replication; full scoring pending |
+| `claude_generic_opus-05_21cf4d` | fully reviewed — 74.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-06_40b02c` | unreviewed |
 | `claude_generic_opus-07_c08c67` | unreviewed |
 | `claude_generic_opus-08_853afe` | unreviewed |
@@ -221,3 +221,8 @@ Opus-05 further metadata/report correction lead: `solver/src/main.cpp:76–82,10
 
 
 Opus-05 DQ correction: prior DQ=false→true under TASK.md:227 prohibited shortcut 7, because immutable main.cpp:76 reads global mesh on each rank, :82 passes it by const reference for partitioning, and :101–107 runs with `gm` alive; mesh.h:6–13 shows owned global vertices, cells, faces and adjacency. Examiner README_EXAMINER.md:83–85 refers to TASK prohibitions as disqualification triggers. METIS and owned-plus-ghost solution state are present; this is not a claim of numbered trigger 9 geometric-only partition or full-state replication. Both gates pass; other scores and DQ triggers remain under review. A narrow pattern screen surfaced potentially similar `GlobalMesh` read sites in `workspace/codex/dsv4_flash/{07,08}`, `workspace/codex/generic/opus46-01`, `workspace/codex/kimik3/{02,03,06}`, and `workspace/oc-goal/kimik3-dsv4/{03,05}`; inspect each rank and object lifetime independently. The pattern alone is not evidence of violation.
+
+
+## Opus-05 full calibration — 2026-10-29
+
+Rubric 98→74.5/100; DQ remains true under the independently checkpointed TASK prohibition on full-mesh replication. Individual review points and rubric sections now document source, report and numerical evidence. Independent case scores in task order 5,5,5,5,5,5,5,2 → 2,3,3,2,3,3,3,2: M0.15 inviscid tail Cd spans −0.00424404–0.00724422, M0.15 laminar Cd tail spans 0.0763978–0.0843528, and Re20 np4/8 Cd is 2.08914/2.17966; other case-specific force behavior and plot references are in the scorecard. State-only halo exchange leaves ghost gradients zero, compromising partition-face reconstruction and consistent viscous/inviscid flux; the primitive velocity-gradient chain rule omits density terms. Full viscous traction is mislabeled skin friction. Distinct source/report deductions are recorded without asserting DQ4, DQ6, DQ7, DQ9 or DQ10 merely from those limitations. Clean immutable build in network-disabled scratch used two CPUs, 4 GiB, 128 processes, 240-second timeout; original eight-case/report validator and both record gates pass. No CFD rerun, comprehensive authorship audit or full pixel-level provenance check.
