@@ -8,7 +8,7 @@
 
 ## Snapshot
 
-- Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: no
+- Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: yes / yes
 - Vendored report PDF: accepted
 - Session analysis: 2026-08-27T08:15:29.603000+00:00 → 2026-08-28T01:32:44.497000+00:00; 35×1800s buckets; idle 2 gaps / 35983s excluded; permission-wait candidates 0; tokens 203,850,063 (cache hit 0.9285)
 
@@ -66,7 +66,7 @@
 Summary:
 1. **Primary Request and Intent**
 
-
+   
   - resume: [Request interrupted by user for tool use]
   - resume: continue
   - resume: <command-name>/exit</command-name>

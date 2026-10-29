@@ -55,7 +55,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
   were assessed in the completed record; no unsteady case was rerun.
 - A partial automated scan of explicit Code/CFD/Results overalls in reports
   found 22 mismatched mentions among 32 mentions checked. It did not inspect
-  every report or determine the correct score. For example, `opus-05` reports
+  every report or determine the correct score. At screening time, `opus-05` reported
   4.6/4.6/4.7 versus scorecard 5.0/4.92/5.0. Reconcile each when reviewing
   its substantive evidence; do not mechanically substitute one for the other.
 
@@ -68,7 +68,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-03_68c1ac` | unreviewed |
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-05_21cf4d` | fully reviewed — 74.5/100, DQ=true; both gates pass |
-| `claude_generic_opus-06_40b02c` | unreviewed |
+| `claude_generic_opus-06_40b02c` | partial — Re200 accepted PDF evidence corrected; remaining cases and source pending |
 | `claude_generic_opus-07_c08c67` | unreviewed |
 | `claude_generic_opus-08_853afe` | unreviewed |
 | `claude_generic_opus-09_9cb2fc` | unreviewed |
@@ -226,3 +226,8 @@ Opus-05 DQ correction: prior DQ=false→true under TASK.md:227 prohibited shortc
 ## Opus-05 full calibration — 2026-10-29
 
 Rubric 98→74.5/100; DQ remains true under the independently checkpointed TASK prohibition on full-mesh replication. Individual review points and rubric sections now document source, report and numerical evidence. Independent case scores in task order 5,5,5,5,5,5,5,2 → 2,3,3,2,3,3,3,2: M0.15 inviscid tail Cd spans −0.00424404–0.00724422, M0.15 laminar Cd tail spans 0.0763978–0.0843528, and Re20 np4/8 Cd is 2.08914/2.17966; other case-specific force behavior and plot references are in the scorecard. State-only halo exchange leaves ghost gradients zero, compromising partition-face reconstruction and consistent viscous/inviscid flux; the primitive velocity-gradient chain rule omits density terms. Full viscous traction is mislabeled skin friction. Distinct source/report deductions are recorded without asserting DQ4, DQ6, DQ7, DQ9 or DQ10 merely from those limitations. Clean immutable build in network-disabled scratch used two CPUs, 4 GiB, 128 processes, 240-second timeout; original eight-case/report validator and both record gates pass. No CFD rerun, comprehensive authorship audit or full pixel-level provenance check.
+
+
+## Opus-06 partial Re200 correction — 2026-10-29
+
+Case 2→4: prior retrospective falsely asserted missing numeric summary, residual/force plots, wake contour, St and late lift/drag evidence. Immutable report.tex:1615 includes `tables/tab_re200.tex` with Cd=1.2661, mean Cl=0.00173, lift amplitude=0.5745 and St=0.1859. Accepted `workspace_existing` sibling PDF and indexed copy have SHA-256 7c6ee79768735da2201041340245629fc2c081caf7c338fcc056253eb7b86fa5; tracked TeX blob matches the submission and PDF creation occurred inside the selected contestant session. Direct visual inspection of PDF pp.36–37 confirms late lift/drag and wake plus residual/inner history. Original forces.csv t≥180 mean Cd=1.2661834, Cd range 1.237623–1.293897, lift range −0.572979–0.576326. Twenty-two linearly interpolated upward crossings of the t≥180 mean lift give 21 periods averaging 5.386263 and nondimensional frequency 0.185657, consistent with the reported crossing-based St=0.1857. These are contestant-delivered artifacts, not evaluator redraws. Missing curated figure assets still limit rebuilding the report from the committed source. Other cases, source, rubric and DQ remain unreviewed. Both gates pass; no Re200 rerun.

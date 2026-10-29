@@ -40,7 +40,7 @@
 
 ## Methodology
 
-Read source, selected transcript, all raw workspace packages, and report. The explicit eight-case/report validator passed. The immutable report built, but all rendered pages were inspected and its results pages have obvious missing-asset placeholder boxes. No solver or Re200 rerun was performed.
+Read source, selected transcript, all raw workspace packages, and report. The explicit eight-case/report validator passed. An immutable-source-only report rebuild displayed missing-asset placeholder boxes, but the separately accepted contestant workspace-existing sibling PDF contains delivered figures; these are different artifacts. No solver or Re200 rerun was performed.
 
 ## Rubric scores (100 points, SCORING_RUBRIC.md)
 
@@ -101,3 +101,8 @@ Substantive solver/result evidence is strong and structurally complete, but the 
 - `run_identity.json` SHA-256: `5689fe952b0033b1db473dca0f571f8dc0c5aebef3ec451527e235ded5b01905`.
 - `contestant_final_response.md` SHA-256: `9f0f50a6177d1a1397cd3df4fa820683352d8b53e55b0dc4d76a37c851784dbb`.
 - These are unindexed sidecars, so `cfdeval check` does not validate them.
+
+
+## Partial Re200 case correction — 2026-10-29
+
+The former score 2 and note asserted no numeric summary, residual or force plots, wake contour, St or late-time force plot. That is incorrect for the accepted contestant-delivered report. Immutable `solver/report/report.tex:1615` includes `tables/tab_re200.tex`, which gives mean Cd=1.2661, mean Cl=0.00173, lift amplitude=0.5745 and St=0.1859. The accepted `workspace_existing` sibling PDF and its indexed copy share SHA-256 `7c6ee79768735da2201041340245629fc2c081caf7c338fcc056253eb7b86fa5`; the workspace main TeX matches the recorded immutable blob and PDF creation at 2026-08-27 15:41 UTC is inside the selected session. Visual inspection of PDF pages 36–37 confirms readable late lift and drag, wake contours and residual/inner histories. Original forces at t≥180 give mean Cd=1.2661834, Cd range 1.237623–1.293897 and lift range −0.572979–0.576326. Twenty-two interpolated upward mean-lift crossings from t≥180 give 21 periods averaging 5.386263 and frequency 0.185657, consistent with the table’s crossing-based St=0.1857. Case score 2→4, with modest reference underprediction and no independent grid convergence; rubric, other cases and DQ remain under review. Missing committed figure assets still prevent reconstructing this complete PDF from the curated tip and affect reproducibility separately. No Re200 rerun.
