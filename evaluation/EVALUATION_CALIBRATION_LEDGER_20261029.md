@@ -41,6 +41,18 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
   `:586` summarizes CL/CD. A readable late-time force plot and numerical
   credibility remain separate requirements. The report says 86/100 while the
   current scorecard says 82/100; its other overalls also differ.
+  Partial follow-up review: the clean immutable CMake build succeeded in a
+  network-disabled container with `JSON_ROOT` supplied, and the explicit
+  eight-case/report validator passed. The evaluator visually screened all 12
+  report-PDF pages and found no Re200 force-history figure; the case remains
+  capped pending full adjudication. The report discloses first-order steady
+  reconstruction (`report/report.tex:91–93,561–564`), and
+  `solver/src/solver.cpp:768–775` zeros the gradients and limiters, while
+  `solver/src/io.cpp:480–482` writes `spatial_order_claimed: 2`. The restart
+  output is a case-name/step placeholder (`solver/src/main.cpp:195–198`), and
+  the evaluator found that the CLI does not parse `--restart`. These findings
+  still need criterion-specific scoring, disqualification review, and a full
+  record; no unsteady case was rerun.
 - A partial automated scan of explicit Code/CFD/Results overalls in reports
   found 22 mismatched mentions among 32 mentions checked. It did not inspect
   every report or determine the correct score. For example, `opus-05` reports
