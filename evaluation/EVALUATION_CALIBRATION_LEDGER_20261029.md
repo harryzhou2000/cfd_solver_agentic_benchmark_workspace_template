@@ -74,7 +74,7 @@ Result branches preserve contestant history, which contains prohibited generated
 | `codex_gpt56_01_cb349f` | unreviewed |
 | `codex_gpt56_02_38616e` | unreviewed |
 | `codex_gpt56_03_93b257` | unreviewed |
-| `codex_gpt56_04_1e36f2` | unreviewed |
+| `codex_gpt56_04_1e36f2` | partial — see finding below |
 | `codex_gpt56_05_7bee7c` | unreviewed |
 | `codex_gpt56_06_97ae53` | unreviewed |
 | `codex_gpt56_07_b7c2c8` | unreviewed |
@@ -105,3 +105,7 @@ Result branches preserve contestant history, which contains prohibited generated
 | `omo_slim_dsv4_06_d8d434` | unreviewed |
 | `omo_slim_dsv4_07_770c37` | unreviewed |
 | `omo_slim_dsv4_08_c49b64` | unreviewed |
+
+## Additional partial finding
+
+`codex_gpt56_04_1e36f2`: immutable `fe320b995caf44acceee26f893cbc4dd355737b8` has main `solver/report/report.tex` input `generated_results.tex`; that source references the M0.15 inviscid np8 residual, force, Mach and pressure images and these exist in the committed figure directory. The existing case note incorrectly asserts no committed/referenced figures. The snapshot PDF was indexed as compiled from the submission. The same note records a severe rank-dependent drag discrepancy and DQ, so no score change is justified from plot presence alone. The candidate `codex_dsv4_flash_03_294b64`, by contrast, has an included figures TeX but no committed PNG or PDF figure assets; it remains unreviewed, not a confirmed false floor.
