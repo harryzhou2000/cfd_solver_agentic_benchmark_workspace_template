@@ -328,8 +328,13 @@
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
+      {
+        "flag": "Prohibited shortcut 7: full mesh retained on every MPI rank during iterations",
+        "found": true,
+        "evidence": "Immutable 4f1876ce solver/src/main.cpp:76 has each MPI rank read GlobalMesh gm; :82 passes it by const reference to partition_and_distribute; :101\u2013107 runs the solver while gm remains in scope and retains global vertices/cells/faces/adjacency (mesh.h:6\u201313). TASK.md:227 explicitly prohibits full mesh OR full state on every MPI rank during solver iterations, and examiner README_EXAMINER.md:83\u201385 refers to TASK prohibited shortcuts as disqualification triggers. Actual solution U is owned plus ghosts and METIS partitioning does occur, so this is the TASK prohibition, not a claim of numbered trigger 9 full-state replication or geometric-only partition. Metadata full_mesh_replication_during_iterations=false and report.tex:646\u2013648 are inaccurate."
+      },
       {
         "id": 1,
         "found": false,
