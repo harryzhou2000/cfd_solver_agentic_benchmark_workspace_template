@@ -1,0 +1,112 @@
+{
+  "review_area": "code_review",
+  "title": "Code review scorecard",
+  "points": [
+    {
+      "id": "code.build",
+      "title": "Build system and reproducibility",
+      "weight": 0.15,
+      "score": 5,
+      "notes": "Clean immutable source CMake build exited 0 in network-disabled cfd-bench with configured external root; run 02 also uses its documented CFD_HEADER_ROOT. No host credentials or network exposed."
+    },
+    {
+      "id": "code.cli",
+      "title": "CLI and error handling",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "Required solve --case --output form is in README and submitted command records; missing-file case exits nonzero with clear error in isolated executable. Standalone --help is unsupported, which is not a required CLI command; other malformed inputs unverified."
+    },
+    {
+      "id": "code.organization",
+      "title": "Code organization and extensibility",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "CMake builds separate mesh, partition, config, flux, solver and output units; reconstruction and nonlinear algorithms are concentrated in lusgs_solver.cpp."
+    },
+    {
+      "id": "code.originality",
+      "title": "Originality and license compliance",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "CMake builds the submitted C++ core and links MPI/CGNS/METIS/HDF5, with no inspected invocation of an external CFD solver. Per trust policy, no authorship or external similarity search was performed."
+    },
+    {
+      "id": "code.hardcoding",
+      "title": "No hard-coded case logic",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "case_config.cpp reads configured mesh and boundary settings rather than two fixed mesh filenames. General nonbenchmark case behavior was not independently exercised."
+    },
+    {
+      "id": "code.mpi",
+      "title": "MPI correctness",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "partition.cpp:110 calls METIS; lusgs_solver.cpp:185\u2013218 exchanges halo state and gradients with sparse Alltoallv counts and :515\u2013517,1046 globally reduces residual/force. Submitted short np2/8 cylinder and np2/4/8 NACA comparisons are close; np1 and independent full convergence remain unverified."
+    },
+    {
+      "id": "code.robustness",
+      "title": "Robustness and memory sanity",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "lusgs_solver.cpp:303\u2013410 implements limited reconstruction and positivity fallback, with first-order startup and 0.1 slope cap for steady cases. Report.tex:458\u2013485 identifies excessive laminar/cylinder drag; no stress testing was run."
+    },
+    {
+      "id": "code.testing",
+      "title": "Testing and validation evidence",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "Eight original packages and report pass the structural validator; report documents short rank checks and numerical limitations. No independent grid-order test or full solver rerun was performed."
+    },
+    {
+      "id": "code.hygiene",
+      "title": "Code hygiene",
+      "weight": 0.07,
+      "score": 4,
+      "notes": "Clean immutable CMake build succeeds; solver/report and source are organized separately. Generated result data were excluded from the curated tip but retained in contestant history."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Existing solver executable called internally",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Force/residual files generated without solving",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Code only reads the two benchmark mesh filenames through hard-coded branches",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "MPI rank count changes results by order-one amounts for steady cases",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Explicit time stepping only (no implicit/steady capability claimed where required)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims algorithms that cannot be found in source",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete/failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Solver core, time integration, or MPI communication copied/adapted/wrapped from an existing open-source CFD codebase",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.97
+}

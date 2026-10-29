@@ -1,0 +1,83 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 4,
+      "notes": "The explicit validator passes all eight workspace packages/report. Structural success does not establish correct tangential force decomposition or physics; output histories/field files remain excluded from immutable tip."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 5,
+      "notes": "Explicit official validator invocation on all eight canonical workspace result directories and the report exited 0. This confirms structure only, not physical correctness."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 3,
+      "notes": "All eight result packages are readable and Re200 reaches t=300, but late-time force plot is dominated by initial transient and cannot display claimed oscillations. Very high reported laminar and cylinder drag materially limits result confidence."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 2.5,
+      "notes": "M0.15 laminar Cd=0.521, M0.8 laminar Cd=0.192 and cylinder Re20 Cd=4.63 are acknowledged in report.tex:478\u2013485 as far above stated comparisons; Re200 has noisy raw frequency and diffuse wake."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Report includes case-specific force, residual and computed field figures, but many are small in the 12-page PDF. Re200 force history uses a full scale dominated by an initial Cd spike and does not reveal late-time lift/drag periodicity."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 3,
+      "notes": "Report documents small-cell/limiter limits and unusually high drag, plus Re200 raw-frequency noise. Some images are small and late transient force behavior cannot be read; source viscous force integrates full stress rather than the rubric-required tangential split."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 3.5,
+      "notes": "Workspace figure_manifest.csv maps each case figure to variables and data; final forces were checked against CSV. Raw datasets are absent from the curated tip and complete pixel-to-field fidelity was not independently verified."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report figures do not correspond to submitted field/CSV outputs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete or failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Debug outputs presented as final case results",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.35
+}

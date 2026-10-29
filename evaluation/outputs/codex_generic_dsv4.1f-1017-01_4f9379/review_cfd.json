@@ -1,0 +1,116 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 4,
+      "notes": "report.tex describes compressible equations; flux.hpp and lusgs_solver.cpp:422\u2013497 implement conservative face and physical-time residual terms. Independent analytical verification was not performed."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 3.5,
+      "notes": "cgns_mesh.cpp:148\u2013275 reads CGNS zones and connectivity and :324 handles TRI_3/QUAD_4; unsupported general MIXED elements and untested multi-zone variants limit confidence. partition.cpp constructs a METIS cell graph."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "lusgs_solver.cpp:422\u2013497 assembles numerical face fluxes with equal/opposite cell contributions and adds BDF time terms; globally reduced residual norms at :500\u2013517. No independent order verification."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "flux.hpp provides Roe and Rusanov paths, selected by numericalFlux, with source positivity fallback. The delivered steady results are limited by low limiter cap, not proof of a broken flux."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "lusgs_solver.cpp:231\u2013259 implements farfield, slip and no-slip wall states; :432 onward uses them for face fluxes. Surface rows show boundary velocity checks; no independent boundary test was repeated."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 3,
+      "notes": "lusgs_solver.cpp:262\u2013300 gradients, :303\u2013410 limiter and reconstructed states; steady metadata reports second-order stage with slope cap 0.1 after first-order startup. This materially limits spatial accuracy."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 3,
+      "notes": "lusgs_solver.cpp:303\u2013396 bounds slopes and includes positivity fallback; wall/small-cell first-order behavior and steady cap 0.1 strongly damp reconstruction."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "flux.hpp:263\u2013290 forms stress and heat flux, but lusgs_solver.cpp:1014\u20131046 integrates the full stress traction in viscous force, with no tangential projection. The rubric requires a tangential skin-friction split. Wall shear/drag accuracy is also materially limited."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "lusgs_solver.cpp:530\u2013666 assembles approximate block Jacobian and SGS, with source time step controls and steady CFL cap 0.1. Independent solver-order study was not performed."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 3.5,
+      "notes": "lusgs_solver.cpp:480\u2013497 adds BDF residual and :1500\u20131546 runs inner updates and shifts physical histories after a step. Re200 metadata gives dt=0.01, t=300, inner convergence fraction 0.9983; report admits strong raw frequency noise and diffuse wake. No unsteady rerun."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "partition.cpp:110 calls METIS; lusgs_solver.cpp:185\u2013218 communicates halo state/gradients with sparse Alltoallv counts; np2/8 cylinder and np2/4/8 NACA continuation force comparisons are close, but no np1 result was delivered."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Solver uses explicit time stepping only",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Normal viscous traction mislabeled as skin friction",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.63
+}

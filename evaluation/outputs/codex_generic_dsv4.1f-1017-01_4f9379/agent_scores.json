@@ -1,0 +1,364 @@
+{
+  "schema": "agent_scores",
+  "contestant": "dsv4.1f-1017-01",
+  "evaluated_at": "2026-10-29T08:44:33.006008+00:00",
+  "evaluator": {
+    "agent": "gpt-6.1-terra",
+    "session_id": null,
+    "harness": "codex",
+    "notes": null
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "harness": "codex",
+    "roots": [
+      "01a16c76-2f04-79a0-a9a9-69304dbbcc08"
+    ],
+    "continuation_roots": [],
+    "included_descendants": [],
+    "excluded_candidate_ids": [],
+    "execution_date": "2026-10-24",
+    "started_at": "2026-10-24T05:51:21.446Z",
+    "ended_at": "2026-10-24T12:08:38.048Z",
+    "time_basis": "first persisted root thread_settings_applied event to last completed root response item, UTC",
+    "rationale": "Workspace-local root begins with benchmark goal and shows implementation/run/report continuity; descendants are selected only through recorded spawn ancestry. Container cwd /workspace maps solely to this workspace-local bundle. Operator explicitly selected the matching latest completed phase=final_answer response item, whose text matches task_complete; literal channel field is absent.",
+    "final_response": {
+      "message_id": "msg_ocx_02cbfef83a1146bfab58530fcfe20d1c_1",
+      "timestamp": "2026-10-24T12:08:38.048Z",
+      "source": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/dsv4.1f-1017-01/.sessions/codex/sessions/2026/10/24/rollout-2026-10-24T05-50-47-01a16c76-2f04-79a0-a9a9-69304dbbcc08.jsonl",
+      "original_message_sha256": "c49645cd20c41fac0aeb642c23acc80826795a3f86e82a0e3804b7997aa2e023",
+      "extracted_file_sha256": "c49645cd20c41fac0aeb642c23acc80826795a3f86e82a0e3804b7997aa2e023",
+      "part_count": 1,
+      "rule": "operator-approved latest completed response_item phase=final_answer matching task_complete; literal channel absent",
+      "redacted": false
+    }
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Clean immutable source CMake build exited 0 in network-disabled cfd-bench with configured external root; run 02 also uses its documented CFD_HEADER_ROOT. No host credentials or network exposed."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Required solve --case --output form is in README and submitted command records; missing-file case exits nonzero with clear error in isolated executable. Standalone --help is unsupported, which is not a required CLI command; other malformed inputs unverified."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "CMake builds separate mesh, partition, config, flux, solver and output units; reconstruction and nonlinear algorithms are concentrated in lusgs_solver.cpp."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "CMake builds the submitted C++ core and links MPI/CGNS/METIS/HDF5, with no inspected invocation of an external CFD solver. Per trust policy, no authorship or external similarity search was performed."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "case_config.cpp reads configured mesh and boundary settings rather than two fixed mesh filenames. General nonbenchmark case behavior was not independently exercised."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "partition.cpp:110 calls METIS; lusgs_solver.cpp:185\u2013218 exchanges halo state and gradients with sparse Alltoallv counts and :515\u2013517,1046 globally reduces residual/force. Submitted short np2/8 cylinder and np2/4/8 NACA comparisons are close; np1 and independent full convergence remain unverified."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "lusgs_solver.cpp:303\u2013410 implements limited reconstruction and positivity fallback, with first-order startup and 0.1 slope cap for steady cases. Report.tex:458\u2013485 identifies excessive laminar/cylinder drag; no stress testing was run."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Eight original packages and report pass the structural validator; report documents short rank checks and numerical limitations. No independent grid-order test or full solver rerun was performed."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 4,
+          "notes": "Clean immutable CMake build succeeds; solver/report and source are organized separately. Generated result data were excluded from the curated tip but retained in contestant history."
+        }
+      ],
+      "overall_score": 3.97,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "report.tex describes compressible equations; flux.hpp and lusgs_solver.cpp:422\u2013497 implement conservative face and physical-time residual terms. Independent analytical verification was not performed."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 3.5,
+          "notes": "cgns_mesh.cpp:148\u2013275 reads CGNS zones and connectivity and :324 handles TRI_3/QUAD_4; unsupported general MIXED elements and untested multi-zone variants limit confidence. partition.cpp constructs a METIS cell graph."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "lusgs_solver.cpp:422\u2013497 assembles numerical face fluxes with equal/opposite cell contributions and adds BDF time terms; globally reduced residual norms at :500\u2013517. No independent order verification."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "flux.hpp provides Roe and Rusanov paths, selected by numericalFlux, with source positivity fallback. The delivered steady results are limited by low limiter cap, not proof of a broken flux."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "lusgs_solver.cpp:231\u2013259 implements farfield, slip and no-slip wall states; :432 onward uses them for face fluxes. Surface rows show boundary velocity checks; no independent boundary test was repeated."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 3,
+          "notes": "lusgs_solver.cpp:262\u2013300 gradients, :303\u2013410 limiter and reconstructed states; steady metadata reports second-order stage with slope cap 0.1 after first-order startup. This materially limits spatial accuracy."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "lusgs_solver.cpp:303\u2013396 bounds slopes and includes positivity fallback; wall/small-cell first-order behavior and steady cap 0.1 strongly damp reconstruction."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "flux.hpp:263\u2013290 forms stress and heat flux, but lusgs_solver.cpp:1014\u20131046 integrates the full stress traction in viscous force, with no tangential projection. The rubric requires a tangential skin-friction split. Wall shear/drag accuracy is also materially limited."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "lusgs_solver.cpp:530\u2013666 assembles approximate block Jacobian and SGS, with source time step controls and steady CFL cap 0.1. Independent solver-order study was not performed."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 3.5,
+          "notes": "lusgs_solver.cpp:480\u2013497 adds BDF residual and :1500\u20131546 runs inner updates and shifts physical histories after a step. Re200 metadata gives dt=0.01, t=300, inner convergence fraction 0.9983; report admits strong raw frequency noise and diffuse wake. No unsteady rerun."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "partition.cpp:110 calls METIS; lusgs_solver.cpp:185\u2013218 communicates halo state/gradients with sparse Alltoallv counts; np2/8 cylinder and np2/4/8 NACA continuation force comparisons are close, but no np1 result was delivered."
+        }
+      ],
+      "overall_score": 3.63,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 4,
+          "notes": "The explicit validator passes all eight workspace packages/report. Structural success does not establish correct tangential force decomposition or physics; output histories/field files remain excluded from immutable tip."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Explicit official validator invocation on all eight canonical workspace result directories and the report exited 0. This confirms structure only, not physical correctness."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 3,
+          "notes": "All eight result packages are readable and Re200 reaches t=300, but late-time force plot is dominated by initial transient and cannot display claimed oscillations. Very high reported laminar and cylinder drag materially limits result confidence."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 2.5,
+          "notes": "M0.15 laminar Cd=0.521, M0.8 laminar Cd=0.192 and cylinder Re20 Cd=4.63 are acknowledged in report.tex:478\u2013485 as far above stated comparisons; Re200 has noisy raw frequency and diffuse wake."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Report includes case-specific force, residual and computed field figures, but many are small in the 12-page PDF. Re200 force history uses a full scale dominated by an initial Cd spike and does not reveal late-time lift/drag periodicity."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 3,
+          "notes": "Report documents small-cell/limiter limits and unusually high drag, plus Re200 raw-frequency noise. Some images are small and late transient force behavior cannot be read; source viscous force integrates full stress rather than the rubric-required tangential split."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 3.5,
+          "notes": "Workspace figure_manifest.csv maps each case figure to variables and data; final forces were checked against CSV. Raw datasets are absent from the curated tip and complete pixel-to-field fidelity was not independently verified."
+        }
+      ],
+      "overall_score": 3.35,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 73.5,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 8.5,
+        "notes": "Clean documented build 4/4; required solve form used in submitted commands 1.5/2; eight packages/report pass explicit validator 2/2; missing-file error verified but other bad-input paths not exercised 1/2."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 8,
+        "notes": "CGNS zones and boundary mapping 3/4 (cgns_mesh.cpp:148\u2013275), geometry 2/2, mixed/multizone support 1/2 (TRI_3/QUAD_4 recognized; general MIXED section unverified/unsupported), adjacency 2/2 (partition.cpp METIS graph)."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 13,
+        "notes": "Conservative face residual 4/5 (lusgs_solver.cpp:422\u2013497), Roe/Rusanov flux 3.5/4, farfield/slip 2.5/3 and no-slip 3/3 (:231\u2013259 and face assembly); independent accuracy and full wall tests were not repeated."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 6.5,
+        "notes": "Reconstruction 2.5/4 and limiter 2/3 (:262\u2013410): first-order startup and final steady limiter cap 0.1 substantially damp slopes; positivity fallback 2/2; independent smooth second-order evidence 0/1."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 7,
+        "notes": "Velocity/temperature gradients 2.5/3 and stress/heat flux 2.5/3 (flux.hpp:263\u2013290), no-slip wall 2/2, tangential force split 0/2: lusgs_solver.cpp:1014\u20131046 integrates full shearTraction stress vector rather than projecting tangentially. Large reported wall drag also limits credibility."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 12.5,
+        "notes": "Steady 3/4: implicit march with disclosed severe CFL caps; linear method 3.5/4: block Jacobian and SGS lusgs_solver.cpp:530\u2013666. Transient 3/4: dt=0.01 and t=300 with BDF residual and inner stepping; observed full residual target count 3/3 from submitted metadata (0.9983). Wake credibility and plotting are judged separately."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 8,
+        "notes": "METIS 2/2 partition.cpp:110; neighbor halo 3/3 lusgs_solver.cpp:185\u2013218; global reductions 2/2 :515\u2013517,1046; output 1/1; rank consistency 0/2: short np2/8 cylinder and np2/4/8 NACA comparisons are close but no np1 and no independent full-rank convergence."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 4.5,
+        "notes": "Inviscid 1.5/2: readable cases but M0.15 drag drift and M0.8 lift asymmetry; laminar 0.5/2: M0.15 and M0.8 high Cd explicitly admitted; Re20 0.5/2: reported Cd 4.63 versus report comparison near 2; Re200 0.5/2: t=300 and inner controls but noisy raw frequency/diffuse wake and no readable late drag plot; fields 1/1; rank comparisons 0.5/1: only short np2\u20138 continuations."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 2.5,
+        "notes": "Equations 0.75/1; histories 0.5/1 (Re200 late forces not readable); fields 0.5/1 (small report figures, diffuse wake); analysis 0.5/1 (unusually high drag and noisy frequency disclosed); traceability 0.25/1 (workspace manifest exists, raw sources unavailable in curated tip and pixel correspondence not independently established)."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 3,
+        "notes": "Equation interface 1/2, boundary extension 0.5/1, 2-D mesh abstractions 0.5/1, organized source units 1/1; solver is largely specialized to 2-D compressible gas."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 2,
+      "notes": "Cd=0.03081, Cl=0.00091; final 10% of force history drifts from Cd 0.03182 to 0.03081, a material fraction of the final force. Numeric values reviewed in report.tex:267 and final forces.csv; plotted residual history report.tex:273, force history :276 and Mach contour :291 are present in the submitted report. All packages passed structural validation; no independent accuracy claim is made."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 3,
+      "notes": "Cd=0.03361, Cl=0.01983; 4.04 reported residual orders with appreciable asymmetry and reduced-slope limitation. Numeric values reviewed in report.tex:331 and final forces.csv; plotted residual history report.tex:337, force history :340 and Mach contour :355 are present in the submitted report. All packages passed structural validation; no independent accuracy claim is made."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 3,
+      "notes": "Cd=0.09409, Cl=-0.00256; 3.53 reported residual orders and a nearly settled tail. Numeric values reviewed in report.tex:395 and final forces.csv; plotted residual history report.tex:401, force history :404 and Mach contour :419 are present in the submitted report. All packages passed structural validation; no independent accuracy claim is made."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 2,
+      "notes": "Cd=0.52100, Cl=0.00001; report.tex:478\u2013480 admits high wall shear/drag relative to flat-plate estimates, a major credibility limitation. Numeric values reviewed in report.tex:299 and final forces.csv; plotted residual history report.tex:305, force history :308 and Mach contour :323 are present in the submitted report. All packages passed structural validation; no independent accuracy claim is made."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 2,
+      "notes": "Cd=0.19234, Cl=0.00362; report.tex:478\u2013480 admits high wall shear/drag relative to flat-plate estimates, a major credibility limitation. Numeric values reviewed in report.tex:363 and final forces.csv; plotted residual history report.tex:369, force history :372 and Mach contour :387 are present in the submitted report. All packages passed structural validation; no independent accuracy claim is made."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 3,
+      "notes": "Cd=0.13969, Cl=-0.00272 and 3.69 reported residual orders; force tail drifts by about 0.00062 and reconstruction has severe 0.1 slope cap. Numeric values reviewed in report.tex:427 and final forces.csv; plotted residual history report.tex:433, force history :436 and Mach contour :451 are present in the submitted report. All packages passed structural validation; no independent accuracy claim is made."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 2,
+      "notes": "Cd=4.63128, Cl=-0.00830; report.tex:483\u2013485 states drag is well above its quoted value near 2, a major credibility limitation despite residual reduction. Numeric values reviewed in report.tex:193 and final forces.csv; plotted residual history report.tex:199, force history :202 and Mach contour :217 are present in the submitted report. All packages passed structural validation; no independent accuracy claim is made."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 2,
+      "notes": "Submitted Re200 has 30,000 physical steps to t=300 and reports 0.9983 inner convergence fraction, St=0.1665 from a 3 s low-pass signal and mean Cd=1.4037 (report.tex:227,262\u2013264). The committed forces figure at report.tex:234 uses full-range axes dominated by the startup spike (Cd about 36), so the late lift/drag periodicity is not readable; the raw-frequency estimate 8.9382 and diffused wake also qualify physical credibility. Score is capped at 2 because the required contestant late-time periodic-force visualization is missing. No Re200 rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": false,
+    "flags": []
+  },
+  "limitations": [
+    "No independent full-rank convergence, general CGNS layouts, grid-order or complete figure-to-array correspondence was verified; original raw files are workspace-only and retained in preserved history.",
+    "Re200 was not rerun. The operator accepted the matching completed phase=final_answer response item despite absent literal channel."
+  ]
+}
