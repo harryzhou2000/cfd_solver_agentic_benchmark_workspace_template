@@ -166,7 +166,13 @@
         }
       ],
       "overall_score": 3.6,
-      "disqualification_flags": []
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "text": "minimum-inner acceptance reported as strict target success",
+          "evidence": "Immutable submission 7ad799097f6d8426eb34d5a5ba092956a3e7d7b7 solver/README.md:98 documents CFD_SOLVER_TRANSIENT_ACCEPT_MIN_INNER=1 for the submitted Re200. solver/src/solver.cpp:697\u2013709 accepts a finite state at the minimum inner count and clamps last_inner_ratio to the requested target without establishing it; :746\u2013749 and :795\u2013798 use that acceptance in the claimed target count. Workspace canonical results/cylinder_m010_laminar_re200_np2_explicitish/metadata.json records observed min=max 5, misses 0, fraction 1, last ratio 0.001, completed=true/statistically_periodic. The displayed fraction and ratio therefore cannot prove strict target attainment; the actual number of strict misses is not established."
+        }
+      ]
     },
     "result_review": {
       "points": [
@@ -221,7 +227,13 @@
         }
       ],
       "overall_score": 2.4,
-      "disqualification_flags": []
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "text": "minimum-inner acceptance reported as strict target success",
+          "evidence": "Immutable submission 7ad799097f6d8426eb34d5a5ba092956a3e7d7b7 solver/README.md:98 documents CFD_SOLVER_TRANSIENT_ACCEPT_MIN_INNER=1 for the submitted Re200. solver/src/solver.cpp:697\u2013709 accepts a finite state at the minimum inner count and clamps last_inner_ratio to the requested target without establishing it; :746\u2013749 and :795\u2013798 use that acceptance in the claimed target count. Workspace canonical results/cylinder_m010_laminar_re200_np2_explicitish/metadata.json records observed min=max 5, misses 0, fraction 1, last ratio 0.001, completed=true/statistically_periodic. The displayed fraction and ratio therefore cannot prove strict target attainment; the actual number of strict misses is not established."
+        }
+      ]
     }
   },
   "rubric": {
@@ -338,9 +350,10 @@
     "triggered": true,
     "flags": [
       {
-        "flag": "metadata marks a non-strict Re200 inner solve statistically_periodic/successful",
+        "id": 7,
+        "text": "metadata marks incomplete or failed run as successful",
         "found": true,
-        "evidence": "report.tex explicitly states minimum-inner damped acceptance and lack of full-horizon strict nonlinear convergence while package metadata reports periodic success."
+        "evidence": "Immutable submission 7ad799097f6d8426eb34d5a5ba092956a3e7d7b7 solver/README.md:98 documents CFD_SOLVER_TRANSIENT_ACCEPT_MIN_INNER=1 for the submitted Re200. solver/src/solver.cpp:697\u2013709 accepts a finite state at the minimum inner count and clamps last_inner_ratio to the requested target without establishing it; :746\u2013749 and :795\u2013798 use that acceptance in the claimed target count. Workspace canonical results/cylinder_m010_laminar_re200_np2_explicitish/metadata.json records observed min=max 5, misses 0, fraction 1, last ratio 0.001, completed=true/statistically_periodic. The displayed fraction and ratio therefore cannot prove strict target attainment; the actual number of strict misses is not established."
       }
     ]
   },
@@ -349,6 +362,7 @@
     "raw original-attempt outputs excluded",
     "committed-tree pdflatex fails missing figures/cylinder_m010_laminar_re200_residual.pdf after prohibited PDF/SVG omission",
     "no Re200 rerun",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "The actual number of strict Re200 inner target misses cannot be recovered from the clamped accepted statistics; no Re200 rerun was performed."
   ]
 }

@@ -90,7 +90,7 @@ Result branches preserve contestant history, which contains prohibited generated
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
 | `codex_gpt56_05_7bee7c` | unreviewed |
 | `codex_gpt56_06_97ae53` | unreviewed |
-| `codex_gpt56_07_b7c2c8` | unreviewed |
+| `codex_gpt56_07_b7c2c8` | partial — DQ evidence/ID corrected; full rubric calibration pending |
 | `codex_gpt56_08_715d70` | unreviewed |
 | `codex_gpt56_09_d5760c` | unreviewed |
 | `codex_gpt56_10_797ac3` | unreviewed |
@@ -134,3 +134,7 @@ The eight former scores were all 2 from the false assertion that committed plots
 ## Opus-04 full calibration — 2026-10-29
 
 The prior 99/100 and generic repeated notes were replaced by criterion-specific evidence: 92.5/100, DQ=false. An isolated immutable-source build and kernel test passed; all eight original case packages/report passed the explicit validator. Committed verification_table.tex shows triangle residual order 0.96 despite reconstruction order near 1.95, honestly discussed in report.tex:419–429. Report.tex:215–221 claims normal viscous drag is below 1% of viscous drag for all laminar cases, but original `solver/results/naca0012_m200_laminar_re5000/metadata.json` reports full viscous 0.05055225841829117, tangential 0.0371029433527206 and normal 0.013449315065570566 (26.6%); M0.8 laminar is ~2.2%. The report correctly says full and tangential components are separately recorded, so this is an inaccurate quantitative claim and rubric/report deduction, not an absent algorithm by itself. Full source/review/rubric/case details, limits, no Re200 rerun, and DQ reasoning are recorded in the snapshot. Both current gates pass.
+
+## DQ evidence clarification — gpt56_07
+
+The former true flag had no numeric ID. Immutable `7ad799097f6d8426eb34d5a5ba092956a3e7d7b7`, `solver/README.md:98`, identifies production `CFD_SOLVER_TRANSIENT_ACCEPT_MIN_INNER=1`; `solver/src/solver.cpp:697–709` marks a finite minimum-inner step converged and clamps the reported ratio to the target, while :746–749,795–798 count it toward target success. Canonical workspace `solver/results/cylinder_m010_laminar_re200_np2_explicitish/metadata.json` records min=max 5, misses 0, fraction 1, last ratio 0.001 and completed/statistically_periodic. Those reported numbers cannot establish strict convergence; the actual strict miss count is unknown. DQ remains true, now explicitly trigger 7; score unchanged, both gates pass. The report discloses acceptance mode. Curated-tip missing figures are a reproducibility limitation, not alone proof that original contestant report lacked them. No Re200 rerun. Full rubric calibration remains pending.

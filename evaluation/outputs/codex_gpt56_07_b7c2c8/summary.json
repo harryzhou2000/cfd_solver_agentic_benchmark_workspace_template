@@ -296,34 +296,9 @@
     ],
     "disqualification_flags": [
       {
-        "flag": "Solver uses explicit time stepping only",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "Normal viscous traction mislabeled as skin friction",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
-        "triggered": null,
-        "notes": ""
+        "id": 7,
+        "text": "minimum-inner acceptance reported as strict target success",
+        "evidence": "Immutable submission 7ad799097f6d8426eb34d5a5ba092956a3e7d7b7 solver/README.md:98 documents CFD_SOLVER_TRANSIENT_ACCEPT_MIN_INNER=1 for the submitted Re200. solver/src/solver.cpp:697\u2013709 accepts a finite state at the minimum inner count and clamps last_inner_ratio to the requested target without establishing it; :746\u2013749 and :795\u2013798 use that acceptance in the claimed target count. Workspace canonical results/cylinder_m010_laminar_re200_np2_explicitish/metadata.json records observed min=max 5, misses 0, fraction 1, last ratio 0.001, completed=true/statistically_periodic. The displayed fraction and ratio therefore cannot prove strict target attainment; the actual number of strict misses is not established."
       }
     ],
     "overall_score": 3.6
@@ -384,29 +359,9 @@
     ],
     "disqualification_flags": [
       {
-        "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "Report figures do not correspond to submitted field/CSV outputs",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "metadata.json marks incomplete or failed runs as successful",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "Debug outputs presented as final case results",
-        "triggered": null,
-        "notes": ""
+        "id": 7,
+        "text": "minimum-inner acceptance reported as strict target success",
+        "evidence": "Immutable submission 7ad799097f6d8426eb34d5a5ba092956a3e7d7b7 solver/README.md:98 documents CFD_SOLVER_TRANSIENT_ACCEPT_MIN_INNER=1 for the submitted Re200. solver/src/solver.cpp:697\u2013709 accepts a finite state at the minimum inner count and clamps last_inner_ratio to the requested target without establishing it; :746\u2013749 and :795\u2013798 use that acceptance in the claimed target count. Workspace canonical results/cylinder_m010_laminar_re200_np2_explicitish/metadata.json records observed min=max 5, misses 0, fraction 1, last ratio 0.001, completed=true/statistically_periodic. The displayed fraction and ratio therefore cannot prove strict target attainment; the actual number of strict misses is not established."
       }
     ],
     "overall_score": 2.4
