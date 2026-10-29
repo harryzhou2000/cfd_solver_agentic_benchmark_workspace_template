@@ -35,7 +35,8 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 
 ## Additional leads awaiting substantive review
 
-- `claude_generic_opus-02_6fc51c`: the Re200 case note says there is no
+- Historical `claude_generic_opus-02_6fc51c` lead (fully reviewed in
+  `5dd2ad5a`): the earlier Re200 case note said there was no
   committed force summary or shedding statistic, but submission `6ed4241`
   `report/report.tex:333–338` reports mean Cd, lift amplitude, and St, and
   `:586` summarizes CL/CD. A readable late-time force plot and numerical
@@ -51,8 +52,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
   `solver/src/io.cpp:480–482` writes `spatial_order_claimed: 2`. The restart
   output is a case-name/step placeholder (`solver/src/main.cpp:195–198`), and
   the evaluator found that the CLI does not parse `--restart`. These findings
-  still need criterion-specific scoring, disqualification review, and a full
-  record; no unsteady case was rerun.
+  were assessed in the completed record; no unsteady case was rerun.
 - A partial automated scan of explicit Code/CFD/Results overalls in reports
   found 22 mismatched mentions among 32 mentions checked. It did not inspect
   every report or determine the correct score. For example, `opus-05` reports
@@ -171,7 +171,7 @@ The former true flag had no numeric ID. Immutable `7ad799097f6d8426eb34d5a5ba092
 
 ## Re200 visual leads — unreviewed
 
-Operator-side screens identify possible late-force floor issues; these are leads only, not reviewed findings or score changes. `claude_generic_opus-01_9a712c` (immutable 8dae7ba) cites shedding.png showing lift/spectrum, while forces.png appears to flatten late drag under a startup spike; inspect the entire report for another late drag plot. `claude_generic_opus-05_21cf4d` (4f1876c) report.tex:41–42,798–800 supplies Cd, lift amplitude and St contrary to a missing-summary note, but its screened forces image flattens late drag; inspect all other plots. `codex_generic_glm53-04_adde03` (c06741d) and `codex_generic_opus5-01_83492a` (cb2bac0) have Re200 force images apparently flattened by startup extremes; inspect all report figures before considering the required late lift/drag floor. `codex_kimik3_08_75b3dc` screened force plot visibly shows both oscillations, so the screen alone supports no change. No Re200 reruns.
+Operator-side screens identified possible late-force floor issues. The `claude_generic_opus-01_9a712c` case was subsequently reviewed and corrected as described below; its overall calibration remains partial. The following remain leads only: `claude_generic_opus-05_21cf4d` (4f1876c) report.tex:41–42,798–800 supplies Cd, lift amplitude and St contrary to a missing-summary note, but its screened forces image flattens late drag; inspect all other plots. `codex_generic_glm53-04_adde03` (c06741d) and `codex_generic_opus5-01_83492a` (cb2bac0) have Re200 force images apparently flattened by startup extremes; inspect all report figures before considering the required late lift/drag floor. `codex_kimik3_08_75b3dc` screened force plot visibly shows both oscillations, so the screen alone supports no change. No Re200 reruns.
 
 ## Opus-02 full calibration — 2026-10-29
 
