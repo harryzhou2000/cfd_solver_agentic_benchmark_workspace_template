@@ -6,50 +6,50 @@
       "id": "res.contract",
       "title": "Output contract compliance",
       "weight": 0.2,
-      "score": 4,
-      "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+      "score": 1,
+      "notes": "Validator accepts structural paths, but all eight restart_final.dat files contain only case and step, not restart state; main.cpp:108\u2013110 does not implement --restart. Residual CSV dt is zero. Final packages are not complete output-contract deliverables."
     },
     {
       "id": "res.validator",
       "title": "Automated validator results",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+      "score": 4,
+      "notes": "Explicit official validator exits 0 on all eight cases and report; it misses the semantically empty restart files and zero dt, so this establishes structure only."
     },
     {
       "id": "res.completion",
       "title": "Case completion and convergence",
       "weight": 0.2,
-      "score": 5,
-      "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+      "score": 2,
+      "notes": "All eight physical histories and fields are present, but required restart files are placeholders and report omits several force plots, including Re200; submission is rejected under TASK.md:226 and examiner README:20."
     },
     {
       "id": "res.plausibility",
       "title": "Result plausibility and MPI consistency",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+      "score": 2,
+      "notes": "Report states Cd=0.445 for M0.15 laminar and 4.504 for Re20, far above the same-mesh opus-04 results 0.0541 and 2.021; first-order steady scheme and high-drag force tails are material accuracy limitations."
     },
     {
       "id": "res.visualization",
       "title": "Visualizations",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+      "score": 2.5,
+      "notes": "Twelve-page PDF contains residual and field plots but only selected steady force histories; no committed Re200 force history is referenced, so late lift/drag periodicity is not visually demonstrated."
     },
     {
       "id": "res.report",
       "title": "Report quality and honesty",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+      "score": 2.5,
+      "notes": "Report explicitly admits first-order steady scheme but incorrectly describes Re20 Cd=4.5 as consistent with 4\u20134.5 reference and omits force plots for several cases; its completed status and restart omission are not clearly disclosed."
     },
     {
       "id": "res.traceability",
       "title": "Traceability of figures and claims",
       "weight": 0.05,
       "score": 3,
-      "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+      "notes": "Report summary values match output CSV; figure mappings are available, but full plot-to-field fidelity was not verified and required restart state is absent from all final packages."
     }
   ],
   "disqualification_flags": [
@@ -79,5 +79,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.25
+  "overall_score": 2.2
 }

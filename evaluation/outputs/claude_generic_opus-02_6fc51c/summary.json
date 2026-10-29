@@ -823,63 +823,63 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4,
-        "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+        "notes": "Immutable CMake build passes in network-disabled container with CFD_EXTERNALS_ROOT and JSON_ROOT configured; no complete documented build procedure was identified."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+        "score": 2,
+        "notes": "main.cpp:108\u2013110 parses case and output only, ignores --restart and report-level; :195\u2013198 writes only two-line restart placeholders. Missing-file invocation exits nonzero with clear diagnostic."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+        "score": 3,
+        "notes": "CMake builds separate mesh, solver, io and main files, but core physics/time stepping is concentrated in solver.cpp and restart logic is not implemented."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+        "notes": "CMake builds submitted C++ with MPI/CGNS/METIS; no direct internal external-solver wrapper found. Per trust policy no external similarity or authorship investigation."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 5,
-        "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+        "score": 4,
+        "notes": "Case parser and CGNS path are configuration driven; actual meshes and case inputs were used. General independent arbitrary-case tests were not run."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 4,
-        "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+        "notes": "mesh.cpp:484 METIS; solver.cpp:131\u2013172 neighbor halo exchange and :616\u2013620,689 global reductions; submitted np2 and np8 NACA/Re20 runs agree in Cd. Global mesh is broadcast temporarily during setup then destroyed on return, not retained for iteration."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+        "score": 2.5,
+        "notes": "First-order steady fallback and frozen transient gradients stabilize the supplied cases, but restart output lacks state and unrecognized CLI options are ignored; no independent stress test."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+        "score": 2.5,
+        "notes": "Eight final directories/report pass structural validator and np2/np8 runs are submitted; no reliable restart test, clean unit-test suite or independent order validation was established."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 4,
-        "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+        "score": 3,
+        "notes": "Build succeeds with configured dependency roots, but no complete build instructions were found and required restart writer is a two-line stub. Generated result paths were curated from the tip while preserved in history."
       }
     ],
     "disqualification_flags": [
@@ -924,7 +924,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.18
+    "overall_score": 3.34
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -935,77 +935,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "notes": "report.tex governing equations and solver.cpp residual/flux source implement compressible conservation; spatial scheme and output limitations are separately noted."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "score": 3.5,
+        "notes": "mesh.cpp:48 and :270\u2013282 read zones and TRI/QUAD sections, builds geometry and graph; general MIXED elements and multi-zone cases were not independently validated."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "notes": "solver.cpp:455 onward assembles conservative face residuals; global norm reductions :616\u2013620. All steady histories reach specified reductions, but formal order is not demonstrated."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "score": 3.5,
+        "notes": "solver.cpp:254 onward implements Rusanov; no Roe or higher-resolution flux is required, but large numerical drag indicates substantial limitations in supplied steady results."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "notes": "solver.cpp boundary_ghost_state and io.cpp:72\u201399 implement boundary states; no-slip output explicitly gives wall values. General boundary variants were not independently tested."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "score": 2,
+        "notes": "solver.cpp:768\u2013775 zeros gradients and limiters on every steady iteration; second-order reconstruction/limiter is used only in transient. report.tex:91\u201393 and :561\u2013564 disclose this; steady metadata nevertheless claims spatial_order_claimed=2."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "score": 2.5,
+        "notes": "solver.cpp:230\u2013295 implements Barth\u2013Jespersen and reconstruction; it is explicitly disabled in all steady runs and computed once per transient physical step. Report discloses this."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "score": 2.5,
+        "notes": "solver.cpp:399\u2013452 computes viscous gradients and stress, but :645\u2013689 integrates full stress vector without tangential projection; report calls this friction drag. Large reported laminar and Re20 drag limit credibility."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "notes": "solver.cpp:500\u2013607 implements scalar spectral-radius LU-SGS with local pseudo time; steady runs reach reported residual targets. Full discretization order and restart are separate limitations."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "score": 3.5,
+        "notes": "solver.cpp:840\u2013898 implements BDF1/BDF2 full transient residual and inner iteration, with gradients frozen per physical step; metadata gives dt=0.01, t=300 and zero target misses. Residual CSV dt field remains zero and no unsteady rerun was performed."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 4,
-        "notes": "Source/report evidence supports method claims; no independent rerun."
+        "notes": "METIS and neighbor exchanges as above; np2/np8 original histories match closely for NACA and cylinder. Global mesh temporarily exists on all ranks during preprocessing, then local mesh is returned; no np1 full run verified."
       }
     ],
     "disqualification_flags": [
@@ -1040,7 +1040,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.41
   },
   "result_review": {
     "review_area": "result_review",
@@ -1050,50 +1050,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 4,
-        "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+        "score": 1,
+        "notes": "Validator accepts structural paths, but all eight restart_final.dat files contain only case and step, not restart state; main.cpp:108\u2013110 does not implement --restart. Residual CSV dt is zero. Final packages are not complete output-contract deliverables."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+        "score": 4,
+        "notes": "Explicit official validator exits 0 on all eight cases and report; it misses the semantically empty restart files and zero dt, so this establishes structure only."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 5,
-        "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+        "score": 2,
+        "notes": "All eight physical histories and fields are present, but required restart files are placeholders and report omits several force plots, including Re200; submission is rejected under TASK.md:226 and examiner README:20."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+        "score": 2,
+        "notes": "Report states Cd=0.445 for M0.15 laminar and 4.504 for Re20, far above the same-mesh opus-04 results 0.0541 and 2.021; first-order steady scheme and high-drag force tails are material accuracy limitations."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+        "score": 2.5,
+        "notes": "Twelve-page PDF contains residual and field plots but only selected steady force histories; no committed Re200 force history is referenced, so late lift/drag periodicity is not visually demonstrated."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+        "score": 2.5,
+        "notes": "Report explicitly admits first-order steady scheme but incorrectly describes Re20 Cd=4.5 as consistent with 4\u20134.5 reference and omits force plots for several cases; its completed status and restart omission are not clearly disclosed."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 3,
-        "notes": "Eight original packages and report explicitly validate; raw outputs excluded from curated tip."
+        "notes": "Report summary values match output CSV; figure mappings are available, but full plot-to-field fidelity was not verified and required restart state is absent from all final packages."
       }
     ],
     "disqualification_flags": [
@@ -1123,7 +1123,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.25
+    "overall_score": 2.2
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-02",
@@ -2259,8 +2259,8 @@
     "configs_captured": true,
     "sessions_analyzed": true,
     "env_snapshot_captured": true,
-    "agent_report": false,
-    "agent_scores": false,
+    "agent_report": true,
+    "agent_scores": true,
     "contestant_final_response": {
       "status": "complete",
       "harness": "claude",

@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+      "notes": "Immutable CMake build passes in network-disabled container with CFD_EXTERNALS_ROOT and JSON_ROOT configured; no complete documented build procedure was identified."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+      "score": 2,
+      "notes": "main.cpp:108\u2013110 parses case and output only, ignores --restart and report-level; :195\u2013198 writes only two-line restart placeholders. Missing-file invocation exits nonzero with clear diagnostic."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+      "score": 3,
+      "notes": "CMake builds separate mesh, solver, io and main files, but core physics/time stepping is concentrated in solver.cpp and restart logic is not implemented."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+      "notes": "CMake builds submitted C++ with MPI/CGNS/METIS; no direct internal external-solver wrapper found. Per trust policy no external similarity or authorship investigation."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+      "score": 4,
+      "notes": "Case parser and CGNS path are configuration driven; actual meshes and case inputs were used. General independent arbitrary-case tests were not run."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+      "notes": "mesh.cpp:484 METIS; solver.cpp:131\u2013172 neighbor halo exchange and :616\u2013620,689 global reductions; submitted np2 and np8 NACA/Re20 runs agree in Cd. Global mesh is broadcast temporarily during setup then destroyed on return, not retained for iteration."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+      "score": 2.5,
+      "notes": "First-order steady fallback and frozen transient gradients stabilize the supplied cases, but restart output lacks state and unrecognized CLI options are ignored; no independent stress test."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+      "score": 2.5,
+      "notes": "Eight final directories/report pass structural validator and np2/np8 runs are submitted; no reliable restart test, clean unit-test suite or independent order validation was established."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Committed source and read-only evidence reviewed; no clean rebuild."
+      "score": 3,
+      "notes": "Build succeeds with configured dependency roots, but no complete build instructions were found and required restart writer is a two-line stub. Generated result paths were curated from the tip while preserved in history."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.18
+  "overall_score": 3.34
 }

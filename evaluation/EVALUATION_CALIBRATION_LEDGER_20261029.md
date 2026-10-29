@@ -64,7 +64,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | Run ID | Review status |
 |---|---|
 | `claude_generic_opus-01_9a712c` | unreviewed |
-| `claude_generic_opus-02_6fc51c` | partial — source/build/validator and report review in progress; scoring and DQ pending |
+| `claude_generic_opus-02_6fc51c` | fully reviewed — 65.5/100, mandatory placeholder-result rejection; both gates pass |
 | `claude_generic_opus-03_68c1ac` | unreviewed |
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-05_21cf4d` | unreviewed |
@@ -172,3 +172,11 @@ The former true flag had no numeric ID. Immutable `7ad799097f6d8426eb34d5a5ba092
 ## Re200 visual leads — unreviewed
 
 Operator-side screens identify possible late-force floor issues; these are leads only, not reviewed findings or score changes. `claude_generic_opus-01_9a712c` (immutable 8dae7ba) cites shedding.png showing lift/spectrum, while forces.png appears to flatten late drag under a startup spike; inspect the entire report for another late drag plot. `claude_generic_opus-05_21cf4d` (4f1876c) report.tex:41–42,798–800 supplies Cd, lift amplitude and St contrary to a missing-summary note, but its screened forces image flattens late drag; inspect all other plots. `codex_generic_glm53-04_adde03` (c06741d) and `codex_generic_opus5-01_83492a` (cb2bac0) have Re200 force images apparently flattened by startup extremes; inspect all report figures before considering the required late lift/drag floor. `codex_kimik3_08_75b3dc` screened force plot visibly shows both oscillations, so the screen alone supports no change. No Re200 reruns.
+
+## Opus-02 full calibration — 2026-10-29
+
+Score 82→65.5/100; prior DQ=false→mandatory submission rejection, based on TASK.md:226 and examiner README_EXAMINER.md:20. All eight canonical `solver/output/<case>/restart_final.dat` files are 41–47 bytes with only `RESTART <case>` and `STEP <n>`; immutable `solver/src/main.cpp:195–198` writes these placeholders and :108–110 has no restart parser. This is a prohibited partial result-file finding, not numbered trigger 2 and not a claim that force/residual histories are synthetic. Narrow exact-format cross-workspace screening found that form only in this run; other placeholder forms remain unreviewed. The previous report prose 86/100 and eight 5/5 case scores did not match its scorecard. In task order, independent case scores changed 5,5,2,5,2,2,5,2 → 2,2,2,2,2,2,2,2, with individual numerical and plotting reasons in the snapshot. Re200 numeric mean Cd, lift amplitude and St are in immutable `report/report.tex:333–338,586`, correcting the prior false absence assertion; no committed/referenced force history was found, so its plotting cap remains. Source :768–775 zeroes steady gradients/limiters, as report.tex:91–93,561–564 discloses, while `io.cpp:480–482` claims spatial_order=2 in metadata. The explicit validator passes but does not establish restart or physics; isolated build succeeds with configured JSON_ROOT. All 27 review points and rubric sections were reassessed, both gates pass, and no Re200 rerun occurred.
+
+## Report consistency advisory baseline
+
+Scanner checkpoint `bfd70451` checked 88 snapshots: 23 contained recognizable explicit totals, 11 had at least one disagreement, and zero read errors. It is rounding-aware, limited to recognizable wording and advisory only; no inference about physical correctness or unrecognized reports follows from it.

@@ -8,7 +8,7 @@
 
 ## Snapshot
 
-- Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: no
+- Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: yes / yes
 - Vendored report PDF: accepted
 - Session analysis: 2026-08-26T01:20:14.035000+00:00 → 2026-08-26T05:55:43.810000+00:00; 10×1800s buckets; idle 4 gaps / 2811s excluded; permission-wait candidates 0; tokens 70,665,236 (cache hit 0.9753)
 
@@ -137,6 +137,6 @@ Goal check-in: «Complete the task defined in @cfd_solver_agentic_benchmark/ .
 
 ## Reviews
 
-- Code review scorecard: `claude_generic_opus-02_6fc51c/review_code.md` (overall: 4.18)
-- CFD methods review: `claude_generic_opus-02_6fc51c/review_cfd.md` (overall: 4.0)
-- Result review: `claude_generic_opus-02_6fc51c/review_results.md` (overall: 4.25)
+- Code review scorecard: `claude_generic_opus-02_6fc51c/review_code.md` (overall: 3.34)
+- CFD methods review: `claude_generic_opus-02_6fc51c/review_cfd.md` (overall: 3.41)
+- Result review: `claude_generic_opus-02_6fc51c/review_results.md` (overall: 2.2)
