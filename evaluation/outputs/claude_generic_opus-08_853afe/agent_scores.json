@@ -353,6 +353,11 @@
         "id": 10,
         "found": true,
         "evidence": "Immutable solver.cpp:89\u2013115 sets limiter_phi to the calculated limiter multiplied by recon_ramp; :446 sets recon_ramp=0 through 75% of max_steps for steady cases, :505 forces it to 0 throughout transient. Original final steps and case max_steps: M0.15 inv 7996/20000, M0.80 inv 4447/30000, M2 inv 2917/40000, M0.15 lam 3058/40000, M0.80 lam 6408/40000, M2 lam 760/50000, Re20 5254/30000; all end before the ramp begins. Thus all submitted production reconstructions were first order, despite report.tex:105\u2013115 and metadata claiming second order with limiter."
+      },
+      {
+        "flag": "Prohibited shortcut 7: full mesh retained on all MPI ranks during solver iterations",
+        "found": true,
+        "evidence": "Immutable 7bf03bc solver/src/main.cpp:120\u2013145 reads mesh on rank 0; :174\u2013260 broadcasts/rebuilds global nodes, cells, faces and adjacency on all ranks; :268 builds local mesh and :280 runs while global_mesh remains in scope. TASK.md:227 forbids full mesh OR full state replication on every rank during iterations; examiner README:83\u201385 references TASK prohibited shortcuts for DQ. Report.tex:170\u2013174 and metadata full_mesh_replication_during_iterations=false incorrectly deny this. METIS partition and local U exist; this is not a numbered trigger 9 full-state or geometric-only finding."
       }
     ]
   },
@@ -360,6 +365,7 @@
     "No evaluator solver rerun was performed; Re200 was never rerun.",
     "Raw workspace outputs were excluded from the curated immutable tip.",
     "The report manifest path is broken and the immutable rendering is only nine pages.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "Original Re200 metadata last_inner_residual_ratio=0 is not a measured ratio: solver.hpp:19 initializes it to 0 and no source assigns it before output.cpp:373 writes it; actual last ratio is unknown."
   ]
 }

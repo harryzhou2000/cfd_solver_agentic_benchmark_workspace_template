@@ -70,7 +70,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-05_21cf4d` | fully reviewed — 74.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-06_40b02c` | fully reviewed — 93/100, DQ=false; both gates pass |
 | `claude_generic_opus-07_c08c67` | unreviewed |
-| `claude_generic_opus-08_853afe` | partial — DQ 7/10 and Re200 case corrected; remaining scoring pending |
+| `claude_generic_opus-08_853afe` | partial — DQ 7/10 and full-mesh prohibition; remaining scoring pending |
 | `claude_generic_opus-09_9cb2fc` | unreviewed |
 | `claude_generic_opus-10_f6b586` | unreviewed |
 | `claude_generic_opus-11_fe7eba` | unreviewed |
@@ -247,3 +247,5 @@ Rubric 92→93/100; prior rubric awarded zero report/viz points based only on th
 ## Opus-08 partial DQ and Re200 correction — 2026-10-29
 
 DQ false→true under triggers 7 and 10. Immutable 7bf03bc solver.cpp:89–115 multiplies limiter by recon_ramp; :446 keeps it zero for first 75% of maximum steady steps and :505 keeps it zero for all transient steps. Original production step/max pairs are M0.15 inv 7996/20000, M0.80 inv 4447/30000, M2 inv 2917/40000, M0.15 lam 3058/40000, M0.80 lam 6408/40000, M2 lam 760/50000, Re20 5254/30000: all end before the ramp. Report.tex:105–115 and metadata claim second order; all submitted production reconstruction is first order. solver.cpp:544 assigns statistically_periodic to nonfailed transient without checking periodicity, and metadata marks completed/periodic. Original Re200 t≥180 has 12,001 force rows, Cd=4.81532521–4.81532988 and Cl=−0.00143977449 to −0.00143974763; accepted PDF p8 shows flat forces and steady-looking wake. Re200 score 2→1 for missing shedding/physically unusable result. Committed but unreferenced tables/forces.tex supplies final force numbers, unlike old blanket absence note; final scalar is not an unsteady summary. PDF source and indexed SHA-256 fb87889af5d91eeda61e40fb9c169b9200de7635a434fdd98a5507d14dd65599 match, main TeX matches the immutable blob, and creation time falls inside contestant session. Remaining cases/rubric/areas pending; both gates pass, no CFD rerun.
+
+Opus-08 further DQ finding: immutable `main.cpp:120–145,174–260` broadcasts/reconstructs the global mesh on all MPI ranks; :268 builds local mesh and :280 calls solve while `global_mesh` remains in scope. TASK.md:227 prohibits full mesh or state on all ranks during iterations; examiner README:83–85 includes TASK shortcuts in DQ assessment. METIS/local U are present, so this is a custom TASK shortcut, not numbered DQ9. Report and metadata deny mesh replication. Separately `solver.hpp:19` initializes `last_inner_residual_ratio=0`, no source assigns it, and `output.cpp:373` writes it; actual final ratio is unknown, distinct from counted 1,200 misses. Both gates pass; full calibration remains partial.
