@@ -67,7 +67,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-02_6fc51c` | fully reviewed — 65.5/100, mandatory placeholder-result rejection; both gates pass |
 | `claude_generic_opus-03_68c1ac` | unreviewed |
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
-| `claude_generic_opus-05_21cf4d` | unreviewed |
+| `claude_generic_opus-05_21cf4d` | partial — Re200 evidence note corrected; source and full scoring pending |
 | `claude_generic_opus-06_40b02c` | unreviewed |
 | `claude_generic_opus-07_c08c67` | unreviewed |
 | `claude_generic_opus-08_853afe` | unreviewed |
@@ -171,7 +171,7 @@ The former true flag had no numeric ID. Immutable `7ad799097f6d8426eb34d5a5ba092
 
 ## Re200 visual leads — unreviewed
 
-Operator-side screens identified possible late-force floor issues. The `claude_generic_opus-01_9a712c` case was subsequently reviewed and corrected as described below; its overall calibration remains partial. The following remain leads only: `claude_generic_opus-05_21cf4d` (4f1876c) report.tex:41–42,798–800 supplies Cd, lift amplitude and St contrary to a missing-summary note, but its screened forces image flattens late drag; inspect all other plots. `codex_generic_glm53-04_adde03` (c06741d) and `codex_generic_opus5-01_83492a` (cb2bac0) have Re200 force images apparently flattened by startup extremes; inspect all report figures before considering the required late lift/drag floor. `codex_kimik3_08_75b3dc` screened force plot visibly shows both oscillations, so the screen alone supports no change. No Re200 reruns.
+Operator-side screens identified possible late-force floor issues. The `claude_generic_opus-01_9a712c` case was subsequently reviewed and corrected as described below; its overall calibration is complete as described below. The following were leads at screening time: `claude_generic_opus-05_21cf4d` (4f1876c) report.tex:41–42,798–800 supplies Cd, lift amplitude and St contrary to a missing-summary note, but its screened forces image flattens late drag; inspect all other plots. `codex_generic_glm53-04_adde03` (c06741d) and `codex_generic_opus5-01_83492a` (cb2bac0) have Re200 force images apparently flattened by startup extremes; inspect all report figures before considering the required late lift/drag floor. `codex_kimik3_08_75b3dc` screened force plot visibly shows both oscillations, so the screen alone supports no change. No Re200 reruns.
 
 ## Opus-02 full calibration — 2026-10-29
 
@@ -196,3 +196,8 @@ Opus-05 additional unreviewed numerical leads from the operator: canonical M0.15
 ## Opus-01 full calibration — 2026-10-29
 
 Rubric 97→93.5/100 and DQ remains false. All 27 review points and ten rubric sections now carry criterion-specific evidence. Case scores in task order were 5,5,5,5,5,5,5,5 → 3,4,4,4,4,3,4,2; the Re200 5→2 correction was checkpointed earlier. The longer M2 laminar force tail rises 0.1117185→0.1146643 over the last 1,223 of 12,221 rows; this is not equivalent to the code's 500-step stationarity criterion and does not prove false success metadata. The general steady plotting floor does not explicitly demand a late drag zoom; compression of the steady Cd plots is reflected in case/report quality, consistent with the earlier Opus-04 assessment. Re200 has the separate explicit late lift/drag requirement. The reviewed transient restart limitation and two report quantitative defects are described above and in the scorecard; they do not establish a numbered DQ trigger. Original rank-study force files match the committed np1/4/8 table for Re20 and M0.15 NACA. Isolated immutable build/kernel ctest and all eight explicit package/report validator checks passed; no case was rerun, pixel-level comparison of every figure and full external similarity/licensing audit were not performed. Both record gates pass.
+
+
+## Opus-05 partial Re200 correction — 2026-10-29
+
+Immutable 4f1876ce report.tex:41–42,798–800,1255–1259 gives mean Cd≈1.078, lift amplitude ±0.208, St≈0.15 and period≈6.7; previous case note falsely said no force summary and gave period 30. Original force data t≥180 averages Cd=1.077823 (1.07032–1.08753), Cl range -0.203319–0.212337. Committed force figure blob c273ee00f35145cd26eb0f4e81dd440d132217fc shows late lift but startup Cd≈31 compresses late drag; full report and immutable figure tree contain no alternate Re200 force/drag plot. Score remains 2 under the explicit late lift/drag floor, not a numerical-failure finding. Previous report prose 91 and areas 4.6/4.6/4.7 differ from scorecard 98 and 5.0/4.92/5.0; full review pending. Both gates pass; no Re200 rerun.
