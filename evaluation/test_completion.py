@@ -19,6 +19,9 @@ class CompletionGateTests(unittest.TestCase):
         target = Path(raw) / SOURCE.name
         shutil.copytree(SOURCE, target)
         identity = json.loads((target / "run_identity.json").read_text())
+        # The historical source snapshot may contain a backfilled report PDF.
+        # This fixture deliberately exercises the absent-report path instead.
+        (target / "report.pdf").unlink(missing_ok=True)
         report_pdf.record_absent(
             snapshot=target, evaluator="completion-test",
             reason="Fixture intentionally records no vendored report PDF.",
