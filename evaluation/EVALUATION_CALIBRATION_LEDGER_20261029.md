@@ -63,7 +63,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 
 | Run ID | Review status |
 |---|---|
-| `claude_generic_opus-01_9a712c` | partial — source, figures and numeric force review underway |
+| `claude_generic_opus-01_9a712c` | fully reviewed — 93.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-02_6fc51c` | fully reviewed — 65.5/100, mandatory placeholder-result rejection; both gates pass |
 | `claude_generic_opus-03_68c1ac` | unreviewed |
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
@@ -191,3 +191,8 @@ Further source review of the same immutable Opus-01 submission: `solver/src/io/W
 Opus-05 additional unreviewed note lead: immutable `4f1876c:solver/report/report.tex:41–42` gives St≈0.15 and :1259 gives period≈6.7, while the existing case note states period 30. Independently inspect the underlying history and all force plots before changing the case score.
 
 Opus-05 additional unreviewed numerical leads from the operator: canonical M0.15 inviscid forces.csv final Cd=0.0045641 and last-10% range -0.004244 to 0.007244 (span 2.52 times final); M0.15 laminar final Cd=0.076469 and last-10% range 0.076398–0.084235 (~10.3% of final). Both have current 5/5 case scores. Review trends, controls, other components and submitted plots before adjudication; these ranges alone do not prove failure.
+
+
+## Opus-01 full calibration — 2026-10-29
+
+Rubric 97→93.5/100 and DQ remains false. All 27 review points and ten rubric sections now carry criterion-specific evidence. Case scores in task order were 5,5,5,5,5,5,5,5 → 3,4,4,4,4,3,4,2; the Re200 5→2 correction was checkpointed earlier. The longer M2 laminar force tail rises 0.1117185→0.1146643 over the last 1,223 of 12,221 rows; this is not equivalent to the code's 500-step stationarity criterion and does not prove false success metadata. The general steady plotting floor does not explicitly demand a late drag zoom; compression of the steady Cd plots is reflected in case/report quality, consistent with the earlier Opus-04 assessment. Re200 has the separate explicit late lift/drag requirement. The reviewed transient restart limitation and two report quantitative defects are described above and in the scorecard; they do not establish a numbered DQ trigger. Original rank-study force files match the committed np1/4/8 table for Re20 and M0.15 NACA. Isolated immutable build/kernel ctest and all eight explicit package/report validator checks passed; no case was rerun, pixel-level comparison of every figure and full external similarity/licensing audit were not performed. Both record gates pass.

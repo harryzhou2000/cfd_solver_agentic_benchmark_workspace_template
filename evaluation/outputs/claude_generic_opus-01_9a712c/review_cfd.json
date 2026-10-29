@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "score": 4.5,
+      "notes": "report.tex:64\u2013135 and GasModel/Residual describe compressible perfect-gas flow and nondimensional references; report.tex:1232\u20131237 materially understates excluded normal viscous drag in M2 laminar."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "score": 4.5,
+      "notes": "CgnsReader.cpp:66\u201380,161\u2013195,220\u2013273 handles unstructured mixed cells and one-to-one connections; LocalMesh constructs geometry. General CGNS layouts were not independently exercised."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 5,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "notes": "Residual.cpp:115\u2013229 reconstructs face states, assembles opposite interior flux contributions and includes viscous terms. Kernel ctest passed; this is not a full grid-convergence proof."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "score": 4.5,
+      "notes": "Flux.cpp:39\u201375 implements Roe and entropy fix; :113\u2013176 supplies HLLC/Rusanov and shock blending. Submitted cases report HLLC with shock blend; exhaustive shock tests were not run."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "score": 4.5,
+      "notes": "Boundary.cpp contains characteristic farfield and wall states; Residual.cpp:236\u2013273 implements no-slip adiabatic wall flux. Report and kernel tests support boundary treatment, with limited independent coverage."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 5,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "score": 4.5,
+      "notes": "Gradients.cpp and Residual.cpp:128\u2013149 implement limited linear reconstruction. report.tex:316\u2013329 reports second-order face reconstruction, not a full residual refinement study."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "notes": "Gradients.cpp:114\u2013145 implements Venkat limiter; Driver.cpp:460\u2013480 freezes existing limiter values after a stability test rather than disabling reconstruction. Freezing affects nonlinear evolution and is disclosed."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "score": 4.5,
+      "notes": "Residual.cpp:170\u2013207,253\u2013273 computes corrected velocity/temperature gradients and wall stress; Forces.cpp:32\u201344 separates tangential traction. The report incorrectly minimizes the excluded normal component for M2 laminar."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "score": 4.5,
+      "notes": "ImplicitSolver.cpp:128\u2013152 uses forward/backward sweeps with neighbor exchange, and Driver.cpp controls the local CFL. Original case histories support execution; no new case rerun was performed."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "score": 4,
+      "notes": "Driver.cpp:618\u2013677 uses frozen-history BDF2 and true nonlinear total-residual checks for the fresh run. Restart files omit U(n-1), while a resumed step immediately uses BDF2 with U(n-1)=U(n), reducing restart accuracy."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 5,
-      "notes": "Reviewed source and validated original outputs support the documented numerical method; limiter freezing is a minor limitation."
+      "notes": "METIS partition graph, neighbor Isend/Irecv and global force reductions appear in Partitioner.cpp:127, HaloExchanger.cpp:23\u201337 and Forces.cpp:57. Two original rank studies support cross-rank consistency."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.92
+  "overall_score": 4.51
 }

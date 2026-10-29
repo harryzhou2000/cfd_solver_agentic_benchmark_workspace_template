@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+      "score": 5,
+      "notes": "Clean immutable CMake build and kernel ctest passed in a network-disabled, resource-limited scratch container with configured external roots; README gives build commands."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+      "notes": "main.cpp parses solve, case, output and restart, rejects missing or unknown arguments; report.tex:595\u2013610 gives bad-input examples. Exhaustive malformed-input testing was not performed."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+      "score": 4.5,
+      "notes": "solver/src separates case configuration, CGNS/mesh/partition, physics, residual/implicit driver and output. Interfaces are substantially two-dimensional."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+      "notes": "Submitted CMake builds the C++ modules with MPI, CGNS and METIS; no direct external CFD solver call was identified. A comprehensive source-similarity or license audit was not performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+      "score": 4.5,
+      "notes": "main.cpp and CaseConfig.cpp take the case and mesh paths from inputs; CgnsReader.cpp reads mesh contents. Arbitrary unseen meshes were not run."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 5,
-      "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+      "notes": "Partitioner.cpp:127 uses METIS and HaloExchanger.cpp:23,33 exchanges neighbors; original np1/4/8 Re20 and M0.15 NACA force rows agree closely with the committed rank-study table."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+      "notes": "Residual.cpp:140\u2013149 falls back for nonpositive face states and Driver.cpp checks finite transient residuals. Writers.cpp:381\u2013409 stores no prior transient time level, yet Driver.cpp:588,621 uses BDF2 after restart."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+      "score": 4.5,
+      "notes": "Isolated kernel ctest passed. report.tex:316\u2013329 reports 2.022 and 2.013 reconstruction refinement orders; that test does not establish full solver residual convergence order."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Committed source and read-only immutable contestant evidence reviewed; no clean evaluator rebuild due dangling external symlink."
+      "notes": "The source has separate modules and a documented build; curated raw outputs and generated PDF are absent at the result tip, retained as original workspace evidence. Full dependency audit was not performed."
     }
   ],
   "disqualification_flags": [
