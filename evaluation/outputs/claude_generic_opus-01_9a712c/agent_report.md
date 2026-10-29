@@ -13,7 +13,7 @@ Read the immutable submitted source, the contestant report and exact terminal re
 
 ## Scores and verdict
 
-Rubric: 97/100. Review-area overalls: Code 4.48/5, CFD 4.86/5, Results 4.65/5. All eight independent case scores are 5/5. The submitted report/figure set is strong and the Re200 package reaches t=300 with nonzero lift oscillation, 7–157 inner iterations, zero target misses, and final ratio 9.46e-4.
+The prior rubric was 97/100; the rubric and review-area scores have not yet been recalibrated. Seven independent case scores remain 5/5 pending review, while the Re200 score is now 2/5 for the plotting limitation documented below. The submitted Re200 package reaches t=300 with nonzero lift oscillation, 7–157 reported inner iterations, zero target misses, and final ratio 9.46e-4.
 
 No DQ trigger was found. The report claims map to source: METIS_PartGraphKway, MPI_Isend/Irecv neighbor exchange, implicit LU-SGS-style relaxation, and BDF2 frozen-history outer/inner loops. The figure/result checks and statuses are consistent.
 
@@ -23,5 +23,9 @@ Selected Claude root `3a8e926a-3e32-45e8-a8dd-893091c1e00f`, 2026-08-25T12:24:12
 
 ## Limitations
 
-The canonical workspace external symlink is dangling, so no clean evaluator rebuild was attempted. Raw outputs and generated report PDF were removed only at the curated result tip but retained read-only in the workspace for validation. The result identity and final-response Markdown are unindexed sidecars as noted above.
+The canonical workspace external symlink is dangling. A later isolated evaluator build and kernel test passed using mounted externals, as recorded in the calibration ledger. Raw outputs and generated report PDF were removed only at the curated result tip but retained read-only in the workspace for validation. The result identity and final-response Markdown are unindexed sidecars as noted above.
 
+
+## Partial Re200 correction — 2026-10-29
+
+The independent Re200 case score changes from 5 to 2 under the required late-time lift/drag plotting floor. Immutable `solver/report/report.tex:1046,1103–1104` references a full force plot and a separate late lift/spectrum plot. Visual review confirms the full plot is dominated by the startup drag spike and does not resolve late drag oscillations; the separate plot contains only lift. No alternate committed Re200 force/drag plot was found. This is a case-result deliverable cap, not a solver-functionality verdict. The report table :664–679 calls the Re200 force row post-transient means; the original force history for t>=180 has means Cd=1.2287960, pressure=0.9919030, viscous=0.2368931, but the displayed pressure 1.0020 and viscous 0.2381 match the final row rather than those means. This is a traceability issue, not evidence that the underlying result was fabricated. Remaining source/rubric and DQ calibration is still partial; prior rubric and review-area scores have not been reverified. No Re200 rerun.
