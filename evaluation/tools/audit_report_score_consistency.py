@@ -18,8 +18,9 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1] / "outputs"
 AREAS = {"code": "code_review", "cfd": "cfd_review", "results": "result_review"}
 PATTERN = re.compile(
-    r"\b(?P<label>rubric(?:\s+(?:score|total))?|code(?:\s+overall)?|"
-    r"cfd(?:\s+overall)?|results(?:\s+overall)?)\s*[:=]?\s*"
+    r"\b(?P<label>rubric(?:\s+(?:score|total|totals|records))?"
+    r"(?:\s+(?:is|remains))?|code(?:\s+overall)?|"
+    r"cfd(?:\s+overall)?|results(?:\s+overall)?)\s*[:=]?\s*(?:\*\*)?"
     r"(?P<number>\d+(?:\.\d+)?)\s*/\s*(?P<denominator>100|5)\b",
     re.IGNORECASE,
 )

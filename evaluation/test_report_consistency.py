@@ -30,6 +30,12 @@ class ReportConsistencyTests(unittest.TestCase):
         scores = {"rubric": {"total_scored": 82}, "scores": {}}
         self.assertEqual(audit.compare_report("Case 4/5; rubric 4/5; code 90/100.", scores), [])
 
+    def test_markdown_and_natural_rubric_totals(self):
+        scores = {"rubric": {"total_scored": 82}}
+        text = "Rubric: **86/100**. The rubric total remains 82/100."
+        found = audit.compare_report(text, scores)
+        self.assertEqual([x["disagreement"] for x in found], [True, False])
+
     def test_inventory_reports_missing_artifacts(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
