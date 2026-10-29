@@ -28,7 +28,7 @@ The report also claims all cases converge while its own table lists M0.8/M2 lami
 
 Rubric: build/output 7, mesh 8, residual/BC 12, second order 8, viscous 4, implicit/transient 6, MPI 9, cases 1, report/viz 0, extensibility 3: **58/100 before DQ**.
 
-**Disqualified** under trigger 4: Re200 reaches final time while missing inner target on most steps yet is presented as statistically periodic. Trigger 8 is also substantiated: report figures required by the delivered report are absent/inconsistent. No external-copy investigation was performed, per trust policy.
+**Disqualified under trigger 7:** immutable solver.cpp:55–62 unconditionally sets transient status to statistically_periodic and completed=true; :743–748 caps inner iterations at 15 and :845–852 counts a miss only at ratio >=1, not the stated 1e-3 target. The earlier evaluation recorded a last ratio of 0.928488 and 97.56% claimed fraction, but the original raw metadata is no longer available in the workspace. The source proves that the claimed fraction uses the wrong threshold; it does not prove what proportion of steps missed the strict target. The previous record labeled this trigger 4, which concerns rank-dependent steady results; that ID was wrong. It also labeled missing report figures as trigger 8, but missing files alone do not establish that figures misrepresent submitted outputs. The seven missing figures remain report/visualization defects and the report score remains unchanged. No external-copy investigation was performed, per trust policy.
 
 ## Limitations
 

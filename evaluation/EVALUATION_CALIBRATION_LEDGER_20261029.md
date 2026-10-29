@@ -81,7 +81,7 @@ Result branches preserve contestant history, which contains prohibited generated
 | `codex_glm52-m3_04_32f2d0` | unreviewed |
 | `codex_glm52-m3_05_f094c1` | unreviewed |
 | `codex_glm52-m3_06_a2dc07` | unreviewed |
-| `codex_glm52_01_1307c9` | unreviewed |
+| `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
 | `codex_glm52_02_06cf18` | unreviewed |
 | `codex_glm52_03_e7d38e` | unreviewed |
 | `codex_gpt56_01_cb349f` | unreviewed |
@@ -122,3 +122,7 @@ Result branches preserve contestant history, which contains prohibited generated
 ## Additional partial finding
 
 `codex_gpt56_04_1e36f2`: immutable `fe320b995caf44acceee26f893cbc4dd355737b8` has main `solver/report/report.tex` input `generated_results.tex`; that source references the M0.15 inviscid np8 residual, force, Mach and pressure images and these exist in the committed figure directory. The existing case note incorrectly asserts no committed/referenced figures. The snapshot PDF was indexed as compiled from the submission. The same note records a severe rank-dependent drag discrepancy and DQ, so no score change is justified from plot presence alone. The candidate `codex_dsv4_flash_03_294b64`, by contrast, has an included figures TeX but no committed PNG or PDF figure assets; it remains unreviewed, not a confirmed false floor.
+
+## DQ mapping correction — glm52_01
+
+Prior flags 4 and 8 were incorrectly assigned. Immutable submission `17a5ef3c78cda02d6707e1f94858184060318216`, `solver/src/solver.cpp:55–62`, unconditionally marks a transient complete/statistically periodic; lines 743–748 cap inner iterations at 15 and 845–852 count a miss only for ratio >=1 rather than the 1e-3 target. The former report recorded last ratio 0.928488 and a 97.56% fraction, but the original raw metadata is currently unavailable. The source proves the success fraction uses the wrong threshold; it does not prove what fraction of steps missed the strict target. DQ remains true under trigger 7, not trigger 4 (steady MPI discrepancy). Seven absent report figures remain a report/visualization defect but do not alone prove trigger 8 (figures misrepresent outputs). Score unchanged; both gates passed after correction. Full independent rubric calibration remains pending.

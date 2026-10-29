@@ -82,9 +82,9 @@
   ],
   "disqualification_flags": [
     {
-      "id": 4,
-      "text": "Re200 reaches final time but misses inner target on most steps",
-      "evidence": "Source increments misses only at ratio>=1.0 rather than >=1e-3; metadata last ratio .928 and report presents periodic."
+      "id": 7,
+      "text": "transient status and inner-success count use unsupported success criteria",
+      "evidence": "Immutable solver/src/solver.cpp:55\u201362 unconditionally sets transient status statistically_periodic and completed=true; :743\u2013748 caps maximum inner iterations at 15, and :845\u2013852 counts a miss only when ratio >=1 rather than the configured 1e-3. The prior evaluation recorded last ratio 0.928488 and a 97.56% success fraction; that fraction uses the wrong threshold. The original raw metadata is not currently available in the workspace, and this evidence does not establish the proportion of steps that missed 1e-3."
     }
   ],
   "overall_score": 3.4
