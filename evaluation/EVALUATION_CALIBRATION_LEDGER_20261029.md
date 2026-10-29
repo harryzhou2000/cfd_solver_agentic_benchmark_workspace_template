@@ -2,6 +2,19 @@
 
 This is a work-in-progress evidence ledger, not a completion claim. Passing structural gates or automated candidate triage do not establish calibrated scores. Reviewed means substantive manual review is complete across the applicable rubric, case results, scorecards and DQ evidence; corrected means a substantiated change passed both current gates. Partial items remain unreviewed for overall calibration. No unsteady or Re200 case has been rerun in this review.
 
+## 30-minute review checkpoint
+
+The three new snapshot directories remain untracked working drafts. All three
+have provisional per-case evidence; the 01 and 02 rubric totals and DQ verdicts
+remain unfilled. The 03 draft has a provisional 78/100 and DQ=true and passes
+`cfdeval check` and `cfdeval check-complete`, but its DQ interpretation has not
+yet been compared with prior evaluations of the same force-split defect. Its
+record must not be treated as a final adjudication until that comparison and
+review are completed. The factual issue is that the report claims tangential
+viscous force while the integrated-force source path uses full stress traction;
+the possible magnitude has not been verified across cases. The review is
+incomplete and no manager snapshot for these three has been committed.
+
 ## New submissions — partial, not scored
 
 | Run ID | Status | Evidence and remaining work |
