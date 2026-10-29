@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "notes": "Immutable CMake build and kernel ctest pass in a network-disabled scratch container with configured external roots; no contestant workspace was modified."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4,
+      "notes": "README documents solve --case --output; isolated missing case exits 2 with clear error, while all other malformed-input branches were not exhaustively tested."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "notes": "CMake and solver/src separate input, mesh, physics, finite-volume, parallel, solve and output units, with documented 2-D scope."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4,
+      "notes": "CMake builds submitted C++ and links MPI/CGNS/METIS/HDF5; no direct external CFD executable wrapper identified. No external authorship/similarity investigation under trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4,
+      "notes": "CaseConfig and CgnsReader accept JSON-specified cases and mesh paths; a general independent arbitrary-mesh validation was not run."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "notes": "MeshPartitioner.cpp:54\u201366 invokes METIS; HaloExchanger.cpp:24,37 uses neighbor Irecv/Isend; Diagnostics.cpp:20\u201342 uses reductions. Original np1/2/4/8 full NACA and cylinder force histories independently agree closely."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4,
+      "notes": "ResidualAssembler.cpp:141\u2013148 falls back at inadmissible interfaces; SolverDriver.cpp uses update damping and records fallbacks. Some numerical claims and general mesh layouts remain unverified."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4.5,
+      "notes": "Clean ctest kernel suite passes; committed report verification_table.tex records gradient, reconstruction and residual refinement studies. Triangle residual order tends to about 0.96, and no independent case rerun was performed."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4.5,
+      "notes": "Separated modules and clean build; original raw data were removed from curated tip but remain in preserved checkpoint history. Full dependency/licensing audit was not performed."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 5.0
+  "overall_score": 4.5
 }

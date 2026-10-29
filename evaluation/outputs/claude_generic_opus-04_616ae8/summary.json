@@ -119,63 +119,63 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "notes": "Immutable CMake build and kernel ctest pass in a network-disabled scratch container with configured external roots; no contestant workspace was modified."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "README documents solve --case --output; isolated missing case exits 2 with clear error, while all other malformed-input branches were not exhaustively tested."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "notes": "CMake and solver/src separate input, mesh, physics, finite-volume, parallel, solve and output units, with documented 2-D scope."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "CMake builds submitted C++ and links MPI/CGNS/METIS/HDF5; no direct external CFD executable wrapper identified. No external authorship/similarity investigation under trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "CaseConfig and CgnsReader accept JSON-specified cases and mesh paths; a general independent arbitrary-mesh validation was not run."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "notes": "MeshPartitioner.cpp:54\u201366 invokes METIS; HaloExchanger.cpp:24,37 uses neighbor Irecv/Isend; Diagnostics.cpp:20\u201342 uses reductions. Original np1/2/4/8 full NACA and cylinder force histories independently agree closely."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "ResidualAssembler.cpp:141\u2013148 falls back at inadmissible interfaces; SolverDriver.cpp uses update damping and records fallbacks. Some numerical claims and general mesh layouts remain unverified."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4.5,
+        "notes": "Clean ctest kernel suite passes; committed report verification_table.tex records gradient, reconstruction and residual refinement studies. Triangle residual order tends to about 0.96, and no independent case rerun was performed."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4.5,
+        "notes": "Separated modules and clean build; original raw data were removed from curated tip but remain in preserved checkpoint history. Full dependency/licensing audit was not performed."
       }
     ],
     "disqualification_flags": [
@@ -220,7 +220,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 5.0
+    "overall_score": 4.5
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -230,78 +230,78 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4.5,
+        "notes": "report.tex governing equations and GasModel/ResidualAssembler implement four-variable perfect-gas compressible flow; normal viscous contribution claim in report is quantitatively incorrect."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4.5,
+        "notes": "CgnsReader.cpp:54\u201394,127\u2013138,217\u2013238 and :319\u2013333 handles TRI/QUAD, MIXED and one-to-one zone connectivity; geometry/adjacency source and tests exist. Not every possible CGNS layout was independently exercised."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "notes": "ResidualAssembler.cpp:120\u2013194 reconstructs states, computes flux and applies equal/opposite face contributions. Unit tests pass and reported manufactured verification covers smooth fields."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "notes": "RiemannSolvers.cpp:31\u2013120 implements Roe and entropy fix with alternative Rusanov; ResidualAssembler invokes riemannFlux and positivity fallback. Kernel unit tests pass."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4.5,
+        "notes": "BoundaryConditions.cpp and ResidualAssembler.cpp implement characteristic farfield, slip and no-slip wall states; original surface data show wall values. Independent general boundary tests not repeated."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "WLS gradient and piecewise-linear reconstruction are present; committed verification_table.tex shows reconstruction order near 1.95 on triangles but the residual operator only 0.96, a material spatial-order limitation disclosed in report.tex:419\u2013429."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4.5,
+        "notes": "Limiters.cpp implements Venkatakrishnan and Barth\u2013Jespersen; SolverDriver.cpp:514\u2013521 freezes values rather than disabling their action, and metadata records limiter diagnostics. Full sensitivity beyond submitted comparisons was not rerun."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "ViscousFlux.h and ResidualAssembler.cpp:232\u2013251 compute full and tangential traction separately; metadata records both, but forces.csv viscous_drag includes full traction and report.tex:220\u2013221 incorrectly claims normal contribution <1% for all cases (M2 laminar is 26.6% of viscous drag)."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "notes": "ImplicitSolver.cpp and SolverDriver.cpp implement implicit marching, CFL ramp and local pseudotime. Submitted steady results and rank runs are readable; kernel test passed."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4.5,
+        "notes": "SolverDriver.cpp:639\u2013707 uses BDF1 startup, full BDF2 transient residual and frozen histories inside inner iterations; Re200 metadata records dt=0.01, t=300, target 1e-3 with zero misses. Report acknowledges underpredicted shedding and wake diffusion; no Re200 rerun."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "notes": "METIS source and neighbor halos are present; submitted np1/2/4/8 NACA/cylinder complete histories agree in drag within 9e-8 and 3.2e-7 respectively, with reported timing."
       }
     ],
     "disqualification_flags": [
@@ -336,7 +336,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.92
+    "overall_score": 4.6
   },
   "result_review": {
     "review_area": "result_review",
@@ -347,49 +347,49 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "notes": "Official validator invoked explicitly on all eight workspace result directories and report, exit 0. Raw result packages remain in workspace and preserved history, outside curated tip."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "notes": "Explicit current official validator accepts all eight cases and report; this is structural evidence, not a substitute for numerical review."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4.5,
+        "notes": "Seven steady cases report convergence and Re200 reaches t=300 with 1e-3 inner target; Re200 amplitude and frequency are underpredicted, and two laminar force tails retain about 1% drift."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "Case-specific notes include final forces and history tails. Re200 PDF has a wake and late lift/drag plot but report acknowledges shedding underprediction; M0.8/M2 laminar tail drift and incorrect normal-viscous share statement remain."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4.5,
+        "notes": "Indexed 42-page PDF pages 17\u201337 contain case histories and contours, including Re200 late lift/drag and wake. Wake diffusion and somewhat small multi-panel plots limit interpretation."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "Report discloses triangle residual order near one and Re200 underprediction; its blanket claim that normal viscous drag is below 1% for all laminar cases contradicts submitted metadata (M2 26.6% of viscous component)."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 5,
-        "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+        "score": 4.5,
+        "notes": "Committed TeX includes case_sections.tex and force_table.tex; original figure manifest maps plots to field/history variables, and selected force values match CSV. Curated tip omits raw output, and complete pixel-to-array equivalence was not independently tested."
       }
     ],
     "disqualification_flags": [
@@ -419,7 +419,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 5.0
+    "overall_score": 4.5
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-04",
@@ -697,8 +697,8 @@
     "configs_captured": true,
     "sessions_analyzed": true,
     "env_snapshot_captured": true,
-    "agent_report": false,
-    "agent_scores": false,
+    "agent_report": true,
+    "agent_scores": true,
     "contestant_final_response": {
       "status": "complete",
       "harness": "claude",

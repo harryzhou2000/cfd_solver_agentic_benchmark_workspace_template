@@ -10,7 +10,7 @@
   },
   "scores": {
     "code_review": {
-      "overall_score": 5.0,
+      "overall_score": 4.5,
       "disqualification_flags": [],
       "points": [
         {
@@ -18,151 +18,151 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "notes": "Immutable CMake build and kernel ctest pass in a network-disabled scratch container with configured external roots; no contestant workspace was modified."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4,
+          "notes": "README documents solve --case --output; isolated missing case exits 2 with clear error, while all other malformed-input branches were not exhaustively tested."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "notes": "CMake and solver/src separate input, mesh, physics, finite-volume, parallel, solve and output units, with documented 2-D scope."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4,
+          "notes": "CMake builds submitted C++ and links MPI/CGNS/METIS/HDF5; no direct external CFD executable wrapper identified. No external authorship/similarity investigation under trust policy."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4,
+          "notes": "CaseConfig and CgnsReader accept JSON-specified cases and mesh paths; a general independent arbitrary-mesh validation was not run."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "notes": "MeshPartitioner.cpp:54\u201366 invokes METIS; HaloExchanger.cpp:24,37 uses neighbor Irecv/Isend; Diagnostics.cpp:20\u201342 uses reductions. Original np1/2/4/8 full NACA and cylinder force histories independently agree closely."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4,
+          "notes": "ResidualAssembler.cpp:141\u2013148 falls back at inadmissible interfaces; SolverDriver.cpp uses update damping and records fallbacks. Some numerical claims and general mesh layouts remain unverified."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4.5,
+          "notes": "Clean ctest kernel suite passes; committed report verification_table.tex records gradient, reconstruction and residual refinement studies. Triangle residual order tends to about 0.96, and no independent case rerun was performed."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4.5,
+          "notes": "Separated modules and clean build; original raw data were removed from curated tip but remain in preserved checkpoint history. Full dependency/licensing audit was not performed."
         }
       ]
     },
     "cfd_review": {
-      "overall_score": 4.92,
+      "overall_score": 4.6,
       "disqualification_flags": [],
       "points": [
         {
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4.5,
+          "notes": "report.tex governing equations and GasModel/ResidualAssembler implement four-variable perfect-gas compressible flow; normal viscous contribution claim in report is quantitatively incorrect."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4.5,
+          "notes": "CgnsReader.cpp:54\u201394,127\u2013138,217\u2013238 and :319\u2013333 handles TRI/QUAD, MIXED and one-to-one zone connectivity; geometry/adjacency source and tests exist. Not every possible CGNS layout was independently exercised."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "notes": "ResidualAssembler.cpp:120\u2013194 reconstructs states, computes flux and applies equal/opposite face contributions. Unit tests pass and reported manufactured verification covers smooth fields."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "notes": "RiemannSolvers.cpp:31\u2013120 implements Roe and entropy fix with alternative Rusanov; ResidualAssembler invokes riemannFlux and positivity fallback. Kernel unit tests pass."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4.5,
+          "notes": "BoundaryConditions.cpp and ResidualAssembler.cpp implement characteristic farfield, slip and no-slip wall states; original surface data show wall values. Independent general boundary tests not repeated."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4,
+          "notes": "WLS gradient and piecewise-linear reconstruction are present; committed verification_table.tex shows reconstruction order near 1.95 on triangles but the residual operator only 0.96, a material spatial-order limitation disclosed in report.tex:419\u2013429."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4.5,
+          "notes": "Limiters.cpp implements Venkatakrishnan and Barth\u2013Jespersen; SolverDriver.cpp:514\u2013521 freezes values rather than disabling their action, and metadata records limiter diagnostics. Full sensitivity beyond submitted comparisons was not rerun."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4,
+          "notes": "ViscousFlux.h and ResidualAssembler.cpp:232\u2013251 compute full and tangential traction separately; metadata records both, but forces.csv viscous_drag includes full traction and report.tex:220\u2013221 incorrectly claims normal contribution <1% for all cases (M2 laminar is 26.6% of viscous drag)."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "notes": "ImplicitSolver.cpp and SolverDriver.cpp implement implicit marching, CFL ramp and local pseudotime. Submitted steady results and rank runs are readable; kernel test passed."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4.5,
+          "notes": "SolverDriver.cpp:639\u2013707 uses BDF1 startup, full BDF2 transient residual and frozen histories inside inner iterations; Re200 metadata records dt=0.01, t=300, target 1e-3 with zero misses. Report acknowledges underpredicted shedding and wake diffusion; no Re200 rerun."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "notes": "METIS source and neighbor halos are present; submitted np1/2/4/8 NACA/cylinder complete histories agree in drag within 9e-8 and 3.2e-7 respectively, with reported timing."
         }
       ]
     },
     "result_review": {
-      "overall_score": 5.0,
+      "overall_score": 4.5,
       "disqualification_flags": [],
       "points": [
         {
@@ -170,126 +170,126 @@
           "title": "Output contract compliance",
           "weight": 0.2,
           "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "notes": "Official validator invoked explicitly on all eight workspace result directories and report, exit 0. Raw result packages remain in workspace and preserved history, outside curated tip."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "notes": "Explicit current official validator accepts all eight cases and report; this is structural evidence, not a substitute for numerical review."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4.5,
+          "notes": "Seven steady cases report convergence and Re200 reaches t=300 with 1e-3 inner target; Re200 amplitude and frequency are underpredicted, and two laminar force tails retain about 1% drift."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4,
+          "notes": "Case-specific notes include final forces and history tails. Re200 PDF has a wake and late lift/drag plot but report acknowledges shedding underprediction; M0.8/M2 laminar tail drift and incorrect normal-viscous share statement remain."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4.5,
+          "notes": "Indexed 42-page PDF pages 17\u201337 contain case histories and contours, including Re200 late lift/drag and wake. Wake diffusion and somewhat small multi-panel plots limit interpretation."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4,
+          "notes": "Report discloses triangle residual order near one and Re200 underprediction; its blanket claim that normal viscous drag is below 1% for all laminar cases contradicts submitted metadata (M2 26.6% of viscous component)."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 5,
-          "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+          "score": 4.5,
+          "notes": "Committed TeX includes case_sections.tex and force_table.tex; original figure manifest maps plots to field/history variables, and selected force values match CSV. Curated tip omits raw output, and complete pixel-to-array equivalence was not independently tested."
         }
       ]
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 99,
+    "total_scored": 92.5,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 10,
-        "notes": "Committed source, validated original packages, sanity checks, and report reviewed."
+        "score": 9.5,
+        "notes": "Clean immutable build 4/4 and kernel ctest passed; documented required CLI 2/2; validator accepts all eight packages/report 2/2; missing-file error verified but all bad-input modes not exercised 1.5/2."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
-        "score": 10,
-        "notes": "Committed source, validated original packages, sanity checks, and report reviewed."
+        "score": 9.5,
+        "notes": "CGNS unstructured read/families 4/4, geometry 2/2, MIXED and zone connections 1.5/2 (general layouts untested), adjacency 2/2; CgnsReader.cpp:54\u201394,127\u2013138,217\u2013238,319\u2013333 and MeshPartitioner.cpp:54\u201366."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 15,
-        "notes": "Committed source, validated original packages, sanity checks, and report reviewed."
+        "score": 14.5,
+        "notes": "Conservative face assembly 5/5 (ResidualAssembler.cpp:120\u2013194), Roe/Rusanov flux 4/4 (RiemannSolvers.cpp), farfield/slip 2.5/3 (general boundary cases not independently tested), no-slip 3/3; submitted surface states and kernel suite support implementation."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 9,
-        "notes": "Committed source, validated original packages, sanity checks, and report reviewed."
+        "score": 8.5,
+        "notes": "Reconstruction 2.5/4: WLS/piecewise linear implemented, but committed verification_table.tex reports triangle residual convergence order only 0.96 despite nearly second-order face reconstruction. Limiter 3/3: active/frozen values remain applied; positivity 2/2; credible diagnostic and disclosed limitation 1/1."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 10,
-        "notes": "Committed source, validated original packages, sanity checks, and report reviewed."
+        "score": 9,
+        "notes": "Gradients 3/3, Newtonian/Fourier 3/3 and wall 2/2. Tangential split 1/2: ResidualAssembler.cpp:232\u2013251 and Diagnostics.cpp:38\u201360 track tangential friction separately in metadata, but forces.csv viscous columns integrate full traction. Report.tex:220\u2013221 incorrectly says normal contribution <1% in every laminar case; M2 metadata shows 26.6% of viscous drag."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 15,
-        "notes": "Committed source, validated original packages, sanity checks, and report reviewed."
+        "notes": "Steady implicit CFL/local time 4/4, LU-SGS 4/4, BDF2 physical scheme 4/4 and inner control/logs 3/3. SolverDriver.cpp:639\u2013707 uses BDF1 startup, frozen BDF2 history, full transient residual and target checks; submitted metadata records dt=0.01, t=300, 5\u20131000 limits, 0 misses. Re200 was not rerun."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
         "score": 10,
-        "notes": "Committed source, validated original packages, sanity checks, and report reviewed."
+        "notes": "METIS/owned ghosts 2/2, neighbor halo 3/3, reductions 2/2, rank output 1/1, np8 comparisons 2/2. Source MeshPartitioner.cpp:54\u201366, HaloExchanger.cpp:24,37 and Diagnostics.cpp:20\u201342; original full-run NACA and cylinder np1/2/4/8 drag differs by at most 9e-8 and 3.2e-7."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 10,
-        "notes": "Committed source, validated original packages, sanity checks, and report reviewed."
+        "score": 8.5,
+        "notes": "NACA inviscid 1.75/2: credible fields with very small M0.15 drag drift; laminar 1.5/2: readable positive wall states but M0.8/M2 tail drifts ~1% and force decomposition caveat; Re20 2/2: converged wake, Cd 2.021; Re200 1.25/2: t=300, periodic plots/wake but reported underprediction and wake diffusion; fields 1/1 and rank comparisons 1/1."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "Committed source, validated original packages, sanity checks, and report reviewed."
+        "score": 4,
+        "notes": "Equations/scheme 1/1, histories 1/1, field visualization 0.75/1, analysis 0.5/1, traceability 0.75/1. PDF pages 17\u201337 show the cases and report honestly discusses first-order triangle residual and Re200 underprediction; report.tex:220\u2013221 falsely says normal viscous contribution <1% for every laminar case, and exact pixel-to-field provenance was not independently established."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 5,
-        "notes": "Committed source, validated original packages, sanity checks, and report reviewed."
+        "score": 4,
+        "notes": "Physics interface 1.5/2, extensible boundary mapping 0.75/1, 3-D abstractions 0.75/1 and source organization 1/1: modular gas, boundary, mesh and solver units, but concrete implementation is primarily 2-D."
       }
     ]
   },
@@ -316,7 +316,7 @@
     },
     "naca0012_m200_laminar_re5000": {
       "score": 3,
-      "notes": "Cd 0.130407, Cl -0.002397 and 3.29 residual orders; last-10% Cd ranges 0.129118\u20130.130416, about 1% of final value, leaving a convergence limitation. Numeric force summary is in immutable c2fefc1:solver/report/generated/force_table.tex and the case text; residual, force and contour references in generated/case_sections.tex:355,:361,:389 are included by report.tex:875 and were visually reviewed in the indexed PDF. Prior retrospective score 2 rested on the incorrect assertion that these committed plots were absent. Structural validation was previously recorded; independent grid convergence was not established."
+      "notes": "Cd 0.130407, Cl -0.002397 and 3.29 residual orders; last-10% Cd ranges 0.129118\u20130.130416, about 1% of final value, leaving a convergence limitation. Numeric force summary is in immutable c2fefc1:solver/report/generated/force_table.tex and the case text; residual, force and contour references in generated/case_sections.tex:355,:361,:389 are included by report.tex:875 and were visually reviewed in the indexed PDF. Prior retrospective score 2 rested on the incorrect assertion that these committed plots were absent. Structural validation was previously recorded; independent grid convergence was not established. Submitted metadata final_normal_viscous_drag=0.0134493 is 26.6% of final_viscous_drag=0.0505523, contradicting report.tex:220\u2013221 (<1% claim)."
     },
     "cylinder_m010_laminar_re20": {
       "score": 4,
@@ -329,48 +329,7 @@
   },
   "disqualification": {
     "triggered": false,
-    "flags": [
-      {
-        "id": 1,
-        "found": false,
-        "evidence": "No wrapper/executable call seen."
-      },
-      {
-        "id": 2,
-        "found": false,
-        "evidence": "No direct synthetic-output evidence."
-      },
-      {
-        "id": 4,
-        "found": false,
-        "evidence": "Submitted scaling cases support MPI consistency."
-      },
-      {
-        "id": 5,
-        "found": false,
-        "evidence": "Implicit method is claimed and source reviewed."
-      },
-      {
-        "id": 6,
-        "found": false,
-        "evidence": "No direct report/source contradiction found."
-      },
-      {
-        "id": 7,
-        "found": false,
-        "evidence": "All eight packages structurally validate."
-      },
-      {
-        "id": 9,
-        "found": false,
-        "evidence": "METIS/MPI claims are source supported."
-      },
-      {
-        "id": 10,
-        "found": false,
-        "evidence": "Production reconstruction path is present."
-      }
-    ]
+    "flags": []
   },
   "session_selection": {
     "source": "project",
@@ -386,9 +345,8 @@
   },
   "metadata_answers": {},
   "limitations": [
-    "No clean evaluator rebuild or rerun.",
-    "Raw evidence/PDF excluded at curated tip.",
-    "Identity/final response are unindexed sidecars.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "Triangle residual refinement approaches first order despite nearly second-order reconstruction; this was disclosed by the contestant.",
+    "M2 laminar normal viscous contribution is 26.6% of viscous drag, contrary to report assertion below 1%; full viscous and tangential values are separately recorded in metadata.",
+    "No independent Re200 rerun, general CGNS-layout sweep or full figure pixel-to-field comparison was performed. Raw solver artifacts remain in workspace and preserved checkpoint history."
   ]
 }

@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4.5,
+      "notes": "report.tex governing equations and GasModel/ResidualAssembler implement four-variable perfect-gas compressible flow; normal viscous contribution claim in report is quantitatively incorrect."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4.5,
+      "notes": "CgnsReader.cpp:54\u201394,127\u2013138,217\u2013238 and :319\u2013333 handles TRI/QUAD, MIXED and one-to-one zone connectivity; geometry/adjacency source and tests exist. Not every possible CGNS layout was independently exercised."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "notes": "ResidualAssembler.cpp:120\u2013194 reconstructs states, computes flux and applies equal/opposite face contributions. Unit tests pass and reported manufactured verification covers smooth fields."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "notes": "RiemannSolvers.cpp:31\u2013120 implements Roe and entropy fix with alternative Rusanov; ResidualAssembler invokes riemannFlux and positivity fallback. Kernel unit tests pass."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4.5,
+      "notes": "BoundaryConditions.cpp and ResidualAssembler.cpp implement characteristic farfield, slip and no-slip wall states; original surface data show wall values. Independent general boundary tests not repeated."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4,
+      "notes": "WLS gradient and piecewise-linear reconstruction are present; committed verification_table.tex shows reconstruction order near 1.95 on triangles but the residual operator only 0.96, a material spatial-order limitation disclosed in report.tex:419\u2013429."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4.5,
+      "notes": "Limiters.cpp implements Venkatakrishnan and Barth\u2013Jespersen; SolverDriver.cpp:514\u2013521 freezes values rather than disabling their action, and metadata records limiter diagnostics. Full sensitivity beyond submitted comparisons was not rerun."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4,
+      "notes": "ViscousFlux.h and ResidualAssembler.cpp:232\u2013251 compute full and tangential traction separately; metadata records both, but forces.csv viscous_drag includes full traction and report.tex:220\u2013221 incorrectly claims normal contribution <1% for all cases (M2 laminar is 26.6% of viscous drag)."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "notes": "ImplicitSolver.cpp and SolverDriver.cpp implement implicit marching, CFL ramp and local pseudotime. Submitted steady results and rank runs are readable; kernel test passed."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "score": 4.5,
+      "notes": "SolverDriver.cpp:639\u2013707 uses BDF1 startup, full BDF2 transient residual and frozen histories inside inner iterations; Re200 metadata records dt=0.01, t=300, target 1e-3 with zero misses. Report acknowledges underpredicted shedding and wake diffusion; no Re200 rerun."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 5,
-      "notes": "Strong committed source/report and original validator evidence; no evaluator rerun."
+      "notes": "METIS source and neighbor halos are present; submitted np1/2/4/8 NACA/cylinder complete histories agree in drag within 9e-8 and 3.2e-7 respectively, with reported timing."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.92
+  "overall_score": 4.6
 }
