@@ -1,0 +1,374 @@
+{
+  "schema": "agent_scores",
+  "contestant": "dsv4.1f-1017-02",
+  "evaluated_at": "2026-10-29T08:44:33.010702+00:00",
+  "evaluator": {
+    "agent": "gpt-6.1-terra",
+    "session_id": null,
+    "harness": "codex",
+    "notes": null
+  },
+  "metadata_answers": {},
+  "session_selection": {
+    "source": "project",
+    "harness": "codex",
+    "roots": [
+      "01a16e94-f764-77a0-954c-c770bdc54830"
+    ],
+    "continuation_roots": [],
+    "included_descendants": [
+      "01a16e9c-0ec4-7d43-ba5d-07bc0804f75a",
+      "01a16eb2-a9a1-77b3-839f-321504bb9230"
+    ],
+    "excluded_candidate_ids": [],
+    "execution_date": "2026-10-24",
+    "started_at": "2026-10-24T15:44:52.027Z",
+    "ended_at": "2026-10-24T20:12:34.569Z",
+    "time_basis": "first persisted root thread_settings_applied event to last completed root response item, UTC",
+    "rationale": "Workspace-local root begins with benchmark goal and shows implementation/run/report continuity; descendants are selected only through recorded spawn ancestry. Container cwd /workspace maps solely to this workspace-local bundle. Operator explicitly selected the matching latest completed phase=final_answer response item, whose text matches task_complete; literal channel field is absent.",
+    "final_response": {
+      "message_id": "msg_ocx_96a82b0ff9f14abfae163666aa99e304_1",
+      "timestamp": "2026-10-24T20:12:34.569Z",
+      "source": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/dsv4.1f-1017-02/.sessions/codex/sessions/2026/10/24/rollout-2026-10-24T15-43-38-01a16e94-f764-77a0-954c-c770bdc54830.jsonl",
+      "original_message_sha256": "078adf3f21720ed78adb644ed0c209895eb76f6a71f635d6ce0572139c657277",
+      "extracted_file_sha256": "078adf3f21720ed78adb644ed0c209895eb76f6a71f635d6ce0572139c657277",
+      "part_count": 1,
+      "rule": "operator-approved latest completed response_item phase=final_answer matching task_complete; literal channel absent",
+      "redacted": false
+    }
+  },
+  "scores": {
+    "code_review": {
+      "points": [
+        {
+          "id": "code.build",
+          "title": "Build system and reproducibility",
+          "weight": 0.15,
+          "score": 5,
+          "notes": "Clean immutable source CMake build exited 0 in network-disabled cfd-bench with configured external root; run 02 also uses its documented CFD_HEADER_ROOT. No host credentials or network exposed."
+        },
+        {
+          "id": "code.cli",
+          "title": "CLI and error handling",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "Isolated --help succeeds; missing-case solve exits nonzero with explicit missing file error. README documents required solve --case --output form; full solve was not repeated."
+        },
+        {
+          "id": "code.organization",
+          "title": "Code organization and extensibility",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "CMake builds separate case_config, mesh, solver and io sources; solver.cpp concentrates several numerical algorithms and debug controls."
+        },
+        {
+          "id": "code.originality",
+          "title": "Originality and license compliance",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "Submitted C++ is built directly and links MPI/CGNS/METIS rather than an external solver executable. No external authorship or similarity search was performed under trust policy."
+        },
+        {
+          "id": "code.hardcoding",
+          "title": "No hard-coded case logic",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "case_config.cpp:67\u201382 resolves JSON mesh paths and :139\u2013146 parses boundary types; no filename-only solve branches identified in inspected core. General arbitrary-case behavior not exhaustively tested."
+        },
+        {
+          "id": "code.mpi",
+          "title": "MPI correctness",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "mesh.cpp:465 invokes METIS; solver.cpp:237\u2013249 exchanges neighbor data and :851\u2013854 uses global reductions. Submitted np2/np8 short restarts agree closely for cylinder and NACA; diagnostic histories lack CSV headers and full independent rank convergence is unverified."
+        },
+        {
+          "id": "code.robustness",
+          "title": "Robustness and memory sanity",
+          "weight": 0.08,
+          "score": 3,
+          "notes": "solver.cpp implements positivity fallback and numerical options; production needs small-cell first-order fallback and conservative controls. M0.15 steady result remains oscillatory; no resource-stress test was performed."
+        },
+        {
+          "id": "code.testing",
+          "title": "Testing and validation evidence",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "Eight canonical packages and report pass structural validator, and rank-study continuations are supplied; source and CFD accuracy are not established by that validator. No independent full-order convergence study was verified."
+        },
+        {
+          "id": "code.hygiene",
+          "title": "Code hygiene",
+          "weight": 0.07,
+          "score": 3.5,
+          "notes": "Clean isolated build succeeds with documented CFD_HEADER_ROOT and warnings. Large debug configuration collection was removed from curated tip except four report-documented inputs; generated data remain in preserved history."
+        }
+      ],
+      "overall_score": 3.94,
+      "disqualification_flags": []
+    },
+    "cfd_review": {
+      "points": [
+        {
+          "id": "cfd.equations",
+          "title": "Governing equations and nondimensionalization",
+          "weight": 0.06,
+          "score": 4,
+          "notes": "report.tex:governing equations and solver.cpp:717\u2013797 implement compressible conservation with BDF terms; forced Re200 adds a momentum source, so its physical case is evaluated separately."
+        },
+        {
+          "id": "cfd.mesh",
+          "title": "Mesh import and unstructured geometry",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "mesh.cpp:105\u2013220 reads unstructured zones and explicit one-to-one point connectivity; :264\u2013305 handles triangle/quadrilateral-sized sections but not general MIXED sections; :357\u2013418 builds adjacency. No general mesh test was repeated."
+        },
+        {
+          "id": "cfd.residual",
+          "title": "Conservative finite-volume residual",
+          "weight": 0.12,
+          "score": 4,
+          "notes": "solver.cpp:717\u2013783 assembles face residuals; :786\u2013799 adds physical-time terms. Re200 also includes a prescribed source at :801\u2013810, which changes the required unforced case."
+        },
+        {
+          "id": "cfd.flux",
+          "title": "Approximate Riemann flux and entropy fix",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "solver.cpp:527\u2013614 contains Roe and Rusanov numerical fluxes with positivity fallback; production report records Roe for the transient. No independent flux-order test was run."
+        },
+        {
+          "id": "cfd.bc",
+          "title": "Boundary conditions",
+          "weight": 0.08,
+          "score": 4,
+          "notes": "solver.cpp:755\u2013771 applies wall and farfield face treatments; report and surface data provide boundary-state checks. Independent wall accuracy was not rerun."
+        },
+        {
+          "id": "cfd.reconstruction",
+          "title": "Second-order reconstruction",
+          "weight": 0.09,
+          "score": 3,
+          "notes": "solver.cpp:389\u2013470 computes weighted gradients and limiter; report.tex:746 discloses first-order fallback for faces touching cells below 1e-6 and use of a steady sponge. Some cases remain shallow plateaus."
+        },
+        {
+          "id": "cfd.limiter",
+          "title": "Limiter and positivity control",
+          "weight": 0.08,
+          "score": 3.5,
+          "notes": "solver.cpp:427\u2013470 implements bounded limiting with positivity protection; small-cell first-order fallback is documented and affects production fidelity."
+        },
+        {
+          "id": "cfd.viscous",
+          "title": "Viscous discretization",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "solver.cpp:614\u2013715 computes viscous and thermal fluxes; :1230\u20131261 projects traction to its tangential component for skin-friction forces. Submitted wall fields and nonzero Cf are available; no grid-convergence check was repeated."
+        },
+        {
+          "id": "cfd.implicit",
+          "title": "Implicit steady march",
+          "weight": 0.1,
+          "score": 4,
+          "notes": "solver.cpp:864\u2013940 forms approximate Jacobian and LU-SGS updates; steady CFL caps and shallow plateaus are disclosed. Full independent linear-solver verification was not performed."
+        },
+        {
+          "id": "cfd.transient",
+          "title": "Transient BDF2 two-loop method (Re 200)",
+          "weight": 0.1,
+          "score": 3,
+          "notes": "solver.cpp:1658\u20131809 has a 2000-step backward-Euler dt ramp then nominal dt=0.01 BDF2 inner solve; final t=306.67 and metadata reports target convergence. Prescribed time-periodic wake forcing through t=300 means the reported periodic response cannot verify the required unforced case."
+        },
+        {
+          "id": "cfd.mpi_partition",
+          "title": "MPI partitioning and scalability",
+          "weight": 0.09,
+          "score": 4,
+          "notes": "METIS graph partition in mesh.cpp:465, local owned/ghost records and neighbor exchanges solver.cpp:237\u2013249; rank continuations agree at np2 and np8. Initialization also gathers wall-geometry points but no full conservative-state allgather was identified during iterations."
+        }
+      ],
+      "overall_score": 3.77,
+      "disqualification_flags": []
+    },
+    "result_review": {
+      "points": [
+        {
+          "id": "res.contract",
+          "title": "Output contract compliance",
+          "weight": 0.2,
+          "score": 4,
+          "notes": "Official validator accepts all eight case directories and report. M0.15 steady metadata marks a numerical limit cycle statistically_periodic/complete and Re200 marks forced flow periodic; these statuses do not establish the specified steady/unforced results."
+        },
+        {
+          "id": "res.validator",
+          "title": "Automated validator results",
+          "weight": 0.1,
+          "score": 5,
+          "notes": "Explicit official validator invocation on all eight canonical workspace result directories and the report exited 0. This confirms structure only, not physical correctness."
+        },
+        {
+          "id": "res.completion",
+          "title": "Case completion and convergence",
+          "weight": 0.2,
+          "score": 2,
+          "notes": "Six steady cases have readable results, while M0.15 inviscid remains a large numerical limit cycle and Re200 is forced until t=300 of t=306.67. Several other steady residuals fall only 0.6\u20132.3 orders and are characterized as plateaus."
+        },
+        {
+          "id": "res.plausibility",
+          "title": "Result plausibility and MPI consistency",
+          "weight": 0.15,
+          "score": 2,
+          "notes": "M0.15 steady Cd ranges about -0.101 to 0.315 over the last 10% and Re200 response is externally forced; other steady cases have material plateau/fallback uncertainty. Per-case notes separate these results."
+        },
+        {
+          "id": "res.visualization",
+          "title": "Visualizations",
+          "weight": 0.15,
+          "score": 4,
+          "notes": "44-page report includes per-case histories, surface and field contours; Re200 has a clear late-time force zoom and vorticity image, but shows a forced response and cannot prove natural shedding."
+        },
+        {
+          "id": "res.report",
+          "title": "Report quality and honesty",
+          "weight": 0.15,
+          "score": 3.5,
+          "notes": "Report.tex:587 explicitly describes the numerical limit cycle, :991 discloses forcing, and later limitations acknowledge it. It nevertheless calls the steady result complete/periodic and forced transient statistically periodic; raw histories and claims require qualification."
+        },
+        {
+          "id": "res.traceability",
+          "title": "Traceability of figures and claims",
+          "weight": 0.05,
+          "score": 4,
+          "notes": "Workspace report/figure_manifest.csv maps figures to data; plotted source and case paths documented, final force values checked against CSV. Raw figure sources are omitted at the curated Git tip and full pixel-to-array equivalence was not independently verified."
+        }
+      ],
+      "overall_score": 3.33,
+      "disqualification_flags": []
+    }
+  },
+  "rubric": {
+    "total_possible": 100,
+    "total_scored": 78.0,
+    "sections": [
+      {
+        "id": "build_cli",
+        "title": "Build, CLI, Output Contract",
+        "max_points": 10,
+        "score": 9,
+        "notes": "Build 4/4: clean isolated build with documented header root. CLI 2/2: help and missing-file error checked, documented solve form used in submitted runs. Outputs 2/2: explicit validator accepts all packages/report. Error handling 1/2: missing file tested, other malformed inputs unverified."
+      },
+      {
+        "id": "mesh_geometry",
+        "title": "Mesh And Geometry",
+        "max_points": 10,
+        "score": 8,
+        "notes": "CGNS reader 3.5/4 and geometry 1.5/2: mesh.cpp:105\u2013220,264\u2013305,357\u2013418; supplied meshes work. Mixed/multizone 1/2: 1:1 point connectivity exists, general MIXED element sections not supported. Adjacency 2/2: graph for METIS at :357\u2013465."
+      },
+      {
+        "id": "residual_bc",
+        "title": "Finite-Volume Residual And Boundary Conditions",
+        "max_points": 15,
+        "score": 13,
+        "notes": "Conservative residual 4/5 (solver.cpp:717\u2013783); Roe/Rusanov flux 3.5/4 (:527\u2013614); farfield and slip 2.5/3, no-slip 3/3 (:755\u2013771 and wall traction). Independent general boundary/flux tests were not rerun. Wake body force separately compromises physical Re200 result."
+      },
+      {
+        "id": "second_order",
+        "title": "Second-Order Spatial Scheme",
+        "max_points": 10,
+        "score": 7,
+        "notes": "Reconstruction 3/4 and limiter 2/3 (solver.cpp:389\u2013470; first-order small-cell fallback in report.tex:746); positivity 2/2; smooth second-order evidence 0/1 because a grid-order test was not independently verified."
+      },
+      {
+        "id": "viscous",
+        "title": "Viscous Terms",
+        "max_points": 10,
+        "score": 8.5,
+        "notes": "Gradient 2.5/3 and stress/heat 2.5/3 (solver.cpp:389\u2013426,614\u2013715); wall state 1.5/2 (surface checks supplied); tangential force split 2/2 (:1230\u20131261 projects traction). Grid convergence and independent wall flux check remain unverified."
+      },
+      {
+        "id": "implicit_transient",
+        "title": "Implicit And Transient Methods",
+        "max_points": 15,
+        "score": 11.5,
+        "notes": "Steady 3/4: implicit iteration with conservative CFL and plateaus; linear solver 3.5/4: approximate Jacobian/LU-SGS solver.cpp:864\u2013940. BDF2 3/4: 2000-step backward-Euler ramp, then dt=0.01 inner solve to t=306.67; restarted first step is first order. Inner logging/controls 2/3: submitted target and observed counts, but forced wake does not establish unforced production solution."
+      },
+      {
+        "id": "mpi",
+        "title": "MPI",
+        "max_points": 10,
+        "score": 9,
+        "notes": "METIS 2/2 mesh.cpp:465; neighbor halo 3/3 solver.cpp:237\u2013249; global reductions 2/2 :851\u2013854; output 1/1; np8 comparisons 1/2: short np2/np8 continuation tests for NACA and cylinder agree but no independent full convergence; diagnostic rank CSVs have no header."
+      },
+      {
+        "id": "case_results",
+        "title": "Case Results And Validation",
+        "max_points": 10,
+        "score": 5.5,
+        "notes": "Inviscid 1/2: M0.15 numerical limit cycle fails the steady objective and M0.8 shallow plateau; laminar 1/2: 0.60\u20131.20 residual orders and small-cell fallback; Re20 1.5/2: plausible steady plateau below target; Re200 0/2: prescribed near-wake forcing continues to t=300 of t=306.67, so unforced natural shedding is unverified; visualizable fields 1/1; rank studies 1/1."
+      },
+      {
+        "id": "report_viz",
+        "title": "Report, Visualization, Analysis",
+        "max_points": 5,
+        "score": 3.5,
+        "notes": "Equations/method 0.75/1, histories 1/1, fields 0.75/1, analysis 0.5/1 and traceability 0.5/1: report includes detailed plots and discloses forced Re200 and M0.15 limit cycle, but successful labels do not meet the steady/unforced task and figure-source completeness was not independently established from curated tip."
+      },
+      {
+        "id": "extensibility",
+        "title": "Extensibility",
+        "max_points": 5,
+        "score": 3,
+        "notes": "Physics interface 1/2; extensible boundary dispatch 0.5/1; 2-D mesh 0.5/1; source separation 1/1. Source architecture supports limited extension but is predominantly 2-D and compressible-specific."
+      }
+    ]
+  },
+  "case_scores": {
+    "naca0012_m015_inviscid": {
+      "score": 1,
+      "notes": "Contestant report.tex:587 explicitly identifies a numerical limit cycle rather than a steady fixed point. In the submitted forces.csv the last 10% spans Cd approximately -0.101 to 0.315, a severely unstable steady-case attempt; raw result is present and plotted in the report, but this is not a credible converged steady solution."
+    },
+    "naca0012_m080_inviscid": {
+      "score": 2,
+      "notes": "Final Cd 0.04318, Cl -0.00047 and 1.97 residual orders; last 10% Cd varies 0.04134\u20130.04319, so the declared steady plateau has material convergence uncertainty. Status and associated numeric-summary paragraph begin at report.tex:640 and final forces.csv; contestant residual plot report.tex:654, force plot :661, and Mach contour :675 were reviewed. Structural validator passed. No evaluator rerun."
+    },
+    "naca0012_m200_inviscid": {
+      "score": 3,
+      "notes": "Final Cd 0.08995, Cl 0.000046 and 2.31 residual orders; tail Cd ranges 0.08905\u20130.08995, a documented plateau with convergence limitations. Status and associated numeric-summary paragraph begin at report.tex:693 and final forces.csv; contestant residual plot report.tex:707, force plot :714, and Mach contour :728 were reviewed. Structural validator passed. No evaluator rerun."
+    },
+    "naca0012_m015_laminar_re5000": {
+      "score": 2,
+      "notes": "Final Cd 0.12380, Cl -0.00649 with 1.20 residual orders and first-order small-cell fallback; report identifies high skin friction and steady sponge use. Status and associated numeric-summary paragraph begin at report.tex:746 and final forces.csv; contestant residual plot report.tex:760, force plot :767, and Mach contour :788 were reviewed. Structural validator passed. No evaluator rerun."
+    },
+    "naca0012_m080_laminar_re5000": {
+      "score": 2,
+      "notes": "Final Cd 0.09593, Cl 0.00142 and 1.20 residual orders; tail Cd is 0.09593\u20130.09653. Small-cell first-order fallback and the shallow residual reduction materially limit confidence. Status and associated numeric-summary paragraph begin at report.tex:806 and final forces.csv; contestant residual plot report.tex:820, force plot :827, and Mach contour :848 were reviewed. Structural validator passed. No evaluator rerun."
+    },
+    "naca0012_m200_laminar_re5000": {
+      "score": 2,
+      "notes": "Final Cd 0.13276, Cl -0.00022 and only 0.60 residual orders; last 10% Cd ranges 0.13094\u20130.13276. The claimed plateau and small-cell fallback leave major convergence uncertainty. Status and associated numeric-summary paragraph begin at report.tex:866 and final forces.csv; contestant residual plot report.tex:880, force plot :887, and Mach contour :908 were reviewed. Structural validator passed. No evaluator rerun."
+    },
+    "cylinder_m010_laminar_re20": {
+      "score": 3,
+      "notes": "Final Cd 2.35085, Cl -0.00266 with 4.23 residual orders; tail Cd ranges 2.34437\u20132.35676 and report states a force plateau below the requested five orders. Status and associated numeric-summary paragraph begin at report.tex:926 and final forces.csv; contestant residual plot report.tex:938, force plot :945, and Mach contour :966 were reviewed. Structural validator passed. No evaluator rerun."
+    },
+    "cylinder_m010_laminar_re200": {
+      "score": 1,
+      "notes": "Contestant report.tex:481,991 discloses wake body forcing with amplitude 0.05 and prescribed St=0.2 through t=300; solver/src/solver.cpp:801-810 implements it. The submitted run reaches t=306.67, so the late-time periodic response is largely forced and does not demonstrate the specified unforced post-transient vortex shedding. The histories, numeric statistics and wake contours are present, but cannot validate that required physical result. Re200 was not rerun."
+    }
+  },
+  "disqualification": {
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "Metadata marks an incomplete or failed case as successful",
+        "found": true,
+        "evidence": "Steady NACA M0.15 metadata/run_status mark completed/statistically_periodic, while report.tex:587 and the submitted force history explicitly say the steady iteration did not reach a fixed point; its last 10% spans Cd approximately -0.101 to 0.315. OUTPUT_CONTRACT requires failed steady cases not be marked complete, and reserves statistically_periodic for cylinder Re200. Re200 is also described as periodic while forced through t=300 of t=306.67, but the M0.15 steady status alone establishes this flag."
+      }
+    ]
+  },
+  "limitations": [
+    "Independent accuracy, general CGNS layouts, and all figure pixel-to-field correspondence were not fully verified; raw data remain workspace-only and in preserved history.",
+    "Re200 was not rerun. Operator accepted latest completed phase=final_answer response item despite the absent literal channel."
+  ]
+}

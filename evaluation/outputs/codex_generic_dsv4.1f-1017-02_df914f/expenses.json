@@ -1,0 +1,126 @@
+{
+  "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/dsv4.1f-1017-02",
+  "time_seconds": {
+    "goal_time": 16048.0,
+    "wall_time": 16062.6,
+    "started_at": "2026-10-24T15:44:52.027000+00:00",
+    "ended_at": "2026-10-24T20:12:34.581000+00:00",
+    "by_root_thread": {
+      "01a16e94-f764-77a0-954c-c770bdc54830": {
+        "status": "complete",
+        "time_used_seconds": 16048,
+        "tokens_used": 2291611
+      }
+    },
+    "by_root_tree": {
+      "01a16e94-f764-77a0-954c-c770bdc54830": {
+        "status": "complete",
+        "goal_time_seconds": 16048,
+        "goal_tokens": 2291611,
+        "threads": 3,
+        "tokens_used": 617548252,
+        "state_tokens_inherited_inclusive": 617548252,
+        "model": "deepseek/deepseek-flash"
+      }
+    }
+  },
+  "tokens": {
+    "total": 617548252,
+    "by_model": {
+      "deepseek/deepseek-flash": {
+        "input": 616203285,
+        "cached_input": 615255680,
+        "non_cached_input": 947605,
+        "output": 1344967,
+        "reasoning_output": 858382,
+        "total": 617548252,
+        "fallback_tokens": 0
+      }
+    },
+    "by_thread": {
+      "01a16e94-f764-77a0-954c-c770bdc54830": {
+        "model": "deepseek/deepseek-flash",
+        "is_subagent": false,
+        "source": "rollout_cumulative",
+        "tokens": {
+          "deepseek/deepseek-flash": {
+            "input": 426489549,
+            "cached": 426009216,
+            "non_cached": 480333,
+            "output": 853761,
+            "reasoning_output": 567758,
+            "total": 427343310
+          }
+        },
+        "total": 427343310,
+        "inherited_baseline_tokens": 0,
+        "fallback_model_tokens": 0
+      },
+      "01a16e9c-0ec4-7d43-ba5d-07bc0804f75a": {
+        "model": "deepseek/deepseek-flash",
+        "is_subagent": true,
+        "source": "rollout_fork_delta",
+        "tokens": {
+          "deepseek/deepseek-flash": {
+            "input": 158318538,
+            "cached": 158110080,
+            "non_cached": 208458,
+            "output": 339548,
+            "reasoning_output": 168957,
+            "total": 158658086
+          }
+        },
+        "total": 158658086,
+        "inherited_baseline_tokens": 0,
+        "fallback_model_tokens": 0
+      },
+      "01a16eb2-a9a1-77b3-839f-321504bb9230": {
+        "model": "deepseek/deepseek-flash",
+        "is_subagent": true,
+        "source": "rollout_fork_delta",
+        "tokens": {
+          "deepseek/deepseek-flash": {
+            "input": 31395198,
+            "cached": 31136384,
+            "non_cached": 258814,
+            "output": 151658,
+            "reasoning_output": 121667,
+            "total": 31546856
+          }
+        },
+        "total": 31546856,
+        "inherited_baseline_tokens": 0,
+        "fallback_model_tokens": 0
+      }
+    },
+    "main_vs_subagent": {
+      "main": 427343310,
+      "subagent": 190204942
+    },
+    "fallback_tokens": 0,
+    "discrepancy_notes": [],
+    "accounting_note": "Cached/input/output splits come from thread-owned rollout counter deltas. Fork replay is excluded at the first child-owned task boundary. Each delta is attributed to the most recent owned turn_context or thread_settings_applied model; only deltas before an explicit owned model event use the thread database model. Fork state counters are diagnostic only. A standalone root may retain the legacy state-counter scaling fallback when its rollout ends before the persisted root total."
+  },
+  "cost_estimate_usd": {
+    "total": null,
+    "by_model": {
+      "deepseek/deepseek-flash": {
+        "usd": null,
+        "tokens": 617548252,
+        "pricing": "unresolved"
+      }
+    },
+    "unpriced_tokens": 617548252,
+    "estimate": true,
+    "metadata": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/evaluation/config/cost_metadata.json"
+  },
+  "provenance": {
+    "state_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/dsv4.1f-1017-02/.sessions/codex/state_5.sqlite",
+    "goals_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/dsv4.1f-1017-02/.sessions/codex/goals_1.sqlite",
+    "logs_db": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/dsv4.1f-1017-02/.sessions/codex/logs_2.sqlite",
+    "sessions_root": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/dsv4.1f-1017-02/.sessions/codex/sessions",
+    "fetched_at": "2026-10-29T08:42:13.249377+00:00",
+    "num_threads": 3,
+    "num_roots": 1
+  }
+}

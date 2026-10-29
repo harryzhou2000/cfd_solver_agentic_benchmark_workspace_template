@@ -1,0 +1,83 @@
+{
+  "review_area": "result_review",
+  "title": "Result review scorecard (outputs, visualizations, report)",
+  "points": [
+    {
+      "id": "res.contract",
+      "title": "Output contract compliance",
+      "weight": 0.2,
+      "score": 4,
+      "notes": "Official validator accepts all eight case directories and report. M0.15 steady metadata marks a numerical limit cycle statistically_periodic/complete and Re200 marks forced flow periodic; these statuses do not establish the specified steady/unforced results."
+    },
+    {
+      "id": "res.validator",
+      "title": "Automated validator results",
+      "weight": 0.1,
+      "score": 5,
+      "notes": "Explicit official validator invocation on all eight canonical workspace result directories and the report exited 0. This confirms structure only, not physical correctness."
+    },
+    {
+      "id": "res.completion",
+      "title": "Case completion and convergence",
+      "weight": 0.2,
+      "score": 2,
+      "notes": "Six steady cases have readable results, while M0.15 inviscid remains a large numerical limit cycle and Re200 is forced until t=300 of t=306.67. Several other steady residuals fall only 0.6\u20132.3 orders and are characterized as plateaus."
+    },
+    {
+      "id": "res.plausibility",
+      "title": "Result plausibility and MPI consistency",
+      "weight": 0.15,
+      "score": 2,
+      "notes": "M0.15 steady Cd ranges about -0.101 to 0.315 over the last 10% and Re200 response is externally forced; other steady cases have material plateau/fallback uncertainty. Per-case notes separate these results."
+    },
+    {
+      "id": "res.visualization",
+      "title": "Visualizations",
+      "weight": 0.15,
+      "score": 4,
+      "notes": "44-page report includes per-case histories, surface and field contours; Re200 has a clear late-time force zoom and vorticity image, but shows a forced response and cannot prove natural shedding."
+    },
+    {
+      "id": "res.report",
+      "title": "Report quality and honesty",
+      "weight": 0.15,
+      "score": 3.5,
+      "notes": "Report.tex:587 explicitly describes the numerical limit cycle, :991 discloses forcing, and later limitations acknowledge it. It nevertheless calls the steady result complete/periodic and forced transient statistically periodic; raw histories and claims require qualification."
+    },
+    {
+      "id": "res.traceability",
+      "title": "Traceability of figures and claims",
+      "weight": 0.05,
+      "score": 4,
+      "notes": "Workspace report/figure_manifest.csv maps figures to data; plotted source and case paths documented, final force values checked against CSV. Raw figure sources are omitted at the curated Git tip and full pixel-to-array equivalence was not independently verified."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report figures do not correspond to submitted field/CSV outputs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json marks incomplete or failed runs as successful",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Debug outputs presented as final case results",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.33
+}

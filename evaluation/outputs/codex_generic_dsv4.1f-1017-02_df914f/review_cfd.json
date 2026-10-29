@@ -1,0 +1,116 @@
+{
+  "review_area": "cfd_review",
+  "title": "CFD methods and algorithms review scorecard",
+  "points": [
+    {
+      "id": "cfd.equations",
+      "title": "Governing equations and nondimensionalization",
+      "weight": 0.06,
+      "score": 4,
+      "notes": "report.tex:governing equations and solver.cpp:717\u2013797 implement compressible conservation with BDF terms; forced Re200 adds a momentum source, so its physical case is evaluated separately."
+    },
+    {
+      "id": "cfd.mesh",
+      "title": "Mesh import and unstructured geometry",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "mesh.cpp:105\u2013220 reads unstructured zones and explicit one-to-one point connectivity; :264\u2013305 handles triangle/quadrilateral-sized sections but not general MIXED sections; :357\u2013418 builds adjacency. No general mesh test was repeated."
+    },
+    {
+      "id": "cfd.residual",
+      "title": "Conservative finite-volume residual",
+      "weight": 0.12,
+      "score": 4,
+      "notes": "solver.cpp:717\u2013783 assembles face residuals; :786\u2013799 adds physical-time terms. Re200 also includes a prescribed source at :801\u2013810, which changes the required unforced case."
+    },
+    {
+      "id": "cfd.flux",
+      "title": "Approximate Riemann flux and entropy fix",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "solver.cpp:527\u2013614 contains Roe and Rusanov numerical fluxes with positivity fallback; production report records Roe for the transient. No independent flux-order test was run."
+    },
+    {
+      "id": "cfd.bc",
+      "title": "Boundary conditions",
+      "weight": 0.08,
+      "score": 4,
+      "notes": "solver.cpp:755\u2013771 applies wall and farfield face treatments; report and surface data provide boundary-state checks. Independent wall accuracy was not rerun."
+    },
+    {
+      "id": "cfd.reconstruction",
+      "title": "Second-order reconstruction",
+      "weight": 0.09,
+      "score": 3,
+      "notes": "solver.cpp:389\u2013470 computes weighted gradients and limiter; report.tex:746 discloses first-order fallback for faces touching cells below 1e-6 and use of a steady sponge. Some cases remain shallow plateaus."
+    },
+    {
+      "id": "cfd.limiter",
+      "title": "Limiter and positivity control",
+      "weight": 0.08,
+      "score": 3.5,
+      "notes": "solver.cpp:427\u2013470 implements bounded limiting with positivity protection; small-cell first-order fallback is documented and affects production fidelity."
+    },
+    {
+      "id": "cfd.viscous",
+      "title": "Viscous discretization",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "solver.cpp:614\u2013715 computes viscous and thermal fluxes; :1230\u20131261 projects traction to its tangential component for skin-friction forces. Submitted wall fields and nonzero Cf are available; no grid-convergence check was repeated."
+    },
+    {
+      "id": "cfd.implicit",
+      "title": "Implicit steady march",
+      "weight": 0.1,
+      "score": 4,
+      "notes": "solver.cpp:864\u2013940 forms approximate Jacobian and LU-SGS updates; steady CFL caps and shallow plateaus are disclosed. Full independent linear-solver verification was not performed."
+    },
+    {
+      "id": "cfd.transient",
+      "title": "Transient BDF2 two-loop method (Re 200)",
+      "weight": 0.1,
+      "score": 3,
+      "notes": "solver.cpp:1658\u20131809 has a 2000-step backward-Euler dt ramp then nominal dt=0.01 BDF2 inner solve; final t=306.67 and metadata reports target convergence. Prescribed time-periodic wake forcing through t=300 means the reported periodic response cannot verify the required unforced case."
+    },
+    {
+      "id": "cfd.mpi_partition",
+      "title": "MPI partitioning and scalability",
+      "weight": 0.09,
+      "score": 4,
+      "notes": "METIS graph partition in mesh.cpp:465, local owned/ghost records and neighbor exchanges solver.cpp:237\u2013249; rank continuations agree at np2 and np8. Initialization also gathers wall-geometry points but no full conservative-state allgather was identified during iterations."
+    }
+  ],
+  "disqualification_flags": [
+    {
+      "flag": "Solver uses explicit time stepping only",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Normal viscous traction mislabeled as skin friction",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+      "triggered": null,
+      "notes": ""
+    }
+  ],
+  "overall_score": 3.77
+}
