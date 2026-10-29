@@ -42,59 +42,15 @@
 
 Read source, selected transcript, all raw workspace packages, and report. The explicit eight-case/report validator passed. An immutable-source-only report rebuild displayed missing-asset placeholder boxes, but the separately accepted contestant workspace-existing sibling PDF contains delivered figures; these are different artifacts. No solver or Re200 rerun was performed.
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
+## Calibrated assessment — 2026-10-29
 
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
+The prior rubric was 92/100, including zero report/visualization credit because an immutable-only rebuild displayed placeholders. The current rubric is **93/100**, with criterion-specific evidence in the scorecard and review overalls computed from the individual points. The accepted contestant workspace-existing PDF is a separate, visually verified delivered artifact containing the figures, while missing committed figures remain a reproducibility limitation. In canonical order the eight independent case scores change from 2,2,2,2,2,2,2,2 to **2,3,3,4,4,4,4,4**. These scores do not alter the rubric or review areas.
 
-## Review-area scores (0-5 weighted, review_*.json)
+DQ remains **false**. `main.cpp:323–335` reads global mesh only on rank zero and `MeshDistributor.cpp:255–310` releases it before the solver allocates state; `SpatialOperator.cpp:273–279` exchanges the state, gradients and limiter values. `Forces.cpp:35–73` separates pressure, tangential and normal viscous contributions; metadata and the report's prescribed wall treatment agree that the normal component is near zero. RunLoop.cpp assembles the BDF2 total residual using frozen history, and the restart stores history levels. The committed limited reconstruction study in `tables/tab_mms.tex` reports successive orders 2.46, 2.09 and 1.52; this is not an independent full residual accuracy proof. Trigger-by-trigger evidence and its limits are in the scorecard. No comprehensive external authorship/similarity or pixel-level figure audit was performed.
 
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
+An isolated clean immutable CMake build and unit ctest passed using `cfd-bench`, two CPUs, 4 GiB, 128-process limit, no network and a 240-second timeout with configured external roots. The MPI ctest failed before solver launch because `scripts/env.sh:4` references unset `LD_LIBRARY_PATH` under `set -u`; it was not rerun. No CFD case was rerun. Original eight-case and report validator passed.
 
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
-
-## Disqualification assessment
-
-No disqualification trigger was affirmatively established from direct internal evidence. The broken curated report is a report-quality/traceability finding, not an additional DQ.
-
-## Metadata answers & session selection
-
-Selected sole Claude root `1170e622-888a-474a-9c10-d6088a1bc70e` and its five persisted subagents because it covers the benchmark objective through terminal delivery.
-
-## Limitations
-
-No evaluator rerun was performed. Raw results were evaluated from the workspace but excluded from the immutable tip. The source report was not vendored because its compiled rendering is visibly broken.
-
-## Verdict
-
-Substantive solver/result evidence is strong and structurally complete, but the curated immutable report needs its committed assets repaired before it can be considered an adequate visual deliverable.
+The selected sole Claude root `1170e622-888a-474a-9c10-d6088a1bc70e` and its five persisted subagents cover benchmark work through terminal delivery. The report PDF is indexed with `workspace_existing` provenance.
 
 ## Sidecar integrity
 
@@ -105,9 +61,9 @@ Substantive solver/result evidence is strong and structurally complete, but the 
 
 ## Partial Re200 case correction — 2026-10-29
 
-The former score 2 and note asserted no numeric summary, residual or force plots, wake contour, St or late-time force plot. That is incorrect for the accepted contestant-delivered report. Immutable `solver/report/report.tex:1615` includes `tables/tab_re200.tex`, which gives mean Cd=1.2661, mean Cl=0.00173, lift amplitude=0.5745 and St=0.1859. The accepted `workspace_existing` sibling PDF and its indexed copy share SHA-256 `7c6ee79768735da2201041340245629fc2c081caf7c338fcc056253eb7b86fa5`; the workspace main TeX matches the recorded immutable blob and PDF creation at 2026-08-27 15:41 UTC is inside the selected session. Visual inspection of PDF pages 36–37 confirms readable late lift and drag, wake contours and residual/inner histories. Original forces at t≥180 give mean Cd=1.2661834, Cd range 1.237623–1.293897 and lift range −0.572979–0.576326. Twenty-two interpolated upward mean-lift crossings from t≥180 give 21 periods averaging 5.386263 and frequency 0.185657, consistent with the table’s crossing-based St=0.1857. Case score 2→4, with modest reference underprediction and no independent grid convergence; rubric and DQ remain under review; the other seven cases were subsequently assessed below. Missing committed figure assets still prevent reconstructing this complete PDF from the curated tip and affect reproducibility separately. No Re200 rerun.
+The former score 2 and note asserted no numeric summary, residual or force plots, wake contour, St or late-time force plot. That is incorrect for the accepted contestant-delivered report. Immutable `solver/report/report.tex:1615` includes `tables/tab_re200.tex`, which gives mean Cd=1.2661, mean Cl=0.00173, lift amplitude=0.5745 and St=0.1859. The accepted `workspace_existing` sibling PDF and its indexed copy share SHA-256 `7c6ee79768735da2201041340245629fc2c081caf7c338fcc056253eb7b86fa5`; the workspace main TeX matches the recorded immutable blob and PDF creation at 2026-08-27 15:41 UTC is inside the selected session. Visual inspection of PDF pages 36–37 confirms readable late lift and drag, wake contours and residual/inner histories. Original forces at t≥180 give mean Cd=1.2661834, Cd range 1.237623–1.293897 and lift range −0.572979–0.576326. Twenty-two interpolated upward mean-lift crossings from t≥180 give 21 periods averaging 5.386263 and frequency 0.185657, consistent with the table’s crossing-based St=0.1857. Case score 2→4, with modest reference underprediction and no independent grid convergence; the other seven cases and full rubric/DQ were subsequently assessed as described above and below. Missing committed figure assets still prevent reconstructing this complete PDF from the curated tip and affect reproducibility separately. No Re200 rerun.
 
 
 ## Seven steady-case evidence corrections — 2026-10-29
 
-The accepted contestant PDF shows numeric summaries and readable case-specific residual/force histories and field contours on pages 24–26, 29–31 and 34. Immutable `report.tex:1259,1277` includes `tables/tab_runs.tex` and `tab_forces.tex`. The previous notes claiming these classes did not exist overlooked the delivered PDF and included tables; missing figure files from the curated tip remain a separate reproducibility issue. In canonical task order the seven steady case scores change 2,2,2,2,2,2,2 → **2,3,3,4,4,4,4**. M0.15 inviscid remains 2 for its large relative final force variation, not a missing-plot claim; M0.8 and M2 inviscid retain material lift/drag variability. Individual notes document each force tail and page. The 100-point rubric, review areas and DQ have not yet been recalibrated. No CFD case was rerun.
+The accepted contestant PDF shows numeric summaries and readable case-specific residual/force histories and field contours on pages 24–26, 29–31 and 34. Immutable `report.tex:1259,1277` includes `tables/tab_runs.tex` and `tab_forces.tex`. The previous notes claiming these classes did not exist overlooked the delivered PDF and included tables; missing figure files from the curated tip remain a separate reproducibility issue. In canonical task order the seven steady case scores change 2,2,2,2,2,2,2 → **2,3,3,4,4,4,4**. M0.15 inviscid remains 2 for its large relative final force variation, not a missing-plot claim; M0.8 and M2 inviscid retain material lift/drag variability. Individual notes document each force tail and page. The 100-point rubric, review areas and DQ were subsequently recalibrated above. No CFD case was rerun.

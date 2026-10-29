@@ -68,7 +68,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-03_68c1ac` | unreviewed |
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-05_21cf4d` | fully reviewed — 74.5/100, DQ=true; both gates pass |
-| `claude_generic_opus-06_40b02c` | partial — all case evidence corrected; source/rubric/DQ pending |
+| `claude_generic_opus-06_40b02c` | fully reviewed — 93/100, DQ=false; both gates pass |
 | `claude_generic_opus-07_c08c67` | unreviewed |
 | `claude_generic_opus-08_853afe` | unreviewed |
 | `claude_generic_opus-09_9cb2fc` | unreviewed |
@@ -237,3 +237,8 @@ Opus-06 seven steady case corrections: accepted contestant PDF pp.24–26,29–3
 
 
 Opus-06 continuing source review: isolated immutable-source CMake build passed using cfd-bench with no network, 2 CPUs, 4 GiB, 128-process limit and 240-second timeout. CTest unit passed; the MPI consistency script failed before launching a solver because `scripts/env.sh:4` references unset `LD_LIBRARY_PATH` under `set -u`. The script uses short steady cases; it was not rerun, and no CFD case or Re200 was run. `main.cpp:323–335` reads global mesh only on rank 0, and `MeshDistributor.cpp:255–310` releases it before solution allocation; `SpatialOperator.cpp:273–279` exchanges U, gradients and limiter values. `Forces.cpp:35–73` separately computes pressure, tangential and normal traction; original metadata reports near-zero normal component consistently with the implemented wall treatment described in report.tex:680–717. Report `tables/tab_mms.tex` gives limited reconstruction convergence orders 2.46, 2.09, 1.52, a qualification for the second-order discussion. Rubric/review areas/DQ remain under active review.
+
+
+## Opus-06 full calibration — 2026-10-29
+
+Rubric 92→93/100; prior rubric awarded zero report/viz points based only on the immutable-only placeholder rebuild, overlooking the accepted contestant PDF. The calibrated report/viz section is 4/5, with the missing curated figure assets reflected separately in reproducibility. All 27 review points, ten rubric sections and DQ triggers now have specific evidence. Case scores in task order 2,2,2,2,2,2,2,2 → 2,3,3,4,4,4,4,4, with case figures and force tails recorded above. Rank-zero global preprocessing mesh is released before solve, solution/gradient/limiter halos are exchanged, and original np1/2/4/8 studies show closely agreeing forces. `Forces.cpp:35–73` separates pressure/tangential/normal traction; metadata near-zero normal is consistent with implemented wall treatment. `tab_mms.tex` limited reconstruction orders 2.46,2.09,1.52 qualify claims of uniform second-order accuracy. Clean immutable build and unit ctest pass in restricted scratch; MPI ctest stops before solver launch on unset LD_LIBRARY_PATH. DQ remains false; no CFD rerun, exhaustive pixel-to-field or external authorship audit. Both gates pass.

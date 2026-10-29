@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "CMake source and documented build/reproduction scripts are committed; evaluator did not repeat a clean solver build."
+      "score": 4.5,
+      "notes": "Immutable CMake build and unit ctest passed in network-disabled scratch with configured externals. The MPI ctest stopped before launching because scripts/env.sh:4 references an unset LD_LIBRARY_PATH under set -u."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 5,
-      "notes": "All eight delivered raw packages pass the explicit output validator."
+      "score": 4.5,
+      "notes": "main.cpp documents solve, case, output and restart; readRestart/writeRestart preserve multiple time levels. All eight original packages pass validator; malformed options were not exhaustively tested."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 5,
-      "notes": "Substantial modular C++ solver, scripts, tests, and report source are present."
+      "notes": "Source separates case/core, CGNS/geometry/partition, physics, numerical operators, MPI, post-processing and output; CMake builds a common core."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 5,
-      "notes": "No direct internal evidence of an external solver wrapper was found; trust policy applied."
+      "score": 4,
+      "notes": "CMake builds submitted C++ core using MPI/CGNS/METIS; no internal wrapper of a complete CFD solver identified. No exhaustive external similarity or license investigation."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Case controls and mesh data are handled through inputs rather than two filename-only branches."
+      "score": 4.5,
+      "notes": "CaseConfig and CGNS reader accept input-defined case/mesh controls; no branch restricted to the two filenames found. General unseen meshes were not run."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 5,
-      "notes": "Source and report document MPI/METIS rank studies and independent checks."
+      "notes": "main.cpp:323\u2013335 reads global mesh only on rank 0; MeshDistributor.cpp:255\u2013310 releases it before solve; SpatialOperator.cpp:273\u2013279 exchanges state, gradients and limiter values. Committed rank table and original runs provide np1/2/4/8 evidence."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "Strong verification tooling is present; independent clean solver rerun was not required."
+      "notes": "SpatialOperator and RunLoop include positivity and finite-residual checks, and report documents limiter freezing. Full malformed-input and arbitrary-mesh paths were not independently exercised."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Terminal response documents 270 unit assertions and contract/physics checks."
+      "score": 4,
+      "notes": "Clean unit ctest passed. MPI ctest failed before solver launch because of unset LD_LIBRARY_PATH in scripts/env.sh; report includes manufactured and flux studies, not independently rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 2,
-      "notes": "452 raw/study artifacts and unreferenced figures required index-only curation."
+      "score": 4,
+      "notes": "Modules and reproducibility documentation are present; curated tip omits required generated report figures and cannot reproduce the accepted PDF without original assets. Code is otherwise buildable with configured externals."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.56
+  "overall_score": 4.43
 }

@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Submitted source and report describe conservative compressible equations."
+      "score": 4.5,
+      "notes": "PerfectGas and finite-volume operators implement compressible equations; report.tex presents nondimensionalization and wall traction. Exhaustive physical verification was not performed."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "CGNS unstructured mesh and geometry implementation documented."
+      "score": 4.5,
+      "notes": "CgnsReader.cpp:170\u2013193 supports MIXED TRI/QUAD and :216\u2013250 merges zone connectivity; LocalMesh geometry and adjacency are used. Arbitrary CGNS layouts were not independently exercised."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Finite-volume residual source and validator-supported outputs are present."
+      "score": 4.5,
+      "notes": "SpatialOperator computes conservative residual and exchanges state/gradient/limiter at interfaces; original rank studies support consistency, but a full independent residual-order verification was not repeated."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Multiple approximate flux studies and production shock treatment are documented."
+      "score": 4.5,
+      "notes": "FluxInviscid.hpp implements Roe/entropy fix, HLLC and Rusanov and shock blending; report describes production choices. No new shock-case run was performed."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Required boundary-condition implementation and surface checks are documented."
+      "score": 4.5,
+      "notes": "BoundaryCondition and SpatialOperator implement farfield, slip and no-slip adiabatic wall; original output validator accepts wall data. General boundaries not exhaustively tested."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 5,
-      "notes": "Second-order reconstruction verification is reported."
+      "score": 4,
+      "notes": "WLS reconstruction is active. Committed tab_mms.tex reports limited reconstruction order 2.46, 2.09, 1.52 across refinements; this does not establish second-order full residual accuracy on all meshes."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Limiter study and production shock-control discussion are present."
+      "score": 4,
+      "notes": "Venkat limiter stays applied when frozen in steady runs (RunLoop.cpp:157\u2013167); Re200 metadata records no freeze. Freezing and its shock/accuracy limitations are disclosed in report."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Laminar cases, wall outputs, and force split evidence pass structural review."
+      "score": 4.5,
+      "notes": "SpatialOperator implements tangential wall traction; Forces.cpp:35\u201373 splits normal and tangential components and reports total. Original metadata normal component is near zero, consistent with chosen wall treatment."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Implicit controls and detailed verification are present."
+      "score": 4.5,
+      "notes": "ImplicitSolver.cpp:107\u2013126 uses LU-SGS forward/back sweeps and neighbor exchange. Report and original histories document CFL controls; no steady rerun was performed."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Re200 t=300 package, BDF2 controls, and periodic analysis are delivered; no rerun performed."
+      "score": 4.5,
+      "notes": "RunLoop.cpp:349\u2013390 assembles frozen-history BDF2 total residual and restart code carries preceding state. Original Re200 reaches t=300 with no reported inner-target misses; independently checked late-period frequency 0.185657."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 5,
-      "notes": "METIS/MPI rank-study and restart evidence are reported."
+      "notes": "METIS partitioner, neighbor exchanges and reductions are present; rank 0 releases preprocessing mesh. Original np1/2/4/8 Re20 and M0.15 studies show close force agreement, with weak-drag sensitivity."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.9
+  "overall_score": 4.46
 }

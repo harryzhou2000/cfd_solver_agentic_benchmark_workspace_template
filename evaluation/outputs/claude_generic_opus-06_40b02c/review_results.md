@@ -2,32 +2,32 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-29T11:34:54.265633+00:00
+Generated: 2026-10-29T11:38:36.278034+00:00
 
-**Overall score: 3.4**
+**Overall score: 4.25**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | All eight raw workspace packages satisfy the contract. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 4.5 | Explicit validator passed eight original packages/report; restart state output and read paths exist. PDF and original result assets are not rebuildable from the curated tip alone. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit eight-case plus report validator returned 0. |
+| 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit eight-case plus report validator passed. This checks structure, not independent numerical accuracy. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 5 | All eight case packages including t=300 Re200 are readable workspace evidence. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Original cases report completion and target residual reductions; Re200 reaches t=300 with zero reported target misses. M0.15 inviscid numerical drag varies substantially in its final 10%. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Terminal response honestly notes small Re200 metric shortfalls. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Re20 Cd≈2.018 and Re200 St≈0.1857 are broadly plausible; M0.15 numerical drag is weak and nonstationary relative to its final value, while M0.8 inviscid lift varies materially. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 0 | Clean immutable report rendering has pervasive missing-asset placeholder boxes. |
+| 5 | **res.visualization** Visualizations | 0.15 | 4.5 | Accepted contestant PDF pp.24–26,29–31,34,36–37 contains case-specific histories, fields and late Re200 lift/drag; the committed source alone cannot rebuild the full figure set. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 1 | Report source is extensive but its curated immutable rendering is visually broken. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 4 | Accepted contestant PDF contains detailed equations, results, limitations, and reference comparisons. The immutable-only build has placeholders because committed figure assets are missing; this affects reproducibility rather than erasing delivered figures. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Raw evidence exists in workspace, but its required curation removes manifests and leaves broken report assets. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3.5 | PDF identifies case data and the immutable TeX includes the case tables. Figure assets/manifest are absent from curated tip; source and full pixel-to-field correspondence were not exhaustively reconstructed. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-29T11:34:54.265633+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.4
+- Overall score (0-5): 4.25
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
