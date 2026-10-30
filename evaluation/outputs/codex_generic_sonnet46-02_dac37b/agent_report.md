@@ -68,7 +68,7 @@ No unanswered metadata questions. Selected the sole main Codex root `01a03d82-f3
 
 ## Limitations
 
-No evaluator clean build or MPI rerun. Re200 was not rerun; readable deliverables show BDF2/inner target evidence, but step 30001/time 300.01 and zero reported reduction are limitations.
+The evaluator clean build succeeded as documented below; no MPI solver rerun. Re200 was not rerun; readable deliverables show BDF2/inner target evidence, but step 30001/time 300.01 and zero reported reduction are limitations.
 
 ## Verdict
 
@@ -90,3 +90,8 @@ M200 laminar force CSV SHA256 `68e2751da5d86ea71016ed3e71e8108e73e7d49039c31b9f1
 ## Mandatory rejection: restart placeholders — 2026-10-30
 
 All eight selected `113f01a:solver/results/final/<case>/restart_final.dat` files match workspace bytes and contain only the 26-byte line `# restart not implemented` plus newline (SHA256 `aad3dadaa2f32b46440f6c511a7cd6d6aebca2ab68747b6ea16dfdbb57b85989`). Immutable `25daaa3:solver/src/OutputWriter.cpp:346–348` writes this literal; `main.cpp:27–38` parses `--restart` without using it. TASK.md:226 prohibited shortcut 6 and examiner README:20 require rejecting submissions with placeholder result files. This is a separately recorded mandatory-rejection reason; numbered DQ2 concerns force/residual histories and is not inferred from restart placeholders. Build/CLI rubric8→5.5, total80→77.5; case-specific physics and other DQ review remain separate and partial. No solver run.
+
+
+## Clean build and PDF inspection — 2026-10-30
+
+Immutable `25daaa3` built successfully in network-disabled `cfd-bench` with two CPUs, 3 GiB and 256 pids, using `CFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install` and `EXTERNAL_ROOT=/opt/external`. OpenMPI header cast warnings did not prevent linking. The executable was not used for a production CFD rerun. All 15 pages of the accepted main PDF were rendered and visually inspected; no obvious missing-asset placeholders were seen. The delivered Re200 force plot's missing readable late drag remains a separate floor defect.

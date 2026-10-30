@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:37:13.108900+00:00
+Generated: 2026-10-30T07:38:32.096173+00:00
 
 **Overall score: 3.71**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Source/build documentation present; no evaluator rebuild. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable 25daaa3 clean CMake build succeeded in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 pids), explicitly setting CFD_EXTERNALS_ROOT and EXTERNAL_ROOT to image libraries/headers. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 2 | main.cpp:27–38 parses --restart but never loads it; OutputWriter.cpp:346–348 emits only a restart placeholder in all eight final packages. |
