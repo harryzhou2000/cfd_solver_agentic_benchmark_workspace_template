@@ -183,7 +183,7 @@
       ]
     },
     "result_review": {
-      "overall_score": 3.55,
+      "overall_score": 3.02,
       "points": [
         {
           "id": "res.contract",
@@ -217,15 +217,15 @@
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Report includes named Mach, pressure, residual, force and surface plots plus Re200 vorticity, with figure manifest."
+          "score": 2,
+          "notes": "Standalone residual histories are readable, but all seven steady force plots collapse at time zero; full-domain contours leave the body/wake tiny, and Re200 late drag is unreadable."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 2,
-          "notes": "Rank table misstates retained force values and report claims second-order final fields for two session-backed first-order viscous runs."
+          "score": 1.5,
+          "notes": "Rank table misstates retained Cd, report claims second-order finals for two first-order runs, and claimed wake visualization is not resolved by its wide field view."
         },
         {
           "id": "res.traceability",
@@ -253,7 +253,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 83.0,
+    "total_scored": 82.5,
     "sections": [
       {
         "id": "build_cli_output",
@@ -315,8 +315,8 @@
         "id": "report",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 2.5,
-        "notes": "Detailed report but rank table misstates actual Cd and claims all final fields second order despite session-backed first-order viscous runs."
+        "score": 2,
+        "notes": "Report equations and tables exist, but rank Cd table is inaccurate, final second-order claim is contradicted by two session-bound runs, and wide-domain contours do not resolve the claimed wake or near-body shock."
       },
       {
         "id": "extensibility",

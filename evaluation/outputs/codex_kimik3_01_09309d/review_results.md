@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T13:26:48.135279+00:00
+Generated: 2026-10-30T13:28:29.522357+00:00
 
-**Overall score: 3.55**
+**Overall score: 3.02**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -21,10 +21,10 @@ Generated: 2026-10-30T13:26:48.135279+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Rankcount Re20 np1/2/4 agree but use different controls from production np8; report table misstates the rank-study Cd values. Other physics remains under review. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 5 | Report includes named Mach, pressure, residual, force and surface plots plus Re200 vorticity, with figure manifest. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2 | Standalone residual histories are readable, but all seven steady force plots collapse at time zero; full-domain contours leave the body/wake tiny, and Re200 late drag is unreadable. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 2 | Rank table misstates retained force values and report claims second-order final fields for two session-backed first-order viscous runs. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 1.5 | Rank table misstates retained Cd, report claims second-order finals for two first-order runs, and claimed wake visualization is not resolved by its wide field view. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Workspace report has figure/run manifests; curated commit excludes raw result data and report-generated manifests, limiting self-contained traceability. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T13:26:48.135279+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.55
+- Overall score (0-5): 3.02
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

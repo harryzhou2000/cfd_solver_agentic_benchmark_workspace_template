@@ -340,15 +340,15 @@
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Report includes named Mach, pressure, residual, force and surface plots plus Re200 vorticity, with figure manifest."
+        "score": 2,
+        "notes": "Standalone residual histories are readable, but all seven steady force plots collapse at time zero; full-domain contours leave the body/wake tiny, and Re200 late drag is unreadable."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 2,
-        "notes": "Rank table misstates retained force values and report claims second-order final fields for two session-backed first-order viscous runs."
+        "score": 1.5,
+        "notes": "Rank table misstates retained Cd, report claims second-order finals for two first-order runs, and claimed wake visualization is not resolved by its wide field view."
       },
       {
         "id": "res.traceability",
@@ -372,7 +372,7 @@
         "evidence": "Selected rollout 019fc805-989c-7971-b70d-53fd4efa3889 applies the 600-step viscous first-order switch at 2026-08-04T10:18:42Z, successfully builds solver/build/cfd2d (call_NQLWSrThOKAoeFBRBQpBlzX2, 10:21:19Z), then launches that path into canonical M080/M200 laminar directories (call_L6Gm7dtyVaAA1nMF7NdZvx6J, 10:31:17Z, argument SHA256 706fef26ee3d9a7744d7132e5c1e4c57804c4f1f892efd5431f7c24e4b717a93). Metadata begins 10:31:18Z; final steps340/69, both below600. Submitted driver.cpp:250\u2013262 sets secondOrder=false through600; residual.cpp:113\u2013137 then uses cell averages. Report.tex:112\u2013117 explicitly claims all final fields are second order and metadata claims order2. Individual historical executable hash unrecorded; session build/launch and timing support the production binding."
       }
     ],
-    "overall_score": 3.55
+    "overall_score": 3.02
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/01",
