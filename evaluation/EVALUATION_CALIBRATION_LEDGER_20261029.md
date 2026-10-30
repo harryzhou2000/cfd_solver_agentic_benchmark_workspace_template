@@ -647,3 +647,6 @@ glm53-04 wake diagnostic: independent shared-edge neighbor least-squares derivat
 
 
 glm53-04 restart/rank checkpoint: source restart serializes U/Uold1/Uold2 by global ID but no time/step, then transient restarts at t=0 with first-step backward Euler; build/contract rubric 10→9. Current rank-study np1/2/8 NACA Cd 0.001153759/0.001153984/0.001167319 and Cl −0.0012681/+0.0007543/+0.0006058; Re20 Cd 2.071663/2.071659/2.071655. Report.tex:529–533 roundoff claim overstates NACA agreement; small absolute force differences do not establish DQ4. Metadata init-only revision does not bind solver generation. Case results 7→6 for M2 laminar false convergence plus documented other limits; rubric total 87→85. Remaining source/rubric/DQ partial.
+
+
+glm53-04 accepted workspace-existing PDF SHA-256 `0962e09351818479a1901c15f83e2336311d91ec35caa4ae3e009d7724d3d9f0`: all 30 pages visually reviewed 2026-10-30, report text and figures present, no missing-asset placeholder observed. Pages 6–23 contain steady results, page25 Re200 force history with startup compressed late drag, pp26–28 field/wake figures, pp28–29 rank comparisons, pp29–30 limitations/reproducibility. This confirms readable report delivery, not physical correctness or historic solver/source binding.
