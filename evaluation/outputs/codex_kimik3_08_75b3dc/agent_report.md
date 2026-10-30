@@ -2,7 +2,7 @@
 
 Curated tip `80fdf699daa4729355996f603d61ebbc23819762` passes audit after index-only removal of 907 tracked generated/build/result artifacts. The selected project-local Codex root and three descendants cover the run. Explicit validation passed the eight final packages and report; the readable 37-page sibling main PDF was visually reviewed and accepted as manager evidence.
 
-**Verdict: 91/100; DQ=false.** Source and delivered evidence support the documented unstructured MPI solver and transient method. The report candidly records slow force convergence and a symmetry-broken laminar M0.8 result; these limitations reduce result credit. Re200 was never rerun.
+**Verdict: 89.5/100; DQ=true (provisional, trigger 7).** M015 laminar is marked converged although its final 500 submitted drag samples span 0.005318–0.009276; the later restart continuation eventually brackets the reported value but does not establish that the submitted final state was force-stable. The report describes that restart band as applying throughout 8000 steps, whereas its actual last 5000 samples span 0.006761–0.007870. Remaining source, rubric and DQ review is underway. Source and delivered evidence support the documented unstructured MPI solver and transient method. The report candidly records slow force convergence and a symmetry-broken laminar M0.8 result; these limitations reduce result credit. Re200 was never rerun.
 
 SHA-256 `run_identity.json`: `2947c446d0239093f21a457db72a1a9310e5aa9497c3e3ff89b2869abc2653c1`.
 

@@ -193,8 +193,8 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Steady targets reached; Re200 periodic."
+          "score": 3,
+          "notes": "M015 laminar status converged despite final500 Cd0.005318..0.009276; continuation eventually brackets the final value but does not show submitted final state stable."
         },
         {
           "id": "res.plausibility",
@@ -225,13 +225,13 @@
           "notes": "Sources/figures traceable."
         }
       ],
-      "overall_score": 4.35,
+      "overall_score": 3.95,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 91,
+    "total_scored": 89.5,
     "sections": [
       {
         "id": "build_cli",
@@ -286,15 +286,15 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 8,
-        "notes": "All eight packages pass explicit validator; delivered laminar plateau limitations reduce credit."
+        "score": 7,
+        "notes": "M015 laminar falsely marked converged while final force window remains materially unsteady; other cases under review."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "37-page readable report with fields/histories/vortex analysis and candid limitations."
+        "score": 4.5,
+        "notes": "Report provides figures and valuable continuation disclosure but overstates full 8000-step restart band and asserts production force stability."
       },
       {
         "id": "extensibility",
@@ -319,8 +319,8 @@
       "notes": "NACA0012 M2.00 inviscid: numeric CL=0.00038, CD=0.09134 at 80fdf69:solver/report/generated_case_sections.tex:68; residual history 80fdf69:solver/report/figures/naca0012_m200_inviscid_residual.png (referenced at solver/report/generated_case_sections.tex:71); force history 80fdf69:solver/report/figures/naca0012_m200_inviscid_forces.png (referenced at solver/report/generated_case_sections.tex:75); computed-field contour 80fdf69:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/generated_case_sections.tex:83). Score 4.5 retained after the post-processing audit. Prior case judgment: Delivered package passed explicit validator; judged from submitted result evidence only."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 4.5,
-      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=-0.00033, CD=0.00775 at 80fdf69:solver/report/generated_case_sections.tex:101; residual history 80fdf69:solver/report/figures/naca0012_m015_laminar_re5000_residual.png (referenced at solver/report/generated_case_sections.tex:104); force history 80fdf69:solver/report/figures/naca0012_m015_laminar_re5000_forces.png (referenced at solver/report/generated_case_sections.tex:108); computed-field contour 80fdf69:solver/report/figures/naca0012_m015_laminar_re5000_mach.png (referenced at solver/report/generated_case_sections.tex:116). Score 4.5 retained after the post-processing audit. Prior case judgment: Delivered package passed explicit validator; judged from submitted result evidence only."
+      "score": 1.5,
+      "notes": "Committed report 80fdf69:solver/report/generated_case_sections.tex:101,131 claims converged Cd0.00775 and states restart Cd stayed 0.0076\u20130.0079 for 8000 steps. Canonical production forces SHA256 f162da1a1a91008551b4b378207e823b9fdd1ba0b614bb342aa52f15995e1d37, matching original contestant commit 97128af, show last500 Cd0.005318..0.009276 and Cl\u22120.001078..0.000599; status SHA256 af9b4b1441127277402b5b991e3e27c8380696f3b4cd64b7d153b8e41b6942b9 marks converged at2888. The continuation tests/out/m015lam_plateau explicitly uses the production restart; its CSV SHA256 8edf32470e1d4f4cb70fdd747e966ab63dc5f6ecf297e12fdcc0a89df778428b has last1000 Cd0.007607..0.007870, but last5000 0.006761..0.007870 and first0.14855, so the reported 8000-step band is not the whole history. Continued run does bracket the final value and provides valuable later evidence but does not make the delivered final state force-stable. TASK.md:140,172 require clear early laminar convergence and stable forces; score4.5\u21921.5 and DQ7. Exact production binary hash remains unrecorded."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 4.5,
@@ -340,8 +340,15 @@
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "metadata/status marks incomplete or failed runs as successful",
+        "found": true,
+        "evidence": "M015 laminar metadata and original-commit-matching status SHA256 af9b4b1441127277402b5b991e3e27c8380696f3b4cd64b7d153b8e41b6942b9 label step2888 converged; submitted force CSV SHA256 f162da1a1a91008551b4b378207e823b9fdd1ba0b614bb342aa52f15995e1d37 shows final500 Cd0.005318..0.009276 and Cl\u22120.001078..0.000599, materially unsteady relative to reported Cd0.00775. TASK.md:140,172 requires clear early convergence and stable forces. The selected 8000-step restart continuation is real and final1000 Cd0.007607..0.007870 brackets this value, but its full history does not stay within the stated band (last5000 0.006761..0.007870, first0.14855); it cannot retroactively make the submitted final state force-stable. The genuine 3.566-order residual drop is not disputed. Other cases remain under review."
+      }
+    ]
   },
   "limitations": [
     "No evaluator clean build or MPI rerun.",
