@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 3,
-      "notes": "CMake source submitted."
+      "score": 4,
+      "notes": "Immutable source clean builds in the network-disabled benchmark container; no CTest tests registered."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 2,
-      "notes": "Partial runner only."
+      "notes": "Case/output CLI is present; --restart is accepted but ignored and completed result contract is not met."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 3,
-      "notes": "Compact solver layout."
+      "score": 2,
+      "notes": "Main solver is compressed into 67 long lines; separate preprocessing and plotting scripts exist."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 3,
-      "notes": "No authorship assessment."
+      "notes": "No internal solver wrapper found; no external authorship investigation performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Case files used."
+      "score": 4,
+      "notes": "Case JSON drives case and mesh; no two-filename-only solver branch found."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 2,
-      "notes": "No submitted MPI production evidence."
+      "score": 3,
+      "notes": "PyMETIS and neighbor halos are implemented; ghost face state has no reconstructed slope and no converged rank comparison exists."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Line search present."
+      "score": 2,
+      "notes": "Input checks and positivity fallback exist; scaled-normal defects and placeholder restart limit reliability."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 1,
-      "notes": "No contract-complete output."
+      "score": 1.5,
+      "notes": "Diagnostic smoke/stability cases exist, but no CTest tests and no completed required production cases."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 3,
-      "notes": "Committed source readable."
+      "score": 2,
+      "notes": "Compressed main.cpp impedes review; build completes with warnings and report exists only as smoke diagnostic."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.55
+  "overall_score": 2.71
 }

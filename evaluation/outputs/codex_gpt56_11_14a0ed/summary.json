@@ -111,64 +111,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 3,
-        "notes": "CMake source submitted."
+        "score": 4,
+        "notes": "Immutable source clean builds in the network-disabled benchmark container; no CTest tests registered."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 2,
-        "notes": "Partial runner only."
+        "notes": "Case/output CLI is present; --restart is accepted but ignored and completed result contract is not met."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 3,
-        "notes": "Compact solver layout."
+        "score": 2,
+        "notes": "Main solver is compressed into 67 long lines; separate preprocessing and plotting scripts exist."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 3,
-        "notes": "No authorship assessment."
+        "notes": "No internal solver wrapper found; no external authorship investigation performed."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Case files used."
+        "score": 4,
+        "notes": "Case JSON drives case and mesh; no two-filename-only solver branch found."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 2,
-        "notes": "No submitted MPI production evidence."
+        "score": 3,
+        "notes": "PyMETIS and neighbor halos are implemented; ghost face state has no reconstructed slope and no converged rank comparison exists."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Line search present."
+        "score": 2,
+        "notes": "Input checks and positivity fallback exist; scaled-normal defects and placeholder restart limit reliability."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 1,
-        "notes": "No contract-complete output."
+        "score": 1.5,
+        "notes": "Diagnostic smoke/stability cases exist, but no CTest tests and no completed required production cases."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 3,
-        "notes": "Committed source readable."
+        "score": 2,
+        "notes": "Compressed main.cpp impedes review; build completes with warnings and report exists only as smoke diagnostic."
       }
     ],
     "disqualification_flags": [
@@ -213,7 +213,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.55
+    "overall_score": 2.71
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -224,77 +224,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 3,
-        "notes": "Partial solver implementation."
+        "notes": "Ideal-gas conservative variables and viscous energy term exist, but numerical consistency is not demonstrated."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Preprocessing exists."
+        "score": 3.5,
+        "notes": "tools/preprocess.py reads TRI/QUAD/BAR and multi-zone geometry; averaged centroids and boundary face count limit correctness."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 3,
-        "notes": "Finite-volume source present."
+        "score": 2,
+        "notes": "Face residual exists, but Rusanov acoustic contribution is not scaled with edge length in main.cpp:40,55."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 2,
-        "notes": "Limited verification."
+        "notes": "Rusanov is implemented but inconsistent scaling of acoustic dissipation undermines the flux."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 2,
-        "notes": "Limited verification."
+        "notes": "Boundary types are implemented; slip reflection receives a non-unit normal main.cpp:52,55."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 2,
-        "notes": "Limited verification."
+        "score": 3,
+        "notes": "Local least-squares linear face states exist; ghost-neighbor face states use cell averages."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 2,
-        "notes": "Limited verification."
+        "score": 3,
+        "notes": "Barth-type local bounds and positivity fallback present; no independent order evidence."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 3,
-        "notes": "Newtonian/Fourier commit."
+        "notes": "Stress/heat and tangential shear source exist, without validated completed laminar results."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Line-search update present."
+        "score": 2,
+        "notes": "Damped diagonal update exists, but line search and target use spatial residual and actual CFL cap differs from README."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 0,
-        "notes": "No Re200 delivery."
+        "score": 1,
+        "notes": "BDF terms exist in update; inner stopping measures only spatial residual, and Re200 is absent."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 1,
-        "notes": "No production MPI result."
+        "score": 3,
+        "notes": "PyMETIS, owned/ghost mesh, neighbor state exchange and reductions exist; rank-ghost reconstructed states are absent."
       }
     ],
     "disqualification_flags": [
@@ -329,7 +329,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.19
+    "overall_score": 2.47
   },
   "result_review": {
     "review_area": "result_review",
@@ -340,49 +340,49 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 0,
-        "notes": "Only two ignored directories; no required raw package set."
+        "notes": "Only two partial CSV histories without metadata; six cases absent and completion would write a placeholder restart."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 0,
-        "notes": "Validator stops at missing metadata."
+        "notes": "Recorded validator stops at missing required metadata; no complete packages."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 0,
-        "notes": "Six required cases and canonical report absent."
+        "notes": "No completed canonical cases; no Re200 run."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 0,
-        "notes": "No verified production evidence."
+        "notes": "Re20 incomplete33-step Cd falls -5.54824\u2192-18.8211; no finished physical validation."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
         "score": 1,
-        "notes": "Smoke report is not a canonical submission report."
+        "notes": "Smoke report has diagnostic plots; no complete production report or case-specific field package."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 1,
-        "notes": "Only smoke report exists."
+        "notes": "README and smoke report disclose development state; no main benchmark report submitted."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 1,
-        "notes": "Partial tooling only."
+        "notes": "Smoke plotting scripts exist; two canonical histories have no metadata or report binding."
       }
     ],
     "disqualification_flags": [

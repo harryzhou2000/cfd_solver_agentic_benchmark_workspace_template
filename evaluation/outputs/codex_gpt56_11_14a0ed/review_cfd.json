@@ -7,77 +7,77 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 3,
-      "notes": "Partial solver implementation."
+      "notes": "Ideal-gas conservative variables and viscous energy term exist, but numerical consistency is not demonstrated."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Preprocessing exists."
+      "score": 3.5,
+      "notes": "tools/preprocess.py reads TRI/QUAD/BAR and multi-zone geometry; averaged centroids and boundary face count limit correctness."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 3,
-      "notes": "Finite-volume source present."
+      "score": 2,
+      "notes": "Face residual exists, but Rusanov acoustic contribution is not scaled with edge length in main.cpp:40,55."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 2,
-      "notes": "Limited verification."
+      "notes": "Rusanov is implemented but inconsistent scaling of acoustic dissipation undermines the flux."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 2,
-      "notes": "Limited verification."
+      "notes": "Boundary types are implemented; slip reflection receives a non-unit normal main.cpp:52,55."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 2,
-      "notes": "Limited verification."
+      "score": 3,
+      "notes": "Local least-squares linear face states exist; ghost-neighbor face states use cell averages."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 2,
-      "notes": "Limited verification."
+      "score": 3,
+      "notes": "Barth-type local bounds and positivity fallback present; no independent order evidence."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 3,
-      "notes": "Newtonian/Fourier commit."
+      "notes": "Stress/heat and tangential shear source exist, without validated completed laminar results."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Line-search update present."
+      "score": 2,
+      "notes": "Damped diagonal update exists, but line search and target use spatial residual and actual CFL cap differs from README."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 0,
-      "notes": "No Re200 delivery."
+      "score": 1,
+      "notes": "BDF terms exist in update; inner stopping measures only spatial residual, and Re200 is absent."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 1,
-      "notes": "No production MPI result."
+      "score": 3,
+      "notes": "PyMETIS, owned/ghost mesh, neighbor state exchange and reductions exist; rank-ghost reconstructed states are absent."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.19
+  "overall_score": 2.47
 }
