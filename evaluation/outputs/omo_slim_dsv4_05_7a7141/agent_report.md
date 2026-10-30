@@ -2,7 +2,7 @@
 
 ## Outcome
 
-The immutable audit-clean submission `308ffdad1069239562786b06cac23612ac9717e4` has a substantial modular C++ CFD implementation, but it does not deliver a valid benchmark result set. The explicit official validator command over all eight canonical paths aborts at `naca0012_m015_inviscid`: `invalid final convergence_status in metadata: failed`. All six readable NACA packages declare `completed: true` and `convergence_status: failed`; their paired `run_status.json` files also say failed. Cylinder Re20 and Re200 have only partial stdout/no final package. The score is **56/100**, and the prior DQ7 finding is removed provisionally: metadata explicitly marks each submitted NACA case failed, and completed=true alone is not a success status. Remaining DQ triggers are under review.
+The immutable audit-clean submission `308ffdad1069239562786b06cac23612ac9717e4` has a substantial modular C++ CFD implementation, but it does not deliver a valid benchmark result set. The explicit official validator command over all eight canonical paths aborts at `naca0012_m015_inviscid`: `invalid final convergence_status in metadata: failed`. All six readable NACA packages declare `completed: true` and `convergence_status: failed`; their paired `run_status.json` files also say failed. Cylinder Re20 and Re200 have only partial stdout/no final package. The score is **56/100**, and the prior DQ7 finding is removed: metadata explicitly marks each submitted NACA case failed, and completed=true alone is not a success status. No other DQ trigger is established by the available evidence.
 
 ## Immutable provenance and session selection
 
@@ -41,7 +41,7 @@ Pre-DQ score **56/100**, previously 58. Weighted Code/CFD/Results are 3.27/3.27/
 
 ## Disqualification assessment
 
-DQ trigger 7 is not established by completed=true alone: all six readable NACA metadata and paired status files explicitly say failed. The validator rejects the failed cases as final results, but does not establish a false successful convergence status. Report claims of convergence are separately penalized. The remaining triggers are under review. No external copy/plagiarism investigation was performed under the trust policy.
+DQ trigger 7 is not established by completed=true alone: all six readable NACA metadata and paired status files explicitly say failed. The validator rejects the failed cases as final results, but does not establish a false successful convergence status. Report claims of convergence are separately penalized. The remaining twelve triggers were assessed individually; no direct supporting evidence establishes them. A later M0.15 history overwrite does not by itself prove the older PDF figure depicts unrelated submitted data. No external copy/plagiarism investigation was performed under the trust policy.
 
 ## Limitations
 
@@ -52,4 +52,4 @@ DQ trigger 7 is not established by completed=true alone: all six readable NACA m
 
 ## Verdict
 
-This is a meaningful implementation attempt, not a complete CFD benchmark delivery. Preserve the source-method credit and report craftsmanship separately from the failed solver outcomes. The provisional score is **56/100**; other DQ and source review remains ongoing.
+This is a meaningful implementation attempt, not a complete CFD benchmark delivery. Preserve the source-method credit and report craftsmanship separately from the failed solver outcomes. The calibrated score is **56/100**, with no DQ established.

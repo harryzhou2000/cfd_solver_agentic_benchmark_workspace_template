@@ -423,13 +423,13 @@
         "id": 7,
         "text": "metadata.json marks incomplete or failed runs as successful final results",
         "found": false,
-        "evidence": "All six NACA metadata files and paired run_status explicitly say convergence_status failed, while metadata says completed true. The validator rejects failed statuses as final results, but completed alone does not establish that metadata falsely marks a failed run converged or statistically periodic. Report claims of successful cases remain separately penalized; other DQ triggers remain under review. Source solver.cpp:1043\u20131058 sums per-rank transient iteration and convergence counts before dividing only by physical steps; no Re200 final metadata exists, so this source defect is not evidence of an actual false success."
+        "evidence": "All six NACA metadata files and paired run_status explicitly say convergence_status failed, while metadata says completed true. The validator rejects failed statuses as final results, but completed alone does not establish that metadata falsely marks a failed run converged or statistically periodic. Report claims of successful cases remain separately penalized; other DQ triggers were independently assessed. Source solver.cpp:1043\u20131058 sums per-rank transient iteration and convergence counts before dividing only by physical steps; no Re200 final metadata exists, so this source defect is not evidence of an actual false success."
       },
       {
         "id": 8,
         "text": "Report figures do not correspond to submitted field/CSV outputs",
         "found": false,
-        "evidence": "Traceability is inadequate because immutable report dependencies/results are absent, but no direct mismatch between a particular figure and a different source file was established."
+        "evidence": "Historical delivered PDF pages5\u201310 show NACA figures, but no specific embedded figure has been proven to depict unrelated submitted data. M0.15 forces were overwritten after the PDF and status, so mismatch with the current history alone cannot establish DQ8. PDF cylinder pages11\u201313 contain missing-image boxes; manifest/traceability limitations are scored."
       },
       {
         "id": 9,
@@ -447,13 +447,13 @@
         "id": 11,
         "text": "Surface no-slip checks fail because reported wall rows are actually adjacent cell-center velocities without documentation",
         "found": false,
-        "evidence": "No direct contradictory surface-row evidence was established from the available failed packages."
+        "evidence": "output.cpp:104\u2013115 explicitly writes zero no-slip wall velocity rather than an undocumented adjacent cell-center velocity. Failed cases do not establish the specific DQ11 condition."
       },
       {
         "id": 12,
         "text": "Figure files are misnamed",
         "found": false,
-        "evidence": "Required figures are not immutably delivered; missing/unverifiable figures are scored as report/result defects, not a proven misnaming trigger."
+        "evidence": "Historical PDF contains NACA Mach/pressure figures, and cylinder image placeholders. No specific Mach/pressure filename swap is demonstrated; absence and questionable physics are scored separately."
       },
       {
         "id": 13,
@@ -469,7 +469,7 @@
     "No independent clean build was performed because it was unnecessary to resolve the failed submitted results.",
     "Context-window values are unavailable in bundled project telemetry and no external source was queried.",
     "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
-    "2026-10-31 partial calibration: removed DQ7 because each submitted metadata record explicitly says failed; validator rejection is a delivery failure, not by itself a false success status. Remaining evidence and flags under review.",
+    "2026-10-31 partial calibration: removed DQ7 because each submitted metadata record explicitly says failed; validator rejection is a delivery failure, not by itself a false success status. The full independent DQ and source review was subsequently completed.",
     "Historical contestant sibling report.pdf SHA-256 580503a7ff76ade191ac5ebe0d9a61c058c98df5d2688f72baab610883118438 (manager history 1f98032809882b994e2a5af07da814c22ad6a664) was delivered and its readable pages assessed, but pages 11\u201313 contain missing-cylinder-figure placeholders. No suitable approved PDF can be built from the immutable source because no figure assets are committed.",
     "Case calibration uses the historical delivered PDF even though its missing cylinder-image placeholders disqualify it as the approved main PDF. M0.15 current force history is later than its older failed status; they are not conflated.",
     "Source solver.cpp:1043\u20131058 sums per-rank transient counts before dividing by step count; field/surface output is rank0 local only. No delivered Re200 metadata proves DQ7 from these source defects."
