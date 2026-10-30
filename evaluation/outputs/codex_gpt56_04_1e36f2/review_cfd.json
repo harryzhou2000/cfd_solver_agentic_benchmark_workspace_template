@@ -7,35 +7,35 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 5,
-      "notes": "Report and physics source specify conservative perfect-gas NS equations, coefficients, Newtonian stress and Fourier heat flux."
+      "notes": "physics.cpp:40\u201349 perfect-gas conserved-state pressure and :67\u201373 Euler flux; report.tex:40 describes Newtonian/Fourier viscous terms."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 5,
-      "notes": "CGNS mixed-cell geometry, boundary families and cell-face topology are implemented."
+      "notes": "mesh.cpp:64\u2013129 reads CGNS coordinates, BCs and element sections, :140\u2013145 builds polygon geometry and rejects degenerate areas."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 5,
-      "notes": "Face-oriented cell-centred FV residual and global residual norms are source-supported."
+      "notes": "solver.cpp:696\u2013775 assembles face fluxes, :948\u2013950 globally reduces residual norms; workspace validator passes all cases, without proving accuracy."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Rusanov/LLF flux is implemented and described; it is deliberately diffusive rather than an entropy-fixed Roe method."
+      "notes": "physics.cpp:82\u201394 implements Rusanov local Lax\u2013Friedrichs, while solver.cpp:768\u2013775 also offers HLLC selection; no entropy-fixed Roe claim."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 5,
-      "notes": "Characteristic farfield, slip and no-slip adiabatic paths are documented and implemented."
+      "notes": "solver.cpp:303\u2013347 characteristic farfield and :735\u2013775 slip/no-slip impermeable wall paths; :1801\u201304 outputs boundary no-slip values."
     },
     {
       "id": "cfd.reconstruction",
@@ -49,7 +49,7 @@
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Barth-Jespersen limiter, sensor and positivity/rejected-update safeguards are source-supported."
+      "notes": "solver.cpp:604\u2013626 bounds reconstructed primitive extrema, :646\u2013664 applies pressure-sensor fallback; physics.cpp:40\u201362 enforces physical state. Historical limiter activations not independently established."
     },
     {
       "id": "cfd.viscous",

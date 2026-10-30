@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:33:15.929752+00:00
+Generated: 2026-10-30T11:34:23.640451+00:00
 
 **Overall score: 4.12**
 
@@ -12,10 +12,10 @@ Generated: 2026-10-30T11:33:15.929752+00:00
 | 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Clean immutable-source CMake build passes using supplied dependencies in restricted cfd-bench; CTest contains no registered tests. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 5 | main.cpp implements the required solve --case/--output interface and explicit malformed-argument errors. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 5 | main.cpp:32–70 parses required solve --case/--output and rejects unknown/missing arguments; :156–159 explicitly refuses unsupported transient restart. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 5 | Separated config, IO, mesh, partition, physics and solver modules give clear numerical boundaries. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 5 | config, physics, mesh, partition, solver and IO modules separate responsibilities; finite-volume core and report generation are in the submitted tree. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
 | 4 | **code.originality** Originality and license compliance | 0.15 | 4 | No internal executable wrapper was found. Trust policy forbids external similarity investigation, so originality is not positively proven. |
@@ -27,7 +27,7 @@ Generated: 2026-10-30T11:33:15.929752+00:00
 | 6 | **code.mpi** MPI correctness | 0.15 | 3.5 | METIS partition.cpp:73–78, neighbour Isend/Irecv :81–89, state/gradient exchange solver.cpp:507,667–668 and global reductions :948–950,1760 are implemented. Reported M015 rank comparison differs 73.81% relatively at near-zero Cd but 0.000892 absolute, with different endpoints and unbound binaries; retain uncertainty without asserting DQ4. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Exceptions, mesh checks, positive-state rejection and finite residual checks are present; no independent memory stress run. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | physics.cpp:40–62 tests finite positive state and falls back; mesh.cpp:140–145 rejects degenerate cell geometry; no independent memory stress test. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
 | 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Mesh diagnostics target builds, but CTest has no registered tests; report and validator provide additional contestant-side checks. |

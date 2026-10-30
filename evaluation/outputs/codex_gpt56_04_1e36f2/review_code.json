@@ -14,14 +14,14 @@
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 5,
-      "notes": "main.cpp implements the required solve --case/--output interface and explicit malformed-argument errors."
+      "notes": "main.cpp:32\u201370 parses required solve --case/--output and rejects unknown/missing arguments; :156\u2013159 explicitly refuses unsupported transient restart."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 5,
-      "notes": "Separated config, IO, mesh, partition, physics and solver modules give clear numerical boundaries."
+      "notes": "config, physics, mesh, partition, solver and IO modules separate responsibilities; finite-volume core and report generation are in the submitted tree."
     },
     {
       "id": "code.originality",
@@ -49,7 +49,7 @@
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "Exceptions, mesh checks, positive-state rejection and finite residual checks are present; no independent memory stress run."
+      "notes": "physics.cpp:40\u201362 tests finite positive state and falls back; mesh.cpp:140\u2013145 rejects degenerate cell geometry; no independent memory stress test."
     },
     {
       "id": "code.testing",

@@ -37,14 +37,14 @@
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 5,
-          "notes": "main.cpp implements the required solve --case/--output interface and explicit malformed-argument errors."
+          "notes": "main.cpp:32\u201370 parses required solve --case/--output and rejects unknown/missing arguments; :156\u2013159 explicitly refuses unsupported transient restart."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 5,
-          "notes": "Separated config, IO, mesh, partition, physics and solver modules give clear numerical boundaries."
+          "notes": "config, physics, mesh, partition, solver and IO modules separate responsibilities; finite-volume core and report generation are in the submitted tree."
         },
         {
           "id": "code.originality",
@@ -72,7 +72,7 @@
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 4,
-          "notes": "Exceptions, mesh checks, positive-state rejection and finite residual checks are present; no independent memory stress run."
+          "notes": "physics.cpp:40\u201362 tests finite positive state and falls back; mesh.cpp:140\u2013145 rejects degenerate cell geometry; no independent memory stress test."
         },
         {
           "id": "code.testing",
@@ -99,35 +99,35 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 5,
-          "notes": "Report and physics source specify conservative perfect-gas NS equations, coefficients, Newtonian stress and Fourier heat flux."
+          "notes": "physics.cpp:40\u201349 perfect-gas conserved-state pressure and :67\u201373 Euler flux; report.tex:40 describes Newtonian/Fourier viscous terms."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 5,
-          "notes": "CGNS mixed-cell geometry, boundary families and cell-face topology are implemented."
+          "notes": "mesh.cpp:64\u2013129 reads CGNS coordinates, BCs and element sections, :140\u2013145 builds polygon geometry and rejects degenerate areas."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 5,
-          "notes": "Face-oriented cell-centred FV residual and global residual norms are source-supported."
+          "notes": "solver.cpp:696\u2013775 assembles face fluxes, :948\u2013950 globally reduces residual norms; workspace validator passes all cases, without proving accuracy."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Rusanov/LLF flux is implemented and described; it is deliberately diffusive rather than an entropy-fixed Roe method."
+          "notes": "physics.cpp:82\u201394 implements Rusanov local Lax\u2013Friedrichs, while solver.cpp:768\u2013775 also offers HLLC selection; no entropy-fixed Roe claim."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 5,
-          "notes": "Characteristic farfield, slip and no-slip adiabatic paths are documented and implemented."
+          "notes": "solver.cpp:303\u2013347 characteristic farfield and :735\u2013775 slip/no-slip impermeable wall paths; :1801\u201304 outputs boundary no-slip values."
         },
         {
           "id": "cfd.reconstruction",
@@ -141,7 +141,7 @@
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4,
-          "notes": "Barth-Jespersen limiter, sensor and positivity/rejected-update safeguards are source-supported."
+          "notes": "solver.cpp:604\u2013626 bounds reconstructed primitive extrema, :646\u2013664 applies pressure-sensor fallback; physics.cpp:40\u201362 enforces physical state. Historical limiter activations not independently established."
         },
         {
           "id": "cfd.viscous",
@@ -310,35 +310,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 2,
-      "notes": "Score 2 retained provisionally: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.00210136, Cl=-0.000161318; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 c11716e0f3a8ef251d922bd67264c1f6d7a3ebc04987db6b5f92564bf2a68aee is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; no alternate reliable case field rendering identified. Final 200 force rows have Cd 0.00244349\u21920.00210136; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Near-zero final Cd/Cl are consistent with nominal symmetric inviscid setup; 200-row drag still drops 14% relative, and np2/np8 comparison remains sensitive to near-zero baseline and differing endpoints."
+      "notes": "Score 2 retained: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.00210136, Cl=-0.000161318; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 c11716e0f3a8ef251d922bd67264c1f6d7a3ebc04987db6b5f92564bf2a68aee is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; the committed report inventory contains no alternative faithful field renderer. Final 200 force rows have Cd 0.00244349\u21920.00210136; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Near-zero final Cd/Cl are consistent with nominal symmetric inviscid setup; 200-row drag still drops 14% relative, and np2/np8 comparison remains sensitive to near-zero baseline and differing endpoints."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
-      "notes": "Score 2 retained provisionally: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.00857203, Cl=0.000919066; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 aed062f5ff0b8692ff4a2db136e522908cb3c2d37c6e1303b8017d8cbb9b183b is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; no alternate reliable case field rendering identified. Final 200 force rows have Cd 0.00879933\u21920.00857203; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Cd 0.00857 and nearly symmetric Cl are finite; 200-row drag drops about 2.6%, and reliable shock structure cannot be established from the incorrectly mapped field figure."
+      "notes": "Score 2 retained: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.00857203, Cl=0.000919066; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 aed062f5ff0b8692ff4a2db136e522908cb3c2d37c6e1303b8017d8cbb9b183b is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; the committed report inventory contains no alternative faithful field renderer. Final 200 force rows have Cd 0.00879933\u21920.00857203; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Cd 0.00857 and nearly symmetric Cl are finite; 200-row drag drops about 2.6%, and reliable shock structure cannot be established from the incorrectly mapped field figure."
     },
     "naca0012_m200_inviscid": {
       "score": 2,
-      "notes": "Score 2 retained provisionally: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.0920059, Cl=0.000538188; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 d09932460a507ea61e9e7707b6c9033de113021a53b3a4b4faa727b09826e21d is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; no alternate reliable case field rendering identified. Final 200 force rows have Cd 0.09188759\u21920.09200590; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Cd 0.09201 is positive and last200 drag varies little; reliable supersonic shock geometry cannot be judged from incorrectly mapped cell contours."
+      "notes": "Score 2 retained: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.0920059, Cl=0.000538188; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 d09932460a507ea61e9e7707b6c9033de113021a53b3a4b4faa727b09826e21d is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; the committed report inventory contains no alternative faithful field renderer. Final 200 force rows have Cd 0.09188759\u21920.09200590; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Cd 0.09201 is positive and last200 drag varies little; reliable supersonic shock geometry cannot be judged from incorrectly mapped cell contours."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 2,
-      "notes": "Score 2 retained provisionally: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.0751211, Cl=-0.000457933; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 a62337ebb39c620f4f379cb3a7c344c9f258d1b46252477e8c135ba2ad0c2dfe is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; no alternate reliable case field rendering identified. Final 200 force rows have Cd 0.07429601\u21920.07512106; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Final pressure/viscous drag contributions 0.02246/0.05266 sum to 0.07512, while final200 drag rises about 1.1%; wall trace is no-slip, but boundary layer geometry lacks a faithful contour."
+      "notes": "Score 2 retained: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.0751211, Cl=-0.000457933; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 a62337ebb39c620f4f379cb3a7c344c9f258d1b46252477e8c135ba2ad0c2dfe is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; the committed report inventory contains no alternative faithful field renderer. Final 200 force rows have Cd 0.07429601\u21920.07512106; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Final pressure/viscous drag contributions 0.02246/0.05266 sum to 0.07512, while final200 drag rises about 1.1%; wall trace is no-slip, but boundary layer geometry lacks a faithful contour."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 2,
-      "notes": "Score 2 retained provisionally: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.0788425, Cl=-0.00349607; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 d930c32b5c39b56bfa4c1d904b5868424249faac600da8dd02ff435289a26cdb is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; no alternate reliable case field rendering identified. Final 200 force rows have Cd 0.08065589\u21920.07884255; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Final pressure/viscous drag 0.04412/0.03472 sums to 0.07884; final200 drag falls 2.25%, whereas the last30 has a very short near-flat window, so sustained convergence is qualified."
+      "notes": "Score 2 retained: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.0788425, Cl=-0.00349607; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 d930c32b5c39b56bfa4c1d904b5868424249faac600da8dd02ff435289a26cdb is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; the committed report inventory contains no alternative faithful field renderer. Final 200 force rows have Cd 0.08065589\u21920.07884255; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Final pressure/viscous drag 0.04412/0.03472 sums to 0.07884; final200 drag falls 2.25%, whereas the last30 has a very short near-flat window, so sustained convergence is qualified."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 2,
-      "notes": "Score 2 retained provisionally: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.0445481, Cl=0.0000619888; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 95fc9be3c40b29e3c0e07bbc9e42d935a0191122cfa4eb1eeab9128e74fa7bed is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; no alternate reliable case field rendering identified. Final 200 force rows have Cd 0.07485545\u21920.04454808; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. At step787 final pressure/viscous drag 0.01812/0.02642 sums to 0.04455, below inviscid M2 drag 0.09201. Final200 falls 40.5%, and last30 is near a turning point; the residual target was met but sustained convergence remains uncertain."
+      "notes": "Score 2 retained: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=0.0445481, Cl=0.0000619888; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 95fc9be3c40b29e3c0e07bbc9e42d935a0191122cfa4eb1eeab9128e74fa7bed is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; the committed report inventory contains no alternative faithful field renderer. Final 200 force rows have Cd 0.07485545\u21920.04454808; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. At step787 final pressure/viscous drag 0.01812/0.02642 sums to 0.04455, below inviscid M2 drag 0.09201. Final200 falls 40.5%, and last30 is near a turning point; the residual target was met but sustained convergence remains uncertain."
     },
     "cylinder_m010_laminar_re20": {
       "score": 2,
-      "notes": "Score 2 retained provisionally: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=2.03721, Cl=-0.000339201; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 28f09a774de1d1cd231fbfc05bd739a329e4edb76fb676b0e65c5e3dfa0ebf01 is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; no alternate reliable case field rendering identified. Final 200 force rows have Cd 2.03923302\u21922.03720638; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Positive drag 2.03721 with small lift and pressure/viscous components 1.23868/0.79853 is plausible; rank comparison is close, but the report wake contour has a demonstrated mapping error and cannot establish detailed wake geometry."
+      "notes": "Score 2 retained: fe320b9:solver/report/generated_results.tex includes case-specific residual, force and field figures and reports Cd=2.03721, Cl=-0.000339201; old note incorrectly labeled residual reduction as Cl and denied those figures existed. The submitted full Mach image SHA256 28f09a774de1d1cd231fbfc05bd739a329e4edb76fb676b0e65c5e3dfa0ebf01 is pixel-identical to regeneration of the submitted plotting code on its selected workspace PVTU; independent connectivity analysis shows systematic quad-to-cell value misassignment (DQ8), so that field rendering is not faithful evidence. The other submitted contours use the same cell-data rendering path; the committed report inventory contains no alternative faithful field renderer. Final 200 force rows have Cd 2.03923302\u21922.03720638; exact historical source/binary binding remains qualified. See calibration ledger for field hashes and qualifications. Positive drag 2.03721 with small lift and pressure/viscous components 1.23868/0.79853 is plausible; rank comparison is close, but the report wake contour has a demonstrated mapping error and cannot establish detailed wake geometry."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Score 2 retained (previously 5 before retrospective): fe320b9:solver/report/generated_results.tex:114,229 reports final Cd=1.15235, Cl=-0.0874561, mean Cd=1.15175, lift amplitude 0.336351 and St=0.16333; the committed report includes residual, force and wake figures, contrary to the old note. Committed figures/cylinder_m010_laminar_re200_np16_forces.png SHA256 adb01d15f825fb0a4e945f42d52514694011758fc061b1fd2548f431349b3bd6 shows late lift but startup drag spike compresses late drag, with no alternate late-force figure found; the explicit late lift AND drag floor remains unmet. Workspace canonical forces.csv SHA256 04329004f3c2c0a4d6c228b9b0de34df0f4320d35046052573dfc9ccae68c6fb over t>=150 has mean Cd 1.1517514, Cl range -0.336021..0.336682, 24 upward crossings, mean period 6.122569 and frequency 0.16333, consistent with reported shedding. Metadata reports target 0.001, zero misses and final ratio 0.000988706; source solver.cpp:2544-55,2582-99 accepts only the target, but exact production executable is unbound. No unsteady rerun."
+      "notes": "Score 2 retained (previously 5 before retrospective): fe320b9:solver/report/generated_results.tex:114,229 reports final Cd=1.15235, Cl=-0.0874561, mean Cd=1.15175, lift amplitude 0.336351 and St=0.16333; the committed report includes residual, force and wake figures, contrary to the old note. Committed figures/cylinder_m010_laminar_re200_np16_forces.png SHA256 adb01d15f825fb0a4e945f42d52514694011758fc061b1fd2548f431349b3bd6 shows late lift but startup drag spike compresses late drag, with no alternate late-force figure found; the explicit late lift AND drag floor remains unmet. Workspace canonical forces.csv SHA256 04329004f3c2c0a4d6c228b9b0de34df0f4320d35046052573dfc9ccae68c6fb over t>=150 has mean Cd 1.1517514, Cl range -0.336021..0.336682, 24 upward crossings, mean period 6.122569 and frequency 0.16333, consistent with reported shedding. Metadata reports target 0.001, zero misses and final ratio 0.000988706; source solver.cpp:2544-55,2582-99 accepts only the target, but exact production executable is unbound. No unsteady rerun. The committed full Mach contour also reproduces pixel-identically with 19,314/19,870 triangles assigned wrong cells; wake velocity and pressure use the same cell-data rendering path. Figure inventory contains no independently rendered faithful wake alternative."
     }
   },
   "disqualification": {
@@ -425,11 +425,12 @@
     ]
   },
   "limitations": [
-    "No independent clean build, solver rerun, or fresh explicit validator invocation was performed in this scorecard.",
     "Re200 was not rerun.",
     "Raw result packages and manifest sources were examined read-only in the workspace but are intentionally absent from the immutable submission commit.",
     "Originality was assessed only from direct internal evidence under the trust policy.",
     "The final-response and run-identity sidecar hashes must be recorded in agent_report.md; current index schema does not validate those sidecars.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "Clean immutable-source build succeeds and a fresh structural examiner check passes eight workspace packages; CTest has no registered tests. These checks do not prove physical accuracy.",
+    "Historical production executables and some actual controls are not independently bound to the final source; M200 laminar sustained force convergence and M015 rank-causation remain qualified.",
+    "Prior 2026-09-06 committed-only figure-floor notes were inaccurate; delivered figures exist but their cell-data rendering misassigns values."
   ]
 }

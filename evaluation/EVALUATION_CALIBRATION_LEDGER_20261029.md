@@ -117,7 +117,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_gpt56_01_cb349f` | fully reviewed: 94/100, no DQ found; executable and individual image bindings qualified |
 | `codex_gpt56_02_38616e` | fully reviewed: 90/100, no DQ established; historic binary/precursor and image bindings qualified |
 | `codex_gpt56_03_93b257` | fully reviewed: 96.5/100, no DQ established; executable/individual figure bindings qualified |
-| `codex_gpt56_04_1e36f2` | partial — see finding below |
+| `codex_gpt56_04_1e36f2` | fully reviewed: 85.5/100, DQ8; historical executables, some controls and sustained convergence qualified |
 | `codex_gpt56_05_7bee7c` | unreviewed |
 | `codex_gpt56_06_97ae53` | unreviewed |
 | `codex_gpt56_07_b7c2c8` | partial — DQ evidence/ID corrected; full rubric calibration pending |
@@ -1099,3 +1099,6 @@ gpt56_04 rubric/source checkpoint (partial): MPI4→7 after removing unsupported
 
 
 gpt56_04 case-physics checkpoint: each of seven steady case notes now records the actual final force values, final200 trend, specific physical qualification and the independently reproduced unreliable contour; each remains2 pending alternative figure review, not because plots were absent. Re20 positive Cd2.037 with small lift is plausible; M200 lam Cd0.04455 and 40.5% final200 drop are uncertain, not proof of failure. Re200 note separately documents actual St, force and explicit late-drag floor. Added criterion-specific source evidence for BDF acceptance, viscous tangent, reconstruction, result contract and report defects. Overall review remains partial pending alternative plots, all remaining rubric/review and DQ examination. No CFD rerun.
+
+
+gpt56_04 full qualified review: all 48 accepted PDF pages, eight case histories, ten rubric sections, 27 review points and numbered DQ1–13 have been manually assessed. Committed report figure inventory and generator show full/zoom Mach, pressure and wake velocity use the same cell-data plot_field path; input PVTU arrays are cell-located. All eight full Mach PNGs independently reproduce pixel-identically with incorrect quad value mapping, documented above; no independently rendered alternative faithful field contour was found, and Re200 also lacks readable late drag. Eight case scores remain2, with case-specific numerical/physics qualifications in their notes. Source evidence now individually recorded for CLI, gas equations, CGNS geometry, flux/BC, limiter, projection, implicit/BDF, MPI and positive-state handling. Structural validator and clean build pass; no CTest tests, no unsteady rerun. DQ8 true from an actual embedded report figure; DQ4 and DQ7 not established for the reasons above, other triggers individually examined. Final85.5/100 pre-DQ; actual historical binaries, some earlier controls, M200 sustained convergence and MPI rank causation cannot be independently bound and remain explicit limitations, not assertions of success or fabrication.

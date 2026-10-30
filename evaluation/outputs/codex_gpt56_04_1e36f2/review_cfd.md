@@ -2,32 +2,32 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:33:15.930183+00:00
+Generated: 2026-10-30T11:34:23.640901+00:00
 
 **Overall score: 4.42**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 5 | Report and physics source specify conservative perfect-gas NS equations, coefficients, Newtonian stress and Fourier heat flux. |
+| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 5 | physics.cpp:40–49 perfect-gas conserved-state pressure and :67–73 Euler flux; report.tex:40 describes Newtonian/Fourier viscous terms. |
 |   | 2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly. | | | |
 |   | *Evidence:* Source flux assembly and report equations. | | | |
-| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 5 | CGNS mixed-cell geometry, boundary families and cell-face topology are implemented. |
+| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 5 | mesh.cpp:64–129 reads CGNS coordinates, BCs and element sections, :140–145 builds polygon geometry and rejects degenerate areas. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
-| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 5 | Face-oriented cell-centred FV residual and global residual norms are source-supported. |
+| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 5 | solver.cpp:696–775 assembles face fluxes, :948–950 globally reduces residual norms; workspace validator passes all cases, without proving accuracy. |
 |   | Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction. | | | |
 |   | *Evidence:* residual assembly code; residuals.csv shows global reduction. | | | |
-| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | Rusanov/LLF flux is implemented and described; it is deliberately diffusive rather than an entropy-fixed Roe method. |
+| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | physics.cpp:82–94 implements Rusanov local Lax–Friedrichs, while solver.cpp:768–775 also offers HLLC selection; no entropy-fixed Roe claim. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 5 | Characteristic farfield, slip and no-slip adiabatic paths are documented and implemented. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 5 | solver.cpp:303–347 characteristic farfield and :735–775 slip/no-slip impermeable wall paths; :1801–04 outputs boundary no-slip values. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
 | 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | solver.cpp:535–553 computes conditioned least-squares gradients; :637–664 applies limiter and pressure-jump fallback. Production controls for earlier cases and executable remain unbound. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Barth-Jespersen limiter, sensor and positivity/rejected-update safeguards are source-supported. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | solver.cpp:604–626 bounds reconstructed primitive extrema, :646–664 applies pressure-sensor fallback; physics.cpp:40–62 enforces physical state. Historical limiter activations not independently established. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | solver.cpp:1741–49 projects viscous traction to tangent and :1806–19 calculates wall cf; primitive-gradient shock coupling remains a limitation. |
