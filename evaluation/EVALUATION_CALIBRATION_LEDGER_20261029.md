@@ -88,7 +88,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_12_7e965b` | fully reviewed: 90→79, DQ false; all cases 2 |
 | `codex_dsv4_flash_14_80096b` | partial: Re200 and initial provenance/mesh assessed; remaining cases/rubric/DQ pending |
 | `codex_generic_02_ed5ee6` | partial: DQ7, TASK full mesh, Re200 checked; others pending |
-| `codex_generic_03_5f2165` | unreviewed |
+| `codex_generic_03_5f2165` | partial: TASK full mesh/state, Re200 checked; others pending |
 | `codex_generic_04_16009f` | unreviewed |
 | `codex_generic_05_2599b1` | unreviewed |
 | `codex_generic_glm53-01_99a969` | unreviewed |
@@ -537,3 +537,8 @@ generic_02 partial steady/build review: Re20 case 0→1 as recognizable severely
 
 
 generic_02 partial rubric/provenance boundary: provisional rubric 36→33 (build 5→6, MPI 5→2, implicit 3→2); all 10 sections/27 points and DQ rules have criterion-specific evidence. DQ7 and TASK full mesh stand. M0.15 inviscid canonical package absent; other current raw result values disagree with report/terminal and metadata git_revision=null, so exact historical source/run selection unproven and review remains partial. main.cpp:1676–1690 CLI lacks restart; :939–974 is diagonal pseudo-time update, :1515–1546 tests spatial-only residual for transient. tools/plot_results.py:231–232 plots steady physical_time=0, so histories collapse; original PDF has explicit missing field placeholders, preserved as historical content but snapshot absent under vendor policy. Clean immutable build passes with warnings, gates pass; no CFD rerun.
+
+
+## generic_03 partial replicated-state/Re200 review — 2026-10-30
+
+DQ false→true under TASK.md:227. Immutable b001f2e solver/src/main.cpp:825–832 loads full CGNS mesh and initializes every cell per rank; :307–354 invokes METIS but retains all cells and :357–363 local copies in explicitly redundant mode. Canonical metadata says serial and replication=true, so no numbered DQ9 metadata-METIS finding inferred. Report.tex:99–102 discloses redundancy. Canonical Re200 metadata/status say failed at step218 t0, Cd17.90433/Cl0.004441; score stays0. Metadata SHA 23d2e4c9d5b0f6a3959bd4088908d1bb1f4859b4d112bc1e38e429d6880519b5, forces SHA 1b71271fb33b46e38a12ae28ddd9ce68c479ab8df0a52d85c846342c52cc0941. Report.tex:265–270 describes a different 171-step diagnostic and discloses pseudo-time not BDF2; git_revision=null. Do not infer DQ7 from old automated periodic inventory when current canonical metadata explicitly fails. Other cases/source/rubric/DQ partial; both gates pass, no CFD rerun.

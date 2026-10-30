@@ -336,12 +336,18 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=1.71, CD=0.228 at b001f2e:report/report.tex:268; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour b001f2e:report/figures/cylinder_m010_laminar_re200_vorticity.png (referenced at report/report.tex:232); no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: run_status failed at step 218, physical time 0; never rerun."
+      "notes": "Score 0 retained. Current canonical results/cylinder_m010_laminar_re200 run_status and metadata say failed at step 218, time 0.0/300; force history ends Cd 17.90433, Cl 0.004441, no completed transient. Report.tex:265\u2013270 describes a different 171-step diagnostic Cd\u22480.228/Cl\u22481.71 and explicitly says pseudo-time, not BDF2. Metadata git_revision=null, so different reported/current outputs are not conflated; strict transient misses cannot be inferred. Metadata SHA 23d2e4c9d5b0f6a3959bd4088908d1bb1f4859b4d112bc1e38e429d6880519b5; force SHA 1b71271fb33b46e38a12ae28ddd9ce68c479ab8df0a52d85c846342c52cc0941."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh and state replication during iterations",
+        "found": true,
+        "evidence": "Immutable b001f2e main.cpp:825\u2013832 reads complete CGNS mesh on every rank and initializes every cell state; :307\u2013354 explicitly retains all cells per rank despite calling METIS; :357\u2013363 says local copying in all-rank-redundant mode. TASK.md:227 prohibits full mesh or state replication during iterations. Canonical current metadata reports partitioner=serial and replication=true, so numbered DQ9 metadata-METIS condition is not inferred."
+      }
+    ]
   },
   "limitations": [
     "No evaluator rerun was performed; Re200 was not rerun.",

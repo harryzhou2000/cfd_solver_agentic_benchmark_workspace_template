@@ -98,3 +98,10 @@ No independent rebuild/rerun was performed. The contestant final response contai
 ## Verdict
 
 30/100, DQ=false. Basic infrastructure exists, but all delivered cases are failed/not converged, Re200 is absent as a physical-time production result, and the report/session claims are inconsistent.
+
+
+## Partial replicated-state and Re200 review — 2026-10-30
+
+Immutable b001f2e solver/src/main.cpp:825–832 reads full CGNS mesh and initializes every cell on every MPI rank; :307–354 invokes METIS but explicitly leaves all cells owned on every rank, and :357–363 performs local copies in all-rank-redundant mode. This independently violates TASK.md:227 full-mesh/full-state prohibition. Current canonical metadata says partitioner=serial and replication=true, so numbered DQ9 condition requiring METIS in metadata is not assumed. Report.tex:99–102 discloses redundant computation.
+
+Canonical Re200 metadata/run_status explicitly say failed at step 218 and time 0.0, with final Cd 17.90433, Cl 0.004441; case remains 0. Metadata SHA 23d2e4c9d5b0f6a3959bd4088908d1bb1f4859b4d112bc1e38e429d6880519b5; forces SHA 1b71271fb33b46e38a12ae28ddd9ce68c479ab8df0a52d85c846342c52cc0941. Report.tex:265–270 describes a different 171-step diagnostic Cd≈0.228/Cl≈1.71 and explicitly discloses pseudo-time instead of BDF2. Its actual raw metadata fails, so DQ7 is not inferred from report language or obsolete automated inventory. Run git_revision=null; source linkage unproven. Other cases/source/rubric/DQ partial; no CFD rerun.
