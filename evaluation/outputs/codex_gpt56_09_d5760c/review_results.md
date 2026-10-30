@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:33:01.892578+00:00
+Generated: 2026-10-30T12:37:41.848135+00:00
 
-**Overall score: 3.48**
+**Overall score: 3.33**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T12:33:01.892578+00:00
 | 5 | **res.visualization** Visualizations | 0.15 | 4 | Evidence-backed review; see report. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 4 | Evidence-backed review; see report. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Committed report directly gives force means at :34–44 and figures, but tangential integrated-force claim differs from source and plotted histories omit numeric ticks/legend; no fabrication inferred. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Original report/run and figure manifests are available; M080 inviscid Mach figure reproduces pixel-identically from canonical VTK (ledger hashes). Its inverse-distance raster fills body region and omits boundary/spatial tick labels; other figures and historical binaries are not exhaustively bound. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T12:33:01.892578+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.48
+- Overall score (0-5): 3.33
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

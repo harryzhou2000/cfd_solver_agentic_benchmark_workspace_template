@@ -145,8 +145,8 @@
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Evidence-backed review; see report."
+          "score": 3,
+          "notes": "main.cpp:819\u2013831 and :906\u2013913 integrate full viscous traction, whereas report.tex:16 calls integrated force tangential; surface Cf :983\u2013989 projects separately. Magnitude of normal contribution not established."
         },
         {
           "id": "cfd.implicit",
@@ -170,7 +170,7 @@
           "notes": "Evidence-backed review; see report."
         }
       ],
-      "overall_score": 4.0,
+      "overall_score": 3.9,
       "disqualification_flags": []
     },
     "result_review": {
@@ -214,8 +214,8 @@
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Evidence-backed review; see report."
+          "score": 3,
+          "notes": "Committed report directly gives force means at :34\u201344 and figures, but tangential integrated-force claim differs from source and plotted histories omit numeric ticks/legend; no fabrication inferred."
         },
         {
           "id": "res.traceability",
@@ -225,13 +225,13 @@
           "notes": "Original report/run and figure manifests are available; M080 inviscid Mach figure reproduces pixel-identically from canonical VTK (ledger hashes). Its inverse-distance raster fills body region and omits boundary/spatial tick labels; other figures and historical binaries are not exhaustively bound."
         }
       ],
-      "overall_score": 3.48,
+      "overall_score": 3.33,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 75,
+    "total_scored": 73.0,
     "sections": [
       {
         "id": "build_cli",
@@ -265,8 +265,8 @@
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 8,
-        "notes": "See report evidence."
+        "score": 6.5,
+        "notes": "main.cpp:819\u2013831 builds full wall viscous traction and :906\u2013913 integrates its x/y components, although report.tex:16 claims tangential skin-friction force. Surface Cf :983\u2013989 separately projects tangent. Normal traction contribution is not quantified; same documented treatment as gpt56_01/02 and sonnet46-02."
       },
       {
         "id": "implicit_transient",
@@ -293,8 +293,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4,
-        "notes": "See report evidence."
+        "score": 3.5,
+        "notes": "Report includes actual force summary, histories and IDW fields, but claims tangential integrated split while code integrates full traction; plots lack ticks/legend or body outline, and Re200 late drag is compressed."
       },
       {
         "id": "extensibility",
@@ -308,35 +308,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "Score2\u21921: contestant report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b records mean Cd0.0582665 and final Cl0.0609251; old note mistook rank-comparison deltas for Cd/Cl. Immutable report references force, residual and field figures; force plot has no tick scale/legend and field image omits body boundary. Canonical workspace forces SHA256 243f522455cdc0f92cecc3c8f0d7da425eb3c227b9e55320b02fc56c09f00ea0 final2000 Cd spans \u22120.68814..0.79436 while metadata marks converged; DQ7 independently of residual target. Exact binary unbound."
+      "notes": "Score2\u21921: contestant report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b records mean Cd0.0582665 and final Cl0.0609251; old note mistook rank-comparison deltas for Cd/Cl. Immutable report references force, residual and field figures; force plot has no tick scale/legend and field image omits body boundary. Canonical workspace forces SHA256 243f522455cdc0f92cecc3c8f0d7da425eb3c227b9e55320b02fc56c09f00ea0 final2000 Cd spans \u22120.68814..0.79436 while metadata marks converged; DQ7 independently of residual target. Exact binary unbound. Immutable7f22dbe report.tex:34\u201344 also directly reports the final1000-sample mean Cd/Cl for each case; prior notes overlooked this committed table."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
-      "notes": "Score 2\u21922 provisionally. Contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b supplies case mean Cd and final Cl and is named by immutable report.tex:123; the previous note incorrectly denied numeric summary and force figure. Referenced force/residual and Mach/pressure PNGs are in immutable7f22dbe. The force plot has no numeric ticks or legend, and the interpolated field raster shows no body boundary or spatial tick labels, limiting its value as a flow contour; field/source binding remains qualified. Numeric mean Cd0.00734321, final Cl\u22120.00746639. Workspace forces.csv SHA256 bd5aa1b4f2bc3a662301622b3efd2339ac526d5d5d2daf09d92c24a154942ff2: final3000 Cd0.00734219\u21920.00734465, Cl\u22120.0076583..\u22120.0072507; bounded forces, with residual/status still subject to independent review. Scores above2 require readable field/history evidence and are not justified by these unscaled plots. Exact historical executable is unbound."
+      "notes": "Score 2\u21922 provisionally. Contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b supplies case mean Cd and final Cl and is named by immutable report.tex:123; the previous note incorrectly denied numeric summary and force figure. Referenced force/residual and Mach/pressure PNGs are in immutable7f22dbe. The force plot has no numeric ticks or legend, and the interpolated field raster shows no body boundary or spatial tick labels, limiting its value as a flow contour; field/source binding remains qualified. Numeric mean Cd0.00734321, final Cl\u22120.00746639. Workspace forces.csv SHA256 bd5aa1b4f2bc3a662301622b3efd2339ac526d5d5d2daf09d92c24a154942ff2: final3000 Cd0.00734219\u21920.00734465, Cl\u22120.0076583..\u22120.0072507; bounded forces, with residual/status still subject to independent review. Scores above2 require readable field/history evidence and are not justified by these unscaled plots. Exact historical executable is unbound. Immutable7f22dbe report.tex:34\u201344 also directly reports the final1000-sample mean Cd/Cl for each case; prior notes overlooked this committed table."
     },
     "naca0012_m200_inviscid": {
       "score": 2,
-      "notes": "Score 2\u21922 provisionally. Contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b supplies case mean Cd and final Cl and is named by immutable report.tex:123; the previous note incorrectly denied numeric summary and force figure. Referenced force/residual and Mach/pressure PNGs are in immutable7f22dbe. The force plot has no numeric ticks or legend, and the interpolated field raster shows no body boundary or spatial tick labels, limiting its value as a flow contour; field/source binding remains qualified. Numeric mean Cd0.0921915, final Cl0.000527776. Workspace forces.csv SHA256 d5e312f0218451630d3ad4262e5aaf00ea37a8cde4a527ba0ef4bea49e2890b8: final4000 Cd0.0922460\u21920.0921138, Cl0.0005102..0.0005685; bounded force and plausible scale. Scores above2 require readable field/history evidence and are not justified by these unscaled plots. Exact historical executable is unbound."
+      "notes": "Score 2\u21922 provisionally. Contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b supplies case mean Cd and final Cl and is named by immutable report.tex:123; the previous note incorrectly denied numeric summary and force figure. Referenced force/residual and Mach/pressure PNGs are in immutable7f22dbe. The force plot has no numeric ticks or legend, and the interpolated field raster shows no body boundary or spatial tick labels, limiting its value as a flow contour; field/source binding remains qualified. Numeric mean Cd0.0921915, final Cl0.000527776. Workspace forces.csv SHA256 d5e312f0218451630d3ad4262e5aaf00ea37a8cde4a527ba0ef4bea49e2890b8: final4000 Cd0.0922460\u21920.0921138, Cl0.0005102..0.0005685; bounded force and plausible scale. Scores above2 require readable field/history evidence and are not justified by these unscaled plots. Exact historical executable is unbound. Immutable7f22dbe report.tex:34\u201344 also directly reports the final1000-sample mean Cd/Cl for each case; prior notes overlooked this committed table."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1.5,
-      "notes": "Score 2\u21921.5 provisionally. Contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b supplies case mean Cd and final Cl and is named by immutable report.tex:123; the previous note incorrectly denied numeric summary and force figure. Referenced force/residual and Mach/pressure PNGs are in immutable7f22dbe. The force plot has no numeric ticks or legend, and the interpolated field raster shows no body boundary or spatial tick labels, limiting its value as a flow contour; field/source binding remains qualified. Numeric mean Cd0.789701, final Cl\u22120.0361705. Workspace forces.csv SHA256 4d97e62a5a70fbed067077255588d81707d0f972f8c960d48e9d0275627b4ceb: final4000 Cd0.640431\u21920.788668, Cl\u22120.03617..\u22120.01991; substantial continued drift despite converged metadata. Scores above2 require readable field/history evidence and are not justified by these unscaled plots. Exact historical executable is unbound."
+      "notes": "Score 2\u21921.5 provisionally. Contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b supplies case mean Cd and final Cl and is named by immutable report.tex:123; the previous note incorrectly denied numeric summary and force figure. Referenced force/residual and Mach/pressure PNGs are in immutable7f22dbe. The force plot has no numeric ticks or legend, and the interpolated field raster shows no body boundary or spatial tick labels, limiting its value as a flow contour; field/source binding remains qualified. Numeric mean Cd0.789701, final Cl\u22120.0361705. Workspace forces.csv SHA256 4d97e62a5a70fbed067077255588d81707d0f972f8c960d48e9d0275627b4ceb: final4000 Cd0.640431\u21920.788668, Cl\u22120.03617..\u22120.01991; substantial continued drift despite converged metadata. Scores above2 require readable field/history evidence and are not justified by these unscaled plots. Exact historical executable is unbound. Immutable7f22dbe report.tex:34\u201344 also directly reports the final1000-sample mean Cd/Cl for each case; prior notes overlooked this committed table."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 1.5,
-      "notes": "Score 2\u21921.5 provisionally. Contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b supplies case mean Cd and final Cl and is named by immutable report.tex:123; the previous note incorrectly denied numeric summary and force figure. Referenced force/residual and Mach/pressure PNGs are in immutable7f22dbe. The force plot has no numeric ticks or legend, and the interpolated field raster shows no body boundary or spatial tick labels, limiting its value as a flow contour; field/source binding remains qualified. Numeric mean Cd0.0779887, final Cl0.00642581. Workspace forces.csv SHA256 15f79856ec8dc87b52cf52d7633a4af5cd75e9d593db759729e2b20d14ecb87c: final4000 Cd0.098645\u21920.076068, Cl0.005715..0.007616; 22.9% decline despite converged metadata. Scores above2 require readable field/history evidence and are not justified by these unscaled plots. Exact historical executable is unbound."
+      "notes": "Score 2\u21921.5 provisionally. Contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b supplies case mean Cd and final Cl and is named by immutable report.tex:123; the previous note incorrectly denied numeric summary and force figure. Referenced force/residual and Mach/pressure PNGs are in immutable7f22dbe. The force plot has no numeric ticks or legend, and the interpolated field raster shows no body boundary or spatial tick labels, limiting its value as a flow contour; field/source binding remains qualified. Numeric mean Cd0.0779887, final Cl0.00642581. Workspace forces.csv SHA256 15f79856ec8dc87b52cf52d7633a4af5cd75e9d593db759729e2b20d14ecb87c: final4000 Cd0.098645\u21920.076068, Cl0.005715..0.007616; 22.9% decline despite converged metadata. Scores above2 require readable field/history evidence and are not justified by these unscaled plots. Exact historical executable is unbound. Immutable7f22dbe report.tex:34\u201344 also directly reports the final1000-sample mean Cd/Cl for each case; prior notes overlooked this committed table."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 2,
-      "notes": "Score 2\u21922 provisionally. Contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b supplies case mean Cd and final Cl and is named by immutable report.tex:123; the previous note incorrectly denied numeric summary and force figure. Referenced force/residual and Mach/pressure PNGs are in immutable7f22dbe. The force plot has no numeric ticks or legend, and the interpolated field raster shows no body boundary or spatial tick labels, limiting its value as a flow contour; field/source binding remains qualified. Numeric mean Cd0.0960373, final Cl0.000628409. Workspace forces.csv SHA256 f7c54fa371f91c96f4bc4bc691662be43ea5196fd28f819945768e69bbc0901b: final5000 Cd0.0950112\u21920.0960860, Cl\u22120.002649..0.0008224; relatively small drag drift but lift varies near zero. Scores above2 require readable field/history evidence and are not justified by these unscaled plots. Exact historical executable is unbound."
+      "notes": "Score 2\u21922 provisionally. Contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b supplies case mean Cd and final Cl and is named by immutable report.tex:123; the previous note incorrectly denied numeric summary and force figure. Referenced force/residual and Mach/pressure PNGs are in immutable7f22dbe. The force plot has no numeric ticks or legend, and the interpolated field raster shows no body boundary or spatial tick labels, limiting its value as a flow contour; field/source binding remains qualified. Numeric mean Cd0.0960373, final Cl0.000628409. Workspace forces.csv SHA256 f7c54fa371f91c96f4bc4bc691662be43ea5196fd28f819945768e69bbc0901b: final5000 Cd0.0950112\u21920.0960860, Cl\u22120.002649..0.0008224; relatively small drag drift but lift varies near zero. Scores above2 require readable field/history evidence and are not justified by these unscaled plots. Exact historical executable is unbound. Immutable7f22dbe report.tex:34\u201344 also directly reports the final1000-sample mean Cd/Cl for each case; prior notes overlooked this committed table."
     },
     "cylinder_m010_laminar_re20": {
       "score": 1,
-      "notes": "Score1.5\u21921: contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b records mean Cd19.00644 and final Cl0.04556; old note incorrectly read rank-comparison differences as Cd/Cl. Immutable report.tex:48\u201349 includes field, residual and force figures; its force plot lacks numeric ticks/legend and field view has no visible cylinder outline. Canonical workspace forces SHA256 5dda4c4ae3a40448e9cff1a3364bcfb22e632a70485d726e9531352633d59619 final3000 Cd11.3201\u219219.5495, final2000 15.3383\u219219.5495, while metadata says converged. This is not stable force; DQ7. Exact historical binary unbound."
+      "notes": "Score1.5\u21921: contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b records mean Cd19.00644 and final Cl0.04556; old note incorrectly read rank-comparison differences as Cd/Cl. Immutable report.tex:48\u201349 includes field, residual and force figures; its force plot lacks numeric ticks/legend and field view has no visible cylinder outline. Canonical workspace forces SHA256 5dda4c4ae3a40448e9cff1a3364bcfb22e632a70485d726e9531352633d59619 final3000 Cd11.3201\u219219.5495, final2000 15.3383\u219219.5495, while metadata says converged. This is not stable force; DQ7. Exact historical binary unbound. Immutable7f22dbe report.tex:34\u201344 also directly reports the final1000-sample mean Cd/Cl for each case; prior notes overlooked this committed table."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Score2 retained provisionally: immutable7f22dbe report.tex:89 reports mean Cd0.9717, lift standard deviation0.2446 (not mean Cl), period5.642 and St0.1772. Contestant-delivered run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b gives final Cl\u22120.124186. Workspace forces SHA256 9f792330b2efbd830e072150b2ac9556fd1a8bb519b055312c195b001226d758 last10000 mean Cd0.971743, mean Cl\u22120.020205, standard deviation0.244569, 17 mean-centered upward crossings period5.64103 (frequency0.17727), consistent with report. Metadata reports 1000/30000 inner misses (fraction0.96667), final ratio0.0009934; actual production binary remains unbound. Report includes residual, force and wake figures, contrary to old note, but full-history force plot has no tick scales/legend and startup drag compresses late drag, so explicit Re200 late lift-and-drag floor is unmet. No solver rerun."
+      "notes": "Score2 retained provisionally: immutable7f22dbe report.tex:89 reports mean Cd0.9717, lift standard deviation0.2446 (not mean Cl), period5.642 and St0.1772. Contestant-delivered run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b gives final Cl\u22120.124186. Workspace forces SHA256 9f792330b2efbd830e072150b2ac9556fd1a8bb519b055312c195b001226d758 last10000 mean Cd0.971743, mean Cl\u22120.020205, standard deviation0.244569, 17 mean-centered upward crossings period5.64103 (frequency0.17727), consistent with report. Metadata reports 1000/30000 inner misses (fraction0.96667), final ratio0.0009934; actual production binary remains unbound. Report includes residual, force and wake figures, contrary to old note, but full-history force plot has no tick scales/legend and startup drag compresses late drag, so explicit Re200 late lift-and-drag floor is unmet. No solver rerun. Immutable7f22dbe report.tex:34\u201344 also directly reports the final1000-sample mean Cd/Cl for each case; prior notes overlooked this committed table."
     }
   },
   "disqualification": {
@@ -347,6 +347,12 @@
         "text": "metadata.json marks incomplete/failed runs as successful",
         "evidence": "Canonical workspace Re20 forces.csv SHA256 5dda4c4ae3a40448e9cff1a3364bcfb22e632a70485d726e9531352633d59619 shows Cd11.3201\u219219.5495 over final3000 of30000 steps, including 15.3383\u219219.5495 over final2000, while metadata marks converged/completed. NACA M015 inviscid forces SHA256 243f522455cdc0f92cecc3c8f0d7da425eb3c227b9e55320b02fc56c09f00ea0 spans Cd\u22120.68814..0.79436 over its final2000 of20000 steps and is also marked converged. These histories are not sustained stable-force plateaus, independently of missed residual targets. Immutable7f22dbe solver/src/main.cpp:1764\u20131794 accepts a 2000-row absolute/relative force span up to max(2,0.5|mean Cd|), but historical executable remains unbound. Figure/report run_manifest and selected final response identify the named production outputs. No assumption of fabricated forces or Re200 rerun.",
         "found": true
+      },
+      {
+        "id": 6,
+        "text": "Report claims algorithms absent from source",
+        "found": false,
+        "evidence": "Report.tex:16 claims tangential integrated skin friction; main.cpp:819\u2013831,906\u2013913 integrates full viscous traction, while surface Cf :983\u2013989 separately projects tangentially. The force split is inaccurate and penalized under viscous/report criteria, not proof an entire claimed algorithm is absent (same treatment as sonnet46-02 and gpt56_01/02). Normal contribution unquantified; other DQ6 claims remain under review."
       }
     ]
   },

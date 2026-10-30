@@ -95,4 +95,4 @@ An independent clean source build succeeded in a restricted container; no CTests
 
 ## Verdict
 
-Score: **75/100; disqualified: true.** Strong structural package and readable BDF2 evidence do not cure false successful steady statuses.
+Provisional score: **73/100; disqualified: true.** Strong structural package and readable BDF2 evidence do not cure false successful steady statuses.
