@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T14:19:12.143652+00:00
+Generated: 2026-10-30T14:21:25.835151+00:00
 
-**Overall score: 3.91**
+**Overall score: 3.66**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,7 +15,7 @@ Generated: 2026-10-30T14:19:12.143652+00:00
 | 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | Mesh. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
-| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4 | FV. |
+| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 3 | Interior flux assembly is conservative locally; partition faces are computed twice using inconsistent owner-only reconstructed states, so opposite contributions need not cancel. |
 |   | Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction. | | | |
 |   | *Evidence:* residual assembly code; residuals.csv shows global reduction. | | | |
 | 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | Flux. |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T14:19:12.143652+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | BC. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | Second order. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 3 | LSQ/BJ active on owned cells, but solver.cpp:345–360 leaves ghost side at cell center at every rank interface, contrary to report no-fallback claim. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Limiter. |
@@ -39,7 +39,7 @@ Generated: 2026-10-30T14:19:12.143652+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4 | Re200. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3 | Limited confirmation. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2.5 | METIS and neighbor state halo are present; gradient/limiter are not exchanged and opposite partition fluxes need not cancel. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T14:19:12.143652+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.91
+- Overall score (0-5): 3.66
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

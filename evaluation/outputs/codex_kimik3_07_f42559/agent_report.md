@@ -4,7 +4,7 @@ Curated tip `e55282a56daec8daa7af868e851ae4d0d7f8d9e2` passes audit. Explicit va
 
 ## Verdict
 
-**72/100; disqualified.** Trigger 7 is independently supported by M2 laminar, marked converged at step 1386 although Cd falls 0.339895 to 0.167402 over its last 200 steps. The old residual-only DQ rationale is withdrawn: a bounded residual and stable force plateau may qualify. Remaining cases and rubric are under review. Re200 is delivered but was not rerun. Detailed score layers are in `agent_scores.json`.
+**68/100; disqualified (provisional).** Trigger 7 is independently supported by M2 laminar, marked converged at step 1386 although Cd falls 0.339895 to 0.167402 over its last 200 steps. The old residual-only DQ rationale is withdrawn: a bounded residual and stable force plateau may qualify. Remaining cases and rubric are under review. Re200 is delivered but was not rerun. Source review also finds owner-only reconstruction at rank interfaces, so opposing rank fluxes need not cancel; this limits conservation and second-order accuracy, although the limiter is not disabled across whole production cases. Full scoring is still underway. Detailed score layers are in `agent_scores.json`.
 
 ## Integrity and limitations
 

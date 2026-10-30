@@ -62,8 +62,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 3,
-          "notes": "No evaluator rerun."
+          "score": 2.5,
+          "notes": "METIS and neighbor state exchange exist, but solver.cpp:345\u2013360 reconstructs owned side only on rank boundaries and 390\u2013405 omits ghost gradient; independent fluxes need not cancel."
         },
         {
           "id": "code.robustness",
@@ -87,7 +87,7 @@
           "notes": "Audit clean."
         }
       ],
-      "overall_score": 3.95,
+      "overall_score": 3.88,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -110,8 +110,8 @@
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 4,
-          "notes": "FV."
+          "score": 3,
+          "notes": "Interior flux assembly is conservative locally; partition faces are computed twice using inconsistent owner-only reconstructed states, so opposite contributions need not cancel."
         },
         {
           "id": "cfd.flux",
@@ -131,8 +131,8 @@
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Second order."
+          "score": 3,
+          "notes": "LSQ/BJ active on owned cells, but solver.cpp:345\u2013360 leaves ghost side at cell center at every rank interface, contrary to report no-fallback claim."
         },
         {
           "id": "cfd.limiter",
@@ -166,11 +166,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 3,
-          "notes": "Limited confirmation."
+          "score": 2.5,
+          "notes": "METIS and neighbor state halo are present; gradient/limiter are not exchanged and opposite partition fluxes need not cancel."
         }
       ],
-      "overall_score": 3.91,
+      "overall_score": 3.66,
       "disqualification_flags": []
     },
     "result_review": {
@@ -214,8 +214,8 @@
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Readable report."
+          "score": 3,
+          "notes": "Report discloses frozen limiter and plateau limits but claims no first-order fallback while partition-face ghost reconstruction is absent; M2 laminar falsely reported converged."
         },
         {
           "id": "res.traceability",
@@ -225,7 +225,7 @@
           "notes": "Traceable figures."
         }
       ],
-      "overall_score": 3.7,
+      "overall_score": 3.55,
       "disqualification_flags": [
         {
           "id": 7,
@@ -238,7 +238,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 72,
+    "total_scored": 68,
     "sections": [
       {
         "id": "build_cli",
@@ -258,15 +258,15 @@
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 12,
-        "notes": "Source."
+        "score": 10,
+        "notes": "Interior FV flux assembly exists, but partition-face ghost side is not reconstructed; separately evaluated opposing rank fluxes need not cancel."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 8,
-        "notes": "Scheme."
+        "score": 7,
+        "notes": "LSQ and BJ limiter are active for owned sides, but partition ghost-side reconstruction is absent despite report no-fallback claim; no complete production disable established."
       },
       {
         "id": "viscous",
@@ -300,8 +300,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "Report."
+        "score": 4,
+        "notes": "Readable report and committed figures; falsely asserts no first-order degradation at partition ghost faces and convergence of M2 laminar. Several force traces compressed."
       },
       {
         "id": "extensibility",

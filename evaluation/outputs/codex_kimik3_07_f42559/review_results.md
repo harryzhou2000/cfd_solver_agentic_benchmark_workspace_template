@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T14:19:12.143931+00:00
+Generated: 2026-10-30T14:21:25.835428+00:00
 
-**Overall score: 3.7**
+**Overall score: 3.55**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T14:19:12.143931+00:00
 | 5 | **res.visualization** Visualizations | 0.15 | 5 | Figures. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 4 | Readable report. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Report discloses frozen limiter and plateau limits but claims no first-order fallback while partition-face ghost reconstruction is absent; M2 laminar falsely reported converged. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Traceable figures. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T14:19:12.143931+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.7
+- Overall score (0-5): 3.55
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

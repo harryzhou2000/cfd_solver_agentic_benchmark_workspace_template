@@ -20,8 +20,8 @@
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 4,
-      "notes": "FV."
+      "score": 3,
+      "notes": "Interior flux assembly is conservative locally; partition faces are computed twice using inconsistent owner-only reconstructed states, so opposite contributions need not cancel."
     },
     {
       "id": "cfd.flux",
@@ -41,8 +41,8 @@
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Second order."
+      "score": 3,
+      "notes": "LSQ/BJ active on owned cells, but solver.cpp:345\u2013360 leaves ghost side at cell center at every rank interface, contrary to report no-fallback claim."
     },
     {
       "id": "cfd.limiter",
@@ -76,8 +76,8 @@
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 3,
-      "notes": "Limited confirmation."
+      "score": 2.5,
+      "notes": "METIS and neighbor state halo are present; gradient/limiter are not exchanged and opposite partition fluxes need not cancel."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.91
+  "overall_score": 3.66
 }
