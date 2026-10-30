@@ -98,3 +98,8 @@ No evaluator clean build or MPI rerun. Re200 was not rerun; readable deliverable
 ## Verdict
 
 Score: **80/100; disqualified: true.** The solver/report have substantial delivery value and a structurally passing package, but the false-success M0.15 status is a disqualifying output-integrity failure.
+
+
+## Re200 evidence correction — 2026-10-30
+
+The previous case note incorrectly described `report.tex:494` as frequency 200 and period 50; 200–300 is the analysis time window. Immutable `25daaa3:solver/report/report.tex:230,488–494` reports instantaneous |Cd|1.053/|Cl|0.336, mean |Cd|≈1.05, lift amplitude≈0.33 and St≈0.19–0.20. Checkpoint `113f01a:solver/results/final/cylinder_m010_laminar_re200/forces.csv` SHA256 `0e60da73e0966e0e826f6178adcee3f54c2eb71cd907ddf935dbd70e42ff4a11` matches workspace bytes. Its t=200–300.01 lift spans −0.348916–0.347568 and FFT peak≈0.15995, differing materially from reported St. The committed delivered force PDF (SHA256 `3b380639b6bc6438e1d5da5cafa1f9ae0689d936e8c6a32d604aed2d53c3d143`) was visually checked: startup drag≈30 flattens the late drag trace, so score 2 remains capped by the explicit late lift-and-drag plot floor. Metadata revision is null; status reaches step30001/t300.01. Remaining cases, source, rubric and DQ review are partial; no Re200 rerun.
