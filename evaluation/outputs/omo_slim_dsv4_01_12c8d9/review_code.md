@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T16:10:33.038823+00:00
+Generated: 2026-10-30T16:12:44.927581+00:00
 
-**Overall score: 4.2**
+**Overall score: 3.9**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T16:10:33.038823+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 5 | JSON case reader and CGNS path input; no case-filename-only branch identified. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4 | METIS partitioning, neighbor isend/irecv halo exchange, and MPI reductions are implemented; rank-count evidence is absent. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2 | main.cpp:357–384,520–534 retains full Mesh on every rank through solver iterations, prohibited by TASK.md:227; METIS/local state remain real. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | All final outputs validate and the report honestly notes no Re200 vortex street, but M0.8 inviscid has appreciable inner target misses. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T16:10:33.038823+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.2
+- Overall score (0-5): 3.9
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

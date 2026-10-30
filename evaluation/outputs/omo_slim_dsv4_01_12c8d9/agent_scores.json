@@ -67,8 +67,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "METIS partitioning, neighbor isend/irecv halo exchange, and MPI reductions are implemented; rank-count evidence is absent."
+          "score": 2,
+          "notes": "main.cpp:357\u2013384,520\u2013534 retains full Mesh on every rank through solver iterations, prohibited by TASK.md:227; METIS/local state remain real."
         },
         {
           "id": "code.robustness",
@@ -92,7 +92,7 @@
           "notes": "Readable modular C++ and report tooling; legacy absolute paths remain in uncommitted manifests only."
         }
       ],
-      "overall_score": 4.2,
+      "overall_score": 3.9,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -171,11 +171,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "METIS and neighbor point-to-point halo exchange with global reductions are directly evidenced; no rank-count comparison."
+          "score": 2,
+          "notes": "main.cpp:357\u2013384,520\u2013534 retains full Mesh on every rank through solver iterations, prohibited by TASK.md:227; METIS/local state remain real."
         }
       ],
-      "overall_score": 4.53,
+      "overall_score": 4.35,
       "disqualification_flags": []
     },
     "result_review": {
@@ -236,7 +236,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 83.5,
+    "total_scored": 80.5,
     "sections": [
       {
         "id": "build_cli",
@@ -284,8 +284,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 7,
-        "notes": "METIS, halo exchange, reductions, and rank-local output present; required np=8 NACA/cylinder comparison absent."
+        "score": 4.5,
+        "notes": "METIS and local halo/state exist, but every rank retains complete Mesh throughout iteration, violating TASK.md:227; reported metadata denies it."
       },
       {
         "id": "case_results",
@@ -298,8 +298,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4.5,
-        "notes": "Report predates full Re200 and correctly says no data at that time; it calls M2 early result converged despite force drift. Final response candidly discloses no vortex street."
+        "score": 4,
+        "notes": "Report denies full-mesh replication although source retains global mesh per rank; it predates full Re200 and final response candidly discloses no shedding."
       },
       {
         "id": "extensibility",
@@ -352,6 +352,11 @@
         "text": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
         "evidence": "Workspace M2 laminar metadata SHA256 b2fc0941ffc0f3d2d2187d5d2281bf30c46e86a5a742c276a77fd3dbb5697233 marks completed/converged at512 while force SHA256 8e487de019273142c1486349fe70e68f6903ce2f03998927cdbe6dd771c509a3 shows Cd0.1169490\u21920.1063017 final100 and 0.1530094\u21920.1063017 final200; the actual 3.040-order residual decrease does not establish early force-stable convergence (TASK.md:140,172). Separately Re200 metadata 647f79f5df9d261f3334fd24136977004f22e60d624880a13696fce70f04f27d says completed/statistically_periodic, but force SHA256 45f898081bbad24dc53d76a0d129fda7d265d6c965cd2edebe64029d9c23fda0 t>=150 Cl0.00012174..0.00014362, RMS4.38e\u22126, with no resolved shedding. Selected final response candidly says no vortex street; pre-run report says no data. No concealment is inferred; status misclassifies the required result."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "Immutable 51d1a78 solver/src/main.cpp:357\u2013374 reads and partitions a complete cfd::Mesh on every rank; const Mesh mesh remains in the surrounding try scope through run_transient_solver/run_steady_solver dispatch at :520\u2013534 and is destroyed only after :654. TASK.md:46,50,213,227 prohibits full mesh replication on each rank during solver execution. output.cpp:141\u2013145 labels full_mesh_replication_during_iterations=false and report.tex:363\u2013365 repeats it. METIS and local solution state exist, so the narrower numbered DQ9 full-state/geometric-only condition is not inferred. main.cpp SHA256 20b42cfde80f9d6795f19ec2b59e866a39b029d9c02d1312412181c8fdf1d8c6 is identical at a0333e6, committed 06:35:52 UTC before the M2 run and Re200 run, although exact historical binary hash remains unbound."
       }
     ]
   },
