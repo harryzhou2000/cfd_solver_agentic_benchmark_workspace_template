@@ -574,3 +574,5 @@ Generic_04 remaining-criteria checkpoint: rubric/review notes now identify indiv
 ## generic_05 partial full-mesh review — 2026-10-30
 
 DQ false→true under TASK.md:227: immutable d8491d9 main.cpp:947–954 reads full mesh on every rank, retains it through iterations and uses it again in field output :1286,1474. State vectors are local, so numbered DQ9 is not inferred. Multiple workspace variants require report/figure-to-package mapping; source/rubric/other DQ review partial, 40 points unchanged. No CFD rerun.
+
+Generic_05 Re200 checkpoint: immutable run_manifest selects runs_final_v3; metadata says statistically_periodic at t300 though selected forces t200–300 show 10000 consecutive monotonic Cl decreases 4.11364e-5→1.31143e-5 and Cd increases -1.17943e-7→-3.79228e-8; report.tex:141–142 admits no shedding. DQ7 added, case stays0; do not infer inner target misses. Selected metadata says diagonal implicit versus report all-LU-SGS claim. Selected metadata/forces mtime 2026-08-26 13:04 UTC precedes source mtime 2026-08-27 04:00 UTC, with no git revision. Other cases/rubric/provenance remain partial. No CFD rerun.

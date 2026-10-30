@@ -74,7 +74,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=true under TASK.md:227 because immutable source retains full mesh on every rank throughout iterations. Numbered DQ9 full-state condition is not inferred: state vectors are partition-local. Other triggers remain under review.
+DQ=true under TASK.md:227 because immutable source retains full mesh on every rank throughout iterations, and DQ7 because the selected Re200 metadata labels a nonperiodic run statistically periodic. Numbered DQ9 full-state condition is not inferred: state vectors are partition-local. Other triggers remain under review.
 
 ## Metadata answers & session selection
 
@@ -92,3 +92,8 @@ No independent build/rerun was performed and Re200 was not rerun. The raw packag
 ## Partial full-mesh review — 2026-10-30
 
 Immutable d8491d9 solver/src/main.cpp:947–954 calls read_mesh on every rank and constructs partition-local state; MeshData mesh remains live throughout the steady/transient iterations and is subsequently passed to write_vtu at :1286,1474. This violates TASK.md:227 full-mesh prohibition independently of genuine METIS/halo work and local solution state. Numbered DQ9 requires full-state replication or geometric split with METIS metadata and is not inferred. Workspace contains many variants; report-to-final-package mapping, other DQ, cases and rubric remain partial. No CFD rerun.
+
+
+## Partial selected Re200 metadata review — 2026-10-30
+
+Immutable d8491d9 solver/report/run_manifest.md selects solver/runs_final_v3/cylinder_m010_laminar_re200/output; metadata says completed=true/statistically_periodic at final time 300. Selected forces.csv has 30000 rows; over t=200–300, all 10000 successive Cl changes decrease from 4.11364e-5 to 1.31143e-5, and Cd increases monotonically from -1.17943e-7 to -3.79228e-8. Report.tex:141–142 itself says no meaningful shedding. DQ7 applies to labeling this nonperiodic result statistically periodic. It does not establish the number of strict inner-target misses; selected metadata contains no counts. Case remains 0. Forces SHA-256 4ddd7c1e1fb00a4314d1cdd11dc56b82ea42ae50689d7cf04df9f6801049e209; metadata 349ff76eacd1b740ff5854b6f05b5d3c9616f3e893a35aa58482017d12a72fd3; run status 15b3bb4e4c5e37c8257cf1e5d0c318f710ac01e4d2afd3fa7e9d6893bb853a47. Selected metadata reports diagonal implicit; report.tex:50–51,81–82 claims LU-SGS for all cases, a production-path discrepancy to assess in report credit. Both metadata and forces mtime 2026-08-26 13:04 UTC precede final source mtime 2026-08-27 04:00 UTC, with no git_revision, so producing source is not bound. Other cases and scoring partial; no CFD rerun.

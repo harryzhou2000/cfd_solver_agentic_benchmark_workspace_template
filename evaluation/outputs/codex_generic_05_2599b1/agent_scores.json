@@ -336,7 +336,7 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; force history d8491d9:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:146); no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: No credible vortex shedding; validator metadata invalid; not rerun."
+      "notes": "Score 0 retained: immutable run_manifest selects runs_final_v3; selected metadata says statistically_periodic at t300, but forces.csv t200\u2013300 monotonically decay Cl 4.11364e-5\u21921.31143e-5 and Cd -1.17943e-7\u2192-3.79228e-8 (10000 successive changes each), with no meaningful vortex shedding as report.tex:141\u2013142 also admits. No St/credible late periodic force; metadata lacks strict target counts. Selected metadata reports diagonal implicit, contrary to report claiming LU-SGS for all. Production source binding unproven; no unsteady rerun."
     }
   },
   "disqualification": {
@@ -346,6 +346,12 @@
         "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
         "found": true,
         "evidence": "Immutable d8491d9 solver/src/main.cpp:947\u2013954 calls read_mesh on every rank and partitions it; MeshData mesh remains in solve_case scope throughout steady and transient iterations and is used again by write_vtu :1286,1474. TASK.md:227 prohibits full mesh replication during iterations. State vectors are local, so numbered DQ9 full-state condition is not inferred."
+      },
+      {
+        "id": 7,
+        "flag": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "Immutable d8491d9 solver/report/run_manifest.md selects runs_final_v3 for Re200. Its output/metadata.json says completed=true/statistically_periodic, but selected forces.csv t=200\u2013300 has 10000 consecutive decreases in Cl from 4.11364e-5 to 1.31143e-5 and 10000 consecutive increases in Cd from -1.17943e-7 to -3.79228e-8: no late periodic shedding. report.tex:141\u2013142 explicitly says no meaningful vortex shedding. Strict inner-target misses cannot be inferred from these forces; metadata lacks counts."
       }
     ]
   },
