@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:29:58.137338+00:00
+Generated: 2026-10-30T06:32:31.531220+00:00
 
 **Overall score: 3.0**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Source/build present; no independent rebuild. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable 1904149 source built cleanly in cfd-bench using configured dependency roots, network disabled, 2 CPUs, 3 GiB and 256 pids; build does not establish numeric correctness. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 1 | All eight scored checkpoint restart_final.dat files contain only 11-byte RESTART_V1/NUL marker; main.cpp does not parse --restart. TASK.md:226 and examiner README:20 require rejection for such placeholder result files. |

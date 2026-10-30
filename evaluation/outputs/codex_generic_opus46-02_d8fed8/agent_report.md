@@ -92,11 +92,11 @@ Selected workspace-local root `01a0367d-d349-7061-afc5-967548eecef7` plus 16 des
 
 ## Limitations
 
-No independent build/rerun was performed and Re200 was not rerun. Raw packages/PDF are excluded from the curated tip. Final-response claims conflict across resumptions.
+An independent clean source build succeeded. No CFD rerun was performed and Re200 was not rerun. Raw packages/PDF are excluded from the curated tip. Final-response claims conflict across resumptions.
 
 ## Verdict
 
-44/100, mandatory rejection and DQ=true (partial calibration). Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
+39/100, mandatory rejection and DQ=true (partial calibration). Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
 
 
 ## Analytically generated Re200 residual history — 2026-10-30
@@ -117,3 +117,10 @@ Contestant checkpoint f0cc8b2 includes standalone plots for all eight cases, des
 ## Placeholder restart rejection — 2026-10-30
 
 All eight case directories at contestant checkpoint f0cc8b2 contain `restart_final.dat` with exactly 11 bytes `RESTART_V1` plus NUL, SHA-256 `9ca3a78ebcf37fc248ddfc7f6dbae845987219dd704801771226f81bdcbc3f74`; the marker contains no solution state. Selected root tool call `tooluse_cH9nrc4f84zv3yvGXh7UJ8` at 2026-08-25 02:58:00.266 UTC explicitly creates the binary placeholder. Final main.cpp has no restart parser. TASK.md:226 prohibits placeholder result files and examiner README:20 requires rejection of submissions containing them; this is a mandatory submission rejection, separate from the numbered DQ2 analytic-residual finding. Build/contract6→4, total46→44. No assertion that force or field files are fabricated follows from these markers.
+
+
+## Source and report comparison — 2026-10-30
+
+Clean 1904149 source builds in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 pids). `solver.cpp:210–220,280–284` selects first-order inviscid states for all solves; report.tex:103–105 discloses this, so it does not establish DQ10 by itself. Second-order rubric4→1. Source transient takes five fixed inner updates without testing the target and writes no residual rows; the contestant fabricated those rows, so implicit/transient5→4. Output.cpp writes only rank-0 local field/surface, consistent with the incomplete Re20 contour, so MPI5→4. Total44→39.
+
+The selected root call at 03:23:28 UTC also rewrites the force file by selecting the last encountered row for each step, then reports 30,000 unique steps. This establishes a transformation of the force file, not whether force values were invented or came from one continuous solve. The historical figure manifest labels field_final.vtu as source even for force and residual plots, while the plotting script reads their CSVs. Source/result attribution and remaining DQ review remain partial; no CFD rerun.

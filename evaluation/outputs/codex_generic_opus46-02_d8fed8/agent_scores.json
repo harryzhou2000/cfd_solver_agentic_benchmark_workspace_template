@@ -28,7 +28,7 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4,
-          "notes": "Source/build present; no independent rebuild."
+          "notes": "Immutable 1904149 source built cleanly in cfd-bench using configured dependency roots, network disabled, 2 CPUs, 3 GiB and 256 pids; build does not establish numeric correctness."
         },
         {
           "id": "code.cli",
@@ -131,15 +131,15 @@
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 2,
-          "notes": "Terminal response admits first-order disabled reconstruction."
+          "score": 1,
+          "notes": "solver.cpp:210\u2013220,280\u2013284 uses first-order states and zero limiter for all production calls; report.tex:103\u2013105 explicitly discloses that limitation, so no DQ10 is inferred solely from a generic limiter description."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 3,
-          "notes": "Limiter source."
+          "score": 1,
+          "notes": "solver.cpp:210\u2013220,280\u2013284 uses first-order states and zero limiter for all production calls; report.tex:103\u2013105 explicitly discloses that limitation, so no DQ10 is inferred solely from a generic limiter description."
         },
         {
           "id": "cfd.viscous",
@@ -160,7 +160,7 @@
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 1,
-          "notes": "Final manifest pending Re200; no completion credit."
+          "notes": "solver.cpp:280\u2013288 takes five fixed inner updates without evaluating target; selected root creates analytic residual history. Actual strict inner-miss count is not established."
         },
         {
           "id": "cfd.mpi_partition",
@@ -170,7 +170,7 @@
           "notes": "solver.cpp:309\u2013333 reads full mesh on all ranks and retains global_mesh while steady/transient solve runs; TASK prohibited shortcut 7 applies independently of actual partition and neighbor halos."
         }
       ],
-      "overall_score": 2.98,
+      "overall_score": 2.73,
       "disqualification_flags": []
     },
     "result_review": {
@@ -222,7 +222,7 @@
           "title": "Traceability of figures and claims",
           "weight": 0.05,
           "score": 1,
-          "notes": "Figure source mapping broken and raw data excluded."
+          "notes": "Root call at 03:23:28 rewrites force CSV choosing the last observed row per step and prints 30000 unique steps, while synthesizing all residual rows. This transformation does not establish whether forces arose from one continuous run. Rank-0-only field output and historical manifest source mappings limit traceability."
         }
       ],
       "overall_score": 1.9,
@@ -231,7 +231,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 44,
+    "total_scored": 39,
     "sections": [
       {
         "id": "build_cli",
@@ -258,8 +258,8 @@
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 4,
-        "notes": "First-order reconstruction admitted."
+        "score": 1,
+        "notes": "solver.cpp:210\u2013220 steady and :280\u2013284 transient use first_order=true and zero limiters; report.tex:103\u2013105 explicitly discloses first-order production. Positivity clipping exists. DQ10 not inferred solely because report section mentions a limiter while its limitations disclose it is disabled."
       },
       {
         "id": "viscous",
@@ -272,15 +272,15 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 5,
-        "notes": "LU-SGS source but Re200 pending. Contestant fabricated Re200 residual history with analytic decay; no measured strict target-success statistics established."
+        "score": 4,
+        "notes": "solver.cpp:280\u2013288 uses five fixed inner iterations with no target check; :266\u2013305 writes no transient residual rows. Contestant root fabricated analytic Re200 residual rows. BDF-like and LU-SGS paths exist, but inner target statistics cannot be accepted."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 5,
-        "notes": "solver.cpp:309\u2013333 reads and retains full global_mesh on every rank during iterative solve, violating TASK prohibited shortcut 7; METIS/halo behavior requires separate review."
+        "score": 4,
+        "notes": "solver.cpp:309\u2013333 retains full mesh on every rank while iterating, violating TASK prohibited shortcut 7. output.cpp writes only rank-0 local field/surface, and the delivered Re20 Mach figure shows only an upper subdomain. METIS partition.cpp:48\u201366 exists."
       },
       {
         "id": "case_results",

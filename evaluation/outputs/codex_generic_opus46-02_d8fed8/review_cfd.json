@@ -41,15 +41,15 @@
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 2,
-      "notes": "Terminal response admits first-order disabled reconstruction."
+      "score": 1,
+      "notes": "solver.cpp:210\u2013220,280\u2013284 uses first-order states and zero limiter for all production calls; report.tex:103\u2013105 explicitly discloses that limitation, so no DQ10 is inferred solely from a generic limiter description."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Limiter source."
+      "score": 1,
+      "notes": "solver.cpp:210\u2013220,280\u2013284 uses first-order states and zero limiter for all production calls; report.tex:103\u2013105 explicitly discloses that limitation, so no DQ10 is inferred solely from a generic limiter description."
     },
     {
       "id": "cfd.viscous",
@@ -70,7 +70,7 @@
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 1,
-      "notes": "Final manifest pending Re200; no completion credit."
+      "notes": "solver.cpp:280\u2013288 takes five fixed inner updates without evaluating target; selected root creates analytic residual history. Actual strict inner-miss count is not established."
     },
     {
       "id": "cfd.mpi_partition",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.98
+  "overall_score": 2.73
 }

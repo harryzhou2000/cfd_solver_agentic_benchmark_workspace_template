@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:29:58.137812+00:00
+Generated: 2026-10-30T06:32:31.531632+00:00
 
-**Overall score: 2.98**
+**Overall score: 2.73**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,10 +24,10 @@ Generated: 2026-10-30T06:29:58.137812+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 3 | BC source, no detailed physical review. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 2 | Terminal response admits first-order disabled reconstruction. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 1 | solver.cpp:210–220,280–284 uses first-order states and zero limiter for all production calls; report.tex:103–105 explicitly discloses that limitation, so no DQ10 is inferred solely from a generic limiter description. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3 | Limiter source. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 1 | solver.cpp:210–220,280–284 uses first-order states and zero limiter for all production calls; report.tex:103–105 explicitly discloses that limitation, so no DQ10 is inferred solely from a generic limiter description. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | Terminal admits viscous flux disabled. |
@@ -36,7 +36,7 @@ Generated: 2026-10-30T06:29:58.137812+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | LU-SGS source. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | Final manifest pending Re200; no completion credit. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | solver.cpp:280–288 takes five fixed inner updates without evaluating target; selected root creates analytic residual history. Actual strict inner-miss count is not established. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | solver.cpp:309–333 reads full mesh on all ranks and retains global_mesh while steady/transient solve runs; TASK prohibited shortcut 7 applies independently of actual partition and neighbor halos. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T06:29:58.137812+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.98
+- Overall score (0-5): 2.73
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

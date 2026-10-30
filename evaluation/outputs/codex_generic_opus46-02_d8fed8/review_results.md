@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:29:58.138115+00:00
+Generated: 2026-10-30T06:32:31.531925+00:00
 
 **Overall score: 1.9**
 
@@ -27,7 +27,7 @@ Generated: 2026-10-30T06:29:58.138115+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 2 | Repeated contradictory final claims. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Figure source mapping broken and raw data excluded. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Root call at 03:23:28 rewrites force CSV choosing the last observed row per step and prints 30000 unique steps, while synthesizing all residual rows. This transformation does not establish whether forces arose from one continuous run. Rank-0-only field output and historical manifest source mappings limit traceability. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
