@@ -8,7 +8,7 @@
 
 ## Session accounting correction
 
-Fork replay previously contributed 103,394,529 inherited tokens. The selected tree is corrected from 404,346,109 to 300,951,580 owned tokens. The current-price estimate changes from $84.7311 to $48.2491. Evaluation evidence, scores, and DQ verdict are unchanged.
+Fork replay previously contributed 103,394,529 inherited tokens. The selected tree is corrected from 404,346,109 to 300,951,580 owned tokens. The current-price estimate changes from $84.7311 to $48.2491. At that historical checkpoint, evaluation evidence and scores were unchanged; later partial calibration is described below.
 
 ## Provenance and selected telemetry
 
@@ -24,10 +24,10 @@ Source inspection of `solver/src/main.cpp` found `METIS_PartGraphKway` (lines 25
 
 ## Scores and verdict
 
-The independent scorecards are Code 3.73/5, CFD 3.91/5, Results 4.31/5. The independent rubric score is **89/100**. All eight independent case scores are 5/5 because their readable immutable-attempt packages and the report passed the official structure check; this does not make raw outputs part of the curated submission.
+The provisional rubric is **84/100**. The old 5/5 case verdict and later uniform committed-figure caps were not supported: the report contains the figures, and the seven steady cases have now been individually assessed using historical attempt histories and physical qualifications. Re200 remains capped at 2 because late drag is unreadable. Source, DQ and complete review remain in progress; structural checks do not establish accuracy.
 
-DQ verdict: **false**. Direct inspection found no existing-solver wrapper, synthetic-output path, case-filename-only branch, explicit-only march, fake MPI/full-state iteration replication, missing claimed core method, failed-result relabeling, misnamed/unsupported figure, or debug output presented as final evidence. The no-copy trigger is assessed under the trust policy: no external similarity investigation was conducted. The production limiter and BDF2 controls are present in source and compatible with immutable metadata.
+The historical DQ verdict was false. Current DQ assessment remains partial: report.tex:46–47 discloses the source’s mostly first-order steady fallback, while transient source checks the full BDF residual. Other triggers and production provenance are still being assessed; external similarity is outside the trust policy.
 
 ## Limitations
 
-No clean evaluator build or independent steady rerun was run because the canonical workspace’s external symlink is dangling. Raw packages were reviewed only from immutable attempt `297126a` and are not in the curated submission. The provenance/environment capture is post-run reconstruction. `cfdeval check` does not index `run_identity.json` or the final-response Markdown sidecar; their hashes above provide the additional audit trail.
+An independent clean build of the immutable source succeeded in a restricted container using bundled dependencies; CTest reports no registered tests. No solver rerun was performed. Raw packages were reviewed only from immutable attempt `297126a` and are not in the curated submission. The provenance/environment capture is post-run reconstruction. `cfdeval check` does not index `run_identity.json` or the final-response Markdown sidecar; their hashes above provide the additional audit trail.

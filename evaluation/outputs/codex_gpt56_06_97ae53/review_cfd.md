@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:51:07.909795+00:00
+Generated: 2026-10-30T11:53:10.215064+00:00
 
-**Overall score: 3.91**
+**Overall score: 3.82**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T11:51:07.909795+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | Farfield, slip and no-slip adiabatic treatments are documented with reported gates. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 3 | Least-squares linear reconstruction exists, but steady high-order sweep is only every 25th outer step. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 2 | main.cpp:981–987 activates limited high-order on only first inner sweep of every 25th steady step; most steady updates and final residual :1029 are first-order. Report.tex:46–47 explicitly discloses this schedule; transient uses high order. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Limiter/positivity controls are documented as production-active. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T11:51:07.909795+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.91
+- Overall score (0-5): 3.82
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

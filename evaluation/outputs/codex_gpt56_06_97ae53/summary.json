@@ -230,7 +230,7 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4,
-        "notes": "CMake C++17/MPI build and documented commands are committed; evaluator did not perform a clean rebuild because the host external symlink is dangling."
+        "notes": "Clean immutable-source CMake build succeeds with supplied dependencies in network-disabled container; compiler warns about misleading indentation and unused code; CTest has no registered tests."
       },
       {
         "id": "code.cli",
@@ -279,7 +279,7 @@
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 4,
-        "notes": "Immutable attempt 297126a contains all eight validator-ready packages and reported Python/diff checks."
+        "notes": "CTest reports no registered tests; independent clean build and historical examiner evidence do not by themselves establish physics."
       },
       {
         "id": "code.hygiene",
@@ -376,8 +376,8 @@
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 3,
-        "notes": "Least-squares linear reconstruction exists, but steady high-order sweep is only every 25th outer step."
+        "score": 2,
+        "notes": "main.cpp:981\u2013987 activates limited high-order on only first inner sweep of every 25th steady step; most steady updates and final residual :1029 are first-order. Report.tex:46\u201347 explicitly discloses this schedule; transient uses high order."
       },
       {
         "id": "cfd.limiter",
@@ -447,7 +447,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.91
+    "overall_score": 3.82
   },
   "result_review": {
     "review_area": "result_review",

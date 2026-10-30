@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:51:07.909062+00:00
+Generated: 2026-10-30T11:53:10.214603+00:00
 
 **Overall score: 3.73**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake C++17/MPI build and documented commands are committed; evaluator did not perform a clean rebuild because the host external symlink is dangling. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Clean immutable-source CMake build succeeds with supplied dependencies in network-disabled container; compiler warns about misleading indentation and unused code; CTest has no registered tests. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 4 | README documents case/config/output CLI and source contains argument validation. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T11:51:07.909062+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Positivity fallback, finite checks and documented robust first-order predictor schedule. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | Immutable attempt 297126a contains all eight validator-ready packages and reported Python/diff checks. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | CTest reports no registered tests; independent clean build and historical examiner evidence do not by themselves establish physics. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Curated result commit audit passed with 57 allowed source/report/figure paths and no prohibited paths. |
