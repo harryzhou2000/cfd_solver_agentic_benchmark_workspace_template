@@ -95,3 +95,8 @@ All eight selected `113f01a:solver/results/final/<case>/restart_final.dat` files
 ## Clean build and PDF inspection — 2026-10-30
 
 Immutable `25daaa3` built successfully in network-disabled `cfd-bench` with two CPUs, 3 GiB and 256 pids, using `CFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install` and `EXTERNAL_ROOT=/opt/external`. OpenMPI header cast warnings did not prevent linking. The executable was not used for a production CFD rerun. All 15 pages of the accepted main PDF were rendered and visually inspected; no obvious missing-asset placeholders were seen. The delivered Re200 force plot's missing readable late drag remains a separate floor defect.
+
+
+## Other steady-case force windows — 2026-10-30
+
+Selected force CSVs for M080 and M200 inviscid, M015 and M080 laminar, and Re20 match checkpoint `113f01a`; individual SHA256 values, 400/50-row force windows, figure and report references are in the case notes. Their final Cd windows are respectively −0.00900087..−0.00898973, −0.09259732..−0.09256281, −0.07051559..−0.07034725, −0.07995832..−0.07993799 and −1.969479..−1.969015. The report expressly uses absolute drag due to its sign convention. The source's full viscous traction in the force split is a separate documented rubric defect; unknown normal contributions are not mechanically charged as failures for every laminar case. These scores are retained. No production CFD rerun.
