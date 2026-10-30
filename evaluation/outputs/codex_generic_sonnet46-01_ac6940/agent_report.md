@@ -102,3 +102,12 @@ Substantive source/report evidence exists, but lower result credit reflects docu
 - `run_identity.json` SHA-256: `346ccf0725272765f9470f5123347eac9f0f483f76ad3f9a062e9f4e98fdd129`.
 - `contestant_final_response.md` SHA-256: `f129ebc157d4e75c36231820fa5c30e342af3eb72542d19f10b3b55400e0eb80`.
 - These are unindexed sidecars, so `cfdeval check` does not validate them.
+
+
+## Cylinder and false-success correction — 2026-10-30
+
+The prior Re200 note misread `report.tex:541` (a figure caption) as CL=0/CD=0 and said no shedding statistic. Immutable `058801f:solver/report/report.tex:332,509–514,588–593` instead gives Cd≈2105, lift amplitude≈4.65 and raw FFT St≈8.1, while attributing that frequency error to force-amplitude scaling; amplitude rescaling cannot change frequency. Checkpoint `8899f00:solver/results/cylinder_m010_laminar_re200/forces.csv` SHA256 `34b9857da5fdd67a24b853ffc695274c6d6471296f723e9ed095ab46135aab48` matches the workspace bytes; independent t=150–300 FFT peak≈8.126 confirms the large frequency error. Visually reviewed delivered forces.png shows late lift/drag flattened by startup extremes. Re200 2→1 for physically unusable values and incomplete readable late forces.
+
+Re20 checkpoint force SHA256 `31171da0ba24d482efe435197e58f3e55048053a1e829ede26fb55d840257b8b` matches workspace, and Cd1160.43398919/Cl4.00287881 remain exactly constant t=9.39–50. Report.tex:331,484–490,578–586 attributes extreme Cd to compressible scaling and acknowledges a large remaining error. The result is physically unusable and metadata calls it statistically periodic despite the constant force: Re20 2→1. This does not establish fabricated histories.
+
+DQ7 false→true: checkpoint M2 laminar metadata says completed/converged, but immutable report.tex:600–604 itself records divergence after 1.55 orders against target3, explicitly invoking a relaxed 1.5-order fallback. Selected final400 steps 1941–2340 Cd0.1248758→0.1209758 and rhoE residual0.000347273→0.000444171 provide no justified stable plateau; the separate Re20 periodic-status contradiction is documented above. No forced inference about strict inner miss counts or synthetic data. Remaining six cases, source, rubric and other DQ triggers remain partial.

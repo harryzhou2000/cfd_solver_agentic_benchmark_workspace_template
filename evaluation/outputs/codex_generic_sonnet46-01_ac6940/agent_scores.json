@@ -332,17 +332,24 @@
       "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-6.2times10^-4, CD=0.12098 at 058801f:solver/report/report.tex:330; residual history 058801f:solver/report/figures/naca0012_m200_laminar_re5000_residuals.png (referenced at solver/report/report.tex:457); no committed/referenced force-history plot; computed-field contour 058801f:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/report.tex:421). Score 2 retained after the post-processing audit. Prior case judgment: Readable workspace package; limitations retained."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=4.00, CD=1160 at 058801f:solver/report/report.tex:331; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 058801f:solver/report/figures/cylinder_m010_laminar_re20_mach.png (referenced at solver/report/report.tex:495). Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable workspace package; limitations retained."
+      "score": 1,
+      "notes": "Recognizable but physically unusable cylinder result: checkpoint 8899f00 solver/results/cylinder_m010_laminar_re20/forces.csv SHA256 31171da0ba24d482efe435197e58f3e55048053a1e829ede26fb55d840257b8b is exactly constant from t=9.39\u201350 at Cd1160.43398919/Cl4.00287881; report.tex:331,484\u2013490 acknowledges Cd\u22481160 and attributes it to compressible scaling. This is not credible Re20 wake/force evidence. The same package metadata says statistically_periodic despite no variation in the final 40.61 time units. No synthetic-history inference or rerun."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0, CD=0 at 058801f:solver/report/report.tex:541; no committed/referenced residual-history plot; force history 058801f:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:540); computed-field contour 058801f:solver/report/figures/cylinder_m010_laminar_re200_vorticity.png (referenced at solver/report/report.tex:532); no committed St/frequency/period statistic; late-time periodic-force evidence 058801f:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:540). Score 2 retained after the post-processing audit. Prior case judgment: Readable workspace package; limitations retained."
+      "score": 1,
+      "notes": "Recognizable but physically unusable result: report.tex:332,509\u2013514 gives mean Cd\u22482105 and lift amplitude\u22484.65, not the old erroneous CL=0/CD=0 citation to figure caption :541. It explicitly reports FFT St\u22488.1 at :588\u2013593, not no St; amplitude scaling cannot change frequency. Checkpoint 8899f00 forces.csv SHA256 34b9857da5fdd67a24b853ffc695274c6d6471296f723e9ed095ab46135aab48 has t=150\u2013300 lift FFT peak\u22488.126, far from report reference\u22480.19. Delivered forces.png compresses late drag and lift with startup extremes, failing the distinct late-force plot floor; no Re200 rerun."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "flag": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "Checkpoint 8899f00 naca0012_m200_laminar_re5000 metadata marks completed=true, converged. Immutable report.tex:600\u2013604 explicitly says residual diverged at 1.55 orders versus target3 and was declared converged by a relaxed 1.5-order fallback. Selected raw final400 steps 1941\u20132340 Cd decreases 0.1248758\u21920.1209758, while rhoE residual rises 0.000347273\u21920.000444171; neither supplied target nor a justified force plateau is established. Separately Re20 metadata calls a result statistically_periodic while Cd and Cl remain exactly constant over t=9.39\u201350. This does not establish force/residual synthesis; no rerun."
+      }
+    ]
   },
   "limitations": [
     "No evaluator solver rerun was performed; Re200 was never rerun.",
