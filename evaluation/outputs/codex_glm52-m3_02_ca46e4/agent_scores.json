@@ -371,7 +371,7 @@
         "id": 4,
         "text": "MPI rank changes steady results by order-one amounts",
         "found": false,
-        "evidence": "Checkpoint 99413eb has rank comparison packages; matched controls, starting states and binary attribution still need review before an order-one rank finding."
+        "evidence": "99413eb final M015 inv np4 Cd0.06430 at step5000 vs np8 Cd0.07031 at step2000; Re20 np4 Cd4.30925 at step20000 vs np8 Cd4.28958 at step5000. Stops and likely controls differ and revisions are null; no controlled order-one result or rank-only cause established."
       },
       {
         "id": 5,
@@ -383,7 +383,7 @@
         "id": 6,
         "text": "Report claims algorithms absent from source",
         "found": false,
-        "evidence": "Core algorithms have source counterparts. Historical checkpoint 99413eb supplies result evidence; specific algorithm-claim verification remains in progress."
+        "evidence": "Report.tex:62\u201369 describes Roe/Rusanov and wall shear; solver.hpp:225\u2013230,330\u2013345 implements Roe and Rusanov, and :596\u2013610 implements viscous traction. Full rather than tangential traction is penalized under viscous rubric; this alone does not prove an absent claimed algorithm."
       },
       {
         "id": 7,
@@ -407,19 +407,19 @@
         "id": 10,
         "text": "Second-order reconstruction or limiter disabled in production",
         "found": false,
-        "evidence": "Source enables reconstruction after configurable startup; first-order/limited fallbacks are disclosed. No production artifact proves a prohibited always-disabled setting."
+        "evidence": "main.cpp:167\u2013170 forces transient first order, explicitly disclosed report.tex:159\u2013160. Steady activation depends on firstOrderSteps/flags at :159\u2013160,199\u2013202; exact historical production controls/binary are not independently bound, so an undisclosed disabled steady reconstruction is not established."
       },
       {
         "id": 11,
         "text": "Surface no-slip rows are adjacent cell-center values without disclosure",
         "found": false,
-        "evidence": "Checkpoint 99413eb contains surface outputs; source/report boundary semantics and actual rows require review before a DQ11 finding."
+        "evidence": "output.hpp:86\u201387 explicitly writes u=v=Mach=0 for no-slip wall boundary values; checkpoint surface files exist. No undocumented adjacent-cell no-slip rows established."
       },
       {
         "id": 12,
         "text": "Misnamed figures",
         "found": false,
-        "evidence": "Committed filenames/captions are internally consistent on inspection; missing source data prevents stronger verification."
+        "evidence": "Checkpoint Re200 Mach PNG is labeled velocity_magnitude, but plot_results.py:174\u2013180 overwrites it using the Mach data array with an incorrect label; this does not establish a different field plotted under a Mach filename. Broader figure correspondence remains partial."
       },
       {
         "id": 13,
