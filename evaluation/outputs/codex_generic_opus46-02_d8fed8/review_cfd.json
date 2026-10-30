@@ -7,35 +7,35 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Equations/source."
+      "notes": "types.h:11\u201314 uses 2D four-variable conservative state and ideal-gas properties; actual viscous residual is disabled as disclosed."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "CGNS/geometry modules."
+      "notes": "mesh.cpp:64\u201375 loops CGNS zones, :113\u2013179 supports TRI/QUAD/MIXED, :193\u2013249 merges interface nodes; rank0-only output omits other partitions."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 4,
-      "notes": "FV source and individual outputs."
+      "notes": "solver.cpp:68\u2013102 assembles conservative inviscid face flux and explicitly comments out viscous flux; production calls use first-order states."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Rusanov/Roe source."
+      "notes": "flux_inviscid.cpp implements Rusanov and Roe/Harten variants; solver.cpp:92 chooses Rusanov in production. First-order/disabled viscous caveat is explicit in report."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 3,
-      "notes": "BC source, no detailed physical review."
+      "notes": "case_parser.cpp:16 rejects unknown boundary types; output.cpp:64\u201394 emits no-slip wall velocity zero and zero cf; source surface output covers rank0 partition only."
     },
     {
       "id": "cfd.reconstruction",
@@ -56,14 +56,14 @@
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 2,
-      "notes": "Terminal admits viscous flux disabled."
+      "notes": "solver.cpp:94\u201398 disables viscous flux in residual although separate viscous force uses tangential approximation :126\u2013138; output.cpp:93 hardcodes cf zero. Report.tex:103\u2013106 discloses disabled viscous evolution."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "LU-SGS source."
+      "score": 3,
+      "notes": "lusgs.cpp:28\u2013100 implements LU-SGS sweeps with local/global time-step modes; five fixed transient iterations are not target convergence."
     },
     {
       "id": "cfd.transient",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.73
+  "overall_score": 2.63
 }

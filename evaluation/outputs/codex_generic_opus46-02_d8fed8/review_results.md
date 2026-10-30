@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:32:31.531925+00:00
+Generated: 2026-10-30T06:34:40.728055+00:00
 
-**Overall score: 1.9**
+**Overall score: 1.75**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -12,19 +12,19 @@ Generated: 2026-10-30T06:32:31.531925+00:00
 | 1 | **res.contract** Output contract compliance | 0.20 | 1 | All eight scored checkpoint restart_final.dat files contain only 11-byte RESTART_V1/NUL marker; main.cpp does not parse --restart. TASK.md:226 and examiner README:20 require rejection for such placeholder result files. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 2 | Full explicit validator fails figure manifest. |
+| 2 | **res.validator** Automated validator results | 0.10 | 2 | Snapshot records structural checks; final figure manifest has source mapping problems. A validator pass cannot establish physical correctness, genuine residuals or usable restart. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Final manifest has two pending cases. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Old report manifest marks M2 laminar/Re200 pending, but later selected packages exist. Re200 residuals are analytic placeholders and its forces are irregular; laminar cases have disabled viscous evolution. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | No credible Re200 result; M2 laminar pending. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | Selected laminar NACA Cd4.519/5.871/5.827 and Re20 Cd9.401 are extremely large; Re200 t>=200 lift spans −12.623 to12.536 with synthetic residuals. No actual strict miss count inferred. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 3 | Figures exist but manifest broken. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2 | Main accepted five-page PDF is readable and covers limited plots; f0cc8b2 contestant checkpoint carries standalone plots for all cases, but Re20 Mach contour covers only upper subdomain and Re200 residual plot is synthetic. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 2 | Repeated contradictory final claims. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 2 | report.tex:103–107 honestly discloses first-order/disabled viscous flux, but :111 claims all eight cases converge and earlier run manifest marks M2 laminar/Re200 pending. Historical later packages are distinct. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Root call at 03:23:28 rewrites force CSV choosing the last observed row per step and prints 30000 unique steps, while synthesizing all residual rows. This transformation does not establish whether forces arose from one continuous run. Rank-0-only field output and historical manifest source mappings limit traceability. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T06:32:31.531925+00:00
 
 ## Summary
 
-- Overall score (0-5): 1.9
+- Overall score (0-5): 1.75
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

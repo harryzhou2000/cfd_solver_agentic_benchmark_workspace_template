@@ -416,21 +416,21 @@
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Modular source layout."
+        "notes": "src separates mesh, partition, flux, reconstruction, implicit and output; types.h fixes four-state 2D arrays, constraining generalization."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "No external solver found; no external search."
+        "notes": "No wrapped external solver core or executable identified in reviewed source; no exhaustive external similarity search."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 3,
-        "notes": "Input driven."
+        "notes": "case_parser.cpp:31\u201352 uses input case mesh path; run statuses, analytic residual and marker restarts were altered in selected root session, not direct proof of case-name hardcoding in PDE source."
       },
       {
         "id": "code.mpi",
@@ -444,21 +444,21 @@
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 3,
-        "notes": "Final contract/report inconsistency."
+        "notes": "solver.cpp:176\u2013185 clips density/pressure and :210\u2013220 uses first order with disabled viscous flux; main has no restart support and rank0-only collective can deadlock at steady completion."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Agent testing evidence, final report broken."
+        "score": 2,
+        "notes": "Structural examiner outcomes are recorded; root-generated analytic Re200 residual and marker restarts show validator pass is not physical validation. Clean source build passed, no CFD rerun."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 2,
-        "notes": "Raw/build artifacts required curation."
+        "notes": "Source includes alternate solver_new.cpp outside CMake; metadata misreports spatial order/viscous flux and result folders contain placeholder restarts; historic figure manifest misstates force/residual sources."
       }
     ],
     "disqualification_flags": [
@@ -503,7 +503,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.0
+    "overall_score": 2.9
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -514,35 +514,35 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Equations/source."
+        "notes": "types.h:11\u201314 uses 2D four-variable conservative state and ideal-gas properties; actual viscous residual is disabled as disclosed."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "CGNS/geometry modules."
+        "notes": "mesh.cpp:64\u201375 loops CGNS zones, :113\u2013179 supports TRI/QUAD/MIXED, :193\u2013249 merges interface nodes; rank0-only output omits other partitions."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 4,
-        "notes": "FV source and individual outputs."
+        "notes": "solver.cpp:68\u2013102 assembles conservative inviscid face flux and explicitly comments out viscous flux; production calls use first-order states."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Rusanov/Roe source."
+        "notes": "flux_inviscid.cpp implements Rusanov and Roe/Harten variants; solver.cpp:92 chooses Rusanov in production. First-order/disabled viscous caveat is explicit in report."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 3,
-        "notes": "BC source, no detailed physical review."
+        "notes": "case_parser.cpp:16 rejects unknown boundary types; output.cpp:64\u201394 emits no-slip wall velocity zero and zero cf; source surface output covers rank0 partition only."
       },
       {
         "id": "cfd.reconstruction",
@@ -563,14 +563,14 @@
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 2,
-        "notes": "Terminal admits viscous flux disabled."
+        "notes": "solver.cpp:94\u201398 disables viscous flux in residual although separate viscous force uses tangential approximation :126\u2013138; output.cpp:93 hardcodes cf zero. Report.tex:103\u2013106 discloses disabled viscous evolution."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 4,
-        "notes": "LU-SGS source."
+        "score": 3,
+        "notes": "lusgs.cpp:28\u2013100 implements LU-SGS sweeps with local/global time-step modes; five fixed transient iterations are not target convergence."
       },
       {
         "id": "cfd.transient",
@@ -619,7 +619,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.73
+    "overall_score": 2.63
   },
   "result_review": {
     "review_area": "result_review",
@@ -637,35 +637,35 @@
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 2,
-        "notes": "Full explicit validator fails figure manifest."
+        "notes": "Snapshot records structural checks; final figure manifest has source mapping problems. A validator pass cannot establish physical correctness, genuine residuals or usable restart."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 2,
-        "notes": "Final manifest has two pending cases."
+        "notes": "Old report manifest marks M2 laminar/Re200 pending, but later selected packages exist. Re200 residuals are analytic placeholders and its forces are irregular; laminar cases have disabled viscous evolution."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 2,
-        "notes": "No credible Re200 result; M2 laminar pending."
+        "notes": "Selected laminar NACA Cd4.519/5.871/5.827 and Re20 Cd9.401 are extremely large; Re200 t>=200 lift spans \u221212.623 to12.536 with synthetic residuals. No actual strict miss count inferred."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Figures exist but manifest broken."
+        "score": 2,
+        "notes": "Main accepted five-page PDF is readable and covers limited plots; f0cc8b2 contestant checkpoint carries standalone plots for all cases, but Re20 Mach contour covers only upper subdomain and Re200 residual plot is synthetic."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 2,
-        "notes": "Repeated contradictory final claims."
+        "notes": "report.tex:103\u2013107 honestly discloses first-order/disabled viscous flux, but :111 claims all eight cases converge and earlier run manifest marks M2 laminar/Re200 pending. Historical later packages are distinct."
       },
       {
         "id": "res.traceability",
@@ -702,7 +702,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 1.9
+    "overall_score": 1.75
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus46-02",

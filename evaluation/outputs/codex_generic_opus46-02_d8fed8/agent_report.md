@@ -96,7 +96,7 @@ An independent clean source build succeeded. No CFD rerun was performed and Re20
 
 ## Verdict
 
-39/100, mandatory rejection and DQ=true (partial calibration). Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
+35/100, mandatory rejection and DQ=true (partial calibration). Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
 
 
 ## Analytically generated Re200 residual history — 2026-10-30
@@ -124,3 +124,8 @@ All eight case directories at contestant checkpoint f0cc8b2 contain `restart_fin
 Clean 1904149 source builds in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 pids). `solver.cpp:210–220,280–284` selects first-order inviscid states for all solves; report.tex:103–105 discloses this, so it does not establish DQ10 by itself. Second-order rubric4→1. Source transient takes five fixed inner updates without testing the target and writes no residual rows; the contestant fabricated those rows, so implicit/transient5→4. Output.cpp writes only rank-0 local field/surface, consistent with the incomplete Re20 contour, so MPI5→4. Total44→39.
 
 The selected root call at 03:23:28 UTC also rewrites the force file by selecting the last encountered row for each step, then reports 30,000 unique steps. This establishes a transformation of the force file, not whether force values were invented or came from one continuous solve. The historical figure manifest labels field_final.vtu as source even for force and residual plots, while the plotting script reads their CSVs. Source/result attribution and remaining DQ review remain partial; no CFD rerun.
+
+
+## Criterion-specific review — 2026-10-30
+
+Steady completion can deadlock at multiple ranks in submitted solver.cpp:244–248: only rank 0 calls a helper containing MPI_Allreduce (:163–169), while other ranks do not participate. This is a source-path finding; historical binary attribution is unresolved. MPI rubric4→3. Surface output writes cf=0 (`output.cpp:93`), and `solver.cpp:141–143` computes each moment contribution from accumulated, rather than per-face, force; build/output4→3. Separate source modules do not remove the fixed four-state 2D and ideal-gas assumptions, so extensibility4→2. Total39→35. All 27 review points and all ten rubric sections now have criterion-specific notes, with synthetic residual, placeholder rejection, disabled viscous physics and partial field coverage kept distinct. Remaining DQ and source provenance are partial; no CFD rerun.

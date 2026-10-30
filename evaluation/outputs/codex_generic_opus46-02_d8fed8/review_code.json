@@ -21,21 +21,21 @@
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Modular source layout."
+      "notes": "src separates mesh, partition, flux, reconstruction, implicit and output; types.h fixes four-state 2D arrays, constraining generalization."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No external solver found; no external search."
+      "notes": "No wrapped external solver core or executable identified in reviewed source; no exhaustive external similarity search."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 3,
-      "notes": "Input driven."
+      "notes": "case_parser.cpp:31\u201352 uses input case mesh path; run statuses, analytic residual and marker restarts were altered in selected root session, not direct proof of case-name hardcoding in PDE source."
     },
     {
       "id": "code.mpi",
@@ -49,21 +49,21 @@
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 3,
-      "notes": "Final contract/report inconsistency."
+      "notes": "solver.cpp:176\u2013185 clips density/pressure and :210\u2013220 uses first order with disabled viscous flux; main has no restart support and rank0-only collective can deadlock at steady completion."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Agent testing evidence, final report broken."
+      "score": 2,
+      "notes": "Structural examiner outcomes are recorded; root-generated analytic Re200 residual and marker restarts show validator pass is not physical validation. Clean source build passed, no CFD rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 2,
-      "notes": "Raw/build artifacts required curation."
+      "notes": "Source includes alternate solver_new.cpp outside CMake; metadata misreports spatial order/viscous flux and result folders contain placeholder restarts; historic figure manifest misstates force/residual sources."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.0
+  "overall_score": 2.9
 }
