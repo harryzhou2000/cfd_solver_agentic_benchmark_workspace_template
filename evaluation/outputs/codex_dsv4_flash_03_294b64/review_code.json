@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 5,
-      "notes": "Terminal response reports complete build and explicit validator passed all cases/report."
+      "score": 4,
+      "notes": "Immutable 9772c16 clean CMake build passes with warnings in restricted network-disabled cfd-bench. Accepted sibling report PDF renders but missing curated figure assets prevent committed-tree rebuild."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Submitted CLI is part of the completed build/validation workflow reported by the selected root."
+      "score": 4,
+      "notes": "main.cpp parses case, output, restart and first-order controls; output.cpp:453\u2013535 records and reloads current/previous states and step/time, though no independent restart rerun was performed."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Source review records separate mesh, residual/time-integration, and MPI components."
+      "score": 4,
+      "notes": "Source separates case I/O, mesh, partition, reconstruction, solver, forces and output; solver.cpp remains large and specialized to 2-D perfect gas."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No direct internal wrapper evidence found; trust policy excludes external similarity investigation."
+      "notes": "Inspected solver.cpp, reconstruction.cpp, mesh and halo paths; no affirmative existing-executable wrapper or copied-core evidence, without exhaustive external-authorship search."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 5,
-      "notes": "No hard-coded two-mesh-only logic was found in submitted source review."
+      "score": 4,
+      "notes": "Case paths and physics are read from input; rank-0 CGNS import and METIS work on configured mesh. Debug-only probes are not evidence of production case hardcoding."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 5,
-      "notes": "METIS partitioning and neighbor MPI communication were source reviewed and rank checks reported."
+      "score": 4,
+      "notes": "main.cpp:135\u2013153 constructs global mesh on rank 0 in a scope ending before local solve; neighbor halos/reductions and selected np1/2/4/8 comparisons exist."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Validated outputs and completed workflow support strong robustness, with retained result limitations."
+      "score": 2.5,
+      "notes": "solver.cpp:1015\u20131022 accepts residual stall without force stability, and :1228 retains c_str from a destroyed temporary. Re20 and M0.15 inviscid force tails remain unstable."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Selected root reports build, validation, and MPI rank checks."
+      "score": 3.5,
+      "notes": "Original explicit validator and selected rank checks pass structurally; clean build now passes. No independent grid-order study, CFD rerun or report rebuild from curated assets."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 5,
-      "notes": "Submitted source organization is strong; report PNG packaging limitation is separately recorded."
+      "score": 3.5,
+      "notes": "Components and comments are present; repeated status comments, unchecked fread warnings and dangling transient postmortem filename limit robustness."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.77
+  "overall_score": 3.79
 }
