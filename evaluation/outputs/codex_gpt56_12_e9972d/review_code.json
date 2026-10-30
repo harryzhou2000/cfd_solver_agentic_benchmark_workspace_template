@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 5,
-      "notes": "CMake/MPI source submitted."
+      "notes": "Immutable clean build succeeds in network-disabled benchmark image; all three registered unit/np2 mesh tests pass."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Documented runner."
+      "score": 4.5,
+      "notes": "Case/output/restart controls and error handling exist; historical executable identity remains qualified."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Header/source separation."
+      "score": 4.5,
+      "notes": "Separate config, physics, mesh, partition, solver and output modules; 2-D scope remains."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No authorship investigation."
+      "notes": "No internal solver wrapper found; external authorship investigation not performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Configuration-driven cases."
+      "score": 4.5,
+      "notes": "Case JSON selects mesh, controls and physics; CGNS reader supports multiple zones and MIXED sections."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Partition/halo implementation and smoke evidence."
+      "score": 4.5,
+      "notes": "METIS and neighbor exchange plus tracked np1/8 comparisons; modest force differences and historic binary qualification remain."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "Guards and line search."
+      "notes": "Positivity and bounded nonlinear updates exist; some steady final force drift limits confidence."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "All eight explicit packages validate."
+      "score": 4.5,
+      "notes": "All three safe registered unit/mesh-partition tests pass; no independent grid/time convergence study."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Curated submission clean."
+      "score": 4.5,
+      "notes": "Modules, report and tools are organized; a frozen preconditioner and some numerical limitations are documented."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.37
+  "overall_score": 4.46
 }

@@ -125,7 +125,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_gpt56_09_d5760c` | fully reviewed: 69/100, DQ7; historical binary and other image bindings qualified |
 | `codex_gpt56_10_797ac3` | fully reviewed with qualified binary, rank-comparison and image provenance: 74/100, DQ7 |
 | `codex_gpt56_11_14a0ed` | fully reviewed: 36/100, no DQ; six absent cases, two partial histories, no production report |
-| `codex_gpt56_12_e9972d` | partial: Re200 force/frequency reviewed; steady, source and DQ under review |
+| `codex_gpt56_12_e9972d` | fully reviewed: 89.5/100, no DQ; historical binary and some figure bindings qualified |
 | `codex_kimik3_01_09309d` | unreviewed |
 | `codex_kimik3_03_09eb62` | unreviewed |
 | `codex_kimik3_04_b353a7` | unreviewed |
@@ -1250,3 +1250,6 @@ gpt56_12 steady-case calibration checkpoint (partial overall): in canonical orde
 
 
 gpt56_12 field-trace checkpoint (partial): contestant checkpoint Re20 field_final.vtk/workspace SHA256 9407db96afeee8eaacba06ef890e198434b979cc7e6a41dc79f2b0398e2a999a contains10185 cells and10185 Mach values. Immutable postprocess.py SHA256 249b604646d04565df1321871869e830b90f0a3e51253af38c65048c094e5fee uses one PolyCollection polygon per corresponding cell value, avoiding the gpt56_04 triangle-ordering defect. A separate render using that source and field has the same 1540x792 dimensions as committed Mach PNG SHA256 291713623f6ae91ad9b23337252e70b5672a0bac70d96ef41858bd52cdd7e461, but pixel values differ (68.3% exactly equal), so exact rendering reproduction is not claimed and the difference alone does not establish unrelated data. All19 PDF pages were visually scanned. Remaining rubric/DQ review pending; no solver rerun.
+
+
+gpt56_12 full qualified review: all eight tracked original case histories, 19 report pages, ten rubric sections, 27 weighted review criteria and DQ1–13 assessed. Rubric90→89.5: build9→9.5, mesh10, residual14, second-order9, viscous10, implicit13→14, MPI8→9, case8→6, report5→4, extensibility4. Source BDF active residual/limiter startup, tangential force split, root-only global mesh and real METIS/halo implementation verified; no DQ established. Re200 wake is sustained (St0.17010) but submitted full-history force plot fails explicit readable late Cd floor; case2 retained. The seven steady case changes and comparative uncertainty are recorded above. Checkpoint7d98c133 tracks all force histories and matches curated solver source; exact historical executable and per-step BDF ratios remain qualified. Selected Re20 Mach rerender is visually similar but not pixel-identical under this environment; other image bindings not independently reproduced, no DQ8 inferred. Clean build and three safe unit/np2 mesh tests pass. Both evaluation gates pass; no external authorship investigation or unsteady rerun.
