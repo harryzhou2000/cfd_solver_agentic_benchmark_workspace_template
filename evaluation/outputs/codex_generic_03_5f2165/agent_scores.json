@@ -27,8 +27,8 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Source/build files present; no independent rebuild."
+          "score": 1,
+          "notes": "Exact curated source clean CMake build fails at main.cpp:101\u2013102 on undeclared rank and incompatible int return from CGNSMesh."
         },
         {
           "id": "code.cli",
@@ -62,8 +62,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 3,
-          "notes": "METIS/MPI structures present; no credible rank validation."
+          "score": 0,
+          "notes": "main.cpp:307\u2013363,825\u2013832 retains full mesh/state on all ranks with local copies; no distributed solve."
         },
         {
           "id": "code.robustness",
@@ -87,7 +87,7 @@
           "notes": "Curated tip clean; workspace raw/debug tree is very large."
         }
       ],
-      "overall_score": 2.6,
+      "overall_score": 1.85,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -166,11 +166,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 3,
-          "notes": "METIS and MPI are present, but no rank-count results."
+          "score": 0,
+          "notes": "METIS call does not partition the solution: main.cpp:307\u2013363 keeps every cell on every rank; main.cpp:825\u2013832 loads and initializes full data per rank."
         }
       ],
-      "overall_score": 1.77,
+      "overall_score": 1.5,
       "disqualification_flags": []
     },
     "result_review": {
@@ -231,14 +231,14 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 30,
+    "total_scored": 22,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 4,
-        "notes": "Build/source exist but CLI/output reliability was not independently verified."
+        "score": 1,
+        "notes": "Exact curated b001f2e clean CMake build fails compiling main.cpp:101\u2013102: rank undeclared in read_cgns and int return incompatible with CGNSMesh. CLI/output paths exist but are not reproducible as submitted."
       },
       {
         "id": "mesh_geometry",
@@ -279,8 +279,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 5,
-        "notes": "METIS/MPI APIs present, without rank-comparison evidence."
+        "score": 0,
+        "notes": "main.cpp:307\u2013363,825\u2013832 retains the full mesh and state on every rank and uses local copies rather than distributed ownership; TASK.md:227 is violated."
       },
       {
         "id": "case_results",

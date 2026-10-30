@@ -148,6 +148,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_generic_03_5f2165/review_code.md` (overall: 2.6)
-- CFD methods review: `codex_generic_03_5f2165/review_cfd.md` (overall: 1.77)
+- Code review scorecard: `codex_generic_03_5f2165/review_code.md` (overall: 1.85)
+- CFD methods review: `codex_generic_03_5f2165/review_cfd.md` (overall: 1.5)
 - Result review: `codex_generic_03_5f2165/review_results.md` (overall: 0.8)

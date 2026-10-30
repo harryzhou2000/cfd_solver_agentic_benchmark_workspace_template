@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:56:00.558501+00:00
+Generated: 2026-10-30T04:59:07.524972+00:00
 
-**Overall score: 2.6**
+**Overall score: 1.85**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | Source/build files present; no independent rebuild. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 1 | Exact curated source clean CMake build fails at main.cpp:101–102 on undeclared rank and incompatible int return from CGNSMesh. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 2 | Final response records CLI/output defects during run. |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T04:56:00.558501+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | JSON-driven inputs, limited verification. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 3 | METIS/MPI structures present; no credible rank validation. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 0 | main.cpp:307–363,825–832 retains full mesh/state on all ranks with local copies; no distributed solve. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 1 | Final response admits divergence/NaN and failed BC force handling. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T04:56:00.558501+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.6
+- Overall score (0-5): 1.85
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

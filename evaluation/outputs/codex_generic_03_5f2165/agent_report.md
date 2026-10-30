@@ -85,7 +85,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=false. The source has METIS/MPI and CFD implementation evidence, but the delivered runs fail. No listed disqualification trigger was proved; no external authorship search was performed.
+DQ=true under TASK.md:227: immutable main.cpp:307–363,825–832 retains full mesh and state on all ranks. Numbered DQ9 is not established because canonical metadata reports serial, not METIS. Other triggers remain under review; no external authorship search was performed.
 
 ## Metadata answers & session selection
 
@@ -93,11 +93,11 @@ Selected workspace-local root `01a026e2-7da6-7130-966e-145bb2b7555d` plus 34 des
 
 ## Limitations
 
-No independent rebuild/rerun was performed. The contestant final response contains mutually contradictory completion claims; raw status/manifest records control the result judgment. Raw packages and PDF are excluded from the curated Git tip.
+A clean build of exact curated source was attempted and failed; no CFD rerun was performed. The contestant final response contains mutually contradictory completion claims; raw status/manifest records control the result judgment. Raw packages and PDF are excluded from the curated Git tip.
 
 ## Verdict
 
-30/100, DQ=false. Basic infrastructure exists, but all delivered cases are failed/not converged, Re200 is absent as a physical-time production result, and the report/session claims are inconsistent.
+22/100, DQ=true (partial calibration). The submitted source fails a clean build and replicates mesh/state; all current cases are failed/not converged, Re200 has no physical-time production result, and source-to-result linkage is unproven. Remaining source and criterion-specific review continues.
 
 
 ## Partial replicated-state and Re200 review — 2026-10-30
@@ -115,3 +115,8 @@ The contestant delivered sibling report/report.pdf SHA-256 9e11b9cd7013bb02fb24b
 ## Partial steady-case review — 2026-10-30
 
 Current canonical M0.15 and M0.8 inviscid statuses are not_converged at steps 1026/343 with residual reductions 0.493/0.176 orders; M0.8 case score 0→1 as a recognizable incomplete attempt. Five other steady statuses explicitly fail: M2 inviscid force magnitude exceeds 10^127; M0.15/M0.8/M2 laminar residuals increase 1.401/2.338/2.374 orders; Re20 ends Cd 205.456259 with residual increased 2.256 orders. Their scores remain 0. Report/PDF describes different diagnostic histories, not these current status values; all metadata git_revision=null. Explicit prior validator fails invalid not_converged status, and obsolete automated snapshot lists periodic statuses from another historical state. Per-case evidence is in agent_scores.json. Source/rubric/DQ still partial; no CFD rerun.
+
+
+## Partial clean-build and MPI calibration — 2026-10-30
+
+Archived exact curated b001f2e into isolated scratch and configured with CMake in the cfd-bench container (`--network none --cpus 2 --memory 3g --pids-limit 256`, `CFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install`); configuration passed, but `cmake --build /work/build -j2` failed at solver/src/main.cpp:101–102 because `rank` is undeclared in `read_cgns` and `return 1` cannot convert to `CGNSMesh`. No submitted file was changed. Build rubric 4→1 and code.build 3→1. Full-mesh/state evidence above reduces MPI rubric 5→0, code.mpi 3→0 and cfd.mpi_partition 3→0. Rubric 30→22. These are current-source findings, not attribution of historical results to this unbound source; remaining criteria and DQ assessment are partial. No Re200 or unsteady rerun.

@@ -88,7 +88,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_12_7e965b` | fully reviewed: 90→79, DQ false; all cases 2 |
 | `codex_dsv4_flash_14_80096b` | partial: Re200 and initial provenance/mesh assessed; remaining cases/rubric/DQ pending |
 | `codex_generic_02_ed5ee6` | partial: DQ7, TASK full mesh, Re200 checked; others pending |
-| `codex_generic_03_5f2165` | partial: TASK full mesh/state, Re200 checked; others pending |
+| `codex_generic_03_5f2165` | partial: all cases, build and TASK full mesh/state checked; remaining source/rubric/DQ review pending |
 | `codex_generic_04_16009f` | unreviewed |
 | `codex_generic_05_2599b1` | unreviewed |
 | `codex_generic_glm53-01_99a969` | unreviewed |
@@ -548,3 +548,5 @@ generic_03 PDF suitability checkpoint: the only sibling PDF SHA 9e11b9cd7013bb02
 
 
 generic_03 partial steady-case review: M0.8 inviscid score 0→1 for recognizable not_converged attempt at step343/0.176 orders, Cd0.023213; M0.15 stays1 at step1026/0.493 orders. Other five steady canonical statuses explicitly failed: M2 inviscid force exceeds 10^127; three laminar residuals increase 1.401/2.338/2.374 orders; Re20 Cd205.456259 with residual increase2.256 orders. Their scores remain0. Report/stale PDF describe different diagnostic histories; metadata git_revision=null and obsolete automated inventory says periodic for different state. Per-case source/results linkage uncertain; remaining source/rubric/DQ partial, both gates pass, no CFD rerun.
+
+Generic_03 clean-build checkpoint: archived exact b001f2e source in isolated cfd-bench container, CMake configuration passed but build fails at main.cpp:101–102 (undeclared rank and integer return from CGNSMesh). Build rubric 4→1, code.build 3→1; replicated mesh/state evidence reduces MPI rubric 5→0, code.mpi 3→0, cfd.mpi_partition 3→0. Total 30→22, DQ remains true under TASK.md:227. Run-source binding remains unproven; other rubric/review/DQ checks remain partial. No CFD rerun.

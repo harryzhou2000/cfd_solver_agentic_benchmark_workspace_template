@@ -6,8 +6,8 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Source/build files present; no independent rebuild."
+      "score": 1,
+      "notes": "Exact curated source clean CMake build fails at main.cpp:101\u2013102 on undeclared rank and incompatible int return from CGNSMesh."
     },
     {
       "id": "code.cli",
@@ -41,8 +41,8 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 3,
-      "notes": "METIS/MPI structures present; no credible rank validation."
+      "score": 0,
+      "notes": "main.cpp:307\u2013363,825\u2013832 retains full mesh/state on all ranks with local copies; no distributed solve."
     },
     {
       "id": "code.robustness",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.6
+  "overall_score": 1.85
 }
