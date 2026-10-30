@@ -75,65 +75,65 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-10_f6b586` | fully reviewed — 87/100, DQ=true; both gates pass |
 | `claude_generic_opus-11_fe7eba` | fully reviewed: 84/100, DQ false; eight case scores 3,3,3,2,2,2,2,2 |
 | `claude_generic_sonnet-01_96c411` | fully reviewed: 71/100, DQ false; report PDF unsuitable for snapshot; both gates pass |
-| `codex_dsv4_flash_01_0c1996` | fully reviewed, qualified: 48/100 DQ6/7/10 and TASK full-mesh; two historical np1 packages unavailable |
-| `codex_dsv4_flash_02_3447d3` | fully reviewed: 68/100, DQ7 and TASK full mesh; both gates pass |
-| `codex_dsv4_flash_03_294b64` | fully reviewed: 74/100, DQ7; both gates pass |
-| `codex_dsv4_flash_04_755869` | fully reviewed: 47/100, DQ7; sibling-result reuse; both gates pass |
-| `codex_dsv4_flash_06_5b6b08` | fully reviewed, qualified: 70.5/100 with DQ7/8; historical executable/control binding unresolved |
-| `codex_dsv4_flash_07_aeae21` | fully reviewed: 68/100, DQ7 and TASK full mesh; three reference cases |
-| `codex_dsv4_flash_08_efba3c` | fully reviewed; 76→71, DQ7 and case evidence corrected |
-| `codex_dsv4_flash_09_526316` | fully reviewed: 55→48, DQ false; both gates pass |
-| `codex_dsv4_flash_10_6468ba` | fully reviewed: 86→71, DQ6 and TASK full mesh; both gates pass |
-| `codex_dsv4_flash_11_6e6ac8` | fully reviewed: 70→53, DQ7 and TASK full mesh; both gates pass |
-| `codex_dsv4_flash_12_7e965b` | fully reviewed: 90→80, DQ false; all cases 2 |
-| `codex_dsv4_flash_14_80096b` | fully reviewed, qualified: 79.5/100, no DQ established; historical binary/rank controls unbound |
-| `codex_generic_02_ed5ee6` | fully reviewed, qualified: 33/100, DQ7 and TASK full mesh; M0.15 package/source attribution unavailable |
-| `codex_generic_03_5f2165` | fully reviewed, qualified: 22/100, DQ2/6/7 plus TASK placeholder/full mesh; historical binary/figure identity limited |
-| `codex_generic_04_16009f` | fully reviewed, qualified: 24/100, DQ6/7/10 and TASK full mesh; historical binary/figure linkage unresolved |
-| `codex_generic_05_2599b1` | fully reviewed, qualified: 31/100, DQ7 and TASK full mesh; historical executable/figure binding limited |
-| `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
-| `codex_generic_glm53-02_ff20c7` | fully reviewed, qualified: 72/100, DQ7 for M2 laminar; historic source binding unresolved |
-| `codex_generic_glm53-03_d469fb` | fully reviewed, qualified: 67/100, DQ7/8; production source/rank data unbound |
-| `codex_generic_glm53-04_adde03` | fully reviewed, qualified: 85/100, DQ7; historic production-source attribution unresolved |
-| `codex_generic_opus46-01_3a72ea` | fully reviewed, qualified: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
-| `codex_generic_opus46-02_d8fed8` | fully reviewed, qualified: 35/100, mandatory placeholder rejection, DQ2 and TASK full mesh; binary/force provenance unresolved |
-| `codex_generic_opus5-01_83492a` | fully reviewed, qualified: 90/100, DQ not established; Re200 binary/fallback attribution unresolved |
-| `codex_generic_opus5-02_cac77b` | fully reviewed, qualified: 90/100, no DQ established; historical Re200 binary/figure provenance unbound |
-| `codex_generic_sonnet46-01_ac6940` | fully reviewed, qualified: 66/100, DQ7/TASK full mesh; historic binary/figure binding limited |
-| `codex_generic_sonnet46-02_dac37b` | fully reviewed, qualified: 73/100, DQ6/7 and placeholder rejection; historical binary unbound |
-| `codex_generic_sonnet5-01_540ddf` | fully reviewed, qualified: 77.5/100, DQ8; historical binary/other-figure/fallback provenance limited |
-| `codex_generic_sonnet5-02_6c0ac0` | fully reviewed, qualified: 75/100, DQ7; historical binary/remaining figure provenance uncertain |
-| `codex_generic_vllm-qwen38-01_2045e0` | fully reviewed, qualified: 62.5/100, no DQ established; rank anomaly unbound to same binary |
-| `codex_generic_vllm-qwen38-02_d47362` | fully reviewed, qualified: 80/100, DQ7; np4 diagnostic/binary attribution unresolved |
-| `codex_glm52-m3_01_919b67` | fully reviewed, qualified: 62.5/100, DQ7/10 and TASK full-mesh; historic binary/strict ratios unbound |
-| `codex_glm52-m3_02_ca46e4` | fully reviewed, qualified: 58.5/100, DQ7 and TASK full mesh; historic binary/strict counts unbound |
-| `codex_glm52-m3_03_674665` | fully reviewed, qualified: 57/100, DQ6/7 and TASK full mesh; historical binary/figure binding limited |
-| `codex_glm52-m3_04_32f2d0` | fully reviewed, qualified: 58.5/100, DQ7/8; binary/strict counts and some figure provenance limited |
-| `codex_glm52-m3_05_f094c1` | fully reviewed, qualified: 54/100, DQ7 and TASK full mesh; historic binary/figure binding limited |
-| `codex_glm52-m3_06_a2dc07` | fully reviewed, qualified: 68/100, DQ7; historical binary/figure binding limited |
-| `codex_glm52_01_1307c9` | fully reviewed, qualified — 57/100; DQ7 and TASK shortcuts 6/7; historical executable and some figure generation unbound |
-| `codex_glm52_02_06cf18` | fully reviewed, qualified — 62/100; DQ7 and TASK full-mesh; production binary/figure binding unverified |
-| `codex_glm52_03_e7d38e` | fully reviewed, qualified — 66/100, DQ7; DQ8 figure-scope interpretation and binary unbound |
-| `codex_gpt56_01_cb349f` | fully reviewed: 94/100, no DQ found; executable and individual image bindings qualified |
-| `codex_gpt56_02_38616e` | fully reviewed: 90/100, no DQ established; historic binary/precursor and image bindings qualified |
-| `codex_gpt56_03_93b257` | fully reviewed: 96.5/100, no DQ established; executable/individual figure bindings qualified |
-| `codex_gpt56_04_1e36f2` | fully reviewed: 85.5/100, DQ8; historical executables, some controls and sustained convergence qualified |
-| `codex_gpt56_05_7bee7c` | fully reviewed: 79.5/100, DQ7; historical binary and unverified image bindings qualified |
-| `codex_gpt56_06_97ae53` | fully reviewed: 76.5/100, no DQ established; historical binary and some image bindings qualified |
-| `codex_gpt56_07_b7c2c8` | fully reviewed: 66/100, DQ7; historical binary/startup and some image bindings qualified |
-| `codex_gpt56_08_715d70` | fully reviewed: 69/100, no DQ established; original binary and later workspace replacements qualified |
-| `codex_gpt56_09_d5760c` | fully reviewed: 69/100, DQ7; historical binary and other image bindings qualified |
-| `codex_gpt56_10_797ac3` | fully reviewed with qualified binary, rank-comparison and image provenance: 74/100, DQ7 |
-| `codex_gpt56_11_14a0ed` | fully reviewed: 36/100, no DQ; six absent cases, two partial histories, no production report |
-| `codex_gpt56_12_e9972d` | fully reviewed: 89.5/100, no DQ; historical binary and some figure bindings qualified |
-| `codex_kimik3_01_09309d` | fully reviewed: 79.5/100, DQ7 and session-supported DQ10; historical binaries qualified |
-| `codex_kimik3_03_09eb62` | fully reviewed: 91.5/100, no DQ; historical binaries and other figure bindings qualified |
-| `codex_kimik3_04_b353a7` | fully reviewed: 78/100, DQ7 on final averaging drift; historical binaries and image bindings qualified |
-| `codex_kimik3_05_382d41` | fully reviewed: 85.5/100, no DQ; historical binary/revision and refreshed target qualified |
-| `codex_kimik3_06_8208e5` | fully reviewed; DQ7, historical executable and unsampled figure bindings qualified |
-| `codex_kimik3_07_f42559` | fully reviewed; DQ7, exact historical binary and unsampled figure bindings qualified |
-| `codex_kimik3_08_75b3dc` | fully reviewed; DQ7 for two laminar force histories; historic binaries qualified |
-| `codex_vllm-qwen38_03_da027b` | fully reviewed; DQ4 rank-only attribution and historic binary qualified |
+| `codex_dsv4_flash_01_0c1996` | substantive review complete; phase-only attribution pending — 48/100 DQ6/7/10 and TASK full-mesh; two historical np1 packages unavailable |
+| `codex_dsv4_flash_02_3447d3` | substantive review complete; phase-only attribution pending — 68/100, DQ7 and TASK full mesh; both gates pass |
+| `codex_dsv4_flash_03_294b64` | substantive review complete; phase-only attribution pending — 74/100, DQ7; both gates pass |
+| `codex_dsv4_flash_04_755869` | substantive review complete; phase-only attribution pending — 47/100, DQ7; sibling-result reuse; both gates pass |
+| `codex_dsv4_flash_06_5b6b08` | substantive review complete; phase-only attribution pending — 70.5/100 with DQ7/8; historical executable/control binding unresolved |
+| `codex_dsv4_flash_07_aeae21` | substantive review complete; phase-only attribution pending — 68/100, DQ7 and TASK full mesh; three reference cases |
+| `codex_dsv4_flash_08_efba3c` | substantive review complete; phase-only attribution pending — 76→71, DQ7 and case evidence corrected |
+| `codex_dsv4_flash_09_526316` | substantive review complete; phase-only attribution pending — 55→48, DQ false; both gates pass |
+| `codex_dsv4_flash_10_6468ba` | substantive review complete; phase-only attribution pending — 86→71, DQ6 and TASK full mesh; both gates pass |
+| `codex_dsv4_flash_11_6e6ac8` | substantive review complete; phase-only attribution pending — 70→53, DQ7 and TASK full mesh; both gates pass |
+| `codex_dsv4_flash_12_7e965b` | substantive review complete; phase-only attribution pending — 90→80, DQ false; all cases 2 |
+| `codex_dsv4_flash_14_80096b` | substantive review complete; multiple-root attribution pending — 79.5/100, no DQ established; historical binary/rank controls unbound |
+| `codex_generic_02_ed5ee6` | substantive review complete; phase-only attribution pending — 33/100, DQ7 and TASK full mesh; M0.15 package/source attribution unavailable |
+| `codex_generic_03_5f2165` | substantive review complete; phase-only attribution pending — 22/100, DQ2/6/7 plus TASK placeholder/full mesh; historical binary/figure identity limited |
+| `codex_generic_04_16009f` | substantive review complete; phase-only attribution pending — 24/100, DQ6/7/10 and TASK full mesh; historical binary/figure linkage unresolved |
+| `codex_generic_05_2599b1` | substantive review complete; phase-only attribution pending — 31/100, DQ7 and TASK full mesh; historical executable/figure binding limited |
+| `codex_generic_glm53-01_99a969` | substantive review complete; phase-only attribution pending — 77/100, DQ4; eight cases 2; both gates pass |
+| `codex_generic_glm53-02_ff20c7` | substantive review complete; phase-only attribution pending — 72/100, DQ7 for M2 laminar; historic source binding unresolved |
+| `codex_generic_glm53-03_d469fb` | substantive review complete; phase-only attribution pending — 67/100, DQ7/8; production source/rank data unbound |
+| `codex_generic_glm53-04_adde03` | substantive review complete; phase-only attribution pending — 85/100, DQ7; historic production-source attribution unresolved |
+| `codex_generic_opus46-01_3a72ea` | substantive review complete; phase-only attribution pending — 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
+| `codex_generic_opus46-02_d8fed8` | substantive review complete; phase-only attribution pending — 35/100, mandatory placeholder rejection, DQ2 and TASK full mesh; binary/force provenance unresolved |
+| `codex_generic_opus5-01_83492a` | substantive review complete; phase-less attribution pending — 90/100, DQ not established; Re200 binary/fallback attribution unresolved |
+| `codex_generic_opus5-02_cac77b` | substantive review complete; phase-less attribution pending — 90/100, no DQ established; historical Re200 binary/figure provenance unbound |
+| `codex_generic_sonnet46-01_ac6940` | substantive review complete; phase-less attribution pending — 66/100, DQ7/TASK full mesh; historic binary/figure binding limited |
+| `codex_generic_sonnet46-02_dac37b` | substantive review complete; phase-less attribution pending — 73/100, DQ6/7 and placeholder rejection; historical binary unbound |
+| `codex_generic_sonnet5-01_540ddf` | substantive review complete; phase-less attribution pending — 77.5/100, DQ8; historical binary/other-figure/fallback provenance limited |
+| `codex_generic_sonnet5-02_6c0ac0` | substantive review complete; phase-less attribution pending — 75/100, DQ7; historical binary/remaining figure provenance uncertain |
+| `codex_generic_vllm-qwen38-01_2045e0` | substantive review complete; phase-only attribution pending — 62.5/100, no DQ established; rank anomaly unbound to same binary |
+| `codex_generic_vllm-qwen38-02_d47362` | substantive review complete; phase-only attribution pending — 80/100, DQ7; np4 diagnostic/binary attribution unresolved |
+| `codex_glm52-m3_01_919b67` | substantive review complete; phase-only attribution pending — 62.5/100, DQ7/10 and TASK full-mesh; historic binary/strict ratios unbound |
+| `codex_glm52-m3_02_ca46e4` | substantive review complete; phase-only attribution pending — 58.5/100, DQ7 and TASK full mesh; historic binary/strict counts unbound |
+| `codex_glm52-m3_03_674665` | substantive review complete; phase-only attribution pending — 57/100, DQ6/7 and TASK full mesh; historical binary/figure binding limited |
+| `codex_glm52-m3_04_32f2d0` | substantive review complete; phase-only attribution pending — 58.5/100, DQ7/8; binary/strict counts and some figure provenance limited |
+| `codex_glm52-m3_05_f094c1` | substantive review complete; phase-only attribution pending — 54/100, DQ7 and TASK full mesh; historic binary/figure binding limited |
+| `codex_glm52-m3_06_a2dc07` | substantive review complete; phase-only attribution pending — 68/100, DQ7; historical binary/figure binding limited |
+| `codex_glm52_01_1307c9` | substantive review complete; phase-only attribution pending — 57/100; DQ7 and TASK shortcuts 6/7; historical executable and some figure generation unbound |
+| `codex_glm52_02_06cf18` | substantive review complete; phase-only attribution pending — 62/100; DQ7 and TASK full-mesh; production binary/figure binding unverified |
+| `codex_glm52_03_e7d38e` | substantive review complete; phase-only attribution pending — 66/100, DQ7; DQ8 figure-scope interpretation and binary unbound |
+| `codex_gpt56_01_cb349f` | substantive review complete; phase-only attribution pending — 94/100, no DQ found; executable and individual image bindings qualified |
+| `codex_gpt56_02_38616e` | substantive review complete; phase-only attribution pending — 90/100, no DQ established; historic binary/precursor and image bindings qualified |
+| `codex_gpt56_03_93b257` | substantive review complete; phase-only attribution pending — 96.5/100, no DQ established; executable/individual figure bindings qualified |
+| `codex_gpt56_04_1e36f2` | substantive review complete; phase-only attribution pending — 85.5/100, DQ8; historical executables, some controls and sustained convergence qualified |
+| `codex_gpt56_05_7bee7c` | substantive review complete; phase-only attribution pending — 79.5/100, DQ7; historical binary and unverified image bindings qualified |
+| `codex_gpt56_06_97ae53` | substantive review complete; phase-only attribution pending — 76.5/100, no DQ established; historical binary and some image bindings qualified |
+| `codex_gpt56_07_b7c2c8` | substantive review complete; phase-only attribution pending — 66/100, DQ7; historical binary/startup and some image bindings qualified |
+| `codex_gpt56_08_715d70` | substantive review complete; phase-only attribution pending — 69/100, no DQ established; original binary and later workspace replacements qualified |
+| `codex_gpt56_09_d5760c` | substantive review complete; phase-only attribution pending — 69/100, DQ7; historical binary and other image bindings qualified |
+| `codex_gpt56_10_797ac3` | substantive review complete; phase-only attribution pending — with qualified binary, rank-comparison and image provenance: 74/100, DQ7 |
+| `codex_gpt56_11_14a0ed` | substantive review complete; phase-only attribution pending — 36/100, no DQ; six absent cases, two partial histories, no production report |
+| `codex_gpt56_12_e9972d` | substantive review complete; phase-only attribution pending — 89.5/100, no DQ; historical binary and some figure bindings qualified |
+| `codex_kimik3_01_09309d` | substantive review complete; phase-only attribution pending — 79.5/100, DQ7 and session-supported DQ10; historical binaries qualified |
+| `codex_kimik3_03_09eb62` | substantive review complete; phase-only attribution pending — 91.5/100, no DQ; historical binaries and other figure bindings qualified |
+| `codex_kimik3_04_b353a7` | substantive review complete; phase-only attribution pending — 78/100, DQ7 on final averaging drift; historical binaries and image bindings qualified |
+| `codex_kimik3_05_382d41` | substantive review complete; phase-only attribution pending — 85.5/100, no DQ; historical binary/revision and refreshed target qualified |
+| `codex_kimik3_06_8208e5` | substantive review complete; phase-only attribution pending — DQ7, historical executable and unsampled figure bindings qualified |
+| `codex_kimik3_07_f42559` | substantive review complete; phase-only attribution pending — DQ7, exact historical binary and unsampled figure bindings qualified |
+| `codex_kimik3_08_75b3dc` | substantive review complete; phase-only attribution pending — DQ7 for two laminar force histories; historic binaries qualified |
+| `codex_vllm-qwen38_03_da027b` | substantive review complete; multiple-root attribution pending — DQ4 rank-only attribution and historic binary qualified |
 | `oc-goal_gpt56-dsv4_01_f83d02` | fully reviewed; DQ7, historical source/binary and transient pass counts qualified |
 | `oc-goal_kimik3-dsv4_01_940dcb` | fully reviewed, qualified: 82/100, DQ7; historical executable/environment and exact figure binding unproven |
 | `oc-goal_kimik3-dsv4_02_0ceb76` | fully reviewed, qualified: 83/100, DQ7; historic binary and refreshed target fraction unproven |
@@ -1657,3 +1657,5 @@ Selected-root OpenCode sidecar audit: 13 non-pending selected-root stores were a
 Codex/Claude terminal audit, pending operator attribution: all 12 workspace-local Claude roots have unique completed end_turn responses matching their sidecars, with zero credential-redaction hits. Among 62 Codex snapshots, the selected-root scan found no literal final-channel response: 54 single-root records have phase=final_answer without channel (40 current sidecars match it, 14 differ, and each candidate matches the latest non-null task_complete); six have neither channel nor phase, although their latest assistant text matches task_complete; two had multiple selected roots. The three 1017 runs already have their specific operator authorization; do not generalize it. Workspace graph shows flash-14 is one user root plus ten spawned children; its report incorrectly called a child a terminal continuation, while its later main-root phase-final matches task_complete and current sidecar matches neither exact text. Qwen38-03 has two independent user roots pursuing the same goal; the first was interrupted and the second continued to a matching phase-final/completion, while the existing record calls terminal selection ambiguous. Neither was altered pending operator direction. The inventory `CODEX_TERMINAL_RESPONSE_AUDIT_20261031.json` contains IDs, timestamps, hashes and status, no response text or credentials; its one generic redaction-pattern hit is a Git object ID, not a credential. These are session-attribution limitations, separate from completed numerical reviews and automated gate results.
 
 Codex attribution inventory verification: all 54 single-root phase=final_answer candidates match their latest non-null task_complete text (zero candidate/completion mismatches); 40 sidecars match and 14 differ. Three of those 54 have the earlier 1017-specific operator authorization, leaving 51 historical single-root candidates for a possible general rule. All six single-root phase-less candidates also match their latest task_complete; five sidecars match and one differs, but these are outside a phase-only rule. Two multi-root records have separately documented root-attribution questions: flash-14's main root and qwen38-03's documented later continuation each have matching phase-final/completion text. No selected store or rollout was inaccessible. Credential screening found no hits on these candidate terminal roots; the generic-pattern hit on one excluded flash-14 child is a demonstrable Git SHA-1, not a credential. No historical selection was changed while the operator decision is pending.
+
+Codex terminal-attribution completion status: the table above now distinguishes completed substantive case/rubric/DQ review from the unresolved required session attribution for 51 historical single-root phase-only runs, six phase-less single-root runs and two multi-root selections. The three 1017 runs retain their explicit prior approval; OpenCode kimik3-dsv4-05 is a separate pending operator question. These 59 historical records are not represented as fully complete while attribution is pending. Existing sidecars and scorecards are not changed by this status clarification; pending does not mean a final response is absent.
