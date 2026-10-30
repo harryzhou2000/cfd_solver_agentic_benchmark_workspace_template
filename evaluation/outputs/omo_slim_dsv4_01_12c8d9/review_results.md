@@ -2,32 +2,32 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T16:17:11.249204+00:00
+Generated: 2026-10-30T16:23:40.679171+00:00
 
-**Overall score: 4.05**
+**Overall score: 3.35**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | All eight final directories pass explicit validator with the report. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Original validator accepted layouts; metadata success does not establish vortex shedding or steady force stability. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit evaluator validation: 8/8 case directories and report OK. |
+| 2 | **res.validator** Automated validator results | 0.10 | 4.5 | Recorded examiner validation passed; numerical outcomes checked independently, no unsteady rerun. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | M2 laminar marked converged at512 despite Cd0.116949→0.106302 final100; Re200 stat-periodic label has no resolved shedding. Final response discloses no vortex street; DQ7. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | M2 laminar marked converged despite final100 Cd0.116949→0.106302; Re200 periodic metadata has no resolved shedding. Final response candidly notes no vortex street; DQ7. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Fields are readable and finite by validator; Re200 terminal lift is near zero and no vortex street is observed. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | M015 inviscid Cd0.0183, M015 laminar0.2388 and Re20 Cd2.812 are high; Re200 lift RMS4.38e−6 shows no shedding. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 5 | Committed report references 32 curated figures with residual, force, surface, Mach, and pressure views. |
+| 5 | **res.visualization** Visualizations | 0.15 | 3.5 | Earlier report omits full Re200 visualizations; selected session later delivered np1 M080 plots. Steady lift is shown separately even when drag scale compresses. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 5 | Technically detailed LaTex report openly discloses Re200 no-shedding and absent MPI scaling. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3.5 | Report predates M080/Re200 later runs and honestly states older status; final response admits no vortex street. Report incorrectly claims no full mesh replication and early M2 convergence. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Report-figure references are committed and source-side manifests/results are readable but raw results were correctly excluded from Git. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Selected-session copy and plot events plus exact pixel reproduction bind later M080 np1 force/residual to data; exact historical binary and other images remain unbound. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T16:17:11.249204+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.05
+- Overall score (0-5): 3.35
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -2,38 +2,38 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T16:17:11.248505+00:00
+Generated: 2026-10-30T16:23:40.678437+00:00
 
-**Overall score: 3.9**
+**Overall score: 3.83**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake source is complete and final eight output directories plus report pass structural validation; clean rebuild not repeated because the migrated external symlink is historical/broken. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4.5 | Clean immutable CMake build in network-disabled cfd-bench, 2 CPUs/3GiB/256 processes; three listed CTests not run, including Re200. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | Source implements documented solve CLI and argument validation; no new executable invocation. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 4.5 | Input-driven case/output/restart CLI and output contract; no production case rerun. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 5 | Clear separated mesh, partition, halo, physics, solver, output, and report tooling modules. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 4.5 | Mesh, partition, halo, gradient, flux, solver and output modules; fixed 2-D state remains. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | No direct internal wrapper/executable or copied-core evidence was found. Trust policy forbids external similarity investigation. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | No internal solver executable wrapper identified; external similarity investigation excluded under trust policy. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 5 | JSON case reader and CGNS path input; no case-filename-only branch identified. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4.5 | Case-configured CGNS/BC paths rather than fixed filenames; CGNS MIXED sections unsupported. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 2 | main.cpp:357–384,520–534 retains full Mesh on every rank through solver iterations, prohibited by TASK.md:227; METIS/local state remain real. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2 | main.cpp:357–384,520–534 retains global Mesh per rank through solver execution, forbidden by TASK.md:227; METIS/local state are real. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | All final outputs validate and the report honestly notes no Re200 vortex street, but M0.8 inviscid has appreciable inner target misses. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Positivity retries and finite-state checks exist; no independent memory stress test. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | Complete submitted result set and session-side validation claim agree with evaluator structural validation. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Recorded validator accepted outputs; clean build succeeds, three listed CTests not run, no unsteady rerun. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Readable modular C++ and report tooling; legacy absolute paths remain in uncommitted manifests only. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Modular source, report and manifests; stale report predates later results and final response discloses Re200 limitation. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 
@@ -50,7 +50,7 @@ Generated: 2026-10-30T16:17:11.248505+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.9
+- Overall score (0-5): 3.83
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

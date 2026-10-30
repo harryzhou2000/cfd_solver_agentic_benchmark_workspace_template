@@ -1,98 +1,11 @@
-## Calibration checkpoint (partial)
+# Agent Evaluation Report — omo_slim_dsv4_01_12c8d9
 
-**78.5/100; DQ=true (provisional, trigger 7 and TASK prohibited shortcut 7).** M2 laminar is marked converged at512 while final100 Cd falls 0.116949→0.106302; its true three-order residual decrease does not establish stable early forces. Re200 metadata says statistically periodic although the later run has no resolved lift shedding; the final assistant response candidly says so and the earlier report said no data. Old case note incorrectly treated expected St≈0.19–0.20 as an observed value and period. Every rank also retains the full global mesh throughout solver execution, contrary to TASK.md:227 and metadata/report; METIS and local state are real. The transient miss counter ignores early stagnation exits and the target is tested with frozen reconstruction; exact actual target misses are unknown. The later M080 inviscid np1 result and its delivered figures are now identified; other case scores reflect distinct force histories and physics. Source and remaining DQ review continue.
+**72.5/100; DQ=true, trigger 7 and TASK prohibited shortcut 7**, superseding 85/100, DQ=false. M2 laminar is marked converged at step512 while Cd falls 0.116949→0.106302 over the final100 steps; its actual three-order residual decrease does not establish stable early forces. Re200 metadata says statistically periodic after t=300, but the t≥150 lift RMS is only 4.38e−6 and no resolved vortex street appears. The selected final assistant response candidly states this limitation; the earlier report correctly says no Re200 data existed at its own timestamp. No concealment or fabricated history is inferred.
 
-# Agent Evaluation Report — 01
+The submitted source reads and retains a full global mesh on every rank during solver calls, contrary to TASK.md:46,50,213,227 and its metadata/report. METIS partitioning and local state/halo exchange do exist; the narrower numbered DQ9 condition is not inferred. The transient miss counter ignores early stagnation exits and tests a frozen-reconstruction residual without a refreshed ratio recheck. Its reported success fraction is incorrectly defined, but actual strict target misses cannot be counted from available evidence.
 
-- Evaluated at: 2026-08-14T08:30:00+00:00
-- Evaluating agent: Codex
-- Harness: opencode
+Case scores are 3, 3.5, 4.5, 2.5, 3, 1.5, 3.5 and 1 in canonical order. M015 inviscid and laminar drag and Re20 drag are high despite bounded tails. A later M080 np1 run was copied to the canonical package after the older report; selected-session events and delivered manifest identify its images, and isolated CSV plotting reproduces the force/residual PNGs pixel-identically. The report's expected St≈0.19–0.20 is not an observed Re200 statistic.
 
-## Run summary (auto)
+Immutable source clean-builds in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 processes). Three CTests are listed but none were run; no Re200/unsteady run was repeated. M015 np1/2/4/8 Cd0.018144–0.018329 shows no order-one absolute rank discrepancy; incomplete cylinder np1/2 runs and unbound binaries limit broader claims. Main/solver source hashes match a0333e6 committed before the reviewed runs, but exact historical executable hashes are unavailable. Other DQ checks are recorded individually; no external similarity investigation was performed under the trust policy.
 
-- Workspace: `/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/omo-slim/dsv4/01` branch `omo_slim/dsv4/01` commit `51d1a785f4a25b3cff7e79294459ed22579addb7`
-- Benchmark submodule: 1bc6580b84825037bbeac097ede1b2226d8185d1
-- Time: 29,556s active after idle exclusion, 40,942s wall
-- Tokens: 164,977,906; 1,204 tools
-
-### Session analysis (auto)
-
-- Source: project-local bundled OpenCode DB — codex 0 threads / opencode 14 sessions
-- Window: 2026-08-01T21:45:03.647000+00:00 → 2026-08-02T08:57:25.674000+00:00
-- Idle excluded: 9 gaps, 10786s (threshold 600s, merged main+subagents)
-- Permission-wait candidates: 0 (method: heuristic; ask-tool events: 0)
-  - limitation: codex rollouts contain no explicit approval-request/response event types (verified by scanning all local sessions); permission-blocked idle cannot be distinguished from user-away time with certainty
-  - limitation: candidates are gaps > idle threshold between a tool/turn boundary and a user message / new turn in approval-aware threads; expect false positives when the user stepped away
-- Whole-session: tokens 164,977,906, cache hit 0.91, tools 1204
-
-### Structural result checks (auto)
-
-- Required cases: 8; found: 12; missing: none
-- Figure manifest: {"manifest_present": true, "entries": 65, "missing_figures": [], "missing_sources": ["residuals.csv", "forces.csv", "surface.csv", "field_final.pvtu", "field_final.pvtu", "residuals.csv", "forces.csv", "surface.csv", "field_final.pvtu", "field_final.pvtu", "field_final.pvtu", "residuals.csv", "forces.csv", "residuals.csv", "forces.csv", "residuals.csv", "forces.csv", "surface.csv", "field_final.pv
-- `cylinder_m010_laminar_re20`: missing=[] completed=True status=converged
-- `cylinder_m010_laminar_re200`: missing=[] completed=True status=statistically_periodic
-- `naca0012_m015_inviscid`: missing=[] completed=True status=converged
-- `naca0012_m015_inviscid_np1`: missing=[] completed=True status=converged
-- `naca0012_m015_inviscid_np2`: missing=[] completed=True status=converged
-- `naca0012_m015_inviscid_np8`: missing=[] completed=True status=converged
-- `naca0012_m015_laminar_re5000`: missing=[] completed=True status=converged
-- `naca0012_m080_inviscid`: missing=[] completed=True status=converged
-- `naca0012_m080_inviscid_np1`: missing=[] completed=True status=converged
-- `naca0012_m080_laminar_re5000`: missing=[] completed=True status=converged
-- `naca0012_m200_inviscid`: missing=[] completed=True status=converged
-- `naca0012_m200_laminar_re5000`: missing=[] completed=True status=converged
-
-## Methodology
-
-Provenance was reconstructed from the operator-approved post-run snapshot: `omo_slim/dsv4/init` at `bdc21ecad96ac517204fddca9ff9751498d65aca`. The curated immutable result commit is `51d1a785f4a25b3cff7e79294459ed22579addb7`, and `run_identity.json` derives canonical ID `omo_slim_dsv4_01_12c8d9` from immutable blobs.
-
-I manually inspected the read-only project OpenCode database. Its sole root, `ses_040b656bdffeVJcS8XFIqGFGTw`, is titled “Complete CFD solver agentic benchmark,” uses the legacy workspace path, spans the full implementation/report timeline, and owns 13 fixer/oracle sessions. The terminal completed assistant message is `msg_fc1b10981001PMeB0ANUdBCsVs`; its exact text is retained in `contestant_final_response.md` (stored-message SHA-256 `5be118a9829f4523bf0c4cea93e476a78e65d8b7d2418527f7a564a16c846c2d`; extracted-file SHA-256 `0ba50a27d9e00bdaf63411b32dccf6277a111010f46c5fc753cf0156ea3487e0`).
-
-The telemetry is internally consistent: the selected harness is OpenCode in `sessions.json` and `metadata.json`; the selected tree contains one DeepSeek V4 Pro orchestrator and thirteen DeepSeek V4 Flash subagents, with nonzero OpenCode-derived expenses and measurements. The initial automatic home-store discovery was superseded and is not used.
-
-The immutable `run_identity.json` SHA-256 is `faea8d6f34f61211a2d6703c665d97b70324f5382cb0105cb537d0a3348f7b6a`.
-
-I read the submitted CMake, solver, partition, halo, output, and report sources; inspected final Re200 forces and metadata; and ran the explicit eight-case validator with `--report`. It returned `OK` for every case and the report. I did not rerun Re200. I also did not rebuild or rerun a steady case: submitted readable evidence already decisively supports structural completeness, while the broken migrated `external` link would otherwise require an environment-only repair.
-
-## Rubric scores (100 points, SCORING_RUBRIC.md)
-
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
-
-## Review-area scores (0-5 weighted, review_*.json)
-
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Disqualification assessment
-
-Not disqualified. No submitted source calls an external solver; solver source implements its own mesh, residual, time integration, and MPI paths. The eight result directories are readable solver outputs, not placeholders. JSON/CGNS input prevents mesh-filename-only logic. Source implements METIS, neighbor `MPI_Isend/Irecv`, and reductions; no full-state allgather was found. The report’s Rusanov/Venkatakrishnan/BDF2 claims match source. The report figures use their stated variables and are committed/referenced. The trust policy precludes external-copy investigation; no direct internal wrapper/copy evidence was found.
-
-## Metadata answers & session selection
-
-The initial automatic summary used the wrong local OpenCode DB, so it raised an `opencode_sessions` question. Direct project-DB extraction supersedes it. Selected primary root: `ses_040b656bdffeVJcS8XFIqGFGTw`; source class `project`; root start/end: 2026-08-01T21:45:03.554Z to 2026-08-02T08:57:26.006Z; execution date: 2026-08-01 UTC. All 13 listed child sessions are included as its implementation/review tree. No unrelated roots or Codex alternate exist in that project bundle. The context windows for DeepSeek V4 Flash and Pro are unavailable in bundled immutable telemetry; no home, provider, or internet source was queried.
-
-## Limitations
-
-- Pre-run environment provenance is reconstructed post-run; original harness/container identity is unavailable.
-- The migrated `external` symlink is deliberately left broken. No clean build/rerun was performed, and Re200 was never rerun.
-- The report honestly says Re200 reached `t=300` without vortex shedding; its near-zero terminal lift variation therefore loses Re200 physical-result credit.
-- Required np=8 NACA/cylinder rank-count comparison is absent; no MPI-comparison credit was assigned.
-- `run_identity.json` and `contestant_final_response.md` are unindexed sidecars; `cfdeval check` does not validate their digests.
-
-## Verdict
-
-Complete, structurally valid legacy submission with a strong modular CFD implementation and unusually clear, honest report. Score: **85/100**. The principal deductions are lack of rank-count demonstrations and the Re200 computation’s failure to develop the required vortex street despite reaching the requested physical horizon. No disqualification is triggered.
+The selected project-local OpenCode root is `ses_040b656bdffeVJcS8XFIqGFGTw` with 13 direct descendants; its completed terminal assistant message is `msg_fc1b10981001PMeB0ANUdBCsVs`. Raw message JSON SHA256 `5be118a9829f4523bf0c4cea93e476a78e65d8b7d2418527f7a564a16c846c2d`, text-part JSON SHA256 `f21fdda21450e1cb6b7c9e9e1a5aae387b85425b15a66ffe8df81dad1f55e52c`, and exact final-response sidecar SHA256 `0ba50a27d9e00bdaf63411b32dccf6277a111010f46c5fc753cf0156ea3487e0` are recorded. Identity sidecar SHA256 `faea8d6f34f61211a2d6703c665d97b70324f5382cb0105cb537d0a3348f7b6a`; these two sidecars are unindexed and `cfdeval check` does not validate them. The original execution environment is unavailable under operator-approved legacy reconstruction; context-window values remain unavailable in bundled telemetry.

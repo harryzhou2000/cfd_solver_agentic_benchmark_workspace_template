@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Conservative compressible perfect-gas formulation is stated and implemented."
+      "score": 4.5,
+      "notes": "2-D conservative perfect-gas equations and reference coefficients source/report-supported."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "CGNS unstructured mixed-cell geometry and boundary-family handling are present."
+      "score": 4,
+      "notes": "CGNS TRI_3/QUAD_4 multizone topology, boundary families and geometry present; MIXED unsupported."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Face residual assembly and global residual reductions are explicit in solver.cpp."
+      "score": 4.5,
+      "notes": "Conservative face residual and global norms present; no independent smooth-order validation."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Rusanov flux is the documented and implemented approximate Riemann flux; no entropy fix is claimed."
+      "notes": "Rusanov flux implemented; excessive low-Mach dissipation suspected for no Re200 shedding, as disclosed in final response."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Farfield, slip wall, and no-slip adiabatic wall paths are present."
+      "score": 4,
+      "notes": "Farfield, slip and no-slip adiabatic boundary paths; report notes first-order-accurate viscous wall treatment."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 5,
-      "notes": "Least-squares reconstruction with production Venkatakrishnan limiting is documented and implemented."
+      "score": 4,
+      "notes": "LSQ/Venkat reconstruction and invalid-face fallback present; report says fallback does not change order, and no independent smooth-order test."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Positivity clamping and CFL-halving fallback are documented and present."
+      "score": 4,
+      "notes": "Venkat limiter active in source; face positivity fallback exists and historic executable unbound."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 4,
-      "notes": "Gradient-based Newtonian/Fourier path and tangential viscous-force split are present; no independent rerun."
+      "notes": "solver.cpp:713\u2013722 correctly projects tangential wall shear; low-Mach M015 laminar Cd0.239 and Re20 Cd2.812 limit accuracy."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Matrix-free LU-SGS/local-CFL steady march implemented and contestant outputs converge."
+      "score": 3.5,
+      "notes": "LU-SGS steady path implemented; M2 early residual-only stopping leaves large force drift."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 3,
-      "notes": "solver.cpp:1643\u20131659 permits early stagnation stop while :1777\u20131779 counts misses only at maximum; fraction definition is wrong. Reconstruction is frozen, no refreshed ratio recheck; actual misses unknown."
+      "score": 2.5,
+      "notes": "BDF2 frozen physical histories exist, but early stagnation exit is omitted from miss count and reconstruction is frozen in inner solve without refreshed ratio recheck; actual strict miss fraction unknown."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 2,
-      "notes": "main.cpp:357\u2013384,520\u2013534 retains full Mesh on every rank through solver iterations, prohibited by TASK.md:227; METIS/local state remain real."
+      "notes": "METIS/local halos exist, but global Mesh remains allocated on every rank throughout solver execution in violation of TASK.md:227."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.25
+  "overall_score": 3.71
 }

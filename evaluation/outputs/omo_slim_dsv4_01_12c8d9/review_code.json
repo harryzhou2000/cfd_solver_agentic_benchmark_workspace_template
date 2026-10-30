@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "CMake source is complete and final eight output directories plus report pass structural validation; clean rebuild not repeated because the migrated external symlink is historical/broken."
+      "score": 4.5,
+      "notes": "Clean immutable CMake build in network-disabled cfd-bench, 2 CPUs/3GiB/256 processes; three listed CTests not run, including Re200."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Source implements documented solve CLI and argument validation; no new executable invocation."
+      "score": 4.5,
+      "notes": "Input-driven case/output/restart CLI and output contract; no production case rerun."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Clear separated mesh, partition, halo, physics, solver, output, and report tooling modules."
+      "score": 4.5,
+      "notes": "Mesh, partition, halo, gradient, flux, solver and output modules; fixed 2-D state remains."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No direct internal wrapper/executable or copied-core evidence was found. Trust policy forbids external similarity investigation."
+      "notes": "No internal solver executable wrapper identified; external similarity investigation excluded under trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 5,
-      "notes": "JSON case reader and CGNS path input; no case-filename-only branch identified."
+      "score": 4.5,
+      "notes": "Case-configured CGNS/BC paths rather than fixed filenames; CGNS MIXED sections unsupported."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 2,
-      "notes": "main.cpp:357\u2013384,520\u2013534 retains full Mesh on every rank through solver iterations, prohibited by TASK.md:227; METIS/local state remain real."
+      "notes": "main.cpp:357\u2013384,520\u2013534 retains global Mesh per rank through solver execution, forbidden by TASK.md:227; METIS/local state are real."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "All final outputs validate and the report honestly notes no Re200 vortex street, but M0.8 inviscid has appreciable inner target misses."
+      "notes": "Positivity retries and finite-state checks exist; no independent memory stress test."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Complete submitted result set and session-side validation claim agree with evaluator structural validation."
+      "score": 3,
+      "notes": "Recorded validator accepted outputs; clean build succeeds, three listed CTests not run, no unsteady rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Readable modular C++ and report tooling; legacy absolute paths remain in uncommitted manifests only."
+      "notes": "Modular source, report and manifests; stale report predates later results and final response discloses Re200 limitation."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.9
+  "overall_score": 3.83
 }
