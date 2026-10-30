@@ -209,56 +209,56 @@
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "notes": "CMake/main.cpp support solve --case/--output and restart; clean build succeeds, but production executable attribution remains unbound."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "score": 2.5,
+        "notes": "Solver, mesh, physics and MPI reside primarily in one main.cpp; report generator is separate."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "score": 3,
+        "notes": "No direct internal solver wrapper identified; external similarity investigation excluded by trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "notes": "Case JSON and CGNS paths drive general mesh/physics; no two-filename-only branch identified."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "score": 3.5,
+        "notes": "main.cpp:1349\u20131366 root reads global mesh, partitions and sends local owned/ghost meshes. Root retains global mesh but other ranks do not; nonstationary rank comparisons limit numerical assurance."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "score": 3,
+        "notes": "Density/pressure clamps and mesh checks exist, but steady terminal load-span criterion main.cpp:1784\u20131794 permits very large excursions and reports failed cases converged."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Clean build succeeds; no CTests registered. Prior official validator passes eight packages and report structurally, which does not prove convergence."
+        "score": 3,
+        "notes": "Clean source build succeeds; CTest has no registered tests. Historical examiner passed output structure, not numerical convergence."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "score": 3,
+        "notes": "Single large main.cpp; report/run/figure manifests are delivered but raw data not committed to curated snapshot."
       }
     ],
     "disqualification_flags": [
@@ -303,7 +303,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.35
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -314,77 +314,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "notes": "Perfect-gas compressible conservative NS and normalization described in report.tex and main.cpp."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "notes": "CGNS unstructured zones, geometric cell/face adjacency and boundary families; METIS on root. No independent geometry oracle."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "score": 3.5,
+        "notes": "Face residual and global norms implemented; Re20 and M015 inviscid remain nonstationary while metadata calls them converged."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "notes": "Rusanov local Lax\u2013Friedrichs implemented; diffusive relative to sharper fluxes."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "notes": "Farfield, slip/no-slip and adiabatic wall paths exist; surface rows describe boundary values."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "notes": "main.cpp:706\u2013757 least-squares limited face states, called within inner iterations; historical executable not independently bound."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "notes": "Barth-type limiter and density/pressure face fallback in source; no independent formal-order diagnostic."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 3,
-        "notes": "main.cpp:819\u2013831 and :906\u2013913 integrate full viscous traction, whereas report.tex:16 calls integrated force tangential; surface Cf :983\u2013989 projects separately. Magnitude of normal contribution not established."
+        "notes": "main.cpp:819\u2013831 and :906\u2013913 integrate full viscous traction despite report.tex:16 claim of tangential force; surface Cf :983\u2013989 projects separately. Normal contribution unquantified."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "score": 3,
+        "notes": "Implicit local relaxation implemented, but steady terminal plateau allows very large force excursions and mislabels Re20/M015 results."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "score": 3,
+        "notes": "Full BDF residual is recomputed on accepted output state at :1624\u201345, but convergence ratio/counter use pre-update candidate. Metadata reports1000 misses/30000 and 0.96667 fraction; actual accepted-state ratio not independently established."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "score": 3.5,
+        "notes": "METIS root partition, local meshes, neighbour halo/reductions. np4/8 M015 endpoints differ0.3305 while both histories oscillate strongly; rank-only causation unproven."
       }
     ],
     "disqualification_flags": [
@@ -419,7 +419,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.9
+    "overall_score": 3.6
   },
   "result_review": {
     "review_area": "result_review",
@@ -429,50 +429,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 5,
-        "notes": "Evidence-backed review; see report."
+        "score": 4,
+        "notes": "Eight original workspace packages and report pass historical official structural validator; source/figure manifests named by report, but curated tip excludes raw packages."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Evidence-backed review; see report."
+        "score": 4,
+        "notes": "Historical evaluator reports all eight and report pass official structural check; independent clean build passes, no CTests. Structural pass cannot validate plateau."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 1,
-        "notes": "Evidence-backed review; see report."
+        "notes": "Re20 Cd11.320\u219219.550 in final3000 and M015 inv Cd spans\u22120.688..0.794 final2000 despite converged metadata (DQ7); two laminar drifts also material."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 2.5,
-        "notes": "Evidence-backed review; see report."
+        "score": 2,
+        "notes": "M080/M200 inviscid Cd are plausible scale; Re20 Cd19.55 and M015 oscillations are not credible steady, two laminar cases drift; Re200 mean Cd0.9717/St0.1772 supported by history."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Evidence-backed review; see report."
+        "score": 2.5,
+        "notes": "Plots are delivered, but force axes lack numeric ticks/legend, IDW fields omit body outline/spatial tick labels and Re200 late drag is flattened by startup."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 3,
-        "notes": "Committed report directly gives force means at :34\u201344 and figures, but tangential integrated-force claim differs from source and plotted histories omit numeric ticks/legend; no fabrication inferred."
+        "notes": "Report gives numeric force table and explicit IDW method, but claims tangential integrated force while code uses full traction; figure readability and false steady statuses limit reliability."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 4,
-        "notes": "Original report/run and figure manifests are available; M080 inviscid Mach figure reproduces pixel-identically from canonical VTK (ledger hashes). Its inverse-distance raster fills body region and omits boundary/spatial tick labels; other figures and historical binaries are not exhaustively bound."
+        "score": 3.5,
+        "notes": "Original run and figure manifests delivered; selected M080 Mach image pixel-identically reproduces from named VTK. Other image and original executable bindings not exhaustive."
       }
     ],
     "disqualification_flags": [
@@ -502,7 +502,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.33
+    "overall_score": 2.7
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/09",

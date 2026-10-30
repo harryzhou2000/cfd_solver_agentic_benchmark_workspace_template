@@ -14,56 +14,56 @@
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "Evidence-backed review; see report."
+      "notes": "CMake/main.cpp support solve --case/--output and restart; clean build succeeds, but production executable attribution remains unbound."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Evidence-backed review; see report."
+      "score": 2.5,
+      "notes": "Solver, mesh, physics and MPI reside primarily in one main.cpp; report generator is separate."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Evidence-backed review; see report."
+      "score": 3,
+      "notes": "No direct internal solver wrapper identified; external similarity investigation excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Evidence-backed review; see report."
+      "notes": "Case JSON and CGNS paths drive general mesh/physics; no two-filename-only branch identified."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Evidence-backed review; see report."
+      "score": 3.5,
+      "notes": "main.cpp:1349\u20131366 root reads global mesh, partitions and sends local owned/ghost meshes. Root retains global mesh but other ranks do not; nonstationary rank comparisons limit numerical assurance."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Evidence-backed review; see report."
+      "score": 3,
+      "notes": "Density/pressure clamps and mesh checks exist, but steady terminal load-span criterion main.cpp:1784\u20131794 permits very large excursions and reports failed cases converged."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Clean build succeeds; no CTests registered. Prior official validator passes eight packages and report structurally, which does not prove convergence."
+      "score": 3,
+      "notes": "Clean source build succeeds; CTest has no registered tests. Historical examiner passed output structure, not numerical convergence."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Evidence-backed review; see report."
+      "score": 3,
+      "notes": "Single large main.cpp; report/run/figure manifests are delivered but raw data not committed to curated snapshot."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.0
+  "overall_score": 3.35
 }

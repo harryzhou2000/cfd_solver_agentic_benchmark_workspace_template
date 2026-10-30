@@ -95,4 +95,7 @@ An independent clean source build succeeded in a restricted container; no CTests
 
 ## Verdict
 
-Provisional score: **73/100; disqualified: true.** Strong structural package and readable BDF2 evidence do not cure false successful steady statuses.
+Provisional score: **69/100; disqualified: true.** Strong structural package and readable BDF2 evidence do not cure false successful steady statuses.
+
+
+The independent case review confirms Re20 and M0.15 inviscid DQ7 from their nonstationary force histories, not merely missed residual targets. The report itself includes all force summaries at lines 34–44. A selected Mach figure reproduces pixel-identically from its field, though the disclosed interpolation omits the body outline. Re200 accepted-state residual history is recomputed after update; its stop ratio and target-miss counter refer to the pre-update candidate, so post-update target achievement remains qualified. The full review remains in progress.
