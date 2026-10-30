@@ -6,36 +6,36 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Source and delivered-result evidence; no evaluator rerun."
+      "score": 4,
+      "notes": "physics.cpp:488 onward assembles interior and boundary compressible flow residuals, including viscous term. Frozen steady reconstruction and limited case validation qualify claimed accuracy."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Source and delivered-result evidence; no evaluator rerun."
+      "score": 4,
+      "notes": "global_mesh.cpp reads configured CGNS, partition.cpp:70 METIS, distributed_mesh.cpp local mesh/ghost construction; root retains full mesh but nonroot does not during iterations."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Source and delivered-result evidence; no evaluator rerun."
+      "score": 3,
+      "notes": "physics.cpp:488 onward assembles flux balance; solver.cpp:1591\u20131657 freezes nonlinear gradients within inner target checks and for final steady stages, then may recompute accepted gradients."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Source and delivered-result evidence; no evaluator rerun."
+      "notes": "physics.cpp:193\u2013262 implements approximate inviscid flux choices; solver.cpp:161\u2013162 selects Roe/Rusanov and report discloses case choices. No independent flux-order study."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Source and delivered-result evidence; no evaluator rerun."
+      "score": 4,
+      "notes": "physics.cpp: boundary_face_flux handles farfield, slip and no-slip; solver.cpp:1887 onward writes wall velocity and Cp/Cf. Wake contours exist but do not guarantee accuracy."
     },
     {
       "id": "cfd.reconstruction",
@@ -48,8 +48,8 @@
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Source and delivered-result evidence; no evaluator rerun."
+      "score": 3,
+      "notes": "physics.cpp:70\u2013132 computes Venkatakrishnan limits; solver.cpp:1558\u20131594 freezes these with gradients at disclosed step 500/800. Optional first-order/limiter bypass exists; production bypass not established."
     },
     {
       "id": "cfd.viscous",
@@ -62,8 +62,8 @@
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Source and delivered-result evidence; no evaluator rerun."
+      "score": 4,
+      "notes": "solver.cpp:1081 onward implements LU-SGS iterations, with optional matrix-free GMRES at :694; convergence quality limited by frozen residual criterion."
     },
     {
       "id": "cfd.transient",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.25
+  "overall_score": 3.51
 }

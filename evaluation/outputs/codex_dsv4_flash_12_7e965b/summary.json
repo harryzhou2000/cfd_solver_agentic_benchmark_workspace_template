@@ -242,28 +242,28 @@
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 4,
-        "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+        "notes": "main.cpp:138\u2013200 validates configured case/mesh path, root-only reads and distributes; CLI supports restart and explicit time/step overrides. Root-only restart error path may leave peers waiting."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+        "notes": "Separate case_input, global/distributed mesh, partition, physics and solver modules; large solver.cpp combines several iterative algorithms."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+        "score": 3,
+        "notes": "No source-evident internal existing-solver wrapper; external similarity search excluded by trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4,
-        "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+        "notes": "main.cpp and case_input.cpp read configurable case/mesh; no hard-coded two-filename-only branch identified. Production perturbation center is disclosed in solver.cpp:212\u2013221."
       },
       {
         "id": "code.mpi",
@@ -277,21 +277,21 @@
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 3,
-        "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+        "notes": "main.cpp checks missing mesh on all ranks; positivity fallback and iteration caps exist. Nonlinear freeze and transient target statistics limit convergence assurances; restart root-only errors may deadlock peers."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+        "score": 3,
+        "notes": "Immutable src contains test_mesh.cpp, test_jacobian.cpp and several test_lusgs variants; no evaluator CFD rerun or full verified regression suite. Contestant report contains np1/8 comparisons."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 4,
-        "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+        "score": 3,
+        "notes": "Curated source excludes raw outputs; tools/plot_histories.py:59\u201365 generates mislabeled x=0 steady force charts. Debug/experimental solver options present."
       }
     ],
     "disqualification_flags": [
@@ -336,7 +336,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.92
+    "overall_score": 3.6
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -346,36 +346,36 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 5,
-        "notes": "Source and delivered-result evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "physics.cpp:488 onward assembles interior and boundary compressible flow residuals, including viscous term. Frozen steady reconstruction and limited case validation qualify claimed accuracy."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Source and delivered-result evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "global_mesh.cpp reads configured CGNS, partition.cpp:70 METIS, distributed_mesh.cpp local mesh/ghost construction; root retains full mesh but nonroot does not during iterations."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 5,
-        "notes": "Source and delivered-result evidence; no evaluator rerun."
+        "score": 3,
+        "notes": "physics.cpp:488 onward assembles flux balance; solver.cpp:1591\u20131657 freezes nonlinear gradients within inner target checks and for final steady stages, then may recompute accepted gradients."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Source and delivered-result evidence; no evaluator rerun."
+        "notes": "physics.cpp:193\u2013262 implements approximate inviscid flux choices; solver.cpp:161\u2013162 selects Roe/Rusanov and report discloses case choices. No independent flux-order study."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
-        "score": 5,
-        "notes": "Source and delivered-result evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "physics.cpp: boundary_face_flux handles farfield, slip and no-slip; solver.cpp:1887 onward writes wall velocity and Cp/Cf. Wake contours exist but do not guarantee accuracy."
       },
       {
         "id": "cfd.reconstruction",
@@ -388,8 +388,8 @@
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 5,
-        "notes": "Source and delivered-result evidence; no evaluator rerun."
+        "score": 3,
+        "notes": "physics.cpp:70\u2013132 computes Venkatakrishnan limits; solver.cpp:1558\u20131594 freezes these with gradients at disclosed step 500/800. Optional first-order/limiter bypass exists; production bypass not established."
       },
       {
         "id": "cfd.viscous",
@@ -402,8 +402,8 @@
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Source and delivered-result evidence; no evaluator rerun."
+        "score": 4,
+        "notes": "solver.cpp:1081 onward implements LU-SGS iterations, with optional matrix-free GMRES at :694; convergence quality limited by frozen residual criterion."
       },
       {
         "id": "cfd.transient",
@@ -452,7 +452,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.25
+    "overall_score": 3.51
   },
   "result_review": {
     "review_area": "result_review",
@@ -462,15 +462,15 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 5,
-        "notes": "Eight workspace-local final case packages and report passed explicit validator; result files are excluded at the curated tip by policy."
+        "score": 4,
+        "notes": "Eight canonical packages passed prior structural validation; seven steady force plots do not expose history, and transient strict updated-residual target is unverified."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Eight workspace-local final case packages and report passed explicit validator; result files are excluded at the curated tip by policy."
+        "score": 4,
+        "notes": "Prior explicit validator accepted eight packages and report; structural pass does not verify physical convergence or target residual with updated reconstruction."
       },
       {
         "id": "res.completion",
@@ -535,7 +535,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.15
+    "overall_score": 2.85
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/12",

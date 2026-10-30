@@ -14,28 +14,28 @@
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+      "notes": "main.cpp:138\u2013200 validates configured case/mesh path, root-only reads and distributes; CLI supports restart and explicit time/step overrides. Root-only restart error path may leave peers waiting."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+      "notes": "Separate case_input, global/distributed mesh, partition, physics and solver modules; large solver.cpp combines several iterative algorithms."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+      "score": 3,
+      "notes": "No source-evident internal existing-solver wrapper; external similarity search excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+      "notes": "main.cpp and case_input.cpp read configurable case/mesh; no hard-coded two-filename-only branch identified. Production perturbation center is disclosed in solver.cpp:212\u2013221."
     },
     {
       "id": "code.mpi",
@@ -49,21 +49,21 @@
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 3,
-      "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+      "notes": "main.cpp checks missing mesh on all ranks; positivity fallback and iteration caps exist. Nonlinear freeze and transient target statistics limit convergence assurances; restart root-only errors may deadlock peers."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+      "score": 3,
+      "notes": "Immutable src contains test_mesh.cpp, test_jacobian.cpp and several test_lusgs variants; no evaluator CFD rerun or full verified regression suite. Contestant report contains np1/8 comparisons."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+      "score": 3,
+      "notes": "Curated source excludes raw outputs; tools/plot_histories.py:59\u201365 generates mislabeled x=0 steady force charts. Debug/experimental solver options present."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.92
+  "overall_score": 3.6
 }

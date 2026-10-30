@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:33:41.540237+00:00
+Generated: 2026-10-30T04:34:49.107639+00:00
 
-**Overall score: 3.15**
+**Overall score: 2.85**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | Eight workspace-local final case packages and report passed explicit validator; result files are excluded at the curated tip by policy. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Eight canonical packages passed prior structural validation; seven steady force plots do not expose history, and transient strict updated-residual target is unverified. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Eight workspace-local final case packages and report passed explicit validator; result files are excluded at the curated tip by policy. |
+| 2 | **res.validator** Automated validator results | 0.10 | 4 | Prior explicit validator accepted eight packages and report; structural pass does not verify physical convergence or target residual with updated reconstruction. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
 | 3 | **res.completion** Case completion and convergence | 0.20 | 3 | All canonical packages validate structurally; seven steady statuses use documented frozen reconstruction, Re200 finishes t300 but strict updated-residual target count is not established. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T04:33:41.540237+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.15
+- Overall score (0-5): 2.85
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

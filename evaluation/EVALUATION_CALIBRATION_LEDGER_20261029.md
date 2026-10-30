@@ -85,7 +85,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_09_526316` | fully reviewed: 55→48, DQ false; both gates pass |
 | `codex_dsv4_flash_10_6468ba` | fully reviewed: 86→71, DQ6 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_11_6e6ac8` | fully reviewed: 70→53, DQ7 and TASK full mesh; both gates pass |
-| `codex_dsv4_flash_12_7e965b` | partial: eight case plots and Re200 source assessed; rubric/DQ pending |
+| `codex_dsv4_flash_12_7e965b` | fully reviewed: 90→79, DQ false; all cases 2 |
 | `codex_dsv4_flash_14_80096b` | unreviewed |
 | `codex_generic_02_ed5ee6` | unreviewed |
 | `codex_generic_03_5f2165` | unreviewed |
@@ -504,3 +504,8 @@ Seven steady case scores 4.5,4.5,3,4.5,4.5,4,4.5→2 each: all contestant-delive
 
 
 dsv4_flash_12 partial build/rubric: provisional rubric 90→81 (second 9→7, viscous 10→9, implicit 14→12, MPI 8→7, results 9→7, report 3→2). Immutable clean CMake build succeeds network-disabled cfd-bench, 2 CPUs/3 GiB, /opt/external, no CFD run. physics.cpp:531–556 integrates full viscous traction while report.tex:171 calls integrated component tangential shear; surface Cf is tangent-projected, normal contribution unknown, no DQ6 inferred. Root-only global mesh and METIS/halos exist; Re20 np1/8 Cd 2.040/1.846 differs 9.5%, not order-one. Frozen reconstruction and transient target/bootstrapping limitations above; remaining source/DQ partial. Both gates pass.
+
+
+## dsv4_flash_12 full calibration — 2026-10-30
+
+Rubric 90→79, DQ remains false; cases 4.5,4.5,3,4.5,4.5,4,4.5,2 → 2 each because steady force charts plot all data at x=0 and Re200 late drag is unreadable. All ten sections/27 points have criterion-specific evidence. Disclosed final steady gradient/limiter freeze means recorded reductions apply to frozen discretization; no undisclosed limiter disable inferred. Re200 original t300 lift oscillations ~4.48–4.63 period and wake image support reported St~0.218; inner fraction measures frozen-stencil residual and true fully updated strict miss count is unknown; no explicit BDF1 bootstrap. Full traction used for viscous split despite report tangential claim, treated like 03/sonnet46-02 under rubric 5.4 without DQ6. Root-only mesh, genuine METIS/halos; Re20 np1/8 Cd 2.040/1.846, not DQ4 order-one. Clean immutable build succeeds network-disabled cfd-bench; no CFD rerun, external similarity search, exhaustive pixel audit or general MPI comparison. Both gates pass.
