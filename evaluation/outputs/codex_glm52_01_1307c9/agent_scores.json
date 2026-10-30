@@ -246,77 +246,77 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 58,
+    "total_scored": 57.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 7,
-        "notes": "Source/CLI and historical outputs; no clean evaluator build."
+        "score": 6.5,
+        "notes": "4/4 documented clean source build succeeds; 1.25/2 case CLI handles inputs but --restart is accepted without loading state; 0.25/2 output: all eight required field_final.vtu are empty sentinels and restart is only rank-zero state; 1/2 errors are caught but success statuses are unreliable."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 8,
-        "notes": "CGNS and graph geometry source."
+        "notes": "3.5/4 CGNS zones/tags; 1.5/2 geometry; 1.5/2 mixed/multizone and family handling; 1.5/2 cell-face adjacency. mesh.cpp reads zones and merges interfaces; no independent exact geometric verification or controlled mesh accuracy test establishes full credit."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 12,
-        "notes": "FV/Roe/BC source."
+        "score": 11.5,
+        "notes": "4/5 face FV residual; 3/4 Roe/Harten and Rusanov fallback; 2.5/3 farfield/slip; 2/3 no-slip adiabatic. solver.cpp:451\u2013554 and flux.cpp implement the paths, but unstable force histories and lack of controlled verification limit demonstrated robustness."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 8,
-        "notes": "GG/Barth/positivity source."
+        "score": 7,
+        "notes": "3/4 Green\u2013Gauss linear reconstruction; 2.5/3 Barth limiter active in solver.cpp:420\u2013438,486\u2013519; 1.5/2 positivity fallback; 0/1 no convergence-order verification. Historical executable binding remains uncertain."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 4,
-        "notes": "Nonphysical high-Mach laminar results."
+        "score": 6,
+        "notes": "2/3 primitive velocity/temperature gradients, 2/3 Newtonian stress/Fourier heat flux (reconstruction.cpp:72\u2013125, flux.cpp:216\u2013236), 1/2 no-slip wall treatment, 1/2 tangential wall shear (solver.cpp:1030\u20131036). Selected laminar forces drift or oscillate; do not attribute stale report billion-scale values to them."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 6,
-        "notes": "Point-implicit steady; Re200 inner convergence noncompliant."
+        "score": 7,
+        "notes": "2.5/4 local-time implicit steady march with viscous CFL cap, 2.5/4 documented diagonal point-implicit solver, 2/4 BDF2 history and dual loop but capped at 15 inner iterations, 0/3 wrong 1.0 miss threshold and misleading convergence fraction rather than 0.001 target. Report explicitly discloses diagonal approximation; actual strict miss count unknown."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 9,
-        "notes": "Actual METIS and neighbor MPI source; np artifacts."
+        "score": 5.5,
+        "notes": "1.5/2 METIS and owned/ghost partitions; 1.5/3 neighbor halo exchange but full global mesh persists on every rank throughout iterations; 1.5/2 reductions; 1/1 per-rank output discipline; 0/2 no valid rank comparison: selected np1 packages fail at step zero with empty force histories."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
         "score": 1,
-        "notes": "Re200 failed strict inner criterion and high-Mach laminar output nonphysical."
+        "notes": "0.5/2 inviscid results with substantial instability and Mach outlier; 0.25/2 laminar attempts with drifts; 0.25/2 low and drifting Re20 drag; 0/2 Re200 lacks credible shedding; 0/1 empty required final fields and huge Mach sample; 0/1 failed np1 comparisons."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 0,
-        "notes": "Report materially contradicts deliverables and has absent referenced figures."
+        "score": 1.5,
+        "notes": "0.5/1 equations/method description with important contradictions and diagonal disclosure; 0.5/1 delivered nested histories but incomplete main report; 0.25/1 centroid-sample fields and missing main figures; 0/1 stale signs/values and false success analysis; 0.25/1 inaccurate field source manifest and missing reproducible main assets."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
         "score": 3,
-        "notes": "Modular but compact concrete implementation."
+        "notes": "1.5/2 case-driven physics interface, 0.5/1 boundary organization, 0.5/1 mesh abstraction is explicitly 2-D, 0.5/1 modular source supports extensions but would need significant refactoring."
       }
     ]
   },
