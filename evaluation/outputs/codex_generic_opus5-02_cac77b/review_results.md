@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:11:51.319872+00:00
+Generated: 2026-10-30T07:16:33.077639+00:00
 
-**Overall score: 4.2**
+**Overall score: 4.17**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -27,7 +27,7 @@ Generated: 2026-10-30T07:11:51.319872+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 4.5 | Detailed report is candid; clean-tip rank-study regeneration inconsistency remains. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Committed generated rank table is readable, but its raw rank-study inputs are excluded at tip. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3.5 | Committed generated rank table is readable but raw rank-study inputs are absent at tip. Re200 metadata stamps configure-time revision339d65f, whose parser does not support --linear-check-interval used in the matching selected launch; the actual binary source is not established. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T07:11:51.319872+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.2
+- Overall score (0-5): 4.17
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

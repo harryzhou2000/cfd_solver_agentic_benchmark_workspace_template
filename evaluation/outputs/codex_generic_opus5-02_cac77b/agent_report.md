@@ -134,3 +134,8 @@ The M015 and M080 inviscid late force variations documented above limit confiden
 ## Other steady cases — 2026-10-30
 
 Selected final-400 force windows and canonical report figures were checked case by case. M2 inviscid Cd0.089118–0.092399 at 3.138 residual orders remains 3.5; M015 laminar Cd0.054313–0.054962 remains 4.5, M080 laminar Cd0.079576–0.079963 remains 4, and Re20 has a delivered velocity wake (`report.tex:1587`) as well as the documented final-50 force range. Lift variations and shorter-window qualifications are preserved in their case notes. These checks are not independent production reruns.
+
+
+## Re200 binary provenance — 2026-10-30
+
+Selected Re200 metadata reports git revision `339d65f`; its `solver/src/main.cpp:99–119` rejects unknown options and does not implement `--linear-check-interval`. The matching selected root-session call `toolu_bdrk_012QV8RMoRZPz7sjw93Dd522` at 2026-08-26 15:29:00.224 UTC invokes `./build/fvmcns` for the canonical `results/cylinder_m010_laminar_re200` with `--linear-check-interval 3`; metadata start is 15:29:01 UTC. The selected call input SHA-256 is `bafc07f3211f26737894a7acbf4639a903254e958c6900d0737565a78821b2b1`. Later revision `e5f8e61` implements the option. `solver/CMakeLists.txt:83–94` obtains the revision at configure time, making a stale configure stamp after recompilation a plausible explanation; an inaccurate recorded invocation or other build history is also possible. The exact production source is consequently not established. This is a provenance limitation, not proof of fabricated results or a basis to infer individual failed inner steps. Result traceability4→3.5; rubric total remains90. No production run repeated.
