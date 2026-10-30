@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T09:47:43.460688+00:00
+Generated: 2026-10-30T18:44:48.476130+00:00
 
 **Overall score: 3.14**
 
@@ -21,7 +21,7 @@ Generated: 2026-10-30T09:47:43.460688+00:00
 | 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 3.5 | Approximate Riemann flux and positivity fallback exist; production runtime flags and metadata do not by themselves establish every numerical path. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | Wall/farfield branches exist; no-slip surface-output semantics require independent row review before stronger DQ11 conclusion. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | Wall/farfield branches exist. output.cpp:40–45 emits zero no-slip boundary velocity; selected checkpoint 783eb18 has all-zero u/v on 404 M0.15 laminar and 100 Re20 no-slip rows. Historical binary remains unbound. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
 | 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 2 | Second-order machinery and limiter exist; report discloses first-order M2 laminar fallback. Actual production flags for every case are not independently bound to binary. |

@@ -133,7 +133,7 @@
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Wall/farfield branches exist; no-slip surface-output semantics require independent row review before stronger DQ11 conclusion."
+          "notes": "Wall/farfield branches exist. output.cpp:40\u201345 emits zero no-slip boundary velocity; selected checkpoint 783eb18 has all-zero u/v on 404 M0.15 laminar and 100 Re20 no-slip rows. Historical binary remains unbound."
         },
         {
           "id": "cfd.reconstruction",
@@ -367,6 +367,56 @@
         "text": "Report figures do not correspond to submitted field/CSV outputs",
         "found": true,
         "evidence": "Report.tex:326\u2013346 associates M015 inviscid figure with selected results/prod run ending step2096 Cd0.0299235/Cl\u22120.00253728 (forces CSV SHA256 655e462c9441fb1ab9955149d3caac01a9ccfce38d333f5a40abf031818937b1). Included figure SHA256 2f92f9f97ffcd7e58ea713bdbdb9855a1eb0174d4556b52a6c12766461d29efd visibly ends step2238, Cd\u22480.03419/Cl\u22480.001136 and is byte-identical from b1c7cc8 on Aug7; selected production history changed in 7572f5b Aug8. Contestant plot function regenerated from older naca_fs20k/q_m015 histories reproduces the visual trajectory, unlike production. Rendering bytes differ by environment and older histories overlap, so exact originating path is not uniquely established. No fabricated solver data inference. Report.tex:453\u2013454 also includes an M080 inviscid force figure extending past step2500 whereas selected production ends2173; :397\u2013398 includes M015 laminar force figure ending near10000 whereas production ends14358. The separate figures_nacalam image ends8000 and is also different."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No internal existing CFD solver executable found in inspected source; no exhaustive external authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence force/residual histories were generated without solving; stale figures are independently DQ8, not evidence of synthetic histories."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Configured case and CGNS mesh input are not limited to two hard-coded filenames."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Submitted source implements implicit and transient methods; explicit-only integration not established."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Major report-described methods have source counterparts; restart and relaxed inner-target discrepancies are separately scored."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "mesh.cpp:22\u201323 uses root-only global preprocessing, with METIS and neighbor exchanges. All-rank full-state/geometric-only condition not established."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Submitted reconstruction/limiter paths exist and report discloses first-order M2 laminar fallback. Actual production controls/binary for all cases remain unbound; no undisclosed disabled scheme established."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "output.cpp:40\u201345 explicitly writes u=v=0 for no-slip boundaries; immutable checkpoint 783eb18 M0.15 laminar has 404 and Re20 has 100 no-slip surface rows, all u=v=0."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "No specific figure variable-name swap established; DQ8 concerns proven stale run-to-figure mismatch."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source CFD core found in inspected source; no exhaustive external authorship search."
       }
     ]
   },
@@ -374,6 +424,7 @@
     "Legacy provenance is a verified post_run reconstruction; original execution environment is unavailable.",
     "Curated submission excludes all raw case packages; attempt-worktree validation is evaluator evidence, not submitted-result evidence.",
     "No Re200 rerun was performed.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All ten sections, eight cases, 27 review points and 13 DQ rules assessed to available evidence. Exact historical executable, strict per-step miss count and some figure provenance remain qualified; no CFD/Re200 rerun."
   ]
 }

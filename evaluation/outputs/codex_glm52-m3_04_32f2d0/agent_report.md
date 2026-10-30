@@ -70,8 +70,13 @@ There are no unanswered metadata questions. This is a post-run legacy reconstruc
 
 ## Limitations
 
-The original runtime environment is incomplete. Curated result tip omits raw packages, but contestant checkpoint `783eb18` preserves them and they are considered as contestant-delivered evidence. A clean immutable-source build passed with no registered CTest tests; read-only examiner validation passed all eight checkpoint packages and the historical report. The approved PDF remains absent: the unmodified curated TeX fails `latexmk -halt-on-error` at line 324 on an unescaped underscore. All 44 referenced figures are present, and no suitable contestant main PDF was found. Re200 was not rerun. Re200 was not rerun, per policy.
+The original runtime environment is incomplete. Curated result tip omits raw packages, but contestant checkpoint `783eb18` preserves them and they are considered as contestant-delivered evidence. A clean immutable-source build passed with no registered CTest tests; read-only examiner validation passed all eight checkpoint packages and the historical report. The approved PDF remains absent: the unmodified curated TeX fails `latexmk -halt-on-error` at line 324 on an unescaped underscore. All 44 referenced figures are present, and no suitable contestant main PDF was found. Re200 was not rerun, per policy.
 
 ## Verdict
 
-Provisional rubric: **58.5/100**. DQ is true for false successful-result metadata and a specific report-figure/data mismatch. Remaining case, source and PDF review is partial; no rank-only cause is inferred from the old comparison.
+Qualified rubric: **58.5/100**. DQ is true for false successful-result metadata and a specific report-figure/data mismatch. All case, source, report and DQ criteria were reviewed to the available evidence limit; no rank-only cause is inferred from the old comparison. Historic binary and figure provenance remain qualified.
+
+
+## Qualified full review and wall-output check — 2026-10-31
+
+All ten sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to available evidence. Final 58.5/100, DQ7/8 remain. In addition to the source’s explicit no-slip boundary zeros at `output.cpp:40–45`, selected checkpoint `783eb18` has 404 M0.15 laminar and 100 Re20 no-slip surface rows, all with u=v=0; DQ11 is not supported. The different-CFL/ramp np1/np2 comparison does not establish DQ4. Re200’s documented relaxed target does not establish a full strict miss count, and its exact binary remains unbound. Earlier partial checkpoints are historical; no CFD, rank or Re200 rerun.
