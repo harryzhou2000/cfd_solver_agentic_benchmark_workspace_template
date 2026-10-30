@@ -1,12 +1,16 @@
-## Calibration checkpoint (partial)
+# Agent Evaluation Report — oc-goal/gpt56-dsv4/01
 
-**93/100; DQ=true (provisional, trigger 7).** M015 and M200 laminar results are labeled converged while final 200 drag samples fall 0.114944→0.087589 and 0.210556→0.141501, respectively. The report discloses the M200 phase gates and some final drift, and the real residual reductions are not disputed; the task also requires stable forces and clear early laminar convergence. The old M200 case note also misread lift 1.5532×10⁻⁴ and viscous drag 0.1298668 as lift 1.5532 and total drag. The remainder of the source, cases and DQ review remains pending.
+**85/100; DQ=true (trigger 7).** M0.15 and M2.0 laminar results are labeled converged even though their last 200 submitted drag samples fall from 0.114944 to 0.087589 and from 0.210556 to 0.141501, respectively. The report discloses M2.0's phase minima and some final drag drift, and the reported residual reductions are not disputed; the task also requires stable forces and clear early laminar convergence.
 
-# Agent Evaluation Report — oc-goal_gpt56-dsv4_01_24edd3
+The evaluated immutable tip is `ade19533de3283fb2c92c36e723d34792afcdc90`. It contains 47 report figure PDFs, unlike the earlier `332ca95` snapshot. The old retrospective incorrectly capped all cases because it overlooked the later figures. The contestant's workspace postprocessing manifest matches all 80 canonical result files and all 47 figure PDF hashes. The accepted 18-page report PDF has SHA256 `d3acb03d5e66ecfc28564647507b7273d78139a697e9fd13ce61d90af7d19ec8`.
 
-- Immutable submission: `332ca95ef31bc8f694e699554f257729657f5d37` on `oc-goal/gpt56-dsv4/01`.
-- Reconstructed provenance: `oc-goal/gpt56-dsv4/init` / `7bb0b026bbc59386143a6f8c46ed56e9e687e900`; post-run snapshot with unavailable original environment.
-- Identity: `oc-goal_gpt56-dsv4_01_f83d02`; `run_identity.json` SHA-256: `25fb794aafdc69ede30b4c7e71b77c3b0c061b52b2e6e9c71615cf8a4c09b147`.
+The Re200 figure resolves both late lift and drag. Its submitted force history over t≥200 gives mean Cd 1.110391 and St≈0.16226 from 16 mean upcrossings, consistent with the report's separate FFT and crossing estimates. Several steady plots flatten both late coefficients on a common scale; the corresponding independent case scores retain the presentation floor. The case scores, separate from the 100-point rubric, are 2, 4.5, 4, 1.5, 2, 1, 2 and 4 in canonical order. The previous M2 laminar note also misread Cl=1.5532×10⁻⁴ and the viscous drag component as Cl=1.5532 and total drag.
+
+The committed solver implements METIS, neighbor communication, reconstruction, implicit GMRES/LU-SGS and BDF2. It reports full viscous traction in the force split while its skin-friction field is tangential; the report describes this distinction, but the rubric specifically rewards tangential force splitting. The transient source can count post-target residual-verification passes toward its minimum nonlinear iteration count. Historical stdout records five nonlinear counts on every step and 2,757 steps with three total linear iterations; it does not establish how many counted passes were verification only, and exact historical source-to-binary attribution remains qualified. The np4/np8 comparison uses different recorded executable hashes and is not a controlled rank-only test.
+
+An isolated network-disabled clean build passed, as did `foundation_serial` (1/1); no full CFD case was rerun. All ten rubric sections, 27 review points, eight cases and DQ1–13 were examined; detailed evidence and limitations are in `agent_scores.json` and the calibration ledger. No external authorship investigation was performed under the trust policy.
+
+Identity `oc-goal_gpt56-dsv4_01_f83d02`; `run_identity.json` SHA256 `25fb794aafdc69ede30b4c7e71b77c3b0c061b52b2e6e9c71615cf8a4c09b147`. Reconstructed init provenance is `oc-goal/gpt56-dsv4/init` / `7bb0b026bbc59386143a6f8c46ed56e9e687e900`, with the original environment unavailable.
 
 ## Telemetry and final response
 
@@ -16,18 +20,7 @@ Project-local OpenCode telemetry is attributable: the sole root `ses_027517d00ff
 
 The original session timeline omitted OpenCode's 21,861,162 cache-write tokens from its displayed input and non-cache-read categories even though the 430,551,708 total was correct. Regeneration now reconstructs input from the disjoint raw-input, cache-read, and cache-write message counters. The stored current-price estimate changes from $316.1733 to $316.0317 under the audited manager price table; provider-reported cost and all evaluation scores are unchanged.
 
-## Evidence and validation
-
-The explicit read-only examiner command over the eight original canonical workspace packages and the report returned rc 0. All seven steady cases report completed/converged status; cylinder Re200 reports completed/statistically-periodic at `t=300`, `dt=0.01`, and zero inner-target misses. Re200 was not rerun.
-
-Committed source uses configurable `CFD_EXTERNALS_ROOT`, generic CGNS input, `METIS_PartGraphKway`, owned/ghost neighbor schedules, nonblocking `MPI_Isend`/`MPI_Irecv`, global `MPI_Allreduce`, Rusanov fluxes, least-squares reconstruction, Barth-Jespersen/positivity safeguards, LU-SGS/GMRES, and BDF2 dual time stepping. The report is detailed and includes figures/manifests, the earlier 332ca95 snapshot lacked required PDFs, but the later evaluated ade1953 includes 47 committed figure PDFs and its main report was accepted as compiled from submission. Its reported np4/np8 comparison also discloses an executable-hash mismatch, so it is not a pure rank-only comparison.
-
-## Score and verdict
-
-The earlier 95/100 score is superseded by the provisional 93/100 DQ7 checkpoint above; the remaining rubric is under review. The 27 review points, ten rubric sections, eight independent case scores, and all 13 DQ checks are in `agent_scores.json`.
-
-**DQ: no.** No trigger is established from direct internal evidence. In particular, source supports METIS/halo/reduction/implicit/BDF2 claims; metadata and run-status are consistent for the eight canonical packages; and no order-one rank discrepancy, figure mismatch, synthetic output generator, wrapper, or hard-coded mesh-only path was established. External similarity investigation was not performed under the trust policy.
 
 ## Limitations
 
-Raw results were read only from the original workspace and are deliberately outside the curated submission commit. The project-local OpenCode database records container cwd `/workspace`, so its mapping to this host workspace is documented rather than inferred from any external path. No Re200 rerun occurred.
+Exact historical source-to-executable attribution, the count of verification-only transient passes, and unsampled figure generation remain qualified. No Re200 or unsteady solver rerun was performed.

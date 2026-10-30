@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "CMake uses CFD_EXTERNALS_ROOT and documents C++17/MPI/CGNS/METIS; no independent clean rebuild was performed."
+      "score": 5,
+      "notes": "Immutable ade1953 clean build succeeds in network-disabled cfd-bench with documented external and benchmark roots; evaluator foundation_serial test passes (1/1)."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "main.cpp implements input-driven --case/--output handling and validation paths; no fresh executable run was needed after complete delivered packages validated."
+      "score": 4.5,
+      "notes": "main.cpp handles case/output, restart/resume and collective input errors; no full CLI/solver campaign independently rerun."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Committed source separates config, mesh, partition, residual, reconstruction, solver and output modules."
+      "score": 4.5,
+      "notes": "Config, mesh, partition, flux, reconstruction, residual, solver and output modules, with a large continuation/Newton solver."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No internal wrapper/executable invocation was found. Trust policy excludes external similarity investigation, so originality is not independently proven."
+      "notes": "Trust policy excludes external authorship investigation; no internal solver executable wrapper found."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 5,
-      "notes": "Case JSON and generic CGNS reader drive production paths; no benchmark mesh-name/case-ID branch found in committed source."
+      "notes": "Case JSON drives mesh and physics; generic CGNS reader and controls without two-mesh-only branch."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "METIS K-way partitioning, neighbor MPI_Isend/Irecv, and MPI_Allreduce paths are implemented. Rank comparison is qualified because report notes an executable mismatch for np4 versus np8."
+      "notes": "Root-only METIS, neighbor state/reconstruction and global reductions exist. Submitted rank comparison uses different executable hashes and cannot isolate rank causation."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Source has finite/admissibility, geometry, CGNS, and collective preflight checks; no independent memory stress test."
+      "score": 3.5,
+      "notes": "Collective error handling and admissibility gates exist, but residual/order completion gate does not require stable forces for two laminar final results."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 4,
-      "notes": "Foundation/numerics/output test sources and run-suite tooling are committed; explicit eight-case validator pass was verified, but no clean test execution was repeated."
+      "notes": "Contestant reports 14 CTests/13 Python tests; evaluator clean build and foundation_serial pass, while validator cannot establish force stability."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Large but consistently structured C++ implementation and detailed comments; committed source includes substantial campaign/postprocessing tooling."
+      "notes": "Source modular; later immutable tip ade1953 tracks 47 figure PDFs. Raw canonical outputs and supporting postprocessing manifest remain workspace evidence."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.2
+  "overall_score": 4.3
 }

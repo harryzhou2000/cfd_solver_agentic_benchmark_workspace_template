@@ -886,64 +886,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 4,
-        "notes": "CMake uses CFD_EXTERNALS_ROOT and documents C++17/MPI/CGNS/METIS; no independent clean rebuild was performed."
+        "score": 5,
+        "notes": "Immutable ade1953 clean build succeeds in network-disabled cfd-bench with documented external and benchmark roots; evaluator foundation_serial test passes (1/1)."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4,
-        "notes": "main.cpp implements input-driven --case/--output handling and validation paths; no fresh executable run was needed after complete delivered packages validated."
+        "score": 4.5,
+        "notes": "main.cpp handles case/output, restart/resume and collective input errors; no full CLI/solver campaign independently rerun."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 5,
-        "notes": "Committed source separates config, mesh, partition, residual, reconstruction, solver and output modules."
+        "score": 4.5,
+        "notes": "Config, mesh, partition, flux, reconstruction, residual, solver and output modules, with a large continuation/Newton solver."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "No internal wrapper/executable invocation was found. Trust policy excludes external similarity investigation, so originality is not independently proven."
+        "notes": "Trust policy excludes external authorship investigation; no internal solver executable wrapper found."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 5,
-        "notes": "Case JSON and generic CGNS reader drive production paths; no benchmark mesh-name/case-ID branch found in committed source."
+        "notes": "Case JSON drives mesh and physics; generic CGNS reader and controls without two-mesh-only branch."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 4,
-        "notes": "METIS K-way partitioning, neighbor MPI_Isend/Irecv, and MPI_Allreduce paths are implemented. Rank comparison is qualified because report notes an executable mismatch for np4 versus np8."
+        "notes": "Root-only METIS, neighbor state/reconstruction and global reductions exist. Submitted rank comparison uses different executable hashes and cannot isolate rank causation."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Source has finite/admissibility, geometry, CGNS, and collective preflight checks; no independent memory stress test."
+        "score": 3.5,
+        "notes": "Collective error handling and admissibility gates exist, but residual/order completion gate does not require stable forces for two laminar final results."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 4,
-        "notes": "Foundation/numerics/output test sources and run-suite tooling are committed; explicit eight-case validator pass was verified, but no clean test execution was repeated."
+        "notes": "Contestant reports 14 CTests/13 Python tests; evaluator clean build and foundation_serial pass, while validator cannot establish force stability."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 4,
-        "notes": "Large but consistently structured C++ implementation and detailed comments; committed source includes substantial campaign/postprocessing tooling."
+        "notes": "Source modular; later immutable tip ade1953 tracks 47 figure PDFs. Raw canonical outputs and supporting postprocessing manifest remain workspace evidence."
       }
     ],
     "disqualification_flags": [
@@ -988,7 +988,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.2
+    "overall_score": 4.3
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -999,77 +999,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 5,
-        "notes": "Conservative perfect-gas formulation and coefficient definitions are documented in report.tex and implemented in gas/flux/residual modules."
+        "notes": "gas/flux source and report provide conservative perfect-gas equations and reference coefficients."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 5,
-        "notes": "mesh.cpp reads unstructured CGNS zones, topology, BC families and computes geometry/adjacency."
+        "score": 4.5,
+        "notes": "mesh.cpp reads unstructured zones, BC families, TRI_3/QUAD_4/BAR_2 and geometry; MIXED section type is rejected."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 5,
-        "notes": "Cell-centred face residual assembly and globally reduced norms are visible in residual.cpp/solver.cpp."
+        "score": 4.5,
+        "notes": "Face residual and globally reduced diagnostics implemented; laminar gate passes materially changing forces and no independent grid convergence established."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Rusanov flux and frozen face Jacobian are implemented and honestly described as diffusive."
+        "notes": "Rusanov flux and frozen Jacobian implemented; report discloses associated diffusion."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
-        "score": 5,
-        "notes": "Farfield, slip and no-slip adiabatic boundary paths and output semantics are implemented/documented."
+        "score": 4.5,
+        "notes": "Characteristic farfield, slip and no-slip adiabatic paths and boundary-state output implemented; accuracy not independently benchmarked."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 5,
-        "notes": "Least-squares piecewise-linear reconstruction with production activation and fallback accounting is in reconstruction.cpp and report.tex."
+        "score": 4,
+        "notes": "LSQ reconstruction and continuation implemented; M200 laminar stops at minimum full-order hold with only 1.202 full-order residual orders and changing force."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 5,
-        "notes": "Barth-Jespersen fallback and density/pressure admissibility scaling are implemented; delivered metadata records controls."
+        "score": 4.5,
+        "notes": "Venkat/BJ and admissibility fallbacks implemented, with reported phase controls and shock diagnostics."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Viscous gradients, Newtonian/Fourier treatment and tangential force split are described and supported by source/output schema."
+        "score": 4,
+        "notes": "Newtonian/Fourier wall terms implemented. residual.cpp:323\u2013327,396\u2013425 uses full viscous traction for force columns; separate Cf is tangential, explicitly disclosed by report."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Matrix-free GMRES and frozen Rusanov LU-SGS are implemented; several steady packages report nonzero inner-target misses."
+        "score": 3.5,
+        "notes": "Matrix-free GMRES/LU-SGS with residual gates; original-baseline/phase hold does not ensure laminar force stability."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Source enforces transient dt/final-time/inner-control bounds; delivered Re200 metadata reports BDF2 controls, t=300 and zero inner-target misses. Re200 was not rerun."
+        "score": 3.5,
+        "notes": "BDF full residual and target logic exist. solver.cpp:2533\u20132545 counts post-target verification passes as nonlinear iterations; stdout records 5 every step and 2757 steps with 3 total linear iterations, but actual padded-pass count and historic source binding are unproven."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 4,
-        "notes": "METIS owned/ghost partition and neighbor schedules are implemented and np=8 packages exist; report qualifies the available np4/np8 comparison as not a pure rank-only experiment."
+        "notes": "METIS and neighbor halos present; np4/np8 comparison uses different binary hashes, disclosed in report, so rank-only attribution is unproven."
       }
     ],
     "disqualification_flags": [
@@ -1104,7 +1104,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.73
+    "overall_score": 4.15
   },
   "result_review": {
     "review_area": "result_review",
@@ -1114,50 +1114,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 5,
-        "notes": "Read-only explicit validator accepted all eight canonical case packages and the report; each package has the required structural files."
+        "score": 4,
+        "notes": "Validator passed eight package layouts; two completed/converged metadata labels conflict with actual laminar force trajectories."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 5,
-        "notes": "Explicit examiner validate_outputs.py invocation over all eight original workspace packages and report returned rc 0."
+        "notes": "Prior explicit examiner pass covers eight packages and report; structural validation does not prove force convergence."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 2.5,
-        "notes": "M015 and M200 laminar metadata say converged while final200 Cd falls 0.114944\u21920.087589 and 0.210556\u21920.141501; real residual reductions do not establish stable forces."
+        "notes": "M015/M200 laminar completed labels conflict with final200 Cd0.114944\u21920.087589 and 0.210556\u21920.141501; DQ7. M080 also trends."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Delivered fields/histories and report support finite, positive, credible results; rank comparison remains qualified by the report's executable-hash caveat."
+        "score": 3,
+        "notes": "Re20 Cd2.053 and Re200 St~0.162 are plausible; laminar force instability and low Re200 drag/Cl amplitude qualify overall physics."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Committed report source references extensive field/history/wake visualizations and the workspace manifest resolves their delivered sources."
+        "score": 4,
+        "notes": "Later tip ade1953 contains 47 figure PDFs, including readable late Re200 Cd/Cl; several steady common-scale plots flatten both late coefficients."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 3,
-        "notes": "Technically detailed report and candid limitations, but the curated committed TeX cannot compile because required PDFs were excluded from the submission."
+        "notes": "Report discloses M200 phase minima/final10 drift and binary mismatch, but calls two visibly drifting laminar results converged and counts all 5 residual passes as nonlinear iterations without distinguishing verification."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 4,
-        "notes": "Manifest/report link figures and claims to readable workspace data, but paths are workspace-absolute and raw source data is intentionally absent from the immutable result commit."
+        "notes": "Workspace postprocessing manifest matches all80 canonical result hashes and all47 figure PDFs; historical M200 executable and source binding are unproven."
       }
     ],
     "disqualification_flags": [
@@ -1187,7 +1187,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.5
   },
   "measurements": {
     "note": "opencode harness: codex tool-usage/LOC extraction not applicable",

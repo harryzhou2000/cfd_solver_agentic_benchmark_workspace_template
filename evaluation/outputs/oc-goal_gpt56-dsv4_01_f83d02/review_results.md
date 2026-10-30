@@ -2,32 +2,32 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T14:57:13.119972+00:00
+Generated: 2026-10-30T15:05:50.830599+00:00
 
-**Overall score: 4.0**
+**Overall score: 3.5**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | Read-only explicit validator accepted all eight canonical case packages and the report; each package has the required structural files. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Validator passed eight package layouts; two completed/converged metadata labels conflict with actual laminar force trajectories. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit examiner validate_outputs.py invocation over all eight original workspace packages and report returned rc 0. |
+| 2 | **res.validator** Automated validator results | 0.10 | 5 | Prior explicit examiner pass covers eight packages and report; structural validation does not prove force convergence. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 2.5 | M015 and M200 laminar metadata say converged while final200 Cd falls 0.114944→0.087589 and 0.210556→0.141501; real residual reductions do not establish stable forces. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2.5 | M015/M200 laminar completed labels conflict with final200 Cd0.114944→0.087589 and 0.210556→0.141501; DQ7. M080 also trends. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Delivered fields/histories and report support finite, positive, credible results; rank comparison remains qualified by the report's executable-hash caveat. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Re20 Cd2.053 and Re200 St~0.162 are plausible; laminar force instability and low Re200 drag/Cl amplitude qualify overall physics. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 5 | Committed report source references extensive field/history/wake visualizations and the workspace manifest resolves their delivered sources. |
+| 5 | **res.visualization** Visualizations | 0.15 | 4 | Later tip ade1953 contains 47 figure PDFs, including readable late Re200 Cd/Cl; several steady common-scale plots flatten both late coefficients. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Technically detailed report and candid limitations, but the curated committed TeX cannot compile because required PDFs were excluded from the submission. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Report discloses M200 phase minima/final10 drift and binary mismatch, but calls two visibly drifting laminar results converged and counts all 5 residual passes as nonlinear iterations without distinguishing verification. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Manifest/report link figures and claims to readable workspace data, but paths are workspace-absolute and raw source data is intentionally absent from the immutable result commit. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Workspace postprocessing manifest matches all80 canonical result hashes and all47 figure PDFs; historical M200 executable and source binding are unproven. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T14:57:13.119972+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.0
+- Overall score (0-5): 3.5
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
