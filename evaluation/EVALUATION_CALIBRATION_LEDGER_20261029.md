@@ -425,3 +425,6 @@ Designated Re200 metadata/status explicitly fail at step 6889, t=68.9/300; origi
 
 
 dsv4_flash_08 partial M2 laminar review: case 2→1, DQ false→true under trigger 7. Submitted metadata/status mark converged at step 33 with 3.005 residual orders, but original forces.csv Cd steps 30–33 is 0.25879026082, 0.24105224449, 0.22615804657, 0.21366941568 (17.44% fall, 5.52% last step). TASK.md:140 requires max_steps budget ≥40000 unless clearly converged earlier; :172 requires convergence or justified stable-force plateau. Residual target was met; rapidly changing drag does not support early convergence. Re200 remains honestly failed, and actual strict miss count remains unknown. Remaining cases, source and rubric partial; no CFD rerun.
+
+
+dsv4_flash_08 partial steady cases: scores 2,4,2,4,4,2,4,0 → 3,3,3,2,2,1,3,0. Evidence, per-case force tails, residual targets, physical limitations and PDF/standalone figure provenance documented in agent_scores.json and agent_report.md. Figure manifest SHA 5d32a9f362a27b2696be277619803fba325208a0986a4a577dfb7d02da5721e3 maps cases to original data; selected terminal response confirms regenerated figures and workspace figure timestamps precede it. Previously applying committed-only cap was incorrect. Full source/rubric/DQ still partial; no CFD rerun.

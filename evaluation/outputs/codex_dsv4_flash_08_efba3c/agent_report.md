@@ -12,7 +12,7 @@ The manually selected project-local Codex root is `019fdf7d-fd63-79b1-99a9-61a5e
 
 Rubric total: **76/100**. Section scores: build/CLI/output 7/10; mesh 9/10; residual/BC 13/15; second order 8/10; viscous 8/10; implicit/transient 10/15; MPI 6/10; results 7/10; report 4/5; extensibility 4/5. Detailed evidence and all section notes are in `agent_scores.json`.
 
-Weighted review areas: Code 3.67/5; CFD 3.82/5; Results 3.43/5. Per-case scores are M0.15 inviscid 4, M0.80 inviscid 4, M2 inviscid 3, M0.15 laminar 4, M0.80 laminar 4, M2 laminar 3, Re20 4, and Re200 0. The M2 first-order limitation and Re200 inner-loop failure are both candidly documented in the submitted report. No submitted np=8 NACA/cylinder comparison is present.
+Weighted review areas: Code 3.67/5; CFD 3.82/5; Results 3.43/5. Current per-case scores are M0.15 inviscid 3, M0.80 inviscid 3, M2 inviscid 3, M0.15 laminar 2, M0.80 laminar 2, M2 laminar 1, Re20 3, and Re200 0. The M2 first-order limitation and Re200 inner-loop failure are both candidly documented in the submitted report. No submitted np=8 NACA/cylinder comparison is present.
 
 ## Disqualification assessment
 
@@ -33,3 +33,7 @@ Designated case metadata and status explicitly mark failed/completed=false at st
 ## Partial M2 laminar result review — 2026-10-30
 
 The submitted M2 laminar status and metadata mark converged at step 33, reporting 3.005 residual-reduction orders. The submitted forces.csv shows Cd 0.25879026082, 0.24105224449, 0.22615804657 and 0.21366941568 at steps 30–33: a 17.44% fall over those steps and 5.52% on the last step. TASK.md:140 requires a configured max_steps budget of at least 40000 unless convergence is clearly achieved earlier; :172 requires a converged state or a justified plateau with stable forces. Meeting the residual target does not establish a settled result here. Case score 2→1, and DQ7 applies to the false convergence status. M2 first-order operation is disclosed at report.tex:273–282,490. Figure provenance, other cases and rubric remain under review. No CFD rerun.
+
+## Partial steady case review — 2026-10-30
+
+Scores 2,4,2,4,4,2,4,0 → 3,3,3,2,2,1,3,0. Each numerical basis and limitation is in case_scores. The accepted compiled report contains four steady cases; original workspace solver/report/figure_manifest.csv maps other delivered case figures to forces.csv, residuals.csv and field_final.vtk. Its SHA-256 is 5d32a9f362a27b2696be277619803fba325208a0986a4a577dfb7d02da5721e3; M0.15 and M2 inviscid force-figure SHA-256 values are db40f09eb9b79f4a49ea678e37c2588dcafe5da495976129898fcb33f4cc55f4 and ffc3bb281d45e61a095a98796caa40cb6b1b04183c63a40d477df6c4266983d9. Figure timestamps 2026-08-09 07:35 UTC precede selected terminal response 10:02 UTC, which explicitly reports regenerated figures; figures were visually checked against case values. Prior cap based solely on absent committed/referenced plots is not the current contestant-delivered evidence standard. Full source/rubric remains partial; no rerun.

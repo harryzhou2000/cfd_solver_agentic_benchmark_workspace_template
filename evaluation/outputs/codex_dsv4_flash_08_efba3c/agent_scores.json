@@ -310,32 +310,32 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 2,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=-2.0e-5, CD=7.8e-4 at e5d4a7a:solver/report/report.tex:293; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator passes; readable submitted result and report-level solver evidence."
+      "score": 3,
+      "notes": "2\u21923. Final Cd 0.0007828649, Cl -0.000019957; last 10% Cd 0.000778673\u20130.000784053; 3.198/4 residual orders. Contestant-delivered residual, force and Mach zoom figures are mapped by solver/report/figure_manifest.csv; previous committed-only cap was too strict. Settled tail supports usable result, but target and grid convergence are not established."
     },
     "naca0012_m080_inviscid": {
-      "score": 4,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=1.7e-3, CD=8.3e-3 at e5d4a7a:solver/report/report.tex:294; residual history e5d4a7a:solver/report/figures/naca0012_m080_inviscid_residuals.png (referenced at solver/report/report.tex:320); force history e5d4a7a:solver/report/figures/naca0012_m080_inviscid_forces.png (referenced at solver/report/report.tex:324); computed-field contour e5d4a7a:solver/report/figures/naca0012_m080_inviscid_mach_zoom.png (referenced at solver/report/report.tex:334). Score 4 retained after the post-processing audit. Prior case judgment: Validator passes and committed report contains residual/force/field figures."
+      "score": 3,
+      "notes": "4\u21923. Accepted report pp6\u20137 has numerical values and residual, force and Mach figures. Final Cd 0.008293034, Cl 0.001687321; last 10% Cd 0.008292737\u20130.008295459. Stable force tail but only 1.763/4 residual orders and no convergence study limit confidence."
     },
     "naca0012_m200_inviscid": {
-      "score": 2,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=-1.0e-3, CD=9.4e-2 at e5d4a7a:solver/report/report.tex:295; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator passes, but report documents first-order fallback for M2 stability."
+      "score": 3,
+      "notes": "2\u21923. Original contestant-delivered residual, force and Mach zoom figures are mapped by solver/report/figure_manifest.csv; previous committed-only cap was too strict. Final Cd 0.09379655, last-10% Cd 0.0937913\u20130.0937966, residual reduction 3.015/3 orders. Report.tex:273\u2013282 explicitly discloses first-order mode for M2; no second-order accuracy inference."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 4,
-      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=-8.8e-4, CD=7.5e-2 at e5d4a7a:solver/report/report.tex:296; residual history e5d4a7a:solver/report/figures/naca0012_m015_laminar_re5000_residuals.png (referenced at solver/report/report.tex:390); force history e5d4a7a:solver/report/figures/naca0012_m015_laminar_re5000_forces.png (referenced at solver/report/report.tex:394); computed-field contour e5d4a7a:solver/report/figures/naca0012_m015_laminar_re5000_mach_zoom.png (referenced at solver/report/report.tex:404). Score 4 retained after the post-processing audit. Prior case judgment: Validator passes and committed report contains figures."
+      "score": 2,
+      "notes": "4\u21922. Accepted PDF p10 supplies force/residual and field figures, but large startup spike compresses late drag; final Cd 0.0751543, last-10% Cd 0.0751522\u20130.0751558, residual reduction 2.767/4 orders. A stable short tail does not establish boundary-layer convergence or a credible accuracy assessment."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 4,
-      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=2.0e-4, CD=8.4e-2 at e5d4a7a:solver/report/report.tex:297; residual history e5d4a7a:solver/report/figures/naca0012_m080_laminar_re5000_residuals.png (referenced at solver/report/report.tex:355); force history e5d4a7a:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:359); computed-field contour e5d4a7a:solver/report/figures/naca0012_m080_laminar_re5000_mach_zoom.png (referenced at solver/report/report.tex:369). Score 4 retained after the post-processing audit. Prior case judgment: Validator passes and committed report contains figures."
+      "score": 2,
+      "notes": "4\u21922. Accepted PDF pp8\u20139 supplies force/residual and field figures, with late drag compressed by startup Cd about 22. Final Cd 0.0835947 at step 199, last-10% Cd 0.0835947\u20130.0844048 and Cl 0.00006415\u20130.0004458; residual reduction 4.008/4. Brief evolving history limits confidence despite nominal residual target."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1,
       "notes": "Score 2\u21921. Submitted results/naca0012_m200_laminar_re5000/{run_status.json,metadata.json} mark converged at step 33 with 3.005 residual-reduction orders; forces.csv Cd steps 30\u201333 is 0.25879026082, 0.24105224449, 0.22615804657, 0.21366941568, dropping 5.52% on the final step. A residual target was met, but such rapidly changing forces do not establish the clearly achieved early convergence needed by TASK.md:140 or the stable-force plateau in :172. This supports DQ7. M2 first-order operation is explicitly disclosed in report.tex:273\u2013282,490. Original report figure provenance and remaining evaluation are under review."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 4,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-2.5e-4, CD=2.248 at e5d4a7a:solver/report/report.tex:299; residual history e5d4a7a:solver/report/figures/cylinder_m010_laminar_re20_residuals.png (referenced at solver/report/report.tex:425); force history e5d4a7a:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:429); computed-field contour e5d4a7a:solver/report/figures/cylinder_m010_laminar_re20_mach_zoom.png (referenced at solver/report/report.tex:439). Score 4 retained after the post-processing audit. Prior case judgment: Validator passes and committed report contains figures."
+      "score": 3,
+      "notes": "4\u21923. Accepted PDF p11 supplies numerical, residual, force and Mach/pressure evidence. Final step 254 Cd 2.2478632, Cl -0.00025224; last-10% Cd 2.247863\u20132.247974 and residual reduction 5.003/5 orders. Force tail is stable and drag positive; short single-rank history and absence of convergence study limit accuracy confidence."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
