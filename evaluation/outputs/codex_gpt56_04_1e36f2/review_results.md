@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:30:07.705736+00:00
+Generated: 2026-10-30T11:30:53.580317+00:00
 
-**Overall score: 3.85**
+**Overall score: 3.95**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -12,7 +12,7 @@ Generated: 2026-10-30T11:30:07.705736+00:00
 | 1 | **res.contract** Output contract compliance | 0.20 | 5 | Read-only workspace has all eight canonical output directories and the generated report records completed statuses; raw packages are intentionally excluded from the immutable commit. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 4 | Generated report marks each required package pass; a fresh explicit validator invocation is not recorded in this scorecard. |
+| 2 | **res.validator** Automated validator results | 0.10 | 5 | Fresh read-only examiner validate_outputs.py passes all eight named canonical workspace output directories; it is a structural check and does not detect the verified field-rendering defect or prove physical convergence. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
 | 3 | **res.completion** Case completion and convergence | 0.20 | 5 | Seven steady cases are reported converged and Re200 statistically periodic at t=300, with readable package evidence; no Re200 rerun. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T11:30:07.705736+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.85
+- Overall score (0-5): 3.95
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
