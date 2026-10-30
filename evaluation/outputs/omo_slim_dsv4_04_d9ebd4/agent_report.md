@@ -43,7 +43,7 @@ DQ trigger 7 is not established solely by `completed: true`: each of the three m
 | Report, Visualization, Analysis | 5 | 1 | Crafted but materially incomplete and dishonest. |
 | Extensibility | 5 | 5 | Modular JSON-configured design. |
 
-Case scores are 1/5 for M0.15 inviscid, M2 inviscid, and cylinder Re20 only because failed packages exist; every other required case is 0/5. Weighted review scores are Code **3.65/5**, CFD methods **3.71/5**, and Results **0.70/5**.
+Case scores are 1/5 for the three incomplete laminar NACA attempts and 0/5 for all other cases: the three finalized packages explicitly failed, M0.80 inviscid has unusable extreme force values, and Re200 has empty histories. Four detached histories continued after the final response; they remain partial and exact executable binding is unproven. Weighted review scores are Code **3.65/5**, CFD methods **3.71/5**, and Results **0.70/5**.
 
 ## Limitations
 
