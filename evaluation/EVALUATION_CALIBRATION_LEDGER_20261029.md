@@ -100,7 +100,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_opus5-01_83492a` | fully reviewed, qualified: 90/100, DQ not established; Re200 binary/fallback attribution unresolved |
 | `codex_generic_opus5-02_cac77b` | fully reviewed, qualified: 90/100, no DQ established; historical Re200 binary/figure provenance unbound |
 | `codex_generic_sonnet46-01_ac6940` | fully reviewed, qualified: 66/100, DQ7/TASK full mesh; historic binary/figure binding limited |
-| `codex_generic_sonnet46-02_dac37b` | partial: all cases, PDF, source/rubric checked; DQ6/DQ7 and placeholder rejection; exact historical binary remains unbound |
+| `codex_generic_sonnet46-02_dac37b` | fully reviewed, qualified: 73/100, DQ6/7 and placeholder rejection; historical binary unbound |
 | `codex_generic_sonnet5-01_540ddf` | partial: PDF, all cases, source/rubric examined; DQ8 proven; historical binary and remaining figure/fallback provenance uncertain |
 | `codex_generic_sonnet5-02_6c0ac0` | partial: all cases, PDF, source/rubric reviewed; DQ7 proven; historical binary/remaining figure provenance uncertain |
 | `codex_generic_vllm-qwen38-01_2045e0` | partial: all cases/PDF/source/rubric examined; DQ4 rank anomaly unbound to same binary; other figure provenance uncertain |
@@ -833,6 +833,8 @@ sonnet46-02 DQ6 checkpoint: report.tex:111–112 claims a cell-joining viscous g
 sonnet46-02 source/review checkpoint: final ghost limiter initialized 1 and updated only on owned cells, yet both sides reconstructed; second-order8.5→7.5, total74→73. Root global mesh deleted before solve. Validator passes eight final cases/report structurally but accepts restart placeholders; Re200 metadata null revision leaves strict-count attribution uncertain. Remaining DQ/provenance partial.
 
 sonnet46-02 remaining DQ boundaries: np1 failed diagnostic uses Barth vs selected np8 Venkat, null revisions; no controlled DQ4 comparison. No specific false-data figure established, root full mesh freed, owned limiter active, wall output boundary-valued. No external authorship search or synthetic force/residual proof. Historical binary unbound; review remains partial.
+
+sonnet46-02 qualified full review: all ten sections, eight cases, 27 review points and 13 numbered DQ rules assessed to available evidence. 73/100, DQ6/7 and TASK shortcut 6 mandatory rejection unchanged. The absent report-claimed gradient correction, unstable metadata-marked steady forces, and eight state-free restart placeholders are separately evidenced; full traction is a distinct scored limitation, and placeholders do not prove synthetic force histories. Historical producing binary and exact Re200 strict miss counts remain unbound and explicitly qualified. Previous partial wording is historical. No CFD/rank/Re200 rerun; both gates required.
 
 sonnet5-01 PDF correction: prior absence reason said 76 pages had pervasive missing/error markers; actual red rectangles are hyperlink borders and all 76 pages have readable content/figures. PDF SHA256 f098a207b99c5644b8be1300987a1963567c101fa28f63c1127bb2b754177f54 matches contestant checkpoint f22bc25; tracked main TeX inputs match 4965edd. Accepted workspace_existing; curated figure blobs omitted, reproducibility separate. All eight tab_forces.tex summaries and tab_saturation St≈0.1829 exist, contrary to old notes. Report rubric0→2.5 total76→78.5; case scores provisional, Re200 late drag floor still unmet on page67. Partial review.
 

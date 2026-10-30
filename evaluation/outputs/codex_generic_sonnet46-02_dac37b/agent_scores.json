@@ -358,6 +358,61 @@
         "flag": "Report claims algorithms that cannot be found in source",
         "found": true,
         "evidence": "Immutable report.tex:111\u2013112 explicitly claims viscous face gradients are corrected along the cell-joining vector. Matching checkpoint and final source Gradient.cpp:31\u201346 forms ordinary Green\u2013Gauss cell gradients; Residual.cpp:77\u201388 averages adjacent gradients and sends them directly to Physics.hpp:131\u2013155 viscousFlux, whose inputs contain no cell-joining vector or cell-to-cell difference. No claimed correction path was found. Gradient, residual and physics blobs are identical in 113f01a and 25daaa3. Newtonian viscous flux is present; the separately defective full-traction force split is not itself the basis for this DQ6."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No internal existing CFD executable invocation found in inspected source; no exhaustive external authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct proof force/residual files were generated without solving. Eight state-free restart placeholders violate TASK shortcut 6 separately and do not prove synthetic histories."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Configured case and CGNS input are not restricted to two hard-coded filenames."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Available np1 diagnostic failed and used Barth while selected np8 used Venkat; np2 raw package unavailable. No controlled order-one rank discrepancy established."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Source implements implicit and BDF2 paths; explicit-only integration not established."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "No specific report figure proven unrelated to its source data. Reported St and raw FFT differ, which is separately scored and not proof of image substitution."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "Root global mesh is released before the iterative solve; METIS/local partitions exist. Full-state/geometric-only DQ9 not established."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Owned-cell reconstruction and limiter are active; ghost limiter handling is flawed but no bound production-disabled scheme is established."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "Surface output uses boundary-valued no-slip velocity; undocumented adjacent-cell wall-velocity violation not established."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "No specific named-variable figure swap established."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source CFD core found in inspected source; no exhaustive external authorship search."
       }
     ]
   },
@@ -365,6 +420,7 @@
     "No evaluator rerun or clean build.",
     "Re200 was not rerun.",
     "Structural validator pass does not validate M015 convergence credibility.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All ten sections, eight cases, 27 review points and 13 DQ rules reviewed to available evidence. Exact historical producing binary and strict transient miss counts remain unbound; no CFD/Re200 rerun."
   ]
 }
