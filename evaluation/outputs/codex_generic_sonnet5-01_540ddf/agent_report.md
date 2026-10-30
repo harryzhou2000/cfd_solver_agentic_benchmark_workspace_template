@@ -83,7 +83,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ false in the existing record; independent DQ review is pending. The prior report-absence finding is superseded below.
+DQ8 is triggered by the directly proven M015 laminar report-figure mismatch documented below; other DQ review remains partial. The prior report-absence finding is superseded below.
 
 ## Metadata answers & session selection
 
@@ -95,7 +95,7 @@ Raw packages are workspace-only evidence after curation. No evaluator rerun was 
 
 ## Verdict
 
-The contestant-delivered main report is usable and accepted; curated-tip report reproducibility is limited by omitted figure assets. Case physics, detailed scoring and DQ review remain partial.
+The contestant-delivered main report is readable and accepted, but a specific plotted case history is misbound to a scaling run, triggering DQ8. Curated-tip report reproducibility is limited by omitted figure assets. Further case physics, scoring and DQ review remains partial.
 
 ## Sidecar integrity
 
@@ -109,3 +109,10 @@ The contestant-delivered main report is usable and accepted; curated-tip report 
 The earlier `report_pdf.json` absence record stated that the sibling PDF had pervasive missing-asset/error markers; this historical assessment was incorrect. All 76 pages were rendered and visually reviewed. The red rectangles are hyperlinks around cross-reference numbers (for example page 21), and case figures render. The sibling `solver/report/report.pdf` SHA256 `f098a207b99c5644b8be1300987a1963567c101fa28f63c1127bb2b754177f54` is byte-identical to contestant checkpoint `f22bc25`; the tracked main TeX and its tracked TeX inputs match curated submission `4965edd`. It is now vendored as `workspace_existing` using the approval tool. Figure assets were excluded from the curated tip, which remains a separate clean-rebuild limitation.
 
 All eight prior case notes incorrectly claimed no committed numeric CL/CD. `4965edd:solver/report/tab_forces.tex` includes all eight; `tab_saturation.tex` reports late St≈0.1829 and mean Cd≈1.2466 for Re200. Each note now records its actual summary. PDF page67 shows a late lift/spectrum plot but its force plot's startup spike compresses late drag; the Re200 score2 remains capped unless another qualifying delivered figure is located. Other case scores remain 2 provisionally while their plot provenance and physics are independently checked. Report/visualization rubric0→2.5, total76→78.5; further claim and figure review may change it. No Re200 rerun.
+
+
+## DQ8: M015 laminar figure refers to a scaling run — 2026-10-30
+
+The accepted checkpoint-matched PDF page 59 Figure 13(a) presents `naca0012_m015_laminar_re5000_forces.png` as the selected case's force and convergence history (`4965edd:solver/report/sec_results.tex:867–910`). The displayed curve ends at step1500 with Cd≈0.11887 and Cl≈0.0012046. These match checkpoint `f22bc25:solver/results/scaling/naca0012_m015_laminar_re5000_np8/forces.csv` (SHA256 `031a20c88ff2acdedaaa7a624b61f56096c17c082985b13d351cbb35a3cc2e11`). The selected case's checkpoint CSV (SHA256 `beb6e2b681d0b30160bcfbb1b67e596cb91999b6e9b80c9627c0c6de47ac780e`) ends at step3839 with Cd0.0551808 and Cl−0.00169723. The plotted PNG SHA256 is `2e3066e48d70436cb70d3bb8efcab1b63dd555dcb690a38ed50c437ccf957ea0`; all these checkpoint bytes match the workspace.
+
+The checkpoint figure manifest repeats that filename for the canonical case and multiple `scaling/` cases, and `tools/make_figures.py:115–145,208–217` recursively generates figures under the shared metadata case ID. This establishes a concrete wrong-source final report figure and DQ8, without claiming fabricated CFD data or assuming every other figure is wrong. The M015 laminar score remains 2 pending an alternative correctly sourced force plot; report/visualization2.5→2, total78.5→78. Other case and DQ review remains partial. No rerun.

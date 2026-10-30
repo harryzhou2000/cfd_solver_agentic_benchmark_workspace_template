@@ -208,8 +208,8 @@
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Readable checkpoint-matched main PDF contains case figures; its Re200 force chart compresses late drag. Additional case-level traceability review pending."
+          "score": 2,
+          "notes": "PDF p59 Figure13(a) shows scaling np8 M015 laminar forces in place of selected case; p67 Re200 late drag is compressed. Remaining plots under review."
         },
         {
           "id": "res.report",
@@ -222,17 +222,17 @@
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 1,
-          "notes": "Validator and visual report evidence reviewed."
+          "score": 1.5,
+          "notes": "PDF p59 M015 laminar force plot ends step1500/Cd0.11887/Cl0.0012046, matching scaling np8, not selected step3839/Cd0.0551808/Cl\u22120.00169723; manifest repeats same figure filename for canonical and scaling paths."
         }
       ],
-      "overall_score": 3.55,
+      "overall_score": 3.42,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 78.5,
+    "total_scored": 78,
     "sections": [
       {
         "id": "build_cli",
@@ -294,8 +294,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 2.5,
-        "notes": "Contestant checkpoint-matched 76-page main PDF is readable and contains extensive report content and figures; original absence finding was erroneous. Curated tip omits figure blobs, limiting reproducibility; Re200 figure compresses late drag. Other claims/figure-to-data provenance remain under review."
+        "score": 2,
+        "notes": "Accepted 76-page main PDF is readable and numeric tables exist, but p59 Figure13(a) plots the scaling np8 M015 laminar history as selected-case convergence evidence; selected final case is different. Curated tip omits figure assets, and Re200 late drag is compressed. Other claims remain under review."
       },
       {
         "id": "extensibility",
@@ -321,7 +321,7 @@
     },
     "naca0012_m015_laminar_re5000": {
       "score": 2,
-      "notes": "Immutable 4965edd:solver/report/tab_forces.tex reports Cd=0.05518, Cl=\u22120.0017; the earlier claim of no committed numeric summary was incorrect. Contestant checkpoint f22bc25 contains the visually reviewed 76-page sibling main PDF and standalone figures omitted from the curated tip. Score 2 retained provisionally pending case-specific plot provenance and physics review."
+      "notes": "Immutable tab_forces.tex reports Cd0.05518/Cl\u22120.0017; selected checkpoint force CSV SHA256 beb6e2b681d0b30160bcfbb1b67e596cb91999b6e9b80c9627c0c6de47ac780e ends step3839 Cd0.0551808/Cl\u22120.00169723. Accepted PDF p59 Figure13(a) instead plots a step1500 history ending Cd\u22480.11887/Cl\u22480.0012046, matching checkpoint scaling np8 CSV SHA256 031a20c88ff2acdedaaa7a624b61f56096c17c082985b13d351cbb35a3cc2e11. The report calls that plot the case convergence evidence. Score2 retained pending a qualifying correct delivered force plot and independent case review; DQ8 applies to this proven figure mismatch."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 2,
@@ -341,8 +341,15 @@
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 8,
+        "flag": "Report figures do not correspond to submitted field/CSV outputs",
+        "found": true,
+        "evidence": "Accepted checkpoint-matched PDF p59 Figure 13(a), sourced from 4965edd sec_results.tex:867\u2013910 and f22bc25 figure naca0012_m015_laminar_re5000_forces.png SHA256 2e3066e48d70436cb70d3bb8efcab1b63dd555dcb690a38ed50c437ccf957ea0, labels the M015 laminar force history as case convergence evidence. It ends step1500, Cd\u22480.11887/Cl\u22480.0012046, matching f22bc25 results/scaling/naca0012_m015_laminar_re5000_np8/forces.csv SHA256 031a20c88ff2acdedaaa7a624b61f56096c17c082985b13d351cbb35a3cc2e11; canonical selected results/naca0012_m015_laminar_re5000/forces.csv SHA256 beb6e2b681d0b30160bcfbb1b67e596cb91999b6e9b80c9627c0c6de47ac780e ends step3839, Cd0.0551808/Cl\u22120.00169723. Figure manifest lists same name for canonical and scaling runs, and tools/make_figures.py:115\u2013145,208\u2013217 generates them under shared metadata case_id. This is a proven report-figure-to-selected-data mismatch, not evidence of synthetic solver data."
+      }
+    ]
   },
   "limitations": [
     "No evaluator solver rerun was performed; Re200 was never rerun.",
