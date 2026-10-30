@@ -1,3 +1,7 @@
+## Calibration checkpoint (partial)
+
+**89.5/100; DQ=true (provisional, trigger 7).** M015 inviscid is marked converged on a stable plateau, but its last five 1000-step mean drag values increase from 0.01271 to 0.02155 and mean lift from 0.00165 to 0.00965. The nominally steady case has not established stable forces. The report instead describes it as statistically periodic, while the metadata says converged. Full review continues.
+
 # Agent Evaluation Report — oc-goal_kimik3-dsv4_01_940dcb
 
 - Immutable submission: `f12b1cda2191dbc3e1361d45a309dad3cccd2172` on `oc-goal/kimik3-dsv4/01`.
@@ -17,9 +21,9 @@ Committed source supports generic CGNS input, METIS k-way partitioning, halo exc
 
 ## Score and verdict
 
-Score: **91/100**. Primary deductions are for no independent clean build, limited controlled MPI comparison, the limiter-selection qualification, and the statistically-periodic outcome for one nominally steady laminar NACA case. The JSON scorecard contains all 27 review points, ten rubric sections, eight case scores, and 13 DQ checks.
+The old **91/100** is superseded by the provisional 89.5/100 DQ7 checkpoint above. Primary deductions are for no independent clean build, limited controlled MPI comparison, the limiter-selection qualification, and the statistically-periodic outcome for one nominally steady laminar NACA case. The JSON scorecard contains all 27 review points, ten rubric sections, eight case scores, and 13 DQ checks.
 
-**DQ: no.** Direct internal evidence does not establish a wrapper, synthetic output generation, hard-coded mesh-only path, order-one rank discrepancy, explicit-only scheme, unsupported core algorithm claim, misleading success metadata, figure mismatch, non-METIS partitioning, disabled second order, surface semantic failure, figure misnaming, or copied/wrapped solver core. External similarity investigation was not performed under the trust policy.
+**DQ: yes, trigger 7.** Apart from the established M015 inviscid status mismatch, the remaining trigger review is ongoing. Prior assessment did not establish a wrapper, synthetic output generation, hard-coded mesh-only path, order-one rank discrepancy, explicit-only scheme, unsupported core algorithm claim, misleading success metadata, figure mismatch, non-METIS partitioning, disabled second order, surface semantic failure, figure misnaming, or copied/wrapped solver core. External similarity investigation was not performed under the trust policy.
 
 ## Limitations
 

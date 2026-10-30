@@ -197,8 +197,8 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 4,
-          "notes": "All packages are structurally complete and marked completed; two low-Mach laminar cases are statistically periodic, not steady converged."
+          "score": 2,
+          "notes": "M015 inviscid metadata says converged/stable plateau while last5000 mean Cd rises 0.01271\u21920.02155 and mean Cl0.00165\u21920.00965; DQ7."
         },
         {
           "id": "res.plausibility",
@@ -229,13 +229,13 @@
           "notes": "Manifest resolves figures; raw data remain read-only workspace evidence and are intentionally outside the result commit."
         }
       ],
-      "overall_score": 4.6,
+      "overall_score": 4.2,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 91,
+    "total_scored": 89.5,
     "sections": [
       {
         "id": "build_cli",
@@ -290,15 +290,15 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 8,
-        "notes": "All eight passed validator; two low-Mach laminar cases are statistically periodic rather than steady converged."
+        "score": 7,
+        "notes": "M015 inviscid marked converged on a claimed plateau while final5000 mean forces drift materially; other cases remain under review."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "Detailed, readable report with resolved figure manifest and stated limitations."
+        "score": 4.5,
+        "notes": "Report presents detailed figures but calls M015 inviscid statistically periodic despite converged metadata and an unstable late force trajectory."
       },
       {
         "id": "extensibility",
@@ -311,8 +311,8 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 5,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.00636 +/- 0.00288, CD=0.01816 +/- 0.00328 at f12b1cd:solver/report/tables.tex:27; residual history f12b1cd:solver/report/figures/naca0012_m015_inviscid_residuals.png (referenced at solver/report/figures.tex:4); force history f12b1cd:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/figures.tex:8); computed-field contour f12b1cd:solver/report/figures/naca0012_m015_inviscid_mach_zoom.png (referenced at solver/report/figures.tex:17). Score 5 retained after the post-processing audit. Prior case judgment: Validator pass; completed/converged package with readable fields and histories."
+      "score": 1,
+      "notes": "Canonical M015 inviscid metadata SHA256 98e94db61b1901b543cf75485e1cf63009e3afe744c137582a9648de642dead2 marks completed/converged at20000; status SHA256 88b7d4ae3d3f52a6cff3a7de89035cc32ac0505280bb30cebed198fda8cdd252 claims stable plateau. Force CSV SHA256 4dc4c6539b18e20caeefed0e8ce7777a1289efbfba07b02a565440f8956b967f final 1000-step mean Cd values 0.01271,0.01676,0.01920,0.02057,0.02155 and Cl means 0.00165,0.00514,0.00705,0.00828,0.00965. Residual only falls 0.274 orders overall (1899.6\u21921022.76), with final5000 2082.7\u21921022.76, so the force plateau is not stable. Report.tex:329\u2013339 instead labels this nominally steady case statistically_periodic and claims a physical instability; task requires converged or justified plateau with stable forces (TASK.md:172). DQ7, old5\u21921. Historical executable/source attribution remains under review."
     },
     "naca0012_m080_inviscid": {
       "score": 5,
@@ -344,7 +344,7 @@
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
       {
         "id": 1,
@@ -385,8 +385,8 @@
       {
         "id": 7,
         "text": "metadata.json marks incomplete or failed runs as successful final results",
-        "evidence": "Eight canonical metadata/run-status pairs consistently mark completed outcomes; two are explicitly statistically_periodic.",
-        "found": false
+        "evidence": "M015 inviscid metadata SHA256 98e94db61b1901b543cf75485e1cf63009e3afe744c137582a9648de642dead2 marks completed/converged and status SHA256 88b7d4ae3d3f52a6cff3a7de89035cc32ac0505280bb30cebed198fda8cdd252 says stable plateau at step20000. Submitted force CSV SHA256 4dc4c6539b18e20caeefed0e8ce7777a1289efbfba07b02a565440f8956b967f shows successive final1000-step mean Cd 0.01271,0.01676,0.01920,0.02057,0.02155 and mean Cl0.00165\u21920.00965; residual decreases 2082.7\u21921022.76 across the same final5000 and only 0.274 orders overall. This is not a stable-force plateau (TASK.md:172). The report identifies nominally steady M015 cases as statistically periodic, inconsistent with the inviscid metadata; actual claimed physical mechanism remains unproven. M015 laminar status boundary is being reviewed separately.",
+        "found": true
       },
       {
         "id": 8,

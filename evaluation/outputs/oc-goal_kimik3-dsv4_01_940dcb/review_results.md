@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:54:03.178123+00:00
+Generated: 2026-10-30T15:09:33.402778+00:00
 
-**Overall score: 4.6**
+**Overall score: 4.2**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,7 +15,7 @@ Generated: 2026-09-07T02:54:03.178123+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 5 | Recorded explicit examiner validation returned rc 0; Re200 was not rerun. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | All packages are structurally complete and marked completed; two low-Mach laminar cases are statistically periodic, not steady converged. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | M015 inviscid metadata says converged/stable plateau while last5000 mean Cd rises 0.01271→0.02155 and mean Cl0.00165→0.00965; DQ7. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Finite histories and report analysis support plausibility; mixed np2/np4/np8 final packages do not establish a controlled MPI comparison. |
@@ -41,7 +41,7 @@ Generated: 2026-09-07T02:54:03.178123+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.6
+- Overall score (0-5): 4.2
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
