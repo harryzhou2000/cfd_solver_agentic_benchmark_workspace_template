@@ -197,8 +197,8 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Seven steady packages are completed/converged; Re200 is completed/statistically_periodic with readable finite histories."
+          "score": 2,
+          "notes": "M2 laminar marked converged at1000 while final100 drag falls 0.673434\u21920.569866; DQ7."
         },
         {
           "id": "res.plausibility",
@@ -229,13 +229,13 @@
           "notes": "Figure manifest is present and resolves figure files; raw result inputs remain read-only workspace evidence outside the curated commit."
         }
       ],
-      "overall_score": 4.95,
+      "overall_score": 4.35,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 94,
+    "total_scored": 92.5,
     "sections": [
       {
         "id": "build_cli",
@@ -290,15 +290,15 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 9,
-        "notes": "All eight passed validator and final rows are finite; plausibility rests on delivered evidence."
+        "score": 8,
+        "notes": "M2 laminar marked converged at1000 despite strong final force drift; remaining case scoring pending."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "Detailed report with resolved figures and candid limitations."
+        "score": 4.5,
+        "notes": "Report claims early M2 laminar convergence while final drag changes materially; other figure/report review pending."
       },
       {
         "id": "extensibility",
@@ -331,8 +331,8 @@
       "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.0002, CD=0.1546 at 4698ba1:solver/report/results_body.tex:69; residual history 4698ba1:solver/report/figures/naca0012_m080_laminar_re5000_residual_history.png (referenced at solver/report/results_body.tex:76); force history 4698ba1:solver/report/figures/naca0012_m080_laminar_re5000_force_history.png (referenced at solver/report/results_body.tex:77); computed-field contour 4698ba1:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/results_body.tex:71). Score 5 retained after the post-processing audit. Prior case judgment: Validator pass; completed/converged package with finite final rows."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 5,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=+0.0006, CD=0.5699 at 4698ba1:solver/report/results_body.tex:82; residual history 4698ba1:solver/report/figures/naca0012_m200_laminar_re5000_residual_history.png (referenced at solver/report/results_body.tex:89); force history 4698ba1:solver/report/figures/naca0012_m200_laminar_re5000_force_history.png (referenced at solver/report/results_body.tex:90); computed-field contour 4698ba1:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/results_body.tex:84). Score 5 retained after the post-processing audit. Prior case judgment: Validator pass; completed/converged package with finite final rows."
+      "score": 1,
+      "notes": "Immutable 4698ba1 report/results_body.tex:80\u201390 gives final Cd0.5699 and reports convergence at1000 steps. Submitted metadata SHA256 46ca7bfc0c841560b787e29dfdbaf5143905e43deb041159407c46cae516d68e says completed/converged, but force CSV SHA256 d88744c1fe8d5fed2dc4d294a371b58c6c5995a01cc77a466ed59cd488ad419e shows Cd0.673434\u21920.569866 final100, 0.618365\u21920.569866 final50 and 0.588552\u21920.569866 final20. TASK.md:140,172 requires clear early laminar convergence and stable forces; actual 3.036-order residual reduction is not disputed. DQ7; old score5\u21921. Other evidence and rubric review pending."
     },
     "cylinder_m010_laminar_re20": {
       "score": 5,
@@ -344,7 +344,7 @@
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
       {
         "id": 1,
@@ -385,8 +385,8 @@
       {
         "id": 7,
         "text": "metadata.json marks incomplete or failed runs as successful final results",
-        "evidence": "All eight canonical packages consistently report completed outcomes; Re200 is explicitly statistically_periodic.",
-        "found": false
+        "evidence": "M2 laminar metadata SHA256 46ca7bfc0c841560b787e29dfdbaf5143905e43deb041159407c46cae516d68e marks completed/converged at step1000, repeated by immutable 4698ba1 solver/report/results_body.tex:80\u201382. Force SHA256 d88744c1fe8d5fed2dc4d294a371b58c6c5995a01cc77a466ed59cd488ad419e shows Cd0.6734338\u21920.5698661 final100 and 0.6183646\u21920.5698661 final50; this early laminar state is not clearly converged or force-stable (TASK.md:140,172), despite an actual 3.036-order residual drop. Other DQ review remains pending.",
+        "found": true
       },
       {
         "id": 8,

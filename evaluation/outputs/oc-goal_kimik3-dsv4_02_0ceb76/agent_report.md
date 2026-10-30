@@ -1,3 +1,7 @@
+## Calibration checkpoint (partial)
+
+**92.5/100; DQ=true (provisional, trigger 7).** M2 laminar is marked converged at step1000, but final100 drag falls 0.673434→0.569866 and final50 0.618365→0.569866. The early laminar result is not force-stable despite its real three-order residual drop. Re20 Cd6.0276 and M015 laminar Cd0.4887 warrant physics review, not an automatic failure claim. Full calibration continues.
+
 # Agent Evaluation Report — oc-goal_kimik3-dsv4_02_0ceb76
 
 - Immutable submission: `4698ba1578ec446c6037bdbfa40e30b6ce82c9e1` on `oc-goal/kimik3-dsv4/02`.
@@ -17,9 +21,9 @@ Committed source supports generic CGNS input, METIS k-way partitioning, owned/gh
 
 ## Score and verdict
 
-Score: **94/100**. Deductions reflect no independent clean build/MPI rerun or memory stress test, and the limited independent verification beyond the delivered evidence. The JSON scorecard contains all 27 review points, ten rubric sections, eight case scores, and 13 DQ checks.
+The earlier **94/100** is superseded by the provisional 92.5/100 DQ7 checkpoint above. Deductions reflect no independent clean build/MPI rerun or memory stress test, and the limited independent verification beyond the delivered evidence. The JSON scorecard contains all 27 review points, ten rubric sections, eight case scores, and 13 DQ checks.
 
-**DQ: no.** Direct internal evidence does not establish an executable wrapper, synthetic result generation, mesh-only hard-coding, order-one rank discrepancy, explicit-only solver, unsupported core-method claim, misleading completion metadata, figure mismatch, non-METIS partitioning, disabled second order, surface semantic failure, figure misnaming, or copied/wrapped solver core. External similarity investigation was not performed under the trust policy.
+**DQ: yes, trigger 7**, as described above; remaining triggers are under review. Previous record said DQ=no. Direct internal evidence does not establish an executable wrapper, synthetic result generation, mesh-only hard-coding, order-one rank discrepancy, explicit-only solver, unsupported core-method claim, misleading completion metadata, figure mismatch, non-METIS partitioning, disabled second order, surface semantic failure, figure misnaming, or copied/wrapped solver core. External similarity investigation was not performed under the trust policy.
 
 ## Limitations
 
