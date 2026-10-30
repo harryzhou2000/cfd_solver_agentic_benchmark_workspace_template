@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:18:48.087288+00:00
+Generated: 2026-10-30T05:20:55.234511+00:00
 
-**Overall score: 4.0**
+**Overall score: 3.2**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -18,16 +18,16 @@ Generated: 2026-10-30T05:18:48.087288+00:00
 | 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Selected Re20 Cd0.8469/Cl-0.3897 is inaccurate/asymmetric despite stable forces; Re200 Cd mean1.126 and Cl rms0.0266 but dominant FFT frequency shifts with time window. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | Selected Re20 Cd0.8469/Cl-0.3897 is inaccurate/asymmetric despite stable forces; Re200 Cd mean1.126 and Cl rms0.0266 but dominant FFT frequency shifts with time window. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 4 | Seven immutable steady force plots collapse at physical_time=0, and Re200 full-history Cd startup hides late drag; separate lift plot has no drag. Report includes readable residual and contour assets. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2 | Seven immutable steady force plots collapse at physical_time=0, and Re200 full-history Cd startup hides late drag; separate lift plot has no drag. Report includes readable residual and contour assets. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Report accurately discloses Re20 asymmetric result and rank sensitivity, and includes diagnostics; it calls all steady force histories readable although figures collapse at time zero. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Metadata identifies bf6e816 for selected results while final b962bf5 fv_solver.cpp differs; report includes tables/manifests but np4 exact controls are not independently recorded. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T05:18:48.087288+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.0
+- Overall score (0-5): 3.2
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

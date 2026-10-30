@@ -62,22 +62,22 @@
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
+      "score": 2,
       "notes": "Production bf6e816 fv_solver.cpp:1049\u20131094 uses SGS with lagged gradients/limiter; selected steady metadata records every inner target missed, but separate outer target and force plateau govern convergence."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4,
+      "score": 3,
       "notes": "bf6e816 fv_solver.cpp:893\u2013926 refreshes gradients/limiter once per physical step and tests frozen-coefficient residual; zero reported misses do not prove fully refreshed nonlinear target. St\u22480.11281 for t>=105 but \u22480.075 peak for t>=100."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "score": 2,
+      "notes": "Same revision bf6e816 and matching step-0 Re20 force rows, but settled np4/8 Cl differs by 0.40238 and Cd by 0.07007; np4 exact CLI controls unavailable. Numerical rank sensitivity material."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.0
+  "overall_score": 3.52
 }

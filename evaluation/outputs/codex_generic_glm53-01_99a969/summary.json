@@ -200,8 +200,8 @@
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "score": 2,
+        "notes": "Root-only global mesh is released before solver, with METIS and neighbor halo; selected Re20 np4/np8 Cl means +0.012703 vs \u22120.389676 and Cd 0.91697 vs 0.84691. Exact np4 CLI controls are not independently documented."
       },
       {
         "id": "code.robustness",
@@ -267,7 +267,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.7
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -333,22 +333,22 @@
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 4,
+        "score": 2,
         "notes": "Production bf6e816 fv_solver.cpp:1049\u20131094 uses SGS with lagged gradients/limiter; selected steady metadata records every inner target missed, but separate outer target and force plateau govern convergence."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 4,
+        "score": 3,
         "notes": "bf6e816 fv_solver.cpp:893\u2013926 refreshes gradients/limiter once per physical step and tests frozen-coefficient residual; zero reported misses do not prove fully refreshed nonlinear target. St\u22480.11281 for t>=105 but \u22480.075 peak for t>=100."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "score": 2,
+        "notes": "Same revision bf6e816 and matching step-0 Re20 force rows, but settled np4/8 Cl differs by 0.40238 and Cd by 0.07007; np4 exact CLI controls unavailable. Numerical rank sensitivity material."
       }
     ],
     "disqualification_flags": [
@@ -383,7 +383,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.52
   },
   "result_review": {
     "review_area": "result_review",
@@ -414,29 +414,29 @@
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 4,
+        "score": 2,
         "notes": "Selected Re20 Cd0.8469/Cl-0.3897 is inaccurate/asymmetric despite stable forces; Re200 Cd mean1.126 and Cl rms0.0266 but dominant FFT frequency shifts with time window."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 4,
+        "score": 2,
         "notes": "Seven immutable steady force plots collapse at physical_time=0, and Re200 full-history Cd startup hides late drag; separate lift plot has no drag. Report includes readable residual and contour assets."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "score": 3,
+        "notes": "Report accurately discloses Re20 asymmetric result and rank sensitivity, and includes diagnostics; it calls all steady force histories readable although figures collapse at time zero."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "score": 3,
+        "notes": "Metadata identifies bf6e816 for selected results while final b962bf5 fv_solver.cpp differs; report includes tables/manifests but np4 exact controls are not independently recorded."
       }
     ],
     "disqualification_flags": [
@@ -466,7 +466,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.2
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/glm53-01",
