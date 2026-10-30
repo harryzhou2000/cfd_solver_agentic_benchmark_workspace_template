@@ -75,7 +75,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-10_f6b586` | fully reviewed — 87/100, DQ=true; both gates pass |
 | `claude_generic_opus-11_fe7eba` | fully reviewed: 84/100, DQ false; eight case scores 3,3,3,2,2,2,2,2 |
 | `claude_generic_sonnet-01_96c411` | fully reviewed: 71/100, DQ false; report PDF unsuitable for snapshot; both gates pass |
-| `codex_dsv4_flash_01_0c1996` | unreviewed |
+| `codex_dsv4_flash_01_0c1996` | partial: DQ and Re200 correction, other cases/rubric/review points pending |
 | `codex_dsv4_flash_02_3447d3` | unreviewed |
 | `codex_dsv4_flash_03_294b64` | unreviewed |
 | `codex_dsv4_flash_04_755869` | unreviewed |
@@ -343,3 +343,8 @@ Sonnet-01 individual case review: all eight scores remain 1,1,1,2,1,2,1,0. Updat
 ## Sonnet-01 full calibration — 2026-10-30
 
 Rubric 74→71/100, DQ false; all 27 review points and ten rubric sections carry criterion-specific evidence. Eight case scores remain 1,1,1,2,1,2,1,0. The delivered PDF is preserved in workspace and manager history but does not qualify for accepted snapshot due p33 missing-wake TODOs; its actual steady and partial-transient plots are still assessed. Two steady residual targets reached but unreliable force normalization/sign, five steady failures, Re200 t=3.03/300 with 303 measured target misses. Residual.cpp:295–305,341–349 establishes the pressure-normal convention disagreement and unnormalized split; report discloses unresolved force inconsistency. Source hypothetical full-horizon periodic status does not produce a submitted false success, so DQ7 not established. METIS root-only global mesh and rank-local solve, active reconstruction and short np1/2/4/8 comparisons documented; 300-step agreement does not establish converged rank independence. Immutable clean build and gas/geometry/writer unit suite 1/1 pass in network-disabled restricted container; original output validator fails, both record gates pass. No CFD/unsteady rerun, exhaustive external authorship or pixel audit.
+
+
+## dsv4_flash_01 partial DQ and Re200 correction — 2026-10-30
+
+DQ6 retained: immutable `f6d8a183` solver.cpp:187–190 calls only Rusanov for Roe, while report.tex:51–52 claims Roe entropy fix. Added DQ10: implicit.cpp:195 and :206–231 disable reconstruction in viscous/transient production cases without report disclosure. Added TASK.md:227 full-mesh prohibition: solver.cpp:12–20 reads complete mesh on every rank; solver.hpp:57 retains it in the solver through main.cpp:65–81. METIS/local state exist, so numbered DQ9 is not asserted. Added DQ7: Re200 np1 metadata is completed/statistically_periodic at t300, but original forces.csv contains exactly Cd=2.81996, Cl=0.00139396 for all 20,001 t≥100 rows. Report.tex:89 supplies numeric values with Cd and Cl swapped, correcting old missing-summary note. Score 2→1; no St/delivered late-time plots. Metadata specifies min/max 3/20 vs 5/1000 controls; transient.cpp:102–103,122–148 tests spatial residual relative to the first physical step, not the required per-step total residual. Metadata git_revision=null and some fields disagree with final output code, so actual strict miss count is unknown. Historical Re20 np1 and NACA M0.15 np1 paths cited in old report are no longer in the live workspace, so their old observations remain historical and need separate review. Other cases, rubric and review areas partial; both gates pass; no CFD rerun.

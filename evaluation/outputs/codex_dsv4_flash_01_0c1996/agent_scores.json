@@ -337,8 +337,8 @@
       "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Divergent np1 terminal residual 1.16233e14 and Cd 3.35506e8; np1_final is also explicitly failed."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 2 retained after the post-processing audit. Prior case judgment: Reaches t=300, but only 3 inner iterations (max 20 versus required controls) and constant force tails do not establish shedding."
+      "score": 1,
+      "notes": "Score 2\u21921. Immutable report.tex:89 gives approximate numeric values, contrary to the old missing-summary assertion, but swaps Cd\u22480.001 and Cl\u22482.82 relative to selected np1 forces.csv final Cd=2.81996, Cl=0.00139396. Original 30,000-row history is exactly constant at these printed values for t\u2265100 (20,001 rows), so it does not demonstrate shedding; metadata nevertheless says completed/statistically_periodic. It uses min/max inner controls 3/20 rather than supplied 5/1000 and no St or late-time contestant force/field plots are delivered in the three-page report. Immutable transient.cpp:102\u2013103,122\u2013148 tests spatial residual against first-step reference, not total inner residual against each step initial value; stored metadata has null git revision and conflicts with some final-source accounting, so the actual strict target-miss count is unknown."
     }
   },
   "disqualification": {
@@ -349,6 +349,23 @@
         "text": "Report claims algorithms that cannot be found in source.",
         "evidence": "report.tex claims Roe with Harten--Yee entropy fix; src/solver.cpp roe_flux returns rusanov_flux directly.",
         "found": true
+      },
+      {
+        "id": 7,
+        "text": "metadata/status marks incomplete or failed runs as successful",
+        "found": true,
+        "evidence": "Selected Re200 np1 metadata says completed=true/statistically_periodic at t=300, while forces.csv contains Cd=2.81996 and Cl=0.00139396 identically for every output row t>=100 (20,001 rows), without demonstrated shedding. Metadata uses 3/20 inner controls against 5/1000 specified; true strict inner misses cannot be inferred because final source tests a different ratio and stored revision is null."
+      },
+      {
+        "id": 10,
+        "text": "Report claims second-order reconstruction or shock limiter disabled for production cases",
+        "found": true,
+        "evidence": "Immutable f6d8a183 implicit.cpp:195,206\u2013213,224\u2013231 uses first-order states for every viscous or transient case; report.tex:51\u201354 claims second-order reconstruction without disclosing these production exceptions."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "Immutable solver.cpp:12\u201320 reads and partitions the complete mesh on every rank, solver.hpp:57 stores it as a Solver member, and main.cpp:65\u201381 holds that solver throughout solve. METIS and local state exist, so this is the TASK.md:227 full-mesh prohibition rather than a claim of geometric-only partition or full-state replication under numbered trigger 9."
       }
     ]
   },
@@ -357,6 +374,7 @@
     "The primary root is an orphan bundled rollout, so primary-to-continuation ancestry is evidence-based rather than DB-verifiable.",
     "No clean build, solver rerun, MPI rerun, or evaluator redraw was performed under the authorized no-rerun/no-redraw decision.",
     "Current index schema does not enumerate run_identity.json or contestant_final_response.md.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "2026-10-30 partial recalibration: Re200 stored metadata has null git revision and differs in some fields from immutable final output code; strict target-miss count cannot be reconstructed. Two historical np1 final directories are no longer present in the current workspace; prior observations retained as historical evidence."
   ]
 }
