@@ -124,3 +124,10 @@ The scorecard had 91 while the old report verdict said 92; the 91 scorecard is t
 ## Rank evidence and telemetry qualifications — 2026-10-30
 
 Selected np1/np8 NACA M015 Cd0.000821942/0.000817179, Cl0.000369430/0.000386138; Re20 Cd2.017874/2.018504, Cl0.000537166/0.000500075. These do not show order-one absolute rank changes; no independent MPI production rerun. The report's general claim (`report.tex:372–380`) that fallback events are counted per step needs qualification: `docs/binary_provenance.md:99–115` states Re200 production used an older binary without those counts, while a separate single-rank 100-step probe covers only 0.33% of the trajectory. That document also says M2 inviscid 326 fallback events, whereas selected `prod_naca0012_m200_inviscid/metadata.json` reports 595 on 324 steps. We retain the exact values as a provenance/report inconsistency, not evidence of a disabled limiter or a proven DQ. Report and traceability review points 5→4.5; rubric total remains 90.
+
+
+## Steady cases and restart limitations — 2026-10-30
+
+Each steady case was compared with its selected b350651 metadata, force tail and delivered report plots. Last-400 drag ranges are recorded per case; the M2 inviscid case remains 3.5 for its justified but below-target 2.55-order plateau, and Re20’s pressure-zoom contour (`fig_atlas.tex:466`) is the wake field required by the cylinder floor. The small M015 laminar lift drift remains the only steady score change in this checkpoint series.
+
+`restart_io.cpp:60–75,127–135` saves one conservative state level plus time and step; `transient_driver.cpp:105–108` initializes both BDF histories from that state and uses backward Euler on the first resumed step. This supports restarting but does not preserve an uninterrupted multistep trajectory. The rubric already has a build/CLI deduction; no unsteady restart rerun was made. DQ/source provenance remain partial.

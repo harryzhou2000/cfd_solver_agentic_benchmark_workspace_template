@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:51:14.035092+00:00
+Generated: 2026-10-30T06:52:58.423735+00:00
 
 **Overall score: 4.71**
 
@@ -12,7 +12,7 @@ Generated: 2026-10-30T06:51:14.035092+00:00
 | 1 | **code.build** Build system and reproducibility | 0.15 | 5 | Immutable cb2bac0 clean CMake build passed in cfd-bench with network disabled, 2 CPUs/3GiB/256 pids and documented roots; no production CFD rerun. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 5 | Required solve CLI, validation, and explicit bad-input paths are implemented. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 5 | Required solve CLI, validation, and explicit bad-input paths are implemented. Restart stores one state level plus time/step; transient_driver.cpp:105–108 rebuilds history and takes backward Euler on resumed first step. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4.5 | Clear physics, mesh, numerics, I/O, MPI, and driver separation. |
