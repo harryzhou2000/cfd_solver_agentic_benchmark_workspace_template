@@ -17,16 +17,7 @@ Explicit `validate_outputs.py --report` passed all eight production case directo
 
 ## Per-case scores
 
-| Case | Score | Evidence |
-|---|---:|---|
-| NACA M0.15 inviscid | 5 | Validator pass; 5.33/5.13 residual orders. |
-| NACA M0.80 inviscid | 3 | Validator pass but only 0.569/0.856 residual orders. |
-| NACA M2 inviscid | 5 | Validator pass; 3.00/3.26 residual orders. |
-| NACA M0.15 Re5000 | 5 | Validator pass; 4.34/4.00 residual orders. |
-| NACA M0.80 Re5000 | 3 | Validator pass but only 0.371/0.350 residual orders. |
-| NACA M2 Re5000 | 5 | Validator pass; 3.65/3.56 residual orders. |
-| Cylinder Re20 | 5 | Validator pass; 5.01 residual orders and Cd 2.049. |
-| Cylinder Re200 | 4.5 | Submitted PDF resolves late lift/drag and wake; strict target and frequency evidence checked. |
+In benchmark order, the independently reviewed scores are 4, 3, 4.5, 4, 3, 3.5, 4.5 and 4.5. The accepted PDF supplies each case’s numeric summary, residual and force plots and suitable field contour. M0.80 cases have low restart-origin residual reductions despite bounded terminal force windows; M2 laminar drag continues falling about 3% over its final 200 samples. Exact hashes and page references are in agent_scores.json.
 
 ## Verdict
 
@@ -34,4 +25,4 @@ Explicit `validate_outputs.py --report` passed all eight production case directo
 
 ## Calibration in progress
 
-The Re200 score is corrected 2→4.5: accepted contestant PDF pages 33–34 and 38–39 show residual, both late forces, wake and lift spectrum. The independently checked t180–300 force history gives mean Cd1.2705235, Cl−0.568460..0.570342, and 22 upward crossings with mean period5.370075 (frequency0.18622), consistent with the reported St0.18333 at FFT resolution0.016667. The exact historic executable cannot be independently rehashed; the selected session records its production/rebuild hash. Other cases and rubric/DQ remain under review.
+The Re200 score is corrected 2→4.5: accepted contestant PDF pages 33–34 and 38–39 show residual, both late forces, wake and lift spectrum. The independently checked t180–300 force history gives mean Cd1.2705235, Cl−0.568460..0.570342, and 22 upward crossings with mean period5.370075 (frequency0.18622), consistent with the reported St0.18333 at FFT resolution0.016667. The exact historic executable cannot be independently rehashed; the selected session records its production/rebuild hash. Rubric and DQ remain under review.
