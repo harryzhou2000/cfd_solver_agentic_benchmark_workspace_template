@@ -116,7 +116,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
 | `codex_gpt56_01_cb349f` | fully reviewed: 94/100, no DQ found; executable and individual image bindings qualified |
 | `codex_gpt56_02_38616e` | fully reviewed: 90/100, no DQ established; historic binary/precursor and image bindings qualified |
-| `codex_gpt56_03_93b257` | unreviewed |
+| `codex_gpt56_03_93b257` | partial: Re200 2→4.5; remaining case/rubric/DQ review ongoing |
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
 | `codex_gpt56_05_7bee7c` | unreviewed |
 | `codex_gpt56_06_97ae53` | unreviewed |
@@ -1054,3 +1054,6 @@ gpt56_02 source/rubric/DQ checkpoint: immutable 6183dc8 archive builds in networ
 
 
 gpt56_02 full-review qualification: all eight cases, 39 PDF pages, ten rubric sections, 27 review criteria and numbered DQ boundaries were reviewed using delivered evidence; clean source build and eight safe CTests passed. The selected session records a production/rebuild hash, source checkpoint be1f6b0 matches curated solver source, and rank/period checks independently corroborate recorded output. Original executable, one M080 inviscid restart precursor and every individual image-to-data binding are unavailable for complete independent verification; these remain explicit qualifications. Review is complete within feasible evidence, without asserting those unknowns. No CFD rerun.
+
+
+gpt56_03 Re200 correction: accepted workspace sibling PDF SHA256 508a9f50ea302020d320455d56d096330efc0fb69290eab0693b0fd6581fb465 matches immutable TeX SHA256 ca350136a3016eb5a1fece5b25fa8bdb3a3de115957a0b6ece1a12a30242d524 and selected final response; page11 visibly contains residual and late Cd/Cl inset, p12 wake. Report.tex:132 gives mean Cd1.2695, mean Cl0.00635245, amplitude0.56721 and St0.18998. Workspace forces SHA256 053b10e7d7e6ece41b8e3cf6924b2be5a9a71877df46fcaf7d00d423d8c5fb89 t≥200 mean Cd1.269459, t180–300 Cl−0.566706..0.568708 and 22 upward crossings mean period5.369611 (frequency0.18623), close to reported spectral estimate. Metadata source revision6faee4137e6441f0eeb416db83113af268cf7252 matches curated solver/src; last ratio0.000942283 vs0.001, no misses, actual binary unbound. Source solver.cpp:393–403 genuinely removes normal viscous traction before force integration, unlike gpt56_01/02. Old committed-figure cap is false under delivered PDF policy; score2→4.5. Remaining cases/rubric/DQ partial; no CFD rerun.

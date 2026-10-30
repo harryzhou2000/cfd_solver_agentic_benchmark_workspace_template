@@ -18,3 +18,7 @@ The explicit official validator passed every required production case directory 
 **98/100, not disqualified.** The only rubric deduction is extensibility: the documented three-dimensional, RANS, chemistry and general-EOS paths remain extensions rather than delivered capabilities. The strict submission audit could not recognize TeX `\detokenize{}` figure references, so result-branch PNGs were excluded; the curated report source is therefore not self-contained even though the contestant artifact report references 41 figures.
 
 `run_identity.json` and `contestant_final_response.md` are unindexed sidecars and are not covered by `cfdeval check`.
+
+## Calibration in progress
+
+Re200 case score 2→4.5: the accepted contestant PDF includes a readable late lift/drag inset and residual on page 11 and wake on page 12. The historical force record gives t≥200 mean Cd1.269459 and t180–300 mean crossing period5.369611 (frequency≈0.18623), close to reported St0.18998. Metadata source revision matches curated solver files; exact executable remains unbound. Other cases, rubric and DQ remain under review.
