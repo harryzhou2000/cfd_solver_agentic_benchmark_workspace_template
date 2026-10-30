@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T08:16:34.266647+00:00
+Generated: 2026-10-30T08:19:04.911099+00:00
 
-**Overall score: 2.48**
+**Overall score: 2.33**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 2.5 | Six NACA packages pass examiner structural checks, but Re20 and Re200 fail the final-status requirement; M015 and M200 laminar success labels are false despite structural passes. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
+| 2 | **res.validator** Automated validator results | 0.10 | 2.5 | Read-only examiner invocation on 2026-10-30 passed six NACA packages and report, and rejected both cylinder packages for failed final convergence_status. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
 | 3 | **res.completion** Case completion and convergence | 0.20 | 1.5 | M015 inviscid and M200 laminar have falsely periodic success despite continuing force drift; Re20 and Re200 explicitly fail. These are separate facts. |
@@ -27,7 +27,7 @@ Generated: 2026-10-30T08:16:34.266647+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 2.5 | Report explicitly discloses failed cylinders but claims periodic success for drifting steady cases and tangential-only viscous drag although source integrates full traction. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Checkpoint 1185ccd preserves selected CSVs, standalone figures and manifest, while final curated tip omits figure/data blobs. Exact source binary revision is null and full figure-data correspondence remains partial. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T08:16:34.266647+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.48
+- Overall score (0-5): 2.33
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

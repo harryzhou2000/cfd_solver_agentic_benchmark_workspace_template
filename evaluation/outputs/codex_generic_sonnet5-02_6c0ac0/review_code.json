@@ -20,36 +20,36 @@
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 3,
-      "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+      "score": 4,
+      "notes": "Distinct mesh, partition, physics, solver, MPI and I/O modules; numerical drivers are separated from output."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+      "score": 4,
+      "notes": "No copied CFD core identified in inspected source; no exhaustive external authorship search was performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+      "score": 4,
+      "notes": "Case inputs supply mesh/physics paths; no two-filename-only dispatch identified in inspected source."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+      "score": 4,
+      "notes": "partition/distributed_mesh.cpp:282\u2013286 constructs global mesh only within root setup scope; METIS and mpi/halo_exchange.cpp neighbor exchange are present."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 3,
-      "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+      "notes": "Invalid input and nonfinite checks exist; residual-only plateau status accepts a false success and transient restart does not restore prior history."
     },
     {
       "id": "code.testing",
@@ -62,8 +62,8 @@
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 3,
-      "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+      "score": 4,
+      "notes": "Contestant checkpoint 1185ccd contains no tracked solver/build paths; 77 result files are preserved in the checkpoint and omitted from curated tip. Manager curation is not contestant misconduct."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.2
+  "overall_score": 3.77
 }

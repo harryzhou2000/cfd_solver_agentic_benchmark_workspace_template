@@ -683,36 +683,36 @@
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "Distinct mesh, partition, physics, solver, MPI and I/O modules; numerical drivers are separated from output."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "No copied CFD core identified in inspected source; no exhaustive external authorship search was performed."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "Case inputs supply mesh/physics paths; no two-filename-only dispatch identified in inspected source."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "partition/distributed_mesh.cpp:282\u2013286 constructs global mesh only within root setup scope; METIS and mpi/halo_exchange.cpp neighbor exchange are present."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "notes": "Invalid input and nonfinite checks exist; residual-only plateau status accepts a false success and transient restart does not restore prior history."
       },
       {
         "id": "code.testing",
@@ -725,8 +725,8 @@
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "Contestant checkpoint 1185ccd contains no tracked solver/build paths; 77 result files are preserved in the checkpoint and omitted from curated tip. Manager curation is not contestant misconduct."
       }
     ],
     "disqualification_flags": [
@@ -771,7 +771,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.2
+    "overall_score": 3.77
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -781,50 +781,50 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "physics/flux.cpp and solver residual implement 2-D compressible inviscid and Newtonian/Fourier terms; report equations are present."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "cgns_reader.cpp:70\u201393,190\u2013219,224\u2013272 handles first-base multizone TRI/QUAD/BAR with one-to-one interface welding; unsupported element sections throw."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 3.5,
+        "notes": "solver/residual.cpp assembles finite-volume face fluxes and boundary conditions; actual cases exhibit unstable force and poor convergence."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "physics/flux.cpp implements Roe and Rusanov paths with entropy/shock handling. Production physics limits are evaluated separately."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "solver/residual.cpp:171\u2013177,199\u2013215 uses no-slip boundary state with zero output velocity; wall traction force split has its own deduction."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "solver/reconstruction.cpp builds primitive gradients and exchanges reconstructed fields through neighbor halo at :93\u201394."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "solver/reconstruction.cpp:51\u201359 selects Venkat or Barth limiter with reconstruction handling; poor case results do not prove the limiter was disabled."
       },
       {
         "id": "cfd.viscous",
@@ -837,8 +837,8 @@
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 3.5,
+        "notes": "solver_driver.cpp:425\u2013469 uses a residual-only bounded-range plateau heuristic; M015/M200 force windows demonstrate cases can be incorrectly labelled periodic."
       },
       {
         "id": "cfd.transient",
@@ -851,8 +851,8 @@
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "partition/distributed_mesh.cpp root-local global mesh and metis_partition.cpp:58 provide partitioning; mpi/halo_exchange.cpp uses neighbor messages. Numerical rank-comparison review remains partial."
       }
     ],
     "disqualification_flags": [
@@ -887,7 +887,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.95
+    "overall_score": 3.64
   },
   "result_review": {
     "review_area": "result_review",
@@ -897,15 +897,15 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 2.5,
+        "notes": "Six NACA packages pass examiner structural checks, but Re20 and Re200 fail the final-status requirement; M015 and M200 laminar success labels are false despite structural passes."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 2.5,
+        "notes": "Read-only examiner invocation on 2026-10-30 passed six NACA packages and report, and rejected both cylinder packages for failed final convergence_status."
       },
       {
         "id": "res.completion",
@@ -940,7 +940,7 @@
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "notes": "Checkpoint 1185ccd preserves selected CSVs, standalone figures and manifest, while final curated tip omits figure/data blobs. Exact source binary revision is null and full figure-data correspondence remains partial."
       }
     ],
     "disqualification_flags": [
@@ -970,7 +970,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.48
+    "overall_score": 2.33
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/sonnet5-02",

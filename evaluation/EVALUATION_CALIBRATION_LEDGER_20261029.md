@@ -825,3 +825,5 @@ Selected last4000/1000 force windows, immutable force SHA256 values, and physica
 sonnet5-02 build/rubric checkpoint: clean immutable build passed, CTest no registered tests; restart restores clock/state but duplicated BDF history. Full traction force split contrary to report tangential claim; same precedent, no mechanical DQ6. Re200 honestly failed at t0.74 with 74 misses; typical inner count is midpoint, e.g. M200 lam metadata20 vs raw mean25.543. Build9→8, viscous9→7, implicit12→10.5, case5→3.5, report5→3, total83→75. Partial.
 
 sonnet5-02 report consistency: replaced obsolete 83/DQ=false verdict with current 75/DQ7 and separate explicit failed-cylinder status; clean build is identified without implying a CFD rerun.
+
+sonnet5-02 source/validator checkpoint: multi-zone TRI/QUAD/BAR with interface welding, root-only global mesh setup, METIS/neighbor halos and reconstruction exchange inspected. Source plateau test uses residual only, not force stability. Validator passes six NACA packages/report and rejects both honestly failed cylinders. Review points now criterion-specific; exact binary/DQ boundaries partial. No CFD rerun.
