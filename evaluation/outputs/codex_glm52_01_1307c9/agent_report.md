@@ -64,3 +64,5 @@ Full rubric, 27 review points and remaining DQ checks are still in progress; the
 ## Partial review-area correction — 2026-10-31
 
 The recovered evidence and source/build checks correct the weighted Code/CFD/Results review-area scores from 3.52/3.40/1.85 to **3.08/3.37/1.45**. Individual point notes now distinguish the successful clean build and structural validator from the empty fields and missing restart; actual METIS and halo work from persistent full-mesh replication; and stale report numbers from recovered final force histories. This is a partial correction, not the completed review: the remaining points, 100-point rubric and numbered DQ checks still require criterion-by-criterion adjudication. Previous 58/100 remains provisional. No unsteady solver run was performed.
+
+The recovered `f9b3d2d` NACA M0.15 inviscid and Re20 `*_np1` packages add direct trigger-7 evidence: both `metadata.json` files say completed and converged, while their `run_status.json` files report failed at final_step=0 and their `forces.csv` files contain zero data rows. They do not establish a valid rank-count comparison or any rank-dependent mismatch.
