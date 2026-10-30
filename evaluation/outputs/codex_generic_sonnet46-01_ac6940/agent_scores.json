@@ -63,8 +63,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "score": 2.5,
+          "notes": "METIS and neighbor halos exist, but main.cpp:89\u2013109,136\u2013156 retains full mesh on every rank through solver iterations. NACA np8 lift\u22480.0303 differs materially from near-zero np1; the cylinder np8 result is a failed 200-step pilot."
         },
         {
           "id": "code.robustness",
@@ -88,7 +88,7 @@
           "notes": "Source and curated submission reviewed."
         }
       ],
-      "overall_score": 3.74,
+      "overall_score": 3.52,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -167,11 +167,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "score": 2.5,
+          "notes": "METIS and neighbor halos exist, but main.cpp:89\u2013109,136\u2013156 retains full mesh on every rank through solver iterations. NACA np8 lift\u22480.0303 differs materially from near-zero np1; the cylinder np8 result is a failed 200-step pilot."
         }
       ],
-      "overall_score": 3.75,
+      "overall_score": 3.62,
       "disqualification_flags": []
     },
     "result_review": {
@@ -215,8 +215,8 @@
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Validator/report evidence reviewed."
+          "score": 2.5,
+          "notes": "Report.tex:244 falsely denies full-mesh replication and :588\u2013593 incorrectly attributes St\u22488.1 frequency to coefficient amplitude scaling; report does disclose negative viscous drag and M2 laminar divergence."
         },
         {
           "id": "res.traceability",
@@ -226,13 +226,13 @@
           "notes": "Validator/report evidence reviewed."
         }
       ],
-      "overall_score": 2.95,
+      "overall_score": 2.88,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 70.5,
+    "total_scored": 68.5,
     "sections": [
       {
         "id": "build_cli",
@@ -280,8 +280,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 8,
-        "notes": "Evidence recorded in report."
+        "score": 6.5,
+        "notes": "Partitioner.cpp:63\u201378 calls METIS and broadcasts partition; MpiHalo.cpp uses neighbor sends/receives. main.cpp:89\u2013109,136\u2013156 retains full mesh on every rank during iteration. Report.tex:549\u2013573 gives NACA np1 Cd0.000813/Cl\u22120.000028 vs np8 Cd0.000858/Cl0.0303, and cylinder np8 is only a failed 200-step pilot, not a consistent completed comparison."
       },
       {
         "id": "case_results",
@@ -294,8 +294,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 3,
-        "notes": "Evidence recorded in report."
+        "score": 2.5,
+        "notes": "Report contains equations, contours and residuals but claims no full-mesh replication despite source, attributes an St\u22488.1 frequency error to amplitude scaling, and omits standalone steady force plots from the curated report. All 11 accepted pages checked."
       },
       {
         "id": "extensibility",

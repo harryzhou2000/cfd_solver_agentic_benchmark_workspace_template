@@ -45,7 +45,7 @@ Reviewed source, selected Codex root, contestant final response, raw workspace p
 
 ## Recorded scores and disqualification
 
-The current 100-point rubric is 70.5/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
+The current 100-point rubric is 68.5/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
 
 | Case | Score |
 |---|---:|
@@ -112,3 +112,10 @@ Immutable `058801f` clean CMake build succeeded in network-disabled `cfd-bench` 
 ## Transient inner convergence — 2026-10-30
 
 `058801f` and checkpoint `8899f00` have the same `TransientSolver.cpp` blob `c5938a23cf5d8caf11425a23b3f7f4fad6091d44`. Lines 182–188 form spatial plus BDF residual, then :191–194 add a pseudo-time regularization term before the norm and ratio at :197–214. TASK.md:143 requires the reduction target on spatial plus physical-time residual; the regularized ratio does not establish that target. The code also sets the maximum to at least 2000 (:40–44), although the supplied case and metadata say 1000. The selected checkpoint residual history has 30000 rows, with 943 at exactly 2000 and observed min11/max2000/mean75.0211. Metadata itself reports 943 misses and max2000, contradicting its own configured maximum1000; it is not necessary to invent miss counts. Because metadata does not identify the production binary, the final source's precise relationship to this run remains uncertain, and the actual strict unregularized target-miss count cannot be inferred. Implicit/transient rubric 9→7 and total72.5→70.5; no Re200 rerun.
+
+
+## MPI and report accuracy — 2026-10-30
+
+`Partitioner.cpp:63–78` calls METIS and broadcasts the partition, and `MpiHalo.cpp:28–35` performs neighbor communication; these do not remove the separate full-mesh replication documented above. Report.tex:244 falsely says the full mesh is not replicated. The report's NACA np1 Cd0.000813/Cl−0.000028 versus np8 Cd0.000858/Cl0.0303 comparison is reproduced by the checkpoint np8 final force row. Its cylinder np8 package is a 200-step failed pilot, not a completed rank consistency demonstration. The large relative change in near-zero lift is material to confidence, but its absolute difference≈0.0303 and unequal convergence states do not establish numbered DQ4's order-one result change. MPI rubric8→6.5.
+
+Report.tex:588–593 incorrectly suggests rescaling force amplitude corrects the FFT frequency, and :244 contradicts actual full-mesh lifetime; it separately discloses negative viscous drag and M2-laminar divergence. Report/visualization3→2.5; total70.5→68.5. No rerun; remaining source/rubric/DQ review remains partial.

@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:28:25.978863+00:00
+Generated: 2026-10-30T07:29:29.831708+00:00
 
-**Overall score: 2.95**
+**Overall score: 2.88**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T07:28:25.978863+00:00
 | 5 | **res.visualization** Visualizations | 0.15 | 3 | Validator/report evidence reviewed. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Validator/report evidence reviewed. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 2.5 | Report.tex:244 falsely denies full-mesh replication and :588–593 incorrectly attributes St≈8.1 frequency to coefficient amplitude scaling; report does disclose negative viscous drag and M2 laminar divergence. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 2 | Validator/report evidence reviewed. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T07:28:25.978863+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.95
+- Overall score (0-5): 2.88
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
