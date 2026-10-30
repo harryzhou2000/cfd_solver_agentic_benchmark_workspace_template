@@ -105,3 +105,10 @@ Score: **92/100; disqualified: false.** This is a strong, structurally valid and
 ## Re200 visualization floor — 2026-10-30
 
 All 52 pages of the accepted immutable-source PDF were visually checked; no missing-asset placeholders seen. `report.tex:1509–1527` and `numbers.tex:12–19` supply mean Cd1.236, mean Cl0.00097, Cl amplitude0.514 and St0.182; `report.tex:1580–1584` and `fig_atlas.tex:481–490` show the same force figure. Its startup drag spike≈31 compresses late Cd to an apparently flat line; no other delivered late-time force plot appears in the report or figure tree. The Re200 floor specifically requires readable late lift and drag periodicity, so case4.5→2. Current raw `results/prod_cylinder_m010_laminar_re200/forces.csv` t≥100 has Cl−0.51265–0.51526, Cd1.21573–1.25888 and lift FFT peak0.17999, independently supporting oscillatory data but not replacing the required delivered figure. Metadata revision is null; provenance/source and all other rubric/DQ review remain partial. No Re200 rerun.
+
+
+## Steady-force and transient provenance checkpoint — 2026-10-30
+
+M015 laminar 4.5→4: selected last400 Cl changes −0.00411475→−0.00303332 (first/second half means −0.00377137/−0.00322880), whereas Cd changes 0.0564460→0.0563279. Its recorded source revision b350651 checks a Cd-only steadiness window (`steady_driver.cpp:249–257,300,398–399`). Lift drift limits confidence, but its absolute change is small relative to drag and does not alone establish DQ7. Other steady case tail checks remain in progress.
+
+Re200 metadata reports null revision and start/end 2026-08-26 13:47:16–19:10:12 UTC. Source commit 638fe3f immediately precedes that start; later 16:03 and 16:38 commits add positivity telemetry while the run was ongoing. Comparing 638fe3f with 0097308 shows the transient total-residual and actual inner-ratio checks remain while telemetry is added, but timestamps/lineage do not establish the exact compiled binary. The final source root-only mesh preprocessing releases its global mesh before iteration. No Re200 rerun.
