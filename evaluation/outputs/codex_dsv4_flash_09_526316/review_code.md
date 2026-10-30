@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:06:49.344732+00:00
+Generated: 2026-10-30T04:07:55.101734+00:00
 
-**Overall score: 3.04**
+**Overall score: 2.74**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | CMake documented; immutable report build passes but solver not clean-built. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 1 | Immutable 11adaa1 clean CMake configure fails: CMakeLists.txt:51 requires src/restart.cpp, absent from submission. Network-disabled cfd-bench with /opt/external dependencies locates MPI and configures through dependency checks before missing-source error. Untracked workspace placeholder exists but is post-session and not submitted at immutable tip. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 3 | CLI source present; not rerun. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T04:06:49.344732+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.04
+- Overall score (0-5): 2.74
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
