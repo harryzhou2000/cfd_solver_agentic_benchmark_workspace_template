@@ -9,30 +9,30 @@
 
 The immutable commit tree, task/output contract, submitted C++/CMake/README/report/scripts, `run_identity.json`, and project-local telemetry sidecars were read. The submission delta adds `solver/` sources, tools, `report.tex`, and `done`, but no `solver/results/<required-case>` directory, raw output package, report figures, `run_manifest`, `figure_manifest`, or `sanity_checks` artifact. `report.tex` names eight figures under `solver/report/figures`, yet `git ls-tree -r 5b9dded7` contains none. Thus the committed report cannot build with its claimed figures.
 
-Contestant checkpoint `fa9d2b83fb632b970e0392a455baab5e5389930c`, at 2026-08-06 01:06 UTC immediately before the selected 01:07 UTC final response, contains eight case packages, 43 figures, manifests and a nine-page contestant PDF. Source and report.tex match curated `5b9dded7`, while that curated tip excludes the plots and raw results. The final response explicitly identifies those deliverables on `codex/glm52-m3/init`. The previously asserted total absence therefore applies only to the curated tip, not contestant-delivered historical evidence. Historical PDF SHA256 `4199cd280ffd7538666bdeb8383ed495c5a5f9fefff0107b63d8ad000a7d2c01` remains historical evidence and has not been substituted for the absent approved snapshot. All nine historical PDF pages and eight cases’ force/residual/contour figures were visually reviewed; individual hashes and physical limitations are recorded in case notes. No evaluator CFD or Re200 rerun was performed.
+Contestant checkpoint `fa9d2b83fb632b970e0392a455baab5e5389930c`, at 2026-08-06 01:06 UTC immediately before the selected 01:07 UTC final response, contains eight case packages, 43 figures, manifests and a nine-page contestant PDF. Source and report.tex match curated `5b9dded7`, while that curated tip excludes the plots and raw results. The final response explicitly identifies those deliverables on `codex/glm52-m3/init`. The previously asserted total absence therefore applies only to the curated tip, not contestant-delivered historical evidence. Historical PDF SHA256 `4199cd280ffd7538666bdeb8383ed495c5a5f9fefff0107b63d8ad000a7d2c01` remains historical evidence and has not been substituted for the absent approved snapshot. All nine historical PDF pages and eight cases’ force/residual/contour figures were visually reviewed; individual hashes and physical limitations are recorded in case notes. Read-only examiner validation of all eight extracted checkpoint packages and historical report returned OK, despite the metadata/stdout contradiction. A fresh immutable-source build succeeded in a network-disabled restricted container; CTest registered no tests. No evaluator CFD or Re200 rerun was performed.
 
 ## Findings
 
 Source supports a partial implementation: C++17 CMake, JSON case parsing, CGNS mesh/geometry code, METIS graph partitioning, owned/ghost state, neighbor nonblocking communication, global reductions, Rusanov/Roe-capable flux code, least-squares reconstruction, a Barth-type limiter, positivity fallback, viscous fluxes, LU-SGS-like sweeps, and a BDF2-shaped physical-time/inner loop.
 
-Material direct limitations remain. `runSteady()` marks a max-step run `converged` unconditionally when it does not meet the target. `runTransient()` unconditionally assigns `statistically_periodic` after its loop; source alone cannot prove the claimed production controls, convergence, or shedding. The report explicitly says Re200 used first-order reconstruction and no shedding, while checkpoint metadata says periodic and claims zero misses; checkpoint stdout reports 11356 target misses and fraction0.621467. Report claims an additional absolute 1e-10 convergence test absent from the source revision recorded by metadata. Full mesh persists on every rank throughout solver execution. Individual case review remains pending.
+Material direct limitations remain. `runSteady()` marks a max-step run `converged` unconditionally when it does not meet the target. `runTransient()` unconditionally assigns `statistically_periodic` after its loop; source alone cannot prove the claimed production controls, convergence, or shedding. The report explicitly says Re200 used first-order reconstruction and no shedding, while checkpoint metadata says periodic and claims zero misses; checkpoint stdout reports 11356 target misses and fraction0.621467. Report claims an additional absolute 1e-10 convergence test absent from the source revision recorded by metadata. Full mesh persists on every rank throughout solver execution; restart argument is ignored, and viscous force includes normal traction. Three steady cases have large continuing force oscillations despite converged metadata.
 
 ## Rubric scores (100 points)
 
 | Section | Max | Score | Basis |
 |---|---:|---:|---|
-| Build, CLI, Output Contract | 10 | 5 | Build and recovered outputs require further review. |
+| Build, CLI, Output Contract | 10 | 4.5 | Clean build passes, but restart argument is ignored. |
 | Mesh And Geometry | 10 | 8 | CGNS/unstructured geometry and adjacency source. |
 | FV Residual And BC | 15 | 11 | Residual/flux/BC code, not numerically verified. |
 | Second-Order Spatial Scheme | 10 | 8 | Reconstruction, limiter, positivity source; material fallbacks. |
-| Viscous Terms | 10 | 7 | Gradient/Newtonian/Fourier source, no laminar evidence. |
+| Viscous Terms | 10 | 5.5 | Newtonian/Fourier flux; force split includes normal traction. |
 | Implicit And Transient Methods | 15 | 7.5 | BDF2 exists; reported miss count and absolute acceptance claim conflict with source/stdout. |
 | MPI | 10 | 5 | METIS and neighbor halos exist, but full mesh persists on each rank during solve. |
 | Case Results And Validation | 10 | 3 | Recovered histories show two partial cases, multiple false success labels and no Re200 street. |
 | Report, Visualization, Analysis | 5 | 1.5 | Historical PDF/figures delivered, but important claims and manifest mappings are wrong. |
 | Extensibility | 5 | 3 | Modular components, limited architecture. |
 
-**Provisional total: 59/100.**
+**Provisional total: 57/100.**
 
 ## Review-area scores
 

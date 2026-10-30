@@ -6,15 +6,15 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 2,
-      "notes": "CMake declares C++17, MPI, CGNS/HDF5/METIS and README documents a build, but no clean build was performed and hard-coded .so paths reduce portability."
+      "score": 4,
+      "notes": "Fresh 5b9dded7 CMake build passed in network-disabled cfd-bench with 2 CPUs, 3 GiB and 256-process limit; CTest reports no registered tests. Historical binary remains unbound."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 3,
-      "notes": "main.cpp parses solve, --case and --output plus documented options and reports parse/partition errors; no executable or malformed-input behavior was run."
+      "score": 2.5,
+      "notes": "main.cpp:35,48 parses --restart, but restartFile is never subsequently loaded/applied. output.cpp:259\u2013273 writes global conservative state, not restart BDF histories/time."
     },
     {
       "id": "code.organization",
@@ -56,7 +56,7 @@
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 1,
-      "notes": "No committed test suite, required case result packages, or reproducible submitted validation record exists."
+      "notes": "Clean source build passed with no registered CTest tests. Read-only validator on recovered fa9d2b83 eight case packages and report returned OK despite metadata/stdout target-miss contradiction; no CFD rerun."
     },
     {
       "id": "code.hygiene",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.69
+  "overall_score": 2.94
 }

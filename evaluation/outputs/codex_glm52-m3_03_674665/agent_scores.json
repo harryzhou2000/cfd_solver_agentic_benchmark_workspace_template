@@ -34,15 +34,15 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 2,
-          "notes": "CMake declares C++17, MPI, CGNS/HDF5/METIS and README documents a build, but no clean build was performed and hard-coded .so paths reduce portability."
+          "score": 4,
+          "notes": "Fresh 5b9dded7 CMake build passed in network-disabled cfd-bench with 2 CPUs, 3 GiB and 256-process limit; CTest reports no registered tests. Historical binary remains unbound."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 3,
-          "notes": "main.cpp parses solve, --case and --output plus documented options and reports parse/partition errors; no executable or malformed-input behavior was run."
+          "score": 2.5,
+          "notes": "main.cpp:35,48 parses --restart, but restartFile is never subsequently loaded/applied. output.cpp:259\u2013273 writes global conservative state, not restart BDF histories/time."
         },
         {
           "id": "code.organization",
@@ -84,7 +84,7 @@
           "title": "Testing and validation evidence",
           "weight": 0.1,
           "score": 1,
-          "notes": "No committed test suite, required case result packages, or reproducible submitted validation record exists."
+          "notes": "Clean source build passed with no registered CTest tests. Read-only validator on recovered fa9d2b83 eight case packages and report returned OK despite metadata/stdout target-miss contradiction; no CFD rerun."
         },
         {
           "id": "code.hygiene",
@@ -94,7 +94,7 @@
           "notes": "Readable header-oriented C++ and scripts, but report/source contradictions and unverified generated-result claims remain."
         }
       ],
-      "overall_score": 2.69,
+      "overall_score": 2.94,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -152,8 +152,8 @@
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Newtonian/Fourier normal viscous-flux and wall-gradient code is present, without submitted laminar evidence."
+          "score": 2.5,
+          "notes": "solver.cpp:650\u2013667 integrates full viscous traction, including normal component, instead of required tangential skin-friction split. Surface Cf separately projects tangential traction. Numerical laminar/Re20 results have independent failures."
         },
         {
           "id": "cfd.implicit",
@@ -177,7 +177,7 @@
           "notes": "5b9dded7 main.cpp:100\u2013102 reads complete mesh on every rank; it remains live through :135\u2013138 solver loops and is reused at :152. This violates TASK.md:46,227 despite METIS/neighbor halos."
         }
       ],
-      "overall_score": 3.19,
+      "overall_score": 3.13,
       "disqualification_flags": []
     },
     "result_review": {
@@ -238,14 +238,14 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 59.0,
+    "total_scored": 57.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 5,
-        "notes": "Build and CLI source/documentation exist, but no clean build/CLI test and no final output-contract packages are submitted."
+        "score": 4.5,
+        "notes": "Fresh clean source build passes, CTest has no registered tests; --restart is parsed but never loaded and written state lacks BDF histories/time."
       },
       {
         "id": "mesh_geometry",
@@ -272,8 +272,8 @@
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 7,
-        "notes": "Gradient-based Newtonian/Fourier implementation and wall treatment are present, but no laminar fields/surfaces validate wall behavior or force split."
+        "score": 5.5,
+        "notes": "Newtonian/Fourier flux and wall shear exist, but solver.cpp:650\u2013667 counts full traction including normal stress as viscous force; rubric requires tangential skin friction."
       },
       {
         "id": "implicit_transient",
@@ -389,7 +389,7 @@
         "id": 7,
         "text": "metadata marks incomplete or failed runs as successful",
         "found": true,
-        "evidence": "Contestant checkpoint fa9d2b83 Re200 metadata reports zero target misses and converged fraction 1.0, while the same checkpoint stdout.log reports 11356 misses and fraction0.621467 for 30000 steps. Metadata marks statistically_periodic/completed; report.tex:124,192 explicitly says forces are steady without a resolved vortex street. The report claims hybrid convergence but the reported revision source counts only strict relative-ratio misses; binary binding is not independently verified."
+        "evidence": "Contestant checkpoint fa9d2b83 Re200 metadata reports zero target misses and converged fraction 1.0, while the same checkpoint stdout.log reports 11356 misses and fraction0.621467 for 30000 steps. Metadata marks statistically_periodic/completed; report.tex:124,192 explicitly says forces are steady without a resolved vortex street. The report claims hybrid convergence but the reported revision source counts only strict relative-ratio misses; binary binding is not independently verified. Additional independent checkpoint evidence: M015 inviscid/laminar and Re20 metadata say converged despite final400 lift ranges \u22123.90..4.87, \u22122.02..2.29, and \u22122.72..3.05 respectively and residual reductions only0.542,0.537,0.447 orders. Source runSteady solver.cpp:538\u2013540 unconditionally labels max-step runs converged. Case histories and immutable hashes are in notes."
       },
       {
         "id": 8,
