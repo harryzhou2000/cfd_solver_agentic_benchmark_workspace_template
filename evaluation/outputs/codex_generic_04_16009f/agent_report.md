@@ -86,7 +86,7 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 
 ## Verdict
 
-33/100, DQ=true (partial calibration). The modular implementation is promising, but the submitted result suite is incomplete and cannot support a completion claim.
+27/100, DQ=true (partial calibration). The modular implementation is promising, but the submitted result suite is incomplete and cannot support a completion claim.
 
 
 ## Partial source and status review — 2026-10-30
@@ -94,3 +94,8 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 Immutable d93a1ef solver/report/report.tex:29–30,68 claims second-order least-squares reconstruction and Barth–Jespersen limiter. main.cpp:40–82 sends cell-centered primitive states directly to Rusanov and main.cpp:272–294 calls this residual without calling the reconstruction or limiter modules (only their headers are included at :25–26). DQ10 applies. main.cpp:189–196 reads the full RawMesh and computes full geometry on every rank; both remain live through the loop :272–328 and raw_mesh is used again at :347, violating TASK.md:227. Solution state is local, so numbered DQ9 full-state condition is not inferred.
 
 Canonical solver/results/naca0012_m015_inviscid/metadata.json reports completed=true and converged, while its run_status.json likewise claims converged but reports residual_reduction_orders=-0.5032948043646994, indicating growth rather than convergence. DQ7 applies. Current residuals.csv and forces.csv end around steps 2388 and 2384, whereas run_status reports step 20000, so the files are not treated as a matched final history. Metadata git_revision=null; main.cpp mtime 2026-08-25 03:46 UTC follows metadata mtime 03:40 UTC, preventing confident run-source binding. Other cases/rubric/source/DQ remain under review. No CFD rerun.
+
+
+## Partial build and source calibration — 2026-10-30
+
+Exact immutable d93a1ef solver archive configured and built successfully in an isolated cfd-bench container (`--network none --cpus 2 --memory 3g --pids-limit 256`; `cmake -S /work/solver -B /work/build -DCFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install`; `cmake --build /work/build -j2`). Build alone does not validate numerical results. Second-order rubric 4→0 and reconstruction/limiter review points 2→0 each for the unused modules described above. Viscous rubric 3→1: main.cpp:70–74 passes g_cells to compute_face_gradient, which reads Cell.U in navier_stokes.cpp:65–72, but main.cpp:218–229,250,272–294 evolves separate U without populating Cell.U. Wall force :102–106 uses velocity instead of velocity gradients and viscosity :243–245 is fixed 1e-3. main.cpp:293–294 calls LU-SGS sweeps rather than the report Jacobi claim, while implicit_solver.cpp:193–197 returns ratio 1.0 and target_reached=true without residual recomputation. Rubric 33→27; remaining source, cases and DQ partial. No CFD rerun.

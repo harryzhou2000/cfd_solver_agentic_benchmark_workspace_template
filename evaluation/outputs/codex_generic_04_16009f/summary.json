@@ -166,7 +166,7 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 3,
-        "notes": "Modular C++ source, no independent rebuild."
+        "notes": "Exact curated d93a1ef clean CMake build succeeds in cfd-bench container; this establishes build only, not valid production results."
       },
       {
         "id": "code.cli",
@@ -312,29 +312,29 @@
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 2,
-        "notes": "LSQ/Barth source present."
+        "score": 0,
+        "notes": "Report.tex:29\u201330,68 claims second order and limiter; main.cpp:40\u201382,272\u2013294 uses direct cell states and does not invoke reconstruction/limiter in production."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 2,
-        "notes": "Clamps rather than credible robustness."
+        "score": 0,
+        "notes": "Report claims Barth\u2013Jespersen, but main.cpp:40\u201382,272\u2013294 does not call limiter; implicit_solver.cpp:164\u2013190 clamps updated states."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 2,
-        "notes": "Viscous runs incomplete."
+        "notes": "main.cpp:70\u201374 calls compute_face_gradient on g_cells; navier_stokes.cpp:65\u201372 reads Cell.U, while main.cpp:218\u2013229,250,272\u2013294 evolves separate U without assigning g_cells[i].U. main.cpp:102\u2013106 uses velocity rather than gradients for wall force; viscosity hardcoded 1e-3 at :243\u2013245."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 2,
-        "notes": "Jacobi pseudo-time, not LU-SGS."
+        "notes": "main.cpp:293\u2013294 calls LU-SGS implementation implicit_solver.cpp:78\u2013160, not the report Jacobi claim; :193\u2013197 returns ratio 1.0 and target_reached=true after one sweep without recomputing residual."
       },
       {
         "id": "cfd.transient",
@@ -383,7 +383,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.13
+    "overall_score": 1.79
   },
   "result_review": {
     "review_area": "result_review",

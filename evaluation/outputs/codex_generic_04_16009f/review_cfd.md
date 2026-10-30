@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:03:26.941554+00:00
+Generated: 2026-10-30T05:04:42.832093+00:00
 
-**Overall score: 2.13**
+**Overall score: 1.79**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,16 +24,16 @@ Generated: 2026-10-30T05:03:26.941554+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 2 | BC fixes recorded but not fully validated. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 2 | LSQ/Barth source present. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 0 | Report.tex:29–30,68 claims second order and limiter; main.cpp:40–82,272–294 uses direct cell states and does not invoke reconstruction/limiter in production. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 2 | Clamps rather than credible robustness. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 0 | Report claims Barth–Jespersen, but main.cpp:40–82,272–294 does not call limiter; implicit_solver.cpp:164–190 clamps updated states. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | Viscous runs incomplete. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | main.cpp:70–74 calls compute_face_gradient on g_cells; navier_stokes.cpp:65–72 reads Cell.U, while main.cpp:218–229,250,272–294 evolves separate U without assigning g_cells[i].U. main.cpp:102–106 uses velocity rather than gradients for wall force; viscosity hardcoded 1e-3 at :243–245. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 2 | Jacobi pseudo-time, not LU-SGS. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 2 | main.cpp:293–294 calls LU-SGS implementation implicit_solver.cpp:78–160, not the report Jacobi claim; :193–197 returns ratio 1.0 and target_reached=true after one sweep without recomputing residual. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 0 | No Re200 physical-time completion. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T05:03:26.941554+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.13
+- Overall score (0-5): 1.79
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

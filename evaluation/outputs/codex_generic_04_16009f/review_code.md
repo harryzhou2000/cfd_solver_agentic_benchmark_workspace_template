@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:03:26.941127+00:00
+Generated: 2026-10-30T05:04:42.831672+00:00
 
 **Overall score: 2.92**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | Modular C++ source, no independent rebuild. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | Exact curated d93a1ef clean CMake build succeeds in cfd-bench container; this establishes build only, not valid production results. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 2 | Only partial output/CLI evidence. |
