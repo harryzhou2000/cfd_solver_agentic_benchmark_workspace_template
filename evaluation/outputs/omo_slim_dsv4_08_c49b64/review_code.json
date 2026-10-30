@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "CMake/MPI source and documented workflow; clean evaluator build not repeated."
+      "score": 3.5,
+      "notes": "Historical a6a118f build succeeds with its original tests; source/CMake match final, but curated final omits tests and cannot configure."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "CLI/config and output tools are present."
+      "notes": "CLI and JSON case controls exist; selected detached runner launches canonical paths. No independent malformed-input execution."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Source is separated into mesh, physics, solver, MPI and output modules."
+      "notes": "Mesh, partition, halo, flux, solver and output modules separated; all-rank global mesh and curated test omission limit deployment."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Trust policy applied; no external provenance search."
+      "score": 4,
+      "notes": "No direct invocation of an existing complete solver found; external authorship investigation excluded."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Case configuration is data-driven."
+      "notes": "Case JSON and generic CGNS path are used; no two-mesh-only branch established."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Source/report claims METIS, owned/ghost storage and neighbor exchange; np comparisons reported."
+      "score": 2.5,
+      "notes": "METIS/local states/neighbor exchange exist, but main.cpp:150,159,345/351 retains two full mesh representations on every rank during solves."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Positivity fallback and run monitoring exist."
+      "score": 2.5,
+      "notes": "M2 laminar force drift and Re200 inner-target failures expose convergence weaknesses despite guards and structural validation."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "14 CTest and seven validator-ready steady packages reported."
+      "score": 3.5,
+      "notes": "Historical a6 build registers 14 tests; flux, gradient and limiter tests pass 3/3 in isolation. Transient test not run; curated final omits tests."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Curated result commit excludes raw/build/session artifacts."
+      "score": 3,
+      "notes": "Modular source but curated build omits tests, metadata denies full-mesh replication and force split overstates tangential shear."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.85
+  "overall_score": 3.46
 }

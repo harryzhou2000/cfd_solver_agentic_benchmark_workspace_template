@@ -2,38 +2,38 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T17:34:33.943038+00:00
+Generated: 2026-10-30T17:39:55.390308+00:00
 
-**Overall score: 3.85**
+**Overall score: 3.46**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake/MPI source and documented workflow; clean evaluator build not repeated. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 3.5 | Historical a6a118f build succeeds with its original tests; source/CMake match final, but curated final omits tests and cannot configure. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | CLI/config and output tools are present. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 4 | CLI and JSON case controls exist; selected detached runner launches canonical paths. No independent malformed-input execution. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Source is separated into mesh, physics, solver, MPI and output modules. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Mesh, partition, halo, flux, solver and output modules separated; all-rank global mesh and curated test omission limit deployment. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 3 | Trust policy applied; no external provenance search. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | No direct invocation of an existing complete solver found; external authorship investigation excluded. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | Case configuration is data-driven. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | Case JSON and generic CGNS path are used; no two-mesh-only branch established. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4 | Source/report claims METIS, owned/ghost storage and neighbor exchange; np comparisons reported. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2.5 | METIS/local states/neighbor exchange exist, but main.cpp:150,159,345/351 retains two full mesh representations on every rank during solves. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Positivity fallback and run monitoring exist. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2.5 | M2 laminar force drift and Re200 inner-target failures expose convergence weaknesses despite guards and structural validation. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | 14 CTest and seven validator-ready steady packages reported. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 3.5 | Historical a6 build registers 14 tests; flux, gradient and limiter tests pass 3/3 in isolation. Transient test not run; curated final omits tests. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Curated result commit excludes raw/build/session artifacts. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Modular source but curated build omits tests, metadata denies full-mesh replication and force split overstates tangential shear. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 
@@ -50,7 +50,7 @@ Generated: 2026-10-30T17:34:33.943038+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.85
+- Overall score (0-5): 3.46
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
