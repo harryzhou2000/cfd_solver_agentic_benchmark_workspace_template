@@ -96,7 +96,7 @@ An independent clean build succeeded; no CFD rerun was performed and Re200 was n
 
 ## Verdict
 
-52/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
+52/100, DQ=true (qualified full calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
 
 
 ## Selected result and report review — 2026-10-30
@@ -143,3 +143,8 @@ For M080 inviscid, M2 laminar, Re20 and Re200, each selected current forces.csv,
 ## Other DQ boundaries — 2026-10-30
 
 Reviewed available source and rank evidence for the other numbered triggers, with criterion-specific limits in the scorecard. The np1/np8 comparisons show no order-one absolute force difference; source contains implicit paths, METIS, wall boundary values and variable-labeled plots. Full-mesh replication is charged separately under TASK shortcut 7. Changed Re200 inner statistics and zero wall cf do not by themselves show that force/residual files were generated without solving. No exhaustive external code similarity analysis was performed. The result remains partial because the exact historical binary/source binding is unavailable; no new numerical rerun.
+
+
+## Qualified full review — 2026-10-31
+
+All ten rubric sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to the evidence limit. 52/100, DQ7/10 and TASK full-mesh prohibition remain supported. Source commits `12f77fb`, `0b4616f` and `f679644` share the same limiter-disabled solver.cpp SHA, strengthening the source lineage but not proving the exact historical executable. The contestant historical manifest and matching outputs supply the standalone evidence described above; other figure/production binding remains qualified. No unsupported DQ2 is inferred from zero surface Cf or edited metadata. Earlier partial checkpoint descriptions are historical. No CFD, rank or Re200 rerun.
