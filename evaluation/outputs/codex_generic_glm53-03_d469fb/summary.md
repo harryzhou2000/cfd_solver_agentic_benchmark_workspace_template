@@ -82,5 +82,5 @@
 ## Reviews
 
 - Code review scorecard: `codex_generic_glm53-03_d469fb/review_code.md` (overall: 3.0)
-- CFD methods review: `codex_generic_glm53-03_d469fb/review_cfd.md` (overall: 3.0)
-- Result review: `codex_generic_glm53-03_d469fb/review_results.md` (overall: 3.0)
+- CFD methods review: `codex_generic_glm53-03_d469fb/review_cfd.md` (overall: 2.61)
+- Result review: `codex_generic_glm53-03_d469fb/review_results.md` (overall: 1.75)

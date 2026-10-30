@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:43:43.915218+00:00
+Generated: 2026-10-30T05:46:20.561492+00:00
 
-**Overall score: 3.0**
+**Overall score: 2.61**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -33,13 +33,13 @@ Generated: 2026-10-30T05:43:43.915218+00:00
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 2 | Final Solver.cpp provides SGS/BDF2 but all current steady metadata records inner fraction0; Re200 zero misses refer to an unbound source and no shedding. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | Current Re200 metadata says periodic t300 but last3000 forces essentially constant. Final source counts inner targets but current metadata revision is init without solver. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | Root-only full mesh distribution exists; Solver.cpp:439 uses invalid same-buffer MPI_Allreduce without MPI_IN_PLACE, and output source binding is unknown. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T05:43:43.915218+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.0
+- Overall score (0-5): 2.61
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

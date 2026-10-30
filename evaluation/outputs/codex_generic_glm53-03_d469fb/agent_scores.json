@@ -27,8 +27,8 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "score": 4,
+          "notes": "Exact 17724cd clean CMake build passed in restricted cfd-bench; current metadata names init-only 26ef1cb, so producing source is unbound."
         },
         {
           "id": "code.cli",
@@ -62,8 +62,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "score": 2,
+          "notes": "main.cpp:62\u201374 partitions on root and distributes; Solver.cpp:439 uses same send/recv pointer in MPI_Allreduce without MPI_IN_PLACE, a runtime compatibility defect."
         },
         {
           "id": "code.robustness",
@@ -152,25 +152,25 @@
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "score": 2,
+          "notes": "Final Solver.cpp provides SGS/BDF2 but all current steady metadata records inner fraction0; Re200 zero misses refer to an unbound source and no shedding."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "score": 1,
+          "notes": "Current Re200 metadata says periodic t300 but last3000 forces essentially constant. Final source counts inner targets but current metadata revision is init without solver."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "score": 2,
+          "notes": "Root-only full mesh distribution exists; Solver.cpp:439 uses invalid same-buffer MPI_Allreduce without MPI_IN_PLACE, and output source binding is unknown."
         }
       ],
-      "overall_score": 3.0,
+      "overall_score": 2.61,
       "disqualification_flags": []
     },
     "result_review": {
@@ -193,22 +193,22 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "score": 1,
+          "notes": "Current Re20 and three laminar NACA cases have materially changing late Cd despite converged status; Re200 is essentially steady despite periodic metadata."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "score": 1,
+          "notes": "Re20 Cd\u22483.98 changes rapidly, three short laminar NACA tails drift, and Re200 Cd\u22484.067 is essentially steady with no shedding."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "score": 0,
+          "notes": "Specific submitted M015 Mach figure proven to misassign/omit cell values on quad triangulation (DQ8); M015 force plot collapses at time0."
         },
         {
           "id": "res.report",
@@ -221,24 +221,24 @@
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "score": 1,
+          "notes": "Current metadata revision 26ef1cb is an initial commit without solver; report describes different runs and one figure is proven mismapped to submitted field."
         }
       ],
-      "overall_score": 3.0,
+      "overall_score": 1.75,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 84,
+    "total_scored": 67,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 10,
-        "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+        "score": 9,
+        "notes": "Exact 17724cd clean CMake build succeeds in restricted container; current metadata revision 26ef1cb points to initial commit without solver source, so historical run-source reproducibility is not established."
       },
       {
         "id": "mesh_geometry",
@@ -265,36 +265,36 @@
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 10,
-        "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+        "score": 9,
+        "notes": "Numerics.cpp:272\u2013275 computes temperature gradients from p/rho with R; wall Cf is tangentially projected :563\u2013567, but Output.cpp:415\u2013442 includes full viscous traction in force split."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 13,
-        "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+        "score": 8,
+        "notes": "Final Solver.cpp has LU-SGS/BDF2 and per-step target check, but current all steady inner fractions are zero and Re200 claims periodic despite no shedding; current output metadata revision points to init without solver source."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 9,
-        "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+        "score": 7,
+        "notes": "main.cpp:62\u201374 constructs mesh on rank0 and distributes local mesh; genuine MPI present. Solver.cpp:439 calls MPI_Allreduce with same send/receive address without MPI_IN_PLACE, a runtime compatibility defect; historical output attribution unproved."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 6,
-        "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+        "score": 2,
+        "notes": "Current three laminar NACA results and Re20 claim convergence with materially changing final forces; Re200 claims periodic despite essentially steady force. Different report generation and invalid source revision prevent conflation."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4,
-        "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+        "score": 0,
+        "notes": "Specific final-report M015 Mach image byte-reproduces the submitted tool/data despite proven cell-to-triangle misregistration (DQ8); M015 force plot collapses at physical_time=0. Report contains contradictory historic/current run descriptions."
       },
       {
         "id": "extensibility",
@@ -312,23 +312,23 @@
     },
     "naca0012_m080_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=-0.0016, CD=0.051 at 17724cd:solver/report/report.tex:120; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 17724cd:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/report.tex:235). Score 2 retained after the post-processing audit. Prior case judgment: Report table labels M0.80 inviscid converged at only 0.81 orders; this false-success evidence supports DQ 7."
+      "notes": "Score 2 retained: current metadata converged at step85/4.009 orders and last-eight Cd0.05102995\u20130.05103457 is steady. Earlier note citing 0.81 orders is stale. Report contains a Mach image but submitted plot tool misassigns cell values when splitting quads; no validated case-specific force/residual evidence floor. Metadata revision 26ef1cb is init without solver source. No CFD rerun."
     },
     "naca0012_m200_inviscid": {
-      "score": 1,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=-0.0010, CD=0.094 at 17724cd:solver/report/report.tex:121; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 17724cd:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/report.tex:236). Score 1 retained after the post-processing audit. Prior case judgment: Report table labels M2 inviscid converged at only 0.14 orders; this false-success evidence supports DQ 7."
+      "score": 2,
+      "notes": "Score 1\u21922: current metadata reports a 2.645-order plateau at step3121, and last-10% Cd0.0937950151\u20130.0937950172/Cl\u22120.001039199 to \u22120.001039189 is stable. Earlier 0.14-order note is stale; report.tex:121,130\u2013133 discloses 2.6-order plateau. Submitted contour tool demonstrably misassigns quad cell values and no readable case-specific force/residual figure has been verified, so floor caps at2. Metadata revision 26ef1cb is init without solver source. No CFD rerun."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
-      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. The report explicitly marks the case Failed after 40000 steps and 1.96 residual orders and reports nonphysical CD=-2.37. Superseded earlier case note: Report table records M0.15 laminar converged at 4.00 orders; validator-passing package is credible."
+      "notes": "Score 1 retained: current selected status converged step25/4.016 orders but last two Cd rows 0.0992915\u21920.0645434 (35% decline); not clearly converged or stable (TASK.md:140,172). The immutable report table :122\u2013124 describes different failed historical values and must not be conflated with current output. Current metadata revision 26ef1cb is init without solver source. No CFD rerun."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 1,
-      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. The report explicitly marks the case Failed after 40000 steps and only 0.29 residual orders; its dagger marks the pressure/force result defective. Superseded earlier case note: Report table records M0.80 laminar converged at 3.87 orders; validator-passing package is credible with modest margin."
+      "notes": "Score 1 retained: current selected status converged step43/4.028 orders but last four Cd rows span 0.0441291\u20130.0517130 (17% increase); not clearly converged or stable (TASK.md:140,172). The immutable report table :122\u2013124 describes different failed historical values and must not be conflated with current output. Current metadata revision 26ef1cb is init without solver source. No CFD rerun."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1,
-      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. The report explicitly marks the case Failed after 50000 steps and only 0.55 residual orders and reports nonphysical CD=-0.14. Superseded earlier case note: Report table records M2 laminar converged at 3.00 orders; validator-passing package is credible with modest margin."
+      "notes": "Score 1 retained: current selected status converged step49/3.014 orders but last four Cd rows span 0.0045001\u20130.00936143 (>100% increase); not clearly converged or stable (TASK.md:140,172). The immutable report table :122\u2013124 describes different failed historical values and must not be conflated with current output. Current metadata revision 26ef1cb is init without solver source. No CFD rerun."
     },
     "cylinder_m010_laminar_re20": {
       "score": 1,
@@ -346,7 +346,7 @@
         "id": 7,
         "flag": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
-        "evidence": "Current selected solver/results/cylinder_m010_laminar_re200 metadata/status say completed/statistically_periodic at t300, but last 3000 force rows Cd range 4.06744774746\u20134.067458670148 and Cl range \u22120.0009113144295156 to \u22120.0009111552227523: essentially steady, no vortex shedding. report.tex:164\u2013169 describes another incomplete t287 history, not the t300 package. Independently Re20 metadata says converged at step56, but last five Cd values span 3.22481\u20133.97529, substantially changing. TASK.md:172\u2013173 requires stable steady forces and periodic Re200 shedding."
+        "evidence": "Current selected solver/results/cylinder_m010_laminar_re200 metadata/status say completed/statistically_periodic at t300, but last 3000 force rows Cd range 4.06744774746\u20134.067458670148 and Cl range \u22120.0009113144295156 to \u22120.0009111552227523: essentially steady, no vortex shedding. report.tex:164\u2013169 describes another incomplete t287 history, not the t300 package. Independently Re20 metadata says converged at step56, but last five Cd values span 3.22481\u20133.97529, substantially changing. TASK.md:172\u2013173 requires stable steady forces and periodic Re200 shedding. Current M015/M080/M200 laminar statuses additionally say converged after 25/43/49 steps, while last force tails Cd change 0.0992915\u21920.0645434, 0.0441291\u21920.0517130, 0.0045001\u21920.00936143 respectively; none is a stable early force plateau."
       },
       {
         "id": 8,

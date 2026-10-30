@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:43:43.915508+00:00
+Generated: 2026-10-30T05:46:20.561795+00:00
 
-**Overall score: 3.0**
+**Overall score: 1.75**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,19 +15,19 @@ Generated: 2026-10-30T05:43:43.915508+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 1 | Current Re20 and three laminar NACA cases have materially changing late Cd despite converged status; Re200 is essentially steady despite periodic metadata. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 1 | Re20 Cd≈3.98 changes rapidly, three short laminar NACA tails drift, and Re200 Cd≈4.067 is essentially steady with no shedding. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
+| 5 | **res.visualization** Visualizations | 0.15 | 0 | Specific submitted M015 Mach figure proven to misassign/omit cell values on quad triangulation (DQ8); M015 force plot collapses at time0. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Current metadata revision 26ef1cb is an initial commit without solver; report describes different runs and one figure is proven mismapped to submitted field. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T05:43:43.915508+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.0
+- Overall score (0-5): 1.75
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

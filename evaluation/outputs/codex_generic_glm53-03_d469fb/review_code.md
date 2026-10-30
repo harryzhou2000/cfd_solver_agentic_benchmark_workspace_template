@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:43:43.914758+00:00
+Generated: 2026-10-30T05:46:20.561080+00:00
 
 **Overall score: 3.0**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Exact 17724cd clean CMake build passed in restricted cfd-bench; current metadata names init-only 26ef1cb, so producing source is unbound. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T05:43:43.914758+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2 | main.cpp:62–74 partitions on root and distributes; Solver.cpp:439 uses same send/recv pointer in MPI_Allreduce without MPI_IN_PLACE, a runtime compatibility defect. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders. |
