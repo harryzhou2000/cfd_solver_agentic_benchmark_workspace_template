@@ -1,6 +1,6 @@
 ## Calibration checkpoint (partial)
 
-**92.5/100; DQ=true (provisional, trigger 7).** M2 laminar is marked converged at step1000, but final100 drag falls 0.673434→0.569866 and final50 0.618365→0.569866. The early laminar result is not force-stable despite its real three-order residual drop. Re20 Cd6.0276 and M015 laminar Cd0.4887 warrant physics review, not an automatic failure claim. Full calibration continues.
+**92.5/100; DQ=true (provisional, trigger 7).** M2 laminar is marked converged at step1000, but final100 drag falls 0.673434→0.569866 and final50 0.618365→0.569866. The early laminar result is not force-stable despite its real three-order residual drop. Re20 Cd6.0276 and M015 laminar Cd0.4887 warrant physics review, not an automatic failure claim. Re200 case 2→4: the actual contestant final commit and delivered figure manifest include readable late lift/drag and residual plots, and the raw frequency corroborates St. Its retained segment starts at t600 after a Roe transient restart; source and strict-target provenance remain under review. Full calibration continues.
 
 # Agent Evaluation Report — oc-goal_kimik3-dsv4_02_0ceb76
 
