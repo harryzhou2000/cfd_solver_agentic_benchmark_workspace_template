@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:27:23.896634+00:00
+Generated: 2026-10-30T06:29:58.138115+00:00
 
-**Overall score: 2.3**
+**Overall score: 1.9**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 3 | Individual cases validate but complete report contract fails. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 1 | All eight scored checkpoint restart_final.dat files contain only 11-byte RESTART_V1/NUL marker; main.cpp does not parse --restart. TASK.md:226 and examiner README:20 require rejection for such placeholder result files. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
 | 2 | **res.validator** Automated validator results | 0.10 | 2 | Full explicit validator fails figure manifest. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T06:27:23.896634+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.3
+- Overall score (0-5): 1.9
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

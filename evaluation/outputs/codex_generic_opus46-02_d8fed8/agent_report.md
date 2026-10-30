@@ -96,7 +96,7 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 
 ## Verdict
 
-46/100, DQ=true (partial calibration). Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
+44/100, mandatory rejection and DQ=true (partial calibration). Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
 
 
 ## Analytically generated Re200 residual history — 2026-10-30
@@ -112,3 +112,8 @@ Immutable 1904149 `solver/src/solver.cpp:309–327` reads and constructs `global
 ## Later case packages and historical plots — 2026-10-30
 
 Contestant checkpoint f0cc8b2 includes standalone plots for all eight cases, despite the five-page main report and earlier manifest omitting or marking some pending. The selected M2 laminar package and its f0cc8b2 force history are byte-identical; the existence of later results does not establish acceptable physics. Its Cd5.827, M015 laminar Cd4.519 and M080 laminar Cd5.871 are extremely large, and both report.tex:103–106 and submitted solver.cpp:92–97 disclose/confirm disabled viscous flux. Those cases score 1, 1 and 1 (previously 2, 2 and 0); a failed physical result and an existing attempt are separately recognized. Re20 2→1: Cd9.401 is far too large and its historical Mach plot covers only the upper portion of the domain. Re200 remains0: its later t300 package and force plot exist, but residual history is synthetic and no St/force statistics or credible periodicity is established. Force data t≥200 have Cl range −12.6233–12.5359 and Cd −8.631–15.057; their own provenance and exact nonlinear target failures are not inferred from the synthetic residual. No CFD rerun.
+
+
+## Placeholder restart rejection — 2026-10-30
+
+All eight case directories at contestant checkpoint f0cc8b2 contain `restart_final.dat` with exactly 11 bytes `RESTART_V1` plus NUL, SHA-256 `9ca3a78ebcf37fc248ddfc7f6dbae845987219dd704801771226f81bdcbc3f74`; the marker contains no solution state. Selected root tool call `tooluse_cH9nrc4f84zv3yvGXh7UJ8` at 2026-08-25 02:58:00.266 UTC explicitly creates the binary placeholder. Final main.cpp has no restart parser. TASK.md:226 prohibits placeholder result files and examiner README:20 requires rejection of submissions containing them; this is a mandatory submission rejection, separate from the numbered DQ2 analytic-residual finding. Build/contract6→4, total46→44. No assertion that force or field files are fabricated follows from these markers.

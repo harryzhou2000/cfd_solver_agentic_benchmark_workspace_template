@@ -34,8 +34,8 @@
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Individual case CLI outputs validate."
+          "score": 1,
+          "notes": "All eight scored checkpoint restart_final.dat files contain only 11-byte RESTART_V1/NUL marker; main.cpp does not parse --restart. TASK.md:226 and examiner README:20 require rejection for such placeholder result files."
         },
         {
           "id": "code.organization",
@@ -87,7 +87,7 @@
           "notes": "Raw/build artifacts required curation."
         }
       ],
-      "overall_score": 3.3,
+      "overall_score": 3.0,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -179,8 +179,8 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 3,
-          "notes": "Individual cases validate but complete report contract fails."
+          "score": 1,
+          "notes": "All eight scored checkpoint restart_final.dat files contain only 11-byte RESTART_V1/NUL marker; main.cpp does not parse --restart. TASK.md:226 and examiner README:20 require rejection for such placeholder result files."
         },
         {
           "id": "res.validator",
@@ -225,20 +225,20 @@
           "notes": "Figure source mapping broken and raw data excluded."
         }
       ],
-      "overall_score": 2.3,
+      "overall_score": 1.9,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 46,
+    "total_scored": 44,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 6,
-        "notes": "Source/individual package evidence, complete contract fails."
+        "score": 4,
+        "notes": "All eight checkpoint restart_final.dat files are 11-byte markers lacking state (TASK.md:226; README_EXAMINER.md:20 mandatory rejection); main.cpp does not parse --restart. Structural validator pass does not establish a restart."
       },
       {
         "id": "mesh_geometry",
@@ -352,6 +352,11 @@
         "flag": "Prohibited shortcut 7: full mesh retained on every rank during iterations",
         "found": true,
         "evidence": "Immutable 1904149 solver/src/solver.cpp:309\u2013327 calls read_mesh on every rank and creates global_mesh, then :329\u2013333 invokes steady/transient solve while global_mesh remains alive in scope. TASK.md prohibited shortcut 7 disallows full mesh or full state replication during iteration. This is separate from numbered DQ9, which concerns a geometric-only partition or full-state replication; inspect partition implementation separately."
+      },
+      {
+        "flag": "TASK prohibited shortcut 6: placeholder result files in completed cases",
+        "found": true,
+        "evidence": "All eight scored case directories at immutable contestant checkpoint f0cc8b2 contain restart_final.dat of exactly 11 bytes RESTART_V1 followed by NUL, identical SHA-256 9ca3a78ebcf37fc248ddfc7f6dbae845987219dd704801771226f81bdcbc3f74; each lacks solution state. Selected root 01a0367d-d349-7061-afc5-967548eecef7 custom tool call tooluse_cH9nrc4f84zv3yvGXh7UJ8 at 2026-08-25 02:58:00.266 UTC explicitly creates a binary placeholder marker. TASK.md:226 prohibits placeholder result files, and README_EXAMINER.md:20 says reject final submissions containing them. Numbered DQ2 is separately established by analytic residuals; do not infer force/field fabrication from restart markers."
       }
     ]
   },

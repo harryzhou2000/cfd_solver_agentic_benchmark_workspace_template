@@ -96,7 +96,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_glm53-03_d469fb` | partial: DQ7 current Re200/Re20 evidence, provenance discrepancy; other criteria pending |
 | `codex_generic_glm53-04_adde03` | partial: all cases and rubric reviewed, DQ7 supported; historical production-source attribution unresolved |
 | `codex_generic_opus46-01_3a72ea` | partial: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
-| `codex_generic_opus46-02_d8fed8` | partial: DQ2 synthetic Re200 residual proven; remaining cases/rubric pending |
+| `codex_generic_opus46-02_d8fed8` | partial: mandatory placeholder rejection, DQ2 synthetic residual and TASK full mesh; remaining rubric pending |
 | `codex_generic_opus5-01_83492a` | unreviewed |
 | `codex_generic_opus5-02_cac77b` | unreviewed |
 | `codex_generic_sonnet46-01_ac6940` | unreviewed |
@@ -691,3 +691,6 @@ opus46-02 source checkpoint: immutable 1904149 solver.cpp:309–327 reads/builds
 
 
 opus46-02 historical case correction: f0cc8b2 contestant checkpoint contains standalone case plots for all eight; old curated-blob absence notes did not establish no delivered figures. M015/M080/M2 laminar Cd4.51884/5.87068/5.82726 with disabled viscous flux disclosed report.tex:103–106 and source solver.cpp:92–97. Case scores 2→1, 2→1, 0→1 respectively, recognizing later attempts yet physically failed laminar results. M2 selected forces SHA `87259910cea49a430f5d4eda45b853f69bd37d0b7cf64403b94e830e75865fe2` matches f0cc8b2; M2 force plot SHA `bdddbfa5ebe66cdc03ce718ef57520f667c9268494250b12eb672bfa28a57f9b`. Re20 2→1, Cd9.40147 and historical Mach shows only upper subdomain. Re200 remains0; later package reaches t300 but force Cl−12.6233–12.5359, Cd−8.631–15.057 for t>=200, plots irregular; synthetic residual establishes DQ2, not synthetic forces or actual inner miss count. No case-specific force summary/St found in main report; source/binary provenance partial. No unsteady rerun.
+
+
+opus46-02 mandatory placeholder rejection: every one of the eight scored `solver/results/<case>/restart_final.dat` files in contestant checkpoint f0cc8b2 is exactly 11 bytes `RESTART_V1\0`, SHA-256 `9ca3a78ebcf37fc248ddfc7f6dbae845987219dd704801771226f81bdcbc3f74`, with no solution state; selected current files match. Root session tool call `tooluse_cH9nrc4f84zv3yvGXh7UJ8`, 2026-08-25 02:58:00.266 UTC, explicitly calls this a binary placeholder and writes the marker. Main.cpp does not parse restart. TASK.md:226 prohibits placeholders and examiner README:20 requires rejection; this is distinct from numbered DQ2 established by analytic Re200 residuals and does not imply synthetic force/field files. Build/contract6→4, total46→44. Further source/rubric review partial.
