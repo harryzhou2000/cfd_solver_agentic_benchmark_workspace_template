@@ -24,10 +24,13 @@ Source inspection of `solver/src/main.cpp` found `METIS_PartGraphKway` (lines 25
 
 ## Scores and verdict
 
-The provisional rubric is **76.5/100**. The old 5/5 case verdict and later uniform committed-figure caps were not supported: the report contains the figures, and the seven steady cases have now been individually assessed using historical attempt histories and physical qualifications. Re200 remains capped at 2 because late drag is unreadable. Source, DQ and complete review remain in progress; structural checks do not establish accuracy.
+The qualified rubric is **76.5/100**. The old 5/5 case verdict and later uniform committed-figure caps were not supported: the report contains the figures, and the seven steady cases have now been individually assessed using historical attempt histories and physical qualifications. Re200 remains capped at 2 because late drag is unreadable. The available source, case, rubric, review and DQ evidence has been assessed; structural checks do not establish accuracy.
 
-The historical DQ verdict was false. Current DQ assessment remains partial: report.tex:46–47 discloses the source’s mostly first-order steady fallback, while transient source checks the full BDF residual. Other triggers and production provenance are still being assessed; external similarity is outside the trust policy.
+DQ remains false within the available evidence. Report.tex:46–47 discloses the source’s mostly first-order steady fallback, while transient source checks the full BDF residual. All numbered triggers were assessed; exact historical executable and some image bindings remain qualified. External similarity is outside the trust policy.
 
 ## Limitations
 
 An independent clean build of the immutable source succeeded in a restricted container using bundled dependencies; CTest reports no registered tests. No solver rerun was performed. Raw packages were reviewed only from immutable attempt `297126a` and are not in the curated submission. The provenance/environment capture is post-run reconstruction. `cfdeval check` does not index `run_identity.json` or the final-response Markdown sidecar; their hashes above provide the additional audit trail.
+
+
+The full qualified review compared all eight original attempt histories, all 16 delivered PDF pages, ten rubric sections, 27 review points and DQ1–13. One Re20 Mach image reproduces pixel-identically from its original field. The source matches the historical attempt, but the original executable and remaining figure bindings are unbound; the clean build has no registered CTests. No solver was rerun.

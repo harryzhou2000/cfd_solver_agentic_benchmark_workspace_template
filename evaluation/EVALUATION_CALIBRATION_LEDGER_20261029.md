@@ -119,7 +119,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_gpt56_03_93b257` | fully reviewed: 96.5/100, no DQ established; executable/individual figure bindings qualified |
 | `codex_gpt56_04_1e36f2` | fully reviewed: 85.5/100, DQ8; historical executables, some controls and sustained convergence qualified |
 | `codex_gpt56_05_7bee7c` | fully reviewed: 79.5/100, DQ7; historical binary and unverified image bindings qualified |
-| `codex_gpt56_06_97ae53` | partial — corrected case evidence and individually reviewed histories |
+| `codex_gpt56_06_97ae53` | fully reviewed: 76.5/100, no DQ established; historical binary and some image bindings qualified |
 | `codex_gpt56_07_b7c2c8` | partial — DQ evidence/ID corrected; full rubric calibration pending |
 | `codex_gpt56_08_715d70` | unreviewed |
 | `codex_gpt56_09_d5760c` | unreviewed |
@@ -1132,3 +1132,6 @@ gpt56_06 source/build checkpoint (partial): immutable55b2426 clean CMake build s
 
 
 gpt56_06 source/rubric/DQ checkpoint (partial): provisional rubric84→76.5: build9→8 (restart state only, no time/BDF history), viscous9→8 (strongly elevated wall forces), implicit14→13 (steady residual-only stopping), cases9→5.5 (bounded but physically suspect large drags), report5→4 (unreadable late Re200 drag and limited accuracy analysis). Added evidence to all ten rubric sections, 27 review criteria and DQ1–13; no DQ established. Report.tex:46–47 explicitly discloses mostly first-order steady schedule, so DQ10 not inferred. Attempt np1/8 NACA final Cd0.0658569/0.0658558 and Re20 4.70139/4.70140, close though exact binaries unbound. Re20 field_final.vtk SHA256 44c08531ee534b22afb792e393c024aca9e446b67dd186190eebfc97b687f398 regenerates committed Mach PNG SHA256 6f5e25d52d6819cd0caa93b2a672d02f8e85656bcb32c93542c12e75b8c9f7f1 pixel-identically via immutable script; 10185 cell values/10185 polygons. Other figures not exhaustively rebound. All 16 accepted PDF pages rendered/visually scanned. Remaining full review/provenance checks pending; no CFD rerun.
+
+
+gpt56_06 full qualified review: original attempt297126a3a19603c907bb722bcc7a77f202e80fef dated2026-08-09T07:14:57Z holds raw packages and matches curated55b2426 solver/src and CMake, but exact historical executable and some controls cannot be independently bound. All eight case histories, 16 delivered PDF pages, ten rubric sections, 27 review points and numbered DQ1–13 examined. Re20 Mach figure SHA256 6f5e25d52d6819cd0caa93b2a672d02f8e85656bcb32c93542c12e75b8c9f7f1 reproduced exactly from attempt field SHA256 44c08531ee534b22afb792e393c024aca9e446b67dd186190eebfc97b687f398; other image bindings remain qualified. Historical np1/8 Re20 and NACA force comparisons are close. Final76.5/100, no DQ established; mostly first-order steady schedule disclosed, large drag values are accuracy concerns rather than proof of incompletion, and Re200 actual force history supports periodicity while late drag plot fails floor. Clean build passes, no CTest tests registered, no solver rerun.
