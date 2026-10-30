@@ -95,7 +95,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_glm53-02_ff20c7` | partial: DQ7 plateau correction and cylinder case evidence; remaining DQ/rubric pending |
 | `codex_generic_glm53-03_d469fb` | partial: DQ7 current Re200/Re20 evidence, provenance discrepancy; other criteria pending |
 | `codex_generic_glm53-04_adde03` | partial: all cases and rubric reviewed, DQ7 supported; historical production-source attribution unresolved |
-| `codex_generic_opus46-01_3a72ea` | partial: DQ7 and initial case/report evidence; other rubric/source pending |
+| `codex_generic_opus46-01_3a72ea` | partial: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
 | `codex_generic_opus46-02_d8fed8` | unreviewed |
 | `codex_generic_opus5-01_83492a` | unreviewed |
 | `codex_generic_opus5-02_cac77b` | unreviewed |
@@ -679,3 +679,6 @@ opus46-01 criterion checkpoint: final source mesh.cpp:62–72 handles first base
 
 
 opus46-01 surface and provenance checkpoint: output.cpp:67–77 assigns cf=0 unconditionally; all selected M015/M080/M2 laminar NACA and Re20 surface rows confirm zero cf despite nonzero viscous drag. This is wrong surface quantity, not proof of synthetic force/residual files; no DQ2 inferred. Build/output7→6, viscous6→5, total54→52. For M080 inviscid, M2 laminar, Re20 and Re200, selected forces.csv/residuals.csv/field_final.vtk bytes all match checkpoint 0b4616f; its contestant manifest SHA `27622de789e86a11677a49270a4d2d729276798b16d11fa9c02ef83ecdd3ff1e`, Re20 force SHA `43bf5e63200426606164608003c49e06004ce8d5d511961f989b0b165c672033`, pressure figure SHA `f01c9b6855e4835bbda568aa3fc87267deefa0ef500137bb3d363f3d038d603f`. Source/binary linkage remains partial.
+
+
+opus46-01 remaining DQ boundaries: selected np1/np8 Re20 Cd7.225956/7.226503, Cl−0.003572/−0.003430 and M080 NACA Cd0.050185/0.050132, Cl−0.001540/−0.001462; no order-one absolute difference established. Source has implicit/BDF, METIS, wall boundary values and named Mach/pressure plotting; no DQ5/9/11/12 finding on reviewed evidence. DQ2 is not inferred from edited metadata or cf zero; DQ8 unrelated-source figures not established; DQ13 no direct finding and no exhaustive external search. DQ7, DQ10 and TASK full mesh remain. All case/rubric areas reviewed, but exact historical production binary/source attribution remains partial; no unsteady rerun.
