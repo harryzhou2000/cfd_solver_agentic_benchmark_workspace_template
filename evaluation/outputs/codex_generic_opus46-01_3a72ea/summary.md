@@ -94,5 +94,5 @@
 ## Reviews
 
 - Code review scorecard: `codex_generic_opus46-01_3a72ea/review_code.md` (overall: 3.35)
-- CFD methods review: `codex_generic_opus46-01_3a72ea/review_cfd.md` (overall: 3.35)
+- CFD methods review: `codex_generic_opus46-01_3a72ea/review_cfd.md` (overall: 3.01)
 - Result review: `codex_generic_opus46-01_3a72ea/review_results.md` (overall: 3.6)

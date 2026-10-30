@@ -96,7 +96,7 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 
 ## Verdict
 
-64/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
+58/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
 
 
 ## Selected result and report review — 2026-10-30
@@ -121,3 +121,8 @@ Checkpoint 0b4616f changes Re200 metadata relative to 12f77fb: observed maximum 
 ## Restart and transient logging — 2026-10-30
 
 Immutable main.cpp:142–155 parses `--restart`, but the value is never passed to the solver; solver.cpp:701–708 initializes freestream. The selected Re200 `restart_final.vtk` equals `field_final.vtk` byte-for-byte, and the source has no restart reader. This is a nonfunctional CLI restart, not a finding that the populated VTK field is an empty placeholder. Build/contract 8→7. Separately, solver.cpp:599–615 updates BDF history before reconstructing the residual for logging, so the logged temporal term differs from the just-solved BDF residual; implicit/transient 9→8. Total 66→64. Historical result/source binding remains qualified; no Re200 rerun.
+
+
+## Disabled production reconstruction — 2026-10-30
+
+Immutable f679644 solver.cpp:89–96 sets every inviscid limiter to zero; :113–130,145–153,210–215 pass those factors to reconstructed faces. Report.tex:147–170,499–501 claims active Barth–Jespersen second order and first-order only as fallback. DQ10 applies to the submitted implementation; second-order rubric 7→1, total64→58. The same source blob SHA `7664b362da6c56ecac8cf8701bc1a3180ddfd92980c1f2b33a04480cb28df3b0` is at 12f77fb (the Re200 result checkpoint), 0b4616f and final submission; earlier cbe40ee also explicitly zeros computed multipliers. Exact binary/source binding is not independently established. Clean immutable CMake build passed in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 pids; documented EXTERNAL_ROOT and CFD_EXTERNALS_ROOT); no CFD rerun.

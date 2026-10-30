@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:13:19.140050+00:00
+Generated: 2026-10-30T06:15:44.474323+00:00
 
-**Overall score: 3.35**
+**Overall score: 3.01**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,10 +24,10 @@ Generated: 2026-10-30T06:13:19.140050+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | BC implementations/surface evidence. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 3 | LSQ reconstruction, no independent order test. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 1 | f679644 solver.cpp:89–96 initializes every limiter to zero; face paths use these factors. report.tex:147–170 claims active second-order/Barth with fallback only, contradicted by submitted source. 12f77fb has same source SHA; earlier cbe40ee also zeroed multipliers. Exact historic binary remains unbound. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3 | Limiter/positivity source only. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 1 | f679644 solver.cpp:89–96 initializes every limiter to zero; face paths use these factors. report.tex:147–170 claims active second-order/Barth with fallback only, contradicted by submitted source. 12f77fb has same source SHA; earlier cbe40ee also zeroed multipliers. Exact historic binary remains unbound. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Viscous outcomes include implausible cylinder drag. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T06:13:19.140050+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.35
+- Overall score (0-5): 3.01
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
