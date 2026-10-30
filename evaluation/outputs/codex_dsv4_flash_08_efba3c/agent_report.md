@@ -16,7 +16,7 @@ Weighted review areas: Code 3.67/5; CFD 3.82/5; Results 3.43/5. Per-case scores 
 
 ## Disqualification assessment
 
-No disqualification is established. Source contains METIS partitioning, neighbor exchange, global reductions, LU-SGS, and BDF2 dual-time code, so the corresponding shortcut flags are not supported. Re200 is truthfully incomplete rather than claimed successful. Under the trust policy I did not perform an external similarity search; there is no internal wrapper/executable evidence. Figure semantics and solver output were not fully independently re-derived, so they are limitations rather than affirmative shortcut findings.
+DQ7 is established for the M2 laminar final status, which claims convergence at step 33 despite rapidly changing drag; see the partial evidence review below. Source contains METIS partitioning, neighbor exchange, global reductions, LU-SGS, and BDF2 dual-time code, so the corresponding shortcut flags are not supported. Re200 is truthfully incomplete rather than claimed successful. Under the trust policy I did not perform an external similarity search; there is no internal wrapper/executable evidence. Figure semantics and solver output were not fully independently re-derived, so they are limitations rather than affirmative shortcut findings.
 
 ## Limitations and sidecars
 
@@ -24,8 +24,12 @@ The delivered `external` symlink is dangling, so I did not perform a clean solve
 
 ## Verdict
 
-The submission is a credible, modular CFD implementation with seven structurally valid steady results and an honest Re200 failure report. It is not a complete benchmark result because Re200 fails and no rank-count evidence is delivered.
+The solver has seven structurally valid steady result packages and an honestly failed Re200 package. M2 laminar is incorrectly marked converged while drag is still changing rapidly; further calibration remains in progress.
 
 ## Partial Re200 evidence review — 2026-10-30
 
 Designated case metadata and status explicitly mark failed/completed=false at step 6889, t=68.9/300; force history remains grossly nonphysical, Cd approximately 36.68 initially and 29.98 by t≈68.79, so score remains 0. Report.tex:195–196 and :452–455 incorrectly say failure occurred at the first step, while the run manifest and actual status give t=68.9. Metadata says observed inner min/max 1000/1000, yet residuals.csv contains many smaller inner counts (including 5 and 10), and last ratio is null. Immutable driver.cpp:825–826,861 would not count a NaN ratio as a miss; the precise actual strict miss count is unknown. This is a traceability/accounting defect, not an assertion of a falsely successful final status. Source/rubric and other case review remain partial; no CFD rerun.
+
+## Partial M2 laminar result review — 2026-10-30
+
+The submitted M2 laminar status and metadata mark converged at step 33, reporting 3.005 residual-reduction orders. The submitted forces.csv shows Cd 0.25879026082, 0.24105224449, 0.22615804657 and 0.21366941568 at steps 30–33: a 17.44% fall over those steps and 5.52% on the last step. TASK.md:140 requires a configured max_steps budget of at least 40000 unless convergence is clearly achieved earlier; :172 requires a converged state or a justified plateau with stable forces. Meeting the residual target does not establish a settled result here. Case score 2→1, and DQ7 applies to the false convergence status. M2 first-order operation is disclosed at report.tex:273–282,490. Figure provenance, other cases and rubric remain under review. No CFD rerun.
