@@ -98,3 +98,8 @@ No evaluator clean-build or MPI rerun was performed. The committed rank table is
 ## Verdict
 
 Score: **92.5/100; disqualified: false.** This is a complete, structurally valid, largely credible finite-volume delivery with unusually extensive report evidence. Deductions reflect production second-order limitations, the low-Mach Re200 accuracy deficit, rank-study reproducibility inconsistency at the curated tip, 2-D scope, and the lack of an independent evaluator rebuild.
+
+
+## Re200 computed/reference values — 2026-10-30
+
+The earlier case note incorrectly assigned reference values St0.195 and lift amplitude0.65 from report.tex:1655–1657 to the computed run. Immutable generated/re200_analysis.tex instead reports St0.1801, mean Cd1.2424 and lift amplitude0.4902 over t=150–300; its generated force table Cl−0.00929 uses a different final-25% window. Selected raw t≥150 Cl−0.48836–0.49211, Cd1.21216–1.27580 and lift FFT peak0.179988 independently support oscillatory behavior. Metadata revision339d65f records 169 misses/30000; this is not evidence that a majority failed. The sole delivered force figure has a startup drag spike≈31, making late drag periodicity unreadable, so the existing 2 remains under the explicit late-lift-and-drag floor. Other report/source/rubric/DQ review partial; no Re200 rerun.

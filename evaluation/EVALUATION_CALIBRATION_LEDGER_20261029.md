@@ -98,7 +98,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_opus46-01_3a72ea` | partial: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
 | `codex_generic_opus46-02_d8fed8` | partial: 35/100, mandatory placeholder rejection, DQ2 and TASK full mesh; binary/force provenance unresolved |
 | `codex_generic_opus5-01_83492a` | partial: 90/100, DQ not established; Re200 binary/fallback attribution unresolved |
-| `codex_generic_opus5-02_cac77b` | unreviewed |
+| `codex_generic_opus5-02_cac77b` | partial: Re200 computed/reference evidence corrected; other cases/rubric pending |
 | `codex_generic_sonnet46-01_ac6940` | unreviewed |
 | `codex_generic_sonnet46-02_dac37b` | unreviewed |
 | `codex_generic_sonnet5-01_540ddf` | unreviewed |
@@ -721,3 +721,6 @@ opus5-01 steady-case checkpoint: all seven b350651 selected raw force tails and 
 
 
 opus5-01 available criterion/DQ checkpoint: all 27 review points and ten rubric sections carry criterion-specific evidence. Main.cpp:285–325 releases root global mesh before iteration; METIS/neighbor halos exist. plot_results.py:123–139 maps each split triangle to its original cell; no specific unrelated-field or variable mismatch established. Seven steady packages identify b350651; Re200 older exact binary and full-run fallback counts remain unverified, and no exhaustive external similarity search was performed. No DQ is established; record stays partial for those limits. Total90, Re200 case2 (late-drag floor), M015 lam4, other cases as previously documented. No Re200 rerun.
+
+
+opus5-02 initial Re200 correction: old case note cited St0.195 and Cl amplitude0.65 from report.tex:1655–1657 as if computed; these are references. Immutable 6f43c42 generated/re200_analysis.tex gives actual St0.1801, Cd mean1.2424, Cl amplitude0.4902, RMS0.3454 over t150–300; force_table.tex:14 mean Cl−0.00929 uses last25%. Selected raw t>=150 Cl−0.48836–0.49211, Cd1.21216–1.27580, FFT lift peak0.179988. Metadata revision339d65f gives 169/30000 misses, not a majority. Single report force figure startup drag≈31 flattens late drag; Re200 score2 retained under explicit late lift/drag floor. Other source/rubric/DQ partial; no Re200 rerun.
