@@ -1,33 +1,14 @@
 # Agent Evaluation Report — codex/kimik3/06
 
-Curated tip `60a259515e88a436ca47c6c9b1d6157db38eb4c2` passes the immutable submission audit. The selected project-local Codex root (`01a037b9-3a44-7213-9cfd-f76875b82b68`) and its eight descendants cover implementation, production runs, report work, and final audit fixes. The explicit examiner invocation passed all eight final packages and the report.
+**88.5/100; DQ=true (trigger 7).** The submitted M0.15 laminar metadata and report say the case converged at step 1917, but its drag keeps decreasing: Cd 0.084303 to 0.073839 over the last 200 samples, and 0.077738 to 0.073839 over the last 100. The four-order residual reduction is real, but these force histories do not establish a converged boundary layer. The task requires clear early convergence and stable forces. The original 94/DQ=false score was revised after this independent review.
 
-## Calibration checkpoint (partial)
+The accepted contestant-delivered 24-page report contains case-specific force and residual histories and computed fields. The old retrospective's blanket caps based on omitted committed field images overlooked this PDF. Its Re200 page resolves late lift and drag, and the submitted CSV over t≥150 gives mean Cd 1.26147, lift range −0.56379 to 0.56896 and St≈0.185 from 28 upcrossings, consistent with the report's St≈0.187. The eight independent case scores are 1.5, 4, 3.5, 1.5, 4, 4, 4.5 and 4 in the canonical order. These do not contribute to the 100-point rubric.
 
-The accepted contestant-delivered PDF page 21 visibly resolves late lift and drag, and its reported Re200 values agree with the submitted force history. The previous case-floor claim omitted this PDF; Re200 case score changes 2 to 4. M015 laminar metadata and report call the case converged at step 1917, although Cd falls from 0.08430 to 0.07384 across the last 200 samples. This establishes DQ7 under the task requirement for stable forces; the 4-order residual reduction is genuine. The old 94/DQ=false aggregate is superseded by provisional 93/DQ=true; remaining source, rubric and DQ review continues.
+Immutable `60a259515e88a436ca47c6c9b1d6157db38eb4c2` implements unstructured finite volumes, Roe/Harten, reconstruction, viscous fluxes with tangential force projection, METIS/neighbor communication and an SGS/BDF transient method. The BDF inner convergence test recomputes the full residual after reconstruction refresh. A restricted, network-disabled clean build and six selftests pass; no CTests are registered. The report documents high-Mach restart/CFL changes and transient pseudo-CFL100, different from the recommended ~1. CGNS MIXED sections and arbitrary BC point sets are not handled; several steady plots compress late drag. The exact historical executable is not bound: metadata records f682e3c, which predates the solver source, while the selected final response documents later audit fixes and reruns. No solver case was rerun for this review.
 
-## Verdict
+The selected final response explicitly says that 43 figures and the PDF were regenerated. Accepted workspace PDF SHA256 `0be615d1ca911e103ab0e47f06ad4488d36cfa9f15d0a646b364ee0abed6cc61`; contestant figure manifest SHA256 `755b3308ca942dd076cac9e1ba5d15719c46cf346134ad41d483a736a6cd0470`. As a provenance check, the immutable plotter reproduced the original Re20 force, residual and Mach PNGs pixel-identically from their corresponding workspace CSV/VTU inputs; other figures have not all been independently bound. The submitted report image files missing from the curated tip remain a reproducibility limitation, not evidence that the contestant did not deliver the PDF.
 
-**93/100; DQ=true (provisional; trigger 7).** Seven steady packages reach their stated residual targets, but the M015 laminar force is not yet stable; submitted Re200 evidence is statistically periodic at `t=300`, reports 48--174 inner iterations and zero target misses, and was never rerun.
-
-## Evidence and limitations
-
-- The 24-page workspace report PDF was visually reviewed through all pages. It is a readable main report matching `solver/report/report.tex`, with equations, field/residual/force/wake figures, limitations, MPI study, and traceable values.
-- Source review supports CGNS unstructured mesh handling, METIS partitioning, neighbor-scoped halo exchange, global reductions, Roe/entropy-fix flux, weighted least-squares reconstruction, Venkat limiting, viscous terms, SGS-style steady iteration, and BDF2 transient structure.
-- The explicit validator passed all eight required final output packages. This structural evidence does not independently establish physical accuracy; no evaluator build or MPI rerun was performed.
-- Curation is index-only: raw outputs, figure inputs, manifests, and build products stay in the workspace as evidence but are absent from the immutable tip.
-
-DQ7 is supported by the M015 laminar late force trajectory described above; remaining triggers are under independent review. The source contains actual MPI/partition/halo implementations and generic case-file handling; it does not expose a solver-wrapper, explicit-only integration, or a misreported incomplete final package. Per trust policy, no external authorship investigation was performed.
-
-SHA-256 `run_identity.json`: `305c6d3c1eb55d8c3e5b0ece9f512a5b56a58387b608502dbe141e17596d094f`.
-
-SHA-256 `contestant_final_response.md`: `bad10610bd33242165172abb6f0c29594ba4989c7d2b22d7b922b97f8829ff14`.
-
-These are unindexed sidecars; `cfdeval check` does not validate them.
-
-- Evaluated at: 2026-08-28T03:22:27.900518+00:00
-- Evaluating agent: codex
-- Harness: codex
+All ten rubric sections, 27 review points, eight cases and DQ1–13 were examined; specific evidence and uncertainty are in `agent_scores.json` and the calibration ledger. No external authorship investigation was performed under the trust policy. Identity and final-response sidecars retain SHA256 `305c6d3c1eb55d8c3e5b0ece9f512a5b56a58387b608502dbe141e17596d094f` and `bad10610bd33242165172abb6f0c29594ba4989c7d2b22d7b922b97f8829ff14` respectively; These are unindexed sidecars; `cfdeval check` does not validate them.
 
 ## Run summary (auto)
 
@@ -64,60 +45,7 @@ These are unindexed sidecars; `cfdeval check` does not validate them.
 - `naca0012_m015_laminar_re5000`: missing=[] completed=True status=converged
 - `naca0012_m080_inviscid`: missing=[] completed=True status=converged
 
-## Methodology
 
-Reviewed immutable source/report and workspace-local result evidence; explicitly ran the examiner validator on the eight required final directories and report, rendered the main PDF through all pages, and inspected the selected local Codex root tree. No evaluator build, MPI run, or Re200 rerun was performed.
+## Scope and limitations
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
-
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
-
-## Review-area scores (0-5 weighted, review_*.json)
-
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
-
-## Disqualification assessment
-
-DQ7 is established for the M015 laminar result as detailed above. The remaining triggers are still under review; the trust policy excludes external authorship searching.
-
-## Metadata answers & session selection
-
-No metadata questions were present. The selected root is `01a037b9-3a44-7213-9cfd-f76875b82b68`, with its eight workspace-local descendants, chosen from prompt, timing, and complete implementation-to-final-audit continuity.
-
-## Limitations
-
-No independent clean build, steady MPI rerun, or Re200 rerun was performed. Structural validation does not prove numerical accuracy.
-
-## Verdict
-
-93/100, DQ=true (provisional; trigger 7). Retain the audited immutable snapshot and its report PDF as the manager record.
+The examiner validator is structural. Raw workspace histories, PDF and report figures were inspected, and the selected session/final response provides delivery context. Exact historical executable and every figure-to-data relationship are not individually verified. The evaluator rerender was used only for provenance comparison and no Re200 or unsteady solver rerun was performed.

@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 5,
-      "notes": "CMake source and documented build; not independently rebuilt."
+      "notes": "Immutable 60a2595 CMake build passes in network-disabled cfd-bench with 2 CPUs/3 GiB/256 processes and documented /opt/external dependencies."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Documented solve/gradcheck CLI and final validator evidence."
+      "score": 4.5,
+      "notes": "main.cpp parses solve, restart, meshinfo, selftest and gradcheck with required arguments and exceptions; evaluator selftest runs, not every CLI branch."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Separated mesh, partition, spatial, time-step, output, and tools components."
+      "score": 4.5,
+      "notes": "Dedicated case_file, mesh, partition, physics, spatial, timestep and output modules; fixed two-dimensional Vec4 limits extension."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No external authorship investigation under trust policy; source is internally coherent."
+      "notes": "Source internally coherent; no external authorship investigation under trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Case files and generic mesh/tag handling; no case-name-only solver branches observed."
+      "score": 5,
+      "notes": "main.cpp loads mesh and physics from supplied case JSON; no two-filename-only solver branch found."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "METIS partitioning, neighbor halo exchange, and global reductions evidenced in source/report; no evaluator MPI rerun."
+      "score": 4.5,
+      "notes": "partition.cpp calls METIS and builds neighbor lists; timestep.cpp exchanges state/gradient/update and reduces norms/forces. Rank sweep gives near-identical Re20 and M015 results; historical binary unbound."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "Positivity/fallback and audited restart/partition guards are documented."
+      "notes": "Positive-state floors/backtracking and error checks exist; timestep.cpp:392\u2013394 accepts residual target without force-stability test."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "All eight delivered final packages and report pass explicit validator; regression and rank-study evidence delivered."
+      "score": 4,
+      "notes": "Isolated clean build and six selftest checks pass; CTest has no registered tests. Delivered rank study and validator are structural/consistency evidence, not proof of convergence."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Curated immutable tip excludes raw outputs/build products; workspace evidence intentionally retained outside Git."
+      "notes": "Source is organized and exact immutable tip preserved; 24 figure blobs are tracked, but other report images, raw results and figure manifest are workspace-only."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.47
+  "overall_score": 4.42
 }
