@@ -42,7 +42,7 @@
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 4,
-      "notes": "Least-squares linear reconstruction is active; the report candidly states pressure-sensor first-order face fallback and viscous-gradient coupling."
+      "notes": "solver.cpp:535\u2013553 computes conditioned least-squares gradients; :637\u2013664 applies limiter and pressure-jump fallback. Production controls for earlier cases and executable remain unbound."
     },
     {
       "id": "cfd.limiter",
@@ -56,7 +56,7 @@
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 4,
-      "notes": "Separate velocity/temperature gradients, Newtonian/Fourier terms and tangential skin-friction reporting are present; shock-gradient coupling limits formal confidence."
+      "notes": "solver.cpp:1741\u201349 projects viscous traction to tangent and :1806\u201319 calculates wall cf; primitive-gradient shock coupling remains a limitation."
     },
     {
       "id": "cfd.implicit",
@@ -70,7 +70,7 @@
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 5,
-      "notes": "BDF1 startup/BDF2 frozen-history physical-time path and t=300 report evidence are present; Re200 was not rerun."
+      "notes": "solver.cpp:2472\u20132609 preserves BDF history, measures full transient defect, retries and accepts only target; canonical t=300 force history supports period6.12257 and St0.16333. Historical binary unbound; no rerun."
     },
     {
       "id": "cfd.mpi_partition",

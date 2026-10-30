@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:32:36.425533+00:00
+Generated: 2026-10-30T11:33:15.930183+00:00
 
 **Overall score: 4.42**
 
@@ -24,19 +24,19 @@ Generated: 2026-10-30T11:32:36.425533+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 5 | Characteristic farfield, slip and no-slip adiabatic paths are documented and implemented. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | Least-squares linear reconstruction is active; the report candidly states pressure-sensor first-order face fallback and viscous-gradient coupling. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | solver.cpp:535–553 computes conditioned least-squares gradients; :637–664 applies limiter and pressure-jump fallback. Production controls for earlier cases and executable remain unbound. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Barth-Jespersen limiter, sensor and positivity/rejected-update safeguards are source-supported. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | Separate velocity/temperature gradients, Newtonian/Fourier terms and tangential skin-friction reporting are present; shock-gradient coupling limits formal confidence. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | solver.cpp:1741–49 projects viscous traction to tangent and :1806–19 calculates wall cf; primitive-gradient shock coupling remains a limitation. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | solver.cpp:2393–2405 ends steady solve on residual target plus 30-row Cd range; this short Cd-only check can mistake a turning point for sustained convergence, as M200 laminar final200 demonstrates. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 5 | BDF1 startup/BDF2 frozen-history physical-time path and t=300 report evidence are present; Re200 was not rerun. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 5 | solver.cpp:2472–2609 preserves BDF history, measures full transient defect, retries and accepts only target; canonical t=300 force history supports period6.12257 and St0.16333. Historical binary unbound; no rerun. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3.5 | METIS partition.cpp:73–78, neighbour Isend/Irecv :81–89, state/gradient exchange solver.cpp:507,667–668 and global reductions :948–950,1760 are implemented. Reported M015 rank comparison differs 73.81% relatively at near-zero Cd but 0.000892 absolute, with different endpoints and unbound binaries; retain uncertainty without asserting DQ4. |

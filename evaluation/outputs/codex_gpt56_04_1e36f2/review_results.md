@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:32:36.425829+00:00
+Generated: 2026-10-30T11:33:15.930471+00:00
 
 **Overall score: 3.65**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | Read-only workspace has all eight canonical output directories and the generated report records completed statuses; raw packages are intentionally excluded from the immutable commit. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 5 | All eight named workspace packages pass a fresh structural validator. Generated report assets are committed; raw output and its manifest are workspace evidence, not committed submission data. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
 | 2 | **res.validator** Automated validator results | 0.10 | 5 | Fresh read-only examiner validate_outputs.py passes all eight named canonical workspace output directories; it is a structural check and does not detect the verified field-rendering defect or prove physical convergence. |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T11:32:36.425829+00:00
 | 5 | **res.visualization** Visualizations | 0.15 | 2 | All eight committed Mach images reproduce from the source field but misassign many cell values to triangles (see DQ8 and ledger); shared renderer affects other cell contours, and Re200 late drag is unreadable. Residual, force and surface plots are delivered. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 4 | Detailed equations, methods, qualifications and MPI discrepancy disclosure; it requires generated_results.tex and its raw provenance sources are not self-contained in the commit. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 4 | Delivered compiled 48-page report contains methods, outputs and reported rank discrepancy; all eight full Mach plots demonstrably misassign source cell values, and Re200 force plot hides late drag. Original data exist and script error is not evidence of invented histories. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 2 | Figure manifest identifies source fields, and direct reproduction identifies a systematic wrong-cell rendering; exact historical solver binaries are unbound. |

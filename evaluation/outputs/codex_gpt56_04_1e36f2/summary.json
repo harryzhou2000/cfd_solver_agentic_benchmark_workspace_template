@@ -726,7 +726,7 @@
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 4,
-        "notes": "Least-squares linear reconstruction is active; the report candidly states pressure-sensor first-order face fallback and viscous-gradient coupling."
+        "notes": "solver.cpp:535\u2013553 computes conditioned least-squares gradients; :637\u2013664 applies limiter and pressure-jump fallback. Production controls for earlier cases and executable remain unbound."
       },
       {
         "id": "cfd.limiter",
@@ -740,7 +740,7 @@
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 4,
-        "notes": "Separate velocity/temperature gradients, Newtonian/Fourier terms and tangential skin-friction reporting are present; shock-gradient coupling limits formal confidence."
+        "notes": "solver.cpp:1741\u201349 projects viscous traction to tangent and :1806\u201319 calculates wall cf; primitive-gradient shock coupling remains a limitation."
       },
       {
         "id": "cfd.implicit",
@@ -754,7 +754,7 @@
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 5,
-        "notes": "BDF1 startup/BDF2 frozen-history physical-time path and t=300 report evidence are present; Re200 was not rerun."
+        "notes": "solver.cpp:2472\u20132609 preserves BDF history, measures full transient defect, retries and accepts only target; canonical t=300 force history supports period6.12257 and St0.16333. Historical binary unbound; no rerun."
       },
       {
         "id": "cfd.mpi_partition",
@@ -807,7 +807,7 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 5,
-        "notes": "Read-only workspace has all eight canonical output directories and the generated report records completed statuses; raw packages are intentionally excluded from the immutable commit."
+        "notes": "All eight named workspace packages pass a fresh structural validator. Generated report assets are committed; raw output and its manifest are workspace evidence, not committed submission data."
       },
       {
         "id": "res.validator",
@@ -842,7 +842,7 @@
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 4,
-        "notes": "Detailed equations, methods, qualifications and MPI discrepancy disclosure; it requires generated_results.tex and its raw provenance sources are not self-contained in the commit."
+        "notes": "Delivered compiled 48-page report contains methods, outputs and reported rank discrepancy; all eight full Mach plots demonstrably misassign source cell values, and Re200 force plot hides late drag. Original data exist and script error is not evidence of invented histories."
       },
       {
         "id": "res.traceability",
