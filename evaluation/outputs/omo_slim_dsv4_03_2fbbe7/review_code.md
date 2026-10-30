@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:54:04.385512+00:00
+Generated: 2026-10-30T16:41:13.192471+00:00
 
 **Overall score: 2.45**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 2 | CMake identifies MPI, CGNS, HDF5, METIS, and Eigen, but no clean build was submitted or performed and no README/reproducible completed-case material is committed. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 2 | Immutable 72c27c3 clean build succeeds in network-disabled cfd-bench; 0 CTests registered. No solver run was performed. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 4 | main.cpp parses solve, --case, --output, --restart, and --report-level and rejects missing or unknown arguments. |

@@ -22,13 +22,13 @@ The code has a CMake MPI/CGNS/METIS build description and a usable basic `solve 
 
 It is materially incomplete. `solver/src/solver/reconstruct.cpp` and `limiter.cpp` are no-op. `viscous_flux.cpp` returns zero and no viscous residual path is active. `main.cpp` explicitly reports transient solve “not yet implemented”; hence no BDF2 Re200 capability exists. Although MPI/METIS code is present, `halo_exchange.cpp` documents that it sends zero-filled placeholder buffers and leaks them; there is no submitted MPI execution evidence. `residual.cpp` is a first-order residual and its local-state indexing versus global face data has not been validated by any result.
 
-No solver was built or rerun. In particular, Re200 was never rerun.
+A clean immutable-source build succeeds in a network-disabled cfd-bench container (2 CPUs, 3 GiB, 256 processes, 120-second command timeout); no CTests are registered. No solver was run, including Re200. `time_stepper.cpp:220–224` collects histories but its final output block is a placeholder; `main.cpp` does not write them.
 
 ## Rubric scores (pre-disqualification)
 
 | Section | Max | Score | Basis |
 |---|---:|---:|---|
-| Build, CLI, Output Contract | 10 | 4 | CMake/CLI present; no build or output deliverables. |
+| Build, CLI, Output Contract | 10 | 4 | Clean isolated build succeeds; CLI present but no output deliverables. |
 | Mesh And Geometry | 10 | 4 | CGNS/geometry source only. |
 | Finite-Volume Residual And Boundary Conditions | 15 | 7 | First-order residual/BC paths, unverified. |
 | Second-Order Spatial Scheme | 10 | 0 | Reconstruction and limiter are no-op. |
