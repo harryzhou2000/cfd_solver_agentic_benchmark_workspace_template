@@ -41,8 +41,8 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 2,
-      "notes": "METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review."
+      "score": 3.5,
+      "notes": "METIS partition.cpp:73\u201378, neighbour Isend/Irecv :81\u201389, state/gradient exchange solver.cpp:507,667\u2013668 and global reductions :948\u2013950,1760 are implemented. Reported M015 rank comparison differs 73.81% relatively at near-zero Cd but 0.000892 absolute, with different endpoints and unbound binaries; retain uncertainty without asserting DQ4."
     },
     {
       "id": "code.robustness",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.9
+  "overall_score": 4.12
 }

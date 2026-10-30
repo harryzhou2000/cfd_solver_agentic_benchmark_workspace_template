@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:31:36.017473+00:00
+Generated: 2026-10-30T11:32:36.425533+00:00
 
-**Overall score: 4.38**
+**Overall score: 4.42**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -33,13 +33,13 @@ Generated: 2026-10-30T11:31:36.017473+00:00
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | Separate velocity/temperature gradients, Newtonian/Fourier terms and tangential skin-friction reporting are present; shock-gradient coupling limits formal confidence. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 5 | Local pseudo-time, rank-local LU-SGS/block-Jacobi Rusanov preconditioning and fully reassembled acceptance are implemented. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | solver.cpp:2393–2405 ends steady solve on residual target plus 30-row Cd range; this short Cd-only check can mistake a turning point for sustained convergence, as M200 laminar final200 demonstrates. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 5 | BDF1 startup/BDF2 frozen-history physical-time path and t=300 report evidence are present; Re200 was not rerun. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3.5 | METIS partition.cpp:73–78, neighbour Isend/Irecv :81–89, state/gradient exchange solver.cpp:507,667–668 and global reductions :948–950,1760 are implemented. Reported M015 rank comparison differs 73.81% relatively at near-zero Cd but 0.000892 absolute, with different endpoints and unbound binaries; retain uncertainty without asserting DQ4. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T11:31:36.017473+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.38
+- Overall score (0-5): 4.42
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -64,8 +64,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 2,
-          "notes": "METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review."
+          "score": 3.5,
+          "notes": "METIS partition.cpp:73\u201378, neighbour Isend/Irecv :81\u201389, state/gradient exchange solver.cpp:507,667\u2013668 and global reductions :948\u2013950,1760 are implemented. Reported M015 rank comparison differs 73.81% relatively at near-zero Cd but 0.000892 absolute, with different endpoints and unbound binaries; retain uncertainty without asserting DQ4."
         },
         {
           "id": "code.robustness",
@@ -89,7 +89,7 @@
           "notes": "Readable, commented C++17 implementation; submitted report depends on generated_results.tex and raw result sources excluded from commit."
         }
       ],
-      "overall_score": 3.9,
+      "overall_score": 4.12,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -154,8 +154,8 @@
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Local pseudo-time, rank-local LU-SGS/block-Jacobi Rusanov preconditioning and fully reassembled acceptance are implemented."
+          "score": 4,
+          "notes": "solver.cpp:2393\u20132405 ends steady solve on residual target plus 30-row Cd range; this short Cd-only check can mistake a turning point for sustained convergence, as M200 laminar final200 demonstrates."
         },
         {
           "id": "cfd.transient",
@@ -168,11 +168,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 2,
-          "notes": "METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review."
+          "score": 3.5,
+          "notes": "METIS partition.cpp:73\u201378, neighbour Isend/Irecv :81\u201389, state/gradient exchange solver.cpp:507,667\u2013668 and global reductions :948\u2013950,1760 are implemented. Reported M015 rank comparison differs 73.81% relatively at near-zero Cd but 0.000892 absolute, with different endpoints and unbound binaries; retain uncertainty without asserting DQ4."
         }
       ],
-      "overall_score": 4.38,
+      "overall_score": 4.42,
       "disqualification_flags": []
     },
     "result_review": {
@@ -195,15 +195,15 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Seven steady cases are reported converged and Re200 statistically periodic at t=300, with readable package evidence; no Re200 rerun."
+          "score": 3.5,
+          "notes": "Eight metadata packages report completion and Re200 shows raw periodic forces; M200 laminar final200 Cd0.07486\u21920.04455 despite 30-row flat criterion, so sustained steady convergence is uncertain even though reported residual target was reached."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 3,
-          "notes": "METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review."
+          "notes": "Re20 Cd2.037 and Re200 mean Cd1.15175/St0.16333 are plausible; M200 laminar Cd0.04455 is less than inviscid Cd0.09201 and its 200-row drift is large. No inference of actual physical failure solely from this comparison."
         },
         {
           "id": "res.visualization",
@@ -227,13 +227,13 @@
           "notes": "Figure manifest identifies source fields, and direct reproduction identifies a systematic wrong-cell rendering; exact historical solver binaries are unbound."
         }
       ],
-      "overall_score": 3.95,
+      "overall_score": 3.65,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 84,
+    "total_scored": 85.5,
     "sections": [
       {
         "id": "build_cli",
@@ -274,22 +274,22 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 15,
-        "notes": "Implicit steady controls and frozen-history BDF2/t=300 evidence are present."
+        "score": 14,
+        "notes": "solver.cpp:2472\u20132609 freezes BDF history and accepts each full residual only at target, with Re200 t=300 numerical shedding supported. Steady convergence check :2393\u20132405 uses only a 30-row Cd range, vulnerable to local turns, as M200 laminar history illustrates; production binary unbound."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 4,
-        "notes": "Partitioning, halos and reductions implemented. Reported M0.15 np2/np8 relative drag discrepancy is material but absolute change 0.00089237, with differing endpoints and historical binaries unbound; DQ4 is not established. Section score remains provisional pending full review."
+        "score": 7,
+        "notes": "METIS partition.cpp:73\u201378, neighbour Isend/Irecv :81\u201389 and global reductions solver.cpp:948\u2013950,1760 are present. M015 np2/np8 drag discrepancy is 73.81% relative on near-zero baseline, with differing endpoints and unknown binaries; retain a consistency deduction but DQ4 not established."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 8,
-        "notes": "All eight readable packages are reported complete with fields/plots; MPI inconsistency prevents full validation credit."
+        "score": 7.5,
+        "notes": "All eight canonical workspace directories pass fresh structural validator and contain force/residual histories. Re200 is numerically periodic; M200 laminar final200 drag changes 0.07486\u21920.04455 despite flat last30 and short achieved-target stop; field plots have verified cell-to-triangle mismapping. Exact production binaries remain unbound."
       },
       {
         "id": "report_viz",

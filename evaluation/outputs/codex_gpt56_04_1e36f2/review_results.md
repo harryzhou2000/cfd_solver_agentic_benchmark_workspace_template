@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:31:36.017787+00:00
+Generated: 2026-10-30T11:32:36.425829+00:00
 
-**Overall score: 3.95**
+**Overall score: 3.65**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,10 +15,10 @@ Generated: 2026-10-30T11:31:36.017787+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 5 | Fresh read-only examiner validate_outputs.py passes all eight named canonical workspace output directories; it is a structural check and does not detect the verified field-rendering defect or prove physical convergence. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 5 | Seven steady cases are reported converged and Re200 statistically periodic at t=300, with readable package evidence; no Re200 rerun. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 3.5 | Eight metadata packages report completion and Re200 shows raw periodic forces; M200 laminar final200 Cd0.07486→0.04455 despite 30-row flat criterion, so sustained steady convergence is uncertain even though reported residual target was reached. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Re20 Cd2.037 and Re200 mean Cd1.15175/St0.16333 are plausible; M200 laminar Cd0.04455 is less than inviscid Cd0.09201 and its 200-row drift is large. No inference of actual physical failure solely from this comparison. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 2 | All eight committed Mach images reproduce from the source field but misassign many cell values to triangles (see DQ8 and ledger); shared renderer affects other cell contours, and Re200 late drag is unreadable. Residual, force and surface plots are delivered. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T11:31:36.017787+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.95
+- Overall score (0-5): 3.65
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
