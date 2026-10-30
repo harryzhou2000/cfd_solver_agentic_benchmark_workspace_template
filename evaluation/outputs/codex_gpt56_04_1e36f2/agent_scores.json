@@ -30,7 +30,7 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4,
-          "notes": "CMake, README commands and configurable CFD_EXTERNALS_ROOT are submitted; no independent clean build was run."
+          "notes": "Clean immutable-source CMake build passes using supplied dependencies in restricted cfd-bench; CTest contains no registered tests."
         },
         {
           "id": "code.cli",
@@ -79,7 +79,7 @@
           "title": "Testing and validation evidence",
           "weight": 0.1,
           "score": 3,
-          "notes": "A mesh diagnostic test and report/validator claims are present, but independent clean execution was not performed."
+          "notes": "Mesh diagnostics target builds, but CTest has no registered tests; report and validator provide additional contestant-side checks."
         },
         {
           "id": "code.hygiene",
@@ -209,8 +209,8 @@
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Committed plots cover cases, but Re20 report Mach image provably misassigns cell values to triangles; see DQ8 evidence. Full scoring remains under review."
+          "score": 2,
+          "notes": "All eight committed Mach images reproduce from the source field but misassign many cell values to triangles (see DQ8 and ledger); shared renderer affects other cell contours, and Re200 late drag is unreadable. Residual, force and surface plots are delivered."
         },
         {
           "id": "res.report",
@@ -223,24 +223,24 @@
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 3,
-          "notes": "Generated report cites manifests and raw files in the workspace, but those source packages/manifests are excluded from the immutable result commit."
+          "score": 2,
+          "notes": "Figure manifest identifies source fields, and direct reproduction identifies a systematic wrong-cell rendering; exact historical solver binaries are unbound."
         }
       ],
-      "overall_score": 4.35,
+      "overall_score": 3.85,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 86,
+    "total_scored": 84,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 8,
-        "notes": "Documented configurable build and robust required CLI; no clean evaluator build."
+        "notes": "Clean immutable-source build succeeded in restricted cfd-bench with supplied dependencies; CTest had no registered tests. Steady restart validates provenance and rank-local state; transient restart is explicitly unsupported."
       },
       {
         "id": "mesh_geometry",
@@ -295,8 +295,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4,
-        "notes": "Comprehensive generated report and figures, but immutable self-containment/provenance is limited."
+        "score": 2,
+        "notes": "Report includes case analysis, histories and contours, but all eight full Mach images provably map many cell values onto wrong triangles; other cell field plots share this renderer. Re200 late drag is unreadable. Report remains delivered; this is a reproducible visualization defect, not evidence of invented solver data."
       },
       {
         "id": "extensibility",

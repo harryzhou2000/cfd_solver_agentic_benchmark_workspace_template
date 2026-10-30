@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:27:38.984515+00:00
+Generated: 2026-10-30T11:28:21.714437+00:00
 
-**Overall score: 4.35**
+**Overall score: 3.85**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -21,13 +21,13 @@ Generated: 2026-10-30T11:27:38.984515+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 5 | Committed plots cover cases, but Re20 report Mach image provably misassigns cell values to triangles; see DQ8 evidence. Full scoring remains under review. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2 | All eight committed Mach images reproduce from the source field but misassign many cell values to triangles (see DQ8 and ledger); shared renderer affects other cell contours, and Re200 late drag is unreadable. Residual, force and surface plots are delivered. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 4 | Detailed equations, methods, qualifications and MPI discrepancy disclosure; it requires generated_results.tex and its raw provenance sources are not self-contained in the commit. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Generated report cites manifests and raw files in the workspace, but those source packages/manifests are excluded from the immutable result commit. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 2 | Figure manifest identifies source fields, and direct reproduction identifies a systematic wrong-cell rendering; exact historical solver binaries are unbound. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T11:27:38.984515+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.35
+- Overall score (0-5): 3.85
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

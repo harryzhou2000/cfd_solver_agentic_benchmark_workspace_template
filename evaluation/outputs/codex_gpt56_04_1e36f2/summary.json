@@ -579,7 +579,7 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4,
-        "notes": "CMake, README commands and configurable CFD_EXTERNALS_ROOT are submitted; no independent clean build was run."
+        "notes": "Clean immutable-source CMake build passes using supplied dependencies in restricted cfd-bench; CTest contains no registered tests."
       },
       {
         "id": "code.cli",
@@ -628,7 +628,7 @@
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 3,
-        "notes": "A mesh diagnostic test and report/validator claims are present, but independent clean execution was not performed."
+        "notes": "Mesh diagnostics target builds, but CTest has no registered tests; report and validator provide additional contestant-side checks."
       },
       {
         "id": "code.hygiene",
@@ -834,8 +834,8 @@
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Committed plots cover cases, but Re20 report Mach image provably misassigns cell values to triangles; see DQ8 evidence. Full scoring remains under review."
+        "score": 2,
+        "notes": "All eight committed Mach images reproduce from the source field but misassign many cell values to triangles (see DQ8 and ledger); shared renderer affects other cell contours, and Re200 late drag is unreadable. Residual, force and surface plots are delivered."
       },
       {
         "id": "res.report",
@@ -848,8 +848,8 @@
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 3,
-        "notes": "Generated report cites manifests and raw files in the workspace, but those source packages/manifests are excluded from the immutable result commit."
+        "score": 2,
+        "notes": "Figure manifest identifies source fields, and direct reproduction identifies a systematic wrong-cell rendering; exact historical solver binaries are unbound."
       }
     ],
     "disqualification_flags": [
@@ -879,7 +879,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.35
+    "overall_score": 3.85
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/04",

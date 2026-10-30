@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:27:38.983834+00:00
+Generated: 2026-10-30T11:28:21.713705+00:00
 
 **Overall score: 3.9**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake, README commands and configurable CFD_EXTERNALS_ROOT are submitted; no independent clean build was run. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Clean immutable-source CMake build passes using supplied dependencies in restricted cfd-bench; CTest contains no registered tests. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 5 | main.cpp implements the required solve --case/--output interface and explicit malformed-argument errors. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T11:27:38.983834+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Exceptions, mesh checks, positive-state rejection and finite residual checks are present; no independent memory stress run. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | A mesh diagnostic test and report/validator claims are present, but independent clean execution was not performed. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Mesh diagnostics target builds, but CTest has no registered tests; report and validator provide additional contestant-side checks. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Readable, commented C++17 implementation; submitted report depends on generated_results.tex and raw result sources excluded from commit. |
