@@ -20,22 +20,22 @@ The previous blanket conclusion that all submitted results could not be products
 
 | Section | Max | Score | Notes |
 |---|---:|---:|---|
-| Build, CLI, Output Contract | 10 | 5 | CMake/CLI skeleton exists; reproducibility and output provenance fail. |
-| Mesh And Geometry | 10 | 5 | CGNS/geometry code exists, with placeholders. |
-| Finite-Volume Residual And Boundary Conditions | 15 | 9 | Serial first-order residual and BC paths present. |
-| Second-Order Spatial Scheme | 10 | 0 | Source explicitly uses first-order states. |
-| Viscous Terms | 10 | 4 | Basic laminar routine only. |
-| Implicit And Transient Methods | 15 | 6 | Point-implicit steady update; no BDF2 transient. |
-| MPI | 10 | 0 | Rank-zero-only solve; claimed MPI unsupported. |
-| Case Results And Validation | 10 | 1 | Readable files but no credible solver provenance. |
-| Report, Visualization, Analysis | 5 | 3 | Useful figures/limitations; incomplete Re200 wake manifest. |
-| Extensibility | 5 | 3 | Some module and JSON boundaries. |
+| Build, CLI, Output Contract | 10 | 2.5 | Clean immutable-source build fails on undeclared run_solver at main.cpp:39. CLI parser exists but ignores unknown options; final VTK connectivity is placeholder and logs are missing. |
+| Mesh And Geometry | 10 | 6 | cgns_reader.cpp:23–56,117–150 reads first zone, triangle/quad sections and boundary edges; face_geometry.cpp:31–75 orients normals and computes global Green-theorem volumes. Multi-zone and local placeholder remain limitations. |
+| Finite-Volume Residual And Boundary Conditions | 15 | 8 | fvm_solver.cpp:99–159 assembles paired conservative interior fluxes and boundary residual; Rusanov and mirrored wall states exist. First order, geometry/viscous simplifications and no verified production-source binding limit credit. |
+| Second-Order Spatial Scheme | 10 | 0.5 | fvm_solver.cpp:109–114 uses piecewise constant states; no reconstruction/limiter or smooth-order evidence. Report.tex:78,233 honestly discloses first order. |
+| Viscous Terms | 10 | 1.5 | fvm_solver.cpp:215–256 uses case-Re viscosity but differences omit distance and use simplified stresses; :513–521 approximates tangential force as mu times speed without wall distance/sign fidelity. |
+| Implicit And Transient Methods | 15 | 3 | fvm_solver.cpp:362–372 ramps CFL but caps at 20; :404–428 repeats a frozen residual in local diagonal updates. There is no BDF2 transient or measured inner convergence. |
+| MPI | 10 | 0 | main.cpp:90–100 solves only on rank zero; METIS, halo and reductions are absent, no rank comparison. |
+| Case Results And Validation | 10 | 2 | Selected-session logs support seven steady solves but M0.15 inviscid has no stable plateau, Re20 drag 4.984 is implausible, Re200 is steady and final VTK connectivity is placeholder. No rank comparisons. |
+| Report, Visualization, Analysis | 5 | 1.5 | Report has equations and honest limitations, but no laminar gallery/domain contours, incorrect contour/manifest claims and false METIS infrastructure; traceability is limited. |
+| Extensibility | 5 | 2.5 | Case JSON and modules separate mesh, gas and solver but source is 2-D and equation/BC logic is tightly coupled; no functioning distributed or generic physics interfaces. |
 
-Pre-DQ score: **36/100**.
+Pre-DQ score: **27.5/100** (previously 36).
 
 ## Review areas and case outcomes
 
-Weighted review scores are Code **2.27/5**, CFD methods **2.28/5**, and Results **1.43/5**. Case scores are **1, 2, 2** for M0.15/0.80/2.00 inviscid; **2, 2, 2** for the corresponding laminar cases; **1** for Re20; and **0** for Re200. The first seven are independently supported by selected-session solver logs and case-specific force histories, with scores capped because the supplied Mach/pressure plots are surface-point scatter rather than domain contours. The historical binary is not bound byte-for-byte to final source. M0.15 inviscid fails the residual target and stable-force plateau; Re20 drag is far too high. The immutable report table at `report.tex:160–170` provides numeric CL/CD for every case, contrary to the old case notes. Re200 also directly contradicts its status/transient metadata and lacks the required manifested wake visualization.
+Weighted review scores: Code **1.88/5**, CFD **1.9/5**, Results **1.38/5**. M0.15/0.80/2.00 inviscid scores are 1/2/2; corresponding laminar scores 2/2/2; Re20 1 and Re200 0. Selected-session logs and case histories support the seven steady outcomes, but numerical limits and missing domain contours restrict credit. Re200's appended rows are not transient evidence. Binary-to-final-source binding and the exact figure-source mapping remain qualified.
 
 ## Disqualification assessment
 

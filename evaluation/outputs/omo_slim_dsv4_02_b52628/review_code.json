@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 2,
-      "notes": "Immutable e272cd3 clean isolated build fails: main.cpp:39 references undeclared run_solver; CMake configured, compiler stopped before any tests. Historical run logs show a separately built executable, whose source revision is not bound."
+      "score": 0.5,
+      "notes": "Immutable clean build fails main.cpp:39 undeclared run_solver; CMake config succeeds. Historical executable source binding is unavailable."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "main.cpp parses solve, --case and --output and rejects unknown/missing arguments."
+      "score": 2,
+      "notes": "main.cpp:37\u201364 recognizes solve and required paths, but returns success for missing command and silently ignores unknown options; clean executable does not build."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 3,
-      "notes": "Reader, mesh, solver, and plotting files are separated, but the production path is serial-only and incomplete."
+      "notes": "CGNS, geometry, gas and solver modules are separated; main solver is monolithic and serial-only."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No internal executable wrapper was found; trust policy precludes external similarity investigation."
+      "notes": "No internal existing-solver invocation found; external authorship investigation excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "CaseReader consumes JSON rather than branching solely on the two benchmark mesh names."
+      "notes": "case_reader.cpp consumes JSON mesh and physics inputs; no two-filename-only solver branches found."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 0,
-      "notes": "main.cpp invokes mesh read and FVMSolver::solve only on rank 0; no partition/halo/reduction solve path exists."
+      "notes": "main.cpp:90\u2013100 reads and solves on rank zero only; no METIS graph partition, halo exchange or distributed reduction implementation."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 1,
-      "notes": "Geometry contains placeholder cell-volume handling and VTK connectivity is explicitly placeholder; no credible parallel robustness evidence."
+      "notes": "VTK writer hardcodes identical cell connectivity, positive-state failure resets to freestream, no parallel robustness; global serial geometry does compute volumes."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 1,
-      "notes": "No tests or reproducible rank comparison were submitted; report validation fails on the Re200 wake manifest requirement."
+      "notes": "No reproducible rank comparison or independent tests established; report validator lacks Re200 wake figure. Clean build failed before tests."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 2,
-      "notes": "Readable short C++ modules, but tracked source contains explicit placeholder paths and stale claims."
+      "notes": "Modules are legible but final source does not compile, local geometry and final VTK contain placeholders, metadata scripts assert unsupported status."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.3
+  "overall_score": 1.88
 }

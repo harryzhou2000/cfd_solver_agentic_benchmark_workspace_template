@@ -7,77 +7,77 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Conservative perfect-gas variables and Rusanov/viscous formulas are present, though numerical credibility is limited."
+      "notes": "Perfect-gas conservative state and nondimensional inputs exist; results suffer first-order and inaccurate viscous approximations."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 3,
-      "notes": "CGNS reader and face geometry exist, but placeholder volume handling prevents full credit."
+      "score": 3.5,
+      "notes": "cgns_reader.cpp first zone handles TRI_3/QUAD_4 and boundary edges; face_geometry.cpp computes global Green-theorem volumes; multi-zone unsupported and local geometry is placeholder."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 3,
-      "notes": "A cell residual loop exists, but it is serial and first-order face states are used."
+      "notes": "fvm_solver.cpp:99\u2013159 applies equal/opposite interior flux and boundary flux, but first-order states and limited validation restrict credit."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Rusanov/LLF flux is identifiable in submitted source."
+      "notes": "fvm_solver.cpp:175\u2013212 implements local Lax-Friedrichs/Rusanov; entropy treatment is its diffusive form."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 3,
-      "notes": "Farfield/slip/no-slip branches exist; no credible final-output verification can be credited."
+      "notes": "farfield, reflected slip and negated-velocity no-slip branches are present; simplified wall flux limits accuracy."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 0,
-      "notes": "compute_residual explicitly uses first-order states; no reconstruction implementation is active."
+      "notes": "fvm_solver.cpp:109\u2013114 uses cell averages directly; report discloses first-order-only."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 1,
-      "notes": "There is an update freestream reset, but no active Barth-Jespersen or reconstructed-state limiter."
+      "score": 0.5,
+      "notes": "No reconstruction limiter; nonpositive updated cells are reset to freestream rather than reconstructed-state positivity preservation."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Laminar viscous-flux routine exists, but wall/gradient fidelity is not established."
+      "score": 1.5,
+      "notes": "fvm_solver.cpp:215\u2013256 omits cell distance in gradients; :513\u2013521 approximates shear as mu times speed without wall distance/sign."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 3,
-      "notes": "A point-Jacobi-like local pseudo-time update and CFL ramp are present."
+      "score": 2,
+      "notes": "CFL-ramped local diagonal updates exist, but inner iterations reuse a frozen residual and no coupled linear convergence is shown."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 0,
-      "notes": "solve always calls steady_solve; report states BDF2 is pending."
+      "notes": "solve dispatches steady solve; report admits BDF2 pending, and Re200 rows after step 7124 were copied without solving."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 0,
-      "notes": "No METIS, neighbor MPI, or global reduction call exists in the submitted solver path."
+      "notes": "METIS is linked but no partition call, rank-local distributed solve, halo or global reduction is implemented."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.14
+  "overall_score": 1.9
 }

@@ -94,64 +94,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 2,
-        "notes": "Immutable e272cd3 clean isolated build fails: main.cpp:39 references undeclared run_solver; CMake configured, compiler stopped before any tests. Historical run logs show a separately built executable, whose source revision is not bound."
+        "score": 0.5,
+        "notes": "Immutable clean build fails main.cpp:39 undeclared run_solver; CMake config succeeds. Historical executable source binding is unavailable."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4,
-        "notes": "main.cpp parses solve, --case and --output and rejects unknown/missing arguments."
+        "score": 2,
+        "notes": "main.cpp:37\u201364 recognizes solve and required paths, but returns success for missing command and silently ignores unknown options; clean executable does not build."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 3,
-        "notes": "Reader, mesh, solver, and plotting files are separated, but the production path is serial-only and incomplete."
+        "notes": "CGNS, geometry, gas and solver modules are separated; main solver is monolithic and serial-only."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "No internal executable wrapper was found; trust policy precludes external similarity investigation."
+        "notes": "No internal existing-solver invocation found; external authorship investigation excluded by trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4,
-        "notes": "CaseReader consumes JSON rather than branching solely on the two benchmark mesh names."
+        "notes": "case_reader.cpp consumes JSON mesh and physics inputs; no two-filename-only solver branches found."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 0,
-        "notes": "main.cpp invokes mesh read and FVMSolver::solve only on rank 0; no partition/halo/reduction solve path exists."
+        "notes": "main.cpp:90\u2013100 reads and solves on rank zero only; no METIS graph partition, halo exchange or distributed reduction implementation."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 1,
-        "notes": "Geometry contains placeholder cell-volume handling and VTK connectivity is explicitly placeholder; no credible parallel robustness evidence."
+        "notes": "VTK writer hardcodes identical cell connectivity, positive-state failure resets to freestream, no parallel robustness; global serial geometry does compute volumes."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 1,
-        "notes": "No tests or reproducible rank comparison were submitted; report validation fails on the Re200 wake manifest requirement."
+        "notes": "No reproducible rank comparison or independent tests established; report validator lacks Re200 wake figure. Clean build failed before tests."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 2,
-        "notes": "Readable short C++ modules, but tracked source contains explicit placeholder paths and stale claims."
+        "notes": "Modules are legible but final source does not compile, local geometry and final VTK contain placeholders, metadata scripts assert unsupported status."
       }
     ],
     "disqualification_flags": [
@@ -196,7 +196,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.3
+    "overall_score": 1.88
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -207,77 +207,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Conservative perfect-gas variables and Rusanov/viscous formulas are present, though numerical credibility is limited."
+        "notes": "Perfect-gas conservative state and nondimensional inputs exist; results suffer first-order and inaccurate viscous approximations."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 3,
-        "notes": "CGNS reader and face geometry exist, but placeholder volume handling prevents full credit."
+        "score": 3.5,
+        "notes": "cgns_reader.cpp first zone handles TRI_3/QUAD_4 and boundary edges; face_geometry.cpp computes global Green-theorem volumes; multi-zone unsupported and local geometry is placeholder."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 3,
-        "notes": "A cell residual loop exists, but it is serial and first-order face states are used."
+        "notes": "fvm_solver.cpp:99\u2013159 applies equal/opposite interior flux and boundary flux, but first-order states and limited validation restrict credit."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Rusanov/LLF flux is identifiable in submitted source."
+        "notes": "fvm_solver.cpp:175\u2013212 implements local Lax-Friedrichs/Rusanov; entropy treatment is its diffusive form."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 3,
-        "notes": "Farfield/slip/no-slip branches exist; no credible final-output verification can be credited."
+        "notes": "farfield, reflected slip and negated-velocity no-slip branches are present; simplified wall flux limits accuracy."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 0,
-        "notes": "compute_residual explicitly uses first-order states; no reconstruction implementation is active."
+        "notes": "fvm_solver.cpp:109\u2013114 uses cell averages directly; report discloses first-order-only."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 1,
-        "notes": "There is an update freestream reset, but no active Barth-Jespersen or reconstructed-state limiter."
+        "score": 0.5,
+        "notes": "No reconstruction limiter; nonpositive updated cells are reset to freestream rather than reconstructed-state positivity preservation."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Laminar viscous-flux routine exists, but wall/gradient fidelity is not established."
+        "score": 1.5,
+        "notes": "fvm_solver.cpp:215\u2013256 omits cell distance in gradients; :513\u2013521 approximates shear as mu times speed without wall distance/sign."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 3,
-        "notes": "A point-Jacobi-like local pseudo-time update and CFL ramp are present."
+        "score": 2,
+        "notes": "CFL-ramped local diagonal updates exist, but inner iterations reuse a frozen residual and no coupled linear convergence is shown."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 0,
-        "notes": "solve always calls steady_solve; report states BDF2 is pending."
+        "notes": "solve dispatches steady solve; report admits BDF2 pending, and Re200 rows after step 7124 were copied without solving."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 0,
-        "notes": "No METIS, neighbor MPI, or global reduction call exists in the submitted solver path."
+        "notes": "METIS is linked but no partition call, rank-local distributed solve, halo or global reduction is implemented."
       }
     ],
     "disqualification_flags": [
@@ -312,7 +312,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.14
+    "overall_score": 1.9
   },
   "result_review": {
     "review_area": "result_review",
@@ -322,50 +322,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 2,
-        "notes": "Eight directories have readable basic files, but each lacks stdout.log and submitted outputs conflict with the source that purportedly produced them."
+        "score": 1,
+        "notes": "Required final fields contain placeholder connectivity, logs absent, and Re200 metadata falsely claims BDF2; serial histories are separately supported."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 1,
-        "notes": "Individual case directories pass structural checks, but --report fails because the Re200 wake visualization is absent from the manifest."
+        "notes": "Historical case checks passed structurally, but report validator lacked Re200 wake; this does not verify field correctness."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 0,
-        "notes": "Completion statuses are not credible: Re200 is labeled statistically periodic/BDF2 despite source and run_status documenting a steady nontransient solve."
+        "score": 1,
+        "notes": "Seven steady serial solves have logs; M0.15 inviscid lacks target and stable forces, and Re200 has no transient while metadata claims periodicity."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 0,
-        "notes": "Re200 rows 7125\u201330000 were explicitly appended as duplicates without solving. The other cases and earlier rows require independent evaluation; serial/MPI metadata contradiction alone does not establish that those rows were fabricated."
+        "score": 1.5,
+        "notes": "Re20 CD 4.984 is excessive and M0.15 inviscid unstable; remaining steady values finite but first-order/viscous and binary provenance limit accuracy."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Readable Mach/pressure/history figures exist, but no required Re200 wake visualization is manifested and result provenance fails."
+        "score": 1.5,
+        "notes": "PDF shows force/residual histories but its Mach/pressure contour captions depict surface-point scatter; no laminar gallery or Re200 wake."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Report candidly says first order and BDF2 pending, but its broad successful-result framing conflicts with Re200 metadata and output claims."
+        "score": 2.5,
+        "notes": "Report candidly discloses serial, first-order and Re200 steady status, but claims absent METIS infrastructure and presents surface scatter as domain contours."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 1,
-        "notes": "Manifest links many figures to files, but the manifest is incomplete for Re200 wake and the underlying result/source mismatch defeats traceability."
+        "notes": "Manifest claims field_final.vtk for surface-scatter plots; isolated fallback reproduction from surface.csv is similar, not byte identical. No firm DQ8 conclusion yet."
       }
     ],
     "disqualification_flags": [
@@ -395,7 +395,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 1.45
+    "overall_score": 1.38
   },
   "measurements": {
     "note": "opencode harness: codex tool-usage/LOC extraction not applicable",
