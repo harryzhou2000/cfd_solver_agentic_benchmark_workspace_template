@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:07:55.102442+00:00
+Generated: 2026-10-30T04:08:31.122580+00:00
 
-**Overall score: 3.04**
+**Overall score: 2.94**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,13 +30,13 @@ Generated: 2026-10-30T04:07:55.102442+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3 | Limiter source present. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | Laminar divergence limits validation. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | solver.cpp:225–263 computes wall stress with tangential projection, but transient :439 and :463 call assemble with wallData false except final step, so wall force uses stale wall gradients; no completed transient result to quantify. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | LU-SGS claimed and source present. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2 | BDF2 source/report but no credible transient result. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | solver.cpp:345–360 writes BDF2 residual, but :430–432 and :450–452 shift Un/Unm1 both before and after each step, so at the next step both historical levels equal the latest state. Restart :397–415 restores only current state, ignores stored time/step and previous BDF level. No completed transient result. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3 | Partition source present; no rank comparison. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T04:07:55.102442+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.04
+- Overall score (0-5): 2.94
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

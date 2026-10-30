@@ -10,7 +10,7 @@ The selected workspace-local Codex root is `019fdf88-1057-7ea1-8471-24edfbc48dc3
 
 ## Scores and verdict
 
-Provisional score: **53/100** (previously 55); current weighted reviews are in agent_scores.json; DQ remains under review. All detailed rubric, review-point, and per-case evidence is in `agent_scores.json`. Canonical case scores are 1, 1, 1, 0, 0, 0, 1, 0 respectively. This is a modular attempt with source-level method evidence, but it lacks credible completed final results and the validator fails immediately on a claimed canonical output.
+Provisional score: **51/100** (previously 55); current weighted reviews are in agent_scores.json; DQ remains under review. All detailed rubric, review-point, and per-case evidence is in `agent_scores.json`. Canonical case scores are 1, 1, 1, 0, 0, 0, 1, 0 respectively. This is a modular attempt with source-level method evidence, but it lacks credible completed final results and the validator fails immediately on a claimed canonical output.
 
 ## Disqualification and limitations
 
@@ -31,3 +31,8 @@ All seven canonical steady status files mark failed at step 500. Final Cd of M0.
 ## Partial immutable build review — 2026-10-30
 
 An archive of submission 11adaa1 was configured inside network-disabled cfd-bench with two CPUs/3 GiB and explicit /opt/external dependency paths. CMake finds MPI and gets past dependency checks but cannot generate because CMakeLists.txt:51 requires src/restart.cpp, absent from immutable submission. Workspace has an untracked 15-byte `// placeholder` file, SHA-256 be179fcf7bbc53ebd35461556b67f6c1c77272b540d511bb365a039d5a387cc0, mtime 2026-08-15 02:36:58 UTC after selected session ended 2026-08-09 10:00:52 UTC. Historical raw commit bc8888f contains the same placeholder, but it is not an ancestor of the curated submission; it cannot silently repair the immutable source. Build rubric 5→3 and code.build 3→1. Remaining rubric/DQ review partial; no solver rerun.
+
+
+## Partial transient source review — 2026-10-30
+
+Immutable solver.cpp:345–360 contains BDF1/BDF2 time terms, but :430–432 shifts Unm1←Un and Un←U at the start of each physical step and :450–452 repeats the same shift at its end. Thus at the start of the next step both histories hold the most recent U, losing the needed earlier level. The restart reader :397–415 loads only current state; stored step/time are not restored, and prior BDF history is unavailable. This is a defective implementation of an existing formula, not proof that the claimed BDF2 code is absent. Also :439 requests fresh wall gradients only on the last transient step, while force evaluation :463 uses assembleResidual with wallData=false; :225–263 therefore uses stale wall gradients for transient viscous force, with no complete result to quantify the effect. Implicit/transient rubric 8→6 and transient review 2→1. Remaining rubric/DQ partial; no CFD rerun.

@@ -148,7 +148,7 @@
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 2,
-          "notes": "Laminar divergence limits validation."
+          "notes": "solver.cpp:225\u2013263 computes wall stress with tangential projection, but transient :439 and :463 call assemble with wallData false except final step, so wall force uses stale wall gradients; no completed transient result to quantify."
         },
         {
           "id": "cfd.implicit",
@@ -161,8 +161,8 @@
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 2,
-          "notes": "BDF2 source/report but no credible transient result."
+          "score": 1,
+          "notes": "solver.cpp:345\u2013360 writes BDF2 residual, but :430\u2013432 and :450\u2013452 shift Un/Unm1 both before and after each step, so at the next step both historical levels equal the latest state. Restart :397\u2013415 restores only current state, ignores stored time/step and previous BDF level. No completed transient result."
         },
         {
           "id": "cfd.mpi_partition",
@@ -172,7 +172,7 @@
           "notes": "Partition source present; no rank comparison."
         }
       ],
-      "overall_score": 3.04,
+      "overall_score": 2.94,
       "disqualification_flags": []
     },
     "result_review": {
@@ -233,7 +233,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 53,
+    "total_scored": 51,
     "sections": [
       {
         "id": "build_cli",
@@ -274,8 +274,8 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 8,
-        "notes": "LU-SGS/BDF2 source claims, no successful evidence."
+        "score": 6,
+        "notes": "LU-SGS and BDF2 residual formula are present; solver.cpp:430\u2013432 and :450\u2013452 shift history twice, corrupting BDF2 prior state, and restart :397\u2013415 does not restore physical time or prior level. Transient remains incomplete."
       },
       {
         "id": "mpi",
