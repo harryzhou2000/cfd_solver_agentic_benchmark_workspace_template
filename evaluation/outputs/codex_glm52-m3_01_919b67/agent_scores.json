@@ -38,28 +38,28 @@
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 4,
-          "notes": "Input-driven solve CLI and error paths are present; malformed-input run not repeated."
+          "notes": "6b376564 main.cpp:50\u201360 parses solve/case/output and rejects missing required arguments; case_input.hpp resolves the JSON mesh path. Bad-input execution was not independently repeated."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Separated mesh, partition, physics, solver, output, and case-input modules."
+          "notes": "6b376564 separates mesh.cpp, partition.cpp, solver.cpp, output.cpp, physics.hpp and case_input.hpp; solver and mesh remain compact 2-D-specific abstractions."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "No direct internal external-solver wrapper found; trust policy prohibits external similarity investigation."
+          "notes": "Source review did not establish an internal external-solver wrapper. No external authorship or exhaustive license investigation was performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "Case JSON and mesh path are parsed; no two-filename-only branch found."
+          "notes": "case_input.hpp reads mesh filename from JSON rather than branching on two supplied filenames; output.cpp:338 does special-case the re200 identifier for convergence fraction."
         },
         {
           "id": "code.mpi",
@@ -73,7 +73,7 @@
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 3,
-          "notes": "Positivity checks exist, but steady laminar/Re20 histories do not show robust convergence."
+          "notes": "solver.cpp has positivity checks, but submitted viscous forces are hundreds to thousands and metadata labels incomplete states successful; no independently verified historic binary."
         },
         {
           "id": "code.testing",
@@ -87,7 +87,7 @@
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 3,
-          "notes": "Readable modular source, with stale comments and generated-result claims inconsistent with source behavior."
+          "notes": "Code is modular, but firstOrder startup logic never clears, transient nPhysicalSteps shadows a member, and status is assigned unconditionally in main.cpp:187\u2013196."
         }
       ],
       "overall_score": 3.52,
@@ -100,35 +100,35 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Conservative perfect-gas formulation and report equations are present."
+          "notes": "report.tex:16\u201330 gives compressible perfect-gas equations and constant Reynolds-based viscosity; physics.hpp/solver.cpp contain corresponding flux and conservative state definitions."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "CGNS read, geometry and cell-face graph code are present."
+          "notes": "mesh.cpp:62\u2013146 reads CGNS multi-zone TRI/QUAD/BAR geometry and builds adjacency; main.cpp:73\u2013143 broadcasts the complete mesh to all ranks."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "Face accumulation plus global norm reduction is implemented."
+          "notes": "solver.cpp:402 onward assembles face contributions and reductions; interior call is Rusanov. No independent conservation or numerical convergence test was run."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 3,
-          "notes": "Rusanov is the actual interior-face flux. Roe implementation exists but solver.cpp calls Rusanov; metadata claiming Roe/Harten-Yee is inaccurate."
+          "notes": "solver.cpp:402 onward calls rusanovFlux; report.tex:68\u201372 correctly states Rusanov, whereas metadata labels Roe/Harten-Yee. Do not infer a report-only DQ6 from metadata alone."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Farfield, slip and no-slip branches plus boundary-value output semantics are implemented."
+          "notes": "report.tex:76\u201382 and solver.cpp boundary branches cover farfield, slip and no-slip; output.cpp:116\u2013125 records explicitly constructed boundary velocity, not undisclosed adjacent-cell velocity."
         },
         {
           "id": "cfd.reconstruction",
@@ -149,21 +149,21 @@
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 3,
-          "notes": "Newtonian/Fourier code exists, but underdeveloped steady laminar results limit validation."
+          "notes": "solver.cpp:418,473 uses Newtonian/Fourier flux and :658\u2013673 projects wall shear tangentially. Laminar NACA Cd\u2248405\u2013532 and Re20 Cd\u22482028 demonstrate major physical failure independently of this source feature."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 3,
-          "notes": "LU-SGS-like pseudo-time path exists, yet currentCFL is forced to at least 10 and 2,000-step finals do not meet supplied steady controls."
+          "notes": "solver.cpp:685\u2013720 uses the case ramp and cflCap, with an optional max-steps override, then checks residual reduction at :809\u2013815; main.cpp:192\u2013196 reports converged even after exhausting the budget. Do not conflate initialization of currentCFL with the per-step steady ramp."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 3,
-          "notes": "True BDF2 outer/inner source structure exists and results reach t=300, but ten fixed inner iterations and final ratio 0.156 miss requested 0.001."
+          "notes": "solver.cpp:823\u2013829 caps inner iterations at 10 and :848\u2013855 applies frozen-history BDF2; checkpoint final inner ratio0.156 misses target0.001. Individual per-step ratios are unavailable and the historic binary is not independently hashed."
         },
         {
           "id": "cfd.mpi_partition",
@@ -182,22 +182,22 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 5,
-          "notes": "All eight historical final directories and report pass explicit validator invocation (RC 0)."
+          "score": 4,
+          "notes": "Prior historical validator reported all eight layouts passing, but status claims for the M2-independent laminar and Re20 results are inconsistent with the selected force histories; correct schema is not convergence."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 5,
-          "notes": "Explicit eight-directory historical validation passed (RC 0)."
+          "notes": "Prior historical eight-directory validator exited 0; that establishes structural output compliance only. Evaluator clean build succeeded without a CFD rerun."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 2,
-          "notes": "Structural completion is present, but laminar and Re20 residuals grow/plateau after 2,000 steps; Re200 has a noncompliant final inner solve."
+          "notes": "Checkpoint 52a1e520: all three laminar NACA forces end at Cd\u2248405\u2013532 and still rise; Re20 Cd\u22482028; Re200 final ratio0.156 misses0.001. Metadata marks these successful despite their distinct limitations."
         },
         {
           "id": "res.plausibility",
@@ -210,15 +210,15 @@
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 4,
-          "notes": "56 historical manifest-traced figures include Mach/pressure and Re200 vorticity; result commit excludes them because report.tex does not include figures."
+          "score": 3.5,
+          "notes": "52a1e520 contains 56 separately delivered manifest-listed figures, although five-page curated report omits them. Re200 force graph has readable late lift but late drag is compressed by startup extremes."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Clear formulas and limitations, but it calls all runs converged/periodic despite weak steady convergence and metadata says Roe while source uses Rusanov."
+          "score": 2.5,
+          "notes": "6b376564 report discloses 10-inner cap and underdeveloped laminar cases, but asserts steady second order after step200 and presents an incorrect rank comparison table; its Re200 St estimate has no numeric value."
         },
         {
           "id": "res.traceability",
@@ -228,7 +228,7 @@
           "notes": "52a1e520 includes raw plots and history manifest, but report.tex:159\u2013166 misstates np2/4/8 step200 Cd\u22480.116; checkpoint force data give 0.5071/0.5065/0.5080. The 0.116 value belongs to np2 step2000. No specific figure mismatch or fabrication inferred."
         }
       ],
-      "overall_score": 3.2,
+      "overall_score": 2.85,
       "disqualification_flags": []
     }
   },
@@ -241,21 +241,21 @@
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 8,
-        "notes": "Documented CMake/CLI and complete schema outputs; clean evaluator build and bad-input run not repeated."
+        "notes": "Immutable clean build passed in restricted cfd-bench; CTest has no registered tests. Required CLI and historical schema pass documented; bad-input execution not independently repeated."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 8,
-        "notes": "CGNS unstructured reader, geometry and adjacency code are present."
+        "notes": "mesh.cpp:62\u2013146 reads multizone CGNS TRI/QUAD/BAR elements and builds geometry/adjacency. Full mesh is broadcast to all ranks during setup and retained through iterations."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 12,
-        "notes": "Conservative FV, Rusanov flux and BC branches are present; source inspection only."
+        "notes": "solver.cpp face assembly uses Rusanov and no-slip/slip/farfield branches; report correctly names Rusanov while metadata misnames Roe. Independent conservation test not run."
       },
       {
         "id": "second_order",
@@ -269,14 +269,14 @@
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 6,
-        "notes": "Viscous formulation exists but submitted laminar convergence is weak."
+        "notes": "solver.cpp:418,473 implements Newtonian/Fourier flux and :658\u2013673 computes tangential shear; supplied viscous histories are physically implausible."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 9,
-        "notes": "LU-SGS/BDF2 structures exist; steady controls are overridden and Re200 final inner ratio is 0.156 versus 0.001 target."
+        "notes": "Steady LU-SGS and BDF2 history/inner structure exist; main.cpp assigns converged after steady budget exhaustion, Re200 hard caps 10 and last recorded ratio0.156 misses0.001; exact historic binary unbound."
       },
       {
         "id": "mpi",
@@ -304,7 +304,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 4,
-        "notes": "Reasonable modular C++ organization, though interfaces remain compact and case-specific in places."
+        "notes": "Separate case input, mesh, partition, physics, solver and output modules exist; implementation and geometry remain 2-D-specific."
       }
     ]
   },

@@ -7,35 +7,35 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Conservative perfect-gas formulation and report equations are present."
+      "notes": "report.tex:16\u201330 gives compressible perfect-gas equations and constant Reynolds-based viscosity; physics.hpp/solver.cpp contain corresponding flux and conservative state definitions."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "CGNS read, geometry and cell-face graph code are present."
+      "notes": "mesh.cpp:62\u2013146 reads CGNS multi-zone TRI/QUAD/BAR geometry and builds adjacency; main.cpp:73\u2013143 broadcasts the complete mesh to all ranks."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 4,
-      "notes": "Face accumulation plus global norm reduction is implemented."
+      "notes": "solver.cpp:402 onward assembles face contributions and reductions; interior call is Rusanov. No independent conservation or numerical convergence test was run."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 3,
-      "notes": "Rusanov is the actual interior-face flux. Roe implementation exists but solver.cpp calls Rusanov; metadata claiming Roe/Harten-Yee is inaccurate."
+      "notes": "solver.cpp:402 onward calls rusanovFlux; report.tex:68\u201372 correctly states Rusanov, whereas metadata labels Roe/Harten-Yee. Do not infer a report-only DQ6 from metadata alone."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Farfield, slip and no-slip branches plus boundary-value output semantics are implemented."
+      "notes": "report.tex:76\u201382 and solver.cpp boundary branches cover farfield, slip and no-slip; output.cpp:116\u2013125 records explicitly constructed boundary velocity, not undisclosed adjacent-cell velocity."
     },
     {
       "id": "cfd.reconstruction",
@@ -56,21 +56,21 @@
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 3,
-      "notes": "Newtonian/Fourier code exists, but underdeveloped steady laminar results limit validation."
+      "notes": "solver.cpp:418,473 uses Newtonian/Fourier flux and :658\u2013673 projects wall shear tangentially. Laminar NACA Cd\u2248405\u2013532 and Re20 Cd\u22482028 demonstrate major physical failure independently of this source feature."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 3,
-      "notes": "LU-SGS-like pseudo-time path exists, yet currentCFL is forced to at least 10 and 2,000-step finals do not meet supplied steady controls."
+      "notes": "solver.cpp:685\u2013720 uses the case ramp and cflCap, with an optional max-steps override, then checks residual reduction at :809\u2013815; main.cpp:192\u2013196 reports converged even after exhausting the budget. Do not conflate initialization of currentCFL with the per-step steady ramp."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 3,
-      "notes": "True BDF2 outer/inner source structure exists and results reach t=300, but ten fixed inner iterations and final ratio 0.156 miss requested 0.001."
+      "notes": "solver.cpp:823\u2013829 caps inner iterations at 10 and :848\u2013855 applies frozen-history BDF2; checkpoint final inner ratio0.156 misses target0.001. Individual per-step ratios are unavailable and the historic binary is not independently hashed."
     },
     {
       "id": "cfd.mpi_partition",

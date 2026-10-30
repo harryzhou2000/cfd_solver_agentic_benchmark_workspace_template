@@ -6,22 +6,22 @@
       "id": "res.contract",
       "title": "Output contract compliance",
       "weight": 0.2,
-      "score": 5,
-      "notes": "All eight historical final directories and report pass explicit validator invocation (RC 0)."
+      "score": 4,
+      "notes": "Prior historical validator reported all eight layouts passing, but status claims for the M2-independent laminar and Re20 results are inconsistent with the selected force histories; correct schema is not convergence."
     },
     {
       "id": "res.validator",
       "title": "Automated validator results",
       "weight": 0.1,
       "score": 5,
-      "notes": "Explicit eight-directory historical validation passed (RC 0)."
+      "notes": "Prior historical eight-directory validator exited 0; that establishes structural output compliance only. Evaluator clean build succeeded without a CFD rerun."
     },
     {
       "id": "res.completion",
       "title": "Case completion and convergence",
       "weight": 0.2,
       "score": 2,
-      "notes": "Structural completion is present, but laminar and Re20 residuals grow/plateau after 2,000 steps; Re200 has a noncompliant final inner solve."
+      "notes": "Checkpoint 52a1e520: all three laminar NACA forces end at Cd\u2248405\u2013532 and still rise; Re20 Cd\u22482028; Re200 final ratio0.156 misses0.001. Metadata marks these successful despite their distinct limitations."
     },
     {
       "id": "res.plausibility",
@@ -34,15 +34,15 @@
       "id": "res.visualization",
       "title": "Visualizations",
       "weight": 0.15,
-      "score": 4,
-      "notes": "56 historical manifest-traced figures include Mach/pressure and Re200 vorticity; result commit excludes them because report.tex does not include figures."
+      "score": 3.5,
+      "notes": "52a1e520 contains 56 separately delivered manifest-listed figures, although five-page curated report omits them. Re200 force graph has readable late lift but late drag is compressed by startup extremes."
     },
     {
       "id": "res.report",
       "title": "Report quality and honesty",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Clear formulas and limitations, but it calls all runs converged/periodic despite weak steady convergence and metadata says Roe while source uses Rusanov."
+      "score": 2.5,
+      "notes": "6b376564 report discloses 10-inner cap and underdeveloped laminar cases, but asserts steady second order after step200 and presents an incorrect rank comparison table; its Re200 St estimate has no numeric value."
     },
     {
       "id": "res.traceability",
@@ -79,5 +79,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.2
+  "overall_score": 2.85
 }
