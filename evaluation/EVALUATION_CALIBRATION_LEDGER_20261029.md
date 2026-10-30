@@ -97,7 +97,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_glm53-04_adde03` | fully reviewed, qualified: 85/100, DQ7; historic production-source attribution unresolved |
 | `codex_generic_opus46-01_3a72ea` | fully reviewed, qualified: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
 | `codex_generic_opus46-02_d8fed8` | fully reviewed, qualified: 35/100, mandatory placeholder rejection, DQ2 and TASK full mesh; binary/force provenance unresolved |
-| `codex_generic_opus5-01_83492a` | partial: 90/100, DQ not established; Re200 binary/fallback attribution unresolved |
+| `codex_generic_opus5-01_83492a` | fully reviewed, qualified: 90/100, DQ not established; Re200 binary/fallback attribution unresolved |
 | `codex_generic_opus5-02_cac77b` | partial: all cases, PDF and source/rubric examined; historical Re200 binary and final DQ adjudication remain uncertain |
 | `codex_generic_sonnet46-01_ac6940` | partial: all cases, PDF, source and rubric reviewed; DQ7/TASK full mesh; historic binary binding and remaining DQ uncertain |
 | `codex_generic_sonnet46-02_dac37b` | partial: all cases, PDF, source/rubric checked; DQ6/DQ7 and placeholder rejection; exact historical binary remains unbound |
@@ -749,6 +749,8 @@ opus5-01 steady-case checkpoint: all seven b350651 selected raw force tails and 
 
 
 opus5-01 available criterion/DQ checkpoint: all 27 review points and ten rubric sections carry criterion-specific evidence. Main.cpp:285–325 releases root global mesh before iteration; METIS/neighbor halos exist. plot_results.py:123–139 maps each split triangle to its original cell; no specific unrelated-field or variable mismatch established. Seven steady packages identify b350651; Re200 older exact binary and full-run fallback counts remain unverified, and no exhaustive external similarity search was performed. No DQ is established; record stays partial for those limits. Total90, Re200 case2 (late-drag floor), M015 lam4, other cases as previously documented. No Re200 rerun.
+
+opus5-01 qualified full review: all ten sections, eight cases, 27 review points and 13 DQ rules reviewed to available evidence; 90/100 and no established DQ unchanged. Re200 case remains 2 under the explicit late-drag plot floor despite raw oscillatory force evidence. Seven steady packages identify b350651; the contestant provenance document places the earlier Re200 executable at a628093 or before but does not bind its exact binary or full-run fallback counts. These are explicit remaining qualifications, not grounds for invented certainty; prior partial wording is historical. No CFD/rank/Re200 rerun; both gates required.
 
 
 opus5-02 initial Re200 correction: old case note cited St0.195 and Cl amplitude0.65 from report.tex:1655–1657 as if computed; these are references. Immutable 6f43c42 generated/re200_analysis.tex gives actual St0.1801, Cd mean1.2424, Cl amplitude0.4902, RMS0.3454 over t150–300; force_table.tex:14 mean Cl−0.00929 uses last25%. Selected raw t>=150 Cl−0.48836–0.49211, Cd1.21216–1.27580, FFT lift peak0.179988. Metadata revision339d65f gives 169/30000 misses, not a majority. Single report force figure startup drag≈31 flattens late drag; Re200 score2 retained under explicit late lift/drag floor. Other source/rubric/DQ partial; no Re200 rerun.

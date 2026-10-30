@@ -85,7 +85,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-No disqualification has been established in the evidence reviewed so far. The remaining triggers and production provenance are under review; no exhaustive external similarity search was performed.
+No numbered disqualification has been established in the available evidence. All triggers have been assessed with historical Re200 production provenance qualified; no exhaustive external similarity search was performed.
 
 ## Metadata answers & session selection
 
@@ -99,7 +99,7 @@ The evaluator independently rebuilt and ran eight bounded NACA/unit verification
 
 ## Verdict
 
-Score: **90/100; disqualified: false (partial calibration).** This is a strong, structurally valid and substantively credible original finite-volume submission with complete delivered packages, validated report, and an honest account of the M2 plateau and Re200 accuracy limitation. The primary deductions are limited independent reproduction, the M2 residual shortfall, modest Re200 under-resolution, and 2-D-only geometry scope.
+Score: **90/100; disqualified: false (qualified full calibration).** This is a strong, structurally valid and substantively credible original finite-volume submission with complete delivered packages, validated report, and an honest account of the M2 plateau and Re200 accuracy limitation. The primary deductions are limited independent reproduction, the M2 residual shortfall, modest Re200 under-resolution, and 2-D-only geometry scope.
 
 
 ## Re200 visualization floor — 2026-10-30
@@ -136,3 +136,8 @@ Each steady case was compared with its selected b350651 metadata, force tail and
 ## Available criterion and DQ review — 2026-10-30
 
 All review points and rubric sections now cite criterion-specific source, selected cases or their limits. No disqualification is established from the available evidence: root-only mesh preprocessing releases the global mesh, METIS and neighbor halos are present, and the plotting script maintains triangle-to-source-cell mapping when splitting quads. Seven steady packages identify revision b350651; their rank and force-window evidence is recorded. Re200’s older production binary and full-run positivity fallback telemetry remain unbound/unmeasured, so this record is intentionally partial rather than presented as completely verified. No exhaustive external code-similarity search or Re200 rerun.
+
+
+## Qualified full review — 2026-10-31
+
+All ten rubric sections, eight case scores, 27 review points and 13 DQ rules were assessed to the available evidence limit. Final 90/100, no established DQ; Re200 case remains capped at 2 because the contestant-delivered plot does not resolve late drag, while its raw lift period and force ranges show an oscillatory attempt. Seven steady packages identify `b350651`; the Re200 executable was built at `a628093` or earlier per the contestant provenance document, but the exact historical binary and full-run fallback counts remain unbound. Prior partial sections are historical checkpoints; no CFD, rank or Re200 rerun.
