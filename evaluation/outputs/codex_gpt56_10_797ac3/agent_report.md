@@ -1,5 +1,7 @@
 # Agent Evaluation Report — codex/gpt56/10
 
+> **Calibration in progress:** The historical DQ7 rationale below relies only on missed steady residual targets and is not independently supported by that fact: bounded plateaus are permitted. The terminal reported forces are flat, while the Re200 lift amplitude decays. Rank, source and final DQ adjudication remain under review; the earlier verdict is provisional.
+
 ## Evidence and method
 
 The curated submission is commit `02007d6f4ef575f88a24c33cfb05bb8ae9289b67`; final-tip audit passed with no violations. I reviewed submitted source/report, the eight workspace result packages, and production root `01a00e56-e6e8-7411-8fce-12931bff5c71` plus its 47 descendants from workspace-local `.sessions`. The explicit examiner invocation passed all eight packages and the report. No evaluator solver run was made; Re200 was not rerun.
@@ -30,7 +32,7 @@ The selected session ran 2026-08-17T06:10:24Z to 2026-08-26T06:32:43Z. Its extra
 | Extensibility | 5/5 |
 | **Total** | **90/100** |
 
-Per-case scores are recorded in `agent_scores.json`: the seven steady cases score 1–2 because of the false successful statuses; Re200 scores 5 for the delivered evidence.
+Per-case scores are recorded in `agent_scores.json`: the seven steady cases score 1–2 because of the false successful statuses; Re200 was retrospectively capped at 2; its late force panel exists but does not resolve the oscillations. Full numerical adjudication remains pending.
 
 ## Disqualification assessment
 
