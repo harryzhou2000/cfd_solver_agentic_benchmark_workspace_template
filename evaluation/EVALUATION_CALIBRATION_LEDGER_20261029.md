@@ -83,7 +83,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_07_aeae21` | fully reviewed: 68/100, DQ7 and TASK full mesh; three reference cases |
 | `codex_dsv4_flash_08_efba3c` | fully reviewed; 76→71, DQ7 and case evidence corrected |
 | `codex_dsv4_flash_09_526316` | fully reviewed: 55→48, DQ false; both gates pass |
-| `codex_dsv4_flash_10_6468ba` | unreviewed |
+| `codex_dsv4_flash_10_6468ba` | partial: Re200/incorrect claimed BDF2 identified; DQ6 and full review pending |
 | `codex_dsv4_flash_11_6e6ac8` | unreviewed |
 | `codex_dsv4_flash_12_7e965b` | unreviewed |
 | `codex_dsv4_flash_14_80096b` | unreviewed |
@@ -458,3 +458,8 @@ dsv4_flash_09 report trace checkpoint: rubric 51→49 provisional, report/viz 3�
 ## dsv4_flash_09 full calibration — 2026-10-30
 
 Rubric 55→48/100; DQ remains false; case scores remain 1,1,1,0,0,0,1,0. Ten sections/27 review points now cite criterion evidence. All seven canonical steady statuses fail, four force histories end NaN; Re200 only partial t=1 field. Curated immutable clean configure fails due missing src/restart.cpp; post-session untracked placeholder and historical raw copy do not repair submitted tip. BDF history double-shift and transient stale wall-gradient defects documented above; restart lacks time and prior state. Report narrative falsely claims valid 8-rank short test with Cd≈0.11/Cl≈0 while its plot and a matching failed diagnostic show Cd≈-455/Cl≈403 and residual >10^13; metadata explicitly reports failure, so no DQ7, and plot-source uniqueness is insufficient for DQ8. Six surviving 8-rank diagnostics rank-0 owned/ghost 2613/95 versus report table 2602/34. Roe implemented/called but metadata incorrectly labels Rusanov. METIS present, full preprocessing mesh reset before solve, limiter active. No CFD rerun, external similarity search, independent rank comparison or exhaustive pixel audit; both gates pass.
+
+
+## dsv4_flash_10 partial Re200/source review — 2026-10-30
+
+Immutable attempt 7152874 forces.csv SHA eba91f39425d2e1a0d7045ddf1814257e1a2934d477272fdecb86d9e71a35ab6 has 30000 steps to t300; t≥200 Cd mean 1.0570129, Cl range -0.0406881–0.0420201, positive crossings 213.7033, 231.3543, 248.8606, 266.1942, 283.3729 imply period 17.18–17.65/frequency ~0.057. Accepted PDF p17 renders wake velocity/pressure contours, correcting old false missing-contour claim; startup Cd≈28.8 compresses late force oscillations, so Re200 case stays 2 pending a separate qualifying late-force plot. Report.tex:304–307 claims BDF2 1.5U−2Un+0.5Unm1; actual solver.cpp:666–673,1435–1437 computes 1.5(U−Un)+0.5(U−Unm1)=2U−1.5Un−0.5Unm1, a 2.5× derivative for linear U rather than BDF2. Production metadata commit acd611d is ancestor of raw attempt and shares solver.cpp blob 8e18821feaa67b4424a7029619ef88a5010d210f with curated tip. Implemented-residual target fraction does not establish strict BDF2 misses. DQ6 precedent and remaining source/rubric pending; both gates pass, no rerun.
