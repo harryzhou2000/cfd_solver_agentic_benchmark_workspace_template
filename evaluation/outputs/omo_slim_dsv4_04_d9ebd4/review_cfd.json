@@ -34,8 +34,8 @@
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Farfield, reflected slip and no-slip boundary states exist; surface writer outputs documented boundary values, but no credible laminar case validates them."
+      "score": 3.5,
+      "notes": "Farfield and mirrored wall ghost states exist, but output_writer.cpp:278\u2013287 reports the no-slip ghost velocity itself as a boundary value rather than the zero face average; Re20 surface rows are nonzero."
     },
     {
       "id": "cfd.reconstruction",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.45
+  "overall_score": 3.41
 }

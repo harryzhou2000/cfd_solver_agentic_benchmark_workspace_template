@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T16:53:03.254138+00:00
+Generated: 2026-10-30T16:54:22.327590+00:00
 
-**Overall score: 3.45**
+**Overall score: 3.41**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -21,7 +21,7 @@ Generated: 2026-10-30T16:53:03.254138+00:00
 | 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | flux.cpp implements Rusanov and Roe/Harten–Yee with fallback; M2 metadata selects Roe. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | Farfield, reflected slip and no-slip boundary states exist; surface writer outputs documented boundary values, but no credible laminar case validates them. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 3.5 | Farfield and mirrored wall ghost states exist, but output_writer.cpp:278–287 reports the no-slip ghost velocity itself as a boundary value rather than the zero face average; Re20 surface rows are nonzero. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
 | 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | residual.cpp invokes least-squares gradients and reconstructed states; no successful production output demonstrates second-order accuracy. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T16:53:03.254138+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.45
+- Overall score (0-5): 3.41
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
