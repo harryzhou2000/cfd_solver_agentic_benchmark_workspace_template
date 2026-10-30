@@ -14,56 +14,56 @@
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "README documents case/config/output CLI and source contains argument validation."
+      "notes": "main.cpp:824\u2013836 parses solve, case/output, restart and report-level; :694\u2013734 restart loads current state. It omits physical time and previous BDF state."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 3,
-      "notes": "Functional but largely monolithic solver/src/main.cpp; tools/report.py and validation helper are separated."
+      "notes": "Main solver/mesh/numerics are concentrated in main.cpp; reporting is in a separate script."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 3,
-      "notes": "Trust policy applied; no internal wrapper/executable call seen, but no external provenance investigation is performed."
+      "notes": "No direct internal solver wrapper found; external similarity investigation excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "CGNS/config-driven case handling; no two-filename-only branches identified."
+      "notes": "JSON configuration and CGNS path determine cases and mesh; no two-filename-only branch found."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "Source/report describe METIS owned/ghost partitioning, neighbor exchange, reductions and rank-local data; attempt evidence contains np=1/8 comparisons."
+      "notes": "main.cpp:842\u2013858 root preprocessing mesh is released before solve; METIS owned/ghost and neighbour exchange present. Historical np1/8 force pairs close."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "Positivity fallback, finite checks and documented robust first-order predictor schedule."
+      "notes": "Admissible-state backtracking and finite/mesh checks exist; MPI_Abort handles exceptions. No independent memory stress run."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "CTest reports no registered tests; independent clean build and historical examiner evidence do not by themselves establish physics."
+      "score": 3,
+      "notes": "Clean immutable-source build succeeds; CTest finds no registered tests. Prior official validator is structural and does not establish physics."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Curated result commit audit passed with 57 allowed source/report/figure paths and no prohibited paths."
+      "notes": "Curated source/report assets are retained; raw outputs and manifests reside in original attempt297126a, not curated tip."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.73
+  "overall_score": 3.63
 }

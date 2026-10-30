@@ -7,35 +7,35 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Report/source document compressible governing variables and nondimensional controls."
+      "notes": "main.cpp uses compressible conservative ideal-gas state and report.tex:44\u201353 gives Euler and viscous formulation."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "CGNS unstructured mesh, adjacency and boundary families are implemented/documented."
+      "notes": "CGNS unstructured cell/face geometry and boundary family mapping, root METIS partition and owned/ghost local geometry are implemented."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Cell-centered conservative FV residual assembly is documented and present in source."
+      "score": 3.5,
+      "notes": "main.cpp:465\u2013520 sums oriented face residual and MPI global norms; :1029 records first-order steady residual, and most steady updates use first order as disclosed."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Rusanov numerical flux is explicit; diffusive but legitimate."
+      "notes": "main.cpp face_flux uses Rusanov local Lax\u2013Friedrichs; it is diffusive compared with less dissipative approximate Riemann solvers."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Farfield, slip and no-slip adiabatic treatments are documented with reported gates."
+      "notes": "main.cpp:487\u2013505 handles slip/no-slip wall conditions and wall gradients; surface rows report boundary states as documented."
     },
     {
       "id": "cfd.reconstruction",
@@ -48,36 +48,36 @@
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Limiter/positivity controls are documented as production-active."
+      "score": 3,
+      "notes": "Steady limited high-order face states active only first inner sweep each25th outer step, with positivity backtracking; transient limiter coefficient is unity and admissibility fallback active, explicitly disclosed."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Newtonian/Fourier treatment and tangential skin-friction reporting are described."
+      "score": 3,
+      "notes": "main.cpp:628\u2013638 projects one-sided wall shear tangentially. The strongly elevated NACA viscous drag warrants accuracy concern; exact source/binary attribution remains qualified."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Local block-Jacobi implicit relaxation and CFL/local controls are described; not a coupled LU-SGS method."
+      "score": 3.5,
+      "notes": "Local block-Jacobi CFL march implemented; steady stop main.cpp:1051\u201355 checks residual target without checking both force histories."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 4,
-      "notes": "Reported BDF2 dual-time loop reaches t=300 with frozen histories, target-miss and inner-iteration statistics in immutable result evidence."
+      "notes": "main.cpp:926\u2013976 uses full BDF residual and rejects target misses. Attempt metadata reports zero misses and history supports t=300 periodic lift; exact historical binary unbound."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 4,
-      "notes": "METIS, halo exchange, reductions and np=1/8 evidence are reported."
+      "notes": "METIS partitions and neighbour exchange; np1/8 historic NACA Cd0.0658569/0.0658558 and Re20 Cd4.70139/4.70140 are close."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.82
+  "overall_score": 3.53
 }

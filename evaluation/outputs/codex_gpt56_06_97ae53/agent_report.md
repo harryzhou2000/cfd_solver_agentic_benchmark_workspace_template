@@ -24,7 +24,7 @@ Source inspection of `solver/src/main.cpp` found `METIS_PartGraphKway` (lines 25
 
 ## Scores and verdict
 
-The provisional rubric is **84/100**. The old 5/5 case verdict and later uniform committed-figure caps were not supported: the report contains the figures, and the seven steady cases have now been individually assessed using historical attempt histories and physical qualifications. Re200 remains capped at 2 because late drag is unreadable. Source, DQ and complete review remain in progress; structural checks do not establish accuracy.
+The provisional rubric is **76.5/100**. The old 5/5 case verdict and later uniform committed-figure caps were not supported: the report contains the figures, and the seven steady cases have now been individually assessed using historical attempt histories and physical qualifications. Re200 remains capped at 2 because late drag is unreadable. Source, DQ and complete review remain in progress; structural checks do not establish accuracy.
 
 The historical DQ verdict was false. Current DQ assessment remains partial: report.tex:46–47 discloses the source’s mostly first-order steady fallback, while transient source checks the full BDF residual. Other triggers and production provenance are still being assessed; external similarity is outside the trust policy.
 
