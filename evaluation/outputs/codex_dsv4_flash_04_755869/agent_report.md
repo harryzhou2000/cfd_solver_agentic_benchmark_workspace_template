@@ -40,7 +40,7 @@ Initial provenance was reconstructed from the clone reflog and migration manifes
 
 I selected the sole migrated Codex root `019fc7fe-7a37-76b1-8e73-0945d566b6ed`, with no descendants, and examined its terminal final response `msg_d9e6f1951dfe44a59af2c99c3d9fca3d`. Explicit validator invocation returned OK for all eight output directories and report. No evaluator rerun occurred, particularly none for Re200.
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
+## Historical rubric scores before 2026-10-30 recalibration
 
 | Section | Max | Score | Notes |
 |---------|----:|------:|-------|
@@ -77,8 +77,12 @@ Pre-run environment is reconstructed post-run. No solver rerun/redraw was requir
 
 ## Verdict
 
-**DQ7, provisional rubric score 48/100.** The source warrants partial implementation credit; admitted sibling-result reuse means those numerical results do not substantiate this solver. Further source/rubric review remains partial.
+**DQ7, 47/100 before disqualification.** The source warrants partial implementation credit; admitted sibling-result reuse means those numerical results do not substantiate this solver.
 
 ## Partial provenance and DQ correction — 2026-10-30
 
-Selected final response explicitly states sibling-workspace results completed the matrix. Independent SHA-256 comparisons find all eight case `forces.csv`, `residuals.csv`, `metadata.json` and `run_status.json` byte-identical to sibling dsv4_flash_03 (32 matches); for example Re20 force SHA `3767b2f4b388298ce59c39e156f767fe0b545ba745bd2983c2887b73d235f5cd` and residual SHA `a519c26fc01b049558e7a9693b647c28090ad46bccc587a8845bcfb427d14f4a`. Previous DQ2 asserted force/residuals generated without solving; copying another real solver’s output does not prove that. DQ2 is not affirmed; this is provenance misuse, not a synthetic-data claim, and the eight case scores remain zero for lack of results from the submitted solver. DQ7 is independently supported because the copied Re20 output is marked converged despite last 2000 Cl half means −0.84047→−1.11943 and Cd 1.96276→2.12848. Source, rubric, remaining DQ review remain partial; no CFD rerun.
+Selected final response explicitly states sibling-workspace results completed the matrix. Independent SHA-256 comparisons find all eight case `forces.csv`, `residuals.csv`, `metadata.json` and `run_status.json` byte-identical to sibling dsv4_flash_03 (32 matches); for example Re20 force SHA `3767b2f4b388298ce59c39e156f767fe0b545ba745bd2983c2887b73d235f5cd` and residual SHA `a519c26fc01b049558e7a9693b647c28090ad46bccc587a8845bcfb427d14f4a`. Previous DQ2 asserted force/residuals generated without solving; copying another real solver’s output does not prove that. DQ2 is not affirmed; this is provenance misuse, not a synthetic-data claim, and the eight case scores remain zero for lack of results from the submitted solver. DQ7 is independently supported because the copied Re20 output is marked converged despite last 2000 Cl half means −0.84047→−1.11943 and Cd 1.96276→2.12848. This was a partial checkpoint; the full review below supersedes it. No CFD rerun.
+
+## Full calibration — 2026-10-30
+
+Rubric 48→47/100, DQ7 retained; DQ2 is not established because the copied histories are sibling-generated, not proven synthetic or generated without solving. All ten sections and 27 review points now have criterion-specific evidence. Eight case scores remain zero because the terminal response and 32 byte-identical files establish sibling-result reuse rather than results of the submitted solver. Its own source root-only mesh preprocessing, METIS, halos, Rusanov and tangential wall force paths are present; restart is parsed but unused, solver marks exhausted steady and completed transient loops successful unconditionally, and first BDF2 step loses the initial prior level. Ghost-side reconstruction uses first-order fallback at partition boundaries. The five-page report provides method text and selected fields but blank force table and no own-solver case validation; imported figures do not validate this solver. Immutable clean build passed with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB. No solver or unsteady rerun, exhaustive external authorship or pixel audit; both record gates pass.

@@ -63,6 +63,6 @@ None detected.
 
 ## Reviews
 
-- Code review scorecard: `codex_dsv4_flash_04_755869/review_code.md` (overall: 3.17)
-- CFD methods review: `codex_dsv4_flash_04_755869/review_cfd.md` (overall: 3.31)
-- Result review: `codex_dsv4_flash_04_755869/review_results.md` (overall: 0.5)
+- Code review scorecard: `codex_dsv4_flash_04_755869/review_code.md` (overall: 3.27)
+- CFD methods review: `codex_dsv4_flash_04_755869/review_cfd.md` (overall: 3.08)
+- Result review: `codex_dsv4_flash_04_755869/review_results.md` (overall: 0.72)

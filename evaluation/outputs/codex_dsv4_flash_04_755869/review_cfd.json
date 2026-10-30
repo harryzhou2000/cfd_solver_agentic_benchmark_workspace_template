@@ -7,77 +7,77 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Governing-flow source exists per retained review."
+      "notes": "Conservative perfect-gas Rusanov, Newtonian/heat and BDF source paths exist, though own case evidence is absent."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "CGNS and distributed geometry source exists."
+      "notes": "mesh_reader.cpp and partition.cpp read unstructured CGNS and call METIS; main.cpp scopes global mesh on root before loading rank-local data."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 3,
-      "notes": "Residual and BC source exists; provenance limits result credit."
+      "notes": "solver.cpp:135\u2013160 accumulates face residuals and viscous terms; no independent end-to-end own-solver results establish correctness."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Flux source exists; no independent physical rerun was performed."
+      "score": 3.5,
+      "notes": "solver.cpp uses Rusanov and report.tex:32 describes it correctly; solver has no production validation from its own final cases."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Boundary-condition implementation is present in source."
+      "score": 3.5,
+      "notes": "solver.cpp contains exact wall pressure and no-slip/farfield branches; independent own-solver case evidence is missing."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Reconstruction source exists."
+      "score": 3,
+      "notes": "Least-squares reconstruction exists, but solver.cpp:145 sets ghost-side limiter to zero and exchanges state only, limiting partition-boundary order."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Limiter source exists."
+      "score": 3.5,
+      "notes": "solver.cpp:75\u2013108 applies Barth-type bounds and positivity fallback to owned cells; ghost-side limiter defaults zero."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 3,
-      "notes": "Viscous source exists; no valid self-produced case evidence."
+      "notes": "Newtonian/heat face path exists; forces.cpp:72\u201380 explicitly projects wall traction tangentially. No reliable own-solver case validation."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Implicit steady source exists; no independent verification run."
+      "score": 2.5,
+      "notes": "LU-SGS steady loop exists; solver.cpp:422\u2013430 unconditionally marks max-step exhaustion converged, and no own case converged evidence was delivered."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 2,
-      "notes": "BDF2 source exists but no valid submitted Re200 evidence; never rerun."
+      "score": 1.5,
+      "notes": "solver.cpp:438\u2013533 has BDF2/inner target path, but :508\u2013513 overwrites previous time level after bootstrap and :533 labels all horizons periodic; no own Re200 result."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 3,
-      "notes": "MPI source exists but result provenance is invalid."
+      "notes": "METIS, root-only global preprocessing, local mesh, state halos and reductions exist; submitted rank/result files are from sibling and do not validate this solver."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.31
+  "overall_score": 3.08
 }
