@@ -2,7 +2,7 @@
 
 ## Verdict
 
-The immutable curated submission is `0065953716e70f087f5d6d4fb512bc7e2fe2ba97` on `codex/glm52-m3/05`, derived from `codex/glm52-m3/init` at `a14f203babe6794ad032aea760aed8e302e62b5a`. Its 100-point rubric score is 60/100, but it is disqualified: DQ trigger 10 is established by the submitted source. `solver.cpp` sets `startup_steps=100000` and leaves reconstruction limiter `phi` zero in the steady production path, and explicitly zeros `phi` in the transient path. The report simultaneously presents piecewise-linear reconstruction and Venkatakrishnan limiting as the numerical scheme while admitting first-order production operation.
+The immutable curated submission is `0065953716e70f087f5d6d4fb512bc7e2fe2ba97`. Its provisional rubric score is 57/100 and it is disqualified for trigger 7 and the separate TASK full-mesh prohibition. The prior trigger 10 is unasserted: report.tex:195–196 explicitly discloses first-order production, although second-order rubric deductions remain. Case/PDF and historical binary review is ongoing.
 
 ## Provenance and session selection
 
@@ -14,20 +14,19 @@ The sole workspace-local Codex root is `019fe861-1832-71b0-b1ae-2f9d13afd309` (B
 
 - `audit_submission_commit.py` passed against the exact result commit; `derive_run_id.py` produced `codex_glm52-m3_05_f094c1`.
 - The submitted `report.tex` compiled successfully with `pdflatex -interaction=nonstopmode -halt-on-error` in a disposable detached worktree at original attempt `be266cd83d8c1c7811050158d0b83acdc59ed8f2` (exit 0; six-page PDF). This is contestant-report evidence, not a rerun.
-- The required result packages are not tracked in either the curated commit or original attempt. An explicit read-only `validate_outputs.py` invocation stopped at missing `solver/results/naca0012_m015_inviscid/metadata.json`. The assistant's terminal claim that all eight pass is therefore unverified and contradicted by the immutable attempt tree.
-- No solver was rebuilt or rerun: the external symlink is dangling. No Re200 run, shortened run, restart, or substitute transient was performed.
-- Source inspection supports CGNS handling, METIS partitioning, neighbor `MPI_Isend/Irecv`, global reductions, LU-SGS, and a BDF2 dual-time path. Those source findings do not restore missing result deliverables.
+- Canonical raw packages are absent from the tracked attempt tree, but all eight remain in the original contestant workspace. Attempt commit `be266cd` run_manifest identifies the same paths, final coefficients and reductions; selected root validator calls at 03:41 and 03:43 UTC and final response at 03:44 UTC affirm these deliveries. Workspace files predate final response. Their hashes, coverage and physics are under independent review; exact historical binary is unbound.
+- No evaluator solver or Re200 rerun was performed. Source provides METIS and neighbor halos but retains a full mesh on every rank through solve.
 
 ## Scores and case findings
 
-The scorecard records code 3.29/5, CFD methods 3.31/5 and results 1.05/5. The 60/100 rubric gives source credit for mesh/finite-volume/viscous/implicit/MPI structure, while deducting for absent output-contract packages and disabled production spatial order. Each of the eight case scores is 1/5: report tables and selected figures are readable evidence of an attempt, but the required per-case CSV, metadata, surface, field, restart, diagnostics and log packages are absent. Re200 has report figures but no readable delivered transient package; it receives no execution-completeness credit and was not rerun.
+The provisional 57/100 rubric includes first-order limitations and full-mesh replication; the eight earlier case scores of 1/5 remain provisional until workspace-history and figure review is complete. Re20's last 400 workspace rows are visibly unsettled; Re200 metadata reports a last inner ratio 0.7 against target0.001.
 
 ## DQ assessment
 
-Only trigger 10 is found. It is direct source/report evidence, not an inference from poor convergence. All other triggers are recorded false where source disproves them or unverified where the missing raw deliverables prevent a finding; absence of evidence was not promoted to disqualification.
+Trigger 7 is supported by unsettled Re20 force history labeled converged and the Re200 final strict inner target miss labeled periodic/completed. Separately, each rank reads and retains the complete global mesh during solver iterations, violating TASK.md:46,227 despite METIS and neighbor halos. Trigger 10 is no longer asserted because report.tex:195–196 explicitly discloses first-order production; this does not restore second-order rubric credit.
 
 ## Limitations
 
-The raw data/manifest loss prevents independent validation of all numerical claims, figure-to-field provenance, MPI rank consistency, wall rows and Re200 controls. The attempted-source report compiles, but its PDF and raw inputs are deliberately not copied into the result commit or manager snapshot. The report's `\date{\today}` makes its rendered date non-reproducible, although compilation itself is reproducible from curated TeX and figures.
+Raw case files survive only in the original workspace and are not tracked in the attempt commit; manifest/session linkage supports delivery, but executable identity and full figure-to-data correspondence remain unverified. The accepted compiled-from-submission main PDF remains indexed; the separate workspace and historical PDFs require provenance review. No Re200 rerun.
 
 `run_identity.json` and `contestant_final_response.md` are unindexed sidecars. `cfdeval check` does not validate these unindexed sidecars; their hashes above are recorded separately for provenance.

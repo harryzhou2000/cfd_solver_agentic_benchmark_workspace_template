@@ -76,8 +76,8 @@
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 3,
-      "notes": "Source supports METIS partitions and neighbor halos; retained delivered evidence cannot verify rank consistency."
+      "score": 2.5,
+      "notes": "0065953 main.cpp:61\u201374 reads full CGNS mesh on every rank and retains it through the solver; :139 still uses it. Violates TASK.md:46,227 even with METIS and neighbor halos."
     }
   ],
   "disqualification_flags": [
@@ -87,5 +87,5 @@
       "evidence": "solver.cpp lines 421-423 sets startup_steps=100000 and scales phi to zero; lines 530 and 558 explicitly zero phi in transient. report.tex lines 193-196 admits first-order production mode."
     }
   ],
-  "overall_score": 3.22
+  "overall_score": 3.18
 }

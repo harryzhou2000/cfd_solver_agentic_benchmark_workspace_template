@@ -64,8 +64,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 3,
-          "notes": "METIS, neighbor Isend/Irecv and reductions are source-supported; no retained rank-comparison outputs validate behavior."
+          "score": 2.5,
+          "notes": "0065953 main.cpp:61\u201374 reads full CGNS mesh on every rank and retains it through the solver; :139 still uses it. Violates TASK.md:46,227 even with METIS and neighbor halos."
         },
         {
           "id": "code.robustness",
@@ -89,7 +89,7 @@
           "notes": "Readable C++17 code, but backup source copies and no reproducible final-result package reduce hygiene."
         }
       ],
-      "overall_score": 3.2,
+      "overall_score": 3.12,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -168,11 +168,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 3,
-          "notes": "Source supports METIS partitions and neighbor halos; retained delivered evidence cannot verify rank consistency."
+          "score": 2.5,
+          "notes": "0065953 main.cpp:61\u201374 reads full CGNS mesh on every rank and retains it through the solver; :139 still uses it. Violates TASK.md:46,227 even with METIS and neighbor halos."
         }
       ],
-      "overall_score": 3.22,
+      "overall_score": 3.18,
       "disqualification_flags": [
         {
           "id": 10,
@@ -239,7 +239,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 60,
+    "total_scored": 57,
     "sections": [
       {
         "id": "build_cli",
@@ -287,15 +287,15 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 7,
-        "notes": "METIS, halos and reductions are present; no submitted rank-count artifacts."
+        "score": 4,
+        "notes": "METIS and neighbor halos exist, but main.cpp:61\u201374 creates full mesh on every rank and keeps it through solve; TASK.md:46,227 prohibit this."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
         "score": 1,
-        "notes": "Only report claims/figures remain; every required raw output package is missing."
+        "notes": "Prior score provisional: original workspace has canonical packages corroborated by be266cd run_manifest and selected-session validator/final response. Re20 is demonstrably unsettled; Re200 final ratio0.7 misses0.001. Remaining case review pending."
       },
       {
         "id": "report_viz",
@@ -316,35 +316,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.002, CD=-0.015 at 0065953:solver/report/report.tex:83; residual history 0065953:solver/report/figures/naca0012_m015_inviscid_residual.png (referenced at solver/report/report.tex:103); force history 0065953:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:104); computed-field contour 0065953:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/report.tex:110). Score 1 retained after the post-processing audit. Prior case judgment: Report table and figures exist, but required package is absent and validator cannot read it."
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.002, CD=-0.015 at 0065953:solver/report/report.tex:83; residual history 0065953:solver/report/figures/naca0012_m015_inviscid_residual.png (referenced at solver/report/report.tex:103); force history 0065953:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:104); computed-field contour 0065953:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/report.tex:110). Score 1 retained after the post-processing audit. Prior case judgment: Report table and figures exist, but required package is absent and validator cannot read it. Recalibration in progress: original contestant workspace has this canonical package, corroborated by committed be266cd run_manifest and selected-session validation/final response. The old assertion of absolute absence was limited to the tracked tree; binary binding and case-specific review remain pending."
     },
     "naca0012_m080_inviscid": {
       "score": 1,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=0., CD=0.198 at 0065953:solver/report/report.tex:122; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/report.tex:127). Score 1 retained after the post-processing audit. Prior case judgment: Report Mach/pressure images and table remain; no raw output."
+      "notes": "NACA0012 M0.80 inviscid: numeric CL=0., CD=0.198 at 0065953:solver/report/report.tex:122; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/report.tex:127). Score 1 retained after the post-processing audit. Prior case judgment: Report Mach/pressure images and table remain; no raw output. Recalibration in progress: original contestant workspace has this canonical package, corroborated by committed be266cd run_manifest and selected-session validation/final response. The old assertion of absolute absence was limited to the tracked tree; binary binding and case-specific review remain pending."
     },
     "naca0012_m200_inviscid": {
       "score": 1,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=0., CD=0.030 at 0065953:solver/report/report.tex:133; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/report.tex:138). Score 1 retained after the post-processing audit. Prior case judgment: Report Mach/pressure images and table remain; no raw output."
+      "notes": "NACA0012 M2.00 inviscid: numeric CL=0., CD=0.030 at 0065953:solver/report/report.tex:133; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/report.tex:138). Score 1 retained after the post-processing audit. Prior case judgment: Report Mach/pressure images and table remain; no raw output. Recalibration in progress: original contestant workspace has this canonical package, corroborated by committed be266cd run_manifest and selected-session validation/final response. The old assertion of absolute absence was limited to the tracked tree; binary binding and case-specific review remain pending."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
-      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=0.046, CD=0.143 at 0065953:solver/report/report.tex:86; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/naca0012_m015_laminar_re5000_mach.png (referenced at solver/report/report.tex:149). Score 1 retained after the post-processing audit. Prior case judgment: Report images/table remain; no raw output."
+      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=0.046, CD=0.143 at 0065953:solver/report/report.tex:86; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/naca0012_m015_laminar_re5000_mach.png (referenced at solver/report/report.tex:149). Score 1 retained after the post-processing audit. Prior case judgment: Report images/table remain; no raw output. Recalibration in progress: original contestant workspace has this canonical package, corroborated by committed be266cd run_manifest and selected-session validation/final response. The old assertion of absolute absence was limited to the tracked tree; binary binding and case-specific review remain pending."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 1,
-      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.090, CD=0.067 at 0065953:solver/report/report.tex:87; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Report images/table remain; no raw output."
+      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.090, CD=0.067 at 0065953:solver/report/report.tex:87; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Report images/table remain; no raw output. Recalibration in progress: original contestant workspace has this canonical package, corroborated by committed be266cd run_manifest and selected-session validation/final response. The old assertion of absolute absence was limited to the tracked tree; binary binding and case-specific review remain pending."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=0.001, CD=0.652 at 0065953:solver/report/report.tex:88; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Report table only; no raw output or figures."
+      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=0.001, CD=0.652 at 0065953:solver/report/report.tex:88; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Report table only; no raw output or figures. Recalibration in progress: original contestant workspace has this canonical package, corroborated by committed be266cd run_manifest and selected-session validation/final response. The old assertion of absolute absence was limited to the tracked tree; binary binding and case-specific review remain pending."
     },
     "cylinder_m010_laminar_re20": {
       "score": 1,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-9.57, CD=-1.01 at 0065953:solver/report/report.tex:89; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/cylinder_m010_laminar_re20_mach.png (referenced at solver/report/report.tex:160). Score 1 retained after the post-processing audit. Prior case judgment: Report Mach/pressure images/table remain; no raw output."
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-9.57, CD=-1.01 at 0065953:solver/report/report.tex:89; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 0065953:solver/report/figures/cylinder_m010_laminar_re20_mach.png (referenced at solver/report/report.tex:160). Score 1 retained after the post-processing audit. Prior case judgment: Report Mach/pressure images/table remain; no raw output. Recalibration in progress: original contestant workspace has this canonical package, corroborated by committed be266cd run_manifest and selected-session validation/final response. The old assertion of absolute absence was limited to the tracked tree; binary binding and case-specific review remain pending."
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=1.16, CD=-1.10 at 0065953:solver/report/report.tex:90; residual history 0065953:solver/report/figures/cylinder_m010_laminar_re200_residual.png (referenced at solver/report/report.tex:174); force history 0065953:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:173); computed-field contour 0065953:solver/report/figures/cylinder_m010_laminar_re200_velocity_u.png (referenced at solver/report/report.tex:181); no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 1 retained after the post-processing audit. Prior case judgment: Report force/residual/Mach/velocity images and table remain; no readable delivered transient package, and it was not rerun."
+      "notes": "Cylinder M0.10 laminar Re200: numeric CL=1.16, CD=-1.10 at 0065953:solver/report/report.tex:90; residual history 0065953:solver/report/figures/cylinder_m010_laminar_re200_residual.png (referenced at solver/report/report.tex:174); force history 0065953:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:173); computed-field contour 0065953:solver/report/figures/cylinder_m010_laminar_re200_velocity_u.png (referenced at solver/report/report.tex:181); no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 1 retained after the post-processing audit. Prior case judgment: Report force/residual/Mach/velocity images and table remain; no readable delivered transient package, and it was not rerun. Recalibration in progress: original contestant workspace has this canonical package, corroborated by committed be266cd run_manifest and selected-session validation/final response. The old assertion of absolute absence was limited to the tracked tree; binary binding and case-specific review remain pending."
     }
   },
   "disqualification": {
@@ -372,7 +372,7 @@
         "id": 4,
         "text": "Order-one steady MPI inconsistency.",
         "found": false,
-        "evidence": "Unverified: rank-comparison raw outputs are absent."
+        "evidence": "Original contestant workspace contains rank-comparison packages; matched inputs, source/binary and start controls remain under review."
       },
       {
         "id": 5,
@@ -389,14 +389,14 @@
       {
         "id": 7,
         "text": "Incomplete/failed metadata marked successful.",
-        "found": false,
-        "evidence": "Unverified: metadata files are absent."
+        "found": true,
+        "evidence": "Original contestant workspace solver/results/cylinder_m010_laminar_re20/forces.csv SHA256 8847b582c780c8ffc00a2a602fbb7d5aa2527c8cab37642bdc61593126a4cf16 final400 Cd\u221216.5748..\u22121.01497 and Cl\u22129.56809..7.79131, while metadata says completed/converged. Re200 workspace metadata SHA256 a636a8805a6ece533c4ea269a9beb3c633474bf2e90c0c5714eeaed50af36d34 says completed/statistically_periodic with last ratio0.7 vs required0.001. Its true strict miss count is not independently established. The committed attempt be266cd run_manifest and selected root validation/final response identify these same paths and final values, and files predate final response. Exact historic binary is unbound."
       },
       {
         "id": 8,
         "text": "Figures do not correspond to submitted outputs.",
         "found": false,
-        "evidence": "Unverified because figure source data and manifests are absent."
+        "evidence": "Committed attempt contains report plots and manifest; original workspace preserves result files. Figure-to-data correspondence remains under review; no specific mismatch established yet."
       },
       {
         "id": 9,
@@ -407,14 +407,14 @@
       {
         "id": 10,
         "text": "Report claims second-order reconstruction or shock limiter disabled for production cases.",
-        "found": true,
-        "evidence": "solver.cpp lines 421-423 and 530/558 disable phi in documented production paths; report.tex lines 193-196 confirms first-order production mode while it claims piecewise-linear/Venkatakrishnan methods."
+        "found": false,
+        "evidence": "0065953 solver.cpp:421\u2013425 uses 100000 steady startup steps and :530,558 zeros transient reconstruction, but report.tex:195\u2013196 explicitly discloses that production runs in first-order mode. Describing implemented piecewise-linear/Venkatakrishnan machinery is not by itself an undisclosed production second-order claim; see the disclosed-first-order precedent. Second-order rubric deduction remains."
       },
       {
         "id": 11,
         "text": "No-slip checks use undocumented cell-center rows.",
         "found": false,
-        "evidence": "Unverified without surface.csv."
+        "evidence": "Original workspace surface files exist, but actual boundary-row semantics and report consistency remain under review."
       },
       {
         "id": 12,
@@ -427,6 +427,11 @@
         "text": "Copied/adapted/wrapped CFD core.",
         "found": false,
         "evidence": "Trust policy prohibits external similarity investigation; no internal wrapper found."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "0065953 main.cpp:61\u201364 calls readCGNSMesh on every rank; mesh.cpp:67\u201373 loads the complete CGNS mesh. The global object remains alive through runSteady/runTransient and main.cpp:139 uses it afterward. This violates TASK.md:46,227 despite real METIS and neighbor halos. be266cd source matches submission; exact historical binary remains unbound."
       }
     ]
   },

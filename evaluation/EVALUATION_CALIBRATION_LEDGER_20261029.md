@@ -109,7 +109,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52-m3_02_ca46e4` | partial: provisional 58.5/100, DQ7 and TASK full-mesh; source and DQ review ongoing |
 | `codex_glm52-m3_03_674665` | partial: provisional 57/100, DQ6/7 and TASK full-mesh; source and DQ review ongoing |
 | `codex_glm52-m3_04_32f2d0` | partial: provisional 58.5/100, DQ7/8; source/DQ ongoing |
-| `codex_glm52-m3_05_f094c1` | unreviewed |
+| `codex_glm52-m3_05_f094c1` | partial: provisional 57/100, DQ7 and TASK full-mesh; workspace evidence under review |
 | `codex_glm52-m3_06_a2dc07` | unreviewed |
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
 | `codex_glm52_02_06cf18` | unreviewed |
@@ -948,3 +948,10 @@ glm52-m3-04 build/report: clean immutable 8615cdd source built in network-disabl
 glm52-m3-04 Re200 path binding: at immutable 783eb18, `results/re200_final2/cylinder_m010_laminar_re200/forces.csv` and canonical `results/prod/cylinder_m010_laminar_re200/forces.csv` have identical SHA256 `2a41bb4165a272b3ff85f600b30f17b3dd48b38d3b42831f95828a4c68f0f302`; their metadata files likewise match SHA256 `99ae7174c0d3e4d15c2d71cbae2b35c7505a776e229ef569e98072d760a3a34b`. This binds the selected launch's output path to the submitted canonical package, while not supplying an executable hash or true strict miss count.
 
 glm52-m3-04 report and review reconciliation: updated `report_pdf.json` via vendor absence tool with exact unescaped-underscore failure and confirmed all 44 referenced PNGs exist; no suitable contestant main PDF was found. Replaced 27 stale or generic review notes with criterion-specific source/checkpoint evidence, correcting old claim of proven rank-only MPI failure and old claim that contestant data do not exist. Root-only global mesh/METIS/neighbor code earns MPI rubric3→5, total56.5→58.5; this is not a claim of validated rank independence. Results/CFD weighted reviews now reflect Re200 relaxed target, stale plots and actual validator pass. Historical binary, strict per-step miss count and remaining DQ/figure provenance stay partial.
+
+
+glm52-m3-05 workspace recovery/DQ checkpoint: attempt `be266cd83d8c1c7811050158d0b83acdc59ed8f2` run_manifest SHA256 `c0dec5dfd19662d300ec1194c3ed17a41468828305d0a022b8c2978501bcb92a` lists all eight canonical paths and final values; original contestant workspace still contains those packages, written 2026-08-10 03:35 UTC. Selected root validator calls at 03:41/03:43 UTC address the same paths, with recorded output including OK lines; final response at 03:44 UTC names results and matching coefficients. This is affirmative delivery linkage, not reliance on timestamps alone. Raw files are workspace-only, not immutable attempt blobs; exact runtime binary and all figure bindings remain unverified.
+
+Workspace Re20 forces SHA256 `8847b582c780c8ffc00a2a602fbb7d5aa2527c8cab37642bdc61593126a4cf16` final400 Cd−16.5748..−1.01497 and Cl−9.56809..7.79131 while metadata says completed/converged. Workspace Re200 metadata SHA256 `a636a8805a6ece533c4ea269a9beb3c633474bf2e90c0c5714eeaed50af36d34` reports completed/periodic and last ratio0.7 against0.001; actual strict miss count not inferred. DQ7 false→true.
+
+0065953 main.cpp:61–64 calls full CGNS read on every rank and retains `global` through :97–105 solver loops, using it again :139; TASK.md:46,227 prohibit full mesh during iterations. Separate custom TASK rejection added; METIS and neighbor halos are real. MPI7→4, rubric60→57 provisional. Previous DQ10 found solely because first-order production was active; report.tex:195–196 expressly discloses it. Per disclosed-first-order precedent, DQ10 true→false; second-order rubric1 remains. Eight case scores, PDF provenance and remaining DQ review partial; no CFD rerun.

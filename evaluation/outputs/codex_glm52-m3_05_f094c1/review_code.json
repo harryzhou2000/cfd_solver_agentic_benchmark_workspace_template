@@ -41,8 +41,8 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 3,
-      "notes": "METIS, neighbor Isend/Irecv and reductions are source-supported; no retained rank-comparison outputs validate behavior."
+      "score": 2.5,
+      "notes": "0065953 main.cpp:61\u201374 reads full CGNS mesh on every rank and retains it through the solver; :139 still uses it. Violates TASK.md:46,227 even with METIS and neighbor halos."
     },
     {
       "id": "code.robustness",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.2
+  "overall_score": 3.12
 }
