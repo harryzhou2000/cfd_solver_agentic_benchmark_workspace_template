@@ -25,18 +25,18 @@ The structural validator found all required eight result cases and the report. T
 
 | Section | Max | Score | Notes |
 |---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 | 8 | Structural validator passes; clean build claimed but not rerun. |
+| Build, CLI, Output Contract | 10 | 7.5 | Clean build passes, no registered tests, restart is ignored. |
 | Mesh And Geometry | 10 | 9 | CGNS/mixed mesh source present. |
 | Finite-Volume Residual And Boundary Conditions | 15 | 12 | FV/Rusanov/boundary paths source reviewed. |
 | Second-Order Spatial Scheme | 10 | 8 | Second-order limiter path present. |
-| Viscous Terms | 10 | 7 | Viscous method present; report admits high/incomplete drag. |
+| Viscous Terms | 10 | 5.5 | Full traction is integrated instead of tangential skin friction; viscous drag is high. |
 | Implicit And Transient Methods | 15 | 8 | Relaxed target counts cannot establish strict inner convergence. |
 | MPI | 10 | 4 | METIS/halo exists, but full global mesh is replicated during iteration. |
 | Case Results And Validation | 10 | 2.5 | Multiple forces remain unsettled, Re20 is implausible, and Re200 is falsely labeled periodic. |
 | Report, Visualization, Analysis | 5 | 2.5 | PDF omits force/rank tables due nested-float errors and asserts unobserved shedding. |
 | Extensibility | 5 | 4 | Modular C++ organization. |
 
-**Provisional total: 65/100. Disqualified under trigger 7 and the separate TASK full-mesh prohibition.**
+**Provisional total: 63/100. Disqualified under trigger 7 and the separate TASK full-mesh prohibition.**
 
 ## Limitations
 
@@ -53,3 +53,5 @@ Other case floors, PDF/figure provenance, source criteria and DQ findings remain
 Individual delivered force plots and histories were reviewed: M015 inviscid Cd falls 0.232600→0.146703 and M200 laminar 3.991995→2.635137 over their final500 rows; Re20 ends Cd8.86975, Cl−0.38716. Scores and exact artifact hashes are in the case notes. The case scores are 1.5, 1.5, 1.5, 2, 2, 1, 1.5 and 1 in benchmark order. Contour/residual figure attribution, all other rubric dimensions and DQ remain partial.
 
 All seven pages of accepted sibling PDF SHA256 c5a75b4aace101f18c4f77c7a2dd63aab61c65258b1a6a30b810f5d9b51ce8bf were visually checked; workspace report.tex matches immutable source SHA256 72af1ca7691327971231593973bf700ef96294b0d2011fa7949ae8d34ba779fc. Nested table environments trigger two recorded LaTeX errors and omit the force and rank tables from the PDF, though immutable force_table.tex contains numerical coefficients. Captions claim Re200 shedding although the delivered forces drift without visible oscillation. Rank test final endpoints differ substantially: M015 inviscid np4 step2261 vs np8 step5000, Re20 np4 step30000 vs np8 step5000; starts and binary revision differ or are unbound, so those values alone do not establish a rank-only mismatch.
+
+Clean immutable source builds in network-disabled cfd-bench using bundled externals (2 CPUs, 3 GiB, 256 processes); CTest registers no tests. main.cpp:53–61 parses --restart but never applies it. solver.cpp:356–368 sums full viscous traction, including its normal component; the rubric requires tangential skin friction. This lowers viscous credit independently and does not by itself establish DQ6. A first-order environment switch exists and appeared in earlier experiments, but production environment and historical binary are not bound; no DQ10 is inferred.

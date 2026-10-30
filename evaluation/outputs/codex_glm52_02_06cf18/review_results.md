@@ -2,26 +2,26 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:21:31.819234+00:00
+Generated: 2026-10-30T10:23:23.695730+00:00
 
-**Overall score: 3.7**
+**Overall score: 2.12**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | Explicit structural validator passed the required production directories and report. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 3 | Eight workspace packages structurally validate, but Re200 periodic/target-success metadata contradicts final strict ratio and force trajectory. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Submitted evidence retains steady-convergence and Re200 inner-convergence caveats. |
+| 2 | **res.validator** Automated validator results | 0.10 | 4 | Previously recorded validator passes eight packages and report; structural checks do not verify physical convergence or inner-target semantics. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 3 | Reported convergence limitations and incomplete credible rank comparisons reduce physical-confidence credit. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 1 | M015 inviscid final500 Cd falls0.2326→0.1467; M200 laminar3.992→2.635; Re200 falsely marked periodic with strict final ratio0.998594 vs0.001. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Submitted evidence includes a 7-page report, 41 figures, and figure manifest. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 1 | Re20 final Cd8.86975, Cl−0.38716; Re200 t180–300 Cd21.012..21.238, Cl3.745..3.830, with no visible shedding. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 5 | Submitted report/figures provide clear case coverage and stated limitations. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2.5 | Selected final response and manifest deliver 41 figures; force plots inspected, but Re200 captions assert absent shedding and several steady drag plots compress late behavior. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 2 | Seven-page delivered PDF is readable, but nested force_table floats generate LaTeX errors and omit both numeric and rank tables. Captions claim Re200 shedding although force history shows slow drift; figure/manifest attribution remains partial. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T10:21:31.819234+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.7
+- Overall score (0-5): 2.12
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

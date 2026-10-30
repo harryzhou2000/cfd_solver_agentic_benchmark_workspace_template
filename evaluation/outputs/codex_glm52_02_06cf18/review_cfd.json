@@ -6,64 +6,64 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Submitted source/report document the governing compressible-flow formulation."
+      "score": 4,
+      "notes": "Compressible NS source and nondimensional report present; independent force histories show material numerical failures."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "CGNS and mixed/unstructured mesh handling are present in submitted source."
+      "score": 4,
+      "notes": "CGNS reader and global/local graph structures support required inputs; complete mesh remains replicated on all ranks during iteration."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Finite-volume residual path was source reviewed, with numerical-result limitations scored separately."
+      "score": 3.5,
+      "notes": "solver.cpp:133\u2013210 reconstructs face states and assembles inviscid/viscous residual; numerical accuracy remains weak in delivered results."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Rusanov flux path is present in submitted source; no stronger flux verification was recorded."
+      "score": 3.5,
+      "notes": "solver.cpp:179 uses Rusanov; no stronger flux/entropy implementation or independent order verification established."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Boundary-condition paths were source reviewed; output structure validates."
+      "notes": "Farfield, slip and no-slip source paths exist; output.cpp:102\u2013105 explicitly writes zero no-slip boundary velocity."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Second-order limiter/reconstruction path is present, without an evaluator rerun."
+      "score": 3.5,
+      "notes": "solver.cpp:140\u2013151 uses Green\u2013Gauss/Barth unless CFD2D_FIRST_ORDER is set. Selected earlier session includes first-order experiments; production environment and exact binary remain unbound."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Limiter/robustness controls are present in source, with case-convergence caveats retained elsewhere."
+      "score": 3.5,
+      "notes": "Barth limiter and positivity fallback are implemented; full historical production environment and order verification remain unbound."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Viscous method exists, but the submitted report admits high or incomplete drag behavior."
+      "score": 2,
+      "notes": "solver.cpp:356\u2013368 integrates full tau\u00b7n traction as viscous force instead of tangential skin friction, and supplied viscous drag is high."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "LU-SGS/BDF2 source paths exist; CFL departure and Re200 limitations reduce credit."
+      "score": 3,
+      "notes": "LU-SGS source exists but capped CFL and evolving forces limit demonstrated performance; Re200 uses relaxed acceptance."
     },
     {
       "id": "cfd.transient",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.67
+  "overall_score": 3.13
 }

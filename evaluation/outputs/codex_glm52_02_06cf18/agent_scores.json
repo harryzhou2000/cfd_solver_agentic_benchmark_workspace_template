@@ -24,42 +24,42 @@
   },
   "scores": {
     "code_review": {
-      "overall_score": 3.98,
+      "overall_score": 3.23,
       "points": [
         {
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4,
-          "notes": "Structural validator passes; clean build was claimed in the submitted evidence but not independently rerun."
+          "notes": "Immutable 1e29ab3c archive builds in network-disabled cfd-bench with bundled external dependencies, 2 CPUs/3 GiB/256 processes. CTest registers no tests."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Input-driven submitted command/configuration interface supports the recorded partial deduction."
+          "score": 2.5,
+          "notes": "main.cpp:53\u201361 parses --restart but no subsequent source use loads it; case and output arguments are parsed."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
-          "score": 5,
-          "notes": "Submitted C++ solver is organized into modular mesh, solver, and output components."
+          "score": 4,
+          "notes": "Mesh, partition, reconstruction, flux, solver, implicit and output modules are separated; output/result provenance remains partial."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "No direct internal wrapper/external executable evidence was found; trust policy limits this finding."
+          "notes": "No direct internal existing-solver invocation identified; no external similarity or authorship investigation performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Required cases are configuration-driven; no case-only output hardcoding was recorded."
+          "score": 4,
+          "notes": "main.cpp:73\u2013100 parses JSON and resolves CGNS case path, with no demonstrated two-filename-only restriction."
         },
         {
           "id": "code.mpi",
@@ -72,90 +72,90 @@
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Structural outputs validate, but no independent evaluator build or rerun was performed."
+          "score": 2.5,
+          "notes": "Positivity fallback and CFL caps exist, but several force histories drift despite residual targets, and Re200 accepts relaxed inner ratios as success."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Submitted testing/build claims and structural validation support partial rather than full verification."
+          "score": 2,
+          "notes": "Clean build passes but CTest registers no tests; validator passes are structural and do not prove force/inner convergence."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": 4,
-          "notes": "Submitted source and report are readable; retained packaging/evidence limitations prevent full credit."
+          "score": 3,
+          "notes": "Separated source and report; nested floats cause PDF table omissions, and source CLI advertises nonfunctional restart."
         }
       ]
     },
     "cfd_review": {
-      "overall_score": 3.67,
+      "overall_score": 3.13,
       "points": [
         {
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 5,
-          "notes": "Submitted source/report document the governing compressible-flow formulation."
+          "score": 4,
+          "notes": "Compressible NS source and nondimensional report present; independent force histories show material numerical failures."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
-          "score": 5,
-          "notes": "CGNS and mixed/unstructured mesh handling are present in submitted source."
+          "score": 4,
+          "notes": "CGNS reader and global/local graph structures support required inputs; complete mesh remains replicated on all ranks during iteration."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 4,
-          "notes": "Finite-volume residual path was source reviewed, with numerical-result limitations scored separately."
+          "score": 3.5,
+          "notes": "solver.cpp:133\u2013210 reconstructs face states and assembles inviscid/viscous residual; numerical accuracy remains weak in delivered results."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Rusanov flux path is present in submitted source; no stronger flux verification was recorded."
+          "score": 3.5,
+          "notes": "solver.cpp:179 uses Rusanov; no stronger flux/entropy implementation or independent order verification established."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Boundary-condition paths were source reviewed; output structure validates."
+          "notes": "Farfield, slip and no-slip source paths exist; output.cpp:102\u2013105 explicitly writes zero no-slip boundary velocity."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Second-order limiter/reconstruction path is present, without an evaluator rerun."
+          "score": 3.5,
+          "notes": "solver.cpp:140\u2013151 uses Green\u2013Gauss/Barth unless CFD2D_FIRST_ORDER is set. Selected earlier session includes first-order experiments; production environment and exact binary remain unbound."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Limiter/robustness controls are present in source, with case-convergence caveats retained elsewhere."
+          "score": 3.5,
+          "notes": "Barth limiter and positivity fallback are implemented; full historical production environment and order verification remain unbound."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Viscous method exists, but the submitted report admits high or incomplete drag behavior."
+          "score": 2,
+          "notes": "solver.cpp:356\u2013368 integrates full tau\u00b7n traction as viscous force instead of tangential skin friction, and supplied viscous drag is high."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 4,
-          "notes": "LU-SGS/BDF2 source paths exist; CFL departure and Re200 limitations reduce credit."
+          "score": 3,
+          "notes": "LU-SGS source exists but capped CFL and evolving forces limit demonstrated performance; Re200 uses relaxed acceptance."
         },
         {
           "id": "cfd.transient",
@@ -174,42 +174,42 @@
       ]
     },
     "result_review": {
-      "overall_score": 3.7,
+      "overall_score": 2.12,
       "points": [
         {
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Explicit structural validator passed the required production directories and report."
+          "score": 3,
+          "notes": "Eight workspace packages structurally validate, but Re200 periodic/target-success metadata contradicts final strict ratio and force trajectory."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Submitted evidence retains steady-convergence and Re200 inner-convergence caveats."
+          "score": 4,
+          "notes": "Previously recorded validator passes eight packages and report; structural checks do not verify physical convergence or inner-target semantics."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 3,
-          "notes": "Reported convergence limitations and incomplete credible rank comparisons reduce physical-confidence credit."
+          "score": 1,
+          "notes": "M015 inviscid final500 Cd falls0.2326\u21920.1467; M200 laminar3.992\u21922.635; Re200 falsely marked periodic with strict final ratio0.998594 vs0.001."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Submitted evidence includes a 7-page report, 41 figures, and figure manifest."
+          "score": 1,
+          "notes": "Re20 final Cd8.86975, Cl\u22120.38716; Re200 t180\u2013300 Cd21.012..21.238, Cl3.745..3.830, with no visible shedding."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Submitted report/figures provide clear case coverage and stated limitations."
+          "score": 2.5,
+          "notes": "Selected final response and manifest deliver 41 figures; force plots inspected, but Re200 captions assert absent shedding and several steady drag plots compress late behavior."
         },
         {
           "id": "res.report",
@@ -230,14 +230,14 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 65.0,
+    "total_scored": 63.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "Structural validator passes; clean build claimed but not rerun."
+        "score": 7.5,
+        "notes": "Clean archive builds with bundled dependencies; no registered tests. --restart is parsed but never applied."
       },
       {
         "id": "mesh_geometry",
@@ -258,14 +258,14 @@
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 8,
-        "notes": "Second-order limiter path present."
+        "notes": "Reconstruction/limiter source exists; CFD2D_FIRST_ORDER is an environment-gated bypass and earlier experiments used it. Production environment and binary are unbound; no DQ10 asserted without a production binding."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 7,
-        "notes": "Viscous method present; report admits high/incomplete drag."
+        "score": 5.5,
+        "notes": "Newtonian/Fourier path exists but solver.cpp:356\u2013368 integrates full traction instead of tangential skin friction, and viscous cases have high drag."
       },
       {
         "id": "implicit_transient",

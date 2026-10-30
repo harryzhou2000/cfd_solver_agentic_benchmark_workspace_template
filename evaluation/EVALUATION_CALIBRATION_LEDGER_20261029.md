@@ -112,7 +112,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52-m3_05_f094c1` | partial: provisional 54/100, DQ7 and TASK full-mesh; historic binary/figure binding unverified |
 | `codex_glm52-m3_06_a2dc07` | partial: 68/100, DQ7; historical binary and figure binding unverified |
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
-| `codex_glm52_02_06cf18` | partial: provisional 65/100, DQ7 and TASK full-mesh; source/rubric review ongoing |
+| `codex_glm52_02_06cf18` | partial: provisional 63/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
 | `codex_glm52_03_e7d38e` | unreviewed |
 | `codex_gpt56_01_cb349f` | unreviewed |
 | `codex_gpt56_02_38616e` | unreviewed |
@@ -994,3 +994,6 @@ glm52_02 case-history checkpoint: selected final response explicitly delivers al
 
 
 glm52_02 PDF/rank checkpoint: all seven pages of accepted contestant sibling PDF SHA256 c5a75b4aace101f18c4f77c7a2dd63aab61c65258b1a6a30b810f5d9b51ce8bf visually checked; sibling report.tex matches immutable SHA256 72af1ca7691327971231593973bf700ef96294b0d2011fa7949ae8d34ba779fc. report.tex:258–260 wraps force_table.tex (which itself contains two table environments) in another float. Workspace report.log records two Not in outer par mode errors; PDF silently omits both force and rank tables, while immutable force_table.tex itself retains numeric coefficient summary. Report captions :305–315 claim Re200 shedding/vortex street, while actual force shows no oscillation. Report/visualization5→2.5, total67.5→65. Existing accepted PDF remains delivered and readable, not misrepresented as absent. Workspace rank np4/np8 M015 endpoints2261/5000, Re20 30000/5000, first states differ and git_revision null: cannot infer DQ4 from endpoint difference alone. Remaining source, DQ and plot attribution partial; no CFD rerun.
+
+
+glm52_02 source/review checkpoint: clean 1e29ab3c archive built in network-disabled cfd-bench with bundled external dependencies, 2 CPUs, 3 GiB, 256 processes; CTest registers no tests. main.cpp:53–61 parses --restart but never uses it: build/CLI8→7.5. solver.cpp:356–368 integrates full tau·n viscous traction rather than tangential skin friction: viscous7→5.5, without mechanical DQ6. Total65→63. Updated 27 review criteria with individual source, result and explicit limitations. solver.cpp:140–151 has env-gated first-order mode and selected session has earlier experiments using it, but no production binary/environment binding: no DQ10 inferred. No-slip output.cpp:102–105 explicitly sets wall velocity zero; true METIS coexists with prohibited full-mesh copies. Remaining figure binding, DQ boundaries and production executable partial; no CFD rerun.
