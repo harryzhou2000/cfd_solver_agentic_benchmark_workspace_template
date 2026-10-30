@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:40:33.729813+00:00
+Generated: 2026-10-30T04:42:55.452501+00:00
 
-**Overall score: 4.21**
+**Overall score: 3.71**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,25 +15,25 @@ Generated: 2026-10-30T04:40:33.729813+00:00
 | 2 | **code.cli** CLI and error handling | 0.10 | 3.5 | main.cpp parses solve/restart and case controls; io.cpp:61–65 writes only current U despite history parameters, and solver.cpp:1872–1873 resets both histories and starts physical loop at step 1 after restart. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4.5 | Separated C++ configuration, CGNS reader, mesh, partition, numerics, solver and I/O units support maintenance and extension. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Separated config, CGNS reader, mesh, partition, numerics, solver and I/O units; solver.cpp contains several complex numerical paths. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 4.0 | Internal source and session evidence support a self-contained implementation; trust policy prohibits external similarity investigation. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 3 | No source-evident internal existing-solver wrapper; external similarity search excluded by trust policy. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4.5 | Case JSON controls and boundary mapping are source-driven; no two-filename-only dispatch was found. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | main.cpp parses case JSON and configured CGNS path; no two-filename-only solver dispatch identified. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4.5 | METIS graph partitioning, rank-local structures, MPI_Isend/Irecv halo exchange, and MPI_Allreduce reductions are present; report documents np=1/8 comparison. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 4 | main.cpp:287–320 uses root-scoped global mesh, METIS and rank-local files; solver halo uses neighbor Isend/Irecv. Original np1/8 Re20 drag differs ~1.1%, source-to-output revision unproven. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4.0 | Input/error handling, positivity floors, and restart are evidenced; evaluator did not execute an additional immutable scratch rerun. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Clean immutable build passes with warnings and positivity checks exist; io.cpp restart omits BDF histories/time continuation; root-only restart error may strand peers. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4.5 | Session-side build/CLI verification plus all eight delivered packages and report sanity checks provide strong, though not independently rerun, validation evidence. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 3.5 | Immutable tests include many input fixtures and mesh_smoke; selected verification reports clean build/smoke/restart. No independent CFD rerun or full formal regression suite performed. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 3.5 | Result branch is curated, but the original workspace retains thousands of excluded raw/debug artifacts; this is history/evidence noise rather than a tip violation. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 3.5 | Curated source excludes raw/debug outputs by policy; selected verification reports uncommitted solver/tool changes and metadata lacks git_revision, limiting production traceability. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 
@@ -50,7 +50,7 @@ Generated: 2026-10-30T04:40:33.729813+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.21
+- Overall score (0-5): 3.71
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

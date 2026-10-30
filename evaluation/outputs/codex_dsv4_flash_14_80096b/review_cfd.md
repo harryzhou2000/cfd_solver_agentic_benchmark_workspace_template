@@ -2,44 +2,44 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:40:33.730277+00:00
+Generated: 2026-10-30T04:42:55.452937+00:00
 
-**Overall score: 4.21**
+**Overall score: 3.86**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4.5 | Report and source consistently state conservative compressible Navier-Stokes equations and nondimensional gas model. |
+| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | solver.cpp:175 onward assembles conservative compressible viscous flow residual; actual production executable revision not established. |
 |   | 2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly. | | | |
 |   | *Evidence:* Source flux assembly and report equations. | | | |
-| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4.5 | CGNS reader, mixed unstructured geometry, cell-face graph, and boundary family handling are implemented and described. |
+| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4.5 | CGNS reader, mixed geometry, cell-face graph and METIS adjacency are source-evident; independent geometry oracle not run. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
-| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4.5 | Source assembles face conservative residuals with global norms; results are consistent with a functioning residual path. |
+| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4 | solver.cpp assembles face residual and global norms. Final source tests fresh-gradient BDF residual, but historical production binary origin and exact target misses are unproven. |
 |   | Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction. | | | |
 |   | *Evidence:* residual assembly code; residuals.csv shows global reduction. | | | |
-| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4.5 | Rusanov and Roe entropy-fix implementations are present and production commands select them by case. |
+| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | numerics.cpp implements Roe and Rusanov, with report case choices. Actual production revision remains unknown; no independent flux convergence study. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 4.5 | Farfield, slip, and no-slip adiabatic treatments are implemented; surface sanity checks show required wall behavior. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | solver.cpp farfield/slip/no-slip paths and output wall semantics exist; raw surface checks are available but actual source version of runs is unbound. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 3.5 | Green-Gauss reconstruction is active, but three production commands use CFD_RECON_SCALE=0.5, an explicitly documented first-order blend. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 3 | solver.cpp:1308–1318 uses CFD_RECON_SCALE=0.5 in three manifest cases, explicitly disclosed; :1414–1456 permits CFD_GRAD_DAMP=0.5 in M2 inviscid, omitted from report. No order study. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4.5 | Venkatakrishnan/Barth limiting and positive-state fallback are in source and metadata. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Source implements Barth/Venkatakrishnan and positivity fallback; run manifest names Venkatakrishnan for Re200 and scaling exceptions. Exact producing source unproven. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | solver.cpp:487–542 computes viscous wall stress and projects onto tangent; raw laminar cases have force plots dominated by startup, and production source revision is unproven. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 4.0 | Local-CFL LU-SGS is implemented, but steady metadata reports fixed budgets/zero observed inner statistics rather than richer measured convergence accounting. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 3.5 | Source LU-SGS and optional matrix-free GMRES; output steady inner statistics vary across final revisions, and actual binary revision is not bound. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3.5 | solver.cpp:1875–1950,2240–2311 implements BDF1 startup, BDF2 and fresh-gradient total residual target. io.cpp:61–65 writes only current U and solver.cpp:1872–1873 resets both histories/time loop after restart. Metadata git_revision=null; strict target production origin remains unproven. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4.5 | Source and delivered rank diagnostics support METIS ownership/ghost partitions and neighbor-scoped communication. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | main.cpp:287–320 root-only preprocessing, METIS and neighbor halo; raw np1/8 Re20 Cd differs ~1.1%, not order-one. Production source revision is unknown. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T04:40:33.730277+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.21
+- Overall score (0-5): 3.86
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

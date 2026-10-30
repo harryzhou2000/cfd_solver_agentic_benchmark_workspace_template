@@ -2,20 +2,20 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:40:33.730587+00:00
+Generated: 2026-10-30T04:42:55.453252+00:00
 
-**Overall score: 3.85**
+**Overall score: 3.45**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 4.5 | All eight selected final packages meet required schema and file checks. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Eight canonical packages and report passed prior structural validator; source-to-run identity remains unproven and output visual limitations documented. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5.0 | Explicit evaluator validator command passed for all eight final directories and report. |
+| 2 | **res.validator** Automated validator results | 0.10 | 4 | Prior validator returned rc0 for all eight final directories and report; it does not establish target-miss truth or identify producing binary. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4.5 | Eight reported production cases are readable and status-consistent; Re200 has production-horizon transient evidence. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 3.5 | Re200 reaches t300 with periodic lift, seven steady statuses converged; source-to-run revision and strict transient target claims are unverified. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Raw force tails/periods are documented; M0.15 inviscid Cd 0.0344 and laminar Cd 0.0118, gradient damping and Re200 lift amplitude suggest limitations without an independent grid study. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T04:40:33.730587+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.85
+- Overall score (0-5): 3.45
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

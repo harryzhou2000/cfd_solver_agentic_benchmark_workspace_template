@@ -47,11 +47,11 @@ The identity sidecar SHA-256 is `b7b99a32688ad8ed7fa88d76f79cccf5bee8bff7f903f0d
 
 ## Scores
 
-Provisional rubric **82.5/100** (previously 87.5); detailed sections, weighted review scores and independent case scores are in `agent_scores.json`. Full review remains in progress.
+Provisional rubric **79.5/100** (previously 87.5); detailed sections, weighted review scores and independent case scores are in `agent_scores.json`. Full review remains in progress.
 
 ## Disqualification assessment
 
-Not disqualified. Source/result review found no invocation of another solver, no generated-without-solve shortcut, no filename-only mesh dispatch, no full-state Allgather, no explicit-only implementation, no unsupported claimed algorithm, and no successful label for a marked failed final case. METIS partitioning (`solver/src/partition.cpp`) and neighbor `MPI_Isend/Irecv` exchange (`solver/src/solver.cpp`) are direct evidence. The report manifest maps figures to source files, and inspected Mach/vorticity filenames match their displayed variables. Per trust policy, no external authorship search was performed.
+No DQ trigger is established from available evidence; each rule has a specific note in agent_scores.json. Re200 strict target misses and producing binary identity remain unverified, so this is not a complete exoneration. METIS, root-only mesh and neighbor communication are source-evident.
 
 ## Metadata answers & session selection
 
@@ -63,7 +63,7 @@ A clean immutable-source CMake build passed with warnings in the network-disable
 
 ## Verdict
 
-Provisional **82.5/100, DQ=false**; source, rubric and DQ review remain incomplete. Original histories and report remain evidence with production-source provenance limitations.
+Provisional **79.5/100, DQ=false**; source, rubric and DQ review remain incomplete. Original histories and report remain evidence with production-source provenance limitations.
 
 
 ## Partial Re200/source provenance review — 2026-10-30
@@ -81,3 +81,8 @@ Case scores 4,4.5,4,4.5,4,4,4,2 → 3,3.5,3.5,2,2,2,2,2. Canonical histories, fo
 ## Partial build and rubric review — 2026-10-30
 
 Immutable 05261f8 clean CMake build succeeds with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB and /opt/external; no solver run. io.cpp:61–65 writes only current state despite history parameters, and solver.cpp:1872–1873 resets both previous histories and the transient loop starts from physical step 1 after restart; the continued transient is not a faithful BDF2 restart. solver.cpp:487–542 projects viscous wall traction tangentially. Provisional rubric 87.5→82.5: implicit/transient 13→11 for restart limitations, results 9→7 for case/source uncertainty, report 4→3 for compressed force plots and undisclosed M2 gradient damping. Further criteria/DQ remain partial; both gates pass.
+
+
+## Partial source and provenance boundary — 2026-10-30
+
+All ten rubric sections and 27 review points now have criterion-specific evidence; provisional rubric 82.5→79.5 after residual 14→13, second-order 7→6 and MPI 9→8 to reflect production source uncertainty and disclosed reconstruction controls. DQ assessment covers each numbered rule, but cannot conclusively evaluate production-specific behavior without binding the actual binaries. Re200 metadata says it ran 2026-08-18 01:30:47–04:18:32 UTC with git_revision=null; a151896 was committed at 01:27:55 UTC, while 3ec9924 (04:51:49 UTC) and a3ef6bd (05:17:30 UTC) subsequently changed numerical code. The tracked a151896 versus curated 05261f8 diff spans 225 added/31 removed lines across four solver files, including residual/reconstruction options. Current build/cfd_solver was rebuilt at 08:11:42 UTC after the Re200 job ended. These timestamps constrain provenance but do not establish the source of the production executable. Selected verification also reports uncommitted source/tool edits at HEAD c10299c. Seven steady run timestamps span 01:30–05:59 UTC and likewise have git_revision=null. Further review requires actual production binary/build provenance or an authoritative saved source/binary artifact; retain partial status. Both gates pass; no CFD rerun.

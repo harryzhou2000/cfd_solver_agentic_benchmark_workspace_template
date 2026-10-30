@@ -20,50 +20,50 @@
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 4.5,
-      "notes": "Separated C++ configuration, CGNS reader, mesh, partition, numerics, solver and I/O units support maintenance and extension."
+      "score": 4,
+      "notes": "Separated config, CGNS reader, mesh, partition, numerics, solver and I/O units; solver.cpp contains several complex numerical paths."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 4.0,
-      "notes": "Internal source and session evidence support a self-contained implementation; trust policy prohibits external similarity investigation."
+      "score": 3,
+      "notes": "No source-evident internal existing-solver wrapper; external similarity search excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 4.5,
-      "notes": "Case JSON controls and boundary mapping are source-driven; no two-filename-only dispatch was found."
+      "score": 4,
+      "notes": "main.cpp parses case JSON and configured CGNS path; no two-filename-only solver dispatch identified."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4.5,
-      "notes": "METIS graph partitioning, rank-local structures, MPI_Isend/Irecv halo exchange, and MPI_Allreduce reductions are present; report documents np=1/8 comparison."
+      "score": 4,
+      "notes": "main.cpp:287\u2013320 uses root-scoped global mesh, METIS and rank-local files; solver halo uses neighbor Isend/Irecv. Original np1/8 Re20 drag differs ~1.1%, source-to-output revision unproven."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4.0,
-      "notes": "Input/error handling, positivity floors, and restart are evidenced; evaluator did not execute an additional immutable scratch rerun."
+      "score": 3,
+      "notes": "Clean immutable build passes with warnings and positivity checks exist; io.cpp restart omits BDF histories/time continuation; root-only restart error may strand peers."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4.5,
-      "notes": "Session-side build/CLI verification plus all eight delivered packages and report sanity checks provide strong, though not independently rerun, validation evidence."
+      "score": 3.5,
+      "notes": "Immutable tests include many input fixtures and mesh_smoke; selected verification reports clean build/smoke/restart. No independent CFD rerun or full formal regression suite performed."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 3.5,
-      "notes": "Result branch is curated, but the original workspace retains thousands of excluded raw/debug artifacts; this is history/evidence noise rather than a tip violation."
+      "notes": "Curated source excludes raw/debug outputs by policy; selected verification reports uncommitted solver/tool changes and metadata lacks git_revision, limiting production traceability."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.21
+  "overall_score": 3.71
 }

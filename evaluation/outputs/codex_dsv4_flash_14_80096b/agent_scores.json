@@ -51,53 +51,53 @@
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
-          "score": 4.5,
-          "notes": "Separated C++ configuration, CGNS reader, mesh, partition, numerics, solver and I/O units support maintenance and extension."
+          "score": 4,
+          "notes": "Separated config, CGNS reader, mesh, partition, numerics, solver and I/O units; solver.cpp contains several complex numerical paths."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
-          "score": 4.0,
-          "notes": "Internal source and session evidence support a self-contained implementation; trust policy prohibits external similarity investigation."
+          "score": 3,
+          "notes": "No source-evident internal existing-solver wrapper; external similarity search excluded by trust policy."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
-          "score": 4.5,
-          "notes": "Case JSON controls and boundary mapping are source-driven; no two-filename-only dispatch was found."
+          "score": 4,
+          "notes": "main.cpp parses case JSON and configured CGNS path; no two-filename-only solver dispatch identified."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4.5,
-          "notes": "METIS graph partitioning, rank-local structures, MPI_Isend/Irecv halo exchange, and MPI_Allreduce reductions are present; report documents np=1/8 comparison."
+          "score": 4,
+          "notes": "main.cpp:287\u2013320 uses root-scoped global mesh, METIS and rank-local files; solver halo uses neighbor Isend/Irecv. Original np1/8 Re20 drag differs ~1.1%, source-to-output revision unproven."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4.0,
-          "notes": "Input/error handling, positivity floors, and restart are evidenced; evaluator did not execute an additional immutable scratch rerun."
+          "score": 3,
+          "notes": "Clean immutable build passes with warnings and positivity checks exist; io.cpp restart omits BDF histories/time continuation; root-only restart error may strand peers."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 4.5,
-          "notes": "Session-side build/CLI verification plus all eight delivered packages and report sanity checks provide strong, though not independently rerun, validation evidence."
+          "score": 3.5,
+          "notes": "Immutable tests include many input fixtures and mesh_smoke; selected verification reports clean build/smoke/restart. No independent CFD rerun or full formal regression suite performed."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 3.5,
-          "notes": "Result branch is curated, but the original workspace retains thousands of excluded raw/debug artifacts; this is history/evidence noise rather than a tip violation."
+          "notes": "Curated source excludes raw/debug outputs by policy; selected verification reports uncommitted solver/tool changes and metadata lacks git_revision, limiting production traceability."
         }
       ],
-      "overall_score": 4.21,
+      "overall_score": 3.71,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -106,50 +106,50 @@
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 4.5,
-          "notes": "Report and source consistently state conservative compressible Navier-Stokes equations and nondimensional gas model."
+          "score": 4,
+          "notes": "solver.cpp:175 onward assembles conservative compressible viscous flow residual; actual production executable revision not established."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4.5,
-          "notes": "CGNS reader, mixed unstructured geometry, cell-face graph, and boundary family handling are implemented and described."
+          "notes": "CGNS reader, mixed geometry, cell-face graph and METIS adjacency are source-evident; independent geometry oracle not run."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 4.5,
-          "notes": "Source assembles face conservative residuals with global norms; results are consistent with a functioning residual path."
+          "score": 4,
+          "notes": "solver.cpp assembles face residual and global norms. Final source tests fresh-gradient BDF residual, but historical production binary origin and exact target misses are unproven."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
-          "score": 4.5,
-          "notes": "Rusanov and Roe entropy-fix implementations are present and production commands select them by case."
+          "score": 4,
+          "notes": "numerics.cpp implements Roe and Rusanov, with report case choices. Actual production revision remains unknown; no independent flux convergence study."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": 4.5,
-          "notes": "Farfield, slip, and no-slip adiabatic treatments are implemented; surface sanity checks show required wall behavior."
+          "score": 4,
+          "notes": "solver.cpp farfield/slip/no-slip paths and output wall semantics exist; raw surface checks are available but actual source version of runs is unbound."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 3.5,
-          "notes": "Green-Gauss reconstruction is active, but three production commands use CFD_RECON_SCALE=0.5, an explicitly documented first-order blend."
+          "score": 3,
+          "notes": "solver.cpp:1308\u20131318 uses CFD_RECON_SCALE=0.5 in three manifest cases, explicitly disclosed; :1414\u20131456 permits CFD_GRAD_DAMP=0.5 in M2 inviscid, omitted from report. No order study."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 4.5,
-          "notes": "Venkatakrishnan/Barth limiting and positive-state fallback are in source and metadata."
+          "score": 4,
+          "notes": "Source implements Barth/Venkatakrishnan and positivity fallback; run manifest names Venkatakrishnan for Re200 and scaling exceptions. Exact producing source unproven."
         },
         {
           "id": "cfd.viscous",
@@ -162,8 +162,8 @@
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 4.0,
-          "notes": "Local-CFL LU-SGS is implemented, but steady metadata reports fixed budgets/zero observed inner statistics rather than richer measured convergence accounting."
+          "score": 3.5,
+          "notes": "Source LU-SGS and optional matrix-free GMRES; output steady inner statistics vary across final revisions, and actual binary revision is not bound."
         },
         {
           "id": "cfd.transient",
@@ -176,11 +176,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4.5,
-          "notes": "Source and delivered rank diagnostics support METIS ownership/ghost partitions and neighbor-scoped communication."
+          "score": 4,
+          "notes": "main.cpp:287\u2013320 root-only preprocessing, METIS and neighbor halo; raw np1/8 Re20 Cd differs ~1.1%, not order-one. Production source revision is unknown."
         }
       ],
-      "overall_score": 4.21,
+      "overall_score": 3.86,
       "disqualification_flags": []
     },
     "result_review": {
@@ -189,22 +189,22 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 4.5,
-          "notes": "All eight selected final packages meet required schema and file checks."
+          "score": 4,
+          "notes": "Eight canonical packages and report passed prior structural validator; source-to-run identity remains unproven and output visual limitations documented."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 5.0,
-          "notes": "Explicit evaluator validator command passed for all eight final directories and report."
+          "score": 4,
+          "notes": "Prior validator returned rc0 for all eight final directories and report; it does not establish target-miss truth or identify producing binary."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 4.5,
-          "notes": "Eight reported production cases are readable and status-consistent; Re200 has production-horizon transient evidence."
+          "score": 3.5,
+          "notes": "Re200 reaches t300 with periodic lift, seven steady statuses converged; source-to-run revision and strict transient target claims are unverified."
         },
         {
           "id": "res.plausibility",
@@ -235,13 +235,13 @@
           "notes": "Final verification notes uncommitted solver edits and case metadata git_revision=null, so exact production binary source is not proven. Run manifest and figures identify canonical paths."
         }
       ],
-      "overall_score": 3.85,
+      "overall_score": 3.45,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 82.5,
+    "total_scored": 79.5,
     "sections": [
       {
         "id": "build_cli",
@@ -255,28 +255,28 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 9.0,
-        "notes": "CGNS unstructured reader, mixed-cell geometry and METIS adjacency graph are directly implemented and described."
+        "notes": "CGNS mixed reader, cell-face geometry and METIS adjacency present; no independent geometry rerun."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 14.0,
-        "notes": "Conservative residual, Roe/Rusanov fluxes, and required farfield/slip/no-slip conditions are present with supportive surface checks."
+        "score": 13,
+        "notes": "Final source implements conservative interior/farfield/slip/no-slip residuals; exact production binary revision is unbound."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 7.0,
-        "notes": "Second-order Green-Gauss plus limiter is implemented, but three production runs intentionally use a 0.5 reconstruction blend."
+        "score": 6,
+        "notes": "Final Green-Gauss/limiter code present; three manifest cases use disclosed 0.5 reconstruction blend and M2 inviscid uses undocumented 0.5 gradient damping. No order study or binary binding."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 9.0,
-        "notes": "Gradient viscous flux, Newtonian/Fourier physics, no-slip reporting and force split are evidenced; not independently rerun."
+        "notes": "solver.cpp:487\u2013542 projects viscous wall traction tangentially; output physics/source binary origin uncertain."
       },
       {
         "id": "implicit_transient",
@@ -289,8 +289,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 9.0,
-        "notes": "METIS, neighbor halo exchange, Allreduce norms, rank-safe outputs and np=1/8 comparisons are documented and source-supported."
+        "score": 8,
+        "notes": "Root-scoped full mesh and METIS/neighbor halos; raw Re20 np1/8 Cd 2.1266/2.1034, ~1.1% spread. Production binary source not bound."
       },
       {
         "id": "case_results",
@@ -311,7 +311,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 4.5,
-        "notes": "Clear modules and input-driven configuration leave reasonable EOS/RANS/species extension space."
+        "notes": "Separate configuration, CGNS, partition, numerics, solver and I/O abstractions; 2-D state fixed."
       }
     ]
   },
@@ -351,7 +351,73 @@
   },
   "disqualification": {
     "triggered": false,
-    "flags": []
+    "flags": [
+      {
+        "id": 1,
+        "triggered": false,
+        "notes": "No source-evident internal existing solver executable; external similarity search excluded by trust policy."
+      },
+      {
+        "id": 2,
+        "triggered": false,
+        "notes": "Original force/residual histories and fields show case attempts; no direct proof of generating histories without solving. Producing binary identity is unbound."
+      },
+      {
+        "id": 3,
+        "triggered": false,
+        "notes": "Final main/config reads case JSON and configured CGNS path; no two-filename-only dispatch found."
+      },
+      {
+        "id": 4,
+        "triggered": false,
+        "notes": "Original Re20 np1/8 Cd 2.12662443/2.10340547, ~1.1%, not order-one; NACA np1/8 Cd 0.03473845/0.03438938."
+      },
+      {
+        "id": 5,
+        "triggered": false,
+        "notes": "Final source LU-SGS and matrix-free Newton/GMRES paths are present; no explicit-only finding."
+      },
+      {
+        "id": 6,
+        "triggered": false,
+        "notes": "Rusanov/Roe, reconstruction, viscous, LU-SGS and BDF2 source code exist; transient restart history is defective but not an absent method. Actual production binary identity is unknown."
+      },
+      {
+        "id": 7,
+        "triggered": false,
+        "notes": "Re200 has repeated lift oscillations and metadata records zero strict misses, but producing binary is unbound; final source counts fresh-gradient total residual. Cannot independently prove actual strict miss fraction; no supported DQ7 finding."
+      },
+      {
+        "id": 8,
+        "triggered": false,
+        "notes": "Committed figures and manifest identify case data; four viscous steady plots and Re200 late drag are compressed, but no proof figures come from unrelated output."
+      },
+      {
+        "id": 9,
+        "triggered": false,
+        "notes": "partition.cpp METIS and main.cpp root-scoped GlobalMesh/local partitions are implemented; no all-rank full mesh/state during iterations established."
+      },
+      {
+        "id": 10,
+        "triggered": false,
+        "notes": "Three manifest runs explicitly use 0.5 reconstruction blending and report discloses it. M2 inviscid gradient damping 0.5 is omitted, but this damps updates rather than disabling reconstruction; no supported DQ10 finding."
+      },
+      {
+        "id": 11,
+        "triggered": false,
+        "notes": "Slip/no-slip wall boundary output code and post-fix report describe boundary values; no direct evidence current report mislabels cell-center velocity. Actual binary source unbound."
+      },
+      {
+        "id": 12,
+        "triggered": false,
+        "notes": "Inspected Mach/vorticity figures and manifest match labeled variables; not exhaustive pixel audit."
+      },
+      {
+        "id": 13,
+        "triggered": false,
+        "notes": "No internal wrapper found; external similarity search excluded under trust policy."
+      }
+    ]
   },
   "limitations": [
     "No evaluator rerun was performed; Re200 was not rerun under the mandatory prohibition.",

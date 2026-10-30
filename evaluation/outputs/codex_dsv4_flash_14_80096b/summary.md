@@ -148,6 +148,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_dsv4_flash_14_80096b/review_code.md` (overall: 4.21)
-- CFD methods review: `codex_dsv4_flash_14_80096b/review_cfd.md` (overall: 4.21)
-- Result review: `codex_dsv4_flash_14_80096b/review_results.md` (overall: 3.85)
+- Code review scorecard: `codex_dsv4_flash_14_80096b/review_code.md` (overall: 3.71)
+- CFD methods review: `codex_dsv4_flash_14_80096b/review_cfd.md` (overall: 3.86)
+- Result review: `codex_dsv4_flash_14_80096b/review_results.md` (overall: 3.45)
