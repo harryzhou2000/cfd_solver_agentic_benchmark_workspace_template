@@ -410,7 +410,7 @@
       {
         "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
         "found": true,
-        "evidence": "Immutable main.cpp:107\u2013108 reads full CGNS mesh on every rank, retains cfd::Mesh in scope and passes it to run_solver at :331. main.cpp is identical at 75ecfec recorded for the np1/2/4/8 M0.15 runs and final 6b84b6f. The np8 metadata reports full_mesh_replication_during_iterations=false. METIS partitioning and local states exist, so numbered DQ9 full-state/geometric-only wording is not assumed; exact historical binary bytes remain unbound."
+        "evidence": "Immutable main.cpp:107\u2013108 reads full CGNS mesh on every rank, retains cfd::Mesh in scope and passes it to run_solver at :331. main.cpp is identical at 75ecfec recorded for the np1/2/4 M0.15 runs and 971f964 recorded for np8 and final 6b84b6f. The np8 metadata reports full_mesh_replication_during_iterations=false. METIS partitioning and local states exist, so numbered DQ9 full-state/geometric-only wording is not assumed; exact historical binary bytes remain unbound."
       }
     ]
   },
