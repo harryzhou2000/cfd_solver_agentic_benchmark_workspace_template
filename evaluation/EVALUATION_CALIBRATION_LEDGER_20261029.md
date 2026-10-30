@@ -103,7 +103,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_sonnet46-02_dac37b` | partial: all cases, PDF, source/rubric checked; DQ6/DQ7 and placeholder rejection; exact historical binary remains unbound |
 | `codex_generic_sonnet5-01_540ddf` | partial: PDF, all cases, source/rubric examined; DQ8 proven; historical binary and remaining figure/fallback provenance uncertain |
 | `codex_generic_sonnet5-02_6c0ac0` | partial: all cases, PDF, source/rubric reviewed; DQ7 proven; historical binary/remaining figure provenance uncertain |
-| `codex_generic_vllm-qwen38-01_2045e0` | partial: delivered PDF/numeric evidence corrected, M200 inviscid 2→3; other cases/source/rubric/DQ pending |
+| `codex_generic_vllm-qwen38-01_2045e0` | partial: all cases/PDF/source/rubric examined; DQ4 rank anomaly unbound to same binary; other figure provenance uncertain |
 | `codex_generic_vllm-qwen38-02_d47362` | unreviewed |
 | `codex_glm52-m3_01_919b67` | unreviewed |
 | `codex_glm52-m3_02_ca46e4` | unreviewed |
@@ -843,3 +843,5 @@ vllm-qwen38-01 DQ4 triage: Checkpoint `18e70a9` contains the selected Re20 rank-
 Both runs are explicitly failed and revisions are `unknown`. The np1 run was 2026-08-26 03:44–08:16 UTC, np2 2026-08-27 02:15–06:54 UTC; source fix `4722f3a` was committed between them on Aug 26 at 13:09 UTC. This prevents binding the executions to the same binary and does not prove rank alone caused the order-one difference. DQ4 remains unasserted pending decisive source/binary evidence; MPI credit and numerical anomaly are documented separately. No CFD rerun.
 
 vllm-qwen38-01 source/review checkpoint: HDF5 /Base assumption and unsupported sections limit mesh generality (9→8); ghost side unreconstructed at MPI faces limits second order (7→6). Root-only mesh, METIS/halo, tangential shear and no-slip output inspected. Validator passes M200/report and rejects seven honestly failed packages. Total64.5→62.5; DQ4 binary binding partial.
+
+vllm-qwen38-01 DQ boundary checkpoint: seven failures honestly completed=false; no DQ7 inferred from failure alone. M200 success residual target/force range documented. Re20 rank anomaly cannot be attributed solely to rank across intervening fix/unknown binaries; DQ4 unasserted. Root-only mesh, METIS, active owned reconstruction, tangential shear and no-slip wall output inspected. No specific DQ8/12 or synthetic history proven; historical binary/other figure provenance partial.
