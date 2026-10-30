@@ -91,7 +91,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_03_5f2165` | partial: all cases, build and TASK full mesh/state checked; remaining source/rubric/DQ review pending |
 | `codex_generic_04_16009f` | partial: DQ10, DQ7, TASK full mesh established; case/rubric/source review pending |
 | `codex_generic_05_2599b1` | partial: TASK full mesh established; report-to-package mapping and rubric pending |
-| `codex_generic_glm53-01_99a969` | unreviewed |
+| `codex_generic_glm53-01_99a969` | partial: seven steady case-floor corrections and Re200 false-note correction; rubric/DQ pending |
 | `codex_generic_glm53-02_ff20c7` | unreviewed |
 | `codex_generic_glm53-03_d469fb` | unreviewed |
 | `codex_generic_glm53-04_adde03` | unreviewed |
@@ -584,3 +584,8 @@ Generic_05 visual checkpoint: visually inspected all eight accepted PDF pages SH
 Generic_05 cases/method checkpoint: selected v3 M015/M080 laminar Cp figures exist; case scores 1,1,0 retained with actual force/residual evidence. Final source steady reconstruction alpha0.1 and transient direct states, report claims all second order; source/run binding prevents DQ10 attribution. Second-order rubric 3→2; viscous 3→1 for 0.01 residual scaling and flawed wall traction, total 34→31; visualization point 3→2. BDF2 source negative temporal sign and zero-valued inner log documented without inferring historic miss counts. Remaining DQ/provenance partial; no CFD rerun.
 
 Generic_05 remaining-criteria checkpoint: individual rubric/review notes and DQ1–6,8–13 evidence boundaries documented. DQ7 and TASK full-mesh stand; selected Re20 surface rows and final writer output zero no-slip velocity, so DQ11 unproved. Selected historical source and figure-data binding unresolved; partial status retained, no CFD rerun.
+
+
+## glm53-01 partial case-floor review — 2026-10-30
+
+All seven b962bf5 steady force figures visually collapse to vertical lines at physical_time=0; plot_results.py:96–110 selects physical time, and no alternate delivered force history found. Seven scores 5,5,4.5,5,5,4.5,5→2 each; case-specific raw tail data in scorecard, Re20 Cd≈0.847/Cl≈−0.390 also physically inaccurate. Re200 false note corrected: report.tex:632–643 and included re200_stats.tex provide St0.11281; committed force plot startup spike makes late Cd unreadable and separate lift plot lacks drag, so remains2. Raw metadata revision bf6e816 differs from final fv_solver.cpp adaptive limiter and plateau threshold; overall rubric/DQ/source review pending. No CFD rerun.
