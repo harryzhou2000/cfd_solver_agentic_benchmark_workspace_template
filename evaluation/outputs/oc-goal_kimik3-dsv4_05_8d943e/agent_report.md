@@ -1,6 +1,6 @@
 ## Calibration checkpoint (partial)
 
-**89.5/100; DQ=true (provisional, trigger 7).** M2 and M015 laminar are marked converged despite final100 Cd falling 0.355596→0.267388 and 0.094719→0.084972; actual residual reductions are acknowledged. Re200 residual plot exists in the original contestant checkpoint, but its delivered late drag oscillation is unresolved and the separate score cap remains. Terminal-message selection remains ambiguous pending operator decision; source, other cases and DQ review continue.
+**89.5/100; DQ=true (provisional, trigger 7).** M2 and M015 laminar are marked converged despite final100 Cd falling 0.355596→0.267388 and 0.094719→0.084972; actual residual reductions are acknowledged. Re200 residual plot exists in the original contestant checkpoint, but its delivered late drag oscillation is unresolved and the separate score cap remains. Terminal-message selection remains ambiguous pending operator decision; Additional case scores now use original checkpoint figures: M080/M200 inviscid recover credit, while Re20 is capped for startup-flattened force traces. Source and remaining DQ review continue.
 
 # Agent Evaluation Report — oc-goal/kimik3-dsv4/05
 

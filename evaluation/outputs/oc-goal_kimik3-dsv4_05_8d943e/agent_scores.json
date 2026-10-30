@@ -311,16 +311,16 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 4.5,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.0001, CD=0.0017 at f7699dd:solver/report/force_table.tex:4; residual history f7699dd:solver/report/figures/naca0012_m015_inviscid_residual.png (referenced at solver/report/report.tex:245); force history f7699dd:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:246); computed-field contour f7699dd:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/report.tex:251). Score 4.5 retained after the post-processing audit. Prior case judgment: Delivered package."
+      "score": 4,
+      "notes": "Workspace force CSV SHA256 975175baaacca8392f8f05c839539e216448a9fe3297f8c556fa6b9c00daff90; final100 Cd 1.9076323830e-03\u21921.7128112646e-03, Cl -2.0222246932e-04\u21929.4865617211e-05. Numeric force table and field contours are delivered. Cd changes from \u22120.498 at step1498 to ~0.0017 after an abrupt late transition; final100 is near zero with modest absolute drift. solver.cpp:1123\u20131128 implements a switch to Newton\u2013Krylov after 1500 stalled steps, which is a possible mechanism but historic executable unbound. Score4.5\u21924 for limited settled duration; no false status solely from relative near-zero forces."
     },
     "naca0012_m080_inviscid": {
-      "score": 2,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=0.0017, CD=0.0090 at f7699dd:solver/report/force_table.tex:5; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour f7699dd:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/report.tex:259). Score capped at 2 from 4.5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Delivered package."
+      "score": 3.5,
+      "notes": "Workspace force CSV SHA256 31b8659d210c63dfa5886d5e42d496f5b376ee4aad706cc5b52e5280248073c3; final100 Cd 1.1741848369e-02\u21929.0109900119e-03, Cl 5.7231071792e-03\u21921.7131043763e-03. Numeric force table and field contours are delivered. Original contestant checkpoint1395c7e and manifest include residual and force plots omitted by curated tip, correcting old absence note. The original force chart SHA256 8ba3c7099f1414ee7b81efa730b8ad0a81eebfd80a1b49ad59502ff677ce6350 shows both force trajectories. Late Cd0.01174\u21920.00901 and Cl0.00572\u21920.00171 over final100 with flatter final50; score2\u21923.5 on delivered evidence with short-settling qualification."
     },
     "naca0012_m200_inviscid": {
-      "score": 2,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=0.0003, CD=0.0923 at f7699dd:solver/report/force_table.tex:6; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour f7699dd:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/report.tex:267). Score capped at 2 from 4.5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Delivered package."
+      "score": 4,
+      "notes": "Workspace force CSV SHA256 804cfd112b36f9d4892d941369dcf2b9619d7837fde9b26552234214f1feff70; final100 Cd 9.2214397818e-02\u21929.2257053976e-02, Cl 3.7053004379e-04\u21923.3301811523e-04. Numeric force table and field contours are delivered. Original checkpoint1395c7e includes readable force/residual figures, including force PNG SHA256 f73252bfc84166df24a8e87f9f6a0dcf703f7a0f43641c2fe9e53598595221c8, correcting old absence note. Cd\u22480.0923 is plausible and final100 forces bounded; score2\u21924."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1.5,
@@ -328,15 +328,15 @@
     },
     "naca0012_m080_laminar_re5000": {
       "score": 2,
-      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=0.0011, CD=0.0850 at f7699dd:solver/report/force_table.tex:8; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour f7699dd:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/report.tex:284). Score capped at 2 from 4.5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Delivered package."
+      "notes": "Workspace force CSV SHA256 0dbbe4143d51638e55ab72d253cf3bb257d0da396106d1d3ec17970117348fdc; final100 Cd 1.2935624573e-01\u21928.5013812580e-02, Cl 8.4015229845e-04\u21921.1394635620e-03. Numeric force table and field contours are delivered. Original checkpoint1395c7e includes residual and force images, correcting old absence claim, but force PNG SHA256 63ae38436b1058d44108519a88ab80781dc68aaf4cfa930e0bb02d3c3dfb5101 uses a common axis dominated by startup Cd>300, flattening both late traces. Final100 Cd0.129356\u21920.085014, with an abrupt late transition; score2 retained on visual floor and limited convergence confidence."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1,
       "notes": "Original workspace metadata SHA256 3698a290989ab1170fc3b03e09a80d1ea43c25a7ef598c36ace9b0226303b795 marks completed/converged at2279; f7699dd report/force_table.tex:9 gives Cd0.2674, status converged. Force CSV SHA256 e23fa3751f1863a021f24c8da3efdcb89fe423c50d814ccd16f7b06e55d76de6 final100 Cd0.3555961\u21920.2673882, final50 0.3069989\u21920.2673882, final20 0.2822537\u21920.2673882. Actual 3.0004-order residual decrease does not establish early force convergence (TASK.md:140,172). DQ7; score2\u21921. Historical binary/other evidence pending."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 4.5,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-0.0019, CD=2.1311 at f7699dd:solver/report/force_table.tex:10; residual history f7699dd:solver/report/figures/cylinder_m010_laminar_re20_residual.png (referenced at solver/report/report.tex:300); force history f7699dd:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:301); computed-field contour f7699dd:solver/report/figures/cylinder_m010_laminar_re20_mach.png (referenced at solver/report/report.tex:307). Score 4.5 retained after the post-processing audit. Prior case judgment: Delivered package."
+      "score": 2,
+      "notes": "Workspace force CSV SHA256 53bd62e98922fc6218bd342520821419088f8c7649fadebea6aaa58018605ae9; final100 Cd 2.1310931985e+00\u21922.1310758957e+00, Cl -1.9417746058e-03\u2192-1.9413201542e-03. Numeric force table and field contours are delivered. Original force PNG SHA256 98d0b4f91cccba1c21f12c1f61c6b7a85cdacb9bd7a9068cb0122128194afa31 uses common scale startup Cd>300, flattening both late force histories at the baseline. Despite plausible final Cd\u22482.131 and small final100 change, no alternate readable force history found in contestant deliverables; score4.5\u21922 on the steady force-history floor, not a numerical failure claim."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
