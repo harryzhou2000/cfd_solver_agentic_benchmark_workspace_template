@@ -36,29 +36,29 @@
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Source and contestant audit show documented CLI."
+          "score": 3,
+          "notes": "main.cpp parses --case/--output/--restart; solver.cpp:896\u2013985 serializes current and two previous states and physical time. Rank-0 restart read errors return before peers reach broadcasts, risking MPI hang."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Separated case, mesh, physics, reconstruction, partition, output and solver modules."
+          "notes": "Separate case, mesh, partition, reconstruction, physics, solver and output modules; state/geometry remain strictly 2-D."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 3,
-          "notes": "No internal wrapper evidence; trust policy excludes external search."
+          "notes": "No internal executable wrapper identified; external authorship/similarity search excluded by trust policy."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "Generic case/mesh source paths."
+          "notes": "main.cpp accepts configured mesh path; mesh.cpp:68 reads CGNS rather than branching solely on two filenames. Only supplied meshes evidenced."
         },
         {
           "id": "code.mpi",
@@ -71,25 +71,25 @@
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Submitted sanity/reproducibility evidence; not independently rerun."
+          "score": 3,
+          "notes": "solver.cpp positivity fallback and finite checks exist, but actual BDF2 formula and log-y plotting fail; solver.cpp:928\u2013941 root restart error can bypass subsequent MPI broadcasts."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
           "score": 3,
-          "notes": "Tools and contestant audit evidence, limited committed formal tests."
+          "notes": "mesh_diag tool and contestant np4/np8 plus clean-checkout audit provide evidence; no independent formal convergence suite or evaluator CFD rerun."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": 4,
-          "notes": "Curated source/report cleanly excludes raw artifacts."
+          "score": 3,
+          "notes": "Curated source/report omit raw results intentionally; generated plots show systematic log-coordinate bug and source contains optional debug controls."
         }
       ],
-      "overall_score": 3.45,
+      "overall_score": 3.2,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -98,64 +98,64 @@
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 4,
-          "notes": "Report/source equations."
+          "score": 3,
+          "notes": "solver.cpp:176\u2013213 assembles conservative interior convective/viscous residual; transient physical derivative coefficients are inconsistent, so structural equations alone do not validate results."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "CGNS/unstructured paths."
+          "notes": "mesh.cpp:68 reads CGNS; partition.cpp builds local topology. Full mesh is retained on every rank during solve; independent geometry oracle not run."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 4,
-          "notes": "Finite-volume source and passing result artifacts."
+          "score": 3,
+          "notes": "solver.cpp:176\u2013276 assembles face/boundary residuals, :662\u2013677 adds physical term. Transient term is not claimed BDF2 and case accuracy is limited."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Physics/solver source evidence."
+          "notes": "solver.cpp:181\u2013194 selects Roe by default or optional Rusanov; physics.cpp contains flux algorithms. Report claims Roe; production fallback-switch use is not established."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Boundary handling source/report."
+          "notes": "solver.cpp:250\u2013276 handles farfield, wall pressure and adiabatic viscous path; :705\u2013751 outputs wall values. No-slip surface reports zero velocity."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 4,
-          "notes": "Second-order reconstruction source."
+          "notes": "reconstruction.cpp:33\u2013137 LSQ gradients and :138\u2013200 limiter feed solver.cpp:153\u2013170. Optional CFD_FIRST_ORDER exists; no production use established. No order-convergence study supplied."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4,
-          "notes": "Limiter source/report evidence."
+          "notes": "reconstruction.cpp:138\u2013200 implements Barth\u2013Jespersen and positivity fallback, called by solver.cpp:163\u2013170. Optional bypass exists, but production activation not established."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 4,
-          "notes": "Laminar result and source evidence."
+          "notes": "solver.cpp:196\u2013213,263\u2013276 computes viscous face/wall fluxes; :606\u2013624 projects wall traction tangentially. Laminar plateau histories have limited convergence evidence."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 4,
-          "notes": "Implicit steady source/report evidence."
+          "notes": "solver.cpp:470\u2013481 performs forward/backward LU-SGS and :1233 onward inner relaxation; short steady runs use residual/force plateau criterion."
         },
         {
           "id": "cfd.transient",
@@ -172,7 +172,7 @@
           "notes": "partition.cpp:36 uses METIS but main.cpp:112\u2013127 replicates full mesh on all ranks throughout solve, contrary to TASK.md:227; np4/8 outputs alone do not establish order-one mismatch."
         }
       ],
-      "overall_score": 3.52,
+      "overall_score": 3.34,
       "disqualification_flags": []
     },
     "result_review": {
@@ -181,15 +181,15 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 5,
-          "notes": "All eight preserved canonical packages validate."
+          "score": 3,
+          "notes": "Eight raw packages pass structural validator, but TASK.md:227 prohibits actual replicated mesh and Re200 does not use required BDF2 despite metadata claim."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Explicit validator rc 0 in immutable attempt worktree."
+          "score": 4,
+          "notes": "Prior examiner validator returned rc0 for eight immutable raw packages plus report; this does not verify BDF2 coefficients, physical accuracy or actual full-mesh lifetime."
         },
         {
           "id": "res.completion",
@@ -202,8 +202,8 @@
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Contestant result/report checks are strong; no evaluator rerun."
+          "score": 2,
+          "notes": "Steady force tails/early plateaus vary in credibility; Re200 lift oscillates but its time discretization is inconsistent, so reported frequency is not independently accurate."
         },
         {
           "id": "res.visualization",
@@ -227,13 +227,13 @@
           "notes": "Immutable raw 7152874 preserved results; report formula and no-full-mesh claims conflict with source; inner fraction refers to different residual, not required BDF2."
         }
       ],
-      "overall_score": 3.05,
+      "overall_score": 2.25,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 73,
+    "total_scored": 71,
     "sections": [
       {
         "id": "build_cli",
@@ -247,28 +247,28 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 9,
-        "notes": "CGNS/unstructured source evidence."
+        "notes": "mesh.cpp:68 CGNS reader; partition.cpp builds local mesh, but full Mesh remains on each rank. Geometry not independently rerun."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 13,
-        "notes": "Source and validated result evidence."
+        "score": 12,
+        "notes": "solver.cpp:176\u2013276 conservative interior, farfield, wall and viscous residual; boundary/physical credibility limited by brief plateaus; transient time formula incorrect separately."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 9,
-        "notes": "Reconstruction/limiter source and report."
+        "score": 8,
+        "notes": "reconstruction.cpp:33\u2013200 LSQ/limiter and positivity fallback; optional first-order environment switch present, no established production use; no order-convergence study."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 8,
-        "notes": "Source/results support; no independent rerun."
+        "notes": "solver.cpp:196\u2013213 and :263\u2013276 viscous flux, :606\u2013624 tangential force split; short laminar plateaus limit physical validation."
       },
       {
         "id": "implicit_transient",
@@ -303,7 +303,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 3,
-        "notes": "Modular but 2-D-specific architecture."
+        "notes": "Separate mesh, case, reconstruction, physics and output modules, but 2-D data structures and solver-specific coupling remain."
       }
     ]
   },
@@ -347,27 +347,27 @@
       {
         "flag": "Existing solver executable called internally",
         "triggered": false,
-        "notes": "No internal wrapper evidence."
+        "notes": "No source-evident internal solver wrapper; trust policy excludes external similarity search."
       },
       {
         "flag": "Force/residual files generated without solving",
         "triggered": false,
-        "notes": "Not established."
+        "notes": "Raw immutable attempt 7152874 retains detailed histories, fields and statuses. No direct evidence of generating force/residual files without solving; wrong transient scheme is separately documented."
       },
       {
         "flag": "Hard-coded mesh reader",
         "triggered": false,
-        "notes": "Not established."
+        "notes": "mesh.cpp:68 reads configured CGNS mesh, no two-filename dispatch found."
       },
       {
         "flag": "MPI mismatch",
         "triggered": false,
-        "notes": "Submitted comparison claimed; no order-one mismatch established."
+        "notes": "Raw np4/np8 M0.15 and Re20 final values differ modestly and not order-one; no general rank-invariance proof."
       },
       {
         "flag": "Explicit only",
         "triggered": false,
-        "notes": "Implicit/BDF2 source present."
+        "notes": "solver.cpp:470\u2013481 and :1233 onward implement implicit LU-SGS; transient residual coefficients are wrong but this is not explicit-only."
       },
       {
         "flag": "Unsupported report claim",
@@ -380,37 +380,37 @@
       {
         "flag": "Failed marked successful",
         "triggered": false,
-        "notes": "Validator accepts metadata."
+        "notes": "Re200 lift has repeated zero crossings and is honestly oscillatory under implemented (incorrect) time scheme; no exact strict BDF2 target miss count follows from metadata. Steady statuses and force tails reviewed; no separate DQ7 established."
       },
       {
         "flag": "Figure mismatch",
         "triggered": false,
-        "notes": "Not established."
+        "notes": "All residual plots are blank due reproducible coordinate-mapping bug; this is unusable visualization, not affirmative proof a plotted field came from unrelated output. Re200 force startup masks late oscillations."
       },
       {
         "flag": "METIS misrepresentation",
         "triggered": false,
-        "notes": "partition.cpp:36 calls METIS. TASK.md:227 separately prohibits full mesh replicated on all ranks through iterations; this is not the narrower numbered DQ9 geometric-only/full-state condition."
+        "notes": "partition.cpp:36 calls METIS and local state exists; all-rank full-mesh lifetime violates TASK.md:227, separately from numbered DQ9."
       },
       {
         "flag": "Limiter disabled",
         "triggered": false,
-        "notes": "Not established."
+        "notes": "solver.cpp:153\u2013170 activates LSQ/limiter by default; optional CFD_FIRST_ORDER exists, but production use is not established from evidence available."
       },
       {
         "flag": "Surface semantic failure",
         "triggered": false,
-        "notes": "Not established."
+        "notes": "solver.cpp:705\u2013751 outputs wall boundary semantics, including zero no-slip velocity; no evidence of mislabeled cell-center velocity."
       },
       {
         "flag": "Misnamed figures",
         "triggered": false,
-        "notes": "Not established."
+        "notes": "Report supplies titled Mach/pressure/velocity fields; sampled semantics and case data without establishing deliberate misnaming. Not an exhaustive pixel audit."
       },
       {
         "flag": "Copied core",
         "triggered": false,
-        "notes": "No internal wrapper evidence; no external search."
+        "notes": "No internal wrapper found; external similarity search excluded under trust policy."
       },
       {
         "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",

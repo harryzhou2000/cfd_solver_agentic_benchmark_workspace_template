@@ -13,29 +13,29 @@
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Source and contestant audit show documented CLI."
+      "score": 3,
+      "notes": "main.cpp parses --case/--output/--restart; solver.cpp:896\u2013985 serializes current and two previous states and physical time. Rank-0 restart read errors return before peers reach broadcasts, risking MPI hang."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Separated case, mesh, physics, reconstruction, partition, output and solver modules."
+      "notes": "Separate case, mesh, partition, reconstruction, physics, solver and output modules; state/geometry remain strictly 2-D."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 3,
-      "notes": "No internal wrapper evidence; trust policy excludes external search."
+      "notes": "No internal executable wrapper identified; external authorship/similarity search excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Generic case/mesh source paths."
+      "notes": "main.cpp accepts configured mesh path; mesh.cpp:68 reads CGNS rather than branching solely on two filenames. Only supplied meshes evidenced."
     },
     {
       "id": "code.mpi",
@@ -48,22 +48,22 @@
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Submitted sanity/reproducibility evidence; not independently rerun."
+      "score": 3,
+      "notes": "solver.cpp positivity fallback and finite checks exist, but actual BDF2 formula and log-y plotting fail; solver.cpp:928\u2013941 root restart error can bypass subsequent MPI broadcasts."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 3,
-      "notes": "Tools and contestant audit evidence, limited committed formal tests."
+      "notes": "mesh_diag tool and contestant np4/np8 plus clean-checkout audit provide evidence; no independent formal convergence suite or evaluator CFD rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Curated source/report cleanly excludes raw artifacts."
+      "score": 3,
+      "notes": "Curated source/report omit raw results intentionally; generated plots show systematic log-coordinate bug and source contains optional debug controls."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.45
+  "overall_score": 3.2
 }

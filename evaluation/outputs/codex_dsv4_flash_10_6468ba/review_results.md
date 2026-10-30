@@ -2,23 +2,23 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:18:19.316345+00:00
+Generated: 2026-10-30T04:19:29.108635+00:00
 
-**Overall score: 3.05**
+**Overall score: 2.25**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | All eight preserved canonical packages validate. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 3 | Eight raw packages pass structural validator, but TASK.md:227 prohibits actual replicated mesh and Re200 does not use required BDF2 despite metadata claim. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit validator rc 0 in immutable attempt worktree. |
+| 2 | **res.validator** Automated validator results | 0.10 | 4 | Prior examiner validator returned rc0 for eight immutable raw packages plus report; this does not verify BDF2 coefficients, physical accuracy or actual full-mesh lifetime. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
 | 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Seven steady statuses converged but most stop early on plateau with limited residual drop; Re200 reaches t300 using an inconsistent physical-time formula, not claimed BDF2. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Contestant result/report checks are strong; no evaluator rerun. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | Steady force tails/early plateaus vary in credibility; Re200 lift oscillates but its time discretization is inconsistent, so reported frequency is not independently accurate. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 1 | All eight accepted report residual images are blank because tools_py/plot_lines.py:137–139 log-y mapping omits offset; Re200 late force oscillations unreadable. Case contours are present. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T04:18:19.316345+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.05
+- Overall score (0-5): 2.25
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -8,7 +8,7 @@ Selected workspace-local Codex root `019fe243-274e-7961-abdb-42fcc139142e` has e
 
 ## Scores and verdict
 
-Provisional score **73/100** (previously 86); Code 3.78/5, CFD 4.00/5, Results 4.69/5; DQ=true under TASK full-mesh prohibition and trigger 6 for the absent claimed BDF2 formula. Every rubric, review-point and case note is in `agent_scores.json`; current case scores are 2, 2, 2, 2, 2, 2, 2, 2. Strong source/report and validator evidence support a high result, while no evaluator solver rerun or independent redraw was performed. Re200 was not rerun.
+Calibrated score **71/100** (previously 86); Code 3.78/5, CFD 4.00/5, Results 4.69/5; DQ=true under TASK full-mesh prohibition and trigger 6 for the absent claimed BDF2 formula. Every rubric, review-point and case note is in `agent_scores.json`; current case scores are 2, 2, 2, 2, 2, 2, 2, 2. Strong source/report and validator evidence support a high result, while no evaluator solver rerun or independent redraw was performed. Re200 was not rerun.
 
 TASK.md:227 full-mesh prohibition and DQ6 apply as documented below. No internal solver wrapper is evident. Trust policy excluded external similarity search.
 
@@ -44,3 +44,8 @@ The claimed BDF2 physical-time algorithm is not present in the sole transient re
 ## Partial build and rubric review — 2026-10-30
 
 Immutable 47dff36 CMake build passes with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB, /opt/external dependencies; no solver run. MPI 9→5 reflects prohibited all-rank full mesh despite actual METIS/local halos and np4/8 case comparisons; results 9→6 reflects early plateaus and incorrect transient formula; report/viz 4→2 reflects eight blank residual graphs, unreadable Re200 late force and inaccurate BDF2/no-replication assertions. Provisional rubric 82→73. Tangential viscous traction is projected at solver.cpp:606–624, and CFD_FIRST_ORDER exists as an optional switch (solver.cpp:154–160), but no direct evidence establishes production used it. Remaining criteria and DQ review partial; both gates pass.
+
+
+## Full calibration — 2026-10-30
+
+All ten rubric sections and 27 weighted review points now carry source- or result-specific evidence. The eight scores remain 2 because all residual plot frames are blank; original case histories, contours and individual physics are documented above. Rubric 86→71; DQ6 for absent claimed BDF2 formula and TASK.md:227 for all-rank full mesh are independent. Full-horizon Re200 has real lift zero crossings under the implemented inconsistent time formula; neither strict BDF2 miss count nor fabricated output is inferred. Genuine METIS, neighbor exchange, tangential viscous projection and optional first-order switch exist; production use of the latter is not established. Root-only restart read can return before MPI broadcasts on error. Immutable clean CMake build passes with warnings in network-disabled cfd-bench; no CFD rerun, external similarity search, exhaustive pixel audit or general rank-invariance proof. Both record gates pass.
