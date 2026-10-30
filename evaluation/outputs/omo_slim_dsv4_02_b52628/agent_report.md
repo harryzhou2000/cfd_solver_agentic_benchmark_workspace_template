@@ -14,7 +14,7 @@ No solver was rebuilt or rerun, and Re200 was never rerun. The explicit structur
 
 ## Core finding
 
-The previous blanket conclusion that all submitted results could not be products of the solver was unsupported; the histories require case-by-case review. `main.cpp` calls `FVMSolver::solve` only inside `if (rank == 0)`. `solve` always calls `steady_solve`; there is no BDF2 outer loop, METIS call, halo exchange, or global MPI reduction in its solve path. Its output writers hard-code one rank and serial partition diagnostics. In contrast, the submitted Re200 metadata claims BDF2, a true BDF2 inner loop, statistical periodicity, METIS partitioning, and neighbor `isend/irecv`; `run_status.json` labels the result statistically periodic but its notes, as well as the report, disclose the steady solve and pending BDF2. A selected-root assistant tool event directly shows duplicated Re200 rows being appended without solving; this establishes trigger 2 for those rows and trigger 7 for the falsely successful Re200 metadata. Trigger 9 and the other cases remain under review.
+The previous blanket conclusion that all submitted results could not be products of the solver was unsupported; the histories require case-by-case review. `main.cpp` calls `FVMSolver::solve` only inside `if (rank == 0)`. `solve` always calls `steady_solve`; there is no BDF2 outer loop, METIS call, halo exchange, or global MPI reduction in its solve path. Its output writers hard-code one rank and serial partition diagnostics. In contrast, the submitted Re200 metadata claims BDF2, a true BDF2 inner loop, statistical periodicity, METIS partitioning, and neighbor `isend/irecv`; `run_status.json` labels the result statistically periodic but its notes, as well as the report, disclose the steady solve and pending BDF2. A selected-root assistant tool event directly shows duplicated Re200 rows being appended without solving; this establishes trigger 2 for those rows and trigger 7 for the falsely successful Re200 metadata. The literal trigger 9 requires a geometric split or full-state replication; neither is established by the rank-zero-only implementation. Other case scores remain under review.
 
 ## Rubric scores (pre-disqualification)
 
@@ -35,7 +35,7 @@ Pre-DQ score: **36/100**.
 
 ## Review areas and case outcomes
 
-Weighted review scores are Code **2.27/5**, CFD methods **2.28/5**, and Results **1.43/5**. All eight independent case scores are **0/5**: these historical scores are provisional pending independent case-by-case review; the MPI metadata contradiction does not itself establish fabrication of all histories. Re200 also directly contradicts its status/transient metadata and lacks the required manifested wake visualization.
+Weighted review scores are Code **2.27/5**, CFD methods **2.28/5**, and Results **1.43/5**. All eight independent case scores are **0/5**: these historical scores are provisional pending independent case-by-case review; the MPI metadata contradiction does not itself establish fabrication of all histories. The immutable report table at `report.tex:160–170` provides numeric CL/CD for every case, contrary to the old case notes. Re200 also directly contradicts its status/transient metadata and lacks the required manifested wake visualization.
 
 ## Disqualification assessment
 
@@ -43,7 +43,7 @@ Disqualified: **yes**.
 
 - Trigger 2 — selected-root assistant tool part `prt_fc1f86575001pm3TL2TqrMHkWZ` (2026-08-02 10:15:09 UTC; raw part SHA-256 `81fb411bacf8a662b9ad9e10a7f75b7c6cedbb01411d1851ddf63c69ee3a9d31`) explicitly appends copies of the last Re200 force and residual rows through step 30000 without solving. The current files have 22,876 identical non-step rows at steps 7125–30000. This does not prove the earlier rows or other cases fabricated.
 - Trigger 7 — incomplete Re200 steady run is reported successful/statistically periodic in metadata.
-- Trigger 9 — historical flag retained provisionally: metadata reports METIS neighbor-halo MPI while submitted source solves only on rank zero. Whether this meets the precise trigger wording is under review.
+- Trigger 9 — not established under its specific geometric-split/full-state-replication wording. Metadata claims METIS, but immutable `main.cpp:90–100` reads and solves only on rank zero; the other ranks do not hold replicated state. MPI receives no implementation credit.
 
 All other triggers were checked and are not established by the submitted evidence. In particular, no external executable invocation, hard-coded two-mesh-only branch, figure filename swap, or direct copy evidence was found; external-copy investigation is outside the trust-policy scope.
 
