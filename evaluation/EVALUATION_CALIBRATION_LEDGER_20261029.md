@@ -82,7 +82,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_06_5b6b08` | partial: 65/100 source assessment, no DQ established; original case packages/figures absent |
 | `codex_dsv4_flash_07_aeae21` | fully reviewed: 68/100, DQ7 and TASK full mesh; three reference cases |
 | `codex_dsv4_flash_08_efba3c` | fully reviewed; 76→71, DQ7 and case evidence corrected |
-| `codex_dsv4_flash_09_526316` | unreviewed |
+| `codex_dsv4_flash_09_526316` | partial: all canonical case outcomes and initial mesh lifetime checked; rubric/DQ pending |
 | `codex_dsv4_flash_10_6468ba` | unreviewed |
 | `codex_dsv4_flash_11_6e6ac8` | unreviewed |
 | `codex_dsv4_flash_12_7e965b` | unreviewed |
@@ -439,3 +439,8 @@ dsv4_flash_08 provisional rubric checkpoint: 76→72/100, viscous 8→7 for full
 ## dsv4_flash_08 full calibration — 2026-10-30
 
 Rubric 76→71/100, DQ false→true under 7, case scores 2,4,2,4,4,2,4,0 → 3,3,3,2,2,1,3,0. Ten sections and 27 review points contain criterion-specific evidence. M2 laminar status says converged at step 33, Cd falls 0.2587903→0.2136694 over steps 30–33 despite residual reduction 3.005 orders; TASK.md:140 supplied max_steps budget/early convergence and :172 stable-force standard apply. Re200 honestly fails at t=68.9; report incorrectly says first step and metadata inner counts disagree with raw residuals; NaN target comparisons do not establish exact misses. Source ignores restart argument, integrates full traction for viscous split, clears global mesh before iterations, and discloses M2 first order. Accepted PDF plus traced contestant standalone figures support case credit; hashes/provenance above. Clean immutable CMake build passes with explicit container paths, both gates pass; no CFD rerun, exhaustive external authorship/pixel audit or rank comparison.
+
+
+## dsv4_flash_09 partial case review — 2026-10-30
+
+All canonical steady statuses fail at 500; final inviscid Cd M0.15/M0.8/M2 -0.898684/-0.207379/-0.118422 and 0.2523/0.2033/0.1870 residual orders. All three laminar NACA cases and Re20 have final NaN Cl/Cd; Re200 directory has only field_t1.000.vtu and stdout.log with no force/residual/status/metadata. Scores remain 1,1,1,0,0,0,1,0. Corrected false old M0.15 claim: report.tex:78–101 includes Cd≈0.11 for separate 100-step eight-rank short test, not canonical failed run. Immutable 11adaa1 main.cpp:91–99 loads full mesh per rank during preprocessing and resets it before iterations. Full source/rubric/DQ remains partial; both gates pass, no CFD rerun.

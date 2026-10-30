@@ -21,3 +21,8 @@ No disqualification is established: no internal executable wrapper was found; th
 `contestant_final_response.md` SHA-256: `44911bcbea7e17fd941dc3b0e642d1d8aaad534904abfe9de713564a23ff93b2`.
 
 Both are unindexed sidecars; `cfdeval check` does not validate them.
+
+
+## Partial case evidence review — 2026-10-30
+
+All seven canonical steady status files mark failed at step 500. Final Cd of M0.15/M0.8/M2 inviscid is -0.898684, -0.207379, -0.118422; their respective residual reduction orders are 0.2523, 0.2033, 0.1870. All three laminar NACA cases and Re20 end with NaN Cl/Cd. Re200 directory has only field_t1.000.vtu and stdout.log, without status/metadata or force/residual histories. Case scores stay 1,1,1,0,0,0,1,0. The previous M0.15 note falsely asserted no report numeric summary: report.tex:78–101 explicitly gives Cd≈0.11 for a separate 100-step eight-rank short test, not the failed canonical run. Immutable main.cpp:91–99 loads full mesh on every rank during preprocessing but resets it before solver iterations; the TASK iteration-time replication prohibition is not established. Source/rubric/DQ review remains partial. No CFD rerun.
