@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:47:25.605388+00:00
+Generated: 2026-10-30T12:54:04.690668+00:00
 
 **Overall score: 3.85**
 
@@ -15,10 +15,10 @@ Generated: 2026-10-30T12:47:25.605388+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit examiner validation passed all eight packages and report. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 1 | Seven steady statuses say converged despite 0.02-0.67 reported residual-order reductions. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 1 | Seven steady residual targets are missed but reported forces are flat and a bounded plateau is allowed; exact no-progress mechanism is unproved. Re200 claims periodicity despite persistent late amplitude decay; full case review pending. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Re200 periodic result is credible; rank smoke force deltas and steady plateaus limit the rest. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Re200 frequency is measurable but lift amplitude decays strongly; steady low-Mach/Re20 forces and rank smoke mismatch limit plausibility. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 5 | Referenced figure assets are present and readable. |

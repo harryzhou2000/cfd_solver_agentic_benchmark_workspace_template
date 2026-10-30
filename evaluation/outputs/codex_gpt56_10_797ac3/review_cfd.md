@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:47:25.604978+00:00
+Generated: 2026-10-30T12:54:04.690365+00:00
 
 **Overall score: 4.72**
 
@@ -36,7 +36,7 @@ Generated: 2026-10-30T12:47:25.604978+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | Pseudo-time method exists, but steady target convergence is not achieved. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 5 | BDF2 Re200 evidence reaches physical horizon and periodicity gates. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 5 | Active-operator BDF2 source and 30000-step history are present; Re200 lift frequency persists but amplitude continues to decay, contrary to statistically settled wake claim. Score provisional. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3 | METIS/halo design exists; smoke-force inconsistency limits confidence. |

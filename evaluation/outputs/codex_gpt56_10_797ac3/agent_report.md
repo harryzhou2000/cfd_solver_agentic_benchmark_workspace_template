@@ -1,6 +1,6 @@
 # Agent Evaluation Report — codex/gpt56/10
 
-> **Calibration in progress:** The historical DQ7 rationale below relies only on missed steady residual targets and is not independently supported by that fact: bounded plateaus are permitted. The terminal reported forces are flat, while the Re200 lift amplitude decays. Rank, source and final DQ adjudication remain under review; the earlier verdict is provisional.
+> **Calibration in progress:** The historical DQ7 rationale below relies only on missed steady residual targets and is not independently supported by that fact: bounded plateaus are permitted. The terminal reported forces are flat, while the Re200 lift amplitude decays. DQ7 is retained on the independently verified decaying Re200 wake; rank, other source criteria and the rubric remain under review.
 
 ## Evidence and method
 
@@ -12,8 +12,8 @@ The selected session ran 2026-08-17T06:10:24Z to 2026-08-26T06:32:43Z. Its extra
 
 - The source and report describe a substantial cell-centred unstructured finite-volume solver: Roe/Rusanov flux choices, least-squares linear reconstruction, limiter/positivity controls, viscous stresses/heat flux, METIS partitioning, and BDF2 physical-time integration.
 - All eight raw packages and the report pass structural validation.
-- Re200 reached the delivered 30,000 physical-step horizon and provides internally consistent periodic-wake evidence (12 cycles, St about 0.12, correlation 0.999); it was not rerun.
-- All seven steady `run_status.json` records set `convergence_status: converged` while reporting only 0.021–0.673 residual-reduction orders. The report correctly calls them bounded pseudo-time plateaus and says their target was not reached. That truthful prose does not repair the contradictory successful machine statuses.
+- Re200 reached 30,000 physical steps and its frequency is real (period about 8.38, St about 0.119), but lift spans fall from 0.002386 to 0.000847 across four successive 25-unit windows over t=200–300, so the wake has not settled statistically.
+- All seven steady `run_status.json` records set `convergence_status: converged` while reporting only 0.021–0.673 residual-reduction orders. The report correctly calls them bounded pseudo-time plateaus and says their target was not reached. A stable bounded plateau is allowed, so residual misses alone do not prove those statuses false; the source permits a no-progress candidate to be counted as accepted, but its actual execution is unresolved.
 - The submitted MPI smoke table reports materially rank-dependent forces, so MPI numerical equivalence is not established.
 
 ## Rubric score
@@ -32,11 +32,11 @@ The selected session ran 2026-08-17T06:10:24Z to 2026-08-26T06:32:43Z. Its extra
 | Extensibility | 5/5 |
 | **Total** | **90/100** |
 
-Per-case scores are recorded in `agent_scores.json`: the seven steady cases score 1–2 because of the false successful statuses; Re200 was retrospectively capped at 2; its late force panel exists but does not resolve the oscillations. Full numerical adjudication remains pending.
+Per-case scores are recorded in `agent_scores.json`: the seven steady scores remain provisional. Re200 is reduced 2→1 for its decaying wake; its late force panel exists but does not resolve the oscillations. Full numerical adjudication remains pending.
 
 ## Disqualification assessment
 
-**Triggered: true, trigger 7.** Seven incomplete steady outcomes are marked successful in `run_status.json`, despite their own low reported reductions. The structural validator passing is necessary but does not overturn this substantive status failure.
+**Triggered: true, trigger 7.** Re200 is marked statistically periodic although its lift oscillation amplitude steadily decays across the final 100 time units. The earlier residual-only steady rationale is withdrawn; other DQ triggers remain under review.
 
 ## Integrity and limitations
 
@@ -48,4 +48,4 @@ These are unindexed sidecars; `cfdeval check` does not validate their content. N
 
 ## Verdict
 
-**90/100; disqualified.** The submitted implementation, report, and Re200 evidence are strong, but the seven contradictory successful steady statuses are a disqualifying substantive result-integrity failure.
+**90/100; disqualified.** The retained disqualification is based on the Re200 wake being marked statistically periodic despite the measured late amplitude decay. The 90-point rubric is provisional pending full calibration.

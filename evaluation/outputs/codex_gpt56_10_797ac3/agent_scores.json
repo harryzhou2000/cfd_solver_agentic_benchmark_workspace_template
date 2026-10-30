@@ -160,7 +160,7 @@
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 5,
-          "notes": "BDF2 Re200 evidence reaches physical horizon and periodicity gates."
+          "notes": "Active-operator BDF2 source and 30000-step history are present; Re200 lift frequency persists but amplitude continues to decay, contrary to statistically settled wake claim. Score provisional."
         },
         {
           "id": "cfd.mpi_partition",
@@ -194,14 +194,14 @@
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 1,
-          "notes": "Seven steady statuses say converged despite 0.02-0.67 reported residual-order reductions."
+          "notes": "Seven steady residual targets are missed but reported forces are flat and a bounded plateau is allowed; exact no-progress mechanism is unproved. Re200 claims periodicity despite persistent late amplitude decay; full case review pending."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 3,
-          "notes": "Re200 periodic result is credible; rank smoke force deltas and steady plateaus limit the rest."
+          "notes": "Re200 frequency is measurable but lift amplitude decays strongly; steady low-Mach/Re20 forces and rank smoke mismatch limit plausibility."
         },
         {
           "id": "res.visualization",
@@ -229,8 +229,8 @@
       "disqualification_flags": [
         {
           "id": 7,
-          "text": "steady statuses are contradictory",
-          "evidence": "See top-level disqualification evidence.",
+          "text": "Re200 marked statistically periodic while lift amplitude continues to decay",
+          "evidence": "Re200 metadata and report.tex:45,143 mark the full-horizon wake statistically periodic, but contestant forces.csv SHA256 78b13e45f40ae2cfbdcf566647c83ad34e3dfb08f135316a1a35ccc3f2b6c1db has CL spans 0.00238598, 0.00169178, 0.00119816, 0.000847183 in consecutive 25-unit windows t=200\u2013225, 225\u2013250, 250\u2013275, 275\u2013300. This persistent decay shows the wake has not settled statistically; approximately 8.38 period is real. The old seven-steady residual-only rationale is withdrawn because stable plateaus are permitted. Historical executable remains qualified.",
           "found": true
         }
       ]
@@ -280,7 +280,7 @@
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 14,
-        "notes": "Strong BDF2 evidence; steady nonlinear convergence remains deficient."
+        "notes": "Provisional: BDF2/active inner source present; Re200 wake not statistically settled and steady residual targets unmet."
       },
       {
         "id": "mpi",
@@ -294,7 +294,7 @@
         "title": "Case Results And Validation",
         "max_points": 10,
         "score": 4,
-        "notes": "Structural pass and credible Re200, but most steady results are plateaus mislabeled converged."
+        "notes": "Provisional: steady targets unmet but stable plateaus are allowed; Re200 wake amplitude decays despite periodic status."
       },
       {
         "id": "report_viz",
@@ -315,35 +315,35 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=4.089e-07, CD=0.9131 at 02007d6:solver/report/report.tex:74; residual history 02007d6:solver/report/figures/naca0012_m015_inviscid_residual.png (referenced at solver/report/report.tex:88); force history 02007d6:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:88); computed-field contour 02007d6:solver/report/figures/naca0012_m015_inviscid_pressure.png (referenced at solver/report/report.tex:90). Score 2 retained after the post-processing audit. Prior case judgment: Bounded plateau falsely labeled converged."
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=4.089e-07, CD=0.9131 at 02007d6:solver/report/report.tex:74; residual history 02007d6:solver/report/figures/naca0012_m015_inviscid_residual.png (referenced at solver/report/report.tex:88); force history 02007d6:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:88); computed-field contour 02007d6:solver/report/figures/naca0012_m015_inviscid_pressure.png (referenced at solver/report/report.tex:90). Score 2 retained after the post-processing audit. Prior case judgment: Bounded plateau; residual target unmet, but low reduction alone does not prove false success."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=5.574e-10, CD=0.2057 at 02007d6:solver/report/report.tex:75; residual history 02007d6:solver/report/figures/naca0012_m080_inviscid_residual.png (referenced at solver/report/report.tex:95); force history 02007d6:solver/report/figures/naca0012_m080_inviscid_forces.png (referenced at solver/report/report.tex:95); computed-field contour 02007d6:solver/report/figures/naca0012_m080_inviscid_pressure.png (referenced at solver/report/report.tex:97). Score 2 retained after the post-processing audit. Prior case judgment: Bounded plateau falsely labeled converged."
+      "notes": "NACA0012 M0.80 inviscid: numeric CL=5.574e-10, CD=0.2057 at 02007d6:solver/report/report.tex:75; residual history 02007d6:solver/report/figures/naca0012_m080_inviscid_residual.png (referenced at solver/report/report.tex:95); force history 02007d6:solver/report/figures/naca0012_m080_inviscid_forces.png (referenced at solver/report/report.tex:95); computed-field contour 02007d6:solver/report/figures/naca0012_m080_inviscid_pressure.png (referenced at solver/report/report.tex:97). Score 2 retained after the post-processing audit. Prior case judgment: Bounded plateau; residual target unmet, but low reduction alone does not prove false success."
     },
     "naca0012_m200_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=-6.284e-10, CD=0.1172 at 02007d6:solver/report/report.tex:76; residual history 02007d6:solver/report/figures/naca0012_m200_inviscid_residual.png (referenced at solver/report/report.tex:102); force history 02007d6:solver/report/figures/naca0012_m200_inviscid_forces.png (referenced at solver/report/report.tex:102); computed-field contour 02007d6:solver/report/figures/naca0012_m200_inviscid_pressure.png (referenced at solver/report/report.tex:104). Score 2 retained after the post-processing audit. Prior case judgment: Bounded plateau falsely labeled converged."
+      "notes": "NACA0012 M2.00 inviscid: numeric CL=-6.284e-10, CD=0.1172 at 02007d6:solver/report/report.tex:76; residual history 02007d6:solver/report/figures/naca0012_m200_inviscid_residual.png (referenced at solver/report/report.tex:102); force history 02007d6:solver/report/figures/naca0012_m200_inviscid_forces.png (referenced at solver/report/report.tex:102); computed-field contour 02007d6:solver/report/figures/naca0012_m200_inviscid_pressure.png (referenced at solver/report/report.tex:104). Score 2 retained after the post-processing audit. Prior case judgment: Bounded plateau; residual target unmet, but low reduction alone does not prove false success."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
-      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=1.65e-07, CD=0.9139 at 02007d6:solver/report/report.tex:77; residual history 02007d6:solver/report/figures/naca0012_m015_laminar_re5000_residual.png (referenced at solver/report/report.tex:109); force history 02007d6:solver/report/figures/naca0012_m015_laminar_re5000_forces.png (referenced at solver/report/report.tex:109); computed-field contour 02007d6:solver/report/figures/naca0012_m015_laminar_re5000_pressure.png (referenced at solver/report/report.tex:111). Score 1 retained after the post-processing audit. Prior case judgment: Near-zero residual reduction yet labeled converged."
+      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=1.65e-07, CD=0.9139 at 02007d6:solver/report/report.tex:77; residual history 02007d6:solver/report/figures/naca0012_m015_laminar_re5000_residual.png (referenced at solver/report/report.tex:109); force history 02007d6:solver/report/figures/naca0012_m015_laminar_re5000_forces.png (referenced at solver/report/report.tex:109); computed-field contour 02007d6:solver/report/figures/naca0012_m015_laminar_re5000_pressure.png (referenced at solver/report/report.tex:111). Score 1 retained after the post-processing audit. Prior case judgment: Near-zero residual reduction with an abruptly flat reported force tail; actual no-progress mechanism remains unproved."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 1.5,
-      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-3.046e-07, CD=0.206 at 02007d6:solver/report/report.tex:78; residual history 02007d6:solver/report/figures/naca0012_m080_laminar_re5000_residual.png (referenced at solver/report/report.tex:116); force history 02007d6:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:116); computed-field contour 02007d6:solver/report/figures/naca0012_m080_laminar_re5000_pressure.png (referenced at solver/report/report.tex:118). Score 1.5 retained after the post-processing audit. Prior case judgment: Bounded plateau falsely labeled converged."
+      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-3.046e-07, CD=0.206 at 02007d6:solver/report/report.tex:78; residual history 02007d6:solver/report/figures/naca0012_m080_laminar_re5000_residual.png (referenced at solver/report/report.tex:116); force history 02007d6:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:116); computed-field contour 02007d6:solver/report/figures/naca0012_m080_laminar_re5000_pressure.png (referenced at solver/report/report.tex:118). Score 1.5 retained after the post-processing audit. Prior case judgment: Bounded plateau; residual target unmet, but low reduction alone does not prove false success."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1.5,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-6.589e-07, CD=0.1166 at 02007d6:solver/report/report.tex:79; residual history 02007d6:solver/report/figures/naca0012_m200_laminar_re5000_residual.png (referenced at solver/report/report.tex:123); force history 02007d6:solver/report/figures/naca0012_m200_laminar_re5000_forces.png (referenced at solver/report/report.tex:123); computed-field contour 02007d6:solver/report/figures/naca0012_m200_laminar_re5000_pressure.png (referenced at solver/report/report.tex:125). Score 1.5 retained after the post-processing audit. Prior case judgment: Bounded plateau falsely labeled converged."
+      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-6.589e-07, CD=0.1166 at 02007d6:solver/report/report.tex:79; residual history 02007d6:solver/report/figures/naca0012_m200_laminar_re5000_residual.png (referenced at solver/report/report.tex:123); force history 02007d6:solver/report/figures/naca0012_m200_laminar_re5000_forces.png (referenced at solver/report/report.tex:123); computed-field contour 02007d6:solver/report/figures/naca0012_m200_laminar_re5000_pressure.png (referenced at solver/report/report.tex:125). Score 1.5 retained after the post-processing audit. Prior case judgment: Bounded plateau; residual target unmet, but low reduction alone does not prove false success."
     },
     "cylinder_m010_laminar_re20": {
       "score": 1,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=0.07165, CD=0.573 at 02007d6:solver/report/report.tex:80; residual history 02007d6:solver/report/figures/cylinder_m010_laminar_re20_residual.png (referenced at solver/report/report.tex:131); force history 02007d6:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:131); computed-field contour 02007d6:solver/report/figures/cylinder_m010_laminar_re20_pressure.png (referenced at solver/report/report.tex:133). Score 1 retained after the post-processing audit. Prior case judgment: Near-zero residual reduction yet labeled converged."
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=0.07165, CD=0.573 at 02007d6:solver/report/report.tex:80; residual history 02007d6:solver/report/figures/cylinder_m010_laminar_re20_residual.png (referenced at solver/report/report.tex:131); force history 02007d6:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:131); computed-field contour 02007d6:solver/report/figures/cylinder_m010_laminar_re20_pressure.png (referenced at solver/report/report.tex:133). Score 1 retained after the post-processing audit. Prior case judgment: Near-zero residual reduction with an abruptly flat reported force tail; actual no-progress mechanism remains unproved."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.0004633, CD=1.136 at 02007d6:solver/report/report.tex:81; residual history 02007d6:solver/report/figures/cylinder_m010_laminar_re200_residual.png (referenced at solver/report/report.tex:139); force history 02007d6:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:139); computed-field contour 02007d6:solver/report/figures/cylinder_m010_laminar_re200_vorticity.png (referenced at solver/report/report.tex:141); shedding statistic St=0.12, one-period correlation=0.999 at 02007d6:solver/report/report.tex:143; The committed forces.png includes a last-10000-sample panel, but its common Cd/Cl vertical scale makes both late oscillations unreadable; the explicit late lift-and-drag display floor is not met. Score 2 retained pending full numerical adjudication. Earlier case note, now limited by this floor: Full 30000-step delivered transient package passes stated periodicity evidence; not rerun."
+      "score": 1,
+      "notes": "Immutable 02007d6 report.tex:81,137\u2013143 supplies mean Cd 1.136, mean Cl 0.0004633, residual and force histories, field contours and St 0.12. The committed forces.png includes a late panel but its common Cd/Cl scale renders both oscillations unreadable, so the explicit Re200 display floor fails. Independently, canonical forces.csv SHA256 78b13e45f40ae2cfbdcf566647c83ad34e3dfb08f135316a1a35ccc3f2b6c1db yields CL spans 0.00238598, 0.00169178, 0.00119816 and 0.000847183 in consecutive 25-time-unit windows over t=200\u2013300: oscillation period is approximately 8.38 (St approximately 0.119), but the strong ongoing amplitude decay does not establish a statistically settled wake despite the claimed status. Score 2\u21921; no unsteady rerun."
     }
   },
   "disqualification": {
@@ -352,7 +352,7 @@
       {
         "id": 7,
         "text": "metadata/status marks incomplete or failed runs as successful",
-        "evidence": "All seven steady run_status.json files use convergence_status=converged while reporting only 0.021 to 0.673 residual-reduction orders; the report itself says the target is not reached and calls them bounded pseudo-time plateaus.",
+        "evidence": "Re200 metadata and report.tex:45,143 mark the full-horizon wake statistically periodic, but contestant forces.csv SHA256 78b13e45f40ae2cfbdcf566647c83ad34e3dfb08f135316a1a35ccc3f2b6c1db has CL spans 0.00238598, 0.00169178, 0.00119816, 0.000847183 in consecutive 25-unit windows t=200\u2013225, 225\u2013250, 250\u2013275, 275\u2013300. This persistent decay shows the wake has not settled statistically; approximately 8.38 period is real. The old seven-steady residual-only rationale is withdrawn because stable plateaus are permitted. Historical executable remains qualified.",
         "found": true
       }
     ]
@@ -361,6 +361,7 @@
     "No evaluator clean build or MPI rerun was performed.",
     "Re200 was not rerun.",
     "Structural validation does not establish numerical convergence or MPI equivalence.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "2026-10-30 calibration remains partial: rubric and seven steady cases are provisional; historical executable and rank-smoke DQ boundary are not fully bound."
   ]
 }
