@@ -371,7 +371,7 @@
         "id": 4,
         "text": "MPI rank changes steady results by order-one amounts",
         "found": false,
-        "evidence": "Checkpoint fa9d2b83 includes MPI comparison packages; exact controls, starting states and binary binding still require independent review."
+        "evidence": "fa9d2b83 common-step2000 M080 inviscid np1 Cd0.02798 vs np2/4/8 Cd0.05334/0.05316/0.05355; Re20 np1 Cd4.3191 vs np2/4/8 4.2428/4.2498/4.2611. All report revision52853ed, but exact start/control/binary binding is unverified. Differences do not by themselves establish an order-one rank-only effect."
       },
       {
         "id": 5,
@@ -407,19 +407,19 @@
         "id": 10,
         "text": "Second-order reconstruction or limiter disabled in production",
         "found": false,
-        "evidence": "Report explicitly discloses first-order Re200; remaining steady activation and historic binary are not yet fully verified."
+        "evidence": "solver.cpp:579 forces first-order transient, disclosed by report.tex:124,192. Steady reconstruction/source and exact historical executable still require qualification; no undisclosed disabled production path established."
       },
       {
         "id": 11,
         "text": "Surface no-slip rows are adjacent cell-center values without disclosure",
         "found": false,
-        "evidence": "Historical checkpoint includes surface files; actual wall-output semantics remain under independent review."
+        "evidence": "solver.cpp:688\u2013700 writes explicit u=v=Mach=0 boundary values for no-slip surface rows; no undocumented adjacent-cell velocity DQ11 established."
       },
       {
         "id": 12,
         "text": "Misnamed figures",
         "found": false,
-        "evidence": "report.tex references eight named figure files, but git tree has no report figure PNGs. This is a missing deliverable, not affirmative evidence that a present figure is misnamed."
+        "evidence": "Historical contour names require further source/data verification. plot_results.py:92\u2013100 appears to compute du/dy\u2212dv/dx for vorticity, opposite the conventional sign if derivative ordering is as assumed; ordering and exact generated-image provenance are not yet independently verified, so no misnaming finding inferred."
       },
       {
         "id": 13,
