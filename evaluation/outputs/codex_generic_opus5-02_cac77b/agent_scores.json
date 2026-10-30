@@ -28,14 +28,14 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4.5,
-          "notes": "Documented wrapper build and full contract artifacts; evaluator did not rebuild."
+          "notes": "Immutable source clean build passed in network-disabled cfd-bench (2 CPUs, 3GiB, 256 pids) after explicit JSON include path; documented root settings alone did not locate header in image."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Required solve CLI and explicit invalid-input handling are source-backed."
+          "score": 4,
+          "notes": "main.cpp:315\u2013334 reads restart state but discards restored time/step and prior states before run_transient, which starts time0 and reconstructs history. Steady state restart is distinct; no transient restart test."
         },
         {
           "id": "code.organization",
@@ -76,8 +76,8 @@
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 4.5,
-          "notes": "Extensive submitted verification claims; not independently rerun."
+          "score": 5,
+          "notes": "Independent clean build ran the unit suite successfully with supplied benchmark meshes mounted read-only; initial missing mount caused four mesh-check errors, resolved by mounting at its expected path. No CFD rerun."
         },
         {
           "id": "code.hygiene",
@@ -87,7 +87,7 @@
           "notes": "Curated tip excludes raw artifacts and retains source/report figures."
         }
       ],
-      "overall_score": 4.59,
+      "overall_score": 4.54,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -207,8 +207,8 @@
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 4.5,
-          "notes": "79 named report figures and manifest are readable."
+          "score": 4,
+          "notes": "Accepted 42-page report contains extensive figures; sole Re200 force plot compresses late Cd beneath startup, failing explicit late-lift/drag floor."
         },
         {
           "id": "res.report",
@@ -225,20 +225,20 @@
           "notes": "Committed generated rank table is readable, but its raw rank-study inputs are excluded at tip."
         }
       ],
-      "overall_score": 4.45,
+      "overall_score": 4.38,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 92.5,
+    "total_scored": 91.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 9.5,
-        "notes": "Strong documented build/CLI/output delivery; no evaluator clean build."
+        "score": 8.5,
+        "notes": "Immutable 6f43c42 source builds with explicit NLOHMANN_JSON_INCLUDE_DIR; documented external-root arguments alone did not find the installed header. main.cpp:315\u2013334 reads restart time/previous states into temporary variables but never passes them to driver; transient_driver.cpp:60\u201363,86\u201396 resets time/history. Real state restart exists; uninterrupted BDF continuation does not."
       },
       {
         "id": "mesh_geometry",
@@ -293,8 +293,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4.5,
-        "notes": "Strong figure/report analysis; raw rank-study reproducibility conflict deducted."
+        "score": 4,
+        "notes": "Extensive report/figures, but the only Re200 force plot compresses late drag and does not meet explicit late lift/drag floor; rank-study raw data absent from curated tip also limits clean regeneration."
       },
       {
         "id": "extensibility",

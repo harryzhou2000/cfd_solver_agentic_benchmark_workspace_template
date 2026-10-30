@@ -137,6 +137,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_generic_opus5-02_cac77b/review_code.md` (overall: 4.59)
+- Code review scorecard: `codex_generic_opus5-02_cac77b/review_code.md` (overall: 4.54)
 - CFD methods review: `codex_generic_opus5-02_cac77b/review_cfd.md` (overall: 4.5)
-- Result review: `codex_generic_opus5-02_cac77b/review_results.md` (overall: 4.45)
+- Result review: `codex_generic_opus5-02_cac77b/review_results.md` (overall: 4.38)

@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:01:54.244661+00:00
+Generated: 2026-10-30T07:06:06.009362+00:00
 
-**Overall score: 4.59**
+**Overall score: 4.54**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4.5 | Documented wrapper build and full contract artifacts; evaluator did not rebuild. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4.5 | Immutable source clean build passed in network-disabled cfd-bench (2 CPUs, 3GiB, 256 pids) after explicit JSON include path; documented root settings alone did not locate header in image. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 5 | Required solve CLI and explicit invalid-input handling are source-backed. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 4 | main.cpp:315–334 reads restart state but discards restored time/step and prior states before run_transient, which starts time0 and reconstructs history. Steady state restart is distinct; no transient restart test. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4.5 | Clear separation of physics, mesh, MPI, numerics, and I/O. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T07:01:54.244661+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4.5 | Validation, positivity handling, and explicit error paths are present. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4.5 | Extensive submitted verification claims; not independently rerun. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 5 | Independent clean build ran the unit suite successfully with supplied benchmark meshes mounted read-only; initial missing mount caused four mesh-check errors, resolved by mounting at its expected path. No CFD rerun. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 4.5 | Curated tip excludes raw artifacts and retains source/report figures. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T07:01:54.244661+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.59
+- Overall score (0-5): 4.54
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

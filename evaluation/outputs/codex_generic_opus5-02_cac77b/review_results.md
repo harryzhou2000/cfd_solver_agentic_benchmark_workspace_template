@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:01:54.245410+00:00
+Generated: 2026-10-30T07:06:06.010140+00:00
 
-**Overall score: 4.45**
+**Overall score: 4.38**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -21,7 +21,7 @@ Generated: 2026-10-30T07:01:54.245410+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Re200 St, drag, and lift-amplitude shortfalls are measured and disclosed. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 4.5 | 79 named report figures and manifest are readable. |
+| 5 | **res.visualization** Visualizations | 0.15 | 4 | Accepted 42-page report contains extensive figures; sole Re200 force plot compresses late Cd beneath startup, failing explicit late-lift/drag floor. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 4.5 | Detailed report is candid; clean-tip rank-study regeneration inconsistency remains. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T07:01:54.245410+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.45
+- Overall score (0-5): 4.38
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -93,11 +93,11 @@ No unanswered metadata questions. Selected Codex root `01a03d7e-99c6-7d13-ae48-9
 
 ## Limitations
 
-No evaluator clean-build or MPI rerun was performed. The committed rank table is readable but its raw `rank_study/` inputs are excluded at the curated tip, so a clean rebuild cannot regenerate that evidence. Re200 was not rerun; its delivered t=300 result has documented 7--10% Strouhal, about 7% drag, and 25--30% lift-amplitude deficits. Production limiter freezes and terminal first-order cells limit formal second-order evidence.
+An evaluator clean build and unit suite were completed with explicit JSON include path; no MPI production rerun was performed. The committed rank table is readable but its raw `rank_study/` inputs are excluded at the curated tip, so a clean rebuild cannot regenerate that evidence. Re200 was not rerun; its delivered t=300 result has documented 7--10% Strouhal, about 7% drag, and 25--30% lift-amplitude deficits. Production limiter freezes and terminal first-order cells limit formal second-order evidence.
 
 ## Verdict
 
-Score: **92.5/100; disqualified: false.** This is a complete, structurally valid, largely credible finite-volume delivery with unusually extensive report evidence. Deductions reflect production second-order limitations, the low-Mach Re200 accuracy deficit, rank-study reproducibility inconsistency at the curated tip, 2-D scope, and the lack of an independent evaluator rebuild.
+Score: **91/100; disqualified: false (partial calibration).** This is a complete, structurally valid, largely credible finite-volume delivery with unusually extensive report evidence. Deductions reflect production second-order limitations, the low-Mach Re200 accuracy deficit, rank-study reproducibility inconsistency at the curated tip, 2-D scope, and the lack of an independent evaluator rebuild.
 
 
 ## Re200 computed/reference values — 2026-10-30
@@ -110,3 +110,10 @@ The earlier case note incorrectly assigned reference values St0.195 and lift amp
 All 42 pages of the accepted main PDF were visually checked; no missing-asset placeholders observed. M015 inviscid case4.5→3: selected np8 final Cd0.0017098/Cl0.000034445 (the old note used rank2 coefficients). Its last50 Cd varies 0.0016464–0.0018931 and Cl −0.0002957→+0.0000344; last100 Cd spans 0.0012579–0.0020459. The stopping rule compares only two Cd endpoints 50 steps apart, which nearly coincide even while the intervening force varies. The absolute scale is small and the oscillation is visibly damping, so DQ7 is not inferred solely from a near-zero relative ratio; further adjudication remains open.
 
 M2 laminar 4→3.5: Cd fell 0.0419788→0.0378895 over the final400 rows but the final50 range is only 0.0378890–0.0379269; its large difference from the same-Mach inviscid pressure drag is a credibility concern, not proof of failure. The steady-force plot shows overall evolution even though late drag is compressed, so the distinct Re200 late-zoom rule is not applied to this steady case. Metadata identifies revision2dff352 for both selected runs; that revision’s steady driver uses the same endpoint test as final source. No CFD rerun.
+
+
+## Build, test and restart — 2026-10-30
+
+The immutable source builds in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 pids) after explicitly setting the nlohmann JSON include directory; the documented compiled/header root options alone did not locate it in this image. The unit CTest passed with benchmark meshes mounted read-only at the test's expected `/workspace/cfd_solver_agentic_benchmark` path. The first attempt without that mount produced four missing-mesh checks, not numerical failures. No production CFD or Re200 rerun.
+
+The restart reader retrieves prior states, time and step (`main.cpp:315–321`), but these variables leave scope before `run_transient` is invoked (`:333–334`); `transient_driver.cpp:60–63,86–96` resets both history and physical clock. The final restart writer saves only one level (`main.cpp:346–347`). A state can be loaded, but uninterrupted transient restart semantics are absent. Build/CLI rubric9.5→8.5. Report/visualization4.5→4 for the separate late-drag plot deficiency; total92.5→91. All other source/rubric/DQ review remains partial.
