@@ -113,7 +113,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52-m3_06_a2dc07` | partial: 68/100, DQ7; historical binary and figure binding unverified |
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
 | `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
-| `codex_glm52_03_e7d38e` | partial: provisional 71/100, DQ7; case/rubric review ongoing |
+| `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
 | `codex_gpt56_01_cb349f` | unreviewed |
 | `codex_gpt56_02_38616e` | unreviewed |
 | `codex_gpt56_03_93b257` | unreviewed |
@@ -1015,3 +1015,6 @@ glm52_03 case checkpoint: historic 0305e450 sanity_checks.json provides per-case
 
 
 glm52_03 specific report-figure mapping lead: immutable attempt 0305e450 Re200 field_final.vtk SHA256 621c4892fe23bc9f5008f60bf02e07a7ef33c5be0434062f1cc90dce3a5cbc68 has 10185 cells (500 triangles, 9685 quads). plot_results.py:90–92 splits each quad into two triangles, then :133–147 pairs the first 10185 triangle positions with 10185 cell-indexed Mach values, causing 10173 indices to refer to the wrong parent cell; actual absolute Mach differences have median0.0179391, 95th percentile0.0782974, max0.106325. First example triangle12 belongs to cell11 but uses cell12 Mach0.00254595 instead of cell11 0.00822085. Reproducing the exact immutable plotting function on the immutable field in scratch produces a PNG pixel-identical to historical report/figures/cylinder_m010_laminar_re200_mach.png (1,350,000/1,350,000 RGB pixels; byte hashes differ). The attempt figure_manifest identifies that exact path as the Re200 Mach report figure. The main historical PDF embeds no plots; whether a manifest-listed delivered report figure triggers DQ8 wording is being adjudicated, so no DQ change at this checkpoint. Diagnostic regeneration is not score-floor evidence. No CFD rerun.
+
+
+glm52_03 source/review checkpoint: clean immutable archive builds in network-disabled cfd-bench with bundled externals and 2 CPUs/3 GiB/256 process limits; CTest registers no tests. Restart io.cpp:221–238 returns on rank0 for missing/invalid file before other ranks broadcast, risking deadlock; valid restart omits BDF history/time. Build8→7. Historic source computes tangential wall shear; metadata labels least-squares while source uses Green–Gauss, matching report. Report/visualization4→2 for missing readable contour, pixel-identical reproduced misassignment and no embedded figures; total71→68. DQ8 classification of manifest-listed but non-embedded image remains pending; no mechanical inference. Updated 27 criterion notes with concrete evidence. Exact historic binary and remaining DQ remain partial. No CFD rerun.

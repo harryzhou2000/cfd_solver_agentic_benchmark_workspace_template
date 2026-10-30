@@ -285,63 +285,63 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4,
-        "notes": "CMake and README are submitted; raw validator passed in immutable attempt worktree."
+        "notes": "Clean immutable archive builds in restricted cfd-bench with bundled externals; CTest registers no tests."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4,
-        "notes": "CLI source and documented commands are present."
+        "score": 2.5,
+        "notes": "main.cpp:68\u201370 loads restart; io.cpp:221\u2013238 returns on rank0 for missing/invalid file before other ranks enter MPI_Bcast, risking hang. Valid restart restores U only, not BDF history/time."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Source is modularized by mesh, IO, physics and solver."
+        "notes": "Source separates CGNS mesh/partition, solver and IO; original historical result artifacts are retained in contestant attempt."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 3,
-        "notes": "No internal wrapper found; trust policy excludes external similarity search."
+        "notes": "No direct wrapper found; no external similarity or authorship investigation performed."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4,
-        "notes": "Case-driven CLI supports both supplied meshes."
+        "notes": "main.cpp:57\u201360 parses supplied case and resolves its CGNS mesh path."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 3,
-        "notes": "MPI artifacts and rank tests exist, but independent parallel rerun was not performed."
+        "score": 3.5,
+        "notes": "solver.cpp:115\u2013123 builds local mesh and clears global mesh within setup; METIS and neighbor exchange exist. Restart error path can hang across ranks."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Basic checks and error handling are present."
+        "score": 2.5,
+        "notes": "State clamps exist, but restart error can deadlock and Re200 target-success status is not credible."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Validator proof and scripts are retained only in immutable attempt evidence."
+        "score": 2.5,
+        "notes": "Clean source builds; CTest registers no tests. Historical validator passed structural checks, not numerical validity."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 3,
-        "notes": "Readable source; excluded raw data prevents a clean submitted reproduction."
+        "notes": "Source is compact; clean curated TeX build fails unescaped underscores in results_table.tex and historical executable is unbound."
       }
     ],
     "disqualification_flags": [
@@ -386,7 +386,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.45
+    "overall_score": 3.29
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -397,63 +397,63 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Compressible equations and nondimensionalization are described."
+        "notes": "Compressible NS and nondimensional parameters are implemented and described; numerical results retain limitations."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "CGNS unstructured mesh handling is source-supported."
+        "notes": "solver.cpp:115\u2013123 reads and partitions CGNS mesh and clears setup global object before time integration."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Finite-volume residual paths are source-supported."
+        "score": 3.5,
+        "notes": "solver.cpp computes conservative face residual; Re200 residual fields reuse aggregate scalar and binary lineage remains unbound."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 3,
-        "notes": "Roe/Rusanov flux path is present; no evaluator rerun."
+        "notes": "Rusanov and Roe paths are present; flux and entropy claims lack independent accuracy verification."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4,
-        "notes": "Boundary-condition code is present."
+        "notes": "Slip/farfield/no-slip paths and io.cpp:121\u2013127 boundary-state zero no-slip velocity with tangential cf are implemented."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 3,
-        "notes": "Green-Gauss reconstruction is source-supported."
+        "notes": "solver.cpp:134\u2013168 computes Green\u2013Gauss gradients (despite misleading least-squares metadata); production first-order Re200 and M080/M200 viscous are disclosed."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 3,
-        "notes": "Barth-Jespersen limiter is source-supported."
+        "notes": "Barth limiter is implemented; first-order startup and selected viscous/transient paths are documented, reducing demonstrated order coverage."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 4,
-        "notes": "Viscous flux and wall treatment are implemented."
+        "notes": "solver.cpp:427\u2013435 computes wall tangential shear from tangential velocity gradient; source implements viscous flux, but Cd4.52 at Re20 is inaccurate."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 4,
-        "notes": "LU-SGS steady implicit method is documented."
+        "score": 3.5,
+        "notes": "LU-SGS uses simplified scalar Jacobian; report discloses modest residual reduction and transient inner acceptance is weak."
       },
       {
         "id": "cfd.transient",
@@ -466,8 +466,8 @@
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 3,
-        "notes": "METIS/MPI paths and claimed comparisons exist; not independently rerun."
+        "score": 3.5,
+        "notes": "setup clears global mesh before run and true METIS/neighbor halos are present; restart missing-file path risks rank hang, rank tests need controlled comparison."
       }
     ],
     "disqualification_flags": [
@@ -502,7 +502,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.41
+    "overall_score": 3.35
   },
   "result_review": {
     "review_area": "result_review",
@@ -512,50 +512,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 2,
-        "notes": "Curated submission excludes raw packages, though immutable attempt validates all eight structurally."
+        "score": 2.5,
+        "notes": "Immutable historical attempt contains all packages and validator passes; Re200 metadata incorrectly reports strict target success and periodicity."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Attempt validator passed all eight plus report."
+        "score": 4,
+        "notes": "Historical attempt validation passes eight cases and report; this does not establish strict inner convergence or physical shedding."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 3,
-        "notes": "All cases are structurally complete, but Re200 report admits no shedding."
+        "score": 1.5,
+        "notes": "Re200 report and forces show no shedding, while metadata asserts periodic and final ratio1.08275 against0.001. Other cases retain mixed convergence limits."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Figures are readable; physical plausibility was source/report reviewed only."
+        "score": 2,
+        "notes": "Historic sanity data provide per-case CL/CD; Re20 Cd4.52 and Re200 Cd4.02/no shedding remain material physical limitations."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Rich committed figure set under report figures."
+        "score": 1.5,
+        "notes": "Historical force/residual plots exist. NACA Mach/pressure views are sparse scatter, cylinder plots collapse to a narrow strip. Re200 Mach plot is pixel-identically reproduced with triangle-to-cell mapping error; no figure embedded in historical main PDF."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Report is detailed and records the Re200 limitation."
+        "score": 2.5,
+        "notes": "Historical four-page PDF is readable and honestly discloses no shedding, but claims 100% inner success and curated source fails clean TeX build; figures are separate."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 2,
-        "notes": "Raw manifests were correctly excluded, so figure-data traceability is not reproducible from submission."
+        "score": 1.5,
+        "notes": "Immutable attempt contains raw CSVs, figure manifest and sanity summaries; historical binary is unbound. Re200 Mach plot reproduction proves 10173/10185 triangle indices map to wrong parent cells."
       }
     ],
     "disqualification_flags": [
@@ -585,7 +585,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.05
+    "overall_score": 2.17
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52/03",

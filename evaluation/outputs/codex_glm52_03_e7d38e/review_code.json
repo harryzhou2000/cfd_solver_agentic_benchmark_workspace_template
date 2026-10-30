@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "CMake and README are submitted; raw validator passed in immutable attempt worktree."
+      "notes": "Clean immutable archive builds in restricted cfd-bench with bundled externals; CTest registers no tests."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "CLI source and documented commands are present."
+      "score": 2.5,
+      "notes": "main.cpp:68\u201370 loads restart; io.cpp:221\u2013238 returns on rank0 for missing/invalid file before other ranks enter MPI_Bcast, risking hang. Valid restart restores U only, not BDF history/time."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Source is modularized by mesh, IO, physics and solver."
+      "notes": "Source separates CGNS mesh/partition, solver and IO; original historical result artifacts are retained in contestant attempt."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 3,
-      "notes": "No internal wrapper found; trust policy excludes external similarity search."
+      "notes": "No direct wrapper found; no external similarity or authorship investigation performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Case-driven CLI supports both supplied meshes."
+      "notes": "main.cpp:57\u201360 parses supplied case and resolves its CGNS mesh path."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 3,
-      "notes": "MPI artifacts and rank tests exist, but independent parallel rerun was not performed."
+      "score": 3.5,
+      "notes": "solver.cpp:115\u2013123 builds local mesh and clears global mesh within setup; METIS and neighbor exchange exist. Restart error path can hang across ranks."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Basic checks and error handling are present."
+      "score": 2.5,
+      "notes": "State clamps exist, but restart error can deadlock and Re200 target-success status is not credible."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Validator proof and scripts are retained only in immutable attempt evidence."
+      "score": 2.5,
+      "notes": "Clean source builds; CTest registers no tests. Historical validator passed structural checks, not numerical validity."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 3,
-      "notes": "Readable source; excluded raw data prevents a clean submitted reproduction."
+      "notes": "Source is compact; clean curated TeX build fails unescaped underscores in results_table.tex and historical executable is unbound."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.45
+  "overall_score": 3.29
 }
