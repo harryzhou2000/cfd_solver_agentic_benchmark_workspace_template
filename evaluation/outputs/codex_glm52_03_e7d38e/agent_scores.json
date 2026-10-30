@@ -233,7 +233,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 68.0,
+    "total_scored": 66.0,
     "sections": [
       {
         "id": "build_cli",
@@ -247,14 +247,14 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 8,
-        "notes": "CGNS and unstructured geometry are source-supported."
+        "notes": "mesh.cpp:25\u201399 reads CGNS zones/tags, :115\u2013185 builds face adjacency and warns on unmatched interface edges; geometry uses 2-D polygon/face data. 3.5/4 input, 1.5/2 geometry, 1.5/2 mixed/zones, 1.5/2 adjacency; no exact geometry oracle."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 11,
-        "notes": "Residual and BC source paths were inspected."
+        "notes": "solver.cpp:264\u2013315 assembles Roe/Rusanov and viscous face contributions with boundary treatments; 4/5 residual, 3/4 numerical flux, 2/3 farfield/slip, 2/3 no-slip. Strong physical limitations remain in recovered results."
       },
       {
         "id": "second_order",
@@ -288,8 +288,8 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 5.5,
-        "notes": "Re200 metadata marks statistically periodic although report and force history explicitly say no shedding; other cases remain under review."
+        "score": 3.5,
+        "notes": "1.5/2 for steadier inviscid forces, 1/2 laminar attempts with M015 high/drifting drag, 0.25/2 Re20 Cd4.52 and unstable lift rather than a credible wake, 0/2 Re200 no shedding, 0.25/1 recovered fields exist but case plots fail contour floor and mapping defect is proven, 0.5/1 recovered rank comparisons have small absolute changes but controls/binaries unbound."
       },
       {
         "id": "report_viz",
@@ -303,7 +303,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 4,
-        "notes": "Modular source organization."
+        "notes": "1.5/2 case-driven physics, 1/1 BC, 0.5/1 2-D mesh generality, 1/1 modular source; mesh.hpp and solver.hpp separate abstractions but extensibility is not demonstrated in 3-D."
       }
     ]
   },
@@ -382,7 +382,7 @@
       {
         "id": 8,
         "found": false,
-        "evidence": "Undecided: 0305e450 report/figures/cylinder_m010_laminar_re200_mach.png is pixel-identical to reproducing its submitted plotting script on submitted VTK; 10173/10185 triangle positions receive Mach values from wrong parent cells. The figure is listed in the delivered report figure_manifest but main report.tex/PDF embed no figures. Report-figure wording scope remains unresolved; false is provisional, not a finding that the plot is correct."
+        "evidence": "Not established under the narrower report-embedded precedent: immutable 0305e450 report/figures/cylinder_m010_laminar_re200_mach.png is pixel-identical to submitted plot code applied to submitted VTK, with 10173/10185 triangle positions taking Mach values from wrong parent cells. It is explicitly listed in the delivered report figure_manifest but the historical report TeX/PDF neither references nor embeds it. A broader interpretation of manifest-listed standalone report figures could classify it as DQ8; this boundary remains ambiguous. The defect is proven and penalized, not treated as a correct image. Independent DQ7 remains true."
       },
       {
         "id": 9,
