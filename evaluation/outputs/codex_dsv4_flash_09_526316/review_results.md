@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:08:31.122878+00:00
+Generated: 2026-10-30T04:09:52.811068+00:00
 
-**Overall score: 1.7**
+**Overall score: 1.35**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,10 +24,10 @@ Generated: 2026-10-30T04:08:31.122878+00:00
 | 5 | **res.visualization** Visualizations | 0.15 | 2 | Committed short-test figures only. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 3 | 4-page report builds and is candid. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 1 | Report.tex:87–103,155–158 claims 100-step short test residual 1.5→8.5, Cd≈0.11, Cl≈0. Its own accepted PDF pp2–3 shows residual >10^13 by step 69 and Cd≈-455, Cl≈403. results/final_verify is 8-rank, failed and NaN after step 69; surface Cp plot is empty because data are NaN. Broader divergence is acknowledged. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 2 | Limited figure/report traceability; manifest excluded. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Short-test narrative conflicts with delivered figure and failed 8-rank results/final_verify; plotted finite values match that diagnostic scale but unique exact source not established. Canonical case packages and short test differ. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T04:08:31.122878+00:00
 
 ## Summary
 
-- Overall score (0-5): 1.7
+- Overall score (0-5): 1.35
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

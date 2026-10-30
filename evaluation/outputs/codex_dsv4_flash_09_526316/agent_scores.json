@@ -216,24 +216,24 @@
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 3,
-          "notes": "4-page report builds and is candid."
+          "score": 1,
+          "notes": "Report.tex:87\u2013103,155\u2013158 claims 100-step short test residual 1.5\u21928.5, Cd\u22480.11, Cl\u22480. Its own accepted PDF pp2\u20133 shows residual >10^13 by step 69 and Cd\u2248-455, Cl\u2248403. results/final_verify is 8-rank, failed and NaN after step 69; surface Cp plot is empty because data are NaN. Broader divergence is acknowledged."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 2,
-          "notes": "Limited figure/report traceability; manifest excluded."
+          "score": 1,
+          "notes": "Short-test narrative conflicts with delivered figure and failed 8-rank results/final_verify; plotted finite values match that diagnostic scale but unique exact source not established. Canonical case packages and short test differ."
         }
       ],
-      "overall_score": 1.7,
+      "overall_score": 1.35,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 51,
+    "total_scored": 49,
     "sections": [
       {
         "id": "build_cli",
@@ -295,8 +295,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 3,
-        "notes": "Compiling candid report, only short-test visualization coverage."
+        "score": 1,
+        "notes": "Accepted PDF compiles, but report.tex:87\u2013103,155\u2013158 asserts stable Cd\u22480.11/Cl\u22480 and modest residual for short test while plotted data show Cd\u2248-455, Cl\u2248403, residual >10^13 and an empty Cp chart. Raw eight-rank final_verify marks failed with NaNs after step 69. Broader failure is disclosed."
       },
       {
         "id": "extensibility",
@@ -310,7 +310,7 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "Score 1 retained. Canonical results/naca0012_m015_inviscid/run_status.json marks failed at step 500 with residual reduction 0.2523 orders; forces.csv final Cd -0.898684, nonphysical negative drag for these cases. The separate report.tex:78\u2013101 short 8-rank M0.15 test cites Cd approximately 0.11 with a force plot, contrary to old claim no case numeric summary; this is a different short test, not the canonical failed step-500 result. Required full case visual/accuracy evidence remains absent."
+      "notes": "Score 1 retained. Canonical results/naca0012_m015_inviscid/run_status.json marks failed at step 500 with residual reduction 0.2523 orders; forces.csv final Cd -0.898684, nonphysical negative drag for these cases. The separate report.tex:78\u2013101 short 8-rank M0.15 test cites Cd approximately 0.11 with a force plot, contrary to old claim no case numeric summary; this is a different short test, not the canonical failed step-500 result. Required full case visual/accuracy evidence remains absent. Correction: the separate short-test claim Cd\u22480.11/Cl\u22480 contradicts its own plotted data. Accepted PDF p3 shows Cd about -458 to -455, Cl about 402\u2013403; PDF p2 residual spikes above 10^13 by step 69. results/final_verify is an 8-rank short test marked failed with matching plotted-scale data and NaNs after step 69. The report statement is not supported by its figure."
     },
     "naca0012_m080_inviscid": {
       "score": 1,
