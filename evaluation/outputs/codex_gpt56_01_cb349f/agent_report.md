@@ -33,3 +33,5 @@ This is an operator-authorized legacy recovery. The 1.1 GB results archive, raw 
 ## Calibration in progress
 
 Re200 case score 2→4.5: the submitted force plot visibly resolves both late lift and drag oscillations, contrary to the previous missing-plot assertion. The historical t180–300 force record independently gives mean Cd 1.135626, lift range −0.32436..0.32589 and mean period 6.085 from 20 upward crossings, consistent with the reported St 0.16667. Residual and wake figures were also reviewed. Exact source paths, hashes and executable-provenance limit are recorded in the case note. Remaining cases, rubric and DQ calibration are partial.
+
+The seven steady force, residual and Mach plots and historical final windows were independently inspected. M015 inviscid Cd drops 0.0007517→0.0005541 over its last 200 samples: the absolute change is small but its relative size limits the result, so that case scores 4 rather than 5. M080 inviscid terminal Cd span is about 1.3% of final and scores 4.5. The other five steady scores remain 5; case notes record individual values, hashes and limitations. This is not by itself a DQ finding.
