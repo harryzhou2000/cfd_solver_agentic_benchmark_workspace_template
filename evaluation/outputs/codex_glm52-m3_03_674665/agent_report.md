@@ -3,7 +3,7 @@
 - Result branch: `codex/glm52-m3/03`; immutable submission: `5b9dded7a68fa1309a19815a2eddb85b6910c788`.
 - Initial branch/commit: `codex/glm52-m3/init` / `a14f203babe6794ad032aea760aed8e302e62b5a`.
 - Identity: v2 `codex_glm52-m3_03_674665`.
-- Scope: partial recalibration including recovered contestant-checkpoint results. No evaluator execution was performed, and cylinder Re200 was not rerun.
+- Scope: qualified full recalibration including recovered contestant-checkpoint results. An isolated clean build and read-only validator checks passed; no CFD case was rerun, and cylinder Re200 was not rerun.
 
 ## Evidence and methodology
 
@@ -32,7 +32,7 @@ Material direct limitations remain. `runSteady()` marks a max-step run `converge
 | Report, Visualization, Analysis | 5 | 1.5 | Historical PDF/figures delivered, but important claims and manifest mappings are wrong. |
 | Extensibility | 5 | 3 | Modular components, limited architecture. |
 
-**Provisional total: 57/100.**
+**Qualified total: 57/100.**
 
 ## Review-area scores
 
@@ -57,3 +57,8 @@ DQ is established for trigger 6 (reported absolute residual acceptance absent fr
 The selected project-local Codex root is `019fd15a-834e-7510-941b-aec0a61981eb` (2026-08-05T09:57:17.364Z to 2026-08-06T01:07:22.684Z), with report-writer child `019fd1b8-e74a-76f1-ae1e-e6cb09bc5440`. Sources were exclusively the workspace `.sessions/codex/state_5.sqlite` and bundled rollout tree; no evaluator-account telemetry was used. The deterministic terminal response is `msg_392a4a09e35843cf9d65e977942483b8` at 2026-08-06T01:07:22.633Z. `run_identity.json` SHA-256 is `6619bc289f7f2319b5ac6808df292c04d420f671ac4fc163ea7f78794ff1bd28`; final-response sidecar SHA-256 is `077107b7beef5e444fbd551400ed2c4633e61ef1da630ced1dc7fdc460e6d2a8`. These unindexed sidecars are not validated by `cfdeval check`.
 
 The delivered histories and solver implementation show significant numerical and reporting failures; binary provenance and some figure correspondence remain unresolved. No evaluator CFD rerun was used to fill contestant evidence.
+
+
+## Qualified full review — 2026-10-31
+
+All ten rubric sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to available evidence. Final 57/100, DQ6/7 and TASK full-mesh prohibition remain. The report-claimed absolute residual acceptance branch is absent from both reported-revision and final source; separately, checkpoint stdout records 11356 Re200 misses while its metadata claims zero, and selected steady force histories independently contradict success labels. Historic `fa9d2b83` contains the contestant PDF, figures and eight packages even though curation omits them; approved snapshot PDF remains absent under vendor rules. Exact historical executable and broader figure/data binding remain unbound, and prior partial sections are historical. No CFD, rank or Re200 rerun.

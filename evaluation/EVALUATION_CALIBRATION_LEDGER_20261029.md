@@ -107,7 +107,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_vllm-qwen38-02_d47362` | fully reviewed, qualified: 80/100, DQ7; np4 diagnostic/binary attribution unresolved |
 | `codex_glm52-m3_01_919b67` | fully reviewed, qualified: 62.5/100, DQ7/10 and TASK full-mesh; historic binary/strict ratios unbound |
 | `codex_glm52-m3_02_ca46e4` | fully reviewed, qualified: 58.5/100, DQ7 and TASK full mesh; historic binary/strict counts unbound |
-| `codex_glm52-m3_03_674665` | partial: provisional 57/100, DQ6/7 and TASK full-mesh; source and DQ review ongoing |
+| `codex_glm52-m3_03_674665` | fully reviewed, qualified: 57/100, DQ6/7 and TASK full mesh; historical binary/figure binding limited |
 | `codex_glm52-m3_04_32f2d0` | partial: provisional 58.5/100, DQ7/8; source/DQ ongoing |
 | `codex_glm52-m3_05_f094c1` | partial: provisional 54/100, DQ7 and TASK full-mesh; historic binary/figure binding unverified |
 | `codex_glm52-m3_06_a2dc07` | partial: 68/100, DQ7; historical binary and figure binding unverified |
@@ -977,6 +977,8 @@ M015 inviscid/laminar and Re20 success metadata despite large late force oscilla
 glm52-m3-03 review calibration checkpoint: replaced seven old result-review zero/no-output notes with criterion-specific recovered evidence and independent scores; validator4 reflects its structural pass but not physical acceptance. Corrected copied source-review claims: this submission uses Rusanov and output.cpp correctly names it, rather than the prior erroneous Roe/output.hpp note. Updated remaining review/source/rubric notes to explicit main.cpp/solver.cpp and checkpoint evidence. Historical PDF and figures, stale tables and wrong manifest mappings are distinguished from the absent curated snapshot. Total rubric remains57; historical binary and remaining DQ/figure correspondence stay partial.
 
 glm52-m3-03 DQ boundary checkpoint: fa9d2b83 common-step2000 M080 inviscid np1 Cd0.02798 vs np2/4/8 0.05334/0.05316/0.05355; Re20 np1 Cd4.3191 vs np2/4/8 4.2428/4.2498/4.2611. Reported revisions are 52853ed, but exact controls/start and executable binding remain unverified; these values alone do not establish an order-one rank-only effect. solver.cpp:688–700 writes explicit no-slip boundary velocities. Report discloses first-order Re200, so do not mechanically assert DQ10.
+
+glm52-m3-03 qualified full review: all ten sections, eight cases, 27 review points and 13 DQ rules assessed to available evidence. 57/100, DQ6/7 and TASK full mesh unchanged. Re200 checkpoint stdout reports 11356 misses while metadata claims zero; selected steady force histories independently contradict success labels, and the report-claimed absolute-residual acceptance branch is absent from both reported-revision and final source. The historical contestant PDF/plots and packages are retained as evidence despite absent curated PDF snapshot. Historic executable and broader figure/data binding remain unbound and qualified; prior partial wording is historical. Clean build and read-only validator did run, correcting the old report claim of no evaluator execution. No CFD/rank/Re200 rerun; both gates required.
 
 Unresolved vorticity lead: historical plot_results.py:92–100 uses `grad[:,1] - grad[:,3]`, apparently the opposite of conventional z-vorticity if VTK gradient ordering is as assumed. The derivative ordering and actual generated-image provenance were not independently verified, so no DQ8/12 or score change is inferred. Historical binary and broader figure matching remain partial.
 
