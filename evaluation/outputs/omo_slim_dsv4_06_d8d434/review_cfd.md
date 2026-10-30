@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:54:04.866380+00:00
+Generated: 2026-10-30T17:10:38.449407+00:00
 
-**Overall score: 3.0**
+**Overall score: 2.66**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,10 +24,10 @@ Generated: 2026-09-07T02:54:04.866380+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 3 | Source/report and seven-case evidence; Re200 missing where applicable. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 3 | Source/report and seven-case evidence; Re200 missing where applicable. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 1 | fluxes.cpp implements reconstruction, but production residual solver.cpp:439–448 uses first-order cell-average states; report.tex:261–262 falsely claims all runs use second order. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3 | Source/report and seven-case evidence; Re200 missing where applicable. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 1 | Barth limiter routine exists in fluxes.cpp but is not called in production residual; no active limited reconstruction evidence. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Source/report and seven-case evidence; Re200 missing where applicable. |
@@ -54,7 +54,7 @@ Generated: 2026-09-07T02:54:04.866380+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.0
+- Overall score (0-5): 2.66
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
