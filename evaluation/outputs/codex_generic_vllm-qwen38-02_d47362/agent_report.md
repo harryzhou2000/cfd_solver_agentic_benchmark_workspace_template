@@ -96,3 +96,8 @@ Clean immutable-source build succeeded in a network-disabled restricted containe
 ## Verdict
 
 Score: **80/100; disqualified: true (trigger 7).** The M2 success labels are inconsistent with the submitted force histories. The remaining production-binary and rank-diagnostic attribution remain unresolved; the previously cited rank-sensitivity statement alone does not establish trigger 4.
+
+
+## Qualified full review — 2026-10-31
+
+All ten sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to the available evidence limit. Final 80/100 and DQ7 remain for the independently unstable M2 laminar and inviscid results marked successful. The np8 four-step/np4 divergent diagnostic is material, but no matched common-step force/field, raw np4 run or confirmed same binary/start state exists, so DQ4 remains unasserted. Re200 build lineage is supported by the contestant documentation and matching source trees, but is not a binary hash; steady executable and some figure/data provenance remain qualified. Previous partial sections are historical checkpoints. No CFD, rank or Re200 rerun.

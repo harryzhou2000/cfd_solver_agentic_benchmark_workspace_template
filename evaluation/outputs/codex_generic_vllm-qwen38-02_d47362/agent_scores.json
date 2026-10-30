@@ -345,7 +345,7 @@
       {
         "id": 4,
         "text": "MPI rank count changes results by order-one amounts for steady cases",
-        "evidence": "Previous evidence README:180\u2013187 says pinned-CFL M2 configuration is ordering-sensitive at np4 but gives no quantified controlled difference. Report.tex:1638\u20131670 instead presents Re20 and M080 laminar np1/np8 differences of 2.8% and 0.3% in Cd at different stopping steps. No controlled order-one case established; additional binary/control attribution remains open.",
+        "evidence": "Previous evidence README:180\u2013187 says pinned-CFL M2 configuration is ordering-sensitive at np4 but gives no quantified controlled difference. Report.tex:1638\u20131670 instead presents Re20 and M080 laminar np1/np8 differences of 2.8% and 0.3% in Cd at different stopping steps. No controlled order-one case established; additional binary/control attribution remains open. Immutable session5_notes.md:705\u2013714 further documents np8 4-step convergence versus an np4 divergent smoke at step327, but no matched common-step force/field, raw np4 run or confirmed same binary/start state is available; the diagnostic is unresolved rather than dismissed.",
         "found": false
       },
       {
@@ -353,6 +353,61 @@
         "text": "metadata.json marks incomplete or failed runs as successful final results",
         "evidence": "M2 laminar metadata marks converged/completed after four steps while immutable 84ccf50:solver/report/figures/fig_naca0012_m200_laminar_re5000_forces.png shows Cd falling 13.6824\u21921.9131; immutable README:180\u2013187 documents this as the production result. M2 inviscid metadata marks statistically_periodic/completed after 200 steps despite residual growth 0.945 orders and the submitted force figure showing irregular Cl about \u22120.8..0.9; report.tex:1690\u20131696 acknowledges floor artifacts. TASK.md:140,172 require genuine convergence or justified stable forces. Original workspace history hashes and runtime-binary limitation are in the ledger.",
         "found": true
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No internal existing CFD executable call found in inspected source; no exhaustive external authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence forces/residual histories generated without solving; the optional ring seed is diagnostic and production use is not established."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Case-driven CGNS mesh input is not limited to two hard-coded filenames."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Source contains implicit and BDF2 methods; explicit-only integration not established."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Major report-described methods exist in final source; disclosed first-order M2 overrides and unbound historic steady binaries limit interpretation."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "No specific report figure proven unrelated to its claimed source. Exact historical figure/data binding remains qualified."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "partition.cpp:271\u2013289 builds global mesh on root before solve and METIS partitions local state. output.cpp:29\u201346 gathers full state only after solve; not all-rank replication during iterations."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "M2 first-order production overrides are explicitly disclosed in report.tex:793\u2013796,1709\u20131711; no undisclosed disabled production reconstruction is established."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "solver.cpp:1521\u20131523 emits no-slip boundary u=v=Mach=0; no undocumented adjacent-cell wall-value failure established."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "plot_all.py:435\u2013450 maps Mach and pressure to distinct arrays/names; no specific variable-name swap established."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source CFD core found in inspected source; no exhaustive external authorship search."
       }
     ]
   },
@@ -360,6 +415,7 @@
     "No evaluator clean build or MPI rerun.",
     "M2 laminar production is first-order in 18353/20816 cells and rank-ordering sensitive.",
     "Re200 was not rerun and report admits unresolved street quality.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All ten sections, eight cases, 27 review points and 13 DQ rules assessed to available evidence. Exact steady executable, np4 diagnostic and some figure/data provenance remain unbound; no CFD/Re200 rerun."
   ]
 }
