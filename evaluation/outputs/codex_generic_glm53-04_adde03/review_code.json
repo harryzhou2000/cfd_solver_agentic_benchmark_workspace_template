@@ -21,49 +21,49 @@
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+      "notes": "c06741d solver/src separates case parsing, mesh, partition, halo, physics, solver and output; fixed 2D/NVAR interfaces constrain extensions."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+      "notes": "Reviewed submitted c06741d source and report descriptions; no reuse finding established. This is not an exhaustive external code-similarity audit."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+      "notes": "case_def.cpp:102\u2013128 parses case BC families and run controls; cgns_read.cpp loops bases/zones and section types rather than branching on the two benchmark filenames."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+      "notes": "partition.cpp:308\u2013363 performs root-only CGNS read, METIS graph partition and local-mesh distribution; halo.cpp:15\u201338 uses neighbor Irecv/Isend. Root gathers for final output/restart; historic results do not bind a production-source revision."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+      "notes": "solver.cpp:233\u2013237 falls back on invalid face density/pressure and :478 onward scales unsafe updates; it also rolls back after divergence. Restart time and source binding limitations remain."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 4,
-      "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+      "notes": "main.cpp runSelfTest includes Roe consistency, reciprocity, stationary contact and viscous checks; rank comparisons are delivered but report overstates NACA agreement. Clean immutable build passed; no CFD rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+      "notes": "c06741d CMake and separated source units build cleanly; absolute reproducibility of historic runs is limited by metadata revision pointing at init without solver code."
     }
   ],
   "disqualification_flags": [

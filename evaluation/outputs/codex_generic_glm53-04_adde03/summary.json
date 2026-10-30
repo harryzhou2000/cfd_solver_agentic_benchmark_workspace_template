@@ -126,49 +126,49 @@
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "c06741d solver/src separates case parsing, mesh, partition, halo, physics, solver and output; fixed 2D/NVAR interfaces constrain extensions."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "Reviewed submitted c06741d source and report descriptions; no reuse finding established. This is not an exhaustive external code-similarity audit."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "case_def.cpp:102\u2013128 parses case BC families and run controls; cgns_read.cpp loops bases/zones and section types rather than branching on the two benchmark filenames."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "partition.cpp:308\u2013363 performs root-only CGNS read, METIS graph partition and local-mesh distribution; halo.cpp:15\u201338 uses neighbor Irecv/Isend. Root gathers for final output/restart; historic results do not bind a production-source revision."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "solver.cpp:233\u2013237 falls back on invalid face density/pressure and :478 onward scales unsafe updates; it also rolls back after divergence. Restart time and source binding limitations remain."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "main.cpp runSelfTest includes Roe consistency, reciprocity, stationary contact and viscous checks; rank comparisons are delivered but report overstates NACA agreement. Clean immutable build passed; no CFD rerun."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "c06741d CMake and separated source units build cleanly; absolute reproducibility of historic runs is limited by metadata revision pointing at init without solver code."
       }
     ],
     "disqualification_flags": [
@@ -224,77 +224,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "physics.hpp fixes 2D perfect-gas conserved variables; case_def.cpp:166\u2013176 sets freestream and Reynolds viscosity; report.tex:1\u20132 describes nondimensional equations."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "cgns_read.cpp:60\u2013164 handles multiple bases/zones and TRI_3/QUAD_4/MIXED; :233\u2013270 maps boundary sections, while partition.cpp:308\u2013363 creates local meshes."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "solver.cpp:188 onward assembles face residuals, includes inviscid and viscous terms and local/global residual reductions; physical result attribution to c06741d is not established."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "physics.cpp:27\u201398 implements Roe acoustic Harten fix and Rusanov alternative; source selftests include consistency and contact. Not a proof of all-flow accuracy."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "solver.cpp:135\u2013153 and :317\u2013332 treat farfield, slip and no-slip adiabatic wall; :369\u2013378 writes actual wall boundary velocity semantics rather than claiming cell-center values."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "solver.cpp:108\u2013167 forms Green\u2013Gauss primitive gradients and :212\u2013230 reconstructs limited face states; source control may turn reconstruction off but selected production-source binding is unknown."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "solver.cpp:169\u2013183,212\u2013230 computes Venkat-type limiter and :1181\u20131186 may freeze it; report.tex:589\u2013591 discloses freeze. No proven DQ10 in selected production outputs with unavailable source binding."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "physics.cpp:178\u2013215 derives temperature gradients from p and rho and Newtonian/Fourier flux; solver.cpp:323\u2013351 projects shear tangentially for force split."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "solver.cpp:433\u2013474 uses forward/backward LU-SGS sweeps with halo exchanges. Steady CFL cap 50 is documented in report.tex:586\u2013588; source/results binding unknown."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "solver.cpp:1326\u20131403 implements BDF time residual and actual inner target miss accounting; selected Re200 metadata reports 167 misses/30000. Restart resets time and starts backward Euler; no proof this exact source produced selected run."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "partition.cpp:110\u2013146 uses METIS graph partition; :325\u2013347 root distributes local owned/ghost meshes before iteration; halo.cpp:15\u201338 exchanges neighbors."
       }
     ],
     "disqualification_flags": [
@@ -340,14 +340,14 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "Examiner validator recorded for all eight selected final packages; source restart serializes state levels but lacks physical time/step. Validator structure does not prove convergence or accuracy."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "notes": "Structural examiner validation is recorded in the snapshot; manual Re200 plot and wake estimator checks, M2 laminar force stability and source provenance identify limitations beyond a validator pass."
       },
       {
         "id": "res.completion",
@@ -374,15 +374,15 @@
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "score": 3,
+        "notes": "c06741d report.tex:294\u2013315 labels steady table values final though M2 Cd1.025 matches last100 mean rather than final0.529; text:445 gives 2.162. Rank agreement claim:529\u2013533 overstates NACA agreement; PDF includes disclosure of CFL/limiter limitations."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 4,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "score": 3,
+        "notes": "The 30-page accepted report and figure manifest are delivered. Re200 wake image pixel-reproduces from selected field and final plotting helper, which is mathematically defective; case metadata revision26ef1cb does not bind production solver source."
       }
     ],
     "disqualification_flags": [
@@ -412,7 +412,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.5
+    "overall_score": 3.3
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/glm53-04",

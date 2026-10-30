@@ -48,3 +48,8 @@ The submitted Re200 wake figure is readable and traceable to the selected field,
 ## Restart and rank-study review — 2026-10-30
 
 Clean c06741d source builds in cfd-bench. Restart persists three state levels by global ID but not step or physical time; resumed transient resets t=0 and takes a backward-Euler first step. Build/contract rubric 10→9. The selected Re20 final Cd at np1/np2/np8 is 2.071663/2.071659/2.071655; NACA M015 is 0.001153759/0.001153984/0.001167319, with Cl −0.0012681/+0.0007543/+0.0006058. Report.tex:529–533 says forces agree to solver roundoff, which overstates NACA agreement; the absolute differences do not establish DQ4. The selected metadata revisions are init-only and do not establish exact solver source. Case-results rubric 7→6 for the documented M2 false convergence and other case/provenance limitations. Remaining criterion reviews partial.
+
+
+## Criterion-specific source checkpoint — 2026-10-30
+
+Replaced generic repeated notes with criterion-specific source and result evidence. Clean build, CGNS/METIS distribution, Roe/Harten or Rusanov, limited reconstruction, wall shear and BDF target accounting are present in immutable c06741d. The report discloses its CFL cap 50 rather than the supplied 100 and limiter freeze; implicit/transient 14→13. Physics and mesh have separate interfaces with family-driven BC mappings but remain fixed to 2D, four variables and perfect gas; extensibility 1→2. Net rubric remains 85. Report and traceability review points 4→3 for documented M2 summary, overstated NACA rank agreement, invalid vorticity derivative and unbound historic solver. DQ7 remains supported by M2 data; no inference that unbound final source produced the histories. Other DQ and production binding remain partial.

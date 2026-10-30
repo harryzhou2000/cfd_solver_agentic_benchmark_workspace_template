@@ -650,3 +650,6 @@ glm53-04 restart/rank checkpoint: source restart serializes U/Uold1/Uold2 by glo
 
 
 glm53-04 accepted workspace-existing PDF SHA-256 `0962e09351818479a1901c15f83e2336311d91ec35caa4ae3e009d7724d3d9f0`: all 30 pages visually reviewed 2026-10-30, report text and figures present, no missing-asset placeholder observed. Pages 6–23 contain steady results, page25 Re200 force history with startup compressed late drag, pp26–28 field/wake figures, pp28–29 rank comparisons, pp29–30 limitations/reproducibility. This confirms readable report delivery, not physical correctness or historic solver/source binding.
+
+
+glm53-04 criterion checkpoint: all 27 review-point notes now cite their actual code, results or explicit limitations, rather than the same unrelated generic text. Ten rubric sections have criterion-specific evidence. Implicit/transient 14→13 for disclosed CFL cap 50 versus supplied 100 and incomplete restart; extensibility 1→2 for separated physics/mesh and case-driven boundary maps with hard-coded 2D perfect-gas limits, net 85 unchanged. Report/traceability review points 4→3 for M2 summary inconsistency, overstated rank agreement, wrong derived vorticity, and unresolved production-source binding. DQ7 retained; overall remains partial pending remaining DQ/source attribution checks.
