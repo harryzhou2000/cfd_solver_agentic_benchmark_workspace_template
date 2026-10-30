@@ -4,13 +4,13 @@ Submission `codex/generic/sonnet5-02` at `e49016dd97c7f3fe9ae2ae1978e8ff8b9aa507
 
 ## Verdict
 
-**83/100; DQ=false.** Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails.
+**75/100; DQ=true (trigger 7).** The selected M015 inviscid and M200 laminar steady forces continue to drift despite statistically-periodic success labels. Re20 and Re200 are explicitly reported failed; their failure alone is not charged as false success. Further source and DQ review remains partial.
 
 ## Evidence
 
 - Read selected workspace-local terminal response, committed source/report, contestant result packages, and run manifest.
 - Ran the examiner validator explicitly against all eight expected final directories and the report; its outcome is recorded above.
-- Visually reviewed the frozen main report PDF. No evaluator rerun was performed; Re200 was never rerun.
+- Visually reviewed the frozen main report PDF. A clean immutable-source build succeeded; no production CFD or Re200 rerun was performed.
 
 ## Limitations
 
