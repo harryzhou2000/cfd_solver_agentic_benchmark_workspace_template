@@ -30,8 +30,8 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 3,
-          "notes": "CMake/README and historical build evidence exist; no clean evaluator build was run."
+          "score": 4,
+          "notes": "Fresh immutable-source CMake build passed in network-disabled cfd-bench with 2 CPUs, 3 GiB and 256-process cap. CTest found no registered tests; actual historical binary remains unbound."
         },
         {
           "id": "code.cli",
@@ -80,7 +80,7 @@
           "title": "Testing and validation evidence",
           "weight": 0.1,
           "score": 3,
-          "notes": "Historical validator and MPI artifacts exist; no clean evaluator execution."
+          "notes": "Evaluator clean build succeeded; CTest found no registered tests. Historical validator and short MPI artifacts exist; no evaluator CFD rerun."
         },
         {
           "id": "code.hygiene",
@@ -90,7 +90,7 @@
           "notes": "Readable modular source, with stale comments and generated-result claims inconsistent with source behavior."
         }
       ],
-      "overall_score": 3.38,
+      "overall_score": 3.52,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -134,15 +134,15 @@
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Green-Gauss linear reconstruction is active after startup; partition-face fallback is disclosed."
+          "score": 2,
+          "notes": "6b376564 solver.cpp:715\u2013720 traps firstOrder=true throughout every steady solve; :259\u2013264,289\u2013294 then bypasses reconstructed face states. Report.tex:62 incorrectly claims second order after step200. Transient path and unbound historical binary are separate."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Barth-Jespersen and density/pressure fallback paths are present."
+          "score": 2.5,
+          "notes": "Barth-Jespersen and positivity fallback code exists, but sticky firstOrder at solver.cpp:715\u2013720 bypasses its reconstructed face states throughout steady production. Transient reconstruction remains a separate path."
         },
         {
           "id": "cfd.viscous",
@@ -173,7 +173,7 @@
           "notes": "6b376564 main.cpp:73\u2013143 broadcasts the full mesh to all ranks; :164\u2013194 retains it throughout solve and solver.cpp:10\u201312 stores a reference. This violates TASK.md:46,227 despite actual METIS and neighbor halo communication. Rank comparisons are short and historical binary attribution is not independently hashed."
         }
       ],
-      "overall_score": 3.49,
+      "overall_score": 3.19,
       "disqualification_flags": []
     },
     "result_review": {
@@ -234,7 +234,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 66.5,
+    "total_scored": 62.5,
     "sections": [
       {
         "id": "build_cli",
@@ -261,8 +261,8 @@
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 8,
-        "notes": "Green-Gauss, limiter and positivity fallback are active, with disclosed startup/partition fallback."
+        "score": 4.5,
+        "notes": "Reconstruction/limiter and positivity source exist, but solver.cpp:715\u2013720 sticky firstOrder disables reconstructed face states for all steady steps; report.tex:62 incorrectly claims activation after step200. Transient code remains a distinct path; historic binary unbound."
       },
       {
         "id": "viscous",
@@ -296,8 +296,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 2.5,
-        "notes": "Five-page report and separately delivered checkpoint figures exist, but report.tex:159\u2013166 gives 0.116 for a 200-step rank comparison where checkpoint np2/4/8 Cd is 0.5071/0.5065/0.5080; 0.116 is instead np2 step2000. Re200 figure lacks readable late drag and no numerical St is stated; several success/plateau assertions conflict with actual force results."
+        "score": 2,
+        "notes": "Five-page report and separately delivered checkpoint figures exist, but report.tex:159\u2013166 gives 0.116 for a 200-step rank comparison where checkpoint np2/4/8 Cd is 0.5071/0.5065/0.5080; 0.116 is instead np2 step2000. Re200 figure lacks readable late drag and no numerical St is stated; several success/plateau assertions conflict with actual force results. Report also falsely claims steady second order after step200 despite the submitted source remaining first-order."
       },
       {
         "id": "extensibility",
@@ -402,8 +402,8 @@
       {
         "id": 10,
         "text": "Second-order reconstruction or limiter disabled in production",
-        "found": false,
-        "evidence": "Metadata/source indicate Green-Gauss and Barth-Jespersen, with disclosed limited fallback."
+        "found": true,
+        "evidence": "Immutable 6b376564:solver/src/solver.cpp:53 initializes firstOrder from the environment; runSteady :715\u2013720 sets it true on step1 when initially false, but the step>200 branch resets it only if !prevFirstOrder, which is false thereafter. If initially true it likewise stays true. These are the only assignments. getFaceStates :259\u2013264,289\u2013294 therefore bypasses gradient/limiter reconstruction throughout every steady solve in this submitted source. Report.tex:62 claims first-order only for the first 200 steps, with second-order afterward. 52a1e520 and submission solver.cpp are byte-identical; no executable hash independently binds historical results. Transient is not automatically covered by this finding."
       },
       {
         "id": 11,

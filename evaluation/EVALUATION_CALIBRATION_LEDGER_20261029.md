@@ -105,7 +105,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_sonnet5-02_6c0ac0` | partial: all cases, PDF, source/rubric reviewed; DQ7 proven; historical binary/remaining figure provenance uncertain |
 | `codex_generic_vllm-qwen38-01_2045e0` | partial: all cases/PDF/source/rubric examined; DQ4 rank anomaly unbound to same binary; other figure provenance uncertain |
 | `codex_generic_vllm-qwen38-02_d47362` | partial: source/result, DQ and score adjudication ongoing |
-| `codex_glm52-m3_01_919b67` | partial: 66.5/100, DQ7 and TASK full-mesh; source review ongoing |
+| `codex_glm52-m3_01_919b67` | partial: 62.5/100, DQ7/10 and TASK full-mesh; binary/remaining review ongoing |
 | `codex_glm52-m3_02_ca46e4` | unreviewed |
 | `codex_glm52-m3_03_674665` | unreviewed |
 | `codex_glm52-m3_04_32f2d0` | unreviewed |
@@ -887,3 +887,7 @@ glm52-m3-01 viscous-case correction: contestant checkpoint `52a1e520` includes e
 glm52-m3-01 inviscid/Re200 checkpoint: 52a1e520 contains each case's historical residual, force and contour figures, correcting old claims of figure absence. Independent case notes give immutable figure/force SHA256 and late windows. M015 inviscid2→1.5 due continued oscillation; M080/M200 remain2 under numeric-summary floor. Re200 stays2: its readable late lift has no readable late drag (startup extremes flatten it), and report.tex:151–152 asserts estimates without numeric St/mean Cd. A separately labeled evaluator calculation on t180–300 gives mean Cd0.89251 and frequency0.12674 from 15 upward crossings; it is not contestant-delivered St or a substitute for the figure floor. Last recorded inner ratio0.156 remains a strict failure, without an inferred full miss count.
 
 Immutable report.tex:159–166 labels a step200 M015 inviscid rank table Cd=0.116 for all three ranks, but historical checkpoint common-step force CSVs give np2 0.5071297, np4 0.5065229, np8 0.5080181. 0.116 matches np2 at step2000. This is a report-table error, not DQ4 (actual common-step Cd agrees closely) nor DQ8 (no figure mismatch proven). Report/visualization3→2.5, total67→66.5; results traceability is separately reduced. Historical binary and broader source/DQ review remain partial. No CFD rerun.
+
+glm52-m3-01 DQ10 correction: immutable 6b376564 solver.cpp:53 initializes `firstOrder` from an environment flag; :715–720 sets it true on steady step1, but the after-step200 reset requires `!prevFirstOrder`, which remains false. These are its only assignments. :259–264 and :289–294 bypass gradient/limiter face reconstruction whenever true. Thus either initial value leaves every steady iteration first-order, contrary to report.tex:62's claim it turns second order after 200 steps. Historical checkpoint 52a1e520 and final solver.cpp are identical; the exact historical executable is unbound. This finding is limited to steady path, not transient. DQ10 false→true, second-order8→4.5 and report2.5→2, total66.5→62.5; reconstruction/limiter review scores reduced.
+
+A fresh immutable-source CMake build succeeded in network-disabled cfd-bench with 2 CPUs, 3 GiB and 256-process cap; CTest had no registered tests. Build review3→4 and stale no-clean-build note corrected. No CFD rerun. Remaining case provenance, detailed rubric and DQ review partial.

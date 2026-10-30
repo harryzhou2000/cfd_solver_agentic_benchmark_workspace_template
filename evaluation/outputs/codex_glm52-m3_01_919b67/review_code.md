@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T08:57:36.666290+00:00
+Generated: 2026-10-30T09:00:15.294313+00:00
 
-**Overall score: 3.38**
+**Overall score: 3.52**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | CMake/README and historical build evidence exist; no clean evaluator build was run. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Fresh immutable-source CMake build passed in network-disabled cfd-bench with 2 CPUs, 3 GiB and 256-process cap. CTest found no registered tests; actual historical binary remains unbound. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 4 | Input-driven solve CLI and error paths are present; malformed-input run not repeated. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T08:57:36.666290+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Positivity checks exist, but steady laminar/Re20 histories do not show robust convergence. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Historical validator and MPI artifacts exist; no clean evaluator execution. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Evaluator clean build succeeded; CTest found no registered tests. Historical validator and short MPI artifacts exist; no evaluator CFD rerun. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Readable modular source, with stale comments and generated-result claims inconsistent with source behavior. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T08:57:36.666290+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.38
+- Overall score (0-5): 3.52
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

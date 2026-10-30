@@ -110,8 +110,8 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 3,
-        "notes": "CMake/README and historical build evidence exist; no clean evaluator build was run."
+        "score": 4,
+        "notes": "Fresh immutable-source CMake build passed in network-disabled cfd-bench with 2 CPUs, 3 GiB and 256-process cap. CTest found no registered tests; actual historical binary remains unbound."
       },
       {
         "id": "code.cli",
@@ -160,7 +160,7 @@
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 3,
-        "notes": "Historical validator and MPI artifacts exist; no clean evaluator execution."
+        "notes": "Evaluator clean build succeeded; CTest found no registered tests. Historical validator and short MPI artifacts exist; no evaluator CFD rerun."
       },
       {
         "id": "code.hygiene",
@@ -212,7 +212,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.38
+    "overall_score": 3.52
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -257,15 +257,15 @@
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Green-Gauss linear reconstruction is active after startup; partition-face fallback is disclosed."
+        "score": 2,
+        "notes": "6b376564 solver.cpp:715\u2013720 traps firstOrder=true throughout every steady solve; :259\u2013264,289\u2013294 then bypasses reconstructed face states. Report.tex:62 incorrectly claims second order after step200. Transient path and unbound historical binary are separate."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Barth-Jespersen and density/pressure fallback paths are present."
+        "score": 2.5,
+        "notes": "Barth-Jespersen and positivity fallback code exists, but sticky firstOrder at solver.cpp:715\u2013720 bypasses its reconstructed face states throughout steady production. Transient reconstruction remains a separate path."
       },
       {
         "id": "cfd.viscous",
@@ -328,7 +328,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.49
+    "overall_score": 3.19
   },
   "result_review": {
     "review_area": "result_review",

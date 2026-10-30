@@ -41,15 +41,15 @@
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Green-Gauss linear reconstruction is active after startup; partition-face fallback is disclosed."
+      "score": 2,
+      "notes": "6b376564 solver.cpp:715\u2013720 traps firstOrder=true throughout every steady solve; :259\u2013264,289\u2013294 then bypasses reconstructed face states. Report.tex:62 incorrectly claims second order after step200. Transient path and unbound historical binary are separate."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Barth-Jespersen and density/pressure fallback paths are present."
+      "score": 2.5,
+      "notes": "Barth-Jespersen and positivity fallback code exists, but sticky firstOrder at solver.cpp:715\u2013720 bypasses its reconstructed face states throughout steady production. Transient reconstruction remains a separate path."
     },
     {
       "id": "cfd.viscous",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.49
+  "overall_score": 3.19
 }

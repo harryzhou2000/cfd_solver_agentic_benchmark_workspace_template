@@ -78,6 +78,6 @@ command aborted by user
 
 ## Reviews
 
-- Code review scorecard: `codex_glm52-m3_01_919b67/review_code.md` (overall: 3.38)
-- CFD methods review: `codex_glm52-m3_01_919b67/review_cfd.md` (overall: 3.49)
+- Code review scorecard: `codex_glm52-m3_01_919b67/review_code.md` (overall: 3.52)
+- CFD methods review: `codex_glm52-m3_01_919b67/review_cfd.md` (overall: 3.19)
 - Result review: `codex_glm52-m3_01_919b67/review_results.md` (overall: 3.2)

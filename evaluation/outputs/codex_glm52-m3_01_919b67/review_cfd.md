@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T08:57:36.666684+00:00
+Generated: 2026-10-30T09:00:15.294720+00:00
 
-**Overall score: 3.49**
+**Overall score: 3.19**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,10 +24,10 @@ Generated: 2026-10-30T08:57:36.666684+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | Farfield, slip and no-slip branches plus boundary-value output semantics are implemented. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | Green-Gauss linear reconstruction is active after startup; partition-face fallback is disclosed. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 2 | 6b376564 solver.cpp:715–720 traps firstOrder=true throughout every steady solve; :259–264,289–294 then bypasses reconstructed face states. Report.tex:62 incorrectly claims second order after step200. Transient path and unbound historical binary are separate. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Barth-Jespersen and density/pressure fallback paths are present. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 2.5 | Barth-Jespersen and positivity fallback code exists, but sticky firstOrder at solver.cpp:715–720 bypasses its reconstructed face states throughout steady production. Transient reconstruction remains a separate path. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Newtonian/Fourier code exists, but underdeveloped steady laminar results limit validation. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T08:57:36.666684+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.49
+- Overall score (0-5): 3.19
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -32,21 +32,23 @@ The structural contract is complete, and the historical manifest maps 56 figures
 | Build, CLI, output contract | 10 | 8 |
 | Mesh and geometry | 10 | 8 |
 | FV residual and BCs | 15 | 12 |
-| Second-order spatial scheme | 10 | 8 |
+| Second-order spatial scheme | 10 | 4.5 |
 | Viscous terms | 10 | 6 |
 | Implicit and transient methods | 15 | 9 |
 | MPI | 10 | 6 |
 | Case results | 10 | 3 |
-| Report and visualization | 5 | 2.5 |
+| Report and visualization | 5 | 2 |
 | Extensibility | 5 | 4 |
-| **Total** | **100** | **66.5** |
+| **Total** | **100** | **62.5** |
 
 ## Disqualification assessment
 
-DQ 7 is substantiated: Re200 metadata/report labels the run complete/periodic, and the recorded final inner ratio 0.156 misses the required 1e-3 target. All 30,000 residual rows record 10 inner iterations, but their individual target ratios are unavailable and the true count of strict misses cannot be inferred from that alone. The source caps inner iterations at 10. Separately, immutable main.cpp:73–143 broadcasts the complete mesh on every rank and retains it throughout solve (:164–194); solver.cpp:10–12 holds a pointer and output.cpp:353–354 dereferences it after solve. This violates TASK.md:46,227 even though METIS and neighbor halos exist. It is a separate TASK prohibited-shortcut rejection, not numbered DQ9. There is no direct internal external-solver wrapper, generated-without-solving evidence, hard-coded two-mesh branch, order-one MPI inconsistency, explicit-only path, figure mismatch, geometric-only partitioning, disabled production reconstruction/limiter, or undocumented cell-center no-slip output. Trigger 13 was not externally investigated under the trust policy. The full per-trigger record is in `agent_scores.json`.
+DQ 10 is independently substantiated by the submitted source: solver.cpp:715–720 sets firstOrder on the first steady step and never clears it; :259–264,289–294 then bypasses linear reconstructed face states. Report.tex:62 claims second order after the first 200 steps. Historical checkpoint and submission source match, but no executable hash binds the historical binary. The transient path is separate.
+
+DQ 7 is substantiated: Re200 metadata/report labels the run complete/periodic, and the recorded final inner ratio 0.156 misses the required 1e-3 target. All 30,000 residual rows record 10 inner iterations, but their individual target ratios are unavailable and the true count of strict misses cannot be inferred from that alone. The source caps inner iterations at 10. Separately, immutable main.cpp:73–143 broadcasts the complete mesh on every rank and retains it throughout solve (:164–194); solver.cpp:10–12 holds a pointer and output.cpp:353–354 dereferences it after solve. This violates TASK.md:46,227 even though METIS and neighbor halos exist. It is a separate TASK prohibited-shortcut rejection, not numbered DQ9. There is no direct internal external-solver wrapper, generated-without-solving evidence, hard-coded two-mesh branch, order-one MPI inconsistency, explicit-only path, specific figure mismatch, geometric-only partitioning, or undocumented cell-center no-slip output. Trigger 13 was not externally investigated under the trust policy. The full per-trigger record is in `agent_scores.json`.
 
 ## Limitations and verdict
 
-The environment capture is post-run only; clean build, bad-input CLI, and steady reruns were not performed. The BLSC/GLM-5.2 context window is not in bundled evidence. `run_identity.json` and the final-response Markdown are unindexed sidecars, so `cfdeval check` cannot validate them.
+The environment capture is post-run only; a clean immutable-source build succeeded in a network-disabled restricted cfd-bench container, with no registered CTest tests. Bad-input CLI and steady reruns were not performed. The BLSC/GLM-5.2 context window is not in bundled evidence. `run_identity.json` and the final-response Markdown are unindexed sidecars, so `cfdeval check` cannot validate them.
 
-Verdict: **66.5/100 before disqualification.** Strengths are the real source-level CFD/MPI implementation and complete historical output contract. Historical checkpoint force histories show laminar NACA Cd≈532, 458 and 405 and still rising, while Re20 Cd≈2028 is constant in its final rows; all four metadata files say converged. The constant history alone does not establish synthetic output. These add independent false-success evidence. The principal deductions are full-mesh replication during solve, weak steady convergence, Re200 inner-solve noncompliance, and report/metadata overstatement. The report.tex:159–166 rank table labels Cd=0.116 for all three runs at step200, but checkpoint CSVs give 0.50713/0.50652/0.50802 at that step; 0.116 belongs to np2 step2000. This is a report-table error, not DQ4 or a figure mismatch. Case-by-case calibration remains partial; the exact historical executable was not independently hashed.
+Verdict: **62.5/100 before disqualification.** Strengths are the real source-level CFD/MPI implementation and complete historical output contract. Historical checkpoint force histories show laminar NACA Cd≈532, 458 and 405 and still rising, while Re20 Cd≈2028 is constant in its final rows; all four metadata files say converged. The constant history alone does not establish synthetic output. These add independent false-success evidence. The principal deductions are full-mesh replication during solve, weak steady convergence, Re200 inner-solve noncompliance, and report/metadata overstatement. The report.tex:159–166 rank table labels Cd=0.116 for all three runs at step200, but checkpoint CSVs give 0.50713/0.50652/0.50802 at that step; 0.116 belongs to np2 step2000. This is a report-table error, not DQ4 or a figure mismatch. Case-by-case calibration remains partial; the exact historical executable was not independently hashed.
