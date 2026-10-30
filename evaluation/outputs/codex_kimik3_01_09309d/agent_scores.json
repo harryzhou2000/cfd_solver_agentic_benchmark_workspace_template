@@ -24,14 +24,14 @@
   },
   "scores": {
     "code_review": {
-      "overall_score": 4.22,
+      "overall_score": 4.2,
       "points": [
         {
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 4,
-          "notes": "CMake locates MPI, CGNS/HDF5 and METIS; README documents the build, but no independent clean build was run."
+          "score": 4.5,
+          "notes": "Immutable source clean-builds with bundled dependencies in isolated network-disabled container; CTest has no registered tests."
         },
         {
           "id": "code.cli",
@@ -79,8 +79,8 @@
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 4,
-          "notes": "All eight output packages pass the official validator and rank artifacts exist, but the cylinder rank evidence fails consistency."
+          "score": 3,
+          "notes": "Validator passes structurally, but no registered CTests, rank report misstates Cd, and np8 uses different controls."
         },
         {
           "id": "code.hygiene",
@@ -93,7 +93,7 @@
       "disqualification_flags": []
     },
     "cfd_review": {
-      "overall_score": 4.4,
+      "overall_score": 4.15,
       "points": [
         {
           "id": "cfd.equations",
@@ -155,15 +155,15 @@
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Nonlinear LU-SGS defect correction with local pseudo-time/CFL controls is source-evidenced."
+          "score": 4,
+          "notes": "Nonlinear LU-SGS exists; a 69-step M200 laminar run stops on residual target despite strongly changing forces."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Re200 metadata reports BDF2 dual time, 30000 steps to t=300 and inner statistics; evaluated read-only, never rerun."
+          "score": 3.5,
+          "notes": "BDF2 history/time residual and sustained St0.14 exist, but driver.cpp:403\u2013428 checks frozen reconstruction target before refreshing it; refreshed strict miss rate is unknown."
         },
         {
           "id": "cfd.mpi_partition",
@@ -183,7 +183,7 @@
       ]
     },
     "result_review": {
-      "overall_score": 3.02,
+      "overall_score": 3.05,
       "points": [
         {
           "id": "res.contract",
@@ -211,7 +211,7 @@
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 3,
-          "notes": "Rankcount Re20 np1/2/4 agree but use different controls from production np8; report table misstates the rank-study Cd values. Other physics remains under review."
+          "notes": "M200 laminar final force falls 24% over10 samples while marked converged; Re200 dominant frequency0.14 is real but noisy, and np8 rank controls differ."
         },
         {
           "id": "res.visualization",
@@ -231,8 +231,8 @@
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 3,
-          "notes": "Workspace report has figure/run manifests; curated commit excludes raw result data and report-generated manifests, limiting self-contained traceability."
+          "score": 3.5,
+          "notes": "Selected final response identifies 41 images; all eight force/residual pairs reproduce pixel-identically from their named workspace CSVs. Exact historical binaries and other figure bindings remain qualified."
         }
       ],
       "disqualification_flags": [
@@ -253,7 +253,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 82.5,
+    "total_scored": 79.5,
     "sections": [
       {
         "id": "build_cli_output",
@@ -294,8 +294,8 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 15,
-        "notes": "LU-SGS/local CFL and reported true BDF2 Re200 inner-loop controls meet the rubric evidence; Re200 not rerun."
+        "score": 12,
+        "notes": "LU-SGS/local CFL and BDF source exist, but transient target ratios are measured with frozen reconstruction and are not rechecked after refresh; accepted-state strict compliance remains unknown."
       },
       {
         "id": "mpi",
@@ -330,31 +330,31 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 2,
-      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:7 supplies Cd 0.001775, Cl 0.000265. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m015_inviscid_residuals.png, naca0012_m015_inviscid_forces.png and naca0012_m015_inviscid_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 2 retained under the force-history floor."
+      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:7 supplies Cd 0.001775, Cl 0.000265. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m015_inviscid_residuals.png, naca0012_m015_inviscid_forces.png and naca0012_m015_inviscid_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 2 retained under the force-history floor. Raw final 50 samples: Cd 0.0016007765\u21920.0017750535, Cl 0.00035709981\u21920.00026513993; reported residual reduction 4.004 orders. Stable coefficients at a small absolute scale do not by themselves establish physical accuracy."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
-      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:9 supplies Cd 0.009006, Cl 0.001754. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m080_inviscid_residuals.png, naca0012_m080_inviscid_forces.png and naca0012_m080_inviscid_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 2 retained under the force-history floor."
+      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:9 supplies Cd 0.009006, Cl 0.001754. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m080_inviscid_residuals.png, naca0012_m080_inviscid_forces.png and naca0012_m080_inviscid_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 2 retained under the force-history floor. Raw final 50 samples: Cd 0.0090061962\u21920.0090056371, Cl 0.0017257865\u21920.0017537671; reported residual reduction 4 orders. Stable coefficients at a small absolute scale do not by themselves establish physical accuracy."
     },
     "naca0012_m200_inviscid": {
       "score": 2,
-      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:11 supplies Cd 0.092252, Cl 0.000410. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m200_inviscid_residuals.png, naca0012_m200_inviscid_forces.png and naca0012_m200_inviscid_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 2 retained under the force-history floor."
+      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:11 supplies Cd 0.092252, Cl 0.000410. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m200_inviscid_residuals.png, naca0012_m200_inviscid_forces.png and naca0012_m200_inviscid_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 2 retained under the force-history floor. Raw final 50 samples: Cd 0.09221575\u21920.092251808, Cl 0.0003974479\u21920.00040968493; reported residual reduction 0.9561 orders. Stable coefficients at a small absolute scale do not by themselves establish physical accuracy."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 2,
-      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:8 supplies Cd 0.076997, Cl -0.002631. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m015_laminar_re5000_residuals.png, naca0012_m015_laminar_re5000_forces.png and naca0012_m015_laminar_re5000_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 2 retained under the force-history floor."
+      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:8 supplies Cd 0.076997, Cl -0.002631. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m015_laminar_re5000_residuals.png, naca0012_m015_laminar_re5000_forces.png and naca0012_m015_laminar_re5000_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 2 retained under the force-history floor. Raw final 50 samples: Cd 0.076989799\u21920.076996507, Cl -0.0028830158\u2192-0.0026312024; reported residual reduction 4.017 orders. Stable coefficients at a small absolute scale do not by themselves establish physical accuracy."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 1.5,
-      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:10 supplies Cd 0.223544, Cl -0.001435. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m080_laminar_re5000_residuals.png, naca0012_m080_laminar_re5000_forces.png and naca0012_m080_laminar_re5000_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 1.5 retained under the force-history floor. Session patch/build/launch evidence also supports piecewise-constant startup throughout its 340 steps despite claimed second-order final field (DQ10); binary hash unrecorded."
+      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:10 supplies Cd 0.223544, Cl -0.001435. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m080_laminar_re5000_residuals.png, naca0012_m080_laminar_re5000_forces.png and naca0012_m080_laminar_re5000_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 1.5 retained under the force-history floor. Session patch/build/launch evidence also supports piecewise-constant startup throughout its 340 steps despite claimed second-order final field (DQ10); binary hash unrecorded. Raw final 50 samples: Cd 0.21953104\u21920.22354414, Cl -0.001210846\u2192-0.0014349894; reported residual reduction 4 orders. Stable coefficients at a small absolute scale do not by themselves establish physical accuracy."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1,
-      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:12 supplies Cd 0.112169, Cl -0.000040. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m200_laminar_re5000_residuals.png, naca0012_m200_laminar_re5000_forces.png and naca0012_m200_laminar_re5000_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 1 retained under the force-history floor. Final20 Cd0.2352103\u21920.1121686 and final10 0.1470408\u21920.1121686 despite completed/converged metadata (DQ7); session evidence also supports first-order mode (DQ10)."
+      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:12 supplies Cd 0.112169, Cl -0.000040. Contestant-delivered workspace report/figure_manifest.csv lists naca0012_m200_laminar_re5000_residuals.png, naca0012_m200_laminar_re5000_forces.png and naca0012_m200_laminar_re5000_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 1 retained under the force-history floor. Final20 Cd0.2352103\u21920.1121686 and final10 0.1470408\u21920.1121686 despite completed/converged metadata (DQ7); session evidence also supports first-order mode (DQ10). Raw final 50 samples: Cd 2.0832999\u21920.11216858, Cl -2.9089095e-06\u2192-4.0375613e-05; reported residual reduction 3.017 orders. Stable coefficients at a small absolute scale do not by themselves establish physical accuracy."
     },
     "cylinder_m010_laminar_re20": {
       "score": 2,
-      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:5 supplies Cd 1.953212, Cl -0.001598. Contestant-delivered workspace report/figure_manifest.csv lists cylinder_m010_laminar_re20_residuals.png, cylinder_m010_laminar_re20_forces.png and cylinder_m010_laminar_re20_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 2 retained under the force-history floor."
+      "notes": "Immutable 005d7d9 report/tables/case_summary.tex:5 supplies Cd 1.953212, Cl -0.001598. Contestant-delivered workspace report/figure_manifest.csv lists cylinder_m010_laminar_re20_residuals.png, cylinder_m010_laminar_re20_forces.png and cylinder_m010_laminar_re20_mach.png/pressure.png; final response identifies the 41-image figure set, and the original residual/force PNGs reproduce pixel-identically from corresponding workspace CSVs using immutable tools/make_figures.py. The residual is readable, but the steady force figure plots physical_time, which is zero for every row, collapsing the whole history into one vertical line; it cannot expose force evolution. Score 2 retained under the force-history floor. Raw final 50 samples: Cd 1.9533056\u21921.9532115, Cl -0.0016048057\u2192-0.0015980846; reported residual reduction 5.007 orders. Stable coefficients at a small absolute scale do not by themselves establish physical accuracy."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
@@ -410,13 +410,13 @@
         "id": 8,
         "text": "Report figures do not correspond to submitted field/CSV outputs.",
         "found": false,
-        "evidence": "Workspace figure manifest maps figures to readable result files; raw results are excluded from the curated Git commit, a traceability limitation."
+        "evidence": "All eight contestant-delivered force/residual pairs reproduce pixel-identically from workspace CSVs. Steady force plots use time0 for every row, and wide-domain wake plots lack detail; those are presentation defects, not unrelated data. Other field bindings not exhaustively reproduced."
       },
       {
         "id": 9,
         "text": "metadata.json reports METIS/ParMETIS but the code uses only a geometric split or full-state replication.",
         "found": false,
-        "evidence": "METIS_PartGraphKway and neighbour Isend/Irecv source paths are present; metadata reports metis_kway."
+        "evidence": "driver.cpp:131\u2013155 loads full mesh only on rank0 and distributes METIS owned/ghost meshes; no full mesh on every rank during iterations found."
       },
       {
         "id": 10,
@@ -428,13 +428,13 @@
         "id": 11,
         "text": "Surface no-slip checks fail because reported wall rows are actually adjacent cell-center velocities without documentation.",
         "found": false,
-        "evidence": "Report documents boundary-value rows and output source records wall states."
+        "evidence": "residual.cpp:522 onward outputs no-slip boundary velocity, not undocumented cell-center velocity; no failing surface check established."
       },
       {
         "id": 12,
         "text": "Figure files are misnamed, such as a Mach image that actually plots pressure.",
         "found": false,
-        "evidence": "Figure manifest and report naming are consistent; no contrary direct evidence found."
+        "evidence": "Figure mapping code reads named VTU variables and cell-to-triangle expansion is ordered; no specific mislabeled image established."
       },
       {
         "id": 13,
@@ -445,11 +445,9 @@
     ]
   },
   "limitations": [
-    "No independent clean build or steady rerun was performed; decisive existing artifacts were read only.",
-    "Cylinder Re200 was not rerun, per evaluation policy.",
-    "run_identity.json and contestant_final_response.md are unindexed sidecars; cfdeval check does not validate them.",
-    "Final-response provenance: root 019fc805-989c-7971-b70d-53fd4efa3889, message msg_69229923f6e8447086815ad8da4d511b at 2026-08-04T21:19:43.584Z, one ordered output_text part, bundled rollout source; stored payload SHA-256 45067b9098a1746690e56a5e169b63061e9ac7fb392fd8979d9a3a1614930b9e and extracted Markdown SHA-256 26e1f0ff1e6545a8889281e1e71f836de3e28dd00c719057009cfad25f2b9d61.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
-    "2026-10-30 recalibration is partial: former DQ4 rank attribution was removed because compared controls differ; other DQ and full source/case review remain pending."
+    "Exact historical executables remain unbound by hash; selected-session patch/build/launch sequence supports M080/M200 first-order production attribution.",
+    "Re200 reported inner ratios use frozen reconstruction before refresh; actual refreshed strict miss rate is unknown.",
+    "Selected final response identifies 41 standalone figures; force/residual images reproduce from source CSVs, but seven steady force plots collapse at time zero, and Re200 late drag is unreadable.",
+    "No external authorship investigation or Re200/unsteady rerun performed."
   ]
 }

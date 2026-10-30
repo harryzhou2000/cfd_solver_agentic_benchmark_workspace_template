@@ -62,15 +62,15 @@
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Nonlinear LU-SGS defect correction with local pseudo-time/CFL controls is source-evidenced."
+      "score": 4,
+      "notes": "Nonlinear LU-SGS exists; a 69-step M200 laminar run stops on residual target despite strongly changing forces."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Re200 metadata reports BDF2 dual time, 30000 steps to t=300 and inner statistics; evaluated read-only, never rerun."
+      "score": 3.5,
+      "notes": "BDF2 history/time residual and sustained St0.14 exist, but driver.cpp:403\u2013428 checks frozen reconstruction target before refreshing it; refreshed strict miss rate is unknown."
     },
     {
       "id": "cfd.mpi_partition",
@@ -88,5 +88,5 @@
       "evidence": "Selected rollout 019fc805-989c-7971-b70d-53fd4efa3889 applies the 600-step viscous first-order switch at 2026-08-04T10:18:42Z, successfully builds solver/build/cfd2d (call_NQLWSrThOKAoeFBRBQpBlzX2, 10:21:19Z), then launches that path into canonical M080/M200 laminar directories (call_L6Gm7dtyVaAA1nMF7NdZvx6J, 10:31:17Z, argument SHA256 706fef26ee3d9a7744d7132e5c1e4c57804c4f1f892efd5431f7c24e4b717a93). Metadata begins 10:31:18Z; final steps340/69, both below600. Submitted driver.cpp:250\u2013262 sets secondOrder=false through600; residual.cpp:113\u2013137 then uses cell averages. Report.tex:112\u2013117 explicitly claims all final fields are second order and metadata claims order2. Individual historical executable hash unrecorded; session build/launch and timing support the production binding."
     }
   ],
-  "overall_score": 4.4
+  "overall_score": 4.15
 }

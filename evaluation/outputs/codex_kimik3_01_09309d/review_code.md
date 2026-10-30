@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T13:28:29.521631+00:00
+Generated: 2026-10-30T13:30:18.258433+00:00
 
-**Overall score: 4.22**
+**Overall score: 4.2**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake locates MPI, CGNS/HDF5 and METIS; README documents the build, but no independent clean build was run. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4.5 | Immutable source clean-builds with bundled dependencies in isolated network-disabled container; CTest has no registered tests. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 5 | main/config source implements the required solve --case/--output interface and FatalError paths. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T13:28:29.521631+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Mesh/config checks, positivity backtracking and finite diagnostics are present; no independent stress run. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | All eight output packages pass the official validator and rank artifacts exist, but the cylinder rank evidence fails consistency. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Validator passes structurally, but no registered CTests, rank report misstates Cd, and np8 uses different controls. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Readable C++17 sources and curated submission; report source depends on excluded raw result/manifests for full regeneration. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T13:28:29.521631+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.22
+- Overall score (0-5): 4.2
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -28,7 +28,7 @@
       "title": "Result plausibility and MPI consistency",
       "weight": 0.15,
       "score": 3,
-      "notes": "Rankcount Re20 np1/2/4 agree but use different controls from production np8; report table misstates the rank-study Cd values. Other physics remains under review."
+      "notes": "M200 laminar final force falls 24% over10 samples while marked converged; Re200 dominant frequency0.14 is real but noisy, and np8 rank controls differ."
     },
     {
       "id": "res.visualization",
@@ -48,8 +48,8 @@
       "id": "res.traceability",
       "title": "Traceability of figures and claims",
       "weight": 0.05,
-      "score": 3,
-      "notes": "Workspace report has figure/run manifests; curated commit excludes raw result data and report-generated manifests, limiting self-contained traceability."
+      "score": 3.5,
+      "notes": "Selected final response identifies 41 images; all eight force/residual pairs reproduce pixel-identically from their named workspace CSVs. Exact historical binaries and other figure bindings remain qualified."
     }
   ],
   "disqualification_flags": [
@@ -66,5 +66,5 @@
       "evidence": "Selected rollout 019fc805-989c-7971-b70d-53fd4efa3889 applies the 600-step viscous first-order switch at 2026-08-04T10:18:42Z, successfully builds solver/build/cfd2d (call_NQLWSrThOKAoeFBRBQpBlzX2, 10:21:19Z), then launches that path into canonical M080/M200 laminar directories (call_L6Gm7dtyVaAA1nMF7NdZvx6J, 10:31:17Z, argument SHA256 706fef26ee3d9a7744d7132e5c1e4c57804c4f1f892efd5431f7c24e4b717a93). Metadata begins 10:31:18Z; final steps340/69, both below600. Submitted driver.cpp:250\u2013262 sets secondOrder=false through600; residual.cpp:113\u2013137 then uses cell averages. Report.tex:112\u2013117 explicitly claims all final fields are second order and metadata claims order2. Individual historical executable hash unrecorded; session build/launch and timing support the production binding."
     }
   ],
-  "overall_score": 3.02
+  "overall_score": 3.05
 }

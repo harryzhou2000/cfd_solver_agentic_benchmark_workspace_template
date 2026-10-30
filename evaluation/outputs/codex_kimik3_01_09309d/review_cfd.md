@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T13:28:29.522063+00:00
+Generated: 2026-10-30T13:30:18.258850+00:00
 
-**Overall score: 4.4**
+**Overall score: 4.15**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -33,10 +33,10 @@ Generated: 2026-10-30T13:28:29.522063+00:00
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 5 | Newtonian/Fourier viscous terms, gradients and tangential skin-friction reporting are evidenced in source and report. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 5 | Nonlinear LU-SGS defect correction with local pseudo-time/CFL controls is source-evidenced. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | Nonlinear LU-SGS exists; a 69-step M200 laminar run stops on residual target despite strongly changing forces. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 5 | Re200 metadata reports BDF2 dual time, 30000 steps to t=300 and inner statistics; evaluated read-only, never rerun. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3.5 | BDF2 history/time residual and sustained St0.14 exist, but driver.cpp:403–428 checks frozen reconstruction target before refreshing it; refreshed strict miss rate is unknown. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3.5 | METIS/halo source present. Re20 np1/2/4 agree; their control overrides differ from np8, so rank-only 5.706 vs 1.953 attribution is unsupported. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T13:28:29.522063+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.4
+- Overall score (0-5): 4.15
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

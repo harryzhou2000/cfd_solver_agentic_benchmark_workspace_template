@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T13:28:29.522357+00:00
+Generated: 2026-10-30T13:30:18.259163+00:00
 
-**Overall score: 3.02**
+**Overall score: 3.05**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -18,7 +18,7 @@ Generated: 2026-10-30T13:28:29.522357+00:00
 | 3 | **res.completion** Case completion and convergence | 0.20 | 2 | M200 laminar is marked complete/converged at step69 despite Cd dropping 24% over final10 samples; remaining cases under review. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Rankcount Re20 np1/2/4 agree but use different controls from production np8; report table misstates the rank-study Cd values. Other physics remains under review. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | M200 laminar final force falls 24% over10 samples while marked converged; Re200 dominant frequency0.14 is real but noisy, and np8 rank controls differ. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 2 | Standalone residual histories are readable, but all seven steady force plots collapse at time zero; full-domain contours leave the body/wake tiny, and Re200 late drag is unreadable. |
@@ -27,7 +27,7 @@ Generated: 2026-10-30T13:28:29.522357+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 1.5 | Rank table misstates retained Cd, report claims second-order finals for two first-order runs, and claimed wake visualization is not resolved by its wide field view. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Workspace report has figure/run manifests; curated commit excludes raw result data and report-generated manifests, limiting self-contained traceability. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3.5 | Selected final response identifies 41 images; all eight force/residual pairs reproduce pixel-identically from their named workspace CSVs. Exact historical binaries and other figure bindings remain qualified. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T13:28:29.522357+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.02
+- Overall score (0-5): 3.05
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
