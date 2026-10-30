@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:30:18.108189+00:00
+Generated: 2026-10-30T12:33:01.892578+00:00
 
 **Overall score: 3.48**
 
@@ -27,7 +27,7 @@ Generated: 2026-10-30T12:30:18.108189+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 4 | Evidence-backed review; see report. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Evidence-backed review; see report. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Original report/run and figure manifests are available; M080 inviscid Mach figure reproduces pixel-identically from canonical VTK (ledger hashes). Its inverse-distance raster fills body region and omits boundary/spatial tick labels; other figures and historical binaries are not exhaustively bound. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 

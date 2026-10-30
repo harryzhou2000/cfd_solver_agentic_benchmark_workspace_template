@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:30:18.107312+00:00
+Generated: 2026-10-30T12:33:01.891829+00:00
 
 **Overall score: 4.0**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Evidence-backed review; see report. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Clean immutable7f22dbe source CMake build succeeds in network-disabled cfd-bench with bundled dependencies; CTest has no registered tests. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 4 | Evidence-backed review; see report. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T12:30:18.107312+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Evidence-backed review; see report. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | Evidence-backed review; see report. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | Clean build succeeds; no CTests registered. Prior official validator passes eight packages and report structurally, which does not prove convergence. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Evidence-backed review; see report. |

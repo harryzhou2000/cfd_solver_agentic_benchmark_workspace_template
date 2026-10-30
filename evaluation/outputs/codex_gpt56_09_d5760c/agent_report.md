@@ -91,7 +91,7 @@ Selected root `01a009f1-0252-7e80-acd4-2783b82d1076` plus four descendants from 
 
 ## Limitations
 
-No evaluator clean build or MPI rerun. Re200 was not rerun.
+An independent clean source build succeeded in a restricted container; no CTests are registered. No solver or MPI rerun was performed.
 
 ## Verdict
 
