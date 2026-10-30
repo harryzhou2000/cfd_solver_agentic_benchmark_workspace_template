@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Source and delivered evidence reviewed; see agent report."
+      "score": 4.5,
+      "notes": "Immutable source builds in a network-disabled scratch container with configured externals, 2 CPUs/4 GiB/128 processes and 240-second limit; compiler reports unused-variable warnings."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Source and delivered evidence reviewed; see agent report."
+      "score": 3,
+      "notes": "main.cpp parses case and output and reads supplied case controls; no restart read path was found. Bad input handling was not exhaustively tested."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Source and delivered evidence reviewed; see agent report."
+      "score": 3.5,
+      "notes": "Source separates mesh, partition, solver, output and MPI but solver.cpp combines physics and marching; fixed 2-D states limit extensibility."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "Source and delivered evidence reviewed; see agent report."
+      "notes": "CMake builds submitted source using MPI/CGNS/METIS; no direct external CFD solver wrapper found. External similarity and licensing were not exhaustively audited."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Source and delivered evidence reviewed; see agent report."
+      "notes": "Case and mesh are parsed from input; no two-filename-only switch identified. Unseen meshes were not independently tested."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Source and delivered evidence reviewed; see agent report."
+      "score": 1.5,
+      "notes": "main.cpp:120\u2013280 broadcasts global mesh to every rank and retains it during solve, prohibited by TASK.md:227. Gradients are exchanged, but reconstruct_left/right use zero limiter on ghosts (solver.cpp:123\u2013144)."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Source and delivered evidence reviewed; see agent report."
+      "score": 2,
+      "notes": "solver.cpp:544 assigns periodic success without testing shedding; last_inner_residual_ratio stays default zero, while metadata unconditionally marks completed. False metadata and gross force values weaken robustness."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Source and delivered evidence reviewed; see agent report."
+      "score": 2,
+      "notes": "Original eight case packages pass structural validation but report validation fails due duplicated figures path. No independent numerical regression or order test identified; no CFD case rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 2,
-      "notes": "Source and delivered evidence reviewed; see agent report."
+      "score": 3,
+      "notes": "Source builds but has warnings and metadata fields that are not updated; report manifest is broken. Original raw results and PDF were kept outside the curated tip."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.76
+  "overall_score": 3.11
 }

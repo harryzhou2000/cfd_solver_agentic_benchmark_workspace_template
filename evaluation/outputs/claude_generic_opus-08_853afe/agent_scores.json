@@ -29,67 +29,67 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Source and delivered evidence reviewed; see agent report."
+          "score": 4.5,
+          "notes": "Immutable source builds in a network-disabled scratch container with configured externals, 2 CPUs/4 GiB/128 processes and 240-second limit; compiler reports unused-variable warnings."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Source and delivered evidence reviewed; see agent report."
+          "score": 3,
+          "notes": "main.cpp parses case and output and reads supplied case controls; no restart read path was found. Bad input handling was not exhaustively tested."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
-          "score": 4,
-          "notes": "Source and delivered evidence reviewed; see agent report."
+          "score": 3.5,
+          "notes": "Source separates mesh, partition, solver, output and MPI but solver.cpp combines physics and marching; fixed 2-D states limit extensibility."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "Source and delivered evidence reviewed; see agent report."
+          "notes": "CMake builds submitted source using MPI/CGNS/METIS; no direct external CFD solver wrapper found. External similarity and licensing were not exhaustively audited."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "Source and delivered evidence reviewed; see agent report."
+          "notes": "Case and mesh are parsed from input; no two-filename-only switch identified. Unseen meshes were not independently tested."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Source and delivered evidence reviewed; see agent report."
+          "score": 1.5,
+          "notes": "main.cpp:120\u2013280 broadcasts global mesh to every rank and retains it during solve, prohibited by TASK.md:227. Gradients are exchanged, but reconstruct_left/right use zero limiter on ghosts (solver.cpp:123\u2013144)."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Source and delivered evidence reviewed; see agent report."
+          "score": 2,
+          "notes": "solver.cpp:544 assigns periodic success without testing shedding; last_inner_residual_ratio stays default zero, while metadata unconditionally marks completed. False metadata and gross force values weaken robustness."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Source and delivered evidence reviewed; see agent report."
+          "score": 2,
+          "notes": "Original eight case packages pass structural validation but report validation fails due duplicated figures path. No independent numerical regression or order test identified; no CFD case rerun."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": 2,
-          "notes": "Source and delivered evidence reviewed; see agent report."
+          "score": 3,
+          "notes": "Source builds but has warnings and metadata fields that are not updated; report manifest is broken. Original raw results and PDF were kept outside the curated tip."
         }
       ],
-      "overall_score": 3.76,
+      "overall_score": 3.11,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -98,81 +98,81 @@
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 4,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "score": 3,
+          "notes": "Conservative equations are represented, but all delivered runs use first-order reconstruction and several laminar drags are negative or grossly large; no independent physical verification."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "score": 3.5,
+          "notes": "mesh.cpp reads TRI_3/QUAD_4 and multi-zone coordinates, builds adjacency and geometry; MIXED support and general zone cases were not established."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 4,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "score": 3,
+          "notes": "solver.cpp:271\u2013298 assembles opposite signed face fluxes, but ghost-side limiter is zero and all delivered recon_ramp values are zero; global mesh is replicated."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "notes": "solver.cpp:147 onward implements Roe with entropy fix and uses Rusanov farfield; no independent shock validation was run."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "score": 3.5,
+          "notes": "solver.cpp:225\u2013267 implements farfield, slip and no-slip wall paths, but gross and negative forces raise numerical credibility questions; boundary fidelity not independently established."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "score": 1,
+          "notes": "solver.cpp:89\u2013115 multiplies limiter by recon_ramp; steady runs stop before the first 75% of max steps and transient ramp stays zero. All delivered runs are first order despite report and metadata claims."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "score": 1,
+          "notes": "Barth limiter is calculated but multiplied by zero for every delivered production step (solver.cpp:89\u2013115,446,505); second-order limiter is not active."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "score": 2.5,
+          "notes": "solver.cpp:194\u2013220 uses a direct center-to-center viscous gradient without full transverse correction. Forces.cpp equivalent solver.cpp:380\u2013420 projects tangential drag, but laminar coefficients are grossly implausible or negative."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "score": 3,
+          "notes": "solver.cpp:323\u2013365 implements LU-SGS sweeps and local pseudo-time; results stop when residual target reached with first-order reconstruction, not verified converged accuracy."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "score": 1.5,
+          "notes": "solver.cpp:505\u2013544 constructs BDF2 inner residual, but actual Re200 force history is flat and false periodic success is assigned unconditionally. 1,200 target misses are counted; final ratio metadata is an unassigned default."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Source and raw workspace evidence reviewed; see agent report."
+          "score": 1.5,
+          "notes": "METIS and neighbor communication exist, but global mesh is retained per rank and ghost-side reconstruction is first order. TASK prohibits the replication regardless of use of METIS."
         }
       ],
-      "overall_score": 3.8,
+      "overall_score": 2.5,
       "disqualification_flags": []
     },
     "result_review": {
@@ -181,160 +181,160 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 4,
-          "notes": "Explicit validator/report evidence reviewed; see agent report."
+          "score": 2,
+          "notes": "Eight case packages pass structural validator, but Re200 metadata falsely marks periodic success and writes an unmeasured last ratio; report manifest path fails validator."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Explicit validator/report evidence reviewed; see agent report."
+          "score": 3,
+          "notes": "Explicit case validator passed all eight packages; report validation failed on duplicated figures path. Structural acceptance does not establish physics."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 4,
-          "notes": "Explicit validator/report evidence reviewed; see agent report."
+          "score": 1.5,
+          "notes": "Re200 reached t=300 but did not produce shedding despite statistically_periodic status. All seven steady results terminate before reconstruction activation."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Explicit validator/report evidence reviewed; see agent report."
+          "score": 1,
+          "notes": "Original Re20 Cd=6.11785, M0.15 inviscid Cd=0.06606, laminar M0.15 Cd=0.61310 and M0.8/M2 laminar Cd=\u22120.06049/\u22120.14512; Re200 Cd\u22484.8153 and lift essentially constant."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 0,
-          "notes": "Explicit validator/report evidence reviewed; see agent report."
+          "score": 2,
+          "notes": "Accepted PDF contains some histories and case contours; five NACA cases have only contours, Re200 force plot is flat and no St or late periodic force plot exists."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 0,
-          "notes": "Explicit validator/report evidence reviewed; see agent report."
+          "score": 1.5,
+          "notes": "Nine-page accepted PDF claims second order, no mesh replication and vortex shedding contrary to source/results. It omits force tables and five NACA histories; manifest has duplicated path."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 1,
-          "notes": "Explicit validator/report evidence reviewed; see agent report."
+          "score": 2,
+          "notes": "Committed but unreferenced tables/forces.tex contains final numeric values; PDF refers to CSVs rather than displaying table, and report manifest paths fail validator. Figure correspondence not exhaustively audited."
         }
       ],
-      "overall_score": 2.5,
+      "overall_score": 1.78,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 71,
+    "total_scored": 50.5,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "Evidence recorded in agent report."
+        "score": 7,
+        "notes": "Clean build 4/4, required CLI 1.5/2, result contract 1/2, errors 0.5/2. Case validator passes, but metadata completion/periodicity and last inner ratio are incorrect; report validator fails manifest path."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
-        "score": 8,
-        "notes": "Evidence recorded in agent report."
+        "score": 7.5,
+        "notes": "CGNS and tags 3/4, geometry 1.5/2, mixed/multizone 1/2, adjacency 2/2. TRI/QUAD and coordinate merges exist; MIXED/general zone handling not established."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 12,
-        "notes": "Evidence recorded in agent report."
+        "score": 10.5,
+        "notes": "Conservative residual 3/5 (ghost-side limiter zero), flux 3.5/4, farfield/slip 2/3, wall 2/3. Roe and wall paths exist, but gross case forces limit confidence."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 8,
-        "notes": "Evidence recorded in agent report."
+        "score": 1,
+        "notes": "Reconstruction 0.5/4, limiter 0/3, positivity fallback 0.5/2, smooth-order evidence 0/1. Actual production ramp is zero in all eight runs; first-order fallback and absent accuracy evidence are material."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 7,
-        "notes": "Evidence recorded in agent report."
+        "score": 5,
+        "notes": "Gradients 1/3 (center-to-center directional differences only), Newtonian/Fourier 2/3, wall 1/2, tangential split 1/2. solver.cpp:194\u2013267,380\u2013420; reported negative or gross forces limit confidence."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 10,
-        "notes": "Evidence recorded in agent report."
+        "score": 9,
+        "notes": "Steady implicit 3/4, LU-SGS 3/4, BDF2 structure 2/4, inner controls/logging 1/3. Re200 does not shed and metadata final ratio is never assigned; 1,200 misses are separately counted."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 8,
-        "notes": "Evidence recorded in agent report."
+        "score": 4.5,
+        "notes": "METIS/owned ghosts 1/2, neighbor exchange 1/3, reductions 2/2, rank output 0.5/1, consistent ranks 0/2. Full global mesh is retained on all ranks and ghost limiter is zero; original rank comparisons have not been independently validated."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 6,
-        "notes": "Evidence recorded in agent report."
+        "score": 1.5,
+        "notes": "Inviscid 0.5/2 (M0.15 Cd=0.066), laminar 0/2 (Cd 0.613, \u22120.0605, \u22120.1451), Re20 0/2 (Cd 6.118), Re200 0/2 (flat history), fields 1/1, rank comparisons 0/1."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 0,
-        "notes": "Evidence recorded in agent report."
+        "score": 1.5,
+        "notes": "Equations 0.5/1, histories 0/1 (five NACA cases omitted and no late shedding), contours 0.5/1, analysis 0/1 (false second-order, mesh and periodic claims), traceability 0.5/1 (broken manifest; unreferenced force table)."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 4,
-        "notes": "Evidence recorded in agent report."
+        "score": 3,
+        "notes": "Physics 1/2, BC 0.5/1, mesh abstraction 0.5/1, modular organization 1/1; code remains fixed 2-D."
       }
     ]
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M0.15 inviscid: no committed case-specific numeric CL/CD summary; residual history 7bf03bc:solver/report/figures/naca0012_m015_inviscid_residual.png (referenced at solver/report/report.tex:192); force history 7bf03bc:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:193); computed-field contour 7bf03bc:solver/report/figures/naca0012_m015_inviscid_mach_zoom.png (referenced at solver/report/report.tex:198). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable raw workspace package; report evidence is incomplete."
+      "notes": "Cd=0.0660597, Cl=\u22120.0001407; last 800 rows Cd 0.0658803\u20130.0661888. Accepted PDF p4 provides history and p5 field; committed unreferenced tables/forces.tex supplies final values. Numerical drag is far too large for the intended low-Mach inviscid symmetric case and the scheme is first order. Original case score 2\u21922. No CFD rerun."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M0.80 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 7bf03bc:solver/report/figures/naca0012_m080_inviscid_mach_zoom.png (referenced at solver/report/report.tex:210). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable raw workspace package; report evidence is incomplete."
+      "notes": "Cd=0.0510214, Cl=\u22120.0016115; last 445 rows Cd 0.0510214\u20130.0510269. Accepted PDF p5 shows contours but lacks this case\u2019s residual/force plots; committed unreferenced table supplies final values. Plot floor caps at 2 and physical credibility is limited. Original case score 2\u21922. No CFD rerun."
     },
     "naca0012_m200_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 7bf03bc:solver/report/figures/naca0012_m200_inviscid_mach_zoom.png (referenced at solver/report/report.tex:217). Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable raw workspace package; report evidence is incomplete."
+      "notes": "Cd=0.0937967, Cl=\u22120.0010398; last 292 rows Cd 0.0937943\u20130.0937968. PDF p6 shows contours but no case-specific residual/force history; committed unreferenced table supplies final values. Floor caps at 2. Original case score 2\u21922. No CFD rerun."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 7bf03bc:solver/report/figures/naca0012_m015_laminar_re5000_mach_zoom.png (referenced at solver/report/report.tex:224). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable raw workspace package; report evidence is incomplete."
+      "score": 1,
+      "notes": "Cd=0.613101, Cl=\u22120.001518; last 306 rows Cd 0.613101\u20130.615655. PDF p6 shows contour but no case histories; committed unreferenced table supplies numeric final row. Cd is severely elevated and first-order viscous case is physically unconvincing. Original case score 2\u21921. No CFD rerun."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 7bf03bc:solver/report/figures/naca0012_m080_laminar_re5000_mach_zoom.png (referenced at solver/report/report.tex:230). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable raw workspace package; report evidence is incomplete."
+      "score": 1,
+      "notes": "Cd=\u22120.0604947, Cl=\u22120.0014047; last 641 rows Cd \u22120.0604947 to \u22120.0573746. PDF p6 shows contour but no case histories; committed unreferenced table supplies numeric final row. Negative drag makes the steady zero-incidence result physically unusable. Original case score 2\u21921. No CFD rerun."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour 7bf03bc:solver/report/figures/naca0012_m200_laminar_re5000_mach_zoom.png (referenced at solver/report/report.tex:236). Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable raw workspace package; report evidence is incomplete."
+      "score": 1,
+      "notes": "Cd=\u22120.145119, Cl=0.00000508; last 76 rows Cd \u22120.211077 to \u22120.145119. PDF p6 has contour but no case histories; committed unreferenced table supplies numeric final row. Negative and rapidly changing drag is physically unusable. Original case score 2\u21921. No CFD rerun."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; residual history 7bf03bc:solver/report/figures/cylinder_m010_laminar_re20_residual.png (referenced at solver/report/report.tex:243); force history 7bf03bc:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:244); computed-field contour 7bf03bc:solver/report/figures/cylinder_m010_laminar_re20_mach_zoom.png (referenced at solver/report/report.tex:249). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable raw workspace package; report evidence is incomplete."
+      "score": 1,
+      "notes": "Cd=6.117851, Cl=\u22120.000956; last 526 rows Cd 6.117851\u20136.118768. Accepted PDF p7 shows histories and wake contour, while committed unreferenced table supplies final values. Drag is about three times the comparable Re20 result around 2.02, a severe physical limitation. Original case score 2\u21921. No CFD rerun."
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
@@ -362,10 +362,9 @@
     ]
   },
   "limitations": [
-    "No evaluator solver rerun was performed; Re200 was never rerun.",
-    "Raw workspace outputs were excluded from the curated immutable tip.",
-    "The report manifest path is broken and the immutable rendering is only nine pages.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
-    "Original Re200 metadata last_inner_residual_ratio=0 is not a measured ratio: solver.hpp:19 initializes it to 0 and no source assigns it before output.cpp:373 writes it; actual last ratio is unknown."
+    "Clean immutable CMake build passed in a network-disabled resource-limited container with configured externals; no CFD case was rerun.",
+    "Accepted workspace-existing PDF and original case outputs were reviewed. Committed force table is unreferenced by the PDF; report manifest validation fails. No comprehensive external similarity or full pixel-to-field audit was performed.",
+    "Re200 actual last inner ratio is unknown: metadata writes the default 0 without assignment; target misses are separately counted.",
+    "Independent case scores do not alter rubric or review-area scores."
   ]
 }

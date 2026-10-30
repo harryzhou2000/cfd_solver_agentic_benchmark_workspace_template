@@ -114,6 +114,6 @@ Goal check-in: «Complete the task defined in @cfd_solver_agentic_benchmark/ .
 
 ## Reviews
 
-- Code review scorecard: `claude_generic_opus-08_853afe/review_code.md` (overall: 3.76)
-- CFD methods review: `claude_generic_opus-08_853afe/review_cfd.md` (overall: 3.8)
-- Result review: `claude_generic_opus-08_853afe/review_results.md` (overall: 2.5)
+- Code review scorecard: `claude_generic_opus-08_853afe/review_code.md` (overall: 3.11)
+- CFD methods review: `claude_generic_opus-08_853afe/review_cfd.md` (overall: 2.5)
+- Result review: `claude_generic_opus-08_853afe/review_results.md` (overall: 1.78)

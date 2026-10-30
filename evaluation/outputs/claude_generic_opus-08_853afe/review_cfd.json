@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 4,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "score": 3,
+      "notes": "Conservative equations are represented, but all delivered runs use first-order reconstruction and several laminar drags are negative or grossly large; no independent physical verification."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "score": 3.5,
+      "notes": "mesh.cpp reads TRI_3/QUAD_4 and multi-zone coordinates, builds adjacency and geometry; MIXED support and general zone cases were not established."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "score": 3,
+      "notes": "solver.cpp:271\u2013298 assembles opposite signed face fluxes, but ghost-side limiter is zero and all delivered recon_ramp values are zero; global mesh is replicated."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "notes": "solver.cpp:147 onward implements Roe with entropy fix and uses Rusanov farfield; no independent shock validation was run."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "score": 3.5,
+      "notes": "solver.cpp:225\u2013267 implements farfield, slip and no-slip wall paths, but gross and negative forces raise numerical credibility questions; boundary fidelity not independently established."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "score": 1,
+      "notes": "solver.cpp:89\u2013115 multiplies limiter by recon_ramp; steady runs stop before the first 75% of max steps and transient ramp stays zero. All delivered runs are first order despite report and metadata claims."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "score": 1,
+      "notes": "Barth limiter is calculated but multiplied by zero for every delivered production step (solver.cpp:89\u2013115,446,505); second-order limiter is not active."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "score": 2.5,
+      "notes": "solver.cpp:194\u2013220 uses a direct center-to-center viscous gradient without full transverse correction. Forces.cpp equivalent solver.cpp:380\u2013420 projects tangential drag, but laminar coefficients are grossly implausible or negative."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "score": 3,
+      "notes": "solver.cpp:323\u2013365 implements LU-SGS sweeps and local pseudo-time; results stop when residual target reached with first-order reconstruction, not verified converged accuracy."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "score": 1.5,
+      "notes": "solver.cpp:505\u2013544 constructs BDF2 inner residual, but actual Re200 force history is flat and false periodic success is assigned unconditionally. 1,200 target misses are counted; final ratio metadata is an unassigned default."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Source and raw workspace evidence reviewed; see agent report."
+      "score": 1.5,
+      "notes": "METIS and neighbor communication exist, but global mesh is retained per rank and ghost-side reconstruction is first order. TASK prohibits the replication regardless of use of METIS."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.8
+  "overall_score": 2.5
 }

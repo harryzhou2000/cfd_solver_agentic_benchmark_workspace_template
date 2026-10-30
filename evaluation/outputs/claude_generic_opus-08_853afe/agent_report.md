@@ -42,59 +42,13 @@
 
 Reviewed source, selected Claude telemetry, raw workspace packages, and the final response. The explicit eight-case validator accepted all packages but report validation failed because its manifest points to `figures/figures/...`; the immutable report build is only nine pages. No solver or Re200 rerun was performed.
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
+## Calibrated assessment — 2026-10-30
 
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
+The rubric changes from 71 to **50.5/100**, based on criterion-specific source and result evidence in the scorecard. Code, CFD and Results review overalls are recomputed from the 27 individually reviewed points. The eight independent case scores change from 2,2,2,2,2,2,2,2 to **2,2,2,1,1,1,1,1**; they do not feed the rubric or review-area scores. A committed but unreferenced force table gives final numbers, correcting the prior blanket claim of no numeric values. The accepted PDF contains some contestant-delivered figures, but five NACA cases lack residual/force histories and the Re200 case lacks actual shedding.
 
-## Review-area scores (0-5 weighted, review_*.json)
+DQ is **true** under trigger 7 (false Re200 periodic status), trigger 10 (reported second-order reconstruction disabled in all production cases) and TASK.md prohibited shortcut 7 (full mesh retained on every MPI rank during solve). Exact source, case steps and force evidence are recorded below. METIS and local solution state exist; the full-mesh finding is not represented as numbered trigger 9. Original force values include Re20 Cd=6.11785, M0.15 inviscid Cd=0.06606, M0.15 laminar Cd=0.61310 and M0.8/M2 laminar Cd=−0.06049/−0.14512. Those findings and first-order execution limit the physical credibility of the case results.
 
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
-
-## Disqualification assessment
-
-DQ true: triggers 7 and 10 and the TASK prohibited full-mesh replication shortcut are supported by source and original Re200 history, as documented below. Full rubric and review-area calibration remains pending.
-
-## Metadata answers & session selection
-
-Selected Claude root `91f832b8-61e2-4180-9dff-a6224acc4816` and its two persisted subagents because it spans the benchmark objective to the terminal response.
-
-## Limitations
-
-No evaluator rerun occurred. Raw results are workspace evidence only. The report cannot be considered a complete immutable deliverable because of its broken manifest and nine-page build.
-
-## Verdict
-
-The raw packages are structurally complete, but the required committed report/figure traceability is materially broken. Repairing contestant artifacts is out of scope for this evaluation.
+The source at immutable `7bf03bc05d3cfeaaab733f03af87e76884b5b5c9` built successfully with warnings in a network-disabled scratch container with configured externals, 2 CPUs, 4 GiB, 128-process limit and 240-second timeout. Original case validator passes structurally but report validation fails because the manifest duplicates the figures path. No CFD case was rerun, and no complete external authorship or pixel-to-field audit was performed. The selected Claude root `91f832b8-61e2-4180-9dff-a6224acc4816` covers the work through its terminal response.
 
 ## Sidecar integrity
 
@@ -105,9 +59,9 @@ The raw packages are structurally complete, but the required committed report/fi
 
 ## Partial DQ and Re200 correction — 2026-10-29
 
-DQ changes from false to true on direct internal evidence for triggers 7 and 10. Immutable `solver.cpp:89–115` multiplies the limiter by `recon_ramp`; :446 sets this to zero through 75% of maximum steady steps and :505 holds it at zero throughout the transient. Every submitted steady run finishes before its ramp threshold (the case-specific step/max-step ratios are in the scorecard), so all eight production reconstructions are first order, although report.tex:105–115 and metadata claim second order. Separately solver.cpp:544 sets any nonfailed transient `statistically_periodic` without analyzing periodicity; metadata repeats completed/periodic. The original Re200 forces.csv over t≥180 has Cd=4.81532521–4.81532988 and Cl=−0.00143977449 to −0.00143974763 across 12,001 rows. The accepted PDF page 8 shows flat force histories and a steady-looking wake. This contradicts claimed shedding and supports DQ7; it is not a claim that the run did not execute. The Re200 case score changes 2→1 for a physically unusable shedding result and absent late-periodic evidence. A committed but unreferenced `solver/report/tables/forces.tex` gives final Cd=4.815325 and Cl=−0.001440, correcting the old blanket missing-numeric assertion without making that final row an unsteady summary. Other cases, rubric and review areas remain under review. No CFD rerun.
+DQ changes from false to true on direct internal evidence for triggers 7 and 10. Immutable `solver.cpp:89–115` multiplies the limiter by `recon_ramp`; :446 sets this to zero through 75% of maximum steady steps and :505 holds it at zero throughout the transient. Every submitted steady run finishes before its ramp threshold (the case-specific step/max-step ratios are in the scorecard), so all eight production reconstructions are first order, although report.tex:105–115 and metadata claim second order. Separately solver.cpp:544 sets any nonfailed transient `statistically_periodic` without analyzing periodicity; metadata repeats completed/periodic. The original Re200 forces.csv over t≥180 has Cd=4.81532521–4.81532988 and Cl=−0.00143977449 to −0.00143974763 across 12,001 rows. The accepted PDF page 8 shows flat force histories and a steady-looking wake. This contradicts claimed shedding and supports DQ7; it is not a claim that the run did not execute. The Re200 case score changes 2→1 for a physically unusable shedding result and absent late-periodic evidence. A committed but unreferenced `solver/report/tables/forces.tex` gives final Cd=4.815325 and Cl=−0.001440, correcting the old blanket missing-numeric assertion without making that final row an unsteady summary. Other cases, rubric and review areas were subsequently calibrated as described above. No CFD rerun.
 
 
 ## Additional partial source findings
 
-Immutable `solver/src/main.cpp:120–145,174–260` broadcasts and reconstructs the global mesh on every rank; :268 builds local mesh and :280 calls `solver.run` while the full `global_mesh` object remains alive. This violates TASK.md:227 prohibited shortcut 7 and examiner README:83–85 addresses TASK shortcuts. METIS is used and solution state is local/ghost, so this is not asserted as numbered trigger 9. The report and metadata incorrectly deny full mesh replication. Separately, Re200 metadata's `last_inner_residual_ratio=0` is not a measured ratio: `solver.hpp:19` initializes it to zero and no source assigns it before `output.cpp:373` writes it; the actual last ratio is unknown. The independently counted 1,200 target misses are a different statistic. Overall rubric and case review remain incomplete.
+Immutable `solver/src/main.cpp:120–145,174–260` broadcasts and reconstructs the global mesh on every rank; :268 builds local mesh and :280 calls `solver.run` while the full `global_mesh` object remains alive. This violates TASK.md:227 prohibited shortcut 7 and examiner README:83–85 addresses TASK shortcuts. METIS is used and solution state is local/ghost, so this is not asserted as numbered trigger 9. The report and metadata incorrectly deny full mesh replication. Separately, Re200 metadata's `last_inner_residual_ratio=0` is not a measured ratio: `solver.hpp:19` initializes it to zero and no source assigns it before `output.cpp:373` writes it; the actual last ratio is unknown. The independently counted 1,200 target misses are a different statistic. Overall rubric and case review were subsequently calibrated above.
