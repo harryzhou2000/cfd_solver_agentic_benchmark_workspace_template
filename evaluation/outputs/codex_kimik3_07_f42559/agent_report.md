@@ -4,7 +4,7 @@ Curated tip `e55282a56daec8daa7af868e851ae4d0d7f8d9e2` passes audit. Explicit va
 
 ## Verdict
 
-**72/100; disqualified.** Trigger 7: multiple steady statuses label max-step or stable-plateau outcomes converged despite residual reductions of 1.32, 2.57, -0.21, 2.13, 3.21, and 1.55 orders. Re200 is delivered but was not rerun. Detailed score layers are in `agent_scores.json`.
+**72/100; disqualified.** Trigger 7 is independently supported by M2 laminar, marked converged at step 1386 although Cd falls 0.339895 to 0.167402 over its last 200 steps. The old residual-only DQ rationale is withdrawn: a bounded residual and stable force plateau may qualify. Remaining cases and rubric are under review. Re200 is delivered but was not rerun. Detailed score layers are in `agent_scores.json`.
 
 ## Integrity and limitations
 
