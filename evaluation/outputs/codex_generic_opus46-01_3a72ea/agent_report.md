@@ -96,7 +96,7 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 
 ## Verdict
 
-66/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
+64/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
 
 
 ## Selected result and report review — 2026-10-30
@@ -116,3 +116,8 @@ Immutable f679644 `solver/src/main.cpp:179–181` reads a complete `GlobalMesh` 
 Contestant checkpoint 0b4616f includes `solver/report/run_manifest.csv` with final Cd/Cl for all cases and standalone residual, force and field figures omitted under historical curation. These are contestant-delivered historical evidence. M080 inviscid has Cd0.050185/Cl−0.001540 and plots: 2→3 with convergence and physics limitations. M080 laminar remains 2 because Cd0.219 is high; Re20 remains 2 because Cd7.226 is implausibly high despite its now-verified residual, force and pressure wake plots. M2 laminar 2→1 because Cd3.146 and a 20.8% late fall indicate a materially failed case, despite historical plots and summary. Re200 historical force figure shows flat late curves, and wake/residual images exist; absence claims in earlier notes are superseded. No St or periodic late lift/drag evidence found.
 
 Checkpoint 0b4616f changes Re200 metadata relative to 12f77fb: observed maximum inner iterations 5→124, target misses 30000→1200, fraction 0→0.96 and last ratio 0.46→0.00099. Residual history SHA `5c4a2e29fb4d61787bc436ed3bb994de7a2683dde84bb3ffcc693585c23faa95` and force history SHA `276713d9fde49c2272c21d3ae8051062d16888d3c590db82631a87e71e17d6e8` are unchanged; every residual row reports 5 inner iterations. Thus the revised max124 contradicts the history, and success statistics have no independent support. The earlier 30000 miss count is an earlier metadata claim, not a proven actual miss count. Implicit/transient rubric12→9 and report/visualization3→2, total70→66; DQ7 remains.
+
+
+## Restart and transient logging — 2026-10-30
+
+Immutable main.cpp:142–155 parses `--restart`, but the value is never passed to the solver; solver.cpp:701–708 initializes freestream. The selected Re200 `restart_final.vtk` equals `field_final.vtk` byte-for-byte, and the source has no restart reader. This is a nonfunctional CLI restart, not a finding that the populated VTK field is an empty placeholder. Build/contract 8→7. Separately, solver.cpp:599–615 updates BDF history before reconstructing the residual for logging, so the logged temporal term differs from the just-solved BDF residual; implicit/transient 9→8. Total 66→64. Historical result/source binding remains qualified; no Re200 rerun.

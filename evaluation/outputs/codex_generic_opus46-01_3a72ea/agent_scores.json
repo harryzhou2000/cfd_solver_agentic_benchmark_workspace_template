@@ -34,8 +34,8 @@
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "CLI/output validator succeeds."
+          "score": 2,
+          "notes": "f679644 main.cpp:142\u2013155 accepts --restart but never uses restart_file; solver.run initializes freestream. restart_final.vtk is identical to field_final.vtk, with no source reader; its field contents exist, so it is not claimed to be an empty placeholder."
         },
         {
           "id": "code.organization",
@@ -87,7 +87,7 @@
           "notes": "Large raw outputs required curation."
         }
       ],
-      "overall_score": 3.55,
+      "overall_score": 3.35,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -159,8 +159,8 @@
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 4,
-          "notes": "BDF2 t=300 and source freezing present, but physical result weak."
+          "score": 2,
+          "notes": "solver.cpp:528\u2013607 implements BDF/inner iteration, but :599\u2013615 updates time histories before logging a new BDF residual; that logged term is not the residual solved in the inner loop. Submitted residual rows all say five iterations; revised metadata max124 contradicts them."
         },
         {
           "id": "cfd.mpi_partition",
@@ -170,7 +170,7 @@
           "notes": "main.cpp:179\u2013229 keeps a full GlobalMesh on every rank during solver.run; this violates TASK prohibited shortcut 7. METIS partition and neighbor communication are present. Production-source binding is unresolved."
         }
       ],
-      "overall_score": 3.55,
+      "overall_score": 3.35,
       "disqualification_flags": []
     },
     "result_review": {
@@ -231,14 +231,14 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 66,
+    "total_scored": 64,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "Build/CLI/output structural evidence strong."
+        "score": 7,
+        "notes": "main.cpp:142\u2013155 parses --restart into restart_file but never uses it before solver.run(): the option silently starts freestream. Selected restart_final.vtk equals field_final.vtk byte-for-byte; the field is real but final source provides no restart reader. Build not independently checked yet."
       },
       {
         "id": "mesh_geometry",
@@ -272,8 +272,8 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 9,
-        "notes": "BDF-like source exists, but checkpoint metadata changed observed max inner iterations 5\u2192124 and fraction 0\u21920.96 while residual history remains unchanged with inner_iter=5 for every row; exact actual target misses remain unproved. Source solver.cpp fixes last ratio 0; CFL cap5. Deduct inner-log/target credibility."
+        "score": 8,
+        "notes": "BDF-like source exists, but checkpoint metadata changed observed max inner iterations 5\u2192124 and fraction 0\u21920.96 while residual history remains unchanged with inner_iter=5 for every row; exact actual target misses remain unproved. Source solver.cpp fixes last ratio 0; CFL cap5. Deduct inner-log/target credibility. solver.cpp:599\u2013615 updates BDF history before recomputing logged residual, so the logged temporal term is not the just-solved BDF residual; initial/source binding remains qualified."
       },
       {
         "id": "mpi",

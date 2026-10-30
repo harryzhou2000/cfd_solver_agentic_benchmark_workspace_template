@@ -69,8 +69,8 @@
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4,
-      "notes": "BDF2 t=300 and source freezing present, but physical result weak."
+      "score": 2,
+      "notes": "solver.cpp:528\u2013607 implements BDF/inner iteration, but :599\u2013615 updates time histories before logging a new BDF residual; that logged term is not the residual solved in the inner loop. Submitted residual rows all say five iterations; revised metadata max124 contradicts them."
     },
     {
       "id": "cfd.mpi_partition",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.55
+  "overall_score": 3.35
 }

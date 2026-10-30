@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:11:53.260032+00:00
+Generated: 2026-10-30T06:13:19.139576+00:00
 
-**Overall score: 3.55**
+**Overall score: 3.35**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -12,7 +12,7 @@ Generated: 2026-10-30T06:11:53.260032+00:00
 | 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Build system/source present; no independent rebuild. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | CLI/output validator succeeds. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 2 | f679644 main.cpp:142–155 accepts --restart but never uses restart_file; solver.run initializes freestream. restart_final.vtk is identical to field_final.vtk, with no source reader; its field contents exist, so it is not claimed to be an empty placeholder. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Well-separated solver modules. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T06:11:53.260032+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.55
+- Overall score (0-5): 3.35
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
