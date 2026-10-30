@@ -43,47 +43,22 @@
 
 Reviewed source, selected Codex root, contestant final response, raw workspace packages, and immutable report. The 11-page report rebuilt and all pages rendered. No solver or Re200 rerun occurred.
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
+## Recorded scores and disqualification
 
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
+The current 100-point rubric is 73/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
 
-## Review-area scores (0-5 weighted, review_*.json)
+| Case | Score |
+|---|---:|
+| `naca0012_m015_inviscid` | 3 |
+| `naca0012_m080_inviscid` | 3 |
+| `naca0012_m200_inviscid` | 3 |
+| `naca0012_m015_laminar_re5000` | 2 |
+| `naca0012_m080_laminar_re5000` | 2 |
+| `naca0012_m200_laminar_re5000` | 2 |
+| `cylinder_m010_laminar_re20` | 1 |
+| `cylinder_m010_laminar_re200` | 1 |
 
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
-
-## Disqualification assessment
-
-DQ false: no trigger was affirmatively established from direct internal evidence. Extensive raw/build artifacts were index-curated and recorded as hygiene/traceability limitations.
+Disqualification is triggered by DQ7 (M2 laminar false success) and the TASK prohibition on replicating the full mesh during iterations. Detailed evidence, uncertainty and subsequent calibration checkpoints follow. This review remains partial.
 
 ## Metadata answers & session selection
 
@@ -91,11 +66,11 @@ Selected Codex root `01a03d80-e7ad-7301-a090-e5beafdecdc7` and its descendants a
 
 ## Limitations
 
-No independent solver rerun occurred. Raw cases remain workspace evidence only after curation.
+No independent solver rerun occurred. Raw cases and standalone figure blobs are preserved in the historical contestant checkpoint; curated-tip exclusions still limit reproducibility.
 
 ## Verdict
 
-Substantive source/report evidence exists, but lower result credit reflects documented weak M2-laminar and Re200 case evidence plus massive artifact curation.
+Disqualification is triggered by the evidence documented below; additional rubric and source review remains partial.
 
 ## Sidecar integrity
 
