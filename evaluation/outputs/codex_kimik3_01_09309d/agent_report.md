@@ -13,7 +13,7 @@ The deterministic terminal response is message `msg_69229923f6e8447086815ad8da4d
 
 The explicit official validator passed all eight required workspace result directories and `solver/report`. Source inspection finds CGNS/unstructured mesh handling, METIS graph partitioning, neighbour Isend/Irecv halos, Rusanov fluxes, least-squares/Venkatakrishnan reconstruction, LU-SGS implicit correction and BDF2 dual time. The result packages show all cases complete; the Re200 evidence reaches t=300 and was not rerun.
 
-**84/100 before disqualification; disqualified.** The retained cylinder rank-count output directly contradicts the report: `rankcount/cylinder_m010_laminar_re20_np1`, `np2`, and `np4` have final Cd 5.7061412154, 5.7061412393, and 5.7061419853, respectively, while the production np8 package has Cd 1.9532115368. This 65.77% steady rank-count change is order-one and triggers rubric DQ flag 4. `report.tex` table 5 instead claims Cd 1.953 for every rank, so the MPI validation claim is not reliable.
+**88/100 provisionally; DQ4 not established.** The original rankcount np1/2/4 studies use explicit CFL/inner/step overrides absent from the production np8 command; their Cd values 5.706 agree with each other but cannot be compared to np8 Cd 1.953 as a rank-only experiment. Report table 5 nevertheless pairs those actual rankcount steps and times with incorrect Cd 1.953, contradicting the retained rank-study CSVs. Other DQ triggers and the full case/rubric calibration remain under review.
 
 The detailed 27-point reviews, all ten rubric sections, eight case scores and all thirteen DQ checks are recorded in `agent_scores.json`. No solver results, logs, fields or raw telemetry were copied into this manager snapshot.
 

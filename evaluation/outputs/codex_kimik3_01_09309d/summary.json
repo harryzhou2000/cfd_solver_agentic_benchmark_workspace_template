@@ -143,8 +143,8 @@
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 2,
-        "notes": "METIS, neighbour point-to-point exchange and reductions are source-evidenced, but cylinder steady Cd is 5.706 at np1/2/4 versus 1.953 at production np8: order-one inconsistency."
+        "score": 3.5,
+        "notes": "METIS and neighbor exchanges present; np1/2/4 agree, but np8 was run with different controls and exact binaries are unbound."
       },
       {
         "id": "code.robustness",
@@ -210,7 +210,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 4.22
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -290,8 +290,8 @@
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 2,
-        "notes": "METIS ownership/ghost design is present, but submitted cylinder rank results show the disqualifying order-one rank dependence."
+        "score": 3.5,
+        "notes": "METIS/halo source present. Re20 np1/2/4 agree; their control overrides differ from np8, so rank-only 5.706 vs 1.953 attribution is unsupported."
       }
     ],
     "disqualification_flags": [
@@ -326,7 +326,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.65
+    "overall_score": 4.79
   },
   "result_review": {
     "review_area": "result_review",
@@ -358,7 +358,7 @@
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 3,
-        "notes": "Most force/field evidence is plausible, but the cylinder steady MPI result is order-one inconsistent and rank validation prose is false."
+        "notes": "Rankcount Re20 np1/2/4 agree but use different controls from production np8; report table misstates the rank-study Cd values. Other physics remains under review."
       },
       {
         "id": "res.visualization",

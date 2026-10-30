@@ -24,7 +24,7 @@
   },
   "scores": {
     "code_review": {
-      "overall_score": 4.0,
+      "overall_score": 4.22,
       "points": [
         {
           "id": "code.build",
@@ -65,8 +65,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 2,
-          "notes": "METIS, neighbour point-to-point exchange and reductions are source-evidenced, but cylinder steady Cd is 5.706 at np1/2/4 versus 1.953 at production np8: order-one inconsistency."
+          "score": 3.5,
+          "notes": "METIS and neighbor exchanges present; np1/2/4 agree, but np8 was run with different controls and exact binaries are unbound."
         },
         {
           "id": "code.robustness",
@@ -93,7 +93,7 @@
       "disqualification_flags": []
     },
     "cfd_review": {
-      "overall_score": 4.65,
+      "overall_score": 4.79,
       "points": [
         {
           "id": "cfd.equations",
@@ -169,8 +169,8 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 2,
-          "notes": "METIS ownership/ghost design is present, but submitted cylinder rank results show the disqualifying order-one rank dependence."
+          "score": 3.5,
+          "notes": "METIS/halo source present. Re20 np1/2/4 agree; their control overrides differ from np8, so rank-only 5.706 vs 1.953 attribution is unsupported."
         }
       ],
       "disqualification_flags": []
@@ -204,7 +204,7 @@
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 3,
-          "notes": "Most force/field evidence is plausible, but the cylinder steady MPI result is order-one inconsistent and rank validation prose is false."
+          "notes": "Rankcount Re20 np1/2/4 agree but use different controls from production np8; report table misstates the rank-study Cd values. Other physics remains under review."
         },
         {
           "id": "res.visualization",
@@ -233,7 +233,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 84,
+    "total_scored": 88,
     "sections": [
       {
         "id": "build_cli_output",
@@ -281,8 +281,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 2,
-        "notes": "METIS and neighbour exchanges are implemented, but cylinder Cd differs from 5.706 (np1/2/4) to 1.953 (np8), triggering DQ."
+        "score": 7,
+        "notes": "METIS/neighbor exchange and internally consistent np1/2/4 rank studies exist. np8 controls differ, so comparable np8 accuracy remains unproved."
       },
       {
         "id": "case_results",
@@ -295,8 +295,8 @@
         "id": "report",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4,
-        "notes": "Comprehensive equations/plots/manifests and plateau limitations; MPI table contradicts retained rank artifacts."
+        "score": 3,
+        "notes": "Detailed report and plateau disclosure, but table 5 pairs actual rank-study steps/timings with incorrect Cd 1.953 instead of 5.706."
       },
       {
         "id": "extensibility",
@@ -342,7 +342,7 @@
     }
   },
   "disqualification": {
-    "triggered": true,
+    "triggered": false,
     "flags": [
       {
         "id": 1,
@@ -365,8 +365,8 @@
       {
         "id": 4,
         "text": "MPI rank count changes results by order-one amounts for steady cases.",
-        "found": true,
-        "evidence": "cylinder Re20 rankcount forces.csv final Cd: np1 5.7061412154, np2 5.7061412393, np4 5.7061419853; production np8 results/cylinder_m010_laminar_re20/forces.csv Cd 1.9532115368 (65.77% lower). report.tex table instead claims 1.953 at every rank."
+        "found": false,
+        "evidence": "Historical np1/2/4 Re20 forces have final Cd 5.7061412154/5.7061412393/5.7061419853 and match one another; production np8 gives 1.9532115368. The rankcount commands explicitly use --cfl-cap 20 --max-inner 150 --max-steps 8000, whereas production np8 command does not; metadata records 151 vs 81 observed inner iterations and unknown revisions. Thus the large difference cannot be attributed to rank count alone. Immutable report.tex:341\u2013358 nevertheless pairs the rankcount steps/times with Cd 1.953 instead of the retained mpi_rank_summary.csv/forces values 5.706, a substantive reporting discrepancy. Full DQ review remains pending."
       },
       {
         "id": 5,
@@ -429,6 +429,7 @@
     "Cylinder Re200 was not rerun, per evaluation policy.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars; cfdeval check does not validate them.",
     "Final-response provenance: root 019fc805-989c-7971-b70d-53fd4efa3889, message msg_69229923f6e8447086815ad8da4d511b at 2026-08-04T21:19:43.584Z, one ordered output_text part, bundled rollout source; stored payload SHA-256 45067b9098a1746690e56a5e169b63061e9ac7fb392fd8979d9a3a1614930b9e and extracted Markdown SHA-256 26e1f0ff1e6545a8889281e1e71f836de3e28dd00c719057009cfad25f2b9d61.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "2026-10-30 recalibration is partial: former DQ4 rank attribution was removed because compared controls differ; other DQ and full source/case review remain pending."
   ]
 }

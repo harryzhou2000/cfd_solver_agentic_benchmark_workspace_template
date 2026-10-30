@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:54:01.473971+00:00
+Generated: 2026-10-30T13:14:55.838324+00:00
 
 **Overall score: 4.3**
 
@@ -18,7 +18,7 @@ Generated: 2026-09-07T02:54:01.473971+00:00
 | 3 | **res.completion** Case completion and convergence | 0.20 | 5 | All eight metadata files mark completed with converged/statistically_periodic status; Re200 reaches t=300. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Most force/field evidence is plausible, but the cylinder steady MPI result is order-one inconsistent and rank validation prose is false. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Rankcount Re20 np1/2/4 agree but use different controls from production np8; report table misstates the rank-study Cd values. Other physics remains under review. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 5 | Report includes named Mach, pressure, residual, force and surface plots plus Re200 vorticity, with figure manifest. |
