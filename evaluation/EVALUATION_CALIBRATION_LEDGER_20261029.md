@@ -428,3 +428,6 @@ dsv4_flash_08 partial M2 laminar review: case 2→1, DQ false→true under trigg
 
 
 dsv4_flash_08 partial steady cases: scores 2,4,2,4,4,2,4,0 → 3,3,3,2,2,1,3,0. Evidence, per-case force tails, residual targets, physical limitations and PDF/standalone figure provenance documented in agent_scores.json and agent_report.md. Figure manifest SHA 5d32a9f362a27b2696be277619803fba325208a0986a4a577dfb7d02da5721e3 maps cases to original data; selected terminal response confirms regenerated figures and workspace figure timestamps precede it. Previously applying committed-only cap was incorrect. Full source/rubric/DQ still partial; no CFD rerun.
+
+
+dsv4_flash_08 source checkpoint: immutable e5d4a7a clean CMake build passed in network-disabled cfd-bench, 2 CPUs/3 GiB, explicit /opt/external paths; first default-path attempt failed CGNS discovery. driver.cpp:997–1058 ignores restart_file and never calls reader :267, although report.tex:516 acknowledges proper transient restart as future work. numerics.cpp:1130–1173 uses full viscous traction in force split; surface skin friction :713 tangential. mesh.cpp:771–773 clears root-built global mesh before iterations. Source/rubric/DQ review still partial; no CFD run.

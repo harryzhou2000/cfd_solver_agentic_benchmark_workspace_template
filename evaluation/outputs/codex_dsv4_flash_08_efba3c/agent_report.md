@@ -20,7 +20,7 @@ DQ7 is established for the M2 laminar final status, which claims convergence at 
 
 ## Limitations and sidecars
 
-The delivered `external` symlink is dangling, so I did not perform a clean solver build or evaluator rerun; no unsteady Re200 rerun was performed. Raw result data were used only for validation and remain excluded from the curated result commit. `run_identity.json` SHA-256 is `5340bfba43c31c9cdb82946acb55c027ba3aae4bc8f554f8bcc9801000de8c35`; `contestant_final_response.md` SHA-256 is `58fc59a37fe51e4ae0857bc6563e0844bf518a89a8b2dc9e3f3cfd6f355c6359`. These are unindexed sidecars: `cfdeval check` does **not** validate them.
+A clean immutable-source solver build succeeds in the network-disabled cfd-bench container using /opt/external; the delivered external symlink itself is dangling. No CFD or unsteady Re200 rerun was performed. Raw result data were used only for validation and remain excluded from the curated result commit. `run_identity.json` SHA-256 is `5340bfba43c31c9cdb82946acb55c027ba3aae4bc8f554f8bcc9801000de8c35`; `contestant_final_response.md` SHA-256 is `58fc59a37fe51e4ae0857bc6563e0844bf518a89a8b2dc9e3f3cfd6f355c6359`. These are unindexed sidecars: `cfdeval check` does **not** validate them.
 
 ## Verdict
 
@@ -37,3 +37,7 @@ The submitted M2 laminar status and metadata mark converged at step 33, reportin
 ## Partial steady case review — 2026-10-30
 
 Scores 2,4,2,4,4,2,4,0 → 3,3,3,2,2,1,3,0. Each numerical basis and limitation is in case_scores. The accepted compiled report contains four steady cases; original workspace solver/report/figure_manifest.csv maps other delivered case figures to forces.csv, residuals.csv and field_final.vtk. Its SHA-256 is 5d32a9f362a27b2696be277619803fba325208a0986a4a577dfb7d02da5721e3; M0.15 and M2 inviscid force-figure SHA-256 values are db40f09eb9b79f4a49ea678e37c2588dcafe5da495976129898fcb33f4cc55f4 and ffc3bb281d45e61a095a98796caa40cb6b1b04183c63a40d477df6c4266983d9. Figure timestamps 2026-08-09 07:35 UTC precede selected terminal response 10:02 UTC, which explicitly reports regenerated figures; figures were visually checked against case values. Prior cap based solely on absent committed/referenced plots is not the current contestant-delivered evidence standard. Full source/rubric remains partial; no rerun.
+
+## Partial source review — 2026-10-30
+
+Immutable e5d4a7a clean CMake build succeeds in network-disabled cfd-bench with two CPUs, 3 GiB, -DCFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install and -DEXTERNALS_DIR=/opt/external; the initial attempt without these explicit container dependency paths failed to find CGNS. driver.cpp:997–1058 receives restart_file but never uses it; the existing reader at :267 is not called, so --restart is accepted without restoring state. report.tex:516 acknowledges proper transient restart as future work. numerics.cpp:1130–1173 includes full viscous traction in the viscous force split, whereas surface skin friction at :713 is tangential; this is a force-split accuracy limitation, not evidence of an absent algorithm. mesh.cpp:771–773 clears the root-built global mesh before iterations. Remaining source, rubric and DQ review partial; no solver run.
