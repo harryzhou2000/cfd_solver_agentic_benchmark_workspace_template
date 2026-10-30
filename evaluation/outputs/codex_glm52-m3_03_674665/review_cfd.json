@@ -7,49 +7,49 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Conservative perfect-gas state, fluxes, and Reynolds-derived viscosity are implemented/described."
+      "notes": "report.tex equations and types.hpp/solver.cpp describe conservative 2-D perfect-gas/Navier\u2013Stokes equations and case viscosity; no independent full physics proof."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "CGNS reader, mixed-element geometry, faces, centers, volumes and graph structures are present in source."
+      "notes": "mesh.cpp reads CGNS and constructs cell/face geometry; main.cpp:100\u2013114 creates the global mesh on each rank and retains it through solve."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 3,
-      "notes": "Face residual accumulation and global reductions are implemented, but no submitted numerical result verifies conservation or terminal behavior."
+      "notes": "solver.cpp:250\u2013335 assembles inviscid/viscous face residual with global norms; no independent conservation rerun. Recovered data expose physical convergence limitations."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 3,
-      "notes": "Roe/Harten-Hyman and Rusanov implementations exist. output.hpp always identifies Roe even when --rusanov selects Rusanov, so metadata fidelity is defective."
+      "notes": "solver.cpp:282\u2013297 uses direct wall and Rusanov interior/farfield fluxes; output.cpp:148 correctly labels Rusanov. Previous note incorrectly asserted Roe and referenced nonexistent output.hpp behavior."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 3,
-      "notes": "Farfield, slip, and direct no-slip wall branches are present; no result/surface output validates the physical boundary treatment."
+      "notes": "solver.cpp:688\u2013700 explicitly writes no-slip u=v=Mach=0 boundary values; recovered surface data exist, but physical wall convergence is not established by boundary-value semantics."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 4,
-      "notes": "Weighted least-squares primitive gradients and reconstructed face states are present; first-order ghost/initial fallbacks are disclosed in source."
+      "notes": "solver.cpp:202 suppresses limiter via firstOrderMode/limiterRamp; :579 forces first-order Re200, explicitly disclosed in report.tex:124,192. Steady activation and runtime provenance remain qualified."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Barth-Jespersen-style limiter plus density/pressure fallback/revert logic is present."
+      "notes": "Barth-type bounded limiter and positive-state fallback are implemented; transient limiterRamp=0 disables reconstructed correction, as disclosed; strong steady oscillations remain."
     },
     {
       "id": "cfd.viscous",
@@ -63,7 +63,7 @@
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 3,
-      "notes": "LU-SGS-like sweep and CFL spectral radii are present, but README production command overrides case controls and no credible steady output is submitted."
+      "notes": "LU-SGS source and CFL cap exist; solver.cpp:538\u2013540 unconditionally marks max-step steady results converged, including oscillatory M015/Re20 historical runs."
     },
     {
       "id": "cfd.transient",

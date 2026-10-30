@@ -153,21 +153,21 @@
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Separate case config, CGNS reader, mesh, partitioner, flux, reconstruction, solver, output, and plotting modules are present."
+        "notes": "5b9dded7 has separate mesh, solver, output, types and main files; its 2-D solver remains tightly coupled to physics/mesh structures."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 3,
-        "notes": "No direct internal executable wrapper is visible in the submitted C++/scripts. Trust policy forbids external similarity investigation, so originality beyond this direct inspection is unverified."
+        "notes": "No direct internal external-solver wrapper established from inspected source; no external authorship or exhaustive license investigation performed."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4,
-        "notes": "case_config.hpp reads JSON case parameters and main.cpp uses --case; no two-benchmark-filename-only branch was found."
+        "notes": "main.cpp:64\u201365 parses input case JSON; output.cpp parses case mesh and controls. No two-filename-only mesh branch was established."
       },
       {
         "id": "code.mpi",
@@ -181,7 +181,7 @@
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 2,
-        "notes": "Positivity checks and errors exist, but main.cpp labels max-step steady runs converged unconditionally and submitted evidence cannot demonstrate robust completion."
+        "notes": "solver.cpp:538\u2013540 marks all max-step steady runs converged irrespective of reduction. Recovered M015 inviscid/laminar and Re20 forces oscillate strongly despite success labels."
       },
       {
         "id": "code.testing",
@@ -195,7 +195,7 @@
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 3,
-        "notes": "Readable header-oriented C++ and scripts, but report/source contradictions and unverified generated-result claims remain."
+        "notes": "Source modules are readable, but steady success is unconditional, restartFile is ignored, report claims a nonexistent absolute target and metadata disagrees with stdout."
       }
     ],
     "disqualification_flags": [
@@ -251,49 +251,49 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Conservative perfect-gas state, fluxes, and Reynolds-derived viscosity are implemented/described."
+        "notes": "report.tex equations and types.hpp/solver.cpp describe conservative 2-D perfect-gas/Navier\u2013Stokes equations and case viscosity; no independent full physics proof."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "CGNS reader, mixed-element geometry, faces, centers, volumes and graph structures are present in source."
+        "notes": "mesh.cpp reads CGNS and constructs cell/face geometry; main.cpp:100\u2013114 creates the global mesh on each rank and retains it through solve."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 3,
-        "notes": "Face residual accumulation and global reductions are implemented, but no submitted numerical result verifies conservation or terminal behavior."
+        "notes": "solver.cpp:250\u2013335 assembles inviscid/viscous face residual with global norms; no independent conservation rerun. Recovered data expose physical convergence limitations."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 3,
-        "notes": "Roe/Harten-Hyman and Rusanov implementations exist. output.hpp always identifies Roe even when --rusanov selects Rusanov, so metadata fidelity is defective."
+        "notes": "solver.cpp:282\u2013297 uses direct wall and Rusanov interior/farfield fluxes; output.cpp:148 correctly labels Rusanov. Previous note incorrectly asserted Roe and referenced nonexistent output.hpp behavior."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 3,
-        "notes": "Farfield, slip, and direct no-slip wall branches are present; no result/surface output validates the physical boundary treatment."
+        "notes": "solver.cpp:688\u2013700 explicitly writes no-slip u=v=Mach=0 boundary values; recovered surface data exist, but physical wall convergence is not established by boundary-value semantics."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 4,
-        "notes": "Weighted least-squares primitive gradients and reconstructed face states are present; first-order ghost/initial fallbacks are disclosed in source."
+        "notes": "solver.cpp:202 suppresses limiter via firstOrderMode/limiterRamp; :579 forces first-order Re200, explicitly disclosed in report.tex:124,192. Steady activation and runtime provenance remain qualified."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 4,
-        "notes": "Barth-Jespersen-style limiter plus density/pressure fallback/revert logic is present."
+        "notes": "Barth-type bounded limiter and positive-state fallback are implemented; transient limiterRamp=0 disables reconstructed correction, as disclosed; strong steady oscillations remain."
       },
       {
         "id": "cfd.viscous",
@@ -307,7 +307,7 @@
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 3,
-        "notes": "LU-SGS-like sweep and CFL spectral radii are present, but README production command overrides case controls and no credible steady output is submitted."
+        "notes": "LU-SGS source and CFL cap exist; solver.cpp:538\u2013540 unconditionally marks max-step steady results converged, including oscillatory M015/Re20 historical runs."
       },
       {
         "id": "cfd.transient",
@@ -366,50 +366,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 0,
-        "notes": "Immutable submission contains no required canonical solver/results case directory; all eight required result packages are absent."
+        "score": 3,
+        "notes": "Recovered fa9d2b83 contains eight case packages and examiner validates their layouts. Metadata Re200 zero misses contradicts checkpoint stdout 11356; global-mesh replication metadata is also false."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": 0,
-        "notes": "Eight canonical paths are absent, so an explicit validator pass cannot be credited; summary inventory finds only four noncanonical uncommitted test directories."
+        "score": 4,
+        "notes": "Read-only examiner validation of recovered eight case directories plus historical report returned OK; this checks structure and accepted the wrong Re200 target statistics."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 0,
-        "notes": "No submitted final result package supports completion, convergence, or statistically-periodic claims for any required case."
+        "score": 1,
+        "notes": "Historical M015 inviscid/laminar and Re20 are labeled converged with large final force oscillations; Re200 reaches t300 but stdout reports11356 target misses and report discloses no street."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 0,
-        "notes": "No committed residual/force/surface/field data or rank comparison exists to inspect."
+        "score": 1.5,
+        "notes": "M015 inviscid/laminar and Re20 have large late force oscillations; M200 laminar Cd falls 4.21\u21920.765 over final400. M080/M200 inviscid and M080 laminar have more credible partial results."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 0,
-        "notes": "report.tex references eight figure files, but immutable commit contains no report/figures PNGs. The submitted report therefore cannot build with its claimed visualizations and no visualization evidence is delivered."
+        "score": 2.5,
+        "notes": "Historical nine-page PDF and separate 43 figures are readable; curated snapshot PDF remains absent. Re200 forces are nearly steady without a late periodic plot, and several global contours lack useful near-body detail."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 0,
-        "notes": "LaTeX methods/tables assert all eight runs and complete output while no result packages or referenced figures are committed. The report is not build-complete and claims lack immutable trace data."
+        "score": 1.5,
+        "notes": "Historical report explains methods and discloses no Re200 street/first order but falsely claims absolute convergence branch and overstates convergence; force table mismatches selected Re20/M200 laminar outputs."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 0,
-        "notes": "No submitted figure_manifest, run_manifest, sanity_checks, result CSV, or field files connect report claims to immutable outputs."
+        "score": 1,
+        "notes": "fa9d2b83 includes case outputs, figures and manifest, but manifest assigns force/residual plots to field_final.vtk; selected historic executable hash unverified and several table values are stale."
       }
     ],
     "disqualification_flags": [
@@ -439,7 +439,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 0.0
+    "overall_score": 2.08
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/03",

@@ -13,7 +13,7 @@ Contestant checkpoint `fa9d2b83fb632b970e0392a455baab5e5389930c`, at 2026-08-06 
 
 ## Findings
 
-Source supports a partial implementation: C++17 CMake, JSON case parsing, CGNS mesh/geometry code, METIS graph partitioning, owned/ghost state, neighbor nonblocking communication, global reductions, Rusanov/Roe-capable flux code, least-squares reconstruction, a Barth-type limiter, positivity fallback, viscous fluxes, LU-SGS-like sweeps, and a BDF2-shaped physical-time/inner loop.
+Source supports a partial implementation: C++17 CMake, JSON case parsing, CGNS mesh/geometry code, METIS graph partitioning, owned/ghost state, neighbor nonblocking communication, global reductions, Rusanov flux code, least-squares reconstruction, a Barth-type limiter, positivity fallback, viscous fluxes, LU-SGS-like sweeps, and a BDF2-shaped physical-time/inner loop.
 
 Material direct limitations remain. `runSteady()` marks a max-step run `converged` unconditionally when it does not meet the target. `runTransient()` unconditionally assigns `statistically_periodic` after its loop; source alone cannot prove the claimed production controls, convergence, or shedding. The report explicitly says Re200 used first-order reconstruction and no shedding, while checkpoint metadata says periodic and claims zero misses; checkpoint stdout reports 11356 target misses and fraction0.621467. Report claims an additional absolute 1e-10 convergence test absent from the source revision recorded by metadata. Full mesh persists on every rank throughout solver execution; restart argument is ignored, and viscous force includes normal traction. Three steady cases have large continuing force oscillations despite converged metadata.
 
@@ -56,4 +56,4 @@ DQ is established for trigger 6 (reported absolute residual acceptance absent fr
 
 The selected project-local Codex root is `019fd15a-834e-7510-941b-aec0a61981eb` (2026-08-05T09:57:17.364Z to 2026-08-06T01:07:22.684Z), with report-writer child `019fd1b8-e74a-76f1-ae1e-e6cb09bc5440`. Sources were exclusively the workspace `.sessions/codex/state_5.sqlite` and bundled rollout tree; no evaluator-account telemetry was used. The deterministic terminal response is `msg_392a4a09e35843cf9d65e977942483b8` at 2026-08-06T01:07:22.633Z. `run_identity.json` SHA-256 is `6619bc289f7f2319b5ac6808df292c04d420f671ac4fc163ea7f78794ff1bd28`; final-response sidecar SHA-256 is `077107b7beef5e444fbd551400ed2c4633e61ef1da630ced1dc7fdc460e6d2a8`. These unindexed sidecars are not validated by `cfdeval check`.
 
-This is a partial solver implementation, not a complete benchmark submission. Original evaluator-runtime execution was deliberately not used to fill missing contestant evidence.
+The delivered histories and solver implementation show significant numerical and reporting failures; binary provenance and some figure correspondence remain unresolved. No evaluator CFD rerun was used to fill contestant evidence.

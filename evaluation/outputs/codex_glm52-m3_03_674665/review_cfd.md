@@ -2,38 +2,38 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T09:22:44.093906+00:00
+Generated: 2026-10-30T09:24:39.569858+00:00
 
 **Overall score: 3.13**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | Conservative perfect-gas state, fluxes, and Reynolds-derived viscosity are implemented/described. |
+| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | report.tex equations and types.hpp/solver.cpp describe conservative 2-D perfect-gas/Navier–Stokes equations and case viscosity; no independent full physics proof. |
 |   | 2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly. | | | |
 |   | *Evidence:* Source flux assembly and report equations. | | | |
-| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | CGNS reader, mixed-element geometry, faces, centers, volumes and graph structures are present in source. |
+| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | mesh.cpp reads CGNS and constructs cell/face geometry; main.cpp:100–114 creates the global mesh on each rank and retains it through solve. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
-| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 3 | Face residual accumulation and global reductions are implemented, but no submitted numerical result verifies conservation or terminal behavior. |
+| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 3 | solver.cpp:250–335 assembles inviscid/viscous face residual with global norms; no independent conservation rerun. Recovered data expose physical convergence limitations. |
 |   | Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction. | | | |
 |   | *Evidence:* residual assembly code; residuals.csv shows global reduction. | | | |
-| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 3 | Roe/Harten-Hyman and Rusanov implementations exist. output.hpp always identifies Roe even when --rusanov selects Rusanov, so metadata fidelity is defective. |
+| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 3 | solver.cpp:282–297 uses direct wall and Rusanov interior/farfield fluxes; output.cpp:148 correctly labels Rusanov. Previous note incorrectly asserted Roe and referenced nonexistent output.hpp behavior. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 3 | Farfield, slip, and direct no-slip wall branches are present; no result/surface output validates the physical boundary treatment. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 3 | solver.cpp:688–700 explicitly writes no-slip u=v=Mach=0 boundary values; recovered surface data exist, but physical wall convergence is not established by boundary-value semantics. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | Weighted least-squares primitive gradients and reconstructed face states are present; first-order ghost/initial fallbacks are disclosed in source. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | solver.cpp:202 suppresses limiter via firstOrderMode/limiterRamp; :579 forces first-order Re200, explicitly disclosed in report.tex:124,192. Steady activation and runtime provenance remain qualified. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Barth-Jespersen-style limiter plus density/pressure fallback/revert logic is present. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Barth-type bounded limiter and positive-state fallback are implemented; transient limiterRamp=0 disables reconstructed correction, as disclosed; strong steady oscillations remain. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 2.5 | solver.cpp:650–667 integrates full viscous traction, including normal component, instead of required tangential skin-friction split. Surface Cf separately projects tangential traction. Numerical laminar/Re20 results have independent failures. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | LU-SGS-like sweep and CFL spectral radii are present, but README production command overrides case controls and no credible steady output is submitted. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | LU-SGS source and CFL cap exist; solver.cpp:538–540 unconditionally marks max-step steady results converged, including oscillatory M015/Re20 historical runs. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2 | BDF2 source and t300 historical package exist, but strict relative-target counting reports 11356 misses in checkpoint stdout while metadata claims zero. Report additionally claims an absolute 1e-10 criterion absent from recorded revision source. Binary hash unverified. |
