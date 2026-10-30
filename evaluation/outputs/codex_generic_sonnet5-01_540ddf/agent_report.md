@@ -43,47 +43,22 @@
 
 Reviewed source, selected Codex root, raw workspace packages, terminal response, explicit eight-case/report validator, and the immutable report. All packages validate; the 76-page contestant checkpoint PDF is readable with rendered figures; its red cross-reference rectangles are hyperlinks, not missing-asset placeholders. No solver/Re200 rerun occurred.
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
+## Recorded scores and disqualification
 
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
+The current 100-point rubric is 78/100; section and weighted review details are in `agent_scores.json`. Independent case scores:
 
-## Review-area scores (0-5 weighted, review_*.json)
+| Case | Score |
+|---|---:|
+| `naca0012_m015_inviscid` | 3.5 |
+| `naca0012_m080_inviscid` | 3.5 |
+| `naca0012_m200_inviscid` | 3.5 |
+| `naca0012_m015_laminar_re5000` | 2 |
+| `naca0012_m080_laminar_re5000` | 3.5 |
+| `naca0012_m200_laminar_re5000` | 4 |
+| `cylinder_m010_laminar_re20` | 4 |
+| `cylinder_m010_laminar_re200` | 2 |
 
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
-
-## Disqualification assessment
-
-DQ8 is triggered by the directly proven M015 laminar report-figure mismatch documented below; other DQ review remains partial. The prior report-absence finding is superseded below.
+DQ8 is triggered by the demonstrated M015 laminar scaling-run figure mismatch. Additional source, rubric and DQ review remains partial.
 
 ## Metadata answers & session selection
 
@@ -91,7 +66,7 @@ Selected root `01a0414d-9e12-7582-ae04-f90553e9f3a1` and its descendants as the 
 
 ## Limitations
 
-Raw packages are workspace-only evidence after curation. No evaluator rerun was performed.
+Raw packages are workspace-only evidence after curation. No production CFD rerun was performed; an independent clean build and unit CTest succeeded as described below.
 
 ## Verdict
 
@@ -128,3 +103,8 @@ Scores 2→3.5 for M015/M080/M200 inviscid and M080 laminar, 2→4 for M200 lami
 ## Re200 late-time evidence — 2026-10-30
 
 Checkpoint-matched `results/cylinder_m010_laminar_re200/forces.csv` SHA256 `ff17250562360b9c32c7f0027b5a8f6bd969f269abc25d5fbb13a77e9fb65357` yields t=180–300 mean Cd1.246529, Cd1.22335–1.26962, Cl−0.528995–0.531735 and 22 upward crossings with mean frequency0.182927, corroborating the reported St≈0.1829. Accepted PDF p67's force figure compresses late drag below the startup spike; the separate spectrum figure shows readable late lift only. The report source and complete checkpoint Re200 figure listing provide no alternate late-drag plot. Score2 remains under the explicit late lift-and-drag floor despite physically plausible raw oscillations. No Re200 rerun.
+
+
+## Clean build and source lineage — 2026-10-30
+
+Immutable `4965edd` clean CMake build succeeded in network-disabled `cfd-bench` with two CPUs, 3 GiB and 256 pids, using documented `CFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install` and `CFD_EXTERNALS_HEADER_ROOT=/opt/external`. The registered `cns2d_unit` CTest passed 1/1 with benchmark meshes mounted read-only at `/workspace/cfd_solver_agentic_benchmark`. This is one registered CTest target, not an independent production CFD run. `git diff cc42ab4..f22bc25 -- solver/src solver/CMakeLists.txt` is empty; report `sec_verification.tex:53–94` itself documents previous revision-stamp problems and the later fix. This source identity supports lineage but does not establish every runtime or binary detail.
