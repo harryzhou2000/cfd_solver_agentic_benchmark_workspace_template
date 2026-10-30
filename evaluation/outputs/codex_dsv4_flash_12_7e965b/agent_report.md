@@ -8,7 +8,7 @@ The eight required final directories and `solver/report` were validated explicit
 
 The manually selected workspace-local Codex root is `019ffa41-6454-7503-82d8-5eb4dcf047e9`, spanning 2026-08-13T08:34:57Z to 2026-08-14T08:34:34Z with its seven spawned descendants. It is the only root and contains the benchmark objective, implementation, build/run/report work, and terminal answer `msg_ocx_f6e7ef715199487ea65e2fd4f1822e2e_1`. The exact extracted final answer is in `contestant_final_response.md` (SHA-256 `17a1ad6190cc2ba88aa2eead1cf9ba13df6acbe948d33bb791fbc81cf99ae5a6`). `run_identity.json` SHA-256 is `0eaa4e0aa4c2cd79d40d63a55e9be5ef645d29e8d2ee2414961de6e9c9acd821`. These Markdown/identity sidecars are unindexed under the current index contract and are not validated by `cfdeval check`.
 
-## Calibrated rubric: 79/100 (previously 90)
+## Calibrated rubric: 80/100 (previously 90)
 
 Detailed section scores and criterion-specific evidence are in `agent_scores.json`.
 
@@ -22,7 +22,7 @@ No DQ trigger is established on available evidence. METIS, local halos and root-
 
 Raw outputs, logs, PDF, and manifest CSV are excluded from the curated result tip under the curation rules. The terminal answer claims a clean LaTeX build, but the evaluator did not reproduce it; report craftsmanship is scored from committed TeX/figures and cross-checks, not from that assertion. No source copying investigation was performed, consistent with the trust policy.
 
-Verdict: **79/100, DQ=false**. Identity is `codex_dsv4_flash_12_7e965b`; raw evidence stays in the contestant workspace and was not copied into this snapshot.
+Verdict: **80/100, DQ=false**. Identity is `codex_dsv4_flash_12_7e965b`; raw evidence stays in the contestant workspace and was not copied into this snapshot.
 
 
 ## Partial case and visualization review — 2026-10-30
@@ -39,4 +39,8 @@ Immutable 97bdc69 clean CMake build succeeds in network-disabled cfd-bench with 
 
 ## Full calibration — 2026-10-30
 
-All ten rubric sections and 27 weighted review points now contain criterion-specific evidence. Rubric 90→79; all eight independent cases score 2 because seven steady force plots are collapsed and Re200 has unreadable late drag. Root-only global mesh and METIS/local halos are present; the reported Re20 np1/8 final Cd difference 9.5% is not order-one. The contestant explicitly discloses final steady reconstruction freezing; its residual reduction is for that frozen discretization. BDF2 formula exists, but first step has no explicit BDF1 bootstrap, and inner ratio is measured on frozen reconstruction before accepted-state recomputation; true updated-residual miss count remains unknown. Full viscous traction is reported as tangential force split, following the same rubric-only treatment used for 03 and sonnet46-02. Real lift oscillations and wake contour are documented; incorrect force-plot x axis does not establish synthetic data. Immutable clean build succeeds in restricted network-disabled cfd-bench; no CFD rerun, external similarity search, exhaustive pixel audit or general MPI-invariance proof. Both gates pass.
+All ten rubric sections and 27 weighted review points now contain criterion-specific evidence. Historical review prose said 90→79, but its scorecard retained case and report sections at 9 and 3, yielding 83. The 2026-10-31 reconciliation assesses those sections as 7 and 2 and sets rubric 90→80; all eight independent cases score 2 because seven steady force plots are collapsed and Re200 has unreadable late drag. Root-only global mesh and METIS/local halos are present; the reported Re20 np1/8 final Cd difference 9.5% is not order-one. The contestant explicitly discloses final steady reconstruction freezing; its residual reduction is for that frozen discretization. BDF2 formula exists, but first step has no explicit BDF1 bootstrap, and inner ratio is measured on frozen reconstruction before accepted-state recomputation; true updated-residual miss count remains unknown. Full viscous traction is reported as tangential force split, following the same rubric-only treatment used for 03 and sonnet46-02. Real lift oscillations and wake contour are documented; incorrect force-plot x axis does not establish synthetic data. Immutable clean build succeeds in restricted network-disabled cfd-bench; no CFD rerun, external similarity search, exhaustive pixel audit or general MPI-invariance proof. Both gates pass.
+
+## Rubric consistency correction — 2026-10-31
+
+The prior review said 79/100, while its actual scorecard totaled 83 because the case-results and report sections had retained old scores 9 and 3. They are now independently reassessed at 7 and 2, respectively, for **80/100**. Settled force histories, Re20 drag, Re200 lift oscillations and wake, fields and rank comparisons receive numerical credit; seven steady force plots collapsed at x=0, unreadable late Re200 drag, frozen-stencil limits and force-split wording reduce the relevant criteria. The independent case scores remain capped at 2 on the separate delivered-plot floor; they are not mechanically used as rubric points. DQ remains false; no CFD or unsteady rerun was performed.
