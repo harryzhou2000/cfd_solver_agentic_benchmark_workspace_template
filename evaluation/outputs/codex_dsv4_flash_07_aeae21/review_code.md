@@ -2,38 +2,38 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T03:51:51.794043+00:00
+Generated: 2026-10-30T03:53:25.992482+00:00
 
-**Overall score: 3.82**
+**Overall score: 3.35**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake and documented production scripts are present; no clean evaluator build was attempted. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable a7ea108 clean CMake build passes with warnings in network-disabled restricted cfd-bench; no solver rerun. Historical PDF exists in raw attempt but curated report build fails. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | main.cpp implements solve CLI and raw run_status records production commands. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3.5 | main.cpp:31–47,68–75 reads rank-local current restart state; previous BDF level and physical time are not restored. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Separated mesh, partition, numerics, drivers, output, and case IO modules. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Case I/O, mesh, partition, numerics, driver, output modules are separated; large numerics.cpp remains specialized 2-D ideal gas. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | No internal wrapper/executable invocation was found; trust policy applied without external similarity search. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | Inspected solver core and no affirmative copied-open-source core evidence found; three result packages are explicitly reference-derived, not an authorship finding. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | Case JSON parsing and generic mesh/tag paths are present; no case-filename-only branch found in reviewed source. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | JSON case parsing, generic CGNS path and METIS partition exist; no two-filename-only dispatcher found. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4 | METIS ownership/ghost structures and neighbor Isend/Irecv appear in source; raw outputs report 8 ranks. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2 | METIS, neighbor halo and reductions exist, but main.cpp:89–115 retains a full global mesh on every rank throughout solving, contrary to TASK. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Positivity fallback and finite checks exist, but Re200 accepts a mere inner-residual decrease as convergence. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2.5 | driver.cpp accepts a merely decreasing transient residual as target success, and own Re20 steady plateau exhibits material force drift. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | README documents checks and raw package validates structurally; no independent clean build/rerun evidence. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 2.5 | Raw output structure validates; three final packages are reference data and own rank-comparison files are not established. Clean build now passes; no CFD rerun. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Curated result contains source, documented scripts, TeX and referenced PNGs only; raw artifacts excluded. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 3.5 | Separate source components, but report narrative overstates completion and the original report build cannot be reproduced from curated assets. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 
@@ -50,7 +50,7 @@ Generated: 2026-10-30T03:51:51.794043+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.82
+- Overall score (0-5): 3.35
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

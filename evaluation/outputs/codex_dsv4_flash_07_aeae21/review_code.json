@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "CMake and documented production scripts are present; no clean evaluator build was attempted."
+      "notes": "Immutable a7ea108 clean CMake build passes with warnings in network-disabled restricted cfd-bench; no solver rerun. Historical PDF exists in raw attempt but curated report build fails."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "main.cpp implements solve CLI and raw run_status records production commands."
+      "score": 3.5,
+      "notes": "main.cpp:31\u201347,68\u201375 reads rank-local current restart state; previous BDF level and physical time are not restored."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Separated mesh, partition, numerics, drivers, output, and case IO modules."
+      "notes": "Case I/O, mesh, partition, numerics, driver, output modules are separated; large numerics.cpp remains specialized 2-D ideal gas."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No internal wrapper/executable invocation was found; trust policy applied without external similarity search."
+      "notes": "Inspected solver core and no affirmative copied-open-source core evidence found; three result packages are explicitly reference-derived, not an authorship finding."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Case JSON parsing and generic mesh/tag paths are present; no case-filename-only branch found in reviewed source."
+      "notes": "JSON case parsing, generic CGNS path and METIS partition exist; no two-filename-only dispatcher found."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "METIS ownership/ghost structures and neighbor Isend/Irecv appear in source; raw outputs report 8 ranks."
+      "score": 2,
+      "notes": "METIS, neighbor halo and reductions exist, but main.cpp:89\u2013115 retains a full global mesh on every rank throughout solving, contrary to TASK."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Positivity fallback and finite checks exist, but Re200 accepts a mere inner-residual decrease as convergence."
+      "score": 2.5,
+      "notes": "driver.cpp accepts a merely decreasing transient residual as target success, and own Re20 steady plateau exhibits material force drift."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 3,
-      "notes": "README documents checks and raw package validates structurally; no independent clean build/rerun evidence."
+      "score": 2.5,
+      "notes": "Raw output structure validates; three final packages are reference data and own rank-comparison files are not established. Clean build now passes; no CFD rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Curated result contains source, documented scripts, TeX and referenced PNGs only; raw artifacts excluded."
+      "score": 3.5,
+      "notes": "Separate source components, but report narrative overstates completion and the original report build cannot be reproduced from curated assets."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.82
+  "overall_score": 3.35
 }

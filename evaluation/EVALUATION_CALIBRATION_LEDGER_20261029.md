@@ -80,7 +80,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_03_294b64` | fully reviewed: 74/100, DQ7; both gates pass |
 | `codex_dsv4_flash_04_755869` | fully reviewed: 47/100, DQ7; sibling-result reuse; both gates pass |
 | `codex_dsv4_flash_06_5b6b08` | partial: 65/100 source assessment, no DQ established; original case packages/figures absent |
-| `codex_dsv4_flash_07_aeae21` | partial: three reference cases, DQ7/narrative corrected; own cases and rubric pending |
+| `codex_dsv4_flash_07_aeae21` | fully reviewed: 68/100, DQ7 and TASK full mesh; three reference cases |
 | `codex_dsv4_flash_08_efba3c` | unreviewed |
 | `codex_dsv4_flash_09_526316` | unreviewed |
 | `codex_dsv4_flash_10_6468ba` | unreviewed |
@@ -412,3 +412,8 @@ dsv4_flash_07 own-case and mesh checkpoint: immutable raw attempt 915af136 suppl
 dsv4_flash_07 source checkpoint: immutable `a7ea108` clean CMake build passes with warnings in network-disabled cfd-bench (2 CPUs/3 GiB). numerics.cpp:1221–1229 integrates full viscous traction as force split rather than tangent-only; apply rubric 5.4 without inventing an absent algorithm. main.cpp:31–47 reads current restart state but not physical time or prior BDF level. driver.cpp:289–311 counts mere residual decrease as inner success; copied Re200 output has a strict miss, while exact strict miss count is unknown. Five own case histories and three reference-package identities documented above. Full rubric/remaining DQ review partial; no CFD rerun.
 
 dsv4_flash_07 historical PDF evidence: original primary final response delivered a compiled report, preserved at immutable raw attempt `915af136:solver/report/report.pdf`, SHA-256 `a3e6f6e682d3b04e898ce08d2007a8f613b4a88dcd50f85d71000478d8377175`, creation 2026-08-04 11:37:34 UTC before selected final 11:38:40 UTC. Raw and curated report.tex blob IDs both `50d3e62f53f23491e8b032e688b5c7363d9d1fb3`. The 29-page original was visually reviewed as historical contestant-delivered evidence, not relabeled workspace_existing or used to bypass vendor policy. Current sibling PDF is absent and curated report compilation had failed, so approved snapshot PDF remains absent. Raw attempt figures and its report content remain evidence, with three reference cases separately excluded from own-solver credit. No solver rerun.
+
+
+## dsv4_flash_07 full calibration — 2026-10-30
+
+Rubric 84→68/100; DQ7 true and TASK full-mesh prohibition. Ten sections and 27 review points now carry criterion-specific evidence. Case scores 4,4,4,3,4,4,4,2 → 0,2,3,0,2,2,2,0. Three cases explicitly reference-labeled and byte-identical to 02 are not own-solver completion evidence; no synthetic-history inference. Five own runs, their plots and force tails are documented above; Re20 final 2000 Cd half-means 3.18288→2.92358, Cl 0.029475→0.004538 despite converged status. Transient source counts relaxed decreases as target success; copied Re200 last ratio misses strict target but exact miss count is unknown. Original 29-page contestant PDF survives in immutable raw attempt, SHA and TeX identity above; current approved PDF remains absent under vendor policy. Main.cpp:89–115 retains full mesh on every rank; numerics.cpp:1221–1229 uses full viscous traction, affecting split credit. Clean immutable build passes with warnings in restricted network-disabled cfd-bench; both record gates pass. No CFD/unsteady rerun or exhaustive external authorship/pixel audit.
