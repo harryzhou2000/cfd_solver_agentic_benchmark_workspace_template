@@ -7,7 +7,7 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "CMake/source present; no independent rebuild."
+      "notes": "Exact d8491d9 solver archive clean CMake build succeeds in network-disabled resource-limited cfd-bench container; numerical runs not repeated."
     },
     {
       "id": "code.cli",
@@ -41,8 +41,8 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "METIS and neighbor Isend/Irecv source evidence."
+      "score": 1,
+      "notes": "METIS/halo paths exist, but full mesh retained on every rank; main.cpp:1292\u20131300 calls MPI_Gather only on root and :967\u2013971 opens same CSV on all ranks. Selected np2/4/8 force files are empty; no validated force agreement."
     },
     {
       "id": "code.robustness",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.3
+  "overall_score": 2.85
 }

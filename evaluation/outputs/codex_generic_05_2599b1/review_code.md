@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:09:30.492077+00:00
+Generated: 2026-10-30T05:11:16.428806+00:00
 
-**Overall score: 3.3**
+**Overall score: 2.85**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake/source present; no independent rebuild. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Exact d8491d9 solver archive clean CMake build succeeds in network-disabled resource-limited cfd-bench container; numerical runs not repeated. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 3 | Output paths documented but final packages invalid. |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T05:09:30.492077+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | Case config driven. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4 | METIS and neighbor Isend/Irecv source evidence. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 1 | METIS/halo paths exist, but full mesh retained on every rank; main.cpp:1292–1300 calls MPI_Gather only on root and :967–971 opens same CSV on all ranks. Selected np2/4/8 force files are empty; no validated force agreement. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Terminal response admits normal/residual flaws. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T05:09:30.492077+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.3
+- Overall score (0-5): 2.85
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

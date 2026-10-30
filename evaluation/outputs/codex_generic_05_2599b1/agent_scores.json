@@ -28,7 +28,7 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4,
-          "notes": "CMake/source present; no independent rebuild."
+          "notes": "Exact d8491d9 solver archive clean CMake build succeeds in network-disabled resource-limited cfd-bench container; numerical runs not repeated."
         },
         {
           "id": "code.cli",
@@ -62,8 +62,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "METIS and neighbor Isend/Irecv source evidence."
+          "score": 1,
+          "notes": "METIS/halo paths exist, but full mesh retained on every rank; main.cpp:1292\u20131300 calls MPI_Gather only on root and :967\u2013971 opens same CSV on all ranks. Selected np2/4/8 force files are empty; no validated force agreement."
         },
         {
           "id": "code.robustness",
@@ -87,7 +87,7 @@
           "notes": "1,245 raw artifacts required curation from tip."
         }
       ],
-      "overall_score": 3.3,
+      "overall_score": 2.85,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -166,11 +166,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "MPI source and claimed comparisons, unverified final packages."
+          "score": 1,
+          "notes": "METIS/halo paths exist, but full mesh retained on every rank; main.cpp:1292\u20131300 calls MPI_Gather only on root and :967\u2013971 opens same CSV on all ranks. Selected np2/4/8 force files are empty; no validated force agreement."
         }
       ],
-      "overall_score": 2.68,
+      "overall_score": 2.41,
       "disqualification_flags": []
     },
     "result_review": {
@@ -231,7 +231,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 40,
+    "total_scored": 34,
     "sections": [
       {
         "id": "build_cli",
@@ -279,8 +279,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 7,
-        "notes": "MPI source/claimed comparison."
+        "score": 2,
+        "notes": "Source implements METIS/halo but retains full mesh per rank; main.cpp:1292\u20131300 calls MPI_Gather only on rank0 and all ranks write shared CSV :967\u2013971. Manifest-selected np2/4/8 force files for both MPI cases are zero bytes; no force consistency evidence."
       },
       {
         "id": "case_results",
@@ -293,8 +293,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 2,
-        "notes": "Report/figures but inconsistent claims and raw traceability gap."
+        "score": 1,
+        "notes": "Report includes residual and field figures and discloses weak viscous physics, but claims all selected runs LU-SGS although v3 metadata says diagonal, and reports 124.7x np4 speedup despite absent MPI force histories."
       },
       {
         "id": "extensibility",
@@ -308,15 +308,15 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "NACA0012 M0.15 inviscid: no committed case-specific numeric CL/CD summary; residual history d8491d9:solver/report/figures/naca0012_m015_inviscid_residuals.png (referenced at solver/report/report.tex:89); no committed/referenced force-history plot; computed-field contour d8491d9:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/report.tex:95). Score 1 retained after the post-processing audit. Prior case judgment: Declared output fails validator metadata partitioner."
+      "notes": "Correction: report.tex:87\u201396 includes a case residual plot and Mach contour; selected v3 final force row at step13000 Cd=0.0659362 and residual 3.07999\u21920.000307457 at step13101. No committed numeric CL/CD summary or case force plot; score1 pending physics and figure review."
     },
     "naca0012_m080_inviscid": {
       "score": 1,
-      "notes": "NACA0012 M0.80 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour d8491d9:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/report.tex:101). Score 1 retained after the post-processing audit. Prior case judgment: Declared output fails validator metadata partitioner."
+      "notes": "Correction: report.tex:99\u2013103 includes a case Mach contour; selected v3 last force row Cd=0.0509994, residual 0.133981\u21921.33957e-5. No committed case-specific numeric force summary or force/residual figure; score1 pending physics review."
     },
     "naca0012_m200_inviscid": {
       "score": 1,
-      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour d8491d9:solver/report/figures/naca0012_m200_inviscid_pressure.png (referenced at solver/report/report.tex:107). Score 1 retained after the post-processing audit. Prior case judgment: Declared output fails validator metadata partitioner."
+      "notes": "Correction: report.tex:105\u2013109 includes a case pressure contour. Manifest selects v4, whose status says converged step1809 but final recomputed log10 residual ratio -2.86198 vs supplied 3-order target; report claims step1758/3 orders. Last force row Cd=0.0936827 at step1500; score1 pending further adjudication."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
@@ -332,7 +332,7 @@
     },
     "cylinder_m010_laminar_re20": {
       "score": 1,
-      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; residual history d8491d9:solver/report/figures/cylinder_m010_laminar_re20_residuals.png (referenced at solver/report/report.tex:131); no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Validator-invalid package and unrealistic drag."
+      "notes": "Correction: report.tex:126\u2013138 explicitly gives Cd\u22480.0006 and includes a residual plot and Cp figure. Manifest-selected v3 final recorded Cd=0.00053667 at step22000 despite status converged step22100; physically far below expected ~2, also disclosed in report. Score1 retained pending force/figure assessment."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,

@@ -82,11 +82,11 @@ Selected workspace-local root `01a0383e-33e3-7213-81ec-591553ab40fd` and its sev
 
 ## Limitations
 
-No independent build/rerun was performed and Re200 was not rerun. The raw packages/PDF are intentionally excluded from the curated result tip. Multiple resumptions in the terminal response contain contradictory completion claims.
+Exact curated source was independently built in a restricted container; no CFD rerun was performed. The raw packages/PDF are intentionally excluded from the curated result tip. Multiple resumptions in the terminal response contain contradictory completion claims.
 
 ## Verdict
 
-40/100, DQ=true (partial calibration). The implementation has meaningful CFD/MPI structure, but no declared final package validates and the admitted viscous/Re200 physics limitations preclude completion credit.
+34/100, DQ=true (partial calibration). The implementation has meaningful CFD/MPI structure, but no declared final package validates and the admitted viscous/Re200 physics limitations preclude completion credit.
 
 
 ## Partial full-mesh review — 2026-10-30
@@ -97,3 +97,10 @@ Immutable d8491d9 solver/src/main.cpp:947–954 calls read_mesh on every rank an
 ## Partial selected Re200 metadata review — 2026-10-30
 
 Immutable d8491d9 solver/report/run_manifest.md selects solver/runs_final_v3/cylinder_m010_laminar_re200/output; metadata says completed=true/statistically_periodic at final time 300. Selected forces.csv has 30000 rows; over t=200–300, all 10000 successive Cl changes decrease from 4.11364e-5 to 1.31143e-5, and Cd increases monotonically from -1.17943e-7 to -3.79228e-8. Report.tex:141–142 itself says no meaningful shedding. DQ7 applies to labeling this nonperiodic result statistically periodic. It does not establish the number of strict inner-target misses; selected metadata contains no counts. Case remains 0. Forces SHA-256 4ddd7c1e1fb00a4314d1cdd11dc56b82ea42ae50689d7cf04df9f6801049e209; metadata 349ff76eacd1b740ff5854b6f05b5d3c9616f3e893a35aa58482017d12a72fd3; run status 15b3bb4e4c5e37c8257cf1e5d0c318f710ac01e4d2afd3fa7e9d6893bb853a47. Selected metadata reports diagonal implicit; report.tex:50–51,81–82 claims LU-SGS for all cases, a production-path discrepancy to assess in report credit. Both metadata and forces mtime 2026-08-26 13:04 UTC precede final source mtime 2026-08-27 04:00 UTC, with no git_revision, so producing source is not bound. Other cases and scoring partial; no CFD rerun.
+
+
+## Partial build, MPI and steady-case evidence — 2026-10-30
+
+Exact d8491d9 source clean CMake build succeeded in cfd-bench with network disabled, two CPUs, 3 GiB memory and 256 process limit (`cmake -S /work/solver -B /work/build -DCFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install`; `cmake --build /work/build -j2`). main.cpp:967–971 opens identical residual/force CSV paths on all ranks; :1292–1300 invokes MPI_Gather only inside rank-zero branch, a collective deadlock risk. For both report MPI cases selected runs_final_v3 np2/4/8 output/forces.csv are zero bytes, so force consistency cannot be checked. The three M015 multi-rank residual files share SHA-256 65c4ceeb966da4de9780eef282caf1e5d499f650368e6ba3b0b6e7edb98a2c17 while serial differs; this does not prove fabrication. Report.tex:151–185 claims convergence/scaling and 124.7x np4 speedup without adequate force evidence. MPI rubric 7→2, report 2→1, total 40→34; MPI review points each 1.
+
+Historical case notes asserting no M015 residual/contour and no Re20 summary/residual were false: report.tex:87–96 and :126–138 contain them, including Re20 Cd≈0.0006. Corrected score notes record selected case-specific data, retaining scores pending full physics/figure assessment. Manifest-selected M2 inviscid v4 status says converged at step1809 with recomputed log10 ratio -2.86198 versus 3-order target; report cites step1758. Do not infer its producing source from final source. Other cases and remaining DQ/provenance partial; no CFD rerun.
