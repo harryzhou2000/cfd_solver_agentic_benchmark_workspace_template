@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 5,
-      "notes": "Documented CMake/MPI build, CLI, and test workflow; validator passed all final cases."
+      "score": 4.5,
+      "notes": "Clean immutable 6183dc8 archive builds in network-disabled cfd-bench with bundled externals; eight selected CTests pass. The solver-based transient step1 test was deliberately excluded."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Submitted input-driven command path and documented failure handling support the score."
+      "score": 4.5,
+      "notes": "main.cpp:534\u2013537 supports state restart and separate transient checkpoint resume. Historical Re200 uses an explicit Re20 state restart and symmetry seed."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 5,
-      "notes": "Reviewed submission separates solver components and benchmark configuration paths."
+      "notes": "Case config, mesh, partition, halo, physics, reconstruction, solver and output modules are separated; report artifacts live separately."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No direct internal wrapper or external-solver executable evidence; trust policy limits this finding."
+      "notes": "No direct internal existing-solver executable invocation found; external copying/authorship investigation was not performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Case behavior is driven by submitted configurations rather than case-specific hard-coded output logic."
+      "score": 4.5,
+      "notes": "Configuration-driven cases and CGNS mesh paths are used; explicit transient symmetry seed and restart are recorded in production command."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 5,
-      "notes": "Submitted MPI diagnostics and np1/np8 comparisons support real distributed execution."
+      "notes": "main.cpp:508\u2013516 root-loads/partitions mesh; actual METIS and neighbor halos are present. Fresh np1/np8 NACA/Re20 comparisons agree closely at common endpoints."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Documented checks and successful final output validation provide robustness evidence."
+      "score": 4.5,
+      "notes": "Positivity backtracking, admissibility-checked HLLC fallback and bounded restart-origin plateau exist; M080 precursor provenance and long-term behavior are limited."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Documented test workflow plus explicit eight-case validator pass support the score."
+      "score": 4.5,
+      "notes": "Eight selected clean CTests pass, including fake-launcher supervisor and np1/2/8 mesh tests; transient step1 solver test deliberately excluded. Historic 9/9 and Python 10/10 are contestant claims."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 5,
-      "notes": "Curated source/report submission is readable; packaging limitation is scored separately in traceability."
+      "score": 4,
+      "notes": "Source and report are organized; curated report misses TeX-escaped figure assets and original production binary is unavailable for independent rehash."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.85
+  "overall_score": 4.53
 }

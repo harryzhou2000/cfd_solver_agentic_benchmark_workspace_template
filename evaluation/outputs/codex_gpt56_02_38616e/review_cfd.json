@@ -7,49 +7,49 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 5,
-      "notes": "Submitted source/report document the compressible governing equations and nondimensional case setup."
+      "notes": "Perfect-gas compressible NS and reference coefficients are implemented; report.tex:20\u201324 gives nondimensional equations."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 5,
-      "notes": "Submitted results validate across the required unstructured NACA and cylinder case meshes."
+      "notes": "main.cpp:508\u2013516 reads CGNS on root and distributes METIS mesh; mesh_np1/2/8 tests passed in clean restricted build."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Source-level review recorded conservative finite-volume residual implementation."
+      "score": 4.5,
+      "notes": "Face-based conservative residual with wall treatment exists; M080 restart-origin cases show only0.569/0.371 residual orders and limited long-tail convergence."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Source review records the approximate flux path; no evidence requires a larger deduction."
+      "notes": "HLLC, Rusanov fallback and stationary wall flux paths exist; report lists per-case choices and limitations."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 5,
-      "notes": "Boundary-condition paths are documented in the submitted solver and validated output set."
+      "notes": "Stationary-wall/farfield paths and solver.cpp:1084\u20131088 explicit zero no-slip wall velocities are present."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 5,
-      "notes": "Source-level review recorded second-order reconstruction in the submitted solver."
+      "score": 4.5,
+      "notes": "Weighted least-squares, Barth limiter and pressure-jump shock flattening are implemented and reconstruction tests pass; temporal production binary cannot be rehashed."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Submitted source/report documents limiting and positivity safeguards."
+      "score": 4.5,
+      "notes": "Barth limiter, positivity safeguards and shock sensor source exist; clean reconstruction test passes, with no independent production rerun."
     },
     {
       "id": "cfd.viscous",
@@ -62,22 +62,22 @@
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Submitted solver source documents the steady implicit-march path."
+      "score": 4.5,
+      "notes": "Stationary-wall 4x4 block implicit source exists; documented CFL caps and short restart-origin plateau evidence limit universal convergence claims."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Submitted Re200 deliverables record 30000 steps to t=300 and inner ratio 0.00098623; not rerun."
+      "score": 4.5,
+      "notes": "solver.cpp:1862\u20131872 tests the strict total-residual ratio; Re200 metadata reports last0.000986228 vs0.001, zero misses, and force/spectrum support shedding. Exact historic binary is unavailable."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 5,
-      "notes": "Submitted rank evidence covers NACA and cylinder np1/np8 comparisons."
+      "notes": "Fresh np1/np8 Re20 step3716 Cd agree to ~4e\u221215; NACA M015 step6397 Cd agree to ~7.5e\u221212. Starts match, but historical binary cannot be rehashed."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.77
+  "overall_score": 4.53
 }
