@@ -194,7 +194,7 @@
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 1,
-          "notes": "Four steady plateaus below targets marked converged."
+          "notes": "Re20/M015 accepted plateau means shift materially during the subsequent 500-step averaging phase; remaining target misses alone do not establish failure."
         },
         {
           "id": "res.plausibility",
@@ -215,7 +215,7 @@
           "title": "Report quality and honesty",
           "weight": 0.15,
           "score": 4,
-          "notes": "Candid plateau text but statuses contradict."
+          "notes": "Report discloses averaging and earlier plateau; final500 means depart materially from the accepted-window means."
         },
         {
           "id": "res.traceability",
@@ -229,8 +229,8 @@
       "disqualification_flags": [
         {
           "id": 7,
-          "text": "below-target steady plateaus marked converged",
-          "evidence": "See top-level DQ evidence.",
+          "text": "metadata/status marks incomplete or failed runs as successful",
+          "evidence": "Re20 and M015 inviscid metadata mark completed/converged after a reported plateau, but original stdout logs show acceptance at steps15750/12000 followed by 500-step state averaging without a new plateau test. Re20 earlier 3937-step Cd mean 2.083406 becomes 2.265972 during the final 500 samples (8.8% shift); final averaged-state Cd2.266489. M015 earlier 3000-step Cd mean +0.004319 becomes -0.033828 over final500, with Cl mean -0.000580\u2192-0.007670; final averaged-state Cd -0.033852. Force CSV SHA256 df8f1e24fb2028009c44eb73360224757dad2f3cb784b7a0ca3568d14505d2b0 and 1d096ce92b0a91f66d598f04f206176fdb81eefde44557d5dd4f094b9420fd0d. Contestant checkpoint 796c458 tracks run_manifest.csv SHA256 3fcbc5244ddfb567e3e37a24636ce86e2cd53ecbac51fdecbf41e999e79e3c7a naming these outputs and matching final rows. Raw binaries unbound. The old residual-only rationale is withdrawn; other below-target cases are not disqualified solely for target misses.",
           "found": true
         }
       ]
@@ -238,7 +238,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 74,
+    "total_scored": 73.5,
     "sections": [
       {
         "id": "build_cli",
@@ -293,8 +293,8 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 4,
-        "notes": "DQ status contradiction."
+        "score": 3.5,
+        "notes": "Re20/M015 force means shift substantially during final averaging despite converged plateau status; residual misses alone are not treated as failures."
       },
       {
         "id": "report_viz",
@@ -314,8 +314,8 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 2,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=-0.0078, CD=-0.0339 at f4ebc43:solver/report/table_forces.tex:11; residual history f4ebc43:solver/report/figures/naca0012_m015_inviscid_residual_history.png (referenced at solver/report/figs_naca015inv.tex:4); force history f4ebc43:solver/report/figures/naca0012_m015_inviscid_force_history.png (referenced at solver/report/figs_naca015inv.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/figs_naca015inv.tex:24). Score 2 retained after the post-processing audit. Prior case judgment: 1.92 orders vs target 4, marked converged."
+      "score": 1,
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=-0.0078, CD=-0.0339 at f4ebc43:solver/report/table_forces.tex:11; residual history f4ebc43:solver/report/figures/naca0012_m015_inviscid_residual_history.png (referenced at solver/report/figs_naca015inv.tex:4); force history f4ebc43:solver/report/figures/naca0012_m015_inviscid_force_history.png (referenced at solver/report/figs_naca015inv.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/figs_naca015inv.tex:24). Score 2 retained after the post-processing audit. Prior case judgment: 1.92 orders vs target 4, marked converged. Score 2\u21921: Acceptance-window Cd mean +0.004319 shifts to -0.033828 during the final500 averaging samples; Cl mean -0.000580\u2192-0.007670. Final averaged state Cd -0.033852 is inconsistent with the earlier settled-force claim."
     },
     "naca0012_m080_inviscid": {
       "score": 2.5,
@@ -338,8 +338,8 @@
       "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.0010, CD=0.1469 at f4ebc43:solver/report/table_forces.tex:16; residual history f4ebc43:solver/report/figures/naca0012_m200_laminar_re5000_residual_history.png (referenced at solver/report/figs_naca200lam.tex:4); force history f4ebc43:solver/report/figures/naca0012_m200_laminar_re5000_force_history.png (referenced at solver/report/figs_naca200lam.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/figs_naca200lam.tex:28). Score 4 retained after the post-processing audit. Prior case judgment: Target reached."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=+0.0016, CD=2.2665 at f4ebc43:solver/report/table_forces.tex:9; residual history f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_residual_history.png (referenced at solver/report/figs_re20.tex:4); force history f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_force_history.png (referenced at solver/report/figs_re20.tex:8); computed-field contour f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_velocity_wake.png (referenced at solver/report/figs_re20.tex:44). Score 2 retained after the post-processing audit. Prior case judgment: 2.11 orders vs target 5, marked converged."
+      "score": 1.5,
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=+0.0016, CD=2.2665 at f4ebc43:solver/report/table_forces.tex:9; residual history f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_residual_history.png (referenced at solver/report/figs_re20.tex:4); force history f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_force_history.png (referenced at solver/report/figs_re20.tex:8); computed-field contour f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_velocity_wake.png (referenced at solver/report/figs_re20.tex:44). Score 2 retained after the post-processing audit. Prior case judgment: 2.11 orders vs target 5, marked converged. Score 2\u21921.5: Acceptance-window Cd mean 2.083406 shifts to 2.265972 over final500 averaging samples (8.8%); final averaged state Cd2.266489. The reported plateau did not persist through final averaging."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
@@ -352,7 +352,7 @@
       {
         "id": 7,
         "text": "metadata/status marks incomplete or failed runs as successful",
-        "evidence": "Re20 is marked converged at 2.11/5 orders; M0.15 inviscid 1.92/4; M0.80 inviscid 2.96/4; M2 inviscid 1.76/3. Each status note calls it a plateau below its stated target.",
+        "evidence": "Re20 and M015 inviscid metadata mark completed/converged after a reported plateau, but original stdout logs show acceptance at steps15750/12000 followed by 500-step state averaging without a new plateau test. Re20 earlier 3937-step Cd mean 2.083406 becomes 2.265972 during the final 500 samples (8.8% shift); final averaged-state Cd2.266489. M015 earlier 3000-step Cd mean +0.004319 becomes -0.033828 over final500, with Cl mean -0.000580\u2192-0.007670; final averaged-state Cd -0.033852. Force CSV SHA256 df8f1e24fb2028009c44eb73360224757dad2f3cb784b7a0ca3568d14505d2b0 and 1d096ce92b0a91f66d598f04f206176fdb81eefde44557d5dd4f094b9420fd0d. Contestant checkpoint 796c458 tracks run_manifest.csv SHA256 3fcbc5244ddfb567e3e37a24636ce86e2cd53ecbac51fdecbf41e999e79e3c7a naming these outputs and matching final rows. Raw binaries unbound. The old residual-only rationale is withdrawn; other below-target cases are not disqualified solely for target misses.",
         "found": true
       }
     ]

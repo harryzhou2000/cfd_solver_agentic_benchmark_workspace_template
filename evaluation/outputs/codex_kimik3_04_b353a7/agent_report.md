@@ -4,7 +4,7 @@ Curated tip `f4ebc4345397502dac9aa1dc2ad0be101f6d9c4b` passed audit. The selecte
 
 ## Verdict
 
-**74/100; disqualified.** Trigger 7: steady statuses call outcomes converged while their own notes give below-target plateaus: Re20 2.11/5 orders, M0.15 inviscid 1.92/4, M0.80 inviscid 2.96/4, and M2 inviscid 1.76/3. The completed Re200 package was not rerun. The 2026-08-28 retrospective calibration corrected this stale prose total to the internally summed, authoritative `agent_scores.json` score; no contestant evidence or scorecard point changed.
+**73.5/100 provisionally; disqualified under trigger 7.** The earlier residual-only rationale is withdrawn: stable bounded plateaus are permitted. Direct force histories instead show that Re20 and M015 inviscid plateau means changed substantially during the 500 steps subsequently used for the final averaged state. Re20 mean Cd changes 2.0834→2.2660; M015 mean Cd +0.00432→−0.03383. Original contestant run manifest identifies both final averaged rows, and source shows no new plateau test before acceptance. Remaining cases, source and DQ checks are under review; exact historical binaries are unbound.
 
 ## Integrity and limitations
 
