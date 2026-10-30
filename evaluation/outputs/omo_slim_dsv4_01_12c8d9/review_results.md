@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T16:23:40.679171+00:00
+Generated: 2026-10-30T19:36:35.550890+00:00
 
-**Overall score: 3.35**
+**Overall score: 2.98**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -21,10 +21,10 @@ Generated: 2026-10-30T16:23:40.679171+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | M015 inviscid Cd0.0183, M015 laminar0.2388 and Re20 Cd2.812 are high; Re200 lift RMS4.38e−6 shows no shedding. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 3.5 | Earlier report omits full Re200 visualizations; selected session later delivered np1 M080 plots. Steady lift is shown separately even when drag scale compresses. |
+| 5 | **res.visualization** Visualizations | 0.15 | 1.5 | Earlier report omits full Re200 visualizations; selected session later delivered np1 M080 plots. Steady lift is shown separately even when drag scale compresses. Six assessed steady cases lack readable near-body Mach/pressure contours because ±80/±200 axes reduce the entire flow to a few pixels; no usable alternative was found. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 3.5 | Report predates M080/Re200 later runs and honestly states older status; final response admits no vortex street. Report incorrectly claims no full mesh replication and early M2 convergence. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Report predates M080/Re200 later runs and honestly states older status; final response admits no vortex street. Report incorrectly claims no full mesh replication and early M2 convergence. Report captions and narrative claim visible near-body contours/shock despite their unreadable scale. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Selected-session copy and plot events plus exact pixel reproduction bind later M080 np1 force/residual to data; exact historical binary and other images remain unbound. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T16:23:40.679171+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.35
+- Overall score (0-5): 2.98
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

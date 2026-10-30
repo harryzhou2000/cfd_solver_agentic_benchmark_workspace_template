@@ -218,15 +218,15 @@
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 3.5,
-          "notes": "Earlier report omits full Re200 visualizations; selected session later delivered np1 M080 plots. Steady lift is shown separately even when drag scale compresses."
+          "score": 1.5,
+          "notes": "Earlier report omits full Re200 visualizations; selected session later delivered np1 M080 plots. Steady lift is shown separately even when drag scale compresses. Six assessed steady cases lack readable near-body Mach/pressure contours because \u00b180/\u00b1200 axes reduce the entire flow to a few pixels; no usable alternative was found."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 3.5,
-          "notes": "Report predates M080/Re200 later runs and honestly states older status; final response admits no vortex street. Report incorrectly claims no full mesh replication and early M2 convergence."
+          "score": 3,
+          "notes": "Report predates M080/Re200 later runs and honestly states older status; final response admits no vortex street. Report incorrectly claims no full mesh replication and early M2 convergence. Report captions and narrative claim visible near-body contours/shock despite their unreadable scale."
         },
         {
           "id": "res.traceability",
@@ -236,13 +236,13 @@
           "notes": "Selected-session copy and plot events plus exact pixel reproduction bind later M080 np1 force/residual to data; exact historical binary and other images remain unbound."
         }
       ],
-      "overall_score": 3.35,
+      "overall_score": 2.98,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 72.5,
+    "total_scored": 71.5,
     "sections": [
       {
         "id": "build_cli",
@@ -304,8 +304,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 3.5,
-        "notes": "All17 PDF pages inspected. Report predates Re200/M080 later runs and correctly discloses earlier lack of data, while final response candidly reports no Re200 shedding; report denies full-mesh replication and asserts M2 early convergence."
+        "score": 2.5,
+        "notes": "All17 PDF pages inspected. Report predates Re200/M080 later runs and correctly discloses earlier lack of data, while final response candidly reports no Re200 shedding; report denies full-mesh replication and asserts M2 early convergence. 2026-10-31 visual reassessment: six steady case Mach/pressure panels confine the near-body flow to a few pixels despite captions and bow-shock claims; no usable alternate near-body contours found. Report/visualization 3.5\u21922.5; the poor scale is not evidence of unrelated data."
       },
       {
         "id": "extensibility",
@@ -318,32 +318,32 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 3,
-      "notes": "Workspace force CSV SHA256 9577294065c02f3fcf9e8d2cb0bb93c26828c979db631d4e439ef47855164a8f; final100 Cd 0.01827375384077179\u21920.01830135930131638, Cl -9.665664864400014e-05\u2192-0.0002287919312138342. Immutable report and force figure give case-specific numbers and readable lift evolution. Cd0.01830 is high for symmetric low-Mach inviscid flow despite a bounded final100; score5\u21923 for numerical accuracy, not a false-status inference."
+      "score": 2,
+      "notes": "Workspace force CSV SHA256 9577294065c02f3fcf9e8d2cb0bb93c26828c979db631d4e439ef47855164a8f; final100 Cd 0.01827375384077179\u21920.01830135930131638, Cl -9.665664864400014e-05\u2192-0.0002287919312138342. Immutable report and force figure give case-specific numbers and readable lift evolution. Cd0.01830 is high for symmetric low-Mach inviscid flow despite a bounded final100; score5\u21923 for numerical accuracy, not a false-status inference. Contour-floor correction 2026-10-31: score 3\u21922. The immutable 51d1a785:solver/report/figures images, byte-identical to workspace and embedded in the accepted PDF have Mach SHA256 d6259ce29f97b40c40115b4a9d54624e9545cab52d56132a183073ec528f09c7 and pressure SHA256 33d59ea04b32612c687a8241d2a15052bf5004f5a4aed307f12bddfdff816e2e; visual inspection shows the near-body flow confined to a few pixels on \u00b180 axes, so neither is a readable case-appropriate computed-field contour. Full figure inventory found no alternative case-specific near-body/wake contour. Force and residual data and their numerical assessment above remain valid separate evidence. No CFD rerun."
     },
     "naca0012_m080_inviscid": {
-      "score": 3.5,
-      "notes": "The earlier curated report.tex:611\u2013638 calls the old attempt nonconverged and has no field contour. A later np1 result completed at2026-08-02 08:16:45 UTC; selected-session event prt_fc18c80040018BnoybmCnVtapn at08:17:18 copies np1 to canonical path, whose force, metadata and status SHA256 match np1 byte-for-byte (force a6ae376963458257bb15fea4476714cdc70238136e95199530425add616cf441). Selected-session plot event prt_fc1aed8450011T1Dcyt2E7Ga5C at08:54:49 precedes final assistant response explicitly delivering 65 figures; workspace manifest SHA256 e5c89b80caae8ec7764e4f9b4fb47b3ae918b0e5ca2ad1b5a7cd05b99532f711 maps np1 force/residual/Mach PNGs SHA256 207fbab9335c5078287e83112e24aa6376e18ef8f042488fee1d025f0e6fdde7 / e369dc970d638f8eec7c6337d8abdf5a117d433a9d2c3e831ff0052604863134 / c2afb910f40892809a07824afccf994afe8f20558ef63d39817f32fc909641f5. The original force PNG visibly resolves both histories; final100 Cd0.02286893\u21920.02286883 and Cl\u22120.00160209\u2192\u22120.00158633. This delivered later result satisfies the figure floor but remains np1-only, with older report stale and exact binary unbound; score2\u21923.5."
+      "score": 2,
+      "notes": "The earlier curated report.tex:611\u2013638 calls the old attempt nonconverged and has no field contour. A later np1 result completed at2026-08-02 08:16:45 UTC; selected-session event prt_fc18c80040018BnoybmCnVtapn at08:17:18 copies np1 to canonical path, whose force, metadata and status SHA256 match np1 byte-for-byte (force a6ae376963458257bb15fea4476714cdc70238136e95199530425add616cf441). Selected-session plot event prt_fc1aed8450011T1Dcyt2E7Ga5C at08:54:49 precedes final assistant response explicitly delivering 65 figures; workspace manifest SHA256 e5c89b80caae8ec7764e4f9b4fb47b3ae918b0e5ca2ad1b5a7cd05b99532f711 maps np1 force/residual/Mach PNGs SHA256 207fbab9335c5078287e83112e24aa6376e18ef8f042488fee1d025f0e6fdde7 / e369dc970d638f8eec7c6337d8abdf5a117d433a9d2c3e831ff0052604863134 / c2afb910f40892809a07824afccf994afe8f20558ef63d39817f32fc909641f5. The original force PNG visibly resolves both histories; final100 Cd0.02286893\u21920.02286883 and Cl\u22120.00160209\u2192\u22120.00158633. This delivered later result satisfies the figure floor but remains np1-only, with older report stale and exact binary unbound; score2\u21923.5. Contour-floor correction 2026-10-31: score 3.5\u21922. The later contestant-delivered np1 workspace images, identified by selected-session plotting/copy and manifest have Mach SHA256 c2afb910f40892809a07824afccf994afe8f20558ef63d39817f32fc909641f5 and pressure SHA256 fa7debf37b069c096d57447942a8d1d500dd54daba5c32f62fd2f4ec8a184831; visual inspection shows the near-body flow confined to a few pixels on \u00b180 axes, so neither is a readable case-appropriate computed-field contour. Full figure inventory found no alternative case-specific near-body/wake contour. Force and residual data and their numerical assessment above remain valid separate evidence. No CFD rerun."
     },
     "naca0012_m200_inviscid": {
-      "score": 4.5,
-      "notes": "Workspace force CSV SHA256 7bac0ca2473e6b7c90c06011785f5cfa49bd979ca163273df47d29c436639528; final100 Cd 0.09266705439058642\u21920.09266625348606666, Cl -4.158587966185401e-05\u2192-4.150059336194278e-05. Immutable report and force figure give case-specific numbers and readable lift evolution. Cd\u22480.09267 and final forces are bounded, with normal wave-drag magnitude; score5\u21924.5 for limited independent accuracy/binary validation."
+      "score": 2,
+      "notes": "Workspace force CSV SHA256 7bac0ca2473e6b7c90c06011785f5cfa49bd979ca163273df47d29c436639528; final100 Cd 0.09266705439058642\u21920.09266625348606666, Cl -4.158587966185401e-05\u2192-4.150059336194278e-05. Immutable report and force figure give case-specific numbers and readable lift evolution. Cd\u22480.09267 and final forces are bounded, with normal wave-drag magnitude; score5\u21924.5 for limited independent accuracy/binary validation. Contour-floor correction 2026-10-31: score 4.5\u21922. The immutable 51d1a785:solver/report/figures images, byte-identical to workspace and embedded in the accepted PDF have Mach SHA256 6fa459406e2fe8b2089f282698cd718e0c52ac07dec06ace66561bfd5233128c and pressure SHA256 4c0be8dc59e8c580a5fb0045f98e70b9f9d25e914ec7a72bd6bac1483ab42e0f; visual inspection shows the near-body flow confined to a few pixels on \u00b180 axes, so neither is a readable case-appropriate computed-field contour. Full figure inventory found no alternative case-specific near-body/wake contour. Force and residual data and their numerical assessment above remain valid separate evidence. No CFD rerun."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 2.5,
-      "notes": "Workspace force CSV SHA256 251cf2c3726c6a89b57a2151d96937230e714aae6d9968f387c72d135d4250c2; final100 Cd 0.2437882502863213\u21920.238848409405485, Cl -0.0008629948766483153\u2192-0.0009641506432060964. Immutable report and force figure give case-specific numbers and readable lift evolution. Cd0.23885 is far above typical low-Re airfoil drag, and last100 falls about2%; the plot resolves lift on a separate axis though drag is startup-compressed. Score5\u21922.5 for numerical accuracy and early settling uncertainty, not an automatic plot floor."
+      "score": 2,
+      "notes": "Workspace force CSV SHA256 251cf2c3726c6a89b57a2151d96937230e714aae6d9968f387c72d135d4250c2; final100 Cd 0.2437882502863213\u21920.238848409405485, Cl -0.0008629948766483153\u2192-0.0009641506432060964. Immutable report and force figure give case-specific numbers and readable lift evolution. Cd0.23885 is far above typical low-Re airfoil drag, and last100 falls about2%; the plot resolves lift on a separate axis though drag is startup-compressed. Score5\u21922.5 for numerical accuracy and early settling uncertainty, not an automatic plot floor. Contour-floor correction 2026-10-31: score 2.5\u21922. The immutable 51d1a785:solver/report/figures images, byte-identical to workspace and embedded in the accepted PDF have Mach SHA256 5bec5bec47a370d744b4d030a84443af1af401c2fde7db7e72a4a7f51c986a79 and pressure SHA256 fd41507f9012f6bdc68ccef68af6b1d63e74ff2c5dbb4d160b1062bf468c7546; visual inspection shows the near-body flow confined to a few pixels on \u00b180 axes, so neither is a readable case-appropriate computed-field contour. Full figure inventory found no alternative case-specific near-body/wake contour. Force and residual data and their numerical assessment above remain valid separate evidence. No CFD rerun."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 3,
-      "notes": "Workspace force CSV SHA256 0336415eea5077f4f11b42907c428590528d44d5056ad44d3391109ade60a601; final100 Cd 0.121607468471161\u21920.1215108679636969, Cl -0.002188141100670782\u2192-0.0004981492433866475. Immutable report and force figure give case-specific numbers and readable lift evolution. Cd\u22480.1215 and final100 lift changes by about0.00169; lift on a separate plot axis is readable despite compressed drag. Score5\u21923 for force variability/accuracy, no separate DQ inferred from near-zero relative lift."
+      "score": 2,
+      "notes": "Workspace force CSV SHA256 0336415eea5077f4f11b42907c428590528d44d5056ad44d3391109ade60a601; final100 Cd 0.121607468471161\u21920.1215108679636969, Cl -0.002188141100670782\u2192-0.0004981492433866475. Immutable report and force figure give case-specific numbers and readable lift evolution. Cd\u22480.1215 and final100 lift changes by about0.00169; lift on a separate plot axis is readable despite compressed drag. Score5\u21923 for force variability/accuracy, no separate DQ inferred from near-zero relative lift. Contour-floor correction 2026-10-31: score 3\u21922. The immutable 51d1a785:solver/report/figures images, byte-identical to workspace and embedded in the accepted PDF have Mach SHA256 27dd600b417bd8ee6714af4a73ff19c68c948ce9359526257d2ec0a963c1bbd5 and pressure SHA256 7172f5d68cf5634b26c341d5abf26b64aab272288b25bac4915ac64ca24cdd62; visual inspection shows the near-body flow confined to a few pixels on \u00b180 axes, so neither is a readable case-appropriate computed-field contour. Full figure inventory found no alternative case-specific near-body/wake contour. Force and residual data and their numerical assessment above remain valid separate evidence. No CFD rerun."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1.5,
       "notes": "Workspace metadata SHA256 b2fc0941ffc0f3d2d2187d5d2281bf30c46e86a5a742c276a77fd3dbb5697233 marks completed/converged at512, also report.tex:738\u2013740. Force CSV SHA256 8e487de019273142c1486349fe70e68f6903ce2f03998927cdbe6dd771c509a3 Cd0.1530094\u21920.1063017 final200, 0.1169490\u21920.1063017 final100, 0.1105889\u21920.1063017 final50. Actual residual reduction3.0397 orders is credited but early force-stable convergence is not established (TASK.md:140,172). DQ7; score5\u21921.5. Source and provenance pending."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 3.5,
-      "notes": "Workspace force CSV SHA256 148758a927bc3323a08e319411f96d3ae79973e528b4a0e40e7665515e492c0b; final100 Cd 2.812359443759831\u21922.812433320768619, Cl -0.001959487300098317\u2192-0.001974525786160086. Immutable report and force figure give case-specific numbers and readable lift evolution. Cd\u22482.8124 is roughly one-third above the benchmark-scale Re20 drag near2.1, despite a small final100 drift and five-order residual drop; lift history is readable on separate axis. Score5\u21923.5 for accuracy, not a false-convergence claim."
+      "score": 2,
+      "notes": "Workspace force CSV SHA256 148758a927bc3323a08e319411f96d3ae79973e528b4a0e40e7665515e492c0b; final100 Cd 2.812359443759831\u21922.812433320768619, Cl -0.001959487300098317\u2192-0.001974525786160086. Immutable report and force figure give case-specific numbers and readable lift evolution. Cd\u22482.8124 is roughly one-third above the benchmark-scale Re20 drag near2.1, despite a small final100 drift and five-order residual drop; lift history is readable on separate axis. Score5\u21923.5 for accuracy, not a false-convergence claim. Contour-floor correction 2026-10-31: score 3.5\u21922. The immutable 51d1a785:solver/report/figures images, byte-identical to workspace and embedded in the accepted PDF have Mach SHA256 e277f9c9956b394779239c2dd1fcecca5641a56e4dbab0440efe8e97c57849fc and pressure SHA256 56cc691da59aa2ba22cb1f3a0e5872fa2ead1f01476148189618eed1a740960c; visual inspection shows the near-body flow confined to a few pixels on \u00b1200 axes, so neither is a readable case-appropriate computed-field contour. Full figure inventory found no alternative case-specific near-body/wake contour. Force and residual data and their numerical assessment above remain valid separate evidence. No CFD rerun."
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
