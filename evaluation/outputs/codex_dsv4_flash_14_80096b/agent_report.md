@@ -45,43 +45,9 @@ I read the contestant final response, task/contract/rubric, committed source and
 
 The identity sidecar SHA-256 is `b7b99a32688ad8ed7fa88d76f79cccf5bee8bff7f903f0d8769d03166765016a`; the contestant final-response sidecar SHA-256 is `0e89ec7e8cfeb9d8b1db4c71711e61c2691a744a2937953f26341d9236128b17`. These are deliberately unindexed sidecars, so `cfdeval check` does not validate either one.
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
+## Scores
 
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
-
-## Review-area scores (0-5 weighted, review_*.json)
-
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
+Provisional rubric **82.5/100** (previously 87.5); detailed sections, weighted review scores and independent case scores are in `agent_scores.json`. Full review remains in progress.
 
 ## Disqualification assessment
 
@@ -93,11 +59,11 @@ Only workspace-local `.sessions/codex` telemetry was used. Root `01a00bc5-383f-7
 
 ## Limitations
 
-No independent evaluator build or steady rerun was performed. The raw result packages and generated PDF are preserved as workspace evidence but excluded from the curated result-branch tip by the artifact policy. Three production cases use documented `CFD_RECON_SCALE=0.5`; M2 inviscid additionally uses `CFD_GRAD_DAMP=0.5`, which is not disclosed by the report's reconstruction/limitations discussion. Re200's 2% asymmetry seed was not sensitivity-tested.
+A clean immutable-source CMake build passed with warnings in the network-disabled cfd-bench container; no CFD rerun was performed. The raw result packages and generated PDF are preserved as workspace evidence but excluded from the curated result-branch tip by the artifact policy. Three production cases use documented `CFD_RECON_SCALE=0.5`; M2 inviscid additionally uses `CFD_GRAD_DAMP=0.5`, which is not disclosed by the report's reconstruction/limitations discussion. Re200's 2% asymmetry seed was not sensitivity-tested.
 
 ## Verdict
 
-87.5/100, DQ=false. This is a substantively strong complete package with real source/result/MPI evidence and credible Re200 transient output. Deductions reflect reconstruction blending, the undisclosed M2 gradient damping, and limits of independent rerun verification, not a structural-validator failure.
+Provisional **82.5/100, DQ=false**; source, rubric and DQ review remain incomplete. Original histories and report remain evidence with production-source provenance limitations.
 
 
 ## Partial Re200/source provenance review — 2026-10-30
@@ -110,3 +76,8 @@ Curated solver.cpp:1875–1950,2240–2311 implements BDF1 startup, BDF2 and fre
 ## Partial steady case and rank comparison review — 2026-10-30
 
 Case scores 4,4.5,4,4.5,4,4,4,2 → 3,3.5,3.5,2,2,2,2,2. Canonical histories, force tails and figure limits are documented individually in agent_scores.json. The three inviscid report figures show readable force evolution and case-specific residual/field contours; four viscous steady force graphs are dominated by Cd startup spikes around 160–320, making their late force histories unreadable, with no alternate contestant-delivered late plots located. Metadata git_revision=null and terminal verification reports uncommitted source edits; exact production binary source is not established. Report tables and original rankcmp results agree: NACA M0.15 np1/8 Cd 0.03473845/0.03438938, Cl -0.00012298/0.00381635; Re20 Cd 2.12662443/2.10340547, Cl 0.00570481/0.00554458. The ~1.1% cylinder drag difference is not DQ4 order-one. Full source/rubric/DQ review remains partial; no CFD rerun.
+
+
+## Partial build and rubric review — 2026-10-30
+
+Immutable 05261f8 clean CMake build succeeds with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB and /opt/external; no solver run. io.cpp:61–65 writes only current state despite history parameters, and solver.cpp:1872–1873 resets both previous histories and the transient loop starts from physical step 1 after restart; the continued transient is not a faithful BDF2 restart. solver.cpp:487–542 projects viscous wall traction tangentially. Provisional rubric 87.5→82.5: implicit/transient 13→11 for restart limitations, results 9→7 for case/source uncertainty, report 4→3 for compressed force plots and undisclosed M2 gradient damping. Further criteria/DQ remain partial; both gates pass.

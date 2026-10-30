@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:38:33.665382+00:00
+Generated: 2026-10-30T04:40:33.730277+00:00
 
-**Overall score: 4.36**
+**Overall score: 4.21**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,13 +30,13 @@ Generated: 2026-10-30T04:38:33.665382+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4.5 | Venkatakrishnan/Barth limiting and positive-state fallback are in source and metadata. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4.5 | Newtonian/Fourier fluxes and wall-force split are implemented; delivered wall checks pass. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | solver.cpp:487–542 computes viscous wall stress and projects onto tangent; raw laminar cases have force plots dominated by startup, and production source revision is unproven. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4.0 | Local-CFL LU-SGS is implemented, but steady metadata reports fixed budgets/zero observed inner statistics rather than richer measured convergence accounting. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4.5 | Re200 metadata records true frozen-history BDF2 dual time, t=300, 30,000 steps, 11-308 inner iterations, and zero target misses. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3.5 | solver.cpp:1875–1950,2240–2311 implements BDF1 startup, BDF2 and fresh-gradient total residual target. io.cpp:61–65 writes only current U and solver.cpp:1872–1873 resets both histories/time loop after restart. Metadata git_revision=null; strict target production origin remains unproven. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4.5 | Source and delivered rank diagnostics support METIS ownership/ghost partitions and neighbor-scoped communication. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T04:38:33.665382+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.36
+- Overall score (0-5): 4.21
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

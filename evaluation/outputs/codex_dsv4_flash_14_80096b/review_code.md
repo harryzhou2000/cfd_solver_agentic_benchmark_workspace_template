@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:38:33.664964+00:00
+Generated: 2026-10-30T04:40:33.729813+00:00
 
-**Overall score: 4.31**
+**Overall score: 4.21**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4.5 | CMake source and the terminal-run verification show a documented clean configure/build using CFD_EXTERNALS_ROOT; no independent clean-container rebuild was performed by this evaluator. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4.5 | Immutable 05261f8 clean CMake build passes with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB with /opt/external. No CFD rerun. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4.5 | Terminal session evidence records a successful MPI smoke solve, restart, and clear nonzero missing-case error; production CLI packages also validate structurally. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3.5 | main.cpp parses solve/restart and case controls; io.cpp:61–65 writes only current U despite history parameters, and solver.cpp:1872–1873 resets both histories and starts physical loop at step 1 after restart. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4.5 | Separated C++ configuration, CGNS reader, mesh, partition, numerics, solver and I/O units support maintenance and extension. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T04:38:33.664964+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.31
+- Overall score (0-5): 4.21
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

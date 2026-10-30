@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:38:33.665672+00:00
+Generated: 2026-10-30T04:40:33.730587+00:00
 
-**Overall score: 4.38**
+**Overall score: 3.85**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -18,16 +18,16 @@ Generated: 2026-10-30T04:38:33.665672+00:00
 | 3 | **res.completion** Case completion and convergence | 0.20 | 4.5 | Eight reported production cases are readable and status-consistent; Re200 has production-horizon transient evidence. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4.0 | Forces, positivity checks, Re200 shedding, and np=1/8 comparisons are credible, with unverified independent reruns and damped production settings limiting confidence. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Raw force tails/periods are documented; M0.15 inviscid Cd 0.0344 and laminar Cd 0.0118, gradient damping and Re200 lift amplitude suggest limitations without an independent grid study. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 4.5 | Opened report PDF and representative M2 Mach/Re200 vorticity figures; fields are labeled continuous mesh visualizations. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2.5 | Three inviscid case plots show force evolution and contours; four steady viscous force plots and Re200 late drag are compressed by startup spikes. Figures remain traceable through report manifest. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 4.0 | The 41-page report is detailed and candid about reconstruction blending, but does not disclose the M2 inviscid CFD_GRAD_DAMP=0.5 production setting. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4.0 | Figure manifest maps figures to raw result files and report builds; raw source data is deliberately uncommitted and therefore not reproducible from result-tip Git alone. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 2.5 | Final verification notes uncommitted solver edits and case metadata git_revision=null, so exact production binary source is not proven. Run manifest and figures identify canonical paths. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T04:38:33.665672+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.38
+- Overall score (0-5): 3.85
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -7,14 +7,14 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4.5,
-      "notes": "CMake source and the terminal-run verification show a documented clean configure/build using CFD_EXTERNALS_ROOT; no independent clean-container rebuild was performed by this evaluator."
+      "notes": "Immutable 05261f8 clean CMake build passes with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB with /opt/external. No CFD rerun."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4.5,
-      "notes": "Terminal session evidence records a successful MPI smoke solve, restart, and clear nonzero missing-case error; production CLI packages also validate structurally."
+      "score": 3.5,
+      "notes": "main.cpp parses solve/restart and case controls; io.cpp:61\u201365 writes only current U despite history parameters, and solver.cpp:1872\u20131873 resets both histories and starts physical loop at step 1 after restart."
     },
     {
       "id": "code.organization",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.31
+  "overall_score": 4.21
 }

@@ -396,14 +396,14 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4.5,
-        "notes": "CMake source and the terminal-run verification show a documented clean configure/build using CFD_EXTERNALS_ROOT; no independent clean-container rebuild was performed by this evaluator."
+        "notes": "Immutable 05261f8 clean CMake build passes with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB with /opt/external. No CFD rerun."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4.5,
-        "notes": "Terminal session evidence records a successful MPI smoke solve, restart, and clear nonzero missing-case error; production CLI packages also validate structurally."
+        "score": 3.5,
+        "notes": "main.cpp parses solve/restart and case controls; io.cpp:61\u201365 writes only current U despite history parameters, and solver.cpp:1872\u20131873 resets both histories and starts physical loop at step 1 after restart."
       },
       {
         "id": "code.organization",
@@ -497,7 +497,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.31
+    "overall_score": 4.21
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -556,8 +556,8 @@
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 4.5,
-        "notes": "Newtonian/Fourier fluxes and wall-force split are implemented; delivered wall checks pass."
+        "score": 4,
+        "notes": "solver.cpp:487\u2013542 computes viscous wall stress and projects onto tangent; raw laminar cases have force plots dominated by startup, and production source revision is unproven."
       },
       {
         "id": "cfd.implicit",
@@ -570,8 +570,8 @@
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 4.5,
-        "notes": "Re200 metadata records true frozen-history BDF2 dual time, t=300, 30,000 steps, 11-308 inner iterations, and zero target misses."
+        "score": 3.5,
+        "notes": "solver.cpp:1875\u20131950,2240\u20132311 implements BDF1 startup, BDF2 and fresh-gradient total residual target. io.cpp:61\u201365 writes only current U and solver.cpp:1872\u20131873 resets both histories/time loop after restart. Metadata git_revision=null; strict target production origin remains unproven."
       },
       {
         "id": "cfd.mpi_partition",
@@ -613,7 +613,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.36
+    "overall_score": 4.21
   },
   "result_review": {
     "review_area": "result_review",
@@ -644,15 +644,15 @@
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 4.0,
-        "notes": "Forces, positivity checks, Re200 shedding, and np=1/8 comparisons are credible, with unverified independent reruns and damped production settings limiting confidence."
+        "score": 3,
+        "notes": "Raw force tails/periods are documented; M0.15 inviscid Cd 0.0344 and laminar Cd 0.0118, gradient damping and Re200 lift amplitude suggest limitations without an independent grid study."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 4.5,
-        "notes": "Opened report PDF and representative M2 Mach/Re200 vorticity figures; fields are labeled continuous mesh visualizations."
+        "score": 2.5,
+        "notes": "Three inviscid case plots show force evolution and contours; four steady viscous force plots and Re200 late drag are compressed by startup spikes. Figures remain traceable through report manifest."
       },
       {
         "id": "res.report",
@@ -665,8 +665,8 @@
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 4.0,
-        "notes": "Figure manifest maps figures to raw result files and report builds; raw source data is deliberately uncommitted and therefore not reproducible from result-tip Git alone."
+        "score": 2.5,
+        "notes": "Final verification notes uncommitted solver edits and case metadata git_revision=null, so exact production binary source is not proven. Run manifest and figures identify canonical paths."
       }
     ],
     "disqualification_flags": [
@@ -696,7 +696,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.38
+    "overall_score": 3.85
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/14",

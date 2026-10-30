@@ -55,8 +55,8 @@
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 4.5,
-      "notes": "Newtonian/Fourier fluxes and wall-force split are implemented; delivered wall checks pass."
+      "score": 4,
+      "notes": "solver.cpp:487\u2013542 computes viscous wall stress and projects onto tangent; raw laminar cases have force plots dominated by startup, and production source revision is unproven."
     },
     {
       "id": "cfd.implicit",
@@ -69,8 +69,8 @@
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4.5,
-      "notes": "Re200 metadata records true frozen-history BDF2 dual time, t=300, 30,000 steps, 11-308 inner iterations, and zero target misses."
+      "score": 3.5,
+      "notes": "solver.cpp:1875\u20131950,2240\u20132311 implements BDF1 startup, BDF2 and fresh-gradient total residual target. io.cpp:61\u201365 writes only current U and solver.cpp:1872\u20131873 resets both histories/time loop after restart. Metadata git_revision=null; strict target production origin remains unproven."
     },
     {
       "id": "cfd.mpi_partition",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.36
+  "overall_score": 4.21
 }
