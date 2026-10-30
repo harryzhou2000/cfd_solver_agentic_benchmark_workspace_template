@@ -97,7 +97,7 @@ An evaluator clean build and unit suite were completed with explicit JSON includ
 
 ## Verdict
 
-Score: **90/100; disqualified: false (partial calibration).** This is a complete, structurally valid, largely credible finite-volume delivery with unusually extensive report evidence. Deductions reflect production second-order limitations, the low-Mach Re200 accuracy deficit, rank-study reproducibility inconsistency at the curated tip, 2-D scope, and the lack of an independent evaluator rebuild.
+Score: **90/100; disqualified: false (qualified full calibration).** This is a structurally valid, largely credible finite-volume delivery with extensive report evidence. Deductions reflect production second-order limitations, the Re200 accuracy and late-force-plot limitations, restart behavior, rank-study reproducibility and 2-D scope. An independent clean build and bounded unit checks passed.
 
 
 ## Re200 computed/reference values — 2026-10-30
@@ -158,3 +158,8 @@ DQ7 is not established by the steady force trends alone. DQ8 has no identified m
 ## DQ boundaries and continuation — 2026-10-30
 
 The clean build and source inspection show an implemented solver and generic CGNS input; no invocation of an external solver or mesh-filename-only branch was identified. Rank table NACA np2/4 Cd0.001832 and np8 Cd0.001710, and Re20 np1 Cd2.027598 versus np8 Cd2.027857, do not establish an order-one absolute rank discrepancy; small lift baselines require care when interpreting relative ratios. The final source contains implicit and transient algorithms, and its report's restart claim at `report.tex:1017–1024` concerns the steady Re20 state, not an uninterrupted transient restart. Thus the discovered transient restart deficiency reduces CLI credit but does not by itself establish DQ6 for a report claim of transient continuation. The Re200 actual-binary uncertainty and the exact provenance of any historical plotted figure remain limits on categorical conclusions. No independent external-authorship search was performed. The review remains partial rather than presenting all thirteen DQ triggers as conclusively adjudicated.
+
+
+## Qualified full review — 2026-10-31
+
+All ten rubric sections, eight case scores, 27 review points and 13 DQ rules were assessed to the available evidence limit. Rubric remains 90/100 and no numbered DQ is established. Near-zero inviscid lift sensitivities are reflected in the case scores rather than automatically treated as failed steady convergence; Re200 remains capped at 2 for its unreadable late drag plot despite raw oscillatory evidence. The claimed steady Re20 restart is distinct from the separately deficient transient restart. The selected Re200 binary is not bound to final source, and exact historical provenance for some plots remains unresolved; prior partial checkpoints are historical. No CFD, rank or Re200 rerun.

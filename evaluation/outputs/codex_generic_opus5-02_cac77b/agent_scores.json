@@ -341,13 +341,80 @@
   },
   "disqualification": {
     "triggered": false,
-    "flags": []
+    "flags": [
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No internal existing CFD executable found in inspected submitted source; no exhaustive external authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence of force/residual generation without solving; historic Re200 executable provenance remains unbound."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Configured case and CGNS input are not restricted to two hard-coded filenames."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Selected NACA np2/4 Cd\u22480.001832 and np8\u22480.001710; Re20 np1 Cd2.027598 versus np8 2.027857. No order-one absolute force difference established; near-zero lift ratios are not decisive."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Final source implements implicit and BDF2 methods; explicit-only integration is not established."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Final source implements major reported algorithms; report restart claim concerns steady Re20, not uninterrupted transient continuation. Transient restart limitation is separately scored."
+      },
+      {
+        "id": 7,
+        "found": false,
+        "evidence": "Selected Re200 reaches t300 with oscillatory lift and metadata 169/30000 misses, not a proven majority miss. M015/M080 inviscid lift tails vary, but small near-zero lift and damping do not alone prove failed stable-force plateau; actual historic transient inner ratio/binary binding remains qualified."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "vtu_reader.py:287\u2013375 maps split triangles to parent cells; no specific report figure proven unrelated to its source data. Full historical figure provenance remains qualified."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "METIS partition and neighbor halos exist, and main.cpp:258\u2013278 releases root global mesh before iterations; all-rank full mesh/state during solve not established."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Limited reconstruction exists and transient limiter freezing is disclosed. Historic Re200 producing binary remains unbound; no disabled production scheme proven."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "forces.cpp:173\u2013179 writes no-slip boundary-condition velocity; no undocumented adjacent-cell wall-velocity violation established."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "No specific figure filename/variable swap established."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source CFD core established in inspected source; no exhaustive external authorship search."
+      }
+    ]
   },
   "limitations": [
     "No evaluator clean build or MPI rerun was performed.",
     "Rank-study raw inputs are excluded at the curated result tip although generated rank tables remain committed.",
     "Re200 has documented 7-10% Strouhal, about 7% drag, and 25-30% lift-amplitude deficits.",
     "Production limiter freezes and terminal first-order fallback cells limit formal second-order evidence.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All ten sections, eight cases, 27 review points and 13 DQ rules reviewed to available evidence; exact Re200 producing binary and some historical image provenance remain unbound. No CFD/Re200 rerun."
   ]
 }
