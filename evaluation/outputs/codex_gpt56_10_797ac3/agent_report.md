@@ -32,7 +32,7 @@ The selected session ran 2026-08-17T06:10:24Z to 2026-08-26T06:32:43Z. Its extra
 | Extensibility | 5/5 |
 | **Total** | **90/100** |
 
-Per-case scores are recorded in `agent_scores.json`: the seven steady scores remain provisional. Re200 is reduced 2→1 for its decaying wake; its late force panel exists but does not resolve the oscillations. Full numerical adjudication remains pending.
+Per-case scores are recorded in `agent_scores.json`: the seven steady scores have been individually reviewed against force histories and residual reduction, with unresolved plateau mechanism and historical executable qualifications. Re200 is reduced 2→1 for its decaying wake; its late force panel exists but does not resolve the oscillations. Full numerical adjudication remains pending.
 
 ## Disqualification assessment
 
