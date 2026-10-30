@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3,
+      "notes": "Conservative compressible flow and nondimensional model are implemented; gross negative laminar drag and first-order steady final results limit demonstrated fidelity."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "notes": "mesh.cpp supports TRI/QUAD/MIXED and zone stitching; full mesh is retained on every rank. General mesh layouts were not independently exercised."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3.5,
+      "notes": "solver.cpp:281\u2013328 assembles reconstructed inviscid/viscous face fluxes, but six steady final states have zeroed limiters and first-order reconstruction."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "notes": "numerics.cpp implements Rusanov and report discloses dissipative flux; no independent shock rerun."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3,
+      "notes": "Farfield/slip/no-slip code exists, but negative low- and high-Mach laminar drag materially limits demonstrated boundary fidelity."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 1.5,
+      "notes": "solver.cpp:259\u2013262,624\u2013626 zeros all limiters for CFL>2; six of seven final steady cases are first order despite report claim. M2 laminar and transient use reconstruction."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 2,
+      "notes": "Barth limiter exists, but is disabled for six final steady results by CFL control; report incorrectly identifies only M2 laminar as first-order."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3.5,
+      "notes": "numerics.cpp:60\u201395 derives primitive gradients; solver.cpp:378\u2013402 projects tangential wall traction. Negative laminar drag limits demonstrated force accuracy."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3.5,
+      "notes": "LU-SGS-like sweeps and local CFL controls are present; residual targets alone do not establish accurate forces, and CFL switch causes first-order final states."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3.5,
+      "notes": "solver.cpp:703\u2013769 forms BDF total residual and counts target misses; original lift has St\u22480.153, lower than literature. last_inner_residual_ratio remains default zero, not a measured ratio."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 2,
+      "notes": "METIS and neighbor communication are present, but global mesh is replicated on all ranks through solve, violating TASK shortcut 7."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.0
+  "overall_score": 3.08
 }
