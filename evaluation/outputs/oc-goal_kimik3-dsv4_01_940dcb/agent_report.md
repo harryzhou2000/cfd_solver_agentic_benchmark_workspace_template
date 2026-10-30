@@ -1,6 +1,6 @@
 ## Calibration checkpoint (partial)
 
-**89.5/100; DQ=true (provisional, trigger 7).** M015 inviscid is marked converged on a stable plateau, but its last five 1000-step mean drag values increase from 0.01271 to 0.02155 and mean lift from 0.00165 to 0.00965. The nominally steady case has not established stable forces. The report instead describes it as statistically periodic, while the metadata says converged. Full review continues.
+**89.5/100; DQ=true (provisional, trigger 7).** M015 inviscid is marked converged on a stable plateau, but its last five 1000-step mean drag values increase from 0.01271 to 0.02155 and mean lift from 0.00165 to 0.00965. The nominally steady case has not established stable forces. The report instead describes it as statistically periodic, while the metadata says converged. Re200 case score 2→4: the committed late-force plot resolves both coefficients and the report gives Cd, lift amplitude and St. M080 and M200 laminar 5→2 because their startup-compressed plots hide both late force histories; raw outputs and the remaining case/rubric/DQ assessment are still under review. Full review continues.
 
 # Agent Evaluation Report — oc-goal_kimik3-dsv4_01_940dcb
 
