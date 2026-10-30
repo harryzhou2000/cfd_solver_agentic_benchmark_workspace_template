@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:59:21.230197+00:00
+Generated: 2026-10-30T06:01:36.644603+00:00
 
-**Overall score: 4.0**
+**Overall score: 3.85**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -21,7 +21,7 @@ Generated: 2026-10-30T05:59:21.230197+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 4 | Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged. |
+| 5 | **res.visualization** Visualizations | 0.15 | 3 | Delivered force histories and contours are readable, with compressed late drag. The Re200 vorticity wake figure is pixel-reproduced from selected field with the committed plotting helper; the helper fails an exact solid-rotation check and disagrees with an independent local-neighbor wake diagnostic. This is a derived-variable accuracy defect, not proof of a substituted field. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 4 | Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T05:59:21.230197+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.0
+- Overall score (0-5): 3.85
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

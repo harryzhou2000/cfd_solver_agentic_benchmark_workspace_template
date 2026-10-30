@@ -4,7 +4,7 @@ Submission `codex/generic/glm53-04` at `c06741d9dc5739d9f4a6d6c0285e3c69c8cf8052
 
 ## Verdict
 
-**88/100; DQ=true under DQ7 (partial calibration).** A separate M2 laminar case is labeled converged while drag remains materially unstable; the prior inviscid residual-only rationale is under review.
+**87/100; DQ=true under DQ7 (partial calibration).** A separate M2 laminar case is labeled converged while drag remains materially unstable; the prior inviscid residual-only rationale is under review.
 
 ## Evidence
 
@@ -38,3 +38,8 @@ Last-10% M080 inviscid residual half-means0.01870→0.01562, Cd0.0094542→0.009
 The four steady plots show drag evolution from startup and independently resolved lift, even where late drag is compressed. Opus-04's immutable steady plots explicitly clip startup and show the settled region more clearly, but similarly penalize presentation rather than automatically cap every compressed force. The steady floor requires readable histories exposing behavior; it does not impose the separate Re200 requirement for readable late lift and drag. On that basis the interim 2 scores are revised to 3 for M015 inviscid, 3 for M015 laminar, 3 for M080 laminar and 4 for Re20; these remain below original 4, 5, 4, 5 for late-force presentation, numerical drift where present, and unresolved source binding. The Re200 cap remains.
 
 For M2 laminar, report.tex:311's Cd=1.025 matches the current last-100-row mean 1.025063, although the table describes steady figures as final; report.tex:445 separately says Cd=2.162 and the raw final is 0.529150. This identifies a summary/claim discrepancy without asserting a different generation. Exact run/source binding remains unproved. No CFD rerun.
+
+
+## Wake-vorticity credibility — 2026-10-30
+
+The submitted Re200 wake figure is readable and traceable to the selected field, but is not reliable evidence of vorticity. The immutable plotting helper produces zero curl on a two-triangle rigid rotation with exact curl 2; it uses a perpendicular centroid direction and opposite owner contributions. Applying those exact submitted functions to the selected field reproduces the delivered image pixel-for-pixel. An independent neighbor-based least-squares derivative over 3,875 wake cells yields correlation −0.026 with the helper and 5th–95th percentile curl −1.737 to 1.538 versus −0.282 to 0.284 for the helper; the independent estimate is diagnostic, not an exact reference solution. Report/visualization rubric 4→3 and results visualization 4→3. This defect does not establish that the plot came from an unrelated field, so it is not itself charged as DQ8. Re200 remains capped at 2 independently for missing readable late drag. Full source and result binding remain partial.
