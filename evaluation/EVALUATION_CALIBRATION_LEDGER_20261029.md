@@ -116,7 +116,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
 | `codex_gpt56_01_cb349f` | fully reviewed: 94/100, no DQ found; executable and individual image bindings qualified |
 | `codex_gpt56_02_38616e` | fully reviewed: 90/100, no DQ established; historic binary/precursor and image bindings qualified |
-| `codex_gpt56_03_93b257` | partial: provisional 96.5/100; remaining DQ and executable provenance review |
+| `codex_gpt56_03_93b257` | fully reviewed: 96.5/100, no DQ established; executable/individual figure bindings qualified |
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
 | `codex_gpt56_05_7bee7c` | unreviewed |
 | `codex_gpt56_06_97ae53` | unreviewed |
@@ -1063,3 +1063,6 @@ gpt56_03 steady case checkpoint: all 13 accepted PDF pages rendered and visually
 
 
 gpt56_03 source/rubric checkpoint: clean immutable f06ea3f build in network-disabled cfd-bench with bundled dependencies and 2 CPUs/3 GiB/256 process limits; all three CTests pass (unit and NACA/cylinder mesh inspections), no solver run. Restart output.cpp:280–296 stores step, physical time, current and previous states in rank-local files; requires original MPI count as report discloses. solver.cpp:393–403 removes normal viscous traction and cf is tangential. Curated TeX omits historical figure blobs despite accepted original workspace PDF: report rubric5→4. Case-results10→9.5 for modest terminal/source qualifications, total98→96.5. All 27 review criteria now have individual source/result evidence; exact binary and some figure bindings remain qualified. Remaining DQ boundaries partial; no CFD rerun.
+
+
+gpt56_03 DQ/full-review qualification: all 13 accepted PDF pages, eight case histories, ten rubric sections and 27 review criteria independently assessed. Re20 np1/2/8 step3846 Cd2.0357612054466268/2.0357612054466268/2.0357612054466352 with metadata source6faee; M015 np1/2 and np8 agree closely at step2566, but np8 names earlier9e89a35 plateau-tolerance source. No order-one DQ4. Strict Re200 target and real periodic force support no DQ7; source explicitly projects tangential wall traction, unlike gpt56_01/02. No specific unrelated image proven; all image bindings and exact production binaries not independently recoverable. Clean build plus three safe CTests pass. Numbered DQ flags now individually qualified, none established. Review complete within feasible evidence at96.5, retaining historical binary/figure/source-version limitations. No CFD rerun.

@@ -346,79 +346,79 @@
         "id": 1,
         "text": "Existing solver executable is called internally",
         "found": false,
-        "evidence": "No such internal call found in submitted source review."
+        "evidence": "No direct internal invocation of an existing CFD solver executable was found; external authorship not investigated."
       },
       {
         "id": 2,
         "text": "Force or residual files are generated without solving",
         "found": false,
-        "evidence": "Output paths are coupled to solver execution in source."
+        "evidence": "No direct evidence force or residual files are generated without solving; historical executable identity is unbound."
       },
       {
         "id": 3,
         "text": "Hard-coded benchmark mesh branches",
         "found": false,
-        "evidence": "General CGNS/JSON-driven path."
+        "evidence": "Input-driven JSON and CGNS mesh handling do not demonstrate two-filename-only branches."
       },
       {
         "id": 4,
         "text": "Order-one steady MPI mismatch",
         "found": false,
-        "evidence": "np1/2/8 force table agrees."
+        "evidence": "Historical Re20 np1/2/8 step3846 Cd2.0357612054466268/2.0357612054466268/2.0357612054466352, same 6faee revision. M015 np1/2 versus np8 also closely agree at step2566 but np8 names earlier 9e89a35 plateau version. No order-one mismatch established; exact binary hashes unbound."
       },
       {
         "id": 5,
         "text": "Explicit-only solver",
         "found": false,
-        "evidence": "Implicit block-Jacobi and BDF2 source evidence."
+        "evidence": "Block-Jacobi implicit and frozen-history BDF2 source paths exist."
       },
       {
         "id": 6,
         "text": "Claimed method absent from source",
         "found": false,
-        "evidence": "Reviewed claims map to source modules."
+        "evidence": "Source and report contain WLS reconstruction, fluxes, tangential wall force and BDF2. No specific claimed missing algorithm established."
       },
       {
         "id": 7,
         "text": "Incomplete run reported successful",
         "found": false,
-        "evidence": "All required statuses and Re200 production horizon are readable."
+        "evidence": "Re200 metadata reports t300, final strict ratio0.000942283 vs0.001 and zero misses; source tests strict ratio and force/wake evidence shows periodicity. Seven steady final windows are bounded and reported reductions 3.78\u20136.18 orders; metadata source versions and executable limitations remain explicit."
       },
       {
         "id": 8,
         "text": "Figures do not correspond to results",
         "found": false,
-        "evidence": "Figure manifest and sanity checks trace sources."
+        "evidence": "The accepted PDF embeds the identified figures. Case histories and selected Re200 force/wake data were checked; no specific final figure proven unrelated to data. Not every image-to-data relationship has been independently reproduced."
       },
       {
         "id": 9,
         "text": "Claimed METIS but geometric partition",
         "found": false,
-        "evidence": "METIS_PartGraphKway source evidence."
+        "evidence": "main.cpp:121\u2013132 root-loads global mesh, uses real METIS and discards full partitions before solve; neighbor halo path present."
       },
       {
         "id": 10,
         "text": "Claimed reconstruction/limiter disabled",
         "found": false,
-        "evidence": "Production reconstruction and fallback counters recorded."
+        "evidence": "WLS reconstruction and limiter are present, and no demonstrated production disablement; historical binary unbound."
       },
       {
         "id": 11,
         "text": "Misrepresented no-slip surface velocity",
         "found": false,
-        "evidence": "Report documents imposed wall semantic."
+        "evidence": "solver.cpp:370\u2013371 explicitly sets no-slip wall velocity to zero."
       },
       {
         "id": 12,
         "text": "Misnamed figures",
         "found": false,
-        "evidence": "Validator/report field labels pass."
+        "evidence": "Plot script selects named Mach, Pressure and Vorticity arrays; solver.cpp:283 computes dv/dx\u2212du/dy. No specific variable swap proven."
       },
       {
         "id": 13,
         "text": "Copied solver core",
         "found": false,
-        "evidence": "No direct internal evidence; trust policy used."
+        "evidence": "No direct evidence copied/wrapped existing CFD core; external similarity/authorship not investigated."
       }
     ]
   },
