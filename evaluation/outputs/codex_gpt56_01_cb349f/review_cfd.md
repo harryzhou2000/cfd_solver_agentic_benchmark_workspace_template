@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:45:03.143993+00:00
+Generated: 2026-10-30T10:46:52.614235+00:00
 
-**Overall score: 4.82**
+**Overall score: 4.73**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -21,7 +21,7 @@ Generated: 2026-10-30T10:45:03.143993+00:00
 | 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | Rusanov flux is implemented and honestly disclosed as diffusive. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 5 | Farfield, slip and no-slip adiabatic paths plus surface semantics are documented. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 4.5 | Boundary surface values and no-slip zero velocity are explicit; solver.cpp:1094–1102 computes tangential cf. Integrated force is full traction rather than report-claimed tangential projection. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
 | 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 5 | WLS piecewise-linear reconstruction with production activation after continuation is source/metadata supported. |
@@ -36,7 +36,7 @@ Generated: 2026-10-30T10:45:03.143993+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 5 | Implicit local pseudo-time / matrix-free Krylov controls and residual evidence are present. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 5 | Read-only Re200 evidence reaches dt=0.01, t=300, BDF2 frozen-history control and 99.71% inner attainment; not rerun. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4.5 | Strict target ratio directly counts misses; historical Re200 reaches t300 with 87 misses/30000 and meaningful Cd/Cl/St. Restart does not preserve BDF history/time; executable hash remains unbound. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 5 | Eight-rank NACA/cylinder final runs plus np1/2/4 comparisons show near-identical terminal forces. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T10:45:03.143993+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.82
+- Overall score (0-5): 4.73
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

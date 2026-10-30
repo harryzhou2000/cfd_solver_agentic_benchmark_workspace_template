@@ -34,8 +34,8 @@
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Farfield, slip and no-slip adiabatic paths plus surface semantics are documented."
+      "score": 4.5,
+      "notes": "Boundary surface values and no-slip zero velocity are explicit; solver.cpp:1094\u20131102 computes tangential cf. Integrated force is full traction rather than report-claimed tangential projection."
     },
     {
       "id": "cfd.reconstruction",
@@ -69,8 +69,8 @@
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Read-only Re200 evidence reaches dt=0.01, t=300, BDF2 frozen-history control and 99.71% inner attainment; not rerun."
+      "score": 4.5,
+      "notes": "Strict target ratio directly counts misses; historical Re200 reaches t300 with 87 misses/30000 and meaningful Cd/Cl/St. Restart does not preserve BDF history/time; executable hash remains unbound."
     },
     {
       "id": "cfd.mpi_partition",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.82
+  "overall_score": 4.73
 }

@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:45:03.143506+00:00
+Generated: 2026-10-30T10:46:52.613519+00:00
 
-**Overall score: 4.2**
+**Overall score: 4.35**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | CMake and tests are present; clean rebuild was not feasible from immutable recovery because benchmark inputs are intentionally not copied. Report wrapper path is defective. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Clean af2fcc3 source builds in network-disabled cfd-bench with -I/opt/external/boost; report build wrapper has a working-directory defect. Seven CTests pass and two MPI tests pass with container-only MPI settings. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | Input-driven solve CLI and validation/error paths are implemented; historical evidence supports use, no fresh solver run performed. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3.5 | Input-driven CLI and collective restart error propagation exist. output.cpp:462–476 stores only cell IDs/current U; run_transient initializes both histories from U and a fresh time horizon, so it does not exactly continue BDF2. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 5 | Clear mesh, partition, halo, physics, numerics, output and solver modules. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T10:45:03.143506+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Defensive geometry/state checks and positivity safeguards are present; no fresh memory stress test. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | Nine CTests and Python tests are submitted/claimed; validator and historical rank evidence verified. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 4.5 | Seven non-MPI CTests and two MPI partition/halo tests independently passed in restricted container; MPI tests needed root/oversubscription container settings. No unsteady solver test was run. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Readable modular C++ source; report-wrapper working-directory defect remains. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T10:45:03.143506+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.2
+- Overall score (0-5): 4.35
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -114,7 +114,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
 | `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
-| `codex_gpt56_01_cb349f` | partial: provisional 94.5/100, no DQ found; source/DQ review ongoing |
+| `codex_gpt56_01_cb349f` | partial: provisional 94/100, no DQ found; historic binary/figure binding unverified |
 | `codex_gpt56_02_38616e` | unreviewed |
 | `codex_gpt56_03_93b257` | unreviewed |
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
@@ -1030,3 +1030,6 @@ gpt56_01 steady case checkpoint: all seven immutable force/residual/Mach plots i
 
 
 gpt56_01 source/force-split checkpoint: af2fcc3 report.tex:195 claims pressure and tangent-projected viscous traction are separately integrated. physics.cpp:351–356 computes full Newtonian tau·n; solver.cpp:618–628 integrates both components without tangent projection. Surface cf at solver.cpp:1094–1102 separately projects tangentially. Historical metadata revision461385a solver.cpp exactly matches curated bytes; actual normal contribution and binary hash are unbound. Viscous rubric10→8.5 and report4→3.5; this follows sonnet46-02/dsv4-03 precedent of a claimed output computed through a different path, not mechanical DQ6. Case-results10→9.5 separately for M015 inviscid terminal low-drag drift, total97→94.5. Clean source build in network-disabled cfd-bench needed explicit -I/opt/external/boost; seven CTests passed, then both MPI tests passed with container-only OpenMPI root/oversubscription settings after initial root guard failure. Remaining rubric/review/DQ provenance partial; no CFD rerun.
+
+
+gpt56_01 restart/review checkpoint: output.cpp:462–476 serializes global cell IDs and current U only; solver.cpp:1462–1477 initializes both prior BDF states from current U and runs a fresh time horizon. Thus restart is useful state initialization but cannot exactly resume an unsteady BDF2 trajectory; build/CLI8→7.5, total94.5→94. Corrected stale no-clean-build review note: immutable build succeeds after explicit Boost include, seven non-MPI CTests and two MPI tests pass across two invocations with container MPI settings. Review notes distinguish tangential cf from full integrated traction, 87 Re200 target misses, low-drag drift and unbound historic executable/individual figure correspondence. Remaining DQ/rubric verification partial; no CFD rerun.

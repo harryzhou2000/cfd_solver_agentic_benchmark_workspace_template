@@ -6,15 +6,15 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 3,
-      "notes": "CMake and tests are present; clean rebuild was not feasible from immutable recovery because benchmark inputs are intentionally not copied. Report wrapper path is defective."
+      "score": 4,
+      "notes": "Clean af2fcc3 source builds in network-disabled cfd-bench with -I/opt/external/boost; report build wrapper has a working-directory defect. Seven CTests pass and two MPI tests pass with container-only MPI settings."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Input-driven solve CLI and validation/error paths are implemented; historical evidence supports use, no fresh solver run performed."
+      "score": 3.5,
+      "notes": "Input-driven CLI and collective restart error propagation exist. output.cpp:462\u2013476 stores only cell IDs/current U; run_transient initializes both histories from U and a fresh time horizon, so it does not exactly continue BDF2."
     },
     {
       "id": "code.organization",
@@ -55,8 +55,8 @@
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Nine CTests and Python tests are submitted/claimed; validator and historical rank evidence verified."
+      "score": 4.5,
+      "notes": "Seven non-MPI CTests and two MPI partition/halo tests independently passed in restricted container; MPI tests needed root/oversubscription container settings. No unsteady solver test was run."
     },
     {
       "id": "code.hygiene",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.2
+  "overall_score": 4.35
 }

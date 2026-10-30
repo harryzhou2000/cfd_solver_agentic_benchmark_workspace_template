@@ -27,15 +27,15 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 3,
-          "notes": "CMake and tests are present; clean rebuild was not feasible from immutable recovery because benchmark inputs are intentionally not copied. Report wrapper path is defective."
+          "score": 4,
+          "notes": "Clean af2fcc3 source builds in network-disabled cfd-bench with -I/opt/external/boost; report build wrapper has a working-directory defect. Seven CTests pass and two MPI tests pass with container-only MPI settings."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Input-driven solve CLI and validation/error paths are implemented; historical evidence supports use, no fresh solver run performed."
+          "score": 3.5,
+          "notes": "Input-driven CLI and collective restart error propagation exist. output.cpp:462\u2013476 stores only cell IDs/current U; run_transient initializes both histories from U and a fresh time horizon, so it does not exactly continue BDF2."
         },
         {
           "id": "code.organization",
@@ -76,8 +76,8 @@
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Nine CTests and Python tests are submitted/claimed; validator and historical rank evidence verified."
+          "score": 4.5,
+          "notes": "Seven non-MPI CTests and two MPI partition/halo tests independently passed in restricted container; MPI tests needed root/oversubscription container settings. No unsteady solver test was run."
         },
         {
           "id": "code.hygiene",
@@ -87,7 +87,7 @@
           "notes": "Readable modular C++ source; report-wrapper working-directory defect remains."
         }
       ],
-      "overall_score": 4.2,
+      "overall_score": 4.35,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -124,8 +124,8 @@
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Farfield, slip and no-slip adiabatic paths plus surface semantics are documented."
+          "score": 4.5,
+          "notes": "Boundary surface values and no-slip zero velocity are explicit; solver.cpp:1094\u20131102 computes tangential cf. Integrated force is full traction rather than report-claimed tangential projection."
         },
         {
           "id": "cfd.reconstruction",
@@ -159,8 +159,8 @@
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Read-only Re200 evidence reaches dt=0.01, t=300, BDF2 frozen-history control and 99.71% inner attainment; not rerun."
+          "score": 4.5,
+          "notes": "Strict target ratio directly counts misses; historical Re200 reaches t300 with 87 misses/30000 and meaningful Cd/Cl/St. Restart does not preserve BDF history/time; executable hash remains unbound."
         },
         {
           "id": "cfd.mpi_partition",
@@ -170,7 +170,7 @@
           "notes": "Eight-rank NACA/cylinder final runs plus np1/2/4 comparisons show near-identical terminal forces."
         }
       ],
-      "overall_score": 4.82,
+      "overall_score": 4.73,
       "disqualification_flags": []
     },
     "result_review": {
@@ -200,8 +200,8 @@
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Positive minima, stable force tails, Re20 steady Cd 2.0469, and Re200 shedding St 0.16667 with rank consistency evidence."
+          "score": 4.5,
+          "notes": "Re20 Cd2.0467 and Re200 mean Cd1.1356, Cl amplitude0.325 and frequency\u22480.164 are credible; M015 inviscid Cd continues changing ~26% relative in final200 at a small near-zero scale."
         },
         {
           "id": "res.visualization",
@@ -221,24 +221,24 @@
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 5,
-          "notes": "49-entry manifest resolves figures to historical CSV/VTU data; spot-checked reported statistics match result_statistics.json."
+          "score": 4.5,
+          "notes": "Historical submodule 0ee54ae manifest identifies outputs and figures; report summaries and sampled raw histories match. Metadata revision461385a solver/main files match curated bytes, but exact executable and every individual figure binding remain unverified."
         }
       ],
-      "overall_score": 4.67,
+      "overall_score": 4.58,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 94.5,
+    "total_scored": 94.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "Source/CLI/output contract are strong; recovery excludes inputs and report wrapper fails."
+        "score": 7.5,
+        "notes": "Clean source builds with explicit bundled Boost include; 7 non-MPI and 2 MPI CTests pass with container MPI settings. Report wrapper has working-directory defect; restart stores only current state and cannot resume exact BDF history/time."
       },
       {
         "id": "mesh_geometry",
