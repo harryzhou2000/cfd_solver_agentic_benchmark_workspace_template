@@ -93,3 +93,8 @@ No independent rebuild/rerun was performed. Raw result data and PDF are excluded
 ## Verdict
 
 36/100, DQ=false. Basic solver/MPI structures exist, but delivered case completeness, viscous reliability, Re20 physics, Re200 completion, visual fields, and report honesty are insufficient.
+
+
+## Partial Re200 and full-mesh DQ review — 2026-10-30
+
+Canonical Re200 metadata marks completed=true/statistically_periodic, but run_status records step 4, physical time 0.05/300; forces.csv has five rows, metadata says five inner misses, zero target fraction and last ratio 1.01476097 versus 0.001. DQ7 applies to the false success metadata; terminal response honestly reports the case incomplete, and case score remains 0. Metadata SHA-256 26134314e539a4dd7263d3f315c4f4c20ee8123e116c1fb2119a0bac413a002d, force SHA eb3add84d2317b5d2a8e6a36493ef18f18e13bad4c28cefba1c6248d61d16172. Immutable d477eaf main.cpp:1708–1712 calls read_cgns_mesh on every MPI rank, retains full Mesh in scope and passes it by reference into solve_case; TASK.md:227 full-mesh prohibition applies independently. METIS and local state exist, so numbered DQ9 is not inferred. Remaining cases/source/rubric/DQ review partial; no CFD rerun.

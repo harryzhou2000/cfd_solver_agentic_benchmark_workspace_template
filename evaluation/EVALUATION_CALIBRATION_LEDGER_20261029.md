@@ -87,7 +87,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_11_6e6ac8` | fully reviewed: 70→53, DQ7 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_12_7e965b` | fully reviewed: 90→79, DQ false; all cases 2 |
 | `codex_dsv4_flash_14_80096b` | partial: Re200 and initial provenance/mesh assessed; remaining cases/rubric/DQ pending |
-| `codex_generic_02_ed5ee6` | unreviewed |
+| `codex_generic_02_ed5ee6` | partial: DQ7, TASK full mesh, Re200 checked; others pending |
 | `codex_generic_03_5f2165` | unreviewed |
 | `codex_generic_04_16009f` | unreviewed |
 | `codex_generic_05_2599b1` | unreviewed |
@@ -523,3 +523,8 @@ dsv4_flash_14 partial build/rubric checkpoint: provisional 87.5→82.5 (implicit
 
 
 dsv4_flash_14 source/provenance boundary: rubric 82.5→79.5 provisional (residual 14→13, second order 7→6, MPI 9→8); all 10 sections/27 review points and 13 DQ rules now have criterion-specific evidence, but run remains partial because actual production binary source is unbound. Re200 metadata git_revision=null, start/end 2026-08-18 01:30:47–04:18:32 UTC; a151896 committed 01:27:55 UTC, subsequent numerical commits 3ec9924 at 04:51:49 and a3ef6bd at 05:17:30 UTC; a151896→curated 05261f8 changes 225 added/31 removed lines across four solver files. Current build/cfd_solver timestamp 08:11:42 UTC postdates production; selected verification reports uncommitted solver/tool changes. Seven steady case timestamps span 01:30–05:59 UTC and git_revision=null. Need decisive saved original executable/source/build provenance to resolve production-specific DQ/accuracy; no rerun. Both gates pass.
+
+
+## generic_02 partial Re200/full-mesh DQ — 2026-10-30
+
+DQ false→true under 7 and TASK full mesh. Canonical Re200 metadata marks completed/statistically_periodic despite run_status step 4, t=0.05/300, five force rows, five inner target misses, zero target fraction and final ratio 1.01476097 versus 0.001. Terminal response honestly says incomplete; DQ7 concerns false metadata. Metadata SHA 26134314e539a4dd7263d3f315c4f4c20ee8123e116c1fb2119a0bac413a002d, force SHA eb3add84d2317b5d2a8e6a36493ef18f18e13bad4c28cefba1c6248d61d16172; score remains 0. Immutable d477eaf main.cpp:1708–1712 reads full Mesh on all ranks and passes it by reference to solve_case, violating TASK.md:227; METIS/local state means no numbered DQ9 inference. Remaining cases/source/rubric/DQ partial; both gates pass, no CFD rerun.

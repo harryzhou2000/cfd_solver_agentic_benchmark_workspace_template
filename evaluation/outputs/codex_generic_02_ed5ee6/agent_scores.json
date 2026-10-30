@@ -336,12 +336,23 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Does not reach t=300 and final response admits unfinished."
+      "notes": "Score 0 retained. Canonical metadata says completed=true/statistically_periodic but run_status says t=0.05/300, step 4; five force rows, five inner misses and last ratio 1.01476097 vs target 0.001. DQ7 applies despite final response honestly saying unfinished. Metadata SHA 26134314e539a4dd7263d3f315c4f4c20ee8123e116c1fb2119a0bac413a002d; force SHA eb3add84d2317b5d2a8e6a36493ef18f18e13bad4c28cefba1c6248d61d16172. No unsteady rerun."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "found": true,
+        "evidence": "Canonical results/cylinder_m010_laminar_re200/metadata.json marks completed=true/statistically_periodic although run_status.json records t=0.05/300, only five force rows exist, all five inner targets are missed, and last ratio 1.01476097 vs 0.001. The terminal response honestly calls it incomplete; DQ7 specifically concerns false metadata."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "Immutable d477eaf main.cpp:1708\u20131712 calls read_cgns_mesh on every rank, retains full Mesh in scope and passes it by reference to solve_case. METIS/local state exist; this independently violates TASK.md:227, not the narrower numbered DQ9 condition."
+      }
+    ]
   },
   "limitations": [
     "No evaluator rerun; Re200 was not rerun.",
