@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:41:19.298353+00:00
+Generated: 2026-10-30T06:48:54.605866+00:00
 
-**Overall score: 4.72**
+**Overall score: 4.58**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -21,7 +21,7 @@ Generated: 2026-10-30T06:41:19.298353+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4.5 | Rank evidence and plausible fields; Re200 St/Cd are modestly low and honestly disclosed. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 5 | 63 manifest-linked figures include required Mach, pressure, and wake views. |
+| 5 | **res.visualization** Visualizations | 0.15 | 4 | Accepted 52-page report contains readable steady histories, fields and Re200 wake/force figure; startup spike compresses late Re200 drag so the explicit late lift/drag criterion is unmet. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 5 | Comprehensive report explicitly identifies M2 plateau and Re200 resolution limitations. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T06:41:19.298353+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.72
+- Overall score (0-5): 4.58
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -95,11 +95,11 @@ The terminal root response was extracted from the root rollout's task-complete e
 
 ## Limitations
 
-The evaluator did not independently rebuild or rerun a steady MPI case; clean-build and rank-study claims were assessed from submitted source, raw artifacts, and documentation. The M2 inviscid case reaches only 2.55 residual orders at a documented certified plateau. Re200 was not rerun (policy); its readable delivered result reaches t=300 with all inner targets met, while its lower Strouhal/mean drag are candidly attributed to coarse wake resolution. Geometry support is explicitly 2-D.
+The evaluator independently rebuilt and ran eight bounded NACA/unit verification checks, but did not rerun a steady MPI production case; rank-study claims were assessed from submitted source, raw artifacts, and documentation. The M2 inviscid case reaches only 2.55 residual orders at a documented certified plateau. Re200 was not rerun (policy); its delivered metadata reports t=300 and all inner targets met, while its lower Strouhal/mean drag are candidly attributed to coarse wake resolution. Geometry support is explicitly 2-D.
 
 ## Verdict
 
-Score: **92/100; disqualified: false.** This is a strong, structurally valid and substantively credible original finite-volume submission with complete delivered packages, validated report, and an honest account of the M2 plateau and Re200 accuracy limitation. The primary deductions are limited independent reproduction, the M2 residual shortfall, modest Re200 under-resolution, and 2-D-only geometry scope.
+Score: **90/100; disqualified: false (partial calibration).** This is a strong, structurally valid and substantively credible original finite-volume submission with complete delivered packages, validated report, and an honest account of the M2 plateau and Re200 accuracy limitation. The primary deductions are limited independent reproduction, the M2 residual shortfall, modest Re200 under-resolution, and 2-D-only geometry scope.
 
 
 ## Re200 visualization floor — 2026-10-30
@@ -112,3 +112,10 @@ All 52 pages of the accepted immutable-source PDF were visually checked; no miss
 M015 laminar 4.5→4: selected last400 Cl changes −0.00411475→−0.00303332 (first/second half means −0.00377137/−0.00322880), whereas Cd changes 0.0564460→0.0563279. Its recorded source revision b350651 checks a Cd-only steadiness window (`steady_driver.cpp:249–257,300,398–399`). Lift drift limits confidence, but its absolute change is small relative to drag and does not alone establish DQ7. Other steady case tail checks remain in progress.
 
 Re200 metadata reports null revision and start/end 2026-08-26 13:47:16–19:10:12 UTC. Source commit 638fe3f immediately precedes that start; later 16:03 and 16:38 commits add positivity telemetry while the run was ongoing. Comparing 638fe3f with 0097308 shows the transient total-residual and actual inner-ratio checks remain while telemetry is added, but timestamps/lineage do not establish the exact compiled binary. The final source root-only mesh preprocessing releases its global mesh before iteration. No Re200 rerun.
+
+
+## Build and provenance evidence — 2026-10-30
+
+The immutable cb2bac0 source configured and built cleanly in a network-disabled cfd-bench container with 2 CPUs, 3 GiB and 256 pids. With supplied NACA benchmark inputs mounted read-only, all eight bounded CTest checks passed, including conservation at both orders, freestream, gradient, Jacobian, spectral radius, Riemann and reconstruction. No production CFD or Re200 rerun.
+
+The scorecard had 91 while the old report verdict said 92; the 91 scorecard is the prior baseline. Report/visualization 5→4 for unreadable late Re200 drag, making the current total 90. Independent clean build/test review points increase from 4.5→5; visualization review 5→4. Contestant `docs/binary_provenance.md` says the running Re200 executable was built before 15:05 UTC, at a628093 or earlier; its bounded single-rank bit-identity checks do not verify the entire 4-rank transient. The 638fe3f source commit timestamp just precedes recorded run start but does not establish that build was used. Remaining rubric/DQ and physical source-binding review partial.

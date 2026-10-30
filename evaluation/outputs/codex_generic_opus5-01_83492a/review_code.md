@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:41:19.297288+00:00
+Generated: 2026-10-30T06:48:54.604828+00:00
 
-**Overall score: 4.59**
+**Overall score: 4.71**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4.5 | Documented CMake build and clean-clone evidence; evaluator did not independently rebuild. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 5 | Immutable cb2bac0 clean CMake build passed in cfd-bench with network disabled, 2 CPUs/3GiB/256 pids and documented roots; no production CFD rerun. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 5 | Required solve CLI, validation, and explicit bad-input paths are implemented. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T06:41:19.297288+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4.5 | Input validation, positivity guard, and explicit errors are implemented. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4.5 | Eight committed test sources and documented clean-clone results; not rerun by evaluator. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 5 | Independent clean build ran all eight bounded verification tests successfully: uniform state, both conservation orders, gradient, Jacobian, spectral radius, Riemann and reconstruction. Tests used supplied NACA cases; no Re200 rerun. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 4.5 | Result/build artifacts excluded at curated tip; report source and figures remain reproducible. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T06:41:19.297288+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.59
+- Overall score (0-5): 4.71
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
