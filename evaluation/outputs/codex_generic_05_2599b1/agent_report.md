@@ -74,7 +74,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=false. The submission is structurally invalid and physically weak, but source inspection did not prove an external solver wrapper, fake MPI, explicit-only path, or other listed disqualification trigger.
+DQ=true under TASK.md:227 because immutable source retains full mesh on every rank throughout iterations. Numbered DQ9 full-state condition is not inferred: state vectors are partition-local. Other triggers remain under review.
 
 ## Metadata answers & session selection
 
@@ -86,4 +86,9 @@ No independent build/rerun was performed and Re200 was not rerun. The raw packag
 
 ## Verdict
 
-40/100, DQ=false. The implementation has meaningful CFD/MPI structure, but no declared final package validates and the admitted viscous/Re200 physics limitations preclude completion credit.
+40/100, DQ=true (partial calibration). The implementation has meaningful CFD/MPI structure, but no declared final package validates and the admitted viscous/Re200 physics limitations preclude completion credit.
+
+
+## Partial full-mesh review — 2026-10-30
+
+Immutable d8491d9 solver/src/main.cpp:947–954 calls read_mesh on every rank and constructs partition-local state; MeshData mesh remains live throughout the steady/transient iterations and is subsequently passed to write_vtu at :1286,1474. This violates TASK.md:227 full-mesh prohibition independently of genuine METIS/halo work and local solution state. Numbered DQ9 requires full-state replication or geometric split with METIS metadata and is not inferred. Workspace contains many variants; report-to-final-package mapping, other DQ, cases and rubric remain partial. No CFD rerun.

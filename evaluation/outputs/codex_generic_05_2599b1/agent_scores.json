@@ -340,8 +340,14 @@
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "Immutable d8491d9 solver/src/main.cpp:947\u2013954 calls read_mesh on every rank and partitions it; MeshData mesh remains in solve_case scope throughout steady and transient iterations and is used again by write_vtu :1286,1474. TASK.md:227 prohibits full mesh replication during iterations. State vectors are local, so numbered DQ9 full-state condition is not inferred."
+      }
+    ]
   },
   "limitations": [
     "No rerun; Re200 was not rerun.",
