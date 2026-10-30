@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 5,
-      "notes": "CMake source."
+      "score": 4.5,
+      "notes": "Immutable source builds in network-disabled cfd-bench with explicit externals; no CTests registered."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Runner."
+      "score": 4.5,
+      "notes": "Input-driven case/output/restart CLI and documented launch scripts; no production case rerun."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Structured project."
+      "score": 4.5,
+      "notes": "Separate case, mesh, partition, physics, solver and output modules; fixed 2-D state remains."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No authorship investigation."
+      "notes": "No internal solver executable wrapper identified; external similarity investigation excluded under trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Case configuration."
+      "score": 4.5,
+      "notes": "Generic case-configured CGNS and BC paths; CGNS MIXED section unsupported."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "MPI source."
+      "notes": "Root-only preprocessing, METIS, owned/ghost exchange and reductions; rank-study exact binaries unbound."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "Guards."
+      "notes": "Positivity and finite checks present, with Newton\u2013Krylov fallback; no independent memory stress test."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "All packages validate."
+      "score": 3,
+      "notes": "Recorded examiner accepted eight outputs; isolated build succeeds, no registered CTests, no unsteady rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Final audit clean."
+      "notes": "Documented scripts, original manifest and report; historic output git revision predates solver source."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.47
+  "overall_score": 4.12
 }
