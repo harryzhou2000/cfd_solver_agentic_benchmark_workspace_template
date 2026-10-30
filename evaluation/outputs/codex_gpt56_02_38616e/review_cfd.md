@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:57:24.432056+00:00
+Generated: 2026-10-30T10:59:04.622209+00:00
 
-**Overall score: 4.92**
+**Overall score: 4.77**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T10:57:24.432056+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 5 | Submitted source/report documents limiting and positivity safeguards. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 5 | Source-level review recorded viscous treatment for the Re5000 cases. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3.5 | Immutable report.tex:24 states integrated viscous split is tangential. physics.cpp:449–458 forms full tau·n and solver.cpp:1054–1064 integrates both traction components; only surface cf at :1078–1083 projects tangentially. Historical source checkpoint be1f6b0 matches curated solver/src. Normal contribution and executable hash are not independently quantified. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 5 | Submitted solver source documents the steady implicit-march path. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T10:57:24.432056+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.92
+- Overall score (0-5): 4.77
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

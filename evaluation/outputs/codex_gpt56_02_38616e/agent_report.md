@@ -21,8 +21,10 @@ In benchmark order, the independently reviewed scores are 4, 3, 4.5, 4, 3, 3.5, 
 
 ## Verdict
 
-**92/100, not disqualified.** The complete output contract, source-level method evidence, MPI diagnostics, and credible Re200 deliverables support a strong evaluation. Deductions retain the two low-reduction NACA cases and a submission-packaging limitation: the strict audit excludes all TeX-escaped report PNG references, so the committed report source is not self-contained even though the images were available as contestant artifacts. `run_identity.json` and `contestant_final_response.md` are unindexed sidecars and are not covered by `cfdeval check`.
+**Provisional 90/100, no disqualification established.** The complete output contract, source-level method evidence, MPI diagnostics, and credible Re200 deliverables support a strong evaluation. Deductions retain the two low-reduction NACA cases and a submission-packaging limitation: the strict audit excludes all TeX-escaped report PNG references, so the committed report source is not self-contained even though the images were available as contestant artifacts. `run_identity.json` and `contestant_final_response.md` are unindexed sidecars and are not covered by `cfdeval check`.
 
 ## Calibration in progress
 
 The Re200 score is corrected 2→4.5: accepted contestant PDF pages 33–34 and 38–39 show residual, both late forces, wake and lift spectrum. The independently checked t180–300 force history gives mean Cd1.2705235, Cl−0.568460..0.570342, and 22 upward crossings with mean period5.370075 (frequency0.18622), consistent with the reported St0.18333 at FFT resolution0.016667. The exact historic executable cannot be independently rehashed; the selected session records its production/rebuild hash. Rubric and DQ remain under review.
+
+Immutable report.tex:24 says the force split uses tangential viscous traction, but physics.cpp:449–458 forms full traction and solver.cpp:1054–1064 integrates it without removing the normal component. The separate surface cf at solver.cpp:1078–1083 is tangential. Viscous rubric 9→7.5 and report 4→3.5; normal contribution is unquantified and this different output path does not automatically trigger DQ6. Source checkpoint be1f6b0 matches curated solver source; the exact historic executable remains qualified.

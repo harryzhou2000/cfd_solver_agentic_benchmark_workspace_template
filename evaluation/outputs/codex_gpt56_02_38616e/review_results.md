@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:57:24.432350+00:00
+Generated: 2026-10-30T10:59:04.622508+00:00
 
-**Overall score: 4.55**
+**Overall score: 4.25**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T10:57:24.432350+00:00
 | 5 | **res.visualization** Visualizations | 0.15 | 5 | Submitted report/manifest describes the required visual result coverage. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 5 | Submitted report documents methods, cases, results, and limitations; no evaluator redraw adds credit. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Accepted readable 39-page report contains case plots but report.tex:24 misstates full-traction integrated split as tangential; clean curated PDF build lacks escaped figure assets. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Strict audit excluded TeX-escaped PNG references, so committed report source is not fully self-contained despite available contestant artifacts. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T10:57:24.432350+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.55
+- Overall score (0-5): 4.25
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

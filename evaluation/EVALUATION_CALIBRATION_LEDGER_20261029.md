@@ -115,7 +115,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
 | `codex_gpt56_01_cb349f` | fully reviewed: 94/100, no DQ found; executable and individual image bindings qualified |
-| `codex_gpt56_02_38616e` | partial: Re200 2→4.5; remaining case/rubric/DQ review ongoing |
+| `codex_gpt56_02_38616e` | partial: provisional 90/100, no DQ established; remaining source/DQ review ongoing |
 | `codex_gpt56_03_93b257` | unreviewed |
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
 | `codex_gpt56_05_7bee7c` | unreviewed |
@@ -1045,3 +1045,6 @@ gpt56_02 Re200 correction: accepted workspace sibling PDF SHA256 845431790330ef3
 
 
 gpt56_02 steady case checkpoint: all 39 accepted contestant PDF pages rendered and visually checked. Case-specific numeric CL/CD, force/residual and near-body Mach/wake plots are present; prior all-seven 2-point caps wrongly equated curated figure exclusion with absent contestant evidence. Each case note records exact PDF page numbers, workspace CSV/PNG SHA256 and final200 Cd/Cl ranges. Scores [2,2,2,2,2,2,2]→[4,3,4.5,4,3,3.5,4.5]. M015 inviscid Cd0.000628803→0.000564251 (near-zero relative drift); M080 inviscid/laminar restart-origin reductions0.569/0.371 orders with bounded 200-row force windows; M200 laminar Cd0.119303→0.115732 (~3%); Re20 Cd2.05697→2.04897. Compressed steady force plots treated as presentation limitation, not automatically a floor cap. Source/binary session attribution remains qualified; rubric92 and DQ review partial. No CFD rerun.
+
+
+gpt56_02 force-split checkpoint: immutable report.tex:24 claims tangential viscous force split. physics.cpp:449–458 forms full tau·n and solver.cpp:1054–1064 integrates both traction components; surface cf separately removes normal component at :1078–1083. Source checkpoint be1f6b0 matches curated solver/src; exact historic binary and normal contribution remain qualified. Viscous rubric9→7.5 and report4→3.5, total92→90; this claimed output through a different code path follows sonnet46-02/gpt56-01 precedent and is not automatic DQ6. Remaining source/rubric/DQ review partial. No CFD rerun.
