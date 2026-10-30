@@ -25,3 +25,7 @@ The delivered `external` symlink is dangling, so I did not perform a clean solve
 ## Verdict
 
 The submission is a credible, modular CFD implementation with seven structurally valid steady results and an honest Re200 failure report. It is not a complete benchmark result because Re200 fails and no rank-count evidence is delivered.
+
+## Partial Re200 evidence review — 2026-10-30
+
+Designated case metadata and status explicitly mark failed/completed=false at step 6889, t=68.9/300; force history remains grossly nonphysical, Cd approximately 36.68 initially and 29.98 by t≈68.79, so score remains 0. Report.tex:195–196 and :452–455 incorrectly say failure occurred at the first step, while the run manifest and actual status give t=68.9. Metadata says observed inner min/max 1000/1000, yet residuals.csv contains many smaller inner counts (including 5 and 10), and last ratio is null. Immutable driver.cpp:825–826,861 would not count a NaN ratio as a miss; the precise actual strict miss count is unknown. This is a traceability/accounting defect, not an assertion of a falsely successful final status. Source/rubric and other case review remain partial; no CFD rerun.

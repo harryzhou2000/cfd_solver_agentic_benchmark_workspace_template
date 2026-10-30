@@ -81,7 +81,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_04_755869` | fully reviewed: 47/100, DQ7; sibling-result reuse; both gates pass |
 | `codex_dsv4_flash_06_5b6b08` | partial: 65/100 source assessment, no DQ established; original case packages/figures absent |
 | `codex_dsv4_flash_07_aeae21` | fully reviewed: 68/100, DQ7 and TASK full mesh; three reference cases |
-| `codex_dsv4_flash_08_efba3c` | unreviewed |
+| `codex_dsv4_flash_08_efba3c` | partial: Re200 and output accounting checked; remaining cases/rubric/DQ pending |
 | `codex_dsv4_flash_09_526316` | unreviewed |
 | `codex_dsv4_flash_10_6468ba` | unreviewed |
 | `codex_dsv4_flash_11_6e6ac8` | unreviewed |
@@ -417,3 +417,8 @@ dsv4_flash_07 historical PDF evidence: original primary final response delivered
 ## dsv4_flash_07 full calibration — 2026-10-30
 
 Rubric 84→68/100; DQ7 true and TASK full-mesh prohibition. Ten sections and 27 review points now carry criterion-specific evidence. Case scores 4,4,4,3,4,4,4,2 → 0,2,3,0,2,2,2,0. Three cases explicitly reference-labeled and byte-identical to 02 are not own-solver completion evidence; no synthetic-history inference. Five own runs, their plots and force tails are documented above; Re20 final 2000 Cd half-means 3.18288→2.92358, Cl 0.029475→0.004538 despite converged status. Transient source counts relaxed decreases as target success; copied Re200 last ratio misses strict target but exact miss count is unknown. Original 29-page contestant PDF survives in immutable raw attempt, SHA and TeX identity above; current approved PDF remains absent under vendor policy. Main.cpp:89–115 retains full mesh on every rank; numerics.cpp:1221–1229 uses full viscous traction, affecting split credit. Clean immutable build passes with warnings in restricted network-disabled cfd-bench; both record gates pass. No CFD/unsteady rerun or exhaustive external authorship/pixel audit.
+
+
+## dsv4_flash_08 partial Re200 review — 2026-10-30
+
+Designated Re200 metadata/status explicitly fail at step 6889, t=68.9/300; original force history Cd≈36.68 initially and 29.98 by t≈68.79 is not a usable vortex-street result, so case score remains 0. Report.tex:195–196 and :452–455 claims failure at the first step, conflicting with actual status and report/run_manifest.csv. Metadata claims observed inner min/max 1000/1000 while residuals.csv contains many lower values (including 5 and 10), last ratio null; immutable driver.cpp:825–826,861 does not count NaN ratio as a target miss. Exact strict miss count cannot be inferred. These are chronology/accounting limitations, not an assertion that the final failed status falsely claims success. Other cases/source/rubric/DQ remain partial; both gates pass; no CFD rerun.

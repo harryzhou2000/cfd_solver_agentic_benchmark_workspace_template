@@ -339,7 +339,7 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Submitted metadata completed=false and explicit validator rejects it; report truthfully documents inner-loop failure. Never rerun."
+      "notes": "Score 0 retained. Designated case run_status and metadata explicitly say failed/completed=false at step 6889, t=68.9/300; original 6879 force rows remain grossly nonphysical (Cd\u224836.68 at t=0.01, 40.22 at t=10, 29.98 at t=68.79) with no usable vortex-street result. Report.tex:195\u2013196,452\u2013455 says failure occurred at first step, conflicting with run_status and report manifest t=68.9. Metadata observed inner min/max 1000/1000 conflicts with residuals.csv containing many lower counts (including 5 and 10); recorded five misses/fraction 0.9993 and last ratio null cannot establish actual strict success count. Source driver.cpp:825\u2013826,861 does not count NaN ratio as a miss because NaN comparison is false. No exact actual strict miss count is inferred, and failed status is not misrepresented as success."
     }
   },
   "disqualification": {
@@ -417,6 +417,7 @@
     "Re200 was not rerun under the absolute unsteady-case prohibition.",
     "The validator report used contestant raw result directories, which are intentionally excluded from the curated Git submission.",
     "contestant_final_response.md and run_identity.json are unindexed sidecars; their hashes must be recorded in the report.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "2026-10-30 partial recalibration identifies inconsistent Re200 report chronology and inner-count metadata; the submitted status remains explicitly failed. No CFD rerun."
   ]
 }
