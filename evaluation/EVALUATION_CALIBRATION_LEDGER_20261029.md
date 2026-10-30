@@ -77,7 +77,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_sonnet-01_96c411` | fully reviewed: 71/100, DQ false; report PDF unsuitable for snapshot; both gates pass |
 | `codex_dsv4_flash_01_0c1996` | partial: 48/100, DQ 6/7/10 and TASK full mesh; two historical raw np1 packages unavailable |
 | `codex_dsv4_flash_02_3447d3` | fully reviewed: 68/100, DQ7 and TASK full mesh; both gates pass |
-| `codex_dsv4_flash_03_294b64` | unreviewed |
+| `codex_dsv4_flash_03_294b64` | partial: Re20/Re200 delivered PDF and DQ7 reviewed; other cases/rubric/points pending |
 | `codex_dsv4_flash_04_755869` | unreviewed |
 | `codex_dsv4_flash_06_5b6b08` | unreviewed |
 | `codex_dsv4_flash_07_aeae21` | unreviewed |
@@ -368,3 +368,8 @@ dsv4_flash_02 Re20 DQ7 adjudication: added independent steady false-success evid
 ## dsv4_flash_02 full calibration — 2026-10-30
 
 Rubric 73→68/100, DQ7 and TASK full-mesh prohibition; ten sections and 27 review points now contain criterion-specific evidence. Case scores 2,2,2,2,2,2,2,0 → 2,2,2,2,2,2,2,1. Re200 actual t≥150 data contains broad 0.25–0.32 spectral content but last strict ratio 0.3696 against 0.001; relaxed target accounting makes the true miss count unknown. Re20 converged at 0.564 residual orders while final 2000 lift half-means move −0.002251→0.028140; plateau code only monitors drag. main.cpp:89–119 keeps full mesh per rank; report says otherwise. solver.cpp:1438–1518 uses full traction, disclosed in report.tex:786–788, so viscous score reflects 5.4 without DQ6. Reported rank comparisons do not establish DQ4 but separate original rank comparison packages are unavailable. Clean immutable build passed with warnings in restricted network-disabled cfd-bench; no solver/unsteady rerun, exhaustive external authorship or pixel audit. The report PDF remains appropriately absent because curated source cannot compile and no sibling PDF exists. Both record gates pass.
+
+
+## dsv4_flash_03 partial Re20/Re200 review — 2026-10-30
+
+Accepted sibling PDF SHA-256 `9c9ca05b3cd8884b19028461b4c05b123b4e86184a588c2c8a1ac26906e52e1f` matches indexed bytes and immutable TeX blob `61ca3a2a50982a99887fab725ea53e5f2871395d`; PDF pp14–16 render Re20/Re200 force/residual and wake-field evidence. Re20 status converged with 1.893 residual reduction orders, but last 2000 original force rows Cl half means −0.84047→−1.11943 and Cd 1.96276→2.12848; report.tex:266–267 calls stable plateau and solver.cpp:1015–1022 tests residual stall without forces. DQ false→true under trigger 7; Re20 score 2→1. Re200 metadata completed/converged but report.tex:275,279 explicitly says steady, no vortex street or St; original last-10% Cd 1.01762162–1.01764043 and Cl 0.193048723–0.19307527 support no shedding, case remains 1. Its PDF p15 force plot is dominated by startup and does not show a readable late-periodic force window. Do not infer unknown strict target misses. Other cases/rubric/areas partial; both gates pass, no CFD rerun.

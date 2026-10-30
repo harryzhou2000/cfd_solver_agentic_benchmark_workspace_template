@@ -61,3 +61,7 @@ The initial environment is reconstructed post-run. The report's figures are refe
 ## Verdict
 
 Score: **87/100**, no DQ. Strong source/MPI/result evidence and structural validation; deductions for the missing Re200 vortex street, limited plateau quality, and non-self-contained curated report figures.
+
+## Partial Re20/Re200 recalibration — 2026-10-30
+
+The accepted sibling PDF SHA-256 `9c9ca05b3cd8884b19028461b4c05b123b4e86184a588c2c8a1ac26906e52e1f` matches indexed bytes and immutable TeX blob `61ca3a2a50982a99887fab725ea53e5f2871395d`. PDF pp14–16 renders Re20 and Re200 force/residual plots and fields despite old committed-only notes; excluded figure assets remain a separate report rebuild limitation. Re20 status converged and report.tex:266–267 describes a stable plateau, but original last 2000 force rows have Cd half means 1.96276→2.12848 and Cl −0.84047→−1.11943. Source solver.cpp:1015–1022 accepts residual stall without checking forces; DQ7 applies and Re20 case 2→1. Re200 report honestly discloses converged-to-steady and absence of shedding; its t≥last10% Cd and Cl ranges are 1.01762162–1.01764043 and 0.193048723–0.19307527, so case remains 1. Do not infer unmeasured strict target misses. Other cases, rubric and review areas remain partial; no CFD rerun.

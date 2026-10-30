@@ -333,23 +333,31 @@
       "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.0171, CD=0.0812 at 9772c16:solver/report/report.tex:236; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator passed; documented shock plateau, though force variation is limited."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-1.2106, CD=2.2435 at 9772c16:solver/report/report.tex:237; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator passed; steady cylinder case and MPI evidence credited."
+      "score": 1,
+      "notes": "Score 2\u21921. Accepted contestant PDF pp14\u201315 shows the Re20 residual/force history and wake-related Mach/pressure fields; report.tex:266\u2013267 calls the plateau stable and reports Cd=2.2435, Cl=\u22121.2106. Original last 2000 force rows have Cd 1.94539\u20132.24346 (half means 1.96276\u21922.12848) and Cl \u22121.21056 to \u22120.67935 (half means \u22120.84047\u2192\u22121.11943). Metadata marks converged after 1.893 residual orders, yet both forces drift substantially and wake/lift are asymmetric. solver.cpp:1015\u20131022 accepts residual stall without a force check, contradicting TASK.md:172 stable-force plateau requirement."
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.1930, CD=1.0176 at 9772c16:solver/report/report.tex:238; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; shedding statistic lift_amplitude=0.0001 at 9772c16:solver/report/report.tex:275; no committed/referenced late-time periodic-force plot. Score 1 retained after the post-processing audit. Prior case judgment: Reached t=300 with submitted BDF2 evidence but explicitly did not develop vortex shedding; not rerun."
+      "notes": "Score 1 retained. Accepted contestant PDF p15 shows Re200 residual and full force histories; p16 shows wake vorticity, so prior committed-asset-only note omitted delivered figures. Report.tex:275,279 accurately discloses no shedding or St, mean Cd\u22481.018 and Cl\u22480.193. Original last-10% Cd 1.01762162\u20131.01764043 and Cl 0.193048723\u20130.19307527 confirms nearly steady asymmetric wake rather than a vortex street. Metadata reports completed=true, converged, t=300 with fraction 1 and zero inner misses; source uses actual total-inner target checks, though their numerical acceptance requires independent interpretation. PDF p15 full-history force scale is dominated by startup, with no readable late lift/drag periodic plot; wake is visibly steady. Computed but physically incomplete vortex-street result remains score 1."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "metadata/status marks incomplete or failed runs as successful",
+        "found": true,
+        "evidence": "Selected Re20 run metadata marks converged; report.tex:266\u2013267 calls its plateau stable at 1.893 residual orders. Original final 2000 rows have Cl half means \u22120.84047\u2192\u22121.11943 and Cd 1.96276\u21922.12848, with significant continued drift; solver.cpp:1015\u20131022 accepts residual stall without checking forces, contrary to TASK.md:172. Re200 separately reports completed/converged despite no required vortex street, which the report explicitly discloses; no strict inner miss count is inferred."
+      }
+    ]
   },
   "limitations": [
     "Post-run provenance reconstruction only.",
     "Broken/legacy external was not repaired and no evaluator rerun occurred.",
     "Curated figures had only indirect TeX references and were excluded to satisfy immutable audit; submitted report does not build self-contained.",
     "run_identity.json and final response sidecars are not index-validated.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "2026-10-30 partial recalibration accepts the matching contestant PDF as delivered evidence despite excluded curated figures; Re20 force instability and honest Re200 no-shedding disclosure are assessed separately. No CFD rerun."
   ]
 }
