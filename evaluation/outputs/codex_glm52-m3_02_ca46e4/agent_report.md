@@ -13,7 +13,7 @@ The selected root tree remains 102,546,862 tokens. Regeneration removed one inhe
 
 The immutable commit tree, task/output contract, scoring rubric, committed C++/CMake/README/report/scripts, `run_identity.json`, and project-local telemetry sidecars were read. `git ls-tree -r 6148b7b` proves that the submission has source, `report.tex`, and nine referenced PNG figures, but no `solver/results/<required-case>` directory, no raw result package, and no report `run_manifest`, `figure_manifest`, or `sanity_checks` artifact.
 
-Contestant branch checkpoint `99413eb21f9d380de985f5a75842fafc7d75866f`, recorded 2026-08-02 09:07 UTC shortly before the selected session's 09:10 UTC final response, contains all eight canonical result packages and historical report artifacts. Its solver/src matches `6148b7b` exactly; its report differs. The final response states that all eight cases were run. These are contestant-delivered historical artifacts even though the curator excluded raw results from the result tip. Exact historic executable identity remains unverified. The previous source-only zero-case verdict was therefore incomplete; provisional scores remain pending individual case/physics review. No evaluator CFD run or Re200 rerun was performed.
+Contestant branch checkpoint `99413eb21f9d380de985f5a75842fafc7d75866f`, recorded 2026-08-02 09:07 UTC shortly before the selected session's 09:10 UTC final response, contains all eight canonical result packages and historical report artifacts. Its solver/src matches `6148b7b` exactly; its report differs. The final response states that all eight cases were run. These are contestant-delivered historical artifacts even though the curator excluded raw results from the result tip. Read-only validation of the eight checkpoint case directories plus historical report returned OK for all nine paths; the validator accepts the clamped fraction and does not assess physical correctness. Exact historic executable identity remains unverified. The previous source-only zero-case verdict was therefore incomplete; provisional scores remain pending individual case/physics review. No evaluator CFD run or Re200 rerun was performed.
 
 ## Findings
 
@@ -33,17 +33,17 @@ Important source/report limitations are material. `output.hpp` records the invis
 | Implicit And Transient Methods | 15 | 9 | LU-SGS/BDF2 source; Re200 inner override/non-evidence. |
 | MPI | 10 | 5 | METIS and neighbor halos exist, but each rank retains full mesh during solve; rank evidence under review. |
 | Case Results And Validation | 10 | 3 | Recovered eight packages reviewed; unsteady miss/no street and mixed steady convergence. |
-| Report, Visualization, Analysis | 5 | 1 | Methods/figures exist but lack data/manifest/coverage. |
+| Report, Visualization, Analysis | 5 | 1.5 | Checkpoint plots exist; several report numbers and inner-count claims conflict. |
 | Extensibility | 5 | 3 | Modular components, limited architecture. |
 
-**Provisional total: 58/100.**
+**Provisional total: 58.5/100.**
 
 ## Review-area scores
 
 | Area | Overall | Basis |
 |---|---:|---|
-| Code | 2.92/5 | Modular implementation and MPI source, without build/tests and with status/metadata defects. |
-| CFD methods | 3.42/5 | Broad source implementation, unverified numerically and constrained by documented fallbacks. |
+| Code | See recorded scores | Modular source, clean build, ignored restart and full mesh replication. |
+| CFD methods | See recorded scores | Broad source implementation constrained by documented fallbacks. |
 | Results | provisional | Historical checkpoint results require case-by-case review. |
 
 All 27 individual review points and their evidence notes are in `agent_scores.json`.

@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T09:11:35.814378+00:00
+Generated: 2026-10-30T09:13:51.647734+00:00
 
 **Overall score: 2.94**
 
@@ -27,13 +27,13 @@ Generated: 2026-10-30T09:11:35.814378+00:00
 | 6 | **code.mpi** MPI correctness | 0.15 | 2.5 | 6148b7b main.cpp:105–137 constructs a full mesh on every rank, holds it through solver loops and uses it again :409; TASK.md:46,227 prohibit this despite actual METIS and neighbor halos. Historic rank packages require further review. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Positivity checks and errors exist, but main.cpp labels max-step steady runs converged unconditionally and submitted evidence cannot demonstrate robust completion. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | main.cpp:274–276 assigns converged after max steps irrespective of residual; historical M200 laminar reports converged after residual growth, and Re200 success fraction is clamped in output.hpp:406–408. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
 | 8 | **code.testing** Testing and validation evidence | 0.10 | 1 | Clean immutable-source build passed; CTest reports no registered tests. Historical result packages were recovered; no evaluator CFD run or Re200 rerun. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Readable header-oriented C++ and scripts, but report/source contradictions and unverified generated-result claims remain. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Header-oriented C++ is modular; report final-force table conflicts with checkpoint histories, restart is ignored, and metadata convergence fraction is clamped. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 

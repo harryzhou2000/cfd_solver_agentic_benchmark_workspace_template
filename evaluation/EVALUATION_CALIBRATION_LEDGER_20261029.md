@@ -106,7 +106,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_vllm-qwen38-01_2045e0` | partial: all cases/PDF/source/rubric examined; DQ4 rank anomaly unbound to same binary; other figure provenance uncertain |
 | `codex_generic_vllm-qwen38-02_d47362` | partial: source/result, DQ and score adjudication ongoing |
 | `codex_glm52-m3_01_919b67` | partial: 62.5/100, DQ7/10 and TASK full-mesh; binary/remaining review ongoing |
-| `codex_glm52-m3_02_ca46e4` | partial: provisional 58/100, DQ7 and TASK full-mesh; source and DQ review ongoing |
+| `codex_glm52-m3_02_ca46e4` | partial: provisional 58.5/100, DQ7 and TASK full-mesh; source and DQ review ongoing |
 | `codex_glm52-m3_03_674665` | unreviewed |
 | `codex_glm52-m3_04_32f2d0` | unreviewed |
 | `codex_glm52-m3_05_f094c1` | unreviewed |
@@ -906,3 +906,7 @@ glm52-m3-02 recovered case review: all eight checkpoint `99413eb` force/residual
 Re200 checkpoint `*_mach.png` is visually labeled velocity_magnitude; immutable plot_results.py:174–180 calls `plot_field(...,"mach","velocity_magnitude")` and overwrites the same Mach file. The underlying array selected is still `mach`; the mistaken colorbar/title does not establish a velocity-as-Mach DQ12. Figures/data are not automatically assumed matched beyond inspected histories.
 
 glm52-m3-02 build/restart/viscous checkpoint: fresh `6148b7b` archive built successfully in network-disabled cfd-bench under 2 CPUs, 3 GiB and 256-process limits; CTest reported no tests. main.cpp:34,61 only parses `restartFile` and never reads/applies it; checkpoint restart_final.dat files are nontrivial binary state records, not placeholder findings. Build/CLI5→4.5 after balancing successful build against unsupported restart. solver.hpp:596–610 integrates complete viscous traction including normal component, whereas rubric requires tangential skin-friction force split; viscous7→5.5. This is scored separately and is not mechanically DQ6. Total60→58; CLI and viscous review areas updated. No CFD rerun; source/report/DQ calibration and binary attribution remain partial.
+
+glm52-m3-02 validator/PDF/review checkpoint: read-only examiner validation of eight extracted 99413eb case directories and historical report returned OK for all nine paths; that validator accepts the clamped Re200 fraction and does not establish numerical correctness. All eleven accepted PDF pages SHA256 `39a9e50bd7f45105f1d4bdcc45bd55950fda394f2e745ca87fcbf65236d64f89` rendered and visually inspected. It embeds nine plots, while checkpoint manifest supplies additional case figures. Report.tex:159–160 says five Re200 inner steps, :172 says one, and :141–148 force table conflicts with selected histories; preserve these as traceability errors.
+
+Updated all results review points, replacing false no-output notes with evidence for each criterion; independent structural, completeness, numerical, visualization, report and traceability scores now reflect recovered data and limitations. Source review notes distinguish explicit boundary values, true full traction, BDF controls and disclosed first-order transient. Report rubric1→1.5 for actual delivered equations/figures/manifest despite significant errors; total58→58.5 provisional. Historic binary and remaining DQ/source review partial; no CFD rerun.

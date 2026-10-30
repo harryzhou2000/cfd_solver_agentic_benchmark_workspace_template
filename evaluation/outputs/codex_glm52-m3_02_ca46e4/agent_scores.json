@@ -77,7 +77,7 @@
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 2,
-          "notes": "Positivity checks and errors exist, but main.cpp labels max-step steady runs converged unconditionally and submitted evidence cannot demonstrate robust completion."
+          "notes": "main.cpp:274\u2013276 assigns converged after max steps irrespective of residual; historical M200 laminar reports converged after residual growth, and Re200 success fraction is clamped in output.hpp:406\u2013408."
         },
         {
           "id": "code.testing",
@@ -91,7 +91,7 @@
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 3,
-          "notes": "Readable header-oriented C++ and scripts, but report/source contradictions and unverified generated-result claims remain."
+          "notes": "Header-oriented C++ is modular; report final-force table conflicts with checkpoint histories, restart is ignored, and metadata convergence fraction is clamped."
         }
       ],
       "overall_score": 2.94,
@@ -118,7 +118,7 @@
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 3,
-          "notes": "Face residual accumulation and global reductions are implemented, but no submitted numerical result verifies conservation or terminal behavior."
+          "notes": "solver.hpp computes face residual and global reductions; checkpoint histories exist but no independent conservation run or production-binary binding was established."
         },
         {
           "id": "cfd.flux",
@@ -132,14 +132,14 @@
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 3,
-          "notes": "Farfield, slip, and direct no-slip wall branches are present; no result/surface output validates the physical boundary treatment."
+          "notes": "Source has farfield/slip/no-slip branches; output.hpp:86\u201387 writes explicit zero wall velocities, and recovered checkpoint surface.csv files are available. This verifies output semantics, not physical wall resolution."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 4,
-          "notes": "Weighted least-squares primitive gradients and reconstructed face states are present; first-order ghost/initial fallbacks are disclosed in source."
+          "notes": "reconstruction.hpp implements least-squares gradients and limiter; main.cpp:167\u2013170 forces first-order transient, disclosed by report.tex:159\u2013160. Steady first-order startup switch depends on runtime options."
         },
         {
           "id": "cfd.limiter",
@@ -160,14 +160,14 @@
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 3,
-          "notes": "LU-SGS-like sweep and CFL spectral radii are present, but README production command overrides case controls and no credible steady output is submitted."
+          "notes": "LU-SGS-like sweeps and case CFL controls are present; checkpoint steady cases stopped at 5000 or 20000 steps, with mixed residual reduction and source unconditionally labeling budget exhaustion converged."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 3,
-          "notes": "Physical-time outer loop, frozen histories and inner iterations exist. README/report state max-inner=1 override, violating requested minimum, and no Re200 artifact demonstrates its execution."
+          "notes": "main.cpp:280\u2013329 implements BDF2 inner structure; recovered Re200 records five inner iterations and final ratio0.915 vs 0.001. Report.tex:159\u2013160 says five, but :172 says one; binary is unbound."
         },
         {
           "id": "cfd.mpi_partition",
@@ -186,59 +186,59 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 0,
-          "notes": "Immutable submission contains no required canonical solver/results case directory; all eight required result packages are absent."
+          "score": 3,
+          "notes": "Extracted checkpoint 99413eb contains all eight canonical packages; read-only validator passes layouts. Re200 and some steady statuses are physically unsupported and full-mesh metadata falsely says no replication."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 0,
-          "notes": "Eight canonical paths are absent, so an explicit validator pass cannot be credited; summary inventory finds only four noncanonical uncommitted test directories."
+          "score": 4,
+          "notes": "Explicit read-only validation of checkpoint 99413eb eight case directories plus its report returned OK for all nine paths; validator accepted clamped convergence fraction and does not prove physical correctness."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 0,
-          "notes": "No submitted final result package supports completion, convergence, or statistically-periodic claims for any required case."
+          "score": 1.5,
+          "notes": "Recovered eight cases replace previous absent-data finding: Re200 t300 has no resolved street and last ratio0.915 misses0.001; M200 laminar residual grows0.468 orders, Re20 falls only0.584 orders."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 0,
-          "notes": "No committed residual/force/surface/field data or rank comparison exists to inspect."
+          "score": 2,
+          "notes": "Checkpoint histories show distinct outcomes: M015 inviscid late Cd0.050\u20130.064; M200 Mach outlier\u2248719; M200 laminar negative viscous drag and rising residual; Re20 Cd4.309; Re200 Cd3.404/no resolved street."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 1,
-          "notes": "Nine committed report PNGs are referenced by report.tex, but their input data and required all-case coverage are absent; they cannot substantiate result credit."
+          "score": 2.5,
+          "notes": "Checkpoint delivers manifest-listed per-case force/residual/Mach/pressure images; accepted 11-page PDF embeds nine figures. Re200 late lift/drag flattened, M200 Mach outlier flattens its image, and Re200 Mach title says velocity_magnitude despite selecting Mach data."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 1,
-          "notes": "LaTeX has methods and figures, but asserts all eight runs and complete output while none is committed; tables/figures lack submitted trace data."
+          "score": 2,
+          "notes": "Submitted report.tex:141\u2013148 force table conflicts with checkpoint results; :159\u2013160 acknowledges five inner iterations but :172 says one. The report discloses no resolved street, but figure caption claims shedding; late force plot is unreadable."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 0,
-          "notes": "No submitted figure_manifest, run_manifest, sanity_checks, result CSV, or field files connect report claims to immutable outputs."
+          "score": 2,
+          "notes": "Checkpoint 99413eb supplies result packages and figure manifest, unlike curated tip. Exact historic binary unbound; several report table coefficients and rank/run descriptions disagree with selected data."
         }
       ],
-      "overall_score": 0.3,
+      "overall_score": 2.38,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 58.0,
+    "total_scored": 58.5,
     "sections": [
       {
         "id": "build_cli",
@@ -259,7 +259,7 @@
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 11,
-        "notes": "Conservative assembly, Riemann options, farfield/slip/no-slip branches and viscous wall path are present; no numerical verification is available."
+        "notes": "Source face residual, Roe/Rusanov and BC branches exist. Recovered historical outputs permit physical assessment but do not replace independent conservation/binary validation."
       },
       {
         "id": "second_order",
@@ -280,7 +280,7 @@
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 9,
-        "notes": "LU-SGS/CFL and BDF2 outer-inner structures exist, but command/report admit max-inner=1 for Re200 and no run logs demonstrate controls."
+        "notes": "LU-SGS/BDF2 source; checkpoint Re200 records five inner iterations and last ratio0.915 vs 0.001, while report has contradictory one/five claims. Steady budget-exhaustion status is unconditional."
       },
       {
         "id": "mpi",
@@ -300,15 +300,15 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 1,
-        "notes": "Methods prose and nine figures exist, but missing all-case coverage, manifests, source data and result packages make claimed analysis non-reproducible."
+        "score": 1.5,
+        "notes": "11-page compiled report includes equations and nine images; separately delivered checkpoint has all-case plots/manifest. Force table mismatches results, transient inner-count prose contradicts itself, Re200 late forces are unreadable and M200 Mach outlier compresses the field."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
         "score": 3,
-        "notes": "Separated modules and JSON case input support extension; header-only single-TU architecture and case-specific report/commands limit it."
+        "notes": "Separate case config, mesh, partition, reconstruction, flux, solver and output modules, but compact 2-D architecture."
       }
     ]
   },
