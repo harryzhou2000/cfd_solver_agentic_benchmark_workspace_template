@@ -193,8 +193,8 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Seven steady final packages reach stated targets; Re200 is statistically periodic at t=300 with no reported inner-target misses."
+          "score": 3,
+          "notes": "M015 laminar marked converged at step1917 despite late monotonic drag drift (see DQ7); other residual targets and Re200 recorded inner statistics are under review."
         },
         {
           "id": "res.plausibility",
@@ -225,13 +225,13 @@
           "notes": "Figure manifest/report map figures to result files, but curation excludes raw results/manifest from immutable tip."
         }
       ],
-      "overall_score": 4.8,
+      "overall_score": 4.4,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 94,
+    "total_scored": 93,
     "sections": [
       {
         "id": "build_cli",
@@ -286,8 +286,8 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 9,
-        "notes": "Eight explicit validator packages; steady targets and delivered Re200 periodicity credible but not independently rerun."
+        "score": 8,
+        "notes": "M015 laminar falsely reported converged despite material late drag drift; other case evidence is being reviewed."
       },
       {
         "id": "report_viz",
@@ -319,8 +319,8 @@
       "notes": "Accepted contestant PDF SHA256 0be615d1ca911e103ab0e47f06ad4488d36cfa9f15d0a646b364ee0abed6cc61, pages 12\u201320, has case-specific numeric coefficients, force and residual histories, and computed field contours. Selected final response explicitly says PDF and 43 figures regenerated; manifest SHA256 755b3308ca942dd076cac9e1ba5d15719c46cf346134ad41d483a736a6cd0470 maps panels to named result files. Cd final 0.091661; final 100 range 0.090461..0.091693, Cl 0.0009413\u2192-0.0000315. Shock field and histories shown, but late coefficients still vary and only three residual orders reached. Corrects the old 2/5 cap based on missing committed field contours; scores reflect submitted workspace CSV trajectory. Production binary attribution and DQ remain under review."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 3,
-      "notes": "Accepted contestant PDF SHA256 0be615d1ca911e103ab0e47f06ad4488d36cfa9f15d0a646b364ee0abed6cc61, pages 12\u201320, has case-specific numeric coefficients, force and residual histories, and computed field contours. Selected final response explicitly says PDF and 43 figures regenerated; manifest SHA256 755b3308ca942dd076cac9e1ba5d15719c46cf346134ad41d483a736a6cd0470 maps panels to named result files. Cd final 0.0738385, last 100 decreases 0.0777379\u21920.0738385; Cl 0.0009777\u21920.0008172. Low-speed laminar force remains trending and Cd high compared with lower-drag calibrated cases; report has separate lift axis and fields. Corrects the old 2/5 cap based on missing committed field contours; scores reflect submitted workspace CSV trajectory. Production binary attribution and DQ remain under review."
+      "score": 1.5,
+      "notes": "Accepted contestant PDF SHA256 0be615d1ca911e103ab0e47f06ad4488d36cfa9f15d0a646b364ee0abed6cc61, pages 12\u201320, has case-specific numeric coefficients, force and residual histories, and computed field contours. Selected final response explicitly says PDF and 43 figures regenerated; manifest SHA256 755b3308ca942dd076cac9e1ba5d15719c46cf346134ad41d483a736a6cd0470 maps panels to named result files. Cd final 0.0738385, last 100 decreases 0.0777379\u21920.0738385; Cl 0.0009777\u21920.0008172. Low-speed laminar force remains trending and Cd high compared with lower-drag calibrated cases; report has separate lift axis and fields. Corrects the old 2/5 cap based on missing committed field contours; scores reflect submitted workspace CSV trajectory. Production binary attribution and DQ remain under review. DQ7: despite the true 4-order residual reduction, status/metadata call this early laminar run converged while Cd continues monotonic 0.084303\u21920.073839 in the last200 and 0.077738\u21920.073839 in the last100; this does not establish force convergence. TASK.md:140,172 explicitly require justified convergence for early termination and stable forces. CSV SHA256 dd334b3d306442f3dba7c2f2618a9ad5d543de5a9ff7e24dc3effb3385c4b4cb; metadata SHA256 d7c3c597773eab35ae24537f42d1f7f06f7757b4e9612bf2cea19a45dfe892e8."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 4,
@@ -340,8 +340,15 @@
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "metadata/status marks incomplete or failed runs as successful",
+        "found": true,
+        "evidence": "Canonical M015 laminar metadata SHA256 d7c3c597773eab35ae24537f42d1f7f06f7757b4e9612bf2cea19a45dfe892e8 marks completed/converged at step1917, repeated at immutable 60a2595 report.tex:803\u2013810. Canonical forces.csv SHA256 dd334b3d306442f3dba7c2f2618a9ad5d543de5a9ff7e24dc3effb3385c4b4cb shows Cd falling 0.084303\u21920.073839 in last200 and 0.077738\u21920.073839 in last100, with Cl also changing; this is not a clearly converged laminar boundary layer, irrespective of the real 4-order residual drop. TASK.md:140,172 require early convergence to be clear and forces stable. Current timestep.cpp:392\u2013394 stops at the residual threshold without testing force stability; the exact production executable hash is unrecorded. Other cases not disqualified merely for residual misses or small near-zero lift."
+      }
+    ]
   },
   "limitations": [
     "No evaluator clean build or MPI rerun was performed.",

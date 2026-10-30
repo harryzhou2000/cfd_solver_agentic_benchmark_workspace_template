@@ -4,11 +4,11 @@ Curated tip `60a259515e88a436ca47c6c9b1d6157db38eb4c2` passes the immutable subm
 
 ## Calibration checkpoint (partial)
 
-The accepted contestant-delivered PDF page 21 visibly resolves late lift and drag, and its reported Re200 values agree with the submitted force history. The previous case-floor claim omitted this PDF; Re200 case score changes 2 to 4. Source, other cases, all rubric sections and DQ remain under active independent review, so the earlier aggregate and verdict below are provisional.
+The accepted contestant-delivered PDF page 21 visibly resolves late lift and drag, and its reported Re200 values agree with the submitted force history. The previous case-floor claim omitted this PDF; Re200 case score changes 2 to 4. M015 laminar metadata and report call the case converged at step 1917, although Cd falls from 0.08430 to 0.07384 across the last 200 samples. This establishes DQ7 under the task requirement for stable forces; the 4-order residual reduction is genuine. The old 94/DQ=false aggregate is superseded by provisional 93/DQ=true; remaining source, rubric and DQ review continues.
 
 ## Verdict
 
-**94/100; DQ=false (provisional).** Seven steady packages reach their stated targets; submitted Re200 evidence is statistically periodic at `t=300`, reports 48--174 inner iterations and zero target misses, and was never rerun.
+**93/100; DQ=true (provisional; trigger 7).** Seven steady packages reach their stated residual targets, but the M015 laminar force is not yet stable; submitted Re200 evidence is statistically periodic at `t=300`, reports 48--174 inner iterations and zero target misses, and was never rerun.
 
 ## Evidence and limitations
 
@@ -17,7 +17,7 @@ The accepted contestant-delivered PDF page 21 visibly resolves late lift and dra
 - The explicit validator passed all eight required final output packages. This structural evidence does not independently establish physical accuracy; no evaluator build or MPI rerun was performed.
 - Curation is index-only: raw outputs, figure inputs, manifests, and build products stay in the workspace as evidence but are absent from the immutable tip.
 
-No disqualification trigger is supported. The source contains actual MPI/partition/halo implementations and generic case-file handling; it does not expose a solver-wrapper, explicit-only integration, or a misreported incomplete final package. Per trust policy, no external authorship investigation was performed.
+DQ7 is supported by the M015 laminar late force trajectory described above; remaining triggers are under independent review. The source contains actual MPI/partition/halo implementations and generic case-file handling; it does not expose a solver-wrapper, explicit-only integration, or a misreported incomplete final package. Per trust policy, no external authorship investigation was performed.
 
 SHA-256 `run_identity.json`: `305c6d3c1eb55d8c3e5b0ece9f512a5b56a58387b608502dbe141e17596d094f`.
 
@@ -108,7 +108,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-All 13 triggers were assessed against source, report, and delivered evidence. None is triggered; the trust policy excludes external authorship searching.
+DQ7 is established for the M015 laminar result as detailed above. The remaining triggers are still under review; the trust policy excludes external authorship searching.
 
 ## Metadata answers & session selection
 
@@ -120,4 +120,4 @@ No independent clean build, steady MPI rerun, or Re200 rerun was performed. Stru
 
 ## Verdict
 
-94/100, DQ=false. Retain the audited immutable snapshot and its report PDF as the manager record.
+93/100, DQ=true (provisional; trigger 7). Retain the audited immutable snapshot and its report PDF as the manager record.
