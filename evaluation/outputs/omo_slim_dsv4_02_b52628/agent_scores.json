@@ -228,7 +228,7 @@
           "title": "Traceability of figures and claims",
           "weight": 0.05,
           "score": 1,
-          "notes": "Manifest claims field_final.vtk for surface-scatter plots; isolated fallback reproduction from surface.csv is similar, not byte identical. No firm DQ8 conclusion yet."
+          "notes": "Manifest wrongly cites field_final.vtk for surface-point plots; isolated submitted-surface fallback reconstruction has matching layout and range but differs by three pixels in width. Exact pixel identity is unproven; no unrelated data source is established."
         }
       ],
       "overall_score": 1.38,
@@ -394,7 +394,7 @@
         "id": 8,
         "text": "Figures do not correspond to results",
         "found": false,
-        "evidence": "No specific mislabelled figure/data mismatch was established; manifest incompleteness is recorded separately."
+        "evidence": "e272cd3 report.tex:271\u2013279 embeds M0.15 Mach/pressure figures captioned as contours; their images explicitly say surface data. figure_manifest.csv calls their source field_final.vtk, but plot_results.py:470\u2013483,527\u2013538 shows a surface.csv fallback with fixed field manifest. An isolated fallback render from the submitted surface.csv reproduces the plot layout and color range but differs in width by three pixels (561\u00d71020 vs 561\u00d71023), so exact original byte provenance is unproven. Surface CSV is itself a submitted output; the wrong field/contour claim and manifest are penalized, but DQ8 does not follow without proving the embedded figure does not correspond to any submitted field/CSV output."
       },
       {
         "id": 9,
@@ -453,6 +453,6 @@
     "Calibration correction: immutable report.tex:160\u2013170 contains all eight numeric CL/CD summaries. DQ9 was removed under its literal geometric-split/full-state-replication wording; rank-zero-only serial execution remains a severe MPI defect. Other scores remain provisional.",
     "2026-10-31 case calibration: 0 scores revised for seven steady cases using report, selected-root solver logs and actual histories; Re200 remains 0. Surface-point scatters do not satisfy domain-field contour floor. Full rubric/review/DQ8 assessment is still partial.",
     "Actual final VTK files use placeholder identical connectivity throughout; submission rejection follows TASK prohibited shortcut 6 separately from numbered DQ2/7.",
-    "2026-10-31 rubric/review recalibration: ten sections and 27 points assessed against source, figures, histories and clean build; DQ8 figure-to-data exact binding remains under review."
+    "2026-10-31 rubric/review recalibration: ten sections and 27 points assessed against source, figures, histories and clean build; DQ8 is not established: plots plausibly derive from submitted surface data, though exact rendered-image binding remains unproven and contour/manifest claims are incorrect."
   ]
 }

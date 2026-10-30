@@ -35,7 +35,7 @@ Pre-DQ score: **27.5/100** (previously 36).
 
 ## Review areas and case outcomes
 
-Weighted review scores: Code **1.88/5**, CFD **1.9/5**, Results **1.38/5**. M0.15/0.80/2.00 inviscid scores are 1/2/2; corresponding laminar scores 2/2/2; Re20 1 and Re200 0. Selected-session logs and case histories support the seven steady outcomes, but numerical limits and missing domain contours restrict credit. Re200's appended rows are not transient evidence. Binary-to-final-source binding and the exact figure-source mapping remain qualified.
+Weighted review scores: Code **1.88/5**, CFD **1.9/5**, Results **1.38/5**. M0.15/0.80/2.00 inviscid scores are 1/2/2; corresponding laminar scores 2/2/2; Re20 1 and Re200 0. Selected-session logs and case histories support the seven steady outcomes, but numerical limits and missing domain contours restrict credit. Re200's appended rows are not transient evidence. Binary-to-final-source binding and exact image-source mapping remain qualified.
 
 ## Disqualification assessment
 
@@ -50,7 +50,9 @@ Disqualified: **yes**.
 - TASK prohibited shortcut 8 — the submitted completed results use the explicitly disclosed first-order-only scheme.
 - TASK prohibited shortcut 6 — each submitted final VTK field has placeholder connectivity: every NACA cell (20,816) or cylinder cell (6,901) repeats `3 0 1 2`. Immutable `solver/src/solver/fvm_solver.cpp:568–570` explicitly writes that placeholder; examiner README:20 requires rejection. This does not establish that the numerical cell states or steady force histories are synthetic.
 
-Other numbered triggers remain under review. In particular, no external executable invocation, hard-coded two-mesh-only branch, figure filename swap, or direct copy evidence was found; external-copy investigation is outside the trust-policy scope.
+Trigger 8 is not established: the embedded figures describe surface data in their own titles, and the submitted plotting fallback can generate similar figures from the submitted surface CSV. An isolated redraw differs by three pixels in width, so exact original-image provenance is not claimed. The manifest incorrectly names VTK fields and captions claim contours; those defects are penalized in report and case scores.
+
+The remaining numbered triggers were assessed: no order-one rank comparison, disabled claimed production second order, undocumented wall-cell semantics, or specific filename variable swap is established; external authorship investigation is excluded by trust policy. In particular, no external executable invocation, hard-coded two-mesh-only branch, figure filename swap, or direct copy evidence was found; external-copy investigation is outside the trust-policy scope.
 
 ## Limitations
 

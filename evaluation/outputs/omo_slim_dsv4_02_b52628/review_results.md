@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T16:38:11.615147+00:00
+Generated: 2026-10-30T16:39:13.771598+00:00
 
 **Overall score: 1.38**
 
@@ -27,7 +27,7 @@ Generated: 2026-10-30T16:38:11.615147+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 2.5 | Report candidly discloses serial, first-order and Re200 steady status, but claims absent METIS infrastructure and presents surface scatter as domain contours. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Manifest claims field_final.vtk for surface-scatter plots; isolated fallback reproduction from surface.csv is similar, not byte identical. No firm DQ8 conclusion yet. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Manifest wrongly cites field_final.vtk for surface-point plots; isolated submitted-surface fallback reconstruction has matching layout and range but differs by three pixels in width. Exact pixel identity is unproven; no unrelated data source is established. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
