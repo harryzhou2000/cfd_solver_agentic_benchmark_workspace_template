@@ -4,7 +4,7 @@ Curated tip `d0ae91d1288da6c8533fd9d6cf96384a2cbd2446` passes audit. Two workspa
 
 ## Verdict
 
-**35/100; DQ=false.** The required canonical result directories are absent: explicit validator stops at missing `naca0012_m015_inviscid/metadata.json`. The workspace contains many recovery/probe directories, but those cannot substitute for the required eight canonical packages. Detailed scores are in `agent_scores.json`.
+**35/100; DQ=false.** Correction: the historical production outputs named in report/run_manifest.csv are under the contestant benchmark submodule `cfd_solver_agentic_benchmark/results/`, not `solver/results/`. Three completed-layout inviscid packages exist but explicitly mark failed; stopped M015 laminar and Re200 retain partial histories, and three cases were not run. The examiner rejects M015 inviscid because metadata says completed=false. All case scores remain 0 for failed/partial/unrun results. Full source, rank and DQ review remains pending. Detailed scores are in `agent_scores.json`.
 
 ## Integrity and limitations
 

@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:54:02.746040+00:00
+Generated: 2026-10-30T14:41:10.168812+00:00
 
 **Overall score: 0.65**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 0 | Expected canonical directories missing. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 0 | Three historical canonical submodule result directories contain complete layouts but mark failed; stopped M015 laminar and Re200 have only partial outputs, three cases unrun. Examiner rejects failed metadata completed=false. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 0 | Validator stops at missing metadata. |
+| 2 | **res.validator** Automated validator results | 0.10 | 0 | Prior evaluation checked wrong solver/results path. Evaluator rechecked actual benchmark-submodule result path; validator rejects M015 inviscid because completed=false, not missing metadata. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
 | 3 | **res.completion** Case completion and convergence | 0.20 | 0 | No canonical eight-case delivery. |
