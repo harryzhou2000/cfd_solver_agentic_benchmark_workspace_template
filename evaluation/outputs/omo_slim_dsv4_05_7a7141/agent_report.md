@@ -37,7 +37,7 @@ The official validator was run explicitly with the six readable NACA result dire
 | Report, Visualization, Analysis | 5 | 1 | Extensive TeX but missing immutable dependencies and contradictory conclusion. |
 | Extensibility | 5 | 5 | Clear module boundaries and JSON-driven case handling. |
 
-Weighted review overalls are Code **3.16/5**, CFD methods **3.29/5**, and Results **0.50/5**. The independent case scores are M0.15 inviscid **1/5** (recognizable but failed; terminal answer admits 0.64 orders) and **0/5** for the other seven cases: M0.8/M2 inviscid and all three laminar NACA packages fail; Re20 and Re200 lack final packages. These case scores do not alter the 100-point total.
+Weighted review overalls are Code **3.16/5**, CFD methods **3.29/5**, and Results **0.50/5**. All eight independent case scores are **0/5**: six statuses explicitly fail and their available histories are physically implausible, Re20 has no final package, and Re200 has only a short corrupted/invalid partial history. The current M0.15 inviscid history was overwritten after its older failed status and is not its final history. The delivered PDF supplies readable NACA plots but its cylinder pages have missing-asset boxes. These case scores do not alter the 100-point total.
 
 ## Disqualification assessment
 
