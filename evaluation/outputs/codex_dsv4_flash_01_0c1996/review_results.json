@@ -6,50 +6,50 @@
       "id": "res.contract",
       "title": "Output contract compliance",
       "weight": 0.2,
-      "score": 2,
-      "notes": "All directories are readable but two designated finals explicitly fail."
+      "score": 1.5,
+      "notes": "Surviving metadata marks divergent laminar and nonperiodic Re200 cases successful; output.cpp:308\u2013327,424\u2013437 writes rank-0-only VTU and restart."
     },
     {
       "id": "res.validator",
       "title": "Automated validator results",
       "weight": 0.1,
       "score": 1,
-      "notes": "Explicit eight-directory validation is 6 pass/2 fail (RC 1)."
+      "notes": "Prior evaluator reports two explicit metadata failures; structural passes do not validate physically divergent histories or false periodic status."
     },
     {
       "id": "res.completion",
       "title": "Case completion and convergence",
       "weight": 0.2,
       "score": 1,
-      "notes": "Re20 and NACA M0.15 failed; Re200 shedding unsupported."
+      "notes": "Surviving laminar histories diverge and are marked converged; Re200 force t>=100 is constant despite periodic status. Two original np1 paths are no longer available."
     },
     {
       "id": "res.plausibility",
       "title": "Result plausibility and MPI consistency",
       "weight": 0.15,
       "score": 1,
-      "notes": "Re20 divergence and nonphysical laminar forces; only partial MPI consistency evidence."
+      "notes": "M0.15/M0.8 lam residuals grow to 623637/3926; M2 lam peaks then zeroes. Re200 lacks force oscillation. Old Re20 plot shows severe divergence."
     },
     {
       "id": "res.visualization",
       "title": "Visualizations",
       "weight": 0.15,
-      "score": 2,
-      "notes": "Figures exist but are uncommitted and report does not reference them; no credit for repair."
+      "score": 2.5,
+      "notes": "Primary final explicitly delivers 56 standalone PNGs with case manifest, including original force/residual/field plots. They reveal failure; report PDF itself contains no plots."
     },
     {
       "id": "res.report",
       "title": "Report quality and honesty",
       "weight": 0.15,
       "score": 1,
-      "notes": "Readable but materially inaccurate claims about validation, convergence, and Roe."
+      "notes": "report.tex:51\u201354 claims Roe and second order, while source substitutes Rusanov and disables reconstruction for viscous/transient cases; case table reverses several Cl/Cd and asserts failed results pass."
     },
     {
       "id": "res.traceability",
       "title": "Traceability of figures and claims",
       "weight": 0.05,
-      "score": 1,
-      "notes": "Manifest paths exist outside commit, but figures not referenced by report.tex."
+      "score": 2,
+      "notes": "Primary final and manifest map delivered standalone plots to case outputs; two original np1 directories have disappeared and report table has mismatches, limiting verification."
     }
   ],
   "disqualification_flags": [
@@ -79,5 +79,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 1.35
+  "overall_score": 1.38
 }

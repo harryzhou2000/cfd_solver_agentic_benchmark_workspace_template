@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T03:14:34.049879+00:00
+Generated: 2026-10-30T03:17:15.748369+00:00
 
-**Overall score: 3.32**
+**Overall score: 3.07**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | CMake and a prior build artifact exist; no clean build rerun. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable f6d8a183 CMake build succeeds in network-disabled cfd-bench container (2 CPUs, 3 GiB) with external dependencies; no solver rerun. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 3 | CLI parser/source documented; malformed-input execution not rerun. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 2 | main.cpp:21–37 accepts case/output but has no required --restart option. Invalid-input execution not rerun. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Separated mesh, partition, solver, implicit, transient, output modules. |
@@ -24,13 +24,13 @@ Generated: 2026-10-30T03:14:34.049879+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | JSON case parsing and CGNS mesh path input; no two-filename-only branch found. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4 | METIS and neighbor exchange/reductions present; output limitation acknowledged. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2 | METIS and neighbor halo exist, but solver.cpp:12–20 and solver.hpp:57 retain complete mesh per rank throughout solving, violating TASK full-mesh prohibition; rank-0 VTU/restart hold only its local data. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Divergent and nonphysical viscous cases show poor robustness. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | Some MPI evidence; final results fail and no clean evaluator run. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | Original validation reported six structural passes and two fails, but surviving steady histories expose additional false-success labels; no numerical rerun. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Reasonably modular source; helper has absolute legacy paths. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T03:14:34.049879+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.32
+- Overall score (0-5): 3.07
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

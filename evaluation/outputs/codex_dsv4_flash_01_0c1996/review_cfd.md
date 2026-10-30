@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T03:14:34.050323+00:00
+Generated: 2026-10-30T03:17:15.748794+00:00
 
-**Overall score: 3.34**
+**Overall score: 2.85**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,10 +24,10 @@ Generated: 2026-10-30T03:14:34.050323+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | Farfield, slip, and no-slip branches present. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | Least-squares reconstructed face states present. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 2 | implicit.cpp:195,206–231 disables reconstruction for all viscous and transient cases despite report claim; inviscid steady reconstruction exists. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Barth--Jespersen limiter and positivity paths present. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3 | Barth–Jespersen code exists for steady inviscid reconstruction, but implicit.cpp:195 disables its use on viscous/transient face states. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | Viscous path exists but results show nonphysical force behavior. |
@@ -36,10 +36,10 @@ Generated: 2026-10-30T03:14:34.050323+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | LU-SGS/Jacobi pseudo-time source present but stability is limited. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2 | BDF2-style two-loop code exists; submitted Re200 controls/results do not meet production evidence. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1.5 | BDF2-style source exists; transient.cpp:102–103,122–148 measures spatial residual against first physical step rather than per-step total inner residual; submitted force history is constant, metadata periodic and strict misses unknown. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | METIS and point-to-point halo exchange/source reductions present. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | Genuine METIS and neighbor exchange/reductions exist, but full mesh is stored on all ranks during iterations, and selected short rank results do not demonstrate correct final outputs. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T03:14:34.050323+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.34
+- Overall score (0-5): 2.85
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

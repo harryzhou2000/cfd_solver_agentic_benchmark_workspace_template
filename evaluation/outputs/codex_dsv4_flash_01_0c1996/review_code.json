@@ -6,15 +6,15 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 3,
-      "notes": "CMake and a prior build artifact exist; no clean build rerun."
+      "score": 4,
+      "notes": "Immutable f6d8a183 CMake build succeeds in network-disabled cfd-bench container (2 CPUs, 3 GiB) with external dependencies; no solver rerun."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 3,
-      "notes": "CLI parser/source documented; malformed-input execution not rerun."
+      "score": 2,
+      "notes": "main.cpp:21\u201337 accepts case/output but has no required --restart option. Invalid-input execution not rerun."
     },
     {
       "id": "code.organization",
@@ -41,8 +41,8 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "METIS and neighbor exchange/reductions present; output limitation acknowledged."
+      "score": 2,
+      "notes": "METIS and neighbor halo exist, but solver.cpp:12\u201320 and solver.hpp:57 retain complete mesh per rank throughout solving, violating TASK full-mesh prohibition; rank-0 VTU/restart hold only its local data."
     },
     {
       "id": "code.robustness",
@@ -56,7 +56,7 @@
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 2,
-      "notes": "Some MPI evidence; final results fail and no clean evaluator run."
+      "notes": "Original validation reported six structural passes and two fails, but surviving steady histories expose additional false-success labels; no numerical rerun."
     },
     {
       "id": "code.hygiene",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.32
+  "overall_score": 3.07
 }

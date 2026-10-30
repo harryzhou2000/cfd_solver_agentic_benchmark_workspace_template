@@ -104,15 +104,15 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 3,
-        "notes": "CMake and a prior build artifact exist; no clean build rerun."
+        "score": 4,
+        "notes": "Immutable f6d8a183 CMake build succeeds in network-disabled cfd-bench container (2 CPUs, 3 GiB) with external dependencies; no solver rerun."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 3,
-        "notes": "CLI parser/source documented; malformed-input execution not rerun."
+        "score": 2,
+        "notes": "main.cpp:21\u201337 accepts case/output but has no required --restart option. Invalid-input execution not rerun."
       },
       {
         "id": "code.organization",
@@ -139,8 +139,8 @@
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 4,
-        "notes": "METIS and neighbor exchange/reductions present; output limitation acknowledged."
+        "score": 2,
+        "notes": "METIS and neighbor halo exist, but solver.cpp:12\u201320 and solver.hpp:57 retain complete mesh per rank throughout solving, violating TASK full-mesh prohibition; rank-0 VTU/restart hold only its local data."
       },
       {
         "id": "code.robustness",
@@ -154,7 +154,7 @@
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 2,
-        "notes": "Some MPI evidence; final results fail and no clean evaluator run."
+        "notes": "Original validation reported six structural passes and two fails, but surviving steady histories expose additional false-success labels; no numerical rerun."
       },
       {
         "id": "code.hygiene",
@@ -206,7 +206,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.32
+    "overall_score": 3.07
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -251,15 +251,15 @@
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Least-squares reconstructed face states present."
+        "score": 2,
+        "notes": "implicit.cpp:195,206\u2013231 disables reconstruction for all viscous and transient cases despite report claim; inviscid steady reconstruction exists."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Barth--Jespersen limiter and positivity paths present."
+        "score": 3,
+        "notes": "Barth\u2013Jespersen code exists for steady inviscid reconstruction, but implicit.cpp:195 disables its use on viscous/transient face states."
       },
       {
         "id": "cfd.viscous",
@@ -279,15 +279,15 @@
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 2,
-        "notes": "BDF2-style two-loop code exists; submitted Re200 controls/results do not meet production evidence."
+        "score": 1.5,
+        "notes": "BDF2-style source exists; transient.cpp:102\u2013103,122\u2013148 measures spatial residual against first physical step rather than per-step total inner residual; submitted force history is constant, metadata periodic and strict misses unknown."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 4,
-        "notes": "METIS and point-to-point halo exchange/source reductions present."
+        "score": 2,
+        "notes": "Genuine METIS and neighbor exchange/reductions exist, but full mesh is stored on all ranks during iterations, and selected short rank results do not demonstrate correct final outputs."
       }
     ],
     "disqualification_flags": [
@@ -322,7 +322,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.34
+    "overall_score": 2.85
   },
   "result_review": {
     "review_area": "result_review",
@@ -332,50 +332,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 2,
-        "notes": "All directories are readable but two designated finals explicitly fail."
+        "score": 1.5,
+        "notes": "Surviving metadata marks divergent laminar and nonperiodic Re200 cases successful; output.cpp:308\u2013327,424\u2013437 writes rank-0-only VTU and restart."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 1,
-        "notes": "Explicit eight-directory validation is 6 pass/2 fail (RC 1)."
+        "notes": "Prior evaluator reports two explicit metadata failures; structural passes do not validate physically divergent histories or false periodic status."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 1,
-        "notes": "Re20 and NACA M0.15 failed; Re200 shedding unsupported."
+        "notes": "Surviving laminar histories diverge and are marked converged; Re200 force t>=100 is constant despite periodic status. Two original np1 paths are no longer available."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 1,
-        "notes": "Re20 divergence and nonphysical laminar forces; only partial MPI consistency evidence."
+        "notes": "M0.15/M0.8 lam residuals grow to 623637/3926; M2 lam peaks then zeroes. Re200 lacks force oscillation. Old Re20 plot shows severe divergence."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 2,
-        "notes": "Figures exist but are uncommitted and report does not reference them; no credit for repair."
+        "score": 2.5,
+        "notes": "Primary final explicitly delivers 56 standalone PNGs with case manifest, including original force/residual/field plots. They reveal failure; report PDF itself contains no plots."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 1,
-        "notes": "Readable but materially inaccurate claims about validation, convergence, and Roe."
+        "notes": "report.tex:51\u201354 claims Roe and second order, while source substitutes Rusanov and disables reconstruction for viscous/transient cases; case table reverses several Cl/Cd and asserts failed results pass."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 1,
-        "notes": "Manifest paths exist outside commit, but figures not referenced by report.tex."
+        "score": 2,
+        "notes": "Primary final and manifest map delivered standalone plots to case outputs; two original np1 directories have disappeared and report table has mismatches, limiting verification."
       }
     ],
     "disqualification_flags": [
@@ -405,7 +405,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 1.35
+    "overall_score": 1.38
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/01",

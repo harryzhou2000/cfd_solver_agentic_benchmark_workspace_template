@@ -41,15 +41,15 @@
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Least-squares reconstructed face states present."
+      "score": 2,
+      "notes": "implicit.cpp:195,206\u2013231 disables reconstruction for all viscous and transient cases despite report claim; inviscid steady reconstruction exists."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Barth--Jespersen limiter and positivity paths present."
+      "score": 3,
+      "notes": "Barth\u2013Jespersen code exists for steady inviscid reconstruction, but implicit.cpp:195 disables its use on viscous/transient face states."
     },
     {
       "id": "cfd.viscous",
@@ -69,15 +69,15 @@
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 2,
-      "notes": "BDF2-style two-loop code exists; submitted Re200 controls/results do not meet production evidence."
+      "score": 1.5,
+      "notes": "BDF2-style source exists; transient.cpp:102\u2013103,122\u2013148 measures spatial residual against first physical step rather than per-step total inner residual; submitted force history is constant, metadata periodic and strict misses unknown."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 4,
-      "notes": "METIS and point-to-point halo exchange/source reductions present."
+      "score": 2,
+      "notes": "Genuine METIS and neighbor exchange/reductions exist, but full mesh is stored on all ranks during iterations, and selected short rank results do not demonstrate correct final outputs."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.34
+  "overall_score": 2.85
 }
