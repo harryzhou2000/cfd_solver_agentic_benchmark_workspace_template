@@ -43,35 +43,35 @@
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "notes": "Separate core, I/O, mesh, numerics, parallel, physics, post and solve modules; substantial solver functionality is isolated in drivers."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "notes": "No direct copied-core evidence identified in source review; no exhaustive external authorship search was performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "notes": "main.cpp and case_input parse configured case and mesh paths; no two-filename-only dispatch identified."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "notes": "distributed_mesh.cpp:57\u201378 builds global mesh in root-only setup scope; partitioner.cpp:82 uses METIS and halo_exchange.cpp:42\u201357 uses neighbor traffic."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "notes": "Case, mesh and restart validation and reconstructed-state positivity fallback exist; transient restart loses stored clock/history."
         },
         {
           "id": "code.testing",
@@ -84,11 +84,11 @@
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": 1,
-          "notes": "Source and curated submission reviewed."
+          "score": 4,
+          "notes": "Contestant checkpoint f22bc25 contains no tracked solver/build paths; its results and plots were intentionally curated from final tip. Do not charge manager curation as contestant misconduct."
         }
       ],
-      "overall_score": 3.74,
+      "overall_score": 3.95,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -98,77 +98,77 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "physics/perfect_gas.cpp and numerics/viscous_flux.cpp implement 2-D compressible ideal-gas and Newtonian/Fourier terms; report supplies formulas."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "mesh/cgns_reader.cpp:94\u2013106,141\u2013147,230\u2013233 reads multi-zone first-base TRI/QUAD/BAR sections, explicitly rejecting polymorphic MIXED; geometry and adjacency are built in distributed mesh."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "numerics/residual.cpp:115\u2013116,224\u2013237 evaluates face flux and scatters opposite contributions; ghost gradients/limiters are exchanged."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "numerics/riemann_flux.cpp implements Roe with entropy fix and HLLC/Rusanov alternatives. Report discloses a latent HLLC issue for separate review."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "physics/boundary_conditions.cpp implements farfield/slip/no-slip; post/surface_output.cpp:54\u201376 writes imposed no-slip velocity rather than cell-center velocity."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "numerics/gradients.cpp uses prebuilt weighted least-squares stencils; residual.cpp:57\u201361,81\u201389 exchanges ghost gradients and limiter factors."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "numerics/limiter.cpp implements Venkat and positivity fallback; report discloses limiter switching/plateau effects."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "post/forces.cpp:68\u2013100 uses corrected wall-normal velocity gradient and wallShearTraction to exclude normal viscous traction; Newtonian/Fourier residual is implemented."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "solve/steady_driver.cpp:523\u2013538 tests residual plateau with forces_stationary; :615\u2013660 restores and records best state when final residual regresses."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "transient_driver.cpp:90\u2013133 tests full spatial+BDF residual. Selected 30000-row inner history gives min49/max144/mean132.818 and metadata reports zero misses; exact per-step initial ratios are not independently reconstructed."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "distributed_mesh.cpp:57\u201378 constructs global mesh only in root-scoped setup; METIS and neighbor halos are present. tab_scaling.tex compares np1/2/4/8 NACA/cylinder at step1500."
         }
       ],
       "overall_score": 4.0,
@@ -181,28 +181,28 @@
           "title": "Output contract compliance",
           "weight": 0.2,
           "score": 4,
-          "notes": "Validator and visual report evidence reviewed."
+          "notes": "Current examiner validator passes all eight workspace packages and report structurally; checkpoint f22bc25 confirms field/restart files for M015 inviscid and M080 laminar that older auto measurements marked missing. Transient restart semantics are limited."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Validator and visual report evidence reviewed."
+          "score": 5,
+          "notes": "Read-only examiner validator passed all eight case directories and report on 2026-10-30; structural success does not establish figure traceability or physics."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 4,
-          "notes": "Validator and visual report evidence reviewed."
+          "score": 3.5,
+          "notes": "Report discloses M080/M200 inviscid shortfalls at stationary plateau and appended best-state rows; Re200 reports 30000 steps and no inner misses. M015 laminar force figure is misbound to a scaling run."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 4,
-          "notes": "Validator and visual report evidence reviewed."
+          "notes": "Re200 t180\u2013300 mean Cd1.246529/St0.182927 and Re20 Cd2.018 are credible; NACA case force variation and restored-row limits are recorded individually."
         },
         {
           "id": "res.visualization",
@@ -215,8 +215,8 @@
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Seventy-six-page main report and tracked numeric tables are readable; the prior absence claim misread cross-reference hyperlink borders as missing assets. Claims and consistency review remain partial."
+          "score": 2.5,
+          "notes": "Readable report discloses numerical limitations, but PDF p59 presents the scaling-run M015 laminar force history as selected-case evidence; curated figure inputs are absent at tip."
         },
         {
           "id": "res.traceability",
@@ -226,7 +226,7 @@
           "notes": "PDF p59 M015 laminar force plot ends step1500/Cd0.11887/Cl0.0012046, matching scaling np8, not selected step3839/Cd0.0551808/Cl\u22120.00169723; manifest repeats same figure filename for canonical and scaling paths."
         }
       ],
-      "overall_score": 3.42,
+      "overall_score": 3.35,
       "disqualification_flags": []
     }
   },
@@ -246,49 +246,49 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 8,
-        "notes": "Evidence recorded in report."
+        "notes": "cgns_reader.cpp:94\u2013106,141\u2013147,230\u2013233 reads all zones in first base and separate TRI/QUAD/BAR sections, explicitly rejecting polymorphic MIXED. Distributed mesh builds geometry and adjacency."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 12,
-        "notes": "Evidence recorded in report."
+        "notes": "numerics/residual.cpp:115\u2013116,224\u2013237 evaluates numerical fluxes and scatters opposite face contributions; physics/boundary_conditions.cpp implements wall and farfield treatments."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 8,
-        "notes": "Evidence recorded in report."
+        "notes": "numerics/gradients.cpp and limiter.cpp implement weighted least-squares and Venkat limiting with positivity fallback; residual.cpp:57\u201361,81\u201389 exchanges ghost gradients and limiter factors. Independent clean unit target passes."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 8,
-        "notes": "Evidence recorded in report."
+        "notes": "post/forces.cpp:68\u2013100 uses wall-normal gradient correction and tangential-only wallShearTraction for force split. Newtonian/Fourier viscous flux and boundary-state wall values are implemented."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 12,
-        "notes": "Evidence recorded in report."
+        "notes": "transient_driver.cpp:90\u2013133 tests spatial+BDF total residual; selected metadata reports 0 misses and residual CSV reports min49/max144/mean132.818 over 30000 steps. Source cc42ab4..f22bc25 unchanged, though runtime binding is qualified."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
         "score": 8,
-        "notes": "Evidence recorded in report."
+        "notes": "distributed_mesh.cpp:57\u201378 builds global mesh only in a root-scoped setup, partitioner.cpp:82 calls METIS, halo_exchange.cpp:42\u201357 uses neighbor traffic. tab_scaling.tex documents np1/2/4/8 NACA and cylinder at common step1500."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
         "score": 8,
-        "notes": "Evidence recorded in report."
+        "notes": "Six case-specific force/figure reviews support scores 3.5\u20134; M015 laminar has misbound force figure and Re200 lacks readable late drag plot. Actual Re200 t180\u2013300 St0.182927 and mean Cd1.246529 corroborate report."
       },
       {
         "id": "report_viz",
@@ -302,7 +302,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 4,
-        "notes": "Evidence recorded in report."
+        "notes": "Distinct mesh, physics, numerics, parallel, solve, post and I/O modules; four-variable 2-D state limits 3-D extensibility."
       }
     ]
   },

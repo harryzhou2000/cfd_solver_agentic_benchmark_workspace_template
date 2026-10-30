@@ -113,3 +113,12 @@ Immutable `4965edd` clean CMake build succeeded in network-disabled `cfd-bench` 
 ## Restart and transient residual — 2026-10-30
 
 `restart_io.cpp:106–108` writes time and step in its header, but `readRestart` (:117 and `solver_context.cpp:67–69`) returns only the state. `transient_driver.cpp:49–57` initializes both BDF history levels from that state and resets time and step to zero. A meaningful state restart is implemented and validated; uninterrupted transient BDF continuation is not. Build/CLI rubric8→7.5 and total78→77.5. The source's transient loop :90–133 evaluates spatial plus BDF physical-time residual before its inner-target test, distinct from pseudo-time-regularized convergence checks seen in other runs. Selected binary attribution is supported by identical `cc42ab4..f22bc25` source trees but not independently proven for every run. No transient rerun.
+
+
+## Source, validation and review-point calibration — 2026-10-30
+
+The source's `distributed_mesh.cpp:57–78` builds the full mesh inside root-only setup scope; `partitioner.cpp:82` calls METIS and `halo_exchange.cpp:42–57` communicates neighbor data. `numerics/residual.cpp:57–61,81–89,115–116,224–237` exchanges reconstruction information and assembles conservative fluxes. `post/forces.cpp:68–100` integrates tangential wall traction, and `post/surface_output.cpp:54–76` emits imposed wall values. The steady driver checks force stationarity for a residual plateau and explicitly appends the restored best-state force row.
+
+Selected Re200 metadata reports zero inner misses; its 30000 residual rows have min49/max144/mean132.818 inner iterations. The code checks the full spatial+BDF residual, but the logged rows do not independently establish every initial inner residual. `cc42ab4..f22bc25` solver source trees match, with report-documented revision-stamp history. No strict miss count beyond submitted metadata is inferred.
+
+The examiner validator independently passed all eight workspace case directories and report on 2026-10-30. Historical auto measurements listed missing field/restart files for M015 inviscid and M080 laminar, but checkpoint `f22bc25` contains those files and their bytes match the workspace; the old auto listing is not current evidence of their absence. The contestant checkpoint contains no tracked `solver/build` paths, so hygiene is assessed on contestant content rather than manager curation. Review-point notes now state evidence and limits; DQ/provenance review remains partial. No CFD rerun.

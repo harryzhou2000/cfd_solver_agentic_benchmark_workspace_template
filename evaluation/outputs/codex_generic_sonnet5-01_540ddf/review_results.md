@@ -2,29 +2,29 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T08:00:09.749460+00:00
+Generated: 2026-10-30T08:03:30.596485+00:00
 
-**Overall score: 3.42**
+**Overall score: 3.35**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Validator and visual report evidence reviewed. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Current examiner validator passes all eight workspace packages and report structurally; checkpoint f22bc25 confirms field/restart files for M015 inviscid and M080 laminar that older auto measurements marked missing. Transient restart semantics are limited. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 4 | Validator and visual report evidence reviewed. |
+| 2 | **res.validator** Automated validator results | 0.10 | 5 | Read-only examiner validator passed all eight case directories and report on 2026-10-30; structural success does not establish figure traceability or physics. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Validator and visual report evidence reviewed. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 3.5 | Report discloses M080/M200 inviscid shortfalls at stationary plateau and appended best-state rows; Re200 reports 30000 steps and no inner misses. M015 laminar force figure is misbound to a scaling run. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Validator and visual report evidence reviewed. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Re200 t180–300 mean Cd1.246529/St0.182927 and Re20 Cd2.018 are credible; NACA case force variation and restored-row limits are recorded individually. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 2 | PDF p59 Figure13(a) shows scaling np8 M015 laminar forces in place of selected case; p67 Re200 late drag is compressed. Remaining plots under review. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Seventy-six-page main report and tracked numeric tables are readable; the prior absence claim misread cross-reference hyperlink borders as missing assets. Claims and consistency review remain partial. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 2.5 | Readable report discloses numerical limitations, but PDF p59 presents the scaling-run M015 laminar force history as selected-case evidence; curated figure inputs are absent at tip. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1.5 | PDF p59 M015 laminar force plot ends step1500/Cd0.11887/Cl0.0012046, matching scaling np8, not selected step3839/Cd0.0551808/Cl−0.00169723; manifest repeats same figure filename for canonical and scaling paths. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T08:00:09.749460+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.42
+- Overall score (0-5): 3.35
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
