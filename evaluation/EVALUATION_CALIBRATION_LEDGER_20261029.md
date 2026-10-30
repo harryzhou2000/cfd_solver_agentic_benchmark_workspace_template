@@ -101,7 +101,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_opus5-02_cac77b` | partial: all cases, PDF and source/rubric examined; historical Re200 binary and final DQ adjudication remain uncertain |
 | `codex_generic_sonnet46-01_ac6940` | partial: all cases, PDF, source and rubric reviewed; DQ7/TASK full mesh; historic binary binding and remaining DQ uncertain |
 | `codex_generic_sonnet46-02_dac37b` | partial: all cases, PDF, source/rubric checked; DQ6/DQ7 and placeholder rejection; exact historical binary remains unbound |
-| `codex_generic_sonnet5-01_540ddf` | unreviewed |
+| `codex_generic_sonnet5-01_540ddf` | partial: PDF absence and numeric notes corrected; individual cases, source/rubric/DQ pending |
 | `codex_generic_sonnet5-02_6c0ac0` | unreviewed |
 | `codex_generic_vllm-qwen38-01_2045e0` | unreviewed |
 | `codex_generic_vllm-qwen38-02_d47362` | unreviewed |
@@ -799,3 +799,5 @@ sonnet46-02 DQ6 checkpoint: report.tex:111–112 claims a cell-joining viscous g
 sonnet46-02 source/review checkpoint: final ghost limiter initialized 1 and updated only on owned cells, yet both sides reconstructed; second-order8.5→7.5, total74→73. Root global mesh deleted before solve. Validator passes eight final cases/report structurally but accepts restart placeholders; Re200 metadata null revision leaves strict-count attribution uncertain. Remaining DQ/provenance partial.
 
 sonnet46-02 remaining DQ boundaries: np1 failed diagnostic uses Barth vs selected np8 Venkat, null revisions; no controlled DQ4 comparison. No specific false-data figure established, root full mesh freed, owned limiter active, wall output boundary-valued. No external authorship search or synthetic force/residual proof. Historical binary unbound; review remains partial.
+
+sonnet5-01 PDF correction: prior absence reason said 76 pages had pervasive missing/error markers; actual red rectangles are hyperlink borders and all 76 pages have readable content/figures. PDF SHA256 f098a207b99c5644b8be1300987a1963567c101fa28f63c1127bb2b754177f54 matches contestant checkpoint f22bc25; tracked main TeX inputs match 4965edd. Accepted workspace_existing; curated figure blobs omitted, reproducibility separate. All eight tab_forces.tex summaries and tab_saturation St≈0.1829 exist, contrary to old notes. Report rubric0→2.5 total76→78.5; case scores provisional, Re200 late drag floor still unmet on page67. Partial review.

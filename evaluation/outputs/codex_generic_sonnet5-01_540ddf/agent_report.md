@@ -41,7 +41,7 @@
 
 ## Methodology
 
-Reviewed source, selected Codex root, raw workspace packages, terminal response, explicit eight-case/report validator, and the immutable report. All packages validate; the 77-page immutable rendering has pervasive obvious missing-asset placeholders. No solver/Re200 rerun occurred.
+Reviewed source, selected Codex root, raw workspace packages, terminal response, explicit eight-case/report validator, and the immutable report. All packages validate; the 76-page contestant checkpoint PDF is readable with rendered figures; its red cross-reference rectangles are hyperlinks, not missing-asset placeholders. No solver/Re200 rerun occurred.
 
 ## Rubric scores (100 points, SCORING_RUBRIC.md)
 
@@ -83,7 +83,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ false: no trigger was affirmatively established from direct internal evidence. The report failure is direct craftsmanship/traceability evidence rather than an extra deduction for the absence record.
+DQ false in the existing record; independent DQ review is pending. The prior report-absence finding is superseded below.
 
 ## Metadata answers & session selection
 
@@ -95,10 +95,17 @@ Raw packages are workspace-only evidence after curation. No evaluator rerun was 
 
 ## Verdict
 
-Solver/result evidence is substantial, but the immutable report cannot serve as a usable visual deliverable because required figure assets are missing from the curated tip.
+The contestant-delivered main report is usable and accepted; curated-tip report reproducibility is limited by omitted figure assets. Case physics, detailed scoring and DQ review remain partial.
 
 ## Sidecar integrity
 
 - `run_identity.json` SHA-256: `d6d5d2375da2d0f7194486ae31f1e7f700c56e8a702d828e9fe37b78c51cbfb4`.
 - `contestant_final_response.md` SHA-256: `9e1debbc756e4a9209227e9ae25197425eb84000c60231292e070a4043e81aa3`.
 - These are unindexed sidecars, so `cfdeval check` does not validate them.
+
+
+## Main report and numeric-evidence correction — 2026-10-30
+
+The earlier `report_pdf.json` absence record stated that the sibling PDF had pervasive missing-asset/error markers; this historical assessment was incorrect. All 76 pages were rendered and visually reviewed. The red rectangles are hyperlinks around cross-reference numbers (for example page 21), and case figures render. The sibling `solver/report/report.pdf` SHA256 `f098a207b99c5644b8be1300987a1963567c101fa28f63c1127bb2b754177f54` is byte-identical to contestant checkpoint `f22bc25`; the tracked main TeX and its tracked TeX inputs match curated submission `4965edd`. It is now vendored as `workspace_existing` using the approval tool. Figure assets were excluded from the curated tip, which remains a separate clean-rebuild limitation.
+
+All eight prior case notes incorrectly claimed no committed numeric CL/CD. `4965edd:solver/report/tab_forces.tex` includes all eight; `tab_saturation.tex` reports late St≈0.1829 and mean Cd≈1.2466 for Re200. Each note now records its actual summary. PDF page67 shows a late lift/spectrum plot but its force plot's startup spike compresses late drag; the Re200 score2 remains capped unless another qualifying delivered figure is located. Other case scores remain 2 provisionally while their plot provenance and physics are independently checked. Report/visualization rubric0→2.5, total76→78.5; further claim and figure review may change it. No Re200 rerun.

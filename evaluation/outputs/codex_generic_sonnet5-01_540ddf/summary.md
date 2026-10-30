@@ -9,7 +9,7 @@
 ## Snapshot
 
 - Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: no
-- Vendored report PDF: absent
+- Vendored report PDF: accepted
 - Session analysis: 2026-08-27T03:40:35.437000+00:00 → 2026-08-27T18:13:23.563000+00:00; 30×1800s buckets; idle 0 gaps / 0s excluded; permission-wait candidates 0; tokens 529,822,828 (cache hit 0.9727)
 
 ## Expenses
@@ -104,4 +104,4 @@
 
 - Code review scorecard: `codex_generic_sonnet5-01_540ddf/review_code.md` (overall: 3.79)
 - CFD methods review: `codex_generic_sonnet5-01_540ddf/review_cfd.md` (overall: 4.0)
-- Result review: `codex_generic_sonnet5-01_540ddf/review_results.md` (overall: 2.65)
+- Result review: `codex_generic_sonnet5-01_540ddf/review_results.md` (overall: 3.55)

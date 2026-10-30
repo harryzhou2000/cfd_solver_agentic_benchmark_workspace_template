@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:53:56.951774+00:00
+Generated: 2026-10-30T07:48:46.621101+00:00
 
-**Overall score: 2.65**
+**Overall score: 3.55**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -21,10 +21,10 @@ Generated: 2026-09-07T02:53:56.951774+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Validator and visual report evidence reviewed. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 0 | Validator and visual report evidence reviewed. |
+| 5 | **res.visualization** Visualizations | 0.15 | 3 | Readable checkpoint-matched main PDF contains case figures; its Re200 force chart compresses late drag. Additional case-level traceability review pending. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 0 | Validator and visual report evidence reviewed. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Seventy-six-page main report and tracked numeric tables are readable; the prior absence claim misread cross-reference hyperlink borders as missing assets. Claims and consistency review remain partial. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Validator and visual report evidence reviewed. |
@@ -41,7 +41,7 @@ Generated: 2026-09-07T02:53:56.951774+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.65
+- Overall score (0-5): 3.55
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
