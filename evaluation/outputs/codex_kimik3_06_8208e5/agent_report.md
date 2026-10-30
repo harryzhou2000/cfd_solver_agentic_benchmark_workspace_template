@@ -2,9 +2,13 @@
 
 Curated tip `60a259515e88a436ca47c6c9b1d6157db38eb4c2` passes the immutable submission audit. The selected project-local Codex root (`01a037b9-3a44-7213-9cfd-f76875b82b68`) and its eight descendants cover implementation, production runs, report work, and final audit fixes. The explicit examiner invocation passed all eight final packages and the report.
 
+## Calibration checkpoint (partial)
+
+The accepted contestant-delivered PDF page 21 visibly resolves late lift and drag, and its reported Re200 values agree with the submitted force history. The previous case-floor claim omitted this PDF; Re200 case score changes 2 to 4. Source, other cases, all rubric sections and DQ remain under active independent review, so the earlier aggregate and verdict below are provisional.
+
 ## Verdict
 
-**94/100; DQ=false.** Seven steady packages reach their stated targets; submitted Re200 evidence is statistically periodic at `t=300`, reports 48--174 inner iterations and zero target misses, and was never rerun.
+**94/100; DQ=false (provisional).** Seven steady packages reach their stated targets; submitted Re200 evidence is statistically periodic at `t=300`, reports 48--174 inner iterations and zero target misses, and was never rerun.
 
 ## Evidence and limitations
 
