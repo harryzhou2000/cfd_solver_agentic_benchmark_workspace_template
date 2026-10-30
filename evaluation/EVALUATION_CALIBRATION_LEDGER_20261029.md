@@ -92,7 +92,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_04_16009f` | fully reviewed, qualified: 24/100, DQ6/7/10 and TASK full mesh; historical binary/figure linkage unresolved |
 | `codex_generic_05_2599b1` | fully reviewed, qualified: 31/100, DQ7 and TASK full mesh; historical executable/figure binding limited |
 | `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
-| `codex_generic_glm53-02_ff20c7` | partial: DQ7 plateau correction and cylinder case evidence; remaining DQ/rubric pending |
+| `codex_generic_glm53-02_ff20c7` | fully reviewed, qualified: 72/100, DQ7 for M2 laminar; historic source binding unresolved |
 | `codex_generic_glm53-03_d469fb` | partial: DQ7 current Re200/Re20 evidence, provenance discrepancy; other criteria pending |
 | `codex_generic_glm53-04_adde03` | partial: all cases and rubric reviewed, DQ7 supported; historical production-source attribution unresolved |
 | `codex_generic_opus46-01_3a72ea` | partial: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
@@ -632,6 +632,8 @@ glm53-02 delivered NACA checkpoint: accepted PDF shows NACA contours contrary to
 glm53-02 wall-friction correction: prior checkpoint incorrectly said surface Cf tangential. Final solver.cpp:808–811 sets no-slip u=v=0 and :820–826 derives direction from that velocity, falls back to x direction, and dots traction with it; not generally wall tangent. Report claims tangential Cf. Viscous rubric6→5, total75→74, CFD viscous2→1; defective output assessed under rubric, not automatic DQ6. Selected source binding remains unproved. No CFD rerun.
 
 glm53-02 remaining-criteria checkpoint: source-specific rubric/review and DQ boundaries documented. Restart reader restores current state/time but sets both BDF histories equal, rubric build/CLI10→8 and total74→72; broadcast limited to initialization. M015 np4/8 mean Cd0.002290526/0.002290542, Cl0.000415197/0.000411708; no DQ4 shown. Root-only global mesh, real METIS/halos; Re20 100 wall rows u=v=0. DQ7 M2 laminar stands; exact selected run-source binding unresolved, partial status retained. No CFD rerun.
+
+glm53-02 qualified full review: assessed all ten sections, eight cases, 27 review points and 13 numbered DQ rules to the available evidence limit. Removed the contradictory duplicate DQ7=false entry while preserving its evidence that the inviscid plateaus were defensible; the single DQ7=true finding is strictly the separate M2 laminar case with Cd decreasing 20.6% in the final 62 rows. Visual comparison with glm53-04 confirms that M015 inviscid and M015/M080 laminar figures overlay force components on one startup-dominated axis, hiding the late coefficients and lift, whereas the precedent has separate resolved lift panels; their 2-point caps remain. Re20's wake contours collapse into strips; Re200 has a stricter late lift/drag rule. 72/100 unchanged; exact selected source/executable remains unbound and qualified. Previous partial language is historical. No CFD/Re200 rerun; both gates required.
 
 
 ## glm53-03 partial current-result review — 2026-10-30

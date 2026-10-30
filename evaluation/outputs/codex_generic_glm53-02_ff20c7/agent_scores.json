@@ -308,7 +308,7 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 2,
-      "notes": "Score 2 retained: previous note incorrectly said case contour absent; accepted source-matching PDF visibly renders the relevant NACA residual and near-body Mach/pressure contours (report.tex:336\u2013346,372\u2013394). A contestant-delivered standalone force-history figure exists and figure_manifest.csv maps it to the selected case CSV, but its startup amplitude compresses the late force tail (M015 inviscid \u22481, M015/M080 laminar \u224870/90 versus late Cd \u22480.0023/0.0675/0.0796), so the required readable history is not established. Current metadata git_revision=null; case-specific raw tail values and plateau limitations are discussed in the report. No CFD rerun."
+      "notes": "Score 2 retained: previous note incorrectly said case contour absent; accepted source-matching PDF visibly renders the relevant NACA residual and near-body Mach/pressure contours (report.tex:336\u2013346,372\u2013394). A contestant-delivered standalone force-history figure exists and figure_manifest.csv maps it to the selected case CSV, but its startup amplitude compresses the late force tail (M015 inviscid \u22481, M015/M080 laminar \u224870/90 versus late Cd \u22480.0023/0.0675/0.0796), so the required readable history is not established. Current metadata git_revision=null; case-specific raw tail values and plateau limitations are discussed in the report. No CFD rerun. 2026-10-31 visual comparison with glm53-04: these force plots overlay Cl/Cd/moment on one startup-dominated scale and their late coefficients merge into the baseline; unlike the precedent, no separately resolved lift panel exists. The required case force behavior remains insufficiently readable."
     },
     "naca0012_m080_inviscid": {
       "score": 3,
@@ -320,11 +320,11 @@
     },
     "naca0012_m015_laminar_re5000": {
       "score": 2,
-      "notes": "Score 2 retained: previous note incorrectly said case contour absent; accepted source-matching PDF visibly renders the relevant NACA residual and near-body Mach/pressure contours (report.tex:336\u2013346,372\u2013394). A contestant-delivered standalone force-history figure exists and figure_manifest.csv maps it to the selected case CSV, but its startup amplitude compresses the late force tail (M015 inviscid \u22481, M015/M080 laminar \u224870/90 versus late Cd \u22480.0023/0.0675/0.0796), so the required readable history is not established. Current metadata git_revision=null; case-specific raw tail values and plateau limitations are discussed in the report. No CFD rerun."
+      "notes": "Score 2 retained: previous note incorrectly said case contour absent; accepted source-matching PDF visibly renders the relevant NACA residual and near-body Mach/pressure contours (report.tex:336\u2013346,372\u2013394). A contestant-delivered standalone force-history figure exists and figure_manifest.csv maps it to the selected case CSV, but its startup amplitude compresses the late force tail (M015 inviscid \u22481, M015/M080 laminar \u224870/90 versus late Cd \u22480.0023/0.0675/0.0796), so the required readable history is not established. Current metadata git_revision=null; case-specific raw tail values and plateau limitations are discussed in the report. No CFD rerun. 2026-10-31 visual comparison with glm53-04: these force plots overlay Cl/Cd/moment on one startup-dominated scale and their late coefficients merge into the baseline; unlike the precedent, no separately resolved lift panel exists. The required case force behavior remains insufficiently readable."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 2,
-      "notes": "Score 2 retained: previous note incorrectly said case contour absent; accepted source-matching PDF visibly renders the relevant NACA residual and near-body Mach/pressure contours (report.tex:336\u2013346,372\u2013394). A contestant-delivered standalone force-history figure exists and figure_manifest.csv maps it to the selected case CSV, but its startup amplitude compresses the late force tail (M015 inviscid \u22481, M015/M080 laminar \u224870/90 versus late Cd \u22480.0023/0.0675/0.0796), so the required readable history is not established. Current metadata git_revision=null; case-specific raw tail values and plateau limitations are discussed in the report. No CFD rerun."
+      "notes": "Score 2 retained: previous note incorrectly said case contour absent; accepted source-matching PDF visibly renders the relevant NACA residual and near-body Mach/pressure contours (report.tex:336\u2013346,372\u2013394). A contestant-delivered standalone force-history figure exists and figure_manifest.csv maps it to the selected case CSV, but its startup amplitude compresses the late force tail (M015 inviscid \u22481, M015/M080 laminar \u224870/90 versus late Cd \u22480.0023/0.0675/0.0796), so the required readable history is not established. Current metadata git_revision=null; case-specific raw tail values and plateau limitations are discussed in the report. No CFD rerun. 2026-10-31 visual comparison with glm53-04: these force plots overlay Cl/Cd/moment on one startup-dominated scale and their late coefficients merge into the baseline; unlike the precedent, no separately resolved lift panel exists. The required case force behavior remains insufficiently readable."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1,
@@ -345,14 +345,68 @@
       {
         "id": 7,
         "flag": "metadata.json marks incomplete or failed runs as successful final results",
-        "found": false,
-        "evidence": "Prior flag relied solely on inviscid outer residual reductions 2.509,2.383,-0.040. TASK.md:172 allows a clearly justified stable force/residual plateau. For M015/M080/M200 inviscid the last-10% residual half-means are 1.460e-5\u21921.433e-5, 1.01311e-6\u21921.01318e-6, 1.32099e-4\u21921.31991e-4; Cd half-means 0.00228491\u21920.00228905, 0.00928821490\u21920.00928821492, 0.092531847\u21920.092531879; Cl half-means 0.00041351\u21920.00041146, 0.000435354436\u21920.000435354431, -0.000174608\u2192-0.000174055. The report explicitly discloses plateau criteria; residual-order shortfalls alone do not prove false success. Re200 FFT peak0.14 across t>=100,150,200, with nonzero oscillation; strict refreshed-limiter misses remain unknown. Other DQ triggers remain under review."
+        "found": true,
+        "evidence": "Separate from the justified inviscid plateaus: selected results/naca0012_m200_laminar_re5000 metadata says completed=true/converged at step627, but last 62 raw force rows show Cd falling monotonically 0.24406605\u21920.19384629 (20.6%); first/second half means 0.22963301\u21920.20424425. TASK.md:172 requires converged state or justified plateau with stable forces, and :140 requires max_steps>=40000 unless clearly converged earlier. Raw metadata git_revision=null, so do not infer final source produced this run. Prior inviscid-only DQ7 rationale is withdrawn: Prior flag relied solely on inviscid outer residual reductions 2.509,2.383,-0.040. TASK.md:172 allows a clearly justified stable force/residual plateau. For M015/M080/M200 inviscid the last-10% residual half-means are 1.460e-5\u21921.433e-5, 1.01311e-6\u21921.01318e-6, 1.32099e-4\u21921.31991e-4; Cd half-means 0.00228491\u21920.00228905, 0.00928821490\u21920.00928821492, 0.092531847\u21920.092531879; Cl half-means 0.00041351\u21920.00041146, 0.000435354436\u21920.000435354431, -0.000174608\u2192-0.000174055. The report explicitly discloses plateau criteria; residual-order shortfalls alone do not prove false success. Re200 FFT peak0.14 across t>=100,150,200, with nonzero oscillation; strict refreshed-limiter misses remain unknown."
       },
       {
-        "id": 7,
-        "flag": "metadata.json marks incomplete or failed runs as successful final results",
-        "found": true,
-        "evidence": "Separate from the justified inviscid plateaus: selected results/naca0012_m200_laminar_re5000 metadata says completed=true/converged at step627, but last 62 raw force rows show Cd falling monotonically 0.24406605\u21920.19384629 (20.6%); first/second half means 0.22963301\u21920.20424425. TASK.md:172 requires converged state or justified plateau with stable forces, and :140 requires max_steps>=40000 unless clearly converged earlier. Raw metadata git_revision=null, so do not infer final source produced this run."
+        "id": 1,
+        "found": false,
+        "evidence": "No internal existing solver executable call established in inspected source; no exhaustive external-authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence force/residual histories were generated without solving."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Case-driven configured CGNS mesh input is not restricted to two hard-coded filenames."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "M0.15 np4/8 last-200 mean Cd 0.002290526/0.002290542 and Cl 0.000415197/0.000411708; no controlled order-one discrepancy established. Cylinder comparison is transient."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Source implements LU-SGS and BDF2 inner loops; no explicit-only integration established."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Report-claimed major algorithms exist; incorrect heat-gradient and wall-traction/Cf outputs are separately scored, not an absent named algorithm."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "Force/contour evidence is compressed in places, but no specific report figure proven to depict unrelated data."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "METIS and partition-local state are implemented; main.cpp:110\u2013145 keeps global mesh only on root. Restart full-state broadcast occurs only during initialization, not iterations."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Source uses reconstruction and limiter, with lagged transient limiter disclosed. Exact historical source/binary binding remains unproven; no production-disabled claimed algorithm established."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "Final source and selected Re20 surface.csv output zero no-slip wall velocity in all 100 wall rows; no undocumented adjacent-cell-velocity violation established."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "Compressed or narrow plots do not establish a specific named-variable swap."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source CFD solver core established in inspected source; no exhaustive external authorship search."
       }
     ]
   },
@@ -361,6 +415,7 @@
     "Structural validation is separate from substantive numerical scoring.",
     "Raw solver artifacts remain workspace evidence and were excluded from the curated submission tip.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All applicable ten rubric sections, eight cases, 27 review points and 13 DQ rules were assessed to the available evidence limit; exact selected run-source/executable attribution remains unresolved. No CFD/Re200 rerun."
   ]
 }

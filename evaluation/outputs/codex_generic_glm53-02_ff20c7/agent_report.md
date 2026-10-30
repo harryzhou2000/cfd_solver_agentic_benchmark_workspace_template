@@ -4,7 +4,7 @@ Submission `codex/generic/glm53-02` at `1bc8fb6ec6c765ec3c4bf7c06770463580dbecb1
 
 ## Verdict
 
-**72/100; DQ=true under DQ7 (partial calibration).** The previous inviscid-plateau rationale was unsupported, but a separate M2 laminar result is labeled converged while its drag is still changing materially; evidence below. Other triggers remain under review.
+**72/100; DQ=true under DQ7 (qualified full calibration).** The previous inviscid-plateau rationale was unsupported, but a separate M2 laminar result is labeled converged while its drag is still changing materially; evidence below. Other numbered triggers have been assessed with historical source/binary attribution qualified.
 
 ## Evidence
 
@@ -57,3 +57,10 @@ Final solver.cpp:808–811 sets no-slip boundary u=v=0; :820–826 builds a tang
 Criterion-specific rubric/review notes document source and result evidence. Restart reader solver.cpp:881–919 restores state, step and time but initializes both prior BDF states to current state, losing transient multistep history; build/CLI rubric10→8, total74→72. Its full-state broadcast is scoped to restart initialization, not all-rank full state during the solve. NACA M015 inviscid np4/8 last-200 mean Cd0.002290526/0.002290542 and Cl0.000415197/0.000411708; no order-one DQ4 shown by that comparison. Re200 np4/8 is the cylinder comparison but is transient. main.cpp:110–145 holds global mesh only on root and distributes local state, so TASK all-rank replication and DQ9 not established.
 
 No internal existing solver executable or fabricated force/residual history evidence found (DQ1/2); case-driven CGNS input does not support DQ3. LU-SGS/BDF2 exist (DQ5/6). DQ7 remains based on the separate M2 laminar unstable final force, not the justified inviscid plateaus. Missing/flattened plots alone do not establish mismatched or misnamed data (DQ8/12). Reconstruction and limiters are active; lagged transient limiter is disclosed (DQ10). Final source and selected Re20 surface rows output zero no-slip velocities (100 rows all u=v=0), so DQ11 not established. No external authorship search was performed (DQ13). Exact selected run-source binding remains unresolved: metadata git_revision=null and M2 results predate final source; the entry remains partial. No CFD/rank/unsteady rerun.
+
+
+## Qualified review and steady-plot comparison — 2026-10-31
+
+All ten rubric sections, eight case scores, 27 review points and 13 numbered DQ rules have been reviewed to the available evidence limit. Rubric remains 72/100, DQ7=true for the M2 laminar 20.6% late Cd decrease, independently of the stable inviscid plateaus. The earlier inviscid-only DQ7 rationale is withdrawn; the two prior entries are merged into one verdict with both evidential distinctions.
+
+Visual comparison with glm53-04 confirms the three 2-point NACA cases overlay lift, drag and moment on one startup-dominated axis so late coefficients merge into the baseline, unlike the precedent’s separately resolved lift panels. Re20 retains its cap because the delivered wake contours collapse to thin strips. Re200 retains the separate explicit late-lift/drag floor. Exact selected run-source/executable attribution remains unresolved; earlier partial checkpoints are historical. No CFD or Re200 rerun.
