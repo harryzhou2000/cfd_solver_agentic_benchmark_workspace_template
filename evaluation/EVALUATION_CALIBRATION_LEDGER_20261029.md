@@ -100,7 +100,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_opus5-01_83492a` | partial: 90/100, DQ not established; Re200 binary/fallback attribution unresolved |
 | `codex_generic_opus5-02_cac77b` | partial: all cases, PDF and source/rubric examined; historical Re200 binary and final DQ adjudication remain uncertain |
 | `codex_generic_sonnet46-01_ac6940` | partial: all cases, PDF, source and rubric reviewed; DQ7/TASK full mesh; historic binary binding and remaining DQ uncertain |
-| `codex_generic_sonnet46-02_dac37b` | partial: Re200 report/FFT/force-plot evidence corrected; remaining source/cases/rubric/DQ pending |
+| `codex_generic_sonnet46-02_dac37b` | partial: all cases, PDF, source/rubric checked; DQ6/DQ7 and placeholder rejection; exact historical binary remains unbound |
 | `codex_generic_sonnet5-01_540ddf` | unreviewed |
 | `codex_generic_sonnet5-02_6c0ac0` | unreviewed |
 | `codex_generic_vllm-qwen38-01_2045e0` | unreviewed |
@@ -797,3 +797,5 @@ sonnet46-02 report/case rubric: report.tex:223 and checkpoint np8 final |Cd|0.67
 sonnet46-02 DQ6 checkpoint: report.tex:111–112 claims a cell-joining viscous gradient correction; identical 113f01a/25daaa3 Gradient.cpp:31–46, Residual.cpp:77–88, Physics.hpp:131–155 implement ordinary cell Green–Gauss and direct face average, with no correction path. DQ6 is distinct from implemented Newtonian flux and separate full-traction split. Viscous7.5→7, report3→2.5, total75→74. Binary binding remains uncertain.
 
 sonnet46-02 source/review checkpoint: final ghost limiter initialized 1 and updated only on owned cells, yet both sides reconstructed; second-order8.5→7.5, total74→73. Root global mesh deleted before solve. Validator passes eight final cases/report structurally but accepts restart placeholders; Re200 metadata null revision leaves strict-count attribution uncertain. Remaining DQ/provenance partial.
+
+sonnet46-02 remaining DQ boundaries: np1 failed diagnostic uses Barth vs selected np8 Venkat, null revisions; no controlled DQ4 comparison. No specific false-data figure established, root full mesh freed, owned limiter active, wall output boundary-valued. No external authorship search or synthetic force/residual proof. Historical binary unbound; review remains partial.
