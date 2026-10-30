@@ -22,208 +22,208 @@
   },
   "scores": {
     "code_review": {
-      "overall_score": 4.85,
+      "overall_score": 4.56,
       "points": [
         {
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 5,
-          "notes": "CMake/MPI/CGNS/METIS build and three CTests are documented."
+          "score": 4.5,
+          "notes": "Clean f06ea3f source builds in restricted cfd-bench with bundled dependencies; all three CTests pass (unit and two mesh-inspection tests)."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Input-driven solve CLI and exception paths are implemented."
+          "score": 4.5,
+          "notes": "main.cpp parses solve/inspect and restart; output.cpp:280\u2013296 stores step, physical time, current and previous states in rank-local files. Restart requires the original MPI count."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 5,
-          "notes": "Separate mesh, partition, solver, output and configuration modules."
+          "notes": "Source separates config, mesh, partition, physics, solver and output; report records future extension limits."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "No internal wrapper/executable evidence; trust policy precludes external comparison."
+          "notes": "No direct internal executable wrapper found; external authorship/similarity investigation was not performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 5,
-          "notes": "JSON case configuration and general mesh reader drive behavior."
+          "notes": "main.cpp loads JSON case configuration and CGNS mesh paths; no two-filename-only case branch found."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 5,
-          "notes": "METIS graph partitioning, nonblocking neighbor halos, and global reductions are source-evidenced."
+          "notes": "main.cpp:121\u2013132 partitions on root, distributes then resets all global partition objects before solve. METIS/neighbor halos and rank evidence exist."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Validated topology and error checks; rank-local diagnostics recorded."
+          "score": 4.5,
+          "notes": "State positivity scaling and error checks exist; no production rerun or independent stress campaign was performed."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Three CTests, all cases validator pass, and np1/2/8 comparisons."
+          "score": 4.5,
+          "notes": "Three clean CTests pass: unit and NACA/cylinder mesh inspections; no unsteady solver rerun. Historical validator and rank packages are preserved."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": 5,
-          "notes": "Readable C++17 source and curated report/source submission."
+          "score": 4,
+          "notes": "Source is organized; curated report omits escaped PNG assets despite an accepted original workspace PDF."
         }
       ],
       "disqualification_flags": []
     },
     "cfd_review": {
-      "overall_score": 4.92,
+      "overall_score": 4.67,
       "points": [
         {
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 5,
-          "notes": "Report and source document compressible Euler/laminar NS nondimensionalization."
+          "notes": "Compressible perfect-gas NS and reference normalization implemented and described."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 5,
-          "notes": "CGNS multi-zone unstructured topology and canonical face construction."
+          "notes": "Root-only CGNS mesh/partition setup and clean NACA/cylinder mesh inspection tests support imported geometry."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 5,
-          "notes": "Face-based conservative finite-volume residual source evidence."
+          "score": 4.5,
+          "notes": "Face residual is assembled conservatively; actual final runs show strong reductions but startup-compressed force figures and single-mesh uncertainty remain."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Robust Rusanov steady flux; transient HLLC fallback documented."
+          "notes": "Rusanov steady and HLLC transient with fallback are implemented and disclosed; no independent higher-order flux comparison."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 5,
-          "notes": "Farfield, slip and no-slip treatments evidenced in source/report."
+          "notes": "Farfield/slip/no-slip paths exist and solver.cpp:370\u2013371 explicitly sets wall velocity to zero."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 5,
-          "notes": "Weighted least-squares linear reconstruction implemented."
+          "score": 4.5,
+          "notes": "Weighted least-squares reconstruction and production limiter are source-supported; no evaluator production rerun or grid-convergence test."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Production limiter and positivity fallback counters are reported."
+          "score": 4.5,
+          "notes": "Barth limiter and positivity controls are implemented; fallback counters and bounded shock tests reported."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 5,
-          "notes": "Newton-Fourier terms and tangential skin friction split are documented."
+          "notes": "solver.cpp:393\u2013403 explicitly subtracts the normal component of wall viscous traction before integrated force; cf uses tangential component at :407\u2013411."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Block-Jacobi implicit defect correction and CFL control implemented."
+          "score": 4.5,
+          "notes": "Block-Jacobi pseudo-time and force/residual gates are implemented; first five historical cases use 9e89a35 plateau-tolerance code, differing from later source."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Frozen-history BDF2 to t=300 with inner-control evidence; not rerun."
+          "score": 4.5,
+          "notes": "BDF2 inner residual ratio is tested against strict target; workspace metadata reports final0.000942283 and zero misses, force/wake data support periodicity. Exact executable unbound."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 5,
-          "notes": "METIS owned/ghost decomposition and halo sizing are source/report evidenced."
+          "notes": "Re20 np1/2/8 final Cd agrees within ~1e\u221214 at step3846; M015 rank runs agree closely but np8 metadata names earlier plateau-source revision."
         }
       ],
       "disqualification_flags": []
     },
     "result_review": {
-      "overall_score": 4.95,
+      "overall_score": 4.4,
       "points": [
         {
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 5,
-          "notes": "All eight case directories and report passed explicit validator."
+          "score": 4.5,
+          "notes": "Eight production packages and report historically pass structural validation; accepted PDF and raw histories checked, while exact executable and all figure bindings remain qualified."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Explicit evaluator validator returned OK for all required outputs."
+          "score": 4.5,
+          "notes": "Historical explicit validator passes eight case directories and report. Structural pass is not a numerical accuracy or executable-identity proof."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Seven steady cases converge; Re200 reaches t=300 and statistically periodic status."
+          "score": 4.5,
+          "notes": "Re200 reaches t300 with strict target metadata and resolved forces. Steady final200 forces are bounded; M015 drag changes 2.6% relative near zero."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Forces, residual reductions, shock/wake narrative and rank comparisons are credible."
+          "score": 4.5,
+          "notes": "Re20 Cd2.03576 and Re200 mean Cd1.26946 with lift amplitude0.567 and period\u22485.37 are physically plausible; no grid refinement supplied."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "41 manifest-traceable field/history figures; visual audit stated by contestant."
+          "score": 4.5,
+          "notes": "All13 accepted PDF pages inspected; case histories/near-body fields and readable Re200 late-force inset/wake are delivered. Several steady force panels compress startup."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 5,
-          "notes": "13-page method/result/limitations report with clear case status table."
+          "score": 4,
+          "notes": "Readable 13-page accepted workspace PDF supplies numeric summaries, figures and limitations, while curated TeX cannot independently include omitted figures."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
           "score": 4,
-          "notes": "Contestant artifacts are traceable through manifests, but strict result-commit audit excludes TeX detokenize PNG references."
+          "notes": "Workspace manifest and selected final response identify figures/results. Metadata revision9e89a35 differs in plateau tolerance from final source for first five cases; exact executables and all individual figure bindings unbound."
         }
       ],
       "disqualification_flags": []
@@ -231,14 +231,14 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 98,
+    "total_scored": 96.5,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 10,
-        "notes": "Documented CMake/CLI, tests and validator evidence."
+        "notes": "Clean restricted build and three unit/mesh-inspection CTests pass; rank-local restart retains step/time and both BDF states but requires the same MPI count."
       },
       {
         "id": "mesh",
@@ -266,14 +266,14 @@
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 10,
-        "notes": "Gradient, Newton-Fourier and tangential wall-force evidence."
+        "notes": "Newtonian/Fourier and explicitly tangential integrated wall traction at solver.cpp:393\u2013403."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 15,
-        "notes": "Implicit steady method and frozen-history BDF2 Re200 deliverable."
+        "notes": "BDF2 histories, strict target ratio and observed periodic Re200 evidence checked; no solver rerun."
       },
       {
         "id": "mpi",
@@ -286,15 +286,15 @@
         "id": "cases",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 10,
-        "notes": "All required cases validated; Re200 judged from submitted evidence only."
+        "score": 9.5,
+        "notes": "All eight delivered results and figures are credible with qualified source provenance; M015 inviscid Cd changes 2.6% relative near zero over final200."
       },
       {
         "id": "report",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "Comprehensive report, figures and traceability manifests."
+        "score": 4,
+        "notes": "Accepted workspace PDF includes readable case figures, but curated TeX omits figure blobs and cannot reproduce those images alone."
       },
       {
         "id": "extensibility",

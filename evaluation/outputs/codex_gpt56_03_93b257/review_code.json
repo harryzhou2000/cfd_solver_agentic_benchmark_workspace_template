@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 5,
-      "notes": "CMake/MPI/CGNS/METIS build and three CTests are documented."
+      "score": 4.5,
+      "notes": "Clean f06ea3f source builds in restricted cfd-bench with bundled dependencies; all three CTests pass (unit and two mesh-inspection tests)."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Input-driven solve CLI and exception paths are implemented."
+      "score": 4.5,
+      "notes": "main.cpp parses solve/inspect and restart; output.cpp:280\u2013296 stores step, physical time, current and previous states in rank-local files. Restart requires the original MPI count."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 5,
-      "notes": "Separate mesh, partition, solver, output and configuration modules."
+      "notes": "Source separates config, mesh, partition, physics, solver and output; report records future extension limits."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No internal wrapper/executable evidence; trust policy precludes external comparison."
+      "notes": "No direct internal executable wrapper found; external authorship/similarity investigation was not performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 5,
-      "notes": "JSON case configuration and general mesh reader drive behavior."
+      "notes": "main.cpp loads JSON case configuration and CGNS mesh paths; no two-filename-only case branch found."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 5,
-      "notes": "METIS graph partitioning, nonblocking neighbor halos, and global reductions are source-evidenced."
+      "notes": "main.cpp:121\u2013132 partitions on root, distributes then resets all global partition objects before solve. METIS/neighbor halos and rank evidence exist."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Validated topology and error checks; rank-local diagnostics recorded."
+      "score": 4.5,
+      "notes": "State positivity scaling and error checks exist; no production rerun or independent stress campaign was performed."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Three CTests, all cases validator pass, and np1/2/8 comparisons."
+      "score": 4.5,
+      "notes": "Three clean CTests pass: unit and NACA/cylinder mesh inspections; no unsteady solver rerun. Historical validator and rank packages are preserved."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 5,
-      "notes": "Readable C++17 source and curated report/source submission."
+      "score": 4,
+      "notes": "Source is organized; curated report omits escaped PNG assets despite an accepted original workspace PDF."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.85
+  "overall_score": 4.56
 }

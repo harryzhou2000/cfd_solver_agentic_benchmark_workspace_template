@@ -116,7 +116,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
 | `codex_gpt56_01_cb349f` | fully reviewed: 94/100, no DQ found; executable and individual image bindings qualified |
 | `codex_gpt56_02_38616e` | fully reviewed: 90/100, no DQ established; historic binary/precursor and image bindings qualified |
-| `codex_gpt56_03_93b257` | partial: Re200 2→4.5; remaining case/rubric/DQ review ongoing |
+| `codex_gpt56_03_93b257` | partial: provisional 96.5/100; remaining DQ and executable provenance review |
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
 | `codex_gpt56_05_7bee7c` | unreviewed |
 | `codex_gpt56_06_97ae53` | unreviewed |
@@ -1060,3 +1060,6 @@ gpt56_03 Re200 correction: accepted workspace sibling PDF SHA256 508a9f50ea30202
 
 
 gpt56_03 steady case checkpoint: all 13 accepted PDF pages rendered and visually reviewed; p3 numeric CL/CD and each case residual/force/near-body Mach/wake plots are delivered despite curated PNG omission. All seven force histories and final200 raw windows independently assessed, with exact workspace CSV/PNG hashes and PDF page numbers in case notes. Scores2→4.5 for each steady case: M015 inviscid Cd0.00056986→0.00055512 (small absolute drift), M080 inviscid Cd0.00815601→0.00815749, M200 inviscid0.09215829→0.09216247, M015 laminar0.06389711→0.06389842, M080 laminar0.08209788→0.08211504, M200 laminar0.11705845→0.11725535, Re20 2.03559427→2.03576121. Metadata for first five cases names 9e89a35, which differs from curated source only in the steady drag-plateau tolerance formula; final two and Re200 name 6faee413 matching curated solver/src. Exact executable remains unbound. Startup-compressed steady force plots are a presentation limitation, not automatic floor caps. Remaining rubric/DQ partial; no CFD rerun.
+
+
+gpt56_03 source/rubric checkpoint: clean immutable f06ea3f build in network-disabled cfd-bench with bundled dependencies and 2 CPUs/3 GiB/256 process limits; all three CTests pass (unit and NACA/cylinder mesh inspections), no solver run. Restart output.cpp:280–296 stores step, physical time, current and previous states in rank-local files; requires original MPI count as report discloses. solver.cpp:393–403 removes normal viscous traction and cf is tangential. Curated TeX omits historical figure blobs despite accepted original workspace PDF: report rubric5→4. Case-results10→9.5 for modest terminal/source qualifications, total98→96.5. All 27 review criteria now have individual source/result evidence; exact binary and some figure bindings remain qualified. Remaining DQ boundaries partial; no CFD rerun.

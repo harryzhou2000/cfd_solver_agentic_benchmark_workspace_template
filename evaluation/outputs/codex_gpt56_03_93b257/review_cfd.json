@@ -7,77 +7,77 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 5,
-      "notes": "Report and source document compressible Euler/laminar NS nondimensionalization."
+      "notes": "Compressible perfect-gas NS and reference normalization implemented and described."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 5,
-      "notes": "CGNS multi-zone unstructured topology and canonical face construction."
+      "notes": "Root-only CGNS mesh/partition setup and clean NACA/cylinder mesh inspection tests support imported geometry."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Face-based conservative finite-volume residual source evidence."
+      "score": 4.5,
+      "notes": "Face residual is assembled conservatively; actual final runs show strong reductions but startup-compressed force figures and single-mesh uncertainty remain."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Robust Rusanov steady flux; transient HLLC fallback documented."
+      "notes": "Rusanov steady and HLLC transient with fallback are implemented and disclosed; no independent higher-order flux comparison."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 5,
-      "notes": "Farfield, slip and no-slip treatments evidenced in source/report."
+      "notes": "Farfield/slip/no-slip paths exist and solver.cpp:370\u2013371 explicitly sets wall velocity to zero."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 5,
-      "notes": "Weighted least-squares linear reconstruction implemented."
+      "score": 4.5,
+      "notes": "Weighted least-squares reconstruction and production limiter are source-supported; no evaluator production rerun or grid-convergence test."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Production limiter and positivity fallback counters are reported."
+      "score": 4.5,
+      "notes": "Barth limiter and positivity controls are implemented; fallback counters and bounded shock tests reported."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 5,
-      "notes": "Newton-Fourier terms and tangential skin friction split are documented."
+      "notes": "solver.cpp:393\u2013403 explicitly subtracts the normal component of wall viscous traction before integrated force; cf uses tangential component at :407\u2013411."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Block-Jacobi implicit defect correction and CFL control implemented."
+      "score": 4.5,
+      "notes": "Block-Jacobi pseudo-time and force/residual gates are implemented; first five historical cases use 9e89a35 plateau-tolerance code, differing from later source."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Frozen-history BDF2 to t=300 with inner-control evidence; not rerun."
+      "score": 4.5,
+      "notes": "BDF2 inner residual ratio is tested against strict target; workspace metadata reports final0.000942283 and zero misses, force/wake data support periodicity. Exact executable unbound."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 5,
-      "notes": "METIS owned/ghost decomposition and halo sizing are source/report evidenced."
+      "notes": "Re20 np1/2/8 final Cd agrees within ~1e\u221214 at step3846; M015 rank runs agree closely but np8 metadata names earlier plateau-source revision."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.92
+  "overall_score": 4.67
 }
