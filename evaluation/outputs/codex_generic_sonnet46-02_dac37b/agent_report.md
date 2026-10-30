@@ -45,7 +45,7 @@ Read immutable source/report, eight raw final packages, and the sole workspace-l
 
 ## Recorded scores and disqualification
 
-The current 100-point rubric is 75.0/100; section details and weighted review scores are in `agent_scores.json`. Independent case scores:
+The current 100-point rubric is 74.0/100; section details and weighted review scores are in `agent_scores.json`. Independent case scores:
 
 | Case | Score |
 |---|---:|
@@ -58,7 +58,7 @@ The current 100-point rubric is 75.0/100; section details and weighted review sc
 | `cylinder_m010_laminar_re20` | 4.5 |
 | `cylinder_m010_laminar_re200` | 2 |
 
-DQ7 is triggered by falsely successful M015 inviscid and M200 laminar results; TASK.md and the examiner independently require rejection for the eight placeholder restart files. Detailed evidence follows. This review remains partial.
+DQ6 is triggered by a claimed absent viscous gradient correction; DQ7 is triggered by falsely successful M015 inviscid and M200 laminar results; TASK.md and the examiner independently require rejection for the eight placeholder restart files. Detailed evidence follows. This review remains partial.
 
 ## Metadata answers & session selection
 
@@ -72,7 +72,7 @@ The evaluator clean build succeeded as documented below; no MPI solver rerun. Re
 
 ## Verdict
 
-Disqualified under DQ7 and the task prohibition on placeholder result files. Remaining source and rubric review is partial.
+Disqualified under DQ6, DQ7 and the task prohibition on placeholder result files. Remaining source and rubric review is partial.
 
 
 ## Re200 evidence correction — 2026-10-30
@@ -107,3 +107,8 @@ Selected force CSVs for M080 and M200 inviscid, M015 and M080 laminar, and Re20 
 The main report's force table (`report.tex:223`) gives selected np8 M015 |Cd|0.674, matching `113f01a:solver/results/final/naca0012_m015_inviscid/forces.csv`; its MPI comparison (`:520–531`) calls the same np8 Cd approximately zero. The np2 comparison's original raw package has not been identified, so no order-one MPI DQ is inferred from that table. The selected Re200 force FFT≈0.160 also differs from report St0.19–0.20. These are specific report/traceability defects rather than proof a plot uses another dataset.
 
 Two steady cases show the independently documented unstable forces despite successful status; Re200 accuracy/late-drag presentation is limited, while the other steady cases retain case-specific force evidence. Case-results rubric7→5.5 and report/visualization4→3; total77.5→75. Source/rubric/DQ review remains partial. No rerun.
+
+
+## Claimed viscous gradient correction — 2026-10-30
+
+Immutable report.tex:111–112 specifically claims a corrected Green–Gauss viscous face gradient with a correction along the cell-joining vector. `Gradient.cpp:31–46` computes ordinary Green–Gauss cell gradients; `Residual.cpp:77–88` averages adjacent gradients and passes them to `Physics.hpp:131–155`, which forms stress and heat flux from the supplied gradients without cell-joining geometry or cell-to-cell differences. No correction path is present. These three source blobs are identical between contestant checkpoint `113f01a` and submission `25daaa3`. This supports DQ6 for a specifically claimed absent algorithm. Newtonian viscous flux is implemented; the separate full-traction force-split defect is not the basis for DQ6, consistent with the prior force-split precedent. Exact historical binary attribution remains uncertain. Viscous rubric7.5→7 and report3→2.5, total75→74. No CFD rerun.

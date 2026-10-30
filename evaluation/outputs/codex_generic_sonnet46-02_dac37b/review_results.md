@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:40:18.478505+00:00
+Generated: 2026-10-30T07:42:14.198056+00:00
 
 **Overall score: 2.7**
 
@@ -24,7 +24,7 @@ Generated: 2026-10-30T07:40:18.478505+00:00
 | 5 | **res.visualization** Visualizations | 0.15 | 4 | Required visual coverage readable. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 2.5 | Report.tex:223 gives M015 np8 |Cd|0.674, while MPI table :520–531 calls same np8 Cd≈0. Re200 report claims St0.19–0.20 versus selected FFT≈0.160. The M015 difficulty is disclosed. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 2.5 | Report.tex:223 gives M015 np8 |Cd|0.674, while MPI table :520–531 calls same np8 Cd≈0. Re200 report claims St0.19–0.20 versus selected FFT≈0.160. The M015 difficulty is disclosed. Report.tex:112 additionally claims a face-joining viscous gradient correction absent from source. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Checkpoint histories and report plots are identifiable, but MPI table contradicts selected np8 result and claimed Re200 St differs from the selected t=200–300 FFT. Metadata has null source revision. |

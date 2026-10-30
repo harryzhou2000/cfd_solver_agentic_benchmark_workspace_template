@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:40:18.478220+00:00
+Generated: 2026-10-30T07:42:14.197588+00:00
 
-**Overall score: 3.91**
+**Overall score: 3.81**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T07:40:18.478220+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Venkatakrishnan and fallback path present. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3.5 | Full traction force integration is not tangential skin friction. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2.5 | Residual.cpp:77–88 averages gradients without the face-joining correction claimed in report.tex:112; :242–263 integrates full traction, while surface cf is tangential. Newtonian/Fourier flux exists. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | LU-SGS pseudo-time implementation present. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T07:40:18.478220+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.91
+- Overall score (0-5): 3.81
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

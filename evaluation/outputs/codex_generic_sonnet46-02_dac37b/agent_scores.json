@@ -145,8 +145,8 @@
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 3.5,
-          "notes": "Full traction force integration is not tangential skin friction."
+          "score": 2.5,
+          "notes": "Residual.cpp:77\u201388 averages gradients without the face-joining correction claimed in report.tex:112; :242\u2013263 integrates full traction, while surface cf is tangential. Newtonian/Fourier flux exists."
         },
         {
           "id": "cfd.implicit",
@@ -170,7 +170,7 @@
           "notes": "Only NACA np2/8 comparison, no cylinder two-rank comparison."
         }
       ],
-      "overall_score": 3.91,
+      "overall_score": 3.81,
       "disqualification_flags": []
     },
     "result_review": {
@@ -215,7 +215,7 @@
           "title": "Report quality and honesty",
           "weight": 0.15,
           "score": 2.5,
-          "notes": "Report.tex:223 gives M015 np8 |Cd|0.674, while MPI table :520\u2013531 calls same np8 Cd\u22480. Re200 report claims St0.19\u20130.20 versus selected FFT\u22480.160. The M015 difficulty is disclosed."
+          "notes": "Report.tex:223 gives M015 np8 |Cd|0.674, while MPI table :520\u2013531 calls same np8 Cd\u22480. Re200 report claims St0.19\u20130.20 versus selected FFT\u22480.160. The M015 difficulty is disclosed. Report.tex:112 additionally claims a face-joining viscous gradient correction absent from source."
         },
         {
           "id": "res.traceability",
@@ -231,7 +231,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 75.0,
+    "total_scored": 74.0,
     "sections": [
       {
         "id": "build_cli",
@@ -265,8 +265,8 @@
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 7.5,
-        "notes": "Viscous implementation present but force traction is not tangential skin-friction split."
+        "score": 7,
+        "notes": "Residual.cpp:77\u201388 uses uncorrected average cell gradients despite report.tex:112 claiming a face-joining correction. Residual.cpp:242\u2013263 integrates full traction rather than tangential-only skin friction. Newtonian/Fourier viscous flux and boundary wall output exist."
       },
       {
         "id": "implicit_transient",
@@ -293,8 +293,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 3,
-        "notes": "Report.tex:223 gives selected np8 M015 |Cd|0.674 while :520\u2013531 says the same np8 result has Cd\u22480; selected-history FFT\u22480.160 vs claimed St0.19\u20130.20. Re200 force plot compresses late drag. Fifteen pages visually checked."
+        "score": 2.5,
+        "notes": "Report.tex:223 gives selected np8 M015 |Cd|0.674 while :520\u2013531 says the same np8 result has Cd\u22480; selected-history FFT\u22480.160 vs claimed St0.19\u20130.20. Re200 force plot compresses late drag. Fifteen pages visually checked. Report.tex:112 also claims a face-joining gradient correction absent from the viscous flux source."
       },
       {
         "id": "extensibility",
@@ -352,6 +352,12 @@
         "flag": "Placeholder result files in submitted case directories",
         "found": true,
         "evidence": "All eight selected 113f01a:solver/results/final/<case>/restart_final.dat files match workspace and contain only 26 bytes, # restart not implemented followed by newline (SHA256 aad3dadaa2f32b46440f6c511a7cd6d6aebca2ab68747b6ea16dfdbb57b85989). Final OutputWriter.cpp:346\u2013348 writes that literal; main.cpp:27\u201338 accepts --restart but never uses it. TASK.md:226 prohibited shortcut 6 and README_EXAMINER.md:20 mandate rejection for placeholder result files. This does not establish synthetic force or residual files, so numbered DQ2 is not inferred."
+      },
+      {
+        "id": 6,
+        "flag": "Report claims algorithms that cannot be found in source",
+        "found": true,
+        "evidence": "Immutable report.tex:111\u2013112 explicitly claims viscous face gradients are corrected along the cell-joining vector. Matching checkpoint and final source Gradient.cpp:31\u201346 forms ordinary Green\u2013Gauss cell gradients; Residual.cpp:77\u201388 averages adjacent gradients and sends them directly to Physics.hpp:131\u2013155 viscousFlux, whose inputs contain no cell-joining vector or cell-to-cell difference. No claimed correction path was found. Gradient, residual and physics blobs are identical in 113f01a and 25daaa3. Newtonian viscous flux is present; the separately defective full-traction force split is not itself the basis for this DQ6."
       }
     ]
   },
