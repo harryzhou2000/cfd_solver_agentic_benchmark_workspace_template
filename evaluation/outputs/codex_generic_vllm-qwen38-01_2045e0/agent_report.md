@@ -4,7 +4,7 @@ Submission `codex/generic/vllm-qwen38-01` at `e185a0a43f42781f93348a4dc85c7f8aec
 
 ## Verdict
 
-**62.5/100; DQ=false (partial review).** One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata.
+**62.5/100; DQ=false (qualified full review).** One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata.
 
 ## Evidence
 
@@ -57,3 +57,8 @@ Both runs are explicitly failed and revisions are `unknown`. The np1 run was 202
 The seven failed selected cases are explicitly marked `completed=false` and `failed`, so their failures alone do not establish DQ7 false success. The sole successful M200 inviscid case reaches the reported residual target and has the force variations documented in its case note; no affirmative failure is established solely from those variations. The order-one Re20 rank-study anomaly is documented above with identical case input/initialization but failed runs separated by an intervening source fix and unknown binary revisions; DQ4 rank-only causation is not established.
 
 Root-only global mesh setup, METIS and neighbor halos do not establish the full-state/full-mesh shortcut; owned-cell second-order reconstruction is active even though ghost faces are first order, so DQ9/10 are not inferred. Tangential wall shear is integrated and no-slip surface output is boundary-valued. No specific final report figure has been proven unrelated to its source or misnamed, and no synthetic force/residual generation or external-solver call was identified in the inspected source. No exhaustive external-authorship search was performed. Historic production binary attribution and full figure-source review remain qualified; this is a partial review, not proof every DQ trigger is impossible. No CFD rerun.
+
+
+## Qualified full review — 2026-10-31
+
+All ten sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to the available evidence limit. Final 62.5/100 and no established DQ remain. Seven cases explicitly report failure and are not disqualified simply for failing. Re20 np1/np2 step300 drag differs by 2.066725 with identical case JSON, but both runs failed and a source fix intervened between unknown-revision executions; rank-only causation is unproved, so DQ4 is not asserted. Exact historical binary and some figure attribution remain qualified. Prior partial sections are historical checkpoints; no CFD, rank or Re200 rerun.

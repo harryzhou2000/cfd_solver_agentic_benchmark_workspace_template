@@ -103,7 +103,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_sonnet46-02_dac37b` | fully reviewed, qualified: 73/100, DQ6/7 and placeholder rejection; historical binary unbound |
 | `codex_generic_sonnet5-01_540ddf` | fully reviewed, qualified: 77.5/100, DQ8; historical binary/other-figure/fallback provenance limited |
 | `codex_generic_sonnet5-02_6c0ac0` | fully reviewed, qualified: 75/100, DQ7; historical binary/remaining figure provenance uncertain |
-| `codex_generic_vllm-qwen38-01_2045e0` | partial: all cases/PDF/source/rubric examined; DQ4 rank anomaly unbound to same binary; other figure provenance uncertain |
+| `codex_generic_vllm-qwen38-01_2045e0` | fully reviewed, qualified: 62.5/100, no DQ established; rank anomaly unbound to same binary |
 | `codex_generic_vllm-qwen38-02_d47362` | partial: source/result, DQ and score adjudication ongoing |
 | `codex_glm52-m3_01_919b67` | partial: 62.5/100, DQ7/10 and TASK full-mesh; binary/remaining review ongoing |
 | `codex_glm52-m3_02_ca46e4` | partial: provisional 58.5/100, DQ7 and TASK full-mesh; source and DQ review ongoing |
@@ -885,6 +885,8 @@ Both runs are explicitly failed and revisions are `unknown`. The np1 run was 202
 vllm-qwen38-01 source/review checkpoint: HDF5 /Base assumption and unsupported sections limit mesh generality (9→8); ghost side unreconstructed at MPI faces limits second order (7→6). Root-only mesh, METIS/halo, tangential shear and no-slip output inspected. Validator passes M200/report and rejects seven honestly failed packages. Total64.5→62.5; DQ4 binary binding partial.
 
 vllm-qwen38-01 DQ boundary checkpoint: seven failures honestly completed=false; no DQ7 inferred from failure alone. M200 success residual target/force range documented. Re20 rank anomaly cannot be attributed solely to rank across intervening fix/unknown binaries; DQ4 unasserted. Root-only mesh, METIS, active owned reconstruction, tangential shear and no-slip wall output inspected. No specific DQ8/12 or synthetic history proven; historical binary/other figure provenance partial.
+
+vllm-qwen38-01 qualified full review: all ten sections, eight cases, 27 review points and 13 DQ rules assessed to available evidence; 62.5/100 and no established DQ unchanged. Re20 np1/np2 step300 drag differs by 2.066725 with matching case JSON, but both runs failed, revisions are unknown and a source fix intervened, so same-binary rank-only causation is unproved. Historical executable and some figure provenance remain qualified; previous partial wording is historical. No CFD/rank/Re200 rerun; both gates required.
 
 
 vllm-qwen38-02 preliminary evidence (partial; no score or DQ changes yet): Immutable submission `84ccf503fa1dcb716fbbf830f6645288a488bb9b` report.tex:1236–1243 contains numerical summaries for all cases, contrary to earlier notes missing M2 and Re200 summaries. Report.tex:1555–1589 discloses no resolved Re200 street and discusses weak, drifting spectral bands; its result is nevertheless marked completed/statistically_periodic. Determine numerical and case-floor consequences separately.
