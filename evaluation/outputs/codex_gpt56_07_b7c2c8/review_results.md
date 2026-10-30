@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:04:55.179171+00:00
+Generated: 2026-10-30T12:07:40.038763+00:00
 
 **Overall score: 2.4**
 
@@ -27,7 +27,7 @@ Generated: 2026-10-30T12:04:55.179171+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 2 | Original report candid, but curated TeX missing committed dependencies. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Original manifest maps figures; excluded as raw CSV. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | generate_report.py:461–483 uses all rank VTU pieces while figure_manifest.csv identifies only the first. Re20 Mach figure SHA256 520dcc5ebd6c1425aed94b41039ee3c70744cc79558585b67581f6eb0165005e regenerates byte-identically from both workspace pieces (ledger hashes); some other figure/executable bindings remain unverified. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
