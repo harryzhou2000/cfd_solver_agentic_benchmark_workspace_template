@@ -76,8 +76,8 @@
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 4,
-      "notes": "METIS PartGraphKway, point-to-point halos and global reductions are directly evidenced; np8 artifacts exist."
+      "score": 2.5,
+      "notes": "6b376564 main.cpp:73\u2013143 broadcasts the full mesh to all ranks; :164\u2013194 retains it throughout solve and solver.cpp:10\u201312 stores a reference. This violates TASK.md:46,227 despite actual METIS and neighbor halo communication. Rank comparisons are short and historical binary attribution is not independently hashed."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.62
+  "overall_score": 3.49
 }

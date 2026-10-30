@@ -65,8 +65,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "METIS, neighbor Isend/Irecv and MPI reductions are implemented; rank comparisons are short runs."
+          "score": 2.5,
+          "notes": "6b376564 main.cpp:73\u2013143 broadcasts the full mesh to all ranks; :164\u2013194 retains it throughout solve and solver.cpp:10\u201312 stores a reference. This violates TASK.md:46,227 despite actual METIS and neighbor halo communication. Rank comparisons are short and historical binary attribution is not independently hashed."
         },
         {
           "id": "code.robustness",
@@ -90,7 +90,7 @@
           "notes": "Readable modular source, with stale comments and generated-result claims inconsistent with source behavior."
         }
       ],
-      "overall_score": 3.6,
+      "overall_score": 3.38,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -169,11 +169,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "METIS PartGraphKway, point-to-point halos and global reductions are directly evidenced; np8 artifacts exist."
+          "score": 2.5,
+          "notes": "6b376564 main.cpp:73\u2013143 broadcasts the full mesh to all ranks; :164\u2013194 retains it throughout solve and solver.cpp:10\u201312 stores a reference. This violates TASK.md:46,227 despite actual METIS and neighbor halo communication. Rank comparisons are short and historical binary attribution is not independently hashed."
         }
       ],
-      "overall_score": 3.62,
+      "overall_score": 3.49,
       "disqualification_flags": []
     },
     "result_review": {
@@ -234,7 +234,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 72,
+    "total_scored": 69,
     "sections": [
       {
         "id": "build_cli",
@@ -282,8 +282,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 9,
-        "notes": "Real METIS partitioning, neighbor nonblocking exchange/reductions, and short np8 evidence."
+        "score": 6,
+        "notes": "Real METIS, neighbor halos and reductions, but main.cpp:73\u2013143,164\u2013194 retains a complete broadcast mesh on every rank throughout solve, violating TASK.md:46,227. Rank comparisons are short."
       },
       {
         "id": "case_results",
@@ -385,7 +385,7 @@
         "id": 7,
         "text": "metadata marks incomplete or failed runs as successful",
         "found": true,
-        "evidence": "Re200 metadata/report labels the run complete/periodic despite every final record using the capped 10 inner iterations and last ratio 0.156 against the required 1e-3 target."
+        "evidence": "Historical checkpoint 52a1e520 Re200 metadata reports completed/statistically_periodic, target 0.001 and last ratio 0.156; residuals.csv has 30000 rows with inner_iter=10. Final recorded ratio demonstrably misses target; the per-step miss count cannot be reconstructed from that CSV alone. Immutable source solver.cpp:823\u2013829 caps maxInner at 10, while main.cpp:187\u2013191 labels every transient statistically_periodic. Report discloses the cap but asserts a successful periodic result. Historical binary is not independently hashed."
       },
       {
         "id": 8,
@@ -422,6 +422,11 @@
         "text": "Copied/adapted/wrapped open-source CFD core",
         "found": false,
         "evidence": "Not investigated externally under trust policy; no direct internal wrapper evidence."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "Immutable 6b376564 main.cpp:73\u2013143 broadcasts complete vertices, cells, faces and geometry to every rank; :164\u2013171 retains the mesh and solver.cpp:10\u201312 stores globalMesh=&gm. The same live mesh remains in scope through runTransient/runSteady at main.cpp:187\u2013194 and is dereferenced afterward by output.cpp:353\u2013354. This violates TASK.md:46,227 despite genuine METIS and neighbor halos; numbered DQ9 is not asserted merely for full-mesh replication. Historical checkpoint 52a1e520 and submission have identical solver/src, though the historical execution binary is not independently hashed."
       }
     ]
   },

@@ -35,18 +35,18 @@ The structural contract is complete, and the historical manifest maps 56 figures
 | Second-order spatial scheme | 10 | 8 |
 | Viscous terms | 10 | 6 |
 | Implicit and transient methods | 15 | 9 |
-| MPI | 10 | 9 |
+| MPI | 10 | 6 |
 | Case results | 10 | 5 |
 | Report and visualization | 5 | 3 |
 | Extensibility | 5 | 4 |
-| **Total** | **100** | **72** |
+| **Total** | **100** | **69** |
 
 ## Disqualification assessment
 
-DQ 7 is substantiated: Re200 metadata/report labels the run complete/periodic despite every final record using the capped 10 inner iterations and a final ratio of 0.156 against the required 1e-3 target. There is no direct internal external-solver wrapper, generated-without-solving evidence, hard-coded two-mesh branch, order-one MPI inconsistency, explicit-only path, figure mismatch, geometric-only partitioning, disabled production reconstruction/limiter, or undocumented cell-center no-slip output. Trigger 13 was not externally investigated under the trust policy. The full per-trigger record is in `agent_scores.json`.
+DQ 7 is substantiated: Re200 metadata/report labels the run complete/periodic, and the recorded final inner ratio 0.156 misses the required 1e-3 target. All 30,000 residual rows record 10 inner iterations, but their individual target ratios are unavailable and the true count of strict misses cannot be inferred from that alone. The source caps inner iterations at 10. Separately, immutable main.cpp:73–143 broadcasts the complete mesh on every rank and retains it throughout solve (:164–194); solver.cpp:10–12 holds a pointer and output.cpp:353–354 dereferences it after solve. This violates TASK.md:46,227 even though METIS and neighbor halos exist. It is a separate TASK prohibited-shortcut rejection, not numbered DQ9. There is no direct internal external-solver wrapper, generated-without-solving evidence, hard-coded two-mesh branch, order-one MPI inconsistency, explicit-only path, figure mismatch, geometric-only partitioning, disabled production reconstruction/limiter, or undocumented cell-center no-slip output. Trigger 13 was not externally investigated under the trust policy. The full per-trigger record is in `agent_scores.json`.
 
 ## Limitations and verdict
 
 The environment capture is post-run only; clean build, bad-input CLI, and steady reruns were not performed. The BLSC/GLM-5.2 context window is not in bundled evidence. `run_identity.json` and the final-response Markdown are unindexed sidecars, so `cfdeval check` cannot validate them.
 
-Verdict: **72/100 before disqualification.** Strengths are the real source-level CFD/MPI implementation and complete historical output contract. The principal deductions are weak steady convergence, Re200 inner-solve noncompliance, and report/metadata overstatement.
+Verdict: **69/100 before disqualification.** Strengths are the real source-level CFD/MPI implementation and complete historical output contract. The principal deductions are full-mesh replication during solve, weak steady convergence, Re200 inner-solve noncompliance, and report/metadata overstatement. Case-by-case calibration remains partial; the exact historical executable was not independently hashed.
