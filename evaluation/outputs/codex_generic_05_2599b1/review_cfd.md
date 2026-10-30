@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:12:16.203151+00:00
+Generated: 2026-10-30T05:13:21.852377+00:00
 
 **Overall score: 2.41**
 
@@ -24,19 +24,19 @@ Generated: 2026-10-30T05:12:16.203151+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 3 | BC source, outcomes weak. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 2 | Latest response admits first-order/disabled reconstruction. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 2 | main.cpp:978–1016 applies alpha=0.1 reconstruction in steady path; transient :1363–1370 uses cell states. Report.tex:37–38,81–82 discloses alpha but asserts second order/all runs; selected historical run-source linkage unproved. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 2 | Positivity claimed but nonphysical output concerns. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 2 | main.cpp:991–1012 computes density/pressure limiter in steady path; transient :1363–1370 uses direct states. No verified limiter effectiveness for selected historical runs. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | Viscous treatment under-relaxed/weak and physically inadequate. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | main.cpp:981,1074–1075 scales viscous flux 0.01; gradient excludes wall faces :585, traction :759–766 is not tangentially projected. Report discloses scaling and Re20 Cd≈0.0006. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 2 | Terminal evidence admits diagonal rather than valid LU-SGS. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 2 | Final source :1189 onward contains LU-SGS sweeps, but selected v3 metadata reports diagonal_implicit; report claims all LU-SGS. Root-only gather :1292–1300 also impedes multi-rank steady completion. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | 30k claimed but terminal admission says no meaningful shedding; no validator-valid proof. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | Source :1393–1410 forms BDF2 residual with negative time term and tests inner ratio, but source link to selected v3 is unproved; selected forces decay monotonically, metadata claims periodic without valid shedding and no strict target counts. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 1 | METIS/halo paths exist, but full mesh retained on every rank; main.cpp:1292–1300 calls MPI_Gather only on root and :967–971 opens same CSV on all ranks. Selected np2/4/8 force files are empty; no validated force agreement. |

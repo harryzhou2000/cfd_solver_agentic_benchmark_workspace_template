@@ -385,35 +385,35 @@
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 2,
-        "notes": "Latest response admits first-order/disabled reconstruction."
+        "notes": "main.cpp:978\u20131016 applies alpha=0.1 reconstruction in steady path; transient :1363\u20131370 uses cell states. Report.tex:37\u201338,81\u201382 discloses alpha but asserts second order/all runs; selected historical run-source linkage unproved."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 2,
-        "notes": "Positivity claimed but nonphysical output concerns."
+        "notes": "main.cpp:991\u20131012 computes density/pressure limiter in steady path; transient :1363\u20131370 uses direct states. No verified limiter effectiveness for selected historical runs."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 2,
-        "notes": "Viscous treatment under-relaxed/weak and physically inadequate."
+        "notes": "main.cpp:981,1074\u20131075 scales viscous flux 0.01; gradient excludes wall faces :585, traction :759\u2013766 is not tangentially projected. Report discloses scaling and Re20 Cd\u22480.0006."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 2,
-        "notes": "Terminal evidence admits diagonal rather than valid LU-SGS."
+        "notes": "Final source :1189 onward contains LU-SGS sweeps, but selected v3 metadata reports diagonal_implicit; report claims all LU-SGS. Root-only gather :1292\u20131300 also impedes multi-rank steady completion."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 1,
-        "notes": "30k claimed but terminal admission says no meaningful shedding; no validator-valid proof."
+        "notes": "Source :1393\u20131410 forms BDF2 residual with negative time term and tests inner ratio, but source link to selected v3 is unproved; selected forces decay monotonically, metadata claims periodic without valid shedding and no strict target counts."
       },
       {
         "id": "cfd.mpi_partition",
@@ -493,7 +493,7 @@
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 3,
+        "score": 2,
         "notes": "Accepted eight-page PDF pp4\u20135 has M015/M080 Mach and M2 pressure figures with blank plot areas despite colorbars; p8 Re200 force history is startup dominated with no readable late lift/drag. Residual and Cp figures exist."
       },
       {
@@ -501,14 +501,14 @@
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 2,
-        "notes": "Terminal response contains contradictory success claims but does document limitations."
+        "notes": "Report.tex:37\u201341 discloses alpha0.1 and viscous scale0.01, :126\u2013142 admits unphysical cylinder forces/no shedding; :81\u201382 wrongly claims all selected runs LU-SGS versus selected v3 diagonal metadata; MPI force comparisons absent."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 1,
-        "notes": "Raw data excluded from tip and figure/raw mapping sidecars prohibited."
+        "notes": "Immutable run_manifest selects v3/v4 packages; their metadata lacks git_revision, selected v3 predates final source and reports diagonal rather than LU-SGS. Workspace figure_manifest points generically to output/ rather than selected directories."
       }
     ],
     "disqualification_flags": [
@@ -538,7 +538,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 1.35
+    "overall_score": 1.2
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/05",

@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:12:16.203606+00:00
+Generated: 2026-10-30T05:13:21.852670+00:00
 
-**Overall score: 1.35**
+**Overall score: 1.2**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -21,13 +21,13 @@ Generated: 2026-10-30T05:12:16.203606+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 1 | Report admits unrealistic cylinder forces and no Re200 shedding. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 3 | Accepted eight-page PDF pp4–5 has M015/M080 Mach and M2 pressure figures with blank plot areas despite colorbars; p8 Re200 force history is startup dominated with no readable late lift/drag. Residual and Cp figures exist. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2 | Accepted eight-page PDF pp4–5 has M015/M080 Mach and M2 pressure figures with blank plot areas despite colorbars; p8 Re200 force history is startup dominated with no readable late lift/drag. Residual and Cp figures exist. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 2 | Terminal response contains contradictory success claims but does document limitations. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 2 | Report.tex:37–41 discloses alpha0.1 and viscous scale0.01, :126–142 admits unphysical cylinder forces/no shedding; :81–82 wrongly claims all selected runs LU-SGS versus selected v3 diagonal metadata; MPI force comparisons absent. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Raw data excluded from tip and figure/raw mapping sidecars prohibited. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Immutable run_manifest selects v3/v4 packages; their metadata lacks git_revision, selected v3 predates final source and reports diagonal rather than LU-SGS. Workspace figure_manifest points generically to output/ rather than selected directories. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T05:12:16.203606+00:00
 
 ## Summary
 
-- Overall score (0-5): 1.35
+- Overall score (0-5): 1.2
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

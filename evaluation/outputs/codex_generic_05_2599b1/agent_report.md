@@ -86,7 +86,7 @@ Exact curated source was independently built in a restricted container; no CFD r
 
 ## Verdict
 
-34/100, DQ=true (partial calibration). The implementation has meaningful CFD/MPI structure, but no declared final package validates and the admitted viscous/Re200 physics limitations preclude completion credit.
+31/100, DQ=true (partial calibration). The implementation has meaningful CFD/MPI structure, but no declared final package validates and the admitted viscous/Re200 physics limitations preclude completion credit.
 
 
 ## Partial full-mesh review — 2026-10-30
@@ -109,3 +109,10 @@ Historical case notes asserting no M015 residual/contour and no Re20 summary/res
 ## Partial report-figure visual review — 2026-10-30
 
 Rendered and visually inspected all eight pages of the accepted immutable-source PDF (SHA e6ef6601bd1b2c5decfc57c91b0d2718370734fe58a4367987d8291734909956). Its pp4–5 images labeled M015/M080 Mach and M2 pressure contain blank plot areas and colorbars, so they do not supply readable field contours despite being included assets. PDF p3 M015 and p7 Re20 residual histories are readable; p8 full-history Re200 Cl/Cd plots are dominated by startup and have no readable late oscillation. This corrects prior references to included contour images, which should not be taken as usable contours. Empty plotted content is assessed as an evidence/visualization defect, without inferring a missing-asset placeholder or a figure-to-data DQ. Case scores and report rubric remain unchanged; further source and case review partial. No CFD rerun.
+
+
+## Partial remaining cases and method calibration — 2026-10-30
+
+Manifest-selected v3 M015 laminar residual decreases 3.5953→0.000359386 with last logged Cd0.0627004; M080 laminar last Cd=-0.0142685/Cl=0.129128 despite residual reduction; M2 laminar fails with last Cl=-13.0545. Report includes M015/M080 Cp plots, correcting historical missing-evidence notes. Scores remain 1,1,0 for these cases; selected metadata says diagonal implicit and producing source is unbound.
+
+Final source steady residual uses reconstruction alpha=0.1 at main.cpp:978–1016, leaving a first-order leading reconstruction error; transient loop :1363–1370 uses direct cell states, while report.tex:81–82 says all cases used reconstruction. The selected transient run predates final source and has no revision, so DQ10 production binding is not inferred. Second-order rubric 3→2. Source :981,1074–1075 scales viscous residual by 0.01; :585 excludes boundary gradients and :759–766 does not project traction tangentially. Report discloses scaling and physically weak Re20 Cd; viscous rubric 3→1. Source :1393–1397 adds negative BDF2 term to positive spatial residual, and inner log :1450 emits zero final residual/ratio rather than measured values; selected historical source link and actual strict misses remain unknown. Total 34→31; visualization review 3→2 for blank contours/late plot. Other DQ/source provenance partial; no CFD rerun.

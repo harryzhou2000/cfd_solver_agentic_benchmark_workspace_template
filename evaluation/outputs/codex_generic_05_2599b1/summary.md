@@ -107,4 +107,4 @@
 
 - Code review scorecard: `codex_generic_05_2599b1/review_code.md` (overall: 2.85)
 - CFD methods review: `codex_generic_05_2599b1/review_cfd.md` (overall: 2.41)
-- Result review: `codex_generic_05_2599b1/review_results.md` (overall: 1.35)
+- Result review: `codex_generic_05_2599b1/review_results.md` (overall: 1.2)
