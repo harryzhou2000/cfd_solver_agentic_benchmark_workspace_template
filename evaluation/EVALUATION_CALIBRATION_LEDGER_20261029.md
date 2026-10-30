@@ -89,7 +89,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_14_80096b` | fully reviewed, qualified: 79.5/100, no DQ established; historical binary/rank controls unbound |
 | `codex_generic_02_ed5ee6` | fully reviewed, qualified: 33/100, DQ7 and TASK full mesh; M0.15 package/source attribution unavailable |
 | `codex_generic_03_5f2165` | fully reviewed, qualified: 22/100, DQ2/6/7 plus TASK placeholder/full mesh; historical binary/figure identity limited |
-| `codex_generic_04_16009f` | partial: DQ10, DQ7, TASK full mesh established; case/rubric/source review pending |
+| `codex_generic_04_16009f` | fully reviewed, qualified: 24/100, DQ6/7/10 and TASK full mesh; historical binary/figure linkage unresolved |
 | `codex_generic_05_2599b1` | partial: TASK full mesh established; report-to-package mapping and rubric pending |
 | `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
 | `codex_generic_glm53-02_ff20c7` | partial: DQ7 plateau correction and cylinder case evidence; remaining DQ/rubric pending |
@@ -583,6 +583,8 @@ Generic_04 case checkpoint: current truncated histories inspected across all eig
 Generic_04 MPI/claim checkpoint: real METIS/halo paths exist, but mesh retained every rank, local forces are not globally reduced and all ranks write common files; MPI rubric 5→2 and two MPI review points 3→1, total 27→24. DQ6 separately applies because final report.tex:31,72 claims Jacobi while actual main.cpp:293–294 invokes LU-SGS sweeps, and jacobi_solve is only declared, not implemented/called. Report honestly labels runs converging/running, correcting old overclaim note. Remaining review/provenance partial; no CFD rerun.
 
 Generic_04 remaining-criteria checkpoint: rubric/review notes now identify individual source paths and case limitations; agent_report records unproved DQ1–5,8–9,11–13 and evidence boundaries. No completed laminar surface package establishes DQ11 despite final writer mislabeling adjacent-cell values. Historical run-source/figure-data linkage remains partial; no CFD rerun.
+
+Generic_04 qualified full review: selected main root `01a03685-bd59-78a3-9346-e89cb6153308` completed-run event at 2026-08-25 03:40:31.034 UTC has stdout SHA-256 `e560990c4dd9e91e415d1e7a25b9680c515e85c0685c957406f19f1287f15e3a` and wall time 99.561593 s, matching preserved M0.15 status. Its logged residual rises monotonically 0.012767→0.016470 from steps 19100→19900 (~29% in 800 steps). This actively worsening tail, the status's −0.5033 residual orders and converged metadata establish DQ7 without pairing the subsequently overwritten force file or assuming a missing force history. All ten rubric sections, eight case histories, 27 points and 13 DQ rules were reviewed to the available evidence limit. 24/100, DQ6/7/10 and TASK full mesh unchanged; final submitted source has no reconstruction call, but its exact identity with the historical run's binary is unbound. Figure/raw attribution and laminar DQ11 evidence remain qualified; no CFD/Re200 rerun. Both gates required.
 
 
 ## generic_05 partial full-mesh review — 2026-10-30

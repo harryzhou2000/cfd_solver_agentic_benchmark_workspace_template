@@ -82,11 +82,11 @@ Selected workspace-local root `01a03685-bd59-78a3-9346-e89cb6153308` plus its th
 
 ## Limitations
 
-No independent build/rerun was performed and Re200 was not rerun. Raw packages/PDF are excluded from the curated tip.
+An independent immutable-source clean build passed; no CFD rerun was performed and Re200 was not rerun. Raw packages/PDF are excluded from the curated tip.
 
 ## Verdict
 
-24/100, DQ=true (partial calibration). The modular implementation is promising, but the submitted result suite is incomplete and cannot support a completion claim.
+24/100, DQ=true (qualified full calibration). The modular implementation is promising, but the submitted result suite is incomplete and cannot support a completion claim.
 
 
 ## Partial source and status review — 2026-10-30
@@ -118,3 +118,10 @@ DQ6 applies separately from DQ10: report.tex:31,72 says production uses Jacobi a
 ## Partial remaining criteria and DQ review — 2026-10-30
 
 Evidence-specific rubric/review notes now identify source methods and current case limitations. No internal existing-solver invocation found in inspected source (DQ1); no evidence establishes force/residual files generated without solving (DQ2); configured mesh input main.cpp:185–189 does not support DQ3. No matched rank comparison proves DQ4; one LU-SGS sweep supplies implicit capability so DQ5 is not inferred. DQ8/12 require reliable linkage between final figures and raw data/fields; differing file generations do not prove a mismatch. METIS is actually invoked and solution state is local, so DQ9 full-state wording is not established by retained full mesh alone. main.cpp:350–367 writes adjacent-cell velocities while output_writer.cpp:47 claims boundary_value, but no completed laminar surface package is available to establish DQ11. No external authorship search for DQ13. DQ6,7,10 and TASK violation stand; run-source and image/data provenance remain partial. No CFD rerun.
+
+
+## Qualified DQ7 and source review — 2026-10-31
+
+All ten rubric sections, eight case histories, 27 review points and 13 DQ rules were assessed to the available evidence limit. Selected main root `01a03685-bd59-78a3-9346-e89cb6153308` completed-run event at 2026-08-25 03:40:31.034 UTC (stdout SHA-256 `e560990c4dd9e91e415d1e7a25b9680c515e85c0685c957406f19f1287f15e3a`) records wall time 99.561593 s, matching the preserved M0.15 run status, and a monotonically rising residual 0.012767→0.016470 from step 19100 to 19900, about 29% in 800 steps. Its metadata nevertheless marks the 20000-step run converged and its final residual-reduction value is −0.5033 orders. The late residual is actively worsening, not a demonstrated stable plateau, supporting DQ7 independently of the subsequently overwritten, unpaired force CSV.
+
+Final DQ6/7/10 and the task full-mesh prohibition remain supported by the source and evidence documented above; the submitted first-order source lacks the report-claimed production reconstruction. No historical executable or exact figure-to-data binding is established, and no DQ8/9/11/12 is inferred from the respective ambiguities. Prior checkpoint sections marked partial are historical. No CFD or Re200 rerun.

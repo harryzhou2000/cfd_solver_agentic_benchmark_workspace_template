@@ -346,13 +346,13 @@
         "id": 10,
         "flag": "Report claims second-order reconstruction or shock limiter disabled in production",
         "found": true,
-        "evidence": "Immutable d93a1ef solver/report/report.tex:29\u201330,68 claims least-squares second order and Barth\u2013Jespersen limiter. solver/src/main.cpp:40\u201382 sends direct cell-centered primitive states to Rusanov; :272\u2013294 invokes that residual and never calls reconstruction/limiter (only includes headers :25\u201326). Production source is first-order despite report claim."
+        "evidence": "Immutable d93a1ef solver/report/report.tex:29\u201330,68 claims least-squares second order and Barth\u2013Jespersen limiter. solver/src/main.cpp:40\u201382 sends direct cell-centered primitive states to Rusanov; :272\u2013294 invokes that residual and never calls reconstruction/limiter (only includes headers :25\u201326). The submitted source residual is first-order despite the production report claim; exact historic executable binding remains unproven."
       },
       {
         "id": 7,
         "flag": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
-        "evidence": "Current solver/results/naca0012_m015_inviscid/metadata.json says completed=true and converged; sibling run_status.json reports converged but residual_reduction_orders=-0.5032948043646994, an increase rather than convergence. Residual/force files currently end around step 2388/2384 while status says 20000, so do not assume those histories correspond to its final run. Metadata git_revision=null."
+        "evidence": "Current solver/results/naca0012_m015_inviscid/metadata.json says completed=true and converged; sibling run_status.json reports converged but residual_reduction_orders=-0.5032948043646994, an increase rather than convergence. Residual/force files currently end around step 2388/2384 while status says 20000, so do not assume those histories correspond to its final run. Metadata git_revision=null. Selected main root 01a03685 event at 2026-08-25T03:40:31.034Z, stdout SHA256 e560990c4dd9e91e415d1e7a25b9680c515e85c0685c957406f19f1287f15e3a, records the same wall time 99.561593s as run_status and a monotonic residual rise 0.012767\u21920.016470 across steps 19100\u201319900 (~29%). This is active late worsening, not a demonstrated bounded stable plateau; overwritten force files are not paired with that run."
       },
       {
         "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
@@ -364,6 +364,56 @@
         "flag": "Report claims algorithms that cannot be found in source",
         "found": true,
         "evidence": "Immutable report/report.tex:31,72 says production uses Jacobi relaxation and LU-SGS is future work; main.cpp:293\u2013294 invokes run_inner_iterations implemented as forward/backward LU-SGS in numerics/implicit_solver.cpp:17\u201318,78\u2013160. jacobi_solve is only declared at implicit_solver.h:36, with no implementation or call in solver/src. This is a claimed solver algorithm absent in source, separate from DQ10 reconstruction."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No existing solver executable call found in inspected submitted source; no exhaustive external authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence that force/residual histories were generated without solving; mismatch between current file generations is not proof of synthetic rows."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "main.cpp:185\u2013189 reads configured CGNS path, without a two-filename-only branch."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "No matched np1/np8 result comparison with proven same controls establishes order-one discrepancy."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "implicit_solver.cpp:78\u2013160 contains LU-SGS sweeps; explicit-only integration is not established."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "Report figures and current raw files have uncertain generation linkage; no specific report figure is proven unrelated to its claimed source."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "METIS partition and rank-local state exist; retained full mesh is a separately proven TASK prohibited shortcut 7, not proof of numbered DQ9 full-state replication."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "main.cpp:350\u2013367 writes adjacent-cell velocity while output_writer.cpp:47 labels boundary_value, but no completed laminar surface package establishes a failed no-slip check."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "No specific report figure is proven to swap named variable; figure/raw-generation binding remains uncertain."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "Inspected core and MPI code; no affirmative copied/wrapped open-source CFD implementation found. No exhaustive external-authorship search."
       }
     ]
   },
@@ -371,6 +421,7 @@
     "No rerun; Re200 not rerun.",
     "Raw packages/PDF excluded.",
     "run_identity.json and contestant_final_response.md unindexed sidecars not validated by cfdeval check.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All applicable rubric sections, eight case histories, 27 review points and 13 DQ rules were reviewed to the available evidence limit. Source-to-historical-run and figure/data attribution remain unbound; no CFD/Re200 rerun."
   ]
 }
