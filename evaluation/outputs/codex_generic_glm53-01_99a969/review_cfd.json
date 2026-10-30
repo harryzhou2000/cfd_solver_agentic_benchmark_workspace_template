@@ -7,49 +7,49 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "physics.hpp implements calorically perfect gas conservative variables, Roe/Rusanov and Newtonian-Fourier flux. Thermal gradient indexing defect recorded separately."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "main.cpp:81\u201384,151\u2013168 imports CGNS and partitions on root, scatters local mesh and frees global before run; selected metadata gives 8-rank ownership/ghosts."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "bf6e816 fv_solver.cpp:365\u2013395 reconstructs and assembles Riemann face flux, :397\u2013447 adds directional-corrected viscous flux; temperature gradient uses wrong primitive slot."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "physics.hpp:58\u2013133 implements Rusanov and Roe Harten entropy fix; manifest uses Roe for M080 inviscid and Re200, Rusanov for other production cases."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "physics.hpp:153 onwards implements farfield, slip and no-slip adiabatic ghosts; fv_solver.cpp:694\u2013725 outputs no-slip zero velocity and projected tangential friction."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "bf6e816 fv_solver.cpp:229\u2013283 computes and exchanges Green\u2013Gauss primitive gradients and :343\u2013389 reconstructs faces with positivity fallback. Frozen per-inner coefficients and steady limiter freeze are disclosed."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "bf6e816 fv_solver.cpp:283 onward computes single Barth\u2013Jespersen coefficient; :1049\u20131085 can freeze it on steady chatter, disclosed in report.tex:180\u2013187,770\u2013775."
     },
     {
       "id": "cfd.viscous",

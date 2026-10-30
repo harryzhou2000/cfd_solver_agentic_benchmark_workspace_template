@@ -35,28 +35,28 @@
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "b962bf5 main.cpp:38\u201374 parses solve, case, output, restart, flux and control options; bf6e816 fv_solver.cpp:210\u2013226 writes per-rank restart state/history; exact restart continuation not rerun."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "b962bf5 solver/src separates CGNS import, global/local mesh, case input, finite-volume solver, physics and output; plotting/report tooling resides under solver/tools."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "Inspected submitted solver/source and build wiring; no internal existing CFD executable invocation found. No external authorship search performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "main.cpp:43\u201374 reads case and configurable flux/control options, cgns_reader/global_mesh handle supplied geometry; no two-filename-only branch found."
         },
         {
           "id": "code.mpi",
@@ -70,21 +70,21 @@
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "bf6e816 solver guards nonfinite/positivity and reports failures, but all steady inner targets miss and Re20 selected rank-sensitive Cl differs 0.402; final source changes limiter and plateau logic."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "Curated solver/tools contains test_freestream.cpp, test_lusgs.cpp and test_residual.cpp; selected rank study exposes material Re20 lift sensitivity. No new CFD rerun."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "Source/report separated; original raw histories are workspace evidence absent from curated tip. Metadata pins bf6e816 whereas final fv_solver.cpp differs."
         }
       ],
       "overall_score": 3.7,
@@ -97,49 +97,49 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "physics.hpp implements calorically perfect gas conservative variables, Roe/Rusanov and Newtonian-Fourier flux. Thermal gradient indexing defect recorded separately."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "main.cpp:81\u201384,151\u2013168 imports CGNS and partitions on root, scatters local mesh and frees global before run; selected metadata gives 8-rank ownership/ghosts."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "bf6e816 fv_solver.cpp:365\u2013395 reconstructs and assembles Riemann face flux, :397\u2013447 adds directional-corrected viscous flux; temperature gradient uses wrong primitive slot."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "physics.hpp:58\u2013133 implements Rusanov and Roe Harten entropy fix; manifest uses Roe for M080 inviscid and Re200, Rusanov for other production cases."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "physics.hpp:153 onwards implements farfield, slip and no-slip adiabatic ghosts; fv_solver.cpp:694\u2013725 outputs no-slip zero velocity and projected tangential friction."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "bf6e816 fv_solver.cpp:229\u2013283 computes and exchanges Green\u2013Gauss primitive gradients and :343\u2013389 reconstructs faces with positivity fallback. Frozen per-inner coefficients and steady limiter freeze are disclosed."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "bf6e816 fv_solver.cpp:283 onward computes single Barth\u2013Jespersen coefficient; :1049\u20131085 can freeze it on steady chatter, disclosed in report.tex:180\u2013187,770\u2013775."
         },
         {
           "id": "cfd.viscous",
@@ -180,21 +180,21 @@
           "title": "Output contract compliance",
           "weight": 0.2,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "Selected eight workspace case packages and report previously passed examiner validator; their metadata identifies bf6e816. Validator pass does not establish physics or fully refreshed inner convergence."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "Explicit eight-case/report validator was previously run and passed; current cfdeval gates verify manager artifacts only, not convergence or accuracy."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "Seven steady statuses show outer residual/force plateau but all inner target fractions 0; Re200 reaches t300.01 and reports frozen-coefficient target success, not confirmed refreshed nonlinear residual."
         },
         {
           "id": "res.plausibility",
@@ -238,28 +238,28 @@
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 10,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "notes": "Exact b962bf5 clean build succeeds in restricted container; main.cpp:38\u201374 supports documented CLI/restart and bf6e816 fv_solver.cpp:210\u2013226 writes state/history. No restart rerun."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 10,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "notes": "Root reads CGNS and constructs METIS partition; main.cpp:151\u2013168 scatters local mesh and releases global before iterations. Selected Re20 exhibits unresolved rank sensitivity."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 14,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "notes": "bf6e816 fv_solver.cpp:365\u2013447 implements FV face Rusanov/Roe and directional corrected viscous flux with ghost BCs; thermal gradient indexing defect noted under viscous."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 9,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "notes": "bf6e816 fv_solver.cpp:229\u2013283,343\u2013389 uses Green\u2013Gauss reconstructed states and limiter with positivity fallback; steady limiter freezing and transient lagged coefficients are disclosed."
       },
       {
         "id": "viscous",
@@ -301,7 +301,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 5,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "notes": "src separates mesh, physics, case, solver and output, and CLI reads configurable case/flux; general 3-D/RANS extensibility not demonstrated."
       }
     ]
   },

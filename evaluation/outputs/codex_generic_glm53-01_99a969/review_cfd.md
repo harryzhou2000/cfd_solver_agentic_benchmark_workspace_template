@@ -2,32 +2,32 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:23:41.417031+00:00
+Generated: 2026-10-30T05:24:49.128221+00:00
 
 **Overall score: 3.42**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | physics.hpp implements calorically perfect gas conservative variables, Roe/Rusanov and Newtonian-Fourier flux. Thermal gradient indexing defect recorded separately. |
 |   | 2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly. | | | |
 |   | *Evidence:* Source flux assembly and report equations. | | | |
-| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | main.cpp:81–84,151–168 imports CGNS and partitions on root, scatters local mesh and frees global before run; selected metadata gives 8-rank ownership/ghosts. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
-| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4 | bf6e816 fv_solver.cpp:365–395 reconstructs and assembles Riemann face flux, :397–447 adds directional-corrected viscous flux; temperature gradient uses wrong primitive slot. |
 |   | Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction. | | | |
 |   | *Evidence:* residual assembly code; residuals.csv shows global reduction. | | | |
-| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | physics.hpp:58–133 implements Rusanov and Roe Harten entropy fix; manifest uses Roe for M080 inviscid and Re200, Rusanov for other production cases. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | physics.hpp:153 onwards implements farfield, slip and no-slip adiabatic ghosts; fv_solver.cpp:694–725 outputs no-slip zero velocity and projected tangential friction. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | bf6e816 fv_solver.cpp:229–283 computes and exchanges Green–Gauss primitive gradients and :343–389 reconstructs faces with positivity fallback. Frozen per-inner coefficients and steady limiter freeze are disclosed. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | bf6e816 fv_solver.cpp:283 onward computes single Barth–Jespersen coefficient; :1049–1085 can freeze it on steady chatter, disclosed in report.tex:180–187,770–775. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Production bf6e816 and final b962bf5 fv_solver.cpp:229–255,421–437 read pressure gradient for temperature slot via grad_off(1+q); correction replaces along-connecting-direction component but generally retains wrong transverse component. :449–462 and :718–725 project tangential shear; no-slip surface velocity is zero. |

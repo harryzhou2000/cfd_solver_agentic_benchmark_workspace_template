@@ -2,20 +2,20 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:23:41.417339+00:00
+Generated: 2026-10-30T05:24:49.128538+00:00
 
 **Overall score: 3.2**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Selected eight workspace case packages and report previously passed examiner validator; their metadata identifies bf6e816. Validator pass does not establish physics or fully refreshed inner convergence. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 2 | **res.validator** Automated validator results | 0.10 | 4 | Explicit eight-case/report validator was previously run and passed; current cfdeval gates verify manager artifacts only, not convergence or accuracy. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Seven steady statuses show outer residual/force plateau but all inner target fractions 0; Re200 reaches t300.01 and reports frozen-coefficient target success, not confirmed refreshed nonlinear residual. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | Selected Re20 Cd0.8469/Cl-0.3897 is inaccurate/asymmetric despite stable forces; Re200 Cd mean1.126 and Cl rms0.0266 but dominant FFT frequency shifts with time window. |

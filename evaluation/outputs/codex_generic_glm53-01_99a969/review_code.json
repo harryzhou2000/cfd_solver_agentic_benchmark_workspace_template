@@ -14,28 +14,28 @@
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "b962bf5 main.cpp:38\u201374 parses solve, case, output, restart, flux and control options; bf6e816 fv_solver.cpp:210\u2013226 writes per-rank restart state/history; exact restart continuation not rerun."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "b962bf5 solver/src separates CGNS import, global/local mesh, case input, finite-volume solver, physics and output; plotting/report tooling resides under solver/tools."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "Inspected submitted solver/source and build wiring; no internal existing CFD executable invocation found. No external authorship search performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "main.cpp:43\u201374 reads case and configurable flux/control options, cgns_reader/global_mesh handle supplied geometry; no two-filename-only branch found."
     },
     {
       "id": "code.mpi",
@@ -49,21 +49,21 @@
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "bf6e816 solver guards nonfinite/positivity and reports failures, but all steady inner targets miss and Re20 selected rank-sensitive Cl differs 0.402; final source changes limiter and plateau logic."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "Curated solver/tools contains test_freestream.cpp, test_lusgs.cpp and test_residual.cpp; selected rank study exposes material Re20 lift sensitivity. No new CFD rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "Source/report separated; original raw histories are workspace evidence absent from curated tip. Metadata pins bf6e816 whereas final fv_solver.cpp differs."
     }
   ],
   "disqualification_flags": [

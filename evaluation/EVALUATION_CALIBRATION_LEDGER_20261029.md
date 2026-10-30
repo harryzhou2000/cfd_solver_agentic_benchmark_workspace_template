@@ -91,7 +91,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_03_5f2165` | partial: all cases, build and TASK full mesh/state checked; remaining source/rubric/DQ review pending |
 | `codex_generic_04_16009f` | partial: DQ10, DQ7, TASK full mesh established; case/rubric/source review pending |
 | `codex_generic_05_2599b1` | partial: TASK full mesh established; report-to-package mapping and rubric pending |
-| `codex_generic_glm53-01_99a969` | partial: seven steady case-floor corrections and Re200 false-note correction; rubric/DQ pending |
+| `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
 | `codex_generic_glm53-02_ff20c7` | unreviewed |
 | `codex_generic_glm53-03_d469fb` | unreviewed |
 | `codex_generic_glm53-04_adde03` | unreviewed |
@@ -597,3 +597,5 @@ glm53-01 rank/PDF checkpoint: selected Re20 np4/8 metadata names bf6e816 and ste
 glm53-01 DQ4 resolution supersedes previous uncertainty: selected root-session tool call 2026-08-29T22:43:17.883Z records np4 Re20 using same rusanov, CFL5/10 and max_steps12000 as np8 immutable manifest, no restart. Both packages bf6e816, matching step0 forces and tight converged tails; absolute Cl delta0.40237944 (~44% np4 Cd) is an order-one force-vector change, while Cd delta7.6%. DQ false→true trigger4; near-zero lift ratio is not the basis. Rubric remains80, other source/DQ criteria partial. No CFD rerun.
 
 glm53-01 viscous checkpoint: bf6e816 and final b962bf5 fv_solver.cpp:229–255 store gradients rho,u,v,p,T, but :421–437 selects grad_off(1+q) for u,v,T, using pressure instead of temperature for q=2; directional correction only fixes the along-connection projection. Tangential traction and zero wall velocities actually exist (:449–462,694–725). Viscous rubric10→7, total80→77, CFD viscous4→3; defective method does not itself establish DQ6. Remaining review partial, no CFD rerun.
+
+glm53-01 full review: 94→77/100, DQ4=true after matched controls/revision and absolute Re20 Cl difference0.40238; all eight cases 2 due missing readable steady histories and late Re200 drag. All rubric sections, 27 review points and DQ triggers independently assessed; thermal-gradient indexing bug, frozen-coefficient target limitation, source revision difference, FFT window sensitivity and report figure defects documented. Both gates pass; no CFD rerun, direct fully refreshed Re200 target count or external authorship search.

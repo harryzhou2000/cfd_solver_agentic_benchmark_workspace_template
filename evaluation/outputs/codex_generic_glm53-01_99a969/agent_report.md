@@ -4,13 +4,13 @@ Submission `codex/generic/glm53-01` at `b962bf5bfa815f4bf65d8ffc05b5734a7ac53ceb
 
 ## Verdict
 
-**77/100; DQ=true under trigger 4 (partial calibration).** Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence.
+**77/100; DQ=true under trigger 4.** The prior explicit validator passed, but Re20 has a material rank-dependent lift discrepancy and several evidence and numerical limitations are documented below.
 
 ## Evidence
 
 - Read selected workspace-local terminal response, committed source/report, contestant result packages, and run manifest.
 - Ran the examiner validator explicitly against all eight expected final directories and the report; its outcome is recorded above.
-- Visually reviewed the frozen main report PDF. No evaluator rerun was performed; Re200 was never rerun.
+- Visually reviewed the frozen main report PDF. A clean source build was performed; no CFD or Re200 rerun was performed.
 
 ## Limitations
 
@@ -23,7 +23,7 @@ run_identity.json SHA-256: d4b9510bf139dbf7e6461db332255a1c36271e9a34080b1474019
 
 Visually inspected all seven immutable b962bf5 solver/report/figures/<case>_forces.png plots: CL/CD histories all collapse to vertical lines at physical time zero. plot_results.py:96–110 uses physical_time as x coordinate for steady cases; searched complete report and workspace figure names and found no alternative delivered steady force-history plots. Numeric force/residual histories do exist and case-specific tail values are recorded in agent_scores.json, but the current case floor requires readable contestant-delivered histories. Seven steady scores are capped: M015/M080 inviscid 5→2, M2 inviscid 4.5→2, M015/M080 laminar 5→2, M2 laminar 4.5→2, and Re20 5→2. The Re20 stable final Cd≈0.847/Cl≈−0.390 is also physically inaccurate for a symmetric low-Re cylinder, candidly disclosed in report.tex:28–30. No physical rerun.
 
-Re200 prior note falsely asserted no committed St: report.tex:632–643 and included re200_stats.tex give St0.11281. Visually inspected committed Re200 force image: startup Cd≈30 makes late Cd oscillations unreadable; separate lift_history.png contains lift only. Score remains2 because readable late lift AND drag plot is missing. Raw result metadata identifies bf6e816; its fv_solver.cpp differs from final b962bf5 in adaptive limiter freeze and force-stationarity thresholds. Do not assume final source generated historical outputs. Overall 94-point rubric, DQ and remaining numerical/source review remain partial.
+Re200 prior note falsely asserted no committed St: report.tex:632–643 and included re200_stats.tex give St0.11281. Visually inspected committed Re200 force image: startup Cd≈30 makes late Cd oscillations unreadable; separate lift_history.png contains lift only. Score remains2 because readable late lift AND drag plot is missing. Raw result metadata identifies bf6e816; its fv_solver.cpp differs from final b962bf5 in adaptive limiter freeze and force-stationarity thresholds. Do not assume final source generated historical outputs. At this checkpoint the 94-point rubric, DQ and remaining numerical/source review were partial; the subsequent sections document their completed assessment.
 
 
 ## Partial numerical and build calibration — 2026-10-30
@@ -48,3 +48,10 @@ The previously missing np4 CLI controls were found in the selected root-session 
 ## Partial viscous source review — 2026-10-30
 
 Both production bf6e816 and final b962bf5 fv_solver.cpp:229–255 store primitive gradients in rho,u,v,p,T order. In residual assembly :421–437 the loop for u,v,T chooses `grad_off(1+q)`, so q=2 selects pressure index3 rather than temperature index4. The directional correction replaces only the projection along the connecting direction; the transverse contribution can remain the pressure gradient, corrupting Fourier heat flux. Tangential traction and skin-friction projections are actually implemented at :449–462 and :718–725, and no-slip rows explicitly use zero wall velocity :694–699. Viscous rubric 10→7, CFD viscous point 4→3, total80→77. This is a defective implementation of an existing claimed method, not a separate DQ6 inference. Other source and DQ review partial; no CFD rerun.
+
+
+## Remaining criterion and DQ assessment — 2026-10-30
+
+Rubric sections and 27 review points now carry source- or result-specific evidence. The root-only global mesh is released before `run_solver` (b962bf5 main.cpp:81–84,151–168), and actual METIS/neighbor communication and force reductions exist; DQ9 and TASK full-mesh prohibition are not established. DQ4 is supported by the matched Re20 rank comparison above. No internal existing solver executable or evidence of forces/residuals generated without solving was found (DQ1/2); case-driven mesh input does not support DQ3. SGS implicit and BDF2 implementations exist (DQ5/6). Steady limiter freezing and frozen-coefficient inner solves are disclosed; disabled reconstruction is not established (DQ10). Re200 zero-miss metadata measures a lagged residual and does not prove fully refreshed target, but its strict miss count or false periodic status is not established (DQ7). Blank steady histories are a plot error, not evidence that the figures depict different submitted data or are misnamed (DQ8/12). No-slip surface values are explicit zero boundary values (:694–699), not undocumented cell-center velocities (DQ11). No external authorship search was performed (DQ13).
+
+This concludes the evidence-backed review of this entry at 77/100, DQ4=true, with independent case scores all 2. Limitations remain: bf6e816 results differ from final b962bf5 fv_solver.cpp, no direct fully refreshed Re200 target count exists, and no CFD/rank/unsteady rerun or exhaustive external similarity search was performed. Structural gates do not establish physics correctness.
