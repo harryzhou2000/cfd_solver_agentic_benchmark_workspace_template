@@ -336,12 +336,18 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.30, CD=0.813 at 7e16370:solver/report/report.tex:247; residual history 7e16370:solver/report/figures/cylinder_m010_laminar_re200_residuals.png (referenced at solver/report/report.tex:261); force history 7e16370:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:255); computed-field contour 7e16370:solver/report/figures/cylinder_m010_laminar_re200_mach_zoom.png (referenced at solver/report/report.tex:267); no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable validator-passing contestant result; limitations retained."
+      "notes": "Accepted contestant sibling report PDF SHA-256 e493bbd7967fb49e21e7a2a2acc24a13ad7e6cd48ffbc1f97be2f27048b2e914 page 4 reports mean Cd=0.813, lift amplitude \u00b10.30, period\u22486.5 and St\u22480.153, correcting prior missing-summary/St claim. PDF page 11 shows residual and full force history; the Cd startup spike \u224827 makes late drag oscillation unreadable and no alternate late drag figure is in the report. Original t\u2265150 lift mean upward crossings: 23 crossings, 22 periods average 6.53634, frequency 0.152991, corroborating reported St; this evaluator calculation cannot replace the missing contestant-delivered late drag plot. The numerical values underpredict expected shedding and drag. Score stays 2 under late lift/drag floor; metadata last_inner_residual_ratio=0 is an unassigned default, while target misses are independently counted. No Re200 rerun."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "flag": "Prohibited shortcut 7: full mesh retained on every MPI rank during solver iterations",
+        "found": true,
+        "evidence": "Immutable 7e16370 solver.cpp:97\u2013217 broadcasts complete global mesh nodes, cells, faces and adjacency to all MPI ranks and builds local mesh; solver.hpp:38 retains global_mesh as a Solver member through run. TASK.md:227 prohibits full mesh OR full state per rank during iterations, and examiner README:83\u201385 includes TASK prohibited shortcuts for DQ. METIS and local states are present, so this is not asserted as numbered trigger 9. solver.cpp:1143 falsely reports no full-mesh replication."
+      }
+    ]
   },
   "limitations": [
     "No evaluator rerun; Re200 never rerun.",

@@ -2,7 +2,7 @@
 
 ## Verdict
 
-**90/100; not disqualified.** Explicit validation passed all eight original
+**Prior rubric 90/100; disqualified after partial review.** Explicit validation passed all eight original
 packages and the 12-page report. Source inspection found CGNS/METIS,
 neighbor-scoped MPI exchange, finite-volume Rusanov flux, limiter, viscous
 terms, LU-SGS and BDF2 structure. No case was rerun, especially not Re200.
@@ -101,7 +101,7 @@ Read-only source, terminal-response, raw-package, report-PDF and explicit valida
 
 ## Disqualification assessment
 
-No direct internal evidence established any of the 13 disqualification triggers.
+Trigger 10 and the TASK full-mesh prohibition are established as documented below; the remaining trigger review is pending.
 
 ## Metadata answers & session selection
 
@@ -116,3 +116,10 @@ No clean evaluator build/MPI rerun; Re200 was never rerun.
 Complete structural delivery with material physical-plausibility limitations noted in the verdict.
 
 Integrity: `run_identity.json` SHA-256 `e37d67ca3a55c31e3d33f3f0fd1b4fa025ac23aced4cbdee912aaea943e01e22`; `contestant_final_response.md` SHA-256 `e1d176b5fdbc5e4fc87cb54b888df688570b095715c5d32440ddcdb516917d2b`. These unindexed sidecars are not validated by `cfdeval check`.
+
+
+## Partial DQ and Re200 evidence correction — 2026-10-30
+
+DQ changes false→true under trigger 10 and TASK prohibited shortcut 7. Immutable `solver.cpp:259–262,624–626` zeros the limiter whenever CFL>2. Original final residual rows show six steady cases at CFL 10.97672–50, so their final reconstruction is first order; M2 laminar finishes at CFL 1.66554 and transient uses second-order code. Report.tex:301–303 asserts production reconstruction active, while :305–307 names only M2 laminar as first order, the opposite of the observed control. `solver.cpp:97–217` broadcasts global nodes/cells/faces/adjacency to every rank and `solver.hpp:38` retains the full mesh through solve, prohibited by TASK.md:227. METIS and local state exist; this is not asserted as numbered DQ9.
+
+The accepted contestant PDF and its indexed copy have SHA-256 `e493bbd7967fb49e21e7a2a2acc24a13ad7e6cd48ffbc1f97be2f27048b2e914`; tracked main TeX matches the immutable blob and the PDF was produced within the selected session. PDF page 4 gives Re200 mean Cd=0.813, lift amplitude ±0.30, period≈6.5 and St≈0.153, correcting the prior false numeric/St absence claim. Original t≥150 lift gives 23 interpolated upward mean crossings, 22 periods averaging 6.53634, frequency 0.152991. PDF page 11 shows readable lift but startup Cd≈27 compresses late drag; no alternate late drag plot was found. Re200 score remains 2 under the explicit late lift/drag plot floor; evaluator-derived statistics cannot supply that deliverable. `last_inner_residual_ratio=0` is an unassigned default in solver.hpp:26, while misses are counted independently. Other case scores/rubric/areas remain partial; no CFD rerun.
