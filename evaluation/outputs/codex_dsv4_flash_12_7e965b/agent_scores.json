@@ -22,14 +22,14 @@
   },
   "scores": {
     "code_review": {
-      "overall_score": 4.07,
+      "overall_score": 3.92,
       "points": [
         {
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+          "score": 4,
+          "notes": "Immutable 97bdc69 clean CMake build succeeds in network-disabled cfd-bench, 2 CPUs/3 GiB with /opt/external; no CFD rerun."
         },
         {
           "id": "code.cli",
@@ -64,7 +64,7 @@
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 4,
-          "notes": "Source/build and workspace-local validation evidence; no evaluator rerun."
+          "notes": "main.cpp:183\u2013200 root-only global mesh preprocessing; distributed_mesh and neighbor exchanges supply owned/ghost cells. Report shows Re20 np1/8 final Cd 2.040/1.846 (9.5% of np1), not order-one."
         },
         {
           "id": "code.robustness",
@@ -91,7 +91,7 @@
       "disqualification_flags": []
     },
     "cfd_review": {
-      "overall_score": 4.83,
+      "overall_score": 4.25,
       "points": [
         {
           "id": "cfd.equations",
@@ -132,8 +132,8 @@
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 5,
-          "notes": "Source and delivered-result evidence; no evaluator rerun."
+          "score": 3,
+          "notes": "LSQ and limiter source exist, but solver.cpp:1558\u20131594 freezes gradients/limiters after documented step 500/800 in final steady runs. Frozen-residual convergence is not independently full nonlinear second-order convergence."
         },
         {
           "id": "cfd.limiter",
@@ -146,8 +146,8 @@
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Source and delivered-result evidence; no evaluator rerun."
+          "score": 3,
+          "notes": "physics.cpp:531\u2013556 integrates full viscous traction as viscous force, while report.tex:171 calls it tangential wall shear; surface Cf is separately projected. Normal contribution is unquantified."
         },
         {
           "id": "cfd.implicit",
@@ -160,8 +160,8 @@
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Source and delivered-result evidence; no evaluator rerun."
+          "score": 3,
+          "notes": "BDF2 residual exists, but first step uses two freestream histories instead of explicit BDF1; solver.cpp:1591\u20131657 counts target on frozen reconstruction before recomputing accepted-state gradients, so strict updated-residual misses are unknown."
         },
         {
           "id": "cfd.mpi_partition",
@@ -174,7 +174,7 @@
       "disqualification_flags": []
     },
     "result_review": {
-      "overall_score": 4.25,
+      "overall_score": 3.15,
       "points": [
         {
           "id": "res.contract",
@@ -194,36 +194,36 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 4,
-          "notes": "Eight workspace-local final case packages and report passed explicit validator; result files are excluded at the curated tip by policy."
+          "score": 3,
+          "notes": "All canonical packages validate structurally; seven steady statuses use documented frozen reconstruction, Re200 finishes t300 but strict updated-residual target count is not established."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Eight workspace-local final case packages and report passed explicit validator; result files are excluded at the curated tip by policy."
+          "score": 3,
+          "notes": "Raw force tails and Re200 repeated crossings support plausible attempts; frozen reconstruction, transient target accounting and Re20 np1/8 difference limit accuracy confidence."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Eight workspace-local final case packages and report passed explicit validator; result files are excluded at the curated tip by policy."
+          "score": 1,
+          "notes": "All seven steady force plots collapse at physical_time=0, not pseudo-step histories; Re200 startup drag compresses late drag. Case-specific fields/residual plots are present."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Eight workspace-local final case packages and report passed explicit validator; result files are excluded at the curated tip by policy."
+          "score": 2,
+          "notes": "Report discloses frozen reconstruction and rank spread, but claims tangential integrated shear while code integrates full traction; steady force graphs do not show time evolution."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
           "score": 3,
-          "notes": "Eight workspace-local final case packages and report passed explicit validator; result files are excluded at the curated tip by policy."
+          "notes": "Manifest maps canonical cases and figures; original metadata git_revision=null and inner target measures frozen residual, not proven accepted-state fully updated residual."
         }
       ],
       "disqualification_flags": []
@@ -231,14 +231,14 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 90,
+    "total_scored": 84,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 9,
-        "notes": "Clean build and CLI were evidenced in contestant audit; all eight readable outputs pass validator."
+        "notes": "Immutable CMake build succeeds in network-disabled restricted cfd-bench with /opt/external; eight original packages pass structural validation."
       },
       {
         "id": "mesh",
@@ -258,29 +258,29 @@
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 9,
-        "notes": "Second-order LSQ/Venkatakrishnan is active; no formal order study."
+        "score": 7,
+        "notes": "LSQ/Venkatakrishnan exist but disclosed final steady reconstruction freeze at steps 500/800 prevents independent inference of fully updated second-order convergence."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 10,
-        "notes": "Gradients, Newtonian/Fourier terms, and wall results are evidenced."
+        "score": 9,
+        "notes": "physics.cpp:531\u2013556 integrates full viscous traction, not the tangential wall shear claimed at report.tex:171; surface Cf uses tangential projection. Normal contribution unquantified."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 14,
-        "notes": "LU-SGS/BDF2 source and Re200 metadata support implementation; report omits some required statistics."
+        "score": 12,
+        "notes": "LU-SGS and BDF2 formula present; first physical step initializes both histories freestream and lacks explicit BDF1 bootstrap; inner ratio counts frozen-stencil residual before accepted gradients recompute, strict updated-residual misses unknown."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 8,
-        "notes": "Real METIS/neighbor halo source; final rank differences need tighter reconciliation."
+        "score": 7,
+        "notes": "Root-only GlobalMesh preprocessing and METIS/local halo exist; report states Re20 np1/8 final Cd 2.040/1.846 (9.5%), not order-one."
       },
       {
         "id": "cases",

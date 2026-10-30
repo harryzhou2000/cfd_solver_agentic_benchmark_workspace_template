@@ -41,8 +41,8 @@
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 5,
-      "notes": "Source and delivered-result evidence; no evaluator rerun."
+      "score": 3,
+      "notes": "LSQ and limiter source exist, but solver.cpp:1558\u20131594 freezes gradients/limiters after documented step 500/800 in final steady runs. Frozen-residual convergence is not independently full nonlinear second-order convergence."
     },
     {
       "id": "cfd.limiter",
@@ -55,8 +55,8 @@
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Source and delivered-result evidence; no evaluator rerun."
+      "score": 3,
+      "notes": "physics.cpp:531\u2013556 integrates full viscous traction as viscous force, while report.tex:171 calls it tangential wall shear; surface Cf is separately projected. Normal contribution is unquantified."
     },
     {
       "id": "cfd.implicit",
@@ -69,8 +69,8 @@
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Source and delivered-result evidence; no evaluator rerun."
+      "score": 3,
+      "notes": "BDF2 residual exists, but first step uses two freestream histories instead of explicit BDF1; solver.cpp:1591\u20131657 counts target on frozen reconstruction before recomputing accepted-state gradients, so strict updated-residual misses are unknown."
     },
     {
       "id": "cfd.mpi_partition",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.83
+  "overall_score": 4.25
 }
