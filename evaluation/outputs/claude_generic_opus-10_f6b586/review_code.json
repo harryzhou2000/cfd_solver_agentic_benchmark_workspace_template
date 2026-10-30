@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 5,
+      "notes": "Immutable source builds in network-disabled scratch with configured externals, 2 CPUs/4 GiB/128 processes and 240-second timeout."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3.5,
+      "notes": "main.cpp parses required inputs and restart. output.cpp:97 writes only a state array; transient driver initializes both histories from that state and restarts its clock, so it cannot faithfully resume a BDF2 transient."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "notes": "Modules separate case, mesh, partition, flux, finite-volume solver and output. The implementation remains fixed 2-D."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 4,
+      "notes": "CMake builds submitted source with MPI/CGNS/METIS; no direct existing CFD solver executable call found. External source similarity/licensing not exhaustively audited."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 4,
+      "notes": "Case inputs select mesh/physics; Re200 source adds a disclosed 4-degree inflow perturbation for t=2\u201312. Arbitrary meshes were not independently run."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "notes": "main.cpp:127\u2013151 reads mesh per rank during preprocessing then releases global mesh on nonroot before solve; partition.cpp and fvsolver.cpp exchange neighbor U/gradients/limiters. Root retains one copy for output."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 2.5,
+      "notes": "fvsolver_run.cpp:382\u2013399 marks residual-stall convergence without force check; M0.8 lift remains strongly variable. Restart lacks physical-time/history preservation."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3.5,
+      "notes": "Immutable source builds and original eight packages/report validate structurally; report has rank studies, but no independent case rerun or full grid-convergence proof."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 4,
+      "notes": "Modules and report generator present. Report table labels final-window means as final steady values; curated tip lacks generated figure assets needed to rebuild accepted PDF."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.5
+  "overall_score": 4.07
 }

@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 4,
+      "notes": "Compressible perfect-gas finite-volume equations and nondimensional references are implemented; selected weak-plateau force data limit demonstrated accuracy."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3.5,
+      "notes": "mesh.cpp:103\u2013130 supports TRI_3/QUAD_4 and boundary edges, but rejects CGNS MIXED section type; general zone/mesh cases not independently exercised."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 4,
+      "notes": "fvsolver.cpp:268\u2013310 reconstructs states and adds signed face fluxes, including viscous correction. Neighbor gradient and limiter exchange are present."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "notes": "flux.hpp contains Roe with entropy fix and Rusanov; case_config.cpp:80\u201382 selects Rusanov when configured. Report describes production dissipation and no shock rerun was performed."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 4,
+      "notes": "Farfield/slip/no-slip and wall viscous paths exist; no independent full boundary validation."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 4,
+      "notes": "fvsolver.cpp uses least-squares reconstruction and positivity fallback; no independent full residual/grid-order study was performed."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 4,
+      "notes": "Venkat limiter and phi halo exchange appear in fvsolver.cpp:171\u2013234. Plateau behavior and force variability constrain demonstrated solution quality."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "notes": "fvsolver.cpp uses corrected gradients; fvsolver_run.cpp:40\u201370 projects tangential wall traction for friction split. Full normal viscous contribution is omitted from total; no independent wall-grid convergence."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3,
+      "notes": "Implicit sweeps and local CFL exist, but source accepts residual-stall plateau without force criterion; M0.8 inviscid violates required stable-force condition."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "score": 3.5,
+      "notes": "Fresh BDF2 history and strict target ratio checks exist (fvsolver_run.cpp:474\u2013514), with documented 4-degree inflow perturbation t=2\u201312 and underpredicted shedding. Restart discards prior history/time."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 4.5,
-      "notes": "Evidence-backed read-only evaluation; no rerun."
+      "notes": "METIS, neighbor state/gradient/limiter halos and reductions are implemented. Nonroot global meshes are released before solve, root retains one for output."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.5
+  "overall_score": 3.94
 }

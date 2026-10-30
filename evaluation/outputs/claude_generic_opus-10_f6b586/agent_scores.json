@@ -27,67 +27,67 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 5,
+          "notes": "Immutable source builds in network-disabled scratch with configured externals, 2 CPUs/4 GiB/128 processes and 240-second timeout."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 3.5,
+          "notes": "main.cpp parses required inputs and restart. output.cpp:97 writes only a state array; transient driver initializes both histories from that state and restarts its clock, so it cannot faithfully resume a BDF2 transient."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "notes": "Modules separate case, mesh, partition, flux, finite-volume solver and output. The implementation remains fixed 2-D."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 4,
+          "notes": "CMake builds submitted source with MPI/CGNS/METIS; no direct existing CFD solver executable call found. External source similarity/licensing not exhaustively audited."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 4,
+          "notes": "Case inputs select mesh/physics; Re200 source adds a disclosed 4-degree inflow perturbation for t=2\u201312. Arbitrary meshes were not independently run."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "notes": "main.cpp:127\u2013151 reads mesh per rank during preprocessing then releases global mesh on nonroot before solve; partition.cpp and fvsolver.cpp exchange neighbor U/gradients/limiters. Root retains one copy for output."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 2.5,
+          "notes": "fvsolver_run.cpp:382\u2013399 marks residual-stall convergence without force check; M0.8 lift remains strongly variable. Restart lacks physical-time/history preservation."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 3.5,
+          "notes": "Immutable source builds and original eight packages/report validate structurally; report has rank studies, but no independent case rerun or full grid-convergence proof."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 4,
+          "notes": "Modules and report generator present. Report table labels final-window means as final steady values; curated tip lacks generated figure assets needed to rebuild accepted PDF."
         }
       ],
-      "overall_score": 4.5,
+      "overall_score": 4.07,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -96,81 +96,81 @@
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 4,
+          "notes": "Compressible perfect-gas finite-volume equations and nondimensional references are implemented; selected weak-plateau force data limit demonstrated accuracy."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 3.5,
+          "notes": "mesh.cpp:103\u2013130 supports TRI_3/QUAD_4 and boundary edges, but rejects CGNS MIXED section type; general zone/mesh cases not independently exercised."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 4,
+          "notes": "fvsolver.cpp:268\u2013310 reconstructs states and adds signed face fluxes, including viscous correction. Neighbor gradient and limiter exchange are present."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "notes": "flux.hpp contains Roe with entropy fix and Rusanov; case_config.cpp:80\u201382 selects Rusanov when configured. Report describes production dissipation and no shock rerun was performed."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 4,
+          "notes": "Farfield/slip/no-slip and wall viscous paths exist; no independent full boundary validation."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 4,
+          "notes": "fvsolver.cpp uses least-squares reconstruction and positivity fallback; no independent full residual/grid-order study was performed."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 4,
+          "notes": "Venkat limiter and phi halo exchange appear in fvsolver.cpp:171\u2013234. Plateau behavior and force variability constrain demonstrated solution quality."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "notes": "fvsolver.cpp uses corrected gradients; fvsolver_run.cpp:40\u201370 projects tangential wall traction for friction split. Full normal viscous contribution is omitted from total; no independent wall-grid convergence."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 3,
+          "notes": "Implicit sweeps and local CFL exist, but source accepts residual-stall plateau without force criterion; M0.8 inviscid violates required stable-force condition."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 3.5,
+          "notes": "Fresh BDF2 history and strict target ratio checks exist (fvsolver_run.cpp:474\u2013514), with documented 4-degree inflow perturbation t=2\u201312 and underpredicted shedding. Restart discards prior history/time."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "notes": "METIS, neighbor state/gradient/limiter halos and reductions are implemented. Nonroot global meshes are released before solve, root retains one for output."
         }
       ],
-      "overall_score": 4.5,
+      "overall_score": 3.94,
       "disqualification_flags": []
     },
     "result_review": {
@@ -179,129 +179,129 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 3,
+          "notes": "Structural validation passes original packages, but M0.8 inviscid metadata marks a force-unstable residual plateau converged; transient restart does not preserve history/time."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 5,
+          "notes": "Original eight packages and report pass structural validator; this does not establish stable force plateaus or physical accuracy."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 2.5,
+          "notes": "Re200 reaches t=300 with actual target checks; M0.8 inviscid is incorrectly marked converged despite a moving lift tail and only 2.08/4 residual orders."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 3,
+          "notes": "Re20 Cd\u22482.019 is plausible; M0.8 inviscid lift varies strongly, M2 inviscid achieves 0.60 residual orders, M2 laminar Cd tail changes ~20%, and Re200 underpredicts St/amplitude."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
           "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "notes": "Accepted PDF shows all case histories/fields, including readable Re200 late lift/drag and wake. Curated source lacks some figure assets for complete reproduction."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 3,
+          "notes": "Report discloses weak residual reductions and Re200 perturbation, but labels moving M0.8 lift steady and table calls final-window means final steady values."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 4.5,
-          "notes": "Evidence-backed read-only evaluation; no rerun."
+          "score": 3.5,
+          "notes": "PDF SHA and immutable TeX provenance verified; tools/analyze.py computes final-window means. Table caption mislabels them as final rows; full pixel-to-field audit not performed."
         }
       ],
-      "overall_score": 4.5,
+      "overall_score": 3.35,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 99,
+    "total_scored": 87.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 10,
-        "notes": "Evidence-backed manual rubric assessment."
+        "score": 9,
+        "notes": "Clean build 4/4, CLI 1.5/2 (transient restart loses time/history), output schema 1.5/2 (false steady convergence), error handling 2/2 for source-checked paths; malformed input coverage limited."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
-        "score": 10,
-        "notes": "Evidence-backed manual rubric assessment."
+        "score": 8.5,
+        "notes": "CGNS/tags 3.5/4, geometry 2/2, mixed/multizone 1/2 (MIXED sections rejected), adjacency 2/2; arbitrary layouts untested."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 15,
-        "notes": "Evidence-backed manual rubric assessment."
+        "score": 14,
+        "notes": "Conservative residual 4.5/5, Riemann flux 4/4, farfield/slip 2.5/3, no-slip 3/3; paths exist but full boundary validation not independently performed."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 10,
-        "notes": "Evidence-backed manual rubric assessment."
+        "score": 9,
+        "notes": "Reconstruction 3.5/4, limiter 3/3, positivity 2/2, smooth-order evidence 0.5/1. WLS/Venkat and halo paths exist; independent full residual order not established."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 10,
-        "notes": "Evidence-backed manual rubric assessment."
+        "score": 9.5,
+        "notes": "Gradients 3/3, stress/heat 3/3, no-slip wall 2/2, tangential split 1.5/2; wall traction projected tangentially, normal viscous force omitted from total and grid convergence unverified."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 15,
-        "notes": "Evidence-backed manual rubric assessment."
+        "score": 13,
+        "notes": "Steady implicit 2.5/4 (plateau accepts residual stall without stable-force check), linear solve 4/4, BDF2 3.5/4 (restart loses prior time/history; fresh run tested by original evidence), inner control 3/3 (actual ratios counted)."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
         "score": 10,
-        "notes": "Evidence-backed manual rubric assessment."
+        "notes": "METIS/owned ghosts 2/2, neighbor state/gradient/limiter exchange 3/3, reductions 2/2, rank output 1/1, np8 comparison 2/2. Nonroot global meshes released before solver, root retains one for output."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 9,
-        "notes": "Evidence-backed manual rubric assessment."
+        "score": 6.5,
+        "notes": "Inviscid 0.75/2 (M0.8 moving lift falsely called converged and M2 only 0.6 orders), laminar 1.25/2 (M2 last-10% Cd changes ~20%), Re20 2/2, Re200 1/2 (underprediction and perturbation), fields 1/1 and rank comparison 0.5/1."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "Evidence-backed manual rubric assessment."
+        "score": 3.5,
+        "notes": "Methods 1/1, histories 1/1, field visuals 1/1, analysis 0.25/1 (unstable M0.8 plateau called steady), traceability 0.25/1 (mean table mislabeled final, missing curated assets). Accepted PDF itself has readable plots."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 5,
-        "notes": "Evidence-backed manual rubric assessment."
+        "score": 4,
+        "notes": "Physics 1.5/2, BC 0.75/1, mesh abstraction 0.75/1, organization 1/1: modular but fixed 2-D implementation."
       }
     ]
   },
@@ -346,12 +346,73 @@
         "id": 7,
         "found": true,
         "evidence": "Immutable d25cd3c fvsolver_run.cpp:382\u2013399 declares converged on residual-stall criteria without testing force stability. Original NACA M0.8 inviscid run_status/metadata says converged at 2.08396 residual orders versus requested 4.0; last 500 forces.csv lift rows span \u22120.0117325 to +0.0790092, with first-half mean +0.0289760 and second-half mean \u22120.0077608. Report.tex:232 calls the mean forces steady, but TASK.md:172 requires stable forces for a justified plateau. This supports a false-success finding for this specific steady case; Re200 inner-target statistics are measured and are not conflated with this issue."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No direct existing complete CFD solver call found in reviewed source/build."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "CSV histories originate in solver code; no direct synthetic-output evidence found."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Case config reads input mesh path; no two-filename-only branch found, although MIXED sections are unsupported."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Report np1/2/8 Re20 and M0.15 forces are close; no specific order-one rank discrepancy established, no independent rank rerun."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Implicit solver and BDF2 residual paths exist, not explicit-only."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Roe/Rusanov, reconstruction, limiter, viscous and BDF methods exist. Temporal restart loses history, a functionality limitation, not proof an entire claimed algorithm is absent."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "No direct figure/output mismatch established; table calls final-window mean a final value, not proof plotted files differ. Full pixel-level audit not performed."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "METIS and local U exist; main.cpp:148\u2013151 releases nonroot global mesh before solve, retaining one root copy for output."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Reconstruction and Venkat limiter remain active in inspected production path; no evidence it is globally disabled."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "Validator accepts wall boundary values; no specific undocumented cell-center wall row failure found."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "Reviewed PDF Mach and pressure labels match; no specific variable swap established."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No internal evidence of copied/wrapped CFD core found; no exhaustive external authorship audit."
       }
     ]
   },
   "limitations": [
-    "No evaluator rerun; Re200 never rerun.",
-    "M2 plateaus and Re200 underprediction disclosed in report.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "Immutable-source clean build passed in network-disabled scratch with configured externals, 2 CPUs/4 GiB/128 processes and 240-second timeout; no CFD case was rerun.",
+    "Accepted sibling PDF and indexed SHA match; curated tip lacks some figure assets. No exhaustive pixel-to-field or external authorship audit.",
+    "M0.8 inviscid force-unstable plateau supports DQ7; Re200 target ratios are independently counted and its documented 4-degree transient perturbation occurs only t=2\u201312.",
+    "Transient restart stores current state but not previous BDF level or time; independent case scores do not alter rubric or review areas."
   ]
 }
