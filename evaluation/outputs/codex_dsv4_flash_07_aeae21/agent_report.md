@@ -1,6 +1,6 @@
 # Agent Evaluation Report — codex/dsv4_flash/07
 
-**84/100, not disqualified.** The submitted C++ solver has credible source-level implementations of unstructured CGNS mesh handling, METIS partitioning, neighbor MPI exchange, second-order reconstruction/limiting, viscous terms, implicit marching, and a BDF2 outer loop. The immutable raw attempt's eight final packages and report pass the structural validator. The principal deduction is Re200: its source accepts a merely decreasing inner residual as converged, while the final recorded ratio is 0.3696 against the 0.001 target. Re200 was not rerun.
+**84/100 provisional; DQ7 true.** The submitted C++ solver has credible source-level implementations of unstructured CGNS mesh handling, METIS partitioning, neighbor MPI exchange, second-order reconstruction/limiting, viscous terms, implicit marching, and a BDF2 outer loop. The immutable raw attempt's eight final packages and report pass the structural validator. The principal deduction is Re200: its source accepts a merely decreasing inner residual as converged, while the final recorded ratio is 0.3696 against the 0.001 target. Re200 was not rerun.
 
 ## Identity and provenance
 
@@ -26,7 +26,7 @@ It returned 0 and reported `OK` for each required case and the report. This esta
 
 Source inspection confirms CGNS/mixed-zone geometry, METIS ownership/ghost partitioning, neighbor `MPI_Isend`/`MPI_Irecv`, global norms, WLS reconstruction, Barth-Jespersen limiting, positivity fallback, Rusanov flux, viscous/wall terms, and steady block-Jacobi/LU-SGS paths. The report and raw package supply fields, histories, surface data, manifests, and figures for all cases. Steady residual reductions are nevertheless generally modest, and the report admits plateau criteria/broad-band Re200 shedding.
 
-For Re200, `driver.cpp` uses a BDF2 outer physical-time loop and frozen histories, but stops an inner iteration after five steps when `strict || decreased`; `strict` is the stated target but `decreased` alone also declares success. Its committed metadata says zero target misses and 1.0 convergence fraction despite `last_inner_residual_ratio = 0.3695944590912151`. This is a substantive functionality/result limitation, not a DQ trigger under the listed rules.
+For Re200, `driver.cpp` uses a BDF2 outer physical-time loop and frozen histories, but stops an inner iteration after five steps when `strict || decreased`; `strict` is the stated target but `decreased` alone also declares success. Its committed metadata says zero target misses and 1.0 convergence fraction despite `last_inner_residual_ratio = 0.3695944590912151`. This is DQ7: the submitted metadata claims strict target success despite the measured final miss; exact strict miss count is unknown.
 
 ## Scores and DQ
 
@@ -37,3 +37,7 @@ The independent review scores are Code 3.78/5, CFD 3.82/5, and Results 4.14/5. T
 ## Limitations
 
 The environment snapshot is post-run reconstruction. Raw validation is structural and no submitted run was rerun; Re200 was categorically not rerun. `run_identity.json` and `contestant_final_response.md` are unindexed sidecars, so `cfdeval check` does not validate their hashes.
+
+## Partial provenance and verdict correction — 2026-10-30
+
+The selected final response labels M0.15 inviscid, M0.15 laminar and Re200 as “reference” while calling the other five “own solver.” Independent SHA-256 comparison of immutable raw attempt `915af136f1468146e3b809c31986b3653f927223` against sibling dsv4_flash_02 shows all force/residual/metadata/status files for those three cases match byte-for-byte (12 matches). The three case scores change 4→0, 3→0 and 2→0: reference-produced histories do not demonstrate this submitted solver’s own runs, and this does not imply synthetic data. Two sampled own cases differ. Structured record already had DQ7=true; the earlier narrative saying no DQ was contradictory and is corrected. Copied Re200 metadata’s last ratio 0.369594 against target 0.001 demonstrates a strict miss, while source counts relaxed decreases as success; exact strict miss count is unknown. Other cases, source and rubric remain partial; no CFD rerun.
