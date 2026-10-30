@@ -84,7 +84,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=false. No external solver, fake MPI, explicit-only implementation, or other listed trigger was proven. Numerical plausibility defects are scored in their relevant criteria.
+DQ7=true based on the separately documented selected Re200 and M2 laminar result histories. Other triggers remain under review.
 
 ## Metadata answers & session selection
 
@@ -96,4 +96,11 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 
 ## Verdict
 
-72/100, DQ=false. This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
+72/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
+
+
+## Selected result and report review — 2026-10-30
+
+All 15 pages of accepted report rebuilt from f679644 visually checked; report contains five NACA cases and concludes the cylinder cases and M2 laminar were incomplete. Its generation relationship to current selected results is unresolved. Current Re200 metadata says statistically periodic, yet every row in t=200–300 has exactly Cd4.8532587021 and Cl−0.0023802775736, with no observable shedding; current M2 laminar metadata says converged but last65 Cd falls 3.974293→3.146444 (20.8%). The delivered report and run manifest also classify M2 laminar incomplete/not converged. DQ7 applies and Re200 case2→1. No actual strict inner-failure count can be inferred from the flat force alone.
+
+M015 inviscid 4→2: Cd0.0617 is high for low-Mach inviscid flow and last308 Cd falls 15.2%; M015 laminar 4→2 because Cd0.583 is unusually large for this flow, despite figures and numeric summaries. M080 inviscid/laminar report supplies Cd0.050/0.219 respectively; previous notes saying no numeric summary are corrected to state Cl summary was not found. Other cases, rubric, provenance and DQ checks remain partial. Source writer f679644:solver/src/output.cpp:247–248 fixes timestamp values to 2024, so these are not run-time provenance. No CFD rerun.
