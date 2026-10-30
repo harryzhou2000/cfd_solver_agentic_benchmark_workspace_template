@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:04:12.884025+00:00
+Generated: 2026-10-30T04:04:41.162668+00:00
 
-**Overall score: 3.8**
+**Overall score: 3.7**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,13 +30,13 @@ Generated: 2026-10-30T04:04:12.884025+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Barth-Jespersen limiter and positivity fallback are active by default. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | Gradient, stress, heat-flux, wall, and force code are present; limited independent numerical verification. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | numerics.cpp:1130–1173 integrates full viscous traction as the viscous force split, not tangential skin friction; surface skin friction at :713 is tangential. Stress/heat and no-slip paths exist. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | LU-SGS/local-step/defect-correction steady machinery is present. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2 | BDF2 dual-time structure exists, but submitted Re200 fails before credible shedding. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2 | driver.cpp:138–164 assembles BDF2/BDF1 full transient residual and :803–861 inner iterations; NaN ratio can evade miss count. Re200 fails by t=68.9; restart CLI is ignored. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | METIS and halo plans are source-evident; no rank-count evidence. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T04:04:12.884025+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.8
+- Overall score (0-5): 3.7
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

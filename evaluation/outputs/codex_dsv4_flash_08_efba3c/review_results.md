@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:04:12.884303+00:00
+Generated: 2026-10-30T04:04:41.162957+00:00
 
-**Overall score: 3.45**
+**Overall score: 2.95**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,16 +15,16 @@ Generated: 2026-10-30T04:04:12.884303+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 4 | Explicit validator passes seven steady cases and correctly fails Re200 completed=false. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 3 | Seven steady results are readable; Re200 is failed and MPI comparison is absent. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Seven steady packages exist but M2 laminar falsely marks early convergence while drag changes rapidly; Re200 fails at t=68.9/300 and rank comparison is absent. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Report/result evidence supports steady attempts; no independent rerun and Re200 is unsuccessful. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | Steady case force tails vary in quality; M2 laminar Cd falls 17.44% in final 3 steps, while Re200 Cd≈30 and run fails. Other steady evidence is case-specific. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 3 | Committed report has curated, referenced plots for four cases; coverage is incomplete for all required cases. |
+| 5 | **res.visualization** Visualizations | 0.15 | 3 | 11-page accepted report has four steady cases; separately delivered contestant figure manifest maps other case plots to data. Large startup spikes flatten late drag in laminar plots; no usable Re200 periodic plot. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 4 | Immutable report compiles to 11 pages and candidly explains Re200 failure. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Report compiles and discloses M2 first order and Re200 failure, but report.tex:195–196,452–455 says Re200 failed at first step rather than actual t=68.9. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Report prose identifies result paths, but raw manifest was excluded from curated submission. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T04:04:12.884303+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.45
+- Overall score (0-5): 2.95
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

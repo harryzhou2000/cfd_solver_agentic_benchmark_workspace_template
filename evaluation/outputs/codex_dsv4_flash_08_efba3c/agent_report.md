@@ -10,9 +10,9 @@ The manually selected project-local Codex root is `019fdf7d-fd63-79b1-99a9-61a5e
 
 ## Scores
 
-Rubric total: **76/100**. Section scores: build/CLI/output 7/10; mesh 9/10; residual/BC 13/15; second order 8/10; viscous 8/10; implicit/transient 10/15; MPI 6/10; results 7/10; report 4/5; extensibility 4/5. Detailed evidence and all section notes are in `agent_scores.json`.
+Provisional rubric total: **72/100**. Section scores: build/CLI/output 7/10; mesh 9/10; residual/BC 13/15; second order 8/10; viscous 7/10; implicit/transient 9/15; MPI 6/10; results 5/10; report 4/5; extensibility 4/5. Remaining criteria are still under review. Detailed evidence and all section notes are in `agent_scores.json`.
 
-Weighted review areas: Code 3.67/5; CFD 3.82/5; Results 3.43/5. Current per-case scores are M0.15 inviscid 3, M0.80 inviscid 3, M2 inviscid 3, M0.15 laminar 2, M0.80 laminar 2, M2 laminar 1, Re20 3, and Re200 0. The M2 first-order limitation and Re200 inner-loop failure are both candidly documented in the submitted report. No submitted np=8 NACA/cylinder comparison is present.
+Weighted review areas are recorded in agent_scores.json and regenerated summaries. Current per-case scores are M0.15 inviscid 3, M0.80 inviscid 3, M2 inviscid 3, M0.15 laminar 2, M0.80 laminar 2, M2 laminar 1, Re20 3, and Re200 0. The M2 first-order limitation and Re200 inner-loop failure are both candidly documented in the submitted report. No submitted np=8 NACA/cylinder comparison is present.
 
 ## Disqualification assessment
 

@@ -31,14 +31,14 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4,
-          "notes": "CMake build is documented; committed report builds in an isolated immutable worktree, but a clean solver build was not possible because the delivered external symlink is dangling."
+          "notes": "Immutable e5d4a7a clean CMake build succeeds in network-disabled cfd-bench using explicit /opt/external dependencies; report compiles. Default delivered external path is unavailable in manager checkout."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "main.cpp/config parsing provide solve/info and input checks; not rerun."
+          "score": 3,
+          "notes": "main.cpp parses solve/info and input flags, but driver.cpp:997\u20131058 ignores --restart and never invokes the reader, so accepted restart does not restore state."
         },
         {
           "id": "code.organization",
@@ -90,7 +90,7 @@
           "notes": "Curated submission excludes build/results/session artifacts and source is organized."
         }
       ],
-      "overall_score": 3.57,
+      "overall_score": 3.47,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -148,8 +148,8 @@
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Gradient, stress, heat-flux, wall, and force code are present; limited independent numerical verification."
+          "score": 3,
+          "notes": "numerics.cpp:1130\u20131173 integrates full viscous traction as the viscous force split, not tangential skin friction; surface skin friction at :713 is tangential. Stress/heat and no-slip paths exist."
         },
         {
           "id": "cfd.implicit",
@@ -163,7 +163,7 @@
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 2,
-          "notes": "BDF2 dual-time structure exists, but submitted Re200 fails before credible shedding."
+          "notes": "driver.cpp:138\u2013164 assembles BDF2/BDF1 full transient residual and :803\u2013861 inner iterations; NaN ratio can evade miss count. Re200 fails by t=68.9; restart CLI is ignored."
         },
         {
           "id": "cfd.mpi_partition",
@@ -173,7 +173,7 @@
           "notes": "METIS and halo plans are source-evident; no rank-count evidence."
         }
       ],
-      "overall_score": 3.8,
+      "overall_score": 3.7,
       "disqualification_flags": []
     },
     "result_review": {
@@ -196,29 +196,29 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 3,
-          "notes": "Seven steady results are readable; Re200 is failed and MPI comparison is absent."
+          "score": 2,
+          "notes": "Seven steady packages exist but M2 laminar falsely marks early convergence while drag changes rapidly; Re200 fails at t=68.9/300 and rank comparison is absent."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Report/result evidence supports steady attempts; no independent rerun and Re200 is unsuccessful."
+          "score": 2,
+          "notes": "Steady case force tails vary in quality; M2 laminar Cd falls 17.44% in final 3 steps, while Re200 Cd\u224830 and run fails. Other steady evidence is case-specific."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
           "score": 3,
-          "notes": "Committed report has curated, referenced plots for four cases; coverage is incomplete for all required cases."
+          "notes": "11-page accepted report has four steady cases; separately delivered contestant figure manifest maps other case plots to data. Large startup spikes flatten late drag in laminar plots; no usable Re200 periodic plot."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Immutable report compiles to 11 pages and candidly explains Re200 failure."
+          "score": 3,
+          "notes": "Report compiles and discloses M2 first order and Re200 failure, but report.tex:195\u2013196,452\u2013455 says Re200 failed at first step rather than actual t=68.9."
         },
         {
           "id": "res.traceability",
@@ -228,20 +228,20 @@
           "notes": "Report prose identifies result paths, but raw manifest was excluded from curated submission."
         }
       ],
-      "overall_score": 3.45,
+      "overall_score": 2.95,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 76,
+    "total_scored": 72,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 7,
-        "notes": "Documented CMake/CLI and seven structurally valid steady outputs; report build verified, clean solver build not run due dangling delivered externals."
+        "notes": "Immutable clean solver build succeeds using container dependencies; --restart accepted but ignored (driver.cpp:997\u20131058), output packages include failure."
       },
       {
         "id": "mesh_geometry",
@@ -268,15 +268,15 @@
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 8,
-        "notes": "Viscous gradients/stress/heat/wall-force code is present; limited independent field verification."
+        "score": 7,
+        "notes": "Stress/heat/wall paths present, but numerics.cpp:1130\u20131173 calls full viscous traction the viscous force split rather than tangential skin friction."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 10,
-        "notes": "Steady LU-SGS and BDF2 dual time/inner diagnostics are implemented, but Re200 does not converge."
+        "score": 9,
+        "notes": "BDF2 full transient residual and inner solve exist, but Re200 fails; restart argument ignored and NaN inner ratio can evade miss count."
       },
       {
         "id": "mpi",
@@ -289,8 +289,8 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 7,
-        "notes": "Seven steady cases validate; Re200 is explicitly incomplete/failed, with no transient credit or MPI comparison credit."
+        "score": 5,
+        "notes": "Steady matrix produced but M2 laminar early-convergence claim fails force stability; Re200 fails and rank comparison absent. Case-specific scores and evidence retained."
       },
       {
         "id": "report_viz",

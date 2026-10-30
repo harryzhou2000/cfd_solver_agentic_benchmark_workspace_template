@@ -55,8 +55,8 @@
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Gradient, stress, heat-flux, wall, and force code are present; limited independent numerical verification."
+      "score": 3,
+      "notes": "numerics.cpp:1130\u20131173 integrates full viscous traction as the viscous force split, not tangential skin friction; surface skin friction at :713 is tangential. Stress/heat and no-slip paths exist."
     },
     {
       "id": "cfd.implicit",
@@ -70,7 +70,7 @@
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 2,
-      "notes": "BDF2 dual-time structure exists, but submitted Re200 fails before credible shedding."
+      "notes": "driver.cpp:138\u2013164 assembles BDF2/BDF1 full transient residual and :803\u2013861 inner iterations; NaN ratio can evade miss count. Re200 fails by t=68.9; restart CLI is ignored."
     },
     {
       "id": "cfd.mpi_partition",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.8
+  "overall_score": 3.7
 }

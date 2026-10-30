@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:04:12.883610+00:00
+Generated: 2026-10-30T04:04:41.162295+00:00
 
-**Overall score: 3.57**
+**Overall score: 3.47**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake build is documented; committed report builds in an isolated immutable worktree, but a clean solver build was not possible because the delivered external symlink is dangling. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable e5d4a7a clean CMake build succeeds in network-disabled cfd-bench using explicit /opt/external dependencies; report compiles. Default delivered external path is unavailable in manager checkout. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | main.cpp/config parsing provide solve/info and input checks; not rerun. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3 | main.cpp parses solve/info and input flags, but driver.cpp:997–1058 ignores --restart and never invokes the reader, so accepted restart does not restore state. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Separated config, mesh, numerics, driver, and main modules. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T04:04:12.883610+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.57
+- Overall score (0-5): 3.47
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

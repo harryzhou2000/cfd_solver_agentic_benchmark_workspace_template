@@ -431,3 +431,6 @@ dsv4_flash_08 partial steady cases: scores 2,4,2,4,4,2,4,0 → 3,3,3,2,2,1,3,0. 
 
 
 dsv4_flash_08 source checkpoint: immutable e5d4a7a clean CMake build passed in network-disabled cfd-bench, 2 CPUs/3 GiB, explicit /opt/external paths; first default-path attempt failed CGNS discovery. driver.cpp:997–1058 ignores restart_file and never calls reader :267, although report.tex:516 acknowledges proper transient restart as future work. numerics.cpp:1130–1173 uses full viscous traction in force split; surface skin friction :713 tangential. mesh.cpp:771–773 clears root-built global mesh before iterations. Source/rubric/DQ review still partial; no CFD run.
+
+
+dsv4_flash_08 provisional rubric checkpoint: 76→72/100, viscous 8→7 for full-traction split, implicit 10→9 for ignored restart and transient accounting, results 7→5 for M2 false convergence and Re200 failure. Build/CLI, selected review points and report narrative updated with clean-build and exact source evidence; remaining criteria and full DQ audit remain partial. Both gates pass; no solver rerun.

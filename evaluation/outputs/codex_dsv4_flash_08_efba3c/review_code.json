@@ -7,14 +7,14 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "CMake build is documented; committed report builds in an isolated immutable worktree, but a clean solver build was not possible because the delivered external symlink is dangling."
+      "notes": "Immutable e5d4a7a clean CMake build succeeds in network-disabled cfd-bench using explicit /opt/external dependencies; report compiles. Default delivered external path is unavailable in manager checkout."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "main.cpp/config parsing provide solve/info and input checks; not rerun."
+      "score": 3,
+      "notes": "main.cpp parses solve/info and input flags, but driver.cpp:997\u20131058 ignores --restart and never invokes the reader, so accepted restart does not restore state."
     },
     {
       "id": "code.organization",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.57
+  "overall_score": 3.47
 }
