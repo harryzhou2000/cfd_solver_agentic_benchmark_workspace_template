@@ -89,7 +89,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_14_80096b` | partial: Re200 and initial provenance/mesh assessed; remaining cases/rubric/DQ pending |
 | `codex_generic_02_ed5ee6` | partial: DQ7, TASK full mesh, Re200 checked; others pending |
 | `codex_generic_03_5f2165` | partial: all cases, build and TASK full mesh/state checked; remaining source/rubric/DQ review pending |
-| `codex_generic_04_16009f` | unreviewed |
+| `codex_generic_04_16009f` | partial: DQ10, DQ7, TASK full mesh established; case/rubric/source review pending |
 | `codex_generic_05_2599b1` | unreviewed |
 | `codex_generic_glm53-01_99a969` | unreviewed |
 | `codex_generic_glm53-02_ff20c7` | unreviewed |
@@ -556,3 +556,8 @@ Generic_03 source checkpoint: DQ6 added for final report.tex:25–26,64–71 cla
 Generic_03 criterion checkpoint: added criterion-specific source evidence, including final same-path all-rank writes (main.cpp:1027–1031), no restart reader, and source viscous relaxation 0.05 vs report 0.8. Scores unchanged 22; provenance and DQ review remain partial. No CFD rerun.
 
 Generic_03 provenance and DQ checkpoint: canonical Re200/M015 metadata mtimes 2026-08-24 06:04 UTC, git_revision=null; final-matching source mtime 23:36 UTC, curated b001f2e commit 2026-08-27 14:20 UTC. This does not establish a producer. DQ1–5,7,9–11 evidence and limitations documented in agent_report; DQ8/12 remain unverified due figure/current-data mismatch and DQ13 not externally searched. Partial status retained.
+
+
+## generic_04 partial DQ review — 2026-10-30
+
+DQ false→true: d93a1ef report.tex:29–30,68 claims second-order reconstruction and limiter, but main.cpp:40–82,272–294 calls direct cell-centered flux without either module (DQ10). Full RawMesh and geometry are allocated on every rank :189–196, retained through loop :272–328 and used again :347 (TASK.md:227); local state does not establish DQ9. Current M015 inviscid metadata and status mark converged though status residual reduction is -0.5032948043646994 orders (DQ7). Current residual/force files end near steps 2388/2384 versus status 20000; git_revision=null and source mtime 03:46 UTC follows metadata 03:40 UTC, so source/result binding and file pairing are unproven. 33-point rubric unchanged pending full review. No CFD rerun.

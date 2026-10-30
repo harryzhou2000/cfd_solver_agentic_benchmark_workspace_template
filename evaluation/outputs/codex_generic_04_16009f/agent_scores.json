@@ -340,8 +340,26 @@
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 10,
+        "flag": "Report claims second-order reconstruction or shock limiter disabled in production",
+        "found": true,
+        "evidence": "Immutable d93a1ef solver/report/report.tex:29\u201330,68 claims least-squares second order and Barth\u2013Jespersen limiter. solver/src/main.cpp:40\u201382 sends direct cell-centered primitive states to Rusanov; :272\u2013294 invokes that residual and never calls reconstruction/limiter (only includes headers :25\u201326). Production source is first-order despite report claim."
+      },
+      {
+        "id": 7,
+        "flag": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "Current solver/results/naca0012_m015_inviscid/metadata.json says completed=true and converged; sibling run_status.json reports converged but residual_reduction_orders=-0.5032948043646994, an increase rather than convergence. Residual/force files currently end around step 2388/2384 while status says 20000, so do not assume those histories correspond to its final run. Metadata git_revision=null."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "Immutable d93a1ef solver/src/main.cpp:189\u2013196 reads RawMesh and computes full geometry on every MPI rank; these objects remain live through solve loop :272\u2013328 and are subsequently used in VTU output :347. TASK.md:227 prohibits full mesh replication during iterations. Solution vectors are partition-local; numbered DQ9 full-state condition is not inferred from mesh replication."
+      }
+    ]
   },
   "limitations": [
     "No rerun; Re200 not rerun.",
