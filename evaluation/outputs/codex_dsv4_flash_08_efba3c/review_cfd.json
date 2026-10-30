@@ -7,49 +7,49 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Report/source implement conservative perfect-gas Navier-Stokes formulation."
+      "notes": "numerics.cpp:132\u2013163 implements conservative Euler flux, :478\u2013610 assembles face and viscous terms; perfect-gas 2-D Vec4 state and report equations. Actual physical accuracy is limited by case results."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "Source reads CGNS zones and constructs unstructured connectivity/geometry."
+      "notes": "mesh.cpp:86\u2013110 reads CGNS bases/zones, constructs connectivity, geometry and tagged faces; :690\u2013773 partitions. Explicit two-dimensional restriction, no independent mesh geometry oracle."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 4,
-      "notes": "Face residual assembly and global residual reductions are present."
+      "notes": "numerics.cpp:478\u2013610 computes boundary/interior fluxes and owned-cell residual; driver.cpp:86\u2013112 globally reduces residual norms. Transient and converged physical correctness evaluated separately."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Rusanov and optional Roe with fallback are implemented."
+      "notes": "numerics.cpp:132\u2013163 Rusanov, :165\u2013245 Roe with NaN fallback; :576\u2013580 selects flux at interior faces. Submitted M2 cases explicitly use first order."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Farfield, slip, and no-slip adiabatic handling are implemented."
+      "notes": "numerics.cpp:490\u2013545 sets pressure-only wall flux and farfield ghost flux with viscous mirror gradients; no-slip surface routine reports zero wall velocity. Separate wall shear limitations remain."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 4,
-      "notes": "Least-squares linear reconstruction is active in source."
+      "notes": "numerics.cpp:290\u2013369 computes least-squares coefficients and gradients; :71 limited face reconstruction, default active. M2 first-order exception is explicitly reported; no demonstrated order-convergence study."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Barth-Jespersen limiter and positivity fallback are active by default."
+      "notes": "numerics.cpp:372\u2013430 implements Barth\u2013Jespersen limiter and :71 density/pressure fallback; CFD_FIRST_ORDER and limiter disabling options exist, with M2 first order explicitly disclosed."
     },
     {
       "id": "cfd.viscous",
@@ -63,7 +63,7 @@
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 4,
-      "notes": "LU-SGS/local-step/defect-correction steady machinery is present."
+      "notes": "driver.cpp:470\u2013528 updates reconstruction and executes implicit sweeps; numerics.cpp:806 implements LU-SGS. Nominal residual-based stop can mark strongly evolving forces converged (M2 laminar)."
     },
     {
       "id": "cfd.transient",
@@ -77,7 +77,7 @@
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 4,
-      "notes": "METIS and halo plans are source-evident; no rank-count evidence."
+      "notes": "mesh.cpp:718\u2013731 calls METIS and :771\u2013773 clears global mesh; numerics.cpp:432\u2013478 exchanges local ghost fields. No submitted independent np1/np8 result comparison."
     }
   ],
   "disqualification_flags": [

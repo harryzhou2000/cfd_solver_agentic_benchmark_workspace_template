@@ -10,7 +10,7 @@ The manually selected project-local Codex root is `019fdf7d-fd63-79b1-99a9-61a5e
 
 ## Scores
 
-Provisional rubric total: **72/100**. Section scores: build/CLI/output 7/10; mesh 9/10; residual/BC 13/15; second order 8/10; viscous 7/10; implicit/transient 9/15; MPI 6/10; results 5/10; report 4/5; extensibility 4/5. Remaining criteria are still under review. Detailed evidence and all section notes are in `agent_scores.json`.
+Calibrated rubric total: **71/100** (previously 76). Section scores: build/CLI/output 7/10; mesh 9/10; residual/BC 13/15; second order 8/10; viscous 7/10; implicit/transient 9/15; MPI 6/10; results 5/10; report 3/5; extensibility 4/5. Detailed evidence and all section notes are in `agent_scores.json`.
 
 Weighted review areas are recorded in agent_scores.json and regenerated summaries. Current per-case scores are M0.15 inviscid 3, M0.80 inviscid 3, M2 inviscid 3, M0.15 laminar 2, M0.80 laminar 2, M2 laminar 1, Re20 3, and Re200 0. The M2 first-order limitation and Re200 inner-loop failure are both candidly documented in the submitted report. No submitted np=8 NACA/cylinder comparison is present.
 
@@ -41,3 +41,7 @@ Scores 2,4,2,4,4,2,4,0 → 3,3,3,2,2,1,3,0. Each numerical basis and limitation 
 ## Partial source review — 2026-10-30
 
 Immutable e5d4a7a clean CMake build succeeds in network-disabled cfd-bench with two CPUs, 3 GiB, -DCFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install and -DEXTERNALS_DIR=/opt/external; the initial attempt without these explicit container dependency paths failed to find CGNS. driver.cpp:997–1058 receives restart_file but never uses it; the existing reader at :267 is not called, so --restart is accepted without restoring state. report.tex:516 acknowledges proper transient restart as future work. numerics.cpp:1130–1173 includes full viscous traction in the viscous force split, whereas surface skin friction at :713 is tangential; this is a force-split accuracy limitation, not evidence of an absent algorithm. mesh.cpp:771–773 clears the root-built global mesh before iterations. Remaining source, rubric and DQ review partial; no solver run.
+
+## Full calibration — 2026-10-30
+
+All ten rubric sections and 27 review points now include criterion-specific evidence. The case scores and DQ7 finding are detailed above. Clean immutable build passed with explicit container dependencies; CLI restart is accepted but ignored. Root-built mesh is cleared before iterations, METIS and halo exchange are implemented, and report explicitly discloses M2 first-order mode. Full viscous traction is used as the viscous force split; NaN transient ratio can escape miss counting, but true strict miss count is unknown and Re200 status itself is failed. driver.cpp:1070–1116 includes a linear LSQ diagnostic that reports error but returns success unconditionally. No solver rerun, external authorship search, exhaustive pixel audit, or independent rank comparison was performed. Both structural/completion gates pass.

@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:04:41.162957+00:00
+Generated: 2026-10-30T04:05:47.770445+00:00
 
 **Overall score: 2.95**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 4 | All eight directories exist; seven steady cases satisfy validator contract, Re200 truthfully incomplete. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Seven steady packages pass structural validator but M2 laminar incorrectly claims physical convergence; Re200 status explicitly fails. Validator conformance does not establish physics. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 4 | Explicit validator passes seven steady cases and correctly fails Re200 completed=false. |
+| 2 | **res.validator** Automated validator results | 0.10 | 4 | Prior examiner validation reports seven steady directories pass and Re200 fails completed=false; no CFD rerun or independent convergence claim follows. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
 | 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Seven steady packages exist but M2 laminar falsely marks early convergence while drag changes rapidly; Re200 fails at t=68.9/300 and rank comparison is absent. |
@@ -27,7 +27,7 @@ Generated: 2026-10-30T04:04:41.162957+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 3 | Report compiles and discloses M2 first order and Re200 failure, but report.tex:195–196,452–455 says Re200 failed at first step rather than actual t=68.9. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Report prose identifies result paths, but raw manifest was excluded from curated submission. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Original case manifest links delivered figures to case data; report.tex:195–196,452–455 states Re200 failure at first step whereas actual status and run manifest give t=68.9. Curated submission omits raw data. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 

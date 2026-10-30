@@ -45,49 +45,49 @@
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Separated config, mesh, numerics, driver, and main modules."
+          "notes": "main.cpp, config.cpp, mesh.cpp, numerics.cpp and driver.cpp separate CLI, case configuration, partition/geometry, physics and integration; 2-D Vec4 data still couples physics."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 3,
-          "notes": "No internal wrapper/executable evidence; trust policy prohibits external similarity search."
+          "notes": "No internal call to an existing solver executable found in source; no external similarity search performed under trust policy."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "CGNS and case parsing are generic rather than filename-only branches."
+          "notes": "mesh.cpp:86\u2013110 opens the configured CGNS and supports zones; config/main parse input options. No two-mesh filename switch identified; reader restricts base/cell dimensions."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 4,
-          "notes": "METIS partitioning, ghosts, neighbor exchange and reductions are present; no submitted rank-count comparison."
+          "notes": "mesh.cpp:690\u2013773 partitions via METIS, scatters and clears global mesh; numerics.cpp:432\u2013478 exchanges neighbor state, gradient, limiter and increments; driver.cpp:110\u2013112 uses reductions. No rank-count comparison submitted."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 3,
-          "notes": "Positivity fallbacks and status output exist, but Re200 inner solve fails."
+          "notes": "numerics.cpp:71 and :243 use positivity/fallback paths; driver.cpp:627\u2013650 unconditionally marks nonfailed steady termination converged, including exhausted loops; M2 final converged claim contradicted by drag history."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
           "score": 2,
-          "notes": "No committed tests; structural validator is external evidence only."
+          "notes": "driver.cpp:1070\u20131116 implements a manufactured linear LSQ diagnostic, but reports errors and returns 0 unconditionally; no independently evidenced regression/accuracy suite. Examiner structural validation is external."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 4,
-          "notes": "Curated submission excludes build/results/session artifacts and source is organized."
+          "notes": "Curated immutable source excludes raw runs and uses separated source files; generated workspace report and outputs require separate provenance review."
         }
       ],
       "overall_score": 3.47,
@@ -100,49 +100,49 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Report/source implement conservative perfect-gas Navier-Stokes formulation."
+          "notes": "numerics.cpp:132\u2013163 implements conservative Euler flux, :478\u2013610 assembles face and viscous terms; perfect-gas 2-D Vec4 state and report equations. Actual physical accuracy is limited by case results."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "Source reads CGNS zones and constructs unstructured connectivity/geometry."
+          "notes": "mesh.cpp:86\u2013110 reads CGNS bases/zones, constructs connectivity, geometry and tagged faces; :690\u2013773 partitions. Explicit two-dimensional restriction, no independent mesh geometry oracle."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "Face residual assembly and global residual reductions are present."
+          "notes": "numerics.cpp:478\u2013610 computes boundary/interior fluxes and owned-cell residual; driver.cpp:86\u2013112 globally reduces residual norms. Transient and converged physical correctness evaluated separately."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Rusanov and optional Roe with fallback are implemented."
+          "notes": "numerics.cpp:132\u2013163 Rusanov, :165\u2013245 Roe with NaN fallback; :576\u2013580 selects flux at interior faces. Submitted M2 cases explicitly use first order."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Farfield, slip, and no-slip adiabatic handling are implemented."
+          "notes": "numerics.cpp:490\u2013545 sets pressure-only wall flux and farfield ghost flux with viscous mirror gradients; no-slip surface routine reports zero wall velocity. Separate wall shear limitations remain."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 4,
-          "notes": "Least-squares linear reconstruction is active in source."
+          "notes": "numerics.cpp:290\u2013369 computes least-squares coefficients and gradients; :71 limited face reconstruction, default active. M2 first-order exception is explicitly reported; no demonstrated order-convergence study."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4,
-          "notes": "Barth-Jespersen limiter and positivity fallback are active by default."
+          "notes": "numerics.cpp:372\u2013430 implements Barth\u2013Jespersen limiter and :71 density/pressure fallback; CFD_FIRST_ORDER and limiter disabling options exist, with M2 first order explicitly disclosed."
         },
         {
           "id": "cfd.viscous",
@@ -156,7 +156,7 @@
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 4,
-          "notes": "LU-SGS/local-step/defect-correction steady machinery is present."
+          "notes": "driver.cpp:470\u2013528 updates reconstruction and executes implicit sweeps; numerics.cpp:806 implements LU-SGS. Nominal residual-based stop can mark strongly evolving forces converged (M2 laminar)."
         },
         {
           "id": "cfd.transient",
@@ -170,7 +170,7 @@
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 4,
-          "notes": "METIS and halo plans are source-evident; no rank-count evidence."
+          "notes": "mesh.cpp:718\u2013731 calls METIS and :771\u2013773 clears global mesh; numerics.cpp:432\u2013478 exchanges local ghost fields. No submitted independent np1/np8 result comparison."
         }
       ],
       "overall_score": 3.7,
@@ -183,14 +183,14 @@
           "title": "Output contract compliance",
           "weight": 0.2,
           "score": 4,
-          "notes": "All eight directories exist; seven steady cases satisfy validator contract, Re200 truthfully incomplete."
+          "notes": "Seven steady packages pass structural validator but M2 laminar incorrectly claims physical convergence; Re200 status explicitly fails. Validator conformance does not establish physics."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 4,
-          "notes": "Explicit validator passes seven steady cases and correctly fails Re200 completed=false."
+          "notes": "Prior examiner validation reports seven steady directories pass and Re200 fails completed=false; no CFD rerun or independent convergence claim follows."
         },
         {
           "id": "res.completion",
@@ -225,7 +225,7 @@
           "title": "Traceability of figures and claims",
           "weight": 0.05,
           "score": 3,
-          "notes": "Report prose identifies result paths, but raw manifest was excluded from curated submission."
+          "notes": "Original case manifest links delivered figures to case data; report.tex:195\u2013196,452\u2013455 states Re200 failure at first step whereas actual status and run manifest give t=68.9. Curated submission omits raw data."
         }
       ],
       "overall_score": 2.95,
@@ -234,7 +234,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 72,
+    "total_scored": 71,
     "sections": [
       {
         "id": "build_cli",
@@ -248,21 +248,21 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 9,
-        "notes": "CGNS, boundary tags, geometry and adjacency are source-evident."
+        "notes": "mesh.cpp:86\u2013110 CGNS zones/base and :690\u2013773 METIS partition/local mesh; 2-D only, no independent geometry oracle."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 13,
-        "notes": "Conservative face residual, Rusanov/Roe, farfield/slip/no-slip paths present; no independent solver rerun."
+        "notes": "numerics.cpp:478\u2013610 conservative interior/boundary assembly with Rusanov/Roe, wall pressure and viscous ghost gradients; physical validation is limited."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 8,
-        "notes": "Least-squares, Barth-Jespersen and positivity fallback implemented; M2 documented first-order fallback."
+        "notes": "numerics.cpp:290\u2013430 LSQ and Barth\u2013Jespersen with positivity fallback; report.tex:273\u2013282 explicitly discloses first-order M2, no order-convergence study."
       },
       {
         "id": "viscous",
@@ -283,7 +283,7 @@
         "title": "MPI",
         "max_points": 10,
         "score": 6,
-        "notes": "METIS, ghost/neighbor exchange and reductions are source-evident; all reported runs are np=1 and no np=8 NACA/cylinder comparison is submitted."
+        "notes": "mesh.cpp:718\u2013773 METIS and cleared global mesh; numerics.cpp:432\u2013478 neighbor exchanges; driver.cpp:110\u2013112 reductions. No np1/np8 result comparison."
       },
       {
         "id": "case_results",
@@ -296,15 +296,15 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4,
-        "notes": "11-page committed report compiles and honestly analyzes failure, but committed figures cover only a subset of cases and no committed manifest."
+        "score": 3,
+        "notes": "11-page PDF and separately delivered case figures; several force plots compress late evolution, report misstates Re200 failure time, and raw artifacts not curated."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
         "score": 4,
-        "notes": "Modular config/mesh/numerics structure supports extension; strictly 2-D implementation."
+        "notes": "Separate configuration, mesh, numerics and driver support modification; Vec4/state and mesh remain strictly 2-D."
       }
     ]
   },
@@ -348,32 +348,32 @@
       {
         "flag": "Existing solver executable called internally",
         "triggered": false,
-        "notes": "No such call found in curated source."
+        "notes": "No source-evident internal solver executable call; external authorship/similarity not searched under trust policy."
       },
       {
         "flag": "Force/residual files generated without solving",
         "triggered": false,
-        "notes": "Output writers are invoked from solve driver; no contrary direct evidence."
+        "notes": "Case histories, source output writers and run manifests reviewed; no direct evidence of fabricated histories. Failure/force-quality defects documented separately."
       },
       {
         "flag": "Hard-coded two-mesh-only reader",
         "triggered": false,
-        "notes": "Generic case/CGNS parsing is source-evident."
+        "notes": "mesh.cpp:86\u2013110 reads configured CGNS base/zones; no filename-only dispatch found; 2-D and one base restrictions noted."
       },
       {
         "flag": "Order-one steady MPI mismatch",
         "triggered": false,
-        "notes": "No rank comparison submitted; not established."
+        "notes": "No required rank-count comparison submitted, so order-one mismatch is not established from available results."
       },
       {
         "flag": "Explicit only",
         "triggered": false,
-        "notes": "LU-SGS and BDF2 dual-time code are present."
+        "notes": "numerics.cpp:806 and driver.cpp:470\u2013528 implement implicit LU-SGS; driver.cpp:138\u2013164,803\u2013861 BDF2 dual-time. Re200 failure does not prove explicit-only."
       },
       {
         "flag": "Unsupported report algorithm claim",
         "triggered": false,
-        "notes": "Claimed core methods found in source."
+        "notes": "Source contains claimed reconstruction, flux and implicit paths; full-traction viscous split is an implementation defect under rubric 5.4, not proof the claimed algorithm is absent."
       },
       {
         "flag": "Failed result marked successful",
@@ -386,32 +386,32 @@
       {
         "flag": "Figure/result mismatch",
         "triggered": false,
-        "notes": "Not established; report figures are not all re-derived."
+        "notes": "Selected delivered figures mapped through figure_manifest.csv and reviewed against case data; no established switched-case figure. Not exhaustive pixel-level verification."
       },
       {
         "flag": "METIS claim without METIS",
         "triggered": false,
-        "notes": "METIS_PartGraphKway is present."
+        "notes": "mesh.cpp:718\u2013731 calls METIS_PartGraphKway; rank 0 global mesh is cleared before solver iterations (:771\u2013773)."
       },
       {
         "flag": "Claimed limiter disabled",
         "triggered": false,
-        "notes": "Limiter defaults enabled; environment can disable only explicitly."
+        "notes": "numerics.cpp:372\u2013430 enables limiter by default; report.tex:273\u2013282 explicitly discloses first-order M2 production exceptions."
       },
       {
         "flag": "Misrepresented no-slip surface velocity",
         "triggered": false,
-        "notes": "Source labels boundary-value wall semantics."
+        "notes": "numerics.cpp:697\u2013713 reports zero velocity at no-slip wall; full-traction force split remains separately documented."
       },
       {
         "flag": "Misnamed Mach/pressure figure",
         "triggered": false,
-        "notes": "Not independently pixel-audited; no affirmative evidence."
+        "notes": "Sampled original named contours and captions without establishing mislabeled field; no exhaustive pixel-level audit."
       },
       {
         "flag": "Copied/open-source core",
         "triggered": false,
-        "notes": "Trust policy: no external similarity search; no internal wrapper evidence."
+        "notes": "No source-evident wrapper identified. Trust policy excludes external similarity search; this is not proof of originality."
       }
     ]
   },

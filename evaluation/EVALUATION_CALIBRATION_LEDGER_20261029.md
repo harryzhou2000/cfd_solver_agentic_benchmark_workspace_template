@@ -81,7 +81,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_04_755869` | fully reviewed: 47/100, DQ7; sibling-result reuse; both gates pass |
 | `codex_dsv4_flash_06_5b6b08` | partial: 65/100 source assessment, no DQ established; original case packages/figures absent |
 | `codex_dsv4_flash_07_aeae21` | fully reviewed: 68/100, DQ7 and TASK full mesh; three reference cases |
-| `codex_dsv4_flash_08_efba3c` | partial: Re200 and output accounting checked; remaining cases/rubric/DQ pending |
+| `codex_dsv4_flash_08_efba3c` | fully reviewed; 76→71, DQ7 and case evidence corrected |
 | `codex_dsv4_flash_09_526316` | unreviewed |
 | `codex_dsv4_flash_10_6468ba` | unreviewed |
 | `codex_dsv4_flash_11_6e6ac8` | unreviewed |
@@ -434,3 +434,8 @@ dsv4_flash_08 source checkpoint: immutable e5d4a7a clean CMake build passed in n
 
 
 dsv4_flash_08 provisional rubric checkpoint: 76→72/100, viscous 8→7 for full-traction split, implicit 10→9 for ignored restart and transient accounting, results 7→5 for M2 false convergence and Re200 failure. Build/CLI, selected review points and report narrative updated with clean-build and exact source evidence; remaining criteria and full DQ audit remain partial. Both gates pass; no solver rerun.
+
+
+## dsv4_flash_08 full calibration — 2026-10-30
+
+Rubric 76→71/100, DQ false→true under 7, case scores 2,4,2,4,4,2,4,0 → 3,3,3,2,2,1,3,0. Ten sections and 27 review points contain criterion-specific evidence. M2 laminar status says converged at step 33, Cd falls 0.2587903→0.2136694 over steps 30–33 despite residual reduction 3.005 orders; TASK.md:140 supplied max_steps budget/early convergence and :172 stable-force standard apply. Re200 honestly fails at t=68.9; report incorrectly says first step and metadata inner counts disagree with raw residuals; NaN target comparisons do not establish exact misses. Source ignores restart argument, integrates full traction for viscous split, clears global mesh before iterations, and discloses M2 first order. Accepted PDF plus traced contestant standalone figures support case credit; hashes/provenance above. Clean immutable CMake build passes with explicit container paths, both gates pass; no CFD rerun, exhaustive external authorship/pixel audit or rank comparison.
