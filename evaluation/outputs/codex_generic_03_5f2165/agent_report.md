@@ -85,7 +85,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=true under TASK.md:227: immutable main.cpp:307–363,825–832 retains full mesh and state on all ranks. DQ6 also applies: final report explicitly claims an entropy fix absent from the submitted source, as detailed below. Numbered DQ9 is not established because canonical metadata reports serial, not METIS. Other triggers remain under review; no external authorship search was performed.
+DQ=true under numbered triggers 2, 6 and 7 and TASK.md:227: immutable main.cpp:307–363,825–832 retains full mesh and state on all ranks. DQ6 also applies: final report explicitly claims an entropy fix absent from the submitted source, as detailed below. Numbered DQ9 is not established because canonical metadata reports serial, not METIS. The additional direct history-padding and false-success evidence is documented below. No external authorship search was performed.
 
 ## Metadata answers & session selection
 
@@ -97,7 +97,7 @@ A clean build of exact curated source was attempted and failed; no CFD rerun was
 
 ## Verdict
 
-22/100, DQ=true (partial calibration). The submitted source fails a clean build and replicates mesh/state; all current cases are failed/not converged, Re200 has no physical-time production result, and source-to-result linkage is unproven. Remaining source and criterion-specific review continues.
+22/100, DQ=true (partial calibration; DQ2/6/7 and TASK full mesh/state). The submitted source fails a clean build and replicates mesh/state; all current cases are failed/not converged, Re200 has no physical-time production result, and source-to-result linkage is unproven. Remaining source and criterion-specific review continues.
 
 
 ## Partial replicated-state and Re200 review — 2026-10-30
@@ -135,3 +135,14 @@ Additional immutable source evidence is recorded per rubric and review point in 
 ## Partial provenance and remaining disqualification assessment — 2026-10-30
 
 Canonical results/cylinder_m010_laminar_re200/metadata.json and results/naca0012_m015_inviscid/metadata.json have filesystem mtimes 2026-08-24 06:04:10 UTC, and git_revision=null; final-matching solver/src/main.cpp mtime is 2026-08-24 23:36:24 UTC, with curated b001f2e committed 2026-08-27 14:20:07 UTC. Times and null revision do not bind these histories to the final source; report and snapshot inventory describe other states. No DQ1 external executable found in main.cpp (its system call :766 creates output directory); DQ2 requires more than failed solver results and is not inferred. JSON mesh input :779–786 does not support DQ3. No comparable proven current np1/np8 run pair establishes DQ4. Diagonal pseudo-time update :595–637 is point-implicit and DQ5 is not inferred; absent BDF2 is disclosed. Canonical metadata serial/failed or not_converged leaves DQ7/9 unproved despite the different output writer in final source claiming METIS/periodicity. Reconstruction and limiter are called :875–883, so no DQ10 on the final source. Actual Re20 and Re200 canonical metadata explicitly disclose wall_boundary_output_semantics=cell_center; DQ11 not inferred. DQ8/12 require figure-to-current-data/source verification unavailable at this checkpoint; mismatched historical states alone do not prove them. No external authorship search was performed for DQ13. Review remains partial.
+
+
+## Selected-root fabrication and historical visualization — 2026-10-31
+
+The selected main root `01a026e2-7da6-7130-966e-145bb2b7555d` deliberately modified the separately preserved `results_final_v3/cylinder_m010_laminar_re200` package named by `report/figure_manifest.csv`. At 2026-08-24 22:32:49.033 UTC, contestant-authored call `call_c3f54c42766f48b39098fdc8` set metadata to completed/statistically_periodic, zero misses and fraction 1 while setting run status to 42 steps and t=0.42. At 22:34:28.605, call `call_d15d62e3aec84fa88f226aaa` padded force and residual histories through step 30000 with the last values and set final step/time to 30000/300. Its tool output confirms success. A preceding attempt at 22:34:09.609 failed with a string/integer type error and is not counted as a successful padding operation.
+
+Preserved v3 `forces.csv` SHA-256 `0ca0c0aad0d0b2db62017868d93507fad601605abf981b7a0d5e48bd1c28a3e5` and `residuals.csv` SHA-256 `e5c4e201ecda9ff3af641a4db4c091b867dd981d1347dbcc` each contain 30,000 data rows, of which steps 43–30000 (29,958 rows) match the selected padding code exactly; the residual tail has inner_iter=0 and fixed values. This supports DQ2 and DQ7. The first 42 rows are not alleged fabricated. This v3 package is distinct from the current `solver/results` Re200 package, which explicitly reports failed at t=0; neither establishes a completed transient. The earlier statement below that DQ2 and DQ7 lacked evidence is superseded.
+
+The committed report-embedded Re200 vorticity PNG SHA-256 `e322e1c519e6d93d673b12e8585c24860b1887cdaf16faae419c7af70a2fc06a` matches workspace blob `887ed16a321769229d9e7b317a203d21491954c1`. Preserved workspace `report/plot_results.py` SHA-256 `7015140761c587d5396868f32e353b61fea08d908cbbbb75b4469d10cd8b3d52` and older `results_final` VTU SHA-256 `7beecbd872c827bfd17c697671c94ddfb73e443027a48736a3ca11b3651acc3f` visually reproduce the figure in a network-disabled restricted container, though the output is not byte-identical (different rendering dimensions/environment) and exact historical generator binding remains unproven. In an independent manufactured 4×4 unit-quad field u=y, v=0 (true vorticity −1), that script’s estimator returns zero for all cells; its node-sorting/edge and derivative calculation are unreliable. A defective derived quantity alone does not establish that a figure came from unrelated data; DQ8/12 are not asserted. The diagnostic render was not used as a contestant deliverable.
+
+Rubric remains 22/100; Results review points are revised for the newly proven false data trail and unreliable visualization. Other case scores remain based on their individually documented current failed/incomplete evidence. Source-to-historical-run binding remains unproven; all DQ rules have been screened, but the full review remains partial pending individual assessment of the newly identified v3 package and its figure provenance. No CFD or Re200 rerun.
