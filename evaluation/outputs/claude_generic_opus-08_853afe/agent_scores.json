@@ -358,6 +358,61 @@
         "flag": "Prohibited shortcut 7: full mesh retained on all MPI ranks during solver iterations",
         "found": true,
         "evidence": "Immutable 7bf03bc solver/src/main.cpp:120\u2013145 reads mesh on rank 0; :174\u2013260 broadcasts/rebuilds global nodes, cells, faces and adjacency on all ranks; :268 builds local mesh and :280 runs while global_mesh remains in scope. TASK.md:227 forbids full mesh OR full state replication on every rank during iterations; examiner README:83\u201385 references TASK prohibited shortcuts for DQ. Report.tex:170\u2013174 and metadata full_mesh_replication_during_iterations=false incorrectly deny this. METIS partition and local U exist; this is not a numbered trigger 9 full-state or geometric-only finding."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No direct existing complete CFD solver invocation found in reviewed CMake/source."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "Residual and force writers are coupled to solver iteration; false success and defective results do not establish synthetic histories."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "CGNS reader uses input mesh path and general TRI/QUAD sections; no two-filename-only branch found."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Rank comparison was not independently validated; no specific order-one rank-only discrepancy established, so this trigger is not affirmed."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "LU-SGS sweeps and implicit physical-time residual exist; implementation is not explicit-only."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Roe, wall treatment, BDF and reconstruction routines exist; zeroed production reconstruction is separately affirmed under trigger 10. No separate wholly absent claimed algorithm is established."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "No specific report figure proven unrelated to its output; p8 actually depicts the flat Re200 history even though its text calls the run periodic. Pixel-level comparison was not exhaustive."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "METIS_PartGraphKway and local/ghost U exist. Full global mesh replication violates TASK shortcut 7, recorded separately; no geometric-only or full-state replication claim is made."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "output.cpp:80\u2013104 writes wall boundary velocity values; original structural wall checks passed. Independent exhaustive wall-state validation not performed."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "Reviewed Mach and pressure figures have matching labels; no specific variable mislabel was established."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No direct copied or wrapped external solver core evidence found; no comprehensive external similarity audit."
       }
     ]
   },
