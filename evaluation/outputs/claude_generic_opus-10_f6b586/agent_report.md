@@ -117,3 +117,8 @@ No clean evaluator build/MPI rerun; Re200 was never rerun.
 Strong complete delivery with the disclosed M2/Re200 accuracy limits retained.
 
 Integrity: `run_identity.json` SHA-256 `b765245146108e6c2f91e808652dd5730eea829135927daf504e6df285ba14d3`; `contestant_final_response.md` SHA-256 `5c5961e7635b3bd813668b015108ac4dd0ff01cd8a4bb02d46eef0846ea5219f`. These unindexed sidecars are not validated by `cfdeval check`.
+
+
+## Partial Re200 correction — 2026-10-30
+
+The prior note incorrectly said no case numeric summary and no late periodic force plot. The accepted contestant sibling PDF and indexed copy share SHA-256 `4900dabfa70aba691f1dfb3575ab4ae5daa08c5a7c19cbacf63a48164ff222ac`; main TeX matches immutable submission `d25cd3cb7c1c75e75812670fd717eca3b61d68ce`, and the PDF creation time is inside the selected session. PDF page 27 reports mean Cd≈1.1233, lift amplitude ±0.2426 and St≈0.1611; high-resolution inspection of page 28 resolves small late Cd oscillations as well as lift, with startup clipped, and pages 29–30 show the wake. Original t≥150 force mean Cd=1.123268 and Cl range −0.240739–0.244489; 24 interpolated upward mean-lift crossings yield 23 periods averaging 6.20753 (frequency≈0.1611). Score 2→3: the contestant-delivered floor is met, but frequency/drag/amplitude underpredict cited references and grid convergence was not independently demonstrated. Source `fvsolver_run.cpp:485–491` and report.tex:151–153 disclose a 4-degree farfield perturbation only at t=2–12; actual strict inner ratios are counted by source :495–511. This does not assume unforced shedding from the outset. Other cases, rubric and DQ remain under review. Missing committed figure assets remain a reproducibility limitation; no Re200 rerun.

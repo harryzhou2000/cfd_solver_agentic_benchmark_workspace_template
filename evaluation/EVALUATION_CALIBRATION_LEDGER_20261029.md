@@ -72,7 +72,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-07_c08c67` | fully reviewed — 61/100, DQ=true; both gates pass |
 | `claude_generic_opus-08_853afe` | fully reviewed — 50.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-09_9cb2fc` | fully reviewed — 65.5/100, DQ=true; both gates pass |
-| `claude_generic_opus-10_f6b586` | unreviewed |
+| `claude_generic_opus-10_f6b586` | partial — Re200 delivered evidence corrected; source/rubric/other cases pending |
 | `claude_generic_opus-11_fe7eba` | unreviewed |
 | `claude_generic_sonnet-01_96c411` | unreviewed |
 | `codex_dsv4_flash_01_0c1996` | unreviewed |
@@ -294,3 +294,8 @@ Opus-09 steady case corrections: accepted PDF p4 contains case force/status tabl
 ## Opus-09 full calibration — 2026-10-30
 
 Rubric 90→65.5/100; DQ true under 10 and TASK full-mesh prohibition. All 27 review points, ten rubric sections and trigger assessments carry specific evidence. Eight case scores 4,2,2,2,2,2,3,2 → 2,2,2,1,2,1,2,2. Accepted PDF force table corrects old missing-numeric notes; missing case plots and unreadable late Re200 drag are distinct floor limitations. Six steady finals execute first order at CFL>2, while M2 laminar/transient use reconstruction; original negative laminar drag and Re20 Cd=2.989 limit physics. Re200 crossing frequency 0.152991 matches report St≈0.153; target misses counted separately from unassigned last ratio. Clean immutable build passes with warnings in network-disabled restricted scratch; original structural validator and both record gates pass. No CFD rerun, exhaustive external authorship or pixel-level audit.
+
+
+## Opus-10 partial Re200 correction — 2026-10-30
+
+Case 2→3: accepted PDF SHA-256 4900dabfa70aba691f1dfb3575ab4ae5daa08c5a7c19cbacf63a48164ff222ac matches sibling/indexed bytes and immutable TeX. PDF p27 reports mean Cd≈1.1233, amplitude ±0.2426 and St≈0.1611; high-resolution p28 shows readable late lift and small drag oscillations with startup clipped, pp29–30 show wake. Old missing-summary/late-plot notes were false. Original t≥150 force mean Cd=1.123268, Cl range −0.240739–0.244489; 24 interpolated upward mean-lift crossings give 23 periods averaging 6.20753 (frequency≈0.1611). Underprediction and lack of independent grid-convergence proof limit score to 3. Report.tex:151–153 and source fvsolver_run.cpp:485–491 disclose a 4-degree farfield perturbation t=2–12; strict inner target ratios are actually counted in :495–511. Missing curated figure assets still affect reproducibility; other scoring/DQ partial, both gates pass, no CFD rerun.
