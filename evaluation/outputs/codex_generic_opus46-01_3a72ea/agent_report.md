@@ -92,11 +92,11 @@ Selected workspace-local root `01a0340e-8e50-7490-b64e-976393b0d123` plus 13 des
 
 ## Limitations
 
-No independent build/rerun was performed and Re200 was not rerun. Raw packages/PDF are excluded from the curated tip. Figure inspection was representative rather than exhaustive.
+An independent clean build succeeded; no CFD rerun was performed and Re200 was not rerun. Raw packages/PDF are excluded from the curated tip. The accepted main PDF was inspected on all 15 pages; selected historical standalone figures were also reviewed.
 
 ## Verdict
 
-54/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
+52/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
 
 
 ## Selected result and report review — 2026-10-30
@@ -131,3 +131,10 @@ Immutable f679644 solver.cpp:89–96 sets every inviscid limiter to zero; :113�
 ## Remaining source criteria — 2026-10-30
 
 The clean f679644 build succeeded using documented external paths. `mesh.cpp:62–72` reads only the first CGNS base and zone, and :126–130 handles separate TRI/QUAD sections but not MIXED; mesh rubric 8→6. Separate physics and mesh modules exist but `types.h:9–10` fixes four-state 2D vectors and ideal-gas/BC branches constrain extensions; extensibility 4→2. Total58→54. The source computes tangential wall shear (`solver.cpp:324–332`); large drag is a physical result limitation, not proof of mislabeled normal traction. Its `cmz` is unconditionally zero (:356), and unknown BC names fall back to farfield (`mesh.cpp:11–21`). Review-point notes now identify their specific evidence. Production binary/source binding, remaining DQ details and some standalone plot provenance remain partial.
+
+
+## Wall-surface output and historical data binding — 2026-10-30
+
+`output.cpp:67–77` obtains a boundary wall state but writes the skin-friction coefficient as constant zero. All selected M015, M080 and M2 laminar NACA and Re20 surface rows confirm cf=0, despite nonzero viscous force components. This is an incorrect reported surface quantity, not proof that the force history was fabricated; build/output rubric7→6 and viscous6→5, total54→52. No DQ2 is inferred.
+
+For M080 inviscid, M2 laminar, Re20 and Re200, each selected current forces.csv, residuals.csv and field_final.vtk is byte-identical to contestant checkpoint 0b4616f. Its run manifest SHA `27622de789e86a11677a49270a4d2d729276798b16d11fa9c02ef83ecdd3ff1e` links final Cd/Cl; its Re20 force and pressure images have SHA `43bf5e63200426606164608003c49e06004ce8d5d511961f989b0b165c672033` and `f01c9b6855e4835bbda568aa3fc87267deefa0ef500137bb3d363f3d038d603f`. These are historical contestant-delivered evidence, not a fresh evaluator plot or an approved workspace-existing PDF. Exact binary/source binding remains unresolved.

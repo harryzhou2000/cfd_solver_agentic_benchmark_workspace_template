@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:17:26.571187+00:00
+Generated: 2026-10-30T06:19:07.213926+00:00
 
-**Overall score: 2.65**
+**Overall score: 2.45**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 3 | Validator reports all eight selected packages structurally complete, but main.cpp ignores restart input and solver.cpp:356 always emits zero moment. Structural conformance does not establish usable restart or truthful metadata. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 2 | Validator reports all eight selected packages structurally complete, but main.cpp ignores restart input and solver.cpp:356 always emits zero moment. Structural conformance does not establish usable restart or truthful metadata. output.cpp:77 hardcodes cf=0, and all selected laminar wall rows confirm it despite nonzero viscous drag. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
 | 2 | **res.validator** Automated validator results | 0.10 | 5 | Existing explicit validator passes all eight; it does not detect flat Re200 periodicity, false max-inner statistics, disabled reconstruction, or full mesh held on all ranks. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T06:17:26.571187+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.65
+- Overall score (0-5): 2.45
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

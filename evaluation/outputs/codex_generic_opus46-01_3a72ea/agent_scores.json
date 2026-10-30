@@ -145,8 +145,8 @@
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 3,
-          "notes": "solver.cpp:173\u2013205 wall viscous treatment and :229\u2013275 direct cell-difference thin-layer gradients; :324\u2013332 explicitly projects wall shear tangentially. High drag remains a result credibility defect, not proof of normal-traction mislabel."
+          "score": 2,
+          "notes": "solver.cpp:173\u2013205 wall viscous treatment and :229\u2013275 direct cell-difference thin-layer gradients; :324\u2013332 explicitly projects wall shear tangentially. High drag remains a result credibility defect, not proof of normal-traction mislabel. output.cpp:77 hardcodes cf=0, and all selected laminar wall rows confirm it despite nonzero viscous drag."
         },
         {
           "id": "cfd.implicit",
@@ -170,7 +170,7 @@
           "notes": "main.cpp:179\u2013229 keeps a full GlobalMesh on every rank during solver.run; this violates TASK prohibited shortcut 7. METIS partition and neighbor communication are present. Production-source binding is unresolved."
         }
       ],
-      "overall_score": 2.91,
+      "overall_score": 2.81,
       "disqualification_flags": []
     },
     "result_review": {
@@ -179,8 +179,8 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 3,
-          "notes": "Validator reports all eight selected packages structurally complete, but main.cpp ignores restart input and solver.cpp:356 always emits zero moment. Structural conformance does not establish usable restart or truthful metadata."
+          "score": 2,
+          "notes": "Validator reports all eight selected packages structurally complete, but main.cpp ignores restart input and solver.cpp:356 always emits zero moment. Structural conformance does not establish usable restart or truthful metadata. output.cpp:77 hardcodes cf=0, and all selected laminar wall rows confirm it despite nonzero viscous drag."
         },
         {
           "id": "res.validator",
@@ -225,20 +225,20 @@
           "notes": "Checkpoint metadata changed max iteration count and convergence statistics while residual history remained byte-identical and always reports five iterations; fixed 2024 timestamps, null revision and historical report/result differences weaken provenance."
         }
       ],
-      "overall_score": 2.65,
+      "overall_score": 2.45,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 54,
+    "total_scored": 52,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 7,
-        "notes": "main.cpp:142\u2013155 parses --restart into restart_file but never uses it before solver.run(): the option silently starts freestream. Selected restart_final.vtk equals field_final.vtk byte-for-byte; the field is real but final source provides no restart reader. Build not independently checked yet. Clean immutable build passed in documented container configuration. solver.cpp:356 always sets moment to zero."
+        "score": 6,
+        "notes": "main.cpp:142\u2013155 parses --restart into restart_file but never uses it before solver.run(): the option silently starts freestream. Selected restart_final.vtk equals field_final.vtk byte-for-byte; the field is real but final source provides no restart reader. Build not independently checked yet. Clean immutable build passed in documented container configuration. solver.cpp:356 always sets moment to zero. output.cpp:77 emits cf=0 for every wall point despite nonzero viscous drag."
       },
       {
         "id": "mesh_geometry",
@@ -265,8 +265,8 @@
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 6,
-        "notes": "solver.cpp:173\u2013205,229\u2013275 uses a wall normal/direct difference thin-layer viscous approximation; :324\u2013332 projects shear onto wall tangent. Re20/Re200 and low-Mach laminar forces are physically suspect, without proving the precise cause."
+        "score": 5,
+        "notes": "solver.cpp:173\u2013205,229\u2013275 uses a wall normal/direct difference thin-layer viscous approximation; :324\u2013332 projects shear onto wall tangent. Re20/Re200 and low-Mach laminar forces are physically suspect, without proving the precise cause. output.cpp:67\u201377 writes cf=0 on all wall rows rather than the nonzero tangential wall shear used in forces; selected laminar surface files confirm zero cf."
       },
       {
         "id": "implicit_transient",

@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:17:26.570880+00:00
+Generated: 2026-10-30T06:19:07.213605+00:00
 
-**Overall score: 2.91**
+**Overall score: 2.81**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T06:17:26.570880+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 1 | f679644 solver.cpp:89–96 initializes every limiter to zero; face paths use these factors. report.tex:147–170 claims active second-order/Barth with fallback only, contradicted by submitted source. 12f77fb has same source SHA; earlier cbe40ee also zeroed multipliers. Exact historic binary remains unbound. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | solver.cpp:173–205 wall viscous treatment and :229–275 direct cell-difference thin-layer gradients; :324–332 explicitly projects wall shear tangentially. High drag remains a result credibility defect, not proof of normal-traction mislabel. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | solver.cpp:173–205 wall viscous treatment and :229–275 direct cell-difference thin-layer gradients; :324–332 explicitly projects wall shear tangentially. High drag remains a result credibility defect, not proof of normal-traction mislabel. output.cpp:77 hardcodes cf=0, and all selected laminar wall rows confirm it despite nonzero viscous drag. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | solver.cpp:414–452 invokes LU-SGS with steady CFL capped at5 and fixed minimum inner iterations, not a measured steady inner convergence test. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T06:17:26.570880+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.91
+- Overall score (0-5): 2.81
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
