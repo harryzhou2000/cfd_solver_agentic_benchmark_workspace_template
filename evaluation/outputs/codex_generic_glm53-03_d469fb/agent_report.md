@@ -4,7 +4,7 @@ Submission `codex/generic/glm53-03` at `17724cd96bf90e2cf9be2568f38a9a418e9fbcae
 
 ## Verdict
 
-**67/100; DQ=true under triggers 7 and 8 (partial calibration).** Current Re200 metadata labels an essentially steady t300 result periodic and Re20 is labeled converged while drag is still changing; the report describes a different Re200 generation.
+**67/100; DQ=true under triggers 7 and 8 (qualified full calibration).** Current Re200 metadata labels an essentially steady t300 result periodic and Re20 is labeled converged while drag is still changing; the report describes a different Re200 generation.
 
 ## Evidence
 
@@ -49,3 +49,8 @@ Exact 17724cd source clean CMake build succeeded in network-disabled cfd-bench w
 All six pages of accepted PDF SHA 3f66e27e77b54f3339954807f2b5f49bfbbd1386fda9fb65c38cccc79aee37a4 were visually inspected; snapshot matches sibling bytes and PDF mtime 2026-09-04 07:13:28 UTC follows matching TeX 07:13:22 UTC, before root end. No missing-asset placeholder found, but the specific M015 Mach image has proven field-value misassignment as above. All rubric and review notes now cite source or result evidence.
 
 No internal existing solver or force/residual generation without solving was found (DQ1/2); case-driven input does not establish DQ3. Historical rank-study force packages were not found, so report rank table alone cannot establish DQ4. Final source implements implicit/BDF2 and claimed reconstruction (DQ5/6); current production source is unbound. DQ7 and DQ8 are independently established as above. main.cpp:62–74 root preprocessing distributes local mesh, so DQ9/TASK all-rank replication not established. NSC2D_FIRST_ORDER can disable reconstruction, but no bound selected run control proves it did so (DQ10). Final source sets no-slip boundary u=v=0 (DQ11 not established); no independent misnamed variable evidence found (DQ12). No external authorship search for DQ13. Because current metadata names an init commit without solver source and report describes different output generations, exact production source and full run-to-report mapping remain unresolved; partial status retained. No CFD or rank rerun.
+
+
+## Qualified full review — 2026-10-31
+
+All ten rubric sections, eight cases, 27 review points and 13 numbered DQ rules were assessed to the available evidence limit. Rubric 67/100 and DQ7/8 remain unchanged: DQ7 is grounded in the current t300 steady Re200 result and unstable late steady forces, while DQ8 is the independently byte-reproduced specific M0.15 Mach figure/data misassignment. No synthetic force/residual history is inferred. Historical rank-study force packages are unavailable, and metadata names an initial commit without solver source, so exact production source and the full report/run mapping remain unresolved and explicitly qualify this review; missing evidence does not establish DQ4/10. Earlier partial sections are historical checkpoints. No CFD, rank or Re200 rerun.

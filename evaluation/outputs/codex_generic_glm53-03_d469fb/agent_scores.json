@@ -353,6 +353,61 @@
         "flag": "Report figures do not correspond to submitted field/CSV outputs",
         "found": true,
         "evidence": "Specific immutable report figure solver/report/figures/naca0012_m015_inviscid_mach.png SHA b79e716eebc239607743825df1499b707f0859e1f3fe7a66eaffe069058e6829 is byte-identical to scratch regeneration using exact submitted plot_results.py SHA e100139d2d7e2627fb318a1991456f53c358a3cd4d2d8c7330f3d0b8547fcbbf and current field_final.vtu SHA 045ecac8e127e4db870a602a7bd66f9fdbb3b017f0e4abda1ba203c85875e5e7. Plot script :33\u201356 splits 10064 quadrilaterals into 30880 triangles but :59\u201370 zips those with only 20816 cell values, misassigning subsequent values and omitting 10064 triangle assignments. Selected session reruns script at 2026-09-04 07:11:59 UTC; source field mtime 07:01:41, figure 07:12:03, manifest 07:12:08 UTC, before root end. This is a demonstrated plotting error, not a finding of fabrication."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No internal existing solver executable invocation found in inspected submitted source; no exhaustive external authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence force or residual histories were generated without solving; the proven plot mapping defect is separate."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Case-driven mesh input does not establish a two-filename-only branch."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Historical rank-study force packages are unavailable, so a controlled order-one discrepancy is not established."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Final source implements implicit/BDF2 paths, so explicit-only treatment is not established."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Major algorithms claimed by report have final-source counterparts; current production source is unbound."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "main.cpp:62\u201374 loads the global mesh only on root before distributing local state; all-rank full mesh/state during solve is not established."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "NSC2D_FIRST_ORDER can disable reconstruction, but no bound selected run control proves it was enabled. Historic production executable unbound."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "Final source writes zero no-slip boundary velocities; no undocumented adjacent-cell-as-wall failure established."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "No specific named-variable swap established; incorrect spatial value mapping is separately DQ8."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source solver core found in inspected source; no exhaustive external authorship search."
       }
     ]
   },
@@ -361,6 +416,7 @@
     "Structural validation is separate from substantive numerical scoring.",
     "Raw solver artifacts remain workspace evidence and were excluded from the curated submission tip.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All ten rubric sections, eight cases, 27 review points and 13 DQ rules reviewed to the evidence limit; exact producing source, historical rank-study packages and full report/run mapping remain unbound. No CFD/Re200 rerun."
   ]
 }

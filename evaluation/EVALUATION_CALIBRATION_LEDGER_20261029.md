@@ -93,7 +93,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_05_2599b1` | fully reviewed, qualified: 31/100, DQ7 and TASK full mesh; historical executable/figure binding limited |
 | `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
 | `codex_generic_glm53-02_ff20c7` | fully reviewed, qualified: 72/100, DQ7 for M2 laminar; historic source binding unresolved |
-| `codex_generic_glm53-03_d469fb` | partial: DQ7 current Re200/Re20 evidence, provenance discrepancy; other criteria pending |
+| `codex_generic_glm53-03_d469fb` | fully reviewed, qualified: 67/100, DQ7/8; production source/rank data unbound |
 | `codex_generic_glm53-04_adde03` | partial: all cases and rubric reviewed, DQ7 supported; historical production-source attribution unresolved |
 | `codex_generic_opus46-01_3a72ea` | partial: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
 | `codex_generic_opus46-02_d8fed8` | partial: 35/100, mandatory placeholder rejection, DQ2 and TASK full mesh; binary/force provenance unresolved |
@@ -645,6 +645,8 @@ glm53-03 DQ8 checkpoint: exact submitted plot_results.py SHA e100139d2d7e2627fb3
 glm53-03 case/build checkpoint: current laminar NACA statuses converge after25/43/49 steps but Cd tails 0.09929→0.06454, 0.04413→0.05171, 0.00450→0.00936; DQ7 independently supported, cases remain1. Current M080 inviscid is 4.009 orders and stable, old note stale; M2 inviscid is 2.645-order disclosed stable plateau, score1→2 (figure floor). Exact 17724cd clean build passes restricted container; source Solver.cpp:439 uses same-buffer MPI_Allreduce without MPI_IN_PLACE; producing source unbound. Rubric build10→9, viscous10→9, implicit13→8, MPI9→7, case6→2, report4→0, total84→67. Other criteria/DQ partial; no CFD rerun.
 
 glm53-03 remaining-criteria/PDF checkpoint: all six accepted PDF pages SHA 3f66e27e77b54f3339954807f2b5f49bfbbd1386fda9fb65c38cccc79aee37a4 inspected; matching sibling/source mtime and no missing-asset placeholders, but DQ8-specific image/data error stands. All rubric/review notes cite source/results; other DQ boundaries documented. Historical rank force packages unavailable and metadata names init commit, so run-source/report mapping unresolved; partial retained. No CFD rerun or external authorship search.
+
+glm53-03 qualified full review: all ten sections, eight cases, 27 review points and 13 DQ rules assessed to the available evidence limit; prior partial wording is historical. 67/100, DQ7/8 unchanged. DQ8 is the specific byte-reproduced M015 Mach plot/value misassignment, not a fabricated solver-history finding. Historical rank force packages remain unavailable and metadata names an init commit without solver source; producing source and complete report/run mapping remain unbound and explicitly qualified. No CFD/rank/Re200 rerun; both gates required.
 
 
 ## glm53-04 partial M2 laminar/Re200 review — 2026-10-30
