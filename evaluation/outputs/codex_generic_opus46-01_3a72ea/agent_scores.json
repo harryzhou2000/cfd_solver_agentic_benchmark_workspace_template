@@ -214,24 +214,24 @@
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Report admits some limitations but status/manifest disagreement remains."
+          "score": 2,
+          "notes": "Main report covers five cases and marks others incomplete; historic checkpoint has extra standalone plots and final-case summary. Re200 metadata success/inner statistics conflict with unchanged force and residual histories."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 3,
-          "notes": "Manifest maps raw files but raw results are excluded from tip."
+          "score": 2,
+          "notes": "Checkpoint metadata changed max iteration count and convergence statistics while residual history remained byte-identical and always reports five iterations; fixed 2024 timestamps, null revision and historical report/result differences weaken provenance."
         }
       ],
-      "overall_score": 3.8,
+      "overall_score": 3.6,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 70,
+    "total_scored": 66,
     "sections": [
       {
         "id": "build_cli",
@@ -272,8 +272,8 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 12,
-        "notes": "LU-SGS and BDF2 source/t=300 evidence, physical limitations."
+        "score": 9,
+        "notes": "BDF-like source exists, but checkpoint metadata changed observed max inner iterations 5\u2192124 and fraction 0\u21920.96 while residual history remains unchanged with inner_iter=5 for every row; exact actual target misses remain unproved. Source solver.cpp fixes last ratio 0; CFL cap5. Deduct inner-log/target credibility."
       },
       {
         "id": "mpi",
@@ -293,8 +293,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 3,
-        "notes": "Report detailed but inconsistent status claims."
+        "score": 2,
+        "notes": "Main f679644 report covers five cases and says others incomplete; historical contestant checkpoint 0b4616f provides other standalone plots and a manifest. Actual Re200 has no periodicity despite success metadata; checkpoint convergence statistics contradict unchanged histories. Rendered report remains readable."
       },
       {
         "id": "extensibility",
@@ -311,8 +311,8 @@
       "notes": "Score 4\u21922: report.tex:320\u2013324 gives Cd0.0617/Cl9.2e\u22125 and delivered PDF pp5\u20137 contains residual/force and Mach/pressure plots. Last 308 force rows Cd0.072724\u21920.061706 (15.2% decrease, range0.059928\u20130.072724), inconsistent with a settled steady force despite reported 4 residual orders; low-Mach drag is also large. Exact production source remains unbound; no CFD rerun."
     },
     "naca0012_m080_inviscid": {
-      "score": 2,
-      "notes": "NACA0012 M0.80 inviscid: report.tex:402\u2013404 gives Cd=0.050 but no numeric Cl summary found; residual history f679644:solver/report/figures/naca0012_m080_inviscid_residuals.png (referenced at solver/report/report.tex:375); force history f679644:solver/report/figures/naca0012_m080_inviscid_forces.png (referenced at solver/report/report.tex:382); computed-field contour f679644:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/report.tex:389). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-valid, near-zero lift and np8 comparison."
+      "score": 3,
+      "notes": "Original 2\u21923: contestant checkpoint 0b4616f solver/report/run_manifest.csv reports final Cd0.0501852 and Cl\u22120.0015396; f679644 report.tex:402\u2013404 gives Cd0.050 and PDF pp9\u201311 delivers residual/force and Mach/pressure plots. Last162 Cd0.048839\u21920.050185 and Cl\u22120.001659\u2192\u22120.001540. Four residual orders and a transonic shock field support limited credit, while remaining drift and source binding limit confidence. The manifest is contestant-delivered historical evidence, not a curated-tip blob. No CFD rerun."
     },
     "naca0012_m200_inviscid": {
       "score": 3,
@@ -324,19 +324,19 @@
     },
     "naca0012_m080_laminar_re5000": {
       "score": 2,
-      "notes": "NACA0012 M0.80 laminar Re5000: report.tex:441\u2013445 gives Cd=0.219 but no numeric Cl summary found; residual history f679644:solver/report/figures/naca0012_m080_laminar_re5000_residuals.png (referenced at solver/report/report.tex:415); force history f679644:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:422); computed-field contour f679644:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/report.tex:429). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-valid, 4 orders status; no independent verification."
+      "notes": "Score 2 retained for physical limitations, not missing summary: checkpoint 0b4616f solver/report/run_manifest.csv gives Cd0.219184/Cl0.000127817; f679644 report.tex:441\u2013445 gives Cd0.219 and PDF pp11\u201313 has residual/force and Mach/pressure plots. Last480 Cd0.214325\u21920.219184 (2.3% increase); unusually high drag limits credibility. Manifest is contestant-delivered historical evidence. No CFD rerun."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Report manifest marks not converged; Cd about 3.15. Current selected last65 Cd rows 3.9742929239\u21923.1464435562 (20.8% decrease), despite metadata converged; report.tex:511\u2013514 and report/run_manifest.csv classify this case not completed/not converged. Exact generation relation is unknown."
+      "score": 1,
+      "notes": "Score 2\u21921: checkpoint 0b4616f solver/report/run_manifest.csv gives Cd3.14644, Cl\u22120.00001979 and marks not converged; contestant historical residual/force/Mach/pressure figures exist in its report/figures directory. Current metadata says converged but last65 Cd3.974293\u21923.146444 (20.8% fall) and drag is very high; result is materially failed despite available plots. Report.tex:511\u2013514 also calls this case incomplete. No CFD rerun."
     },
     "cylinder_m010_laminar_re20": {
       "score": 2,
-      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Validator-valid but Cd about 7.23 is physically implausible."
+      "notes": "Score 2 retained for physics, not missing plots: checkpoint 0b4616f solver/report/run_manifest.csv gives Cd7.225956 and Cl\u22120.0035723; its report/figures contains residual and force plots and a pressure wake figure, visually reviewed. Current last227 Cd7.23824\u21927.22596 (stable but much higher than credible Re20 cylinder drag); PDF report.tex:511\u2013514 says cylinder cases incomplete. Historical run/source binding remains uncertain. No CFD rerun."
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
-      "notes": "Score 2\u21921: selected metadata marks statistically periodic to t=300, but all 10001 rows t>=200 have identical Cd4.8532587021 and Cl\u22120.0023802775736; no credible shedding or St. f679644 report has no Re200 numeric summary, plots or wake contours; report.tex:511\u2013514 says cylinder cases did not complete. Metadata timestamps fixed 2024 and revision null, so exact run/source binding remains unresolved. No CFD rerun."
+      "notes": "Score 2\u21921: checkpoint 0b4616f run_manifest.csv gives final Cd4.8532587021 and Cl\u22120.0023802775736, and its delivered residual/force and velocity-wake figures exist despite omission from curated report. The force figure and all 10001 current t>=200 rows show constant Cd/Cl, not shedding; no St or late periodic force summary was found. Metadata claims periodic. Re200 numerical/late plot floor is not met. No CFD rerun."
     }
   },
   "disqualification": {
@@ -346,7 +346,7 @@
         "id": 7,
         "flag": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
-        "evidence": "Selected solver/results/cylinder_m010_laminar_re200/metadata.json says completed=true, statistically_periodic, t=300 but the entire submitted t=200\u2013300 force window has exactly constant Cd=4.8532587021 and Cl=\u22120.0023802775736; no late shedding is shown. M2 laminar metadata says converged, but last 65 Cd rows decrease 3.9742929239\u21923.1464435562 (20.8%); report.tex:511\u2013514 and run_manifest.csv mark this case incomplete/not converged. Generation relation between report and workspace results is not established. No CFD rerun."
+        "evidence": "Selected solver/results/cylinder_m010_laminar_re200/metadata.json says completed=true, statistically_periodic, t=300 but the entire submitted t=200\u2013300 force window has exactly constant Cd=4.8532587021 and Cl=\u22120.0023802775736; no late shedding is shown. M2 laminar metadata says converged, but last 65 Cd rows decrease 3.9742929239\u21923.1464435562 (20.8%); report.tex:511\u2013514 and run_manifest.csv mark this case incomplete/not converged. Generation relation between report and workspace results is not established. No CFD rerun. The unchanged residual history SHA 5c4a2e29fb4d61787bc436ed3bb994de7a2683dde84bb3ffcc693585c23faa95 has inner_iter=5 in all 30000 rows. Between 12f77fb and 0b4616f, metadata changed observed max 5\u2192124, misses 30000\u21921200, fraction 0\u21920.96 and final ratio 0.46\u21920.00099 without changing that history. This proves metadata/history incompatibility, not the exact actual miss count."
       },
       {
         "flag": "Full mesh or full state replicated on all MPI ranks during iterations",

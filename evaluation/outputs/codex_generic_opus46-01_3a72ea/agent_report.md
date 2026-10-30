@@ -96,16 +96,23 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 
 ## Verdict
 
-70/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
+66/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
 
 
 ## Selected result and report review — 2026-10-30
 
 All 15 pages of accepted report rebuilt from f679644 visually checked; report contains five NACA cases and concludes the cylinder cases and M2 laminar were incomplete. Its generation relationship to current selected results is unresolved. Current Re200 metadata says statistically periodic, yet every row in t=200–300 has exactly Cd4.8532587021 and Cl−0.0023802775736, with no observable shedding; current M2 laminar metadata says converged but last65 Cd falls 3.974293→3.146444 (20.8%). The delivered report and run manifest also classify M2 laminar incomplete/not converged. DQ7 applies and Re200 case2→1. No actual strict inner-failure count can be inferred from the flat force alone.
 
-M015 inviscid 4→2: Cd0.0617 is high for low-Mach inviscid flow and last308 Cd falls 15.2%; M015 laminar 4→2 because Cd0.583 is unusually large for this flow, despite figures and numeric summaries. M080 inviscid/laminar report supplies Cd0.050/0.219 respectively; previous notes saying no numeric summary are corrected to state Cl summary was not found. Other cases, rubric, provenance and DQ checks remain partial. Source writer f679644:solver/src/output.cpp:247–248 fixes timestamp values to 2024, so these are not run-time provenance. No CFD rerun.
+M015 inviscid 4→2: Cd0.0617 is high for low-Mach inviscid flow and last308 Cd falls 15.2%; M015 laminar 4→2 because Cd0.583 is unusually large for this flow, despite figures and numeric summaries. M080 inviscid/laminar report supplies Cd0.050/0.219 respectively; their Cl summaries were subsequently located in the contestant historical manifest as described below. Other cases, rubric, provenance and DQ checks remain partial. Source writer f679644:solver/src/output.cpp:247–248 fixes timestamp values to 2024, so these are not run-time provenance. No CFD rerun.
 
 
 ## Distributed mesh source review — 2026-10-30
 
 Immutable f679644 `solver/src/main.cpp:179–181` reads a complete `GlobalMesh` on each rank, then `:192–199` constructs partitions and local meshes, and `:211–229` calls the solver while the full mesh remains alive in the same scope. This violates TASK prohibited shortcut 7 for full-mesh replication during iteration, independently of the actual METIS partition and local halo exchanges. It is not charged as numbered DQ9, whose full-state/geometric-split wording is narrower. MPI rubric 8→6 and code/CFD MPI review points 4→2; total 72→70. Selected result metadata lacks a usable revision; no claim is made that this exact source produced every historical package.
+
+
+## Historical deliverables and inner-statistics contradiction — 2026-10-30
+
+Contestant checkpoint 0b4616f includes `solver/report/run_manifest.csv` with final Cd/Cl for all cases and standalone residual, force and field figures omitted under historical curation. These are contestant-delivered historical evidence. M080 inviscid has Cd0.050185/Cl−0.001540 and plots: 2→3 with convergence and physics limitations. M080 laminar remains 2 because Cd0.219 is high; Re20 remains 2 because Cd7.226 is implausibly high despite its now-verified residual, force and pressure wake plots. M2 laminar 2→1 because Cd3.146 and a 20.8% late fall indicate a materially failed case, despite historical plots and summary. Re200 historical force figure shows flat late curves, and wake/residual images exist; absence claims in earlier notes are superseded. No St or periodic late lift/drag evidence found.
+
+Checkpoint 0b4616f changes Re200 metadata relative to 12f77fb: observed maximum inner iterations 5→124, target misses 30000→1200, fraction 0→0.96 and last ratio 0.46→0.00099. Residual history SHA `5c4a2e29fb4d61787bc436ed3bb994de7a2683dde84bb3ffcc693585c23faa95` and force history SHA `276713d9fde49c2272c21d3ae8051062d16888d3c590db82631a87e71e17d6e8` are unchanged; every residual row reports 5 inner iterations. Thus the revised max124 contradicts the history, and success statistics have no independent support. The earlier 30000 miss count is an earlier metadata claim, not a proven actual miss count. Implicit/transient rubric12→9 and report/visualization3→2, total70→66; DQ7 remains.
