@@ -2,7 +2,7 @@
 
 ## Verdict
 
-The immutable curated submission is `0065953716e70f087f5d6d4fb512bc7e2fe2ba97`. Its provisional rubric score is 57/100 and it is disqualified for trigger 7 and the separate TASK full-mesh prohibition. The prior trigger 10 is unasserted: report.tex:195–196 explicitly discloses first-order production, although second-order rubric deductions remain. Case/PDF and historical binary review is ongoing.
+The immutable curated submission is `0065953716e70f087f5d6d4fb512bc7e2fe2ba97`. Its provisional rubric score is 56.5/100 and it is disqualified for trigger 7 and the separate TASK full-mesh prohibition. The prior trigger 10 is unasserted: report.tex:195–196 explicitly discloses first-order production, although second-order rubric deductions remain. Case/PDF and historical binary review is ongoing.
 
 ## Provenance and session selection
 
@@ -19,7 +19,7 @@ The sole workspace-local Codex root is `019fe861-1832-71b0-b1ae-2f9d13afd309` (B
 
 ## Scores and case findings
 
-The provisional 57/100 rubric includes first-order limitations and full-mesh replication; the eight earlier case scores of 1/5 remain provisional until workspace-history and figure review is complete. Re20's last 400 workspace rows are visibly unsettled; Re200 metadata reports a last inner ratio 0.7 against target0.001.
+The provisional 56.5/100 rubric includes first-order limitations and full-mesh replication. All eight workspace force histories and attempt force/residual/field figures were inspected; case notes record hashes, missing-row coverage and numerical limitations. The seven steady force plots collapse to a vertical line because physical time is zero, and Re200 lacks a readable late lift-and-drag plot or numeric St. Re20 is strongly unsettled and Re200 reports final inner ratio0.7 against target0.001.
 
 ## DQ assessment
 
@@ -27,6 +27,6 @@ Trigger 7 is supported by unsettled Re20 force history labeled converged and the
 
 ## Limitations
 
-Raw case files survive only in the original workspace and are not tracked in the attempt commit; manifest/session linkage supports delivery, but executable identity and full figure-to-data correspondence remain unverified. The accepted compiled-from-submission main PDF remains indexed; the separate workspace and historical PDFs require provenance review. No Re200 rerun.
+Raw case files survive only in the original workspace and are not tracked in the attempt commit; manifest/session linkage supports delivery, but executable identity and full figure-to-data correspondence remain unverified. All six accepted compiled-from-submission PDF pages were visually checked. The separate contestant historical PDF SHA256 f85bd651f508b4b6d976651a38c15c7284c3f9b23b760f3a6438ef285526654e is preserved in attempt commit be266cd; the PDF differs in bytes from the current build and date is generated with today. No Re200 rerun.
 
 `run_identity.json` and `contestant_final_response.md` are unindexed sidecars. `cfdeval check` does not validate these unindexed sidecars; their hashes above are recorded separately for provenance.
