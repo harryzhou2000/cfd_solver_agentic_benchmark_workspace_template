@@ -38,9 +38,9 @@ Material direct limitations remain. `runSteady()` marks a max-step run `converge
 
 | Area | Overall | Basis |
 |---|---:|---|
-| Code | provisional | Modular implementation, full mesh replication and status defects. |
-| CFD methods | provisional | Source and historical outcomes require further review. |
-| Results | provisional | Recovered case evidence requires individual review. |
+| Code | 2.94/5 | Modular implementation, full mesh replication and status defects. |
+| CFD methods | 3.13/5 | Source and historical outcomes were independently assessed. |
+| Results | 2.08/5 | Recovered case evidence was individually assessed. |
 
 All 27 individual review points and their evidence notes are in `agent_scores.json` and the three review scorecards.
 
@@ -50,7 +50,7 @@ All eight recovered checkpoint cases are scored independently, with immutable fo
 
 ## Disqualification assessment
 
-DQ is established for trigger 6 (reported absolute residual acceptance absent from the source revision), trigger 7 (checkpoint metadata zero misses conflicts with stdout 11356 misses and the periodic claim conflicts with disclosed no street), and the separate TASK prohibition on full-mesh replication during solver iterations. Exact historic binary identity and other trigger boundaries remain under review.
+DQ is established for trigger 6 (reported absolute residual acceptance absent from the source revision), trigger 7 (checkpoint metadata zero misses conflicts with stdout 11356 misses and the periodic claim conflicts with disclosed no street), and the separate TASK prohibition on full-mesh replication during solver iterations. Exact historic binary identity remains unbound; all other trigger boundaries were assessed with the recorded qualifications.
 
 ## Session selection and limitations
 
