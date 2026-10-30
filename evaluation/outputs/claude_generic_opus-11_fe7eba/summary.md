@@ -87,6 +87,6 @@
 
 ## Reviews
 
-- Code review scorecard: `claude_generic_opus-11_fe7eba/review_code.md` (overall: 4.0)
-- CFD methods review: `claude_generic_opus-11_fe7eba/review_cfd.md` (overall: 4.0)
-- Result review: `claude_generic_opus-11_fe7eba/review_results.md` (overall: 4.0)
+- Code review scorecard: `claude_generic_opus-11_fe7eba/review_code.md` (overall: 3.72)
+- CFD methods review: `claude_generic_opus-11_fe7eba/review_cfd.md` (overall: 3.95)
+- Result review: `claude_generic_opus-11_fe7eba/review_results.md` (overall: 3.33)

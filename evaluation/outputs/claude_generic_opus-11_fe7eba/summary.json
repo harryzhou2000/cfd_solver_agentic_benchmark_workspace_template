@@ -279,63 +279,63 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Immutable 9965be84 clean CMake build succeeds in restricted cfd-bench container with image dependencies; curated report cannot be rebuilt without excluded figures."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "score": 3,
+        "notes": "main.cpp:58\u2013100 parses case/output/flux/limiter and errors on unknown options; :125\u2013128 accepts restart but explicitly cold-starts."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Config, GlobalMesh, Partition, Solver, TimeLoop and Output isolate major responsibilities; interfaces remain specific to 2-D perfect gas."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Inspected Physics.hpp, Solver.cpp, TimeLoop.cpp and Halo.hpp implement the numerical core directly; no affirmative copied-core evidence in this review, without exhaustive authorship search."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Config.cpp:60\u2013135 reads the supplied case and run type; GlobalMesh.cpp reads the requested CGNS path. Documented Re20 flux override is a CLI choice, not a filename branch."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Partition.cpp:10\u201338 calls METIS, Halo.hpp:19\u201347 exchanges neighbor data; gradients and limiters are exchanged in Solver.cpp:111\u2013112,151. GlobalMesh scope ends before solve."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "score": 3,
+        "notes": "GlobalMesh.cpp:227\u2013232 warns on unmatched boundaries and Partition.cpp:153 treats them as farfield; TimeLoop.cpp:89\u2013104 rejects nonpositive updates. Unknown meshes are not exhaustively tested."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "score": 3,
+        "notes": "Submitted validator passes eight cases and report; results_tables.tex provides rank comparisons. No independent grid-convergence demonstration or new CFD rerun."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Source is split by responsibility with readable comments; CMakeLists.txt sets Release -march=native and source glob, limiting portability and reproducibility."
       }
     ],
     "disqualification_flags": [
@@ -380,7 +380,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.72
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -391,77 +391,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Physics.hpp defines perfect-gas conservative/primitive conversion and inviscid flux; Config.cpp reads freestream and Reynolds parameters."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "GlobalMesh.cpp:56\u2013155 imports unstructured CGNS tri/quad and MIXED sections; :193\u2013234 welds zones and builds adjacency. Boundary matching uses section names and unmatched faces only warn."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Solver.cpp:266\u2013292 adds interior face flux to owner and opposite sign to local neighbor, with partition boundary handled through halo; no separate conservation test executed."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Physics.hpp:70\u2013124 supplies Roe and Harten\u2013Yee eigenvalue treatment; Solver.cpp:280\u2013288 selects Roe or Rusanov."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Solver.cpp:165\u2013227 uses characteristic farfield, pressure slip and no-slip adiabatic wall flux; wall output explicitly reports zero boundary velocity in Forces.cpp:69\u201374."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Solver.cpp:90\u2013112 computes least-squares primitive gradients and exchanges them; :154\u2013162 reconstructs at faces with positivity fallback. No formal order study supplied."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Solver.cpp:115\u2013151 computes and exchanges Venkatakrishnan factors; TimeLoop.cpp:219\u2013225 freezes them in steady cases, transient recomputes each inner iteration."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "score": 3.5,
+        "notes": "Solver.cpp:230\u2013263 computes primitive-gradient Newtonian stress and Fourier heat with corrected face gradients; Forces.cpp:50\u201355 integrates full traction, not the tangential-only split claimed by report.tex:138\u2013141."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "TimeLoop.cpp:20\u201387 uses spectral-radius LU-SGS and neighbor increments; :166\u2013179 uses ramped local CFL. Steady rollback can accept a plateau, with M2 reported."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "TimeLoop.cpp:304\u2013379 freezes two histories, bootstraps BDF1 then BDF2 and measures actual target misses; original metadata gives 5\u2013153 iterations and zero misses."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "METIS graph partition, owned/ghost exchange and reductions are implemented; original NACA np1/8 Cd 0.000782/0.000929 and cylinder np2/8 Cd 0.878030/0.877966 demonstrate selected comparisons."
       }
     ],
     "disqualification_flags": [
@@ -496,7 +496,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.95
   },
   "result_review": {
     "review_area": "result_review",
@@ -506,50 +506,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "score": 3.5,
+        "notes": "Original eight final packages and report pass validator; Output.cpp:283\u2013297 writes state restart, but main.cpp:125\u2013128 does not read it."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "notes": "Existing explicit validator reports eight cases and report pass; this is structural evidence rather than proof of numerical accuracy."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "score": 3.5,
+        "notes": "Original runs reach reported endpoints and transient target statistics are counted; M2 inviscid plateaus at 2.10 orders, M2 laminar Cd remains evolving in final 10%."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "score": 3,
+        "notes": "Re200 St=0.190 matches 0.189919 from original history, but Re20 Cd=0.878 versus reference\u22482 and late laminar force variation constrain accuracy; rank checks are limited examples."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "score": 3,
+        "notes": "Contestant expressly delivered 42 case figures; three inviscid plots meet floor. Four steady viscous and Re200 full force graphs flatten late signals under startup spikes."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "score": 3,
+        "notes": "Report discloses low-Mach error and M2 plateau; results_tables.tex labels the transient final-force row as a mean, and report.tex:138\u2013141 mislabels full viscous traction as tangential."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+        "score": 3.5,
+        "notes": "Workspace figure_manifest.csv maps contestant plots to original case data; checked plots precede selected final response. Figure assets/manifest excluded from immutable tip limit report rebuilding."
       }
     ],
     "disqualification_flags": [
@@ -579,7 +579,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.33
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-11",

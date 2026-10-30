@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+      "notes": "Immutable 9965be84 clean CMake build succeeds in restricted cfd-bench container with image dependencies; curated report cannot be rebuilt without excluded figures."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+      "score": 3,
+      "notes": "main.cpp:58\u2013100 parses case/output/flux/limiter and errors on unknown options; :125\u2013128 accepts restart but explicitly cold-starts."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+      "notes": "Config, GlobalMesh, Partition, Solver, TimeLoop and Output isolate major responsibilities; interfaces remain specific to 2-D perfect gas."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+      "notes": "Inspected Physics.hpp, Solver.cpp, TimeLoop.cpp and Halo.hpp implement the numerical core directly; no affirmative copied-core evidence in this review, without exhaustive authorship search."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+      "notes": "Config.cpp:60\u2013135 reads the supplied case and run type; GlobalMesh.cpp reads the requested CGNS path. Documented Re20 flux override is a CLI choice, not a filename branch."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+      "notes": "Partition.cpp:10\u201338 calls METIS, Halo.hpp:19\u201347 exchanges neighbor data; gradients and limiters are exchanged in Solver.cpp:111\u2013112,151. GlobalMesh scope ends before solve."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+      "score": 3,
+      "notes": "GlobalMesh.cpp:227\u2013232 warns on unmatched boundaries and Partition.cpp:153 treats them as farfield; TimeLoop.cpp:89\u2013104 rejects nonpositive updates. Unknown meshes are not exhaustively tested."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+      "score": 3,
+      "notes": "Submitted validator passes eight cases and report; results_tables.tex provides rank comparisons. No independent grid-convergence demonstration or new CFD rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; submitted report/manifest provides credible steady and Re200 evidence."
+      "notes": "Source is split by responsibility with readable comments; CMakeLists.txt sets Release -march=native and source glob, limiting portability and reproducibility."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.0
+  "overall_score": 3.72
 }
