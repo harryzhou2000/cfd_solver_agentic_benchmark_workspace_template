@@ -7,14 +7,14 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 3,
-      "notes": "CMake and README are submitted; session records a clean build, but evaluator build was not possible with the dangling external symlink."
+      "notes": "Fresh immutable 0065953 archive: default CMake configure failed because FindHDF5 treated NO_MODULE_PATH as a component; configuration and build succeeded with HDF5_DIR=/opt/external/cfd_externals/install/cmake and CMAKE_FIND_PACKAGE_PREFER_CONFIG=ON in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 processes). CTest registered no tests."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "main.cpp implements solve --case/--output and errors; not independently executed."
+      "score": 2.5,
+      "notes": "main.cpp:45\u201347 parses case/output/report level. Help :37 advertises --restart but no code parses or applies it; this is an unsupported required operation."
     },
     {
       "id": "code.organization",
@@ -55,8 +55,8 @@
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 2,
-      "notes": "Small diagnostic programs and session assertions exist, but result packages are absent from every immutable submission ref."
+      "score": 2.5,
+      "notes": "CTest registers no tests. The eight workspace packages and historical report pass read-only examiner checks, but physics and output-status failures remain."
     },
     {
       "id": "code.hygiene",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.12
+  "overall_score": 3.02
 }

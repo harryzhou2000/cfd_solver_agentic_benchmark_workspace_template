@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T09:58:42.347815+00:00
+Generated: 2026-10-30T10:06:28.395240+00:00
 
-**Overall score: 3.12**
+**Overall score: 3.02**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | CMake and README are submitted; session records a clean build, but evaluator build was not possible with the dangling external symlink. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | Fresh immutable 0065953 archive: default CMake configure failed because FindHDF5 treated NO_MODULE_PATH as a component; configuration and build succeeded with HDF5_DIR=/opt/external/cfd_externals/install/cmake and CMAKE_FIND_PACKAGE_PREFER_CONFIG=ON in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 processes). CTest registered no tests. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | main.cpp implements solve --case/--output and errors; not independently executed. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 2.5 | main.cpp:45–47 parses case/output/report level. Help :37 advertises --restart but no code parses or applies it; this is an unsupported required operation. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Separated mesh, partition, IO, physics, and solver modules. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T09:58:42.347815+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Positive-state safeguards and exceptions are present; no independent stress test. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | Small diagnostic programs and session assertions exist, but result packages are absent from every immutable submission ref. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 2.5 | CTest registers no tests. The eight workspace packages and historical report pass read-only examiner checks, but physics and output-status failures remain. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Readable C++17 code, but backup source copies and no reproducible final-result package reduce hygiene. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T09:58:42.347815+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.12
+- Overall score (0-5): 3.02
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

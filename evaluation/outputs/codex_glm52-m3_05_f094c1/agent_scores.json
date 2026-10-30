@@ -30,14 +30,14 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 3,
-          "notes": "CMake and README are submitted; session records a clean build, but evaluator build was not possible with the dangling external symlink."
+          "notes": "Fresh immutable 0065953 archive: default CMake configure failed because FindHDF5 treated NO_MODULE_PATH as a component; configuration and build succeeded with HDF5_DIR=/opt/external/cfd_externals/install/cmake and CMAKE_FIND_PACKAGE_PREFER_CONFIG=ON in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 processes). CTest registered no tests."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "main.cpp implements solve --case/--output and errors; not independently executed."
+          "score": 2.5,
+          "notes": "main.cpp:45\u201347 parses case/output/report level. Help :37 advertises --restart but no code parses or applies it; this is an unsupported required operation."
         },
         {
           "id": "code.organization",
@@ -78,8 +78,8 @@
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 2,
-          "notes": "Small diagnostic programs and session assertions exist, but result packages are absent from every immutable submission ref."
+          "score": 2.5,
+          "notes": "CTest registers no tests. The eight workspace packages and historical report pass read-only examiner checks, but physics and output-status failures remain."
         },
         {
           "id": "code.hygiene",
@@ -89,7 +89,7 @@
           "notes": "Readable C++17 code, but backup source copies and no reproducible final-result package reduce hygiene."
         }
       ],
-      "overall_score": 3.12,
+      "overall_score": 3.02,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -148,7 +148,7 @@
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 4,
-          "notes": "Newtonian/Fourier and wall treatment are source-supported."
+          "notes": "solver.cpp:605\u2013615 removes normal traction before accumulating wall shear; io.cpp:144\u2013145 provides zero wall velocity. The result histories still show unsettled viscous cases."
         },
         {
           "id": "cfd.implicit",
@@ -161,8 +161,8 @@
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 3,
-          "notes": "BDF2 dual-time source path exists, but no retained Re200 output proves production controls or inner convergence."
+          "score": 1.5,
+          "notes": "BDF2 source exists. Delivered Re200 case caps inner iterations at 10 versus required maximum 1000; metadata final ratio0.7 exceeds target0.001. Full strict miss count and executed binary remain unknown."
         },
         {
           "id": "cfd.mpi_partition",
@@ -172,14 +172,8 @@
           "notes": "0065953 main.cpp:61\u201374 reads full CGNS mesh on every rank and retains it through the solver; :139 still uses it. Violates TASK.md:46,227 even with METIS and neighbor halos."
         }
       ],
-      "overall_score": 3.18,
-      "disqualification_flags": [
-        {
-          "id": 10,
-          "text": "second-order reconstruction or shock limiter disabled for production cases",
-          "evidence": "solver.cpp lines 421-423 sets startup_steps=100000 and scales phi to zero; lines 530 and 558 explicitly zero phi in transient. report.tex lines 193-196 admits first-order production mode."
-        }
-      ]
+      "overall_score": 3.02,
+      "disqualification_flags": []
     },
     "result_review": {
       "points": [
@@ -187,66 +181,66 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 0,
-          "notes": "No solver/results files are tracked in the curated commit or source attempt; explicit validator therefore fails immediately for missing metadata.json."
+          "score": 3,
+          "notes": "All eight manifest-linked original workspace packages pass structural examiner checks, though several converged/periodic statuses conflict with force histories or last inner ratio. Raw files are not tracked in the attempt commit."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 0,
-          "notes": "Evaluator explicit validator at source attempt be266cd fails: missing solver/results/naca0012_m015_inviscid/metadata.json."
+          "score": 4,
+          "notes": "Read-only examiner passes eight original workspace packages and extracted be266cd historical report; workspace report alone fails missing run_manifest. Structural checks do not establish numerical correctness."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 1,
-          "notes": "A compiled six-page report tabulates claims, but none of eight required raw packages is retained for verification."
+          "notes": "Re20 metadata says converged despite final400 Cd \u221216.5748..\u22121.01497 and Cl \u22129.56809..7.79131; Re200 final ratio0.7 versus target0.001. Seven steady histories remain unsettled or incomplete."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 1,
-          "notes": "Some report figures look interpretable, but absent fields/CSVs prevent numerical or MPI plausibility review."
+          "notes": "Workspace Re20 forces are strongly unsettled; M080 laminar final400 Cl reaches \u2212128.693; Re200 t180\u2013300 Cd \u22121.24931..\u22121.07427 and Cl 1.13943..1.22122 do not establish a credible periodic wake."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 2,
-          "notes": "The committed report compiles and includes selected readable figures, but it lacks required history/surface/cylinder-pressure coverage and source data."
+          "score": 1.5,
+          "notes": "All seven attempt steady force figures collapse to a vertical line because physical_time=0. Re200 full-history drag is compressed and no numeric St is reported; selected field/residual figures exist."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Report has equations, table, figures and candid convergence limitation, but overclaims complete validated outputs and contradicts source on production spatial order."
+          "score": 2,
+          "notes": "Six-page compiled report includes methods and figures and discloses first-order production, but convergence/periodic labels disagree with recovered histories and strict final ratio."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 0,
-          "notes": "figure_manifest, run_manifest, sanity checks, result CSVs and fields are absent from the immutable submission and attempt commit."
+          "score": 1.5,
+          "notes": "be266cd run_manifest and selected validator calls/final response affirm eight workspace paths and coefficients. Exact runtime binary and image-to-CSV correspondence are unbound; raw packages are workspace-only."
         }
       ],
-      "overall_score": 1.1,
+      "overall_score": 1.95,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 56.5,
+    "total_scored": 54.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 6,
-        "notes": "Build/CLI source exists; final output contract packages are absent."
+        "score": 5,
+        "notes": "Immutable source builds using an explicit HDF5 config workaround; default configure fails. CLI advertises --restart but main.cpp never reads it. Eight delivered packages pass structural validation."
       },
       {
         "id": "mesh_geometry",
@@ -260,28 +254,28 @@
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 11,
-        "notes": "FV residual and required BC paths are source-supported; no numerical execution verification."
+        "notes": "Face residual and farfield/slip/no-slip source paths exist; io.cpp:144\u2013145 writes zero no-slip boundary velocity. Unsettled histories limit numerical verification."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 1,
-        "notes": "Production limiter/reconstruction is disabled, triggering DQ 10."
+        "notes": "Production limiter/reconstruction is disabled, explicitly disclosed in report.tex:195\u2013196; deduction applies without DQ10."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 8,
-        "notes": "Viscous source paths are present; no retained wall output validates them."
+        "notes": "Newtonian/Fourier source and tangential wall-force projection at solver.cpp:605\u2013615 exist; unsettled viscous results limit validation."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 10,
-        "notes": "LU-SGS and BDF2 source exist; no retained Re200 data proves completed production inner controls."
+        "score": 8.5,
+        "notes": "LU-SGS/BDF2 paths exist; delivered Re200 max_inner10 versus required 1000, final inner ratio0.7 versus target0.001. Strict miss count and runtime binary remain unknown."
       },
       {
         "id": "mpi",
@@ -309,7 +303,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 4,
-        "notes": "Modular C++ design supports extensions."
+        "notes": "Separated mesh, partition, solver and IO modules support extensions, subject to globally replicated mesh and disabled production reconstruction."
       }
     ]
   },

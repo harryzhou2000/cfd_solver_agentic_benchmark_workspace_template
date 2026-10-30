@@ -56,7 +56,7 @@
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 4,
-      "notes": "Newtonian/Fourier and wall treatment are source-supported."
+      "notes": "solver.cpp:605\u2013615 removes normal traction before accumulating wall shear; io.cpp:144\u2013145 provides zero wall velocity. The result histories still show unsettled viscous cases."
     },
     {
       "id": "cfd.implicit",
@@ -69,8 +69,8 @@
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 3,
-      "notes": "BDF2 dual-time source path exists, but no retained Re200 output proves production controls or inner convergence."
+      "score": 1.5,
+      "notes": "BDF2 source exists. Delivered Re200 case caps inner iterations at 10 versus required maximum 1000; metadata final ratio0.7 exceeds target0.001. Full strict miss count and executed binary remain unknown."
     },
     {
       "id": "cfd.mpi_partition",
@@ -82,10 +82,35 @@
   ],
   "disqualification_flags": [
     {
-      "id": 10,
-      "text": "second-order reconstruction or shock limiter disabled for production cases",
-      "evidence": "solver.cpp lines 421-423 sets startup_steps=100000 and scales phi to zero; lines 530 and 558 explicitly zero phi in transient. report.tex lines 193-196 admits first-order production mode."
+      "flag": "Solver uses explicit time stepping only",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Normal viscous traction mislabeled as skin friction",
+      "triggered": null,
+      "notes": ""
+    },
+    {
+      "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+      "triggered": null,
+      "notes": ""
     }
   ],
-  "overall_score": 3.18
+  "overall_score": 3.02
 }

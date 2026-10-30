@@ -2,7 +2,7 @@
 
 ## Verdict
 
-The immutable curated submission is `0065953716e70f087f5d6d4fb512bc7e2fe2ba97`. Its provisional rubric score is 56.5/100 and it is disqualified for trigger 7 and the separate TASK full-mesh prohibition. The prior trigger 10 is unasserted: report.tex:195–196 explicitly discloses first-order production, although second-order rubric deductions remain. Case/PDF and historical binary review is ongoing.
+The immutable curated submission is `0065953716e70f087f5d6d4fb512bc7e2fe2ba97`. Its provisional rubric score is 54/100 and it is disqualified for trigger 7 and the separate TASK full-mesh prohibition. The prior trigger 10 is unasserted: report.tex:195–196 explicitly discloses first-order production, although second-order rubric deductions remain. Historical binary and figure-to-data attribution remain unresolved.
 
 ## Provenance and session selection
 
@@ -14,12 +14,13 @@ The sole workspace-local Codex root is `019fe861-1832-71b0-b1ae-2f9d13afd309` (B
 
 - `audit_submission_commit.py` passed against the exact result commit; `derive_run_id.py` produced `codex_glm52-m3_05_f094c1`.
 - The submitted `report.tex` compiled successfully with `pdflatex -interaction=nonstopmode -halt-on-error` in a disposable detached worktree at original attempt `be266cd83d8c1c7811050158d0b83acdc59ed8f2` (exit 0; six-page PDF). This is contestant-report evidence, not a rerun.
-- Canonical raw packages are absent from the tracked attempt tree, but all eight remain in the original contestant workspace. Attempt commit `be266cd` run_manifest identifies the same paths, final coefficients and reductions; selected root validator calls at 03:41 and 03:43 UTC and final response at 03:44 UTC affirm these deliveries. Workspace files predate final response. Their hashes, coverage and physics are under independent review; exact historical binary is unbound.
+- Canonical raw packages are absent from the tracked attempt tree, but all eight remain in the original contestant workspace. Attempt commit `be266cd` run_manifest identifies the same paths, final coefficients and reductions; selected root validator calls at 03:41 and 03:43 UTC and final response at 03:44 UTC affirm these deliveries. Workspace files predate final response. Case notes record their hashes, coverage and physics; the exact historical binary is unbound.
+- A fresh 0065953 build in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 processes) failed at default HDF5 discovery; configuration/build succeeded using `-DHDF5_DIR=/opt/external/cfd_externals/install/cmake -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON`. CTest registered no tests. `main.cpp:37` advertises `--restart`, but :45–47 never parse it. `solver.cpp:605–615` projects viscous traction tangentially.
 - No evaluator solver or Re200 rerun was performed. Source provides METIS and neighbor halos but retains a full mesh on every rank through solve.
 
 ## Scores and case findings
 
-The provisional 56.5/100 rubric includes first-order limitations and full-mesh replication. All eight workspace force histories and attempt force/residual/field figures were inspected; case notes record hashes, missing-row coverage and numerical limitations. The seven steady force plots collapse to a vertical line because physical time is zero, and Re200 lacks a readable late lift-and-drag plot or numeric St. Re20 is strongly unsettled and Re200 reports final inner ratio0.7 against target0.001.
+The provisional 54/100 rubric includes first-order limitations and full-mesh replication. All eight workspace force histories and attempt force/residual/field figures were inspected; case notes record hashes, missing-row coverage and numerical limitations. The seven steady force plots collapse to a vertical line because physical time is zero, and Re200 lacks a readable late lift-and-drag plot or numeric St. Re20 is strongly unsettled and Re200 reports final inner ratio0.7 against target0.001; the delivered case sets max_inner10 rather than the required 1000. The full strict miss count is not established.
 
 ## DQ assessment
 
