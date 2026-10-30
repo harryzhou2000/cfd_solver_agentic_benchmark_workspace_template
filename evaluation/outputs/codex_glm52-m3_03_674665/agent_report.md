@@ -9,7 +9,7 @@
 
 The immutable commit tree, task/output contract, submitted C++/CMake/README/report/scripts, `run_identity.json`, and project-local telemetry sidecars were read. The submission delta adds `solver/` sources, tools, `report.tex`, and `done`, but no `solver/results/<required-case>` directory, raw output package, report figures, `run_manifest`, `figure_manifest`, or `sanity_checks` artifact. `report.tex` names eight figures under `solver/report/figures`, yet `git ls-tree -r 5b9dded7` contains none. Thus the committed report cannot build with its claimed figures.
 
-Contestant checkpoint `fa9d2b83fb632b970e0392a455baab5e5389930c`, at 2026-08-06 01:06 UTC immediately before the selected 01:07 UTC final response, contains eight case packages, 43 figures, manifests and a nine-page contestant PDF. Source and report.tex match curated `5b9dded7`, while that curated tip excludes the plots and raw results. The final response explicitly identifies those deliverables on `codex/glm52-m3/init`. The previously asserted total absence therefore applies only to the curated tip, not contestant-delivered historical evidence. Historical PDF SHA256 `4199cd280ffd7538666bdeb8383ed495c5a5f9fefff0107b63d8ad000a7d2c01` remains historical evidence and has not been substituted for the absent approved snapshot. Individual cases and PDF still require visual/physics review. No evaluator CFD or Re200 rerun was performed.
+Contestant checkpoint `fa9d2b83fb632b970e0392a455baab5e5389930c`, at 2026-08-06 01:06 UTC immediately before the selected 01:07 UTC final response, contains eight case packages, 43 figures, manifests and a nine-page contestant PDF. Source and report.tex match curated `5b9dded7`, while that curated tip excludes the plots and raw results. The final response explicitly identifies those deliverables on `codex/glm52-m3/init`. The previously asserted total absence therefore applies only to the curated tip, not contestant-delivered historical evidence. Historical PDF SHA256 `4199cd280ffd7538666bdeb8383ed495c5a5f9fefff0107b63d8ad000a7d2c01` remains historical evidence and has not been substituted for the absent approved snapshot. All nine historical PDF pages and eight cases’ force/residual/contour figures were visually reviewed; individual hashes and physical limitations are recorded in case notes. No evaluator CFD or Re200 rerun was performed.
 
 ## Findings
 
@@ -28,11 +28,11 @@ Material direct limitations remain. `runSteady()` marks a max-step run `converge
 | Viscous Terms | 10 | 7 | Gradient/Newtonian/Fourier source, no laminar evidence. |
 | Implicit And Transient Methods | 15 | 7.5 | BDF2 exists; reported miss count and absolute acceptance claim conflict with source/stdout. |
 | MPI | 10 | 5 | METIS and neighbor halos exist, but full mesh persists on each rank during solve. |
-| Case Results And Validation | 10 | 0 | Provisional pending recovered checkpoint case review. |
-| Report, Visualization, Analysis | 5 | 0 | Provisional pending historical PDF and figure review. |
+| Case Results And Validation | 10 | 3 | Recovered histories show two partial cases, multiple false success labels and no Re200 street. |
+| Report, Visualization, Analysis | 5 | 1.5 | Historical PDF/figures delivered, but important claims and manifest mappings are wrong. |
 | Extensibility | 5 | 3 | Modular components, limited architecture. |
 
-**Provisional total: 54.5/100.**
+**Provisional total: 59/100.**
 
 ## Review-area scores
 
@@ -46,7 +46,7 @@ All 27 individual review points and their evidence notes are in `agent_scores.js
 
 ## Per-case scores
 
-Prior case scores of zero are provisional only: the recovered contestant checkpoint has all eight required result packages and plots. Individual case credibility and evidence floors remain to be reviewed.
+All eight recovered checkpoint cases are scored independently, with immutable force/figure hashes and late-window evidence in `agent_scores.json`. The prior zeros incorrectly treated curated-tip exclusions as absence. Historic executable attribution remains unverified.
 
 ## Disqualification assessment
 
