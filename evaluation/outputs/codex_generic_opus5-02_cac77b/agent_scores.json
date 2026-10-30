@@ -104,7 +104,7 @@
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 5,
-          "notes": "CGNS mixed/multizone import and adjacency paths are source-backed."
+          "notes": "cgns_reader.cpp:123,293\u2013337 handles multiple zones and TRI_3/QUAD_4/BAR_2 sections; mixed triangles and quads in separate sections are supported. CGNS MIXED element sections fall through to an error."
         },
         {
           "id": "cfd.residual",
@@ -160,7 +160,7 @@
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 4.5,
-          "notes": "Re200 raw result reaches t=300 with BDF2 and 99.44% inner target success."
+          "notes": "Selected raw Re200 force history reaches t=300; metadata reports 169/30000 target misses (99.44% success). Final source implements BDF2 and explicit residual-ratio checks, but its exact identity with the executed binary is unproven because the configured revision stamp conflicts with the selected launch option."
         },
         {
           "id": "cfd.mpi_partition",
@@ -194,7 +194,7 @@
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 3.5,
-          "notes": "Metadata reports seven steady cases converged and Re200 periodic, but M015 inviscid last50 drag oscillates 0.001646\u20130.001893 and M080 inviscid lift rises0.000916\u20130.002436 despite Cd-only stopping. These limit confidence without proving DQ7."
+          "notes": "Steady last-50 windows span iterations 1544\u20131593 (M015 inviscid) and 3201\u20133250 (M080 inviscid); Cd oscillates 0.001646\u20130.001893 in the former and Cl rises 0.000916\u20130.002436 in the latter despite Cd-only stopping. Near-zero lift and absent later history limit inference; DQ7 is not established by these variations alone."
         },
         {
           "id": "res.plausibility",

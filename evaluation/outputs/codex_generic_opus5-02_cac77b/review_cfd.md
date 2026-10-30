@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:16:33.077370+00:00
+Generated: 2026-10-30T07:17:22.696577+00:00
 
 **Overall score: 4.5**
 
@@ -12,7 +12,7 @@ Generated: 2026-10-30T07:16:33.077370+00:00
 | 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 5 | Report/source agree on conservative nondimensional Euler/NS formulation. |
 |   | 2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly. | | | |
 |   | *Evidence:* Source flux assembly and report equations. | | | |
-| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 5 | CGNS mixed/multizone import and adjacency paths are source-backed. |
+| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 5 | cgns_reader.cpp:123,293–337 handles multiple zones and TRI_3/QUAD_4/BAR_2 sections; mixed triangles and quads in separate sections are supported. CGNS MIXED element sections fall through to an error. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
 | 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4.5 | Conservative residual assembly inspected. |
@@ -36,7 +36,7 @@ Generated: 2026-10-30T07:16:33.077370+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4.5 | CFL local pseudo-time and LU-SGS are implemented. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4.5 | Re200 raw result reaches t=300 with BDF2 and 99.44% inner target success. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4.5 | Selected raw Re200 force history reaches t=300; metadata reports 169/30000 target misses (99.44% success). Final source implements BDF2 and explicit residual-ratio checks, but its exact identity with the executed binary is unproven because the configured revision stamp conflicts with the selected launch option. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4.5 | METIS/ghost/neighbor exchange source and rank-consistency evidence; timing is unusable for scaling. |

@@ -14,7 +14,7 @@
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 5,
-      "notes": "CGNS mixed/multizone import and adjacency paths are source-backed."
+      "notes": "cgns_reader.cpp:123,293\u2013337 handles multiple zones and TRI_3/QUAD_4/BAR_2 sections; mixed triangles and quads in separate sections are supported. CGNS MIXED element sections fall through to an error."
     },
     {
       "id": "cfd.residual",
@@ -70,7 +70,7 @@
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 4.5,
-      "notes": "Re200 raw result reaches t=300 with BDF2 and 99.44% inner target success."
+      "notes": "Selected raw Re200 force history reaches t=300; metadata reports 169/30000 target misses (99.44% success). Final source implements BDF2 and explicit residual-ratio checks, but its exact identity with the executed binary is unproven because the configured revision stamp conflicts with the selected launch option."
     },
     {
       "id": "cfd.mpi_partition",
