@@ -14,28 +14,28 @@
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 2,
-      "notes": "Only partial output/CLI evidence."
+      "notes": "main.cpp:171\u2013180 parses solve, case and output options; no restart option or restart reader found. Output writer claims completion independently of actual residual."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Good module split."
+      "notes": "solver/src separates mesh, numerical, physics and I/O modules, though production main.cpp bypasses reconstruction and limiter modules."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No external solver found; no external search."
+      "notes": "No internal call to an external CFD executable found in inspected main/source; external authorship search was not performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 3,
-      "notes": "Input config driven."
+      "notes": "main.cpp:185\u2013189 parses a case file and reads its configured mesh path rather than branching on two mesh filenames; no full general-mesh validation."
     },
     {
       "id": "code.mpi",
@@ -49,21 +49,21 @@
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 2,
-      "notes": "Only first case has complete package."
+      "notes": "main.cpp:255\u2013257,335\u2013394 writes shared paths on each rank; no global force reduction and M015 status reports convergence despite residual growth."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 2,
-      "notes": "Session shows development but incomplete final suite."
+      "notes": "Committed run_manifest documents unfinished cases; no focused automated tests found in curated solver tree, and only one current package has metadata."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 2,
-      "notes": "Raw/debug outputs excluded from result tip."
+      "notes": "Curated tree separates solver modules and report; raw results are untracked and their source binding is unknown."
     }
   ],
   "disqualification_flags": [

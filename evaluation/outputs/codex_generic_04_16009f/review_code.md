@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:06:40.353016+00:00
+Generated: 2026-10-30T05:07:22.344203+00:00
 
 **Overall score: 2.62**
 
@@ -12,28 +12,28 @@ Generated: 2026-10-30T05:06:40.353016+00:00
 | 1 | **code.build** Build system and reproducibility | 0.15 | 3 | Exact curated d93a1ef clean CMake build succeeds in cfd-bench container; this establishes build only, not valid production results. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 2 | Only partial output/CLI evidence. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 2 | main.cpp:171–180 parses solve, case and output options; no restart option or restart reader found. Output writer claims completion independently of actual residual. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Good module split. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | solver/src separates mesh, numerical, physics and I/O modules, though production main.cpp bypasses reconstruction and limiter modules. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | No external solver found; no external search. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | No internal call to an external CFD executable found in inspected main/source; external authorship search was not performed. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | Input config driven. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | main.cpp:185–189 parses a case file and reads its configured mesh path rather than branching on two mesh filenames; no full general-mesh validation. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
 | 6 | **code.mpi** MPI correctness | 0.15 | 1 | METIS ownership and halo lists are present (mesh_partition.cpp:42–93,106–248), but full mesh persists on every rank and main.cpp:84–114,311–314 omits global force reduction; all ranks write the same result paths :255–257,335–394. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Only first case has complete package. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | main.cpp:255–257,335–394 writes shared paths on each rank; no global force reduction and M015 status reports convergence despite residual growth. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | Session shows development but incomplete final suite. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | Committed run_manifest documents unfinished cases; no focused automated tests found in curated solver tree, and only one current package has metadata. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 2 | Raw/debug outputs excluded from result tip. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 2 | Curated tree separates solver modules and report; raw results are untracked and their source binding is unknown. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 

@@ -7,35 +7,35 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 3,
-      "notes": "Equations/gas source present."
+      "notes": "report.tex:18\u201324 states conservative compressible NS; physics/navier_stokes.cpp and gas_model.cpp provide inviscid/viscous flux and thermodynamics."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 3,
-      "notes": "CGNS/geometry modules."
+      "notes": "main.cpp:189\u2013196 imports CGNS and builds geometry/METIS partitions, but retains full RawMesh and geometry on every rank throughout iterations."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 2,
-      "notes": "FV path source-supported, weak results."
+      "notes": "main.cpp:40\u201382 assembles Rusanov interior flux with opposing contributions; no viscous boundary-face flux in boundary branch and production reconstruction unused."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 3,
-      "notes": "Rusanov/Roe code claimed."
+      "notes": "numerics/riemann_solver.cpp:8\u201331 implements Rusanov; report claims Rusanov and main.cpp:62,69 calls interface. Roe module presence alone does not establish its production use."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 2,
-      "notes": "BC fixes recorded but not fully validated."
+      "notes": "boundary_conditions.cpp:50\u2013104 supplies characteristic farfield, reflected slip and no-slip adiabatic ghost states; main.cpp:52\u201364 applies inviscid boundary flux without wall viscous flux."
     },
     {
       "id": "cfd.reconstruction",
@@ -70,7 +70,7 @@
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 0,
-      "notes": "No Re200 physical-time completion."
+      "notes": "main.cpp:278\u2013283 adds BDF2 expression but :293\u2013294 invokes only one sweep with no true residual recomputation; current Re200 ends around t2.95 with divergent residual, no final package."
     },
     {
       "id": "cfd.mpi_partition",

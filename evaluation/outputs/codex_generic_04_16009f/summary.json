@@ -173,28 +173,28 @@
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 2,
-        "notes": "Only partial output/CLI evidence."
+        "notes": "main.cpp:171\u2013180 parses solve, case and output options; no restart option or restart reader found. Output writer claims completion independently of actual residual."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Good module split."
+        "notes": "solver/src separates mesh, numerical, physics and I/O modules, though production main.cpp bypasses reconstruction and limiter modules."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "No external solver found; no external search."
+        "notes": "No internal call to an external CFD executable found in inspected main/source; external authorship search was not performed."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 3,
-        "notes": "Input config driven."
+        "notes": "main.cpp:185\u2013189 parses a case file and reads its configured mesh path rather than branching on two mesh filenames; no full general-mesh validation."
       },
       {
         "id": "code.mpi",
@@ -208,21 +208,21 @@
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 2,
-        "notes": "Only first case has complete package."
+        "notes": "main.cpp:255\u2013257,335\u2013394 writes shared paths on each rank; no global force reduction and M015 status reports convergence despite residual growth."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 2,
-        "notes": "Session shows development but incomplete final suite."
+        "notes": "Committed run_manifest documents unfinished cases; no focused automated tests found in curated solver tree, and only one current package has metadata."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 2,
-        "notes": "Raw/debug outputs excluded from result tip."
+        "notes": "Curated tree separates solver modules and report; raw results are untracked and their source binding is unknown."
       }
     ],
     "disqualification_flags": [
@@ -278,35 +278,35 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 3,
-        "notes": "Equations/gas source present."
+        "notes": "report.tex:18\u201324 states conservative compressible NS; physics/navier_stokes.cpp and gas_model.cpp provide inviscid/viscous flux and thermodynamics."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 3,
-        "notes": "CGNS/geometry modules."
+        "notes": "main.cpp:189\u2013196 imports CGNS and builds geometry/METIS partitions, but retains full RawMesh and geometry on every rank throughout iterations."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 2,
-        "notes": "FV path source-supported, weak results."
+        "notes": "main.cpp:40\u201382 assembles Rusanov interior flux with opposing contributions; no viscous boundary-face flux in boundary branch and production reconstruction unused."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 3,
-        "notes": "Rusanov/Roe code claimed."
+        "notes": "numerics/riemann_solver.cpp:8\u201331 implements Rusanov; report claims Rusanov and main.cpp:62,69 calls interface. Roe module presence alone does not establish its production use."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 2,
-        "notes": "BC fixes recorded but not fully validated."
+        "notes": "boundary_conditions.cpp:50\u2013104 supplies characteristic farfield, reflected slip and no-slip adiabatic ghost states; main.cpp:52\u201364 applies inviscid boundary flux without wall viscous flux."
       },
       {
         "id": "cfd.reconstruction",
@@ -341,7 +341,7 @@
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 0,
-        "notes": "No Re200 physical-time completion."
+        "notes": "main.cpp:278\u2013283 adds BDF2 expression but :293\u2013294 invokes only one sweep with no true residual recomputation; current Re200 ends around t2.95 with divergent residual, no final package."
       },
       {
         "id": "cfd.mpi_partition",
@@ -394,35 +394,35 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 1,
-        "notes": "Only one near-complete directory."
+        "notes": "Current M015 metadata/status claim converged despite residual growth; seven other cases lack metadata/status. main.cpp has no restart reader, all-rank output paths are shared."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 1,
-        "notes": "Validator fails invalid equation_set."
+        "notes": "Prior explicit validator failed invalid equation_set; cfdeval structural gates do not assess numerical correctness."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 0,
-        "notes": "Manifest marks seven cases Running."
+        "notes": "Current M015 status claims converged with -0.5033 reduction orders, and seven other cases lack status/metadata; histories are truncated and report marks cases converging/running."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 1,
-        "notes": "No credible converged multi-case physics."
+        "notes": "Current airfoil Cd tails are negative; Re20 Cd\u224829.5 and Re200 Cd\u224864.7 at t\u22482.95. Histories are not confidently linked to final source or matched M015 metadata."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
         "score": 2,
-        "notes": "Some plots, no field coverage."
+        "notes": "Accepted two-page report has combined residual plot, visually compressed by Re200 spike near 1e140. Delivered standalone force images lack provenance binding to a final package; no case-specific field contours in report."
       },
       {
         "id": "res.report",
@@ -436,7 +436,7 @@
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 1,
-        "notes": "Raw data uncommitted/traceability incomplete."
+        "notes": "M015 metadata git_revision=null and 03:40 UTC status predates 04:03 UTC histories and 03:46 UTC final source; other cases have no metadata. Figure manifest does not establish final-run source binding."
       }
     ],
     "disqualification_flags": [
