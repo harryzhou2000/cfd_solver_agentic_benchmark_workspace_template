@@ -105,4 +105,4 @@ None detected.
 
 - Code review scorecard: `oc-goal_gpt56-dsv4_01_f83d02/review_code.md` (overall: 4.2)
 - CFD methods review: `oc-goal_gpt56-dsv4_01_f83d02/review_cfd.md` (overall: 4.73)
-- Result review: `oc-goal_gpt56-dsv4_01_f83d02/review_results.md` (overall: 4.5)
+- Result review: `oc-goal_gpt56-dsv4_01_f83d02/review_results.md` (overall: 4.0)

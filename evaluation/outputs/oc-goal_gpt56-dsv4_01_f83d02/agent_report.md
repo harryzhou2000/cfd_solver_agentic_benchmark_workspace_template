@@ -1,3 +1,7 @@
+## Calibration checkpoint (partial)
+
+**93/100; DQ=true (provisional, trigger 7).** M015 and M200 laminar results are labeled converged while final 200 drag samples fall 0.114944→0.087589 and 0.210556→0.141501, respectively. The report discloses the M200 phase gates and some final drift, and the real residual reductions are not disputed; the task also requires stable forces and clear early laminar convergence. The old M200 case note also misread lift 1.5532×10⁻⁴ and viscous drag 0.1298668 as lift 1.5532 and total drag. The remainder of the source, cases and DQ review remains pending.
+
 # Agent Evaluation Report — oc-goal_gpt56-dsv4_01_24edd3
 
 - Immutable submission: `332ca95ef31bc8f694e699554f257729657f5d37` on `oc-goal/gpt56-dsv4/01`.
@@ -16,11 +20,11 @@ The original session timeline omitted OpenCode's 21,861,162 cache-write tokens f
 
 The explicit read-only examiner command over the eight original canonical workspace packages and the report returned rc 0. All seven steady cases report completed/converged status; cylinder Re200 reports completed/statistically-periodic at `t=300`, `dt=0.01`, and zero inner-target misses. Re200 was not rerun.
 
-Committed source uses configurable `CFD_EXTERNALS_ROOT`, generic CGNS input, `METIS_PartGraphKway`, owned/ghost neighbor schedules, nonblocking `MPI_Isend`/`MPI_Irecv`, global `MPI_Allreduce`, Rusanov fluxes, least-squares reconstruction, Barth-Jespersen/positivity safeguards, LU-SGS/GMRES, and BDF2 dual time stepping. The report is detailed and includes figures/manifests, but its curated committed TeX does not compile because required PDFs were excluded. Its reported np4/np8 comparison also discloses an executable-hash mismatch, so it is not a pure rank-only comparison.
+Committed source uses configurable `CFD_EXTERNALS_ROOT`, generic CGNS input, `METIS_PartGraphKway`, owned/ghost neighbor schedules, nonblocking `MPI_Isend`/`MPI_Irecv`, global `MPI_Allreduce`, Rusanov fluxes, least-squares reconstruction, Barth-Jespersen/positivity safeguards, LU-SGS/GMRES, and BDF2 dual time stepping. The report is detailed and includes figures/manifests, the earlier 332ca95 snapshot lacked required PDFs, but the later evaluated ade1953 includes 47 committed figure PDFs and its main report was accepted as compiled from submission. Its reported np4/np8 comparison also discloses an executable-hash mismatch, so it is not a pure rank-only comparison.
 
 ## Score and verdict
 
-Score: **95/100**. Deductions: two points for independent clean-build/self-contained report reproducibility, two MPI points for the qualified rank comparison, and one report/visualization point for missing committed PDF dependencies. The 27 review points, ten rubric sections, eight independent case scores, and all 13 DQ checks are in `agent_scores.json`.
+The earlier 95/100 score is superseded by the provisional 93/100 DQ7 checkpoint above; the remaining rubric is under review. The 27 review points, ten rubric sections, eight independent case scores, and all 13 DQ checks are in `agent_scores.json`.
 
 **DQ: no.** No trigger is established from direct internal evidence. In particular, source supports METIS/halo/reduction/implicit/BDF2 claims; metadata and run-status are consistent for the eight canonical packages; and no order-one rank discrepancy, figure mismatch, synthetic output generator, wrapper, or hard-coded mesh-only path was established. External similarity investigation was not performed under the trust policy.
 
