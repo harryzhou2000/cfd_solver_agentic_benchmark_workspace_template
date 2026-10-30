@@ -6,36 +6,36 @@
       "id": "res.contract",
       "title": "Output contract compliance",
       "weight": 0.2,
-      "score": 5,
-      "notes": "All eight contract packages pass validator."
+      "score": 3,
+      "notes": "Validator reports all eight selected packages structurally complete, but main.cpp ignores restart input and solver.cpp:356 always emits zero moment. Structural conformance does not establish usable restart or truthful metadata."
     },
     {
       "id": "res.validator",
       "title": "Automated validator results",
       "weight": 0.1,
       "score": 5,
-      "notes": "Explicit validator command passes all packages/report."
+      "notes": "Existing explicit validator passes all eight; it does not detect flat Re200 periodicity, false max-inner statistics, disabled reconstruction, or full mesh held on all ranks."
     },
     {
       "id": "res.completion",
       "title": "Case completion and convergence",
       "weight": 0.2,
-      "score": 4,
-      "notes": "Eight readable package statuses, but M2 report manifest says not converged."
+      "score": 2,
+      "notes": "Re200 metadata periodic contradicts flat t>=200 forces; M2 laminar claims converged while Cd drops20.8% in final65 rows; M015 inviscid final 10% Cd changes15.2%."
     },
     {
       "id": "res.plausibility",
       "title": "Result plausibility and MPI consistency",
       "weight": 0.15,
       "score": 2,
-      "notes": "Re20/200 drag and Re200 lift are not credible."
+      "notes": "Re20 Cd7.226 and Re200 Cd4.853 with no shedding are not credible; low-Mach M015 laminar Cd0.583 is unusually large. Source/run relation remains qualified."
     },
     {
       "id": "res.visualization",
       "title": "Visualizations",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Figures/report sources included; visual review not exhaustive."
+      "score": 3,
+      "notes": "Accepted report PDF has 15 readable pages covering five NACA cases; checkpoint 0b4616f provides extra standalone histories and field images. Re200 late plots show no periodicity and historic source figures are omitted under curation."
     },
     {
       "id": "res.report",
@@ -79,5 +79,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.6
+  "overall_score": 2.65
 }

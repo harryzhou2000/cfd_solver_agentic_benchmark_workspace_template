@@ -2,26 +2,26 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:15:44.474323+00:00
+Generated: 2026-10-30T06:17:26.570880+00:00
 
-**Overall score: 3.01**
+**Overall score: 2.91**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | Conservative/gas implementation. |
+| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | types.h:9–18 defines four conserved variables and ideal-gas parameters; flux.cpp computes 2D conservative Euler flux. This does not validate numerical outcomes. |
 |   | 2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly. | | | |
 |   | *Evidence:* Source flux assembly and report equations. | | | |
-| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | CGNS and geometry modules. |
+| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 3 | mesh.cpp:62–72 reads only the first base/zone and :126–130 accepts separate TRI/QUAD sections, not MIXED sections. geometry.cpp computes 2D polygon area; rank-distributed solver keeps a full mesh on every rank. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
-| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4 | FV residual source, output values need caution. |
+| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4 | solver.cpp:89–101,162–170,210–227 assembles local inviscid face contributions; viscous direct-difference implementation :229–275 is limited, and inviscid limiter is globally zero. |
 |   | Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction. | | | |
 |   | *Evidence:* residual assembly code; residuals.csv shows global reduction. | | | |
-| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | Rusanov and flux code. |
+| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | flux.cpp:24–67 implements Rusanov numerical flux; no Roe/Harten assertion required for this report. Low-Mach numerical drag is large. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | BC implementations/surface evidence. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | boundary.cpp:14–91 implements farfield, slip and no-slip ghost states; output.cpp obtains wall values. Unknown BC strings default to FARFIELD in mesh.cpp:11–21, weakening error handling. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
 | 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 1 | f679644 solver.cpp:89–96 initializes every limiter to zero; face paths use these factors. report.tex:147–170 claims active second-order/Barth with fallback only, contradicted by submitted source. 12f77fb has same source SHA; earlier cbe40ee also zeroed multipliers. Exact historic binary remains unbound. |
@@ -30,10 +30,10 @@ Generated: 2026-10-30T06:15:44.474323+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 1 | f679644 solver.cpp:89–96 initializes every limiter to zero; face paths use these factors. report.tex:147–170 claims active second-order/Barth with fallback only, contradicted by submitted source. 12f77fb has same source SHA; earlier cbe40ee also zeroed multipliers. Exact historic binary remains unbound. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Viscous outcomes include implausible cylinder drag. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | solver.cpp:173–205 wall viscous treatment and :229–275 direct cell-difference thin-layer gradients; :324–332 explicitly projects wall shear tangentially. High drag remains a result credibility defect, not proof of normal-traction mislabel. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | LU-SGS source. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | solver.cpp:414–452 invokes LU-SGS with steady CFL capped at5 and fixed minimum inner iterations, not a measured steady inner convergence test. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2 | solver.cpp:528–607 implements BDF/inner iteration, but :599–615 updates time histories before logging a new BDF residual; that logged term is not the residual solved in the inner loop. Submitted residual rows all say five iterations; revised metadata max124 contradicts them. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T06:15:44.474323+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.01
+- Overall score (0-5): 2.91
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

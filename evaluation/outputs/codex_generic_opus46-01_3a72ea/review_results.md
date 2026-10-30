@@ -2,26 +2,26 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:15:44.474602+00:00
+Generated: 2026-10-30T06:17:26.571187+00:00
 
-**Overall score: 3.6**
+**Overall score: 2.65**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | All eight contract packages pass validator. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 3 | Validator reports all eight selected packages structurally complete, but main.cpp ignores restart input and solver.cpp:356 always emits zero moment. Structural conformance does not establish usable restart or truthful metadata. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit validator command passes all packages/report. |
+| 2 | **res.validator** Automated validator results | 0.10 | 5 | Existing explicit validator passes all eight; it does not detect flat Re200 periodicity, false max-inner statistics, disabled reconstruction, or full mesh held on all ranks. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Eight readable package statuses, but M2 report manifest says not converged. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Re200 metadata periodic contradicts flat t>=200 forces; M2 laminar claims converged while Cd drops20.8% in final65 rows; M015 inviscid final 10% Cd changes15.2%. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | Re20/200 drag and Re200 lift are not credible. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | Re20 Cd7.226 and Re200 Cd4.853 with no shedding are not credible; low-Mach M015 laminar Cd0.583 is unusually large. Source/run relation remains qualified. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 4 | Figures/report sources included; visual review not exhaustive. |
+| 5 | **res.visualization** Visualizations | 0.15 | 3 | Accepted report PDF has 15 readable pages covering five NACA cases; checkpoint 0b4616f provides extra standalone histories and field images. Re200 late plots show no periodicity and historic source figures are omitted under curation. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 2 | Main report covers five cases and marks others incomplete; historic checkpoint has extra standalone plots and final-case summary. Re200 metadata success/inner statistics conflict with unchanged force and residual histories. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T06:15:44.474602+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.6
+- Overall score (0-5): 2.65
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

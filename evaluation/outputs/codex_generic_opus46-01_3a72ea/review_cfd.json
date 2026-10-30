@@ -7,35 +7,35 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Conservative/gas implementation."
+      "notes": "types.h:9\u201318 defines four conserved variables and ideal-gas parameters; flux.cpp computes 2D conservative Euler flux. This does not validate numerical outcomes."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 4,
-      "notes": "CGNS and geometry modules."
+      "score": 3,
+      "notes": "mesh.cpp:62\u201372 reads only the first base/zone and :126\u2013130 accepts separate TRI/QUAD sections, not MIXED sections. geometry.cpp computes 2D polygon area; rank-distributed solver keeps a full mesh on every rank."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 4,
-      "notes": "FV residual source, output values need caution."
+      "notes": "solver.cpp:89\u2013101,162\u2013170,210\u2013227 assembles local inviscid face contributions; viscous direct-difference implementation :229\u2013275 is limited, and inviscid limiter is globally zero."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Rusanov and flux code."
+      "notes": "flux.cpp:24\u201367 implements Rusanov numerical flux; no Roe/Harten assertion required for this report. Low-Mach numerical drag is large."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "BC implementations/surface evidence."
+      "notes": "boundary.cpp:14\u201391 implements farfield, slip and no-slip ghost states; output.cpp obtains wall values. Unknown BC strings default to FARFIELD in mesh.cpp:11\u201321, weakening error handling."
     },
     {
       "id": "cfd.reconstruction",
@@ -56,14 +56,14 @@
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 3,
-      "notes": "Viscous outcomes include implausible cylinder drag."
+      "notes": "solver.cpp:173\u2013205 wall viscous treatment and :229\u2013275 direct cell-difference thin-layer gradients; :324\u2013332 explicitly projects wall shear tangentially. High drag remains a result credibility defect, not proof of normal-traction mislabel."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 4,
-      "notes": "LU-SGS source."
+      "notes": "solver.cpp:414\u2013452 invokes LU-SGS with steady CFL capped at5 and fixed minimum inner iterations, not a measured steady inner convergence test."
     },
     {
       "id": "cfd.transient",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.01
+  "overall_score": 2.91
 }

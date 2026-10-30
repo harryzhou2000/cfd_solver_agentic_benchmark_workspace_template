@@ -96,7 +96,7 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 
 ## Verdict
 
-58/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
+54/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
 
 
 ## Selected result and report review — 2026-10-30
@@ -126,3 +126,8 @@ Immutable main.cpp:142–155 parses `--restart`, but the value is never passed t
 ## Disabled production reconstruction — 2026-10-30
 
 Immutable f679644 solver.cpp:89–96 sets every inviscid limiter to zero; :113–130,145–153,210–215 pass those factors to reconstructed faces. Report.tex:147–170,499–501 claims active Barth–Jespersen second order and first-order only as fallback. DQ10 applies to the submitted implementation; second-order rubric 7→1, total64→58. The same source blob SHA `7664b362da6c56ecac8cf8701bc1a3180ddfd92980c1f2b33a04480cb28df3b0` is at 12f77fb (the Re200 result checkpoint), 0b4616f and final submission; earlier cbe40ee also explicitly zeros computed multipliers. Exact binary/source binding is not independently established. Clean immutable CMake build passed in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 pids; documented EXTERNAL_ROOT and CFD_EXTERNALS_ROOT); no CFD rerun.
+
+
+## Remaining source criteria — 2026-10-30
+
+The clean f679644 build succeeded using documented external paths. `mesh.cpp:62–72` reads only the first CGNS base and zone, and :126–130 handles separate TRI/QUAD sections but not MIXED; mesh rubric 8→6. Separate physics and mesh modules exist but `types.h:9–10` fixes four-state 2D vectors and ideal-gas/BC branches constrain extensions; extensibility 4→2. Total58→54. The source computes tangential wall shear (`solver.cpp:324–332`); large drag is a physical result limitation, not proof of mislabeled normal traction. Its `cmz` is unconditionally zero (:356), and unknown BC names fall back to farfield (`mesh.cpp:11–21`). Review-point notes now identify their specific evidence. Production binary/source binding, remaining DQ details and some standalone plot provenance remain partial.

@@ -7,7 +7,7 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "Build system/source present; no independent rebuild."
+      "notes": "Clean immutable f679644 build succeeded with documented CMake external roots inside network-disabled cfd-bench, 2 CPUs/3GiB/256 pids. No CFD rerun."
     },
     {
       "id": "code.cli",
@@ -21,21 +21,21 @@
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Well-separated solver modules."
+      "notes": "Source separates mesh, partition, flux, viscous, reconstruction, implicit and output, but main.cpp contains unfinished development commentary and fixed 2D state."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No external solver found; no external search."
+      "notes": "No external solver executable or copied core directly established in reviewed source; no exhaustive external similarity investigation."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Case configuration driven."
+      "notes": "main.cpp:35\u201344 selects mesh from case JSON rather than only two filenames; output.cpp:247\u2013249 fixes timestamps and success flag, and solver.cpp:356 hardcodes zero moment."
     },
     {
       "id": "code.mpi",
@@ -49,21 +49,21 @@
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 3,
-      "notes": "CFL cap and result discrepancies limit robustness."
+      "notes": "solver.cpp:415\u2013422 caps steady CFL at5, :459\u2013464 applies density and pressure fallback; status is unconditionally successful at :712\u2013715 despite selected failed results."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Session evidence and output suite."
+      "score": 3,
+      "notes": "Previous structural validator results are recorded; independent clean build passed. Selected Re200 iteration metadata conflicts with its unchanged residual history and no unsteady run was repeated."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 3,
-      "notes": "Large raw outputs required curation."
+      "notes": "main.cpp:213\u2013225 retains development comments; metadata uses fixed 2024 timestamps and output moment is always zero. Historical result packages require separate provenance."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.35
+  "overall_score": 3.25
 }

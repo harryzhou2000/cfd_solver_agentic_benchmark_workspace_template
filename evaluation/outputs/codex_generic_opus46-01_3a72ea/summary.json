@@ -346,7 +346,7 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4,
-        "notes": "Build system/source present; no independent rebuild."
+        "notes": "Clean immutable f679644 build succeeded with documented CMake external roots inside network-disabled cfd-bench, 2 CPUs/3GiB/256 pids. No CFD rerun."
       },
       {
         "id": "code.cli",
@@ -360,21 +360,21 @@
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Well-separated solver modules."
+        "notes": "Source separates mesh, partition, flux, viscous, reconstruction, implicit and output, but main.cpp contains unfinished development commentary and fixed 2D state."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "No external solver found; no external search."
+        "notes": "No external solver executable or copied core directly established in reviewed source; no exhaustive external similarity investigation."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4,
-        "notes": "Case configuration driven."
+        "notes": "main.cpp:35\u201344 selects mesh from case JSON rather than only two filenames; output.cpp:247\u2013249 fixes timestamps and success flag, and solver.cpp:356 hardcodes zero moment."
       },
       {
         "id": "code.mpi",
@@ -388,21 +388,21 @@
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 3,
-        "notes": "CFL cap and result discrepancies limit robustness."
+        "notes": "solver.cpp:415\u2013422 caps steady CFL at5, :459\u2013464 applies density and pressure fallback; status is unconditionally successful at :712\u2013715 despite selected failed results."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Session evidence and output suite."
+        "score": 3,
+        "notes": "Previous structural validator results are recorded; independent clean build passed. Selected Re200 iteration metadata conflicts with its unchanged residual history and no unsteady run was repeated."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 3,
-        "notes": "Large raw outputs required curation."
+        "notes": "main.cpp:213\u2013225 retains development comments; metadata uses fixed 2024 timestamps and output moment is always zero. Historical result packages require separate provenance."
       }
     ],
     "disqualification_flags": [
@@ -447,7 +447,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.35
+    "overall_score": 3.25
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -458,35 +458,35 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Conservative/gas implementation."
+        "notes": "types.h:9\u201318 defines four conserved variables and ideal-gas parameters; flux.cpp computes 2D conservative Euler flux. This does not validate numerical outcomes."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 4,
-        "notes": "CGNS and geometry modules."
+        "score": 3,
+        "notes": "mesh.cpp:62\u201372 reads only the first base/zone and :126\u2013130 accepts separate TRI/QUAD sections, not MIXED sections. geometry.cpp computes 2D polygon area; rank-distributed solver keeps a full mesh on every rank."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 4,
-        "notes": "FV residual source, output values need caution."
+        "notes": "solver.cpp:89\u2013101,162\u2013170,210\u2013227 assembles local inviscid face contributions; viscous direct-difference implementation :229\u2013275 is limited, and inviscid limiter is globally zero."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Rusanov and flux code."
+        "notes": "flux.cpp:24\u201367 implements Rusanov numerical flux; no Roe/Harten assertion required for this report. Low-Mach numerical drag is large."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4,
-        "notes": "BC implementations/surface evidence."
+        "notes": "boundary.cpp:14\u201391 implements farfield, slip and no-slip ghost states; output.cpp obtains wall values. Unknown BC strings default to FARFIELD in mesh.cpp:11\u201321, weakening error handling."
       },
       {
         "id": "cfd.reconstruction",
@@ -507,14 +507,14 @@
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 3,
-        "notes": "Viscous outcomes include implausible cylinder drag."
+        "notes": "solver.cpp:173\u2013205 wall viscous treatment and :229\u2013275 direct cell-difference thin-layer gradients; :324\u2013332 explicitly projects wall shear tangentially. High drag remains a result credibility defect, not proof of normal-traction mislabel."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 4,
-        "notes": "LU-SGS source."
+        "notes": "solver.cpp:414\u2013452 invokes LU-SGS with steady CFL capped at5 and fixed minimum inner iterations, not a measured steady inner convergence test."
       },
       {
         "id": "cfd.transient",
@@ -563,7 +563,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.01
+    "overall_score": 2.91
   },
   "result_review": {
     "review_area": "result_review",
@@ -573,36 +573,36 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 5,
-        "notes": "All eight contract packages pass validator."
+        "score": 3,
+        "notes": "Validator reports all eight selected packages structurally complete, but main.cpp ignores restart input and solver.cpp:356 always emits zero moment. Structural conformance does not establish usable restart or truthful metadata."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 5,
-        "notes": "Explicit validator command passes all packages/report."
+        "notes": "Existing explicit validator passes all eight; it does not detect flat Re200 periodicity, false max-inner statistics, disabled reconstruction, or full mesh held on all ranks."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 4,
-        "notes": "Eight readable package statuses, but M2 report manifest says not converged."
+        "score": 2,
+        "notes": "Re200 metadata periodic contradicts flat t>=200 forces; M2 laminar claims converged while Cd drops20.8% in final65 rows; M015 inviscid final 10% Cd changes15.2%."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 2,
-        "notes": "Re20/200 drag and Re200 lift are not credible."
+        "notes": "Re20 Cd7.226 and Re200 Cd4.853 with no shedding are not credible; low-Mach M015 laminar Cd0.583 is unusually large. Source/run relation remains qualified."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Figures/report sources included; visual review not exhaustive."
+        "score": 3,
+        "notes": "Accepted report PDF has 15 readable pages covering five NACA cases; checkpoint 0b4616f provides extra standalone histories and field images. Re200 late plots show no periodicity and historic source figures are omitted under curation."
       },
       {
         "id": "res.report",
@@ -646,7 +646,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.6
+    "overall_score": 2.65
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/opus46-01",
