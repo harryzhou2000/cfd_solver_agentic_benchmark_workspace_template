@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 5,
-      "notes": "CMake build and documented runner submitted."
+      "score": 4,
+      "notes": "Immutable clean CMake build succeeds using bundled dependencies; no registered tests and initial configuration needs the expected external layout."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Runner and documented case controls present."
+      "score": 4,
+      "notes": "main.cpp:1655\u20131660 parses case/output/restart and overrides; validation of invalid inputs and unknown options is limited."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Solver, tools, and report are separated."
+      "score": 2.5,
+      "notes": "Approximately 2700-line main.cpp holds mesh, solver, MPI and output; report tools are separate."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No authorship investigation; source reviewed only."
+      "notes": "Source reviewed for internal wrapping; no external authorship search and no positive copying claim."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Case metadata drives production paths."
+      "notes": "Case JSON drives mesh and controls; CGNS element support is limited to explicit types, not two named mesh files."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Distributed implementation exists, but submitted smoke comparison has large rank-dependent force deltas."
+      "score": 2.5,
+      "notes": "METIS and neighbor halos exist; matching-condition Re20 smoke Cd differs 6.448 between np1 and np8, reproduced in a separate one-step diagnostic."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Positivity and guarded updates are documented."
+      "score": 3,
+      "notes": "Positivity and residual guards exist; accepted plateau logic can accept no-change candidates and input error behavior is limited."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Eight validator packages and report pass structurally."
+      "score": 2.5,
+      "notes": "No CTest tests registered; structural validator passes eight packages but does not establish accuracy."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Curated source is readable; raw artifacts excluded from submission tip."
+      "score": 3,
+      "notes": "Source is monolithic and generates compiler warnings; report and scripts provide traceability."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.1
+  "overall_score": 3.29
 }

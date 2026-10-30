@@ -6,59 +6,59 @@
       "id": "res.contract",
       "title": "Output contract compliance",
       "weight": 0.2,
-      "score": 5,
-      "notes": "All eight submitted raw packages meet structural contract."
+      "score": 4,
+      "notes": "Eight packages satisfy recorded structural validator; metadata success for the unsettled Re200 wake is misleading."
     },
     {
       "id": "res.validator",
       "title": "Automated validator results",
       "weight": 0.1,
       "score": 5,
-      "notes": "Explicit examiner validation passed all eight packages and report."
+      "notes": "Recorded structural examiner validation passed; does not establish numerical correctness."
     },
     {
       "id": "res.completion",
       "title": "Case completion and convergence",
       "weight": 0.2,
-      "score": 1,
-      "notes": "Seven steady residual targets are missed but reported forces are flat and a bounded plateau is allowed; exact no-progress mechanism is unproved. Re200 claims periodicity despite persistent late amplitude decay; full case review pending."
+      "score": 2,
+      "notes": "Steady targets are missed but stable plateaus allowed; Re200 amplitude decays strongly while labeled statistically periodic."
     },
     {
       "id": "res.plausibility",
       "title": "Result plausibility and MPI consistency",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Re200 frequency is measurable but lift amplitude decays strongly; steady low-Mach/Re20 forces and rank smoke mismatch limit plausibility."
+      "score": 2,
+      "notes": "M015 Cd0.913, Re20 Cd0.573 and decaying Re200 wake limit credibility; M2 Cd0.117 scale is more plausible."
     },
     {
       "id": "res.visualization",
       "title": "Visualizations",
       "weight": 0.15,
-      "score": 5,
-      "notes": "Referenced figure assets are present and readable."
+      "score": 3,
+      "notes": "All 25 report pages render, but Re200 late shared-scale panel cannot resolve either force oscillation."
     },
     {
       "id": "res.report",
       "title": "Report quality and honesty",
       "weight": 0.15,
-      "score": 5,
-      "notes": "Report explicitly calls the steady outcomes bounded plateaus."
+      "score": 3,
+      "notes": "Report documents plateau targets and provides source manifests, but does not discuss strong Re200 amplitude decay and overstates periodic completion."
     },
     {
       "id": "res.traceability",
       "title": "Traceability of figures and claims",
       "weight": 0.05,
       "score": 4,
-      "notes": "Figure mapping is complete; curated submission omits raw files by policy."
+      "notes": "Reproducibility manifest output hashes match all eight workspace packages; selected field reproduction visually similar but not pixel-identical in current rendering environment."
     }
   ],
   "disqualification_flags": [
     {
       "id": 7,
-      "text": "Re200 marked statistically periodic while lift amplitude continues to decay",
+      "text": "metadata/status marks incomplete or failed runs as successful",
       "evidence": "Re200 metadata and report.tex:45,143 mark the full-horizon wake statistically periodic, but contestant forces.csv SHA256 78b13e45f40ae2cfbdcf566647c83ad34e3dfb08f135316a1a35ccc3f2b6c1db has CL spans 0.00238598, 0.00169178, 0.00119816, 0.000847183 in consecutive 25-unit windows t=200\u2013225, 225\u2013250, 250\u2013275, 275\u2013300. This persistent decay shows the wake has not settled statistically; approximately 8.38 period is real. The old seven-steady residual-only rationale is withdrawn because stable plateaus are permitted. Historical executable remains qualified.",
       "found": true
     }
   ],
-  "overall_score": 3.85
+  "overall_score": 3.1
 }

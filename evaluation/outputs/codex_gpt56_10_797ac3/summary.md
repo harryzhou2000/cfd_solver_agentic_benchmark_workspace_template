@@ -145,6 +145,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_gpt56_10_797ac3/review_code.md` (overall: 4.1)
-- CFD methods review: `codex_gpt56_10_797ac3/review_cfd.md` (overall: 4.72)
-- Result review: `codex_gpt56_10_797ac3/review_results.md` (overall: 3.85)
+- Code review scorecard: `codex_gpt56_10_797ac3/review_code.md` (overall: 3.29)
+- CFD methods review: `codex_gpt56_10_797ac3/review_cfd.md` (overall: 3.67)
+- Result review: `codex_gpt56_10_797ac3/review_results.md` (overall: 3.1)

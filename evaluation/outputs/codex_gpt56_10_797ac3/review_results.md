@@ -2,32 +2,32 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:58:04.825155+00:00
+Generated: 2026-10-30T12:59:55.094024+00:00
 
-**Overall score: 3.85**
+**Overall score: 3.1**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | All eight submitted raw packages meet structural contract. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Eight packages satisfy recorded structural validator; metadata success for the unsettled Re200 wake is misleading. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit examiner validation passed all eight packages and report. |
+| 2 | **res.validator** Automated validator results | 0.10 | 5 | Recorded structural examiner validation passed; does not establish numerical correctness. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 1 | Seven steady residual targets are missed but reported forces are flat and a bounded plateau is allowed; exact no-progress mechanism is unproved. Re200 claims periodicity despite persistent late amplitude decay; full case review pending. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Steady targets are missed but stable plateaus allowed; Re200 amplitude decays strongly while labeled statistically periodic. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Re200 frequency is measurable but lift amplitude decays strongly; steady low-Mach/Re20 forces and rank smoke mismatch limit plausibility. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | M015 Cd0.913, Re20 Cd0.573 and decaying Re200 wake limit credibility; M2 Cd0.117 scale is more plausible. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 5 | Referenced figure assets are present and readable. |
+| 5 | **res.visualization** Visualizations | 0.15 | 3 | All 25 report pages render, but Re200 late shared-scale panel cannot resolve either force oscillation. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 5 | Report explicitly calls the steady outcomes bounded plateaus. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Report documents plateau targets and provides source manifests, but does not discuss strong Re200 amplitude decay and overstates periodic completion. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Figure mapping is complete; curated submission omits raw files by policy. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Reproducibility manifest output hashes match all eight workspace packages; selected field reproduction visually similar but not pixel-identical in current rendering environment. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T12:58:04.825155+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.85
+- Overall score (0-5): 3.1
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Conservative equations and nondimensionalization documented."
+      "score": 4,
+      "notes": "Conservative ideal-gas state and case nondimensional inputs at main.cpp:86\u2013117 and report.tex:22\u201323; accuracy remains empirical."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "CGNS unstructured mesh path and geometry evidence submitted."
+      "score": 4,
+      "notes": "CGNS zones, TRI_3/QUAD_4/BAR_2 geometry and graph at main.cpp:168\u2013245; CGNS MIXED sections are skipped."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Face-oriented finite-volume residual documented and source present."
+      "score": 4,
+      "notes": "Face-oriented residual and global norms implemented; major Re20 rank mismatch limits verified behavior."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Roe with smoothing and Rusanov selections are distinguished."
+      "score": 4,
+      "notes": "Selectable Roe and Rusanov; report records case-specific selection and Re200 low-Mach adjustments."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Farfield, slip, and no-slip treatments documented."
+      "score": 4,
+      "notes": "Farfield and wall implementations exist; no-slip wall rows are emitted as wall state; low-Mach accuracy remains limited."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 5,
-      "notes": "Least-squares piecewise-linear reconstruction documented."
+      "score": 4,
+      "notes": "Least-squares linear reconstruction and common Barth limiter in main.cpp:501\u2013508,640\u2013658; no smooth-order proof."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Positivity backtrack and limiter rationale provided."
+      "score": 4,
+      "notes": "Barth-type common limiter and positivity backtracking are present; component mode is explicitly disabled in Re200 metadata."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Newtonian stress and Fourier heat flux documented."
+      "score": 4,
+      "notes": "Newtonian/Fourier flux and explicit tangential traction projection main.cpp:1064,1271\u20131304; Cf uses absolute shear."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Pseudo-time method exists, but steady target convergence is not achieved."
+      "score": 3,
+      "notes": "Local pseudo-time/Anderson source exists but accepted no-change states may satisfy plateau, with minimal residual reduction in low-Mach and Re20 cases."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Active-operator BDF2 source and 30000-step history are present; Re200 lift frequency persists but amplitude continues to decay, contrary to statistically settled wake claim. Score provisional."
+      "score": 3,
+      "notes": "Active-state BDF2 target checks and 30000 rows exist, but actual lift amplitude steadily decays despite periodic label."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 3,
-      "notes": "METIS/halo design exists; smoke-force inconsistency limits confidence."
+      "score": 2.5,
+      "notes": "METIS/neighbor communication and rank-local state are present; Re20 np1/8 order-one startup force difference reproduced independently."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.72
+  "overall_score": 3.67
 }

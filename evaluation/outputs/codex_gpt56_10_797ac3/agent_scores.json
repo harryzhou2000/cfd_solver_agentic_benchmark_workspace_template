@@ -27,67 +27,67 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 5,
-          "notes": "CMake build and documented runner submitted."
+          "score": 4,
+          "notes": "Immutable clean CMake build succeeds using bundled dependencies; no registered tests and initial configuration needs the expected external layout."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Runner and documented case controls present."
+          "score": 4,
+          "notes": "main.cpp:1655\u20131660 parses case/output/restart and overrides; validation of invalid inputs and unknown options is limited."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
-          "score": 4,
-          "notes": "Solver, tools, and report are separated."
+          "score": 2.5,
+          "notes": "Approximately 2700-line main.cpp holds mesh, solver, MPI and output; report tools are separate."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "No authorship investigation; source reviewed only."
+          "notes": "Source reviewed for internal wrapping; no external authorship search and no positive copying claim."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "Case metadata drives production paths."
+          "notes": "Case JSON drives mesh and controls; CGNS element support is limited to explicit types, not two named mesh files."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Distributed implementation exists, but submitted smoke comparison has large rank-dependent force deltas."
+          "score": 2.5,
+          "notes": "METIS and neighbor halos exist; matching-condition Re20 smoke Cd differs 6.448 between np1 and np8, reproduced in a separate one-step diagnostic."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Positivity and guarded updates are documented."
+          "score": 3,
+          "notes": "Positivity and residual guards exist; accepted plateau logic can accept no-change candidates and input error behavior is limited."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Eight validator packages and report pass structurally."
+          "score": 2.5,
+          "notes": "No CTest tests registered; structural validator passes eight packages but does not establish accuracy."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": 4,
-          "notes": "Curated source is readable; raw artifacts excluded from submission tip."
+          "score": 3,
+          "notes": "Source is monolithic and generates compiler warnings; report and scripts provide traceability."
         }
       ],
-      "overall_score": 4.1,
+      "overall_score": 3.29,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -96,81 +96,81 @@
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 5,
-          "notes": "Conservative equations and nondimensionalization documented."
+          "score": 4,
+          "notes": "Conservative ideal-gas state and case nondimensional inputs at main.cpp:86\u2013117 and report.tex:22\u201323; accuracy remains empirical."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
-          "score": 5,
-          "notes": "CGNS unstructured mesh path and geometry evidence submitted."
+          "score": 4,
+          "notes": "CGNS zones, TRI_3/QUAD_4/BAR_2 geometry and graph at main.cpp:168\u2013245; CGNS MIXED sections are skipped."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 5,
-          "notes": "Face-oriented finite-volume residual documented and source present."
+          "score": 4,
+          "notes": "Face-oriented residual and global norms implemented; major Re20 rank mismatch limits verified behavior."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Roe with smoothing and Rusanov selections are distinguished."
+          "score": 4,
+          "notes": "Selectable Roe and Rusanov; report records case-specific selection and Re200 low-Mach adjustments."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Farfield, slip, and no-slip treatments documented."
+          "score": 4,
+          "notes": "Farfield and wall implementations exist; no-slip wall rows are emitted as wall state; low-Mach accuracy remains limited."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 5,
-          "notes": "Least-squares piecewise-linear reconstruction documented."
+          "score": 4,
+          "notes": "Least-squares linear reconstruction and common Barth limiter in main.cpp:501\u2013508,640\u2013658; no smooth-order proof."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Positivity backtrack and limiter rationale provided."
+          "score": 4,
+          "notes": "Barth-type common limiter and positivity backtracking are present; component mode is explicitly disabled in Re200 metadata."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Newtonian stress and Fourier heat flux documented."
+          "score": 4,
+          "notes": "Newtonian/Fourier flux and explicit tangential traction projection main.cpp:1064,1271\u20131304; Cf uses absolute shear."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Pseudo-time method exists, but steady target convergence is not achieved."
+          "score": 3,
+          "notes": "Local pseudo-time/Anderson source exists but accepted no-change states may satisfy plateau, with minimal residual reduction in low-Mach and Re20 cases."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Active-operator BDF2 source and 30000-step history are present; Re200 lift frequency persists but amplitude continues to decay, contrary to statistically settled wake claim. Score provisional."
+          "score": 3,
+          "notes": "Active-state BDF2 target checks and 30000 rows exist, but actual lift amplitude steadily decays despite periodic label."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 3,
-          "notes": "METIS/halo design exists; smoke-force inconsistency limits confidence."
+          "score": 2.5,
+          "notes": "METIS/neighbor communication and rank-local state are present; Re20 np1/8 order-one startup force difference reproduced independently."
         }
       ],
-      "overall_score": 4.72,
+      "overall_score": 3.67,
       "disqualification_flags": []
     },
     "result_review": {
@@ -179,57 +179,57 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 5,
-          "notes": "All eight submitted raw packages meet structural contract."
+          "score": 4,
+          "notes": "Eight packages satisfy recorded structural validator; metadata success for the unsettled Re200 wake is misleading."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 5,
-          "notes": "Explicit examiner validation passed all eight packages and report."
+          "notes": "Recorded structural examiner validation passed; does not establish numerical correctness."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 1,
-          "notes": "Seven steady residual targets are missed but reported forces are flat and a bounded plateau is allowed; exact no-progress mechanism is unproved. Re200 claims periodicity despite persistent late amplitude decay; full case review pending."
+          "score": 2,
+          "notes": "Steady targets are missed but stable plateaus allowed; Re200 amplitude decays strongly while labeled statistically periodic."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Re200 frequency is measurable but lift amplitude decays strongly; steady low-Mach/Re20 forces and rank smoke mismatch limit plausibility."
+          "score": 2,
+          "notes": "M015 Cd0.913, Re20 Cd0.573 and decaying Re200 wake limit credibility; M2 Cd0.117 scale is more plausible."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Referenced figure assets are present and readable."
+          "score": 3,
+          "notes": "All 25 report pages render, but Re200 late shared-scale panel cannot resolve either force oscillation."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Report explicitly calls the steady outcomes bounded plateaus."
+          "score": 3,
+          "notes": "Report documents plateau targets and provides source manifests, but does not discuss strong Re200 amplitude decay and overstates periodic completion."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
           "score": 4,
-          "notes": "Figure mapping is complete; curated submission omits raw files by policy."
+          "notes": "Reproducibility manifest output hashes match all eight workspace packages; selected field reproduction visually similar but not pixel-identical in current rendering environment."
         }
       ],
-      "overall_score": 3.85,
+      "overall_score": 3.1,
       "disqualification_flags": [
         {
           "id": 7,
-          "text": "Re200 marked statistically periodic while lift amplitude continues to decay",
+          "text": "metadata/status marks incomplete or failed runs as successful",
           "evidence": "Re200 metadata and report.tex:45,143 mark the full-horizon wake statistically periodic, but contestant forces.csv SHA256 78b13e45f40ae2cfbdcf566647c83ad34e3dfb08f135316a1a35ccc3f2b6c1db has CL spans 0.00238598, 0.00169178, 0.00119816, 0.000847183 in consecutive 25-unit windows t=200\u2013225, 225\u2013250, 250\u2013275, 275\u2013300. This persistent decay shows the wake has not settled statistically; approximately 8.38 period is real. The old seven-steady residual-only rationale is withdrawn because stable plateaus are permitted. Historical executable remains qualified.",
           "found": true
         }
@@ -238,77 +238,77 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 90,
+    "total_scored": 74.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 10,
-        "notes": "Complete build/CLI and contract evidence."
+        "score": 9,
+        "notes": "Clean immutable build succeeds with bundled dependencies; no CTest tests registered. CLI and output schema are present; input error handling remains limited."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
-        "score": 10,
-        "notes": "CGNS unstructured geometry implementation."
+        "score": 8.5,
+        "notes": "main.cpp:168\u2013245 reads multi-zone TRI_3/QUAD_4/BAR_2, geometry and adjacency; other sections including CGNS MIXED are silently skipped."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 15,
-        "notes": "Conservative residual and named boundary treatments."
+        "score": 12.5,
+        "notes": "Conservative face assembly and Roe/Rusanov choices are present; low-Mach and wall results have large physics and MPI uncertainties."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 10,
-        "notes": "Least-squares linear reconstruction with limiter."
+        "score": 8,
+        "notes": "Least-squares slopes, Barth-type common limiter and positivity checks exist; no independent smooth-order demonstration. Re200 component limiter is disabled and common limiter remains active."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 10,
-        "notes": "Laminar stresses and heat flux documented."
+        "score": 9,
+        "notes": "Newtonian/Fourier terms and wall no-slip exist; main.cpp:1271\u20131304 projects tangential traction as claimed. Surface Cf uses absolute shear; negative Mach-2 viscous drag and Re20 discrepancy constrain confidence."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 14,
-        "notes": "Provisional: BDF2/active inner source present; Re200 wake not statistically settled and steady residual targets unmet."
+        "score": 12,
+        "notes": "Steady local iterative source and BDF2 active-residual checks exist; many steady results plateau at weak residual reduction, and the reported periodic Re200 wake amplitude keeps decaying."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 7,
-        "notes": "Partition/halo implementation, limited by materially inconsistent smoke forces."
+        "score": 6,
+        "notes": "METIS, local/ghost data, neighbor communication and reductions present; matched Re20 smoke results differ by Cd6.448 at step100 and independent one-step diagnostic reproduces the startup discrepancy."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 4,
-        "notes": "Provisional: steady targets unmet but stable plateaus are allowed; Re200 wake amplitude decays despite periodic status."
+        "score": 3,
+        "notes": "Eight packages and visualizations exist; low-Mach/Re20 forces are suspect, M2 scale is more plausible, Re200 wake remains decaying. MPI comparison is provided but inconsistent."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "Complete, readable, and unusually candid report."
+        "score": 3.5,
+        "notes": "25-page report provides case tables, plots, contours and manifest but does not expose Re200 amplitude decay, and its late force panel cannot resolve the oscillations."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 5,
-        "notes": "Configuration and postprocessing tools submitted."
+        "score": 2.5,
+        "notes": "Case JSON configures physics and BCs but the 2-D solver, mesh, EOS and algorithms are concentrated in a large main.cpp; extension interfaces are limited."
       }
     ]
   },
@@ -350,10 +350,82 @@
     "triggered": true,
     "flags": [
       {
+        "id": 1,
+        "text": "Existing solver executable called internally",
+        "evidence": "main.cpp implements finite-volume solver; no internal solver wrapper found.",
+        "found": false
+      },
+      {
+        "id": 2,
+        "text": "Force or residual files generated without solving",
+        "evidence": "main.cpp:1322\u20131323 writes from solver residual and integrated force; no direct fabricated-history path established, historical binary qualified.",
+        "found": false
+      },
+      {
+        "id": 3,
+        "text": "Hard-coded mesh filenames",
+        "evidence": "main.cpp:86\u2013117,168 reads case-configured mesh paths, not two filename-specific solver branches.",
+        "found": false
+      },
+      {
+        "id": 4,
+        "text": "Order-one steady MPI result changes",
+        "evidence": "Historical Re20 np1/np8 same-case 100-step smoke Cd -2.95491/-9.40322 differs 6.44831, and isolated matched-controls one-step diagnostic reproduces the historical first rows. Both historical runs are explicitly failed and unconverged; unlike the matched converged-tail glm53-01 precedent, a final steady-result difference is not established. This is a serious documented MPI defect and literal-trigger boundary, not proof of rank-independent results.",
+        "found": false
+      },
+      {
+        "id": 5,
+        "text": "Explicit time stepping only",
+        "evidence": "Steady iterative and BDF2 active residual/inner solves appear in main.cpp; not explicit-only.",
+        "found": false
+      },
+      {
+        "id": 6,
+        "text": "Report claims algorithms absent from source",
+        "evidence": "Roe/Rusanov, LSQ reconstruction, common Barth-type limiter, viscous terms, METIS and BDF2 source exist. Report calls the limiter componentwise while Re200 explicitly disables that option; common limiter remains active, so a completely absent algorithm is not established.",
+        "found": false
+      },
+      {
         "id": 7,
         "text": "metadata/status marks incomplete or failed runs as successful",
         "evidence": "Re200 metadata and report.tex:45,143 mark the full-horizon wake statistically periodic, but contestant forces.csv SHA256 78b13e45f40ae2cfbdcf566647c83ad34e3dfb08f135316a1a35ccc3f2b6c1db has CL spans 0.00238598, 0.00169178, 0.00119816, 0.000847183 in consecutive 25-unit windows t=200\u2013225, 225\u2013250, 250\u2013275, 275\u2013300. This persistent decay shows the wake has not settled statistically; approximately 8.38 period is real. The old seven-steady residual-only rationale is withdrawn because stable plateaus are permitted. Historical executable remains qualified.",
         "found": true
+      },
+      {
+        "id": 8,
+        "text": "Report figures do not correspond to submitted outputs",
+        "evidence": "All eight case output hashes match contestant reproducibility manifest; selected Re20 field rendered similarly using the submitted plotting code but exact pixels differ with this rendering environment. No specific unrelated figure established.",
+        "found": false
+      },
+      {
+        "id": 9,
+        "text": "METIS claimed but geometric split/full-state replication",
+        "evidence": "main.cpp:280 uses METIS; :1660\u20131723 retains global mesh only on rank zero for preprocessing and frees it before iterations; neighbor halos are implemented.",
+        "found": false
+      },
+      {
+        "id": 10,
+        "text": "Claimed second-order reconstruction or limiter disabled",
+        "evidence": "Linear reconstruction and common limiter source are present; metadata Re200 component mode0 selects common mode rather than proving reconstruction disabled. Historical binary qualified.",
+        "found": false
+      },
+      {
+        "id": 11,
+        "text": "No-slip surface rows use undocumented cell-center velocity",
+        "evidence": "main.cpp:1274\u20131279 writes stationary no-slip boundary velocity; report describes wall values.",
+        "found": false
+      },
+      {
+        "id": 12,
+        "text": "Misnamed figures",
+        "evidence": "Report and generator label Mach and Pressure fields by respective VTK arrays; no specific mislabeled image established.",
+        "found": false
+      },
+      {
+        "id": 13,
+        "text": "Copied/adapted external solver core",
+        "evidence": "No positive evidence established in submitted source; no external authorship investigation was performed.",
+        "found": false
       }
     ]
   },
@@ -362,6 +434,7 @@
     "Re200 was not rerun.",
     "Structural validation does not establish numerical convergence or MPI equivalence.",
     "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
-    "2026-10-30 calibration remains partial: rubric and seven steady cases are provisional; historical executable and rank-smoke DQ boundary are not fully bound."
+    "2026-10-30 calibration remains partial: rubric and seven steady cases are provisional; historical executable and rank-smoke DQ boundary are not fully bound.",
+    "DQ4 remains a qualified boundary: the large, reproduced startup rank difference is demonstrated in deliberately failed short runs, while a matched converged steady comparison is not available."
   ]
 }
