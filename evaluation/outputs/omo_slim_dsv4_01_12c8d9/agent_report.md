@@ -1,3 +1,7 @@
+## Calibration checkpoint (partial)
+
+**83.5/100; DQ=true (provisional, trigger 7).** M2 laminar is marked converged at512 while final100 Cd falls 0.116949→0.106302; its true three-order residual decrease does not establish stable early forces. Re200 metadata says statistically periodic although the later run has no resolved lift shedding; the final assistant response candidly says so and the earlier report said no data. Old case note incorrectly treated expected St≈0.19–0.20 as an observed value and period. Source, remaining cases and DQ review continue.
+
 # Agent Evaluation Report — 01
 
 - Evaluated at: 2026-08-14T08:30:00+00:00

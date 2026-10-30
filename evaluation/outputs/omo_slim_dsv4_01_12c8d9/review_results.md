@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:54:04.050499+00:00
+Generated: 2026-10-30T16:10:33.039544+00:00
 
-**Overall score: 4.45**
+**Overall score: 4.05**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,7 +15,7 @@ Generated: 2026-09-07T02:54:04.050499+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit evaluator validation: 8/8 case directories and report OK. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Seven steady cases converge; Re200 reaches t=300 statistically_periodic but lacks the requested shedding. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | M2 laminar marked converged at512 despite Cd0.116949→0.106302 final100; Re200 stat-periodic label has no resolved shedding. Final response discloses no vortex street; DQ7. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Fields are readable and finite by validator; Re200 terminal lift is near zero and no vortex street is observed. |
@@ -41,7 +41,7 @@ Generated: 2026-09-07T02:54:04.050499+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.45
+- Overall score (0-5): 4.05
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

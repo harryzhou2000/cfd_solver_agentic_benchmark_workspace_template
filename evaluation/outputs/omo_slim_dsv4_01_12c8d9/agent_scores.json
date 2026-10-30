@@ -198,8 +198,8 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 4,
-          "notes": "Seven steady cases converge; Re200 reaches t=300 statistically_periodic but lacks the requested shedding."
+          "score": 2,
+          "notes": "M2 laminar marked converged at512 despite Cd0.116949\u21920.106302 final100; Re200 stat-periodic label has no resolved shedding. Final response discloses no vortex street; DQ7."
         },
         {
           "id": "res.plausibility",
@@ -230,13 +230,13 @@
           "notes": "Report-figure references are committed and source-side manifests/results are readable but raw results were correctly excluded from Git."
         }
       ],
-      "overall_score": 4.45,
+      "overall_score": 4.05,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 85,
+    "total_scored": 83.5,
     "sections": [
       {
         "id": "build_cli",
@@ -291,15 +291,15 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 5,
-        "notes": "Steady cases are structurally complete and visualizable; Re200 reaches t=300 without a vortex street and no MPI comparison credit."
+        "score": 4,
+        "notes": "M2 laminar marked converged despite final100 drag drift; Re200 metadata says periodic despite no resolved shedding. Final response discloses no vortex street."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "Committed report is detailed, well-illustrated, traceable, and honest about limitations."
+        "score": 4.5,
+        "notes": "Report predates full Re200 and correctly says no data at that time; it calls M2 early result converged despite force drift. Final response candidly discloses no vortex street."
       },
       {
         "id": "extensibility",
@@ -332,8 +332,8 @@
       "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-4.98e-4, CD=1.215e-1 at 51d1a78:solver/report/report.tex:501; residual history 51d1a78:solver/report/figures/naca0012_m080_laminar_re5000_residuals.png (referenced at solver/report/report.tex:656); force history 51d1a78:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:661); computed-field contour 51d1a78:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/report.tex:676). Score 5 retained after the post-processing audit. Prior case judgment: Explicit validator pass and converged result; no case-specific adverse finding in the reviewed evidence."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 5,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-9.95e-4, CD=1.063e-1 at 51d1a78:solver/report/report.tex:503; residual history 51d1a78:solver/report/figures/naca0012_m200_laminar_re5000_residuals.png (referenced at solver/report/report.tex:752); force history 51d1a78:solver/report/figures/naca0012_m200_laminar_re5000_forces.png (referenced at solver/report/report.tex:757); computed-field contour 51d1a78:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/report.tex:772). Score 5 retained after the post-processing audit. Prior case judgment: Explicit validator pass and converged result; no case-specific adverse finding in the reviewed evidence."
+      "score": 1.5,
+      "notes": "Workspace metadata SHA256 b2fc0941ffc0f3d2d2187d5d2281bf30c46e86a5a742c276a77fd3dbb5697233 marks completed/converged at512, also report.tex:738\u2013740. Force CSV SHA256 8e487de019273142c1486349fe70e68f6903ce2f03998927cdbe6dd771c509a3 Cd0.1530094\u21920.1063017 final200, 0.1169490\u21920.1063017 final100, 0.1105889\u21920.1063017 final50. Actual residual reduction3.0397 orders is credited but early force-stable convergence is not established (TASK.md:140,172). DQ7; score5\u21921.5. Source and provenance pending."
     },
     "cylinder_m010_laminar_re20": {
       "score": 5,
@@ -341,12 +341,19 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
-      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; shedding statistic St=0.19, period=0.19 at 51d1a78:solver/report/report.tex:847; no committed/referenced late-time periodic-force plot. Score 1 retained after the post-processing audit. Prior case judgment: Reaches t=300 and validates structurally, but near-zero terminal lift and no vortex street/shedding make the physical result unusable."
+      "notes": "Workspace metadata SHA256 647f79f5df9d261f3334fd24136977004f22e60d624880a13696fce70f04f27d marks completed/statistically_periodic at t300, but force SHA256 45f898081bbad24dc53d76a0d129fda7d265d6c965cd2edebe64029d9c23fda0 t>=150 gives Cl0.00012174..0.00014362 and RMS4.38e\u22126, Cd1.79074..1.79134: no resolved vortex shedding. Selected final assistant response explicitly acknowledges near-zero lift/no vortex street; report.tex:838\u2013853 predates this later run and says no data, so no concealment inferred. Report\u2019s St\u22480.19\u20130.20 is an expected literature value, not a measured statistic or period, correcting prior note. Score1 retained; DQ7 is independently supported by M2 early force instability. No unsteady rerun."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "Workspace M2 laminar metadata SHA256 b2fc0941ffc0f3d2d2187d5d2281bf30c46e86a5a742c276a77fd3dbb5697233 marks completed/converged at512 while force SHA256 8e487de019273142c1486349fe70e68f6903ce2f03998927cdbe6dd771c509a3 shows Cd0.1169490\u21920.1063017 final100 and 0.1530094\u21920.1063017 final200; the actual 3.040-order residual decrease does not establish early force-stable convergence (TASK.md:140,172). Separately Re200 metadata 647f79f5df9d261f3334fd24136977004f22e60d624880a13696fce70f04f27d says completed/statistically_periodic, but force SHA256 45f898081bbad24dc53d76a0d129fda7d265d6c965cd2edebe64029d9c23fda0 t>=150 Cl0.00012174..0.00014362, RMS4.38e\u22126, with no resolved shedding. Selected final response candidly says no vortex street; pre-run report says no data. No concealment is inferred; status misclassifies the required result."
+      }
+    ]
   },
   "limitations": [
     "Pre-run provenance is a post-run operator-approved reconstruction; original harness/container and runtime environment are unavailable.",

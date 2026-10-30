@@ -86,4 +86,4 @@ None detected.
 
 - Code review scorecard: `omo_slim_dsv4_01_12c8d9/review_code.md` (overall: 4.2)
 - CFD methods review: `omo_slim_dsv4_01_12c8d9/review_cfd.md` (overall: 4.53)
-- Result review: `omo_slim_dsv4_01_12c8d9/review_results.md` (overall: 4.45)
+- Result review: `omo_slim_dsv4_01_12c8d9/review_results.md` (overall: 4.05)
