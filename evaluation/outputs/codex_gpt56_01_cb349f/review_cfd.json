@@ -55,8 +55,8 @@
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Corrected primitive gradients, Newtonian/Fourier flux and tangential skin-friction split are implemented."
+      "score": 4,
+      "notes": "physics.cpp:351\u2013356 forms full tau\u00b7n traction and solver.cpp:618\u2013628 integrates it without tangential projection; separate surface cf at :1094\u20131102 is tangential. Report.tex:195 incorrectly calls integrated viscous force tangent-projected. Exact normal contribution is not quantified."
     },
     {
       "id": "cfd.implicit",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.92
+  "overall_score": 4.82
 }

@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:41:55.545877+00:00
+Generated: 2026-10-30T10:45:03.144281+00:00
 
-**Overall score: 4.85**
+**Overall score: 4.67**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,7 +15,7 @@ Generated: 2026-10-30T10:41:55.545877+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit validator returned OK for all eight directories and report. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 5 | Seven steady cases converged; Re200 statistically periodic at t=300 from readable run_status/statistics. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 4.5 | All eight historical packages pass validator with strong Re200 evidence; M015 inviscid terminal Cd falls ~26% relative over its final 200 samples, though absolute change near zero is small. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 5 | Positive minima, stable force tails, Re20 steady Cd 2.0469, and Re200 shedding St 0.16667 with rank consistency evidence. |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T10:41:55.545877+00:00
 | 5 | **res.visualization** Visualizations | 0.15 | 5 | 49 manifest-traced curated figures include histories, Mach/pressure and Re200 wake vorticity. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 4 | Detailed and candid report compiles directly from report/; submitted build_report.sh fails from solver root due relative figure paths. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3.5 | Report and figures are substantial; build_report.sh has working-directory defect and report.tex:195 incorrectly describes integrated viscous traction as tangential. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 5 | 49-entry manifest resolves figures to historical CSV/VTU data; spot-checked reported statistics match result_statistics.json. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T10:41:55.545877+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.85
+- Overall score (0-5): 4.67
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

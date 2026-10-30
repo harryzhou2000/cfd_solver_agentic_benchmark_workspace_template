@@ -145,8 +145,8 @@
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Corrected primitive gradients, Newtonian/Fourier flux and tangential skin-friction split are implemented."
+          "score": 4,
+          "notes": "physics.cpp:351\u2013356 forms full tau\u00b7n traction and solver.cpp:618\u2013628 integrates it without tangential projection; separate surface cf at :1094\u20131102 is tangential. Report.tex:195 incorrectly calls integrated viscous force tangent-projected. Exact normal contribution is not quantified."
         },
         {
           "id": "cfd.implicit",
@@ -170,7 +170,7 @@
           "notes": "Eight-rank NACA/cylinder final runs plus np1/2/4 comparisons show near-identical terminal forces."
         }
       ],
-      "overall_score": 4.92,
+      "overall_score": 4.82,
       "disqualification_flags": []
     },
     "result_review": {
@@ -193,8 +193,8 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Seven steady cases converged; Re200 statistically periodic at t=300 from readable run_status/statistics."
+          "score": 4.5,
+          "notes": "All eight historical packages pass validator with strong Re200 evidence; M015 inviscid terminal Cd falls ~26% relative over its final 200 samples, though absolute change near zero is small."
         },
         {
           "id": "res.plausibility",
@@ -214,8 +214,8 @@
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Detailed and candid report compiles directly from report/; submitted build_report.sh fails from solver root due relative figure paths."
+          "score": 3.5,
+          "notes": "Report and figures are substantial; build_report.sh has working-directory defect and report.tex:195 incorrectly describes integrated viscous traction as tangential."
         },
         {
           "id": "res.traceability",
@@ -225,13 +225,13 @@
           "notes": "49-entry manifest resolves figures to historical CSV/VTU data; spot-checked reported statistics match result_statistics.json."
         }
       ],
-      "overall_score": 4.85,
+      "overall_score": 4.67,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 97,
+    "total_scored": 94.5,
     "sections": [
       {
         "id": "build_cli",
@@ -265,8 +265,8 @@
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 10,
-        "notes": "Gradients, Newtonian/Fourier model, wall treatment and force split verified."
+        "score": 8.5,
+        "notes": "physics.cpp:351\u2013356 forms full tau\u00b7n traction and solver.cpp:618\u2013628 integrates it without tangential projection; separate surface cf at :1094\u20131102 is tangential. Report.tex:195 incorrectly calls integrated viscous force tangent-projected. Exact normal contribution is not quantified."
       },
       {
         "id": "implicit_transient",
@@ -286,15 +286,15 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 10,
-        "notes": "All eight historical final results validate and show credible reported completion."
+        "score": 9.5,
+        "notes": "All eight historical packages pass validator with strong Re200 evidence; M015 inviscid terminal Cd falls ~26% relative over its final 200 samples, though absolute change near zero is small."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4,
-        "notes": "High-quality, traceable report; wrapper reproducibility defect."
+        "score": 3.5,
+        "notes": "Report and figures are substantial; build_report.sh has working-directory defect and report.tex:195 incorrectly describes integrated viscous traction as tangential."
       },
       {
         "id": "extensibility",
@@ -375,7 +375,7 @@
       {
         "id": 6,
         "text": "Report claims missing algorithms",
-        "evidence": "Claimed METIS, halos, limiter, viscous gradients and BDF2 each found in source.",
+        "evidence": "Report.tex:195 claims tangent-projected integrated viscous traction, but physics.cpp:351\u2013356 and solver.cpp:618\u2013628 integrate full traction. Surface cf separately projects tangentially at solver.cpp:1094\u20131102. This is a claimed output computed by a different code path, scored under viscous/report rather than automatic absent-algorithm DQ6, consistent with sonnet46-02 and dsv4-03; exact normal contribution and historic executable remain unbound.",
         "found": false
       },
       {

@@ -114,7 +114,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
 | `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
-| `codex_gpt56_01_cb349f` | partial: Re200 2→4.5; remaining rubric/cases/DQ under review |
+| `codex_gpt56_01_cb349f` | partial: provisional 94.5/100, no DQ found; source/DQ review ongoing |
 | `codex_gpt56_02_38616e` | unreviewed |
 | `codex_gpt56_03_93b257` | unreviewed |
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
@@ -1027,3 +1027,6 @@ gpt56_01 Re200 correction: report af2fcc3:solver/report/report.tex:593,1271 supp
 
 
 gpt56_01 steady case checkpoint: all seven immutable force/residual/Mach plots individually visually checked, and workspace final200 force windows compared with contestant 0ee54ae figure_manifest and report. Per-case notes record exact raw and force-image hashes, Cd/Cl ranges, residual reduction and historical revision. M015 inviscid Cd0.0007517107→0.0005541437 over final200 (about26% relative drop, absolute0.00019757), Cl span0.0001874; score5→4. M080 inviscid Cd span0.0001104 around0.00826 (~1.3%); score5→4.5. Other five retain5 on actual delivered residual, numeric force and near-body field evidence. Report.tex:247 discloses 200-sample gate normalized by max(1,|mean|), so near-zero force drift alone is not evidence of false-success DQ. Reported metadata source revision461385a matches curated solver/main; exact runtime binary still unbound. Rubric97 and remaining source/DQ review remain partial; no CFD rerun.
+
+
+gpt56_01 source/force-split checkpoint: af2fcc3 report.tex:195 claims pressure and tangent-projected viscous traction are separately integrated. physics.cpp:351–356 computes full Newtonian tau·n; solver.cpp:618–628 integrates both components without tangent projection. Surface cf at solver.cpp:1094–1102 separately projects tangentially. Historical metadata revision461385a solver.cpp exactly matches curated bytes; actual normal contribution and binary hash are unbound. Viscous rubric10→8.5 and report4→3.5; this follows sonnet46-02/dsv4-03 precedent of a claimed output computed through a different path, not mechanical DQ6. Case-results10→9.5 separately for M015 inviscid terminal low-drag drift, total97→94.5. Clean source build in network-disabled cfd-bench needed explicit -I/opt/external/boost; seven CTests passed, then both MPI tests passed with container-only OpenMPI root/oversubscription settings after initial root guard failure. Remaining rubric/review/DQ provenance partial; no CFD rerun.

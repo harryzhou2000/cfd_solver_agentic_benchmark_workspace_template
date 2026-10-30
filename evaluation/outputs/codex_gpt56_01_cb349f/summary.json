@@ -700,8 +700,8 @@
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Corrected primitive gradients, Newtonian/Fourier flux and tangential skin-friction split are implemented."
+        "score": 4,
+        "notes": "physics.cpp:351\u2013356 forms full tau\u00b7n traction and solver.cpp:618\u2013628 integrates it without tangential projection; separate surface cf at :1094\u20131102 is tangential. Report.tex:195 incorrectly calls integrated viscous force tangent-projected. Exact normal contribution is not quantified."
       },
       {
         "id": "cfd.implicit",
@@ -757,7 +757,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.92
+    "overall_score": 4.82
   },
   "result_review": {
     "review_area": "result_review",
@@ -781,8 +781,8 @@
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 5,
-        "notes": "Seven steady cases converged; Re200 statistically periodic at t=300 from readable run_status/statistics."
+        "score": 4.5,
+        "notes": "All eight historical packages pass validator with strong Re200 evidence; M015 inviscid terminal Cd falls ~26% relative over its final 200 samples, though absolute change near zero is small."
       },
       {
         "id": "res.plausibility",
@@ -802,8 +802,8 @@
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Detailed and candid report compiles directly from report/; submitted build_report.sh fails from solver root due relative figure paths."
+        "score": 3.5,
+        "notes": "Report and figures are substantial; build_report.sh has working-directory defect and report.tex:195 incorrectly describes integrated viscous traction as tangential."
       },
       {
         "id": "res.traceability",
@@ -840,7 +840,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.85
+    "overall_score": 4.67
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/01",
