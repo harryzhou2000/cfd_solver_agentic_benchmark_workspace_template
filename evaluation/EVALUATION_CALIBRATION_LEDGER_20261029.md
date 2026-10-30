@@ -79,7 +79,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_02_3447d3` | fully reviewed: 68/100, DQ7 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_03_294b64` | fully reviewed: 74/100, DQ7; both gates pass |
 | `codex_dsv4_flash_04_755869` | fully reviewed: 47/100, DQ7; sibling-result reuse; both gates pass |
-| `codex_dsv4_flash_06_5b6b08` | partial: live workspace output absence verified; source/rubric/DQ pending |
+| `codex_dsv4_flash_06_5b6b08` | partial: 65/100 source assessment, no DQ established; original case packages/figures absent |
 | `codex_dsv4_flash_07_aeae21` | unreviewed |
 | `codex_dsv4_flash_08_efba3c` | unreviewed |
 | `codex_dsv4_flash_09_526316` | unreviewed |
@@ -399,3 +399,5 @@ Rubric 48→47/100, DQ7 true; prior DQ2 is not established because the copied hi
 ## dsv4_flash_06 partial evidence recheck — 2026-10-30
 
 No `solver/results` directory or case metadata, residual/force histories, rendered figures or sibling PDF currently exists anywhere under the contestant workspace; report.tex supplies numeric claims but they cannot be verified against current delivered case data. This is independent of the correct policy excluding raw data from curated commit. Eight case scores remain 0, and unavailable evidence alone does not establish DQ. Immutable `e998060` main.cpp:93–101 broadcasts global mesh during preprocessing but drops it on all nonroot ranks before solver.run() :128; no TASK all-rank full-mesh-in-iterations finding. Solver.cpp:1693–1716 distinguishes strict transient target from early degradation but original metadata/statistics are absent. Remaining source/rubric/DQ partial; both gates pass; no CFD rerun.
+
+dsv4_flash_06 source/rubric checkpoint: 63→65/100 after reviewing ten rubric sections and 27 points. Extensibility increases 0→3 for actual modular gas/mesh/solver/I/O interfaces; report gets 1 for existing method text, while all cases remain 0 because no live case packages survive. Viscous 8→7: Solver.cpp:676–704 includes full traction in total force but tangent-only viscous split, so normal traction can make components not sum to total; no absent data are used to quantify it. Implicit 10→9 because main.cpp:106–121 reloads only current state, not previous BDF level or physical time. Root-only mesh lifetime and strict transient count logic documented above; no DQ inferred from missing output. Immutable clean build passes with warnings in restricted network-disabled cfd-bench. Overall review remains partial due unavailable original case/figure/PDF evidence; both gates pass, no CFD rerun.
