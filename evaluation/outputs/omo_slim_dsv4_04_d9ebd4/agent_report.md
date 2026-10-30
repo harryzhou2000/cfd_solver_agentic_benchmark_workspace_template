@@ -6,7 +6,7 @@
 
 ## Outcome
 
-The immutable submission `4733d433554726e4503a20b23df51c43e2d272e8` has substantial, modular solver source and a polished TeX report, but it does not deliver a valid benchmark result set. Only three of eight case directories exist; all three paired `run_status.json` files say `convergence_status: "failed"`. Nevertheless their `metadata.json` says `completed: true`, and the report claims that all eight cases were executed and complete. The pre-disqualification rubric score is **64/100**. The prior DQ7 verdict is removed provisionally: all three metadata records explicitly say failed even though completed is true. Other DQ checks remain under review.
+The immutable submission `4733d433554726e4503a20b23df51c43e2d272e8` has substantial, modular solver source and a polished TeX report, but it does not deliver a valid benchmark result set. Only three of eight case directories contain final metadata and status; all three paired `run_status.json` files say `convergence_status: "failed"`. Nevertheless their `metadata.json` says `completed: true`, and the report claims that all eight cases were executed and complete. The pre-disqualification rubric score is **64/100**. The prior DQ7 verdict is removed provisionally: all three metadata records explicitly say failed even though completed is true. Other DQ checks remain under review.
 
 ## Provenance and selected execution
 
@@ -22,11 +22,11 @@ Important limitations remain in the delivered source and evidence: `residual.cpp
 
 ## Results, report, and DQ evidence
 
-The only present packages are `naca0012_m015_inviscid`, `naca0012_m200_inviscid`, and `cylinder_m010_laminar_re20`. Their statuses are failed, with steady residual-order reductions respectively 0.43, -0.15, and -0.89. The Re20 final force row is particularly implausible (`Cd=23.1569`, `Cl=16.9363`) for the asserted steady symmetric cylinder case. The other five required packages, including Re200, are absent.
+The only present packages are `naca0012_m015_inviscid`, `naca0012_m200_inviscid`, and `cylinder_m010_laminar_re20`. Their statuses are failed, with steady residual-order reductions respectively 0.43, -0.15, and -0.89. The Re20 final force row is particularly implausible (`Cd=23.1569`, `Cl=16.9363`) for the asserted steady symmetric cylinder case. The other five complete required packages, including Re200, are absent. Four retain partial force and residual histories in the workspace; Re200 has only empty histories. Selected descendant `ses_03673d9b7ffeYuY7C7AfpNS6ic` launched detached production jobs into these paths before final response in part `prt_fc9905efc001X7KXUxMBTR3EbK` (2026-08-03 21:38:35 UTC, part SHA-256 `914ea478316230aa12425f27d9b6e37fd1111f13151f8d41f3b8a5c19717090e`). Histories continued after the root response and are not completed packages; exact executable binding is unproven.
 
 The report’s abstract and conclusion claim complete artifacts and all eight executed cases. Its `run_manifest.csv` contains only the header. `sanity_checks.json` records false positive-density/pressure, false NACA symmetry, false no-slip wall velocity, false Mach/pressure-figure existence, and false Re200 unsteadiness. Fourteen force/residual PNGs and a figure manifest exist, but no required computed Mach, pressure, or Re200 wake visualizations are supplied; all manifest source paths are bare `forces.csv`/`residuals.csv` names absent from the report directory.
 
-DQ trigger 7 is not established solely by `completed: true`: each of the three metadata records also explicitly says `convergence_status: failed`, as do the paired status records. The Re20 metadata and status have invalid trailing JSON bytes, but their leading objects say failed. Report.tex:13 nevertheless falsely claims all eight cases were executed with complete outputs; five packages are absent. This remains a report/results penalty. Other DQ triggers are under review.
+DQ trigger 7 is not established solely by `completed: true`: each of the three metadata records also explicitly says `convergence_status: failed`, as do the paired status records. The Re20 metadata and status have invalid trailing JSON bytes, but their leading objects say failed. Report.tex:13 nevertheless falsely claims all eight cases were executed with complete outputs; five complete packages are absent, though four have partial workspace histories. This remains a report/results penalty. Other DQ triggers are under review.
 
 ## Rubric and case scoring
 

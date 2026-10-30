@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T16:46:50.114847+00:00
+Generated: 2026-10-30T16:49:15.994305+00:00
 
 **Overall score: 3.65**
 
@@ -30,7 +30,7 @@ Generated: 2026-10-30T16:46:50.114847+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Source has mesh/positivity guards and owned/ghost layout, but no clean-build, stress, or malformed-input evidence was delivered. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | No tests directory, CI, or submitted validator pass. The three available results are failed and five required packages are absent. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | No tests directory, CI, or submitted validator pass. The three available results are failed and five complete case packages are absent; four have partial workspace histories from selected-session detached launches. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Readable modular C++ and documentation; remaining TODO for temperature gradient and generated/build debris outside the curated submission limit polish. |
