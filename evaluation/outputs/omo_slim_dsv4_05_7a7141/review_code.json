@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 3,
-      "notes": "CMake source is substantial and the terminal response claims a build, but no independent evaluator build was performed and the delivered immutable commit has no build artifact."
+      "score": 4,
+      "notes": "Immutable 308ffdad clean build succeeds in network-disabled cfd-bench; zero CTests registered."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "main.cpp implements solve --case/--output/--restart/--report-level and argparse error handling."
+      "notes": "main.cpp parses solve/case/output and optional restart/report-level; restart is explicitly unimplemented."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Separate C++ modules cover case parsing, CGNS, geometry, partitioning, halo, reconstruction, flux, output, and solver logic."
+      "notes": "Mesh, case, flux, partition, halo, reconstruction and output are modular; MPI output and transient statistics need work."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 3,
-      "notes": "No direct internal wrapper/external-executable evidence was found. Trust policy prohibits external-copy investigation."
+      "score": 4,
+      "notes": "No internal external-solver call found; external similarity investigation excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "JSON case reader and generic case paths are present; no two-mesh-only branch was established."
+      "notes": "JSON case configuration and generic case paths; no two-mesh-only branch found."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "partition.cpp calls METIS_PartGraphKway and halo.cpp implements neighbor MPI_Isend/Irecv; no delivered rank-consistency demonstration."
+      "score": 3,
+      "notes": "Root METIS partition/scatter and neighbor halo exist, but output.cpp writes rank0 local field/surface only; no rank comparison."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 1,
-      "notes": "Six readable NACA outputs are marked failed, laminar histories become non-finite, and both cylinder final packages are absent."
+      "notes": "Three laminar residual histories include 11,160\u201324,129 nonfinite entries; all six statuses failed and cylinders incomplete."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 1,
-      "notes": "No passing final validator/test evidence: the official validator aborts on the first canonical package's failed metadata."
+      "notes": "Zero CTests; official validator rejects first failed final metadata. No completed rank comparison or test result."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "The immutable source tree is reasonably modular and has no committed build/result/session bulk artifacts."
+      "score": 3.5,
+      "notes": "Clear C++ modules but unimplemented restart, rank0-only output and uncommitted report figures limit reproducibility."
     }
   ],
   "disqualification_flags": [
@@ -72,5 +72,5 @@
       "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
     }
   ],
-  "overall_score": 3.16
+  "overall_score": 3.27
 }

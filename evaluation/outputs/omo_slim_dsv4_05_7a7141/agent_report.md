@@ -2,7 +2,7 @@
 
 ## Outcome
 
-The immutable audit-clean submission `308ffdad1069239562786b06cac23612ac9717e4` has a substantial modular C++ CFD implementation, but it does not deliver a valid benchmark result set. The explicit official validator command over all eight canonical paths aborts at `naca0012_m015_inviscid`: `invalid final convergence_status in metadata: failed`. All six readable NACA packages declare `completed: true` and `convergence_status: failed`; their paired `run_status.json` files also say failed. Cylinder Re20 and Re200 have only partial stdout/no final package. The score is **58/100**, and the prior DQ7 finding is removed provisionally: metadata explicitly marks each submitted NACA case failed, and completed=true alone is not a success status. Remaining DQ triggers are under review.
+The immutable audit-clean submission `308ffdad1069239562786b06cac23612ac9717e4` has a substantial modular C++ CFD implementation, but it does not deliver a valid benchmark result set. The explicit official validator command over all eight canonical paths aborts at `naca0012_m015_inviscid`: `invalid final convergence_status in metadata: failed`. All six readable NACA packages declare `completed: true` and `convergence_status: failed`; their paired `run_status.json` files also say failed. Cylinder Re20 and Re200 have only partial stdout/no final package. The score is **56/100**, and the prior DQ7 finding is removed provisionally: metadata explicitly marks each submitted NACA case failed, and completed=true alone is not a success status. Remaining DQ triggers are under review.
 
 ## Immutable provenance and session selection
 
@@ -26,18 +26,18 @@ The official validator was run explicitly with the six readable NACA result dire
 
 | Section | Max | Score | Evidence |
 |---|---:|---:|---|
-| Build, CLI, Output Contract | 10 | 5 | CMake/CLI source exists; final output contract fails. |
-| Mesh And Geometry | 10 | 8 | CGNS, geometry, adjacency source. |
-| Finite-Volume Residual And Boundary Conditions | 15 | 11 | Substantial residual/flux/BC source; failed numerical evidence. |
-| Second-Order Spatial Scheme | 10 | 7 | Least-squares reconstruction and Barth limiter source, unverified production behavior. |
-| Viscous Terms | 10 | 6 | Viscous/wall source exists; every laminar history fails/non-finite. |
-| Implicit And Transient Methods | 15 | 8 | LU-SGS/BDF2 source; insufficient scalar-Jacobian convergence and no Re200 package. |
-| MPI | 10 | 7 | METIS/halo/reductions source; no successful rank-count comparison. |
-| Case Results And Validation | 10 | 0 | Six failed NACA packages and two missing cylinder final packages. |
-| Report, Visualization, Analysis | 5 | 1 | Extensive TeX but missing immutable dependencies and contradictory conclusion. |
-| Extensibility | 5 | 5 | Clear module boundaries and JSON-driven case handling. |
+| Build, CLI, Output Contract | 10 | 8 | Clean isolated build succeeds and CLI exists; six final packages fail and cylinder final outputs are missing. |
+| Mesh And Geometry | 10 | 8 | CGNS first-zone mesh, geometry and adjacency source exist, with no successful case validation. |
+| Finite-Volume Residual And Boundary Conditions | 15 | 10 | Conservative residual, flux and BC implementations exist; six failed outcomes and invalid residuals prevent performance credit. |
+| Second-Order Spatial Scheme | 10 | 7.5 | Least-squares gradients and Barth limiter are invoked; no credible smooth-order or successfully converged production evidence. |
+| Viscous Terms | 10 | 5 | Viscous flux and approximate tangential wall force exist; laminar residuals become nonfinite and no credible wall/force result is delivered. |
+| Implicit And Transient Methods | 15 | 6.5 | Steady path uses one frozen-RHS sweep; BDF2 inner loop exists but no final Re200, and per-rank transient statistics are incorrectly summed. |
+| MPI | 10 | 5 | METIS and neighbor exchange exist; output field/surface writes rank0 local mesh only, and no credible rank comparison is delivered. |
+| Case Results And Validation | 10 | 0 | Six failed NACA outcomes, Re20 missing and Re200 partial invalid; no credible completed case. |
+| Report, Visualization, Analysis | 5 | 1.5 | Historical delivered PDF has formulas and NACA images but missing cylinder figure placeholders, contradictory stable/convergence claims and no committed figure assets. |
+| Extensibility | 5 | 4.5 | Modules and JSON configuration provide reusable structure, with no demonstrated extensions or validated parallel output. |
 
-Weighted review overalls are Code **3.16/5**, CFD methods **3.29/5**, and Results **0.50/5**. All eight independent case scores are **0/5**: six statuses explicitly fail and their available histories are physically implausible, Re20 has no final package, and Re200 has only a short corrupted/invalid partial history. The current M0.15 inviscid history was overwritten after its older failed status and is not its final history. The delivered PDF supplies readable NACA plots but its cylinder pages have missing-asset boxes. These case scores do not alter the 100-point total.
+Pre-DQ score **56/100**, previously 58. Weighted Code/CFD/Results are 3.27/3.27/0.4. All eight independent cases score 0: six explicit failed statuses, missing Re20, and invalid partial Re200. The older M0.15 failed status and subsequently overwritten force history are distinct. The historical delivered PDF's readable NACA pages were reviewed, with cylinder placeholder boxes recorded separately.
 
 ## Disqualification assessment
 
@@ -46,10 +46,10 @@ DQ trigger 7 is not established by completed=true alone: all six readable NACA m
 ## Limitations
 
 - No solver rerun or evaluator redraw was needed to resolve the failed/incomplete delivery; Re200 was never rerun.
-- No independent clean build was performed; the decisive evidence is the delivered failed result set and validator failure.
+- A clean isolated immutable-source build succeeds; zero CTests registered. This does not establish successful CFD results.
 - Raw workspace outputs/report figures are contestant evidence but were deliberately excluded from the curated immutable result commit; they do not repair the submission.
 - Context-window metadata is unavailable from the bundled telemetry.
 
 ## Verdict
 
-This is a meaningful implementation attempt, not a complete CFD benchmark delivery. Preserve the source-method credit and report craftsmanship separately from the failed solver outcomes. The provisional score is **58/100**; other DQ and source review remains ongoing.
+This is a meaningful implementation attempt, not a complete CFD benchmark delivery. Preserve the source-method credit and report craftsmanship separately from the failed solver outcomes. The provisional score is **56/100**; other DQ and source review remains ongoing.

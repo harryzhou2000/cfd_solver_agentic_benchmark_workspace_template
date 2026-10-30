@@ -279,64 +279,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 3,
-        "notes": "CMake source is substantial and the terminal response claims a build, but no independent evaluator build was performed and the delivered immutable commit has no build artifact."
+        "score": 4,
+        "notes": "Immutable 308ffdad clean build succeeds in network-disabled cfd-bench; zero CTests registered."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 4,
-        "notes": "main.cpp implements solve --case/--output/--restart/--report-level and argparse error handling."
+        "notes": "main.cpp parses solve/case/output and optional restart/report-level; restart is explicitly unimplemented."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Separate C++ modules cover case parsing, CGNS, geometry, partitioning, halo, reconstruction, flux, output, and solver logic."
+        "notes": "Mesh, case, flux, partition, halo, reconstruction and output are modular; MPI output and transient statistics need work."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
-        "score": 3,
-        "notes": "No direct internal wrapper/external-executable evidence was found. Trust policy prohibits external-copy investigation."
+        "score": 4,
+        "notes": "No internal external-solver call found; external similarity investigation excluded by trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4,
-        "notes": "JSON case reader and generic case paths are present; no two-mesh-only branch was established."
+        "notes": "JSON case configuration and generic case paths; no two-mesh-only branch found."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 4,
-        "notes": "partition.cpp calls METIS_PartGraphKway and halo.cpp implements neighbor MPI_Isend/Irecv; no delivered rank-consistency demonstration."
+        "score": 3,
+        "notes": "Root METIS partition/scatter and neighbor halo exist, but output.cpp writes rank0 local field/surface only; no rank comparison."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 1,
-        "notes": "Six readable NACA outputs are marked failed, laminar histories become non-finite, and both cylinder final packages are absent."
+        "notes": "Three laminar residual histories include 11,160\u201324,129 nonfinite entries; all six statuses failed and cylinders incomplete."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 1,
-        "notes": "No passing final validator/test evidence: the official validator aborts on the first canonical package's failed metadata."
+        "notes": "Zero CTests; official validator rejects first failed final metadata. No completed rank comparison or test result."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 4,
-        "notes": "The immutable source tree is reasonably modular and has no committed build/result/session bulk artifacts."
+        "score": 3.5,
+        "notes": "Clear C++ modules but unimplemented restart, rank0-only output and uncommitted report figures limit reproducibility."
       }
     ],
     "disqualification_flags": [
@@ -345,7 +345,7 @@
         "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
       }
     ],
-    "overall_score": 3.16
+    "overall_score": 3.27
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -356,77 +356,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Source defines conservative compressible variables, equation-of-state helpers, inviscid and viscous paths."
+        "notes": "Conservative perfect-gas Navier\u2013Stokes, case Reynolds viscosity and separate inviscid/viscous routines present."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "CGNS reader, geometry, adjacency, and boundary-family handling are present in submitted source."
+        "notes": "CGNS, geometry, boundary tagging and graph partition source exist; failed histories do not validate their accuracy."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 4,
-        "notes": "solver.cpp assembles residuals with global reductions, but delivered numerical outcomes fail."
+        "score": 3.5,
+        "notes": "solver.cpp assembles face fluxes with global reductions; invalid laminar residuals and failed final cases limit validation."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 3,
-        "notes": "Approximate Riemann-flux code is present; failed M0.8/M2 results do not support robust production behavior."
+        "notes": "Rusanov and Roe paths exist, but failed M0.8/M2 histories do not establish robust production behavior."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4,
-        "notes": "Dedicated boundary module implements farfield/slip/no-slip treatment in source."
+        "notes": "Farfield, slip and no-slip routines exist; output.cpp sets reported no-slip wall u/v to zero."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 4,
-        "notes": "Least-squares primitive gradients and linear face reconstruction are invoked in source."
+        "notes": "Least-squares gradients and face reconstruction are called, but production smooth-order accuracy remains unverified."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 4,
-        "notes": "Barth-Jespersen limiting and positivity-oriented reconstruction checks are identifiable in source."
+        "notes": "Barth limiter and positivity fallback implemented; successful accuracy or limiter frequency not demonstrated."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 3,
-        "notes": "Viscous source exists, but all delivered laminar outputs fail/non-finite and no credible viscous case is complete."
+        "notes": "Newtonian viscous path and approximate tangential wall shear exist; all laminar residual histories have nonfinite values."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 2,
-        "notes": "Steady loop uses one frozen-RHS LU-SGS sweep per step; the terminal response identifies the scalar-Jacobian solver as unable to meet the required residual reduction."
+        "notes": "Steady solver uses one frozen-RHS LU-SGS sweep; selected final response reports inability to achieve required convergence."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 2,
-        "notes": "run_transient has a BDF2 outer/inner structure, but no Re200 final package or production convergence evidence exists; Re200 was not rerun."
+        "notes": "Frozen BDF2 history and inner target logic exist, but rank-summed counters can inflate per-step statistics and no Re200 final result exists."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 4,
-        "notes": "METIS k-way and neighbor-scoped halo implementation are present; no successful np=8 NACA/cylinder evidence was delivered."
+        "score": 3,
+        "notes": "Root partitions with METIS and neighbor exchange exists; only rank0 local fields are written and no credible np comparison."
       }
     ],
     "disqualification_flags": [
@@ -435,7 +435,7 @@
         "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
       }
     ],
-    "overall_score": 3.42
+    "overall_score": 3.27
   },
   "result_review": {
     "review_area": "result_review",
@@ -446,49 +446,49 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 0,
-        "notes": "The official validator rejects the first required package because metadata convergence_status is failed; cylinder Re20/Re200 final packages are absent."
+        "notes": "Official validator rejects failed metadata; Re20 missing and Re200 partial invalid, with no complete case package."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 0,
-        "notes": "Explicit eight-directory validator command exits 1 at naca0012_m015_inviscid: invalid final convergence_status in metadata: failed."
+        "notes": "Explicit official eight-case validator exits 1 at M0.15 failed convergence_status."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 0,
-        "notes": "All six readable NACA packages declare failed convergence; cylinder output is only partial stdout and Re200 has no final result package."
+        "notes": "Six final NACA metadata/status records say failed; Re20 lacks final output, Re200 has only invalid partial rows."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 0,
-        "notes": "M0.8/M2 histories grow, all laminar histories reach non-finite values, and no credible completed cylinder or transient evidence exists."
+        "notes": "M0.80/M2 final CL 3.95/14.90; laminar residuals have many nonfinite rows. M0.15 current force history is a later overwrite."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
         "score": 1,
-        "notes": "The report source references field/history figures, but the immutable submission excludes them and no complete valid result set supports the visualization claims."
+        "notes": "Historical PDF pages5\u201310 contain NACA field and history plots, while cylinder pages11\u201313 are missing-image boxes and cases failed."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 2,
-        "notes": "The report discloses several limitations, but its conclusion claims requirements met and M0.8 steady convergence despite failed metadata/readable histories."
+        "score": 1.5,
+        "notes": "Report discloses limitations but claims M0.8 stable and M2 converged despite failed outputs; cylinder figures absent."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 1,
-        "notes": "The terminal response identifies uncommitted report/manifest artifacts, while immutable submission has only report.tex and no final validated package-to-figure traceability."
+        "score": 0.5,
+        "notes": "Tracked TeX excludes figure assets; delivered PDF predates M0.15 history overwrite, so exact figures to current data are unbound."
       }
     ],
     "disqualification_flags": [
@@ -497,7 +497,7 @@
         "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
       }
     ],
-    "overall_score": 0.5
+    "overall_score": 0.4
   },
   "measurements": {
     "note": "opencode harness: codex tool-usage/LOC extraction not applicable",
