@@ -381,7 +381,7 @@
     }
   },
   "disqualification": {
-    "triggered": true,
+    "triggered": false,
     "flags": [
       {
         "id": 1,
@@ -422,8 +422,8 @@
       {
         "id": 7,
         "text": "metadata.json marks incomplete or failed runs as successful final results",
-        "found": true,
-        "evidence": "Each of the six readable NACA metadata.json files sets completed: true while convergence_status is failed; paired run_status.json also says failed, and the official validator rejects this exact condition."
+        "found": false,
+        "evidence": "All six NACA metadata files and paired run_status explicitly say convergence_status failed, while metadata says completed true. The validator rejects failed statuses as final results, but completed alone does not establish that metadata falsely marks a failed run converged or statistically periodic. Report claims of successful cases remain separately penalized; other DQ triggers remain under review."
       },
       {
         "id": 8,
@@ -468,6 +468,7 @@
     "Evaluation uses the audit-clean curated submission 308ffdad and on-disk immutable contestant result/telemetry evidence; untracked raw outputs are not part of the result commit.",
     "No independent clean build was performed because it was unnecessary to resolve the failed submitted results.",
     "Context-window values are unavailable in bundled project telemetry and no external source was queried.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "2026-10-31 partial calibration: removed DQ7 because each submitted metadata record explicitly says failed; validator rejection is a delivery failure, not by itself a false success status. Remaining evidence and flags under review."
   ]
 }
