@@ -83,7 +83,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=true, trigger 7: multiple steady run-status files claim converged despite far-below-target reductions, including Re20 0.876/5 at 30000 steps and M015 inviscid 1.485/4 at 20000. Structural validation is separate and passed.
+DQ=true, trigger 7: Re20 Cd rises 11.320→19.550 in its final 3,000 steps and M015 inviscid Cd spans −0.688..0.794 in its final 2,000, while metadata marks both converged. This is direct nonstationary force evidence; missed residual targets alone would not exclude a justified stable plateau. Structural validation is separate and passed.
 
 ## Metadata answers & session selection
 
@@ -95,7 +95,10 @@ An independent clean source build succeeded in a restricted container; no CTests
 
 ## Verdict
 
-Provisional score: **69/100; disqualified: true.** Strong structural package and readable BDF2 evidence do not cure false successful steady statuses.
+Qualified score: **69/100; disqualified: true.** Strong structural package and readable BDF2 evidence do not cure false successful steady statuses.
 
 
-The independent case review confirms Re20 and M0.15 inviscid DQ7 from their nonstationary force histories, not merely missed residual targets. The report itself includes all force summaries at lines 34–44. A selected Mach figure reproduces pixel-identically from its field, though the disclosed interpolation omits the body outline. Re200 accepted-state residual history is recomputed after update; its stop ratio and target-miss counter refer to the pre-update candidate, so post-update target achievement remains qualified. The full review remains in progress.
+The independent case review confirms Re20 and M0.15 inviscid DQ7 from their nonstationary force histories, not merely missed residual targets. The report itself includes all force summaries at lines 34–44. A selected Mach figure reproduces pixel-identically from its field, though the disclosed interpolation omits the body outline. Re200 accepted-state residual history is recomputed after update; its stop ratio and target-miss counter refer to the pre-update candidate, so post-update target achievement remains qualified. All case, rubric, review and DQ criteria have been assessed within available evidence; historical binaries and untested figure bindings remain qualified.
+
+
+The qualified review assessed all eight canonical histories, all 13 compiled report pages, ten rubric sections, 27 review points and DQ1–13. Original selected production metadata dates the Re20, M015 inviscid and Re200 runs to 2026-08-16, before the selected final response; the run manifest and report identify them. The curated source and output data are traceable, but exact historical executable bytes are unbound. No solver was rerun.
