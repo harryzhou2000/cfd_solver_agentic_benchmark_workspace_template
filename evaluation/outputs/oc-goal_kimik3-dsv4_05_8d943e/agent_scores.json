@@ -197,8 +197,8 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Stated steady targets and periodic Re200."
+          "score": 2,
+          "notes": "M2 and M015 laminar marked converged despite final100 Cd0.355596\u21920.267388 and 0.094719\u21920.084972, respectively; DQ7."
         },
         {
           "id": "res.plausibility",
@@ -229,13 +229,13 @@
           "notes": "Curated report."
         }
       ],
-      "overall_score": 4.8,
+      "overall_score": 4.2,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 91,
+    "total_scored": 89.5,
     "sections": [
       {
         "id": "build_cli",
@@ -290,15 +290,15 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 8,
-        "notes": "Structural pass."
+        "score": 7,
+        "notes": "M015 and M2 laminar mark success despite material final force drift; other cases pending."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "Complete."
+        "score": 4.5,
+        "notes": "Report claims both early laminar runs converged; Re200 residual exists in original checkpoint, while late drag plot remains unresolved."
       },
       {
         "id": "extensibility",
@@ -323,16 +323,16 @@
       "notes": "NACA0012 M2.00 inviscid: numeric CL=0.0003, CD=0.0923 at f7699dd:solver/report/force_table.tex:6; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour f7699dd:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/report.tex:267). Score capped at 2 from 4.5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Delivered package."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=-0.0023, CD=0.0850 at f7699dd:solver/report/force_table.tex:7; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4.5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Delivered package."
+      "score": 1.5,
+      "notes": "Original workspace metadata SHA256 bd12a2044e9291cff7cf6e01b7f450645845661a98c026c74a6ecf03365b54b8 marks completed/converged at9120; force_table.tex:7 says Cd0.0850. Force CSV SHA256 7f4cffcd86948429083d2f3a268fe33cb1403dc5269894c22c335415f19a41a7 final100 Cd0.0947193\u21920.0849716 and final200 0.1058371\u21920.0849716, with lift \u22120.0000198\u2192\u22120.0022855 final100. Actual 4.0317 residual orders do not establish stable early laminar forces (TASK.md:140,172). DQ7; score2\u21921.5. Historical binary/other evidence pending."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 2,
       "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=0.0011, CD=0.0850 at f7699dd:solver/report/force_table.tex:8; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour f7699dd:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/report.tex:284). Score capped at 2 from 4.5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Delivered package."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.0001, CD=0.2674 at f7699dd:solver/report/force_table.tex:9; no committed/referenced residual-history plot; no committed/referenced force-history plot; computed-field contour f7699dd:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/report.tex:292). Score capped at 2 from 4.5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Delivered package."
+      "score": 1,
+      "notes": "Original workspace metadata SHA256 3698a290989ab1170fc3b03e09a80d1ea43c25a7ef598c36ace9b0226303b795 marks completed/converged at2279; f7699dd report/force_table.tex:9 gives Cd0.2674, status converged. Force CSV SHA256 e23fa3751f1863a021f24c8da3efdcb89fe423c50d814ccd16f7b06e55d76de6 final100 Cd0.3555961\u21920.2673882, final50 0.3069989\u21920.2673882, final20 0.2822537\u21920.2673882. Actual 3.0004-order residual decrease does not establish early force convergence (TASK.md:140,172). DQ7; score2\u21921. Historical binary/other evidence pending."
     },
     "cylinder_m010_laminar_re20": {
       "score": 4.5,
@@ -340,12 +340,19 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.0025, CD=1.2013 at f7699dd:solver/report/force_table.tex:11; no committed/referenced residual-history plot; force history f7699dd:solver/report/figures/cylinder_m010_laminar_re200_forces_posttransient.png (referenced at solver/report/report.tex:315); computed-field contour f7699dd:solver/report/figures/cylinder_m010_laminar_re200_vorticity.png (referenced at solver/report/report.tex:322); shedding statistic St=0.15 at f7699dd:solver/report/report.tex:27; late-time periodic-force evidence f7699dd:solver/report/figures/cylinder_m010_laminar_re200_forces_posttransient.png (referenced at solver/report/report.tex:315). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Delivered periodic package; not rerun."
+      "notes": "Curated f7699dd report.tex:27,315\u2013322 provides St\u22480.15, numeric forces and post-transient force/spectrum plus wake contour. Original contestant checkpoint 1395c7e includes residual PNG SHA256 ed5118c176444244e57863fdb1910d77add5bd78a2bb1482a0c9eb0398ae1224 and manifest SHA256 c58c78201496a57e0792622ecf6eec4f0df690846a00b9c833df67763db6f8ea, omitted from curated subset, correcting the old no-residual claim. Delivered post-transient force PNG SHA256 2dd032b363b5c24b2c363c4c9f1d61b4b0bd991f222500fdd8b5ba3dc92392b1 visibly shows lift but does not resolve late drag oscillations, so the independent Re200 late-lift-and-drag floor caps score at2. Workspace force SHA256 acf74c82459a261e24dafad05ff30ee9e4aaddcb5fdf98f569391dcb7ccaab0d Cl RMS increases0.01417\u21920.03892\u21920.05649 over 150\u2013200/200\u2013250/250\u2013300, but final10-window RMS0.05517/0.05577/0.05607 suggests approach to a plateau; do not infer false status solely from earlier growth. Source, binary and St verification remain pending; no unsteady rerun."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "M2 laminar metadata SHA256 3698a290989ab1170fc3b03e09a80d1ea43c25a7ef598c36ace9b0226303b795 marks completed/converged at2279, while force SHA256 e23fa3751f1863a021f24c8da3efdcb89fe423c50d814ccd16f7b06e55d76de6 Cd0.3555961\u21920.2673882 final100 and 0.3069989\u21920.2673882 final50. M015 laminar metadata bd12a2044e9291cff7cf6e01b7f450645845661a98c026c74a6ecf03365b54b8 marks completed/converged at9120 while force 7f4cffcd86948429083d2f3a268fe33cb1403dc5269894c22c335415f19a41a7 Cd0.0947193\u21920.0849716 final100. Residual decreases 3.000/4.032 orders are real, but TASK.md:140,172 requires clear early laminar convergence and stable forces."
+      }
+    ]
   },
   "limitations": [
     "No evaluator build or MPI rerun.",
