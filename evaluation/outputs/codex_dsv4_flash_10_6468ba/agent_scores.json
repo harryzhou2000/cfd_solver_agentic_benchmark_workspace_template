@@ -161,8 +161,8 @@
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Validated Re200 package and report evidence."
+          "score": 1,
+          "notes": "Report.tex:304\u2013307 claims BDF2, but sole transient residual solver.cpp:666\u2013673,1435\u20131437 uses 1.5(U\u2212Un)+0.5(U\u2212Unm1), not BDF2 and not a consistent time derivative; this exact solver.cpp blob matches production commit. Full-horizon data/inner ratios belong to that different residual."
         },
         {
           "id": "cfd.mpi_partition",
@@ -172,7 +172,7 @@
           "notes": "Partition implementation plus np8 submitted results."
         }
       ],
-      "overall_score": 4.0,
+      "overall_score": 3.7,
       "disqualification_flags": []
     },
     "result_review": {
@@ -233,7 +233,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 86,
+    "total_scored": 82,
     "sections": [
       {
         "id": "build_cli",
@@ -274,8 +274,8 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 13,
-        "notes": "Validated Re200 package and documented BDF2/inner controls."
+        "score": 9,
+        "notes": "LU-SGS and physical-time inner loop are present, but claimed BDF2 residual is absent: solver.cpp:666\u2013673,1435\u20131437 implements 2U\u22121.5Un\u22120.5Unm1, not 1.5U\u22122Un+0.5Unm1. Deduct the four-point second-order transient criterion; measured targets apply to the implemented residual."
       },
       {
         "id": "mpi",
@@ -338,7 +338,7 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Score 2 retained. Immutable attempt 7152874 forces.csv covers 30000 steps to t=300; t\u2265200 mean Cd 1.0570129, Cl range -0.0406881\u20130.0420201, upcrossings 213.7033, 231.3543, 248.8606, 266.1942, 283.3729 yield periods 17.18\u201317.65 and frequency about 0.057, consistent with report estimate St\u22480.055 under its normalization. Accepted PDF p17 has actual wake velocity/pressure contours, correcting old false missing-contour note, but startup Cd\u224828.8 compresses the complete force plot and neither late Cd nor Cl oscillation is readable; no qualifying separate late plot identified, so floor remains 2. More critically, report.tex:304\u2013307 claims BDF2 but the run-version and curated solver.cpp:666\u2013673,1435\u20131437 compute 1.5(U\u2212Un)+0.5(U\u2212Unm1), not BDF2; transient is of uncertain physics/temporal accuracy. Inner ratio is for the implemented total residual, not the required BDF2 residual; actual strict BDF2 misses cannot be inferred. DQ6 is under review. All eight committed residual figures, including this one, have blank plotting regions due to tools_py/plot_lines.py:137\u2013139 log-y coordinate error; no alternate contestant-delivered residual plot was found in immutable attempt. The previous note citing the residual plot as late force evidence was incorrect."
+      "notes": "Score 2 retained. Immutable attempt 7152874 forces.csv covers 30000 steps to t=300; t\u2265200 mean Cd 1.0570129, Cl range -0.0406881\u20130.0420201, upcrossings 213.7033, 231.3543, 248.8606, 266.1942, 283.3729 yield periods 17.18\u201317.65 and frequency about 0.057, consistent with report estimate St\u22480.055 under its normalization. Accepted PDF p17 has actual wake velocity/pressure contours, correcting old false missing-contour note, but startup Cd\u224828.8 compresses the complete force plot and neither late Cd nor Cl oscillation is readable; no qualifying separate late plot identified, so floor remains 2. More critically, report.tex:304\u2013307 claims BDF2 but the run-version and curated solver.cpp:666\u2013673,1435\u20131437 compute 1.5(U\u2212Un)+0.5(U\u2212Unm1), not BDF2; transient is of uncertain physics/temporal accuracy. Inner ratio is for the implemented total residual, not the required BDF2 residual; actual strict BDF2 misses cannot be inferred. DQ6 applies: the claimed BDF2 scheme is absent from the sole implemented transient residual. All eight committed residual figures, including this one, have blank plotting regions due to tools_py/plot_lines.py:137\u2013139 log-y coordinate error; no alternate contestant-delivered residual plot was found in immutable attempt. The previous note citing the residual plot as late force evidence was incorrect."
     }
   },
   "disqualification": {
@@ -371,8 +371,11 @@
       },
       {
         "flag": "Unsupported report claim",
-        "triggered": false,
-        "notes": "Core claims have source evidence."
+        "triggered": true,
+        "notes": "Report.tex:304\u2013307 claims the BDF2 formula 1.5U\u22122Un+0.5Unm1. In actual run-version and curated solver.cpp:666\u2013673,1435\u20131437 the sole transient residual instead uses 1.5(U\u2212Un)+0.5(U\u2212Unm1) = 2U\u22121.5Un\u22120.5Unm1, inconsistent even for linear time evolution. No BDF2 or equivalent second-order physical time residual was found. Blob is identical at production acd611d and curated 47dff36.",
+        "id": 6,
+        "found": true,
+        "evidence": "Report.tex:304\u2013307 claims the BDF2 formula 1.5U\u22122Un+0.5Unm1. In actual run-version and curated solver.cpp:666\u2013673,1435\u20131437 the sole transient residual instead uses 1.5(U\u2212Un)+0.5(U\u2212Unm1) = 2U\u22121.5Un\u22120.5Unm1, inconsistent even for linear time evolution. No BDF2 or equivalent second-order physical time residual was found. Blob is identical at production acd611d and curated 47dff36."
       },
       {
         "flag": "Failed marked successful",

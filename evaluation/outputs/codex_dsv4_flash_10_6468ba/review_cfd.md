@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:16:23.792884+00:00
+Generated: 2026-10-30T04:17:11.405565+00:00
 
-**Overall score: 4.0**
+**Overall score: 3.7**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -36,7 +36,7 @@ Generated: 2026-10-30T04:16:23.792884+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | Implicit steady source/report evidence. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4 | Validated Re200 package and report evidence. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | Report.tex:304–307 claims BDF2, but sole transient residual solver.cpp:666–673,1435–1437 uses 1.5(U−Un)+0.5(U−Unm1), not BDF2 and not a consistent time derivative; this exact solver.cpp blob matches production commit. Full-horizon data/inner ratios belong to that different residual. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | Partition implementation plus np8 submitted results. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T04:16:23.792884+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.0
+- Overall score (0-5): 3.7
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
