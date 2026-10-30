@@ -354,12 +354,18 @@
         "flag": "Prohibited shortcut 7: full mesh retained on every MPI rank during solver iterations",
         "found": true,
         "evidence": "Immutable 3071a743 solver/src/main.cpp:49\u201365 constructs CFDSolver per rank and invokes build_mesh_from_cgns on every rank; solver.cpp:88\u2013168 fills global_mesh nodes, cells, faces and adjacency; solver.h:68 retains it as a member and main.cpp:77\u201398 builds local partitions and executes solve without releasing it. TASK.md:227 prohibits full mesh OR full state on every MPI rank during iterations, and examiner README:83\u201385 includes TASK shortcuts in DQ assessment. METIS and local state are present; this is not asserted as numbered trigger 9 full-state replication or geometric-only split. Report.tex:579 and metadata full_mesh_replication_during_iterations=false deny this behavior."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "solver.cpp:1038\u20131053 activates steady second order only for step > max(ramp_steps/2,200). Original final step/activation threshold: M0.15 inv 380/1000, M0.8 inv 383/1500, M2 inv 363/2500, M0.15 lam 597/2500, M0.8 lam 1107/2500, M2 lam 270/3500, Re20 528/1500; all seven steady outputs are first order. Report.tex:284\u2013286 discloses the activation rule and provides control and final-step tables, although it does not explicitly conclude the outputs were first order and metadata spatial_order_claimed=2 is misleading. Transient invokes gradients and limiter at :1301\u20131302. Compared with Opus-02 explicit first-order disclosure and Opus-08 undisclosed disabled production, the generic schedule disclosure supports a severe spatial/metadata deduction; DQ10 is not affirmed solely from the general method description."
       }
     ]
   },
   "limitations": [
     "No evaluator rerun was performed; Re200 was never rerun.",
     "Raw result packages were evaluated in the workspace but excluded from the immutable curated submission tip.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "Isolated immutable-source CMake build succeeded in network-disabled scratch with 2 CPUs, 4 GiB, 128-process limit and 240-second timeout; no CFD case was rerun. All seven original steady cases ended before second-order activation despite metadata claiming order 2."
   ]
 }
