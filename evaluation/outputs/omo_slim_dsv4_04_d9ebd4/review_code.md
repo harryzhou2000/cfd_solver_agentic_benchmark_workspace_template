@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:54:04.545756+00:00
+Generated: 2026-10-30T16:46:50.114847+00:00
 
 **Overall score: 3.65**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake exposes CFD_EXTERNALS_ROOT and finds MPI/CGNS/HDF5/METIS; README gives build/run commands. A clean evaluator build was not performed. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable 4733d43 clean build succeeds in isolated network-disabled cfd-bench; zero CTests registered. No solver rerun. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 4 | main.cpp implements solve --case --output and rejects malformed invocation paths; no independent negative-path run was performed. |

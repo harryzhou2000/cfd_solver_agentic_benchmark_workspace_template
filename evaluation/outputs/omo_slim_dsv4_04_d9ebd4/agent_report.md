@@ -6,7 +6,7 @@
 
 ## Outcome
 
-The immutable submission `4733d433554726e4503a20b23df51c43e2d272e8` has substantial, modular solver source and a polished TeX report, but it does not deliver a valid benchmark result set. Only three of eight case directories exist; all three paired `run_status.json` files say `convergence_status: "failed"`. Nevertheless their `metadata.json` says `completed: true`, and the report claims that all eight cases were executed and complete. The pre-disqualification rubric score is **64/100**. It is **disqualified** for incomplete/failed runs represented as successful (DQ trigger 7).
+The immutable submission `4733d433554726e4503a20b23df51c43e2d272e8` has substantial, modular solver source and a polished TeX report, but it does not deliver a valid benchmark result set. Only three of eight case directories exist; all three paired `run_status.json` files say `convergence_status: "failed"`. Nevertheless their `metadata.json` says `completed: true`, and the report claims that all eight cases were executed and complete. The pre-disqualification rubric score is **64/100**. The prior DQ7 verdict is removed provisionally: all three metadata records explicitly say failed even though completed is true. Other DQ checks remain under review.
 
 ## Provenance and selected execution
 
@@ -16,7 +16,7 @@ The sole project-local OpenCode root is `ses_037ea03fbffeTlMHHzZ9j54nzA`, “Com
 
 ## Source and method findings
 
-The source has configurable CMake dependencies, JSON-driven `solve --case --output` invocation, CGNS geometry and adjacency, METIS k-way partitioning, owned/ghost cells, packed neighbor `MPI_Isend`/`MPI_Irecv`, and global reductions. Residual assembly calls Rusanov/Roe fluxes, least-squares reconstruction, Barth-Jespersen limiting, viscous terms, and LU-SGS pseudo-time iteration. `time_integrator.cpp` also contains a frozen-history BDF2 physical-time loop with inner solves. These mechanisms support credit for implementation, but no clean evaluator build or solver run was performed.
+The source has configurable CMake dependencies, JSON-driven `solve --case --output` invocation, CGNS geometry and adjacency, METIS k-way partitioning, owned/ghost cells, packed neighbor `MPI_Isend`/`MPI_Irecv`, and global reductions. Residual assembly calls Rusanov/Roe fluxes, least-squares reconstruction, Barth-Jespersen limiting, viscous terms, and LU-SGS pseudo-time iteration. `time_integrator.cpp` also contains a frozen-history BDF2 physical-time loop with inner solves. These mechanisms support credit for implementation. A clean immutable-source build succeeded in a network-disabled cfd-bench container (2 CPUs, 3 GiB, 256 processes; zero CTests registered); no solver was rerun.
 
 Important limitations remain in the delivered source and evidence: `residual.cpp` leaves temperature-gradient heat conduction as TODO, the report admits this viscous limitation, only np=4 failed outputs exist, and there is no np=1/2/4/8 force comparison. No Re200 result package exists, so the BDF2 implementation is not validated.
 
@@ -26,7 +26,7 @@ The only present packages are `naca0012_m015_inviscid`, `naca0012_m200_inviscid`
 
 The report’s abstract and conclusion claim complete artifacts and all eight executed cases. Its `run_manifest.csv` contains only the header. `sanity_checks.json` records false positive-density/pressure, false NACA symmetry, false no-slip wall velocity, false Mach/pressure-figure existence, and false Re200 unsteadiness. Fourteen force/residual PNGs and a figure manifest exist, but no required computed Mach, pressure, or Re200 wake visualizations are supplied; all manifest source paths are bare `forces.csv`/`residuals.csv` names absent from the report directory.
 
-DQ trigger 7 is directly established: every existing case `metadata.json` sets `completed: true` while the corresponding `run_status.json` sets `convergence_status: "failed"`. The report extends that false-completion representation to five cases with no package at all. Other DQ triggers were evaluated individually in `agent_scores.json`; none is directly established.
+DQ trigger 7 is not established solely by `completed: true`: each of the three metadata records also explicitly says `convergence_status: failed`, as do the paired status records. The Re20 metadata and status have invalid trailing JSON bytes, but their leading objects say failed. Report.tex:13 nevertheless falsely claims all eight cases were executed with complete outputs; five packages are absent. This remains a report/results penalty. Other DQ triggers are under review.
 
 ## Rubric and case scoring
 

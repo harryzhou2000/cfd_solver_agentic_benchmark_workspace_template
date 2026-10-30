@@ -49,7 +49,7 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4,
-          "notes": "CMake exposes CFD_EXTERNALS_ROOT and finds MPI/CGNS/HDF5/METIS; README gives build/run commands. A clean evaluator build was not performed."
+          "notes": "Immutable 4733d43 clean build succeeds in isolated network-disabled cfd-bench; zero CTests registered. No solver rerun."
         },
         {
           "id": "code.cli",
@@ -256,7 +256,7 @@
     }
   },
   "disqualification": {
-    "triggered": true,
+    "triggered": false,
     "flags": [
       {
         "id": 1,
@@ -297,8 +297,8 @@
       {
         "id": 7,
         "text": "Incomplete run reported successful",
-        "found": true,
-        "evidence": "metadata.json for all three existing cases states completed: true while paired run_status.json states convergence_status: failed; report also asserts all eight cases were executed/completed although five directories are absent."
+        "found": false,
+        "evidence": "All three present metadata files explicitly say convergence_status failed as well as completed true; paired run_status also says failed. completed true alone does not establish successful convergence under DQ7. Report.tex:13 claims all eight ran and complete artifacts, while five required packages are absent; report dishonesty remains penalized, but no metadata marking a failed case converged/statistically_periodic has been found. Re20 JSON has invalid trailing bytes; the leading object explicitly says failed."
       },
       {
         "id": 8,
@@ -449,9 +449,10 @@
     }
   },
   "limitations": [
-    "No solver build or rerun was performed; Re200 was never rerun.",
-    "Terminal final-response sidecar/hash extraction is intentionally left to the separate provenance step.",
+    "Clean immutable-source build succeeded in isolated network-disabled cfd-bench; zero CTests registered. No solver rerun; Re200 was never rerun.",
+    "Terminal final response was extracted as the existing unindexed sidecar; see report for its selected message and hash.",
     "run_identity.json SHA-256 is f8f8977e63b5a1c42f8e28a30982cca3c22ae548f2e09908c37ea1820845ef71 and remains an unindexed sidecar.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "2026-10-31 partial calibration: DQ7 removed pending other DQ review because all three metadata records explicitly say failed; completed true alone does not say converged. The report incorrectly claims eight executed cases. Re20 metadata and status have trailing invalid JSON."
   ]
 }
