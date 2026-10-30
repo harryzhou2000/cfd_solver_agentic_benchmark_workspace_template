@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:01:11.961788+00:00
+Generated: 2026-10-30T12:04:55.178479+00:00
 
 **Overall score: 3.7**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake build claimed and source present; no evaluator build. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Clean immutable-source CMake build succeeds with bundled dependencies in network-disabled restricted cfd-bench; CTest finds no registered tests. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 4 | Documented CLI. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T12:01:11.961788+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Production transient acceptance is non-strict. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | Original attempt validator pass. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | Clean build succeeds; CTest has no registered tests. Historical validator checks are structural, not a numerical accuracy proof. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Curated source clean but report dependencies omitted by policy. |
