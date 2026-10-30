@@ -2,44 +2,44 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:17:32.358144+00:00
+Generated: 2026-10-30T12:22:15.245982+00:00
 
-**Overall score: 3.0**
+**Overall score: 3.46**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 3 | Source/session evidence reviewed; see agent report. |
+| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | main.cpp:289–345 and report.tex describe perfect-gas conservative NS, Rusanov and viscous terms. |
 |   | 2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly. | | | |
 |   | *Evidence:* Source flux assembly and report equations. | | | |
-| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 3 | Source/session evidence reviewed; see agent report. |
+| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | CGNS geometry, cell-face adjacency, boundary families, METIS partition and owned/ghost geometry implemented; independent mesh oracle not run. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
-| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 3 | Source/session evidence reviewed; see agent report. |
+| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 3.5 | main.cpp:948 onward assembles face residual and global norms. Original 300-step steady residual targets remain unmet and plateau uses drag-only 10% criterion. |
 |   | Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction. | | | |
 |   | *Evidence:* residual assembly code; residuals.csv shows global reduction. | | | |
-| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 3 | Source/session evidence reviewed; see agent report. |
+| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | Rusanov and optional HLLC implemented; original report notes Rusanov production and low-Mach acoustic scaling for failed Re200. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 3 | Source/session evidence reviewed; see agent report. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | Slip/no-slip and farfield state/flux paths exist; surface rows are documented boundary values. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 3 | Source/session evidence reviewed; see agent report. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 3 | Least-squares limited gradients exist; original transient uses documented reconstruction slope0.1 and historic binary/source binding is limited. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3 | Source/session evidence reviewed; see agent report. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3.5 | Barth-type limiter and positivity controls implemented; no independent smooth-flow order evidence; Re200 slope0.1 disclosed. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Source/session evidence reviewed; see agent report. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3.5 | main.cpp:1489–1510 projects viscous wall traction tangentially. Original laminar drag very low and boundary-layer credibility weak. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | Source/session evidence reviewed; see agent report. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | Scalar/block Jacobi and CFL controls present. Historic source e7977ee tests only drag over100 rows within10% and bounded residual; no lift stability check. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3 | Source/session evidence reviewed; see agent report. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2 | BDF residual and frozen histories implemented; original resumed Re200 metadata records26720 BE fallback intervals for steps3281–30000 with slope0.1. Report discloses counts and marks failed; no resolved shedding. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3 | Source/session evidence reviewed; see agent report. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | METIS root preprocessing and neighbour halos/reductions. Original np2/8 Re20 same Cd0.130384 at300, NACA comparison only20-step diagnostic. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T12:17:32.358144+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.0
+- Overall score (0-5): 3.46
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

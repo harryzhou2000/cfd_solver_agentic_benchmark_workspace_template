@@ -44,10 +44,7 @@ telemetry repair.
 
 ## Recorded scoring
 
-The recorded rubric total remains 30/100. Code, CFD, and Results review
-overalls remain 3.0/5 each. The seven steady cases remain recorded at 1/5 and
-cylinder Re200 at 0/5. The DQ verdict remains false. Detailed point and case
-notes are authoritative in `agent_scores.json` and the three review sidecars.
+The provisional rubric is **69/100**, replacing the old unsupported 3-point assignment in every section. Seven steady cases remain low due to weak 300-step plateaus and implausible forces; M2 inviscid receives 1.5/5, and the honestly failed Re200 remains 0/5. DQ is not established. The original report figures are present; current workspace packages include later replacements and are not attributed to the curated report. Full review remains partial. Detailed evidence is recorded in `agent_scores.json` and the ledger.
 
 ## Integrity and limitations
 
