@@ -2,32 +2,32 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T14:00:13.257499+00:00
+Generated: 2026-10-30T14:05:12.269725+00:00
 
-**Overall score: 4.8**
+**Overall score: 3.92**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | Eight packages. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 5 | All eight original checkpoint packages passed recorded structural validation; numerical/display criteria assessed separately. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit validator passed. |
+| 2 | **res.validator** Automated validator results | 0.10 | 5 | Recorded examiner validation passed all cases/report; this does not establish numerical accuracy. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 5 | Steady targets reached; Re200 periodic. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Steady status reductions reach targets; M200 inviscid final100 Cd varies ~5.7%, slowing over final20, and refreshed transient limiter target is unknown. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Delivered evidence; no rerun. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Re20 Cd2.0269 and Re200 Cd1.2165/St≈0.178 plausible; near-zero M015 and M2 short-tail variation limit confidence. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 5 | Referenced figures. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2.5 | All16 PDF pages render, but three laminar force plots compress both late coefficients and Re200 late drag is unreadable. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 5 | Complete report. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Numeric Re200 summary exists; displayed BDF history formula misses factor1.5 and rank table names earlier np8 cases as production. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Sources/figures traceable. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | All eight original checkpoint forces match workspace; selected Re20 Mach PNG reproduces pixel-identically from its field, historical binary qualified. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T14:00:13.257499+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.8
+- Overall score (0-5): 3.92
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

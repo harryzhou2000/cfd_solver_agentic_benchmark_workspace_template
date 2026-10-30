@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Conservative source."
+      "score": 4,
+      "notes": "Conservative NS source present; report.tex:193\u2013197 omits factor1.5 on BDF history term which code applies."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Unstructured mesh."
+      "score": 4,
+      "notes": "CGNS zones with TRI/QUAD/BAR and adjacency; MIXED sections are not handled."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 5,
-      "notes": "FV residual."
+      "score": 4.5,
+      "notes": "Roe/Rusanov conservative residual and BCs present; historical binary/source revision remains qualified."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Flux options."
+      "score": 4.5,
+      "notes": "Roe/Rusanov paths with reported per-case controls; low-Mach numerical dissipation remains."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "BC treatments."
+      "score": 4.5,
+      "notes": "Characteristic farfield, slip and no-slip adiabatic wall source and boundary checks present."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Second order."
+      "score": 4.5,
+      "notes": "LSQ limited reconstruction and positivity fallback present; no independent smooth-order proof."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Limiter."
+      "notes": "Limiter/positivity source exists; transient limiter is frozen during inner iterations and fully refreshed target is not checked."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Laminar terms."
+      "score": 4.5,
+      "notes": "Newtonian/Fourier source and tangential wall-force projection residual.cpp:481\u2013531."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 4,
-      "notes": "Implicit method."
+      "notes": "Steady LU-SGS and target source exist; M200 inviscid Cd still varies over its final100 samples."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Delivered Re200."
+      "score": 3.5,
+      "notes": "BDF2 formula in source and St\u22480.178 supported; strict ratio uses predictor-frozen limiter and historical binary is unbound."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 4,
-      "notes": "MPI implementation."
+      "notes": "Root-only global mesh, METIS and neighbor halos; rank table compares prior np8 target-level variants with lower-rank runs."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.46
+  "overall_score": 4.19
 }

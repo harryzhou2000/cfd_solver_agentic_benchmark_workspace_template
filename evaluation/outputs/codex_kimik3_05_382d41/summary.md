@@ -116,6 +116,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_kimik3_05_382d41/review_code.md` (overall: 4.47)
-- CFD methods review: `codex_kimik3_05_382d41/review_cfd.md` (overall: 4.46)
-- Result review: `codex_kimik3_05_382d41/review_results.md` (overall: 4.8)
+- Code review scorecard: `codex_kimik3_05_382d41/review_code.md` (overall: 4.21)
+- CFD methods review: `codex_kimik3_05_382d41/review_cfd.md` (overall: 4.19)
+- Result review: `codex_kimik3_05_382d41/review_results.md` (overall: 3.92)
