@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:54:03.526140+00:00
+Generated: 2026-10-30T15:33:33.939254+00:00
 
-**Overall score: 4.0**
+**Overall score: 3.6**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,7 +15,7 @@ Generated: 2026-09-07T02:54:03.526140+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 4 | Validated immutable contestant-result evidence. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Validated immutable contestant-result evidence. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | M2 laminar marked converged at989 despite final200 Cd0.1311815→0.1161380; DQ7. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Validated immutable contestant-result evidence. |
@@ -41,7 +41,7 @@ Generated: 2026-09-07T02:54:03.526140+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.0
+- Overall score (0-5): 3.6
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
