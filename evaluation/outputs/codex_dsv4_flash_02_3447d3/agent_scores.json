@@ -335,8 +335,8 @@
       "notes": "Cylinder M0.10 laminar Re20: numeric CL=0.0159, CD=2.959 at 93e8729:solver/report/report.tex:535; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Case validator OK."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 0,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.016, CD=1.906 at 93e8729:solver/report/report.tex:536; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; shedding statistic St=0.28, lift_amplitude=0.11 at 93e8729:solver/report/report.tex:26; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Terminal response admits strict inner convergence failure; never rerun."
+      "score": 1,
+      "notes": "Score 0\u21921: original 3001-row forces.csv reaches t=300 and contains unsteady force history. For t\u2265150, mean Cd=1.90548 and Cl range \u22120.08186 to 0.12022; Hann-windowed spectrum has several broad peaks near 0.2465, 0.2798 and 0.3065, consistent with report.tex:25\u201326,627\u2013628 stating St\u22480.275 with bandwidth 0.25\u20130.32. This is substantial partial computed evidence, not reliable strict-target convergence: metadata reports 1.0 fraction and zero misses but last ratio 0.369594 against target 0.001; driver.cpp:818\u2013832 treats a decrease as convergence and :930\u2013964 uses that flag to count target misses. Actual strict miss count is not derivable from the reported fraction. No contestant plot or field image is present in current workspace and no acceptable sibling PDF exists; report figure references cannot be rendered from curated source. Credibility and delivered-evidence limits prevent higher score."
     }
   },
   "disqualification": {
@@ -346,13 +346,14 @@
         "id": 7,
         "text": "metadata reports incomplete/failed runs as successful final results",
         "found": true,
-        "evidence": "Terminal response admits Re200 1e-3 target was not reached, while production status accepted all steps as successful."
+        "evidence": "Immutable 93e8729 driver.cpp:778\u2013782 computes per-step total residual reference; :818\u2013832 accepts strict target OR mere decrease and sets inner_converged; :930\u2013964 counts misses and fraction from this broader flag. Re200 metadata target=0.001, last_inner_residual_ratio=0.3695944591, inner_target_misses=0, fraction=1.0 and status statistically_periodic. Last step demonstrably missed the strict target; the fraction does not establish the number of actual strict misses. Report and terminal response disclose relaxed acceptance."
       }
     ]
   },
   "limitations": [
     "Operator-authorized curated rewrite excluded all raw result/report data; case directories remained readable but report validation fails for missing run_manifest.csv.",
     "Old audit-failing result commit 2376b11 is retained only as recovery provenance.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "2026-10-30 partial Re200 recalibration uses original forces.csv for numeric and spectral inspection only; no evaluator redraw or CFD rerun. Actual strict target-miss count is unknown because metadata counts relaxed acceptance."
   ]
 }
