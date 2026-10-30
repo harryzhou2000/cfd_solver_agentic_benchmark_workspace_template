@@ -4,7 +4,7 @@ Submission `codex/generic/glm53-02` at `1bc8fb6ec6c765ec3c4bf7c06770463580dbecb1
 
 ## Verdict
 
-**86/100; DQ=false (partial calibration).** The previous DQ7 flag based only on residual-order shortfalls is not supported after reviewing stable force and bounded residual plateaus allowed by TASK.md:172; other triggers remain under review.
+**86/100; DQ=true under DQ7 (partial calibration).** The previous inviscid-plateau rationale was unsupported, but a separate M2 laminar result is labeled converged while its drag is still changing materially; evidence below. Other triggers remain under review.
 
 ## Evidence
 
@@ -24,3 +24,8 @@ run_identity.json SHA-256: 1d16f3880d29da32fd7905b50fd117ea2186b70a952db1f563904
 The previous DQ7 flag treated inviscid reductions 2.509, 2.383 and −0.040 orders as automatically failed. TASK.md:172 permits a clearly justified plateau with stable forces and bounded residuals; report.tex:501–509 explicitly discloses terminal plateau acceptance. Independently reading the last 10% of M015/M080/M200 inviscid histories gives residual half-means 1.460e-5→1.433e-5, 1.01311e-6→1.01318e-6, 1.32099e-4→1.31991e-4; Cd half-means 0.00228491→0.00228905, 0.00928821490→0.00928821492, 0.092531847→0.092531879; Cl half-means 0.00041351→0.00041146, 0.000435354436→0.000435354431, −0.000174608→−0.000174055. These support bounded stable plateaus; residual-order shortfall alone is not proof of false metadata. DQ7 removed, DQ=false provisionally while other triggers remain under review.
 
 Re20 case 5→2: report_data.tex:19 reports Cd1.997/Cl−0.001196 and last-10% raw Cd1.99656–1.99838 supports plausible stable drag. Visually reviewed immutable force image and accepted PDF p10: startup Cd≈103 compresses the late force tail. Its Mach/pressure panels and standalone vorticity contour are compressed to thin strips, not wake-revealing; no suitable alternate delivered wake plot found. Re200 old case note had a numeric attribution error: report_data.tex:20 reports mean Cd0.9727 and Cl0.001315±0.01511, while line32 is residual statistics; St0.14 is present at :42. Raw lift FFT independently peaks at 0.14 for t>=100,150,200, but PDF p10 force plot lacks readable late lift/drag and score remains2. PDF p11 shows wake zoom. Output metadata has git_revision=null, and source linkage and remaining rubric/DQ are partial. No CFD rerun.
+
+
+## Separate M2 laminar false-success finding — 2026-10-30
+
+Selected solver/results/naca0012_m200_laminar_re5000/metadata.json and run_status.json say completed/converged at step627 with 3.004 residual orders, yet the last 62 force rows show Cd decreasing monotonically 0.24406605467→0.19384628823 (20.6% of its starting value); first and second half means 0.2296330056→0.2042442508. This is not a stable force result. TASK.md:140 requires max_steps at least 40000 unless convergence is clearly achieved early; :172 requires convergence or a justified plateau with stable forces and bounded residuals. DQ7 applies on this separate case, and its independent case score 2→1. This does not reinstate the unsupported inviscid rationale: those plateaus remain as previously documented. Metadata git_revision=null, force file mtime 2026-08-30 14:00:50 UTC precedes final solver.cpp mtime 19:24:44 UTC; final source :1159–1165 tests residual orders alone, but is not proved to have generated these historical rows. Other DQ/rubric review partial; no CFD rerun.
