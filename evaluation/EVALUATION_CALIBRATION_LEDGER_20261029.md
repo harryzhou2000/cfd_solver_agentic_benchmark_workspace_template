@@ -769,3 +769,5 @@ Final `SteadySolver.cpp:92–105,139–145` sets at least 5000 first-order steps
 sonnet46-01 report consistency: removed the inherited empty rubric/case tables and stale DQ=false verdict; current case table, 73/100 pending rubric review, DQ7 and TASK full-mesh findings are now coherent with recorded scorecard. The report remains partial.
 
 sonnet46-01 build/force checkpoint: clean immutable build passed in restricted cfd-bench; --restart manifest handling is incompatible/silent and transient history is not restored, build/CLI 8→7.5 total73→72.5. Full viscous traction is integrated instead of tangential-only force; surface no-slip velocity is boundary-valued. Eleven PDF pages reviewed without placeholders. Other rubric/DQ remains partial.
+
+sonnet46-01 transient checkpoint: final TransientSolver.cpp:182–214 measures spatial+BDF+pseudo regularization, not TASK.md:143 spatial+BDF alone. Checkpoint residuals have 943/30000 steps at 2000, metadata says configured max1000 and observed max2000. Actual unregularized misses and production binary binding unknown. Implicit/transient9→7, total72.5→70.5, no Re200 rerun.

@@ -45,7 +45,7 @@ Reviewed source, selected Codex root, contestant final response, raw workspace p
 
 ## Recorded scores and disqualification
 
-The current 100-point rubric is 72.5/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
+The current 100-point rubric is 70.5/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
 
 | Case | Score |
 |---|---:|
@@ -107,3 +107,8 @@ Final `SteadySolver.cpp:92–105,139–145` sets at least 5000 first-order steps
 Immutable `058801f` clean CMake build succeeded in network-disabled `cfd-bench` with two CPUs, 3 GiB and 256 pids, explicitly setting `CFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install` and `EXTERNAL_ROOT=/opt/external`. No CFD run was performed. `README.md:33` describes `--restart` as a manifest, but `main.cpp:120–133` instead appends `_rankN.bin` to the argument and silently proceeds on missing files or a count mismatch; the loaded state does not restore physical time or BDF history. Build/CLI rubric 8→7.5 and CLI review 4→3.5; total 73→72.5.
 
 `OutputManager.cpp:118–135` integrates the entire viscous traction vector, including normal stress, as viscous drag, while :203–217 separately projects tangential shear for skin-friction output. This is a force-split defect under rubric 5.4; report.tex:595–598 discloses negative viscous drag but this does not establish that the solver omitted all claimed viscous algorithms. `OutputManager.cpp:190–194,224` writes the zero wall boundary velocity for no-slip, distinct from adjacent-cell velocity. All eleven accepted PDF pages were visually checked and show no obvious missing-asset placeholders. Remaining rubric and DQ review remains partial.
+
+
+## Transient inner convergence — 2026-10-30
+
+`058801f` and checkpoint `8899f00` have the same `TransientSolver.cpp` blob `c5938a23cf5d8caf11425a23b3f7f4fad6091d44`. Lines 182–188 form spatial plus BDF residual, then :191–194 add a pseudo-time regularization term before the norm and ratio at :197–214. TASK.md:143 requires the reduction target on spatial plus physical-time residual; the regularized ratio does not establish that target. The code also sets the maximum to at least 2000 (:40–44), although the supplied case and metadata say 1000. The selected checkpoint residual history has 30000 rows, with 943 at exactly 2000 and observed min11/max2000/mean75.0211. Metadata itself reports 943 misses and max2000, contradicting its own configured maximum1000; it is not necessary to invent miss counts. Because metadata does not identify the production binary, the final source's precise relationship to this run remains uncertain, and the actual strict unregularized target-miss count cannot be inferred. Implicit/transient rubric 9→7 and total72.5→70.5; no Re200 rerun.
