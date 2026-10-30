@@ -74,7 +74,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-09_9cb2fc` | fully reviewed — 65.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-10_f6b586` | fully reviewed — 87/100, DQ=true; both gates pass |
 | `claude_generic_opus-11_fe7eba` | fully reviewed: 84/100, DQ false; eight case scores 3,3,3,2,2,2,2,2 |
-| `claude_generic_sonnet-01_96c411` | unreviewed |
+| `claude_generic_sonnet-01_96c411` | partial: report appropriateness and Re200 evidence checked; case, source, rubric and DQ review pending |
 | `codex_dsv4_flash_01_0c1996` | unreviewed |
 | `codex_dsv4_flash_02_3447d3` | unreviewed |
 | `codex_dsv4_flash_03_294b64` | unreviewed |
@@ -327,3 +327,8 @@ Opus-11 partial source review: immutable `9965be84` main.cpp:103–110 creates `
 ## Opus-11 full calibration — 2026-10-30
 
 Rubric 92→84/100, DQ remains false; all 27 review points and ten rubric sections have criterion-specific source/result evidence. Case scores in task order 2,2,2,2,2,2,2,2 → 3,3,3,2,2,2,2,2. Explicitly contestant-delivered standalone figures and session/manifest provenance are documented above; unreadable force tails still cap the four steady viscous cases and Re200. Re20 Cd≈0.878 vs ≈2 reference, M2 inviscid plateau 2.10 orders disclosed and stable, Re200 original St≈0.189919. Source findings: full mesh scope ends before solver; restart cold-starts; transient target ratios are measured; full viscous traction is inaccurately called a tangential split (same DQ6 distinction as prior runs). Transient force row mislabeled mean is separately corrected by a true mean table. No affirmative disqualification evidence found; no exhaustive external authorship or pixel audit. Immutable clean build passes in restricted network-disabled container, original validator and both record gates pass. No CFD rerun.
+
+
+## Sonnet-01 partial report provenance review — 2026-10-30
+
+The only sibling main report PDF SHA-256 `fe1abdd4fadde590638e9d186293f0898df92980afc1fad1181cc6a0503fca9c` matches the former indexed snapshot and workspace bytes; report.tex blob `50b2613f25dcaf881d8e49909c5e09d22bc8115e` matches immutable `64bbe107`. The 36-page report was delivered and its readable content remains evidence. Visual review of PDF p33 found explicit TODO boxes for missing post-transient Re200 wake velocity/vorticity, from report.tex:20–30,789–790. SKILL.md accepted-PDF criteria exclude obvious missing-asset placeholders, so prior accepted status is corrected to absent/unsuitable with this reason; prior PDF bytes remain in the original workspace and Git history at manager commit `9986925f`. No other main report PDF found. PDF p31 does contain actual partial Re200 residual and lift/drag plots through approximately t=3, contrary to old notes claiming no plot; it cannot establish final-periodic behavior because final status is failed t=3.03 and force CSV ends t=2.86. The report expressly discloses this and the force-sign inconsistency. Case scoring and source, rubric and DQ remain partial; both record gates pass; no CFD rerun.
