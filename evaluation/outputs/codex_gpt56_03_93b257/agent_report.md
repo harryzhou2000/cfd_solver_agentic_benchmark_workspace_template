@@ -21,4 +21,6 @@ The explicit official validator passed every required production case directory 
 
 ## Calibration in progress
 
-Re200 case score 2→4.5: the accepted contestant PDF includes a readable late lift/drag inset and residual on page 11 and wake on page 12. The historical force record gives t≥200 mean Cd1.269459 and t180–300 mean crossing period5.369611 (frequency≈0.18623), close to reported St0.18998. Metadata source revision matches curated solver files; exact executable remains unbound. Other cases, rubric and DQ remain under review.
+Re200 case score 2→4.5: the accepted contestant PDF includes a readable late lift/drag inset and residual on page 11 and wake on page 12. The historical force record gives t≥200 mean Cd1.269459 and t180–300 mean crossing period5.369611 (frequency≈0.18623), close to reported St0.18998. Metadata source revision matches curated solver files; exact executable remains unbound. Subsequently the other seven case histories and delivered PDF figures were independently reviewed; rubric and DQ remain under review.
+
+The seven steady cases each score 4.5 after inspection of the accepted PDF’s numeric table, residual/force histories and near-body fields and of their own final 200 force rows. The five metadata records naming 9e89a35 use a source version differing from the curated solver only in the steady drag-plateau tolerance formula; Re20, M2 laminar and Re200 name matching 6faee413 source. This distinction and the unbound executable are recorded in the case notes.
