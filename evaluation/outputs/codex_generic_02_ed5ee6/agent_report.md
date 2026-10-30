@@ -40,13 +40,13 @@ Read the final response, submitted source/report and raw workspace packages. The
 
 `run_identity.json` SHA-256: `3188a831b912158728b6e55ba17d62e0a27fd85f6b52a816bd398088909cc5dd`; `contestant_final_response.md` SHA-256: `1937e2cc0590ccd93ac0272d300726889a1238eff5ed59d6bcb4bfa0c082bba0`. These are unindexed sidecars not validated by `cfdeval check`.
 
-## Provisional rubric: 33/100 (previously 36)
+## Qualified rubric: 33/100 (previously 36)
 
-Detailed rubric sections, weighted review points and independent case scores are in `agent_scores.json`. Overall review remains partial because the M0.15 inviscid raw package is missing and current result/run provenance does not resolve report/final-response conflicts.
+Detailed rubric sections, weighted review points and independent case scores are in `agent_scores.json`. All ten sections, eight cases, 27 review points and 13 DQ triggers have been assessed to the available evidence limit. The M0.15 inviscid raw package is missing and current result/run provenance does not resolve report/final-response conflicts; conclusions remain qualified.
 
 ## Disqualification assessment
 
-DQ=false. The incomplete/poor outcomes warrant deductions, but source review did not prove an external-solver wrapper, fake MPI, explicit-only solver, copied core, or another listed disqualification trigger.
+DQ=true under trigger 7 and the task full-mesh prohibition, as documented below. No evidence establishes an external-solver wrapper, explicit-only solver or copied core.
 
 ## Metadata answers & session selection
 
@@ -54,11 +54,11 @@ Workspace-local Codex root `01a02255-f5df-7840-b43d-b6e51aa2f3a7` and its eight 
 
 ## Limitations
 
-No independent rebuild/rerun was performed. Raw result data and PDF are excluded from the curated Git tip. The contestant final response contradicts itself about completion and admits unfinished/incorrect cases.
+An independent clean immutable-source build passed with warnings; no CFD rerun was performed. Raw result data and PDF are excluded from the curated Git tip. The contestant final response contradicts itself about completion and admits unfinished/incorrect cases.
 
 ## Verdict
 
-Provisional 33/100, DQ=true. Basic solver/MPI structures exist, but delivered case completeness, viscous reliability, Re20 physics, Re200 completion, visual fields, and report honesty are insufficient.
+Qualified 33/100, DQ=true. Basic solver/MPI structures exist, but delivered case completeness, viscous reliability, Re20 physics, Re200 completion, visual fields, and report honesty are insufficient.
 
 
 ## Partial Re200 and full-mesh DQ review — 2026-10-30
@@ -81,3 +81,8 @@ Immutable d477eaf clean CMake build succeeds with warnings in network-disabled c
 ## Partial rubric and provenance boundary — 2026-10-30
 
 All ten rubric sections and 27 review points now contain criterion-specific evidence. Provisional rubric 36→33 (build 5→6 after successful immutable clean build, MPI 5→2 for replicated full mesh, implicit 3→2 for diagonal-only update and spatial-only transient target). DQ7 and TASK full-mesh prohibition remain established; each other rule is individually assessed without inventing evidence. main.cpp:1676–1690 has no restart CLI. tools/plot_results.py:231–232 selects physical_time for steady data, collapsing their force histories to x=0. Report PDF is excluded from snapshot under explicit MISSING-placeholder vendor rule but is preserved and assessed as delivered historical content. Canonical M0.15 inviscid raw package is missing, and other current raw files conflict with report/final-response values while metadata git_revision=null; producing binary and precise historical run selection remain unproven. The review remains partial rather than treating absent evidence as complete. Both gates pass; no CFD rerun.
+
+
+## Qualified review and missing-package correction — 2026-10-31
+
+The historical checkpoints below document earlier partial stages; all ten rubric sections, eight case scores, 27 review points and 13 DQ triggers are now assessed to the evidence limit. The M0.15 inviscid raw package remains absent, but submission `d477eaf:solver/report/report.tex:92` gives Cd 0.450249/Cl 0.002361, and its committed residual, force and Cp figures document a recognizable case attempt. The residual graph contains roughly 50 sampled iterations; the force graph collapses at x=0, the report has a missing field placeholder, and the final response gives a different Cd≈0.403. Thus the score changes 0→1 for a severely incomplete, physically implausible attempt; no missing raw final data or producing source are invented. Other scores and 33/100 DQ7/TASK full mesh remain unchanged. The source-to-run and report/current-output conflicts cannot be resolved from available saved evidence; this qualification remains. No CFD/Re200 rerun.

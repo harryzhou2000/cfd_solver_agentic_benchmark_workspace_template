@@ -87,7 +87,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_11_6e6ac8` | fully reviewed: 70→53, DQ7 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_12_7e965b` | fully reviewed: 90→79, DQ false; all cases 2 |
 | `codex_dsv4_flash_14_80096b` | fully reviewed, qualified: 79.5/100, no DQ established; historical binary/rank controls unbound |
-| `codex_generic_02_ed5ee6` | partial: DQ7, TASK full mesh, Re200 checked; others pending |
+| `codex_generic_02_ed5ee6` | fully reviewed, qualified: 33/100, DQ7 and TASK full mesh; M0.15 package/source attribution unavailable |
 | `codex_generic_03_5f2165` | partial: all cases, build and TASK full mesh/state checked; remaining source/rubric/DQ review pending |
 | `codex_generic_04_16009f` | partial: DQ10, DQ7, TASK full mesh established; case/rubric/source review pending |
 | `codex_generic_05_2599b1` | partial: TASK full mesh established; report-to-package mapping and rubric pending |
@@ -539,6 +539,8 @@ generic_02 partial steady/build review: Re20 case 0→1 as recognizable severely
 
 
 generic_02 partial rubric/provenance boundary: provisional rubric 36→33 (build 5→6, MPI 5→2, implicit 3→2); all 10 sections/27 points and DQ rules have criterion-specific evidence. DQ7 and TASK full mesh stand. M0.15 inviscid canonical package absent; other current raw result values disagree with report/terminal and metadata git_revision=null, so exact historical source/run selection unproven and review remains partial. main.cpp:1676–1690 CLI lacks restart; :939–974 is diagonal pseudo-time update, :1515–1546 tests spatial-only residual for transient. tools/plot_results.py:231–232 plots steady physical_time=0, so histories collapse; original PDF has explicit missing field placeholders, preserved as historical content but snapshot absent under vendor policy. Clean immutable build passes with warnings, gates pass; no CFD rerun.
+
+generic_02 qualified full review and missing-package score correction: the M0.15 inviscid directory contains only stdout and no raw final package, and no tracked historic result package was found. Nonetheless immutable `d477eaf:solver/report/report.tex:92` supplies Cd 0.450249/Cl 0.002361 and references committed residual, force and Cp figures; the visually inspected residual plot contains ~50 sampled iterations. The force plot collapses at x=0, the report has an explicit missing field box, and the final response gives a different Cd≈0.403. This is a recognizable but severely incomplete and physically implausible case attempt: score 0→1, without inventing absent final data or a producing source. All ten sections, eight cases, 27 review points and 13 DQ rules have been assessed to the available evidence limit; prior partial wording above is historical. 33/100, DQ7 and TASK full mesh remain unchanged. Report/current-output conflicts and historic source/run selection remain unresolved and qualified; no CFD/Re200 rerun. Both gates required.
 
 
 ## generic_03 partial replicated-state/Re200 review — 2026-10-30

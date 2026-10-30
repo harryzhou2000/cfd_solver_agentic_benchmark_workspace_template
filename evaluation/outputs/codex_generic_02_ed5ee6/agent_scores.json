@@ -307,8 +307,8 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 0,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.002361, CD=0.450249 at d477eaf:solver/report/report.tex:92; residual history d477eaf:solver/report/figures/naca0012_m015_inviscid_residuals.png (referenced at solver/report/report.tex:110); force history d477eaf:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:117); no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Missing metadata; no readable final package."
+      "score": 1,
+      "notes": "Original 0\u21921: canonical raw package and metadata are missing (current directory contains only stdout.log), but immutable d477eaf:solver/report/report.tex:92 reports Cd 0.450249/Cl 0.002361 and references case-specific residual, force and Cp figures. The residual graph shows ~50 sampled iterations; the force graph collapses to x=0 because steady physical_time is zero, and the report contains an explicit missing field box. This is a recognizable but severely incomplete and physically implausible inviscid attempt, not proof of a recoverable final result; current report and final-response Cd\u22480.403 differ and exact production source/run selection is unbound."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
@@ -418,6 +418,7 @@
     "No evaluator rerun; Re200 was not rerun.",
     "Raw results and PDF are uncommitted workspace evidence excluded by curation.",
     "run_identity.json and contestant_final_response.md are unindexed; cfdeval check does not validate them.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All applicable rubric sections, independent cases, 27 review points and 13 DQ rules were reviewed to the available evidence limit. M0.15 inviscid raw package is absent and historical source/run selection is unresolved; review is qualified. No CFD/Re200 rerun."
   ]
 }
