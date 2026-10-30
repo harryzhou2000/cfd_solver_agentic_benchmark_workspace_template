@@ -341,8 +341,44 @@
     ],
     "disqualification_flags": [
       {
-        "id": 7,
-        "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
+        "flag": "Existing solver executable called internally",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Force/residual files generated without solving",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Code only reads the two benchmark mesh filenames through hard-coded branches",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "MPI rank count changes results by order-one amounts for steady cases",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Explicit time stepping only (no implicit/steady capability claimed where required)",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Report claims algorithms that cannot be found in source",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "metadata.json marks incomplete/failed runs as successful",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Solver core, time integration, or MPI communication copied/adapted/wrapped from an existing open-source CFD codebase",
+        "triggered": null,
+        "notes": ""
       }
     ],
     "overall_score": 3.27
@@ -431,8 +467,34 @@
     ],
     "disqualification_flags": [
       {
-        "id": 7,
-        "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
+        "flag": "Solver uses explicit time stepping only",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Report claims second-order reconstruction or limiter that is disabled in production",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "metadata.json claims METIS/ParMETIS but code uses geometric split or full-state replication",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Re 200 run reaches final time but misses inner target on most steps (failed transient solve presented as periodic)",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Normal viscous traction mislabeled as skin friction",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Surface no-slip rows are actually adjacent cell-center velocities without documentation",
+        "triggered": null,
+        "notes": ""
       }
     ],
     "overall_score": 3.27
@@ -493,8 +555,29 @@
     ],
     "disqualification_flags": [
       {
-        "id": 7,
-        "evidence": "See the explicit trigger-7 finding in the top-level disqualification assessment."
+        "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Report figures do not correspond to submitted field/CSV outputs",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "metadata.json marks incomplete or failed runs as successful",
+        "triggered": null,
+        "notes": ""
+      },
+      {
+        "flag": "Debug outputs presented as final case results",
+        "triggered": null,
+        "notes": ""
       }
     ],
     "overall_score": 0.4
