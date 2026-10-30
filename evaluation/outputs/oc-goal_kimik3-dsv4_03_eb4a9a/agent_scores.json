@@ -149,8 +149,8 @@
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 3.5,
+          "notes": "solver_core.cpp:299\u2013311,550\u2013557 integrates full traction, but report.tex:214\u2013217 claims tangential-only; magnitude of normal contribution unknown."
         },
         {
           "id": "cfd.implicit",
@@ -174,7 +174,7 @@
           "notes": "Validated immutable contestant-result evidence."
         }
       ],
-      "overall_score": 4.0,
+      "overall_score": 3.95,
       "disqualification_flags": []
     },
     "result_review": {
@@ -235,7 +235,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 70.5,
+    "total_scored": 68,
     "sections": [
       {
         "id": "build_cli",
@@ -269,8 +269,8 @@
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 8,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 6,
+        "notes": "solver_core.cpp:299\u2013311,550\u2013557 accumulates full wall traction, while report.tex:214\u2013217 claims tangential-only. Magnitude of normal contribution is unproven; other viscous review pending."
       },
       {
         "id": "implicit_transient",
@@ -297,8 +297,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 3.5,
-        "notes": "Report calls the early M2 laminar state converged despite late drag drift; Re200 delivered St and late force were previously overlooked."
+        "score": 3,
+        "notes": "Report claims early M2 convergence despite late drag drift and describes full traction force split as tangential-only. Re200 delivered evidence was previously overlooked."
       },
       {
         "id": "extensibility",

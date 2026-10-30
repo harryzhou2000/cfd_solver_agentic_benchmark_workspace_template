@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T15:33:33.938963+00:00
+Generated: 2026-10-30T15:35:25.685405+00:00
 
-**Overall score: 4.0**
+**Overall score: 3.95**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T15:33:33.938963+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Validated immutable contestant-result evidence. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | Validated immutable contestant-result evidence. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3.5 | solver_core.cpp:299–311,550–557 integrates full traction, but report.tex:214–217 claims tangential-only; magnitude of normal contribution unknown. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | Validated immutable contestant-result evidence. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T15:33:33.938963+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.0
+- Overall score (0-5): 3.95
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
