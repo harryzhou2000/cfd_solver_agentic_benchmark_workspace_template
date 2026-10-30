@@ -7,77 +7,77 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Conservative perfect-gas formulation and force-coefficient definitions are implemented/described."
+      "notes": "Perfect-gas conservative equations and nondimensional force definitions exist; actual heat conduction and wall force are incomplete."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "CGNS reader, face/cell geometry, adjacency, and METIS graph construction are present; only partial failed-run evidence exists."
+      "notes": "CGNS, polygon geometry and cell adjacency implemented; root distributes owned/ghost mesh, but numerical cases did not validate geometry."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Face residual assembly, boundary treatment, and global L2/Linf reductions are present, though failed histories do not validate production convergence."
+      "score": 3.5,
+      "notes": "Paired face flux residual and BC paths implemented; failed/partial histories and inactive temperature gradient limit validation."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Rusanov and Roe/Harten-Yee paths are implemented; the M2 metadata selects Roe with Harten-Yee."
+      "notes": "flux.cpp implements Rusanov and Roe/Harten\u2013Yee with fallback; M2 metadata selects Roe."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Farfield, slip, and mirrored no-slip/adiabatic boundary implementations are present; output validation is inadequate."
+      "notes": "Farfield, reflected slip and no-slip boundary states exist; surface writer outputs documented boundary values, but no credible laminar case validates them."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 4,
-      "notes": "Least-squares gradients and reconstructed face states are called from residual assembly; no successful production result verifies accuracy."
+      "notes": "residual.cpp invokes least-squares gradients and reconstructed states; no successful production output demonstrates second-order accuracy."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Barth-Jespersen limiter and positivity fallback are implemented and called; production quality remains unverified."
+      "notes": "Barth\u2013Jespersen limiter and positivity fallback are called in residual assembly; fallback frequency in historical production unknown."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Newtonian viscous path is implemented, but residual.cpp leaves temperature gradient TODO and report admits heat conduction is inactive; laminar result forces show zero viscous contribution."
+      "score": 2,
+      "notes": "Viscous stress exists but residual.cpp:119\u2013123 disables heat gradient and :261\u2013275 never integrates wall shear; report falsely claims separated skin-friction force."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 3,
-      "notes": "Block LU-SGS/pseudo-time implementation exists, but all three available steady runs are failed with -0.89 to 0.43 residual-order reduction."
+      "notes": "LU-SGS pseudo-time implemented; three steady final statuses failed and no successful force plateau established."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Source contains frozen-history BDF2 dual-time loops and inner statistics, but no Re200 deliverable validates it."
+      "score": 3,
+      "notes": "BDF2 frozen-history two-loop code exists; time_integrator.cpp:704 assigns statistically_periodic unconditionally and no Re200 package validates inner convergence or shedding."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 3,
-      "notes": "METIS k-way partition, owned/ghost data, and neighbor diagnostics are implemented; no np=1/2/4/8 comparison is delivered."
+      "notes": "METIS root partition, owned/ghost packing and reductions implemented; exact historical binary and controlled rank agreement remain unverified."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.71
+  "overall_score": 3.45
 }

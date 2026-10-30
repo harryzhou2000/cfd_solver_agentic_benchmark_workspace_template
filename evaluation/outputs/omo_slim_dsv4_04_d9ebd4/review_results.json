@@ -7,49 +7,49 @@
       "title": "Output contract compliance",
       "weight": 0.2,
       "score": 1,
-      "notes": "Only three of eight case directories exist. The three have files, but all record failed status; five complete case packages are absent; four have partial workspace histories from selected-session detached launches."
+      "notes": "Three complete-looking packages explicitly failed; Re20 metadata/status contain trailing invalid JSON. Four more histories partial, Re200 empty."
     },
     {
       "id": "res.validator",
       "title": "Automated validator results",
       "weight": 0.1,
       "score": 0,
-      "notes": "No submitted validator pass; the absent five case directories and incomplete report artifacts prevent a passing submission."
+      "notes": "No submitted validator pass; missing completed cases and report assets preclude a passing submission."
     },
     {
       "id": "res.completion",
       "title": "Case completion and convergence",
       "weight": 0.2,
       "score": 0,
-      "notes": "All three present cases record convergence_status failed; five complete packages, including Re200, are absent; four have partial workspace histories."
+      "notes": "Three final statuses failed, four histories partial, and Re200 empty; completed true does not override explicit failed status."
     },
     {
       "id": "res.plausibility",
       "title": "Result plausibility and MPI consistency",
       "weight": 0.15,
       "score": 0,
-      "notes": "Failed tails are implausible (cylinder Re20 ends Cd 23.16 and Cl 16.94); sanity_checks records failed symmetry, wall, positivity, and Re200 checks; no rank comparison."
+      "notes": "Re20 last1000 CD -58.94 to 66.42; NACA late histories have extreme spikes. Concurrent launches and unbound binaries prevent attributing a single cause."
     },
     {
       "id": "res.visualization",
       "title": "Visualizations",
       "weight": 0.15,
-      "score": 1,
-      "notes": "Fourteen force/residual PNGs exist, but no computed Mach/pressure or Re200 wake figure; manifests name bare source CSVs that are not present beside the manifest."
+      "score": 0.5,
+      "notes": "Fourteen delivered line PNGs are dominated by extreme spikes; PDF contains no figures and no domain contour or Re200 wake."
     },
     {
       "id": "res.report",
       "title": "Report quality and honesty",
       "weight": 0.15,
-      "score": 2,
-      "notes": "Well-structured equations and limitations, but it claims complete eight-case output and analyses that do not exist; run_manifest.csv is header-only."
+      "score": 1,
+      "notes": "Report gives equations and admits heat limitation, but falsely asserts eight complete cases, unsupported Re200 St\u22480.19, and non-existent skin-friction force decomposition."
     },
     {
       "id": "res.traceability",
       "title": "Traceability of figures and claims",
       "weight": 0.05,
-      "score": 1,
-      "notes": "A figure manifest exists, but every entry references bare forces.csv/residuals.csv missing from the report directory and the report has no actual run summary."
+      "score": 0.5,
+      "notes": "Manifest names bare force/residual CSV paths, while PDF embeds no figures; run_manifest contains only its header."
     }
   ],
   "disqualification_flags": [
@@ -58,5 +58,5 @@
       "evidence": "Existing package metadata says completed=true while its run_status says failed."
     }
   ],
-  "overall_score": 0.7
+  "overall_score": 0.45
 }

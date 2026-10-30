@@ -375,63 +375,63 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4,
-        "notes": "Immutable 4733d43 clean build succeeds in isolated network-disabled cfd-bench; zero CTests registered. No solver rerun."
+        "notes": "Immutable 4733d43 clean isolated build succeeds with required externals; 0 CTests registered."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 4,
-        "notes": "main.cpp implements solve --case --output and rejects malformed invocation paths; no independent negative-path run was performed."
+        "notes": "main.cpp parses solve/case/output and guards bad commands; no independent negative-path execution performed."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Mesh, partition, halo, flux, reconstruction, residual, integration, and output are separated into named modules."
+        "notes": "Mesh, partition, halo, flux, reconstruction, residual, integration and output are separated; force and output paths retain omissions."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "No internal call to an existing solver executable is evident. Trust policy precludes external similarity investigation."
+        "notes": "No internal complete-solver executable invocation found; external authorship investigation excluded by trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 5,
-        "notes": "Case JSON controls physics/run settings; source does not branch only on the two benchmark mesh names."
+        "notes": "JSON supplies physics and controls; no two-mesh-only solver branches found."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 3,
-        "notes": "Neighbor Isend/Irecv halo packing and global reductions are implemented, but only np=4 failed outputs are present and no rank-consistency comparison is delivered."
+        "notes": "partition.cpp uses METIS on root and sends owned/ghost data; neighbor MPI and reductions exist, but no credible rank comparison was delivered."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Source has mesh/positivity guards and owned/ghost layout, but no clean-build, stress, or malformed-input evidence was delivered."
+        "score": 2.5,
+        "notes": "Clean build succeeds; production force histories are invalid and positivity clamps exist, but no independent stress or malformed-input tests establish robustness."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 2,
-        "notes": "No tests directory, CI, or submitted validator pass. The three available results are failed and five complete case packages are absent; four have partial workspace histories from selected-session detached launches."
+        "score": 1,
+        "notes": "No CTests, committed tests or valid completed result; three final packages failed and four workspace histories remain partial."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 4,
-        "notes": "Readable modular C++ and documentation; remaining TODO for temperature gradient and generated/build debris outside the curated submission limit polish."
+        "score": 3.5,
+        "notes": "Modular source but residual heat gradient and integrated wall force are explicitly unimplemented; output/reported completeness inconsistent."
       }
     ],
     "disqualification_flags": [
@@ -476,7 +476,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.65
+    "overall_score": 3.48
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -487,77 +487,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Conservative perfect-gas formulation and force-coefficient definitions are implemented/described."
+        "notes": "Perfect-gas conservative equations and nondimensional force definitions exist; actual heat conduction and wall force are incomplete."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "CGNS reader, face/cell geometry, adjacency, and METIS graph construction are present; only partial failed-run evidence exists."
+        "notes": "CGNS, polygon geometry and cell adjacency implemented; root distributes owned/ghost mesh, but numerical cases did not validate geometry."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Face residual assembly, boundary treatment, and global L2/Linf reductions are present, though failed histories do not validate production convergence."
+        "score": 3.5,
+        "notes": "Paired face flux residual and BC paths implemented; failed/partial histories and inactive temperature gradient limit validation."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Rusanov and Roe/Harten-Yee paths are implemented; the M2 metadata selects Roe with Harten-Yee."
+        "notes": "flux.cpp implements Rusanov and Roe/Harten\u2013Yee with fallback; M2 metadata selects Roe."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4,
-        "notes": "Farfield, slip, and mirrored no-slip/adiabatic boundary implementations are present; output validation is inadequate."
+        "notes": "Farfield, reflected slip and no-slip boundary states exist; surface writer outputs documented boundary values, but no credible laminar case validates them."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 4,
-        "notes": "Least-squares gradients and reconstructed face states are called from residual assembly; no successful production result verifies accuracy."
+        "notes": "residual.cpp invokes least-squares gradients and reconstructed states; no successful production output demonstrates second-order accuracy."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 4,
-        "notes": "Barth-Jespersen limiter and positivity fallback are implemented and called; production quality remains unverified."
+        "notes": "Barth\u2013Jespersen limiter and positivity fallback are called in residual assembly; fallback frequency in historical production unknown."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Newtonian viscous path is implemented, but residual.cpp leaves temperature gradient TODO and report admits heat conduction is inactive; laminar result forces show zero viscous contribution."
+        "score": 2,
+        "notes": "Viscous stress exists but residual.cpp:119\u2013123 disables heat gradient and :261\u2013275 never integrates wall shear; report falsely claims separated skin-friction force."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 3,
-        "notes": "Block LU-SGS/pseudo-time implementation exists, but all three available steady runs are failed with -0.89 to 0.43 residual-order reduction."
+        "notes": "LU-SGS pseudo-time implemented; three steady final statuses failed and no successful force plateau established."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source contains frozen-history BDF2 dual-time loops and inner statistics, but no Re200 deliverable validates it."
+        "score": 3,
+        "notes": "BDF2 frozen-history two-loop code exists; time_integrator.cpp:704 assigns statistically_periodic unconditionally and no Re200 package validates inner convergence or shedding."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 3,
-        "notes": "METIS k-way partition, owned/ghost data, and neighbor diagnostics are implemented; no np=1/2/4/8 comparison is delivered."
+        "notes": "METIS root partition, owned/ghost packing and reductions implemented; exact historical binary and controlled rank agreement remain unverified."
       }
     ],
     "disqualification_flags": [
@@ -592,7 +592,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.71
+    "overall_score": 3.45
   },
   "result_review": {
     "review_area": "result_review",
@@ -603,49 +603,49 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 1,
-        "notes": "Only three of eight case directories exist. The three have files, but all record failed status; five complete case packages are absent; four have partial workspace histories from selected-session detached launches."
+        "notes": "Three complete-looking packages explicitly failed; Re20 metadata/status contain trailing invalid JSON. Four more histories partial, Re200 empty."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 0,
-        "notes": "No submitted validator pass; the absent five case directories and incomplete report artifacts prevent a passing submission."
+        "notes": "No submitted validator pass; missing completed cases and report assets preclude a passing submission."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 0,
-        "notes": "All three present cases record convergence_status failed; five complete packages, including Re200, are absent; four have partial workspace histories."
+        "notes": "Three final statuses failed, four histories partial, and Re200 empty; completed true does not override explicit failed status."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 0,
-        "notes": "Failed tails are implausible (cylinder Re20 ends Cd 23.16 and Cl 16.94); sanity_checks records failed symmetry, wall, positivity, and Re200 checks; no rank comparison."
+        "notes": "Re20 last1000 CD -58.94 to 66.42; NACA late histories have extreme spikes. Concurrent launches and unbound binaries prevent attributing a single cause."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 1,
-        "notes": "Fourteen force/residual PNGs exist, but no computed Mach/pressure or Re200 wake figure; manifests name bare source CSVs that are not present beside the manifest."
+        "score": 0.5,
+        "notes": "Fourteen delivered line PNGs are dominated by extreme spikes; PDF contains no figures and no domain contour or Re200 wake."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 2,
-        "notes": "Well-structured equations and limitations, but it claims complete eight-case output and analyses that do not exist; run_manifest.csv is header-only."
+        "score": 1,
+        "notes": "Report gives equations and admits heat limitation, but falsely asserts eight complete cases, unsupported Re200 St\u22480.19, and non-existent skin-friction force decomposition."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 1,
-        "notes": "A figure manifest exists, but every entry references bare forces.csv/residuals.csv missing from the report directory and the report has no actual run summary."
+        "score": 0.5,
+        "notes": "Manifest names bare force/residual CSV paths, while PDF embeds no figures; run_manifest contains only its header."
       }
     ],
     "disqualification_flags": [
@@ -654,7 +654,7 @@
         "evidence": "Existing package metadata says completed=true while its run_status says failed."
       }
     ],
-    "overall_score": 0.7
+    "overall_score": 0.45
   },
   "measurements": {
     "note": "opencode harness: codex tool-usage/LOC extraction not applicable",

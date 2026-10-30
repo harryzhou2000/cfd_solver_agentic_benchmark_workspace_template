@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "Immutable 4733d43 clean build succeeds in isolated network-disabled cfd-bench; zero CTests registered. No solver rerun."
+      "notes": "Immutable 4733d43 clean isolated build succeeds with required externals; 0 CTests registered."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "main.cpp implements solve --case --output and rejects malformed invocation paths; no independent negative-path run was performed."
+      "notes": "main.cpp parses solve/case/output and guards bad commands; no independent negative-path execution performed."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Mesh, partition, halo, flux, reconstruction, residual, integration, and output are separated into named modules."
+      "notes": "Mesh, partition, halo, flux, reconstruction, residual, integration and output are separated; force and output paths retain omissions."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No internal call to an existing solver executable is evident. Trust policy precludes external similarity investigation."
+      "notes": "No internal complete-solver executable invocation found; external authorship investigation excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 5,
-      "notes": "Case JSON controls physics/run settings; source does not branch only on the two benchmark mesh names."
+      "notes": "JSON supplies physics and controls; no two-mesh-only solver branches found."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 3,
-      "notes": "Neighbor Isend/Irecv halo packing and global reductions are implemented, but only np=4 failed outputs are present and no rank-consistency comparison is delivered."
+      "notes": "partition.cpp uses METIS on root and sends owned/ghost data; neighbor MPI and reductions exist, but no credible rank comparison was delivered."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Source has mesh/positivity guards and owned/ghost layout, but no clean-build, stress, or malformed-input evidence was delivered."
+      "score": 2.5,
+      "notes": "Clean build succeeds; production force histories are invalid and positivity clamps exist, but no independent stress or malformed-input tests establish robustness."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 2,
-      "notes": "No tests directory, CI, or submitted validator pass. The three available results are failed and five complete case packages are absent; four have partial workspace histories from selected-session detached launches."
+      "score": 1,
+      "notes": "No CTests, committed tests or valid completed result; three final packages failed and four workspace histories remain partial."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Readable modular C++ and documentation; remaining TODO for temperature gradient and generated/build debris outside the curated submission limit polish."
+      "score": 3.5,
+      "notes": "Modular source but residual heat gradient and integrated wall force are explicitly unimplemented; output/reported completeness inconsistent."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.65
+  "overall_score": 3.48
 }
