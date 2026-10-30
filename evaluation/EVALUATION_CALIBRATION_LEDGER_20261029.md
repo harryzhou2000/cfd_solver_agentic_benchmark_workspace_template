@@ -127,7 +127,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_gpt56_11_14a0ed` | fully reviewed: 36/100, no DQ; six absent cases, two partial histories, no production report |
 | `codex_gpt56_12_e9972d` | fully reviewed: 89.5/100, no DQ; historical binary and some figure bindings qualified |
 | `codex_kimik3_01_09309d` | fully reviewed: 79.5/100, DQ7 and session-supported DQ10; historical binaries qualified |
-| `codex_kimik3_03_09eb62` | partial: Re200 case 2→4.5, old missing-plot/summary findings disproven |
+| `codex_kimik3_03_09eb62` | fully reviewed: 91.5/100, no DQ; historical binaries and other figure bindings qualified |
 | `codex_kimik3_04_b353a7` | unreviewed |
 | `codex_kimik3_05_382d41` | unreviewed |
 | `codex_kimik3_06_8208e5` | unreviewed |
@@ -1283,3 +1283,6 @@ kimik3_03 steady case checkpoint (partial overall): all eight canonical workspac
 
 
 kimik3_03 build/MPI/figure checkpoint (partial): immutable d397c03 source clean-builds in the network-disabled benchmark image with2 CPUs,3 GiB,256 process limit; CTest has no registered tests. partition.cpp:82–91 loads global mesh only on rank0 for METIS/distribution; solver.cpp:459–472 projects viscous wall traction tangentially. Tracked scaling directories give Re20 np1/2/4/8 Cd2.100673109/2.100690176/2.100533656/2.100816641; M080 inviscid np1/2/4/8 Cd0.009575820557/0.009575643411/0.009575695586/0.009576252481, all reported converged. Differences are not order-one in absolute force; exact historical executables qualified. Immutable cfdpost.py:212–232 builds an explicit owning-cell index for every generated triangle and :556 uses it, avoiding the previously demonstrated triangle ordering defect. All18 accepted PDF pages rendered and visually scanned; original Re200 late-force PNG exactly reproduced from original CSV as recorded above. Other image bindings and remaining DQ checks remain qualified; no unsteady rerun.
+
+
+kimik3_03 full qualified review: all eight original checkpoint histories, tracked np1/2/4/8 scaling histories, 18 accepted report pages, ten rubric sections, 27 weighted points and DQ1–13 assessed. Rubric93→91.5: build10→9.5 (clean build, no registered CTests), second-order10→9 (no independent smooth-order proof), MPI9→9.5 (tracked rank force agreement), case8→7.5 (comparatively elevated low-Mach/M080 laminar drag); other sections retained. No DQ established. Retrospective false Re200 missing numeric/late-force claims corrected; score2→4.5 supported by readable original late plot, exact pixel reproduction from checkpoint CSV, St0.16765 and full active BDF residual target source. Seven steady case notes include final500 trajectories; two laminar scores4.5→3.5 as comparative qualifications. All eight case and all eight scaling force files match contestant checkpoint a53b2f9. Full mesh is rank-zero preprocessing, tangential force projection implemented, triangle-to-cell mapping explicit. Historical executable, individual transient ratios and nonselected field-image bindings remain qualified; no external authorship investigation or unsteady rerun. Both gates pass.

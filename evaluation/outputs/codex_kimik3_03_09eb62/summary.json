@@ -183,64 +183,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 5,
-        "notes": "CMake/MPI source submitted."
+        "score": 4.5,
+        "notes": "Immutable source clean builds in network-disabled cfd-bench; no registered CTest tests."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Documented runner."
+        "score": 4.5,
+        "notes": "Config/CLI, output and restart source present; exact historic binary remains unbound."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 5,
-        "notes": "Structured solver/report layout."
+        "score": 4.5,
+        "notes": "Separate mesh, partition, physics, reconstruction and solver files; 2-D focus remains."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "No authorship investigation."
+        "notes": "No internal solver wrapper found; external authorship investigation not performed."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Case-driven configuration."
+        "score": 4.5,
+        "notes": "Input case selects mesh and controls; multizone CGNS reader does not depend on two filenames."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Distributed source and scaling evidence."
+        "score": 4.5,
+        "notes": "METIS owned/ghost distribution and neighbor exchange; tracked np1/2/4/8 steady comparison agrees closely."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 4,
-        "notes": "Production guards documented."
+        "notes": "Positivity updates and guarded residual convergence exist; numerical accuracy differs across cases."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 5,
-        "notes": "All eight packages validate."
+        "score": 3.5,
+        "notes": "Recorded structural validation and rank studies exist; no registered CTests or grid/time convergence study."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 4,
-        "notes": "Final curation audit clean."
+        "score": 4.5,
+        "notes": "Modular C++ and documented postprocessing; checkpoint retains raw outputs, although curated tip excludes them."
       }
     ],
     "disqualification_flags": [
@@ -285,7 +285,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.62
+    "overall_score": 4.29
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -296,77 +296,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 5,
-        "notes": "Conservative formulation."
+        "notes": "Conservative compressible Navier\u2013Stokes and nondimensionalization documented and source represented."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 5,
-        "notes": "Unstructured mesh support."
+        "notes": "CGNS multizone TRI/QUAD/MIXED import and geometry source; root-only mesh before distribution."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 5,
-        "notes": "Finite-volume residual source."
+        "score": 4.5,
+        "notes": "Conservative face residual and Rusanov source present; low-Mach force accuracy remains qualified."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Flux implementation."
+        "notes": "Rusanov with viscous terms implemented; numerical diffusion noted in report."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
-        "score": 5,
-        "notes": "Boundary conditions documented."
+        "score": 4.5,
+        "notes": "Farfield, slip and no-slip adiabatic boundary paths implemented; wall output reports boundary values."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 5,
-        "notes": "Second-order reconstruction."
+        "score": 4.5,
+        "notes": "LSQ piecewise-linear states and limiter active; no independent smooth-order study."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Limiter/positivity controls."
+        "score": 4.5,
+        "notes": "Limiter and positivity fallback implemented; no production-wide disable found."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Laminar terms."
+        "score": 4.5,
+        "notes": "Newtonian/Fourier source and tangential wall-force projection; low-Mach laminar drag remains comparatively elevated."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 4,
-        "notes": "Steady method."
+        "notes": "Steady SGS defect correction, residual and force histories present; finite tolerances and physical accuracy qualified."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Delivered Re200 full horizon."
+        "score": 4.5,
+        "notes": "Recomputed active BDF residual checks, metadata0 misses and sustained Re200 St0.16765; exact historical executable unbound."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 5,
-        "notes": "MPI partition/halo and scaling."
+        "score": 4.5,
+        "notes": "Rank-zero METIS preprocessing, neighbor halos and tracked np1/2/4/8 force agreement; binaries qualified."
       }
     ],
     "disqualification_flags": [
@@ -401,7 +401,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.74
+    "overall_score": 4.49
   },
   "result_review": {
     "review_area": "result_review",
@@ -412,49 +412,49 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 5,
-        "notes": "All eight packages present."
+        "notes": "Eight original checkpoint packages and report passed recorded structural validator."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 5,
-        "notes": "Explicit validator passed."
+        "notes": "Explicit recorded examiner validation passed; structural pass alone is not physics proof."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 5,
-        "notes": "Steady targets reached; Re200 periodic."
+        "score": 4.5,
+        "notes": "Seven stable reported steady tails and sustained Re200 periodic wake; exact historic executable/inner ratios remain qualified."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 4,
-        "notes": "Credible delivered evidence; no rerun."
+        "notes": "Re20 Cd2.1005 and Re200 mean1.162/St0.16765 plausible; M015/M080 laminar drag elevated versus reviewed peers."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
         "score": 5,
-        "notes": "Referenced figure gallery."
+        "notes": "All18 PDF pages render; distinct original late force plot resolves both Cl and Cd and reproduces from CSV."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Complete report."
+        "score": 4.5,
+        "notes": "Methods, per-case galleries, run controls and limitations documented; limited accuracy comparison remains."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 5,
-        "notes": "Report/material traceability."
+        "score": 4.5,
+        "notes": "Original checkpoint contains matching case and scaling force CSVs; selected Re200 window figure reproduces pixel-identically, other bindings qualified."
       }
     ],
     "disqualification_flags": [
@@ -484,7 +484,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.85
+    "overall_score": 4.65
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/03",
