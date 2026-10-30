@@ -1,6 +1,6 @@
 ## Calibration checkpoint (partial)
 
-**70.5/100; DQ=true (provisional, trigger 7).** M2 laminar is marked converged at12219 although final5000 Cd rises 0.0963453→0.1107485; its real 4.5-order residual reduction is not force stability. Re200 2→4 after verifying the original attempt residual PNG, readable late lift/drag and St; report amplitude≈0.282 understates measured half peak-to-peak≈0.568. Full case/source/rubric and other DQ review continue.
+**70.5/100; DQ=true (provisional, trigger 7).** M2 laminar is marked converged at12219 although final5000 Cd rises 0.0963453→0.1107485; its real 4.5-order residual reduction is not force stability. Re200 2→4 after verifying the original attempt residual PNG, readable late lift/drag and St; report amplitude≈0.282 understates measured half peak-to-peak≈0.568. Other steady case histories have been checked from original blobs: three cases score 4→3.5 for observed long-window drift, Re20 4→4.5 for plausible drag. Full source/rubric and other DQ review continue.
 
 # Evaluation — oc-goal_kimik3-dsv4_04_60cc7d
 
