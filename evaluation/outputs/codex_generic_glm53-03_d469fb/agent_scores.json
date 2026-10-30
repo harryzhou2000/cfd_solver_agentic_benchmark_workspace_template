@@ -332,11 +332,11 @@
     },
     "cylinder_m010_laminar_re20": {
       "score": 1,
-      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. The report flags the nominal converged status with a dagger and reports nonphysical CD=-25.0; the result is physically unusable. Superseded earlier case note: Report identifies Re20 as converged at step 1415 with 5.00 orders and Cd=2.072; complete package passes validator."
+      "notes": "Score 1 retained: current metadata/status says converged at step56 with 5.009 residual orders, but last five force rows Cd spans 3.22481\u20133.97529 (23% relative to first) and Cl changes \u22120.00827\u2192\u22120.000887, so no stable plateau. Metadata git_revision=26ef1cb names initial commit with no solver source, so output-producing revision unbound. No CFD rerun."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. The report states that no vortex shedding developed, with mean drag about 4.07 and negligible lift variation; this is a substantial but unsuccessful production-horizon attempt. Superseded earlier case note: Re200 score reduced 4.00 to 2.00: although status says statistically_periodic at t=300, report.tex says the run terminated at t=287 after inner failures beyond t\u2248267, no vortex shedding, lift amplitude\u22480, and Cd=4.07. Raw forces at t=300 are nearly constant (Cl\u2248-9.1e-4), so the periodic-status claim is not credible; no rerun."
+      "score": 1,
+      "notes": "Score 2\u21921: current selected metadata says statistically_periodic t300, yet last 3000 force rows are essentially steady (Cd 4.06744775\u20134.06745867, Cl \u22120.0009113144 to \u22120.0009111552), not a credible vortex street. report.tex:164\u2013169 describes a different incomplete t287 run without shedding; do not conflate generations. Metadata git_revision=26ef1cb points to initial commit containing no solver files, so source binding is invalid; inner-target accounting unverified. No unsteady rerun."
     }
   },
   "disqualification": {
@@ -344,9 +344,9 @@
     "flags": [
       {
         "id": 7,
-        "text": "metadata/status marks incomplete or failed runs as successful",
-        "evidence": "Trigger 7: M0.80 and M2 inviscid are marked converged at 0.81 and 0.14 orders; Re200 is also marked statistically_periodic despite report.tex stating termination at t=287, inner failures after t\u2248267, no shedding and lift amplitude\u22480.",
-        "found": true
+        "flag": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "Current selected solver/results/cylinder_m010_laminar_re200 metadata/status say completed/statistically_periodic at t300, but last 3000 force rows Cd range 4.06744774746\u20134.067458670148 and Cl range \u22120.0009113144295156 to \u22120.0009111552227523: essentially steady, no vortex shedding. report.tex:164\u2013169 describes another incomplete t287 history, not the t300 package. Independently Re20 metadata says converged at step56, but last five Cd values span 3.22481\u20133.97529, substantially changing. TASK.md:172\u2013173 requires stable steady forces and periodic Re200 shedding."
       }
     ]
   },

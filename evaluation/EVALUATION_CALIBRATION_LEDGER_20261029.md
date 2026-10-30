@@ -93,7 +93,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_05_2599b1` | partial: TASK full mesh established; report-to-package mapping and rubric pending |
 | `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
 | `codex_generic_glm53-02_ff20c7` | partial: DQ7 plateau correction and cylinder case evidence; remaining DQ/rubric pending |
-| `codex_generic_glm53-03_d469fb` | unreviewed |
+| `codex_generic_glm53-03_d469fb` | partial: DQ7 current Re200/Re20 evidence, provenance discrepancy; other criteria pending |
 | `codex_generic_glm53-04_adde03` | unreviewed |
 | `codex_generic_opus46-01_3a72ea` | unreviewed |
 | `codex_generic_opus46-02_d8fed8` | unreviewed |
@@ -614,3 +614,8 @@ glm53-02 delivered NACA checkpoint: accepted PDF shows NACA contours contrary to
 glm53-02 wall-friction correction: prior checkpoint incorrectly said surface Cf tangential. Final solver.cpp:808–811 sets no-slip u=v=0 and :820–826 derives direction from that velocity, falls back to x direction, and dots traction with it; not generally wall tangent. Report claims tangential Cf. Viscous rubric6→5, total75→74, CFD viscous2→1; defective output assessed under rubric, not automatic DQ6. Selected source binding remains unproved. No CFD rerun.
 
 glm53-02 remaining-criteria checkpoint: source-specific rubric/review and DQ boundaries documented. Restart reader restores current state/time but sets both BDF histories equal, rubric build/CLI10→8 and total74→72; broadcast limited to initialization. M015 np4/8 mean Cd0.002290526/0.002290542, Cl0.000415197/0.000411708; no DQ4 shown. Root-only global mesh, real METIS/halos; Re20 100 wall rows u=v=0. DQ7 M2 laminar stands; exact selected run-source binding unresolved, partial status retained. No CFD rerun.
+
+
+## glm53-03 partial current-result review — 2026-10-30
+
+DQ7 remains true but evidence corrected: current Re200 metadata says periodic t300 while last3000 Cd4.06744775–4.06745867, Cl−0.0009113144 to−0.0009111552 show essentially steady no shedding; score2→1. Report.tex:164–169 describes a different incomplete t287 run, not the current package. Current Re20 claims convergence step56 with last-five Cd3.22481–3.97529, unstable; score remains1. Prior M080/M2 inviscid order citations describe a different state; current metadata reports 4.009/2.645 orders, cases pending. All current metadata git_revision=26ef1cb points to init commit without solver source; production source unbound. Other rubric/DQ partial, no CFD rerun.
