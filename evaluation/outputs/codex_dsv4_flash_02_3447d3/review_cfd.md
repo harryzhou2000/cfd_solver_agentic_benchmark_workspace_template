@@ -2,44 +2,44 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T03:23:17.803713+00:00
+Generated: 2026-10-30T03:24:56.536332+00:00
 
-**Overall score: 3.7**
+**Overall score: 3.43**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | Rubric source review supports the compressible governing-equation implementation. |
+| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | fluxes.cpp and solver.cpp implement conservative compressible perfect-gas finite-volume terms with case-derived gas and viscosity controls. |
 |   | 2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly. | | | |
 |   | *Evidence:* Source flux assembly and report equations. | | | |
-| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | Rubric evidence records unstructured mesh source support. |
+| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | mesh.cpp reads unstructured zones and 1-to-1 connectivity, merges zones and builds geometry; partition.cpp calls METIS on adjacency. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
-| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4 | Rubric source review records finite-volume residual and boundary-condition evidence. |
+| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4 | solver.cpp:684–914 reconstructs interior face states, assembles flux contributions and reduces residual norms; detailed convergence limitations are scored separately. |
 |   | Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction. | | | |
 |   | *Evidence:* residual assembly code; residuals.csv shows global reduction. | | | |
-| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4 | No contrary flux-source finding is recorded; retained score reflects source evidence without rerun verification. |
+| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 3.5 | fluxes.cpp:7 implements Rusanov; report.tex:229 accurately discloses this choice and identifies Roe/HLLC as future work. No entropy-fixed Roe is implemented. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | Boundary-condition implementation is included in the retained finite-volume source review. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 4 | solver.cpp classifies farfield, slip and no-slip boundaries and uses wall stress; wall surface output represents boundary values. General independent BC validation is limited. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | Limiter source evidence exists, with admitted non-smooth convergence issue retained. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | solver.cpp:691–708 applies limiter and reconstructs interior faces; :1794–1913 implements gradient-based limiter. No formal smooth-order convergence test was established. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Limiter and robustness controls are source-evidenced; the Re200 production failure limits confidence. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | solver.cpp:1794–1913 computes Barth-type limiter and reconstruction; positivity safeguards apply to updates. Non-smooth force/residual tails remain. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | Delivered source and laminar case artifacts support viscous-method credit. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3.5 | fluxes.cpp viscous flux and solver.cpp:1438–1518 wall stresses exist; integrated split is full traction, expressly disclosed by report.tex:786–788, rather than tangential-only rubric split. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | Steady implicit capability is source-evidenced; no independent rerun was used. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 3.5 | driver.cpp uses LU-SGS/block-Jacobi paths and CFL controls; plateau criterion at :625–675 tests drag but not lift, leaving Re20 lift drift unrecognized. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | Terminal response admits Re200 never met strict 1e-3 inner target while production metadata marks every step successful. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1.5 | driver.cpp:778–832 uses BDF2 total residual but accepts mere decrease as strict-target success; original last ratio 0.3696 against 0.001 and strict miss count unknown. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | MPI source and submitted output evidence support the retained rubric MPI score. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | METIS and neighbor state/gradient exchanges exist, but main.cpp:89–119 retains full CGNS mesh on every rank throughout iterations. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T03:23:17.803713+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.7
+- Overall score (0-5): 3.43
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

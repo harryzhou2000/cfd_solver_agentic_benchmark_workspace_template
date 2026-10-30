@@ -76,7 +76,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-11_fe7eba` | fully reviewed: 84/100, DQ false; eight case scores 3,3,3,2,2,2,2,2 |
 | `claude_generic_sonnet-01_96c411` | fully reviewed: 71/100, DQ false; report PDF unsuitable for snapshot; both gates pass |
 | `codex_dsv4_flash_01_0c1996` | partial: 48/100, DQ 6/7/10 and TASK full mesh; two historical raw np1 packages unavailable |
-| `codex_dsv4_flash_02_3447d3` | partial: Re200 and DQ7 independently reviewed; other cases/rubric/review points pending |
+| `codex_dsv4_flash_02_3447d3` | fully reviewed: 68/100, DQ7 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_03_294b64` | unreviewed |
 | `codex_dsv4_flash_04_755869` | unreviewed |
 | `codex_dsv4_flash_06_5b6b08` | unreviewed |
@@ -363,3 +363,8 @@ dsv4_flash_02 steady-case and mesh checkpoint: all seven steady case scores rema
 dsv4_flash_02 source checkpoint: immutable `93e8729` clean CMake build succeeds with warnings in network-disabled cfd-bench (2 CPUs, 3 GiB; image `/opt/external`). solver.cpp:1438–1518 integrates full viscous traction for force split, while report.tex:786–788 expressly discloses this and distinguishes tangential Cf; apply rubric 5.4 without DQ6. main.cpp:17–41/output.cpp:131–141 implement rank-local current-state restart, but do not restore previous BDF history/time. Rusanov is disclosed (report.tex:229), not falsely claimed Roe. driver.cpp:625–675 plateau check uses drag but not lift; Re20 last-500 lift means drift 0.03016→0.01327, so its stated stable-force plateau warrants caution. Full rubric/remaining DQ review partial; no CFD rerun.
 
 dsv4_flash_02 Re20 DQ7 adjudication: added independent steady false-success evidence. Report.tex:345–359 claims plateau forces stable; immutable driver.cpp:625–675 tests drag history only. Final 2000 original Re20 force rows (steps 21473–23472) have Cl range −0.0157536–0.0530209 and half-window means −0.002251→0.028140; Cd range 2.933967–2.981357. Metadata marks converged at only 0.564 residual orders, whereas TASK.md:172 requires stable forces for plateau. This is independently distinct from Re200 target accounting. Re20 case remains 2. Both gates pass; no rerun.
+
+
+## dsv4_flash_02 full calibration — 2026-10-30
+
+Rubric 73→68/100, DQ7 and TASK full-mesh prohibition; ten sections and 27 review points now contain criterion-specific evidence. Case scores 2,2,2,2,2,2,2,0 → 2,2,2,2,2,2,2,1. Re200 actual t≥150 data contains broad 0.25–0.32 spectral content but last strict ratio 0.3696 against 0.001; relaxed target accounting makes the true miss count unknown. Re20 converged at 0.564 residual orders while final 2000 lift half-means move −0.002251→0.028140; plateau code only monitors drag. main.cpp:89–119 keeps full mesh per rank; report says otherwise. solver.cpp:1438–1518 uses full traction, disclosed in report.tex:786–788, so viscous score reflects 5.4 without DQ6. Reported rank comparisons do not establish DQ4 but separate original rank comparison packages are unavailable. Clean immutable build passed with warnings in restricted network-disabled cfd-bench; no solver/unsteady rerun, exhaustive external authorship or pixel audit. The report PDF remains appropriately absent because curated source cannot compile and no sibling PDF exists. Both record gates pass.

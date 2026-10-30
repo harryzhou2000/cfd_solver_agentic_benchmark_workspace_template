@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "Curated CMake/source submission and documented CLI exist; no clean evaluator build was needed for the recorded result finding."
+      "notes": "Immutable 93e8729 clean CMake build passes with warnings in network-disabled cfd-bench with two CPUs and 3 GiB; no CFD rerun. Curated report cannot compile without excluded figures."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "Source/CLI is documented in the curated submission; no contrary command-path evidence was recorded."
+      "notes": "main.cpp:17\u201341,65\u2013105 parses case/output/restart and reads rank-local restart; transient restart does not restore previous BDF state/time."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Rubric evidence identifies modular solver source and interfaces."
+      "score": 4,
+      "notes": "Source separates mesh, partition, fluxes, solver, driver and output; solver.cpp is large and remains 2-D perfect-gas specific."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No direct internal wrapper or existing-solver executable evidence was recorded; external comparison is outside the trust policy."
+      "notes": "Inspected fluxes.cpp, solver.cpp, driver.cpp and partition/halo implementations; no affirmative copied-core or executable-wrapper evidence, without exhaustive external-authorship search."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 5,
-      "notes": "The eight required cases are delivered through the submitted solver/configuration workflow, not a two-file output shortcut."
+      "score": 4,
+      "notes": "main.cpp:89 reads configured CGNS path and partition.cpp calls METIS; run controls and physics come from case input rather than a two-filename branch."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "MPI source and submitted outputs support distributed execution, with no fresh rerun used to elevate credit."
+      "score": 2,
+      "notes": "Neighbor halo/reductions and METIS exist, but main.cpp:89\u2013119 retains complete mesh on every rank through solve; report.tex:401\u2013407 claims the opposite."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 3,
-      "notes": "The Re200 production metadata accepts an unmet strict inner target, a material robustness failure."
+      "score": 2.5,
+      "notes": "Re200 relaxed inner acceptance is counted as target convergence; plateau checks drag but not lift. Several cases terminate with small residual reductions and Re20 lift drifts."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 3,
-      "notes": "Eight case directories structurally validate, but no evaluator build/rerun was performed and Re200 completion is invalid."
+      "notes": "Original validator passes eight case structures; clean build now passes. No new CFD rerun, smooth-order study, or reproducible committed report figures."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Curated source is organized, while the report bundle deliberately omits required raw manifest input."
+      "score": 3.5,
+      "notes": "Separated components and detailed comments; large solver/driver sources include numerous environment-controlled behaviors and warnings."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.02
+  "overall_score": 3.44
 }
