@@ -103,3 +103,10 @@ Score: **92.5/100; disqualified: false.** This is a complete, structurally valid
 ## Re200 computed/reference values — 2026-10-30
 
 The earlier case note incorrectly assigned reference values St0.195 and lift amplitude0.65 from report.tex:1655–1657 to the computed run. Immutable generated/re200_analysis.tex instead reports St0.1801, mean Cd1.2424 and lift amplitude0.4902 over t=150–300; its generated force table Cl−0.00929 uses a different final-25% window. Selected raw t≥150 Cl−0.48836–0.49211, Cd1.21216–1.27580 and lift FFT peak0.179988 independently support oscillatory behavior. Metadata revision339d65f records 169 misses/30000; this is not evidence that a majority failed. The sole delivered force figure has a startup drag spike≈31, making late drag periodicity unreadable, so the existing 2 remains under the explicit late-lift-and-drag floor. Other report/source/rubric/DQ review partial; no Re200 rerun.
+
+
+## Steady-force windows and report — 2026-10-30
+
+All 42 pages of the accepted main PDF were visually checked; no missing-asset placeholders observed. M015 inviscid case4.5→3: selected np8 final Cd0.0017098/Cl0.000034445 (the old note used rank2 coefficients). Its last50 Cd varies 0.0016464–0.0018931 and Cl −0.0002957→+0.0000344; last100 Cd spans 0.0012579–0.0020459. The stopping rule compares only two Cd endpoints 50 steps apart, which nearly coincide even while the intervening force varies. The absolute scale is small and the oscillation is visibly damping, so DQ7 is not inferred solely from a near-zero relative ratio; further adjudication remains open.
+
+M2 laminar 4→3.5: Cd fell 0.0419788→0.0378895 over the final400 rows but the final50 range is only 0.0378890–0.0379269; its large difference from the same-Mach inviscid pressure drag is a credibility concern, not proof of failure. The steady-force plot shows overall evolution even though late drag is compressed, so the distinct Re200 late-zoom rule is not applied to this steady case. Metadata identifies revision2dff352 for both selected runs; that revision’s steady driver uses the same endpoint test as final source. No CFD rerun.
