@@ -371,7 +371,7 @@
       {
         "flag": "TASK prohibited shortcut 7: full mesh replicated on every MPI rank during iterations",
         "found": true,
-        "evidence": "Immutable 17a5ef3 solver/src/solver.hpp:64 retains globalMesh_ as a Solver member; solver.cpp:165\u2013205 reads the complete CGNS mesh and partitions it on every rank, builds local mesh and does not release globalMesh_; solver.cpp:46\u201352 continues into iterations in the same Solver lifetime. TASK.md:228 prohibits full-mesh replication on every rank during iterations. Report.tex:326 claims the opposite. METIS and neighbor halos are present; this separate shortcut is not numbered DQ9\u2019s narrower geometric-split/full-state condition. Exact historical executable binding remains unproven."
+        "evidence": "Immutable 17a5ef3 solver/src/solver.hpp:64 retains globalMesh_ as a Solver member; solver.cpp:165\u2013205 reads the complete CGNS mesh and partitions it on every rank, builds local mesh and does not release globalMesh_; solver.cpp:46\u201352 continues into iterations in the same Solver lifetime. TASK.md:227 prohibits full-mesh replication on every rank during iterations. Report.tex:326 claims the opposite. METIS and neighbor halos are present; this separate shortcut is not numbered DQ9\u2019s narrower geometric-split/full-state condition. Exact historical executable binding remains unproven."
       }
     ]
   },
