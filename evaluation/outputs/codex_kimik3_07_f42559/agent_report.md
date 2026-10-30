@@ -1,15 +1,17 @@
 # Agent Evaluation Report — codex/kimik3/07
 
-Curated tip `e55282a56daec8daa7af868e851ae4d0d7f8d9e2` passes audit. Explicit validation passed eight packages and report. The selected workspace-local root has one descendant.
+**74.5/100; DQ=true (trigger 7).** M2 laminar metadata and the report mark the case converged at step 1386, but submitted Cd falls 0.339895 to 0.167402 over the last 200 steps and 0.198447 to 0.167402 over the last 50. The three-order residual reduction is real, but this is not clearly converged early under the task's stable-force requirement. The earlier residual-only disqualification rationale is withdrawn: several other cases have bounded residuals and stable force plateaus despite missing nominal targets.
 
-## Verdict
+The submitted solver has a separate MPI accuracy defect. At each rank interface it exchanges cell states but reconstructs only the owned side, leaving the ghost side at its cell-center value. Each rank calculates its own oriented flux, so opposite contributions need not cancel; the same limitation affects ghost-side viscous gradients. The report's statement that no first-order fallback occurs omits this interface behavior. Reconstruction and limiting remain active in owned cells, so DQ10 is not asserted merely for this partial defect. The Re20 rank study has a roughly 1.3% drag spread, not an order-one change.
 
-**68/100; disqualified (provisional).** Trigger 7 is independently supported by M2 laminar, marked converged at step 1386 although Cd falls 0.339895 to 0.167402 over its last 200 steps. The old residual-only DQ rationale is withdrawn: a bounded residual and stable force plateau may qualify. Remaining cases and rubric are under review. Re200 is delivered but was not rerun. Source review also finds owner-only reconstruction at rank interfaces, so opposing rank fluxes need not cancel; this limits conservation and second-order accuracy, although the limiter is not disabled across whole production cases. Full scoring is still underway. Detailed score layers are in `agent_scores.json`.
+The committed report includes case-specific numerical summaries, residual histories, force figures and contours. Re200 force data for t≥150 has mean Cd 1.20455, Cl range −0.41630 to 0.41214 and St≈0.186 from 28 upward crossings, consistent with the reported spectrum. Its full-history force figure has an initial Cd spike near 31 that hides late drag oscillations; the explicit late lift-and-drag evidence floor therefore caps that case at 2. Several steady shared-scale charts also compress both late traces. Individual case scores, which do not contribute to the rubric, are 1.5, 4, 3.5, 2, 2, 1, 2 and 2 in canonical order.
 
-## Integrity and limitations
+The BDF inner test measures the full temporal residual with limiter factors frozen at the prior accepted state, a limitation disclosed in the report; it is not rechecked with refreshed limiting, so the actual fully refreshed miss fraction is unknown. The submitted source at `e55282a56daec8daa7af868e851ae4d0d7f8d9e2` matches the source in metadata revision `6af4607`; the exact historical binary hash was not recorded. An isolated, network-disabled clean build passed after supplying both external dependency roots; CTest has no registered tests. No solver case was rerun.
+
+The accepted 32-page compiled report PDF has SHA256 `b2ee7b4741bad4d7fc93fbc636f4c19ba73f166eb91f98ee482516d94933eb0f`. As a provenance check, the immutable plotting script reproduced the original Re20 force, residual and Mach-zoom images pixel-identically from their named workspace CSV/VTU data. Other figure-to-data bindings remain qualified. All ten rubric sections, 27 review points, eight cases and DQ1–13 were examined; evidence and qualifications are in `agent_scores.json` and the calibration ledger. No external authorship investigation was performed under the trust policy.
 
 SHA-256 `run_identity.json`: `b6d41c34aaa3b2f4f5ae731bfc6ff392e0c5cc7dc16f8086c55992a49bedc295`.
 
 SHA-256 `contestant_final_response.md`: `772f9c8a4c8c0d66b7fec62ab98b1b3d032707ab3a36b1d24ecc363686b15db3`.
 
-These are unindexed sidecars and are not validated by `cfdeval check`. No evaluator build/MPI rerun was performed, and Re200 was not rerun.
+These are unindexed sidecars and are not validated by `cfdeval check`. The structural validator does not prove physical convergence; no Re200 or unsteady solver rerun was performed.

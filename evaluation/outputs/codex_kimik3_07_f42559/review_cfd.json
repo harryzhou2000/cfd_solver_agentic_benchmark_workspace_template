@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 4,
-      "notes": "Source."
+      "score": 4.5,
+      "notes": "report.tex equations and physics.cpp implement nondimensional conservative gas dynamics with case-scaled forces."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Mesh."
+      "score": 4.5,
+      "notes": "global_mesh.cpp reads triangle/quad sections, boundary families and declared abutting zone interfaces; general connectivities unsupported."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 3,
-      "notes": "Interior flux assembly is conservative locally; partition faces are computed twice using inconsistent owner-only reconstructed states, so opposite contributions need not cancel."
+      "notes": "solver.cpp face flux is locally conservative for owned pairs, but partition ghost side is unreconstructed and separately evaluated rank fluxes need not cancel."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Flux."
+      "notes": "physics.cpp implements Rusanov with low-Mach dissipation and optional HLLC; no independent shock convergence test."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "BC."
+      "notes": "Farfield, slip and no-slip adiabatic wall and boundary-state surface output implemented."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 3,
-      "notes": "LSQ/BJ active on owned cells, but solver.cpp:345\u2013360 leaves ghost side at cell center at every rank interface, contrary to report no-fallback claim."
+      "notes": "LSQ/BJ owned-cell reconstruction active; partition ghost side uses cell center, contrary to no first-order-fallback report claim."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Limiter."
+      "notes": "BJ/Venkat and positivity/trust safeguards implemented; production report says BJ. Limiter frozen inside transient inner solve."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 4,
-      "notes": "Laminar."
+      "notes": "Corrected gradients and Newtonian/Fourier flux; ghost-side viscous gradient is zero on rank boundaries; wall traction tangential projection present."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Steady."
+      "score": 3.5,
+      "notes": "SGS and CFL control exist; convergence test accepts target/max steps without checking stable forces and steady inner ratio uses update proxy."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Re200."
+      "score": 3.5,
+      "notes": "BDF2 freezes accepted-state limiter through inner solve and tests that frozen residual; report discloses this, but fully refreshed target misses are unproven."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 2.5,
-      "notes": "METIS and neighbor state halo are present; gradient/limiter are not exchanged and opposite partition fluxes need not cancel."
+      "notes": "METIS, state halo and reductions exist; missing ghost gradients mean separately computed partition fluxes need not cancel. Rank study has 1.3% Re20 Cd span and small absolute lift variation."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.66
+  "overall_score": 3.64
 }

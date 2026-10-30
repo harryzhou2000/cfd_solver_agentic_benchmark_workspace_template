@@ -27,67 +27,67 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 4,
-          "notes": "CMake source."
+          "score": 4.5,
+          "notes": "Immutable e55282a CMake build succeeds in network-disabled cfd-bench with explicit external/header-only roots, 2 CPUs,3GiB,256 processes. Initial missing header-root configuration failed; CTest has no tests."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 4,
-          "notes": "Runner."
+          "notes": "main.cpp parses case/output and solver options; documented run_all orchestration, not every error path independently exercised."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Structured source."
+          "notes": "Mesh, partition, physics, solver and IO modules are separated; fixed 2-D state limits extension."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "No authorship investigation."
+          "notes": "Trust policy excludes external authorship search; no solver wrapper observed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Case input."
+          "score": 4.5,
+          "notes": "main.cpp and case_config.cpp load case mesh and boundary settings; no two-mesh filename-only solver branch."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 2.5,
-          "notes": "METIS and neighbor state exchange exist, but solver.cpp:345\u2013360 reconstructs owned side only on rank boundaries and 390\u2013405 omits ghost gradient; independent fluxes need not cancel."
+          "notes": "METIS and neighbor state exchange present; partition interfaces use only owned-side gradient and separately evaluated fluxes need not cancel."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Guards."
+          "score": 3,
+          "notes": "Floors and trust-region updates exist; solver.cpp:1015\u20131019 declares convergence unconditionally at max steps, and residual target alone stops M2 laminar while force is changing."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Structural packages pass."
+          "score": 3.5,
+          "notes": "Explicit validator and rank studies delivered; no CTests registered, and structural validation misses M2 laminar drift and partition-flux defect."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 4,
-          "notes": "Audit clean."
+          "notes": "Source/report modular and immutable snapshot includes report figures; raw result histories remain workspace evidence."
         }
       ],
-      "overall_score": 3.88,
+      "overall_score": 3.76,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -96,81 +96,81 @@
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 4,
-          "notes": "Source."
+          "score": 4.5,
+          "notes": "report.tex equations and physics.cpp implement nondimensional conservative gas dynamics with case-scaled forces."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Mesh."
+          "score": 4.5,
+          "notes": "global_mesh.cpp reads triangle/quad sections, boundary families and declared abutting zone interfaces; general connectivities unsupported."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 3,
-          "notes": "Interior flux assembly is conservative locally; partition faces are computed twice using inconsistent owner-only reconstructed states, so opposite contributions need not cancel."
+          "notes": "solver.cpp face flux is locally conservative for owned pairs, but partition ghost side is unreconstructed and separately evaluated rank fluxes need not cancel."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Flux."
+          "notes": "physics.cpp implements Rusanov with low-Mach dissipation and optional HLLC; no independent shock convergence test."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "BC."
+          "notes": "Farfield, slip and no-slip adiabatic wall and boundary-state surface output implemented."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 3,
-          "notes": "LSQ/BJ active on owned cells, but solver.cpp:345\u2013360 leaves ghost side at cell center at every rank interface, contrary to report no-fallback claim."
+          "notes": "LSQ/BJ owned-cell reconstruction active; partition ghost side uses cell center, contrary to no first-order-fallback report claim."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4,
-          "notes": "Limiter."
+          "notes": "BJ/Venkat and positivity/trust safeguards implemented; production report says BJ. Limiter frozen inside transient inner solve."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 4,
-          "notes": "Laminar."
+          "notes": "Corrected gradients and Newtonian/Fourier flux; ghost-side viscous gradient is zero on rank boundaries; wall traction tangential projection present."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Steady."
+          "score": 3.5,
+          "notes": "SGS and CFL control exist; convergence test accepts target/max steps without checking stable forces and steady inner ratio uses update proxy."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Re200."
+          "score": 3.5,
+          "notes": "BDF2 freezes accepted-state limiter through inner solve and tests that frozen residual; report discloses this, but fully refreshed target misses are unproven."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 2.5,
-          "notes": "METIS and neighbor state halo are present; gradient/limiter are not exchanged and opposite partition fluxes need not cancel."
+          "notes": "METIS, state halo and reductions exist; missing ghost gradients mean separately computed partition fluxes need not cancel. Rank study has 1.3% Re20 Cd span and small absolute lift variation."
         }
       ],
-      "overall_score": 3.66,
+      "overall_score": 3.64,
       "disqualification_flags": []
     },
     "result_review": {
@@ -179,53 +179,53 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Eight packages."
+          "score": 4.5,
+          "notes": "All eight layouts passed prior validator, which does not establish convergence; metadata reports M2 laminar converged prematurely."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 5,
-          "notes": "Validator passed."
+          "notes": "Prior explicit examiner invocation passed all eight required output packages and report; structural scope only."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 1,
-          "notes": "Below-target cases marked converged."
+          "score": 2.5,
+          "notes": "M2 laminar incorrectly marked converged despite Cd0.339895\u21920.167402 in final200; several below-target cases have independently bounded plateaus."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Re200 delivered, steady deficiencies."
+          "score": 3.5,
+          "notes": "Re20 Cd1.993 and Re200 St~0.186 are plausible; M2 laminar is still changing, low-speed inviscid remains oscillatory, and high residuals warrant caution."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Figures."
+          "score": 3,
+          "notes": "Report has case-specific fields and residuals; several common-scale force images flatten both late components and Re200 fails readable late drag floor."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
           "score": 3,
-          "notes": "Report discloses frozen limiter and plateau limits but claims no first-order fallback while partition-face ghost reconstruction is absent; M2 laminar falsely reported converged."
+          "notes": "Discloses limiter freezing and plateau limits but asserts no first-order fallback despite partition ghost issue, and calls M2 laminar converged despite large force drift."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
           "score": 4,
-          "notes": "Traceable figures."
+          "notes": "Committed report figures and source; Re20 force, residual, Mach-zoom PNGs independently pixel-reproduced from named workspace inputs. Other image bindings and exact binary hash unverified."
         }
       ],
-      "overall_score": 3.55,
+      "overall_score": 3.52,
       "disqualification_flags": [
         {
           "id": 7,
@@ -238,77 +238,77 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 68,
+    "total_scored": 74.5,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "Source."
+        "score": 9,
+        "notes": "Clean build and validator; CLI error paths not exhaustively exercised."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
-        "score": 8,
-        "notes": "Mesh."
+        "score": 9,
+        "notes": "CGNS TRI/QUAD, families, abutting zone merge and adjacency; general connectivity unsupported."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 10,
-        "notes": "Interior FV flux assembly exists, but partition-face ghost side is not reconstructed; separately evaluated opposing rank fluxes need not cancel."
+        "notes": "FV and walls implemented, but owner-only reconstruction at partition faces breaks guaranteed cancellation of independently computed rank fluxes."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 7,
-        "notes": "LSQ and BJ limiter are active for owned sides, but partition ghost-side reconstruction is absent despite report no-fallback claim; no complete production disable established."
+        "notes": "LSQ and BJ active, but ghost-side partition reconstruction absent and report no-fallback claim inaccurate."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 8,
-        "notes": "Laminar."
+        "score": 9,
+        "notes": "Corrected gradients, stresses, wall conditions and tangential split; ghost-side viscous gradient omitted."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 10,
-        "notes": "Re200 delivered, steady deficient."
+        "notes": "SGS and BDF present; steady update-proxy stopping and BDF frozen-limiter target limit nonlinear convergence evidence."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
         "score": 5,
-        "notes": "No evaluator MPI run."
+        "notes": "METIS, state halos and reductions present; missing gradient/limiter exchange makes partition-face fluxes inconsistent, despite reported small rank-study differences."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 3,
-        "notes": "DQ contradiction."
+        "score": 7.5,
+        "notes": "Two inviscid bounded plateaus, two laminar and Re20 bounded plateaus, Re200 periodic shedding and rank study; M2 laminar incorrectly marked converged and low-speed oscillation remains."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
         "score": 4,
-        "notes": "Readable report and committed figures; falsely asserts no first-order degradation at partition ghost faces and convergence of M2 laminar. Several force traces compressed."
+        "notes": "Complete case figures and methods, but partition no-fallback claim and M2 laminar convergence are inaccurate; late force views compressed."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 5,
-        "notes": "Tools."
+        "score": 4,
+        "notes": "Separate modules and case inputs but fixed 2-D state/geometry require substantive 3-D or multispecies refactoring."
       }
     ]
   },
@@ -350,10 +350,82 @@
     "triggered": true,
     "flags": [
       {
+        "id": 1,
+        "text": "Existing solver executable called internally",
+        "found": false,
+        "evidence": "CMake builds submitted CFD source; no solver wrapper found."
+      },
+      {
+        "id": 2,
+        "text": "Force or residual files generated without solving",
+        "found": false,
+        "evidence": "Time march writes histories; no synthetic-history path established."
+      },
+      {
+        "id": 3,
+        "text": "Hard-coded mesh filenames",
+        "found": false,
+        "evidence": "Case-configured mesh and boundary map are read generically."
+      },
+      {
+        "id": 4,
+        "text": "Order-one steady MPI result changes",
+        "found": false,
+        "evidence": "Reported rankstudy Re20 tail Cd1.9677..1.9932 (~1.3%); low-speed lift differences ~0.017 absolute near zero, not order-one coefficient changes. Source interface defect warrants deductions."
+      },
+      {
+        "id": 5,
+        "text": "Explicit time stepping only",
+        "found": false,
+        "evidence": "SGS steady and BDF2 transient source implemented."
+      },
+      {
+        "id": 6,
+        "text": "Report claims algorithms absent from source",
+        "found": false,
+        "evidence": "Rusanov, BJ, SGS, BDF and METIS exist; partition interface defect is partial implementation and reporting limitation, not a wholly absent major algorithm."
+      },
+      {
         "id": 7,
         "text": "metadata/status marks incomplete or failed runs as successful",
-        "evidence": "Prior rationale treated six below-target results as automatically false success; this is withdrawn because bounded residual and stable-force plateau can qualify. Independently, M2 laminar metadata SHA256 2be9f6ef26942dd399a3f309091b1b56d1dbb8036c2e1e521180a91271970576 marks converged at 1386 despite force CSV SHA256 d4491fb52f42154ae0424d2dc4c46c7a98bbfe09c2f39d8653f651eabb60618a decreasing Cd0.339895\u21920.167402 in final200 and 0.198447\u21920.167402 in final50. Report e55282a:solver/report/results.tex:281 repeats convergence and 0.1674; real 3-order residual drop alone does not justify clear early laminar convergence under TASK.md:140,172. Other cases require separate review.",
-        "found": true
+        "found": true,
+        "evidence": "Prior rationale treated six below-target results as automatically false success; this is withdrawn because bounded residual and stable-force plateau can qualify. Independently, M2 laminar metadata SHA256 2be9f6ef26942dd399a3f309091b1b56d1dbb8036c2e1e521180a91271970576 marks converged at 1386 despite force CSV SHA256 d4491fb52f42154ae0424d2dc4c46c7a98bbfe09c2f39d8653f651eabb60618a decreasing Cd0.339895\u21920.167402 in final200 and 0.198447\u21920.167402 in final50. Report e55282a:solver/report/results.tex:281 repeats convergence and 0.1674; real 3-order residual drop alone does not justify clear early laminar convergence under TASK.md:140,172. Other cases require separate review."
+      },
+      {
+        "id": 8,
+        "text": "Report figures do not correspond to submitted field/CSV outputs",
+        "found": false,
+        "evidence": "Re20 force, residual and Mach-zoom originals pixel-reproduced from corresponding workspace CSV/VTU with immutable plotter; untested figures remain qualified."
+      },
+      {
+        "id": 9,
+        "text": "Metadata reports METIS but only geometric split or full-state replication",
+        "found": false,
+        "evidence": "METIS_PartGraphKway, rank0 global preprocessing, local ghost partitions and neighbor state exchange; global mesh discarded before iterations."
+      },
+      {
+        "id": 10,
+        "text": "Production second-order reconstruction or limiter disabled",
+        "found": false,
+        "evidence": "LSQ/BJ active for owned cells. Ghost side at each rank interface is first order, contradicting no-fallback claim and requiring deductions, but whole production reconstruction/limiter is not disabled."
+      },
+      {
+        "id": 11,
+        "text": "No-slip surface rows are undisclosed cell-center velocities",
+        "found": false,
+        "evidence": "solver.cpp:835 onward writes boundary-state zero wall velocity; report describes boundary values."
+      },
+      {
+        "id": 12,
+        "text": "Figures misname plotted variable",
+        "found": false,
+        "evidence": "plot_results.py maps Mach and pressure fields by variable name; Re20 Mach reproduced; other figure bindings qualified."
+      },
+      {
+        "id": 13,
+        "text": "Copied or wrapped existing open-source solver core",
+        "found": false,
+        "evidence": "Trust policy excludes external authorship investigation; no internal solver wrapper identified."
       }
     ]
   },
