@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:25:24.867220+00:00
+Generated: 2026-10-30T07:26:41.224183+00:00
 
-**Overall score: 3.79**
+**Overall score: 3.74**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Source and curated submission reviewed. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable 058801f clean build passed in network-disabled cfd-bench, 2 CPUs/3 GiB/256 pids, with explicit CFD_EXTERNALS_ROOT and EXTERNAL_ROOT pointing into /opt/external. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | Source and curated submission reviewed. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3.5 | README says --restart takes a manifest; main.cpp:120–133 instead appends _rankN.bin to its argument and silently proceeds on missing or size-mismatched files. It does not restore transient time/history. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Source and curated submission reviewed. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T07:25:24.867220+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.79
+- Overall score (0-5): 3.74
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

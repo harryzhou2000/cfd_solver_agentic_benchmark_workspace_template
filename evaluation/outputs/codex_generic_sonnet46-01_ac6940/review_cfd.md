@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:25:24.867647+00:00
+Generated: 2026-10-30T07:26:41.224616+00:00
 
 **Overall score: 3.8**
 
@@ -30,7 +30,7 @@ Generated: 2026-10-30T07:25:24.867647+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Source and contestant evidence reviewed. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Source and contestant evidence reviewed. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | OutputManager.cpp:118–135 uses full viscous traction in force integration; :203–217 projects tangential shear for cf. Report.tex:595–598 acknowledges negative viscous drag. Surface boundary velocities are zero on no-slip at :190–194,224. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | Source and contestant evidence reviewed. |

@@ -292,14 +292,14 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4,
-        "notes": "Source and curated submission reviewed."
+        "notes": "Immutable 058801f clean build passed in network-disabled cfd-bench, 2 CPUs/3 GiB/256 pids, with explicit CFD_EXTERNALS_ROOT and EXTERNAL_ROOT pointing into /opt/external."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source and curated submission reviewed."
+        "score": 3.5,
+        "notes": "README says --restart takes a manifest; main.cpp:120\u2013133 instead appends _rankN.bin to its argument and silently proceeds on missing or size-mismatched files. It does not restore transient time/history."
       },
       {
         "id": "code.organization",
@@ -393,7 +393,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.79
+    "overall_score": 3.74
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -453,7 +453,7 @@
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 3,
-        "notes": "Source and contestant evidence reviewed."
+        "notes": "OutputManager.cpp:118\u2013135 uses full viscous traction in force integration; :203\u2013217 projects tangential shear for cf. Report.tex:595\u2013598 acknowledges negative viscous drag. Surface boundary velocities are zero on no-slip at :190\u2013194,224."
       },
       {
         "id": "cfd.implicit",

@@ -45,7 +45,7 @@ Reviewed source, selected Codex root, contestant final response, raw workspace p
 
 ## Recorded scores and disqualification
 
-The current 100-point rubric is 73/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
+The current 100-point rubric is 72.5/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
 
 | Case | Score |
 |---|---:|
@@ -100,3 +100,10 @@ The three inviscid scores 2→3: last50 Cd ranges M015 0.000813–0.00084501, M0
 Immutable `058801f` and contestant checkpoint `8899f00` share `solver/src/main.cpp` blob `77eae4fe67d9ce68227b6293367b8aac91132d68`. Lines 89–97 read the complete `GlobalMesh gm` on every rank, :104–109 construct local partitions without releasing it, and :136–156 call the iterative solver in the same scope. This violates TASK prohibited shortcut 7 even though selected metadata says `full_mesh_replication_during_iterations=false`. Actual historical binary/source binding remains uncertain because metadata revision is null. The task prohibition is recorded separately from numbered DQ9, whose wording concerns full-state replication or geometric-only partitioning.
 
 Final `SteadySolver.cpp:92–105,139–145` sets at least 5000 first-order steps for M≥0.5 inviscid cases, whereas selected M080/M200 runs end at 974/831 and report.tex:187–197 claims second-order active for all production. However the M080 force file timestamp is 2026-08-27 06:23 UTC, near the 05:53 source change that introduced this 5000-step rule; an older source (`6a567ef`) uses 100 steps. The selected metadata does not bind a binary revision, so DQ10 is not yet asserted on final-source thresholds alone. No production rerun.
+
+
+## Build, restart and viscous force — 2026-10-30
+
+Immutable `058801f` clean CMake build succeeded in network-disabled `cfd-bench` with two CPUs, 3 GiB and 256 pids, explicitly setting `CFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install` and `EXTERNAL_ROOT=/opt/external`. No CFD run was performed. `README.md:33` describes `--restart` as a manifest, but `main.cpp:120–133` instead appends `_rankN.bin` to the argument and silently proceeds on missing files or a count mismatch; the loaded state does not restore physical time or BDF history. Build/CLI rubric 8→7.5 and CLI review 4→3.5; total 73→72.5.
+
+`OutputManager.cpp:118–135` integrates the entire viscous traction vector, including normal stress, as viscous drag, while :203–217 separately projects tangential shear for skin-friction output. This is a force-split defect under rubric 5.4; report.tex:595–598 discloses negative viscous drag but this does not establish that the solver omitted all claimed viscous algorithms. `OutputManager.cpp:190–194,224` writes the zero wall boundary velocity for no-slip, distinct from adjacent-cell velocity. All eleven accepted PDF pages were visually checked and show no obvious missing-asset placeholders. Remaining rubric and DQ review remains partial.
