@@ -184,7 +184,7 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "notes": "Exact 1bc8fb6 solver source clean CMake build passed in a restricted network-disabled cfd-bench container; no CFD rerun."
       },
       {
         "id": "code.cli",
@@ -344,22 +344,22 @@
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "score": 2,
+        "notes": "solver.cpp:190\u2013204 stores rho/u/v/p gradients; :330\u2013336 uses pressure gradient as temperature for heat flux, with directional correction only along connection. :782\u2013794 uses full viscous traction for force split; surface Cf projects tangentially :820\u2013826."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "score": 2,
+        "notes": "All selected steady metadata records inner_target_converged_fraction=0; outer residual/plateau statuses must be independently checked, and M2 laminar Cd is still falling at stop."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "score": 3,
+        "notes": "solver.cpp:1014\u20131021 recomputes gradients each inner sweep but freezes limiter after first; measured target is lagged-limiter residual, and fully refreshed strict miss count is unknown. Raw lift FFT yields St0.14 across t>=100/150/200."
       },
       {
         "id": "cfd.mpi_partition",
@@ -401,7 +401,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.5
   },
   "result_review": {
     "review_area": "result_review",
@@ -425,22 +425,22 @@
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 4,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "score": 2,
+        "notes": "Three inviscid plateaus are justified by bounded late residuals and stable Cl/Cd; M2 laminar Cd falls 20.6% in final 62 rows while status claims converged."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "score": 3,
+        "notes": "Re20 selected Cd\u22481.997 is plausible and Re200 FFT St\u22480.14 is stable by time window; M2 laminar Cd declines 20.6% immediately before reported convergence."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "score": 2,
+        "notes": "PDF p10 Re20 contours are compressed into strips and late force detail is hidden by startup; p10 Re200 late force oscillations unreadable while p11 wake zoom is visible."
       },
       {
         "id": "res.report",
@@ -484,7 +484,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.15
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/glm53-02",

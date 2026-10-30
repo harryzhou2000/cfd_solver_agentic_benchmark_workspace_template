@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:30:00.399346+00:00
+Generated: 2026-10-30T05:32:27.842551+00:00
 
 **Overall score: 4.0**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Exact 1bc8fb6 solver source clean CMake build passed in a restricted network-disabled cfd-bench container; no CFD rerun. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 4 | Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance. |

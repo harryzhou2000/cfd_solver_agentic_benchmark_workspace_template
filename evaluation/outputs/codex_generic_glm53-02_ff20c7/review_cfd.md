@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:30:00.400035+00:00
+Generated: 2026-10-30T05:32:27.843011+00:00
 
-**Overall score: 4.0**
+**Overall score: 3.5**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,13 +30,13 @@ Generated: 2026-10-30T05:30:00.400035+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | solver.cpp:190–204 stores rho/u/v/p gradients; :330–336 uses pressure gradient as temperature for heat flux, with directional correction only along connection. :782–794 uses full viscous traction for force split; surface Cf projects tangentially :820–826. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 2 | All selected steady metadata records inner_target_converged_fraction=0; outer residual/plateau statuses must be independently checked, and M2 laminar Cd is still falling at stop. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4 | Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3 | solver.cpp:1014–1021 recomputes gradients each inner sweep but freezes limiter after first; measured target is lagged-limiter residual, and fully refreshed strict miss count is unknown. Raw lift FFT yields St0.14 across t>=100/150/200. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T05:30:00.400035+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.0
+- Overall score (0-5): 3.5
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
