@@ -27,15 +27,15 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 2,
-          "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+          "score": 4,
+          "notes": "Immutable e185a0a clean build succeeded in network-disabled cfd-bench (2 CPUs,3 GiB,256 pids) with explicit library/header roots; compiler warnings include unchecked fread results."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 2,
-          "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+          "score": 3.5,
+          "notes": "State/time/step restart exists, but driver.cpp:1044\u20131045 initializes previous BDF state from loaded current state, preventing uninterrupted two-level transient continuation."
         },
         {
           "id": "code.organization",
@@ -76,8 +76,8 @@
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 2,
-          "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+          "score": 2.5,
+          "notes": "Clean build succeeded; CTest reports no registered tests. Existing standalone probes were not independently executed and no CFD rerun occurred."
         },
         {
           "id": "code.hygiene",
@@ -87,7 +87,7 @@
           "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
         }
       ],
-      "overall_score": 2.0,
+      "overall_score": 2.5,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -231,14 +231,14 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 63,
+    "total_scored": 64.5,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 7.5,
+        "notes": "Immutable e185a0a clean build passed in restricted network-disabled cfd-bench. State/time/step restart exists, but driver.cpp:1044\u20131045 initializes the prior BDF state from the loaded current state, so uninterrupted two-level transient restart is not preserved."
       },
       {
         "id": "mesh_geometry",
@@ -273,7 +273,7 @@
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 9,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "notes": "driver.cpp:1094\u20131112 forms frozen BDF2 anchor and :1630\u20131634 records inner outcomes; selected Re200 is honestly failed at t30 with 3000/3000 misses and metadata max3142 inner evaluations against configured1000. Exact production binary revision is unknown."
       },
       {
         "id": "mpi",
@@ -300,8 +300,8 @@
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 1,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3,
+        "notes": "Separate mesh, flux, gradient, residual, partition, halo and output modules exist, but state and geometry are 2-D and driver.cpp is monolithic; 3-D/general-physics extensibility is limited."
       }
     ]
   },

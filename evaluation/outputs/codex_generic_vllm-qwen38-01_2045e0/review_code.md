@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T08:24:42.516363+00:00
+Generated: 2026-10-30T08:27:57.398573+00:00
 
-**Overall score: 2.0**
+**Overall score: 2.5**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 2 | One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable e185a0a clean build succeeded in network-disabled cfd-bench (2 CPUs,3 GiB,256 pids) with explicit library/header roots; compiler warnings include unchecked fread results. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 2 | One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3.5 | State/time/step restart exists, but driver.cpp:1044–1045 initializes previous BDF state from loaded current state, preventing uninterrupted two-level transient continuation. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 2 | One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T08:24:42.516363+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 2.5 | Clean build succeeded; CTest reports no registered tests. Existing standalone probes were not independently executed and no CFD rerun occurred. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 2 | One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T08:24:42.516363+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.0
+- Overall score (0-5): 2.5
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
