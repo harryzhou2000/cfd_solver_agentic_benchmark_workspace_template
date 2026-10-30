@@ -71,7 +71,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-06_40b02c` | fully reviewed — 93/100, DQ=false; both gates pass |
 | `claude_generic_opus-07_c08c67` | fully reviewed — 61/100, DQ=true; both gates pass |
 | `claude_generic_opus-08_853afe` | fully reviewed — 50.5/100, DQ=true; both gates pass |
-| `claude_generic_opus-09_9cb2fc` | partial — DQ 10/full-mesh and Re200 evidence reviewed; remaining scoring pending |
+| `claude_generic_opus-09_9cb2fc` | partial — DQ and all case scores reviewed; rubric/areas pending |
 | `claude_generic_opus-10_f6b586` | unreviewed |
 | `claude_generic_opus-11_fe7eba` | unreviewed |
 | `claude_generic_sonnet-01_96c411` | unreviewed |
@@ -287,3 +287,5 @@ Rubric 89→61/100; DQ true under trigger 7 and TASK full-mesh prohibition. All 
 DQ false→true under trigger 10 and TASK full-mesh prohibition. Immutable 7e16370 solver.cpp:259–262,624–626 zeros limiters at CFL>2: six steady final CFLs are 10.97672–50, while M2 laminar ends at 1.66554 and transient invokes second-order reconstruction. Report.tex:301–303 asserts production reconstruction and :305–307 identifies only M2 laminar as first order; that is opposite the actual control. solver.cpp:97–217 broadcasts full global mesh to every rank and solver.hpp:38 retains it through solve; METIS/local state exist, so TASK.md:227 applies separately from numbered DQ9.
 
 Accepted contestant PDF SHA-256 e493bbd7967fb49e21e7a2a2acc24a13ad7e6cd48ffbc1f97be2f27048b2e914 matches indexed bytes and immutable TeX; PDF p4 reports mean Cd=0.813, lift amplitude ±0.30, period≈6.5 and St≈0.153, correcting old false absence note. Original t≥150 lift gives 23 interpolated upward crossings, mean of 22 periods 6.53634, frequency 0.152991. PDF p11 startup Cd≈27 makes late drag unreadable; no alternate plot in complete report, so Re200 case remains 2 under the delivered late lift/drag floor. `last_inner_residual_ratio=0` is an unassigned default, while target misses are counted independently. Remaining cases/rubric/areas partial, both gates pass, no CFD rerun.
+
+Opus-09 steady case corrections: accepted PDF p4 contains case force/status table, disproving previous numeric-absence notes; pp.5–10 show only the specified subset of case histories/fields. Scores 4,2,2,2,2,2,3 → 2,2,2,1,2,1,2. M0.15 inv Cd=0.06618 with last-10% 0.06151–0.07173; M0.15 and M2 laminar Cd=−0.15498/−3.38099; Re20 Cd=2.98942. Details and presentation floor evidence are case-specific. Rubric/areas remain partial; both gates pass; no CFD rerun.
