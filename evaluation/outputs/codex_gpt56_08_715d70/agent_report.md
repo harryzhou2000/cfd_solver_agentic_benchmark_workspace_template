@@ -44,7 +44,7 @@ telemetry repair.
 
 ## Recorded scoring
 
-The provisional rubric is **69/100**, replacing the old unsupported 3-point assignment in every section. Seven steady cases remain low due to weak 300-step plateaus and implausible forces; M2 inviscid receives 1.5/5, and the honestly failed Re200 remains 0/5. DQ is not established. The original report figures are present; current workspace packages include later replacements and are not attributed to the curated report. Full review remains partial. Detailed evidence is recorded in `agent_scores.json` and the ledger.
+The qualified rubric is **69/100**, replacing the old unsupported 3-point assignment in every section. Seven steady cases remain low due to weak 300-step plateaus and implausible forces; M2 inviscid receives 1.5/5, and the honestly failed Re200 remains 0/5. DQ is not established. The original report figures are present; current workspace packages include later replacements and are not attributed to the curated report. The available case, rubric, review and DQ evidence has been assessed; original binary/source binding and later workspace replacements remain qualified. Detailed evidence is recorded in `agent_scores.json` and the ledger.
 
 ## Integrity and limitations
 
@@ -58,3 +58,6 @@ stored response-item record SHA-256:
 
 Those two Markdown/identity sidecars are unindexed by this snapshot's current
 index contract; `cfdeval check` does not validate unindexed sidecars.
+
+
+The independent review examined all eight original attempt histories, all 36 delivered report pages, ten rubric sections, 27 review points and DQ1–13. The old 30-point rubric assigned 3 points to every section without criterion-specific support; the revised score credits source and report capability while keeping poor case scores low. Original Re200 metadata and report explicitly say failed, and the report discloses 26,720 backward-Euler fallback intervals. The current workspace contains a later different Re200 package and is not substituted for the original. The precise original production binary and other image bindings remain unbound; one Re20 figure was reproduced exactly. No solver was rerun.
