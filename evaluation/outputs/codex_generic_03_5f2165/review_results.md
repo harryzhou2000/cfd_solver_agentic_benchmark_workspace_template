@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:59:07.525694+00:00
+Generated: 2026-10-30T05:00:11.398134+00:00
 
 **Overall score: 0.8**
 
@@ -15,7 +15,7 @@ Generated: 2026-10-30T04:59:07.525694+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 1 | Explicit validator fails immediately on invalid not_converged status. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 0 | Report manifest calls every steady run failed; Re200 only 10000 attempted steps and raw status ends at 218. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 0 | Canonical raw statuses show M015/M080 inviscid not_converged, other five steady failed, and Re200 failed at step218/time0. Historical inventory/report describe different states; production source binding unknown. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 0 | No converged/settled production result; final response documents instability. |

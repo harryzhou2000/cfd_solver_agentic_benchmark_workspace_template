@@ -118,14 +118,14 @@
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 2,
-          "notes": "Rusanov present; no credible converged validation."
+          "notes": "main.cpp:439\u2013450 has Rusanov flux but no Harten\u2013Yee entropy fix claimed in report.tex:25\u201326,64\u201371; metadata writer :981,1053 says null. Current source is unbound to historical runs."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 1,
-          "notes": "Final response admits earlier boundary/force detection failure."
+          "notes": "main.cpp:456\u2013473 uses zero-velocity ghost for viscous wall and freestream farfield; source :722\u2013739 writes adjacent cell velocities, disclosed as cell_center in writer :989,1061. Case statuses fail."
         },
         {
           "id": "cfd.reconstruction",
@@ -146,7 +146,7 @@
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 1,
-          "notes": "Viscous cases failed."
+          "notes": "main.cpp:478\u2013519,556\u2013584 has primitive-gradient stresses, but wall gradients exclude boundary neighbors (:497); compute_forces :644\u2013660 only integrates pressure, and surface writer :737 emits cf=0. Viscous runs fail."
         },
         {
           "id": "cfd.implicit",
@@ -160,7 +160,7 @@
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 0,
-          "notes": "Re200 ends at step 218 / time 0, not a transient production run."
+          "notes": "Report.tex:265\u2013270 discloses no true BDF2; main.cpp:847\u2013905 advances pseudo-time without BDF2 residual. Current canonical Re200 fails at step218 and time0, with no established source binding."
         },
         {
           "id": "cfd.mpi_partition",
@@ -194,7 +194,7 @@
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 0,
-          "notes": "Report manifest calls every steady run failed; Re200 only 10000 attempted steps and raw status ends at 218."
+          "notes": "Canonical raw statuses show M015/M080 inviscid not_converged, other five steady failed, and Re200 failed at step218/time0. Historical inventory/report describe different states; production source binding unknown."
         },
         {
           "id": "res.plausibility",
@@ -346,6 +346,12 @@
         "flag": "TASK prohibited shortcut 7: full mesh and state replication during iterations",
         "found": true,
         "evidence": "Immutable b001f2e main.cpp:825\u2013832 reads complete CGNS mesh on every rank and initializes every cell state; :307\u2013354 explicitly retains all cells per rank despite calling METIS; :357\u2013363 says local copying in all-rank-redundant mode. TASK.md:227 prohibits full mesh or state replication during iterations. Canonical current metadata reports partitioner=serial and replication=true, so numbered DQ9 metadata-METIS condition is not inferred."
+      },
+      {
+        "id": 6,
+        "flag": "Report claims algorithms that cannot be found in source",
+        "found": true,
+        "evidence": "Immutable report/report.tex:25\u201326,64\u201371 explicitly claims Harten\u2013Yee entropy fix and max with entropy threshold. Immutable solver/src/main.cpp:439\u2013450 computes the Rusanov maximum |un|+a without an entropy threshold or Harten\u2013Yee correction; metadata writer :981,1053 declares entropy_fix=null. Re200 BDF2 absence is separately disclosed in report.tex:265\u2013270 and is not the basis for this finding."
       }
     ]
   },

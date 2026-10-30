@@ -85,7 +85,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=true under TASK.md:227: immutable main.cpp:307–363,825–832 retains full mesh and state on all ranks. Numbered DQ9 is not established because canonical metadata reports serial, not METIS. Other triggers remain under review; no external authorship search was performed.
+DQ=true under TASK.md:227: immutable main.cpp:307–363,825–832 retains full mesh and state on all ranks. DQ6 also applies: final report explicitly claims an entropy fix absent from the submitted source, as detailed below. Numbered DQ9 is not established because canonical metadata reports serial, not METIS. Other triggers remain under review; no external authorship search was performed.
 
 ## Metadata answers & session selection
 
@@ -120,3 +120,8 @@ Current canonical M0.15 and M0.8 inviscid statuses are not_converged at steps 10
 ## Partial clean-build and MPI calibration — 2026-10-30
 
 Archived exact curated b001f2e into isolated scratch and configured with CMake in the cfd-bench container (`--network none --cpus 2 --memory 3g --pids-limit 256`, `CFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install`); configuration passed, but `cmake --build /work/build -j2` failed at solver/src/main.cpp:101–102 because `rank` is undeclared in `read_cgns` and `return 1` cannot convert to `CGNSMesh`. No submitted file was changed. Build rubric 4→1 and code.build 3→1. Full-mesh/state evidence above reduces MPI rubric 5→0, code.mpi 3→0 and cfd.mpi_partition 3→0. Rubric 30→22. These are current-source findings, not attribution of historical results to this unbound source; remaining criteria and DQ assessment are partial. No Re200 or unsteady rerun.
+
+
+## Partial source and DQ review — 2026-10-30
+
+Immutable report/report.tex:25–26,64–71 claims a Harten–Yee entropy fix with entropy threshold. Immutable solver/src/main.cpp:439–450 calculates the maximum of |un|+a without that correction; its metadata writers :981,1053 explicitly say entropy_fix=null. DQ6 applies to that concrete claimed but absent algorithm. The separate lack of BDF2 is disclosed in report.tex:265–270, so is not the DQ6 basis. main.cpp:478–519,556–584 computes viscous gradients and stresses, but skips boundary neighbors in gradients (:497); force function :644–660 integrates pressure only and surface writer :737 outputs cf=0. Surface writer :722–739 writes adjacent-cell velocity and metadata writers :989,1061 explicitly disclose cell_center; DQ11 is not inferred. Raw output source provenance remains unbound; remaining DQ and rubric calibration partial. No CFD rerun.
