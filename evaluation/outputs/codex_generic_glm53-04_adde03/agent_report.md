@@ -4,7 +4,7 @@ Submission `codex/generic/glm53-04` at `c06741d9dc5739d9f4a6d6c0285e3c69c8cf8052
 
 ## Verdict
 
-**87/100; DQ=true under DQ7 (partial calibration).** A separate M2 laminar case is labeled converged while drag remains materially unstable; the prior inviscid residual-only rationale is under review.
+**85/100; DQ=true under DQ7 (partial calibration).** A separate M2 laminar case is labeled converged while drag remains materially unstable; the prior inviscid residual-only rationale is under review.
 
 ## Evidence
 
@@ -43,3 +43,8 @@ For M2 laminar, report.tex:311's Cd=1.025 matches the current last-100-row mean 
 ## Wake-vorticity credibility — 2026-10-30
 
 The submitted Re200 wake figure is readable and traceable to the selected field, but is not reliable evidence of vorticity. The immutable plotting helper produces zero curl on a two-triangle rigid rotation with exact curl 2; it uses a perpendicular centroid direction and opposite owner contributions. Applying those exact submitted functions to the selected field reproduces the delivered image pixel-for-pixel. An independent neighbor-based least-squares derivative over 3,875 wake cells yields correlation −0.026 with the helper and 5th–95th percentile curl −1.737 to 1.538 versus −0.282 to 0.284 for the helper; the independent estimate is diagnostic, not an exact reference solution. Report/visualization rubric 4→3 and results visualization 4→3. This defect does not establish that the plot came from an unrelated field, so it is not itself charged as DQ8. Re200 remains capped at 2 independently for missing readable late drag. Full source and result binding remain partial.
+
+
+## Restart and rank-study review — 2026-10-30
+
+Clean c06741d source builds in cfd-bench. Restart persists three state levels by global ID but not step or physical time; resumed transient resets t=0 and takes a backward-Euler first step. Build/contract rubric 10→9. The selected Re20 final Cd at np1/np2/np8 is 2.071663/2.071659/2.071655; NACA M015 is 0.001153759/0.001153984/0.001167319, with Cl −0.0012681/+0.0007543/+0.0006058. Report.tex:529–533 says forces agree to solver roundoff, which overstates NACA agreement; the absolute differences do not establish DQ4. The selected metadata revisions are init-only and do not establish exact solver source. Case-results rubric 7→6 for the documented M2 false convergence and other case/provenance limitations. Remaining criterion reviews partial.

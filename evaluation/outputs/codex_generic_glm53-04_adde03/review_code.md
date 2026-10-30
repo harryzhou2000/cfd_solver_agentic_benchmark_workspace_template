@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:01:36.643898+00:00
+Generated: 2026-10-30T06:02:33.966251+00:00
 
-**Overall score: 4.0**
+**Overall score: 3.9**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Clean immutable c06741d CMake build in cfd-bench passed with no CFD rerun; historic run/source binding remains unproved. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3 | main.cpp solve parser validates required case/output paths and options. Restart saves state levels but transient resume resets time and starts with backward Euler (solver.cpp:757–846,1326–1343). |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T06:01:36.643898+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.0
+- Overall score (0-5): 3.9
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

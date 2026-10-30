@@ -28,14 +28,14 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4,
-          "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+          "notes": "Clean immutable c06741d CMake build in cfd-bench passed with no CFD rerun; historic run/source binding remains unproved."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+          "score": 3,
+          "notes": "main.cpp solve parser validates required case/output paths and options. Restart saves state levels but transient resume resets time and starts with backward Euler (solver.cpp:757\u2013846,1326\u20131343)."
         },
         {
           "id": "code.organization",
@@ -87,7 +87,7 @@
           "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
         }
       ],
-      "overall_score": 4.0,
+      "overall_score": 3.9,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -193,15 +193,15 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 4,
-          "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+          "score": 3,
+          "notes": "M2 laminar metadata claims converged while final 40 Cd values fall 0.853765\u21920.529150; Re200 t300 and plotted late drag limitation are distinct. Selected historic outputs are not bound to immutable solver source."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+          "score": 3,
+          "notes": "Re20 last Cd\u22482.072 is stable; Re200 raw lift FFT\u22480.175. Rank-study NACA np1 vs np8 final Cd 0.001153759 vs 0.001167319 and Cl \u22120.0012681 vs +0.0006058; Re20 Cd 2.071663 vs 2.071655. Report claim of solver-roundoff agreement overstates NACA agreement; absolute differences do not demonstrate an order-one force mismatch."
         },
         {
           "id": "res.visualization",
@@ -225,20 +225,20 @@
           "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
         }
       ],
-      "overall_score": 3.85,
+      "overall_score": 3.5,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 87,
+    "total_scored": 85,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 10,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "score": 9,
+        "notes": "Immutable c06741d clean build succeeded with CMake in cfd-bench; main.cpp:180\u2013219 checks solve options and required paths. Restart stores three state levels but no time/step, and solver.cpp:1326\u20131343 resets transient clock and takes backward Euler on the first resumed step, so full transient continuation is not provided."
       },
       {
         "id": "mesh_geometry",
@@ -286,8 +286,8 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 7,
-        "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+        "score": 6,
+        "notes": "Current M2 laminar metadata labels converged despite last40 Cd 0.853765\u21920.529150; Re200 raw lift gives St\u22480.175 but late drag plot lacks resolution and wake vorticity estimate is inconsistent. Re20 is steady, and inviscid plateaus require force-based evaluation. Rank-study results exist; all selected metadata revision26ef1cb lacks solver source, so production binding remains unproved."
       },
       {
         "id": "report_viz",

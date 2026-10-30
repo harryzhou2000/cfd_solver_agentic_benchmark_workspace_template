@@ -7,14 +7,14 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+      "notes": "Clean immutable c06741d CMake build in cfd-bench passed with no CFD rerun; historic run/source binding remains unproved."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged."
+      "score": 3,
+      "notes": "main.cpp solve parser validates required case/output paths and options. Restart saves state levels but transient resume resets time and starts with backward Euler (solver.cpp:757\u2013846,1326\u20131343)."
     },
     {
       "id": "code.organization",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.0
+  "overall_score": 3.9
 }

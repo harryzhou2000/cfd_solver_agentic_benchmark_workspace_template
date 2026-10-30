@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:01:36.644603+00:00
+Generated: 2026-10-30T06:02:33.966939+00:00
 
-**Overall score: 3.85**
+**Overall score: 3.5**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,10 +15,10 @@ Generated: 2026-10-30T06:01:36.644603+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 4 | Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 3 | M2 laminar metadata claims converged while final 40 Cd values fall 0.853765→0.529150; Re200 t300 and plotted late drag limitation are distinct. Selected historic outputs are not bound to immutable solver source. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Re20 last Cd≈2.072 is stable; Re200 raw lift FFT≈0.175. Rank-study NACA np1 vs np8 final Cd 0.001153759 vs 0.001167319 and Cl −0.0012681 vs +0.0006058; Re20 Cd 2.071663 vs 2.071655. Report claim of solver-roundoff agreement overstates NACA agreement; absolute differences do not demonstrate an order-one force mismatch. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 3 | Delivered force histories and contours are readable, with compressed late drag. The Re200 vorticity wake figure is pixel-reproduced from selected field with the committed plotting helper; the helper fails an exact solid-rotation check and disagrees with an independent local-neighbor wake diagnostic. This is a derived-variable accuracy defect, not proof of a substituted field. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T06:01:36.644603+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.85
+- Overall score (0-5): 3.5
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
