@@ -90,7 +90,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_02_ed5ee6` | fully reviewed, qualified: 33/100, DQ7 and TASK full mesh; M0.15 package/source attribution unavailable |
 | `codex_generic_03_5f2165` | fully reviewed, qualified: 22/100, DQ2/6/7 plus TASK placeholder/full mesh; historical binary/figure identity limited |
 | `codex_generic_04_16009f` | fully reviewed, qualified: 24/100, DQ6/7/10 and TASK full mesh; historical binary/figure linkage unresolved |
-| `codex_generic_05_2599b1` | partial: TASK full mesh established; report-to-package mapping and rubric pending |
+| `codex_generic_05_2599b1` | fully reviewed, qualified: 31/100, DQ7 and TASK full mesh; historical executable/figure binding limited |
 | `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
 | `codex_generic_glm53-02_ff20c7` | partial: DQ7 plateau correction and cylinder case evidence; remaining DQ/rubric pending |
 | `codex_generic_glm53-03_d469fb` | partial: DQ7 current Re200/Re20 evidence, provenance discrepancy; other criteria pending |
@@ -600,6 +600,8 @@ Generic_05 visual checkpoint: visually inspected all eight accepted PDF pages SH
 Generic_05 cases/method checkpoint: selected v3 M015/M080 laminar Cp figures exist; case scores 1,1,0 retained with actual force/residual evidence. Final source steady reconstruction alpha0.1 and transient direct states, report claims all second order; source/run binding prevents DQ10 attribution. Second-order rubric 3→2; viscous 3→1 for 0.01 residual scaling and flawed wall traction, total 34→31; visualization point 3→2. BDF2 source negative temporal sign and zero-valued inner log documented without inferring historic miss counts. Remaining DQ/provenance partial; no CFD rerun.
 
 Generic_05 remaining-criteria checkpoint: individual rubric/review notes and DQ1–6,8–13 evidence boundaries documented. DQ7 and TASK full-mesh stand; selected Re20 surface rows and final writer output zero no-slip velocity, so DQ11 unproved. Selected historical source and figure-data binding unresolved; partial status retained, no CFD rerun.
+
+Generic_05 qualified full review: all ten rubric sections, eight selected v3/v4 cases, 27 review points and 13 numbered DQ rules assessed to the available evidence limit; prior partial wording is historical. 31/100, DQ7 and TASK full mesh unchanged. In particular, empty selected multi-rank force files do not establish DQ4, and the final-source transient reconstruction defect cannot be attributed to the earlier unbound producing binary for DQ10. Exact historic executable/source and some figure/data identity remain unresolved and explicitly qualified. No CFD/Re200 rerun; both gates required.
 
 
 ## glm53-01 partial case-floor review — 2026-10-30

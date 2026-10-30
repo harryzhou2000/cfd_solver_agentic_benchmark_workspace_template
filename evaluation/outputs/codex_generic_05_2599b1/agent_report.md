@@ -74,7 +74,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=true under TASK.md:227 because immutable source retains full mesh on every rank throughout iterations, and DQ7 because the selected Re200 metadata labels a nonperiodic run statistically periodic. Numbered DQ9 full-state condition is not inferred: state vectors are partition-local. Other triggers remain under review.
+DQ=true under TASK.md:227 because immutable source retains full mesh on every rank throughout iterations, and DQ7 because the selected Re200 metadata labels a nonperiodic run statistically periodic. Numbered DQ9 full-state condition is not inferred: state vectors are partition-local. Other numbered triggers are assessed in the scorecard without assuming unbound historical source or figures.
 
 ## Metadata answers & session selection
 
@@ -86,7 +86,7 @@ Exact curated source was independently built in a restricted container; no CFD r
 
 ## Verdict
 
-31/100, DQ=true (partial calibration). The implementation has meaningful CFD/MPI structure, but no declared final package validates and the admitted viscous/Re200 physics limitations preclude completion credit.
+31/100, DQ=true (qualified full calibration). The implementation has meaningful CFD/MPI structure, but no declared final package validates and the admitted viscous/Re200 physics limitations preclude completion credit.
 
 
 ## Partial full-mesh review — 2026-10-30
@@ -121,3 +121,8 @@ Final source steady residual uses reconstruction alpha=0.1 at main.cpp:978–101
 ## Partial remaining criteria and DQ assessment — 2026-10-30
 
 Criterion-specific score notes now identify the exact source and selected-result limitations. No evidence found of an internally called existing solver executable (DQ1), generated force/residual files without solving (DQ2), or two-mesh-filename-only input (DQ3). Missing selected MPI force files preclude DQ4 numerical comparison; LU-SGS source supplies implicit capability (DQ5). Claimed LU-SGS exists in final source, although selected v3 metadata says diagonal, so that production-path discrepancy alone does not establish DQ6. DQ7 and TASK full-mesh remain established. Blank contour plots do not by themselves establish figure/data mismatch or misnaming (DQ8/12). Selected metadata lacks partitioner and local state is partitioned, so DQ9 is unproved. Final-source transient reconstruction is absent, but selected run predates and is not bound to it, so DQ10 remains unproved. Final writer :890–899 outputs zero velocity for no-slip wall, and selected Re20 surface rows do so; DQ11 not established. No external authorship search for DQ13. Source-result and figure-data provenance remain partial; no CFD rerun.
+
+
+## Qualified full review — 2026-10-31
+
+All ten rubric sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to the available evidence limit. The immutable manifest identifies the v3/v4 result variants; Re200 v3 force history and the report itself establish the nonperiodic outcome despite its statistically-periodic metadata, and source establishes all-rank full mesh. DQ7 and TASK prohibited shortcut 7 remain; other triggers are not established on the available evidence. In particular, selected multi-rank force files are empty, so no DQ4 numerical comparison is asserted, and final-source transient first-order treatment is not attributed to an earlier unbound production binary for DQ10. The previously labeled partial sections are historical checkpoints. Exact historical executable/source and some figure/data identities remain unresolved and explicitly qualify this review; no CFD or Re200 rerun.

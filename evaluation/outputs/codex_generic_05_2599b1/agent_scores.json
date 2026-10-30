@@ -352,6 +352,66 @@
         "flag": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
         "evidence": "Immutable d8491d9 solver/report/run_manifest.md selects runs_final_v3 for Re200. Its output/metadata.json says completed=true/statistically_periodic, but selected forces.csv t=200\u2013300 has 10000 consecutive decreases in Cl from 4.11364e-5 to 1.31143e-5 and 10000 consecutive increases in Cd from -1.17943e-7 to -3.79228e-8: no late periodic shedding. report.tex:141\u2013142 explicitly says no meaningful vortex shedding. Strict inner-target misses cannot be inferred from these forces; metadata lacks counts."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "Inspected final source; no internal existing-CFD-executable call found. No exhaustive external authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence of force/residual generation without solving; identical multi-rank residual files do not by themselves prove fabrication."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "main.cpp:947\u2013953 reads configured mesh path and case input; no two-mesh-filename-only dispatch established."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Selected np2/4/8 force histories for both comparison cases are empty; no controlled order-one force discrepancy can be established."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Final source implements LU-SGS implicit sweeps, though root-only MPI gather and historical binary provenance limit practical validation."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Report claims LU-SGS and this method exists in final source; selected v3 metadata says diagonal implicit, but the exact producing source is unbound. This discrepancy alone does not prove an absent claimed algorithm."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "Accepted PDF contains blank contour plots, a visualization defect; no specific report figure is proven unrelated to the claimed data."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "Selected metadata omits partitioner and final source partitions local state. All-rank full mesh is independently TASK prohibited shortcut 7; numbered full-state/geometric-only condition is unproved."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Final source transient uses direct states and steady uses alpha 0.1 while report asserts all second order, but selected run predates and is unbound to that source. No definite disabled historical production reconstruction established."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "main.cpp:890\u2013899 emits zero no-slip boundary velocity and selected Re20 wall rows are zero; no adjacent-cell-as-boundary no-slip failure established."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "Blank plots alone do not establish a named-variable swap; precise figure-generation binding is unavailable."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source CFD core found in inspected source; no exhaustive external authorship search."
       }
     ]
   },
@@ -359,6 +419,7 @@
     "No rerun; Re200 was not rerun.",
     "Raw packages and PDF are excluded from the result tip.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars not validated by cfdeval check.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All ten rubric sections, eight cases, 27 review points and 13 DQ rules reviewed to the available evidence limit; selected historical source/executable and some figure/data identities remain unbound. No CFD/Re200 rerun."
   ]
 }
