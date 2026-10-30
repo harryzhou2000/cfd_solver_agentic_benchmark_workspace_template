@@ -307,8 +307,8 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 4,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=-0.0001, CD=0.066 at 17724cd:solver/report/report.tex:119; residual history 17724cd:solver/report/figures/naca0012_m015_inviscid_residuals.png (referenced at solver/report/report.tex:221); force history 17724cd:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:222); computed-field contour 17724cd:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/report.tex:228). Score 4 retained after the post-processing audit. Prior case judgment: Report table records M0.15 inviscid converged at 3.97 orders; package passes validator, with no independent rerun."
+      "score": 2,
+      "notes": "Score 4\u21922: immutable report figure naca0012_m015_inviscid_forces.png collapses at physical_time=0 (accepted PDF p5), so no readable force history. Specific Mach contour has proven cell-to-triangle value misregistration: exact submitted plot tool reproduces committed image SHA b79e716eebc239607743825df1499b707f0859e1f3fe7a66eaffe069058e6829 byte-for-byte from current field SHA 045ecac8e127e4db870a602a7bd66f9fdbb3b017f0e4abda1ba203c85875e5e7, but 30880 triangles are zipped to 20816 cell values. Numeric Cd0.06612/Cl\u22120.000113 and residual rows exist, but Cd is high for zero-AoA inviscid and source revision 26ef1cb is an init commit without solver. DQ8 concerns actual mismapped figure, not authorship. No CFD rerun."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
@@ -347,6 +347,12 @@
         "flag": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
         "evidence": "Current selected solver/results/cylinder_m010_laminar_re200 metadata/status say completed/statistically_periodic at t300, but last 3000 force rows Cd range 4.06744774746\u20134.067458670148 and Cl range \u22120.0009113144295156 to \u22120.0009111552227523: essentially steady, no vortex shedding. report.tex:164\u2013169 describes another incomplete t287 history, not the t300 package. Independently Re20 metadata says converged at step56, but last five Cd values span 3.22481\u20133.97529, substantially changing. TASK.md:172\u2013173 requires stable steady forces and periodic Re200 shedding."
+      },
+      {
+        "id": 8,
+        "flag": "Report figures do not correspond to submitted field/CSV outputs",
+        "found": true,
+        "evidence": "Specific immutable report figure solver/report/figures/naca0012_m015_inviscid_mach.png SHA b79e716eebc239607743825df1499b707f0859e1f3fe7a66eaffe069058e6829 is byte-identical to scratch regeneration using exact submitted plot_results.py SHA e100139d2d7e2627fb318a1991456f53c358a3cd4d2d8c7330f3d0b8547fcbbf and current field_final.vtu SHA 045ecac8e127e4db870a602a7bd66f9fdbb3b017f0e4abda1ba203c85875e5e7. Plot script :33\u201356 splits 10064 quadrilaterals into 30880 triangles but :59\u201370 zips those with only 20816 cell values, misassigning subsequent values and omitting 10064 triangle assignments. Selected session reruns script at 2026-09-04 07:11:59 UTC; source field mtime 07:01:41, figure 07:12:03, manifest 07:12:08 UTC, before root end. This is a demonstrated plotting error, not a finding of fabrication."
       }
     ]
   },

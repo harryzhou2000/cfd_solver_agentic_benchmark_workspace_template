@@ -4,7 +4,7 @@ Submission `codex/generic/glm53-03` at `17724cd96bf90e2cf9be2568f38a9a418e9fbcae
 
 ## Verdict
 
-**84/100; DQ=true under trigger 7 (partial calibration).** Current Re200 metadata labels an essentially steady t300 result periodic and Re20 is labeled converged while drag is still changing; the report describes a different Re200 generation.
+**84/100; DQ=true under triggers 7 and 8 (partial calibration).** Current Re200 metadata labels an essentially steady t300 result periodic and Re20 is labeled converged while drag is still changing; the report describes a different Re200 generation.
 
 ## Evidence
 
@@ -28,3 +28,10 @@ The independent Re200 score changes from **4.00 to 2.00**. Its own report says t
 Current selected solver/results/cylinder_m010_laminar_re200 metadata/status label completed/statistically_periodic at t300, but last 3000 force rows have Cd 4.06744774746–4.067458670148 and Cl −0.0009113144295156 to −0.0009111552227523: essentially steady with no vortex street. Case score 2→1 and DQ7 remains true under TASK.md:173. report.tex:164–169 instead describes an incomplete t287 run with inner failures/no shedding; that historical report generation must not be conflated with the current t300 package. Current Re20 status claims converged at step56 but last five Cd rows span 3.2248058–3.9752864 (23% relative to first) and lift also changes, inconsistent with TASK.md:172 stable-force criterion; case remains1.
 
 The prior DQ evidence citing M080/M2 inviscid 0.81/0.14 orders refers to a different report/result state; current selected metadata instead shows steps85/3121 with 4.009/2.645 orders. Those cases and their plateau evidence remain under review. Current metadata git_revision=26ef1cb points to an initial workspace commit with no solver source, not proof of production source; other cases/rubric/DQ partial. No CFD rerun.
+
+
+## Demonstrated report figure/data mismatch — 2026-10-30
+
+Immutable 17724cd solver/tools/plot_results.py:33–56 splits each quad into two triangles, while :59–70 zips triangles with one scalar per original cell instead of duplicating/mapping the cell value. The selected M015 inviscid field_final.vtu has 20816 cells, including 10064 quads, giving 30880 triangles but only 20816 values; after the first quad, subsequent values are attached to wrong triangles and the final 10064 triangle assignments are omitted. Field SHA-256 045ecac8e127e4db870a602a7bd66f9fdbb3b017f0e4abda1ba203c85875e5e7, submitted plotting script SHA e100139d2d7e2627fb318a1991456f53c358a3cd4d2d8c7330f3d0b8547fcbbf.
+
+The selected root session reran the plotting script at 2026-09-04 07:11:59 UTC; field, Mach figure and manifest mtimes 07:01:41, 07:12:03 and 07:12:08 UTC precede root end. The workspace Mach figure matches immutable report figure SHA b79e716eebc239607743825df1499b707f0859e1f3fe7a66eaffe069058e6829. A scratch reproduction using that submitted script and current field generated exactly the same PNG bytes, establishing the specific report figure/data mismatch. DQ8 applies; this is an implementation error and no fabrication claim. The scratch redraw is diagnostic evidence only, not a contestant deliverable. PDF p5 also shows M015 force plot collapsed at physical time0; M015 case score 4→2. Other dimensions and provenance remain partial; no CFD rerun.
