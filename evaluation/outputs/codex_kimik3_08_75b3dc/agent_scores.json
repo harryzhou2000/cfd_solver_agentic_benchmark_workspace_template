@@ -231,7 +231,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 89.5,
+    "total_scored": 88.5,
     "sections": [
       {
         "id": "build_cli",
@@ -286,8 +286,8 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 7,
-        "notes": "M015 laminar falsely marked converged while final force window remains materially unsteady; other cases under review."
+        "score": 6,
+        "notes": "M015/M080 laminar force instability contradicts success metadata; Re20 drag0.889 is far below reference despite bounded history; Re200 shedding supported."
       },
       {
         "id": "report_viz",
@@ -307,36 +307,36 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 4.5,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=2e-05, CD=0.00486 at 80fdf69:solver/report/generated_case_sections.tex:2; residual history 80fdf69:solver/report/figures/naca0012_m015_inviscid_residual.png (referenced at solver/report/generated_case_sections.tex:5); force history 80fdf69:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/generated_case_sections.tex:9); computed-field contour 80fdf69:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/generated_case_sections.tex:17). Score 4.5 retained after the post-processing audit. Prior case judgment: Delivered package passed explicit validator; judged from submitted result evidence only."
+      "score": 2.5,
+      "notes": "Submitted contestant commit 97128af tracks force/residual/metadata/status bytes matching workspace; accepted main PDF 4f6862073ada8f13d871f9d57e4fb0f4cca0f01f4a71c09c62dd4997a873c5c1 shows case-specific histories and fields. Final Cd0.004865, but last500 Cd\u22120.004261..0.005498 and Cl\u22120.0000466..0.0006309: persistent low-speed oscillation around an expected near-zero drag. Separate lift/drag axes and fields are visible. Old4.5\u21922.5."
     },
     "naca0012_m080_inviscid": {
-      "score": 4.5,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=0.00228, CD=0.00866 at 80fdf69:solver/report/generated_case_sections.tex:35; residual history 80fdf69:solver/report/figures/naca0012_m080_inviscid_residual.png (referenced at solver/report/generated_case_sections.tex:38); force history 80fdf69:solver/report/figures/naca0012_m080_inviscid_forces.png (referenced at solver/report/generated_case_sections.tex:42); computed-field contour 80fdf69:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/generated_case_sections.tex:50). Score 4.5 retained after the post-processing audit. Prior case judgment: Delivered package passed explicit validator; judged from submitted result evidence only."
+      "score": 4,
+      "notes": "Submitted contestant commit 97128af tracks force/residual/metadata/status bytes matching workspace; accepted main PDF 4f6862073ada8f13d871f9d57e4fb0f4cca0f01f4a71c09c62dd4997a873c5c1 shows case-specific histories and fields. Final Cd0.008663, Cl0.002283; last200 Cd0.008655..0.008730 and Cl0.002209..0.002711, plausible transonic case with some lift drift. 4.5\u21924."
     },
     "naca0012_m200_inviscid": {
-      "score": 4.5,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=0.00038, CD=0.09134 at 80fdf69:solver/report/generated_case_sections.tex:68; residual history 80fdf69:solver/report/figures/naca0012_m200_inviscid_residual.png (referenced at solver/report/generated_case_sections.tex:71); force history 80fdf69:solver/report/figures/naca0012_m200_inviscid_forces.png (referenced at solver/report/generated_case_sections.tex:75); computed-field contour 80fdf69:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/generated_case_sections.tex:83). Score 4.5 retained after the post-processing audit. Prior case judgment: Delivered package passed explicit validator; judged from submitted result evidence only."
+      "score": 3.5,
+      "notes": "Submitted contestant commit 97128af tracks force/residual/metadata/status bytes matching workspace; accepted main PDF 4f6862073ada8f13d871f9d57e4fb0f4cca0f01f4a71c09c62dd4997a873c5c1 shows case-specific histories and fields. Final Cd0.091340, last200 Cd0.090088..0.092181 and Cl\u22120.002030..0.001202; shock is shown but late force oscillation and three residual orders limit confidence. 4.5\u21923.5."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1.5,
       "notes": "Committed report 80fdf69:solver/report/generated_case_sections.tex:101,131 claims converged Cd0.00775 and states restart Cd stayed 0.0076\u20130.0079 for 8000 steps. Canonical production forces SHA256 f162da1a1a91008551b4b378207e823b9fdd1ba0b614bb342aa52f15995e1d37, matching original contestant commit 97128af, show last500 Cd0.005318..0.009276 and Cl\u22120.001078..0.000599; status SHA256 af9b4b1441127277402b5b991e3e27c8380696f3b4cd64b7d153b8e41b6942b9 marks converged at2888. The continuation tests/out/m015lam_plateau explicitly uses the production restart; its CSV SHA256 8edf32470e1d4f4cb70fdd747e966ab63dc5f6ecf297e12fdcc0a89df778428b has last1000 Cd0.007607..0.007870, but last5000 0.006761..0.007870 and first0.14855, so the reported 8000-step band is not the whole history. Continued run does bracket the final value and provides valuable later evidence but does not make the delivered final state force-stable. TASK.md:140,172 require clear early laminar convergence and stable forces; score4.5\u21921.5 and DQ7. Exact production binary hash remains unrecorded."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 4.5,
-      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=0.01808, CD=0.04013 at 80fdf69:solver/report/generated_case_sections.tex:134; residual history 80fdf69:solver/report/figures/naca0012_m080_laminar_re5000_residual.png (referenced at solver/report/generated_case_sections.tex:137); force history 80fdf69:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/generated_case_sections.tex:141); computed-field contour 80fdf69:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/generated_case_sections.tex:149). Score 4.5 retained after the post-processing audit. Prior case judgment: Delivered package passed explicit validator; judged from submitted result evidence only."
+      "score": 1.5,
+      "notes": "Submitted contestant commit 97128af tracks force/residual/metadata/status bytes matching workspace; accepted main PDF 4f6862073ada8f13d871f9d57e4fb0f4cca0f01f4a71c09c62dd4997a873c5c1 shows case-specific histories and fields. Status 25000 claims stable plateau; final5000 Cd0.039453..0.040445 (~2.5% of mean) and Cl0.017388..0.034735. Consecutive 1000-step Cl means 0.03071,0.02684,0.02646,0.02248,0.02114 show substantial late drift; report claims <1% Cd variation and settled Cl\u22480.026. CSV SHA256 deee581efb779412a4ca99dfa3cb982d25593614d16fc6647104e145f56694a5 and status SHA256 3c32bf581ea015149f08f0f0fc2295995f72e9fcf29494d18deee95ae7b9e659 match contestant commit 97128af. DQ7 applies on force evidence, independently of residual target. 4.5\u21921.5."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 4.5,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=0.00067, CD=0.10257 at 80fdf69:solver/report/generated_case_sections.tex:167; residual history 80fdf69:solver/report/figures/naca0012_m200_laminar_re5000_residual.png (referenced at solver/report/generated_case_sections.tex:170); force history 80fdf69:solver/report/figures/naca0012_m200_laminar_re5000_forces.png (referenced at solver/report/generated_case_sections.tex:174); computed-field contour 80fdf69:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/generated_case_sections.tex:182). Score 4.5 retained after the post-processing audit. Prior case judgment: Delivered package passed explicit validator; judged from submitted result evidence only."
+      "score": 4,
+      "notes": "Submitted contestant commit 97128af tracks force/residual/metadata/status bytes matching workspace; accepted main PDF 4f6862073ada8f13d871f9d57e4fb0f4cca0f01f4a71c09c62dd4997a873c5c1 shows case-specific histories and fields. Final Cd0.102567, final200 Cd0.102549..0.102567 and Cl0.000666..0.000672. Report discloses CFL10/Rusanov/Venkat controls and ~15% difference from Roe continuation. 4.5\u21924."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 4.5,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=0.0049, CD=0.88927 at 80fdf69:solver/report/generated_summary_table.tex:12; residual history 80fdf69:solver/report/figures/cylinder_m010_laminar_re20_residual.png (referenced at solver/report/generated_case_sections.tex:203); force history 80fdf69:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/generated_case_sections.tex:207); computed-field contour 80fdf69:solver/report/figures/cylinder_m010_laminar_re20_vorticity_wake.png (referenced at solver/report/generated_case_sections.tex:231). Score 4.5 retained after the post-processing audit. Prior case judgment: Delivered package passed explicit validator; judged from submitted result evidence only."
+      "score": 2.5,
+      "notes": "Submitted contestant commit 97128af tracks force/residual/metadata/status bytes matching workspace; accepted main PDF 4f6862073ada8f13d871f9d57e4fb0f4cca0f01f4a71c09c62dd4997a873c5c1 shows case-specific histories and fields. Final Cd0.889271, Cl0.004900; last2000 Cd0.867257..0.903369 and Cl0.004242..0.005449, bounded but variable. The report acknowledges drag is far below canonical ~2 and attributes this to low-Mach dissipation; physical accuracy materially limits credit. Separate lift/drag axes and wake shown; 4.5\u21922.5."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 4,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.7496, CD=0.9954 at 80fdf69:solver/report/generated_case_sections.tex:237; residual history 80fdf69:solver/report/figures/cylinder_m010_laminar_re200_residual.png (referenced at solver/report/generated_case_sections.tex:240); force history 80fdf69:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/generated_case_sections.tex:244); computed-field contour 80fdf69:solver/report/figures/cylinder_m010_laminar_re200_vorticity_wake.png (referenced at solver/report/generated_case_sections.tex:268); shedding statistic St=0.2 at 80fdf69:solver/report/generated_case_sections.tex:237; late-time periodic-force evidence 80fdf69:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/generated_case_sections.tex:244). Score 4 retained after the post-processing audit. Prior case judgment: Delivered statistically periodic result assessed from artifacts only; never rerun."
+      "score": 3.5,
+      "notes": "Submitted contestant commit 97128af tracks force/residual/metadata/status bytes matching workspace; accepted main PDF 4f6862073ada8f13d871f9d57e4fb0f4cca0f01f4a71c09c62dd4997a873c5c1 shows case-specific histories and fields. Report gives mean Cd0.9954 and Cl amplitude~0.75, not mean Cl0.7496 as old note implies. CSV SHA256 cca1ec2e36ae13b6867c4968a539e8d21c17ffc1a1015d7293daf107e0678a48 t>=200 gives Cd mean0.995399, Cl\u22120.749229..0.751124 and 20 upcrossings, period4.93813/St0.20251. Original PNG SHA256 025c5e175504f9b6d2321728184e34831df4e86b01cd10eb7250629b9a1d95a9 shows readable late lift AND drag, satisfying floor; drag below benchmark and frozen-limiter inner check limit credit. 4\u21923.5; no unsteady rerun."
     }
   },
   "disqualification": {
@@ -346,7 +346,7 @@
         "id": 7,
         "text": "metadata/status marks incomplete or failed runs as successful",
         "found": true,
-        "evidence": "M015 laminar metadata and original-commit-matching status SHA256 af9b4b1441127277402b5b991e3e27c8380696f3b4cd64b7d153b8e41b6942b9 label step2888 converged; submitted force CSV SHA256 f162da1a1a91008551b4b378207e823b9fdd1ba0b614bb342aa52f15995e1d37 shows final500 Cd0.005318..0.009276 and Cl\u22120.001078..0.000599, materially unsteady relative to reported Cd0.00775. TASK.md:140,172 requires clear early convergence and stable forces. The selected 8000-step restart continuation is real and final1000 Cd0.007607..0.007870 brackets this value, but its full history does not stay within the stated band (last5000 0.006761..0.007870, first0.14855); it cannot retroactively make the submitted final state force-stable. The genuine 3.566-order residual drop is not disputed. Other cases remain under review."
+        "evidence": "M015 laminar metadata and original-commit-matching status SHA256 af9b4b1441127277402b5b991e3e27c8380696f3b4cd64b7d153b8e41b6942b9 label step2888 converged; submitted force CSV SHA256 f162da1a1a91008551b4b378207e823b9fdd1ba0b614bb342aa52f15995e1d37 shows final500 Cd0.005318..0.009276 and Cl\u22120.001078..0.000599, materially unsteady relative to reported Cd0.00775. TASK.md:140,172 requires clear early convergence and stable forces. The selected 8000-step restart continuation is real and final1000 Cd0.007607..0.007870 brackets this value, but its full history does not stay within the stated band (last5000 0.006761..0.007870, first0.14855); it cannot retroactively make the submitted final state force-stable. The genuine 3.566-order residual drop is not disputed. Other cases remain under review. Independently, M080 laminar status SHA256 3c32bf581ea015149f08f0f0fc2295995f72e9fcf29494d18deee95ae7b9e659 says converged/force-stable at25000; force CSV SHA256 deee581efb779412a4ca99dfa3cb982d25593614d16fc6647104e145f56694a5 last5000 Cd0.039453..0.040445 and Cl0.017388..0.034735, with successive 1000-step mean Cl0.03071\u21920.02684\u21920.02646\u21920.02248\u21920.02114. This sustained lift drift contradicts stable force plateau independently of nominal residual target."
       }
     ]
   },
