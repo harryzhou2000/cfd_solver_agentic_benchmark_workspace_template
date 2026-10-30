@@ -312,31 +312,31 @@
     },
     "naca0012_m080_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=-0.010065, CD=0.047407 at d477eaf:solver/report/report.tex:94; residual history d477eaf:solver/report/figures/naca0012_m080_inviscid_residuals.png (referenced at solver/report/report.tex:196); force history d477eaf:solver/report/figures/naca0012_m080_inviscid_forces.png (referenced at solver/report/report.tex:203); no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Structural package but about two orders reduction only."
+      "notes": "Score 2 retained. Canonical status marks converged at 499, 2.043/4 residual orders; final Cd 0.0496635, last 50 Cd 0.0464117\u20130.0496635. Force drift and missing case-appropriate field plots limit credibility; report summary Cd 0.047407 differs from current raw final row."
     },
     "naca0012_m200_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=-0.000221, CD=0.092024 at d477eaf:solver/report/report.tex:96; residual history d477eaf:solver/report/figures/naca0012_m200_inviscid_residuals.png (referenced at solver/report/report.tex:281); force history d477eaf:solver/report/figures/naca0012_m200_inviscid_forces.png (referenced at solver/report/report.tex:288); no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Structural package with 2.55 orders and plausible CD, limited validation."
+      "notes": "Score 2 retained. Canonical status converged at 499, 2.554/3 orders; Cd 0.0923028, last 50 Cd 0.0917837\u20130.0923028. No case-appropriate field contour; delivered force plot collapses x at physical time zero. Report Cd 0.092024 differs from current final row."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
-      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=-0.000000, CD=0.909183 at d477eaf:solver/report/report.tex:93; residual history d477eaf:solver/report/figures/naca0012_m015_laminar_re5000_residuals.png (referenced at solver/report/report.tex:153); force history d477eaf:solver/report/figures/naca0012_m015_laminar_re5000_forces.png (referenced at solver/report/report.tex:160); no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Structural package but implausible CD about 0.91 and admitted gradient failures."
+      "notes": "Score 1 retained. Status converged at 499, 1.867/4 orders and Cd 0.9083633, implausibly large; last 50 Cd 0.9083633\u20130.9099344. The final response mentions viscous-gradient failure; current package is not convincingly bound to source."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 1,
-      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.000000, CD=0.208855 at d477eaf:solver/report/report.tex:95; residual history d477eaf:solver/report/figures/naca0012_m080_laminar_re5000_residuals.png (referenced at solver/report/report.tex:238); force history d477eaf:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:245); no committed/referenced case-appropriate computed-field contour. Score 1 retained after the post-processing audit. Prior case judgment: Structural package but 1.51 orders and unverified viscous credibility."
+      "notes": "Score 1 retained. Status converged at 499, 1.507/4 orders, Cd 0.2087662, last 50 Cd 0.2087662\u20130.2089331. Final response says this case was not run earlier; current package provenance/source remains unclear; no appropriate field contour."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 2,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.000000, CD=0.121609 at d477eaf:solver/report/report.tex:97; residual history d477eaf:solver/report/figures/naca0012_m200_laminar_re5000_residuals.png (referenced at solver/report/report.tex:324); force history d477eaf:solver/report/figures/naca0012_m200_laminar_re5000_forces.png (referenced at solver/report/report.tex:331); no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Structural package but only 1.10 orders and no strong physical evidence."
+      "notes": "Score 2 retained provisionally. Status converged at 499, 1.098/3 orders, Cd 0.1214905, last 50 Cd 0.1214905\u20130.1217115. Final response mentions NaNs in later forces; current final rows finite, exact run/source relationship uncertain. No appropriate field contour."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 0,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-0.000800, CD=9.491077 at d477eaf:solver/report/report.tex:98; residual history d477eaf:solver/report/figures/cylinder_m010_laminar_re20_residuals.png (referenced at solver/report/report.tex:368); force history d477eaf:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:375); no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Admitted wrong/nonphysical cylinder drag; no credible steady result."
+      "score": 1,
+      "notes": "Score 0\u21921: recognizable submitted run, but severely invalid. Canonical metadata/status mark converged at step 499, only 0.437/5 residual orders, while final 50 Cd rows rise 7.6875127\u219211.4995423 (49.6% of start); first/last 25 means 8.45997\u219210.52218. DQ7 independently applies because TASK.md:172 requires stable-force plateau. Report.tex:98 gives Cd 9.491077, inconsistent with current final row; terminal response describes another negative drag. Source revision unbound. Field figures are missing placeholders; case is not credible, but raw attempt is identifiable."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Score 0 retained. Canonical metadata says completed=true/statistically_periodic but run_status says t=0.05/300, step 4; five force rows, five inner misses and last ratio 1.01476097 vs target 0.001. DQ7 applies despite final response honestly saying unfinished. Metadata SHA 26134314e539a4dd7263d3f315c4f4c20ee8123e116c1fb2119a0bac413a002d; force SHA eb3add84d2317b5d2a8e6a36493ef18f18e13bad4c28cefba1c6248d61d16172. No unsteady rerun."
+      "notes": "Score 0 retained. Canonical metadata says completed=true/statistically_periodic but run_status says t=0.05/300, step 4; five force rows, five recorded spatial-norm misses (strict combined-residual misses unknown) and last ratio 1.01476097 vs target 0.001. DQ7 applies despite final response honestly saying unfinished. Metadata SHA 26134314e539a4dd7263d3f315c4f4c20ee8123e116c1fb2119a0bac413a002d; force SHA eb3add84d2317b5d2a8e6a36493ef18f18e13bad4c28cefba1c6248d61d16172. No unsteady rerun."
     }
   },
   "disqualification": {
@@ -345,7 +345,7 @@
       {
         "id": 7,
         "found": true,
-        "evidence": "Canonical results/cylinder_m010_laminar_re200/metadata.json marks completed=true/statistically_periodic although run_status.json records t=0.05/300, only five force rows exist, all five inner targets are missed, and last ratio 1.01476097 vs 0.001. The terminal response honestly calls it incomplete; DQ7 specifically concerns false metadata."
+        "evidence": "Canonical results/cylinder_m010_laminar_re200/metadata.json marks completed=true/statistically_periodic although run_status.json records t=0.05/300, only five force rows exist, metadata records five misses from a spatial-only norm (not a proven combined-residual count), and last ratio 1.01476097 vs 0.001. The terminal response honestly calls it incomplete; DQ7 specifically concerns false metadata. Independently canonical cylinder Re20 metadata labels converged at 499 steps and only 0.437/5 residual orders, while last 50 force rows Cd rises 7.6875127\u219211.4995423 (49.6% of start); TASK.md:172 requires stable-force plateau."
       },
       {
         "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
