@@ -76,8 +76,8 @@
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 3,
-      "notes": "METIS/MPI modules no scaling evidence."
+      "score": 1,
+      "notes": "METIS ownership and halo lists are present (mesh_partition.cpp:42\u201393,106\u2013248), but full mesh persists on every rank and main.cpp:84\u2013114,311\u2013314 omits global force reduction; all ranks write the same result paths :255\u2013257,335\u2013394."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 1.79
+  "overall_score": 1.61
 }

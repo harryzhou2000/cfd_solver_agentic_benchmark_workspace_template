@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:05:51.473502+00:00
+Generated: 2026-10-30T05:06:40.353704+00:00
 
 **Overall score: 0.95**
 
@@ -24,7 +24,7 @@ Generated: 2026-10-30T05:05:51.473502+00:00
 | 5 | **res.visualization** Visualizations | 0.15 | 2 | Some plots, no field coverage. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 1 | Report calls task complete despite running cases. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 1 | Report.tex labels several cases converging/running and does not claim full convergence; it falsely claims Jacobi and second-order reconstruction used in production. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Raw data uncommitted/traceability incomplete. |

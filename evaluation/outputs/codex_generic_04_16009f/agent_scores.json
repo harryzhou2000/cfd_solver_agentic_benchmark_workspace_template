@@ -62,8 +62,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 3,
-          "notes": "METIS/MPI source present, no rank comparison."
+          "score": 1,
+          "notes": "METIS ownership and halo lists are present (mesh_partition.cpp:42\u201393,106\u2013248), but full mesh persists on every rank and main.cpp:84\u2013114,311\u2013314 omits global force reduction; all ranks write the same result paths :255\u2013257,335\u2013394."
         },
         {
           "id": "code.robustness",
@@ -87,7 +87,7 @@
           "notes": "Raw/debug outputs excluded from result tip."
         }
       ],
-      "overall_score": 2.92,
+      "overall_score": 2.62,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -166,11 +166,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 3,
-          "notes": "METIS/MPI modules no scaling evidence."
+          "score": 1,
+          "notes": "METIS ownership and halo lists are present (mesh_partition.cpp:42\u201393,106\u2013248), but full mesh persists on every rank and main.cpp:84\u2013114,311\u2013314 omits global force reduction; all ranks write the same result paths :255\u2013257,335\u2013394."
         }
       ],
-      "overall_score": 1.79,
+      "overall_score": 1.61,
       "disqualification_flags": []
     },
     "result_review": {
@@ -215,7 +215,7 @@
           "title": "Report quality and honesty",
           "weight": 0.15,
           "score": 1,
-          "notes": "Report calls task complete despite running cases."
+          "notes": "Report.tex labels several cases converging/running and does not claim full convergence; it falsely claims Jacobi and second-order reconstruction used in production."
         },
         {
           "id": "res.traceability",
@@ -231,7 +231,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 27,
+    "total_scored": 24,
     "sections": [
       {
         "id": "build_cli",
@@ -279,8 +279,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 5,
-        "notes": "METIS/MPI source only."
+        "score": 2,
+        "notes": "mesh_partition.cpp:42\u201393,106\u2013248 implements METIS ownership and halo lists; main.cpp:189\u2013196 retains full mesh per rank, :84\u2013114 and :311\u2013314 write unreduced local forces, and :255\u2013257,335\u2013394 write same paths on every rank. No rank validation."
       },
       {
         "id": "case_results",
@@ -358,6 +358,12 @@
         "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
         "found": true,
         "evidence": "Immutable d93a1ef solver/src/main.cpp:189\u2013196 reads RawMesh and computes full geometry on every MPI rank; these objects remain live through solve loop :272\u2013328 and are subsequently used in VTU output :347. TASK.md:227 prohibits full mesh replication during iterations. Solution vectors are partition-local; numbered DQ9 full-state condition is not inferred from mesh replication."
+      },
+      {
+        "id": 6,
+        "flag": "Report claims algorithms that cannot be found in source",
+        "found": true,
+        "evidence": "Immutable report/report.tex:31,72 says production uses Jacobi relaxation and LU-SGS is future work; main.cpp:293\u2013294 invokes run_inner_iterations implemented as forward/backward LU-SGS in numerics/implicit_solver.cpp:17\u201318,78\u2013160. jacobi_solve is only declared at implicit_solver.h:36, with no implementation or call in solver/src. This is a claimed solver algorithm absent in source, separate from DQ10 reconstruction."
       }
     ]
   },

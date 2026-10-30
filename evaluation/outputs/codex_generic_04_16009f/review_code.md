@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:05:51.472830+00:00
+Generated: 2026-10-30T05:06:40.353016+00:00
 
-**Overall score: 2.92**
+**Overall score: 2.62**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T05:05:51.472830+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | Input config driven. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 3 | METIS/MPI source present, no rank comparison. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 1 | METIS ownership and halo lists are present (mesh_partition.cpp:42–93,106–248), but full mesh persists on every rank and main.cpp:84–114,311–314 omits global force reduction; all ranks write the same result paths :255–257,335–394. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Only first case has complete package. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T05:05:51.472830+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.92
+- Overall score (0-5): 2.62
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

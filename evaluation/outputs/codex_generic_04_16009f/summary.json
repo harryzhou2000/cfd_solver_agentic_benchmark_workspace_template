@@ -200,8 +200,8 @@
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 3,
-        "notes": "METIS/MPI source present, no rank comparison."
+        "score": 1,
+        "notes": "METIS ownership and halo lists are present (mesh_partition.cpp:42\u201393,106\u2013248), but full mesh persists on every rank and main.cpp:84\u2013114,311\u2013314 omits global force reduction; all ranks write the same result paths :255\u2013257,335\u2013394."
       },
       {
         "id": "code.robustness",
@@ -267,7 +267,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.92
+    "overall_score": 2.62
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -347,8 +347,8 @@
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 3,
-        "notes": "METIS/MPI modules no scaling evidence."
+        "score": 1,
+        "notes": "METIS ownership and halo lists are present (mesh_partition.cpp:42\u201393,106\u2013248), but full mesh persists on every rank and main.cpp:84\u2013114,311\u2013314 omits global force reduction; all ranks write the same result paths :255\u2013257,335\u2013394."
       }
     ],
     "disqualification_flags": [
@@ -383,7 +383,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 1.79
+    "overall_score": 1.61
   },
   "result_review": {
     "review_area": "result_review",
@@ -429,7 +429,7 @@
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 1,
-        "notes": "Report calls task complete despite running cases."
+        "notes": "Report.tex labels several cases converging/running and does not claim full convergence; it falsely claims Jacobi and second-order reconstruction used in production."
       },
       {
         "id": "res.traceability",

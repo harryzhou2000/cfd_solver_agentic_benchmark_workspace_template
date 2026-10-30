@@ -41,8 +41,8 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 3,
-      "notes": "METIS/MPI source present, no rank comparison."
+      "score": 1,
+      "notes": "METIS ownership and halo lists are present (mesh_partition.cpp:42\u201393,106\u2013248), but full mesh persists on every rank and main.cpp:84\u2013114,311\u2013314 omits global force reduction; all ranks write the same result paths :255\u2013257,335\u2013394."
     },
     {
       "id": "code.robustness",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.92
+  "overall_score": 2.62
 }

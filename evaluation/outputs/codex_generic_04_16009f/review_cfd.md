@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:05:51.473220+00:00
+Generated: 2026-10-30T05:06:40.353423+00:00
 
-**Overall score: 1.79**
+**Overall score: 1.61**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -39,7 +39,7 @@ Generated: 2026-10-30T05:05:51.473220+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 0 | No Re200 physical-time completion. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3 | METIS/MPI modules no scaling evidence. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 1 | METIS ownership and halo lists are present (mesh_partition.cpp:42–93,106–248), but full mesh persists on every rank and main.cpp:84–114,311–314 omits global force reduction; all ranks write the same result paths :255–257,335–394. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T05:05:51.473220+00:00
 
 ## Summary
 
-- Overall score (0-5): 1.79
+- Overall score (0-5): 1.61
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
