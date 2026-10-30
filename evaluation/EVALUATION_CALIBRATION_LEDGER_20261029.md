@@ -94,7 +94,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
 | `codex_generic_glm53-02_ff20c7` | partial: DQ7 plateau correction and cylinder case evidence; remaining DQ/rubric pending |
 | `codex_generic_glm53-03_d469fb` | partial: DQ7 current Re200/Re20 evidence, provenance discrepancy; other criteria pending |
-| `codex_generic_glm53-04_adde03` | partial: M2 laminar DQ7 and Re200 case floor; other plateau/rubric pending |
+| `codex_generic_glm53-04_adde03` | partial: all cases and rubric reviewed, DQ7 supported; historical production-source attribution unresolved |
 | `codex_generic_opus46-01_3a72ea` | unreviewed |
 | `codex_generic_opus46-02_d8fed8` | unreviewed |
 | `codex_generic_opus5-01_83492a` | unreviewed |
@@ -653,3 +653,6 @@ glm53-04 accepted workspace-existing PDF SHA-256 `0962e09351818479a1901c15f83e23
 
 
 glm53-04 criterion checkpoint: all 27 review-point notes now cite their actual code, results or explicit limitations, rather than the same unrelated generic text. Ten rubric sections have criterion-specific evidence. Implicit/transient 14→13 for disclosed CFL cap 50 versus supplied 100 and incomplete restart; extensibility 1→2 for separated physics/mesh and case-driven boundary maps with hard-coded 2D perfect-gas limits, net 85 unchanged. Report/traceability review points 4→3 for M2 summary inconsistency, overstated rank agreement, wrong derived vorticity, and unresolved production-source binding. DQ7 retained; overall remains partial pending remaining DQ/source attribution checks.
+
+
+glm53-04 final checkpoint: M2 inviscid 2→3, considering pp11–13 readable case report and bounded raw late drag/lift despite only ~0.14 residual orders; plateau credit is limited, not target-convergence credit. Selected M2 laminar metadata start/end 2026-09-03 17:08:18–17:08:24 UTC, Re200 17:08:25–17:36:24 UTC, revision26ef1cb init without solver source; final solver.cpp mtime 2026-09-04 08:11:52 UTC and SHA `ce98e2a32caaf00f518cda0bcc71f34a599e645d377e203e8d9b7d1a6afda397`, equal at source commit 836aedb and final c06741d. No proof final source generated selected historical data. DQ7 supported; DQ4 rank absolute changes small; DQ8 not applied to same-field defective derivative alone; source METIS/BDF/reconstruction/figure mapping does not support DQ9/5/10/12 from available data. Other production-specific claims and external source similarity are not exhaustively proven; retain partial status. No unsteady rerun.
