@@ -35,14 +35,14 @@
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 2,
-          "notes": "Final response records CLI/output defects during run."
+          "notes": "main.cpp:756\u2013777 parses --case/--output and reports JSON errors; no restart input is parsed despite writing restart_final.vtu at :1030. Source does not compile as delivered."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 2,
-          "notes": "Large monolithic main.cpp plus many abandoned fix artifacts."
+          "notes": "Single solver/src/main.cpp contains mesh, flux, integrator, MPI and writers; CMakeLists and scripts provide limited separation."
         },
         {
           "id": "code.originality",
@@ -56,7 +56,7 @@
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 3,
-          "notes": "JSON-driven inputs, limited verification."
+          "notes": "main.cpp:779\u2013810 reads case JSON and :96\u2013183 reads CGNS; boundary tag names are matched at :154\u2013158. No two-mesh-only branch identified."
         },
         {
           "id": "code.mpi",
@@ -70,21 +70,21 @@
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 1,
-          "notes": "Final response admits divergence/NaN and failed BC force handling."
+          "notes": "main.cpp:1027\u20131031 writes identical final output paths from all ranks, risking concurrent overwrite; :628\u2013639 applies positivity fallback. Current failed/unstable results cannot be bound to final source."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
           "score": 2,
-          "notes": "Extensive attempts but failed final outputs."
+          "notes": "Submitted scripts include sanity_checks.py and run_cases.py, but canonical cases fail or are not converged; clean submitted-source build fails."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 2,
-          "notes": "Curated tip clean; workspace raw/debug tree is very large."
+          "notes": "Curated solver tree contains CMake, four scripts and monolithic main.cpp; current report TeX fails rebuild on undefined \\Benchmark."
         }
       ],
       "overall_score": 1.85,
@@ -97,21 +97,21 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 3,
-          "notes": "Conservative CFD intent documented."
+          "notes": "report.tex:39\u201354 states compressible conservative equations; main.cpp:438\u2013450 implements ideal-gas Rusanov convective flux, with production source binding unproved."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 3,
-          "notes": "CGNS/METIS code paths found."
+          "notes": "main.cpp:96\u2013212 reads CGNS zones and boundaries, :216\u2013300 builds cell/face geometry and areas; source fails clean build and full meshes are replicated."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 2,
-          "notes": "Residual path exists but results fail."
+          "notes": "main.cpp:523\u2013590 applies opposing interior-face fluxes to owners/neighbors; wall/farfield ghosts :456\u2013473, but no independent converged production evidence."
         },
         {
           "id": "cfd.flux",
@@ -132,14 +132,14 @@
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 2,
-          "notes": "Least-squares/limiter present, no production success."
+          "notes": "main.cpp:374\u2013405 forms least-squares gradients and :407\u2013435 limits them, used at :875\u2013883; no verified second-order production result."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 2,
-          "notes": "Positivity/limiter claims contradicted by instability history."
+          "notes": "main.cpp:407\u2013435 bounds reconstruction from neighbor ratios; :545\u2013553 clamps face density/pressure and :628\u2013639 retries state updates. Failed results do not demonstrate robustness."
         },
         {
           "id": "cfd.viscous",
@@ -153,7 +153,7 @@
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 1,
-          "notes": "Source output identifies point-implicit local CFL, not credible LU-SGS."
+          "notes": "main.cpp:595\u2013637 uses a diagonal pseudo-time residual update with viscous under-relaxation 0.05; no coupled LU-SGS sweep. Report.tex:84\u201390 identifies diagonal Jacobi but says 0.8."
         },
         {
           "id": "cfd.transient",
@@ -180,14 +180,14 @@
           "title": "Output contract compliance",
           "weight": 0.2,
           "score": 1,
-          "notes": "Eight paths exist but final M015 status is invalid and no credible complete package."
+          "notes": "main.cpp:756\u2013759 accepts case/output options; :1027\u20131031 writes final VTU/surface/restart without rank guard, and no restart reader exists. Current statuses fail or not_converged; source linkage unknown."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 1,
-          "notes": "Explicit validator fails immediately on invalid not_converged status."
+          "notes": "Prior explicit validator fails on current M015 inviscid not_converged status; structured artifact integrity gates do not validate CFD correctness."
         },
         {
           "id": "res.completion",
@@ -201,28 +201,28 @@
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 0,
-          "notes": "No converged/settled production result; final response documents instability."
+          "notes": "Current Re20 Cd205.456 and M2 inviscid force >1e127 are implausible; current Re200 fails at t=0. Two inviscid airfoil cases are incomplete rather than converged."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
           "score": 2,
-          "notes": "Some rendered figures exist but most are unreferenced and report evidence is inconsistent."
+          "notes": "Historical sibling PDF delivered but stale against final TeX; final TeX cannot build due undefined \\Benchmark. Report references contour and force images; matching final report PDF unavailable."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
           "score": 1,
-          "notes": "Run manifest candidly lists failures, but session final response repeatedly contradicts itself and report overclaims artifacts."
+          "notes": "Final report.tex:25\u201326,64\u201371 claims missing Harten\u2013Yee fix; :265\u2013270 discloses no BDF2. It reports other diagnostic values and statuses unlike current raw outputs."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
           "score": 1,
-          "notes": "Raw packages are not committed; figure/source traceability is incomplete."
+          "notes": "Current metadata git_revision=null, and final TeX and historical PDF disagree about the algorithm and case statuses; no decisive mapping binds final source to current result histories."
         }
       ],
       "overall_score": 0.8,
@@ -245,35 +245,35 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 5,
-        "notes": "CGNS/METIS geometry path exists."
+        "notes": "main.cpp:96\u2013212 imports CGNS, :216\u2013300 builds cell areas/faces; final build fails, and :307\u2013363 retains full mesh per rank."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 6,
-        "notes": "FV/Rusanov/BC code is present but results expose boundary/force defects."
+        "notes": "main.cpp:523\u2013590 assembles interior Rusanov flux conservatively; :456\u2013473 uses wall/farfield ghost states. All submitted case statuses fail or not_converged."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 4,
-        "notes": "Reconstruction/limiter implementation has no credible production validation."
+        "notes": "main.cpp:374\u2013435 implements least-squares gradients and limiter used :875\u2013883; failed runs and missing run-source binding prevent demonstrated accuracy."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 2,
-        "notes": "All laminar outcomes fail."
+        "notes": "main.cpp:478\u2013519,556\u2013584 implements primitive-gradient stresses, but skips boundary neighbors; :644\u2013660 integrates pressure only and :737 writes cf=0. All viscous cases fail."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 1,
-        "notes": "Point-implicit path only; Re200 has no valid physical-time completion."
+        "notes": "main.cpp:595\u2013637 provides diagonal pseudo-update; :847\u2013905 has no BDF2 physical residual, disclosed in report.tex:265\u2013270. Current Re200 fails at time0."
       },
       {
         "id": "mpi",
@@ -287,21 +287,21 @@
         "title": "Case Results And Validation",
         "max_points": 10,
         "score": 0,
-        "notes": "No credible completed case; all submitted statuses are failed/not converged."
+        "notes": "Canonical M015 and M080 inviscid not_converged, other five steady and Re200 failed; implausible Re20 Cd205.456 and M2 forces >1e127."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
         "score": 1,
-        "notes": "Figures/report exist but many unreferenced and claims conflict."
+        "notes": "Historical delivered PDF is stale versus final report, which does not compile; TeX claims entropy fix missing from source and describes differing diagnostic runs."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
         "score": 2,
-        "notes": "Some configuration structure, but core is monolithic."
+        "notes": "JSON-driven case input in main.cpp:779\u2013810 and scripts exist, but solver algorithms and output are monolithic in main.cpp, with no restart input."
       }
     ]
   },

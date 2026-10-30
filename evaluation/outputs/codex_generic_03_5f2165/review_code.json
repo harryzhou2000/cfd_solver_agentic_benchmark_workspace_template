@@ -14,14 +14,14 @@
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 2,
-      "notes": "Final response records CLI/output defects during run."
+      "notes": "main.cpp:756\u2013777 parses --case/--output and reports JSON errors; no restart input is parsed despite writing restart_final.vtu at :1030. Source does not compile as delivered."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 2,
-      "notes": "Large monolithic main.cpp plus many abandoned fix artifacts."
+      "notes": "Single solver/src/main.cpp contains mesh, flux, integrator, MPI and writers; CMakeLists and scripts provide limited separation."
     },
     {
       "id": "code.originality",
@@ -35,7 +35,7 @@
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 3,
-      "notes": "JSON-driven inputs, limited verification."
+      "notes": "main.cpp:779\u2013810 reads case JSON and :96\u2013183 reads CGNS; boundary tag names are matched at :154\u2013158. No two-mesh-only branch identified."
     },
     {
       "id": "code.mpi",
@@ -49,21 +49,21 @@
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 1,
-      "notes": "Final response admits divergence/NaN and failed BC force handling."
+      "notes": "main.cpp:1027\u20131031 writes identical final output paths from all ranks, risking concurrent overwrite; :628\u2013639 applies positivity fallback. Current failed/unstable results cannot be bound to final source."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 2,
-      "notes": "Extensive attempts but failed final outputs."
+      "notes": "Submitted scripts include sanity_checks.py and run_cases.py, but canonical cases fail or are not converged; clean submitted-source build fails."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 2,
-      "notes": "Curated tip clean; workspace raw/debug tree is very large."
+      "notes": "Curated solver tree contains CMake, four scripts and monolithic main.cpp; current report TeX fails rebuild on undefined \\Benchmark."
     }
   ],
   "disqualification_flags": [

@@ -125,3 +125,8 @@ Archived exact curated b001f2e into isolated scratch and configured with CMake i
 ## Partial source and DQ review — 2026-10-30
 
 Immutable report/report.tex:25–26,64–71 claims a Harten–Yee entropy fix with entropy threshold. Immutable solver/src/main.cpp:439–450 calculates the maximum of |un|+a without that correction; its metadata writers :981,1053 explicitly say entropy_fix=null. DQ6 applies to that concrete claimed but absent algorithm. The separate lack of BDF2 is disclosed in report.tex:265–270, so is not the DQ6 basis. main.cpp:478–519,556–584 computes viscous gradients and stresses, but skips boundary neighbors in gradients (:497); force function :644–660 integrates pressure only and surface writer :737 outputs cf=0. Surface writer :722–739 writes adjacent-cell velocity and metadata writers :989,1061 explicitly disclose cell_center; DQ11 is not inferred. Raw output source provenance remains unbound; remaining DQ and rubric calibration partial. No CFD rerun.
+
+
+## Partial criterion traceability — 2026-10-30
+
+Additional immutable source evidence is recorded per rubric and review point in agent_scores.json. In particular main.cpp:1027–1031 writes final field/restart/surface files on all ranks to identical paths, exposing a concurrent-write risk; only restart VTU writing exists, no restart input. The diagonal pseudo-update :595–637 has 0.05 viscous relaxation while report.tex:84–90 says 0.8. These source findings do not establish which historical run produced the current raw files. DQ assessment and source-to-result provenance remain partial; no CFD rerun.

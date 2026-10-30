@@ -7,21 +7,21 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 3,
-      "notes": "Conservative CFD intent documented."
+      "notes": "report.tex:39\u201354 states compressible conservative equations; main.cpp:438\u2013450 implements ideal-gas Rusanov convective flux, with production source binding unproved."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 3,
-      "notes": "CGNS/METIS code paths found."
+      "notes": "main.cpp:96\u2013212 reads CGNS zones and boundaries, :216\u2013300 builds cell/face geometry and areas; source fails clean build and full meshes are replicated."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 2,
-      "notes": "Residual path exists but results fail."
+      "notes": "main.cpp:523\u2013590 applies opposing interior-face fluxes to owners/neighbors; wall/farfield ghosts :456\u2013473, but no independent converged production evidence."
     },
     {
       "id": "cfd.flux",
@@ -42,14 +42,14 @@
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 2,
-      "notes": "Least-squares/limiter present, no production success."
+      "notes": "main.cpp:374\u2013405 forms least-squares gradients and :407\u2013435 limits them, used at :875\u2013883; no verified second-order production result."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 2,
-      "notes": "Positivity/limiter claims contradicted by instability history."
+      "notes": "main.cpp:407\u2013435 bounds reconstruction from neighbor ratios; :545\u2013553 clamps face density/pressure and :628\u2013639 retries state updates. Failed results do not demonstrate robustness."
     },
     {
       "id": "cfd.viscous",
@@ -63,7 +63,7 @@
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 1,
-      "notes": "Source output identifies point-implicit local CFL, not credible LU-SGS."
+      "notes": "main.cpp:595\u2013637 uses a diagonal pseudo-time residual update with viscous under-relaxation 0.05; no coupled LU-SGS sweep. Report.tex:84\u201390 identifies diagonal Jacobi but says 0.8."
     },
     {
       "id": "cfd.transient",
