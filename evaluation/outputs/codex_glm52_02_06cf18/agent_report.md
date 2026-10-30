@@ -32,11 +32,11 @@ The structural validator found all required eight result cases and the report. T
 | Viscous Terms | 10 | 7 | Viscous method present; report admits high/incomplete drag. |
 | Implicit And Transient Methods | 15 | 8 | Relaxed target counts cannot establish strict inner convergence. |
 | MPI | 10 | 4 | METIS/halo exists, but full global mesh is replicated during iteration. |
-| Case Results And Validation | 10 | 4 | Re200 claims periodic/completed despite a strict last-step miss and no demonstrated shedding. |
+| Case Results And Validation | 10 | 2.5 | Multiple forces remain unsettled, Re20 is implausible, and Re200 is falsely labeled periodic. |
 | Report, Visualization, Analysis | 5 | 5 | Report, figures, and manifest present. |
 | Extensibility | 5 | 4 | Modular C++ organization. |
 
-**Provisional total: 69/100. Disqualified under trigger 7 and the separate TASK full-mesh prohibition.**
+**Provisional total: 67.5/100. Disqualified under trigger 7 and the separate TASK full-mesh prohibition.**
 
 ## Limitations
 
@@ -49,3 +49,5 @@ Selected final response identifies eight completed cases and canonical Re200 dt0
 Immutable 1e29ab3c main.cpp:83–86 reads complete CGNS mesh on every rank; :92–100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150–160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real.
 
 Other case floors, PDF/figure provenance, source criteria and DQ findings remain under review. No CFD or Re200 rerun was performed.
+
+Individual delivered force plots and histories were reviewed: M015 inviscid Cd falls 0.232600→0.146703 and M200 laminar 3.991995→2.635137 over their final500 rows; Re20 ends Cd8.86975, Cl−0.38716. Scores and exact artifact hashes are in the case notes. The case scores are 1.5, 1.5, 1.5, 2, 2, 1, 1.5 and 1 in benchmark order. Contour/residual figure attribution, all other rubric dimensions and DQ remain partial.

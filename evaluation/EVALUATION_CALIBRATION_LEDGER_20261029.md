@@ -112,7 +112,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52-m3_05_f094c1` | partial: provisional 54/100, DQ7 and TASK full-mesh; historic binary/figure binding unverified |
 | `codex_glm52-m3_06_a2dc07` | partial: 68/100, DQ7; historical binary and figure binding unverified |
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
-| `codex_glm52_02_06cf18` | partial: provisional 69/100, DQ7 and TASK full-mesh; case/rubric review ongoing |
+| `codex_glm52_02_06cf18` | partial: provisional 67.5/100, DQ7 and TASK full-mesh; figure/rubric review ongoing |
 | `codex_glm52_03_e7d38e` | unreviewed |
 | `codex_gpt56_01_cb349f` | unreviewed |
 | `codex_gpt56_02_38616e` | unreviewed |
@@ -988,3 +988,6 @@ glm52-m3-06 DQ boundaries and PDF: all six accepted compiled PDF pages SHA256 b9
 
 
 glm52_02 provenance/DQ checkpoint: final selected response explicitly identifies all eight delivered cases and Re200 60000 steps dt0.005; original workspace metadata SHA256 0d71cdc2ff36da0714c032a813c3ef2edfba7b470aa2009b7fea7b6c2a17e94a says completed/statistically_periodic, zero misses, fraction1, target0.001 and last ratio0.998594. Immutable 1e29ab3c main.cpp:272–275 relaxes target to 0.1, :307–314 accepts any residual decrease at maximum iterations and :317–322 counts as target success; :348–349 unconditionally declares periodic. Canonical workspace force SHA256 399a6ab0c64cfff3da086b9fbe767305828dfce5280cc6e20b090009df8d2436 t180–300 Cd21.01216..21.23840 and Cl3.74469..3.82989 show no established periodic shedding. DQ7 false→true, final ratio misses strict target; do not infer actual strict miss count from false success statistics, and exact historic binary remains unbound. Separately main.cpp:83–100 constructs full raw/global mesh on every rank and both objects remain in scope during loops, violating TASK.md:46,227 regardless of true METIS. Custom TASK flag added, MPI7→4, implicit10→8, case-results6→4; total76→69 provisional. Other case floors, DQ, PDF/source attribution and rubric remain partial. No CFD rerun.
+
+
+glm52_02 case-history checkpoint: selected final response explicitly delivers all eight cases and 41 figures; workspace figure_manifest maps force plots to case CSVs. All eight contestant force plots were visually inspected and each case note records workspace CSV/PNG SHA256, final500 ranges, convergence and independent physics. M015 inviscid Cd0.232600→0.146703, M080 inviscid0.106865→0.093639, M200 inviscid0.109243→0.095864; M200 laminar3.991995→2.635137 over final500. Re20 Cd8.76417→8.86975, Cl−0.43465..−0.38716 and Re200 t180–300 Cd21.01216..21.23840, Cl3.74469..3.82989. Scores in benchmark order were [4,2,2,2,2,2,2,2]→[1.5,1.5,1.5,2,2,1,1.5,1]; case-results4→2.5, total69→67.5. Residual reduction and force stabilization are separately assessed; DQ7 remains supported by Re200, not inferred from residuals alone. Exact runtime binary, figure-to-CSV binding and remaining source/rubric/DQ remain partial. No CFD rerun.
