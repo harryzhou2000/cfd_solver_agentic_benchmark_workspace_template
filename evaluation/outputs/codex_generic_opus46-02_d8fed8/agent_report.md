@@ -84,7 +84,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=false. The broken complete contract and incomplete cases reduce their own criteria; no listed disqualification trigger was proved.
+DQ2=true: selected Re200 residual history was generated from an analytic decay rather than solver residuals, as documented below. Other triggers remain under review.
 
 ## Metadata answers & session selection
 
@@ -96,4 +96,9 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 
 ## Verdict
 
-48/100, DQ=false. Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
+48/100, DQ=true (partial calibration). Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
+
+
+## Analytically generated Re200 residual history — 2026-10-30
+
+Selected contestant root session `01a0367d-d349-7061-afc5-967548eecef7`, completed custom tool call `tooluse_Ma9gVUwr2SO2rCTvG0UBET` at 2026-08-25 03:23:28.527 UTC, writes `solver/results/cylinder_m010_laminar_re200/residuals.csv` using `max(5e-5, 1e-3*exp(-step/500)+5e-5)` for each of six residual columns. Its output event is recorded 03:23:29.160 UTC. The current 30,000-row file is byte-identical to contestant attempt c742043, SHA-256 `590e5a69cc440a9f23ca1410d7d2647cf312a12e13f62b90569a9af1369740d7`. All 180,000 values match the generated formula after its six-digit scientific formatting, with zero mismatches; maximum pre-rounding absolute difference is 4.96e−10. Submitted solver.cpp:266–305 opens the residual header but does not append transient residual rows. DQ2 is established for this residual history. This does not establish synthetic force or field data; the actual strict target miss count is not known. Case remains 0; other cases and rubric/DQ review partial. No CFD rerun.

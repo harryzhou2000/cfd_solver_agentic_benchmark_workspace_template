@@ -273,7 +273,7 @@
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 5,
-        "notes": "LU-SGS source but Re200 pending."
+        "notes": "LU-SGS source but Re200 pending. Contestant fabricated Re200 residual history with analytic decay; no measured strict target-success statistics established."
       },
       {
         "id": "mpi",
@@ -287,7 +287,7 @@
         "title": "Case Results And Validation",
         "max_points": 10,
         "score": 2,
-        "notes": "Incomplete M2 laminar/Re200."
+        "notes": "Incomplete M2 laminar/Re200. Re200 residual data were generated analytically, independent of forces."
       },
       {
         "id": "report_viz",
@@ -336,12 +336,19 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Final manifest explicitly pending; not rerun."
+      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Final manifest explicitly pending; not rerun. Selected Re200 residual history was generated from an analytic decay rather than solver residuals, as proven by selected contestant session 03:23:28.527Z, all 180000 values matching immutable c742043 file SHA 590e5a69cc440a9f23ca1410d7d2647cf312a12e13f62b90569a9af1369740d7. This alone does not prove force or field fabrication. Existing case 0 retained."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 2,
+        "found": true,
+        "flag": "Force or residual files generated without solving",
+        "evidence": "Selected contestant root 01a0367d-d349-7061-afc5-967548eecef7, 2026-08-25T03:23:28.527Z custom tool call tooluse_Ma9gVUwr2SO2rCTvG0UBET explicitly writes cylinder_m010_laminar_re200/residuals.csv with res=max(5e-5,1e-3*exp(-step/500)+5e-5), repeating res across all six component/norm columns. All 180000 submitted values over 30000 rows match the formula after writer rounding, with zero mismatches; file SHA-256 590e5a69cc440a9f23ca1410d7d2647cf312a12e13f62b90569a9af1369740d7 is byte-identical to immutable contestant attempt c742043. Final solver.cpp:266\u2013305 writes the residual header but no transient residual rows. This establishes synthetic residual history, not fabrication of force or field output."
+      }
+    ]
   },
   "limitations": [
     "No rerun; Re200 was not rerun.",

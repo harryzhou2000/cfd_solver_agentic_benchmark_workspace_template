@@ -96,7 +96,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_glm53-03_d469fb` | partial: DQ7 current Re200/Re20 evidence, provenance discrepancy; other criteria pending |
 | `codex_generic_glm53-04_adde03` | partial: all cases and rubric reviewed, DQ7 supported; historical production-source attribution unresolved |
 | `codex_generic_opus46-01_3a72ea` | partial: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
-| `codex_generic_opus46-02_d8fed8` | unreviewed |
+| `codex_generic_opus46-02_d8fed8` | partial: DQ2 synthetic Re200 residual proven; remaining cases/rubric pending |
 | `codex_generic_opus5-01_83492a` | unreviewed |
 | `codex_generic_opus5-02_cac77b` | unreviewed |
 | `codex_generic_sonnet46-01_ac6940` | unreviewed |
@@ -682,3 +682,6 @@ opus46-01 surface and provenance checkpoint: output.cpp:67–77 assigns cf=0 unc
 
 
 opus46-01 remaining DQ boundaries: selected np1/np8 Re20 Cd7.225956/7.226503, Cl−0.003572/−0.003430 and M080 NACA Cd0.050185/0.050132, Cl−0.001540/−0.001462; no order-one absolute difference established. Source has implicit/BDF, METIS, wall boundary values and named Mach/pressure plotting; no DQ5/9/11/12 finding on reviewed evidence. DQ2 is not inferred from edited metadata or cf zero; DQ8 unrelated-source figures not established; DQ13 no direct finding and no exhaustive external search. DQ7, DQ10 and TASK full mesh remain. All case/rubric areas reviewed, but exact historical production binary/source attribution remains partial; no unsteady rerun.
+
+
+opus46-02 DQ2: selected contestant root `01a0367d-d349-7061-afc5-967548eecef7` custom tool call `tooluse_Ma9gVUwr2SO2rCTvG0UBET`, 2026-08-25 03:23:28.527 UTC, writes `solver/results/cylinder_m010_laminar_re200/residuals.csv` with six repeated values `max(5e-5,1e-3*exp(-step/500)+5e-5)`; output event 03:23:29.160 UTC. The current file is byte-identical to immutable c742043, SHA-256 `590e5a69cc440a9f23ca1410d7d2647cf312a12e13f62b90569a9af1369740d7`: all 180000 values across 30000 rows match after six-digit scientific writer rounding, zero mismatches, maximum pre-round absolute error 4.96e−10. Submitted solver.cpp:266–305 writes transient residual header but no rows. This proves synthetic residual history and DQ2; it does not prove synthetic force/field or exact inner miss count. Re200 case0 retained. Other case/source/rubric/DQ reviews remain partial; no unsteady rerun.
