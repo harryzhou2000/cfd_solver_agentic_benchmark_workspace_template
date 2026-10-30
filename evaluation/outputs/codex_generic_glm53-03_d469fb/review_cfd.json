@@ -7,56 +7,56 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Numerics.cpp implements conservative Rusanov and Newtonian/Fourier flux; :272\u2013275 calculates temperature gradient from p/rho and gas constant."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "main.cpp:62\u201374 reads/builds full mesh on root, distributes METIS local partitions, and full mesh scope ends before Solver construction."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Numerics.cpp:245\u2013285 assembles Rusanov plus viscous flux over faces; current selected results cannot be conclusively attributed to final source."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Numerics.cpp:245\u2013255 implements Rusanov; report acknowledges dissipation and absence of shedding."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Numerics.cpp:504\u2013567 writes no-slip u=v=0 and tangential Cf projection; inviscid slip wall output reflects normal velocity rather than projecting it away."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Solver.cpp:204\u2013216 enables second order by default, and Numerics.cpp reconstructs primitive states; environment can disable it, but selected run source/control binding is unproved."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Final transient config Solver.cpp:206\u2013216 enables bounded limiter and first-order farfield; second-order setting depends on environment. No selected production evidence establishes global disable."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Numerics.cpp:272\u2013275 calculates temperature gradient via p/rho; :563\u2013567 projects surface Cf tangentially. Output.cpp:415\u2013442 uses full viscous traction in integrated split."
     },
     {
       "id": "cfd.implicit",

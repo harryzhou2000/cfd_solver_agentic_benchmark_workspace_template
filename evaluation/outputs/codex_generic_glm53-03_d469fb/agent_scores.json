@@ -35,28 +35,28 @@
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "main.cpp parses solve, case/output and restart; Output.cpp:285\u2013328 writes/reads current and old states with step/time. Exact restart continuation not rerun."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "solver/src separates CGNS reader, mesh construction, partition, numerics, solver and output; solver/tools supplies plotting and tests."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Inspected source/build and found no internal existing CFD solver invocation; no external authorship search performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "main.cpp reads case configuration and configured CGNS mesh; no two-filename-only case branch established."
         },
         {
           "id": "code.mpi",
@@ -70,21 +70,21 @@
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Final Solver.cpp:439 same-buffer MPI_Allreduce lacks MPI_IN_PLACE; current short laminar results have unstable force tails and Re200 no shedding. Source binding is unproved."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Curated solver/tests includes unit and probe sources; clean build includes nsc2d_tests. No new solver or unsteady case rerun."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Submitted plot tool reproducibly misassigns quad cell values in final report image; current result metadata names init-only revision and report contains another run generation."
         }
       ],
       "overall_score": 3.0,
@@ -97,56 +97,56 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Numerics.cpp implements conservative Rusanov and Newtonian/Fourier flux; :272\u2013275 calculates temperature gradient from p/rho and gas constant."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "main.cpp:62\u201374 reads/builds full mesh on root, distributes METIS local partitions, and full mesh scope ends before Solver construction."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Numerics.cpp:245\u2013285 assembles Rusanov plus viscous flux over faces; current selected results cannot be conclusively attributed to final source."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Numerics.cpp:245\u2013255 implements Rusanov; report acknowledges dissipation and absence of shedding."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Numerics.cpp:504\u2013567 writes no-slip u=v=0 and tangential Cf projection; inviscid slip wall output reflects normal velocity rather than projecting it away."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Solver.cpp:204\u2013216 enables second order by default, and Numerics.cpp reconstructs primitive states; environment can disable it, but selected run source/control binding is unproved."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Final transient config Solver.cpp:206\u2013216 enables bounded limiter and first-order farfield; second-order setting depends on environment. No selected production evidence establishes global disable."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Numerics.cpp:272\u2013275 calculates temperature gradient via p/rho; :563\u2013567 projects surface Cf tangentially. Output.cpp:415\u2013442 uses full viscous traction in integrated split."
         },
         {
           "id": "cfd.implicit",
@@ -180,14 +180,14 @@
           "title": "Output contract compliance",
           "weight": 0.2,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Current Re200 periodic status contradicts essentially steady forces; Re20 and three laminar NACA statuses claim convergence while force tails change materially."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "Earlier explicit benchmark validator passed structurally; current cfdeval gates validate manager snapshot/index, not CFD physics."
         },
         {
           "id": "res.completion",
@@ -215,7 +215,7 @@
           "title": "Report quality and honesty",
           "weight": 0.15,
           "score": 3,
-          "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+          "notes": "PDF abstract claims all cases converged/t300, while its body discusses older t287 Re200 and failed viscous cases. The specific M015 Mach image is proven to misassign field cell values."
         },
         {
           "id": "res.traceability",
@@ -245,21 +245,21 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 10,
-        "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+        "notes": "main.cpp:62\u201374 builds full mesh on rank0 and distributes METIS local partitions; root preprocessing full-mesh scope ends before Solver construction."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 13,
-        "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+        "notes": "Numerics.cpp:245\u2013285 assembles Rusanov and viscous conservative face flux, wall ghosts and boundary values; current selected outputs remain unbound to final source."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 8,
-        "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+        "notes": "Solver.cpp:204\u2013216 and Numerics.cpp implement reconstruction/limiter; environment can disable it, but no bound selected production control proves disabled reconstruction."
       },
       {
         "id": "viscous",
@@ -301,7 +301,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 1,
-        "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+        "notes": "Mesh, physics and solver code are separated but 3-D/RANS/EOS extension not demonstrated."
       }
     ]
   },

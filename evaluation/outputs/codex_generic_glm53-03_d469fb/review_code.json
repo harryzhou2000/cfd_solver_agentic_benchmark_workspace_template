@@ -14,28 +14,28 @@
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "main.cpp parses solve, case/output and restart; Output.cpp:285\u2013328 writes/reads current and old states with step/time. Exact restart continuation not rerun."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "solver/src separates CGNS reader, mesh construction, partition, numerics, solver and output; solver/tools supplies plotting and tests."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Inspected source/build and found no internal existing CFD solver invocation; no external authorship search performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "main.cpp reads case configuration and configured CGNS mesh; no two-filename-only case branch established."
     },
     {
       "id": "code.mpi",
@@ -49,21 +49,21 @@
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Final Solver.cpp:439 same-buffer MPI_Allreduce lacks MPI_IN_PLACE; current short laminar results have unstable force tails and Re200 no shedding. Source binding is unproved."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Curated solver/tests includes unit and probe sources; clean build includes nsc2d_tests. No new solver or unsteady case rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 3,
-      "notes": "Validator passes structurally, but the report marks M0.80 and M2 inviscid runs converged at 0.81 and 0.14 residual orders."
+      "notes": "Submitted plot tool reproducibly misassigns quad cell values in final report image; current result metadata names init-only revision and report contains another run generation."
     }
   ],
   "disqualification_flags": [
