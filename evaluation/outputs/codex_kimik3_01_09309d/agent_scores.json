@@ -176,7 +176,7 @@
       "disqualification_flags": []
     },
     "result_review": {
-      "overall_score": 4.3,
+      "overall_score": 3.7,
       "points": [
         {
           "id": "res.contract",
@@ -196,8 +196,8 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 5,
-          "notes": "All eight metadata files mark completed with converged/statistically_periodic status; Re200 reaches t=300."
+          "score": 2,
+          "notes": "M200 laminar is marked complete/converged at step69 despite Cd dropping 24% over final10 samples; remaining cases under review."
         },
         {
           "id": "res.plausibility",
@@ -228,12 +228,19 @@
           "notes": "Workspace report has figure/run manifests; curated commit excludes raw result data and report-generated manifests, limiting self-contained traceability."
         }
       ],
-      "disqualification_flags": []
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "text": "metadata.json marks incomplete or failed runs as successful final results.",
+          "found": true,
+          "evidence": "Canonical M200 laminar forces.csv SHA256 4544cf7c208130e10580faf425f13cf94f68cdf26cd391a3a92e8a25b719b233 has 69 steps; Cd drops 0.2352103\u21920.1121686 over the last20 and 0.1470408\u21920.1121686 over the last10, while metadata SHA256 6fa028b49eea07a98035cfbccae813f88c35db423967883d22ca765b01767847 marks completed/converged. Report case_summary.tex:12 and run_manifest identify the same step69/Cd0.112169. The supplied residual target alone does not establish stable forces; historic binary remains unbound."
+        }
+      ]
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 88,
+    "total_scored": 87.5,
     "sections": [
       {
         "id": "build_cli_output",
@@ -288,8 +295,8 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 7,
-        "notes": "Eight packages validate and Re200 statistics are complete, but the required cylinder rank demonstration is not consistent."
+        "score": 6.5,
+        "notes": "Eight packages structurally validate, but M200 laminar force remains strongly nonstationary when marked converged; other cases remain under review."
       },
       {
         "id": "report",
@@ -329,8 +336,8 @@
       "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.0014, CD=0.2235 at 005d7d9:solver/report/tables/case_summary.tex:10; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validated completed package with wall/field evidence."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.0000, CD=0.1122 at 005d7d9:solver/report/tables/case_summary.tex:12; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validated completed package with compressible field and pressure-dominant drag evidence."
+      "score": 1,
+      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.0000, CD=0.1122 at 005d7d9:solver/report/tables/case_summary.tex:12; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validated completed package with compressible field and pressure-dominant drag evidence. Score 2\u21921: final20 Cd 0.2352103\u21920.1121686 and final10 0.1470408\u21920.1121686, so the marked converged result has strongly changing force despite meeting its residual target. Workspace force SHA256 4544cf7c208130e10580faf425f13cf94f68cdf26cd391a3a92e8a25b719b233; immutable case_summary.tex:12 and run_manifest identify this 69-step output."
     },
     "cylinder_m010_laminar_re20": {
       "score": 2,
@@ -342,7 +349,7 @@
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
       {
         "id": 1,
@@ -383,8 +390,8 @@
       {
         "id": 7,
         "text": "metadata.json marks incomplete or failed runs as successful final results.",
-        "found": false,
-        "evidence": "All scored packages are completed with converged/statistically_periodic status; plateau is disclosed."
+        "found": true,
+        "evidence": "Canonical M200 laminar forces.csv SHA256 4544cf7c208130e10580faf425f13cf94f68cdf26cd391a3a92e8a25b719b233 has 69 steps; Cd drops 0.2352103\u21920.1121686 over the last20 and 0.1470408\u21920.1121686 over the last10, while metadata SHA256 6fa028b49eea07a98035cfbccae813f88c35db423967883d22ca765b01767847 marks completed/converged. Report case_summary.tex:12 and run_manifest identify the same step69/Cd0.112169. The supplied residual target alone does not establish stable forces; historic binary remains unbound."
       },
       {
         "id": 8,

@@ -20,8 +20,8 @@
       "id": "res.completion",
       "title": "Case completion and convergence",
       "weight": 0.2,
-      "score": 5,
-      "notes": "All eight metadata files mark completed with converged/statistically_periodic status; Re200 reaches t=300."
+      "score": 2,
+      "notes": "M200 laminar is marked complete/converged at step69 despite Cd dropping 24% over final10 samples; remaining cases under review."
     },
     {
       "id": "res.plausibility",
@@ -54,30 +54,11 @@
   ],
   "disqualification_flags": [
     {
-      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
-      "triggered": null,
-      "notes": ""
-    },
-    {
-      "flag": "Report figures do not correspond to submitted field/CSV outputs",
-      "triggered": null,
-      "notes": ""
-    },
-    {
-      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
-      "triggered": null,
-      "notes": ""
-    },
-    {
-      "flag": "metadata.json marks incomplete or failed runs as successful",
-      "triggered": null,
-      "notes": ""
-    },
-    {
-      "flag": "Debug outputs presented as final case results",
-      "triggered": null,
-      "notes": ""
+      "id": 7,
+      "text": "metadata.json marks incomplete or failed runs as successful final results.",
+      "found": true,
+      "evidence": "Canonical M200 laminar forces.csv SHA256 4544cf7c208130e10580faf425f13cf94f68cdf26cd391a3a92e8a25b719b233 has 69 steps; Cd drops 0.2352103\u21920.1121686 over the last20 and 0.1470408\u21920.1121686 over the last10, while metadata SHA256 6fa028b49eea07a98035cfbccae813f88c35db423967883d22ca765b01767847 marks completed/converged. Report case_summary.tex:12 and run_manifest identify the same step69/Cd0.112169. The supplied residual target alone does not establish stable forces; historic binary remains unbound."
     }
   ],
-  "overall_score": 4.3
+  "overall_score": 3.7
 }

@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T13:14:55.838324+00:00
+Generated: 2026-10-30T13:17:28.942234+00:00
 
-**Overall score: 4.3**
+**Overall score: 3.7**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,7 +15,7 @@ Generated: 2026-10-30T13:14:55.838324+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit official validator invocation returned OK for every case and solver/report. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 5 | All eight metadata files mark completed with converged/statistically_periodic status; Re200 reaches t=300. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | M200 laminar is marked complete/converged at step69 despite Cd dropping 24% over final10 samples; remaining cases under review. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Rankcount Re20 np1/2/4 agree but use different controls from production np8; report table misstates the rank-study Cd values. Other physics remains under review. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T13:14:55.838324+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.3
+- Overall score (0-5): 3.7
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
