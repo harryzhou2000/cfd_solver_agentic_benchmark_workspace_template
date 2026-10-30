@@ -202,8 +202,8 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 2,
+          "notes": "M2 laminar marked converged at12219 despite final5000 Cd0.0963453\u21920.1107485; DQ7."
         },
         {
           "id": "res.plausibility",
@@ -234,13 +234,13 @@
           "notes": "Validated immutable contestant-result evidence."
         }
       ],
-      "overall_score": 4.0,
+      "overall_score": 3.6,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 72,
+    "total_scored": 70.5,
     "sections": [
       {
         "id": "build_cli",
@@ -295,15 +295,15 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 8,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 7,
+        "notes": "M2 laminar marked converged despite monotonic 15% final5000 drag increase; other case scoring pending."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 3.5,
+        "notes": "Report calls M2 laminar converged and understates Re200 lift amplitude by factor about2; original attempt contains residual plot."
       },
       {
         "id": "extensibility",
@@ -336,21 +336,28 @@
       "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=0.01231, CD=0.08062 at f45bb59:solver/report/report.tex:342; residual history f45bb59:solver/report/figures/naca0012_m080_laminar_re5000_residuals.png (referenced at solver/report/report.tex:575); force history f45bb59:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:582); computed-field contour f45bb59:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/report.tex:603). Score 4 retained after the post-processing audit. Prior case judgment: Validator passed in immutable attempt."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 4,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=0.0009022, CD=0.1107 at f45bb59:solver/report/report.tex:343; residual history f45bb59:solver/report/figures/naca0012_m200_laminar_re5000_residuals.png (referenced at solver/report/report.tex:635); force history f45bb59:solver/report/figures/naca0012_m200_laminar_re5000_forces.png (referenced at solver/report/report.tex:642); computed-field contour f45bb59:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/report.tex:663). Score 4 retained after the post-processing audit. Prior case judgment: Validator passed in immutable attempt."
+      "score": 2,
+      "notes": "Original attempt 7c1d0bf metadata SHA256 82023914d89b116a42778aadb2337eb3e1dd4c2e32c5de594e89eb98d18124b7 says completed/converged at12219, repeated at f45bb59 report.tex:631. Force SHA256 435e400e3b741aa46a1cd6d90195a4236f7dc4520b1c9eeabec0914c89937905 final5000 Cd0.0963453\u21920.1107485, with successive 1000-step means 0.09832,0.10184,0.10484,0.10743,0.10970; final1000 0.1086151\u21920.1107485. The real 4.500-order residual decrease does not prove force-stable convergence (TASK.md:172). DQ7; score4\u21922, remaining case/source review pending."
     },
     "cylinder_m010_laminar_re20": {
       "score": 4,
       "notes": "Cylinder M0.10 laminar Re20: numeric CL=0.001902, CD=2.102 at f45bb59:solver/report/report.tex:344; residual history f45bb59:solver/report/figures/cylinder_m010_laminar_re20_residuals.png (referenced at solver/report/report.tex:695); force history f45bb59:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:702); computed-field contour f45bb59:solver/report/figures/cylinder_m010_laminar_re20_mach.png (referenced at solver/report/report.tex:723). Score 4 retained after the post-processing audit. Prior case judgment: Validator passed in immutable attempt."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.003164, CD=1.27 at f45bb59:solver/report/report.tex:345; no committed/referenced residual-history plot; force history f45bb59:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:755); computed-field contour f45bb59:solver/report/figures/cylinder_m010_laminar_re200_vorticity_wake.png (referenced at solver/report/report.tex:762); shedding statistic St=0.1867, frequency=0.1867 at f45bb59:solver/report/report.tex:752; late-time periodic-force evidence f45bb59:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:755). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator passed in immutable attempt."
+      "score": 4,
+      "notes": "Original contestant attempt 7c1d0bf includes Re200 residual PNG SHA256 29c0ac6ef8d7b21e7ab76fd46dea2f0ff360e8526eebd525d62c0b6f6e4fc340, omitted from curated subset; curated report.tex:752\u2013755 includes St0.1867, mean Cd1.27 and force PNG SHA256 ae621a86a855dcbaf2ff40d41fcaa51f9997dd95b2102bcdd62f1f0dafd35a8e visibly resolving late lift and drag. Original force CSV SHA256 b757ca5c6ab4ff5aa5629f6563e6a737ba721f6c453273858755c28763ca5074 t>=150 mean Cd1.270177, Cl\u22120.566858..0.568796, RMS0.3998, 28 upward crossings St0.186209. Report.tex:752 incorrectly says lift amplitude\u22480.282; actual half peak-to-peak\u22480.567827. Previous missing-residual floor note overlooked original attempt, score2\u21924; binary and target details pending. No unsteady rerun."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "Original attempt 7c1d0bf M2 laminar metadata SHA256 82023914d89b116a42778aadb2337eb3e1dd4c2e32c5de594e89eb98d18124b7 marks completed/converged at12219. Force CSV SHA256 435e400e3b741aa46a1cd6d90195a4236f7dc4520b1c9eeabec0914c89937905 shows Cd0.0963453\u21920.1107485 over final5000 steps and final five 1000-step means 0.09832,0.10184,0.10484,0.10743,0.10970. The actual 4.5-order residual decrease does not establish stable forces required by TASK.md:172. Further DQ review pending."
+      }
+    ]
   },
   "limitations": [
     "All eight packages validate at attempt 8285817960158113d900fad3335bccef9c0f764f; raw data excluded from curated branch.",
