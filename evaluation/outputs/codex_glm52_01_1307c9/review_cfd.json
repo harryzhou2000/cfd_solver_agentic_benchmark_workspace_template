@@ -55,8 +55,8 @@
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 2,
-      "notes": "Viscous code exists but high-Mach laminar output is nonphysical."
+      "score": 3,
+      "notes": "flux.cpp:216\u2013236 implements Newtonian stress and heat flux, and solver.cpp:1030\u20131036 estimates tangential wall shear. Selected laminar force histories drift or oscillate and do not establish credible convergence."
     },
     {
       "id": "cfd.implicit",
@@ -76,8 +76,8 @@
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 4,
-      "notes": "METIS, Isend/Irecv, reductions, np1/np8 artifacts."
+      "score": 2.5,
+      "notes": "METIS partition and neighbor exchange are implemented, but persistent full mesh exists on each rank during iteration; historical np1 result histories are empty/failed, so rank consistency is not established."
     }
   ],
   "disqualification_flags": [
@@ -87,5 +87,5 @@
       "evidence": "Immutable solver.cpp:55\u201362 declares Re200 completed and statistically_periodic; :743\u2013748 caps inner iterations at 15, and :845\u2013852 counts a miss only at ratio >=1 rather than the configured 0.001. Correction 2026-10-31: original metadata was recovered from contestant checkpoint f9b3d2d86be7691191d72b8b323de4c503a2597a, SHA256 bb6ec9e31484739fb64406961f3d91341a8e1e65337f7dc07c2187e5b70fa46e; it reports last ratio 0.9284884538816688, 731 misses and fraction 0.9756333333333334. Source counts ratio>=1 rather than target 0.001, so 731 is not the strict-target miss count. Binary unbound."
     }
   ],
-  "overall_score": 3.4
+  "overall_score": 3.37
 }

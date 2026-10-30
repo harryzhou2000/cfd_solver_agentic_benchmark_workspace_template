@@ -953,15 +953,15 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 3,
-        "notes": "CMake and historical binary evidence; no clean evaluator build."
+        "score": 4,
+        "notes": "Clean immutable 17a5ef3 CMake build succeeded in network-disabled cfd-bench, 2 CPUs/3 GiB/256 processes; CTest found no tests. Historical executable is not bound."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Case-driven solve CLI present."
+        "score": 2,
+        "notes": "main.cpp:34\u201335 accepts --restart but solver.cpp:23\u201327 only stores it and no read implementation exists; output.cpp:441\u2013450 writes only rank-zero-owned state. Case-driven parsing and error paths exist."
       },
       {
         "id": "code.organization",
@@ -988,22 +988,22 @@
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 4,
-        "notes": "METIS and neighbor nonblocking halos/reductions present."
+        "score": 2,
+        "notes": "partition.cpp:61 uses METIS and neighbor halos exist, but solver.hpp:64 and solver.cpp:165\u2013205 retain a complete global mesh on every rank throughout iterations; no valid controlled np1/np8 comparison established."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 2,
-        "notes": "High-Mach laminar report results are nonphysical."
+        "score": 1.5,
+        "notes": "Recovered M0.15 inviscid/laminar histories are strongly unstable; selected M2 inviscid point field has Mach maximum 3.166e15. Do not apply stale report billion-scale laminar numbers to recovered cases."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Historical validator/scaling artifacts, no clean evaluator rerun."
+        "score": 2.5,
+        "notes": "Independent validator passed all eight recovered cases and report yet accepted eight empty final-field sentinels; clean build succeeds but CTest finds no tests. Valid numerical or rank-consistency demonstration remains lacking."
       },
       {
         "id": "code.hygiene",
@@ -1055,7 +1055,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.52
+    "overall_score": 3.08
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -1114,8 +1114,8 @@
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 2,
-        "notes": "Viscous code exists but high-Mach laminar output is nonphysical."
+        "score": 3,
+        "notes": "flux.cpp:216\u2013236 implements Newtonian stress and heat flux, and solver.cpp:1030\u20131036 estimates tangential wall shear. Selected laminar force histories drift or oscillate and do not establish credible convergence."
       },
       {
         "id": "cfd.implicit",
@@ -1135,8 +1135,8 @@
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 4,
-        "notes": "METIS, Isend/Irecv, reductions, np1/np8 artifacts."
+        "score": 2.5,
+        "notes": "METIS partition and neighbor exchange are implemented, but persistent full mesh exists on each rank during iteration; historical np1 result histories are empty/failed, so rank consistency is not established."
       }
     ],
     "disqualification_flags": [
@@ -1146,7 +1146,7 @@
         "evidence": "Immutable solver.cpp:55\u201362 declares Re200 completed and statistically_periodic; :743\u2013748 caps inner iterations at 15, and :845\u2013852 counts a miss only at ratio >=1 rather than the configured 0.001. Correction 2026-10-31: original metadata was recovered from contestant checkpoint f9b3d2d86be7691191d72b8b323de4c503a2597a, SHA256 bb6ec9e31484739fb64406961f3d91341a8e1e65337f7dc07c2187e5b70fa46e; it reports last ratio 0.9284884538816688, 731 misses and fraction 0.9756333333333334. Source counts ratio>=1 rather than target 0.001, so 731 is not the strict-target miss count. Binary unbound."
       }
     ],
-    "overall_score": 3.4
+    "overall_score": 3.37
   },
   "result_review": {
     "review_area": "result_review",
@@ -1156,50 +1156,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 3,
-        "notes": "Historical eight dirs are structurally rich, but curated report references seven absent report figures."
+        "score": 1,
+        "notes": "All eight f9b3d2d field_final.vtu files are 474-byte empty placeholders; separate rank point-sample VTUs exist. Restart write is rank-zero local only and read is absent. Validator nevertheless accepts structure."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 4,
-        "notes": "Historical terminal claim says validator passes; fresh explicit replay was not retained as reliable output."
+        "notes": "Fresh read-only benchmark validation of all eight f9b3d2d case directories and historical report directory returns OK, including empty final-field files. Structural acceptance does not prove physics."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 1,
-        "notes": "Re200 transient solve noncompliant; high-Mach laminar report output nonphysical."
+        "notes": "Recovered M0.15 histories unstable, M080/M2 laminar and Re20 drag drift, Re200 last ratio 0.928488 and late-force behavior lacks credible shedding, despite successful metadata."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 1,
-        "notes": "Report gives billion-scale forces for M0.8/M2 laminar and negative residual-reduction entries."
+        "notes": "Re20 Cd 0.338 is low and drifting; M2 inviscid sample field has Mach maximum 3.166e15; force histories are not settled. Billion-scale laminar values in report are stale, not selected checkpoint results."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
         "score": 2,
-        "notes": "Many historical plots, but seven figures report.tex requires are absent from its committed tree."
+        "notes": "Historical PDF has missing-figure placeholders; independently delivered nested residual/force and centroid-sample plots exist. Re200 has a readable late force plot, showing drift, rather than no late-force figure."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 1,
-        "notes": "Claims all eight complete/vortex shedding conflict with Re200 statistics and stale/nonphysical table values."
+        "notes": "Report table has stale and sign-inverted values versus selected f9b3d2d forces, missing figures, and claims no mesh replication despite source. The explicit diagonal-implicit disclosure is credited."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 1,
-        "notes": "Figure/claim traceability is broken by absent referenced figures and stale report table."
+        "notes": "Historical table differs from recovered forces and figure manifest names empty field_final.vtu although separate rank fields contain centroid samples. Exact historical executable and some plot generation bindings remain unproven."
       }
     ],
     "disqualification_flags": [
@@ -1209,7 +1209,7 @@
         "evidence": "Immutable solver.cpp:55\u201362 declares Re200 completed and statistically_periodic; :743\u2013748 caps inner iterations at 15, and :845\u2013852 counts a miss only at ratio >=1 rather than the configured 0.001. Correction 2026-10-31: original metadata was recovered from contestant checkpoint f9b3d2d86be7691191d72b8b323de4c503a2597a, SHA256 bb6ec9e31484739fb64406961f3d91341a8e1e65337f7dc07c2187e5b70fa46e; it reports last ratio 0.9284884538816688, 731 misses and fraction 0.9756333333333334. Source counts ratio>=1 rather than target 0.001, so 731 is not the strict-target miss count. Binary unbound."
       }
     ],
-    "overall_score": 1.85
+    "overall_score": 1.45
   },
   "provenance": {
     "state_db": "workspace-bundled .sessions/codex/state_5.sqlite",

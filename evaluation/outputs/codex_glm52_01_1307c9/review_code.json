@@ -6,15 +6,15 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 3,
-      "notes": "CMake and historical binary evidence; no clean evaluator build."
+      "score": 4,
+      "notes": "Clean immutable 17a5ef3 CMake build succeeded in network-disabled cfd-bench, 2 CPUs/3 GiB/256 processes; CTest found no tests. Historical executable is not bound."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Case-driven solve CLI present."
+      "score": 2,
+      "notes": "main.cpp:34\u201335 accepts --restart but solver.cpp:23\u201327 only stores it and no read implementation exists; output.cpp:441\u2013450 writes only rank-zero-owned state. Case-driven parsing and error paths exist."
     },
     {
       "id": "code.organization",
@@ -41,22 +41,22 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "METIS and neighbor nonblocking halos/reductions present."
+      "score": 2,
+      "notes": "partition.cpp:61 uses METIS and neighbor halos exist, but solver.hpp:64 and solver.cpp:165\u2013205 retain a complete global mesh on every rank throughout iterations; no valid controlled np1/np8 comparison established."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 2,
-      "notes": "High-Mach laminar report results are nonphysical."
+      "score": 1.5,
+      "notes": "Recovered M0.15 inviscid/laminar histories are strongly unstable; selected M2 inviscid point field has Mach maximum 3.166e15. Do not apply stale report billion-scale laminar numbers to recovered cases."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Historical validator/scaling artifacts, no clean evaluator rerun."
+      "score": 2.5,
+      "notes": "Independent validator passed all eight recovered cases and report yet accepted eight empty final-field sentinels; clean build succeeds but CTest finds no tests. Valid numerical or rank-consistency demonstration remains lacking."
     },
     {
       "id": "code.hygiene",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.52
+  "overall_score": 3.08
 }

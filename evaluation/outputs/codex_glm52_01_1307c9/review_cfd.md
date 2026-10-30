@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T19:03:00.376374+00:00
+Generated: 2026-10-30T19:03:44.973944+00:00
 
-**Overall score: 3.4**
+**Overall score: 3.37**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T19:03:00.376374+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Barth-Jespersen and positivity paths present. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | Viscous code exists but high-Mach laminar output is nonphysical. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | flux.cpp:216–236 implements Newtonian stress and heat flux, and solver.cpp:1030–1036 estimates tangential wall shear. Selected laminar force histories drift or oscillate and do not establish credible convergence. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | Point-implicit diagonal LU-SGS approximation. |
@@ -39,7 +39,7 @@ Generated: 2026-10-30T19:03:00.376374+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | BDF2 source exists, but Re200 uses fixed 15 inner iterations and strict target is miscounted. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | METIS, Isend/Irecv, reductions, np1/np8 artifacts. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2.5 | METIS partition and neighbor exchange are implemented, but persistent full mesh exists on each rank during iteration; historical np1 result histories are empty/failed, so rank consistency is not established. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T19:03:00.376374+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.4
+- Overall score (0-5): 3.37
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
