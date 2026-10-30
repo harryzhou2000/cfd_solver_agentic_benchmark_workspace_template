@@ -85,7 +85,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_09_526316` | fully reviewed: 55→48, DQ false; both gates pass |
 | `codex_dsv4_flash_10_6468ba` | fully reviewed: 86→71, DQ6 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_11_6e6ac8` | fully reviewed: 70→53, DQ7 and TASK full mesh; both gates pass |
-| `codex_dsv4_flash_12_7e965b` | unreviewed |
+| `codex_dsv4_flash_12_7e965b` | partial: eight case plots and Re200 source assessed; rubric/DQ pending |
 | `codex_dsv4_flash_14_80096b` | unreviewed |
 | `codex_generic_02_ed5ee6` | unreviewed |
 | `codex_generic_03_5f2165` | unreviewed |
@@ -496,3 +496,8 @@ dsv4_flash_11 partial source/build/rubric: provisional 70→56 (viscous 8→5, t
 ## dsv4_flash_11 full calibration — 2026-10-30
 
 Rubric 70→53, DQ7 and TASK full mesh; case scores 2,2,2,2,2,2,2,0 → 1,2,2,1,2,1,1,0. Ten sections and 27 review points include criterion-specific evidence. M0.15 inviscid converged plateau is undermined by 8.4% Cd drift in last 100 rows; full GlobalMesh broadcast/persisted all ranks, and rank-0-only MPI_Allreduce risks collective mismatch. Seven structural validator passes and Re200 fails for missing metadata (correcting old validator note). Source and report use Rusanov, not old review claim of Roe; no committed probes (old note wrong). BDF2 residual present for fresh runs but all resumed steps use BDF1; completed status would label periodic without testing it, though no completed Re200 metadata exists. Force accumulator uses full traction and unscaled Fv_local[1] in y; old raw zero viscous columns versus nonzero surface Cf are not attributed to current source because git_revision=null. Report/PDF provenance, blank near-body/wake detail, force-table misassignments, contradictory Re200 prose and case physics documented above. Clean immutable build succeeds with warnings; both gates pass, no CFD rerun, external similarity search, general MPI comparison or exhaustive pixel audit.
+
+
+## dsv4_flash_12 partial case/visualization review — 2026-10-30
+
+Seven steady case scores 4.5,4.5,3,4.5,4.5,4,4.5→2 each: all contestant-delivered steady force figures collapse to x=0 because tools/plot_histories.py:59–65 plots physical_time (zero) rather than step; no alternative delivered plots identified. Per-case original force tails/orders in agent_scores; report.tex:207–212 discloses frozen reconstruction after 500/800, so high reductions are for frozen residual. Re200 remains 2: PDF p7 wake contour/lift visible but startup Cd≈35 compresses late drag, with no other late drag plot. Canonical np3 original t≥200 mean Cd 1.359854, Cl range -1.29846–1.18364, normal lift positive-crossing periods 4.48–4.63 agree with St≈0.218; force SHA d46909e71de4360168a4f70b491d3d7928d4af724b5f2b77e17b6b490f89edb8. Source ratio uses frozen reconstruction and accepted-state gradient is recomputed, so metadata fraction 1.0 cannot establish strict fully updated miss count; no DQ7 inferred. Initial step lacks explicit BDF1 bootstrap. Main root-only GlobalMesh preprocessing does not establish all-rank full-mesh violation. Remaining source/rubric/DQ partial; both gates pass, no CFD rerun.

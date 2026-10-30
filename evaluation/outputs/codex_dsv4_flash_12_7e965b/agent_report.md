@@ -23,7 +23,7 @@ The manually selected workspace-local Codex root is `019ffa41-6454-7503-82d8-5eb
 | Report And Analysis | 3/5 | Extensive figures and manifest exist, but report/manifest accuracy claims have limitations. |
 | Extensibility | 4/5 | Clean modular 2-D design, constrained by fixed-size state/dimensionality. |
 
-Independent case scores: M0.15 inviscid 4.5, M0.80 inviscid 4.5, M2 inviscid 3.0, M0.15 Re5000 4.5, M0.80 Re5000 4.5, M2 Re5000 4.0, cylinder Re20 4.5, cylinder Re200 4.5.
+Independent case scores currently 2,2,2,2,2,2,2,2; per-case raw data, plot evidence and limitations are detailed below.
 
 ## Disqualification
 
@@ -34,3 +34,10 @@ No DQ trigger is supported by direct evidence. Source implements METIS partition
 This is a strong, complete workspace-evidence submission, not a clean Git-only raw-data submission: curation rules require raw outputs, logs, PDF, and manifest CSV to remain uncommitted at the result tip. The terminal answer claims a clean LaTeX build, but the evaluator did not reproduce it; report craftsmanship is scored from committed TeX/figures and cross-checks, not from that assertion. No source copying investigation was performed, consistent with the trust policy.
 
 Verdict: **90/100, no disqualification**. Identity is `codex_dsv4_flash_12_7e965b`; raw evidence stays in the contestant workspace and was not copied into this snapshot.
+
+
+## Partial case and visualization review — 2026-10-30
+
+All seven steady force-history figures collapse to a vertical line at x=0: tools/plot_histories.py:59–65 always plots physical_time, which is zero for steady CSV rows, despite labeling the axis pseudo step. All seven PNGs were visually checked and the immutable attempt has no alternative delivered steady force plots. Under the current post-processing floor their case scores change 4.5,4.5,3,4.5,4.5,4,4.5→2,2,2,2,2,2,2; per-case original tail values and residual orders are in agent_scores.json. Report.tex:207–212 explicitly discloses frozen reconstruction after step 500/800; recorded high residual reductions apply to that frozen discretization.
+
+Re200 case remains 2: accepted PDF p7 includes wake contour and lift oscillation but startup Cd≈35 makes late drag oscillation unreadable; no alternative late drag plot was found. Canonical manifest selects final_cylinder_m010_laminar_re200_np3, 30000 steps to t300. Original forces SHA-256 d46909e71de4360168a4f70b491d3d7928d4af724b5f2b77e17b6b490f89edb8; t≥200 mean Cd 1.359854, Cl range -1.29846–1.18364 and regular positive crossing periods 4.48–4.63 support reported St≈0.218 (one 0.012 crossing pair is noise). Metadata SHA de779010d4fb9f462d0acb8529ee8d90c044209b32952d19e1ffdf39a2301716 reports 0 misses/fraction 1.0, but source solver.cpp:1591–1657 measures inner ratio with frozen reconstruction and then recomputes accepted-state gradients; fully updated strict miss count cannot be inferred. Initial step also uses BDF2 with both histories initialized freestream, not explicit BDF1. Main.cpp:183–200 loads full mesh on root only before distributing, so TASK all-rank full-mesh violation is not established. Full source/rubric/DQ review remains partial; no CFD rerun.
