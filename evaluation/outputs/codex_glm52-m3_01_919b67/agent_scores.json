@@ -224,17 +224,17 @@
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 4,
-          "notes": "Historical figure_manifest.csv maps 56 figures to CSV/VTU sources; spot checks were read-only."
+          "score": 2,
+          "notes": "52a1e520 includes raw plots and history manifest, but report.tex:159\u2013166 misstates np2/4/8 step200 Cd\u22480.116; checkpoint force data give 0.5071/0.5065/0.5080. The 0.116 value belongs to np2 step2000. No specific figure mismatch or fabrication inferred."
         }
       ],
-      "overall_score": 3.3,
+      "overall_score": 3.2,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 67,
+    "total_scored": 66.5,
     "sections": [
       {
         "id": "build_cli",
@@ -296,8 +296,8 @@
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 3,
-        "notes": "Historical report/manifest provide broad coverage and disclosed limits, but reporting overstates convergence."
+        "score": 2.5,
+        "notes": "Five-page report and separately delivered checkpoint figures exist, but report.tex:159\u2013166 gives 0.116 for a 200-step rank comparison where checkpoint np2/4/8 Cd is 0.5071/0.5065/0.5080; 0.116 is instead np2 step2000. Re200 figure lacks readable late drag and no numerical St is stated; several success/plateau assertions conflict with actual force results."
       },
       {
         "id": "extensibility",
@@ -310,16 +310,16 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 2,
-      "notes": "NACA0012 M0.15 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Historical directory validates; residual reduction is about 1.03 orders, adequate but limited."
+      "score": 1.5,
+      "notes": "Contestant checkpoint 52a1e520 contains original force CSV SHA256 4f4fff11eec3acbdf383fc9aa3e1f1a95bfec339ce3c46e94dae7d4966b3e174 and force figure SHA256 baa4bd1ebc1f115cb7920cff37c1905fb14d8e2a50cd988606c9c2e97218900d, plus residual/contour figures. Prior note incorrectly claimed no contestant-delivered figures because the curated tip omits them. final400 Cd0.00735\u20130.12368 and Cl\u22120.00313..0.00163; residual reduction 1.03 orders, visibly oscillating rather than settled. Score2\u21921.5. Historic binary attribution is not independently hashed."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M0.80 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Historical directory validates with about 1.99 orders residual reduction."
+      "notes": "Contestant checkpoint 52a1e520 contains original force CSV SHA256 506bba803199d61a9d95d0e947e8b9c8e67638c5480ba106858aeadf02a80695 and force figure SHA256 79b732fb94e46f2c50d52472c315c988f80e388911248f53780685bcf5ac5daa, plus residual/contour figures. Prior note incorrectly claimed no contestant-delivered figures because the curated tip omits them. final400 Cd0.04855\u21920.05072 and Cl\u22120.00159\u2192\u22120.00146; residual reduction 1.99 orders in 2000 steps. Score2 retained; lack of an unambiguous case-specific submitted numeric summary remains a floor. Historic binary attribution is not independently hashed."
     },
     "naca0012_m200_inviscid": {
       "score": 2,
-      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Historical directory validates with about 2.20 orders residual reduction."
+      "notes": "Contestant checkpoint 52a1e520 contains original force CSV SHA256 7b3578058d8338b7ac0a96d717eaf2ca4184bd9daab865ed8c15bbc87521f024 and force figure SHA256 410707f6dbcfc3ad4ed1779a3552bb79c1e0211a6761b8ba91f6d27fb680c9b2, plus residual/contour figures. Prior note incorrectly claimed no contestant-delivered figures because the curated tip omits them. final400 Cd0.09363\u21920.09372 and Cl\u22120.00095\u2192\u22120.00102; residual reduction 2.20 orders in 2000 steps. Score2 retained; lack of an unambiguous submitted numeric summary remains a floor. Historic binary attribution is not independently hashed."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 1,
@@ -339,7 +339,7 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 2 retained after the post-processing audit. Prior case judgment: Reaches t=300 with figures, but fixed 10 inner iterations and final ratio 0.156 miss the 1e-3 target."
+      "notes": "Contestant checkpoint 52a1e520 includes force CSV SHA256 917411be5612776ee45645824f369b64c2d0cb16a2c4d036cc2cd8cb920c4ca6 and figure SHA256 640a52495f51c81a45132b7523014adfa901f6332d0fab66a7abcd18aeaf9892 plus residual and vorticity figures. Prior note incorrectly claimed figures absent because the curated tip omits them. Force plot shows late lift oscillation, but drag is flattened by startup extrema and there is no alternative late drag figure; report.tex:151\u2013152 claims St and mean drag are estimated without actually reporting numeric values. Score2 stays capped under required delivered numeric and readable late lift/drag evidence. Evaluator-only calculation on t180\u2013300 gives mean Cd0.89251, Cl\u22120.2804..0.2703 and 15 upward crossings at frequency\u22480.12674, which is diagnostic, not contestant-delivered St. Reported last inner ratio0.156 misses 0.001; individual actual miss count and executable binding are unproven. No Re200 rerun."
     }
   },
   "disqualification": {

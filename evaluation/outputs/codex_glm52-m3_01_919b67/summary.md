@@ -80,4 +80,4 @@ command aborted by user
 
 - Code review scorecard: `codex_glm52-m3_01_919b67/review_code.md` (overall: 3.38)
 - CFD methods review: `codex_glm52-m3_01_919b67/review_cfd.md` (overall: 3.49)
-- Result review: `codex_glm52-m3_01_919b67/review_results.md` (overall: 3.3)
+- Result review: `codex_glm52-m3_01_919b67/review_results.md` (overall: 3.2)

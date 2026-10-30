@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T08:56:03.079991+00:00
+Generated: 2026-10-30T08:57:36.667026+00:00
 
-**Overall score: 3.3**
+**Overall score: 3.2**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -27,7 +27,7 @@ Generated: 2026-10-30T08:56:03.079991+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 3 | Clear formulas and limitations, but it calls all runs converged/periodic despite weak steady convergence and metadata says Roe while source uses Rusanov. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Historical figure_manifest.csv maps 56 figures to CSV/VTU sources; spot checks were read-only. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 2 | 52a1e520 includes raw plots and history manifest, but report.tex:159–166 misstates np2/4/8 step200 Cd≈0.116; checkpoint force data give 0.5071/0.5065/0.5080. The 0.116 value belongs to np2 step2000. No specific figure mismatch or fabrication inferred. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T08:56:03.079991+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.3
+- Overall score (0-5): 3.2
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
