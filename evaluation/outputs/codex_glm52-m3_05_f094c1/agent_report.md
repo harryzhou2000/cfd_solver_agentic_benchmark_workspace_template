@@ -2,7 +2,7 @@
 
 ## Verdict
 
-The immutable curated submission is `0065953716e70f087f5d6d4fb512bc7e2fe2ba97`. Its provisional rubric score is 54/100 and it is disqualified for trigger 7 and the separate TASK full-mesh prohibition. The prior trigger 10 is unasserted: report.tex:195–196 explicitly discloses first-order production, although second-order rubric deductions remain. Historical binary and figure-to-data attribution remain unresolved.
+The immutable curated submission is `0065953716e70f087f5d6d4fb512bc7e2fe2ba97`. Its qualified rubric score is 54/100 and it is disqualified for trigger 7 and the separate TASK full-mesh prohibition. The prior trigger 10 is unasserted: report.tex:195–196 explicitly discloses first-order production, although second-order rubric deductions remain. Historical binary and figure-to-data attribution remain unresolved.
 
 ## Provenance and session selection
 
@@ -20,7 +20,7 @@ The sole workspace-local Codex root is `019fe861-1832-71b0-b1ae-2f9d13afd309` (B
 
 ## Scores and case findings
 
-The provisional 54/100 rubric includes first-order limitations and full-mesh replication. All eight workspace force histories and attempt force/residual/field figures were inspected; case notes record hashes, missing-row coverage and numerical limitations. The seven steady force plots collapse to a vertical line because physical time is zero, and Re200 lacks a readable late lift-and-drag plot or numeric St. Re20 is strongly unsettled and Re200 reports final inner ratio0.7 against target0.001; the delivered case sets max_inner10 rather than the required 1000. The full strict miss count is not established.
+The qualified 54/100 rubric includes first-order limitations and full-mesh replication. All eight workspace force histories and attempt force/residual/field figures were inspected; case notes record hashes, missing-row coverage and numerical limitations. The seven steady force plots collapse to a vertical line because physical time is zero, and Re200 lacks a readable late lift-and-drag plot or numeric St. Re20 is strongly unsettled and Re200 reports final inner ratio0.7 against target0.001; the delivered case sets max_inner10 rather than the required 1000. The full strict miss count is not established.
 
 ## DQ assessment
 
@@ -31,3 +31,8 @@ Trigger 7 is supported by unsettled Re20 force history labeled converged and the
 Raw case files survive only in the original workspace and are not tracked in the attempt commit; manifest/session linkage supports delivery, but executable identity and full figure-to-data correspondence remain unverified. All six accepted compiled-from-submission PDF pages were visually checked. The separate contestant historical PDF SHA256 f85bd651f508b4b6d976651a38c15c7284c3f9b23b760f3a6438ef285526654e is preserved in attempt commit be266cd; the PDF differs in bytes from the current build and date is generated with today. No Re200 rerun.
 
 `run_identity.json` and `contestant_final_response.md` are unindexed sidecars. `cfdeval check` does not validate these unindexed sidecars; their hashes above are recorded separately for provenance.
+
+
+## Qualified full review — 2026-10-31
+
+All ten sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to available evidence. Final 54/100, DQ7 and TASK full-mesh prohibition remain. The selected root validator calls and final response identify the same workspace case paths and coefficients, establishing delivery beyond timestamps alone; raw files remain workspace-only. Re20 force ranges contradict converged metadata, while Re200’s recorded last ratio 0.7 misses 0.001 and its case max-inner setting is 10 rather than 1000; the total strict miss count is not established. Exact historical executable and full figure-to-CSV attribution remain unbound. Earlier partial sections are historical checkpoints; no CFD, rank or Re200 rerun.
