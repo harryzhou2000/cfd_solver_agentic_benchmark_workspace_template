@@ -45,7 +45,7 @@ Read immutable source/report, eight raw final packages, and the sole workspace-l
 
 ## Recorded scores and disqualification
 
-The current 100-point rubric is 77.5/100; section details and weighted review scores are in `agent_scores.json`. Independent case scores:
+The current 100-point rubric is 75.0/100; section details and weighted review scores are in `agent_scores.json`. Independent case scores:
 
 | Case | Score |
 |---|---:|
@@ -100,3 +100,10 @@ Immutable `25daaa3` built successfully in network-disabled `cfd-bench` with two 
 ## Other steady-case force windows — 2026-10-30
 
 Selected force CSVs for M080 and M200 inviscid, M015 and M080 laminar, and Re20 match checkpoint `113f01a`; individual SHA256 values, 400/50-row force windows, figure and report references are in the case notes. Their final Cd windows are respectively −0.00900087..−0.00898973, −0.09259732..−0.09256281, −0.07051559..−0.07034725, −0.07995832..−0.07993799 and −1.969479..−1.969015. The report expressly uses absolute drag due to its sign convention. The source's full viscous traction in the force split is a separate documented rubric defect; unknown normal contributions are not mechanically charged as failures for every laminar case. These scores are retained. No production CFD rerun.
+
+
+## Case and report rubric — 2026-10-30
+
+The main report's force table (`report.tex:223`) gives selected np8 M015 |Cd|0.674, matching `113f01a:solver/results/final/naca0012_m015_inviscid/forces.csv`; its MPI comparison (`:520–531`) calls the same np8 Cd approximately zero. The np2 comparison's original raw package has not been identified, so no order-one MPI DQ is inferred from that table. The selected Re200 force FFT≈0.160 also differs from report St0.19–0.20. These are specific report/traceability defects rather than proof a plot uses another dataset.
+
+Two steady cases show the independently documented unstable forces despite successful status; Re200 accuracy/late-drag presentation is limited, while the other steady cases retain case-specific force evidence. Case-results rubric7→5.5 and report/visualization4→3; total77.5→75. Source/rubric/DQ review remains partial. No rerun.
