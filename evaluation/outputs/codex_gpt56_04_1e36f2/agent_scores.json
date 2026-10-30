@@ -210,7 +210,7 @@
           "title": "Visualizations",
           "weight": 0.15,
           "score": 5,
-          "notes": "Committed report figures cover residual/force/surface/Mach/pressure for the final cases and a Re200 wake velocity view."
+          "notes": "Committed plots cover cases, but Re20 report Mach image provably misassigns cell values to triangles; see DQ8 evidence. Full scoring remains under review."
         },
         {
           "id": "res.report",
@@ -389,8 +389,8 @@
       {
         "id": 8,
         "text": "Figures do not correspond to submitted data",
-        "found": false,
-        "evidence": "No direct mismatch found; traceability is limited because raw manifest sources are excluded from the commit."
+        "found": true,
+        "evidence": "Immutable fe320b995 solver/report/generated_results.tex:539-543 embeds cylinder_m010_laminar_re20_np8_mach.png (SHA256 28f09a774de1d1cd231fbfc05bd739a329e4edb76fb676b0e65c5e3dfa0ebf01), explicitly captioned as field_final.pvtu. Reproducing submitted generate_report.py on the identified workspace PVTU gives pixel-identical PNG. Script lines 276-284 append each quad block first triangles then second triangles, but lines 325-326 repeat each cell value consecutively. Independent original-connectivity mapping shows 19,338 of 19,870 rendered triangles receive another cell value; absolute Mach error median 0.0113311, p95 0.0882042, max 0.113904. This is a reproducible plotting-data mismatch, not a finding that solver data were fabricated. PVTU and all piece hashes are recorded in the calibration ledger. Historical executable and other image bindings remain unbound."
       }
     ]
   },

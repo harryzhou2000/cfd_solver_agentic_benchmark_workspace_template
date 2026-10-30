@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:20:49.946976+00:00
+Generated: 2026-10-30T11:24:13.444827+00:00
 
 **Overall score: 4.35**
 
@@ -21,7 +21,7 @@ Generated: 2026-10-30T11:20:49.946976+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Force/residual and Re200 late-window evidence are plausible, but the np2/np8 NACA M0.15 Cd discrepancy is order-one. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 5 | Committed report figures cover residual/force/surface/Mach/pressure for the final cases and a Re200 wake velocity view. |
+| 5 | **res.visualization** Visualizations | 0.15 | 5 | Committed plots cover cases, but Re20 report Mach image provably misassigns cell values to triangles; see DQ8 evidence. Full scoring remains under review. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 4 | Detailed equations, methods, qualifications and MPI discrepancy disclosure; it requires generated_results.tex and its raw provenance sources are not self-contained in the commit. |
