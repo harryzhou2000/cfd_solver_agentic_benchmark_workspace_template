@@ -79,7 +79,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_02_3447d3` | fully reviewed: 68/100, DQ7 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_03_294b64` | fully reviewed: 74/100, DQ7; both gates pass |
 | `codex_dsv4_flash_04_755869` | fully reviewed: 47/100, DQ7; sibling-result reuse; both gates pass |
-| `codex_dsv4_flash_06_5b6b08` | unreviewed |
+| `codex_dsv4_flash_06_5b6b08` | partial: live workspace output absence verified; source/rubric/DQ pending |
 | `codex_dsv4_flash_07_aeae21` | unreviewed |
 | `codex_dsv4_flash_08_efba3c` | unreviewed |
 | `codex_dsv4_flash_09_526316` | unreviewed |
@@ -394,3 +394,8 @@ dsv4_flash_04 source checkpoint: immutable `1b164486` clean CMake build succeeds
 ## dsv4_flash_04 full calibration — 2026-10-30
 
 Rubric 48→47/100, DQ7 true; prior DQ2 is not established because the copied histories originate from the sibling’s submitted output and are not shown to be generated without solving. All ten rubric sections and 27 review points have criterion-specific evidence. Eight case scores remain zero because selected final and 32 byte-identical files establish sibling-result reuse, not own-solver case runs. Re20 copied metadata claims a stable converged plateau despite large force drift. Own source has root-only global mesh preprocessing, METIS, state halos and tangential shear; main.cpp accepts but never uses restart, solver.cpp:422–430/533 unconditionally marks exhausted/finished loops successful, :508–513 loses prior BDF history after bootstrap, and :145 uses zero ghost-side limiter. Five-page PDF has method text/selected fields but blank force table, and standalone figures map to sibling outputs. Immutable clean build passes with warnings in network-disabled cfd-bench. Both record gates pass; no solver/unsteady rerun, exhaustive external authorship or pixel audit.
+
+
+## dsv4_flash_06 partial evidence recheck — 2026-10-30
+
+No `solver/results` directory or case metadata, residual/force histories, rendered figures or sibling PDF currently exists anywhere under the contestant workspace; report.tex supplies numeric claims but they cannot be verified against current delivered case data. This is independent of the correct policy excluding raw data from curated commit. Eight case scores remain 0, and unavailable evidence alone does not establish DQ. Immutable `e998060` main.cpp:93–101 broadcasts global mesh during preprocessing but drops it on all nonroot ranks before solver.run() :128; no TASK all-rank full-mesh-in-iterations finding. Solver.cpp:1693–1716 distinguishes strict transient target from early degradation but original metadata/statistics are absent. Remaining source/rubric/DQ partial; both gates pass; no CFD rerun.
