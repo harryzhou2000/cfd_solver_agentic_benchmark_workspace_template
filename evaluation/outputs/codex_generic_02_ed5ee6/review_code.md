@@ -2,38 +2,38 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:48:39.768180+00:00
+Generated: 2026-10-30T04:50:35.224267+00:00
 
-**Overall score: 2.78**
+**Overall score: 2.2**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | Source/config present; no independent rebuild. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable d477eaf clean CMake build succeeds with warnings in network-disabled cfd-bench using /opt/external; no CFD rerun. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 3 | CLI source exists; only self-reported smoke evidence. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 2 | main.cpp:1676–1690 accepts solve, case and output only; no restart argument or restoration found. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 2 | One 1732-line solver monolith. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 2 | Most solver functionality is in one main.cpp (~1700 lines); helper plotting tools are separate. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | No internal external-solver call found; no external search per trust policy. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 3 | No source-evident internal existing-solver wrapper; external similarity search excluded by trust policy. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | Case JSON parsing, but limited evidence. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | Case JSON and CGNS path are parsed generically; no two-filename-only dispatch identified. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 3 | MPI APIs/partition structures present; no evaluator MPI comparison. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 1 | main.cpp:1708–1712 reads and retains full Mesh on all ranks during solve, prohibited by TASK.md:227; METIS and halo APIs are present. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Admitted viscous instability and bad Re20 force. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 1 | Re20 forces change substantially despite converged metadata, Re200 false periodic metadata, low CFL fixed at 1, and final response admits viscous/gradient instability. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | Many attempts but no credible complete regression set. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 1 | No committed solver tests; tools include plotting/sanity scripts. No independent solver rerun; prior validator fails missing M0.15 package and Re200 horizon. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 2 | Curated tip clean; workspace contains extensive raw build/results. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 2 | Curated source/report separate from workspace raw output, but report has explicit MISSING assets and x=0 force figures. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 
@@ -50,7 +50,7 @@ Generated: 2026-10-30T04:48:39.768180+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.78
+- Overall score (0-5): 2.2
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

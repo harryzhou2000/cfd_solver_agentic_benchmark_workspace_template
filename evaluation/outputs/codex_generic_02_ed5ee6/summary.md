@@ -90,6 +90,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_generic_02_ed5ee6/review_code.md` (overall: 2.78)
-- CFD methods review: `codex_generic_02_ed5ee6/review_cfd.md` (overall: 1.95)
-- Result review: `codex_generic_02_ed5ee6/review_results.md` (overall: 1.3)
+- Code review scorecard: `codex_generic_02_ed5ee6/review_code.md` (overall: 2.2)
+- CFD methods review: `codex_generic_02_ed5ee6/review_cfd.md` (overall: 1.71)
+- Result review: `codex_generic_02_ed5ee6/review_results.md` (overall: 1.1)

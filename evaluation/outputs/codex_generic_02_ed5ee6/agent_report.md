@@ -40,43 +40,9 @@ Read the final response, submitted source/report and raw workspace packages. The
 
 `run_identity.json` SHA-256: `3188a831b912158728b6e55ba17d62e0a27fd85f6b52a816bd398088909cc5dd`; `contestant_final_response.md` SHA-256: `1937e2cc0590ccd93ac0272d300726889a1238eff5ed59d6bcb4bfa0c082bba0`. These are unindexed sidecars not validated by `cfdeval check`.
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
+## Provisional rubric: 33/100 (previously 36)
 
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
-
-## Review-area scores (0-5 weighted, review_*.json)
-
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
+Detailed rubric sections, weighted review points and independent case scores are in `agent_scores.json`. Overall review remains partial because the M0.15 inviscid raw package is missing and current result/run provenance does not resolve report/final-response conflicts.
 
 ## Disqualification assessment
 
@@ -92,7 +58,7 @@ No independent rebuild/rerun was performed. Raw result data and PDF are excluded
 
 ## Verdict
 
-36/100, DQ=false. Basic solver/MPI structures exist, but delivered case completeness, viscous reliability, Re20 physics, Re200 completion, visual fields, and report honesty are insufficient.
+Provisional 33/100, DQ=true. Basic solver/MPI structures exist, but delivered case completeness, viscous reliability, Re20 physics, Re200 completion, visual fields, and report honesty are insufficient.
 
 
 ## Partial Re200 and full-mesh DQ review — 2026-10-30
@@ -110,3 +76,8 @@ Contestant delivered sibling solver/report/report.pdf SHA-256 ec32d9f73ed376b829
 Re20 case 0→1: it is a recognizable but severely invalid attempt. Metadata/status claim converged after 499 steps and 0.437/5 residual orders, while last 50 Cd values rise 7.6875127→11.4995423, first/last 25 means 8.45997→10.52218. This independently supports DQ7 under TASK.md:172 stable-force requirement. Report.tex:98 gives Cd 9.491077 and terminal response gives a negative value, neither matching current final row; source/run binding is unproven. Other five present steady case raw values and limits are in case_scores; M0.15 inviscid final package remains missing.
 
 Immutable d477eaf clean CMake build succeeds with warnings in network-disabled cfd-bench with two CPUs/3 GiB and /opt/external. main.cpp:939–974 function named lusgs_solve performs a per-cell diagonal update without forward/backward neighbor sweeps; terminal response itself calls it a simple diagonal implicit solver. main.cpp:1515–1546 adds BDF source to residual vector but uses the separately computed spatial l2_norm to test/record inner target, so the actual combined-residual target misses are unknown. The existing DQ7 Re200 finding rests on t=0.05 and false periodic success, not a claimed exact strict miss count. Remaining source/rubric/DQ review partial; no CFD rerun.
+
+
+## Partial rubric and provenance boundary — 2026-10-30
+
+All ten rubric sections and 27 review points now contain criterion-specific evidence. Provisional rubric 36→33 (build 5→6 after successful immutable clean build, MPI 5→2 for replicated full mesh, implicit 3→2 for diagonal-only update and spatial-only transient target). DQ7 and TASK full-mesh prohibition remain established; each other rule is individually assessed without inventing evidence. main.cpp:1676–1690 has no restart CLI. tools/plot_results.py:231–232 selects physical_time for steady data, collapsing their force histories to x=0. Report PDF is excluded from snapshot under explicit MISSING-placeholder vendor rule but is preserved and assessed as delivered historical content. Canonical M0.15 inviscid raw package is missing, and other current raw files conflict with report/final-response values while metadata git_revision=null; producing binary and precise historical run selection remain unproven. The review remains partial rather than treating absent evidence as complete. Both gates pass; no CFD rerun.

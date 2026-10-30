@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Source/config present; no independent rebuild."
+      "score": 4,
+      "notes": "Immutable d477eaf clean CMake build succeeds with warnings in network-disabled cfd-bench using /opt/external; no CFD rerun."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 3,
-      "notes": "CLI source exists; only self-reported smoke evidence."
+      "score": 2,
+      "notes": "main.cpp:1676\u20131690 accepts solve, case and output only; no restart argument or restoration found."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 2,
-      "notes": "One 1732-line solver monolith."
+      "notes": "Most solver functionality is in one main.cpp (~1700 lines); helper plotting tools are separate."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 4,
-      "notes": "No internal external-solver call found; no external search per trust policy."
+      "score": 3,
+      "notes": "No source-evident internal existing-solver wrapper; external similarity search excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 3,
-      "notes": "Case JSON parsing, but limited evidence."
+      "notes": "Case JSON and CGNS path are parsed generically; no two-filename-only dispatch identified."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 3,
-      "notes": "MPI APIs/partition structures present; no evaluator MPI comparison."
+      "score": 1,
+      "notes": "main.cpp:1708\u20131712 reads and retains full Mesh on all ranks during solve, prohibited by TASK.md:227; METIS and halo APIs are present."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 2,
-      "notes": "Admitted viscous instability and bad Re20 force."
+      "score": 1,
+      "notes": "Re20 forces change substantially despite converged metadata, Re200 false periodic metadata, low CFL fixed at 1, and final response admits viscous/gradient instability."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 2,
-      "notes": "Many attempts but no credible complete regression set."
+      "score": 1,
+      "notes": "No committed solver tests; tools include plotting/sanity scripts. No independent solver rerun; prior validator fails missing M0.15 package and Re200 horizon."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 2,
-      "notes": "Curated tip clean; workspace contains extensive raw build/results."
+      "notes": "Curated source/report separate from workspace raw output, but report has explicit MISSING assets and x=0 force figures."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.78
+  "overall_score": 2.2
 }

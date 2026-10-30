@@ -255,64 +255,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Source/config present; no independent rebuild."
+        "score": 4,
+        "notes": "Immutable d477eaf clean CMake build succeeds with warnings in network-disabled cfd-bench using /opt/external; no CFD rerun."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 3,
-        "notes": "CLI source exists; only self-reported smoke evidence."
+        "score": 2,
+        "notes": "main.cpp:1676\u20131690 accepts solve, case and output only; no restart argument or restoration found."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 2,
-        "notes": "One 1732-line solver monolith."
+        "notes": "Most solver functionality is in one main.cpp (~1700 lines); helper plotting tools are separate."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
-        "score": 4,
-        "notes": "No internal external-solver call found; no external search per trust policy."
+        "score": 3,
+        "notes": "No source-evident internal existing-solver wrapper; external similarity search excluded by trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 3,
-        "notes": "Case JSON parsing, but limited evidence."
+        "notes": "Case JSON and CGNS path are parsed generically; no two-filename-only dispatch identified."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 3,
-        "notes": "MPI APIs/partition structures present; no evaluator MPI comparison."
+        "score": 1,
+        "notes": "main.cpp:1708\u20131712 reads and retains full Mesh on all ranks during solve, prohibited by TASK.md:227; METIS and halo APIs are present."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 2,
-        "notes": "Admitted viscous instability and bad Re20 force."
+        "score": 1,
+        "notes": "Re20 forces change substantially despite converged metadata, Re200 false periodic metadata, low CFL fixed at 1, and final response admits viscous/gradient instability."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 2,
-        "notes": "Many attempts but no credible complete regression set."
+        "score": 1,
+        "notes": "No committed solver tests; tools include plotting/sanity scripts. No independent solver rerun; prior validator fails missing M0.15 package and Re200 horizon."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 2,
-        "notes": "Curated tip clean; workspace contains extensive raw build/results."
+        "notes": "Curated source/report separate from workspace raw output, but report has explicit MISSING assets and x=0 force figures."
       }
     ],
     "disqualification_flags": [
@@ -357,7 +357,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.78
+    "overall_score": 2.2
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -367,78 +367,78 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 3,
-        "notes": "Conservative equations stated."
+        "score": 2,
+        "notes": "main.cpp assembles compressible FV residual, but physical-time inner norm excludes added BDF source; package quality is poor."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 3,
-        "notes": "CGNS/METIS structures present."
+        "notes": "main.cpp:172 CGNS mesh read and :351 METIS partition; full mesh retained every rank during solve."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 2,
-        "notes": "Single-file residual path only partially evidenced."
+        "notes": "main.cpp:729 onward assembles residual; :1515\u20131546 adds transient source to vector but target test uses spatial-only l2_norm, so required total residual miss count unknown."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 2,
-        "notes": "Rusanov present; weak low-Mach outcome."
+        "notes": "Rusanov flux implemented; low-Mach cases show poor drag and convergence. Report accurately identifies Rusanov."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 2,
-        "notes": "BC code claimed but viscous outcomes fail."
+        "notes": "Source has farfield/slip/no-slip branches and tangential wall shear approximation; Re20 drag grossly incorrect and field contours missing."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 2,
-        "notes": "Least-squares/Barth claims, no credible production verification."
+        "notes": "main.cpp:494 onward LSQ gradients and :561 limiter exist; code clamps gradients for robustness, and no order convergence study exists."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 2,
-        "notes": "Positivity claimed, later NaN admitted."
+        "notes": "Barth-type limiter and positivity fallback exist; final response admits viscous-gradient failures and later NaNs."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 1,
-        "notes": "Viscous gradients crash or yield nonphysical forces."
+        "notes": "main.cpp:869\u2013877 approximates wall shear; M0.15 laminar Cd\u22480.908 and Re20 Cd rises 7.69\u219211.50 over final 50 steps, demonstrating poor delivered physics."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 1,
-        "notes": "Diagonal local update, not claimed LU-SGS."
+        "notes": "main.cpp:939\u2013974 lusgs_solve uses independent per-cell diagonal update with no forward/back neighbor sweeps or physical-time diagonal; terminal correctly describes simple diagonal scheme."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 1,
-        "notes": "BDF2 structure exists but Re200 unfinished."
+        "notes": "main.cpp:1515\u20131530 adds BDF source but :1539\u20131546 tests spatial-only l2 norm; canonical Re200 ends at 0.05/300 with false periodic metadata."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 3,
-        "notes": "METIS/Isend-Irecv structures present, no rank evidence."
+        "score": 1,
+        "notes": "METIS and neighbor halo calls exist, but every rank retains full Mesh in solve and no rank comparison is supplied."
       }
     ],
     "disqualification_flags": [
@@ -473,7 +473,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 1.95
+    "overall_score": 1.71
   },
   "result_review": {
     "review_area": "result_review",
@@ -483,50 +483,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 2,
-        "notes": "Only 6/8 structural packages; m015 inv incomplete."
+        "score": 1,
+        "notes": "M0.15 inviscid canonical package absent; Re200 false completed/periodic at t0.05, and Re20 falsely converged with strong force drift."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 2,
-        "notes": "Explicit full validator fails on m015 metadata and Re200 t=300."
+        "notes": "Prior explicit validator fails missing M0.15 metadata and Re200 t300 horizon; structural validation alone does not establish physical credibility."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 1,
-        "notes": "No complete credible eight-case submission."
+        "notes": "No credible complete benchmark suite: missing M0.15, false Re200 and Re20 success statuses and weak steady residual reductions."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 1,
-        "notes": "Wrong/implausible Re20 drag and partial residual reductions."
+        "notes": "Re20 Cd rises 7.69\u219211.50 in last 50 rows and M0.15 laminar Cd\u22480.908; raw metadata and terminal/report claims disagree."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
         "score": 1,
-        "notes": "Line plots exist but report displays explicit missing field panels."
+        "notes": "Original delivered report shows explicit MISSING field boxes and steady force plots collapse at physical_time zero. Snapshot main PDF is absent under vendor policy; original report remains evidence."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
         "score": 1,
-        "notes": "Report contradicts manifest/final response and overclaims completion."
+        "notes": "Report contains source-authored MISSING field placeholders and summaries inconsistent with current raw rows and terminal response."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 1,
-        "notes": "Raw result evidence is uncommitted; figure panels/source mapping incomplete."
+        "notes": "M0.15 canonical results missing; report and current Re20 values differ, raw metadata git_revision=null and producing source is unbound."
       }
     ],
     "disqualification_flags": [
@@ -556,7 +556,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 1.3
+    "overall_score": 1.1
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/02",
