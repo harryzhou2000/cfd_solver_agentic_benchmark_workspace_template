@@ -346,7 +346,67 @@
         "id": 7,
         "flag": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
-        "evidence": "Current selected results/naca0012_m200_laminar_re5000 metadata says completed=true/converged at step406 with 3.004 orders, but last40 Cd rows fall 0.8537653491\u21920.5291502491 (38.0%), half means 0.76240268\u21920.59653982. TASK.md:140,172 require clear early convergence or stable force plateau. Source revision in metadata 26ef1cb names an initial commit with no solver source; do not infer final source generated these rows. The previous DQ7 rationale based only on below-target inviscid residual orders is not sufficient; those plateau claims remain independently under review."
+        "evidence": "Current selected results/naca0012_m200_laminar_re5000 metadata says completed=true/converged at step406 with 3.004 orders, but last40 Cd rows fall 0.8537653491\u21920.5291502491 (38.0%), half means 0.76240268\u21920.59653982. TASK.md:140,172 require clear early convergence or stable force plateau. Source revision in metadata 26ef1cb names an initial commit with no solver source; do not infer final source generated these rows. The previous DQ7 rationale based only on below-target inviscid residual orders is not sufficient; those plateau claims were independently assessed as bounded with material limitations, not automatic target-convergence failures."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No internally called existing CFD solver executable found in inspected source; no exhaustive external-authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence of synthetic force/residual files; defective derived vorticity is separate from source data."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Configured case input and CGNS mesh loading are not limited to two hard-coded filenames."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Selected Re20 np1/2/8 Cd 2.071663/2.071659/2.071655; NACA M015 Cd 0.001153759/0.001153984/0.001167319. The report overstates NACA agreement but no order-one absolute force discrepancy is established."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Source implements implicit and BDF2 paths; explicit-only integration not established."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Source implements major reported algorithms; incorrect vorticity derivative and report force-summary discrepancy are separately scored, not absent claimed solver methods."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "Re200 vorticity helper is a demonstrably inconsistent derivative but reproduces the delivered image from the same selected field; wrong derived quantity alone does not establish unrelated source data."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "partition.cpp:308\u2013347 performs root-only global preprocessing and METIS distribution; all-rank full-state/geometric-only fallback not established."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Limited reconstruction and limiter are used in submitted source; no evidence binds a production-disabled run to the report claim. Historical binary attribution remains unproven."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "Final source projects surface wall traction tangentially and boundary semantics do not establish an undocumented adjacent-cell no-slip failure."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "No specific named-variable swap established; the flawed vorticity derivative is a quality defect, not proof of a velocity image mislabeled as vorticity."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source CFD core found in inspected source; no exhaustive external-authorship search."
       }
     ]
   },
@@ -355,6 +415,7 @@
     "Structural validation is separate from substantive numerical scoring.",
     "Raw solver artifacts remain workspace evidence and were excluded from the curated submission tip.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All ten sections, eight cases, 27 review points and 13 numbered DQ rules assessed to available evidence; exact historic producing source/binary remains unbound. No CFD/Re200 rerun."
   ]
 }

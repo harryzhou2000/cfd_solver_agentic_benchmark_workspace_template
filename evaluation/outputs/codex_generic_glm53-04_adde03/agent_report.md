@@ -4,7 +4,7 @@ Submission `codex/generic/glm53-04` at `c06741d9dc5739d9f4a6d6c0285e3c69c8cf8052
 
 ## Verdict
 
-**85/100; DQ=true under DQ7 (partial calibration).** A separate M2 laminar case is labeled converged while drag remains materially unstable; the prior inviscid residual-only rationale is under review.
+**85/100; DQ=true under DQ7 (qualified full calibration).** M2 laminar is labeled converged while drag remains materially unstable; the earlier inviscid residual-only rationale is withdrawn. Historical producing source remains unbound.
 
 ## Evidence
 
@@ -60,3 +60,8 @@ Replaced generic repeated notes with criterion-specific source and result eviden
 M2 inviscid 2→3: report PDF pp11–13 deliver the numeric summary, residual/force histories and Mach/pressure fields; last-10% Cd and Cl are stable with bounded oscillation although residual reduction is only about 0.14 orders. This is limited plateau credit, not a residual-target convergence claim. M2 laminar remains DQ7 for materially changing drag. DQ4 is not supported by the reported small absolute rank differences; DQ8 is not assigned to a numerically defective derivative of the demonstrated same field. Source contains METIS, neighbor halos, transient BDF, limited reconstruction and labeled Mach/pressure mappings; no evidence found for the corresponding absent-algorithm, fake-partition, explicit-only or misnaming triggers, but historic run binding limits any production-specific conclusion. No external similarity search was performed and no finding of copying is asserted.
 
 Selected M2 laminar metadata records 2026-09-03 17:08:18–17:08:24 UTC, Re200 17:08:25–17:36:24 UTC and revision 26ef1cb (init with no solver source); final solver.cpp mtime 2026-09-04 08:11:52 UTC, SHA ce98e2a32caaf00f518cda0bcc71f34a599e645d377e203e8d9b7d1a6afda397, identical at source commit 836aedb and final c06741d. These timestamps do not establish what changed or that final source produced earlier results. This record remains partial.
+
+
+## Qualified full review — 2026-10-31
+
+All ten rubric sections, eight case scores, 27 review points and 13 DQ rules were assessed to the available evidence limit. Rubric remains 85/100 with DQ7 for the M2 laminar 38% final drag decrease; inviscid residual shortfalls alone are not used as a false-success rationale. The reproducible same-field vorticity derivative defect is a visualization/analysis deduction, not proof of an unrelated source for DQ8. Rank force differences are small in absolute terms and do not establish DQ4. Historical selected metadata names an init-only revision, and the final source was modified after the runs, so exact producing source/binary remains unbound; earlier partial sections are historical checkpoints. No CFD, rank or Re200 rerun.

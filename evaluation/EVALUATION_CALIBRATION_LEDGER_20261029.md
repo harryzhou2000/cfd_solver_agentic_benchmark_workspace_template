@@ -94,7 +94,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
 | `codex_generic_glm53-02_ff20c7` | fully reviewed, qualified: 72/100, DQ7 for M2 laminar; historic source binding unresolved |
 | `codex_generic_glm53-03_d469fb` | fully reviewed, qualified: 67/100, DQ7/8; production source/rank data unbound |
-| `codex_generic_glm53-04_adde03` | partial: all cases and rubric reviewed, DQ7 supported; historical production-source attribution unresolved |
+| `codex_generic_glm53-04_adde03` | fully reviewed, qualified: 85/100, DQ7; historic production-source attribution unresolved |
 | `codex_generic_opus46-01_3a72ea` | partial: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
 | `codex_generic_opus46-02_d8fed8` | partial: 35/100, mandatory placeholder rejection, DQ2 and TASK full mesh; binary/force provenance unresolved |
 | `codex_generic_opus5-01_83492a` | partial: 90/100, DQ not established; Re200 binary/fallback attribution unresolved |
@@ -678,6 +678,8 @@ glm53-04 criterion checkpoint: all 27 review-point notes now cite their actual c
 
 
 glm53-04 final checkpoint: M2 inviscid 2→3, considering pp11–13 readable case report and bounded raw late drag/lift despite only ~0.14 residual orders; plateau credit is limited, not target-convergence credit. Selected M2 laminar metadata start/end 2026-09-03 17:08:18–17:08:24 UTC, Re200 17:08:25–17:36:24 UTC, revision26ef1cb init without solver source; final solver.cpp mtime 2026-09-04 08:11:52 UTC and SHA `ce98e2a32caaf00f518cda0bcc71f34a599e645d377e203e8d9b7d1a6afda397`, equal at source commit 836aedb and final c06741d. No proof final source generated selected historical data. DQ7 supported; DQ4 rank absolute changes small; DQ8 not applied to same-field defective derivative alone; source METIS/BDF/reconstruction/figure mapping does not support DQ9/5/10/12 from available data. Other production-specific claims and external source similarity are not exhaustively proven; retain partial status. No unsteady rerun.
+
+glm53-04 qualified full review: all ten rubric sections, eight cases, 27 review points and 13 DQ rules were assessed to the available evidence limit. 85/100 and DQ7 remain; inviscid residual shortfall alone is not the DQ rationale. Reproduced same-field vorticity derivative defect is a visualization/analysis deduction, not proof of an unrelated field for DQ8. Historic source/binary remains unbound and explicitly qualified; earlier partial language is historical. No CFD/rank/Re200 rerun; both gates required.
 
 
 opus46-01 initial review: accepted f679644 main report rebuilt from source, all 15 PDF pages visually reviewed; report.tex:511–514 marks cylinders and M2 laminar incomplete, while selected workspace packages claim success and their generation relation is unresolved. Re200 metadata periodic but all 10001 t>=200 rows Cd4.8532587021, Cl−0.0023802775736, no observed oscillation: DQ7, case2→1. M2 laminar last65 Cd3.974293→3.146444 (20.8% decline), metadata converged but report manifest says not converged; independently supports DQ7. M015 inviscid 4→2 due last308 Cd0.072724→0.061706 and high low-Mach drag; M015 laminar 4→2 due Cd0.583 implausibly large though numeric/plot evidence exists. M080 report Cd0.050/0.219 present; missing Cl numeric summary remains. Fixed output.cpp:247–248 2024 timestamps do not prove execution time or source version. Further source/rubric review pending; no CFD rerun.
