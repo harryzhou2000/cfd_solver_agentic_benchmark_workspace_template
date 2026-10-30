@@ -103,7 +103,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_sonnet46-02_dac37b` | partial: all cases, PDF, source/rubric checked; DQ6/DQ7 and placeholder rejection; exact historical binary remains unbound |
 | `codex_generic_sonnet5-01_540ddf` | partial: PDF, all cases, source/rubric examined; DQ8 proven; historical binary and remaining figure/fallback provenance uncertain |
 | `codex_generic_sonnet5-02_6c0ac0` | partial: all cases, PDF, source/rubric reviewed; DQ7 proven; historical binary/remaining figure provenance uncertain |
-| `codex_generic_vllm-qwen38-01_2045e0` | unreviewed |
+| `codex_generic_vllm-qwen38-01_2045e0` | partial: delivered PDF/numeric evidence corrected, M200 inviscid 2→3; other cases/source/rubric/DQ pending |
 | `codex_generic_vllm-qwen38-02_d47362` | unreviewed |
 | `codex_glm52-m3_01_919b67` | unreviewed |
 | `codex_glm52-m3_02_ca46e4` | unreviewed |
@@ -829,3 +829,7 @@ sonnet5-02 report consistency: replaced obsolete 83/DQ=false verdict with curren
 sonnet5-02 source/validator checkpoint: multi-zone TRI/QUAD/BAR with interface welding, root-only global mesh setup, METIS/neighbor halos and reconstruction exchange inspected. Source plateau test uses residual only, not force stability. Validator passes six NACA packages/report and rejects both honestly failed cylinders. Review points now criterion-specific; exact binary/DQ boundaries partial. No CFD rerun.
 
 sonnet5-02 DQ boundary checkpoint: DQ7 supported by two force-drift cases; explicitly failed cylinders are not false success. Root-only mesh/METIS/neighbors, active reconstruction, no-slip boundary output inspected; no DQ4/6/8/9/10/11/12 inferred without qualifying proof. report.tex:942–945 reverses ordering of quoted 19% and 34% viscous fractions. Historical binary null revision and remaining figure/source attribution partial.
+
+vllm-qwen38-01 PDF/case checkpoint: All 50 pages of the accepted sibling main PDF were rendered and visually inspected; the PDF SHA256 `c8943305dfb4e6fdae87518654f1ea6b23f2940fe348a354ac58a794e31dd8c8` matches checkpoint `18e70a9`, and tracked main TeX matches submission `e185a0a`. Contrary to prior notes, the report includes case residual/force histories and computed fields; curated-tip omission of figure blobs remains a reproducibility limitation. Immutable report.tex:942–951 also lists all three laminar numeric CL/CD values.
+
+The sole completed M200 inviscid case has readable numeric summary, residual/force plots (PDF p29) and Mach/pressure contours (p30). Checkpoint-matched force SHA256 `2ef8f5d9559e9e0c69de0fc544c6a50edfd8f4fb8e3b95cc6fe32003329670a0` gives final400 Cd0.0920658–0.0931395 and Cl−0.0021059..−0.0003083; its score rises 2→3 with residual/force variation limiting confidence. The old Re200 note's St0.16 is a reference range, while report.tex:1528–1544 states partial t30 FFT St≈0.1333 and identifies the result as failed; score1 remains. Other case physics, source/rubric/DQ review remains partial. No Re200 rerun.
