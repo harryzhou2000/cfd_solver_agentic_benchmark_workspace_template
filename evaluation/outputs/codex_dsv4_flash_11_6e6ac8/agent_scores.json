@@ -29,8 +29,8 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 3,
-          "notes": "CMake documented; immutable report build passes but solver not clean-built."
+          "score": 4,
+          "notes": "Immutable 2cd0844 clean CMake build succeeds with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB, /opt/external dependencies; no CFD rerun."
         },
         {
           "id": "code.cli",
@@ -64,8 +64,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Partition and MPI source present; result evidence weak."
+          "score": 1,
+          "notes": "main.cpp:87\u2013123 retains full GlobalMesh on every rank through solver iterations; solver.cpp:1187\u20131201 places MPI_Allreduce inside a rank-0-only steady logging branch, risking deadlock or collective mismatch."
         },
         {
           "id": "code.robustness",
@@ -89,7 +89,7 @@
           "notes": "Curated code is clean; result artifacts excluded."
         }
       ],
-      "overall_score": 3.04,
+      "overall_score": 2.89,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -148,7 +148,7 @@
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 2,
-          "notes": "Laminar divergence limits validation."
+          "notes": "solver.cpp:875\u2013881 integrates full viscous traction and adds Fv_local[1] unscaled to y contribution, rather than promised separated tangential force. Submitted Re20 force history has zero viscous force throughout despite surface Cf range -3.24 to +3.24; git_revision=null so source-to-output linkage is uncertain."
         },
         {
           "id": "cfd.implicit",
@@ -161,18 +161,18 @@
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 2,
-          "notes": "BDF2 source/report but no credible transient result."
+          "score": 1,
+          "notes": "Transient BDF2 residual code exists but no completed Re200 result. solver.cpp:1271 keeps BDF1 active for every resumed step when restart_step>0; :1430 labels any fully completed transient statistically_periodic without checking shedding."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 3,
-          "notes": "Partition source present; no rank comparison."
+          "score": 1,
+          "notes": "METIS/local halos exist, but full GlobalMesh remains on every rank and rank-0-only steady MPI_Allreduce at solver.cpp:1187\u20131201 is incorrect collective ordering; no actual rank comparison available."
         }
       ],
-      "overall_score": 3.04,
+      "overall_score": 2.76,
       "disqualification_flags": []
     },
     "result_review": {
@@ -196,51 +196,51 @@
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 1,
-          "notes": "Report admits broad instability/divergence."
+          "notes": "Seven steady outputs claim plateau, but M0.15 inviscid drifts 8.4% over last 100 Cd values; Re200 metadata/force history absent and terminal reports failure."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 1,
-          "notes": "No credible canonical converged evidence."
+          "notes": "Cd 25.193 for Re20, Cd 0.5138 low-M laminar and 0.0072 M2 laminar, weak residual reductions and force drift severely limit credibility."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 2,
-          "notes": "Committed short-test figures only."
+          "score": 1,
+          "notes": "Accepted report has force/residual histories but all field images show full-domain color disks with body/wake unresolved; no usable Re200 plots."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 3,
-          "notes": "4-page report builds and is candid."
+          "score": 1,
+          "notes": "Report.tex:451\u2013463 contradicts itself about Re200 completion, claims residual reductions incompatible with metadata, reports Re20 Cd\u22482.01 vs 25.193 and misassigns force split columns."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 2,
-          "notes": "Limited figure/report traceability; manifest excluded."
+          "score": 1,
+          "notes": "Output metadata git_revision=null; seven report table cases can be matched to CSV but force component columns are wrong. Report PDF matches tracked TeX, whose Re200 claims contradict each other."
         }
       ],
-      "overall_score": 1.7,
+      "overall_score": 1.2,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 70,
+    "total_scored": 56,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 7,
-        "notes": "Report builds; solver build/CLI not independently rerun; failed outputs."
+        "notes": "Immutable clean CMake build succeeds with warnings using /opt/external; seven validator-accepted steady packages and failed Re200."
       },
       {
         "id": "mesh_geometry",
@@ -267,36 +267,36 @@
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 8,
-        "notes": "Laminar failures limit credit."
+        "score": 5,
+        "notes": "Viscous residual and surface shear exist, but solver.cpp:875\u2013881 accumulates full traction and unscaled Fv_local[1] into y force. Submitted four viscous force histories have zero viscous components despite nonzero surface Cf; source/output git linkage uncertain."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 11,
-        "notes": "LU-SGS/BDF2 source claims, no successful evidence."
+        "score": 8,
+        "notes": "Implicit and transient code exist, but Re200 has no completed run; :1271 keeps first-order BDF1 on all resumed transient steps, :1430 claims periodicity without testing it."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 7,
-        "notes": "Partition/MPI code but no credible rank comparison."
+        "score": 3,
+        "notes": "METIS and neighbor exchange exist but full mesh replicated on every rank throughout solve; rank-0-only MPI_Allreduce calls in solver.cpp:1187\u20131201 risk deadlock or collective mismatch. No np comparison."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 4,
-        "notes": "Validator rejects canonical first result as failed."
+        "score": 2,
+        "notes": "Seven structural passes are not physical acceptance: M0.15 inviscid plateau drifts 8.4%, Re20 Cd 25.19 and other laminar drag values suspect; Re200 incomplete."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 3,
-        "notes": "Compiling candid report, only short-test visualization coverage."
+        "score": 1,
+        "notes": "Accepted PDF has histories but full-domain contours do not resolve body or wake; force split/report residual claims and Re200 completion prose contradict submitted evidence."
       },
       {
         "id": "extensibility",

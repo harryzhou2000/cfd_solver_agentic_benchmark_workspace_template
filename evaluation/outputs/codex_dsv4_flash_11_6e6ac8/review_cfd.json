@@ -56,7 +56,7 @@
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 2,
-      "notes": "Laminar divergence limits validation."
+      "notes": "solver.cpp:875\u2013881 integrates full viscous traction and adds Fv_local[1] unscaled to y contribution, rather than promised separated tangential force. Submitted Re20 force history has zero viscous force throughout despite surface Cf range -3.24 to +3.24; git_revision=null so source-to-output linkage is uncertain."
     },
     {
       "id": "cfd.implicit",
@@ -69,15 +69,15 @@
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 2,
-      "notes": "BDF2 source/report but no credible transient result."
+      "score": 1,
+      "notes": "Transient BDF2 residual code exists but no completed Re200 result. solver.cpp:1271 keeps BDF1 active for every resumed step when restart_step>0; :1430 labels any fully completed transient statistically_periodic without checking shedding."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 3,
-      "notes": "Partition source present; no rank comparison."
+      "score": 1,
+      "notes": "METIS/local halos exist, but full GlobalMesh remains on every rank and rank-0-only steady MPI_Allreduce at solver.cpp:1187\u20131201 is incorrect collective ordering; no actual rank comparison available."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.04
+  "overall_score": 2.76
 }

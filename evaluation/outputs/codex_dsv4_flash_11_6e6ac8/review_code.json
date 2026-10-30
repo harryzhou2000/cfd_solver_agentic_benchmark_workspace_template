@@ -6,8 +6,8 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 3,
-      "notes": "CMake documented; immutable report build passes but solver not clean-built."
+      "score": 4,
+      "notes": "Immutable 2cd0844 clean CMake build succeeds with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB, /opt/external dependencies; no CFD rerun."
     },
     {
       "id": "code.cli",
@@ -41,8 +41,8 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Partition and MPI source present; result evidence weak."
+      "score": 1,
+      "notes": "main.cpp:87\u2013123 retains full GlobalMesh on every rank through solver iterations; solver.cpp:1187\u20131201 places MPI_Allreduce inside a rank-0-only steady logging branch, risking deadlock or collective mismatch."
     },
     {
       "id": "code.robustness",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.04
+  "overall_score": 2.89
 }

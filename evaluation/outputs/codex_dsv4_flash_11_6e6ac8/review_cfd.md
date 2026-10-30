@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:23:39.963727+00:00
+Generated: 2026-10-30T04:26:36.114825+00:00
 
-**Overall score: 3.04**
+**Overall score: 2.76**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,16 +30,16 @@ Generated: 2026-10-30T04:23:39.963727+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3 | Limiter source present. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | Laminar divergence limits validation. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | solver.cpp:875–881 integrates full viscous traction and adds Fv_local[1] unscaled to y contribution, rather than promised separated tangential force. Submitted Re20 force history has zero viscous force throughout despite surface Cf range -3.24 to +3.24; git_revision=null so source-to-output linkage is uncertain. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | LU-SGS claimed and source present. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2 | BDF2 source/report but no credible transient result. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | Transient BDF2 residual code exists but no completed Re200 result. solver.cpp:1271 keeps BDF1 active for every resumed step when restart_step>0; :1430 labels any fully completed transient statistically_periodic without checking shedding. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3 | Partition source present; no rank comparison. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 1 | METIS/local halos exist, but full GlobalMesh remains on every rank and rank-0-only steady MPI_Allreduce at solver.cpp:1187–1201 is incorrect collective ordering; no actual rank comparison available. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T04:23:39.963727+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.04
+- Overall score (0-5): 2.76
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
