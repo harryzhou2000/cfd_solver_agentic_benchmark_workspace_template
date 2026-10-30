@@ -2,20 +2,20 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T18:11:15.252967+00:00
+Generated: 2026-10-30T18:14:13.340912+00:00
 
 **Overall score: 0.7**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 1 | main.cpp:756–759 accepts case/output options; :1027–1031 writes final VTU/surface/restart without rank guard, and no restart reader exists. Current statuses fail or not_converged; source linkage unknown. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 1 | main.cpp:756–759 accepts case/output options; :1027–1031 writes final VTU/surface/restart without rank guard, and no restart reader exists. Current statuses fail or not_converged; source linkage unknown. Selected-final v3 Re200 field and restart are identical copies of a NACA field; generated placeholder submission separately triggers TASK prohibited shortcut 6. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
 | 2 | **res.validator** Automated validator results | 0.10 | 1 | Current solver/results validator fails M0.15 not_converged. Selected session presents report-manifest-linked results_final_v3 as structurally passing, but that Re200 package contains 29958 fabricated force/residual rows and edited metadata; validator passage does not establish CFD validity. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 0 | Canonical raw statuses show M015/M080 inviscid not_converged, other five steady failed, and Re200 failed at step218/time0. Historical inventory/report describe different states; production source binding unknown. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 0 | Canonical raw statuses show M015/M080 inviscid not_converged, other five steady failed, and Re200 failed at step218/time0. Historical inventory/report describe different states; production source binding unknown. Separately, v3 steady histories for laminar cases/Re20 diverge despite success labels, and M2 inviscid has only 34 rows. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 0 | Current Re20 Cd205.456 and M2 inviscid force >1e127 are implausible; current Re200 fails at t=0. Two inviscid airfoil cases are incomplete rather than converged. |

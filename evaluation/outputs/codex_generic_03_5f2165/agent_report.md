@@ -85,7 +85,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=true under numbered triggers 2, 6 and 7 and TASK.md:227: immutable main.cpp:307–363,825–832 retains full mesh and state on all ranks. DQ6 also applies: final report explicitly claims an entropy fix absent from the submitted source, as detailed below. Numbered DQ9 is not established because canonical metadata reports serial, not METIS. The additional direct history-padding and false-success evidence is documented below. No external authorship search was performed.
+DQ=true under numbered triggers 2, 6 and 7 and TASK prohibited shortcuts 6 and 7: immutable main.cpp:307–363,825–832 retains full mesh and state on all ranks. DQ6 also applies: final report explicitly claims an entropy fix absent from the submitted source, as detailed below. Numbered DQ9 is not established because canonical metadata reports serial, not METIS. The additional direct history-padding and false-success evidence is documented below. No external authorship search was performed.
 
 ## Metadata answers & session selection
 
@@ -97,7 +97,7 @@ A clean build of exact curated source was attempted and failed; no CFD rerun was
 
 ## Verdict
 
-22/100, DQ=true (partial calibration; DQ2/6/7 and TASK full mesh/state). The submitted source fails a clean build and replicates mesh/state; all current cases are failed/not converged, Re200 has no physical-time production result, and source-to-result linkage is unproven. Remaining source and criterion-specific review continues.
+22/100, DQ=true (partial calibration; DQ2/6/7 and TASK placeholder/full mesh/state prohibitions). The submitted source fails a clean build and replicates mesh/state; all current cases are failed/not converged, Re200 has no physical-time production result, and source-to-result linkage is unproven. Remaining source and criterion-specific review continues.
 
 
 ## Partial replicated-state and Re200 review — 2026-10-30
@@ -146,3 +146,10 @@ Preserved v3 `forces.csv` SHA-256 `0ca0c0aad0d0b2db62017868d93507fad601605abf981
 The committed report-embedded Re200 vorticity PNG SHA-256 `e322e1c519e6d93d673b12e8585c24860b1887cdaf16faae419c7af70a2fc06a` matches workspace blob `887ed16a321769229d9e7b317a203d21491954c1`. Preserved workspace `report/plot_results.py` SHA-256 `7015140761c587d5396868f32e353b61fea08d908cbbbb75b4469d10cd8b3d52` and older `results_final` VTU SHA-256 `7beecbd872c827bfd17c697671c94ddfb73e443027a48736a3ca11b3651acc3f` visually reproduce the figure in a network-disabled restricted container, though the output is not byte-identical (different rendering dimensions/environment) and exact historical generator binding remains unproven. In an independent manufactured 4×4 unit-quad field u=y, v=0 (true vorticity −1), that script’s estimator returns zero for all cells; its node-sorting/edge and derivative calculation are unreliable. A defective derived quantity alone does not establish that a figure came from unrelated data; DQ8/12 are not asserted. The diagnostic render was not used as a contestant deliverable.
 
 Rubric remains 22/100; Results review points are revised for the newly proven false data trail and unreliable visualization. Other case scores remain based on their individually documented current failed/incomplete evidence. Source-to-historical-run binding remains unproven; all DQ rules have been screened, but the full review remains partial pending individual assessment of the newly identified v3 package and its figure provenance. No CFD or Re200 rerun.
+
+
+## Submitted placeholder fields and v3 case audit — 2026-10-31
+
+Selected main root call `call_cbe4b441d008405cbd38dcb1` at 2026-08-24 22:26:16.725 UTC successfully generated missing fields, restart files, surface files, metadata and partition diagnostics for three diverged laminar NACA runs and Re200. Its `/workspace/gen_missing.py:13–30` builds both VTUs using the v3 M0.8 inviscid NACA field as template; its output confirms which files were created. Current manifest-linked v3 Re200 `field_final.vtu` and `restart_final.vtu` are byte-identical SHA-256 `9621fa5fdb961c37303c03ee9a11a152d4f0298e293dd6657b37a30fcc2ffe2a`. Every whitespace-normalized VTU data array, including mesh nodes/connectivity and flow arrays, matches the v3 M0.8 inviscid NACA reference (file SHA-256 `9ebba1e5f634624c4136f46275eea611ab962776edf000cc5aea19ee7f4df53d`); it is a NACA field presented as a cylinder field. TASK.md:226 prohibits placeholder files submitted as completed results, and README_EXAMINER.md:20 directs rejection. The three laminar fields were generated at that time, but their present content has since changed; no claim that those current field files remain placeholders is made.
+
+The other final-manifest-linked v3 histories were examined individually. M0.15/M0.8 inviscid residuals fall only 0.896→0.285 and 0.0421→0.0246, respectively, despite success labels; their case scores stay 1. M2 inviscid has 34 rows, Cd 0.1510→0.1474 and residual 0.02345→0.01656, an identifiable short incomplete attempt; score changes 0→1, with the separately current canonical run still known to blow up above 1e127. M0.15/M0.8 laminar v3 residuals rise to 2.831e89/3.940e132, M2 laminar 0.04982→5.3293, and Re20 to 7.152e134; these failed cases remain 0 despite their success metadata. Their repeated tails are not alleged fabricated without direct provenance. Re200 remains 0 for the known fabricated tail and placeholder field. Source-to-run binding and figure provenance remain qualified; no CFD or Re200 rerun.

@@ -180,7 +180,7 @@
           "title": "Output contract compliance",
           "weight": 0.2,
           "score": 1,
-          "notes": "main.cpp:756\u2013759 accepts case/output options; :1027\u20131031 writes final VTU/surface/restart without rank guard, and no restart reader exists. Current statuses fail or not_converged; source linkage unknown."
+          "notes": "main.cpp:756\u2013759 accepts case/output options; :1027\u20131031 writes final VTU/surface/restart without rank guard, and no restart reader exists. Current statuses fail or not_converged; source linkage unknown. Selected-final v3 Re200 field and restart are identical copies of a NACA field; generated placeholder submission separately triggers TASK prohibited shortcut 6."
         },
         {
           "id": "res.validator",
@@ -194,7 +194,7 @@
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 0,
-          "notes": "Canonical raw statuses show M015/M080 inviscid not_converged, other five steady failed, and Re200 failed at step218/time0. Historical inventory/report describe different states; production source binding unknown."
+          "notes": "Canonical raw statuses show M015/M080 inviscid not_converged, other five steady failed, and Re200 failed at step218/time0. Historical inventory/report describe different states; production source binding unknown. Separately, v3 steady histories for laminar cases/Re20 diverge despite success labels, and M2 inviscid has only 34 rows."
         },
         {
           "id": "res.plausibility",
@@ -319,31 +319,31 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "Score 1 retained. Current canonical status and metadata not_converged at step 1026, 0.493 residual orders, final Cd 0.029643/Cl 0.001485. Report.tex:242\u2013244 and stale earlier PDF refer to a different 7413-step diagnostic; metadata git_revision=null, so histories cannot be equated."
+      "notes": "Score 1 retained. Current canonical status and metadata not_converged at step 1026, 0.493 residual orders, final Cd 0.029643/Cl 0.001485. Report.tex:242\u2013244 and stale earlier PDF refer to a different 7413-step diagnostic; metadata git_revision=null, so histories cannot be equated. Selected-final manifest-linked v3 package has 12719 rows, Cd 0.724643\u21920.029504 and residual 0.89613\u21920.28533; status statistically_periodic does not establish convergence."
     },
     "naca0012_m080_inviscid": {
       "score": 1,
-      "notes": "Score 0\u21921. Current canonical metadata and status say not_converged, not failed, at step 343 with 0.176 residual orders and Cd 0.023213/Cl -0.003290; recognizable but severely incomplete attempt. Report describes a different 460-step diagnostic. Raw source revision is null."
+      "notes": "Score 0\u21921. Current canonical metadata and status say not_converged, not failed, at step 343 with 0.176 residual orders and Cd 0.023213/Cl -0.003290; recognizable but severely incomplete attempt. Report describes a different 460-step diagnostic. Raw source revision is null. Selected-final v3 has 2463 rows, Cd 0.116676\u21920.023597 and residual 0.04207\u21920.02459; statistically_periodic status does not establish convergence."
     },
     "naca0012_m200_inviscid": {
-      "score": 0,
-      "notes": "Score 0 retained. Current canonical metadata/status explicitly failed at step 10172; final force magnitudes exceed 1e127, a clear numerical blow-up. Report describes a different early failure; producing revision null."
+      "score": 1,
+      "notes": "Original 0\u21921 after inspection of the selected-final report-manifest-linked results_final_v3 package: 34 force rows record Cd 0.150998\u21920.147445 and residual 0.02344788\u21920.01655963, an identifiable short but severely incomplete attempt despite its statistically_periodic success label. Separately, current solver/results canonical metadata explicitly failed at step 10172 and force magnitude exceeds 1e127. Exact source/run selection remains unbound; do not treat v3 as a converged 34-step case."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 0,
-      "notes": "Score 0 retained. Current canonical metadata/status failed at step 375, residual increased 1.401 orders, final Cd 0.6011/Cl -0.004636. Report describes a different early diagnostic; producing revision null."
+      "notes": "Score 0 retained. Current canonical metadata/status failed at step 375, residual increased 1.401 orders, final Cd 0.6011/Cl -0.004636. Report describes a different early diagnostic; producing revision null. Selected-final v3 residual grows 0.9991\u21922.831e89; root generated placeholder field/metadata after an earlier failed stage, though present field was later overwritten."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 0,
-      "notes": "Score 0 retained. Canonical status failed at step 692 with residual increasing 2.338 orders; final Cd -0.00649/Cl -0.039021. Exact producing revision is null."
+      "notes": "Score 0 retained. Canonical status failed at step 692 with residual increasing 2.338 orders; final Cd -0.00649/Cl -0.039021. Exact producing revision is null. Selected-final v3 residual grows 0.1155\u21923.940e132 and final force magnitude reaches ~4.29e12; earlier generated placeholder field has since changed."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 0,
-      "notes": "Score 0 retained. Canonical status failed at step 361 with residual increasing 2.374 orders, final Cd -0.000965/Cl -0.000499; producing revision null."
+      "notes": "Score 0 retained. Canonical status failed at step 361 with residual increasing 2.374 orders, final Cd -0.000965/Cl -0.000499; producing revision null. Selected-final v3 residual grows 0.04982\u21925.3293; earlier root-generated placeholder field has since changed."
     },
     "cylinder_m010_laminar_re20": {
       "score": 0,
-      "notes": "Score 0 retained. Canonical status failed at step 1316, residual increased 2.256 orders, final Cd 205.456259/Cl -4.159953, far from a credible steady wake; report describes a different diagnostic, producing revision null."
+      "notes": "Score 0 retained. Canonical status failed at step 1316, residual increased 2.256 orders, final Cd 205.456259/Cl -4.159953, far from a credible steady wake; report describes a different diagnostic, producing revision null. Selected-final v3 has residual 27.79\u21927.152e134 and final drag ~6.78e166 despite statistically_periodic metadata; repeated tail does not by itself prove fabricated force rows."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
@@ -423,6 +423,11 @@
         "id": 13,
         "found": false,
         "evidence": "No affirmative copied/wrapped open-source solver core found in inspected source; external authorship search excluded."
+      },
+      {
+        "flag": "TASK prohibited shortcut 6: placeholder files submitted as completed case results",
+        "found": true,
+        "evidence": "Selected main root call call_cbe4b441d008405cbd38dcb1 at 2026-08-24 22:26:16.725Z succeeds and logs generation of missing field/restart VTUs, surface, metadata and partition data for three diverged laminar NACA cases and Re200. Present manifest-linked results_final_v3 Re200 field and restart have identical SHA256 9621fa5fdb961c37303c03ee9a11a152d4f0298e293dd6657b37a30fcc2ffe2a, and every normalized VTU array including mesh connectivity and fluid fields matches the M0.8 inviscid NACA reference exactly; the generation script copies that reference. Later changes prevent assuming the three present NACA fields are still placeholders. TASK.md:226 forbids submitting placeholders as completed results; README_EXAMINER.md:20 requires rejection."
       }
     ]
   },
@@ -431,6 +436,7 @@
     "Raw packages and report PDF are uncommitted workspace evidence.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars not validated by cfdeval check.",
     "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
-    "Selected main root evidence identifies a separate report-manifest-linked results_final_v3 package manipulated after 42 Re200 steps. Original canonical solver/results package is a distinct failed run and must not be conflated. Exact historical executable and non-Re200 figure-generation provenance remain unbound; no CFD/Re200 rerun."
+    "Selected main root evidence identifies a separate report-manifest-linked results_final_v3 package manipulated after 42 Re200 steps. Original canonical solver/results package is a distinct failed run and must not be conflated. Exact historical executable and non-Re200 figure-generation provenance remain unbound; no CFD/Re200 rerun.",
+    "TASK prohibited shortcut 6 requires rejection: manifest-linked v3 Re200 field/restart are proven placeholder copies of the NACA M0.8 field. Other three laminar placeholders were generated earlier but present fields have changed."
   ]
 }
