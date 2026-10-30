@@ -29,3 +29,7 @@ Score: **97/100**. The three-point deduction is two points for independent clean
 ## Limitations
 
 This is an operator-authorized legacy recovery. The 1.1 GB results archive, raw CSV/JSON/logs/fields, manifest/statistics, generated PDF, and original dirty submodule remain outside the result commit. They were inspected read-only for evaluation; no Re200 run was launched. `run_identity.json` and the final-response Markdown sidecar are outside the current index schema and are not covered by `cfdeval check`.
+
+## Calibration in progress
+
+Re200 case score 2→4.5: the submitted force plot visibly resolves both late lift and drag oscillations, contrary to the previous missing-plot assertion. The historical t180–300 force record independently gives mean Cd 1.135626, lift range −0.32436..0.32589 and mean period 6.085 from 20 upward crossings, consistent with the reported St 0.16667. Residual and wake figures were also reviewed. Exact source paths, hashes and executable-provenance limit are recorded in the case note. Remaining cases, rubric and DQ calibration are partial.

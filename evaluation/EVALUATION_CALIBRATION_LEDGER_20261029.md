@@ -114,7 +114,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
 | `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
-| `codex_gpt56_01_cb349f` | unreviewed |
+| `codex_gpt56_01_cb349f` | partial: Re200 2→4.5; remaining rubric/cases/DQ under review |
 | `codex_gpt56_02_38616e` | unreviewed |
 | `codex_gpt56_03_93b257` | unreviewed |
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
@@ -1021,3 +1021,6 @@ glm52_03 source/review checkpoint: clean immutable archive builds in network-dis
 
 
 glm52_03 DQ boundaries checkpoint: immutable attempt Re20 step30000 np1/np2/np8 Cd4.551593/4.535406/4.519919 and Cl0.0161764/0.0147988/−0.0430847; M2 inviscid step40000 np4/np8 Cd0.093675/0.093932. These are not order-one absolute changes; unknown historical binaries/controls and near-zero lift limit attribution. Source releases setup global mesh before iteration and implements real METIS/halos, explicit no-slip values, Roe/Rusanov and disclosed first-order modes. Added individually evidenced provisional false flags for other DQ criteria; DQ8 remains specifically undecided due manifest-listed mis-mapped figure not embedded in main report PDF, not a claim image is correct. DQ7 remains true, rubric68. Overall partial pending DQ8 interpretation, binary and figure attribution. No CFD rerun.
+
+
+gpt56_01 Re200 correction: report af2fcc3:solver/report/report.tex:593,1271 supplies mean Cd1.1356, mean Cl−0.001273, amplitude0.32513 and St0.16667. Its embedded force PNG SHA256 172b3490ac8e2f9d823775416ef5a2a18e1f3e5bed80b505af16022216222cb4 visibly resolves late Cd AND Cl; residual SHA256 738afd651e0e6ffe828b948deeac1042f0e1db9f57bbfca57982e5509d084bfe and wake SHA256 45739274cf49560d2a44330811482aac724674164263eaac12cdf4739b5f2b21 also inspected. Contestant historical benchmark-submodule commit 0ee54aed0ba23ee06f9f654d0bb50410504a966d manifest maps these plots to case outputs; selected final response directly identifies them. Original submodule workspace forces SHA256 858673c522f6d1cb9fa89a0d8daf7fe4cd75c9f80a313c5eb89933d81e86cb9f t180–300 mean Cd1.135626, Cl−0.324364..0.325889, 20 upward crossings mean period6.084998 (frequency0.16434) consistent with reported FFT St0.16667. Metadata 87 misses/30000, fraction0.9971, last ratio0.000896876; reported source revision461385a solver.cpp/main.cpp byte-identical to curated source, and strict ratio directly counts misses. Binary hash remains unbound. Old 2-point cap falsely claimed no late force plot; independent score2→4.5, rubric97 unchanged pending full review. No CFD rerun.
