@@ -45,7 +45,7 @@ Reviewed source, selected Codex root, raw workspace packages, terminal response,
 
 ## Recorded scores and disqualification
 
-The current 100-point rubric is 78/100; section and weighted review details are in `agent_scores.json`. Independent case scores:
+The current 100-point rubric is 77.5/100; section and weighted review details are in `agent_scores.json`. Independent case scores:
 
 | Case | Score |
 |---|---:|
@@ -108,3 +108,8 @@ Checkpoint-matched `results/cylinder_m010_laminar_re200/forces.csv` SHA256 `ff17
 ## Clean build and source lineage — 2026-10-30
 
 Immutable `4965edd` clean CMake build succeeded in network-disabled `cfd-bench` with two CPUs, 3 GiB and 256 pids, using documented `CFD_EXTERNALS_ROOT=/opt/external/cfd_externals/install` and `CFD_EXTERNALS_HEADER_ROOT=/opt/external`. The registered `cns2d_unit` CTest passed 1/1 with benchmark meshes mounted read-only at `/workspace/cfd_solver_agentic_benchmark`. This is one registered CTest target, not an independent production CFD run. `git diff cc42ab4..f22bc25 -- solver/src solver/CMakeLists.txt` is empty; report `sec_verification.tex:53–94` itself documents previous revision-stamp problems and the later fix. This source identity supports lineage but does not establish every runtime or binary detail.
+
+
+## Restart and transient residual — 2026-10-30
+
+`restart_io.cpp:106–108` writes time and step in its header, but `readRestart` (:117 and `solver_context.cpp:67–69`) returns only the state. `transient_driver.cpp:49–57` initializes both BDF history levels from that state and resets time and step to zero. A meaningful state restart is implemented and validated; uninterrupted transient BDF continuation is not. Build/CLI rubric8→7.5 and total78→77.5. The source's transient loop :90–133 evaluates spatial plus BDF physical-time residual before its inner-target test, distinct from pseudo-time-regularized convergence checks seen in other runs. Selected binary attribution is supported by identical `cc42ab4..f22bc25` source trees but not independently proven for every run. No transient rerun.

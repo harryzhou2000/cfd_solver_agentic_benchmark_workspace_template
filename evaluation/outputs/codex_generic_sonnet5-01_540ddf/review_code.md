@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:58:07.694090+00:00
+Generated: 2026-10-30T08:00:09.748757+00:00
 
-**Overall score: 3.79**
+**Overall score: 3.74**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -12,7 +12,7 @@ Generated: 2026-10-30T07:58:07.694090+00:00
 | 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable 4965edd clean build succeeded in network-disabled cfd-bench (2 CPUs,3 GiB,256 pids) using documented external roots. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | Source and curated submission reviewed. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3.5 | State restart exists with validation, but restart_io.cpp:106–108,117 and transient_driver.cpp:49–57 discard stored time/step and restart BDF history at the loaded state, so it is not an uninterrupted transient continuation. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Source and curated submission reviewed. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T07:58:07.694090+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.79
+- Overall score (0-5): 3.74
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -35,8 +35,8 @@
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "score": 3.5,
+          "notes": "State restart exists with validation, but restart_io.cpp:106\u2013108,117 and transient_driver.cpp:49\u201357 discard stored time/step and restart BDF history at the loaded state, so it is not an uninterrupted transient continuation."
         },
         {
           "id": "code.organization",
@@ -88,7 +88,7 @@
           "notes": "Source and curated submission reviewed."
         }
       ],
-      "overall_score": 3.79,
+      "overall_score": 3.74,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -232,14 +232,14 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 78,
+    "total_scored": 77.5,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "Immutable 4965edd clean build succeeded in network-disabled cfd-bench with 2 CPUs/3 GiB/256 pids, documented external roots and benchmark meshes mounted read-only; its registered CTest unit target passed 1/1. Restart and CLI review remains partial."
+        "score": 7.5,
+        "notes": "Immutable 4965edd clean build and registered unit CTest pass. restart_io.cpp:106\u2013108 writes time/step into the header, but readRestart returns only state and transient_driver.cpp:49\u201357 resets both history levels and time; uninterrupted BDF restart is not supported."
       },
       {
         "id": "mesh_geometry",

@@ -102,6 +102,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_generic_sonnet5-01_540ddf/review_code.md` (overall: 3.79)
+- Code review scorecard: `codex_generic_sonnet5-01_540ddf/review_code.md` (overall: 3.74)
 - CFD methods review: `codex_generic_sonnet5-01_540ddf/review_cfd.md` (overall: 4.0)
 - Result review: `codex_generic_sonnet5-01_540ddf/review_results.md` (overall: 3.42)
