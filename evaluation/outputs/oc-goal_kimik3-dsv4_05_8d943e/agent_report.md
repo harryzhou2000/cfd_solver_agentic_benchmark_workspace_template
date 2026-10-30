@@ -16,4 +16,4 @@ The prior **91/100; DQ=false** is superseded by the provisional checkpoint above
 
 SHA-256 `run_identity.json`: `8443fdec2f0aaa0f760a23c0b0b0890abac0d97e9b0e211c9ae481ea3021c5f1`.
 
-Final-response status: absent. Reason: OpenCode session records did not yield a terminal contestant-response artifact. The identity sidecar is unindexed and not validated by `cfdeval check`. No evaluator build/MPI rerun was performed, and Re200 was not rerun. K3 context window is unavailable from the workspace-local catalog.
+Final-response status: unknown pending operator attribution. A completed stop message with terminal text is followed by a later assistant row with no parts or finish metadata; no response has been selected. The identity sidecar is unindexed and not validated by `cfdeval check`. An isolated clean build passed, with no registered CTests; no MPI case or Re200 rerun was performed. K3 context window is unavailable from the workspace-local catalog.
