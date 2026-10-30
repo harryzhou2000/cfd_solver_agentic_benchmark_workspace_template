@@ -113,7 +113,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52-m3_06_a2dc07` | partial: 68/100, DQ7; historical binary and figure binding unverified |
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
 | `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
-| `codex_glm52_03_e7d38e` | unreviewed |
+| `codex_glm52_03_e7d38e` | partial: provisional 71/100, DQ7; case/rubric review ongoing |
 | `codex_gpt56_01_cb349f` | unreviewed |
 | `codex_gpt56_02_38616e` | unreviewed |
 | `codex_gpt56_03_93b257` | unreviewed |
@@ -1003,3 +1003,6 @@ glm52_02 surface-friction correction: immutable 1e29ab3c output.cpp:107–109 un
 
 
 glm52_02 DQ boundaries checkpoint: immutable main.cpp:243–246 labels any max-step steady run converged without checking its stated stable-force condition. Re20 final5000 delivered rows Cd7.89684→8.86975 and Cl−0.83702→−0.38716, metadata converged, independently reinforce DQ7; runtime binary remains unbound. Other numbered triggers have individual source/provenance assessments: force-split/output failures do not automatically prove DQ6, unequal rank-run controls/endpoints do not prove DQ4, false vortex-shedding caption does not establish DQ8, and first-order experiments without production binding do not prove DQ10. Proper Mach input and explicit no-slip velocity confirmed. 27 criterion notes and individual case histories were reviewed but exact historical binary and image-to-data binding remain genuine limits; overall remains partial. No CFD rerun.
+
+
+glm52_03 historical provenance/DQ checkpoint: contestant workspace Git store has attempt 0305e4500d5c62cf325680114e794ba1d97a4e9b (Aug1 19:58:59 UTC), before selected final Aug1 19:59:29; final response identifies the delivered run branch. All eight case packages and report are tracked in that immutable contestant commit; curated 9532e19d solver/src differs only by removal of solver.cpp.bak. Re200 metadata SHA256 8d7ecfc0402e458b04753158bfd0a60386cfca231a3cd3eea73a2841c1b0d3d0 says completed/statistically_periodic, target0.001, zero misses/fraction1, last ratio1.082751244; report.tex:149–156 candidly admits no shedding. Force CSV SHA256 a01cd785e7c748d82b950aef81e5514cce03177a84131f19993f7c6ffb88c9d3 t180–300 Cd4.022308..4.052735, Cl−0.000918793..−0.000368475. solver.cpp:672–686 marks convergence after any per-iteration decrease or eight steps, :731–734 calls nondiverged transient periodic, :797–800 reports this as strict success. DQ7 false→true because metadata is false, while report honesty is preserved; actual strict miss proportion and executable remain unbound. Implicit11→8.5 and case-results7→5.5, total75→71. Existing report had empty score tables despite completed scorecard; replaced them with provisional verdict and directs reader to scorecard. Other cases, rubric and DQ partial; no CFD rerun.

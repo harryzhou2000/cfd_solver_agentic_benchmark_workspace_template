@@ -29,49 +29,13 @@
 
 ## Methodology
 
-Immutable curated submission `9532e19d7552900782e8835c441cbed2303178f5` was audited against reconstructed initial `de4960b2c72f0217b8e526539e02badbeebae9ca`. A detached temporary worktree at immutable attempt `0305e4500d5c62cf325680114e794ba1d97a4e9b` was validated explicitly: all eight canonical case directories and report returned OK. Those raw results are evaluator evidence only and were not copied into the submission or snapshot. Selected project-local Codex root is `019fbe25-8c45-7f20-a5e8-9501b5d23ba3`; terminal final response is preserved exactly.
+Immutable curated submission `9532e19d7552900782e8835c441cbed2303178f5` was audited against reconstructed initial `de4960b2c72f0217b8e526539e02badbeebae9ca`. A detached temporary worktree at immutable attempt `0305e4500d5c62cf325680114e794ba1d97a4e9b` was validated explicitly: all eight canonical case directories and report returned OK. Those historical contestant-delivered raw results are evidence and were not copied into the submission or snapshot. Selected project-local Codex root is `019fbe25-8c45-7f20-a5e8-9501b5d23ba3`; terminal final response is preserved exactly.
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
+## Calibration verdict
 
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
+Provisional rubric 71/100, disqualified under trigger 7. The case and review scores are recorded in agent_scores.json; the broader review remains partial.
 
-## Review-area scores (0-5 weighted, review_*.json)
-
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
-
-## Disqualification assessment
-
-DQ: **false**. Source inspection found no internal executable wrapper, explicit-only solver, or demonstrable fake MPI. Trust policy prohibits external copying investigation. The raw attempt metadata and report were structurally valid; Re200 lacks credible vortex shedding but that is scored as an incomplete result, not a DQ.
+Immutable contestant workspace Git attempt 0305e4500d5c62cf325680114e794ba1d97a4e9b metadata SHA256 8d7ecfc0402e458b04753158bfd0a60386cfca231a3cd3eea73a2841c1b0d3d0 reports completed/statistically_periodic, target0.001, fraction1, zero misses and last ratio1.082751244. Attempt report.tex:149–156 candidly says no vortex shedding; immutable force CSV SHA256 a01cd785e7c748d82b950aef81e5514cce03177a84131f19993f7c6ffb88c9d3 t180–300 Cd4.022308..4.052735, Cl−0.000918793..−0.000368475 confirms nearly steady force. Curated 9532e19d solver.cpp:672–686 accepts any per-iteration reduction or eight iterations as converged; :731–734 labels transient periodic unless diverged; :797–800 counts this as strict target success. Source matches attempt aside from removed .bak. Final ratio directly misses strict target, while full strict miss count and historical binary are unbound.
 
 ## Metadata answers & session selection
 

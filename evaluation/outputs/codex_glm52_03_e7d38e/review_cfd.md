@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:53:58.985310+00:00
+Generated: 2026-10-30T10:26:53.226659+00:00
 
-**Overall score: 3.56**
+**Overall score: 3.41**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -36,7 +36,7 @@ Generated: 2026-09-07T02:53:58.985310+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | LU-SGS steady implicit method is documented. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3 | BDF2 Re200 reaches t=300 but report admits no vortex shedding. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1.5 | Immutable contestant workspace Git attempt 0305e4500d5c62cf325680114e794ba1d97a4e9b metadata SHA256 8d7ecfc0402e458b04753158bfd0a60386cfca231a3cd3eea73a2841c1b0d3d0 reports completed/statistically_periodic, target0.001, fraction1, zero misses and last ratio1.082751244. Attempt report.tex:149–156 candidly says no vortex shedding; immutable force CSV SHA256 a01cd785e7c748d82b950aef81e5514cce03177a84131f19993f7c6ffb88c9d3 t180–300 Cd4.022308..4.052735, Cl−0.000918793..−0.000368475 confirms nearly steady force. Curated 9532e19d solver.cpp:672–686 accepts any per-iteration reduction or eight iterations as converged; :731–734 labels transient periodic unless diverged; :797–800 counts this as strict target success. Source matches attempt aside from removed .bak. Final ratio directly misses strict target, while full strict miss count and historical binary are unbound. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3 | METIS/MPI paths and claimed comparisons exist; not independently rerun. |
@@ -54,7 +54,7 @@ Generated: 2026-09-07T02:53:58.985310+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.56
+- Overall score (0-5): 3.41
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
