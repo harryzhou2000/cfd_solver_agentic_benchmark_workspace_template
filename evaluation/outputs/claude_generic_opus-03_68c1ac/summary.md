@@ -8,7 +8,7 @@
 
 ## Snapshot
 
-- Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: no
+- Configs captured: yes · sessions analyzed: yes · env snapshot: yes · agent report/scores: yes / yes
 - Vendored report PDF: accepted
 - Session analysis: 2026-08-26T09:26:45.938000+00:00 → 2026-08-27T15:31:11.018000+00:00; 61×1800s buckets; idle 26 gaps / 58956s excluded; permission-wait candidates 0; tokens 288,608,693 (cache hit 0.979)
 
@@ -69,27 +69,27 @@
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: <task-notification>
 <summary>Goal check-in: background work still running</summary>
 </task-notification>
@@ -99,12 +99,12 @@ Goal check-in: «Complete the task defined in @cfd_solver_agentic_benchmark/ .
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: <task-notification>
 <summary>Goal check-in: background work still running</summary>
 </task-notification>
@@ -250,42 +250,42 @@ Goal check-in: «Complete the task defined in @cfd_solver_agentic_benchmark/ .
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
 1. Primary Request and Intent:
-   The
+   The 
   - resume: <task-notification>
 <summary>Goal check-in: background work still running</summary>
 </task-notification>

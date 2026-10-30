@@ -101,3 +101,10 @@ The submitted source is a substantial CFD implementation with structurally compl
 - `run_identity.json` SHA-256: `c726b5784f725dc68e5f3dd4c802060dd69dfd00939e80479221cb48bd5844e9`.
 - `contestant_final_response.md` SHA-256: `7290726c86eb46a3d9f7dee8a58932010dee271e4fdd626c58be422b433969eb`.
 - These are unindexed sidecars, so `cfdeval check` does not validate them.
+
+
+## Partial DQ review — 2026-10-30
+
+DQ remains true under trigger 7: immutable `solver.cpp:1330–1338` accepts 100 times the strict residual target after 100 iterations, and :1381–1385 marks max-inner exhaustion converged. Metadata therefore reports fraction 1 and no misses without establishing strict-target convergence; the actual number of strict misses is unknown. Report.tex:1192–1198 claims every step met the target. The canonical report figure manifest line 10 maps its Re200 plot to `results/cylinder_m010_laminar_re200/forces.csv`, byte-identical to the `results/re200_final/forces.csv` named by the run-status command (SHA-256 `dca863f47ed5c3e5efc2ce681badf204caa5105cd1a96511a6c0c756aed36d58`). The last 10% of its 30,001 rows has Cd from −41.0911 to 38.5662 and Cl from −18.5503 to 43.4364, not credible physical shedding.
+
+A separate TASK.md:227 prohibited full-mesh finding is added: `main.cpp:49–65` creates a solver and reads the full mesh on every rank; `solver.cpp:88–168` fills global nodes/cells/faces/adjacency; `solver.h:68` retains `global_mesh` as a member while main.cpp:77–98 builds local partitions and solves. Report.tex:579 and metadata falsely deny mesh replication. METIS and local solution state exist, so this is the TASK shortcut, not a claim of numbered trigger 9. Other cases, rubric and review points remain under review; no CFD rerun.
