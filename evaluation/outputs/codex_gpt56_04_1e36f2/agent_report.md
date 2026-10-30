@@ -6,7 +6,7 @@
 
 ## Session accounting correction
 
-Forked rollouts replayed large parent histories into descendants. Excluding inherited prefixes corrects the selected tree from 8,698,654,004 to 689,394,311 owned tokens, removing 8,009,259,693 replayed tokens. The current-price estimate changes from $2,980.9933 to $241.2582. Evaluation evidence, the 86/100 pre-DQ rubric, and the DQ verdict are unchanged.
+Forked rollouts replayed large parent histories into descendants. Excluding inherited prefixes corrects the selected tree from 8,698,654,004 to 689,394,311 owned tokens, removing 8,009,259,693 replayed tokens. The current-price estimate changes from $2,980.9933 to $241.2582. At that historical checkpoint the rubric was 86/100 and DQ4 was asserted; the later partial calibration below changes the basis and provisional score.
 
 ## Session selection
 
@@ -16,8 +16,10 @@ Project-local Codex root `019fcc41-b754-7b02-8563-d4cdfbcc43de`, with its 26 des
 
 The immutable source contains a modular C++17 CGNS/METIS/MPI finite-volume solver: JSON case loading, point-to-point halo exchange, global reductions, WLS reconstruction, Barth--Jespersen limiting, positivity/rejected-update recovery, Newtonian/Fourier fluxes, rank-local implicit correction, and a frozen-history BDF2 Re200 path. The submitted generated report records all eight required result packages as completed (seven steady converged, Re200 statistically periodic at `t=300`) and includes residual, force, surface, Mach, pressure, and wake figures. Re200 was not rerun.
 
-The report itself identifies a decisive MPI defect: NACA M0.15 inviscid final `C_D` is `0.00120899` at np=2 and `0.00210136` at np=8, a reported 73.81% difference. This is an order-one steady rank-count change and triggers DQ #4, even though the report discloses it honestly. Cylinder Re20's reported np2/np8 difference is only 0.01081%.
+The reported NACA M0.15 inviscid final `C_D` is `0.00120899` at np=2 and `0.00210136` at np=8: a 73.81% relative difference but 0.00089237 absolute near zero. Endpoints differ and both histories still evolve; production binaries and launch settings are unbound. An order-one absolute change caused by rank is not established, and DQ4 was removed. Cylinder Re20 reported np2/np8 difference is 0.01081%.
+
+A separate DQ8 is established: the embedded Re20 Mach contour was reproduced pixel-for-pixel from its named workspace field using the submitted plotting script, but that script assigns incorrect source-cell values to 19,338 of 19,870 triangles. All eight full Mach figures show the same reproducible mapping problem. The ledger records immutable image and source field hashes and per-case errors; this is not a finding that solver histories were fabricated. The Re200 force plot also compresses late drag beneath a startup spike, although its lift history and raw numerical shedding are present. A clean source build succeeds; no CTest tests are registered. No solver was rerun.
 
 ## Verdict
 
-The rubric records **86/100 before disqualification**, but the submission is **disqualified** for the order-one steady MPI inconsistency. The 27 point scorecards, ten-section rubric, eight independent case notes, and DQ evidence are in `agent_scores.json`. Result files and manifests were read only from the workspace and are not part of the immutable commit; their absence limits self-contained report traceability. `run_identity.json` and the required final-response Markdown sidecar are unindexed under the current index schema, so `cfdeval check` does not validate them.
+The provisional rubric records **84/100 before disqualification**; the submission is **disqualified** under DQ8 for the verified report-figure mapping defect. The full calibration remains partial, including outstanding case physics and other DQ checks. The 27 point scorecards, ten-section rubric, eight independent case notes, and DQ evidence are in `agent_scores.json`. Result files and manifests were read only from the workspace and are not part of the immutable commit; their absence limits self-contained report traceability. `run_identity.json` and the required final-response Markdown sidecar are unindexed under the current index schema, so `cfdeval check` does not validate them.
