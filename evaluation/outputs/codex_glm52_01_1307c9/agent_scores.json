@@ -45,21 +45,21 @@
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Modular mesh/flux/partition/solver/output source."
+          "notes": "Separate case_def, mesh, partition, flux, reconstruction, solver and output units support case-driven extension; Solver holds substantial coupled state."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "No direct internal wrapper evidence observed; trust policy prohibits external similarity investigation."
+          "notes": "Reviewed source has an in-repository FV implementation; no call to external CFD solver executable was found. Trust policy excludes exhaustive external similarity/authorship investigation."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "JSON case paths are parsed; no two-filename-only branch found."
+          "notes": "main.cpp consumes a case path and case_def.cpp parses case JSON; no two-filename-only branch found. Viscous high-Mach CFL is hard capped in solver.cpp:649\u2013656 and is a control limitation."
         },
         {
           "id": "code.mpi",
@@ -87,7 +87,7 @@
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 3,
-          "notes": "Readable but debug sources/build products existed only in historical raw tree."
+          "notes": "Readable modular C++ with lengthy disputed force-sign commentary and an unused steady innerIters variable; three debug-only source files removed by curated commit."
         }
       ],
       "overall_score": 3.08,
@@ -100,49 +100,49 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Conservative perfect-gas formulation present."
+          "notes": "flux.cpp:16\u201350 and :81\u201387 implement nondimensional perfect-gas primitive/conservative conversion and Euler flux; result accuracy is assessed separately."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "CGNS mixed/multizone geometry code."
+          "notes": "mesh.cpp reads CGNS zones and tags, resolves interzone interfaces, and constructs face adjacency. No independent exact geometric verification establishes all mesh accuracy."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "FV face residual plus MPI global norms."
+          "notes": "solver.cpp:451\u2013554 forms face fluxes with viscous contributions and uses MPI reductions; force instabilities and lack of controlled validation limit demonstrated quality."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Roe/Harten-Yee and Rusanov fallback source present."
+          "notes": "flux.cpp:115 onward supplies Roe/Harten entropy correction and Rusanov fallback; high-Mach viscous mode forces Rusanov in solver.cpp:649\u2013656."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Farfield/slip/no-slip code."
+          "notes": "solver.cpp:372\u2013405 uses freestream inflow and extrapolated outflow, slip reflection and mirrored adiabatic no-slip velocity. This is a simplified farfield treatment."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 4,
-          "notes": "Green-Gauss reconstruction present."
+          "notes": "solver.hpp defaults secondOrder true; solver.cpp:420\u2013438,486\u2013519 uses Green\u2013Gauss gradients and reconstructed face states. No measured smooth-grid convergence order and historical executable is unbound."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4,
-          "notes": "Barth-Jespersen and positivity paths present."
+          "notes": "solver.cpp:420\u2013438 computes Barth limiter and :486\u2013519 applies it; reconstructed positivity fallback and update scaling exist. No independent production fallback statistics."
         },
         {
           "id": "cfd.viscous",
@@ -156,14 +156,14 @@
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 3,
-          "notes": "Point-implicit diagonal LU-SGS approximation."
+          "notes": "solver.cpp:576\u2013636 executes a local-time point-implicit diagonal update, not full lower/upper sweeps; report.tex:763 explicitly discloses this. The stated multiple steady sweeps do not occur."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 1,
-          "notes": "BDF2 source exists, but Re200 uses fixed 15 inner iterations and strict target is miscounted."
+          "notes": "BDF2 history and inner loop exist; solver.cpp:743\u2013748 caps inner iterations at 15 and :845\u2013852 counts ratio>=1 misses despite target 0.001. Recovered last ratio 0.928488; actual strict miss total is unknown."
         },
         {
           "id": "cfd.mpi_partition",
@@ -372,6 +372,66 @@
         "flag": "TASK prohibited shortcut 7: full mesh replicated on every MPI rank during iterations",
         "found": true,
         "evidence": "Immutable 17a5ef3 solver/src/solver.hpp:64 retains globalMesh_ as a Solver member; solver.cpp:165\u2013205 reads the complete CGNS mesh and partitions it on every rank, builds local mesh and does not release globalMesh_; solver.cpp:46\u201352 continues into iterations in the same Solver lifetime. TASK.md:227 prohibits full-mesh replication on every rank during iterations. Report.tex:326 claims the opposite. METIS and neighbor halos are present; this separate shortcut is not numbered DQ9\u2019s narrower geometric-split/full-state condition. Exact historical executable binding remains unproven."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No invocation of an external complete CFD solver executable found in reviewed solver/build source."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct proof force or residual histories were generated without solving. Empty field placeholders and incorrect success statistics are separately proven."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "main.cpp and case_def.cpp take a case JSON and mesh path; no two-filename-only branch found."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Recovered NACA M0.15 and Re20 np1 histories are empty and failed at step 0; no matched valid rank-only force comparison is established."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "solver.cpp:576\u2013636 and implicit.cpp:11\u201349 implement point-implicit diagonal updates; this is not explicit-only."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Roe, reconstruction, viscous terms and BDF2 structures exist. Report.tex:763,774 explicitly discloses the diagonal implicit approximation and missing full sweeps; its misleading sweep claim is deducted without asserting a concealed missing core algorithm."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "Main report force figure for M0.15 has extrema consistent with recovered force CSV; nested field manifest names empty field_final.vtu while plot_field_combined.py reads per-rank centroid VTUs. Incorrect manifest is a traceability defect; a specific report image using unrelated output is not proven. Exact historical figure generation binding is qualified."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "partition.cpp:61 invokes METIS, solution state uses local/ghost arrays and neighbor halos; persistent full global mesh violates separate TASK shortcut 7, not the narrower full-state/geometric-only DQ9."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "solver.hpp defaults secondOrder true and solver.cpp:420\u2013438,486\u2013519 calculates and applies reconstruction/limiter; exact historical executable binding is unproven, with no proof production disabled it."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "output.cpp:257\u2013268 writes zero no-slip boundary velocities and metadata describes boundary_value semantics; not undocumented adjacent cell-center velocities."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "plot_field_combined.py reads each named Mach/pressure field for corresponding plots; incorrect manifest and centroid interpolation are separately noted. A specific report image misnamed with the other variable is not established."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No wrapped or copied external CFD core identified in reviewed source. No exhaustive external authorship/similarity search was conducted under trust policy."
       }
     ]
   },

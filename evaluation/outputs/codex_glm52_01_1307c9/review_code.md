@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T19:04:54.194699+00:00
+Generated: 2026-10-30T19:05:46.289872+00:00
 
 **Overall score: 3.08**
 
@@ -15,13 +15,13 @@ Generated: 2026-10-30T19:04:54.194699+00:00
 | 2 | **code.cli** CLI and error handling | 0.10 | 2 | main.cpp:34–35 accepts --restart but solver.cpp:23–27 only stores it and no read implementation exists; output.cpp:441–450 writes only rank-zero-owned state. Case-driven parsing and error paths exist. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Modular mesh/flux/partition/solver/output source. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Separate case_def, mesh, partition, flux, reconstruction, solver and output units support case-driven extension; Solver holds substantial coupled state. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | No direct internal wrapper evidence observed; trust policy prohibits external similarity investigation. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | Reviewed source has an in-repository FV implementation; no call to external CFD solver executable was found. Trust policy excludes exhaustive external similarity/authorship investigation. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | JSON case paths are parsed; no two-filename-only branch found. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | main.cpp consumes a case path and case_def.cpp parses case JSON; no two-filename-only branch found. Viscous high-Mach CFL is hard capped in solver.cpp:649–656 and is a control limitation. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
 | 6 | **code.mpi** MPI correctness | 0.15 | 2 | partition.cpp:61 uses METIS and neighbor halos exist, but solver.hpp:64 and solver.cpp:165–205 retain a complete global mesh on every rank throughout iterations; no valid controlled np1/np8 comparison established. |
@@ -33,7 +33,7 @@ Generated: 2026-10-30T19:04:54.194699+00:00
 | 8 | **code.testing** Testing and validation evidence | 0.10 | 2.5 | Independent validator passed all eight recovered cases and report yet accepted eight empty final-field sentinels; clean build succeeds but CTest finds no tests. Valid numerical or rank-consistency demonstration remains lacking. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Readable but debug sources/build products existed only in historical raw tree. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Readable modular C++ with lengthy disputed force-sign commentary and an unused steady innerIters variable; three debug-only source files removed by curated commit. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 

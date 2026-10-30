@@ -7,49 +7,49 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Conservative perfect-gas formulation present."
+      "notes": "flux.cpp:16\u201350 and :81\u201387 implement nondimensional perfect-gas primitive/conservative conversion and Euler flux; result accuracy is assessed separately."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "CGNS mixed/multizone geometry code."
+      "notes": "mesh.cpp reads CGNS zones and tags, resolves interzone interfaces, and constructs face adjacency. No independent exact geometric verification establishes all mesh accuracy."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 4,
-      "notes": "FV face residual plus MPI global norms."
+      "notes": "solver.cpp:451\u2013554 forms face fluxes with viscous contributions and uses MPI reductions; force instabilities and lack of controlled validation limit demonstrated quality."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Roe/Harten-Yee and Rusanov fallback source present."
+      "notes": "flux.cpp:115 onward supplies Roe/Harten entropy correction and Rusanov fallback; high-Mach viscous mode forces Rusanov in solver.cpp:649\u2013656."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Farfield/slip/no-slip code."
+      "notes": "solver.cpp:372\u2013405 uses freestream inflow and extrapolated outflow, slip reflection and mirrored adiabatic no-slip velocity. This is a simplified farfield treatment."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 4,
-      "notes": "Green-Gauss reconstruction present."
+      "notes": "solver.hpp defaults secondOrder true; solver.cpp:420\u2013438,486\u2013519 uses Green\u2013Gauss gradients and reconstructed face states. No measured smooth-grid convergence order and historical executable is unbound."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Barth-Jespersen and positivity paths present."
+      "notes": "solver.cpp:420\u2013438 computes Barth limiter and :486\u2013519 applies it; reconstructed positivity fallback and update scaling exist. No independent production fallback statistics."
     },
     {
       "id": "cfd.viscous",
@@ -63,14 +63,14 @@
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 3,
-      "notes": "Point-implicit diagonal LU-SGS approximation."
+      "notes": "solver.cpp:576\u2013636 executes a local-time point-implicit diagonal update, not full lower/upper sweeps; report.tex:763 explicitly discloses this. The stated multiple steady sweeps do not occur."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 1,
-      "notes": "BDF2 source exists, but Re200 uses fixed 15 inner iterations and strict target is miscounted."
+      "notes": "BDF2 history and inner loop exist; solver.cpp:743\u2013748 caps inner iterations at 15 and :845\u2013852 counts ratio>=1 misses despite target 0.001. Recovered last ratio 0.928488; actual strict miss total is unknown."
     },
     {
       "id": "cfd.mpi_partition",
