@@ -575,7 +575,7 @@
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 5,
-        "notes": "METIS K-way, Isend/Irecv neighbor halos, and Allreduce residual/force reductions are present."
+        "notes": "main.cpp:101\u2013122 root-loads and discards global mesh before solve; partition/halo source and np1/2/4/8 comparisons support MPI correctness, with historical executable hash unbound."
       },
       {
         "id": "code.robustness",
@@ -687,7 +687,7 @@
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 5,
-        "notes": "WLS piecewise-linear reconstruction with production activation after continuation is source/metadata supported."
+        "notes": "solver.cpp:1143,1209\u20131215 requires full reconstruction for 200 additional iterations before steady success; WLS/Barth implementation and reconstruction-order CTest are present."
       },
       {
         "id": "cfd.limiter",
@@ -722,7 +722,7 @@
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 5,
-        "notes": "Eight-rank NACA/cylinder final runs plus np1/2/4 comparisons show near-identical terminal forces."
+        "notes": "Historical same-revision Re20 np1/2/4/8 Cd agree to ~2e\u221210 and M015 inviscid to ~2e\u22129; controls use the same selected case, but exact binary hash is unavailable."
       }
     ],
     "disqualification_flags": [
@@ -796,7 +796,7 @@
         "title": "Visualizations",
         "weight": 0.15,
         "score": 5,
-        "notes": "49 manifest-traced curated figures include histories, Mach/pressure and Re200 wake vorticity."
+        "notes": "All 48 accepted compiled PDF pages rendered and visually checked; curated figures include seven steady force/residual/Mach plots and Re200 force/residual/wake. Re200 late Cd and Cl oscillations are readable."
       },
       {
         "id": "res.report",

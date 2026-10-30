@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:46:52.614235+00:00
+Generated: 2026-10-30T10:48:32.060640+00:00
 
 **Overall score: 4.73**
 
@@ -24,7 +24,7 @@ Generated: 2026-10-30T10:46:52.614235+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 4.5 | Boundary surface values and no-slip zero velocity are explicit; solver.cpp:1094–1102 computes tangential cf. Integrated force is full traction rather than report-claimed tangential projection. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 5 | WLS piecewise-linear reconstruction with production activation after continuation is source/metadata supported. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 5 | solver.cpp:1143,1209–1215 requires full reconstruction for 200 additional iterations before steady success; WLS/Barth implementation and reconstruction-order CTest are present. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 5 | Active Barth-Jespersen limiting and density/pressure safeguards are present. |
@@ -39,7 +39,7 @@ Generated: 2026-10-30T10:46:52.614235+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4.5 | Strict target ratio directly counts misses; historical Re200 reaches t300 with 87 misses/30000 and meaningful Cd/Cl/St. Restart does not preserve BDF history/time; executable hash remains unbound. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 5 | Eight-rank NACA/cylinder final runs plus np1/2/4 comparisons show near-identical terminal forces. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 5 | Historical same-revision Re20 np1/2/4/8 Cd agree to ~2e−10 and M015 inviscid to ~2e−9; controls use the same selected case, but exact binary hash is unavailable. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 

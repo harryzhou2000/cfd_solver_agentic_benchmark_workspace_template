@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:46:52.613519+00:00
+Generated: 2026-10-30T10:48:32.060228+00:00
 
 **Overall score: 4.35**
 
@@ -24,7 +24,7 @@ Generated: 2026-10-30T10:46:52.613519+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 5 | Source reads case JSON and CGNS topology; no case-id or mesh-name production branches found. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 5 | METIS K-way, Isend/Irecv neighbor halos, and Allreduce residual/force reductions are present. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 5 | main.cpp:101–122 root-loads and discards global mesh before solve; partition/halo source and np1/2/4/8 comparisons support MPI correctness, with historical executable hash unbound. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Defensive geometry/state checks and positivity safeguards are present; no fresh memory stress test. |

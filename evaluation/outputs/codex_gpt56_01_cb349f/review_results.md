@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:46:52.614710+00:00
+Generated: 2026-10-30T10:48:32.060935+00:00
 
 **Overall score: 4.58**
 
@@ -21,7 +21,7 @@ Generated: 2026-10-30T10:46:52.614710+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4.5 | Re20 Cd2.0467 and Re200 mean Cd1.1356, Cl amplitude0.325 and frequency≈0.164 are credible; M015 inviscid Cd continues changing ~26% relative in final200 at a small near-zero scale. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 5 | 49 manifest-traced curated figures include histories, Mach/pressure and Re200 wake vorticity. |
+| 5 | **res.visualization** Visualizations | 0.15 | 5 | All 48 accepted compiled PDF pages rendered and visually checked; curated figures include seven steady force/residual/Mach plots and Re200 force/residual/wake. Re200 late Cd and Cl oscillations are readable. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 3.5 | Report and figures are substantial; build_report.sh has working-directory defect and report.tex:195 incorrectly describes integrated viscous traction as tangential. |
