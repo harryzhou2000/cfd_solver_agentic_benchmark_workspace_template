@@ -199,63 +199,63 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "notes": "Historical recorded revision 934934ac builds and test_mesh passes; final curated source cannot configure because solver/tests is omitted, although historical commit/workspace retain it."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "main.cpp parses solve/case/output, restart and report-level; max-step diagnostic override is visible and production controls remain separate."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "Mesh, partition, halo, physics, reconstruction, time solver and output modules are separated; full mesh lifetime and curated tests omission remain."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "No internal existing-solver executable invocation found; external authorship investigation excluded by trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "JSON case settings and CGNS input paths are generic; no two-filename-only branch found."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 2.5,
+        "notes": "METIS, local solution/halo and rank force comparison exist, but main.cpp reads and retains full global mesh on every rank through solves."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "notes": "Historical mesh test passes and M0.15 rank outputs agree; laminar short attempts and Re200 fail, and full mesh replication limits scaling."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "notes": "Historical 934934ac test_mesh passes 1/1; test_numerics includes Re200 transient smoke and was not run. Tests were omitted from curated final source."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "notes": "Readable modules and report; documented CMake requires tests absent in curated tip, and report incorrectly claims no full-mesh replication."
       }
     ],
     "disqualification_flags": [
@@ -300,7 +300,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.0
+    "overall_score": 3.38
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -310,78 +310,78 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "Conservative perfect-gas equations, freestream normalization and case-Re viscosity are implemented."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "CGNS mixed cells, stitched cylinder geometry, adjacency and boundary families exist; historical test_mesh passes."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "Face residual uses reconstructed states and conservative accumulation; M0.15/Re20 steady results support partial verification."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 3.5,
+        "notes": "Rusanov flux exists and is used; no Roe/Harten\u2013Yee implementation or supersonic production case verified."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "Farfield, slip and no-slip adiabatic wall treatments exist; boundary-value surface output sets no-slip velocity zero."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "steady_solver.cpp:125\u2013149 evaluates R2\u2212R1 from least-squares reconstructed states as persistent defect correction."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "Barth limiter and positivity fallback act on reconstructed gradients; no independent convergence-order study delivered."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "No-slip viscous wall flux and forces.cpp:48\u201360 tangential wall shear exist; Re20 CD2.033 with stable force tail supports limited validation."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 4,
+        "notes": "CFL ramp, outer second-order defect and block LU-SGS inner sweeps deliver M0.15/Re20 residual target and stable-ish forces."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "notes": "BDF2 frozen-history two-loop exists; Re200 runs only t=1 and is marked failed, so full-horizon target and shedding are unverified."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 3,
-        "notes": "Source and limited submitted-result evidence."
+        "score": 2.5,
+        "notes": "METIS and neighbor halos plus M0.15 np1/2/4/8 comparison exist; full global mesh is retained per rank during solve."
       }
     ],
     "disqualification_flags": [
@@ -416,7 +416,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.0
+    "overall_score": 3.73
   },
   "result_review": {
     "review_area": "result_review",
@@ -426,50 +426,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 1,
-        "notes": "Only M0.15 inviscid validates; remaining required results missing or partial."
+        "score": 1.5,
+        "notes": "M0.15/Re20 canonical packages pass independent structural validation; other required cases missing/partial and Re200 explicitly failed."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": 1,
-        "notes": "Only M0.15 inviscid validates; remaining required results missing or partial."
+        "score": 2,
+        "notes": "Original all-case validator stops at missing M0.80. Separate read-only validation passes M0.15 and Re20."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 1,
-        "notes": "Only M0.15 inviscid validates; remaining required results missing or partial."
+        "score": 1.5,
+        "notes": "Two steady cases meet reported residual targets; M0.15 laminar diagnostic incomplete and Re200 t=1 failed."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 1,
-        "notes": "Only M0.15 inviscid validates; remaining required results missing or partial."
+        "score": 2,
+        "notes": "Re20 final CD2.033 and near-zero lift are plausible with stable last100 drag; M0.15 CD0.000705 near zero but relative late variation substantial."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 1,
-        "notes": "Only M0.15 inviscid validates; remaining required results missing or partial."
+        "score": 1.5,
+        "notes": "Delivered PDF contains histories, but NACA zoom misses body and full-domain Re20 field/vorticity shrinks wake to a few pixels."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 1,
-        "notes": "Only M0.15 inviscid validates; remaining required results missing or partial."
+        "score": 2,
+        "notes": "Report honestly describes short Re200 and absent other cases, but incorrectly frames only three benchmark cases and denies iteration-time full mesh."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 1,
-        "notes": "Only M0.15 inviscid validates; remaining required results missing or partial."
+        "score": 2,
+        "notes": "Sibling PDF corresponds to tracked TeX; tables/figures trace to cases but figure blobs are uncommitted and exact binary binding unproven."
       }
     ],
     "disqualification_flags": [
@@ -499,7 +499,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 1.0
+    "overall_score": 1.73
   },
   "measurements": {
     "note": "opencode harness: codex tool-usage/LOC extraction not applicable",

@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "Conservative perfect-gas equations, freestream normalization and case-Re viscosity are implemented."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "CGNS mixed cells, stitched cylinder geometry, adjacency and boundary families exist; historical test_mesh passes."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "Face residual uses reconstructed states and conservative accumulation; M0.15/Re20 steady results support partial verification."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 3.5,
+      "notes": "Rusanov flux exists and is used; no Roe/Harten\u2013Yee implementation or supersonic production case verified."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "Farfield, slip and no-slip adiabatic wall treatments exist; boundary-value surface output sets no-slip velocity zero."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "steady_solver.cpp:125\u2013149 evaluates R2\u2212R1 from least-squares reconstructed states as persistent defect correction."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "Barth limiter and positivity fallback act on reconstructed gradients; no independent convergence-order study delivered."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "No-slip viscous wall flux and forces.cpp:48\u201360 tangential wall shear exist; Re20 CD2.033 with stable force tail supports limited validation."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "CFL ramp, outer second-order defect and block LU-SGS inner sweeps deliver M0.15/Re20 residual target and stable-ish forces."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "notes": "BDF2 frozen-history two-loop exists; Re200 runs only t=1 and is marked failed, so full-horizon target and shedding are unverified."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 2.5,
+      "notes": "METIS and neighbor halos plus M0.15 np1/2/4/8 comparison exist; full global mesh is retained per rank during solve."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.0
+  "overall_score": 3.73
 }

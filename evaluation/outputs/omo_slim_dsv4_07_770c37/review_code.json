@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "notes": "Historical recorded revision 934934ac builds and test_mesh passes; final curated source cannot configure because solver/tests is omitted, although historical commit/workspace retain it."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "main.cpp parses solve/case/output, restart and report-level; max-step diagnostic override is visible and production controls remain separate."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "Mesh, partition, halo, physics, reconstruction, time solver and output modules are separated; full mesh lifetime and curated tests omission remain."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "No internal existing-solver executable invocation found; external authorship investigation excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 4,
+      "notes": "JSON case settings and CGNS input paths are generic; no two-filename-only branch found."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "score": 2.5,
+      "notes": "METIS, local solution/halo and rank force comparison exist, but main.cpp reads and retains full global mesh on every rank through solves."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "notes": "Historical mesh test passes and M0.15 rank outputs agree; laminar short attempts and Re200 fail, and full mesh replication limits scaling."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "notes": "Historical 934934ac test_mesh passes 1/1; test_numerics includes Re200 transient smoke and was not run. Tests were omitted from curated final source."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 3,
-      "notes": "Source and limited submitted-result evidence."
+      "notes": "Readable modules and report; documented CMake requires tests absent in curated tip, and report incorrectly claims no full-mesh replication."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.0
+  "overall_score": 3.38
 }
