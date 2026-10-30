@@ -669,15 +669,15 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 4,
+        "notes": "Immutable e49016d clean build succeeded in network-disabled cfd-bench with 2 CPUs/3 GiB/256 pids and documented external roots."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 3.5,
+        "notes": "io/restart.cpp loads state/time/step, but solver_driver.cpp:487\u2013494 restores identical histories and immediately applies BDF2 on resume, limiting transient continuation."
       },
       {
         "id": "code.organization",
@@ -719,7 +719,7 @@
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "notes": "Clean build passed; CTest reports no registered tests. Standalone test sources exist under solver/tools but were not independently executed."
       },
       {
         "id": "code.hygiene",
@@ -771,7 +771,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.0
+    "overall_score": 3.2
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -831,7 +831,7 @@
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "notes": "solver/residual.cpp:192\u2013203 integrates full wall traction in viscous force while projecting tangentially only for Cf; report claims tangential-only. Corrected wall gradients and viscous flux exist."
       },
       {
         "id": "cfd.implicit",
@@ -844,8 +844,8 @@
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 2.5,
+        "notes": "time_integrator.cpp:291\u2013331 forms total spatial+BDF inner residual; selected run is failed at t0.74 with 74/74 misses. Metadata typical inner count is midpoint of observed extrema, not actual mean."
       },
       {
         "id": "cfd.mpi_partition",
@@ -887,7 +887,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.0
+    "overall_score": 2.95
   },
   "result_review": {
     "review_area": "result_review",
@@ -911,29 +911,29 @@
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 1.5,
+        "notes": "M015 inviscid and M200 laminar have falsely periodic success despite continuing force drift; Re20 and Re200 explicitly fail. These are separate facts."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 2,
+        "notes": "M015 inviscid drag crosses negative while drifting; laminar cases have large forces or unsettled long windows; Re20 and Re200 fail. Individual force windows and limits are documented."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
         "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "notes": "All 19 accepted PDF pages are readable but contain no case plots; checkpoint includes 69 standalone PNGs with force, residual and field evidence. Figure/data traceability beyond checked cases remains under review."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+        "score": 2.5,
+        "notes": "Report explicitly discloses failed cylinders but claims periodic success for drifting steady cases and tangential-only viscous drag although source integrates full traction."
       },
       {
         "id": "res.traceability",
@@ -970,7 +970,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.0
+    "overall_score": 2.48
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/sonnet5-02",

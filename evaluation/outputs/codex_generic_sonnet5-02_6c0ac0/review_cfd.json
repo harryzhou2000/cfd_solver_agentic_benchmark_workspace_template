@@ -56,7 +56,7 @@
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 3,
-      "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+      "notes": "solver/residual.cpp:192\u2013203 integrates full wall traction in viscous force while projecting tangentially only for Cf; report claims tangential-only. Corrected wall gradients and viscous flux exist."
     },
     {
       "id": "cfd.implicit",
@@ -69,8 +69,8 @@
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails."
+      "score": 2.5,
+      "notes": "time_integrator.cpp:291\u2013331 forms total spatial+BDF inner residual; selected run is failed at t0.74 with 74/74 misses. Metadata typical inner count is midpoint of observed extrema, not actual mean."
     },
     {
       "id": "cfd.mpi_partition",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.0
+  "overall_score": 2.95
 }

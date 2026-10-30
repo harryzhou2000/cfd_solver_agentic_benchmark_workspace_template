@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T08:11:24.317823+00:00
+Generated: 2026-10-30T08:15:24.913245+00:00
 
-**Overall score: 3.0**
+**Overall score: 2.95**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,13 +30,13 @@ Generated: 2026-10-30T08:11:24.317823+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | solver/residual.cpp:192–203 integrates full wall traction in viscous force while projecting tangentially only for Cf; report claims tangential-only. Corrected wall gradients and viscous flux exist. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2.5 | time_integrator.cpp:291–331 forms total spatial+BDF inner residual; selected run is failed at t0.74 with 74/74 misses. Metadata typical inner count is midpoint of observed extrema, not actual mean. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T08:11:24.317823+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.0
+- Overall score (0-5): 2.95
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

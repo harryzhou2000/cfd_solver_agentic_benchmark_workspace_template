@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T08:11:24.318130+00:00
+Generated: 2026-10-30T08:15:24.913564+00:00
 
-**Overall score: 3.0**
+**Overall score: 2.48**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,16 +15,16 @@ Generated: 2026-10-30T08:11:24.318130+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 1.5 | M015 inviscid and M200 laminar have falsely periodic success despite continuing force drift; Re20 and Re200 explicitly fail. These are separate facts. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | M015 inviscid drag crosses negative while drifting; laminar cases have large forces or unsettled long windows; Re20 and Re200 fail. Individual force windows and limits are documented. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
+| 5 | **res.visualization** Visualizations | 0.15 | 3 | All 19 accepted PDF pages are readable but contain no case plots; checkpoint includes 69 standalone PNGs with force, residual and field evidence. Figure/data traceability beyond checked cases remains under review. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 2.5 | Report explicitly discloses failed cylinders but claims periodic success for drifting steady cases and tangential-only viscous drag although source integrates full traction. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
 | 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T08:11:24.318130+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.0
+- Overall score (0-5): 2.48
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
