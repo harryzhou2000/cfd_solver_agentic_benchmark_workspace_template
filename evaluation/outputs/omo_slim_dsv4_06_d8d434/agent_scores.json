@@ -347,12 +347,18 @@
         "text": "A report claims second-order reconstruction or a shock limiter that is disabled for production cases",
         "found": true,
         "evidence": "Immutable report.tex:261\u2013262 explicitly claims second-order reconstruction active in all production runs. solver.cpp:439\u2013448 explicitly uses first-order cell-average states and says reconstruction is disabled; fluxes.cpp has an unused reconstruction routine. Result metadata claims second order at 75ecfec/971f964; solver.cpp is identical at both recorded production revisions and final 6b84b6f, while exact historical executable bytes remain unbound."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "Immutable main.cpp:107\u2013108 reads full CGNS mesh on every rank, retains cfd::Mesh in scope and passes it to run_solver at :331. main.cpp is identical at 75ecfec recorded for the np1/2/4/8 M0.15 runs and final 6b84b6f. The np8 metadata reports full_mesh_replication_during_iterations=false. METIS partitioning and local states exist, so numbered DQ9 full-state/geometric-only wording is not assumed; exact historical binary bytes remain unbound."
       }
     ]
   },
   "limitations": [
     "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
     "2026-10-31 calibration: DQ10 established from explicit production-order claim and inactive reconstruction at matching recorded source revisions. Exact historical executable bytes remain unbound. Other source/DQ/case review remains partial.",
-    "2026-10-31 case review recognizes delivered PDF evidence despite absent committed figure blobs; field panels have near-body flow shrunk to a few pixels, so they do not meet the suitable contour floor. Zero laminar Cf/viscous drag is observed but its cause is unproven."
+    "2026-10-31 case review recognizes delivered PDF evidence despite absent committed figure blobs; field panels have near-body flow shrunk to a few pixels, so they do not meet the suitable contour floor. Zero laminar Cf/viscous drag is observed but its cause is unproven.",
+    "Full mesh is read and retained on every rank through the solve, prohibited separately by TASK shortcut 7; exact historical binary binding remains qualified."
   ]
 }
