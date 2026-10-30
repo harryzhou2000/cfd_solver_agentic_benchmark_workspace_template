@@ -96,7 +96,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_glm53-03_d469fb` | partial: DQ7 current Re200/Re20 evidence, provenance discrepancy; other criteria pending |
 | `codex_generic_glm53-04_adde03` | partial: all cases and rubric reviewed, DQ7 supported; historical production-source attribution unresolved |
 | `codex_generic_opus46-01_3a72ea` | partial: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
-| `codex_generic_opus46-02_d8fed8` | partial: mandatory placeholder rejection, DQ2 synthetic residual and TASK full mesh; remaining rubric pending |
+| `codex_generic_opus46-02_d8fed8` | partial: 35/100, mandatory placeholder rejection, DQ2 and TASK full mesh; binary/force provenance unresolved |
 | `codex_generic_opus5-01_83492a` | unreviewed |
 | `codex_generic_opus5-02_cac77b` | unreviewed |
 | `codex_generic_sonnet46-01_ac6940` | unreviewed |
@@ -700,3 +700,6 @@ opus46-02 source checkpoint: clean immutable 1904149 CMake build passed in netwo
 
 
 opus46-02 criterion checkpoint: source solver.cpp:244–248 calls compute_residual_norms (MPI_Allreduce :163–169) only from rank0 final-output block, creating multi-rank steady completion deadlock in submitted source; do not assume historical runs used this binary. MPI4→3. output.cpp:93 hardcodes surface cf=0 and solver.cpp:141–143 accumulates moment using cumulative instead of per-face forces; build/output4→3. types.h:11–12 hardcodes 2D/four-state arrays, limiting 3D/EOS/species despite modular structure, extensibility4→2; total39→35. All 27 review notes and ten rubric sections now evidence-specific. Further DQ and source attribution partial; no CFD rerun.
+
+
+opus46-02 DQ/PDF checkpoint: all five pages of accepted workspace-existing PDF SHA `f2d52bb09f7dbbbe67fb0872690cc13cac1cdce7ad6662ff07903b99601d1254` visually reviewed; no missing-asset placeholders, incomplete case coverage and rank-0-only Re20 contour separately scored. DQ10 not assigned because report.tex:103–105 explicitly discloses first-order production; DQ7 not established solely by unsupported target fraction or physically poor oscillatory force, actual strict failure count unknown. METIS exists and TASK full mesh is separately charged; selected np4/np8 NACA Cd0.0660201/0.0660022 and Re20 Cd9.40147/9.40147 show no order-one absolute rank mismatch. Numbered DQ2 and TASK6 placeholder rejection remain independently established. Other trigger boundaries are recorded in scorecard; external similarity not exhaustive. Preserve partial status for binary and force provenance; no CFD rerun.
