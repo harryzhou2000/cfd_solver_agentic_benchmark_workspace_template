@@ -1090,3 +1090,6 @@ gpt56_04 steady-convergence qualification (partial): M200 laminar metadata repor
 
 
 gpt56_04 validator and PDF checkpoint: fresh read-only examiner/validate_outputs.py passes all eight canonical workspace directories; result validator review4→5 and weighted overall recalculated. This is structural evidence only, not proof of numerical convergence or faithful figures. All 48 approved snapshot PDF pages rendered and visually scanned; report includes embedded plots and text without obvious missing assets, but the independently demonstrated plotted-field mapping defect remains. No CFD rerun.
+
+
+gpt56_04 additional DQ boundaries (partial): explicitly added numbered triggers9–13. METIS and scoped halos are source-supported; default reconstruction scale is1 and M200 laminar metadata explicitly records1, but earlier actual controls and exact binaries are unbound; no-slip surface outputs are genuine boundary values (solver.cpp:1801–04) rather than undocumented cell centers; Mach images request Mach even though incorrect triangle mapping triggers DQ8; external similarity is not investigated under the trust policy. DQ7 is qualified with the residual/short-force-window evidence, not asserted from uncertainty alone. Remaining full rubric, case physics and 27-point calibration still pending.
