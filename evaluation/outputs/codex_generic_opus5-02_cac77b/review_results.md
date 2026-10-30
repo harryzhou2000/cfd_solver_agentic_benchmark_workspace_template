@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:07:51.978214+00:00
+Generated: 2026-10-30T07:09:23.814745+00:00
 
-**Overall score: 4.38**
+**Overall score: 4.2**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,10 +15,10 @@ Generated: 2026-10-30T07:07:51.978214+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit examiner invocation passes all eight packages and report. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Seven steady cases converge and Re200 is periodic, with material Re200 accuracy deficits. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 3.5 | Metadata reports seven steady cases converged and Re200 periodic, but M015 inviscid last50 drag oscillates 0.001646–0.001893 and M080 inviscid lift rises0.000916–0.002436 despite Cd-only stopping. These limit confidence without proving DQ7. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Re200 St, drag, and lift-amplitude shortfalls are measured and disclosed. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3.5 | Re200 measured St0.1801/Cd1.2424/Cl amplitude0.4902 is low against stated reference; selected inviscid force tails show significant sensitivity and M2 laminar drag differs from same-Mach inviscid. Numerical limits do not prove fabricated outputs. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 4 | Accepted 42-page report contains extensive figures; sole Re200 force plot compresses late Cd beneath startup, failing explicit late-lift/drag floor. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T07:07:51.978214+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.38
+- Overall score (0-5): 4.2
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

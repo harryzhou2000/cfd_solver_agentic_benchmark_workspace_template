@@ -733,3 +733,6 @@ opus5-02 build/restart checkpoint: immutable 6f43c42 builds in network-disabled 
 
 
 opus5-02 M080 inviscid force checkpoint: selected final50 recorded steps Cl0.00091646→0.00243617, Δ0.0015197≈18% of final Cd0.00848768; Cd range0.00847988–0.00848768. Final100 Cl range0.00010025–0.00243617. Case4→3 for material lift sensitivity; report.tex:715–723 explicitly limits stopping criterion to Cd. Symmetric-flow expected lift near zero and no later evolution mean no DQ7 solely from relative lift change; retain uncertainty, do not claim proven failure. Re20 canonical np8 Cd2.02785667/Cl0.00055704 versus old rank1 citation Cd2.027598/Cl0.000573; score4.5 retained. No CFD rerun.
+
+
+opus5-02 case-result calibration: M015/M080 inviscid tail sensitivities documented above reduce confidence in selected steady forces; M2 laminar 400-row decay is qualified by final50 settling. Case-result rubric8→7, total91→90; result completion4→3.5, plausibility4→3.5. No DQ7 based solely on near-zero lift or decaying oscillations; no CFD rerun.

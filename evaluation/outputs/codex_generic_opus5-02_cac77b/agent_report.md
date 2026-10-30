@@ -97,7 +97,7 @@ An evaluator clean build and unit suite were completed with explicit JSON includ
 
 ## Verdict
 
-Score: **91/100; disqualified: false (partial calibration).** This is a complete, structurally valid, largely credible finite-volume delivery with unusually extensive report evidence. Deductions reflect production second-order limitations, the low-Mach Re200 accuracy deficit, rank-study reproducibility inconsistency at the curated tip, 2-D scope, and the lack of an independent evaluator rebuild.
+Score: **90/100; disqualified: false (partial calibration).** This is a complete, structurally valid, largely credible finite-volume delivery with unusually extensive report evidence. Deductions reflect production second-order limitations, the low-Mach Re200 accuracy deficit, rank-study reproducibility inconsistency at the curated tip, 2-D scope, and the lack of an independent evaluator rebuild.
 
 
 ## Re200 computed/reference values — 2026-10-30
@@ -124,3 +124,8 @@ The restart reader retrieves prior states, time and step (`main.cpp:315–321`),
 M080 inviscid case4→3: in its selected last50 recorded steps Cl rises 0.00091646→0.00243617, a change about 18% of final Cd0.00848768; Cd itself ranges only 0.00847988–0.00848768. Last100 Cl ranges 0.00010025–0.00243617. The report explicitly says its convergence check tests Cd only. The lift change is material to confidence in the final force, but because the symmetric-flow expected lift is near zero and no subsequent history is available, this evidence alone is not treated as proof of failed completion under DQ7.
 
 The old Re20 note cited the np1 rank-table final rather than the canonical np8 result: selected np8 Cd2.02785667/Cl0.00055704, versus np1 Cd2.027598/Cl0.000573. Both are retained as separate rank data; Re20 score remains 4.5. No CFD rerun.
+
+
+## Case-result rubric calibration — 2026-10-30
+
+The M015 and M080 inviscid late force variations documented above limit confidence in the final steady forces even though the Cd endpoint/residual checks triggered. M2 laminar's 400-row decay is balanced by its final-50 settling, while its same-Mach inviscid/laminar pressure drag disparity remains a concern rather than a proven failure. Case-results rubric8→7 and total91→90; completion/plausibility review points each fall by 0.5. DQ7 has not been assigned solely from the near-zero-lift and damping evidence. No CFD rerun.
