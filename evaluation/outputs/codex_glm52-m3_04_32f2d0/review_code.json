@@ -21,49 +21,49 @@
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Mesh, physics, output and solver source are separated."
+      "notes": "8615cdd separates main, mesh, physics, solver and output modules; numerous environment-controlled options increase configuration complexity."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 3,
-      "notes": "No internal external-solver invocation found; trust policy excludes internet similarity investigation."
+      "notes": "No direct internal external-solver invocation was established from inspected source. No external authorship or exhaustive license investigation was performed."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Case JSON and CLI paths, rather than two mesh-name branches, are source-supported."
+      "notes": "main.cpp parses case JSON, mesh path and CLI overrides; no two-filename-only mesh branch established."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 0.5,
-      "notes": "MPI code exists, but report Table rankcmp shows order-one steady NACA force changes across ranks."
+      "score": 2.5,
+      "notes": "mesh.cpp:22\u201323 reads full mesh on rank0 only; main.cpp:54 partitions/scatters and solver uses neighbor exchange. Old reported np1/np2 anomaly uses different recorded CFL/ramp flags and evolving source, so rank-only causation is not established."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 3,
-      "notes": "Exceptions and positivity clamps are present; no independent stress rerun was performed."
+      "notes": "Positivity clamps exist, but source marks max-step steady results converged; M015/M080 steady forces remain unsettled and Re200 produces severe spikes."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 2,
-      "notes": "Attempt contains diagnostics, but final immutable submission omits all raw case packages."
+      "score": 3,
+      "notes": "Clean immutable build passed with no registered CTest tests. Read-only examiner passes eight historical packages/report structurally but misses runtime-target mismatch and physical defects."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 3,
-      "notes": "Readable C++ source, but many tuning scripts and excluded raw outputs limit reproducibility."
+      "notes": "Curated source is modular; output metadata fixes timestamps, reports original inner target despite runtime override, and source report fails clean LaTeX build on an unescaped underscore."
     }
   ],
   "disqualification_flags": [
@@ -73,5 +73,5 @@
       "evidence": "report.tex rank comparison reports NACA M0.15 CL 0.002416 at np=1 versus 53.72 at np=2, while calling the behavior qualitatively consistent."
     }
   ],
-  "overall_score": 2.98
+  "overall_score": 3.38
 }

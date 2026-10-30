@@ -43,7 +43,7 @@ The sole project-local Codex root `019fd883-6a9d-7c53-a1b1-96a168fb91ae` and its
 | Second-Order Spatial Scheme | 10 | 5 | M2 laminar is reported first-order. |
 | Viscous Terms | 10 | 7 | Source-supported, raw wall proof excluded. |
 | Implicit And Transient Methods | 15 | 8.5 | Re200 runtime target was relaxed to 1.0 while metadata reports 0.001; restart duplicates history. |
-| MPI | 10 | 3 | Halo/METIS exist; old rank comparison differs in options and evolving source. |
+| MPI | 10 | 5 | Root-only mesh, METIS and halos exist; old rank comparison differs in options/source. |
 | Case Results And Validation | 10 | 2.5 | Re200 target/forces and multiple steady cases fail physical requirements. |
 | Report, Visualization, Analysis | 5 | 2 | M015 force figure depicts a different run; Re200 claims conflict with data. |
 | Extensibility | 5 | 4 | Reasonable module split. |
@@ -52,9 +52,9 @@ The sole project-local Codex root `019fd883-6a9d-7c53-a1b1-96a168fb91ae` and its
 
 | Area | Overall | Notes |
 |------|--------:|-------|
-| Code | 2.83 | Source structure is reasonable, but MPI result dependence is a DQ trigger. |
-| CFD methods | 3.24 | Major methods exist; shock/second-order and transient claims are limited. |
-| Results | 2.65 | Raw attempt supports limited evidence only; curated submission has no raw packages. |
+| Code | See recorded score | Modular source, clean build and non-exact transient restart. |
+| CFD methods | See recorded score | Methods exist; shock and transient controls have major limitations. |
+| Results | See recorded score | Contestant checkpoint supplies results; multiple claims/figures are inconsistent. |
 
 ## Per-case scores (independent 0-5)
 
@@ -74,4 +74,4 @@ The original runtime environment is incomplete. Curated result tip omits raw pac
 
 ## Verdict
 
-Provisional rubric: **56.5/100**. DQ is true for false successful-result metadata and a specific report-figure/data mismatch. Remaining case, source and PDF review is partial; no rank-only cause is inferred from the old comparison.
+Provisional rubric: **58.5/100**. DQ is true for false successful-result metadata and a specific report-figure/data mismatch. Remaining case, source and PDF review is partial; no rank-only cause is inferred from the old comparison.

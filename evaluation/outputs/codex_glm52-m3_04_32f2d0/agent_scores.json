@@ -44,52 +44,52 @@
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Mesh, physics, output and solver source are separated."
+          "notes": "8615cdd separates main, mesh, physics, solver and output modules; numerous environment-controlled options increase configuration complexity."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 3,
-          "notes": "No internal external-solver invocation found; trust policy excludes internet similarity investigation."
+          "notes": "No direct internal external-solver invocation was established from inspected source. No external authorship or exhaustive license investigation was performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "Case JSON and CLI paths, rather than two mesh-name branches, are source-supported."
+          "notes": "main.cpp parses case JSON, mesh path and CLI overrides; no two-filename-only mesh branch established."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 0.5,
-          "notes": "MPI code exists, but report Table rankcmp shows order-one steady NACA force changes across ranks."
+          "score": 2.5,
+          "notes": "mesh.cpp:22\u201323 reads full mesh on rank0 only; main.cpp:54 partitions/scatters and solver uses neighbor exchange. Old reported np1/np2 anomaly uses different recorded CFL/ramp flags and evolving source, so rank-only causation is not established."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 3,
-          "notes": "Exceptions and positivity clamps are present; no independent stress rerun was performed."
+          "notes": "Positivity clamps exist, but source marks max-step steady results converged; M015/M080 steady forces remain unsettled and Re200 produces severe spikes."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 2,
-          "notes": "Attempt contains diagnostics, but final immutable submission omits all raw case packages."
+          "score": 3,
+          "notes": "Clean immutable build passed with no registered CTest tests. Read-only examiner passes eight historical packages/report structurally but misses runtime-target mismatch and physical defects."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 3,
-          "notes": "Readable C++ source, but many tuning scripts and excluded raw outputs limit reproducibility."
+          "notes": "Curated source is modular; output metadata fixes timestamps, reports original inner target despite runtime override, and source report fails clean LaTeX build on an unescaped underscore."
         }
       ],
-      "overall_score": 2.98,
+      "overall_score": 3.38,
       "disqualification_flags": [
         {
           "id": 4,
@@ -105,63 +105,63 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Report and source describe compressible Navier-Stokes and nondimensional variables."
+          "notes": "Report and physics.cpp describe nondimensional compressible Navier\u2013Stokes with ideal-gas states; no independent solver physics rerun."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "CGNS unstructured mesh and boundary-family code is present."
+          "notes": "mesh.cpp:22\u201323 loads full CGNS geometry on rank0, then partition_and_scatter distributes local meshes; no full-mesh replication on every rank during solve established."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "Face-based residual assembly is source-supported."
+          "notes": "solver.cpp assembles face residual and global reductions; Re200 case uses adaptive dt and repeated nonlinear solves, but numerical fidelity is limited by relaxed runtime target and severe force spikes."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 3.5,
-          "notes": "Approximate flux implementation is present; no independent numerical verification."
+          "notes": "Approximate Riemann flux and positivity fallback exist; production runtime flags and metadata do not by themselves establish every numerical path."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Farfield, slip and no-slip branches are source-supported."
+          "notes": "Wall/farfield branches exist; no-slip surface-output semantics require independent row review before stronger DQ11 conclusion."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 2,
-          "notes": "Gradient/reconstruction exists, but reported M2 laminar production uses first-order mode."
+          "notes": "Second-order machinery and limiter exist; report discloses first-order M2 laminar fallback. Actual production flags for every case are not independently bound to binary."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 2,
-          "notes": "Limiter/positivity paths exist; production reliability is not demonstrated for shock cases."
+          "notes": "Limiter and positivity paths are present; M2 inviscid sanity reports extreme Mach range7.81447e15, so usable shock solution is not established."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 4,
-          "notes": "Newtonian/Fourier viscous treatment and wall output are source-supported."
+          "notes": "solver.cpp:258\u2013267 computes tangential wall shear for viscous force split; source supports Newtonian/Fourier flux. High laminar drags are separate physical-result limitations."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 3,
-          "notes": "Diagonal implicit and CFL controls are present, with documented weak convergence."
+          "notes": "Steady implicit and CFL controls exist, but metadata labels unsettled M015/M080/M200 laminar force histories converged; old rank comparison is not controlled."
         },
         {
           "id": "cfd.transient",
@@ -174,11 +174,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 2,
-          "notes": "METIS/halo code is present, but retained rank comparison establishes severe rank dependence."
+          "score": 2.5,
+          "notes": "METIS and neighbor halo structure exist, root-only global mesh setup; old rank comparison changes recorded CFL/ramp options and evolving source. Controlled rank equivalence remains unproven."
         }
       ],
-      "overall_score": 3.09,
+      "overall_score": 3.14,
       "disqualification_flags": []
     },
     "result_review": {
@@ -188,58 +188,58 @@
           "title": "Output contract compliance",
           "weight": 0.2,
           "score": 3,
-          "notes": "All eight raw packages exist only in the immutable attempt worktree, not in the curated submission."
+          "notes": "Contestant checkpoint 783eb18 provides eight canonical packages; validator passes layouts. Re200 metadata reports original0.001 while selected runtime target is1.0, so compliant schema is not physical convergence."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Validator is reproducible for the eight attempt packages after excluding _rerun_logs; curated commit itself has none."
+          "score": 4,
+          "notes": "Read-only examiner validation of eight checkpoint packages/report returned OK; its structural pass misses relaxed target, stale figure histories and nonphysical Re200 force spikes."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 3,
-          "notes": "Raw/report evidence shows seven pass and M2 inviscid failed; metadata nonetheless says converged."
+          "score": 1,
+          "notes": "M015/M080 inviscid and M200 laminar forces remain unsettled; Re200 t180\u2013300 has extreme excursions and final strict ratio0.435. M2 inviscid sanity marks field failed despite success metadata."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 2.3,
-          "notes": "M2 failure and order-one MPI inconsistency materially undermine the raw claims."
+          "score": 1,
+          "notes": "Re200 Cd\u22127.55..388.99 and Cl\u221239.51..171.63 over t180\u2013300; Re20 Cd6.29; laminar NACA drag is high. Rank-only cause is not proven for the old np1/np2 anomaly."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Committed figures are numerous and readable, including Mach/pressure histories and fields."
+          "score": 2,
+          "notes": "Contestant figures exist, but M015/M080 inviscid and M015 laminar force figures do not depict selected production histories. Re200 plot has severe spikes; curated main PDF fails LaTeX compilation."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 4,
-          "notes": "The LaTex report is substantial but contains M2 and Re200 claim contradictions."
+          "score": 1.5,
+          "notes": "Detailed TeX contains equations, results and figures, but claims Re200 both periodic and not periodic, reports relaxed-target fraction as case-target success, and includes stale force plots. Clean build fails at line324."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 2,
-          "notes": "No raw CSV/field/manifest is committed, so figures cannot be traced from the submission."
+          "score": 1.5,
+          "notes": "Checkpoint run/figure manifests exist, and Re200 final2/prod force and metadata hashes match; multiple selected figure histories are stale. Historic executable hashes and true strict miss count remain unknown."
         }
       ],
-      "overall_score": 3.15,
+      "overall_score": 1.95,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 56.5,
+    "total_scored": 58.5,
     "sections": [
       {
         "id": "build_cli",
@@ -253,28 +253,28 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 8,
-        "notes": "CGNS unstructured geometry, adjacency and boundary tags are source-supported."
+        "notes": "Root-only CGNS read, cell/face geometry and METIS partitioning source inspected; no all-rank global mesh during solve established."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 10,
-        "notes": "Conservative flux/residual and wall branches are implemented, with no independent solver rerun."
+        "notes": "Face flux, wall and farfield branches and global reductions implemented; exact historical production binary and full conservation verification remain incomplete."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 5,
-        "notes": "Second-order machinery exists, but report documents first-order M2 laminar production fallback."
+        "notes": "Reconstruction/limiter and positivity fallback exist; M2 laminar first-order production is disclosed. Full runtime flags and exact binary remain qualified."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 7,
-        "notes": "Viscous gradients, stresses and heat flux are source-supported; final wall evidence is excluded."
+        "notes": "Newtonian/Fourier flux and tangential wall force projection exist in solver.cpp:258\u2013267; recovered viscous cases have high drag and physical limitations."
       },
       {
         "id": "implicit_transient",
@@ -287,8 +287,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 3,
-        "notes": "METIS/neighbor halos exist, but earlier report rank comparison changes recorded CFL launch options and evolving source; rank-only effect not proven. Broader MPI calibration remains partial."
+        "score": 5,
+        "notes": "Root-only mesh setup, METIS and neighbor exchange implemented; old DQ4 rank comparison used different options and evolving source, so rank-only causation is unproven. Broader controlled rank evidence remains partial."
       },
       {
         "id": "case_results",
@@ -309,7 +309,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 4,
-        "notes": "Module split is usable, though tuning scripts and reproducibility exclusions constrain extension."
+        "notes": "Mesh, physics, solver and output modules exist; many environment-controlled diagnostic/tuning branches complicate extension."
       }
     ]
   },

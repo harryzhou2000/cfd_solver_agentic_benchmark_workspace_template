@@ -7,63 +7,63 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Report and source describe compressible Navier-Stokes and nondimensional variables."
+      "notes": "Report and physics.cpp describe nondimensional compressible Navier\u2013Stokes with ideal-gas states; no independent solver physics rerun."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "CGNS unstructured mesh and boundary-family code is present."
+      "notes": "mesh.cpp:22\u201323 loads full CGNS geometry on rank0, then partition_and_scatter distributes local meshes; no full-mesh replication on every rank during solve established."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 4,
-      "notes": "Face-based residual assembly is source-supported."
+      "notes": "solver.cpp assembles face residual and global reductions; Re200 case uses adaptive dt and repeated nonlinear solves, but numerical fidelity is limited by relaxed runtime target and severe force spikes."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 3.5,
-      "notes": "Approximate flux implementation is present; no independent numerical verification."
+      "notes": "Approximate Riemann flux and positivity fallback exist; production runtime flags and metadata do not by themselves establish every numerical path."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Farfield, slip and no-slip branches are source-supported."
+      "notes": "Wall/farfield branches exist; no-slip surface-output semantics require independent row review before stronger DQ11 conclusion."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 2,
-      "notes": "Gradient/reconstruction exists, but reported M2 laminar production uses first-order mode."
+      "notes": "Second-order machinery and limiter exist; report discloses first-order M2 laminar fallback. Actual production flags for every case are not independently bound to binary."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 2,
-      "notes": "Limiter/positivity paths exist; production reliability is not demonstrated for shock cases."
+      "notes": "Limiter and positivity paths are present; M2 inviscid sanity reports extreme Mach range7.81447e15, so usable shock solution is not established."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 4,
-      "notes": "Newtonian/Fourier viscous treatment and wall output are source-supported."
+      "notes": "solver.cpp:258\u2013267 computes tangential wall shear for viscous force split; source supports Newtonian/Fourier flux. High laminar drags are separate physical-result limitations."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 3,
-      "notes": "Diagonal implicit and CFL controls are present, with documented weak convergence."
+      "notes": "Steady implicit and CFL controls exist, but metadata labels unsettled M015/M080/M200 laminar force histories converged; old rank comparison is not controlled."
     },
     {
       "id": "cfd.transient",
@@ -76,8 +76,8 @@
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 2,
-      "notes": "METIS/halo code is present, but retained rank comparison establishes severe rank dependence."
+      "score": 2.5,
+      "notes": "METIS and neighbor halo structure exist, root-only global mesh setup; old rank comparison changes recorded CFL/ramp options and evolving source. Controlled rank equivalence remains unproven."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.09
+  "overall_score": 3.14
 }
