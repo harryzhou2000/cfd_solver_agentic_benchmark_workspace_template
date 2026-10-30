@@ -102,7 +102,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_sonnet46-01_ac6940` | partial: all cases, PDF, source and rubric reviewed; DQ7/TASK full mesh; historic binary binding and remaining DQ uncertain |
 | `codex_generic_sonnet46-02_dac37b` | partial: all cases, PDF, source/rubric checked; DQ6/DQ7 and placeholder rejection; exact historical binary remains unbound |
 | `codex_generic_sonnet5-01_540ddf` | partial: PDF, all cases, source/rubric examined; DQ8 proven; historical binary and remaining figure/fallback provenance uncertain |
-| `codex_generic_sonnet5-02_6c0ac0` | partial: M015 inviscid false-success DQ7 established; other cases/source/rubric pending |
+| `codex_generic_sonnet5-02_6c0ac0` | partial: all cases, PDF, source/rubric reviewed; DQ7 proven; historical binary/remaining figure provenance uncertain |
 | `codex_generic_vllm-qwen38-01_2045e0` | unreviewed |
 | `codex_generic_vllm-qwen38-02_d47362` | unreviewed |
 | `codex_glm52-m3_01_919b67` | unreviewed |
@@ -827,3 +827,5 @@ sonnet5-02 build/rubric checkpoint: clean immutable build passed, CTest no regis
 sonnet5-02 report consistency: replaced obsolete 83/DQ=false verdict with current 75/DQ7 and separate explicit failed-cylinder status; clean build is identified without implying a CFD rerun.
 
 sonnet5-02 source/validator checkpoint: multi-zone TRI/QUAD/BAR with interface welding, root-only global mesh setup, METIS/neighbor halos and reconstruction exchange inspected. Source plateau test uses residual only, not force stability. Validator passes six NACA packages/report and rejects both honestly failed cylinders. Review points now criterion-specific; exact binary/DQ boundaries partial. No CFD rerun.
+
+sonnet5-02 DQ boundary checkpoint: DQ7 supported by two force-drift cases; explicitly failed cylinders are not false success. Root-only mesh/METIS/neighbors, active reconstruction, no-slip boundary output inspected; no DQ4/6/8/9/10/11/12 inferred without qualifying proof. report.tex:942–945 reverses ordering of quoted 19% and 34% viscous fractions. Historical binary null revision and remaining figure/source attribution partial.
