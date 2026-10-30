@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "2-D conservative perfect-gas equations and reference coefficients source/report-supported."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "notes": "Separate TRI_3/QUAD_4 multizone sections with geometric matching; MIXED unsupported."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "Conservative face residual and global norms implemented; no independent order study."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "HLLC subsonic and Rusanov supersonic defaults implemented; no independent shock verification."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "Farfield, slip and no-slip adiabatic paths and wall boundary semantics documented."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "LSQ Barth-type limiter and fallback; steady shock-free limiter freeze disclosed, no independent smooth-order test."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "notes": "Selective steady limiter freezing is disclosed; exact historical source/binary/environment unbound."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "solver.cpp:600\u2013609 integrates tangential shear force; wall gradients/heat flux implemented."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 3.5,
+      "notes": "LU-SGS present; residual target+1.5 shortcut can terminate while long-window forces still drift as M2 does."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "Current source reevaluates full residual and limiter before target comparison; historical Re200 revision predates source changes and binary unbound."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "notes": "METIS, root-only global preprocessing, owned/ghost halos and reductions; compared M015 np8 revision differs from np1/2/4."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.0
+  "overall_score": 4.26
 }
