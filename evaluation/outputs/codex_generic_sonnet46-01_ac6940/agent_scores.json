@@ -43,21 +43,21 @@
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "notes": "Distinct CgnsReader, MeshBuilder, Partitioner, Physics, Residual, SteadySolver, TransientSolver and OutputManager components; major solver methods remain monolithic."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "notes": "Source files inspected for generic finite-volume implementation; no copied CFD core identified. No exhaustive external similarity search performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "notes": "main.cpp:74,89\u2013109 reads case configuration and mesh path rather than dispatching on two mesh filenames. Case-conditioned numerical startup rules are separate."
         },
         {
           "id": "code.mpi",
@@ -70,25 +70,25 @@
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "score": 3,
+          "notes": "Residual.cpp:40\u201348,114\u2013115 falls back on nonpositive reconstructed states; missing or mismatched restart inputs are silently ignored in main.cpp:120\u2013133 and divergent M2 metadata is marked successful."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Source and curated submission reviewed."
+          "score": 2.5,
+          "notes": "CMakeLists.txt and README contain no registered CTest or dedicated regression suite. Evaluator clean build succeeded; no production CFD rerun."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": 1,
-          "notes": "Source and curated submission reviewed."
+          "score": 2.5,
+          "notes": "Contestant checkpoint 8899f00 contains 3377 tracked solver/pylibs paths and 53 solver/build paths; curated result removes those artifacts. The manager curation itself is not charged as contestant misconduct."
         }
       ],
-      "overall_score": 3.52,
+      "overall_score": 3.39,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -98,49 +98,49 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "Physics.hpp provides a four-variable 2-D compressible state, ideal-gas flux and constant-viscosity treatment; report.tex:60\u2013123 describes governing equations."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "CgnsReader.cpp:40\u201359,215\u2013239 reads TRI_3/QUAD_4/BAR_2 in all zones of the first CGNS base; unknown/MIXED sections are skipped. MeshBuilder constructs geometry and adjacency."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "Residual.cpp:31\u201372 assembles interior flux with opposite signs; :110\u2013155 handles boundary and wall viscous contributions."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "Physics.hpp:59 implements local Lax\u2013Friedrichs/Rusanov flux; no higher-resolution Riemann solver credit is assumed."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "Physics.hpp:115\u2013182 implements farfield, slip and no-slip states; Residual.cpp:134\u2013155 applies pressure-only inviscid and viscous no-slip wall fluxes."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "score": 3.5,
+          "notes": "Gradient.cpp:15\u201339 and Reconstruction.cpp:45\u201356 implement weighted LS face reconstruction. Final SteadySolver.cpp:92\u2013105,139\u2013145 delays M\u22650.5 inviscid reconstruction beyond selected run lengths; historical binary is unbound."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "score": 3.5,
+          "notes": "Reconstruction.cpp:6\u201341 implements Barth limiting and Residual.cpp:40\u201348 falls back on nonpositive face states. Final-source long first-order startup and unbound historic binary limit production-order evidence."
         },
         {
           "id": "cfd.viscous",
@@ -154,7 +154,7 @@
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 4,
-          "notes": "Source and contestant evidence reviewed."
+          "notes": "SteadySolver.cpp and ImplicitSolver.cpp implement pseudo-time continuation and LU-SGS; selected M2 laminar diverged before supplied target."
         },
         {
           "id": "cfd.transient",
@@ -171,7 +171,7 @@
           "notes": "METIS and neighbor halos exist, but main.cpp:89\u2013109,136\u2013156 retains full mesh on every rank through solver iterations. NACA np8 lift\u22480.0303 differs materially from near-zero np1; the cylinder np8 result is a failed 200-step pilot."
         }
       ],
-      "overall_score": 3.62,
+      "overall_score": 3.53,
       "disqualification_flags": []
     },
     "result_review": {
@@ -180,15 +180,15 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 3,
-          "notes": "Validator/report evidence reviewed."
+          "score": 4,
+          "notes": "Examiner validator independently passed all eight workspace case directories and report; structural conformance does not establish convergence, physical correctness or restart semantics."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Validator/report evidence reviewed."
+          "score": 5,
+          "notes": "Read-only examiner validate_outputs.py invocation passed all eight workspace case directories and report on 2026-10-30. It is a structural check only."
         },
         {
           "id": "res.completion",
@@ -226,13 +226,13 @@
           "notes": "Checkpoint 8899f00 preserves selected histories and standalone NACA force figures; curated report excludes those plots and raw data. Metadata revision null leaves exact historical binary unresolved."
         }
       ],
-      "overall_score": 2.52,
+      "overall_score": 2.92,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 67.0,
+    "total_scored": 66.0,
     "sections": [
       {
         "id": "build_cli",
@@ -246,21 +246,21 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 8,
-        "notes": "Evidence recorded in report."
+        "notes": "CgnsReader.cpp:40\u201359,215\u2013239 reads all zones in the first base and TRI_3/QUAD_4/BAR_2 sections, but skips CGNS MIXED sections; MeshBuilder builds geometry/adjacency. Full generality is limited."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 12,
-        "notes": "Evidence recorded in report."
+        "notes": "Residual.cpp:31\u201372,110\u2013155 reconstructs face states, assembles opposite face fluxes, and applies Rusanov and wall/farfield paths; Physics.hpp:59,115\u2013182 contains the flux and boundary treatments."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 8,
-        "notes": "Evidence recorded in report."
+        "score": 7,
+        "notes": "Gradient.cpp:15\u201339 and Reconstruction.cpp:6\u201356 implement weighted LS and Barth limiter; Residual.cpp:40\u201348,114\u2013115 falls back on nonpositive reconstructed state. Final SteadySolver.cpp:92\u2013105,139\u2013145 delays M\u22650.5 inviscid reconstruction at least 5000 steps, while reported runs end earlier; exact historical binary is unbound and no convergence-order study is shown."
       },
       {
         "id": "viscous",
@@ -302,7 +302,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 4,
-        "notes": "Evidence recorded in report."
+        "notes": "Separate mesh, physics, flux, reconstruction, solver and output files provide modular seams; data and geometry remain 2-D and equation state uses four components."
       }
     ]
   },

@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:30:29.696119+00:00
+Generated: 2026-10-30T07:31:55.700482+00:00
 
-**Overall score: 3.52**
+**Overall score: 3.39**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,25 +15,25 @@ Generated: 2026-10-30T07:30:29.696119+00:00
 | 2 | **code.cli** CLI and error handling | 0.10 | 3.5 | README says --restart takes a manifest; main.cpp:120–133 instead appends _rankN.bin to its argument and silently proceeds on missing or size-mismatched files. It does not restore transient time/history. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Source and curated submission reviewed. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Distinct CgnsReader, MeshBuilder, Partitioner, Physics, Residual, SteadySolver, TransientSolver and OutputManager components; major solver methods remain monolithic. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | Source and curated submission reviewed. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | Source files inspected for generic finite-volume implementation; no copied CFD core identified. No exhaustive external similarity search performed. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | Source and curated submission reviewed. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | main.cpp:74,89–109 reads case configuration and mesh path rather than dispatching on two mesh filenames. Case-conditioned numerical startup rules are separate. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
 | 6 | **code.mpi** MPI correctness | 0.15 | 2.5 | METIS and neighbor halos exist, but main.cpp:89–109,136–156 retains full mesh on every rank through solver iterations. NACA np8 lift≈0.0303 differs materially from near-zero np1; the cylinder np8 result is a failed 200-step pilot. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Source and curated submission reviewed. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Residual.cpp:40–48,114–115 falls back on nonpositive reconstructed states; missing or mismatched restart inputs are silently ignored in main.cpp:120–133 and divergent M2 metadata is marked successful. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | Source and curated submission reviewed. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 2.5 | CMakeLists.txt and README contain no registered CTest or dedicated regression suite. Evaluator clean build succeeded; no production CFD rerun. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 1 | Source and curated submission reviewed. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 2.5 | Contestant checkpoint 8899f00 contains 3377 tracked solver/pylibs paths and 53 solver/build paths; curated result removes those artifacts. The manager curation itself is not charged as contestant misconduct. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 
@@ -50,7 +50,7 @@ Generated: 2026-10-30T07:30:29.696119+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.52
+- Overall score (0-5): 3.39
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

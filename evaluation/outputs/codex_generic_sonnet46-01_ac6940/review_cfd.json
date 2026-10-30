@@ -7,49 +7,49 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Source and contestant evidence reviewed."
+      "notes": "Physics.hpp provides a four-variable 2-D compressible state, ideal-gas flux and constant-viscosity treatment; report.tex:60\u2013123 describes governing equations."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "Source and contestant evidence reviewed."
+      "notes": "CgnsReader.cpp:40\u201359,215\u2013239 reads TRI_3/QUAD_4/BAR_2 in all zones of the first CGNS base; unknown/MIXED sections are skipped. MeshBuilder constructs geometry and adjacency."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 4,
-      "notes": "Source and contestant evidence reviewed."
+      "notes": "Residual.cpp:31\u201372 assembles interior flux with opposite signs; :110\u2013155 handles boundary and wall viscous contributions."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Source and contestant evidence reviewed."
+      "notes": "Physics.hpp:59 implements local Lax\u2013Friedrichs/Rusanov flux; no higher-resolution Riemann solver credit is assumed."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Source and contestant evidence reviewed."
+      "notes": "Physics.hpp:115\u2013182 implements farfield, slip and no-slip states; Residual.cpp:134\u2013155 applies pressure-only inviscid and viscous no-slip wall fluxes."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Source and contestant evidence reviewed."
+      "score": 3.5,
+      "notes": "Gradient.cpp:15\u201339 and Reconstruction.cpp:45\u201356 implement weighted LS face reconstruction. Final SteadySolver.cpp:92\u2013105,139\u2013145 delays M\u22650.5 inviscid reconstruction beyond selected run lengths; historical binary is unbound."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Source and contestant evidence reviewed."
+      "score": 3.5,
+      "notes": "Reconstruction.cpp:6\u201341 implements Barth limiting and Residual.cpp:40\u201348 falls back on nonpositive face states. Final-source long first-order startup and unbound historic binary limit production-order evidence."
     },
     {
       "id": "cfd.viscous",
@@ -63,7 +63,7 @@
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 4,
-      "notes": "Source and contestant evidence reviewed."
+      "notes": "SteadySolver.cpp and ImplicitSolver.cpp implement pseudo-time continuation and LU-SGS; selected M2 laminar diverged before supplied target."
     },
     {
       "id": "cfd.transient",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.62
+  "overall_score": 3.53
 }

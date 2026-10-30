@@ -45,7 +45,7 @@ Reviewed source, selected Codex root, contestant final response, raw workspace p
 
 ## Recorded scores and disqualification
 
-The current 100-point rubric is 67/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
+The current 100-point rubric is 66/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
 
 | Case | Score |
 |---|---:|
@@ -124,3 +124,10 @@ Report.tex:588–593 incorrectly suggests rescaling force amplitude corrects the
 ## Case-results rubric — 2026-10-30
 
 The three inviscid NACA cases have readable delivered plots and plausible final Cd, but M015/M080 laminar cases have negative viscous-drag defects and the M200 laminar case diverges. The selected Re20 Cd≈1160 is physically unusable and the Re200 Cd≈2105/St≈8.1 do not support credible shedding; these are independent of their plot-floor limitations. NACA has a limited rank comparison while cylinder np8 is only a failed pilot. Case-results rubric6→4.5, total68.5→67, with completion/plausibility review points 3→2. No CFD rerun; other criterion and DQ review remains partial.
+
+
+## Remaining criterion evidence — 2026-10-30
+
+`CgnsReader.cpp:40–59,215–239` reads all zones in the first base and TRI/QUAD/BAR sections but skips CGNS MIXED sections. `Gradient.cpp:15–39`, `Reconstruction.cpp:6–56`, and `Residual.cpp:31–72,110–155` implement weighted least-squares gradients, Barth limiting, positivity fallback, conservative flux contributions and wall/farfield paths. Final-source M≥0.5 inviscid startup lasts at least 5000 steps while selected runs end at 974/831; the historical binary is unbound and an older source had a shorter startup. Second-order rubric8→7 for limited demonstrated production-order evidence, not a new DQ10. Total67→66.
+
+The examiner validator passed all eight workspace case directories and the report in a read-only invocation on 2026-10-30; this establishes structural checks only. Contestant checkpoint `8899f00` tracked 3377 `solver/pylibs` and 53 `solver/build` files, while the curated tip excludes them; hygiene reflects the contestant checkpoint rather than the manager's curation. The clean build passed but no registered CTest/regression suite was found. Specific source, validation and case evidence replaces earlier generic review-point notes. Historical production binary and remaining DQ adjudication remain partial.
