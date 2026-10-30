@@ -45,7 +45,7 @@ Read immutable source/report, eight raw final packages, and the sole workspace-l
 
 ## Recorded scores and disqualification
 
-The current 100-point rubric is 74.0/100; section details and weighted review scores are in `agent_scores.json`. Independent case scores:
+The current 100-point rubric is 73.0/100; section details and weighted review scores are in `agent_scores.json`. Independent case scores:
 
 | Case | Score |
 |---|---:|
@@ -112,3 +112,10 @@ Two steady cases show the independently documented unstable forces despite succe
 ## Claimed viscous gradient correction — 2026-10-30
 
 Immutable report.tex:111–112 specifically claims a corrected Green–Gauss viscous face gradient with a correction along the cell-joining vector. `Gradient.cpp:31–46` computes ordinary Green–Gauss cell gradients; `Residual.cpp:77–88` averages adjacent gradients and passes them to `Physics.hpp:131–155`, which forms stress and heat flux from the supplied gradients without cell-joining geometry or cell-to-cell differences. No correction path is present. These three source blobs are identical between contestant checkpoint `113f01a` and submission `25daaa3`. This supports DQ6 for a specifically claimed absent algorithm. Newtonian viscous flux is implemented; the separate full-traction force-split defect is not the basis for DQ6, consistent with the prior force-split precedent. Exact historical binary attribution remains uncertain. Viscous rubric7.5→7 and report3→2.5, total75→74. No CFD rerun.
+
+
+## Source and review-point calibration — 2026-10-30
+
+`MeshCGNS.cpp:109–150,185–207` reads separate TRI/QUAD/BAR sections and all zones of the first base but skips MIXED sections. `Gradient.cpp:31–46,120–125` computes and exchanges Green–Gauss gradients. `Reconstruction.hpp:96–106,137–158` initializes all limiters to one but updates owned cells only; `Residual.cpp:48–53` reconstructs both sides without exchanging the ghost limiter. This limits partition-boundary shock control and second-order evidence; second-order rubric8.5→7.5 and total74→73. `main.cpp:66–71` creates the global mesh only on root and deletes it before the iterative solver.
+
+The independent examiner validator passed all eight final workspace case directories and report on 2026-10-30, but its structural check accepts the known restart placeholders. Re200 selected residual CSV contains 30001 rows with inner iterations min85/max266/mean245.714; metadata reports zero misses, while null git revision prevents binding the exact production binary or verifying each initial inner residual. Generic review-point notes have been replaced with criterion-specific source and evidence. The remaining DQ and binary-provenance review is partial; no CFD rerun.

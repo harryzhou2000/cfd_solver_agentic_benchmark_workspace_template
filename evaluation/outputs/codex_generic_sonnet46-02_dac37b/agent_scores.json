@@ -42,52 +42,52 @@
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Organized C++ solver modules."
+          "notes": "Separate MeshCGNS, Partition, MpiHalo, Physics, Gradient, Residual, LuSgs, Solver and OutputWriter modules; solver loop remains monolithic."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "No direct internal copied-core evidence."
+          "notes": "No direct copied-core evidence identified in inspected source; no exhaustive external similarity search performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "No two-filename-only mesh dispatch found."
+          "notes": "main.cpp:42\u201369 reads case configuration and its mesh path; no two-filename-only dispatch identified."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 4,
-          "notes": "METIS/neighbor halo/allreduce source evidence."
+          "notes": "main.cpp:66\u201371 creates full mesh only on root and deletes it before iteration; Partition uses METIS and MpiHalo uses neighbor exchanges."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Input validation and positivity handling exist."
+          "score": 3,
+          "notes": "Reconstructed states have a positivity fallback, but --restart is ignored and M015/M200 laminar force failures are marked successful."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
           "score": 3.5,
-          "notes": "Readable result tests and validator evidence."
+          "notes": "Examiner independently passed all eight workspace packages and report structurally. Clean build succeeded; no production rerun or independent CFD validation inferred from validator."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 3.5,
-          "notes": "Curation excludes raw results at final tip."
+          "notes": "Manager curated tip excludes raw case results; historical contestant checkpoint 113f01a preserves selected results. Curation exclusion is a reproducibility limitation, not a source misconduct inference."
         }
       ],
-      "overall_score": 3.71,
+      "overall_score": 3.63,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -97,49 +97,49 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Governing equations/source are consistent."
+          "notes": "Physics.hpp implements a four-component 2-D compressible ideal-gas state, Rusanov and Newtonian/Fourier fluxes."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "CGNS/mixed-mesh geometry paths present."
+          "notes": "MeshCGNS.cpp:109\u2013150,185\u2013207 reads separate TRI/QUAD/BAR sections and all zones of first base; MIXED sections are skipped."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "Conservative residual assembly source-backed."
+          "notes": "Residual.cpp:41\u2013101 distributes face flux to owned left/right cells with opposite signs; :105\u2013158 handles wall and farfield fluxes."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Rusanov flux source-backed."
+          "notes": "Physics.hpp implements local Lax\u2013Friedrichs/Rusanov; no independent high-order Riemann solver credit is inferred."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Farfield/slip/no-slip paths present."
+          "notes": "Residual.cpp:105\u2013158 uses farfield, slip and no-slip paths, projecting wall temperature gradient to enforce adiabatic condition; OutputWriter.cpp:184\u2013199 writes boundary wall state."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Green-Gauss reconstruction and limiter present."
+          "score": 3.5,
+          "notes": "Gradient.cpp:31\u201346,120\u2013125 computes/exchanges Green\u2013Gauss gradients; Residual.cpp:48\u201359 reconstructs both sides and falls back if nonphysical. Ghost limiter exchange is absent."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Venkatakrishnan and fallback path present."
+          "score": 3.5,
+          "notes": "Reconstruction.hpp:96\u2013106 initializes all factors to one, :137\u2013158 updates only owned cells; Residual.cpp:48\u201353 uses ghost factors in face reconstruction without exchange. Venkat limiting exists on owned cells."
         },
         {
           "id": "cfd.viscous",
@@ -153,24 +153,24 @@
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 4,
-          "notes": "LU-SGS pseudo-time implementation present."
+          "notes": "Solver.cpp uses LU-SGS pseudo-time and residual checks; M015 max-step plateau is falsely successful despite oscillating force."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 4,
-          "notes": "BDF2 two-loop evidence and delivered inner controls."
+          "score": 3.5,
+          "notes": "Solver.cpp:71\u2013110 freezes history and tests spatial plus BDF physical residual. Selected metadata reports zero misses, but git revision null prevents exact binary attribution; t300.01/30001 and FFT\u22480.160 are limitations."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 3.5,
-          "notes": "Only NACA np2/8 comparison, no cylinder two-rank comparison."
+          "notes": "main.cpp:66\u201371 deletes root global mesh before solve; METIS/neighbor halo exist. Report np2/np8 force comparison conflicts with selected np8 and np2 raw package unlocated."
         }
       ],
-      "overall_score": 3.81,
+      "overall_score": 3.67,
       "disqualification_flags": []
     },
     "result_review": {
@@ -187,14 +187,14 @@
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 5,
-          "notes": "Explicit all-case/report examiner pass."
+          "notes": "Read-only examiner validator passed all eight final workspace directories and report on 2026-10-30; it checks structure, not physics or meaningful restart content."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 2,
-          "notes": "M015 false converged status is a DQ status mismatch."
+          "notes": "M015 inviscid and M200 laminar metadata falsely label unstable forces converged; Re200 metadata reaches t300.01 with reported zero misses but null binary revision."
         },
         {
           "id": "res.plausibility",
@@ -207,8 +207,8 @@
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Required visual coverage readable."
+          "score": 3.5,
+          "notes": "All 15 report pages were visually reviewed. Re200 late drag oscillation is compressed by startup; other case plots and contours are present."
         },
         {
           "id": "res.report",
@@ -225,13 +225,13 @@
           "notes": "Checkpoint histories and report plots are identifiable, but MPI table contradicts selected np8 result and claimed Re200 St differs from the selected t=200\u2013300 FFT. Metadata has null source revision."
         }
       ],
-      "overall_score": 2.7,
+      "overall_score": 2.62,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 74.0,
+    "total_scored": 73.0,
     "sections": [
       {
         "id": "build_cli",
@@ -245,21 +245,21 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 8.5,
-        "notes": "CGNS/mixed geometry and adjacency source paths."
+        "notes": "MeshCGNS.cpp:109\u2013150 reads TRI/QUAD/BAR sections but skips MIXED sections; :185\u2013207 reads all zones of the first base. Mesh geometry/adjacency are implemented."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 12.5,
-        "notes": "Residual/BC core present, with simple Rusanov accuracy limit."
+        "notes": "Residual.cpp:41\u2013101 assembles Rusanov face fluxes with opposite contributions to owned neighboring cells; :105\u2013158 applies farfield/slip/no-slip and adiabatic wall paths."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 8.5,
-        "notes": "Second-order reconstruction/limiter source-backed."
+        "score": 7.5,
+        "notes": "Gradient.cpp:31\u201346,120\u2013125 computes and exchanges Green\u2013Gauss gradients; Reconstruction.hpp:96\u2013106,137\u2013158 initializes all limiters to one but only updates owned cells, and Residual.cpp:48\u201359 reconstructs both sides. Ghost limiter factors are not exchanged, limiting partition-boundary shock control and production-order evidence."
       },
       {
         "id": "viscous",
@@ -273,14 +273,14 @@
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 12.5,
-        "notes": "Implicit/BDF2 core and Re200 inner evidence; horizon/reduction discrepancy deducted."
+        "notes": "Solver.cpp:71\u2013110 freezes BDF history and measures spatial plus physical-time residual. Selected Re200 metadata reports zero misses, but null git revision leaves exact binary unbound; raw history has 30001 steps to t300.01 and FFT\u22480.160."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
         "score": 7.5,
-        "notes": "METIS/halo/reductions, but limited rank comparison evidence."
+        "notes": "main.cpp:66\u201371 reads global mesh on root and deletes it before runSolver; METIS and neighbor halos are implemented. Report np2/np8 comparison contradicts selected np8 drag and its np2 raw source is unlocated; cylinder only has np8 evidence."
       },
       {
         "id": "case_results",
@@ -301,7 +301,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 4,
-        "notes": "Modular but 2-D-specific architecture."
+        "notes": "Separate physics, mesh, boundary, gradient, residual, LU-SGS and output components, with four-component 2-D state and geometry."
       }
     ]
   },

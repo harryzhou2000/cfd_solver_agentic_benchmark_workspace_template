@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:42:14.198056+00:00
+Generated: 2026-10-30T07:43:33.278158+00:00
 
-**Overall score: 2.7**
+**Overall score: 2.62**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -12,16 +12,16 @@ Generated: 2026-10-30T07:42:14.198056+00:00
 | 1 | **res.contract** Output contract compliance | 0.20 | 1.5 | Each selected 113f01a final case contains 26-byte restart_final.dat stating restart not implemented. Validator passes its structural existence check, but the file is a prohibited placeholder, not restart state. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit all-case/report examiner pass. |
+| 2 | **res.validator** Automated validator results | 0.10 | 5 | Read-only examiner validator passed all eight final workspace directories and report on 2026-10-30; it checks structure, not physics or meaningful restart content. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | M015 false converged status is a DQ status mismatch. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | M015 inviscid and M200 laminar metadata falsely label unstable forces converged; Re200 metadata reaches t300.01 with reported zero misses but null binary revision. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2.5 | M015 force oscillates strongly and M200 laminar Cd falls 16.8% in final50 despite converged status; Re200 FFT≈0.160 differs from report. Re20 and remaining NACA final force windows have stronger evidence. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 4 | Required visual coverage readable. |
+| 5 | **res.visualization** Visualizations | 0.15 | 3.5 | All 15 report pages were visually reviewed. Re200 late drag oscillation is compressed by startup; other case plots and contours are present. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 2.5 | Report.tex:223 gives M015 np8 |Cd|0.674, while MPI table :520–531 calls same np8 Cd≈0. Re200 report claims St0.19–0.20 versus selected FFT≈0.160. The M015 difficulty is disclosed. Report.tex:112 additionally claims a face-joining viscous gradient correction absent from source. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T07:42:14.198056+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.7
+- Overall score (0-5): 2.62
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
