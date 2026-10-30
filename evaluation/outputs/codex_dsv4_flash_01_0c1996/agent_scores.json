@@ -345,6 +345,31 @@
     "triggered": true,
     "flags": [
       {
+        "id": 1,
+        "found": false,
+        "evidence": "No direct internal complete-solver executable invocation found; external authorship investigation excluded."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence that force/residual files were generated without solving; divergent or flat outputs alone do not establish fabrication."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Case JSON and generic CGNS path are used; no two-mesh-only branch established."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Original M0.15/Re20 np1 raw packages are now unavailable, so a controlled rank-only order-one mismatch cannot be established."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "implicit.cpp contains LU-SGS/Jacobi pseudo-time machinery, although numerical outcomes fail."
+      },
+      {
         "id": 6,
         "text": "Report claims algorithms that cannot be found in source.",
         "evidence": "report.tex claims Roe with Harten--Yee entropy fix; src/solver.cpp roe_flux returns rusanov_flux directly.",
@@ -357,10 +382,35 @@
         "evidence": "Selected Re200 np1 metadata says completed=true/statistically_periodic at t=300, while forces.csv contains Cd=2.81996 and Cl=0.00139396 identically for every output row t>=100 (20,001 rows), without demonstrated shedding. Metadata uses 3/20 inner controls against 5/1000 specified; true strict inner misses cannot be inferred because final source tests a different ratio and stored revision is null. Additionally, M0.15 laminar selected np1 residual increases 1.52537\u2192623637 and M0.8 laminar 0.0669724\u21923926.12 while both metadata files say converged; M2 laminar grows from 0.026785 to 31169 at step 200 before residual/forces become zero, yet is labeled converged."
       },
       {
+        "id": 8,
+        "found": false,
+        "evidence": "Delivered standalone case figures and manifest exist; two historical np1 raw packages are unavailable, so exact data binding cannot be independently completed. No specific unrelated figure is established."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "METIS partition and local solution/neighbor halos exist; the full mesh per rank is separately prohibited by TASK shortcut7, not automatically the narrower full-state/geometric-only DQ9."
+      },
+      {
         "id": 10,
         "text": "Report claims second-order reconstruction or shock limiter disabled for production cases",
         "found": true,
         "evidence": "Immutable f6d8a183 implicit.cpp:195,206\u2013213,224\u2013231 uses first-order states for every viscous or transient case; report.tex:51\u201354 claims second-order reconstruction without disclosing these production exceptions."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "output.cpp:209\u2013216 writes explicit zero no-slip wall velocity as boundary value; undocumented adjacent-cell wall rows are not established."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "No specific Mach/pressure filename swap demonstrated; nonphysical plotted values and absent original raw packages are separate limitations."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No direct internal solver-copy evidence; external similarity investigation excluded by trust policy."
       },
       {
         "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
@@ -376,6 +426,7 @@
     "Current index schema does not enumerate run_identity.json or contestant_final_response.md.",
     "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
     "2026-10-30 partial recalibration: Re200 stored metadata has null git revision and differs in some fields from immutable final output code; strict target-miss count cannot be reconstructed. Two historical np1 final directories are no longer present in the current workspace; prior observations retained as historical evidence.",
-    "2026-10-30 clean immutable-source build succeeds in a restricted network-disabled cfd-bench container; no solver or unsteady rerun. Historical Re20 and M0.15 inviscid np1 raw packages are missing from current workspace; old notes and contestant-delivered figures are preserved with this limitation."
+    "2026-10-30 clean immutable-source build succeeds in a restricted network-disabled cfd-bench container; no solver or unsteady rerun. Historical Re20 and M0.15 inviscid np1 raw packages are missing from current workspace; old notes and contestant-delivered figures are preserved with this limitation.",
+    "Full qualified audit: historical M0.15 inviscid and Re20 np1 raw directories are irrecoverable, but their delivered case-labeled figures and manifest were visually reviewed; exact raw values and binary/figure binding remain unverified. All feasible rubric, review and DQ checks were completed without reconstructing missing data."
   ]
 }
