@@ -295,32 +295,32 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 5,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=-0.006, CD=0.0275 at eaae575:solver/report/report.tex:641; residual history eaae575:solver/report/figures/naca0012_m015_inviscid_residual.png (referenced at solver/report/report.tex:676); force history eaae575:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:691); computed-field contour eaae575:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/report.tex:714). Score 5 retained after the post-processing audit. Prior case judgment: Validator-passing readable original contestant package; no unsteady rerun."
+      "score": 2,
+      "notes": "Immutable report.tex:641,676,691,714 gives Cd\u22480.0275/Cl\u2248\u22120.006, residual/force histories and Mach contour. Original final Cd=0.0274722; last 2,000 of 20,000 rows span 0.014316\u20130.049673 and Cl \u22120.012181 to \u22120.000025. The run hit the step cap with only 2.4 residual orders and large force variation; score 5\u21922. Original workspace values are separate from the earlier report snapshot; no CFD case rerun."
     },
     "naca0012_m080_inviscid": {
-      "score": 5,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=0.001, CD=0.0274 at eaae575:solver/report/report.tex:642; residual history eaae575:solver/report/figures/naca0012_m080_inviscid_residual.png (referenced at solver/report/report.tex:744); force history eaae575:solver/report/figures/naca0012_m080_inviscid_forces.png (referenced at solver/report/report.tex:753); computed-field contour eaae575:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/report.tex:777). Score 5 retained after the post-processing audit. Prior case judgment: Validator-passing readable original contestant package; no unsteady rerun."
+      "score": 3,
+      "notes": "Immutable report.tex:642,744,753,777 gives Cd\u22480.0274, histories and Mach contour. Original final Cd=0.0274139; last 1,190 of 11,898 rows Cd=0.0271364\u20130.0274150 and Cl=0.001048\u20130.001170. Residual target is reported met, but elevated drag and tail variation materially limit confidence; score 5\u21923. Original workspace values are separate from the earlier report snapshot; no CFD case rerun."
     },
     "naca0012_m200_inviscid": {
-      "score": 5,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=0.001, CD=0.0924 at eaae575:solver/report/report.tex:643; residual history eaae575:solver/report/figures/naca0012_m200_inviscid_residual.png (referenced at solver/report/report.tex:808); force history eaae575:solver/report/figures/naca0012_m200_inviscid_forces.png (referenced at solver/report/report.tex:817); computed-field contour eaae575:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/report.tex:838). Score 5 retained after the post-processing audit. Prior case judgment: Validator-passing readable original contestant package; no unsteady rerun."
+      "score": 3,
+      "notes": "Immutable report.tex:643,808,817,838 gives partial-run Cd\u22480.0924, histories and Mach contour. Later original workspace force history has 5,190 rows ending Cd=0.0941871 and Cl=0.0025528, last 519 Cd=0.0941809\u20130.0941889; report instead describes 3,774-step partial result. This timing discrepancy and finite resolution limit interpretation; score 5\u21923. Original workspace values are separate from the earlier report snapshot; no CFD case rerun."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-passing readable original contestant package; no unsteady rerun."
+      "score": 1,
+      "notes": "Report.tex:620 lists case pending and has no case numeric summary, residual/force plots or contour; prior floor 2 is not the only defect. Later workspace forces.csv final Cd=0.351849 and last 1,220 rows 0.351849\u20130.356819, substantially above comparable low-Mach laminar cases (~0.054). The delivered case is physically unconvincing; score 2\u21921. Original workspace values are separate from the earlier report snapshot; no CFD case rerun."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 2,
-      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-passing readable original contestant package; no unsteady rerun."
+      "notes": "Report.tex:621 lists case pending; no delivered case numeric summary, histories or contour, so floor remains 2. Later workspace final Cd=0.142125; last 956 rows Cd 0.137525\u20130.142125 (3.2% of final) and Cl \u22120.004856 to \u22120.003799. Score remains 2 with substantial numerical and coverage limitations. Original workspace values are separate from the earlier report snapshot; no CFD case rerun."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-passing readable original contestant package; no unsteady rerun."
+      "score": 1,
+      "notes": "Report.tex:622 lists case pending; no case numeric summary, histories or contour. Later workspace final Cd=5.722734; last 39 of 383 rows Cd 5.722734\u20136.690650. This very large, still-changing drag makes the case physically unusable; score 2\u21921. Original workspace values are separate from the earlier report snapshot; no CFD case rerun."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-passing readable original contestant package; no unsteady rerun."
+      "score": 1,
+      "notes": "Report.tex:623 lists case pending; no case numeric summary, histories or wake contour. Later workspace final Cd=3.565314 and Cl=0.148953; last 1,880 rows Cd 3.562794\u20133.570917 and Cl 0.148541\u20130.149344. Drag and persistent large lift depart substantially from the expected near-symmetric Re20 result (Cd around 2); score 2\u21921. Original workspace values are separate from the earlier report snapshot; no CFD case rerun."
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
