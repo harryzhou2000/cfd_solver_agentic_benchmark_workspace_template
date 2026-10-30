@@ -140,14 +140,14 @@
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4,
-          "notes": "Solver.cpp:269 onward computes Barth-type limiter and positivity fallback, including local first-order fallback; output diagnostics are unavailable."
+          "notes": "Solver.cpp:276\u2013290 and :328 onward implement Barth-type limiting with first-order sliver fallback; original run_status records cumulative fallback counts but does not resolve their per-step spatial distribution."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 3.5,
-          "notes": "Solver.cpp:676\u2013704 adds full viscous traction to total force but tangent projection to split, so total can differ from pressure plus viscous components; result data absent. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+          "notes": "Solver.cpp:676\u2013704 integrates full viscous traction into total force but records tangential projection in its split. Original last 1000 rows have mean Cd minus pressure/viscous split \u22120.004143 for M2 laminar and +0.008745 for Re20; normal traction can account for such differences."
         },
         {
           "id": "cfd.implicit",
@@ -355,6 +355,36 @@
     "triggered": true,
     "flags": [
       {
+        "id": 1,
+        "found": false,
+        "evidence": "Inspected main, finite-volume and build sources: solver is run in-process; no internal call to an existing solver executable found. No exhaustive external authorship audit."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "Historical package histories, restart payloads and code paths are present. No direct evidence force/residual files were generated without solving; wrong plots and incorrect status are separately established and do not prove fabricated histories."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Input.cpp reads configured case/mesh and GlobalMesh.cpp imports configured CGNS; no code path limited to the two exact supplied filenames found."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Original np2/np8 comparisons in PDF pp.41\u201342 and results/mpi_np2 show reported M0.15 Cd 0.0151 vs 0.0155 and Re20 2.6967 vs 2.7806; exact historic controls and executable attribution remain qualified. No controlled order-one discrepancy established."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Solver.cpp implements damped block-Jacobi implicit iterations and BDF2 dual-time residual; not explicit-only."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Report methods Rusanov flux, reconstruction/limiter, viscous and BDF2 are present in Gas.cpp and Solver.cpp. Tangential-only split differs from total full traction and is penalized separately; no absent claimed algorithm established."
+      },
+      {
         "id": 7,
         "found": true,
         "evidence": "Historical cf36ac0 Re200 metadata says statistically_periodic, while Solver.cpp:1741\u20131749 sets that status whenever final time is reached; t>150 Cl history is broadband (3.85% spectral power below 0.5, autocorrelation -0.0037 at reported 8.83-period), with no credible periodic shedding. Report discloses irregularity. Fourteen steps also stop below the required minimum five; 625 target misses are separately reported, not alleged fabricated. Historical binary binding remains unproven."
@@ -363,6 +393,31 @@
         "id": 8,
         "found": true,
         "evidence": "All 16 report Mach/pressure PNGs reproduce byte-for-byte from original case VTUs using make_figures.py:180\u2013193, whose grouped quad-triangle ordering conflicts with adjacent duplicated cell values. M2 inviscid Mach misassigns 20126/20128 quad triangles (mean absolute error 0.5394). Re200 report vorticity PNG SHA256 5e5f1ae907a51521a54381211043c74bf693df46e0ccbc104f006681a75e850c reproduces exactly; make_figures.py:135\u2013161 indexes cell-centered Velocity by node ID and also misassigns triangles. This establishes specific embedded figure/data misrepresentation, not fabricated underlying fields."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "Partition.cpp:379 calls METIS_PartGraphKway; owned/ghost and neighbor exchanges exist. main.cpp:93\u2013101 discards broadcast preprocessing full mesh on nonroot before solver.run; all-rank full-state/full-mesh replication during iterations is not established."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Steady reconstruction is blended in after the documented CFL ramp at Solver.cpp:1364\u20131378, unless CFDS_FIRST_ORDER is set; Solver.cpp:1607\u20131613 explicitly enables transient reconstruction. Final historical executable/environment attribution is not decisive, but no production-disabled scheme is established."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "Output.cpp:182\u2013187 explicitly writes zero boundary velocities on no-slip walls, as report.tex:248\u2013258 discloses; no mislabeled adjacent-cell wall rows found."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "Case Mach and Pressure files are generated from the corresponding VTU variable names; their proven spatial misassignment is DQ8, not a Mach/pressure filename swap."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "Inspected finite-volume, time integration, MPI and mesh code; no affirmative evidence of a copied/wrapped open-source CFD core. No exhaustive external authorship search."
       }
     ]
   },
@@ -370,6 +425,6 @@
     "Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains original eight result packages, PDF and figures. Source/CMake/TeX match curated e998060 but the result branch has separate ancestry; exact historic executable binding remains unproven.",
     "Original 42-page PDF SHA256 92727fed474ad205eed506735ff76ca01d7c7f8cb4bd528724cf8297f3ffa5c2 is historical contestant-delivered evidence; it is not falsely labeled workspace_existing. Curated submission excludes report figure assets and cannot rebuild that PDF.",
     "All eight historical packages and report pass read-only structural validation; this does not certify numerical accuracy or contour fidelity. Original figure reproduction was diagnostic only, not a contestant post-processing deliverable.",
-    "Remaining full-catalog calibration and this run\u2019s remaining DQ/source checks are partial. No CFD or Re200 rerun occurred."
+    "All applicable sections, independent cases, 27 review points and 13 DQ triggers were reviewed to available evidence. Exact historic executable/control attribution remains unresolved; no CFD or Re200 rerun occurred."
   ]
 }

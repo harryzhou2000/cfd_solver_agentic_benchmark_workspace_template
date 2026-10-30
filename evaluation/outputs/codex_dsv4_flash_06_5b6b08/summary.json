@@ -263,14 +263,14 @@
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 4,
-        "notes": "Solver.cpp:269 onward computes Barth-type limiter and positivity fallback, including local first-order fallback; output diagnostics are unavailable."
+        "notes": "Solver.cpp:276\u2013290 and :328 onward implement Barth-type limiting with first-order sliver fallback; original run_status records cumulative fallback counts but does not resolve their per-step spatial distribution."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 3.5,
-        "notes": "Solver.cpp:676\u2013704 adds full viscous traction to total force but tangent projection to split, so total can differ from pressure plus viscous components; result data absent. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+        "notes": "Solver.cpp:676\u2013704 integrates full viscous traction into total force but records tangential projection in its split. Original last 1000 rows have mean Cd minus pressure/viscous split \u22120.004143 for M2 laminar and +0.008745 for Re20; normal traction can account for such differences."
       },
       {
         "id": "cfd.implicit",

@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T17:58:00.454557+00:00
+Generated: 2026-10-30T18:00:43.887651+00:00
 
 **Overall score: 3.55**
 
@@ -27,10 +27,10 @@ Generated: 2026-10-30T17:58:00.454557+00:00
 | 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | Solver.cpp:1169–1176,1369–1378 blends reconstruction after startup; original outputs exist but exact historical executable binding is unproven. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Solver.cpp:269 onward computes Barth-type limiter and positivity fallback, including local first-order fallback; output diagnostics are unavailable. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Solver.cpp:276–290 and :328 onward implement Barth-type limiting with first-order sliver fallback; original run_status records cumulative fallback counts but does not resolve their per-step spatial distribution. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3.5 | Solver.cpp:676–704 adds full viscous traction to total force but tangent projection to split, so total can differ from pressure plus viscous components; result data absent. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3.5 | Solver.cpp:676–704 integrates full viscous traction into total force but records tangential projection in its split. Original last 1000 rows have mean Cd minus pressure/viscous split −0.004143 for M2 laminar and +0.008745 for Re20; normal traction can account for such differences. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | Steady implicit path stops on mean-based plateau. Original Re20 and M0.15 inviscid force histories show significant oscillations despite approximately stationary half-window means. |
