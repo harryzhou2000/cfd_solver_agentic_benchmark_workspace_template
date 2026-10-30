@@ -61,6 +61,6 @@ None detected.
 
 ## Reviews
 
-- Code review scorecard: `codex_gpt56_07_b7c2c8/review_code.md` (overall: 3.7)
-- CFD methods review: `codex_gpt56_07_b7c2c8/review_cfd.md` (overall: 3.6)
-- Result review: `codex_gpt56_07_b7c2c8/review_results.md` (overall: 2.4)
+- Code review scorecard: `codex_gpt56_07_b7c2c8/review_code.md` (overall: 3.6)
+- CFD methods review: `codex_gpt56_07_b7c2c8/review_cfd.md` (overall: 3.33)
+- Result review: `codex_gpt56_07_b7c2c8/review_results.md` (overall: 2.83)

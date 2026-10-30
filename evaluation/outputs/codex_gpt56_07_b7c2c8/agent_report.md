@@ -10,7 +10,7 @@ The official validator passed all eight named canonical packages and `solver/rep
 
 Source supports CGNS/METIS partitioning, halo exchange, FV/Rusanov, reconstruction, limiter and viscous methods. The original report is candid that Re200 uses minimum-inner damped explicit-like acceptance and does not achieve strict full-horizon BDF2 nonlinear convergence; several laminar steady cases are force plateaus with zero residual-order reduction. Re200 was not rerun.
 
-Rubric: **70/100**. Review overalls are Code 3.70/5, CFD 3.60/5, Results 2.40/5. DQ: **true**: Re200 metadata labels the non-strict accepted run `statistically_periodic`/successful despite the report’s own statement that strict production inner convergence was not achieved. No external-copy investigation was performed under trust policy. Key limitations: post-run provenance reconstruction, excluded raw packages/figure artifacts, and the committed-tree report reproducibility failure.
+Provisional rubric: **66/100**. DQ7 is established because selected minimum-inner acceptance is counted as if the strict residual target were met. The original report clearly discloses the acceptance mode; the metadata target statistics remain invalid and the actual strict miss count is unknown. Several steady cases have weak residual evidence. The original 36-page PDF and figures were delivered, though excluded from curated report dependencies. Exact historical binaries and some figure bindings remain unbound. Remaining review is partial.
 
 ## DQ evidence clarification — 2026-10-29
 

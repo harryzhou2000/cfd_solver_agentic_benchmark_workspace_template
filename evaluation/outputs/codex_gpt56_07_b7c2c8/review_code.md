@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:07:40.038068+00:00
+Generated: 2026-10-30T12:09:33.686014+00:00
 
-**Overall score: 3.7**
+**Overall score: 3.6**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -12,28 +12,28 @@ Generated: 2026-10-30T12:07:40.038068+00:00
 | 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Clean immutable-source CMake build succeeds with bundled dependencies in network-disabled restricted cfd-bench; CTest finds no registered tests. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | Documented CLI. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 4 | main.cpp parses documented case/output/restart/report-level; restart holds current rank-local state only and cannot exactly resume BDF time/history. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Separated C++ modules. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Separated config, mesh, partition, state, FV, solver and output modules; report generator is separate. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 3 | Trust policy; no external search. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 3 | No internal executable wrapper found; external similarity outside trust policy. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | Config-driven cases. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | Case JSON and CGNS path drive solver, not two hard-coded mesh names. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4 | METIS/halo source and attempted np8 evidence. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 4 | solver.cpp:529–541 reads full mesh on each rank for preprocessing but releases it before owned/ghost iterations; METIS and halo exchange supported. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Production transient acceptance is non-strict. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Positivity/backtracking exists, but transient minimum-inner acceptance can count a finite unverified step as strict success; report discloses mode. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | Clean build succeeds; CTest has no registered tests. Historical validator checks are structural, not a numerical accuracy proof. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Clean source build succeeds in restricted container; CTest has no registered tests. Original validator passes are structural. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Curated source clean but report dependencies omitted by policy. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Curated source builds, but original delivered PDF and figures were excluded from curated TeX dependencies and report does not rebuild there. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 
@@ -50,7 +50,7 @@ Generated: 2026-10-30T12:07:40.038068+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.7
+- Overall score (0-5): 3.6
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

@@ -14,56 +14,56 @@
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "Documented CLI."
+      "notes": "main.cpp parses documented case/output/restart/report-level; restart holds current rank-local state only and cannot exactly resume BDF time/history."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Separated C++ modules."
+      "notes": "Separated config, mesh, partition, state, FV, solver and output modules; report generator is separate."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 3,
-      "notes": "Trust policy; no external search."
+      "notes": "No internal executable wrapper found; external similarity outside trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Config-driven cases."
+      "notes": "Case JSON and CGNS path drive solver, not two hard-coded mesh names."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "METIS/halo source and attempted np8 evidence."
+      "notes": "solver.cpp:529\u2013541 reads full mesh on each rank for preprocessing but releases it before owned/ghost iterations; METIS and halo exchange supported."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 3,
-      "notes": "Production transient acceptance is non-strict."
+      "notes": "Positivity/backtracking exists, but transient minimum-inner acceptance can count a finite unverified step as strict success; report discloses mode."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Clean build succeeds; CTest has no registered tests. Historical validator checks are structural, not a numerical accuracy proof."
+      "score": 3,
+      "notes": "Clean source build succeeds in restricted container; CTest has no registered tests. Original validator passes are structural."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 3,
-      "notes": "Curated source clean but report dependencies omitted by policy."
+      "notes": "Curated source builds, but original delivered PDF and figures were excluded from curated TeX dependencies and report does not rebuild there."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.7
+  "overall_score": 3.6
 }

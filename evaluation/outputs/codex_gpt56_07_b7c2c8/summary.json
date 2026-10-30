@@ -116,56 +116,56 @@
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 4,
-        "notes": "Documented CLI."
+        "notes": "main.cpp parses documented case/output/restart/report-level; restart holds current rank-local state only and cannot exactly resume BDF time/history."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Separated C++ modules."
+        "notes": "Separated config, mesh, partition, state, FV, solver and output modules; report generator is separate."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 3,
-        "notes": "Trust policy; no external search."
+        "notes": "No internal executable wrapper found; external similarity outside trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4,
-        "notes": "Config-driven cases."
+        "notes": "Case JSON and CGNS path drive solver, not two hard-coded mesh names."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 4,
-        "notes": "METIS/halo source and attempted np8 evidence."
+        "notes": "solver.cpp:529\u2013541 reads full mesh on each rank for preprocessing but releases it before owned/ghost iterations; METIS and halo exchange supported."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 3,
-        "notes": "Production transient acceptance is non-strict."
+        "notes": "Positivity/backtracking exists, but transient minimum-inner acceptance can count a finite unverified step as strict success; report discloses mode."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Clean build succeeds; CTest has no registered tests. Historical validator checks are structural, not a numerical accuracy proof."
+        "score": 3,
+        "notes": "Clean source build succeeds in restricted container; CTest has no registered tests. Original validator passes are structural."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 3,
-        "notes": "Curated source clean but report dependencies omitted by policy."
+        "notes": "Curated source builds, but original delivered PDF and figures were excluded from curated TeX dependencies and report does not rebuild there."
       }
     ],
     "disqualification_flags": [
@@ -210,7 +210,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.7
+    "overall_score": 3.6
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -221,77 +221,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Documented compressible FV."
+        "notes": "Report.tex:17\u201319 and source describe conservative perfect-gas NS and force normalization."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "CGNS unstructured/METIS."
+        "notes": "CGNS mesh geometry, METIS partition and owned/ghost local mesh are source-supported; global preprocessing copies released before solve."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 4,
-        "notes": "FV residual source."
+        "score": 3.5,
+        "notes": "FV residual and global norms exist; Re20 force history stagnates and three viscous cases end above their starting residual while reported as bounded plateaus."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Rusanov."
+        "notes": "fvm.cpp implements local Rusanov flux; diffusive relative to sharper approximate Riemann methods."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4,
-        "notes": "Required BCs."
+        "notes": "fvm.cpp uses slip/no-slip impermeable pressure states and wall shear; boundary output is documented."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Limited reconstruction."
+        "score": 2.5,
+        "notes": "Selected M2 np2 launch explicitly sets reconstruction scale0.25; preceding source defaults500 first-order startup steps while run ends247. Whether that default and binary were active is unresolved."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Production limiter source."
+        "score": 3,
+        "notes": "Barth\u2013Jespersen and positivity controls implemented; production scale0.25 suppresses selected reconstruction, and startup/binary attribution remains qualified."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 4,
-        "notes": "Viscous source."
+        "notes": "fvm.cpp:568\u2013573 projects one-sided wall shear onto tangent; no full-traction mislabel found."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 3,
-        "notes": "Local relaxation."
+        "notes": "Local pseudo-time relaxation and optional bounded force-plateau logic implemented; Re20 has 0.00012057 reduction orders and exact repeated force tail."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 1,
-        "notes": "Re200 long production uses minimum-inner explicit-like acceptance; report admits no strict nonlinear convergence."
+        "notes": "solver.cpp:697\u2013709 minimum-inner acceptance clamps ratio and counts target success; canonical metadata says zero misses and fraction1, actual strict misses unknown. DQ7."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 4,
-        "notes": "METIS/halo; np8 diagnostics."
+        "notes": "METIS root partition and neighbour halo/reductions supported; np2/8 M2 Cd0.09339181323917058/0.09339181323917056 and Re20 Cd0.346388/0.345966 are close."
       }
     ],
     "disqualification_flags": [
@@ -301,7 +301,7 @@
         "evidence": "Immutable submission 7ad799097f6d8426eb34d5a5ba092956a3e7d7b7 solver/README.md:98 documents CFD_SOLVER_TRANSIENT_ACCEPT_MIN_INNER=1 for the submitted Re200. solver/src/solver.cpp:697\u2013709 accepts a finite state at the minimum inner count and clamps last_inner_ratio to the requested target without establishing it; :746\u2013749 and :795\u2013798 use that acceptance in the claimed target count. Workspace canonical results/cylinder_m010_laminar_re200_np2_explicitish/metadata.json records observed min=max 5, misses 0, fraction 1, last ratio 0.001, completed=true/statistically_periodic. The displayed fraction and ratio therefore cannot prove strict target attainment; the actual number of strict misses is not established."
       }
     ],
-    "overall_score": 3.6
+    "overall_score": 3.33
   },
   "result_review": {
     "review_area": "result_review",
@@ -311,50 +311,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 2,
-        "notes": "Raw packages validate only in original attempt; excluded from curated branch."
+        "score": 3,
+        "notes": "Original attempt0b925ed contains eight packages; historical evaluator records all-case/report structural validator pass. Curated tip excludes raw data and report figures."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 4,
-        "notes": "Original attempt exact eight/report validator pass."
+        "notes": "Historical original-attempt validator passes all eight and report; independent clean source build succeeds but no registered CTests. Structural passes do not prove convergence."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 2,
-        "notes": "Steady plateaus and invalid strict Re200."
+        "notes": "Re200 strict target success statistics are not valid under selected minimum-inner mode; Re20 residual barely changes and force tail freezes. Other viscous plateaus have growing residuals, not automatically failed."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 2,
-        "notes": "Re200 limitation and zero-order viscous residual reductions."
+        "notes": "Re20 Cd0.3464 is far below same-case peers and residual barely falls; low-Mach inviscid Cd unusually high. Reported Re200 St0.01182 is weak and strict target statistics invalid."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Original report figures readable; curated report cannot build without forbidden PDFs/SVG."
+        "score": 3.5,
+        "notes": "Accepted 36-page contestant PDF contains fields/histories; Re200 late drag is compressed and curated TeX cannot rebuild without excluded figures."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 2,
-        "notes": "Original report candid, but curated TeX missing committed dependencies."
+        "score": 3,
+        "notes": "Delivered report explicitly discloses minimum-inner Re200 acceptance and plateau residuals; metadata nevertheless falsely counts minimum-inner as strict target success. Curated report dependencies excluded."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 3,
-        "notes": "generate_report.py:461\u2013483 uses all rank VTU pieces while figure_manifest.csv identifies only the first. Re20 Mach figure SHA256 520dcc5ebd6c1425aed94b41039ee3c70744cc79558585b67581f6eb0165005e regenerates byte-identically from both workspace pieces (ledger hashes); some other figure/executable bindings remain unverified."
+        "notes": "One Re20 Mach PDF regenerates byte-identically from both rank fields; figure manifest cites only one. Other image/binary bindings remain qualified."
       }
     ],
     "disqualification_flags": [
@@ -364,7 +364,7 @@
         "evidence": "Immutable submission 7ad799097f6d8426eb34d5a5ba092956a3e7d7b7 solver/README.md:98 documents CFD_SOLVER_TRANSIENT_ACCEPT_MIN_INNER=1 for the submitted Re200. solver/src/solver.cpp:697\u2013709 accepts a finite state at the minimum inner count and clamps last_inner_ratio to the requested target without establishing it; :746\u2013749 and :795\u2013798 use that acceptance in the claimed target count. Workspace canonical results/cylinder_m010_laminar_re200_np2_explicitish/metadata.json records observed min=max 5, misses 0, fraction 1, last ratio 0.001, completed=true/statistically_periodic. The displayed fraction and ratio therefore cannot prove strict target attainment; the actual number of strict misses is not established."
       }
     ],
-    "overall_score": 2.4
+    "overall_score": 2.83
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/gpt56/07",
