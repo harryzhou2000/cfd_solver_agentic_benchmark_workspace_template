@@ -307,8 +307,8 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 2,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=-0.0165, CD=-0.0545 at e49016d:solver/report/report.tex:898; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: run_manifest.md labels M0.15 inviscid statistically_periodic after 20000 steady steps and only +0.20 orders; recognizable but not credible steady convergence."
+      "score": 1,
+      "notes": "Recognizable but physically unusable steady result: checkpoint 1185ccd forces.csv SHA256 8613113c292b69c738b5b35d8a9f5df4c6ead7dd067b9a6f0df49049d76ab511 matches workspace. Cd declines +0.510818\u2192\u22120.054502 over steps12001\u201320000 and \u22120.026512\u2192\u22120.054502 in final400; Cl changes \u22120.03513\u2192\u22120.016532 over final4000. Delivered checkpoint force figure visibly shows continued drift. Metadata claims completed/statistically_periodic and report force table gives Cd\u22120.0545/Cl\u22120.0165. Score2\u21921; DQ7 for false success, independent of report floor. No rerun."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
@@ -340,13 +340,13 @@
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
       {
         "id": 7,
-        "text": "metadata/status marks incomplete or failed runs as successful",
-        "evidence": "No affirmative false-success evidence: Six delivered NACA attempts are honestly qualified; cylinder Re20 and Re200 are explicitly failed, so the explicit final validator fails.",
-        "found": false
+        "flag": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "Checkpoint 1185ccd selected naca0012_m015_inviscid metadata SHA256 038c0dcd8f1902255e3a411d77a58a2f328e1ae7aa63f6079ecf58270d0b69b3 says completed=true, statistically_periodic. Its checkpoint-matched forces.csv SHA256 8613113c292b69c738b5b35d8a9f5df4c6ead7dd067b9a6f0df49049d76ab511 shows Cd descending from +0.510818 at step12001 to \u22120.054502 at step20000, including \u22120.026512\u2192\u22120.054502 in final400; Cl \u22120.03513\u2192\u22120.016532 over final4000. Delivered force plot visibly confirms continued drift rather than a stationary or periodic state. Immutable report.tex:21,875 and run_manifest.md:23,32\u201335 characterize steady cases as converged/statistically periodic. Re20 and Re200 status=failed are separately disclosed and are not charged merely for failure. No CFD rerun."
       }
     ]
   },

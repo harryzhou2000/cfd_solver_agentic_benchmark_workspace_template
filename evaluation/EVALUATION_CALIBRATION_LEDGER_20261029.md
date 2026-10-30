@@ -102,7 +102,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_sonnet46-01_ac6940` | partial: all cases, PDF, source and rubric reviewed; DQ7/TASK full mesh; historic binary binding and remaining DQ uncertain |
 | `codex_generic_sonnet46-02_dac37b` | partial: all cases, PDF, source/rubric checked; DQ6/DQ7 and placeholder rejection; exact historical binary remains unbound |
 | `codex_generic_sonnet5-01_540ddf` | partial: PDF, all cases, source/rubric examined; DQ8 proven; historical binary and remaining figure/fallback provenance uncertain |
-| `codex_generic_sonnet5-02_6c0ac0` | unreviewed |
+| `codex_generic_sonnet5-02_6c0ac0` | partial: M015 inviscid false-success DQ7 established; other cases/source/rubric pending |
 | `codex_generic_vllm-qwen38-01_2045e0` | unreviewed |
 | `codex_generic_vllm-qwen38-02_d47362` | unreviewed |
 | `codex_glm52-m3_01_919b67` | unreviewed |
@@ -815,3 +815,5 @@ sonnet5-01 restart/source checkpoint: restart header stores step/time but reader
 sonnet5-01 source/review checkpoint: root-only mesh setup destroyed before solver, METIS/neighbor halos, exchanged reconstruction, tangential wall traction and full spatial+BDF inner target inspected. Re200 metadata zero misses; 30000 rows min49/max144/mean132.818, exact strict ratios not reconstructed. Validator passes eight packages/report; checkpoint matches field/restart files previously marked missing by stale auto measurements. Hygiene now reflects zero tracked build paths, not manager curation. Remaining DQ/provenance partial; no CFD rerun.
 
 sonnet5-01 DQ/fallback boundaries: DQ8 specific Fig13(a) proven; no inferred DQ7 from disclosed force-checked plateau or DQ9/full mesh with root-only setup. Report sec_verification.tex:1172–1179 treats zero reconstruction positivity fallbacks as evidence HLLC never ran, but Roe-to-HLLC dispatch in riemann_flux.cpp:192–196,341–346 is a separate uncounted condition. Current HLLC expression corrected; no actual dispatch count or defect impact inferred. Remaining binary/other-figure provenance partial.
+
+sonnet5-02 DQ7 correction: checkpoint 1185ccd M015 inviscid metadata completed/statistically_periodic; force CSV SHA8613113c292b69c738b5b35d8a9f5df4c6ead7dd067b9a6f0df49049d76ab511 matches workspace, Cd+0.510818→−0.054502 over steps12001–20000, last400 −0.026512→−0.054502, and lift changes substantially. Delivered plot confirms drift. report/manifest claim periodic success. DQ7 false→true, case2→1; failed cylinder statuses separately disclosed. Other review partial.
