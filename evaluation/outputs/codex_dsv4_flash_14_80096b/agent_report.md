@@ -47,7 +47,7 @@ The identity sidecar SHA-256 is `b7b99a32688ad8ed7fa88d76f79cccf5bee8bff7f903f0d
 
 ## Scores
 
-Provisional rubric **79.5/100** (previously 87.5); detailed sections, weighted review scores and independent case scores are in `agent_scores.json`. Full review remains in progress.
+Qualified rubric **79.5/100** (previously 87.5); detailed sections, weighted review scores and independent case scores are in `agent_scores.json`. All applicable sections, cases, review points and DQ triggers have been examined; producing-binary and rank-control provenance remain unresolved.
 
 ## Disqualification assessment
 
@@ -63,7 +63,7 @@ A clean immutable-source CMake build passed with warnings in the network-disable
 
 ## Verdict
 
-Provisional **79.5/100, DQ=false**; source, rubric and DQ review remain incomplete. Original histories and report remain evidence with production-source provenance limitations.
+Qualified **79.5/100, DQ=false**; no trigger is established by the available evidence. Original histories and report remain evidence, with historical production-source/binary and rank-control provenance limitations.
 
 
 ## Partial Re200/source provenance review — 2026-10-30
@@ -86,3 +86,10 @@ Immutable 05261f8 clean CMake build succeeds with warnings in network-disabled c
 ## Partial source and provenance boundary — 2026-10-30
 
 All ten rubric sections and 27 review points now have criterion-specific evidence; provisional rubric 82.5→79.5 after residual 14→13, second-order 7→6 and MPI 9→8 to reflect production source uncertainty and disclosed reconstruction controls. DQ assessment covers each numbered rule, but cannot conclusively evaluate production-specific behavior without binding the actual binaries. Re200 metadata says it ran 2026-08-18 01:30:47–04:18:32 UTC with git_revision=null; a151896 was committed at 01:27:55 UTC, while 3ec9924 (04:51:49 UTC) and a3ef6bd (05:17:30 UTC) subsequently changed numerical code. The tracked a151896 versus curated 05261f8 diff spans 225 added/31 removed lines across four solver files, including residual/reconstruction options. Current build/cfd_solver was rebuilt at 08:11:42 UTC after the Re200 job ended. These timestamps constrain provenance but do not establish the source of the production executable. Selected verification also reports uncommitted source/tool edits at HEAD c10299c. Seven steady run timestamps span 01:30–05:59 UTC and likewise have git_revision=null. Further review requires actual production binary/build provenance or an authoritative saved source/binary artifact; retain partial status. Both gates pass; no CFD rerun.
+
+
+## Qualified review and steady-plot correction — 2026-10-31
+
+Independent visual comparison with glm53-04 shows the three NACA laminar force plots merge both curves into the startup-dominated baseline, unlike the separately resolved lift panels in that precedent; their 2-point floor caps remain. Re20 force figure at 05261f8 has blob `3ec9879a92e56b89a763611e7e0ff57dac4ca83a` and visibly shows drag settling above lift even though a startup spike reduces late resolution. `results_summary.tex:21` gives Cd 2.10341/Cl 0.00554, residual reduction 6.97 orders, and references its force/residual/wake figures. The final 10% of original drag rows spans 2.10338502–2.10340547. The steady floor does not demand a late-drag zoom, so the earlier automatic cap was inconsistent: Re20 2→3.5, retaining deductions for scale and numerical/provenance limitations. Re200 has a separate explicit late-lift/drag requirement and remains 2.
+
+Ten sections, eight cases, 27 review points and 13 DQ rules have now been reviewed to the available evidence limit. Original run metadata has null git_revision; current build and verify executables were rebuilt after the Re200 run, and earlier ASan/UBSan binaries do not establish the production executable. Git tracked history contains no archived `cfd_solver` binary. The actual historic binary and exact rank-test controls remain unbound; no claim that final source produced the results is made. No CFD or Re200 rerun.

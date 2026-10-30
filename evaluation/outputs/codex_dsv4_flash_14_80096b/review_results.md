@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:42:55.453252+00:00
+Generated: 2026-10-30T18:02:59.555793+00:00
 
 **Overall score: 3.45**
 
@@ -21,7 +21,7 @@ Generated: 2026-10-30T04:42:55.453252+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Raw force tails/periods are documented; M0.15 inviscid Cd 0.0344 and laminar Cd 0.0118, gradient damping and Re200 lift amplitude suggest limitations without an independent grid study. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 2.5 | Three inviscid case plots show force evolution and contours; four steady viscous force plots and Re200 late drag are compressed by startup spikes. Figures remain traceable through report manifest. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2.5 | Three inviscid and Re20 graphs show overall force evolution with contours; Re20 late drag is poorly resolved but discernible. Three laminar NACA plots merge lift/drag into baseline, while Re200 late drag is startup-compressed. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 4.0 | The 41-page report is detailed and candid about reconstruction blending, but does not disclose the M2 inviscid CFD_GRAD_DAMP=0.5 production setting. |

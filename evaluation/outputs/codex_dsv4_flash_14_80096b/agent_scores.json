@@ -218,7 +218,7 @@
           "title": "Visualizations",
           "weight": 0.15,
           "score": 2.5,
-          "notes": "Three inviscid case plots show force evolution and contours; four steady viscous force plots and Re200 late drag are compressed by startup spikes. Figures remain traceable through report manifest."
+          "notes": "Three inviscid and Re20 graphs show overall force evolution with contours; Re20 late drag is poorly resolved but discernible. Three laminar NACA plots merge lift/drag into baseline, while Re200 late drag is startup-compressed."
         },
         {
           "id": "res.report",
@@ -341,8 +341,8 @@
       "notes": "4\u21922. Canonical np8 5587 steps, 3.272 orders, Cd 0.10132355/Cl 0.00024645, last 10% Cd 0.10127970\u20130.10134663. Residual/field plots exist; startup Cd\u2248320 makes late forces unreadable, and no alternative delivered late force plot found. Original result metadata git_revision=null; exact solver binary source revision is not proven."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 2,
-      "notes": "4\u21922. Canonical np8 969 steps, 6.968 orders, Cd 2.10340547/Cl 0.00554458, last 10% Cd 2.10338502\u20132.10340547. np1 comparison Cd 2.12662443/Cl 0.00570481, ~1.1% drag difference. Residual and wake plots exist, but startup Cd\u2248160 flattens late force history; no alternative delivered late force plot found. Original result metadata git_revision=null; exact solver binary source revision is not proven."
+      "score": 3.5,
+      "notes": "Original 4\u21922 cap\u21923.5 after visual comparison with glm53-04. Canonical np8 969 steps, 6.968 residual orders, Cd 2.10340547/Cl 0.00554458; last 10% Cd 2.10338502\u20132.10340547. Submission 05261f8:solver/report/results_summary.tex:21 gives numeric summary; figures.tex references the committed residual, force and near-body/wake contours. Force PNG blob 3ec9879a92e56b89a763611e7e0ff57dac4ca83a shows Cd settling visibly above Cl despite initial Cd\u2248160; late scale resolution is weak but unlike Re200 the steady floor does not demand a late-drag zoom. Original np1/8 Cd 2.12662443/2.10340547 differs ~1.1%. Exact producing binary remains unbound; no independent grid study."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
@@ -423,6 +423,7 @@
     "No evaluator rerun was performed; Re200 was not rerun under the mandatory prohibition.",
     "The result branch intentionally excludes raw case packages and the compiled report PDF; raw workspace evidence was inspected read-only but is not reproducible from result-tip Git alone.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars; cfdeval check does not validate either sidecar.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "Qualified full review: exact historical production binary and rank-control provenance remain unbound despite inspecting saved binary timestamps, commit history and the selected verification. All feasible source, case, review-area and DQ checks are documented; no CFD/Re200 rerun."
   ]
 }

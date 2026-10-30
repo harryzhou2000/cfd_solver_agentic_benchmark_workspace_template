@@ -86,7 +86,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_10_6468ba` | fully reviewed: 86→71, DQ6 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_11_6e6ac8` | fully reviewed: 70→53, DQ7 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_12_7e965b` | fully reviewed: 90→79, DQ false; all cases 2 |
-| `codex_dsv4_flash_14_80096b` | partial: Re200 and initial provenance/mesh assessed; remaining cases/rubric/DQ pending |
+| `codex_dsv4_flash_14_80096b` | fully reviewed, qualified: 79.5/100, no DQ established; historical binary/rank controls unbound |
 | `codex_generic_02_ed5ee6` | partial: DQ7, TASK full mesh, Re200 checked; others pending |
 | `codex_generic_03_5f2165` | partial: all cases, build and TASK full mesh/state checked; remaining source/rubric/DQ review pending |
 | `codex_generic_04_16009f` | partial: DQ10, DQ7, TASK full mesh established; case/rubric/source review pending |
@@ -523,6 +523,8 @@ dsv4_flash_14 partial build/rubric checkpoint: provisional 87.5→82.5 (implicit
 
 
 dsv4_flash_14 source/provenance boundary: rubric 82.5→79.5 provisional (residual 14→13, second order 7→6, MPI 9→8); all 10 sections/27 review points and 13 DQ rules now have criterion-specific evidence, but run remains partial because actual production binary source is unbound. Re200 metadata git_revision=null, start/end 2026-08-18 01:30:47–04:18:32 UTC; a151896 committed 01:27:55 UTC, subsequent numerical commits 3ec9924 at 04:51:49 and a3ef6bd at 05:17:30 UTC; a151896→curated 05261f8 changes 225 added/31 removed lines across four solver files. Current build/cfd_solver timestamp 08:11:42 UTC postdates production; selected verification reports uncommitted solver/tool changes. Seven steady case timestamps span 01:30–05:59 UTC and git_revision=null. Need decisive saved original executable/source/build provenance to resolve production-specific DQ/accuracy; no rerun. Both gates pass.
+
+dsv4_flash_14 qualified completion and Re20 steady-plot correction: individually compared the committed plots with glm53-04. Three NACA laminar force plots merge lift and drag into the startup-dominated baseline, unlike that precedent's separately readable lift panels, and remain capped at 2. The Re20 plot `05261f8:solver/report/figures/cylinder_m010_laminar_re20_forces.png`, blob `3ec9879a92e56b89a763611e7e0ff57dac4ca83a`, visibly resolves the drag settling trajectory above lift despite its compressed late scale. `results_summary.tex:21` gives Cd 2.10341/Cl 0.00554 and references force, residual and wake evidence; original last-10% Cd spans 2.10338502–2.10340547. The steady floor does not require an explicit late-drag zoom: Re20 2→3.5, with presentation and provenance deductions. Re200's explicit late-lift/drag rule is unchanged. All 10 sections, 27 points, eight cases and 13 DQ rules have been reviewed; prior partial language above is historical. No production solver binary was found in tracked Git history; existing build and verify binaries postdate Re200 while earlier ASan/UBSan builds do not bind production. Historical executable and rank controls remain genuinely unresolved, reflected in qualified evidence rather than a false certainty. No CFD/Re200 rerun. Both gates required.
 
 
 ## generic_02 partial Re200/full-mesh DQ — 2026-10-30
