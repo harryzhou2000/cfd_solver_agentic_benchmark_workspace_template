@@ -41,8 +41,8 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "METIS graph partitioning, owned/ghost construction, neighbor Isend/Irecv, and Allreduce paths are directly present. Runtime rank consistency is unavailable."
+      "score": 2.5,
+      "notes": "6148b7b main.cpp:105\u2013137 constructs a full mesh on every rank, holds it through solver loops and uses it again :409; TASK.md:46,227 prohibit this despite actual METIS and neighbor halos. Historic rank packages require further review."
     },
     {
       "id": "code.robustness",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.92
+  "overall_score": 2.69
 }

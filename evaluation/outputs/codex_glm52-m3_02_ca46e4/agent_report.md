@@ -3,23 +3,23 @@
 - Result branch: `codex/glm52-m3/02`; immutable submission: `6148b7b8525000945d5591faceda30aeb1bc1180`.
 - Initial branch/commit: `codex/glm52-m3/init` / `746ef3980fddf8558a8b7e29370ff32117604d8e` (operator-authorized post-run reconstruction).
 - Identity: v2 `codex_glm52-m3_02_ca46e4`; `run_identity.json` SHA-256 `18dc46b7b02c18853880ad546084beffdd62f4ee8cbb28d3ec40df13d1681419`.
-- Scope: source-only / zero-results assessment. No evaluator execution was performed, and cylinder Re200 was not rerun.
+- Scope: partial recalibration including recovered contestant-checkpoint results. No evaluator execution was performed, and cylinder Re200 was not rerun.
 
 ## Session accounting correction
 
-The selected root tree remains 102,546,862 tokens. Regeneration removed one inherited fork-replay activity record without changing owned token or tool totals. Repricing the immutable model/token split with the audited manager table changes the stored estimate from $11.6346 to $33.4368. Evaluation evidence, scores, and DQ verdict are unchanged.
+The selected root tree remains 102,546,862 tokens. Regeneration removed one inherited fork-replay activity record without changing owned token or tool totals. Repricing the immutable model/token split with the audited manager table changes the stored estimate from $11.6346 to $33.4368. This accounting correction precedes the subsequent result-evidence recalibration.
 
 ## Evidence and methodology
 
 The immutable commit tree, task/output contract, scoring rubric, committed C++/CMake/README/report/scripts, `run_identity.json`, and project-local telemetry sidecars were read. `git ls-tree -r 6148b7b` proves that the submission has source, `report.tex`, and nine referenced PNG figures, but no `solver/results/<required-case>` directory, no raw result package, and no report `run_manifest`, `figure_manifest`, or `sanity_checks` artifact.
 
-The summary inventory reports four noncanonical uncommitted test directories; they are not in the immutable submission and receive no final-result credit. The report's statements that all eight cases ran and satisfy the output contract are consequently unsupported by committed evidence. No clean build, CLI test, validator invocation, numerical rerun, redraw, or MPI comparison was done. This is deliberate: the missing committed deliverables already decide result completeness; a rerun cannot repair them. Re200 is additionally never rerun under the evaluation policy.
+Contestant branch checkpoint `99413eb21f9d380de985f5a75842fafc7d75866f`, recorded 2026-08-02 09:07 UTC shortly before the selected session's 09:10 UTC final response, contains all eight canonical result packages and historical report artifacts. Its solver/src matches `6148b7b` exactly; its report differs. The final response states that all eight cases were run. These are contestant-delivered historical artifacts even though the curator excluded raw results from the result tip. Exact historic executable identity remains unverified. The previous source-only zero-case verdict was therefore incomplete; provisional scores remain pending individual case/physics review. No evaluator CFD run or Re200 rerun was performed.
 
 ## Findings
 
 Source supports a credible partial implementation: C++17 CMake, JSON case parsing, CGNS mesh/geometry code, METIS graph partitioning, owned/ghost state, neighbor nonblocking communication, global reductions, Roe/Rusanov fluxes, least-squares reconstruction, a Barth-type limiter, positivity fallback, viscous fluxes, LU-SGS-like sweeps, and a BDF2-shaped physical-time/inner loop.
 
-Important source/report limitations are material. `output.hpp` records the inviscid flux as Roe even where the runtime `--rusanov` switch selects Rusanov. The README's transient command passes `--max-inner 1`; `report.tex` also acknowledges that override, although elsewhere it claims five inner iterations. `main.cpp` labels a steady run that reaches max steps as `converged` regardless of its residual reduction. These defects reduce method/robustness credit but do not, on direct evidence alone, establish a disqualification trigger.
+Important source/report limitations are material. `output.hpp` records the inviscid flux as Roe even where the runtime `--rusanov` switch selects Rusanov. The README's transient command passes `--max-inner 1`; `report.tex` also acknowledges that override, although elsewhere it claims five inner iterations. `main.cpp` labels a steady run that reaches max steps as `converged` regardless of its residual reduction. Re200 checkpoint metadata labels completion/periodicity with final inner ratio 0.915 against the 0.001 target. Submitted output.hpp sums per-rank misses and clamps the reported success fraction to 0.95; the reported 120000 misses are not 120000 distinct physical steps. This substantiates DQ7. Separately, full raw/global mesh is retained on every rank throughout solver execution, contrary to TASK.md:46,227 despite real METIS and halo exchange.
 
 ## Rubric scores (100 points)
 
@@ -31,12 +31,12 @@ Important source/report limitations are material. `output.hpp` records the invis
 | Second-Order Spatial Scheme | 10 | 8 | Reconstruction, limiter, positivity source; material fallbacks. |
 | Viscous Terms | 10 | 7 | Gradient/Newtonian/Fourier source, no laminar evidence. |
 | Implicit And Transient Methods | 15 | 9 | LU-SGS/BDF2 source; Re200 inner override/non-evidence. |
-| MPI | 10 | 8 | METIS, halo/reductions source; no np=8 result. |
-| Case Results And Validation | 10 | 0 | All eight final packages absent. |
+| MPI | 10 | 5 | METIS and neighbor halos exist, but each rank retains full mesh during solve; rank evidence under review. |
+| Case Results And Validation | 10 | 0 | Provisional pending recovered checkpoint package review. |
 | Report, Visualization, Analysis | 5 | 1 | Methods/figures exist but lack data/manifest/coverage. |
 | Extensibility | 5 | 3 | Modular components, limited architecture. |
 
-**Total: 60/100.**
+**Provisional total: 57/100.**
 
 ## Review-area scores
 
@@ -44,17 +44,17 @@ Important source/report limitations are material. `output.hpp` records the invis
 |---|---:|---|
 | Code | 2.92/5 | Modular implementation and MPI source, without build/tests and with status/metadata defects. |
 | CFD methods | 3.42/5 | Broad source implementation, unverified numerically and constrained by documented fallbacks. |
-| Results | 0.30/5 | No immutable case results; only unsupported report figures/prose remain. |
+| Results | provisional | Historical checkpoint results require case-by-case review. |
 
 All 27 individual review points and their evidence notes are in `agent_scores.json`.
 
 ## Per-case scores
 
-Every required case scores **0/5** independently: all eight canonical result directories are missing from immutable commit `6148b7b`. This applies to the three inviscid NACA cases, three laminar Re5000 NACA cases, cylinder Re20, and cylinder Re200. Re200 source can inform implementation review only; without a readable submitted result it cannot establish production controls or periodic shedding.
+The previous eight 0/5 case scores are retained temporarily only as provisional values: the now-identified checkpoint contains all eight canonical result packages. Each case and its plots, controls and physical credibility still require independent assessment.
 
 ## Disqualification assessment
 
-**DQ: no (not established).** All thirteen triggers have explicit direct-evidence findings in `agent_scores.json`. No internal external-solver wrapper, hard-coded two-mesh-only input path, explicit-only integration, or false METIS implementation was found. Missing evidence is not converted into a DQ finding: it is scored as missing results/traceability. The report's unsupported completion claims and the source's metadata/status inconsistencies are deductions; they do not meet the worded affirmative trigger on the evidence available.
+**DQ: yes**, trigger 7 and the separate TASK full-mesh prohibition. The checkpoint Re200 final inner ratio 0.915 exceeds its 0.001 target despite completed/periodic metadata; full per-rank mesh is retained during solver iterations. Per-rank miss reduction and the 0.95 clamp prevent interpreting the stored miss count or fraction as the number of actual failed physical steps. Remaining trigger and binary-provenance review is incomplete.
 
 ## Session selection and integrity
 

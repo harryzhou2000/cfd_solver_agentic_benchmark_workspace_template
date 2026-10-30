@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:53:57.824666+00:00
+Generated: 2026-10-30T09:06:02.948189+00:00
 
-**Overall score: 3.42**
+**Overall score: 3.29**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -39,7 +39,7 @@ Generated: 2026-09-07T02:53:57.824666+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3 | Physical-time outer loop, frozen histories and inner iterations exist. README/report state max-inner=1 override, violating requested minimum, and no Re200 artifact demonstrates its execution. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | METIS_PartGraphKway, rank-local owned/ghost sets, neighbor communication and reductions are source-evidenced; scalability remains unmeasured. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2.5 | 6148b7b main.cpp:105–137 constructs a full mesh on every rank, holds it through solver loops and uses it again :409; TASK.md:46,227 prohibit this despite actual METIS and neighbor halos. Historic rank packages require further review. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-09-07T02:53:57.824666+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.42
+- Overall score (0-5): 3.29
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
