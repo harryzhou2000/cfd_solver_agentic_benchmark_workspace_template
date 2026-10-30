@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:17:11.405565+00:00
+Generated: 2026-10-30T04:18:19.316052+00:00
 
-**Overall score: 3.7**
+**Overall score: 3.52**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -39,7 +39,7 @@ Generated: 2026-10-30T04:17:11.405565+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1 | Report.tex:304–307 claims BDF2, but sole transient residual solver.cpp:666–673,1435–1437 uses 1.5(U−Un)+0.5(U−Unm1), not BDF2 and not a consistent time derivative; this exact solver.cpp blob matches production commit. Full-horizon data/inner ratios belong to that different residual. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | Partition implementation plus np8 submitted results. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | partition.cpp:36 uses METIS but main.cpp:112–127 replicates full mesh on all ranks throughout solve, contrary to TASK.md:227; np4/8 outputs alone do not establish order-one mismatch. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T04:17:11.405565+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.7
+- Overall score (0-5): 3.52
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

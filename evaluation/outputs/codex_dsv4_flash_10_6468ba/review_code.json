@@ -7,7 +7,7 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "Documented CMake and contestant clean-checkout evidence; evaluator did not rerun."
+      "notes": "Immutable curated 47dff36 clean CMake build succeeds with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB, /opt/external dependencies; no CFD rerun."
     },
     {
       "id": "code.cli",
@@ -41,8 +41,8 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Partition/MPI source and submitted np8 evidence."
+      "score": 2,
+      "notes": "main.cpp:112\u2013127 loads full Mesh on every rank and retains it through iterations, contrary to TASK.md:227. METIS and neighbor exchanges exist; np4/8 output differences are recorded."
     },
     {
       "id": "code.robustness",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.75
+  "overall_score": 3.45
 }

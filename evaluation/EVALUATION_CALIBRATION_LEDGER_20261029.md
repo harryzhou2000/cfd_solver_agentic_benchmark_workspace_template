@@ -472,3 +472,6 @@ dsv4_flash_10 partial steady/figure review: all eight case scores remain 2. Acce
 
 
 dsv4_flash_10 DQ6 adjudication: rubric 86→82 provisional, implicit/transient 13→9 (four-point second-order transient criterion), cfd.transient 4→1. Report.tex:304–307 explicitly claims BDF2, but sole transient solver.cpp:666–673,1435–1437 uses coefficients 2,-1.5,-0.5 instead of 1.5,-2,+0.5 and fails linear-time consistency. Correct BDF2/equivalent residual not found; production and submitted solver.cpp blobs match. This matches flash-01 DQ6 (claimed Roe vs only Rusanov), not flash-09 (BDF2 formula present but history separately shifted incorrectly), and is distinct from mislabeled full traction. No fabrication or true BDF2 miss count inferred. TASK full-mesh DQ independently stands; other review partial, both gates pass, no rerun.
+
+
+dsv4_flash_10 partial build/rubric: 82→73 provisional (MPI 9→5 for full mesh, case results 9→6 for early plateaus/incorrect transient, report 4→2 for blank residuals and false scheme/mesh claims). Immutable 47dff36 clean CMake build passed with warnings in network-disabled cfd-bench, two CPUs/3 GiB using /opt/external. solver.cpp:606–624 projects viscous shear tangentially; :154–160 offers optional CFD_FIRST_ORDER, but production use is not established from available evidence. Other criteria/DQ partial; both gates pass, no solver rerun.

@@ -30,7 +30,7 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4,
-          "notes": "Documented CMake and contestant clean-checkout evidence; evaluator did not rerun."
+          "notes": "Immutable curated 47dff36 clean CMake build succeeds with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB, /opt/external dependencies; no CFD rerun."
         },
         {
           "id": "code.cli",
@@ -64,8 +64,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Partition/MPI source and submitted np8 evidence."
+          "score": 2,
+          "notes": "main.cpp:112\u2013127 loads full Mesh on every rank and retains it through iterations, contrary to TASK.md:227. METIS and neighbor exchanges exist; np4/8 output differences are recorded."
         },
         {
           "id": "code.robustness",
@@ -89,7 +89,7 @@
           "notes": "Curated source/report cleanly excludes raw artifacts."
         }
       ],
-      "overall_score": 3.75,
+      "overall_score": 3.45,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -168,11 +168,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Partition implementation plus np8 submitted results."
+          "score": 2,
+          "notes": "partition.cpp:36 uses METIS but main.cpp:112\u2013127 replicates full mesh on all ranks throughout solve, contrary to TASK.md:227; np4/8 outputs alone do not establish order-one mismatch."
         }
       ],
-      "overall_score": 3.7,
+      "overall_score": 3.52,
       "disqualification_flags": []
     },
     "result_review": {
@@ -195,8 +195,8 @@
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 5,
-          "notes": "All eight package metadata validate, including Re200."
+          "score": 2,
+          "notes": "Seven steady statuses converged but most stop early on plateau with limited residual drop; Re200 reaches t300 using an inconsistent physical-time formula, not claimed BDF2."
         },
         {
           "id": "res.plausibility",
@@ -209,38 +209,38 @@
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Committed TeX references comprehensive curated PNGs."
+          "score": 1,
+          "notes": "All eight accepted report residual images are blank because tools_py/plot_lines.py:137\u2013139 log-y mapping omits offset; Re200 late force oscillations unreadable. Case contours are present."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Report source and figures are curated; contestant claims compiled report."
+          "score": 2,
+          "notes": "Report contains case tables and fields, but wrongly asserts BDF2 formula and no full mesh replication; residual figures blank and late Re200 forces unreadable."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 4,
-          "notes": "Contestant manifest exists in evidence commit but raw manifests excluded from curated branch."
+          "score": 2,
+          "notes": "Immutable raw 7152874 preserved results; report formula and no-full-mesh claims conflict with source; inner fraction refers to different residual, not required BDF2."
         }
       ],
-      "overall_score": 4.8,
+      "overall_score": 3.05,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 82,
+    "total_scored": 73,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 9,
-        "notes": "Strong documented/contestant audit evidence; no evaluator clean solver build."
+        "notes": "Immutable clean CMake build succeeds with warnings in restricted cfd-bench using /opt/external; output packages preserved in raw attempt."
       },
       {
         "id": "mesh_geometry",
@@ -281,22 +281,22 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 9,
-        "notes": "Partition source and np8 NACA/cylinder evidence."
+        "score": 5,
+        "notes": "METIS, neighbor communication and np4/8 outputs exist, but main.cpp:112\u2013127 retains complete Mesh on every rank throughout solver iterations, prohibited by TASK.md:227."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 9,
-        "notes": "All eight preserved packages validate; plausibility not independently rerun."
+        "score": 6,
+        "notes": "All packages structurally validate, but early steady plateaus have limited reductions and Re200 uses inconsistent physical-time residual rather than claimed BDF2; per-case evidence documented."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4,
-        "notes": "Comprehensive curated figures/report, raw manifest excluded."
+        "score": 2,
+        "notes": "Report includes fields/forces, but all residual graphs are blank, Re200 late force unreadable, and BDF2/no-mesh-replication assertions contradict source."
       },
       {
         "id": "extensibility",

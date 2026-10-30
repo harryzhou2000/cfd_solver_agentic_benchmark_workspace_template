@@ -8,7 +8,7 @@ Selected workspace-local Codex root `019fe243-274e-7961-abdb-42fcc139142e` has e
 
 ## Scores and verdict
 
-Provisional score **82/100** (previously 86); Code 3.78/5, CFD 4.00/5, Results 4.69/5; DQ=true under TASK full-mesh prohibition and trigger 6 for the absent claimed BDF2 formula. Every rubric, review-point and case note is in `agent_scores.json`; current case scores are 2, 2, 2, 2, 2, 2, 2, 2. Strong source/report and validator evidence support a high result, while no evaluator solver rerun or independent redraw was performed. Re200 was not rerun.
+Provisional score **73/100** (previously 86); Code 3.78/5, CFD 4.00/5, Results 4.69/5; DQ=true under TASK full-mesh prohibition and trigger 6 for the absent claimed BDF2 formula. Every rubric, review-point and case note is in `agent_scores.json`; current case scores are 2, 2, 2, 2, 2, 2, 2, 2. Strong source/report and validator evidence support a high result, while no evaluator solver rerun or independent redraw was performed. Re200 was not rerun.
 
 TASK.md:227 full-mesh prohibition and DQ6 apply as documented below. No internal solver wrapper is evident. Trust policy excluded external similarity search.
 
@@ -39,3 +39,8 @@ Accepted PDF pp10–16 includes case-specific force histories and Mach/pressure 
 ## Partial DQ6 adjudication — 2026-10-30
 
 The claimed BDF2 physical-time algorithm is not present in the sole transient residual: the implemented coefficients are 2, -1.5, -0.5 instead of 1.5, -2, +0.5. This is a different, inconsistent time formula rather than the claimed method with an output-label or force-split issue. Compare flash-01 DQ6, where report claims Roe but the only flux path is Rusanov; unlike flash-09, whose BDF2 residual formula exists but loses history through a separate shift bug, here the claimed formula itself cannot be found. Production and submitted source share the exact solver.cpp blob documented above. DQ6 is therefore found; implicit/transient section 13→9 removes its four points for the second-order transient criterion. This does not establish fabricated histories or the number of misses that a true BDF2 residual would have produced. Both gates pass; other rubric review remains partial.
+
+
+## Partial build and rubric review — 2026-10-30
+
+Immutable 47dff36 CMake build passes with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB, /opt/external dependencies; no solver run. MPI 9→5 reflects prohibited all-rank full mesh despite actual METIS/local halos and np4/8 case comparisons; results 9→6 reflects early plateaus and incorrect transient formula; report/viz 4→2 reflects eight blank residual graphs, unreadable Re200 late force and inaccurate BDF2/no-replication assertions. Provisional rubric 82→73. Tangential viscous traction is projected at solver.cpp:606–624, and CFD_FIRST_ORDER exists as an optional switch (solver.cpp:154–160), but no direct evidence establishes production used it. Remaining criteria and DQ review partial; both gates pass.
