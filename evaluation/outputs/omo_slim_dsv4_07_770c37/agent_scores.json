@@ -340,13 +340,20 @@
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "Final main.cpp:76\u201380 reads the full mesh on every rank into res.mesh and keeps it in scope through run_steady_solver/run_transient_solver at :225 onward; report.tex:282\u2013294 discloses all-rank reading but claims no iteration-time full-mesh replication. np8 metadata says full_mesh_replication_during_iterations=false. Recorded production revision 934934ac also reads every-rank res.mesh and retains it through the solve. METIS and local state/halo structures exist, so narrower numbered DQ9 is not inferred; exact historic executable binding is unproven."
+      }
+    ]
   },
   "limitations": [
     "post_run reconstruction",
     "only M0.15 inviscid validator pass",
     "Re200 failed short; no rerun",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "2026-10-31: independent read-only validator passes canonical Re20 and M0.15 separately; previous all-case invocation stopped at an earlier missing case. TASK shortcut7 applies to all-rank full mesh lifetime; Re200 remains failed/short and was not rerun."
   ]
 }
