@@ -26,8 +26,12 @@ Explicit `validate_outputs.py --report` passed all eight production case directo
 | NACA M0.80 Re5000 | 3 | Validator pass but only 0.371/0.350 residual orders. |
 | NACA M2 Re5000 | 5 | Validator pass; 3.65/3.56 residual orders. |
 | Cylinder Re20 | 5 | Validator pass; 5.01 residual orders and Cd 2.049. |
-| Cylinder Re200 | 5 | t=300, target met, and submitted shedding statistic. |
+| Cylinder Re200 | 4.5 | Submitted PDF resolves late lift/drag and wake; strict target and frequency evidence checked. |
 
 ## Verdict
 
 **92/100, not disqualified.** The complete output contract, source-level method evidence, MPI diagnostics, and credible Re200 deliverables support a strong evaluation. Deductions retain the two low-reduction NACA cases and a submission-packaging limitation: the strict audit excludes all TeX-escaped report PNG references, so the committed report source is not self-contained even though the images were available as contestant artifacts. `run_identity.json` and `contestant_final_response.md` are unindexed sidecars and are not covered by `cfdeval check`.
+
+## Calibration in progress
+
+The Re200 score is corrected 2→4.5: accepted contestant PDF pages 33–34 and 38–39 show residual, both late forces, wake and lift spectrum. The independently checked t180–300 force history gives mean Cd1.2705235, Cl−0.568460..0.570342, and 22 upward crossings with mean period5.370075 (frequency0.18622), consistent with the reported St0.18333 at FFT resolution0.016667. The exact historic executable cannot be independently rehashed; the selected session records its production/rebuild hash. Other cases and rubric/DQ remain under review.

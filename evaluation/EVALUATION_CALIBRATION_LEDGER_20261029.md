@@ -115,7 +115,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
 | `codex_gpt56_01_cb349f` | fully reviewed: 94/100, no DQ found; executable and individual image bindings qualified |
-| `codex_gpt56_02_38616e` | unreviewed |
+| `codex_gpt56_02_38616e` | partial: Re200 2→4.5; remaining case/rubric/DQ review ongoing |
 | `codex_gpt56_03_93b257` | unreviewed |
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
 | `codex_gpt56_05_7bee7c` | unreviewed |
@@ -1039,3 +1039,6 @@ gpt56_01 DQ/PDF checkpoint: all 48 accepted compiled PDF pages SHA256 d273c00b0e
 
 
 gpt56_01 full-review qualification: all 21 curated solver/src files are byte-identical to corresponding files at historical contestant submodule revision461385a3d4472c0fa2c2c9f46bced39937ea4819 named by production metadata. Independent review covered all eight case scores, rendered all 48 PDF pages, checked all rubric and 27 review criteria, individually assessed DQ boundaries, verified force/period data and controlled rank evidence, and built/tested clean source. Exact historical executable hash and all individual image-to-data bindings are not recoverable from available evidence; these are incorporated limitations, not claims of proven identity. Review is complete within feasible evidence, with these explicit qualifications. No CFD rerun.
+
+
+gpt56_02 Re200 correction: accepted workspace sibling PDF SHA256 845431790330ef3d240987305fb2b5aa3f8b255bbe16ba6a41845a56d5be183b matches immutable TeX SHA256 a6c7109de0306ec06008f9e3b9a90af3f0a356f0b85f50413a81ea2e3d664e79; selected final response directly identifies it, and pages33–34/38–39 were visually reviewed. Page33 shows residual, p34 readable late Cd and Cl, p38 wake, p39 FFT; report.tex:343 states final Cd1.2747/Cl−0.52747, tail mean Cd1.2704, amplitude0.5694 and St0.18333. Workspace force SHA256 557338f7d6fe1e62875b266f2d38d5f778b17cc3b5afe05cdabb1a8ee9852004 t180–300 mean Cd1.2705235, Cl−0.568460..0.570342, 22 upward crossings mean period5.370075 (frequency0.18622), consistent with FFT resolution0.016667. Source be1f6b0 solver/src matches curated 6183dc8, solver.cpp:1862–1872 checks strict target, metadata ratio0.000986228 and no misses. Selected root records production/rebuild binary SHA256 31ae68f0fcced8ecac480cdb5fd9e783a7655ffff8146a1889e00adb7865eab6; actual executable is unavailable to independently rehash. Old cap wrongly required committed image blobs despite accepted contestant-delivered PDF; score2→4.5. Rubric92 remains provisional, other cases/source/DQ partial. No CFD rerun.
