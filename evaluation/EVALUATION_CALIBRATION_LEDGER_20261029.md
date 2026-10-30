@@ -84,7 +84,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_08_efba3c` | fully reviewed; 76→71, DQ7 and case evidence corrected |
 | `codex_dsv4_flash_09_526316` | fully reviewed: 55→48, DQ false; both gates pass |
 | `codex_dsv4_flash_10_6468ba` | fully reviewed: 86→71, DQ6 and TASK full mesh; both gates pass |
-| `codex_dsv4_flash_11_6e6ac8` | unreviewed |
+| `codex_dsv4_flash_11_6e6ac8` | partial: DQ7, TASK full mesh, M0.15 inviscid checked; other cases/rubric pending |
 | `codex_dsv4_flash_12_7e965b` | unreviewed |
 | `codex_dsv4_flash_14_80096b` | unreviewed |
 | `codex_generic_02_ed5ee6` | unreviewed |
@@ -480,3 +480,8 @@ dsv4_flash_10 partial build/rubric: 82→73 provisional (MPI 9→5 for full mesh
 ## dsv4_flash_10 full calibration — 2026-10-30
 
 Rubric 86→71/100, DQ6 and TASK full-mesh prohibition, all eight case scores remain 2 for blank residual graphs (Re200 also lacks readable late force). Ten sections and 27 review points have criterion-specific evidence. Actual run commit and curated solver.cpp share blob 8e18821feaa67b4424a7029619ef88a5010d210f: claimed BDF2 1.5U−2Un+0.5Unm1 is absent and implemented 2U−1.5Un−0.5Unm1 is inconsistent; no exact strict BDF2 miss count or fabricated history inferred. Each rank retains complete Mesh during iterations; actual METIS/local state mean numbered DQ9 not inferred. Original Re200 t≥200 lift has repeated zero crossings and reported ~0.055 frequency is consistent with those data, but physics reflects wrong time formula. Plotting log-y bug, raw per-case force tails, np4/8 comparisons, provenance and hashes documented above. Clean immutable build succeeds with warnings; optional first-order switch production use unproven, wall shear tangentially projected. Both gates pass; no CFD rerun, external similarity search, exhaustive pixel audit or general rank-invariance proof.
+
+
+## dsv4_flash_11 partial DQ/M0.15 review — 2026-10-30
+
+DQ false→true under 7 and TASK.md:227 full-mesh prohibition. Canonical M0.15 inviscid metadata/run_status label converged plateau at step 999, 0.565/4 residual orders, but last 100 Cd drops 0.24740155378→0.22821744394 (8.4% of final), first/last 50 means 0.23499916→0.22821745. Source solver.cpp:1171–1182,1223–1234 admits absolute drift <0.02, not stable at this relative change. Case 2→1; prior note erroneously says metadata failed. Report.tex:322–323 claims >6 orders. Force/metadata SHAs c291279c28485c3ba45ebe61a0a8295492bc152bf8b186faaf41be4919bc2e66 / 5a94b8cd3e2d20eb58ecba1373eb11a99346ed39c2c2de21aab39f2e8f904399. Immutable main.cpp:87–101 broadcasts entire GlobalMesh to every rank via mesh.cpp:418–502 and retains it through solver.run():113–123. Actual METIS/local state means no numbered DQ9 assertion. Remaining cases, PDF suitability and rubric pending; both gates pass, no CFD rerun.

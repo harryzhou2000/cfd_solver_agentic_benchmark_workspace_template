@@ -309,8 +309,8 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 2,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.0065, CD=0.2282 at 2cd0844:solver/report/report.tex:306; residual history 2cd0844:solver/report/figures/naca0012_m015_inviscid_residuals.png (referenced at solver/report/report.tex:330); force history 2cd0844:solver/report/figures/naca0012_m015_inviscid_forces.png (referenced at solver/report/report.tex:331); no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Submitted metadata failed; validator rejects."
+      "score": 1,
+      "notes": "Score 2\u21921. Canonical metadata and run_status mark converged/stable plateau at step 999 and 0.565/4 residual orders; last 100 Cd falls 0.24740155378\u21920.22821744394 (8.4% of final), unsupported stable-force claim and DQ7 under TASK.md:172. Report.tex:322\u2013323 claims >6 orders, contradicting status. Prior evaluation incorrectly said metadata failed. Full-domain Mach/pressure images are visually uniform disks that do not resolve airfoil flow; no qualifying near-body contour established. Force SHA c291279c28485c3ba45ebe61a0a8295492bc152bf8b186faaf41be4919bc2e66."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
@@ -342,7 +342,7 @@
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
       {
         "flag": "Existing solver executable called internally",
@@ -376,8 +376,11 @@
       },
       {
         "flag": "Failed marked successful",
-        "triggered": false,
-        "notes": "Metadata says failed."
+        "triggered": true,
+        "notes": "Canonical naca0012_m015_inviscid metadata/run_status mark converged stable plateau at step 999 and only 0.565/4 residual orders, while last 100 Cd decreases 0.24740155378\u21920.22821744394 (8.4% of final). solver.cpp:1171\u20131182,1223\u20131234 accepts absolute force drift below 0.02 despite this significant relative change. TASK.md:172 requires converged or justified stable-force plateau.",
+        "id": 7,
+        "found": true,
+        "evidence": "Canonical naca0012_m015_inviscid metadata/run_status mark converged stable plateau at step 999 and only 0.565/4 residual orders, while last 100 Cd decreases 0.24740155378\u21920.22821744394 (8.4% of final). solver.cpp:1171\u20131182,1223\u20131234 accepts absolute force drift below 0.02 despite this significant relative change. TASK.md:172 requires converged or justified stable-force plateau."
       },
       {
         "flag": "Figure mismatch",
@@ -408,6 +411,11 @@
         "flag": "Copied core",
         "triggered": false,
         "notes": "No internal wrapper evidence; no external search."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "Immutable main.cpp:87\u2013101 loads mesh on rank 0, broadcast_mesh distributes the complete GlobalMesh to every rank (mesh.cpp:418\u2013502), and main retains it in scope through solver.run():113\u2013123. Metadata falsely reports full_mesh_replication_during_iterations=false. Real METIS/local state coexist; numbered DQ9 is not asserted."
       }
     ]
   },
