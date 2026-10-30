@@ -83,7 +83,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ=true, trigger 4: README lines 180-187 documents exact M2 laminar `np=8` production convergence while explicitly admitting the same first-order pinned-CFL configuration is ordering-sensitive at `np=4`. Source otherwise supports METIS/neighbor halos/implicit/BDF2; structural validation passing does not cure the rank-dependent steady result.
+DQ=true, trigger 7: M2 laminar metadata claims convergence after four steps although the immutable submitted force plot shows Cd falling 13.6824→1.9131; M2 inviscid metadata claims periodic completion despite growing residual and wildly irregular lift (submitted figure shows approximately −0.8 to +0.9). These do not meet TASK.md:140,172 convergence/stable-force requirements. The previous trigger 4 cited only README:180–187 describing ordering sensitivity at np4; it establishes no quantified controlled order-one rank difference. DQ4 is unasserted pending stronger matched-run/binary evidence. Source, controls and remaining DQ review remain partial.
 
 ## Metadata answers & session selection
 
@@ -95,4 +95,4 @@ No evaluator clean build or MPI rerun. M2 laminar uses first-order B0VOL in 1835
 
 ## Verdict
 
-Score: **82/100; disqualified: true.** Strong source/report coverage and structurally complete packages are outweighed by the directly documented rank-sensitive M2 production configuration and major physics/convergence limitations.
+Score: **82/100; disqualified: true (trigger 7).** The M2 success labels are inconsistent with the submitted force histories. The 100-point rubric and review-area scores remain provisional pending full recalibration; the previously cited rank-sensitivity statement alone does not establish trigger 4.

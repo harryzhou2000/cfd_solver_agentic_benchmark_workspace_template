@@ -316,7 +316,7 @@
     },
     "naca0012_m200_inviscid": {
       "score": 1,
-      "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; residual history 84ccf50:solver/report/figures/fig_naca0012_m200_inviscid_residuals.png (referenced at solver/report/report.tex:1338); force history 84ccf50:solver/report/figures/fig_naca0012_m200_inviscid_forces.png (referenced at solver/report/report.tex:1342); computed-field contour 84ccf50:solver/report/figures/fig_naca0012_m200_inviscid_mach.png (referenced at solver/report/report.tex:1364). Score 1 retained after the post-processing audit. Prior case judgment: Readable delivered result assessed independently; no evaluator Re200 rerun."
+      "notes": "Submission 84ccf50 report.tex:1236\u20131243 reports Cd\u22120.016437 and Cl0.371614; the old note incorrectly said no numeric summary. The immutable residual, force and Mach figures are referenced at :1338,1342,1364. Workspace force SHA256 850ccaaa442fba6f99348f30325ec18574b4a54c60a36034a47d3b2a4650167f and matching submitted figure SHA256 4885c7ea844a47c224544c8126ee63a9b2a4e44ef4bf26790f52e06411d2dc53 show strongly irregular lift through step200; residual grows 0.945 orders, but metadata says completed/statistically_periodic. Report :1690\u20131696 identifies the final coefficients as floor artifacts. Score 1 remains for the incomplete/unphysical result; exact historical binary is unbound."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 3,
@@ -327,8 +327,8 @@
       "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-5.29e-3, CD=8.36e-2 at 84ccf50:solver/report/report.tex:1239; residual history 84ccf50:solver/report/figures/fig_naca0012_m080_laminar_re5000_residuals.png (referenced at solver/report/report.tex:1422); force history 84ccf50:solver/report/figures/fig_naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:1426); computed-field contour 84ccf50:solver/report/figures/fig_naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/report.tex:1448). Score 4 retained after the post-processing audit. Prior case judgment: Readable delivered result assessed independently; no evaluator Re200 rerun."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 1.5,
-      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; residual history 84ccf50:solver/report/figures/fig_naca0012_m200_laminar_re5000_residuals.png (referenced at solver/report/report.tex:1464); force history 84ccf50:solver/report/figures/fig_naca0012_m200_laminar_re5000_forces.png (referenced at solver/report/report.tex:1468); computed-field contour 84ccf50:solver/report/figures/fig_naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/report.tex:1490). Score 1.5 retained after the post-processing audit. Prior case judgment: Readable delivered result assessed independently; no evaluator Re200 rerun."
+      "score": 1,
+      "notes": "Submission 84ccf50 report.tex:1236\u20131243 reports Cd1.913098, Cl0.001514; the old note incorrectly said no numeric summary. Submitted residual, force and Mach figures are referenced at :1464,1468,1490. Workspace force SHA256 5d118f60541d176be2fdf7929d4083c5c169d545ea64a34321fb32186c63ccaf and matching immutable figure SHA256 9c72a987fa77445757940236ee86f79d672caf9ec23d9c477bd42bc8e584a363 show Cd13.6824\u21921.9131 in only four steps, still rapidly changing. Metadata nevertheless says completed/converged on residual reduction; README :180\u2013187 specifies first-order B0VOL and CFL cap. Score 1.5\u21921 for incomplete force convergence; historical executable unbound."
     },
     "cylinder_m010_laminar_re20": {
       "score": 3.5,
@@ -336,7 +336,7 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: no committed case-specific numeric CL/CD summary; residual history 84ccf50:solver/report/figures/fig_cylinder_m010_laminar_re200_residuals.png (referenced at solver/report/report.tex:1594); force history 84ccf50:solver/report/figures/fig_cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:1598); computed-field contour 84ccf50:solver/report/figures/fig_cylinder_m010_laminar_re200_vorticity.png (referenced at solver/report/report.tex:1620); no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score capped at 2 from 3 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Readable delivered result assessed independently; no evaluator Re200 rerun."
+      "notes": "Submission 84ccf50 report.tex:1555\u20131589 supplies mean Cd1.902, final Cd1.922, lift peak-to-peak 0.068 and drifting spectral-band estimates St\u22480.19,0.17,0.21; old note incorrectly claimed no summary or frequency. The report discloses that no resolved street or reliable shedding frequency is achieved. Submitted residual and vorticity figures are referenced at :1594,1620. The sole full force figure :1598 has startup Cd\u224831 and compresses late lift and drag below readability, so the explicit late lift-and-drag deliverable floor caps score at 2. No Re200 rerun; exact historical executable unbound."
     }
   },
   "disqualification": {
@@ -345,7 +345,13 @@
       {
         "id": 4,
         "text": "MPI rank count changes results by order-one amounts for steady cases",
-        "evidence": "README lines 180-187 documents exact M2 laminar np8 production convergence but explicitly says the same first-order pinned-CFL configuration is ordering-sensitive at np4.",
+        "evidence": "Previous evidence README:180\u2013187 says pinned-CFL M2 configuration is ordering-sensitive at np4 but gives no quantified controlled difference. Report.tex:1638\u20131670 instead presents Re20 and M080 laminar np1/np8 differences of 2.8% and 0.3% in Cd at different stopping steps. No controlled order-one case established; additional binary/control attribution remains open.",
+        "found": false
+      },
+      {
+        "id": 7,
+        "text": "metadata.json marks incomplete or failed runs as successful final results",
+        "evidence": "M2 laminar metadata marks converged/completed after four steps while immutable 84ccf50:solver/report/figures/fig_naca0012_m200_laminar_re5000_forces.png shows Cd falling 13.6824\u21921.9131; immutable README:180\u2013187 documents this as the production result. M2 inviscid metadata marks statistically_periodic/completed after 200 steps despite residual growth 0.945 orders and the submitted force figure showing irregular Cl about \u22120.8..0.9; report.tex:1690\u20131696 acknowledges floor artifacts. TASK.md:140,172 require genuine convergence or justified stable forces. Original workspace history hashes and runtime-binary limitation are in the ledger.",
         "found": true
       }
     ]
