@@ -27,67 +27,67 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Substantial source."
+          "score": 4.5,
+          "notes": "Immutable source clean builds in isolated network-disabled image with bundled dependencies; no registered CTests."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Runner documented."
+          "score": 4.5,
+          "notes": "Case/output/restart and documented resurface/jacfd paths exist; exact historical binary remains unbound."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
-          "score": 4,
-          "notes": "Structured project."
+          "score": 4.5,
+          "notes": "Separate configuration, mesh, partition, physics, reconstruction, residual and solver modules."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "No authorship investigation."
+          "notes": "No internal solver wrapper found; no external authorship investigation performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Case configuration."
+          "score": 4.5,
+          "notes": "Case inputs drive mesh and controls; no two-filename-only path found."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 3,
-          "notes": "No evaluator MPI rerun."
+          "score": 4,
+          "notes": "METIS and neighbor exchanges exist; 1500-step failed diagnostics show Re20 ~2.4% Cd range across ranks, not converged equivalence."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Guards documented."
+          "score": 3.5,
+          "notes": "Positivity and adaptive CFL guards exist; accepted plateau is not reevaluated after final averaging."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Packages validate structurally."
+          "score": 3.5,
+          "notes": "Jacobian artifacts and smoke diagnostics exist; no registered CTests and structural validation is not physics proof."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 4,
-          "notes": "Audited curation."
+          "notes": "Modular source and report/manifests; historical binary and nonselected plot bindings qualified."
         }
       ],
-      "overall_score": 3.95,
+      "overall_score": 4.13,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -96,81 +96,81 @@
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 4,
-          "notes": "Source/report evidence."
+          "score": 4.5,
+          "notes": "Conservative NS and nondimensionalization described; physical result accuracy assessed separately."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "Unstructured mesh."
+          "notes": "CGNS multizone TRI/QUAD/BAR reader and adjacency; MIXED sections explicitly unsupported."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "FV residual."
+          "notes": "Face conservative residual and wall/farfield paths implemented; final averaging can invalidate plateau assumption."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Flux implementation."
+          "notes": "Roe/Rusanov numerical flux choices exist; first-order farfield sponge disclosed."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Boundary handling."
+          "score": 4.5,
+          "notes": "Farfield, slip and no-slip adiabatic paths and boundary-state surface output present."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 4,
-          "notes": "Second order."
+          "notes": "LSQ reconstruction and limiter active after disclosed startup; M200 laminar only748 steps after 12500 first-order steps."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4,
-          "notes": "Limiter."
+          "notes": "Venkatakrishnan and positivity controls exist; transient limiter frozen at predictor and report discloses it."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Laminar terms."
+          "score": 4.5,
+          "notes": "Newtonian/Fourier terms and explicit tangential force projection residual.cpp:202\u2013215."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Steady method."
+          "score": 3.5,
+          "notes": "LU-SGS and averaged-state plateau method exist, but final500 force means shift after acceptance without a new test."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Delivered Re200."
+          "score": 3.5,
+          "notes": "BDF2/GMRES and periodic St0.160 supported; reported target ratio uses predictor-frozen limiter, refreshed-limiter strict behavior unknown."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 3,
-          "notes": "Limited confirmation."
+          "score": 4,
+          "notes": "Root-only mesh preprocessing, METIS and neighbor halos; short rank diagnostics not converged and Re20 differs ~2.4%."
         }
       ],
-      "overall_score": 3.91,
+      "overall_score": 4.02,
       "disqualification_flags": []
     },
     "result_review": {
@@ -179,53 +179,53 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Eight packages present."
+          "score": 4,
+          "notes": "Eight structural packages pass, but Re20/M015 averaged outputs are marked converged after the accepted force mean shifts."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 5,
-          "notes": "Explicit validator passed."
+          "notes": "Recorded validator passes all packages/report; structural pass is not numerical proof."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 1,
-          "notes": "Re20/M015 accepted plateau means shift materially during the subsequent 500-step averaging phase; remaining target misses alone do not establish failure."
+          "score": 1.5,
+          "notes": "Re20/M015 final averaging phase shifts Cd means substantially after plateau acceptance; other shortfalls alone do not prove failed cases."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 3,
-          "notes": "Re200 delivered; steady plateaus limit confidence."
+          "notes": "Re200 St0.160 supported, M080/M200 inviscid tails bounded, while M015/Re20 mean shifts and M200 laminar drift limit confidence."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Report assets supplied."
+          "score": 2.5,
+          "notes": "All22 report pages render; three laminar force plots compress both late coefficients and Re200 late drag is unresolved."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Report discloses averaging and earlier plateau; final500 means depart materially from the accepted-window means."
+          "score": 3,
+          "notes": "Report discloses averaging/startup/frozen limiter but plateau claim does not persist into final averaging and rank comparison overstates agreement."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 4,
-          "notes": "Sources available as workspace evidence."
+          "score": 3.5,
+          "notes": "Original tracked manifest identifies results; three separate rerenders differ in pixels in this environment, so exact image binding remains qualified."
         }
       ],
-      "overall_score": 3.7,
+      "overall_score": 3.05,
       "disqualification_flags": [
         {
           "id": 7,
@@ -238,108 +238,108 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 73.5,
+    "total_scored": 78.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "Strong source."
+        "score": 9,
+        "notes": "Immutable source clean-builds with bundled dependencies; CLI/restart and output contract exist, no registered CTests."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 9,
-        "notes": "Unstructured support."
+        "notes": "CGNS zones, TRI/QUAD/BAR and face adjacency implemented; MIXED sections explicitly rejected."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 12,
-        "notes": "Source evidence."
+        "score": 13,
+        "notes": "Conservative Roe/Rusanov, characteristic and wall paths exist; steady plateau drift and physical limitations constrain verification."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 8,
-        "notes": "Documented."
+        "notes": "LSQ, limiter and positivity implemented; long first-order startup and farfield sponge disclosed, no independent smooth-order study."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 8,
-        "notes": "Documented."
+        "score": 9,
+        "notes": "Newtonian/Fourier terms and tangential wall force projection implemented; laminar force histories are not display-readable."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 11,
-        "notes": "Re200 but steady convergence deficient."
+        "notes": "LU-SGS/GMRES and BDF residual with predictor-frozen limiter exist; fully refreshed-limiter target not verified and final plateau is not rechecked after averaging."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 6,
-        "notes": "No evaluator rerun."
+        "score": 8,
+        "notes": "Root-only global preprocessing, METIS and neighbor halos; 1500-step rank diagnostics have modest differences and are explicitly unfinished."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 3.5,
-        "notes": "Re20/M015 force means shift substantially during final averaging despite converged plateau status; residual misses alone are not treated as failures."
+        "score": 4,
+        "notes": "All eight packages structurally pass; M015/Re20 final averaging shifts depart from accepted means, other steady tails and Re200 wake have qualified evidence."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 5,
-        "notes": "Complete report."
+        "score": 3.5,
+        "notes": "22-page report and galleries document methods and limits, but three steady laminar plots compress both late forces and Re200 late drag is unresolved."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 3,
-        "notes": "Focused scope."
+        "score": 3.5,
+        "notes": "Separate mesh, physics, reconstruction, residual and solver modules; 2-D geometric interfaces limit extension."
       }
     ]
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 1,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=-0.0078, CD=-0.0339 at f4ebc43:solver/report/table_forces.tex:11; residual history f4ebc43:solver/report/figures/naca0012_m015_inviscid_residual_history.png (referenced at solver/report/figs_naca015inv.tex:4); force history f4ebc43:solver/report/figures/naca0012_m015_inviscid_force_history.png (referenced at solver/report/figs_naca015inv.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/figs_naca015inv.tex:24). Score 2 retained after the post-processing audit. Prior case judgment: 1.92 orders vs target 4, marked converged. Score 2\u21921: Acceptance-window Cd mean +0.004319 shifts to -0.033828 during the final500 averaging samples; Cl mean -0.000580\u2192-0.007670. Final averaged state Cd -0.033852 is inconsistent with the earlier settled-force claim."
+      "notes": "NACA0012 M0.15 inviscid: numeric CL=-0.0078, CD=-0.0339 at f4ebc43:solver/report/table_forces.tex:11; residual history f4ebc43:solver/report/figures/naca0012_m015_inviscid_residual_history.png (referenced at solver/report/figs_naca015inv.tex:4); force history f4ebc43:solver/report/figures/naca0012_m015_inviscid_force_history.png (referenced at solver/report/figs_naca015inv.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/figs_naca015inv.tex:24). Score 2 retained after the post-processing audit. Prior case judgment: 1.92 orders vs target 4, marked converged. Score 2\u21921: Acceptance-window Cd mean +0.004319 shifts to -0.033828 during the final500 averaging samples; Cl mean -0.000580\u2192-0.007670. Final averaged state Cd -0.033852 is inconsistent with the earlier settled-force claim. Final 500 in-loop samples (excluding the separately recomputed final-state row): Cd 0.0074840466\u2192-0.0046369934, Cl 0.022398225\u2192-0.026380674; status reports 1.92 orders. The final row uses the solver output state and is evaluated separately from the in-loop trajectory."
     },
     "naca0012_m080_inviscid": {
       "score": 4,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=+0.0017, CD=0.0090 at f4ebc43:solver/report/table_forces.tex:13; residual history f4ebc43:solver/report/figures/naca0012_m080_inviscid_residual_history.png (referenced at solver/report/figs_naca080inv.tex:4); force history f4ebc43:solver/report/figures/naca0012_m080_inviscid_force_history.png (referenced at solver/report/figs_naca080inv.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/figs_naca080inv.tex:24). Score 2.5\u21924: Cd 0.00907268\u21920.00897147, Cl 0.00158490\u21920.00161405 over final500 in-loop samples; final averaged Cd0.00897767. Plateau and averaged state are explicitly disclosed; residual-target shortfall alone does not prove failure. Values are plausible but historic executable and numerical accuracy remain qualified."
+      "notes": "NACA0012 M0.80 inviscid: numeric CL=+0.0017, CD=0.0090 at f4ebc43:solver/report/table_forces.tex:13; residual history f4ebc43:solver/report/figures/naca0012_m080_inviscid_residual_history.png (referenced at solver/report/figs_naca080inv.tex:4); force history f4ebc43:solver/report/figures/naca0012_m080_inviscid_force_history.png (referenced at solver/report/figs_naca080inv.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m080_inviscid_mach.png (referenced at solver/report/figs_naca080inv.tex:24). Score 2.5\u21924: Cd 0.00907268\u21920.00897147, Cl 0.00158490\u21920.00161405 over final500 in-loop samples; final averaged Cd0.00897767. Plateau and averaged state are explicitly disclosed; residual-target shortfall alone does not prove failure. Values are plausible but historic executable and numerical accuracy remain qualified. Final 500 in-loop samples (excluding the separately recomputed final-state row): Cd 0.0090726768\u21920.0089714657, Cl 0.0015849007\u21920.0016140545; status reports 2.963 orders. The final row uses the solver output state and is evaluated separately from the in-loop trajectory."
     },
     "naca0012_m200_inviscid": {
       "score": 4,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=-0.0005, CD=0.0920 at f4ebc43:solver/report/table_forces.tex:15; residual history f4ebc43:solver/report/figures/naca0012_m200_inviscid_residual_history.png (referenced at solver/report/figs_naca200inv.tex:4); force history f4ebc43:solver/report/figures/naca0012_m200_inviscid_force_history.png (referenced at solver/report/figs_naca200inv.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/figs_naca200inv.tex:24). Score 2\u21924: Cd0.09160544\u21920.09229658, Cl -0.00078639\u2192-0.00002825 over final500 in-loop samples; final averaged Cd0.09203399. Plateau and averaged state are explicitly disclosed; residual-target shortfall alone does not prove failure. Values are plausible but historic executable and numerical accuracy remain qualified."
+      "notes": "NACA0012 M2.00 inviscid: numeric CL=-0.0005, CD=0.0920 at f4ebc43:solver/report/table_forces.tex:15; residual history f4ebc43:solver/report/figures/naca0012_m200_inviscid_residual_history.png (referenced at solver/report/figs_naca200inv.tex:4); force history f4ebc43:solver/report/figures/naca0012_m200_inviscid_force_history.png (referenced at solver/report/figs_naca200inv.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m200_inviscid_mach.png (referenced at solver/report/figs_naca200inv.tex:24). Score 2\u21924: Cd0.09160544\u21920.09229658, Cl -0.00078639\u2192-0.00002825 over final500 in-loop samples; final averaged Cd0.09203399. Plateau and averaged state are explicitly disclosed; residual-target shortfall alone does not prove failure. Values are plausible but historic executable and numerical accuracy remain qualified. Final 500 in-loop samples (excluding the separately recomputed final-state row): Cd 0.091605444\u21920.092296581, Cl -0.00078639158\u2192-2.8250764e-05; status reports 1.757 orders. The final row uses the solver output state and is evaluated separately from the in-loop trajectory."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 2,
-      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=+0.0003, CD=0.0670 at f4ebc43:solver/report/table_forces.tex:12; residual history f4ebc43:solver/report/figures/naca0012_m015_laminar_re5000_residual_history.png (referenced at solver/report/figs_naca015lam.tex:4); force history f4ebc43:solver/report/figures/naca0012_m015_laminar_re5000_force_history.png (referenced at solver/report/figs_naca015lam.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m015_laminar_re5000_mach.png (referenced at solver/report/figs_naca015lam.tex:28). Score 4 retained after the post-processing audit. Prior case judgment: Target reached. Score 4\u21922: the only original case-specific force-history figure uses one vertical scale dominated by startup Cd above 300, compressing both Cl and Cd near zero throughout the meaningful late interval. Direct visual review of the full report and delivered figure list found no alternate readable history. Unlike the steady precedent where lift evolution remains visible, neither late force behavior can be assessed in this plot."
+      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=+0.0003, CD=0.0670 at f4ebc43:solver/report/table_forces.tex:12; residual history f4ebc43:solver/report/figures/naca0012_m015_laminar_re5000_residual_history.png (referenced at solver/report/figs_naca015lam.tex:4); force history f4ebc43:solver/report/figures/naca0012_m015_laminar_re5000_force_history.png (referenced at solver/report/figs_naca015lam.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m015_laminar_re5000_mach.png (referenced at solver/report/figs_naca015lam.tex:28). Score 4 retained after the post-processing audit. Prior case judgment: Target reached. Score 4\u21922: the only original case-specific force-history figure uses one vertical scale dominated by startup Cd above 300, compressing both Cl and Cd near zero throughout the meaningful late interval. Direct visual review of the full report and delivered figure list found no alternate readable history. Unlike the steady precedent where lift evolution remains visible, neither late force behavior can be assessed in this plot. Final 500 in-loop samples (excluding the separately recomputed final-state row): Cd 0.067120933\u21920.066993328, Cl 0.00045415208\u21920.00027658038; status reports 4 orders. The final row uses the solver output state and is evaluated separately from the in-loop trajectory."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 2,
-      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.0011, CD=0.0922 at f4ebc43:solver/report/table_forces.tex:14; residual history f4ebc43:solver/report/figures/naca0012_m080_laminar_re5000_residual_history.png (referenced at solver/report/figs_naca080lam.tex:4); force history f4ebc43:solver/report/figures/naca0012_m080_laminar_re5000_force_history.png (referenced at solver/report/figs_naca080lam.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/figs_naca080lam.tex:28). Score 4 retained after the post-processing audit. Prior case judgment: Target reached. Score 4\u21922: the only original case-specific force-history figure uses one vertical scale dominated by startup Cd above 300, compressing both Cl and Cd near zero throughout the meaningful late interval. Direct visual review of the full report and delivered figure list found no alternate readable history. Unlike the steady precedent where lift evolution remains visible, neither late force behavior can be assessed in this plot."
+      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.0011, CD=0.0922 at f4ebc43:solver/report/table_forces.tex:14; residual history f4ebc43:solver/report/figures/naca0012_m080_laminar_re5000_residual_history.png (referenced at solver/report/figs_naca080lam.tex:4); force history f4ebc43:solver/report/figures/naca0012_m080_laminar_re5000_force_history.png (referenced at solver/report/figs_naca080lam.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/figs_naca080lam.tex:28). Score 4 retained after the post-processing audit. Prior case judgment: Target reached. Score 4\u21922: the only original case-specific force-history figure uses one vertical scale dominated by startup Cd above 300, compressing both Cl and Cd near zero throughout the meaningful late interval. Direct visual review of the full report and delivered figure list found no alternate readable history. Unlike the steady precedent where lift evolution remains visible, neither late force behavior can be assessed in this plot. Final 500 in-loop samples (excluding the separately recomputed final-state row): Cd 0.092223007\u21920.092219575, Cl -0.0011343132\u2192-0.0011090185; status reports 4 orders. The final row uses the solver output state and is evaluated separately from the in-loop trajectory."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 2,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.0010, CD=0.1469 at f4ebc43:solver/report/table_forces.tex:16; residual history f4ebc43:solver/report/figures/naca0012_m200_laminar_re5000_residual_history.png (referenced at solver/report/figs_naca200lam.tex:4); force history f4ebc43:solver/report/figures/naca0012_m200_laminar_re5000_force_history.png (referenced at solver/report/figs_naca200lam.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/figs_naca200lam.tex:28). Score 4 retained after the post-processing audit. Prior case judgment: Target reached. Score 4\u21922: the only original case-specific force-history figure uses one vertical scale dominated by startup Cd above 300, compressing both Cl and Cd near zero throughout the meaningful late interval. Direct visual review of the full report and delivered figure list found no alternate readable history. Unlike the steady precedent where lift evolution remains visible, neither late force behavior can be assessed in this plot. Metadata records 12500 first-order startup steps and the run ends at13248; final500 Cd decreases 0.158827\u21920.146928, final100 0.150043\u21920.146928, a separate convergence limitation."
+      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.0010, CD=0.1469 at f4ebc43:solver/report/table_forces.tex:16; residual history f4ebc43:solver/report/figures/naca0012_m200_laminar_re5000_residual_history.png (referenced at solver/report/figs_naca200lam.tex:4); force history f4ebc43:solver/report/figures/naca0012_m200_laminar_re5000_force_history.png (referenced at solver/report/figs_naca200lam.tex:8); computed-field contour f4ebc43:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/figs_naca200lam.tex:28). Score 4 retained after the post-processing audit. Prior case judgment: Target reached. Score 4\u21922: the only original case-specific force-history figure uses one vertical scale dominated by startup Cd above 300, compressing both Cl and Cd near zero throughout the meaningful late interval. Direct visual review of the full report and delivered figure list found no alternate readable history. Unlike the steady precedent where lift evolution remains visible, neither late force behavior can be assessed in this plot. Metadata records 12500 first-order startup steps and the run ends at13248; final500 Cd decreases 0.158827\u21920.146928, final100 0.150043\u21920.146928, a separate convergence limitation. Final 500 in-loop samples (excluding the separately recomputed final-state row): Cd 0.15882692\u21920.14692804, Cl -0.00097512625\u2192-0.00098056121; status reports 3.002 orders. The final row uses the solver output state and is evaluated separately from the in-loop trajectory."
     },
     "cylinder_m010_laminar_re20": {
       "score": 1.5,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=+0.0016, CD=2.2665 at f4ebc43:solver/report/table_forces.tex:9; residual history f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_residual_history.png (referenced at solver/report/figs_re20.tex:4); force history f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_force_history.png (referenced at solver/report/figs_re20.tex:8); computed-field contour f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_velocity_wake.png (referenced at solver/report/figs_re20.tex:44). Score 2 retained after the post-processing audit. Prior case judgment: 2.11 orders vs target 5, marked converged. Score 2\u21921.5: Acceptance-window Cd mean 2.083406 shifts to 2.265972 over final500 averaging samples (8.8%); final averaged state Cd2.266489. The reported plateau did not persist through final averaging."
+      "notes": "Cylinder M0.10 laminar Re20: numeric CL=+0.0016, CD=2.2665 at f4ebc43:solver/report/table_forces.tex:9; residual history f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_residual_history.png (referenced at solver/report/figs_re20.tex:4); force history f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_force_history.png (referenced at solver/report/figs_re20.tex:8); computed-field contour f4ebc43:solver/report/figures/cylinder_m010_laminar_re20_velocity_wake.png (referenced at solver/report/figs_re20.tex:44). Score 2 retained after the post-processing audit. Prior case judgment: 2.11 orders vs target 5, marked converged. Score 2\u21921.5: Acceptance-window Cd mean 2.083406 shifts to 2.265972 over final500 averaging samples (8.8%); final averaged state Cd2.266489. The reported plateau did not persist through final averaging. Final 500 in-loop samples (excluding the separately recomputed final-state row): Cd 2.0533415\u21922.3130474, Cl -0.0046049228\u21920.0083862206; status reports 2.114 orders. The final row uses the solver output state and is evaluated separately from the in-loop trajectory."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
@@ -350,17 +350,89 @@
     "triggered": true,
     "flags": [
       {
+        "id": 1,
+        "text": "Existing solver executable called internally",
+        "found": false,
+        "evidence": "Finite-volume solver source exists; no internal solver wrapper found."
+      },
+      {
+        "id": 2,
+        "text": "Force or residual files generated without solving",
+        "found": false,
+        "evidence": "Force histories originate from solver output; final state averaging is disclosed and output is recomputed. No direct synthetic-history path established."
+      },
+      {
+        "id": 3,
+        "text": "Hard-coded mesh filenames",
+        "found": false,
+        "evidence": "Case-configured CGNS path; no two-filename-only branch found."
+      },
+      {
+        "id": 4,
+        "text": "Order-one steady MPI result changes",
+        "found": false,
+        "evidence": "1500-step failed diagnostics report Re20 np1/2/4/8 Cd1.83395/1.83132/1.85554/1.87489; ~2.4% range is not order one, and converged rank equivalence remains unproven."
+      },
+      {
+        "id": 5,
+        "text": "Explicit time stepping only",
+        "found": false,
+        "evidence": "LU-SGS, GMRES and BDF source present."
+      },
+      {
+        "id": 6,
+        "text": "Report claims algorithms absent from source",
+        "found": false,
+        "evidence": "Roe/Rusanov, LSQ limiter, viscous, implicit, METIS and BDF source found; no specific absent major algorithm established."
+      },
+      {
         "id": 7,
         "text": "metadata/status marks incomplete or failed runs as successful",
         "evidence": "Re20 and M015 inviscid metadata mark completed/converged after a reported plateau, but original stdout logs show acceptance at steps15750/12000 followed by 500-step state averaging without a new plateau test. Re20 earlier 3937-step Cd mean 2.083406 becomes 2.265972 during the final 500 samples (8.8% shift); final averaged-state Cd2.266489. M015 earlier 3000-step Cd mean +0.004319 becomes -0.033828 over final500, with Cl mean -0.000580\u2192-0.007670; final averaged-state Cd -0.033852. Force CSV SHA256 df8f1e24fb2028009c44eb73360224757dad2f3cb784b7a0ca3568d14505d2b0 and 1d096ce92b0a91f66d598f04f206176fdb81eefde44557d5dd4f094b9420fd0d. Contestant checkpoint 796c458 tracks run_manifest.csv SHA256 3fcbc5244ddfb567e3e37a24636ce86e2cd53ecbac51fdecbf41e999e79e3c7a naming these outputs and matching final rows. Raw binaries unbound. The old residual-only rationale is withdrawn; other below-target cases are not disqualified solely for target misses.",
         "found": true
+      },
+      {
+        "id": 8,
+        "text": "Report figures do not correspond to submitted outputs",
+        "found": false,
+        "evidence": "Three force-figure rerenders differ in pixels under current environment; no specific unrelated final figure established. Shared-axis compression is a presentation defect."
+      },
+      {
+        "id": 9,
+        "text": "METIS claimed but geometric split/full-state replication",
+        "found": false,
+        "evidence": "driver.cpp:186\u2013192 loads global mesh only on rank0 and partition.cpp uses METIS; local/ghost MPI exchange used."
+      },
+      {
+        "id": 10,
+        "text": "Claimed second-order reconstruction or limiter disabled",
+        "found": false,
+        "evidence": "Report discloses first-order startup and outer inviscid sponge; seven steady results end after recorded startup counts. No undisclosed fully first-order production demonstrated."
+      },
+      {
+        "id": 11,
+        "text": "No-slip surface rows use undocumented cell-center velocities",
+        "found": false,
+        "evidence": "Surface writer uses wall boundary states; no failing no-slip check established."
+      },
+      {
+        "id": 12,
+        "text": "Misnamed figures",
+        "found": false,
+        "evidence": "Plot source maps named VTU variables and owner-indexed triangles; no specific mislabeled final figure established."
+      },
+      {
+        "id": 13,
+        "text": "Copied/adapted external solver core",
+        "found": false,
+        "evidence": "No positive evidence established; no external authorship investigation performed."
       }
     ]
   },
   "limitations": [
-    "No evaluator build or MPI rerun.",
-    "Re200 was not rerun.",
-    "Structural validation does not prove convergence.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "Contestant checkpoint tracks run manifest but not raw case data; original workspace histories are bound by manifest/final values and session, with exact historical executable unrecorded.",
+    "Re200 target statistic uses the disclosed predictor-frozen limiter; fully refreshed-limiter target behavior and actual miss count are unknown.",
+    "Three laminar force charts and Re200 late-drag chart do not expose late behavior; three force rerenders differ in pixels in this environment.",
+    "No external authorship investigation or Re200/unsteady rerun performed."
   ]
 }

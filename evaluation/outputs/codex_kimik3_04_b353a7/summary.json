@@ -151,64 +151,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Substantial source."
+        "score": 4.5,
+        "notes": "Immutable source clean builds in isolated network-disabled image with bundled dependencies; no registered CTests."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Runner documented."
+        "score": 4.5,
+        "notes": "Case/output/restart and documented resurface/jacfd paths exist; exact historical binary remains unbound."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Structured project."
+        "score": 4.5,
+        "notes": "Separate configuration, mesh, partition, physics, reconstruction, residual and solver modules."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "No authorship investigation."
+        "notes": "No internal solver wrapper found; no external authorship investigation performed."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Case configuration."
+        "score": 4.5,
+        "notes": "Case inputs drive mesh and controls; no two-filename-only path found."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 3,
-        "notes": "No evaluator MPI rerun."
+        "score": 4,
+        "notes": "METIS and neighbor exchanges exist; 1500-step failed diagnostics show Re20 ~2.4% Cd range across ranks, not converged equivalence."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Guards documented."
+        "score": 3.5,
+        "notes": "Positivity and adaptive CFL guards exist; accepted plateau is not reevaluated after final averaging."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 5,
-        "notes": "Packages validate structurally."
+        "score": 3.5,
+        "notes": "Jacobian artifacts and smoke diagnostics exist; no registered CTests and structural validation is not physics proof."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 4,
-        "notes": "Audited curation."
+        "notes": "Modular source and report/manifests; historical binary and nonselected plot bindings qualified."
       }
     ],
     "disqualification_flags": [
@@ -253,7 +253,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.95
+    "overall_score": 4.13
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -263,78 +263,78 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 4,
-        "notes": "Source/report evidence."
+        "score": 4.5,
+        "notes": "Conservative NS and nondimensionalization described; physical result accuracy assessed separately."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "Unstructured mesh."
+        "notes": "CGNS multizone TRI/QUAD/BAR reader and adjacency; MIXED sections explicitly unsupported."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 4,
-        "notes": "FV residual."
+        "notes": "Face conservative residual and wall/farfield paths implemented; final averaging can invalidate plateau assumption."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Flux implementation."
+        "notes": "Roe/Rusanov numerical flux choices exist; first-order farfield sponge disclosed."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Boundary handling."
+        "score": 4.5,
+        "notes": "Farfield, slip and no-slip adiabatic paths and boundary-state surface output present."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 4,
-        "notes": "Second order."
+        "notes": "LSQ reconstruction and limiter active after disclosed startup; M200 laminar only748 steps after 12500 first-order steps."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 4,
-        "notes": "Limiter."
+        "notes": "Venkatakrishnan and positivity controls exist; transient limiter frozen at predictor and report discloses it."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Laminar terms."
+        "score": 4.5,
+        "notes": "Newtonian/Fourier terms and explicit tangential force projection residual.cpp:202\u2013215."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Steady method."
+        "score": 3.5,
+        "notes": "LU-SGS and averaged-state plateau method exist, but final500 force means shift after acceptance without a new test."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Delivered Re200."
+        "score": 3.5,
+        "notes": "BDF2/GMRES and periodic St0.160 supported; reported target ratio uses predictor-frozen limiter, refreshed-limiter strict behavior unknown."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 3,
-        "notes": "Limited confirmation."
+        "score": 4,
+        "notes": "Root-only mesh preprocessing, METIS and neighbor halos; short rank diagnostics not converged and Re20 differs ~2.4%."
       }
     ],
     "disqualification_flags": [
@@ -369,7 +369,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.91
+    "overall_score": 4.02
   },
   "result_review": {
     "review_area": "result_review",
@@ -379,50 +379,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 5,
-        "notes": "Eight packages present."
+        "score": 4,
+        "notes": "Eight structural packages pass, but Re20/M015 averaged outputs are marked converged after the accepted force mean shifts."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 5,
-        "notes": "Explicit validator passed."
+        "notes": "Recorded validator passes all packages/report; structural pass is not numerical proof."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 1,
-        "notes": "Re20/M015 accepted plateau means shift materially during the subsequent 500-step averaging phase; remaining target misses alone do not establish failure."
+        "score": 1.5,
+        "notes": "Re20/M015 final averaging phase shifts Cd means substantially after plateau acceptance; other shortfalls alone do not prove failed cases."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 3,
-        "notes": "Re200 delivered; steady plateaus limit confidence."
+        "notes": "Re200 St0.160 supported, M080/M200 inviscid tails bounded, while M015/Re20 mean shifts and M200 laminar drift limit confidence."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Report assets supplied."
+        "score": 2.5,
+        "notes": "All22 report pages render; three laminar force plots compress both late coefficients and Re200 late drag is unresolved."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Report discloses averaging and earlier plateau; final500 means depart materially from the accepted-window means."
+        "score": 3,
+        "notes": "Report discloses averaging/startup/frozen limiter but plateau claim does not persist into final averaging and rank comparison overstates agreement."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 4,
-        "notes": "Sources available as workspace evidence."
+        "score": 3.5,
+        "notes": "Original tracked manifest identifies results; three separate rerenders differ in pixels in this environment, so exact image binding remains qualified."
       }
     ],
     "disqualification_flags": [
@@ -433,7 +433,7 @@
         "found": true
       }
     ],
-    "overall_score": 3.7
+    "overall_score": 3.05
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/kimik3/04",
