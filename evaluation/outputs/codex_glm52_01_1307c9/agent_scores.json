@@ -178,7 +178,7 @@
         {
           "id": 7,
           "text": "transient status and inner-success count use unsupported success criteria",
-          "evidence": "Immutable solver/src/solver.cpp:55\u201362 unconditionally sets transient status statistically_periodic and completed=true; :743\u2013748 caps maximum inner iterations at 15, and :845\u2013852 counts a miss only when ratio >=1 rather than the configured 1e-3. The prior evaluation recorded last ratio 0.928488 and a 97.56% success fraction; that fraction uses the wrong threshold. The original raw metadata is not currently available in the workspace, and this evidence does not establish the proportion of steps that missed 1e-3."
+          "evidence": "Immutable solver.cpp:55\u201362 declares Re200 completed and statistically_periodic; :743\u2013748 caps inner iterations at 15, and :845\u2013852 counts a miss only at ratio >=1 rather than the configured 0.001. Correction 2026-10-31: original metadata was recovered from contestant checkpoint f9b3d2d86be7691191d72b8b323de4c503a2597a, SHA256 bb6ec9e31484739fb64406961f3d91341a8e1e65337f7dc07c2187e5b70fa46e; it reports last ratio 0.9284884538816688, 731 misses and fraction 0.9756333333333334. Source counts ratio>=1 rather than target 0.001, so 731 is not the strict-target miss count. Binary unbound."
         }
       ]
     },
@@ -239,7 +239,7 @@
         {
           "id": 7,
           "text": "transient status and inner-success count use unsupported success criteria",
-          "evidence": "Immutable solver/src/solver.cpp:55\u201362 unconditionally sets transient status statistically_periodic and completed=true; :743\u2013748 caps maximum inner iterations at 15, and :845\u2013852 counts a miss only when ratio >=1 rather than the configured 1e-3. The prior evaluation recorded last ratio 0.928488 and a 97.56% success fraction; that fraction uses the wrong threshold. The original raw metadata is not currently available in the workspace, and this evidence does not establish the proportion of steps that missed 1e-3."
+          "evidence": "Immutable solver.cpp:55\u201362 declares Re200 completed and statistically_periodic; :743\u2013748 caps inner iterations at 15, and :845\u2013852 counts a miss only at ratio >=1 rather than the configured 0.001. Correction 2026-10-31: original metadata was recovered from contestant checkpoint f9b3d2d86be7691191d72b8b323de4c503a2597a, SHA256 bb6ec9e31484739fb64406961f3d91341a8e1e65337f7dc07c2187e5b70fa46e; it reports last ratio 0.9284884538816688, 731 misses and fraction 0.9756333333333334. Source counts ratio>=1 rather than target 0.001, so 731 is not the strict-target miss count. Binary unbound."
         }
       ]
     }
@@ -361,12 +361,17 @@
         "id": 7,
         "text": "metadata marks incomplete or failed runs as successful",
         "found": true,
-        "evidence": "Immutable solver/src/solver.cpp:55\u201362 unconditionally sets transient status statistically_periodic and completed=true; :743\u2013748 caps maximum inner iterations at 15, and :845\u2013852 counts a miss only when ratio >=1 rather than the configured 1e-3. The prior evaluation recorded last ratio 0.928488 and a 97.56% success fraction; that fraction uses the wrong threshold. The original raw metadata is not currently available in the workspace, and this evidence does not establish the proportion of steps that missed 1e-3. Correction 2026-10-31: original metadata was recovered from contestant checkpoint f9b3d2d86be7691191d72b8b323de4c503a2597a, SHA256 bb6ec9e31484739fb64406961f3d91341a8e1e65337f7dc07c2187e5b70fa46e; it reports last ratio 0.9284884538816688, 731 misses and fraction 0.9756333333333334. Source counts ratio>=1 rather than target 0.001, so 731 is not the strict-target miss count. Binary unbound."
+        "evidence": "Immutable solver.cpp:55\u201362 declares Re200 completed and statistically_periodic; :743\u2013748 caps inner iterations at 15, and :845\u2013852 counts a miss only at ratio >=1 rather than the configured 0.001. Correction 2026-10-31: original metadata was recovered from contestant checkpoint f9b3d2d86be7691191d72b8b323de4c503a2597a, SHA256 bb6ec9e31484739fb64406961f3d91341a8e1e65337f7dc07c2187e5b70fa46e; it reports last ratio 0.9284884538816688, 731 misses and fraction 0.9756333333333334. Source counts ratio>=1 rather than target 0.001, so 731 is not the strict-target miss count. Binary unbound."
       },
       {
         "flag": "TASK prohibited shortcut 6: empty placeholder field submitted as completed result",
         "found": true,
         "evidence": "All eight contestant checkpoint f9b3d2d scored case field_final.vtu files are identical 474-byte XML with NumberOfPoints=0 and NumberOfCells=0, SHA256 c4153d5346a4ce8b82c168f9d4ed2130cba4458679c8d3354fe1e2a31d4b8b96. Submitted solver/src/output.cpp:425\u2013436 explicitly writes this empty file for validator compatibility; the separate PVTU and per-rank VTUs contain point-sample data and are distinct artifacts. TASK.md:226 forbids placeholder results and README_EXAMINER.md:20 requires rejection. This does not establish fabricated force/residual histories."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replicated on every MPI rank during iterations",
+        "found": true,
+        "evidence": "Immutable 17a5ef3 solver/src/solver.hpp:64 retains globalMesh_ as a Solver member; solver.cpp:165\u2013205 reads the complete CGNS mesh and partitions it on every rank, builds local mesh and does not release globalMesh_; solver.cpp:46\u201352 continues into iterations in the same Solver lifetime. TASK.md:228 prohibits full-mesh replication on every rank during iterations. Report.tex:326 claims the opposite. METIS and neighbor halos are present; this separate shortcut is not numbered DQ9\u2019s narrower geometric-split/full-state condition. Exact historical executable binding remains unproven."
       }
     ]
   },
