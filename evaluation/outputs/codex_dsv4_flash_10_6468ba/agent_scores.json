@@ -342,7 +342,7 @@
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
       {
         "flag": "Existing solver executable called internally",
@@ -387,7 +387,7 @@
       {
         "flag": "METIS misrepresentation",
         "triggered": false,
-        "notes": "Partition source present."
+        "notes": "partition.cpp:36 calls METIS. TASK.md:227 separately prohibits full mesh replicated on all ranks through iterations; this is not the narrower numbered DQ9 geometric-only/full-state condition."
       },
       {
         "flag": "Limiter disabled",
@@ -408,6 +408,11 @@
         "flag": "Copied core",
         "triggered": false,
         "notes": "No internal wrapper evidence; no external search."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "Immutable main.cpp:112\u2013127 calls read_mesh on every rank, retains full Mesh object and passes it as const Mesh& through run_solver (solver.h:16, solver.cpp:1091). Production acd611d and curated 47dff36 share main.cpp blob fc6473ad09dd330fb11cae57a0bd9b2a74d578f1. TASK.md:227 explicitly prohibits full mesh replication during iterations. METIS/local state exist; numbered DQ9 is not asserted."
       }
     ]
   },
