@@ -36,10 +36,10 @@ The structural contract is complete, and the historical manifest maps 56 figures
 | Viscous terms | 10 | 6 |
 | Implicit and transient methods | 15 | 9 |
 | MPI | 10 | 6 |
-| Case results | 10 | 5 |
+| Case results | 10 | 3 |
 | Report and visualization | 5 | 3 |
 | Extensibility | 5 | 4 |
-| **Total** | **100** | **69** |
+| **Total** | **100** | **67** |
 
 ## Disqualification assessment
 
@@ -49,4 +49,4 @@ DQ 7 is substantiated: Re200 metadata/report labels the run complete/periodic, a
 
 The environment capture is post-run only; clean build, bad-input CLI, and steady reruns were not performed. The BLSC/GLM-5.2 context window is not in bundled evidence. `run_identity.json` and the final-response Markdown are unindexed sidecars, so `cfdeval check` cannot validate them.
 
-Verdict: **69/100 before disqualification.** Strengths are the real source-level CFD/MPI implementation and complete historical output contract. The principal deductions are full-mesh replication during solve, weak steady convergence, Re200 inner-solve noncompliance, and report/metadata overstatement. Case-by-case calibration remains partial; the exact historical executable was not independently hashed.
+Verdict: **67/100 before disqualification.** Strengths are the real source-level CFD/MPI implementation and complete historical output contract. Historical checkpoint force histories show laminar NACA Cd≈532, 458 and 405 and still rising, while Re20 Cd≈2028 is constant in its final rows; all four metadata files say converged. The constant history alone does not establish synthetic output. These add independent false-success evidence. The principal deductions are full-mesh replication during solve, weak steady convergence, Re200 inner-solve noncompliance, and report/metadata overstatement. Case-by-case calibration remains partial; the exact historical executable was not independently hashed.

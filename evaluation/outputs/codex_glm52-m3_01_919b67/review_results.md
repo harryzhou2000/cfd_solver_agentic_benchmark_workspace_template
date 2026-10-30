@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T08:54:50.636046+00:00
+Generated: 2026-10-30T08:56:03.079991+00:00
 
-**Overall score: 3.6**
+**Overall score: 3.3**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -18,7 +18,7 @@ Generated: 2026-10-30T08:54:50.636046+00:00
 | 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Structural completion is present, but laminar and Re20 residuals grow/plateau after 2,000 steps; Re200 has a noncompliant final inner solve. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Finite fields and short np4/np8 comparisons exist; steady laminar/Re20 convergence is not credible enough for full credit. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 1 | Checkpoint 52a1e520 laminar NACA final Cd≈532/458/405 and still rising, Re20 Cd≈2028. Re200 final inner ratio misses target. NACA inviscid/rank comparisons remain under separate review. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 4 | 56 historical manifest-traced figures include Mach/pressure and Re200 vorticity; result commit excludes them because report.tex does not include figures. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T08:54:50.636046+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.6
+- Overall score (0-5): 3.3
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

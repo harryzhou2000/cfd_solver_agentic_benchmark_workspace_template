@@ -203,8 +203,8 @@
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Finite fields and short np4/np8 comparisons exist; steady laminar/Re20 convergence is not credible enough for full credit."
+          "score": 1,
+          "notes": "Checkpoint 52a1e520 laminar NACA final Cd\u2248532/458/405 and still rising, Re20 Cd\u22482028. Re200 final inner ratio misses target. NACA inviscid/rank comparisons remain under separate review."
         },
         {
           "id": "res.visualization",
@@ -228,13 +228,13 @@
           "notes": "Historical figure_manifest.csv maps 56 figures to CSV/VTU sources; spot checks were read-only."
         }
       ],
-      "overall_score": 3.6,
+      "overall_score": 3.3,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 69,
+    "total_scored": 67,
     "sections": [
       {
         "id": "build_cli",
@@ -289,8 +289,8 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 5,
-        "notes": "Inviscid histories are finite, but steady laminar/Re20 plateau claims are not persuasive and Re200 production inner target is not met at final step."
+        "score": 3,
+        "notes": "Inviscid cases have limited 2000-step histories; all three laminar NACA forces are hundreds and growing, Re20 Cd\u22482027, and Re200 final target ratio0.156 misses0.001. Case-result credit retained only for surviving field/rank evidence and incomplete inviscid cases."
       },
       {
         "id": "report_viz",
@@ -322,20 +322,20 @@
       "notes": "NACA0012 M2.00 inviscid: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Historical directory validates with about 2.20 orders residual reduction."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M0.15 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Complete readable output, but negative/plateauing residual reduction within the 2,000-step cap is not credible convergence."
+      "score": 1,
+      "notes": "Contestant checkpoint 52a1e520:solver/results/naca0012_m015_laminar_re5000/forces.csv SHA256 3be84df89897c6f4b17884e540d3c4229c472caff49d40b7652959238fc99e27; delivered force figure solver/report/figures/naca0012_m015_laminar_re5000_forces.png SHA256 247c225fa44bb4ca6321ea85035193ed0f5098b3441fc7c4324d319373839a94, with matching residual/field figures in the checkpoint manifest. Earlier note incorrectly claimed these figures did not exist because the curated tip omits them. Cd484.410\u2192531.616 over final400, Cl0.000890\u21920.001600; drag rises through the full 2000-step figure and is orders of magnitude implausible for this case. Metadata says converged at 2000 steps; report.tex:134\u2013149 calls the result a plateau. Score 2\u21921 for the incomplete, implausible solution, independently of numeric-summary floor. Historical executable not independently hashed."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M0.80 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Complete readable output, but negative/plateauing residual reduction within the 2,000-step cap is not credible convergence."
+      "score": 1,
+      "notes": "Contestant checkpoint 52a1e520:solver/results/naca0012_m080_laminar_re5000/forces.csv SHA256 66d91f0297d409ca6f668e75ebbacbb60bd588e89d83ca89ce7e81359c5cea69; delivered force figure solver/report/figures/naca0012_m080_laminar_re5000_forces.png SHA256 d1458c4f624c13ae4812be7953752192ef63fa6e19db62890ff16bc6bb5be845, with matching residual/field figures in the checkpoint manifest. Earlier note incorrectly claimed these figures did not exist because the curated tip omits them. Cd433.233\u2192458.447 over final400; drag continues to rise through the submitted figure and is orders of magnitude implausible. Metadata says converged at 2000 steps; report.tex:134\u2013149 calls the result a plateau. Score 2\u21921 for the incomplete, implausible solution, independently of numeric-summary floor. Historical executable not independently hashed."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Complete readable output, but negative/plateauing residual reduction within the 2,000-step cap is not credible convergence."
+      "score": 1,
+      "notes": "Contestant checkpoint 52a1e520:solver/results/naca0012_m200_laminar_re5000/forces.csv SHA256 0324031664fb8b904989aaf910e5b8d63a6fe6186ca5f42a891b449d35e361a0; delivered force figure solver/report/figures/naca0012_m200_laminar_re5000_forces.png SHA256 e29a72321933774390ce3c4376ff2cb76442f9f49f3c7b062e597605491884ea, with matching residual/field figures in the checkpoint manifest. Earlier note incorrectly claimed these figures did not exist because the curated tip omits them. Cd391.719\u2192404.884 over final400; drag continues to rise through the submitted figure and is orders of magnitude implausible. Metadata says converged at 2000 steps; report.tex:134\u2013149 calls the result a plateau. Score 2\u21921 for the incomplete, implausible solution, independently of numeric-summary floor. Historical executable not independently hashed."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 2 retained after the post-processing audit. Prior case judgment: Historical directory validates, but residual growth/plateau after 2,000 steps leaves major steady-convergence defect."
+      "score": 1,
+      "notes": "Contestant checkpoint 52a1e520:solver/results/cylinder_m010_laminar_re20/forces.csv SHA256 1b81bb11007cd589d4804f59e2ed5ef5f84f66d9013e415d1fe6a41707c5178c; delivered force figure solver/report/figures/cylinder_m010_laminar_re20_forces.png SHA256 148808a75e65b4ee13fe10a8bb0777b81c48d4e1f7a0bdd8377fec883376a8ad, with matching residual/field figures in the checkpoint manifest. Earlier note incorrectly claimed these figures did not exist because the curated tip omits them. Cd2027.5515 and Cl0.04789 are constant over the final400 rows and the delivered force figure; this drag is physically implausible for Re20. The constant values do not alone prove synthetic output. Metadata says converged at 2000 steps; report.tex:134\u2013149 calls the result a plateau. Score 2\u21921 for the incomplete, implausible solution, independently of numeric-summary floor. Historical executable not independently hashed."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
@@ -385,7 +385,7 @@
         "id": 7,
         "text": "metadata marks incomplete or failed runs as successful",
         "found": true,
-        "evidence": "Historical checkpoint 52a1e520 Re200 metadata reports completed/statistically_periodic, target 0.001 and last ratio 0.156; residuals.csv has 30000 rows with inner_iter=10. Final recorded ratio demonstrably misses target; the per-step miss count cannot be reconstructed from that CSV alone. Immutable source solver.cpp:823\u2013829 caps maxInner at 10, while main.cpp:187\u2013191 labels every transient statistically_periodic. Report discloses the cap but asserts a successful periodic result. Historical binary is not independently hashed."
+        "evidence": "Historical checkpoint 52a1e520 Re200 metadata reports completed/statistically_periodic, target 0.001 and last ratio 0.156; residuals.csv has 30000 rows with inner_iter=10. Final recorded ratio demonstrably misses target; the per-step miss count cannot be reconstructed from that CSV alone. Immutable source solver.cpp:823\u2013829 caps maxInner at 10, while main.cpp:187\u2013191 labels every transient statistically_periodic. Report discloses the cap but asserts a successful periodic result. Historical binary is not independently hashed. Additional independent evidence: historical checkpoint 52a1e520 three laminar NACA metadata say converged while Cd remains rising to 531.616, 458.447 and 404.884 by step2000; Re20 metadata says converged with Cd2027.5515. These are not plausible completed solutions; force history and hashes are in individual case notes."
       },
       {
         "id": 8,
