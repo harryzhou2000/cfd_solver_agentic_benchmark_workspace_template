@@ -2,23 +2,23 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:13:21.852670+00:00
+Generated: 2026-10-30T05:14:09.339117+00:00
 
 **Overall score: 1.2**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 1 | All declared v3 packages fail required metadata partitioner. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 1 | Selected v3/v4 metadata omits required partitioner, and Re200 labels monotonic decay statistically periodic. Output writers omit strict inner convergence metadata. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 0 | Explicit validator fails all eight. |
+| 2 | **res.validator** Automated validator results | 0.10 | 0 | Earlier explicit benchmark validator fails selected outputs on missing partitioner; cfdeval gates check manager records, not CFD validity. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 1 | Readable data exists but no contract-complete final package. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 1 | Manifest selects six converged steady cases, one failed and Re200 periodic; Re200 is nonperiodic, M2 inviscid final recomputed ratio -2.862 falls short of its 3-order target. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 1 | Report admits unrealistic cylinder forces and no Re200 shedding. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 1 | Selected Re20 Cd≈0.000537 versus expected order2, M080 laminar Cd=-0.0143, and Re200 t200–300 force decay rather than shedding. Report admits cylinder limitations. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 2 | Accepted eight-page PDF pp4–5 has M015/M080 Mach and M2 pressure figures with blank plot areas despite colorbars; p8 Re200 force history is startup dominated with no readable late lift/drag. Residual and Cp figures exist. |

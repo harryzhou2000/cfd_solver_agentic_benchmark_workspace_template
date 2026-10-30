@@ -245,28 +245,28 @@
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 3,
-        "notes": "Output paths documented but final packages invalid."
+        "notes": "main.cpp:1485 onward accepts solve and case input, but solve_case :967\u2013971 writes fixed output/ paths; selected packages lack required metadata partitioner and no restart reader was established."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 3,
-        "notes": "Moderate modularity; large raw experiment history."
+        "notes": "Most solver implementation resides in 1490-line main.cpp; report and plotting tools are separate, with many raw workspace run variants."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "No external solver found; no external search."
+        "notes": "No internal existing CFD executable invocation established from inspected source; external authorship search not performed."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 3,
-        "notes": "Case config driven."
+        "notes": "main.cpp:947\u2013953 resolves configured mesh path and case data; no two-filename-only branch established."
       },
       {
         "id": "code.mpi",
@@ -280,21 +280,21 @@
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 2,
-        "notes": "Terminal response admits normal/residual flaws."
+        "notes": "main.cpp:1292\u20131300 MPI_Gather only on rank0 risks deadlock, and :967\u2013971 opens same CSVs on all ranks; selected Re200 no shedding and selected M2 laminar fails."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
         "score": 3,
-        "notes": "Long agent testing history, final regressions incomplete."
+        "notes": "Manifest lists np1/2/4/8 comparisons, but selected np2/4/8 force files for both cases are empty. No valid force agreement or scalability validation established."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 2,
-        "notes": "1,245 raw artifacts required curation from tip."
+        "notes": "Curated source/report tip excludes raw work; many workspace variants and selected metadata lacking revision complicate reproducibility."
       }
     ],
     "disqualification_flags": [
@@ -350,35 +350,35 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4,
-        "notes": "Conservative/gas source documented."
+        "notes": "main.cpp:inviscid_flux and viscous_flux implement compressible Euler and Newtonian-Fourier expressions; effective viscous residual is scaled to 1% at :981,1074\u20131075."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "CGNS/METIS code structure."
+        "notes": "main.cpp:152 onwards reads CGNS and :388\u2013434 calls METIS for local partitions, but full mesh is loaded on all ranks and retained through solve_case :947\u2013954,1286,1474."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 3,
-        "notes": "FV path exists, no valid output-contract evidence."
+        "notes": "main.cpp:976\u20131084 assembles conservative face fluxes and MPI residual norm; viscous contribution scaled 0.01 and steady reconstruction scaled 0.1."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 3,
-        "notes": "Rusanov source, high-Mach limits admitted."
+        "notes": "main.cpp:1064 and :1381 call Rusanov inviscid_flux; no successful independent solution verification and selected M2 case below recomputed target."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 3,
-        "notes": "BC source, outcomes weak."
+        "notes": "main.cpp:1054\u20131062 uses configured farfield, slip and no-slip ghosts; gradient computation :585 skips boundary faces, weakening viscous wall behavior."
       },
       {
         "id": "cfd.reconstruction",
@@ -466,28 +466,28 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 1,
-        "notes": "All declared v3 packages fail required metadata partitioner."
+        "notes": "Selected v3/v4 metadata omits required partitioner, and Re200 labels monotonic decay statistically periodic. Output writers omit strict inner convergence metadata."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 0,
-        "notes": "Explicit validator fails all eight."
+        "notes": "Earlier explicit benchmark validator fails selected outputs on missing partitioner; cfdeval gates check manager records, not CFD validity."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 1,
-        "notes": "Readable data exists but no contract-complete final package."
+        "notes": "Manifest selects six converged steady cases, one failed and Re200 periodic; Re200 is nonperiodic, M2 inviscid final recomputed ratio -2.862 falls short of its 3-order target."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 1,
-        "notes": "Report admits unrealistic cylinder forces and no Re200 shedding."
+        "notes": "Selected Re20 Cd\u22480.000537 versus expected order2, M080 laminar Cd=-0.0143, and Re200 t200\u2013300 force decay rather than shedding. Report admits cylinder limitations."
       },
       {
         "id": "res.visualization",

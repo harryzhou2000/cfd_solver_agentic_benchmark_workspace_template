@@ -2,26 +2,26 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:13:21.852377+00:00
+Generated: 2026-10-30T05:14:09.338824+00:00
 
 **Overall score: 2.41**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | Conservative/gas source documented. |
+| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 4 | main.cpp:inviscid_flux and viscous_flux implement compressible Euler and Newtonian-Fourier expressions; effective viscous residual is scaled to 1% at :981,1074–1075. |
 |   | 2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly. | | | |
 |   | *Evidence:* Source flux assembly and report equations. | | | |
-| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | CGNS/METIS code structure. |
+| 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 4 | main.cpp:152 onwards reads CGNS and :388–434 calls METIS for local partitions, but full mesh is loaded on all ranks and retained through solve_case :947–954,1286,1474. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
-| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 3 | FV path exists, no valid output-contract evidence. |
+| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 3 | main.cpp:976–1084 assembles conservative face fluxes and MPI residual norm; viscous contribution scaled 0.01 and steady reconstruction scaled 0.1. |
 |   | Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction. | | | |
 |   | *Evidence:* residual assembly code; residuals.csv shows global reduction. | | | |
-| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 3 | Rusanov source, high-Mach limits admitted. |
+| 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 3 | main.cpp:1064 and :1381 call Rusanov inviscid_flux; no successful independent solution verification and selected M2 case below recomputed target. |
 |   | Rusanov/LLF minimum or Roe-type with entropy fix; flux matches the stated method; no loss of conservation at boundaries. | | | |
 |   | *Evidence:* Flux implementation; metadata inviscid_flux/entropy_fix; code walkthrough. | | | |
-| 5 | **cfd.bc** Boundary conditions | 0.08 | 3 | BC source, outcomes weak. |
+| 5 | **cfd.bc** Boundary conditions | 0.08 | 3 | main.cpp:1054–1062 uses configured farfield, slip and no-slip ghosts; gradient computation :585 skips boundary faces, weakening viscous wall behavior. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
 | 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 2 | main.cpp:978–1016 applies alpha=0.1 reconstruction in steady path; transient :1363–1370 uses cell states. Report.tex:37–38,81–82 discloses alpha but asserts second order/all runs; selected historical run-source linkage unproved. |

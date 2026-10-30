@@ -7,35 +7,35 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Conservative/gas source documented."
+      "notes": "main.cpp:inviscid_flux and viscous_flux implement compressible Euler and Newtonian-Fourier expressions; effective viscous residual is scaled to 1% at :981,1074\u20131075."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "CGNS/METIS code structure."
+      "notes": "main.cpp:152 onwards reads CGNS and :388\u2013434 calls METIS for local partitions, but full mesh is loaded on all ranks and retained through solve_case :947\u2013954,1286,1474."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 3,
-      "notes": "FV path exists, no valid output-contract evidence."
+      "notes": "main.cpp:976\u20131084 assembles conservative face fluxes and MPI residual norm; viscous contribution scaled 0.01 and steady reconstruction scaled 0.1."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 3,
-      "notes": "Rusanov source, high-Mach limits admitted."
+      "notes": "main.cpp:1064 and :1381 call Rusanov inviscid_flux; no successful independent solution verification and selected M2 case below recomputed target."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 3,
-      "notes": "BC source, outcomes weak."
+      "notes": "main.cpp:1054\u20131062 uses configured farfield, slip and no-slip ghosts; gradient computation :585 skips boundary faces, weakening viscous wall behavior."
     },
     {
       "id": "cfd.reconstruction",
