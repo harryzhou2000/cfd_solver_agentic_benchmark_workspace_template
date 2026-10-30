@@ -45,7 +45,7 @@ Reviewed source, selected Codex root, contestant final response, raw workspace p
 
 ## Recorded scores and disqualification
 
-The current 100-point rubric is 68.5/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
+The current 100-point rubric is 67/100; sections and the current weighted review-area scores are recorded in `agent_scores.json`. The independent case scores are:
 
 | Case | Score |
 |---|---:|
@@ -119,3 +119,8 @@ Immutable `058801f` clean CMake build succeeded in network-disabled `cfd-bench` 
 `Partitioner.cpp:63–78` calls METIS and broadcasts the partition, and `MpiHalo.cpp:28–35` performs neighbor communication; these do not remove the separate full-mesh replication documented above. Report.tex:244 falsely says the full mesh is not replicated. The report's NACA np1 Cd0.000813/Cl−0.000028 versus np8 Cd0.000858/Cl0.0303 comparison is reproduced by the checkpoint np8 final force row. Its cylinder np8 package is a 200-step failed pilot, not a completed rank consistency demonstration. The large relative change in near-zero lift is material to confidence, but its absolute difference≈0.0303 and unequal convergence states do not establish numbered DQ4's order-one result change. MPI rubric8→6.5.
 
 Report.tex:588–593 incorrectly suggests rescaling force amplitude corrects the FFT frequency, and :244 contradicts actual full-mesh lifetime; it separately discloses negative viscous drag and M2-laminar divergence. Report/visualization3→2.5; total70.5→68.5. No rerun; remaining source/rubric/DQ review remains partial.
+
+
+## Case-results rubric — 2026-10-30
+
+The three inviscid NACA cases have readable delivered plots and plausible final Cd, but M015/M080 laminar cases have negative viscous-drag defects and the M200 laminar case diverges. The selected Re20 Cd≈1160 is physically unusable and the Re200 Cd≈2105/St≈8.1 do not support credible shedding; these are independent of their plot-floor limitations. NACA has a limited rank comparison while cylinder np8 is only a failed pilot. Case-results rubric6→4.5, total68.5→67, with completion/plausibility review points 3→2. No CFD rerun; other criterion and DQ review remains partial.

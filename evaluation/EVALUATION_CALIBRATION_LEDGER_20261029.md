@@ -773,3 +773,5 @@ sonnet46-01 build/force checkpoint: clean immutable build passed in restricted c
 sonnet46-01 transient checkpoint: final TransientSolver.cpp:182–214 measures spatial+BDF+pseudo regularization, not TASK.md:143 spatial+BDF alone. Checkpoint residuals have 943/30000 steps at 2000, metadata says configured max1000 and observed max2000. Actual unregularized misses and production binary binding unknown. Implicit/transient9→7, total72.5→70.5, no Re200 rerun.
 
 sonnet46-01 MPI/report checkpoint: METIS/neighbor halos coexist with per-rank full mesh; report.tex:244 claims otherwise. NACA np1 Cl−0.000028 vs np8 +0.0303 and Cd0.000813 vs0.000858; cylinder np8 is failed 200-step pilot. Near-zero lift and unequal convergence limit DQ4 inference. MPI8→6.5, report3→2.5, total70.5→68.5. Partial review.
+
+sonnet46-01 case-results calibration: NACA inviscid evidence is plausible but two laminar force splits are negative, M2 laminar diverged, and both cylinder cases are physically unusable. Limited NACA rank comparison; cylinder np8 is failed pilot. Case-results6→4.5, total68.5→67, completion/plausibility3→2. Partial review.
