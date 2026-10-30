@@ -114,7 +114,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
 | `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
-| `codex_gpt56_01_cb349f` | partial: provisional 94/100, no DQ found; historic binary/figure binding unverified |
+| `codex_gpt56_01_cb349f` | fully reviewed: 94/100, no DQ found; executable and individual image bindings qualified |
 | `codex_gpt56_02_38616e` | unreviewed |
 | `codex_gpt56_03_93b257` | unreviewed |
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
@@ -1036,3 +1036,6 @@ gpt56_01 restart/review checkpoint: output.cpp:462–476 serializes global cell 
 
 
 gpt56_01 DQ/PDF checkpoint: all 48 accepted compiled PDF pages SHA256 d273c00b0ed72c59e9acce52b3ae0b6c9d30d9e1228c5c4a793a410e6563f5a6 rendered and visually reviewed. Historical np1/2/4/8 Re20 at step4186 Cd2.04673583927/2.04673583947/2.04673583932/2.04673583928; M015 inviscid at step2785 Cd0.0005541454/0.0005541452/0.0005541454/0.0005541437. Metadata revision461385a, exact binary unbound; no order-one DQ4. Source requires full reconstruction and 200 extra steps before steady acceptance, explicitly disclosed continuation; strict Re200 target counting with 87 misses and actual oscillations supports no DQ7. Corrected DQ8 wording: selected figures independently checked, not a claim all 49 image-to-data bindings proven. Tangential output mismatch remains viscous/report deduction and no automatic DQ6. No DQ established; rubric94. Exact historic executable and every figure binding are still unverified, so overall remains partial. No CFD rerun.
+
+
+gpt56_01 full-review qualification: all 21 curated solver/src files are byte-identical to corresponding files at historical contestant submodule revision461385a3d4472c0fa2c2c9f46bced39937ea4819 named by production metadata. Independent review covered all eight case scores, rendered all 48 PDF pages, checked all rubric and 27 review criteria, individually assessed DQ boundaries, verified force/period data and controlled rank evidence, and built/tested clean source. Exact historical executable hash and all individual image-to-data bindings are not recoverable from available evidence; these are incorporated limitations, not claims of proven identity. Review is complete within feasible evidence, with these explicit qualifications. No CFD rerun.
