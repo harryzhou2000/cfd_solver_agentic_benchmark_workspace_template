@@ -43,47 +43,22 @@
 
 Read immutable source/report, eight raw final packages, and the sole workspace-local Codex root. Ran the examiner explicitly on all packages plus report; it passed. Audited result tip `25daaa33082392c46c69425cd9c0673ec04e1b63` from checkpoint `113f01aa755d6db31e41b1b50602c7397ee73e71`; 290 prohibited paths were removed from its index. No evaluator rerun was performed, including no Re200 rerun.
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
+## Recorded scores and disqualification
 
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
+The current 100-point rubric is 77.5/100; section details and weighted review scores are in `agent_scores.json`. Independent case scores:
 
-## Review-area scores (0-5 weighted, review_*.json)
+| Case | Score |
+|---|---:|
+| `naca0012_m015_inviscid` | 1 |
+| `naca0012_m080_inviscid` | 4 |
+| `naca0012_m200_inviscid` | 4 |
+| `naca0012_m015_laminar_re5000` | 4 |
+| `naca0012_m080_laminar_re5000` | 4 |
+| `naca0012_m200_laminar_re5000` | 2 |
+| `cylinder_m010_laminar_re20` | 4.5 |
+| `cylinder_m010_laminar_re200` | 2 |
 
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
-
-## Disqualification assessment
-
-DQ=true: Trigger 7. The raw M0.15 inviscid metadata/run-status marks the max-step 1.69-order result `completed:true` and `converged`; late force history is not steady and the report itself calls it a plateau below the target. Source accepts any reduction above one order as converged. No other DQ trigger was directly established.
+DQ7 is triggered by falsely successful M015 inviscid and M200 laminar results; TASK.md and the examiner independently require rejection for the eight placeholder restart files. Detailed evidence follows. This review remains partial.
 
 ## Metadata answers & session selection
 
@@ -97,7 +72,7 @@ No evaluator clean build or MPI rerun. Re200 was not rerun; readable deliverable
 
 ## Verdict
 
-Score: **80/100; disqualified: true.** The solver/report have substantial delivery value and a structurally passing package, but the false-success M0.15 status is a disqualifying output-integrity failure.
+Disqualified under DQ7 and the task prohibition on placeholder result files. Remaining source and rubric review is partial.
 
 
 ## Re200 evidence correction — 2026-10-30
