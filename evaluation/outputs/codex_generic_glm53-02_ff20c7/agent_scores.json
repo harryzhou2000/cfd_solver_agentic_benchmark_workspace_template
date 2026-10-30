@@ -35,59 +35,59 @@
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "main.cpp:28\u201351 parses solve/export-restart, case/output/restart; solver.cpp:881\u2013919 restores state/step/time but sets both prior BDF states equal to current, so transient restart loses prior history."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "solver/src separates case input/types, CGNS mesh, partition and solver; solver/tools separates plotting, report and synthetic post-processing self-test."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "Inspected source/build for internal solver invocation; none found. No external authorship search performed."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "main.cpp:28\u201351 parses case/output; :97\u2013120 reads configured case and CGNS mesh and METIS partition, without two-filename-only branching."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "partition.cpp:136\u2013142 calls METIS and builds local halos; main.cpp:110\u2013145 retains global mesh only on root while solve is local. NACA M015 np4/8 last-200 Cd means 0.002290526/0.002290542; source binding null."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "solver.cpp has positivity halving and stable-CFL control; M2 laminar stops with Cd falling 20.6% and metadata falsely says converged. Early source-to-result binding unavailable."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "score": 3,
+          "notes": "solver/tools/_selftest exercises synthetic plotting/report pipeline; selected rank comparisons include M015 inviscid np4/8 and Re200 np4/8, but no new CFD rerun."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "Curated solver source/report exclude workspace-generated assets; accepted PDF and standalone figures are traced in report/ledger, while result metadata revision is null."
         }
       ],
-      "overall_score": 4.0,
+      "overall_score": 3.9,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -97,49 +97,49 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "numerics.hpp implements compressible conservative inviscid and Newtonian-Fourier flux; solver.cpp:330\u2013336 uses pressure gradient for temperature, compromising heat-flux discretization."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "main.cpp:110\u2013130 reads CGNS/partitions on root and scatters local mesh; full mesh retained only on root for output, not replicated to all ranks during solve."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "solver.cpp:286\u2013350 reconstructs face states, evaluates Rusanov and opposing owner/neighbor fluxes; pressure-gradient-as-temperature defect affects viscous flux."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "solver.cpp:306 and numerics.hpp implement Rusanov flux; report identifies this dissipative choice and notes shock limitations."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "solver.cpp:799\u2013819 outputs zero no-slip boundary velocities; Re20 selected surface has 100 rows all u=v=0. Heat gradient and surface Cf direction defects documented separately."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "solver.cpp:172\u2013204 computes and exchanges Green\u2013Gauss gradients; :286\u2013306 reconstructs primitive face values with positivity fallback."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "solver.cpp:207 onward applies Barth for steady viscous and Venkatakrishnan for inviscid/transient; :1014\u20131019 refreshes transient limiter once per physical step, not each inner iteration."
         },
         {
           "id": "cfd.viscous",
@@ -167,7 +167,7 @@
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "METIS and local halo implemented; M015 inviscid np4/8 last-200 mean Cd 0.002290526/0.002290542, Cl0.000415197/0.000411708. Re200 rank study is transient, no extra steady cylinder comparison."
         }
       ],
       "overall_score": 3.4,
@@ -179,15 +179,15 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "score": 3,
+          "notes": "Prior structural examiner pass does not prove physics. M2 laminar metadata says converged despite Cd falling 20.6% in last62 rows; transient restart loses preceding state."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "notes": "Prior eight-case/report examiner validator passed; current manager gates check structure and index, not physical convergence."
         },
         {
           "id": "res.completion",
@@ -214,52 +214,52 @@
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "score": 3,
+          "notes": "Report.tex:501\u2013509 discloses plateau acceptance, supported for inviscid cases. It labels M2 laminar converged despite changing drag and shows compressed cylinder plots."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 4,
-          "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+          "score": 2,
+          "notes": "Accepted PDF and standalone figure manifests/hashes are recorded; case metadata git_revision=null and selected M2 result predates final source, so exact producing revision unbound."
         }
       ],
-      "overall_score": 3.15,
+      "overall_score": 2.7,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 74,
+    "total_scored": 72,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 10,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "score": 8,
+        "notes": "Exact 1bc8fb6 clean build passed; CLI supports restart but solver.cpp:881\u2013919 restores step/time/current state and sets both prior BDF states equal, losing previous physical history on transient restart."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 10,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "notes": "main.cpp:110\u2013130 imports CGNS/METIS on rank0 and scatters local meshes; global mesh remains only on root for output, not every rank."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 13,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "notes": "solver.cpp:172\u2013204,286\u2013350 reconstructs states, applies Rusanov and conservative face flux, with ghost boundaries; temperature gradient slot defect documented under viscous."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 8,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "notes": "Green\u2013Gauss primitive reconstruction and Barth/Venkat limiters implemented in solver.cpp:172\u2013306; transient limiter frozen within inner solve, and all steady inner targets missed."
       },
       {
         "id": "viscous",
@@ -280,7 +280,7 @@
         "title": "MPI",
         "max_points": 10,
         "score": 9,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "notes": "METIS local partition, neighbor exchanges and reductions implemented; NACA M015 np4/8 last-200 Cd means 0.002290526/0.002290542, Cl0.000415197/0.000411708. Cylinder comparison is Re200 transient; no separate steady cylinder comparison established."
       },
       {
         "id": "case_results",
@@ -301,7 +301,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 1,
-        "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+        "notes": "Case/mesh/partition/solver and plotting tools separated, but numerical implementation remains 2D and RANS/EOS extensions not demonstrated."
       }
     ]
   },

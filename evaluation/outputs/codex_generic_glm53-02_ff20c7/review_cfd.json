@@ -7,49 +7,49 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+      "notes": "numerics.hpp implements compressible conservative inviscid and Newtonian-Fourier flux; solver.cpp:330\u2013336 uses pressure gradient for temperature, compromising heat-flux discretization."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+      "notes": "main.cpp:110\u2013130 reads CGNS/partitions on root and scatters local mesh; full mesh retained only on root for output, not replicated to all ranks during solve."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 4,
-      "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+      "notes": "solver.cpp:286\u2013350 reconstructs face states, evaluates Rusanov and opposing owner/neighbor fluxes; pressure-gradient-as-temperature defect affects viscous flux."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+      "notes": "solver.cpp:306 and numerics.hpp implement Rusanov flux; report identifies this dissipative choice and notes shock limitations."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+      "notes": "solver.cpp:799\u2013819 outputs zero no-slip boundary velocities; Re20 selected surface has 100 rows all u=v=0. Heat gradient and surface Cf direction defects documented separately."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 4,
-      "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+      "notes": "solver.cpp:172\u2013204 computes and exchanges Green\u2013Gauss gradients; :286\u2013306 reconstructs primitive face values with positivity fallback."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+      "notes": "solver.cpp:207 onward applies Barth for steady viscous and Venkatakrishnan for inviscid/transient; :1014\u20131019 refreshes transient limiter once per physical step, not each inner iteration."
     },
     {
       "id": "cfd.viscous",
@@ -77,7 +77,7 @@
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 4,
-      "notes": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance."
+      "notes": "METIS and local halo implemented; M015 inviscid np4/8 last-200 mean Cd 0.002290526/0.002290542, Cl0.000415197/0.000411708. Re200 rank study is transient, no extra steady cylinder comparison."
     }
   ],
   "disqualification_flags": [

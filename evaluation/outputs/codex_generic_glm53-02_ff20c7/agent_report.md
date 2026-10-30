@@ -4,7 +4,7 @@ Submission `codex/generic/glm53-02` at `1bc8fb6ec6c765ec3c4bf7c06770463580dbecb1
 
 ## Verdict
 
-**74/100; DQ=true under DQ7 (partial calibration).** The previous inviscid-plateau rationale was unsupported, but a separate M2 laminar result is labeled converged while its drag is still changing materially; evidence below. Other triggers remain under review.
+**72/100; DQ=true under DQ7 (partial calibration).** The previous inviscid-plateau rationale was unsupported, but a separate M2 laminar result is labeled converged while its drag is still changing materially; evidence below. Other triggers remain under review.
 
 ## Evidence
 
@@ -50,3 +50,10 @@ M080 inviscid score 2→3, M2 inviscid 1→3: each has a numeric summary, readab
 ## Partial wall-friction correction — 2026-10-30
 
 Final solver.cpp:808–811 sets no-slip boundary u=v=0; :820–826 builds a tangential direction from that velocity, falls back to (1,0), and dots the full traction with it. That is not generally the local wall tangent, despite report.tex:193–197 claiming tangential wall shear. The integrated force split separately uses full traction :782–794. This corrects the earlier statement that the surface Cf was tangentially projected: a projection exists, but in the wrong direction. As with the documented force-split precedent, this is a defective produced output assessed under viscous credit rather than automatically DQ6. Viscous rubric6→5, CFD viscous review2→1, total75→74. Selected production metadata has no revision, so exact historic source binding remains unproved. No CFD rerun.
+
+
+## Partial remaining criteria and DQ review — 2026-10-30
+
+Criterion-specific rubric/review notes document source and result evidence. Restart reader solver.cpp:881–919 restores state, step and time but initializes both prior BDF states to current state, losing transient multistep history; build/CLI rubric10→8, total74→72. Its full-state broadcast is scoped to restart initialization, not all-rank full state during the solve. NACA M015 inviscid np4/8 last-200 mean Cd0.002290526/0.002290542 and Cl0.000415197/0.000411708; no order-one DQ4 shown by that comparison. Re200 np4/8 is the cylinder comparison but is transient. main.cpp:110–145 holds global mesh only on root and distributes local state, so TASK all-rank replication and DQ9 not established.
+
+No internal existing solver executable or fabricated force/residual history evidence found (DQ1/2); case-driven CGNS input does not support DQ3. LU-SGS/BDF2 exist (DQ5/6). DQ7 remains based on the separate M2 laminar unstable final force, not the justified inviscid plateaus. Missing/flattened plots alone do not establish mismatched or misnamed data (DQ8/12). Reconstruction and limiters are active; lagged transient limiter is disclosed (DQ10). Final source and selected Re20 surface rows output zero no-slip velocities (100 rows all u=v=0), so DQ11 not established. No external authorship search was performed (DQ13). Exact selected run-source binding remains unresolved: metadata git_revision=null and M2 results predate final source; the entry remains partial. No CFD/rank/unsteady rerun.
