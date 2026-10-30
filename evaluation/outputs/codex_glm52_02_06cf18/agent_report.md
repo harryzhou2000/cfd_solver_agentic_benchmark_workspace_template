@@ -33,10 +33,10 @@ The structural validator found all required eight result cases and the report. T
 | Implicit And Transient Methods | 15 | 8 | Relaxed target counts cannot establish strict inner convergence. |
 | MPI | 10 | 4 | METIS/halo exists, but full global mesh is replicated during iteration. |
 | Case Results And Validation | 10 | 2.5 | Multiple forces remain unsettled, Re20 is implausible, and Re200 is falsely labeled periodic. |
-| Report, Visualization, Analysis | 5 | 5 | Report, figures, and manifest present. |
+| Report, Visualization, Analysis | 5 | 2.5 | PDF omits force/rank tables due nested-float errors and asserts unobserved shedding. |
 | Extensibility | 5 | 4 | Modular C++ organization. |
 
-**Provisional total: 67.5/100. Disqualified under trigger 7 and the separate TASK full-mesh prohibition.**
+**Provisional total: 65/100. Disqualified under trigger 7 and the separate TASK full-mesh prohibition.**
 
 ## Limitations
 
@@ -51,3 +51,5 @@ Immutable 1e29ab3c main.cpp:83–86 reads complete CGNS mesh on every rank; :92�
 Other case floors, PDF/figure provenance, source criteria and DQ findings remain under review. No CFD or Re200 rerun was performed.
 
 Individual delivered force plots and histories were reviewed: M015 inviscid Cd falls 0.232600→0.146703 and M200 laminar 3.991995→2.635137 over their final500 rows; Re20 ends Cd8.86975, Cl−0.38716. Scores and exact artifact hashes are in the case notes. The case scores are 1.5, 1.5, 1.5, 2, 2, 1, 1.5 and 1 in benchmark order. Contour/residual figure attribution, all other rubric dimensions and DQ remain partial.
+
+All seven pages of accepted sibling PDF SHA256 c5a75b4aace101f18c4f77c7a2dd63aab61c65258b1a6a30b810f5d9b51ce8bf were visually checked; workspace report.tex matches immutable source SHA256 72af1ca7691327971231593973bf700ef96294b0d2011fa7949ae8d34ba779fc. Nested table environments trigger two recorded LaTeX errors and omit the force and rank tables from the PDF, though immutable force_table.tex contains numerical coefficients. Captions claim Re200 shedding although the delivered forces drift without visible oscillation. Rank test final endpoints differ substantially: M015 inviscid np4 step2261 vs np8 step5000, Re20 np4 step30000 vs np8 step5000; starts and binary revision differ or are unbound, so those values alone do not establish a rank-only mismatch.

@@ -112,7 +112,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52-m3_05_f094c1` | partial: provisional 54/100, DQ7 and TASK full-mesh; historic binary/figure binding unverified |
 | `codex_glm52-m3_06_a2dc07` | partial: 68/100, DQ7; historical binary and figure binding unverified |
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
-| `codex_glm52_02_06cf18` | partial: provisional 67.5/100, DQ7 and TASK full-mesh; figure/rubric review ongoing |
+| `codex_glm52_02_06cf18` | partial: provisional 65/100, DQ7 and TASK full-mesh; source/rubric review ongoing |
 | `codex_glm52_03_e7d38e` | unreviewed |
 | `codex_gpt56_01_cb349f` | unreviewed |
 | `codex_gpt56_02_38616e` | unreviewed |
@@ -991,3 +991,6 @@ glm52_02 provenance/DQ checkpoint: final selected response explicitly identifies
 
 
 glm52_02 case-history checkpoint: selected final response explicitly delivers all eight cases and 41 figures; workspace figure_manifest maps force plots to case CSVs. All eight contestant force plots were visually inspected and each case note records workspace CSV/PNG SHA256, final500 ranges, convergence and independent physics. M015 inviscid Cd0.232600→0.146703, M080 inviscid0.106865→0.093639, M200 inviscid0.109243→0.095864; M200 laminar3.991995→2.635137 over final500. Re20 Cd8.76417→8.86975, Cl−0.43465..−0.38716 and Re200 t180–300 Cd21.01216..21.23840, Cl3.74469..3.82989. Scores in benchmark order were [4,2,2,2,2,2,2,2]→[1.5,1.5,1.5,2,2,1,1.5,1]; case-results4→2.5, total69→67.5. Residual reduction and force stabilization are separately assessed; DQ7 remains supported by Re200, not inferred from residuals alone. Exact runtime binary, figure-to-CSV binding and remaining source/rubric/DQ remain partial. No CFD rerun.
+
+
+glm52_02 PDF/rank checkpoint: all seven pages of accepted contestant sibling PDF SHA256 c5a75b4aace101f18c4f77c7a2dd63aab61c65258b1a6a30b810f5d9b51ce8bf visually checked; sibling report.tex matches immutable SHA256 72af1ca7691327971231593973bf700ef96294b0d2011fa7949ae8d34ba779fc. report.tex:258–260 wraps force_table.tex (which itself contains two table environments) in another float. Workspace report.log records two Not in outer par mode errors; PDF silently omits both force and rank tables, while immutable force_table.tex itself retains numeric coefficient summary. Report captions :305–315 claim Re200 shedding/vortex street, while actual force shows no oscillation. Report/visualization5→2.5, total67.5→65. Existing accepted PDF remains delivered and readable, not misrepresented as absent. Workspace rank np4/np8 M015 endpoints2261/5000, Re20 30000/5000, first states differ and git_revision null: cannot infer DQ4 from endpoint difference alone. Remaining source, DQ and plot attribution partial; no CFD rerun.
