@@ -7,77 +7,77 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Conservative perfect-gas state conversion and Euler-state calculations are identifiable in common/gas_model.hpp."
+      "notes": "Perfect-gas conservative/primitive state conversions exist, but full Navier\u2013Stokes viscous terms are absent."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 3,
-      "notes": "A CGNS reader, mesh structures, and geometry routines are submitted, but no build or production mesh result verifies them."
+      "score": 2,
+      "notes": "First-zone CGNS reader recognizes TRI/QUAD and boundary sections; geometry.cpp uses incorrect shared-face sign and computes volume before orienting normals."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 2,
-      "notes": "A first-order face residual loop exists, but it uses local-index checks against global face indices and is not validated by a delivered case."
+      "notes": "First-order Rusanov face residual loop exists but indexes local states with unremapped global faces; no submitted solver result."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 3,
-      "notes": "Rusanov flux is called in residual.cpp; no separate entropy-fix implementation or result validation is evident."
+      "notes": "Rusanov numerical flux is implemented and called; no separate entropy-fix or solution validation."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Farfield, slip-wall, and no-slip adiabatic branches appear in residual.cpp, without output evidence of correct boundary behavior."
+      "score": 2.5,
+      "notes": "Farfield, slip and no-slip branches exist; zero viscous flux and local/global face indexing limit wall accuracy."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 0,
-      "notes": "reconstruct_faces is entirely no-op and compute_residual uses first-order face states."
+      "notes": "reconstruct.cpp is no-op; residual uses first-order states."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 0,
-      "notes": "apply_limiter is entirely no-op; only an ad hoc state reset/check appears in the point update."
+      "notes": "limiter.cpp is no-op; point update includes an ad hoc state reset."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 1,
-      "notes": "viscous_flux returns an all-zero state and is not integrated into the residual, so laminar viscous capability is not implemented."
+      "score": 0,
+      "notes": "viscous_flux.cpp returns zero and is not included in residual; wall shear is placeholder."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 3,
-      "notes": "steady_march contains a CFL-ramped point-implicit/diagonal update, but no completed steady result verifies convergence or correctness."
+      "score": 2.5,
+      "notes": "time_stepper.cpp:115\u2013165 computes CFL-ramped diagonal update, but separate LU-SGS/Jacobi sweeps are no-op; no converged deliverable."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 0,
-      "notes": "main.cpp prints that the transient solver is not implemented; no BDF2 outer loop is committed."
+      "notes": "main.cpp explicitly skips transient solver; no BDF2 implementation."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 1,
-      "notes": "METIS distribution and nonblocking MPI scaffolding exist, but neighbor data are placeholders and no scalability evidence was submitted."
+      "notes": "METIS partition function exists but main/distributor does not transfer root mesh to other ranks and halo exchanges zeros."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 1.75
+  "overall_score": 1.46
 }

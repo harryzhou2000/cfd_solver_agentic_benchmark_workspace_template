@@ -44,67 +44,67 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 2,
-          "notes": "Immutable 72c27c3 clean build succeeds in network-disabled cfd-bench; 0 CTests registered. No solver run was performed."
+          "score": 4,
+          "notes": "Immutable 72c27c3 clean isolated build succeeds with shared externals; no tests registered. One partial steady diagnostic is not completion evidence."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 4,
-          "notes": "main.cpp parses solve, --case, --output, --restart, and --report-level and rejects missing or unknown arguments."
+          "notes": "main.cpp:28\u201345 parses solve/case/output, rejects missing/unknown options; restart and report-level are parsed but not implemented."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 3,
-          "notes": "Mesh, partition, residual, output, and time-step modules are separated, but several advertised modules are placeholders or unconnected."
+          "notes": "Mesh, gas, partition, residual and output modules are separated, but many interfaces are no-op or disconnected."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "No internal external-solver invocation is evident. Trust policy precludes external similarity investigation."
+          "notes": "No internal existing solver executable call found; external-copy investigation excluded by trust policy."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "The submitted CLI consumes JSON case configuration and batch script enumerates case JSON files rather than branching only on benchmark mesh names."
+          "notes": "JSON case input and generic case enumeration, with no two-filename-only solver branch found."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 1,
-          "notes": "MPI/METIS scaffolding exists, but halo exchange deliberately sends zeros and leaks buffers; no submitted MPI execution or rank comparison establishes correctness."
+          "notes": "METIS call and owned/ghost structures exist; non-root global mesh remains empty and halo sends zero buffers without unpacking."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 1,
-          "notes": "halo_exchange.cpp explicitly leaks receive/send buffers and sends placeholder zero data; there is no credible runtime robustness evidence."
+          "notes": "Halo buffers are intentionally leaked and zero-filled; geometry has incorrect cell-face volume signs; no completed runtime evidence."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 1,
-          "notes": "No committed tests, validator output, or completed case artifacts exist. The session-side goal record says the eight cases remain unrun."
+          "score": 0.5,
+          "notes": "Clean build lists zero tests; no submitted validator or cases. One capped evaluator diagnostic stopped after last captured step 6000."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 2,
-          "notes": "The source is compact and named coherently, but contains TODOs, unused interfaces, explicit placeholders, and no report/documentation."
+          "notes": "Named modules and build work, but reconstruct/limiter/viscous/output routines are no-op or placeholders."
         }
       ],
-      "overall_score": 2.45,
+      "overall_score": 2.7,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -114,80 +114,80 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Conservative perfect-gas state conversion and Euler-state calculations are identifiable in common/gas_model.hpp."
+          "notes": "Perfect-gas conservative/primitive state conversions exist, but full Navier\u2013Stokes viscous terms are absent."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
-          "score": 3,
-          "notes": "A CGNS reader, mesh structures, and geometry routines are submitted, but no build or production mesh result verifies them."
+          "score": 2,
+          "notes": "First-zone CGNS reader recognizes TRI/QUAD and boundary sections; geometry.cpp uses incorrect shared-face sign and computes volume before orienting normals."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 2,
-          "notes": "A first-order face residual loop exists, but it uses local-index checks against global face indices and is not validated by a delivered case."
+          "notes": "First-order Rusanov face residual loop exists but indexes local states with unremapped global faces; no submitted solver result."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 3,
-          "notes": "Rusanov flux is called in residual.cpp; no separate entropy-fix implementation or result validation is evident."
+          "notes": "Rusanov numerical flux is implemented and called; no separate entropy-fix or solution validation."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": 3,
-          "notes": "Farfield, slip-wall, and no-slip adiabatic branches appear in residual.cpp, without output evidence of correct boundary behavior."
+          "score": 2.5,
+          "notes": "Farfield, slip and no-slip branches exist; zero viscous flux and local/global face indexing limit wall accuracy."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 0,
-          "notes": "reconstruct_faces is entirely no-op and compute_residual uses first-order face states."
+          "notes": "reconstruct.cpp is no-op; residual uses first-order states."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 0,
-          "notes": "apply_limiter is entirely no-op; only an ad hoc state reset/check appears in the point update."
+          "notes": "limiter.cpp is no-op; point update includes an ad hoc state reset."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 1,
-          "notes": "viscous_flux returns an all-zero state and is not integrated into the residual, so laminar viscous capability is not implemented."
+          "score": 0,
+          "notes": "viscous_flux.cpp returns zero and is not included in residual; wall shear is placeholder."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 3,
-          "notes": "steady_march contains a CFL-ramped point-implicit/diagonal update, but no completed steady result verifies convergence or correctness."
+          "score": 2.5,
+          "notes": "time_stepper.cpp:115\u2013165 computes CFL-ramped diagonal update, but separate LU-SGS/Jacobi sweeps are no-op; no converged deliverable."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 0,
-          "notes": "main.cpp prints that the transient solver is not implemented; no BDF2 outer loop is committed."
+          "notes": "main.cpp explicitly skips transient solver; no BDF2 implementation."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 1,
-          "notes": "METIS distribution and nonblocking MPI scaffolding exist, but neighbor data are placeholders and no scalability evidence was submitted."
+          "notes": "METIS partition function exists but main/distributor does not transfer root mesh to other ranks and halo exchanges zeros."
         }
       ],
-      "overall_score": 1.75,
+      "overall_score": 1.46,
       "disqualification_flags": []
     },
     "result_review": {
@@ -248,77 +248,77 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 27,
+    "total_scored": 24.5,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 4,
-        "notes": "Clean isolated immutable-source build succeeds and CLI exists, but no case output packages were submitted; steady_march itself has a placeholder output block."
+        "score": 6,
+        "notes": "Clean isolated build succeeds; CLI parses case and output and rejects unknown options. Required output packages are absent; steady output block is a placeholder."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
-        "score": 4,
-        "notes": "CGNS/geometry source exists but is unverified and incomplete."
+        "score": 3.5,
+        "notes": "CGNS reader handles TRI/QUAD and boundary tags for first zone; geometry.cpp:7\u201315,32\u201351 computes cell volumes before normal orientation and without reversing face signs for right cells."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 7,
-        "notes": "First-order Rusanov residual and BC branches exist, with unresolved local/global indexing correctness."
+        "score": 6.5,
+        "notes": "First-order Rusanov residual and boundary branches exist, but rank-local/global indexing mismatch and geometry defect undermine correctness; no delivered validation."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 0,
-        "notes": "Reconstruction and limiter are no-op."
+        "notes": "Reconstruction and limiter routines are no-op; no second-order evidence or report."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 1,
-        "notes": "Viscous-flux function returns zero and is not part of the residual."
+        "score": 0,
+        "notes": "viscous_flux.cpp returns zero; no laminar viscous residual or wall-shear implementation."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 5,
-        "notes": "Point-implicit steady update is present; transient/BDF2 implementation is explicitly absent."
+        "score": 4.5,
+        "notes": "time_stepper.cpp:115\u2013165 implements local diagonal updates and CFL ramp; implicit_solver.cpp separate sweeps are no-op, transient BDF2 absent, no submitted convergence."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
         "score": 1,
-        "notes": "MPI/METIS scaffolding is incomplete: halo messages are zeros and no MPI run is delivered."
+        "notes": "METIS graph call and MPI scaffolding exist, but non-root global meshes are empty, halo sends zeros and never unpacks; no distributed result."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
         "score": 0,
-        "notes": "All eight immutable result packages are absent."
+        "notes": "No submitted case package, field, force history or rank comparison."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
         "score": 0,
-        "notes": "No report or curated visualizations are submitted."
+        "notes": "No report, plots or manifest submitted."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 5,
-        "notes": "The source is divided into reasonably reusable C++ modules and JSON case configuration, despite major unimplemented numerical features."
+        "score": 3,
+        "notes": "Modular mesh, gas and solver structure offers some extension points but many methods are no-op, 2-D assumptions pervasive and output disconnected."
       }
     ]
   },
@@ -440,12 +440,13 @@
     ]
   },
   "limitations": [
-    "This is a source-only submission: results/, report/, field files, histories, manifests, and validator evidence are absent. No solver was built or rerun; Re200 was never rerun.",
+    "Source-only contestant submission: no delivered results, report, field files, histories, manifests or validator evidence. Later evaluator build and partial steady diagnostic are described separately; Re200 was never rerun.",
     "Selected telemetry is restricted to the project-local OpenCode DB root ses_038139b85ffehS9M4UEnGezyvb and explorer descendant ses_03811d3ebffe3UJgZoawpqixqU.",
     "contestant_final_response.md is an unindexed sidecar: terminal message msg_fca33227d001vf8WE7dnGuZg0m, one text part, stored-message SHA-256 dab77d47720503bffef40e975631b445808532d20ed8e371302695ecc6c4c805, extracted SHA-256 8354f8d24e009759283bbdfdcd519589f7f424a29ea4f4e1d92affb15c79c9a0.",
     "run_identity.json SHA-256 is f8092735b947fbad56b8ceee75a6fb3dbc23a710b06919ed5ca36bbf56f98f22; it is an unindexed sidecar and is not validated by cfdeval check.",
     "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
-    "2026-10-31: clean immutable-source build succeeds in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 processes, 120-second command timeout); no CTests registered and no solver run. Historical results/report remain absent. Full rubric and source calibration remains partial.",
-    "One evaluator-generated M0.15 inviscid steady diagnostic was launched in restricted network-disabled cfd-bench using submitted input with 45-second cap; first launch failed before solver execution due missing libhdf5.so.310, then one infrastructure retry added only the external runtime library path. Last captured step 6000/20000, residual reduction 1.30857 orders, no output files; exact process exit status was not retained. This is partial diagnostic evidence, not convergence or contestant-delivered evidence. No transient rerun."
+    "2026-10-31: clean immutable-source build succeeds in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 processes, 120-second command timeout); no CTests registered and no tests run at that checkpoint. Historical results/report remain absent; the subsequent partial steady diagnostic and full calibration are documented separately.",
+    "One evaluator-generated M0.15 inviscid steady diagnostic was launched in restricted network-disabled cfd-bench using submitted input with 45-second cap; first launch failed before solver execution due missing libhdf5.so.310, then one infrastructure retry added only the external runtime library path. Last captured step 6000/20000, residual reduction 1.30857 orders, no output files; exact process exit status was not retained. This is partial diagnostic evidence, not convergence or contestant-delivered evidence. No transient rerun.",
+    "2026-10-31 full calibration: source and all review criteria checked; no completed contestant results or report exist. One partial diagnostic and clean build do not establish numerical success."
   ]
 }

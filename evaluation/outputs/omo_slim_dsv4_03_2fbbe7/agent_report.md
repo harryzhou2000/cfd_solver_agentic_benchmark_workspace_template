@@ -6,7 +6,7 @@
 
 ## Outcome
 
-The immutable submission `72c27c36c8d01db85d8730cda1373cdb46f44751` is a source-only solver skeleton. It provides no `results/` tree, final case package, report source, PDF, manifest, history, field, or curated figure. The pre-disqualification rubric score is **27/100**; it is **not disqualified** because no DQ trigger is directly established by the limited submission.
+The immutable submission `72c27c36c8d01db85d8730cda1373cdb46f44751` is a source-only solver skeleton. It provides no `results/` tree, final case package, report source, PDF, manifest, history, field, or curated figure. The pre-disqualification rubric score is **24.5/100**; it is **not disqualified** because no DQ trigger is directly established by the limited submission.
 
 ## Provenance and session selection
 
@@ -28,22 +28,22 @@ A clean immutable-source build succeeds in a network-disabled cfd-bench containe
 
 | Section | Max | Score | Basis |
 |---|---:|---:|---|
-| Build, CLI, Output Contract | 10 | 4 | Clean isolated build succeeds; CLI present but no output deliverables. |
-| Mesh And Geometry | 10 | 4 | CGNS/geometry source only. |
-| Finite-Volume Residual And Boundary Conditions | 15 | 7 | First-order residual/BC paths, unverified. |
-| Second-Order Spatial Scheme | 10 | 0 | Reconstruction and limiter are no-op. |
-| Viscous Terms | 10 | 1 | Viscous flux is zero. |
-| Implicit And Transient Methods | 15 | 5 | Point-implicit steady update; no transient BDF2. |
-| MPI | 10 | 1 | Incomplete placeholder halo path. |
-| Case Results And Validation | 10 | 0 | All eight final packages absent. |
-| Report, Visualization, Analysis | 5 | 0 | No report or figures. |
-| Extensibility | 5 | 5 | Modular, JSON-configured source layout. |
+| Build, CLI, Output Contract | 10 | 6 | Clean isolated build succeeds; CLI parses case and output and rejects unknown options. Required output packages are absent; steady output block is a placeholder. |
+| Mesh And Geometry | 10 | 3.5 | CGNS reader handles TRI/QUAD and boundary tags for first zone; geometry.cpp:7–15,32–51 computes cell volumes before normal orientation and without reversing face signs for right cells. |
+| Finite-Volume Residual And Boundary Conditions | 15 | 6.5 | First-order Rusanov residual and boundary branches exist, but rank-local/global indexing mismatch and geometry defect undermine correctness; no delivered validation. |
+| Second-Order Spatial Scheme | 10 | 0 | Reconstruction and limiter routines are no-op; no second-order evidence or report. |
+| Viscous Terms | 10 | 0 | viscous_flux.cpp returns zero; no laminar viscous residual or wall-shear implementation. |
+| Implicit And Transient Methods | 15 | 4.5 | time_stepper.cpp:115–165 implements local diagonal updates and CFL ramp; implicit_solver.cpp separate sweeps are no-op, transient BDF2 absent, no submitted convergence. |
+| MPI | 10 | 1 | METIS graph call and MPI scaffolding exist, but non-root global meshes are empty, halo sends zeros and never unpacks; no distributed result. |
+| Case Results And Validation | 10 | 0 | No submitted case package, field, force history or rank comparison. |
+| Report, Visualization, Analysis | 5 | 0 | No report, plots or manifest submitted. |
+| Extensibility | 5 | 3 | Modular mesh, gas and solver structure offers some extension points but many methods are no-op, 2-D assumptions pervasive and output disconnected. |
+
+Pre-DQ score **24.5/100**, previously 27.
 
 ## Results and case outcomes
 
-All eight independent case scores are **0/5**: M0.15/M0.80/M2.00 inviscid NACA0012; the three corresponding Re5000 laminar NACA0012 cases; cylinder Re20; and cylinder Re200. Each has no immutable final package or case-specific evidence. Re200 additionally cannot receive implementation credit for BDF2 because the source explicitly says transient solve is unimplemented.
-
-Weighted review scores are Code **2.45/5**, CFD methods **1.75/5**, and Results **0.00/5**.
+All eight independent case scores remain **0/5**: no contestant-delivered result package, force/field evidence or report was submitted. The single partial evaluator diagnostic does not change these scores. Weighted Code/CFD/Results scores are **2.7/1.46/0.0**.
 
 ## Disqualification assessment
 
