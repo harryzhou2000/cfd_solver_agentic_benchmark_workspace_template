@@ -100,3 +100,8 @@ The evaluator did not independently rebuild or rerun a steady MPI case; clean-bu
 ## Verdict
 
 Score: **92/100; disqualified: false.** This is a strong, structurally valid and substantively credible original finite-volume submission with complete delivered packages, validated report, and an honest account of the M2 plateau and Re200 accuracy limitation. The primary deductions are limited independent reproduction, the M2 residual shortfall, modest Re200 under-resolution, and 2-D-only geometry scope.
+
+
+## Re200 visualization floor — 2026-10-30
+
+All 52 pages of the accepted immutable-source PDF were visually checked; no missing-asset placeholders seen. `report.tex:1509–1527` and `numbers.tex:12–19` supply mean Cd1.236, mean Cl0.00097, Cl amplitude0.514 and St0.182; `report.tex:1580–1584` and `fig_atlas.tex:481–490` show the same force figure. Its startup drag spike≈31 compresses late Cd to an apparently flat line; no other delivered late-time force plot appears in the report or figure tree. The Re200 floor specifically requires readable late lift and drag periodicity, so case4.5→2. Current raw `results/prod_cylinder_m010_laminar_re200/forces.csv` t≥100 has Cl−0.51265–0.51526, Cd1.21573–1.25888 and lift FFT peak0.17999, independently supporting oscillatory data but not replacing the required delivered figure. Metadata revision is null; provenance/source and all other rubric/DQ review remain partial. No Re200 rerun.

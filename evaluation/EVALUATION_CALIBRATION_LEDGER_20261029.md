@@ -97,7 +97,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_glm53-04_adde03` | partial: all cases and rubric reviewed, DQ7 supported; historical production-source attribution unresolved |
 | `codex_generic_opus46-01_3a72ea` | partial: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
 | `codex_generic_opus46-02_d8fed8` | partial: 35/100, mandatory placeholder rejection, DQ2 and TASK full mesh; binary/force provenance unresolved |
-| `codex_generic_opus5-01_83492a` | unreviewed |
+| `codex_generic_opus5-01_83492a` | partial: Re200 plot floor and PDF reviewed; other cases/rubric/DQ pending |
 | `codex_generic_opus5-02_cac77b` | unreviewed |
 | `codex_generic_sonnet46-01_ac6940` | unreviewed |
 | `codex_generic_sonnet46-02_dac37b` | unreviewed |
@@ -703,3 +703,6 @@ opus46-02 criterion checkpoint: source solver.cpp:244–248 calls compute_residu
 
 
 opus46-02 DQ/PDF checkpoint: all five pages of accepted workspace-existing PDF SHA `f2d52bb09f7dbbbe67fb0872690cc13cac1cdce7ad6662ff07903b99601d1254` visually reviewed; no missing-asset placeholders, incomplete case coverage and rank-0-only Re20 contour separately scored. DQ10 not assigned because report.tex:103–105 explicitly discloses first-order production; DQ7 not established solely by unsupported target fraction or physically poor oscillatory force, actual strict failure count unknown. METIS exists and TASK full mesh is separately charged; selected np4/np8 NACA Cd0.0660201/0.0660022 and Re20 Cd9.40147/9.40147 show no order-one absolute rank mismatch. Numbered DQ2 and TASK6 placeholder rejection remain independently established. Other trigger boundaries are recorded in scorecard; external similarity not exhaustive. Preserve partial status for binary and force provenance; no CFD rerun.
+
+
+opus5-01 initial Re200 review: all 52 pages of accepted cb2bac0 compiled main PDF visually checked, no missing-asset placeholders. report.tex:1509–1527 and numbers.tex:12–19 supply Cd mean1.236, Cl mean0.00097/amplitude0.514, St0.182; report.tex:1580–1584 and fig_atlas.tex:481–490 share `cylinder_m010_laminar_re200_forces.png` SHA `a8275b1c57968e09bf97faf8f1b4944bac8617682682653f31822b82be8db41f`. Startup drag≈31 makes late Cd≈1.22–1.26 appear flat; no alternate late-force figure in full report/tree. Explicit Re200 late-lift-and-drag floor caps 4.5→2. Raw `results/prod_cylinder_m010_laminar_re200/forces.csv` t>=100 Cl−0.51265–0.51526, Cd1.21573–1.25888, lift FFT0.17999; data support oscillatory motion but cannot substitute for plot. Metadata revision null, further source/provenance/rubric/DQ partial. No Re200 rerun.
