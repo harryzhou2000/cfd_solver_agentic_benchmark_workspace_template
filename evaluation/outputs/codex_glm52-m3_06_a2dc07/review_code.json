@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "Fresh a063106 archive builds in cfd-bench using bundled external paths; one registered CTest passes. Source CMake supports configured dependency roots."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "score": 3,
+      "notes": "main.cpp:33\u201341 parses case/output/restart. io.cpp:17\u201339 and :335\u2013341 restart only rank-local U, omitting physical time, step and previous BDF state, so exact transient continuation is not supported."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "Separate case, mesh, partition, halo, flux, residual, implicit, time and IO modules; reproducibility is limited by untracked historical binary."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 3,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "No direct internal solver wrapper found in submitted source; this is not an external similarity or authorship investigation."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "main.cpp:49\u201355 loads JSON case and resolves its mesh path; numerical controls are overridden for production as disclosed."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "solver.cpp:126\u2013138 root-loads and frees global mesh after distribution; partition.cpp:249,284 uses METIS and scatter; halo.cpp:26\u201343 exchanges neighbor data. Rank tests remain limited to short runs."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 3,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "State floors and CFL caps are implemented; runtime/status evidence shows incomplete steady results and failed unsteady case. Exact binary is unbound."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "score": 3.5,
+      "notes": "Clean build and 1/1 registered CTest pass (gas/flux/case checks); structural validator rejects honestly failed Re200. Tests do not establish solver physics."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 3,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "Modular C++ and scripts are retained; generated result packages and some figure assets survive only in workspace or historical checkpoint."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.6
+  "overall_score": 3.55
 }

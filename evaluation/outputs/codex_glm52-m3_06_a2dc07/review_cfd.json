@@ -7,77 +7,77 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "Compressible NS source provides conservative state, Euler flux and Newtonian/Fourier terms; numerical validation remains limited by case results."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 5,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "solver.cpp:126\u2013138 loads CGNS on root; partition.cpp:249 uses METIS and :284 distributes serialized local meshes."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "residual.cpp assembles face fluxes and viscous contributions; solver applies first-order positivity fallback. No independent order-of-accuracy verification."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 3,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "solver.cpp:35\u201350 selects Rusanov subsonic and Roe supersonic; report acknowledges low-Mach dissipation and source implements Harten entropy treatment."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "Report and source implement farfield, slip and no-slip; io.cpp:216\u2013222 explicitly outputs zero no-slip velocity (also writes zero for slip)."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "score": 2.5,
+      "notes": "reconstruction.cpp:214\u2013220 caps gradients at default0.5 or production0.3, while residual.cpp:19\u201324 multiplies face gradients by the cap. It is nonzero but is not linearly exact under a fixed cap; formal second-order accuracy is unverified and the first-order M2 viscous case is disclosed."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "score": 2.5,
+      "notes": "Barth limiter is implemented but capped0.3\u20130.5 even in smooth regions; CFD2D_FIRSTORDER zeroes reconstruction for disclosed M2 viscous production."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
       "score": 3,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "Newtonian/Fourier source exists; io.cpp:63\u201365 projects wall traction tangentially. Re20 Cd7.114 and laminar Cd2.287 show large numerical errors."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 3,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "implicit.cpp:89\u2013107 builds scalar diagonal and BDF contribution; report documents low CFL caps and limited pressure-velocity coupling."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "Historical f262da0 time_integrate.cpp:133\u2013145 and residual.cpp:131\u2013145 implement BDF1 startup and BDF2; Re200 was honestly failed with no sustained shedding. Binary and individual inner ratios remain unbound."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 4,
-      "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+      "notes": "METIS partition and neighbor-only halo implemented; global mesh exists only during root setup and is freed before iteration. Short reported rank comparisons do not establish scalability generally."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.82
+  "overall_score": 3.56
 }

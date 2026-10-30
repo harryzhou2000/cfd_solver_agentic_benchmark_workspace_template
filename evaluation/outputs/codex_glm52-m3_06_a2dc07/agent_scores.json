@@ -28,66 +28,66 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Fresh a063106 archive builds in cfd-bench using bundled external paths; one registered CTest passes. Source CMake supports configured dependency roots."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "score": 3,
+          "notes": "main.cpp:33\u201341 parses case/output/restart. io.cpp:17\u201339 and :335\u2013341 restart only rank-local U, omitting physical time, step and previous BDF state, so exact transient continuation is not supported."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Separate case, mesh, partition, halo, flux, residual, implicit, time and IO modules; reproducibility is limited by untracked historical binary."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 3,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "No direct internal solver wrapper found in submitted source; this is not an external similarity or authorship investigation."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
           "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "main.cpp:49\u201355 loads JSON case and resolves its mesh path; numerical controls are overridden for production as disclosed."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "solver.cpp:126\u2013138 root-loads and frees global mesh after distribution; partition.cpp:249,284 uses METIS and scatter; halo.cpp:26\u201343 exchanges neighbor data. Rank tests remain limited to short runs."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 3,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "State floors and CFL caps are implemented; runtime/status evidence shows incomplete steady results and failed unsteady case. Exact binary is unbound."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "score": 3.5,
+          "notes": "Clean build and 1/1 registered CTest pass (gas/flux/case checks); structural validator rejects honestly failed Re200. Tests do not establish solver physics."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 3,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Modular C++ and scripts are retained; generated result packages and some figure assets survive only in workspace or historical checkpoint."
         }
       ],
-      "overall_score": 3.6,
+      "overall_score": 3.55,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -97,80 +97,80 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Compressible NS source provides conservative state, Euler flux and Newtonian/Fourier terms; numerical validation remains limited by case results."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 5,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "solver.cpp:126\u2013138 loads CGNS on root; partition.cpp:249 uses METIS and :284 distributes serialized local meshes."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "residual.cpp assembles face fluxes and viscous contributions; solver applies first-order positivity fallback. No independent order-of-accuracy verification."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 3,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "solver.cpp:35\u201350 selects Rusanov subsonic and Roe supersonic; report acknowledges low-Mach dissipation and source implements Harten entropy treatment."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Report and source implement farfield, slip and no-slip; io.cpp:216\u2013222 explicitly outputs zero no-slip velocity (also writes zero for slip)."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "score": 2.5,
+          "notes": "reconstruction.cpp:214\u2013220 caps gradients at default0.5 or production0.3, while residual.cpp:19\u201324 multiplies face gradients by the cap. It is nonzero but is not linearly exact under a fixed cap; formal second-order accuracy is unverified and the first-order M2 viscous case is disclosed."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "score": 2.5,
+          "notes": "Barth limiter is implemented but capped0.3\u20130.5 even in smooth regions; CFD2D_FIRSTORDER zeroes reconstruction for disclosed M2 viscous production."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 3,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Newtonian/Fourier source exists; io.cpp:63\u201365 projects wall traction tangentially. Re20 Cd7.114 and laminar Cd2.287 show large numerical errors."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 3,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "implicit.cpp:89\u2013107 builds scalar diagonal and BDF contribution; report documents low CFL caps and limited pressure-velocity coupling."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Historical f262da0 time_integrate.cpp:133\u2013145 and residual.cpp:131\u2013145 implement BDF1 startup and BDF2; Re200 was honestly failed with no sustained shedding. Binary and individual inner ratios remain unbound."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 4,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "METIS partition and neighbor-only halo implemented; global mesh exists only during root setup and is freed before iteration. Short reported rank comparisons do not establish scalability generally."
         }
       ],
-      "overall_score": 3.82,
+      "overall_score": 3.56,
       "disqualification_flags": []
     },
     "result_review": {
@@ -180,14 +180,14 @@
           "title": "Output contract compliance",
           "weight": 0.2,
           "score": 3,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Seven workspace steady packages passed structural validation; Re200 completed=false and is correctly rejected. M015 inviscid converged status contradicts its changing trajectory."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
           "score": 2,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Prior official read-only validation passed seven steady packages and rejected honestly failed Re200; structural success is not numerical convergence evidence."
         },
         {
           "id": "res.completion",
@@ -201,28 +201,28 @@
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 2,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "M015 inviscid Cd falls0.477107\u21920.432620 over final1000; Re20 Cd7.114 and M015 laminar Cd2.287 remain high; Re200 has no sustained oscillation."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
           "score": 3,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Historical 14db231d checkpoint includes eight force/residual/Mach sets. Several full-domain contours obscure body and startup compresses late force; Re200 has no readable late lift and drag."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
           "score": 3,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "Report candidly labels failed Re200 and discloses controls/drag limitations, but M015 inviscid convergence claim is unsupported and fixed limiter cap weakens formal second-order claim."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
           "score": 2,
-          "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+          "notes": "14db231d manifest and root session link workspace results; figures have historical hashes, but runtime binary and exact plot inputs remain unbound. Re200 wake manifest mistakenly names forces.csv as source; plotting code reads field_final.vtu."
         }
       ],
       "overall_score": 2.3,
@@ -237,14 +237,14 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 71,
+    "total_scored": 68.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "Seven final packages structurally pass; Re200 metadata is honestly incomplete/failed."
+        "score": 7.5,
+        "notes": "Clean archived source build and 1/1 unit test pass with configured bundled externals. Restart loads current state only, not prior transient history/time/step; seven packages structurally pass and Re200 honestly fails."
       },
       {
         "id": "mesh_geometry",
@@ -264,22 +264,22 @@
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 8,
-        "notes": "Green-Gauss/BJ and fallback source evidence, but no convergence-order proof."
+        "score": 5.5,
+        "notes": "Reconstruction/limiter implemented; fixed production cap0.3\u20130.5 scales gradients even in smooth cells and does not preserve linear reconstruction. M2 viscous first-order is disclosed; DQ10 not asserted merely for a nonzero cap."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 7,
-        "notes": "Viscous formulation exists; delivered laminar force magnitudes are weakly credible."
+        "notes": "Newtonian/Fourier discretization and tangential wall traction projection exist; high reported laminar/Re20 drag limits demonstrated accuracy."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 10,
-        "notes": "Pseudo-time/LU-SGS and BDF2 source exist; Re200 fails physical result."
+        "notes": "Scalar LU-SGS and historical BDF1/BDF2 dual-time path exist. Re200 reaches t300 but is honestly failed for lack of sustained shedding; binary and per-step target ratios are unbound."
       },
       {
         "id": "mpi",
@@ -300,7 +300,7 @@
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
         "score": 3,
-        "notes": "Readable figures/report but no valid Re200 completion; traceability is partial after curation."
+        "notes": "Readable report and historical per-case figures; M015 inviscid false convergence, fixed-cap order claim, small near-body contour and Re200 force visibility limit credit."
       },
       {
         "id": "extensibility",
