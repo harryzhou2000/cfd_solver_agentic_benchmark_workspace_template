@@ -27,7 +27,7 @@ The selected workspace-local Codex root is `019fff60-e8b8-7990-8df2-f0784bde7d60
 | Report And Analysis | 3/5 | Readable and candid about failure, but completion/traceability is partial. |
 | Extensibility | 3/5 | Modular 2-D code, constrained scalar implicit architecture. |
 
-Case scores: M0.15 inviscid 1.5, M0.80 inviscid 3.0, M2 inviscid 3.0, M0.15 Re5000 1.5, M0.80 Re5000 2.5, M2 Re5000 2.5, cylinder Re20 2.0, cylinder Re200 0.0.
+Current case scores: M0.15 inviscid 1.5, M0.80 inviscid 3, M2 inviscid 2, M0.15 Re5000 1.5, M0.80 Re5000 2, M2 Re5000 2, cylinder Re20 2, cylinder Re200 0. Remaining case calibration is partial.
 
 ## Disqualification and limitations
 
