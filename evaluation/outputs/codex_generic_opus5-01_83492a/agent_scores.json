@@ -139,7 +139,7 @@
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 4.5,
-          "notes": "Venkatakrishnan limiter and measured positivity fallbacks are documented."
+          "notes": "Venkat and positivity guard exist in source. Steady M2 selected metadata reports 595 fallback events on 324 steps; contestant docs/binary_provenance.md:117\u2013120 says 326, a stale/inconsistent count. Re200 production fallback counts were not measured; a separate one-rank first-100-step probe cannot establish the remaining trajectory."
         },
         {
           "id": "cfd.viscous",
@@ -160,7 +160,7 @@
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 4.5,
-          "notes": "Re200 raw deliverables show BDF2 dual time, t=300, and all inner targets met."
+          "notes": "Final transient source assembles total BDF residual and measures inner ratio (transient_driver.cpp:185\u2013209,246\u2013264,288\u2013294); selected Re200 metadata claims 0/30000 misses, log provides sampled ratios and t300. Exact older production binary is not independently bound; no unsteady rerun."
         },
         {
           "id": "cfd.mpi_partition",
@@ -214,18 +214,18 @@
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Comprehensive report explicitly identifies M2 plateau and Re200 resolution limitations."
+          "score": 4.5,
+          "notes": "The report gives extensive case tables, fields, limitations and plateau discussion. report.tex:372\u2013380 states both positivity events are counted per step, but Re200 production binary lacked fallback telemetry; docs/binary_provenance.md qualifies the gap. Its stated M2 fallback count 326 differs from selected metadata 595."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 5,
-          "notes": "Figure generators and manifests trace report values to raw delivery files."
+          "score": 4.5,
+          "notes": "Reports/figures have manifest links. Steady cases report revision b350651, whereas Re200 revision is null and contestant binary_provenance.md says pre-15:05 build at a628093 or earlier; the separate 100-step single-rank fallback probe does not cover full 4-rank transient."
         }
       ],
-      "overall_score": 4.58,
+      "overall_score": 4.47,
       "disqualification_flags": []
     }
   },
@@ -238,7 +238,7 @@
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 9,
-        "notes": "Strong documented build, CLI, schemas, and errors; clean build not independently run."
+        "notes": "Immutable cb2bac0 clean CMake build passed independently in cfd-bench, as did eight bounded verification checks. CLI and required output paths are source-backed; no production MPI rerun."
       },
       {
         "id": "mesh_geometry",
@@ -259,7 +259,7 @@
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 9,
-        "notes": "LSQ/Venkat production reconstruction with measured fallback disclosure."
+        "notes": "Final source implements LSQ/Venkat reconstruction and positivity fallback. Seven steady selected metadata revision b350651 reports production activation; Re200 old binary lacks full-run fallback telemetry, with a submitted separate first-100-step one-rank probe only."
       },
       {
         "id": "viscous",

@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:48:54.605866+00:00
+Generated: 2026-10-30T06:51:14.035809+00:00
 
-**Overall score: 4.58**
+**Overall score: 4.47**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,10 +24,10 @@ Generated: 2026-10-30T06:48:54.605866+00:00
 | 5 | **res.visualization** Visualizations | 0.15 | 4 | Accepted 52-page report contains readable steady histories, fields and Re200 wake/force figure; startup spike compresses late Re200 drag so the explicit late lift/drag criterion is unmet. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 5 | Comprehensive report explicitly identifies M2 plateau and Re200 resolution limitations. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 4.5 | The report gives extensive case tables, fields, limitations and plateau discussion. report.tex:372–380 states both positivity events are counted per step, but Re200 production binary lacked fallback telemetry; docs/binary_provenance.md qualifies the gap. Its stated M2 fallback count 326 differs from selected metadata 595. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 5 | Figure generators and manifests trace report values to raw delivery files. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4.5 | Reports/figures have manifest links. Steady cases report revision b350651, whereas Re200 revision is null and contestant binary_provenance.md says pre-15:05 build at a628093 or earlier; the separate 100-step single-rank fallback probe does not cover full 4-rank transient. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T06:48:54.605866+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.58
+- Overall score (0-5): 4.47
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

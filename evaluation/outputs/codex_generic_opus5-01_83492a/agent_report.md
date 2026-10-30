@@ -85,7 +85,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-No disqualification triggered. Direct source/result inspection found no external-solver invocation, fabricated histories, mesh-name-only dispatch, explicit-only integration, disabled production reconstruction/limiter, geometric partition masquerading as METIS, full-state replication, order-one rank inconsistency, mislabeled wall rows, or figure/result mismatch. The report's core algorithm descriptions match the inspected source. Under the trust policy, no external plagiarism search was performed; no direct internal copied-core evidence was found.
+No disqualification has been established in the evidence reviewed so far. The remaining triggers and production provenance are under review; no exhaustive external similarity search was performed.
 
 ## Metadata answers & session selection
 
@@ -119,3 +119,8 @@ Re200 metadata reports null revision and start/end 2026-08-26 13:47:16–19:10:1
 The immutable cb2bac0 source configured and built cleanly in a network-disabled cfd-bench container with 2 CPUs, 3 GiB and 256 pids. With supplied NACA benchmark inputs mounted read-only, all eight bounded CTest checks passed, including conservation at both orders, freestream, gradient, Jacobian, spectral radius, Riemann and reconstruction. No production CFD or Re200 rerun.
 
 The scorecard had 91 while the old report verdict said 92; the 91 scorecard is the prior baseline. Report/visualization 5→4 for unreadable late Re200 drag, making the current total 90. Independent clean build/test review points increase from 4.5→5; visualization review 5→4. Contestant `docs/binary_provenance.md` says the running Re200 executable was built before 15:05 UTC, at a628093 or earlier; its bounded single-rank bit-identity checks do not verify the entire 4-rank transient. The 638fe3f source commit timestamp just precedes recorded run start but does not establish that build was used. Remaining rubric/DQ and physical source-binding review partial.
+
+
+## Rank evidence and telemetry qualifications — 2026-10-30
+
+Selected np1/np8 NACA M015 Cd0.000821942/0.000817179, Cl0.000369430/0.000386138; Re20 Cd2.017874/2.018504, Cl0.000537166/0.000500075. These do not show order-one absolute rank changes; no independent MPI production rerun. The report's general claim (`report.tex:372–380`) that fallback events are counted per step needs qualification: `docs/binary_provenance.md:99–115` states Re200 production used an older binary without those counts, while a separate single-rank 100-step probe covers only 0.33% of the trajectory. That document also says M2 inviscid 326 fallback events, whereas selected `prod_naca0012_m200_inviscid/metadata.json` reports 595 on 324 steps. We retain the exact values as a provenance/report inconsistency, not evidence of a disabled limiter or a proven DQ. Report and traceability review points 5→4.5; rubric total remains 90.

@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:48:54.605444+00:00
+Generated: 2026-10-30T06:51:14.035513+00:00
 
 **Overall score: 4.53**
 
@@ -27,7 +27,7 @@ Generated: 2026-10-30T06:48:54.605444+00:00
 | 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4.5 | Least-squares reconstruction is active in production. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4.5 | Venkatakrishnan limiter and measured positivity fallbacks are documented. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4.5 | Venkat and positivity guard exist in source. Steady M2 selected metadata reports 595 fallback events on 324 steps; contestant docs/binary_provenance.md:117–120 says 326, a stale/inconsistent count. Re200 production fallback counts were not measured; a separate one-rank first-100-step probe cannot establish the remaining trajectory. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 4.5 | Newtonian/Fourier viscous discretization and force split are source/report backed. |
@@ -36,7 +36,7 @@ Generated: 2026-10-30T06:48:54.605444+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4.5 | CFL-controlled implicit steady march and LU-SGS are implemented. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4.5 | Re200 raw deliverables show BDF2 dual time, t=300, and all inner targets met. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4.5 | Final transient source assembles total BDF residual and measures inner ratio (transient_driver.cpp:185–209,246–264,288–294); selected Re200 metadata claims 0/30000 misses, log provides sampled ratios and t300. Exact older production binary is not independently bound; no unsteady rerun. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4.5 | METIS ownership/ghost design and neighbor exchange; independent MPI rerun not performed. |
