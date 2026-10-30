@@ -65,7 +65,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 |---|---|
 | `claude_generic_opus-01_9a712c` | fully reviewed — 93.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-02_6fc51c` | fully reviewed — 65.5/100, mandatory placeholder-result rejection; both gates pass |
-| `claude_generic_opus-03_68c1ac` | partial — DQ evidence and full-mesh prohibition reviewed; cases/rubric pending |
+| `claude_generic_opus-03_68c1ac` | partial — DQ and all case scores reviewed; rubric/areas pending |
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-05_21cf4d` | fully reviewed — 74.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-06_40b02c` | fully reviewed — 93/100, DQ=false; both gates pass |
@@ -259,3 +259,5 @@ Rubric 71→50.5/100, DQ=true on numbered 7 and 10 and TASK prohibited full-mesh
 ## Opus-03 partial DQ review — 2026-10-30
 
 DQ remains true under 7: immutable 3071a743 solver.cpp:1330–1338 accepts 100 times target after 100 iterations, :1381–1385 marks exhaustion converged, so metadata fraction 1/misses 0 does not establish strict-target convergence and actual strict miss count is unknown. Report.tex:1192–1198 claims every step met target. Figure manifest line 10 maps the report Re200 plot to `results/cylinder_m010_laminar_re200/forces.csv`, byte-identical to `results/re200_final/forces.csv` (SHA-256 dca863f47ed5c3e5efc2ce681badf204caa5105cd1a96511a6c0c756aed36d58); run status names re200_final. Final 10% of 30,001 rows ranges Cd −41.0911–38.5662 and Cl −18.5503–43.4364. A separate TASK.md:227 full-mesh prohibition is supported: main.cpp:49–65 reads full mesh per rank, solver.cpp:88–168 fills global nodes/cells/faces, solver.h:68 retains it as a member through the solve. METIS and local state exist; this is not numbered trigger 9. Report.tex:579 and metadata deny replication. Case scoring, rubric and review areas remain partial; both gates pass, no CFD rerun.
+
+Opus-03 steady-case correction: scores 4,4,4,4,4,4,4 → 2,3,3,1,2,1,1 after reviewing committed histories/contours and original force tails. M0.15 inv Cd=0.06059 with last 10% 0.05487–0.07650; M0.15 lam Cd=0.62044; M2 lam Cd=3.15702 with last 10% 3.15702–4.19055; Re20 Cd=6.13992. Individual notes distinguish physics and plot evidence. Re200 remains 1; rubric and review areas still partial. Both gates pass; no CFD rerun.
