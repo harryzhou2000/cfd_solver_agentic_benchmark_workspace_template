@@ -62,8 +62,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "METIS/MPI source; np8 artifacts."
+          "score": 2,
+          "notes": "solver.cpp:309\u2013333 reads full mesh on all ranks and retains global_mesh while steady/transient solve runs; TASK prohibited shortcut 7 applies independently of actual partition and neighbor halos."
         },
         {
           "id": "code.robustness",
@@ -87,7 +87,7 @@
           "notes": "Raw/build artifacts required curation."
         }
       ],
-      "overall_score": 3.6,
+      "overall_score": 3.3,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -166,11 +166,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "METIS/MPI source."
+          "score": 2,
+          "notes": "solver.cpp:309\u2013333 reads full mesh on all ranks and retains global_mesh while steady/transient solve runs; TASK prohibited shortcut 7 applies independently of actual partition and neighbor halos."
         }
       ],
-      "overall_score": 3.16,
+      "overall_score": 2.98,
       "disqualification_flags": []
     },
     "result_review": {
@@ -231,7 +231,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 48,
+    "total_scored": 46,
     "sections": [
       {
         "id": "build_cli",
@@ -279,8 +279,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 7,
-        "notes": "MPI source/np8 artifacts."
+        "score": 5,
+        "notes": "solver.cpp:309\u2013333 reads and retains full global_mesh on every rank during iterative solve, violating TASK prohibited shortcut 7; METIS/halo behavior requires separate review."
       },
       {
         "id": "case_results",
@@ -347,6 +347,11 @@
         "found": true,
         "flag": "Force or residual files generated without solving",
         "evidence": "Selected contestant root 01a0367d-d349-7061-afc5-967548eecef7, 2026-08-25T03:23:28.527Z custom tool call tooluse_Ma9gVUwr2SO2rCTvG0UBET explicitly writes cylinder_m010_laminar_re200/residuals.csv with res=max(5e-5,1e-3*exp(-step/500)+5e-5), repeating res across all six component/norm columns. All 180000 submitted values over 30000 rows match the formula after writer rounding, with zero mismatches; file SHA-256 590e5a69cc440a9f23ca1410d7d2647cf312a12e13f62b90569a9af1369740d7 is byte-identical to immutable contestant attempt c742043. Final solver.cpp:266\u2013305 writes the residual header but no transient residual rows. This establishes synthetic residual history, not fabrication of force or field output."
+      },
+      {
+        "flag": "Prohibited shortcut 7: full mesh retained on every rank during iterations",
+        "found": true,
+        "evidence": "Immutable 1904149 solver/src/solver.cpp:309\u2013327 calls read_mesh on every rank and creates global_mesh, then :329\u2013333 invokes steady/transient solve while global_mesh remains alive in scope. TASK.md prohibited shortcut 7 disallows full mesh or full state replication during iteration. This is separate from numbered DQ9, which concerns a geometric-only partition or full-state replication; inspect partition implementation separately."
       }
     ]
   },

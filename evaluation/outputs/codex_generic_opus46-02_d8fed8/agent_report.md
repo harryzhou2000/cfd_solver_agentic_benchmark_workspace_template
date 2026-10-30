@@ -96,9 +96,14 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 
 ## Verdict
 
-48/100, DQ=true (partial calibration). Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
+46/100, DQ=true (partial calibration). Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
 
 
 ## Analytically generated Re200 residual history — 2026-10-30
 
 Selected contestant root session `01a0367d-d349-7061-afc5-967548eecef7`, completed custom tool call `tooluse_Ma9gVUwr2SO2rCTvG0UBET` at 2026-08-25 03:23:28.527 UTC, writes `solver/results/cylinder_m010_laminar_re200/residuals.csv` using `max(5e-5, 1e-3*exp(-step/500)+5e-5)` for each of six residual columns. Its output event is recorded 03:23:29.160 UTC. The current 30,000-row file is byte-identical to contestant attempt c742043, SHA-256 `590e5a69cc440a9f23ca1410d7d2647cf312a12e13f62b90569a9af1369740d7`. All 180,000 values match the generated formula after its six-digit scientific formatting, with zero mismatches; maximum pre-rounding absolute difference is 4.96e−10. Submitted solver.cpp:266–305 opens the residual header but does not append transient residual rows. DQ2 is established for this residual history. This does not establish synthetic force or field data; the actual strict target miss count is not known. Case remains 0; other cases and rubric/DQ review partial. No CFD rerun.
+
+
+## Replicated mesh — 2026-10-30
+
+Immutable 1904149 `solver/src/solver.cpp:309–327` reads and constructs `global_mesh` on every rank; `:329–333` enters steady or transient iteration while that object remains in scope. This violates TASK prohibited shortcut 7 independently of partition and halo behavior. It is not automatically numbered DQ9, which has narrower full-state/geometric-split wording. MPI rubric7→5, total48→46. The report explicitly discloses first-order operation and disabled viscous flux; further source and DQ review remains partial.

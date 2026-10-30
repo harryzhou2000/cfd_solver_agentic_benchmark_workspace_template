@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:24:21.720464+00:00
+Generated: 2026-10-30T06:25:17.969627+00:00
 
-**Overall score: 3.6**
+**Overall score: 3.3**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,7 +24,7 @@ Generated: 2026-10-30T06:24:21.720464+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | Input driven. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4 | METIS/MPI source; np8 artifacts. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2 | solver.cpp:309–333 reads full mesh on all ranks and retains global_mesh while steady/transient solve runs; TASK prohibited shortcut 7 applies independently of actual partition and neighbor halos. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Final contract/report inconsistency. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T06:24:21.720464+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.6
+- Overall score (0-5): 3.3
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

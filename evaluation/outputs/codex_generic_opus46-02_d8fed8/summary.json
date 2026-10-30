@@ -436,8 +436,8 @@
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 4,
-        "notes": "METIS/MPI source; np8 artifacts."
+        "score": 2,
+        "notes": "solver.cpp:309\u2013333 reads full mesh on all ranks and retains global_mesh while steady/transient solve runs; TASK prohibited shortcut 7 applies independently of actual partition and neighbor halos."
       },
       {
         "id": "code.robustness",
@@ -503,7 +503,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.6
+    "overall_score": 3.3
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -583,8 +583,8 @@
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 4,
-        "notes": "METIS/MPI source."
+        "score": 2,
+        "notes": "solver.cpp:309\u2013333 reads full mesh on all ranks and retains global_mesh while steady/transient solve runs; TASK prohibited shortcut 7 applies independently of actual partition and neighbor halos."
       }
     ],
     "disqualification_flags": [
@@ -619,7 +619,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.16
+    "overall_score": 2.98
   },
   "result_review": {
     "review_area": "result_review",
