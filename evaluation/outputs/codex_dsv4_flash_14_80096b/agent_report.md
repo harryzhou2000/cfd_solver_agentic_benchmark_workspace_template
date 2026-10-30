@@ -98,3 +98,10 @@ No independent evaluator build or steady rerun was performed. The raw result pac
 ## Verdict
 
 87.5/100, DQ=false. This is a substantively strong complete package with real source/result/MPI evidence and credible Re200 transient output. Deductions reflect reconstruction blending, the undisclosed M2 gradient damping, and limits of independent rerun verification, not a structural-validator failure.
+
+
+## Partial Re200/source provenance review — 2026-10-30
+
+Canonical results/cylinder_m010_laminar_re200/forces.csv SHA-256 bd62af0571b755f2c52b8bd3e51bb3353fbfd35a39e01cb94c1c7f3826bec36b has 30001 rows to t300; t≥200 mean Cd 1.2323515, Cd range 1.14503–1.32126, Cl range -1.05970–1.06052. Positive lift crossings at 200.465, 205.186, 209.911 through 299.686 have periods 4.720–4.729, giving frequency≈0.212, consistent with results_summary.tex:24 St≈0.211. Previous note erroneously called final time 300 a shedding period. Committed force figure shows lift but startup Cd≈30 compresses late drag; no separate late Cd plot in report figure inventory, so Re200 score stays 2.
+
+Curated solver.cpp:1875–1950,2240–2311 implements BDF1 startup, BDF2 and fresh-gradient total residual acceptance with miss counting. Canonical metadata SHA f05c949dccda64e869040de0a63fda12719ed121eb49533972a76a7c1767d2cc reports zero misses/fraction 1.0, but git_revision=null; contestant final verification explicitly mentions pre-existing uncommitted solver.cpp edits. Curated and c10299c versions differ by 21 steady-statistics lines, not transient code, but that comparison does not prove the exact production binary source. Thus actual strict misses remain unverified rather than assumed fabricated. main.cpp:287–320 constructs GlobalMesh inside rank-0 scope, which ends before solver invocation; no all-rank full-mesh prohibition finding. Other cases, source/rubric/DQ remain partial; no CFD rerun.

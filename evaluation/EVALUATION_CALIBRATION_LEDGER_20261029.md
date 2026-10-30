@@ -86,7 +86,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_10_6468ba` | fully reviewed: 86→71, DQ6 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_11_6e6ac8` | fully reviewed: 70→53, DQ7 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_12_7e965b` | fully reviewed: 90→79, DQ false; all cases 2 |
-| `codex_dsv4_flash_14_80096b` | unreviewed |
+| `codex_dsv4_flash_14_80096b` | partial: Re200 and initial provenance/mesh assessed; remaining cases/rubric/DQ pending |
 | `codex_generic_02_ed5ee6` | unreviewed |
 | `codex_generic_03_5f2165` | unreviewed |
 | `codex_generic_04_16009f` | unreviewed |
@@ -509,3 +509,8 @@ dsv4_flash_12 partial build/rubric: provisional rubric 90→81 (second 9→7, vi
 ## dsv4_flash_12 full calibration — 2026-10-30
 
 Rubric 90→79, DQ remains false; cases 4.5,4.5,3,4.5,4.5,4,4.5,2 → 2 each because steady force charts plot all data at x=0 and Re200 late drag is unreadable. All ten sections/27 points have criterion-specific evidence. Disclosed final steady gradient/limiter freeze means recorded reductions apply to frozen discretization; no undisclosed limiter disable inferred. Re200 original t300 lift oscillations ~4.48–4.63 period and wake image support reported St~0.218; inner fraction measures frozen-stencil residual and true fully updated strict miss count is unknown; no explicit BDF1 bootstrap. Full traction used for viscous split despite report tangential claim, treated like 03/sonnet46-02 under rubric 5.4 without DQ6. Root-only mesh, genuine METIS/halos; Re20 np1/8 Cd 2.040/1.846, not DQ4 order-one. Clean immutable build succeeds network-disabled cfd-bench; no CFD rerun, external similarity search, exhaustive pixel audit or general MPI comparison. Both gates pass.
+
+
+## dsv4_flash_14 partial Re200/source provenance — 2026-10-30
+
+Canonical Re200 forces SHA bd62af0571b755f2c52b8bd3e51bb3353fbfd35a39e01cb94c1c7f3826bec36b, t≥200 Cd mean 1.2323515, range 1.14503–1.32126, Cl -1.05970–1.06052, 21 upcrossing periods 4.720–4.729 imply frequency≈0.212, corroborating reported St≈0.211; corrected earlier false period=300 (that is final time). Force PNG startup Cd≈30 compresses late drag; no separate late Cd plot, score remains 2. Curated solver.cpp:1875–1950,2240–2311 tests fresh-gradient combined BDF residual and counts misses. Metadata SHA f05c949dccda64e869040de0a63fda12719ed121eb49533972a76a7c1767d2cc reports zero misses/fraction 1 but git_revision=null; selected verification response notes uncommitted source edits and exact production binary source is unproven. c10299c vs curated source differs only 21 steady-statistics lines, not proof of production origin. main.cpp:287–320 root-scoped GlobalMesh ends before solve. Other cases/rubric/DQ partial; both gates pass, no CFD rerun.
