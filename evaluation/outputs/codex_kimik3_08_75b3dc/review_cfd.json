@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Conservative source."
+      "score": 4.5,
+      "notes": "report.tex and gas/flux source define nondimensional conservative gas equations and coefficient scaling."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Unstructured mesh."
+      "score": 4.5,
+      "notes": "global_mesh.cpp reads TRI_3/QUAD_4, boundaries and Abutting1to1 zone links; MIXED and arbitrary general connectivity rejected."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 5,
-      "notes": "FV residual."
+      "score": 4,
+      "notes": "Finite-volume face contributions with exchanged reconstruction implemented; low-Mach Re20 drag remains substantially under-predicted."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Flux options."
+      "notes": "Roe/Harten and Rusanov fluxes implemented; report discloses low-Mach dissipation limitations and modified stiff-case settings."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "BC treatments."
+      "score": 4,
+      "notes": "Farfield, slip and no-slip adiabatic walls implemented; boundary flux uses cell-center state rather than reconstructed state."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 4,
-      "notes": "Second order."
+      "notes": "LSQ gradients and BJ/Venkat reconstruction exchanged over halos; saved stdout for steady production explicitly records second-order activation at step300."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Limiter."
+      "notes": "BJ/Venkat and positivity floors implemented, with disclosed first-order startup; accepted-state limiter frozen inside transient inner solve."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Laminar terms."
+      "score": 4.5,
+      "notes": "Corrected gradients, Newtonian/Fourier terms and tangential wall traction projection in solver.cpp:490\u2013495; report notes coarse-wall limitations."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Implicit method."
+      "score": 3.5,
+      "notes": "SGS and optional GMRES; steady Cd-only window test can falsely accept changing lift, and transient target uses frozen limiter."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Delivered Re200."
+      "score": 3.5,
+      "notes": "BDF2 fixed histories and full temporal term implemented; limiter frozen during inner test and no recheck after refresh, so fully refreshed target miss fraction is unknown."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 4,
-      "notes": "MPI implementation."
+      "notes": "Root-only METIS mesh preprocessing with neighbor state, gradient/limiter and correction halos; fixed-step Re20 rank diagnostics failed and differ ~9.7% np2 vs np4."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.46
+  "overall_score": 4.03
 }

@@ -1,18 +1,22 @@
 # Agent Evaluation Report — codex/kimik3/08
 
-Curated tip `80fdf699daa4729355996f603d61ebbc23819762` passes audit after index-only removal of 907 tracked generated/build/result artifacts. The selected project-local Codex root and three descendants cover the run. Explicit validation passed the eight final packages and report; the readable 37-page sibling main PDF was visually reviewed and accepted as manager evidence.
+**80/100; DQ=true (trigger 7).** Two laminar NACA results are marked converged while their force histories remain materially unsteady. M0.15 at step 2888 has Cd 0.005318–0.009276 over the final 500 samples, compared with the reported final Cd 0.00775. M0.80 at step 25000 has consecutive final 1000-step mean Cl values 0.03071, 0.02684, 0.02646, 0.02248 and 0.02114. Its final 5000-step Cd span is about 2.5%, rather than the reported under 1%. These findings concern forces; the recorded residual reductions are not disputed.
 
-**Verdict: 88.5/100; DQ=true (provisional, trigger 7).** M015 laminar is marked converged although its final 500 submitted drag samples span 0.005318–0.009276; the later restart continuation eventually brackets the reported value but does not establish that the submitted final state was force-stable. The report describes that restart band as applying throughout 8000 steps, whereas its actual last 5000 samples span 0.006761–0.007870. M080 laminar also shows sustained lift drift across its final 5000 samples despite a reported stable plateau. Remaining source, rubric and DQ review is underway. Source and delivered evidence support the documented unstructured MPI solver and transient method. The report candidly records slow force convergence and a symmetry-broken laminar M0.8 result; these limitations reduce result credit. Re200 was never rerun.
+The contestant performed a real 8000-step M0.15 restart continuation from the submitted final restart. Its last 1000 Cd samples span 0.007607–0.007870, bracketing the reported final value. The complete continuation does not remain in that band: its last 5000 span 0.006761–0.007870 and the first recorded Cd is 0.14855. This later evidence supports the eventual drag level but does not make the submitted final state force-stable. The report's wording overstates the duration of the narrow band.
+
+The accepted 37-page report contains readable case-specific histories and fields. Re20 Cd 0.889 is far below the approximately 2.0 benchmark range, a low-Mach limitation the contestant discloses. Re200 exhibits resolved late lift and drag; its submitted force history for t≥200 gives mean Cd 0.99540 and St≈0.2025 from 20 upward crossings. Individual case scores, independent of the 100-point rubric, are 2.5, 4, 3.5, 1.5, 1.5, 4, 2.5 and 3.5 in canonical order.
+
+Immutable source implements METIS, neighbor state/reconstruction/correction halos, finite-volume fluxes, limiting, viscous traction projection and SGS/BDF2. The transient inner residual is tested with a frozen limiter and is not checked again after refreshing it, so the fully refreshed miss fraction is unknown. Saved production logs record second-order activation at step 300. The Re20 rank comparison consists of failed pre-asymptotic runs: fixed-step Cd is 0.851695, 0.934107 and 0.914190 at np2/4/8, a roughly 9.7% np2–4 spread rather than the report's few percent; it is not an order-one mismatch. The comparison script names `fv2d.v2`, while production names `fv2d`, and historical binary equivalence is unproven.
+
+Original contestant commit `97128af` tracks all eight force, residual, status and metadata files, each matching the workspace bytes; its source matches curated tip `80fdf699daa4729355996f603d61ebbc23819762`. The exact historical executable is unbound. The accepted PDF SHA256 is `4f6862073ada8f13d871f9d57e4fb0f4cca0f01f4a71c09c62dd4997a873c5c1`. As a provenance check the submitted plotting code reproduced the original Re20 force, residual and Mach-zoom images pixel-identically from tracked workspace inputs. Other figure bindings remain qualified. An isolated network-disabled clean build passed; CTest reports no registered tests. No solver case was rerun.
+
+All ten rubric sections, 27 review points, eight cases and DQ1–13 were examined; precise evidence is in `agent_scores.json` and the calibration ledger. The validator is structural and cannot establish physical convergence. No external authorship investigation was performed under the trust policy.
 
 SHA-256 `run_identity.json`: `2947c446d0239093f21a457db72a1a9310e5aa9497c3e3ff89b2869abc2653c1`.
 
 SHA-256 `contestant_final_response.md`: `8629c6b48726bc8ef4363cce6fb60d2664ada9aea8e7f42d6b397b745b747296`.
 
 These are unindexed sidecars; `cfdeval check` does not validate them.
-
-- Evaluated at: 2026-08-28T03:30:36.787595+00:00
-- Evaluating agent: codex
-- Harness: codex
 
 ## Run summary (auto)
 
@@ -49,60 +53,7 @@ These are unindexed sidecars; `cfdeval check` does not validate them.
 - `np8`: missing=[] completed=True status=converged
 - `np1`: missing=[] completed=False status=failed
 
-## Methodology
 
-Reviewed immutable source/report and workspace-local results, ran the examiner validator explicitly over all eight final directories and report, rendered the full PDF, and selected the project-local Codex tree. No evaluator build/MPI rerun was performed.
+## Scope and limitations
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
-
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 |  |  |
-| Mesh And Geometry | 10 |  |  |
-| Finite-Volume Residual And Boundary Conditions | 15 |  |  |
-| Second-Order Spatial Scheme | 10 |  |  |
-| Viscous Terms | 10 |  |  |
-| Implicit And Transient Methods | 15 |  |  |
-| MPI | 10 |  |  |
-| Case Results And Validation | 10 |  |  |
-| Report, Visualization, Analysis | 5 |  |  |
-| Extensibility | 5 |  |  |
-
-## Review-area scores (0-5 weighted, review_*.json)
-
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
-
-## Disqualification assessment
-
-All triggers were assessed from source/report/result evidence. No trigger is supported; no external authorship investigation was conducted under the trust policy.
-
-## Metadata answers & session selection
-
-No metadata questions. Root `01a04155-66b4-7dd1-9672-2fe9cfc28407` and its three descendants were selected from prompt, timing, and end-to-end task continuity.
-
-## Limitations
-
-No clean evaluator build, MPI rerun, or Re200 rerun; structural validation does not prove exact numerical accuracy.
-
-## Verdict
-
-91/100, DQ=false. Preserve the audited manager snapshot and frozen report PDF.
+The exact historical executable and every figure-to-data binding are not individually verified. No Re200 or unsteady solver rerun was performed.

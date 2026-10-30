@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 5,
-      "notes": "CMake source."
+      "notes": "Immutable 80fdf69 CMake build succeeds in network-disabled cfd-bench using /opt/external roots, 2 CPUs, 3 GiB and 256 processes; CTest has no registered tests."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Documented runner."
+      "score": 4.5,
+      "notes": "main.cpp parses solve, case/output, restart and flux settings; documented scripts supply per-case overrides. Not every error path independently tested."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Structured solver."
+      "score": 4.5,
+      "notes": "Mesh, partition, gradients, flux, Jacobian, GMRES, solver and output modules separated; state and geometry remain fixed 2-D."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No authorship investigation."
+      "notes": "Trust policy excludes external authorship investigation; no internal solver wrapper found."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Case files."
+      "score": 4.5,
+      "notes": "Case JSON supplies mesh/physics/boundary mapping; generic production logic, with documented control overrides."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "MPI source."
+      "notes": "METIS, state/reconstruction halos and reductions exist; Re20 fixed-step diagnostic spread ~9.7% between np2/np4 and failed statuses limit rank-independence evidence."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Guards."
+      "score": 3.5,
+      "notes": "Floors, CFL and limiter options exist, but stopping gate checks Cd standard deviation only with a 0.05 floor and fails to detect substantial lift drift."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "All packages validate."
+      "score": 4,
+      "notes": "Prior validator, Jacobian and sanity checks plus rank studies supplied; evaluator build passes, no registered CTests. Structural tests miss incorrect success labels."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Final audit clean."
+      "notes": "Curated immutable tip and original contestant commit preserved; 97128af tracks eight output packages, though manager curation removes raw outputs and some generated assets."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.47
+  "overall_score": 4.26
 }
