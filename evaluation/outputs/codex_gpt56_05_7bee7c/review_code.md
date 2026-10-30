@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:41:22.249020+00:00
+Generated: 2026-10-30T11:42:32.398482+00:00
 
 **Overall score: 3.85**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Clean immutable-source CMake build succeeds with bundled CFD dependencies in network-disabled restricted container; all ten registered CTests pass, including two-rank mesh and halo tests. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 4 | CLI |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T11:41:22.249020+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | guards |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | tests |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 4 | Ten CTests pass independently: case parsing, NACA/cylinder mesh and two-rank distribution, physics, output, spatial operator, halo and partition-failure tests. These do not establish production convergence. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 4 | curated |
