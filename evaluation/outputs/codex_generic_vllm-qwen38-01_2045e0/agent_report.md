@@ -36,3 +36,10 @@ The selected Re200 result honestly reports failed at step3000/t30, with 3000 tar
 ## Failed-case evidence — 2026-10-30
 
 Each of the seven failed selected force CSVs matches contestant checkpoint `18e70a9`; exact SHA256 values, final-400 force ranges, reported status and relevant physics are recorded in each case note. The accepted main PDF includes their histories and fields, and the immutable report's force table includes all eight numerical summaries. The M080 laminar tail is exactly constant during a disclosed failed state, which is not by itself proof of synthetic history. Re200 remains a recognizable partial run at t30/300, not a completed shedding result. Scores 1 remain for independent failed-case limitations, not the earlier false claim of missing plots or numbers. No CFD rerun.
+
+
+## Rank-study anomaly and source binding — 2026-10-30
+
+Checkpoint `18e70a9` contains the selected Re20 rank-study force CSVs, matching workspace bytes. At common step300 np1 Cd1.615080/Cl−0.338803 and np2 Cd−0.451645/Cl−0.335014 differ by 2.066725 in absolute drag. The np1 force CSV SHA256 is `9d6163f4b2a2a08de8af65c41b03aca79db01069a8d834af075c47ec2ccc92d2`; np2 SHA256 is `623371f9ccd46d5ea24886b63b0fb3b131cc10c15f832c56c8d1d4c70a3a471b`. Their case JSON files are byte-identical SHA256 `b7eda45660d0292b73af6dd27b9701bacfcd6208929a35a70f60f2e755888b7e`; recorded commands select Rusanov without restart, and stdout reports the same freestream and no-slip initial profile.
+
+Both runs are explicitly failed and revisions are `unknown`. The np1 run was 2026-08-26 03:44–08:16 UTC, np2 2026-08-27 02:15–06:54 UTC; source fix `4722f3a` was committed between them on Aug 26 at 13:09 UTC. This prevents binding the executions to the same binary and does not prove rank alone caused the order-one difference. DQ4 remains unasserted pending decisive source/binary evidence; MPI credit and numerical anomaly are documented separately. No CFD rerun.

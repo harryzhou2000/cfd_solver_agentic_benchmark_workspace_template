@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T08:29:25.452046+00:00
+Generated: 2026-10-30T08:34:38.729044+00:00
 
-**Overall score: 2.0**
+**Overall score: 2.09**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -39,7 +39,7 @@ Generated: 2026-10-30T08:29:25.452046+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2 | One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 3 | Root-only setup, METIS and neighbor halos are implemented. Re20 np1/np2 Cd differs by2.0667 at step300 with identical case JSON and same logged initialization; runs fail and bracket a source fix with unknown binary revisions, so DQ4 rank-only causation is unproven. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T08:29:25.452046+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.0
+- Overall score (0-5): 2.09
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
