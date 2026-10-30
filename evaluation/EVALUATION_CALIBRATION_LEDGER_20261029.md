@@ -94,7 +94,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
 | `codex_generic_glm53-02_ff20c7` | partial: DQ7 plateau correction and cylinder case evidence; remaining DQ/rubric pending |
 | `codex_generic_glm53-03_d469fb` | partial: DQ7 current Re200/Re20 evidence, provenance discrepancy; other criteria pending |
-| `codex_generic_glm53-04_adde03` | unreviewed |
+| `codex_generic_glm53-04_adde03` | partial: M2 laminar DQ7 and Re200 case floor; other plateau/rubric pending |
 | `codex_generic_opus46-01_3a72ea` | unreviewed |
 | `codex_generic_opus46-02_d8fed8` | unreviewed |
 | `codex_generic_opus5-01_83492a` | unreviewed |
@@ -625,3 +625,8 @@ glm53-03 DQ8 checkpoint: exact submitted plot_results.py SHA e100139d2d7e2627fb3
 glm53-03 case/build checkpoint: current laminar NACA statuses converge after25/43/49 steps but Cd tails 0.09929→0.06454, 0.04413→0.05171, 0.00450→0.00936; DQ7 independently supported, cases remain1. Current M080 inviscid is 4.009 orders and stable, old note stale; M2 inviscid is 2.645-order disclosed stable plateau, score1→2 (figure floor). Exact 17724cd clean build passes restricted container; source Solver.cpp:439 uses same-buffer MPI_Allreduce without MPI_IN_PLACE; producing source unbound. Rubric build10→9, viscous10→9, implicit13→8, MPI9→7, case6→2, report4→0, total84→67. Other criteria/DQ partial; no CFD rerun.
 
 glm53-03 remaining-criteria/PDF checkpoint: all six accepted PDF pages SHA 3f66e27e77b54f3339954807f2b5f49bfbbd1386fda9fb65c38cccc79aee37a4 inspected; matching sibling/source mtime and no missing-asset placeholders, but DQ8-specific image/data error stands. All rubric/review notes cite source/results; other DQ boundaries documented. Historical rank force packages unavailable and metadata names init commit, so run-source/report mapping unresolved; partial retained. No CFD rerun or external authorship search.
+
+
+## glm53-04 partial M2 laminar/Re200 review — 2026-10-30
+
+DQ7 remains true on separate current M2 laminar: metadata converged step406/3.004 orders but last40 Cd0.853765→0.529150 (38% decline), violating TASK.md:140,172; case4→1. Immutable report Cd1.025 differs from current0.529, metadata revision26ef1cb is init without solver source; generation binding unproved. Prior inviscid residual-only DQ rationale remains under review, not assumed. Re200 4.5→2: immutable force image startup Cd −120 to +40 hides late drag, no alternative delivered late plot; report St0.175 present and independent t>=100 FFT0.174991 confirms oscillatory lift. Recorded167/30000 inner misses do not prove missed majority. Other criteria partial; no CFD rerun.

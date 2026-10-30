@@ -327,16 +327,16 @@
       "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=0.00128, CD=0.07574 at c06741d:solver/report/report.tex:309; residual history c06741d:solver/report/figures/naca0012_m080_laminar_re5000_residuals.png (referenced at solver/report/report.tex:424); force history c06741d:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:428); computed-field contour c06741d:solver/report/figures/naca0012_m080_laminar_re5000_mach_zoom.png (referenced at solver/report/report.tex:436). Score 4 retained after the post-processing audit. Prior case judgment: M0.80 laminar package passes validator and report supplies a complete result with minor limitations."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 4,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-1.13e-07, CD=1.025 at c06741d:solver/report/report.tex:311; residual history c06741d:solver/report/figures/naca0012_m200_laminar_re5000_residuals.png (referenced at solver/report/report.tex:448); force history c06741d:solver/report/figures/naca0012_m200_laminar_re5000_forces.png (referenced at solver/report/report.tex:452); computed-field contour c06741d:solver/report/figures/naca0012_m200_laminar_re5000_mach_zoom.png (referenced at solver/report/report.tex:460). Score 4 retained after the post-processing audit. Prior case judgment: M2 laminar package passes validator and report supplies a complete result with minor limitations."
+      "score": 1,
+      "notes": "Score 4\u21921: current selected metadata/status label converged at step406 (3.004 orders), while last40 force rows Cd declines 0.85376535\u21920.52915025 (38.0%), with half-means 0.76240268\u21920.59653982; no stable convergence under TASK.md:140,172. Immutable report.tex:311 reports Cd1.025, inconsistent with current final Cd0.529; metadata revision 26ef1cb is initial commit without solver source, so generation/source binding unproved. No CFD rerun."
     },
     "cylinder_m010_laminar_re20": {
       "score": 5,
       "notes": "Cylinder M0.10 laminar Re20: numeric CL=-0.001127, CD=2.072 at c06741d:solver/report/report.tex:313; residual history c06741d:solver/report/figures/cylinder_m010_laminar_re20_residuals.png (referenced at solver/report/report.tex:472); force history c06741d:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:476); computed-field contour c06741d:solver/report/figures/cylinder_m010_laminar_re20_vorticity.png (referenced at solver/report/report.tex:492). Score 5 retained after the post-processing audit. Prior case judgment: Re20 package passes validator; report gives Cd about 2.07 and rank-consistent steady wake evidence."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 4.5,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.00505, CD=1.16 at c06741d:solver/report/report.tex:315; residual history c06741d:solver/report/figures/cylinder_m010_laminar_re200_residuals.png (referenced at solver/report/report.tex:500); force history c06741d:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:504); computed-field contour c06741d:solver/report/figures/cylinder_m010_laminar_re200_vorticity_wake.png (referenced at solver/report/report.tex:524); shedding statistic St=0.175 at c06741d:solver/report/report.tex:315; late-time periodic-force evidence c06741d:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:504). Score 4.5 retained after the post-processing audit. Prior case judgment: Re200 package reaches t=300 and report gives BDF2, lift-amplitude and St=0.175 evidence; no unsteady rerun, so minor verification limitation remains."
+      "score": 2,
+      "notes": "Score 4.5\u21922: immutable c06741d report.tex:497 gives St0.175 and mean Cd1.16; selected raw force FFT peak t>=100 is 0.174991 and Cl spans \u22120.450674 to 0.4611, confirming oscillatory lift. Visually reviewed immutable forces.png: startup Cd excursions \u2212120 to +40 compress late Cd, so no readable late lift/drag periodic-force plot; no alternate delivered late force plot found. Figure floor unmet. Metadata revision 26ef1cb is init without solver source; 167/30000 recorded inner misses do not imply missed-majority. No unsteady rerun."
     }
   },
   "disqualification": {
@@ -344,9 +344,9 @@
     "flags": [
       {
         "id": 7,
-        "text": "metadata/status marks incomplete or failed runs as successful",
-        "evidence": "Validator passes structurally, while the submitted report explicitly describes below-target shock-case force-plateau acceptance as converged.",
-        "found": true
+        "flag": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": true,
+        "evidence": "Current selected results/naca0012_m200_laminar_re5000 metadata says completed=true/converged at step406 with 3.004 orders, but last40 Cd rows fall 0.8537653491\u21920.5291502491 (38.0%), half means 0.76240268\u21920.59653982. TASK.md:140,172 require clear early convergence or stable force plateau. Source revision in metadata 26ef1cb names an initial commit with no solver source; do not infer final source generated these rows. The previous DQ7 rationale based only on below-target inviscid residual orders is not sufficient; those plateau claims remain independently under review."
       }
     ]
   },
