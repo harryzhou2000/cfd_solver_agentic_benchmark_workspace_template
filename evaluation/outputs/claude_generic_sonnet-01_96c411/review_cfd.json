@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "score": 4,
+      "notes": "Gas model and Flux.cpp implement conservative compressible perfect-gas flux and viscosity; reference conditions are case-derived in PhysicsSetup.cpp."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "score": 4,
+      "notes": "CgnsReader.cpp handles mixed unstructured zones and BC data; Partition.cpp partitions the graph with METIS and distributes rank-local cells."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "score": 3.5,
+      "notes": "Residual.cpp:172\u2013256 assembles equal/opposite interior fluxes and divides by cell volume; pressure force sign in :295\u2013305 contradicts the stated normal derivation."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "score": 4,
+      "notes": "Flux.cpp:20\u201398 implements Rusanov and Roe characteristic flux with entropy fix; five steady cases still fail to converge."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "score": 3.5,
+      "notes": "Boundary.cpp:12\u201370 applies characteristic farfield and reflected slip/no-slip ghost states; surface extraction outputs boundary averages. Flow/force credibility remains limited."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "score": 4,
+      "notes": "Residual.cpp:32\u201378,150\u2013161 computes and exchanges Green\u2013Gauss gradients and limited primitive reconstruction with positivity fallback; no demonstrated order study."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "score": 4,
+      "notes": "Residual.cpp:81\u2013147 computes and exchanges face-based limiters; PhysicsSetup.cpp:70\u201378 selects Barth by default and spatial order two."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "score": 2.5,
+      "notes": "Flux.cpp:119 onward uses stress and heat flux; Residual.cpp:310\u2013325 projects tangent wall traction. Force projection outputs at :341\u2013349 lack qref normalization and pressure sign contradicts normal derivation."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "score": 3.5,
+      "notes": "LUSGS.cpp:39\u2013105 builds/inverts local block Jacobians and exchanges increments; TimeIntegrator implements CFL-controlled march. Five cases fail residual targets."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "notes": "TimeIntegrator.cpp:319\u2013435 implements frozen-history BDF1/BDF2 and measures target misses, but submitted Re200 reaches t=3.03/300 with all 303 misses; unconditional periodic label at a hypothetical horizon is a source defect, not an actual false success."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 2,
-      "notes": "Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata."
+      "score": 3.5,
+      "notes": "Partition.cpp:274\u2013315 keeps global mesh only on rank 0 before solve; report rank_comparison.csv shows np1/2/4/8 agreement at 300 bounded steps, not at steady convergence."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.0
+  "overall_score": 3.46
 }

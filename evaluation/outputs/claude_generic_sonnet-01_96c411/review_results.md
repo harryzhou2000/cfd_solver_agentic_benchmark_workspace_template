@@ -2,32 +2,32 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T03:06:22.671341+00:00
+Generated: 2026-10-30T03:08:24.325231+00:00
 
-**Overall score: 2.0**
+**Overall score: 2.17**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 2 | Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 2 | Final metadata honestly records six failed/incomplete cases and validator fails final results; --restart accepts a path but resumption is not implemented. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 2 | Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata. |
+| 2 | **res.validator** Automated validator results | 0.10 | 2 | Original explicit validator fails final metadata because six cases did not finish successfully; this is distinct from the snapshot integrity and completion gates. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 1.5 | Only two steady residual targets reached; five steady cases failed and Re200 stopped at t=3.03/300 with 303 target misses. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 1.5 | Negative Cd for several airfoils, M2 lam Cd 3.086 and unstable Re20 forces undermine accuracy; report discloses force inconsistencies. Rank comparisons are only short runs. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 2 | Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata. |
+| 5 | **res.visualization** Visualizations | 0.15 | 3 | Delivered 36-page report contains seven steady case figures and partial Re200 histories, but p33 has wake TODO boxes and several late drag plots are flattened. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 2 | Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Report explicitly records failed cases and force caveat; automatic p31 post-transient label describes only t≈3/300 and wake figures are missing. PDF is not suitable for accepted snapshot. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 2 | Only two steady cases are reported converged; the other steady cases and Re200 are explicitly failed, and the explicit validator fails final metadata. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Original workspace figure manifest and report link plots to case data, but curated assets are absent and delivered PDF contains TODO boxes; raw evidence retained outside commit. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T03:06:22.671341+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.0
+- Overall score (0-5): 2.17
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

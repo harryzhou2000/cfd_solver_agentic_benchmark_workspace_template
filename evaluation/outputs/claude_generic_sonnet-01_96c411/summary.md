@@ -236,6 +236,6 @@ Summary:
 
 ## Reviews
 
-- Code review scorecard: `claude_generic_sonnet-01_96c411/review_code.md` (overall: 2.0)
-- CFD methods review: `claude_generic_sonnet-01_96c411/review_cfd.md` (overall: 2.0)
-- Result review: `claude_generic_sonnet-01_96c411/review_results.md` (overall: 2.0)
+- Code review scorecard: `claude_generic_sonnet-01_96c411/review_code.md` (overall: 3.72)
+- CFD methods review: `claude_generic_sonnet-01_96c411/review_cfd.md` (overall: 3.46)
+- Result review: `claude_generic_sonnet-01_96c411/review_results.md` (overall: 2.17)
