@@ -112,7 +112,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52-m3_05_f094c1` | partial: provisional 54/100, DQ7 and TASK full-mesh; historic binary/figure binding unverified |
 | `codex_glm52-m3_06_a2dc07` | partial: 68/100, DQ7; historical binary and figure binding unverified |
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
-| `codex_glm52_02_06cf18` | partial: provisional 63/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
+| `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
 | `codex_glm52_03_e7d38e` | unreviewed |
 | `codex_gpt56_01_cb349f` | unreviewed |
 | `codex_gpt56_02_38616e` | unreviewed |
@@ -997,3 +997,6 @@ glm52_02 PDF/rank checkpoint: all seven pages of accepted contestant sibling PDF
 
 
 glm52_02 source/review checkpoint: clean 1e29ab3c archive built in network-disabled cfd-bench with bundled external dependencies, 2 CPUs, 3 GiB, 256 processes; CTest registers no tests. main.cpp:53–61 parses --restart but never uses it: build/CLI8→7.5. solver.cpp:356–368 integrates full tau·n viscous traction rather than tangential skin friction: viscous7→5.5, without mechanical DQ6. Total65→63. Updated 27 review criteria with individual source, result and explicit limitations. solver.cpp:140–151 has env-gated first-order mode and selected session has earlier experiments using it, but no production binary/environment binding: no DQ10 inferred. No-slip output.cpp:102–105 explicitly sets wall velocity zero; true METIS coexists with prohibited full-mesh copies. Remaining figure binding, DQ boundaries and production executable partial; no CFD rerun.
+
+
+glm52_02 surface-friction correction: immutable 1e29ab3c output.cpp:107–109 unconditionally sets surface cf=0. Recovered M015 laminar, Re20 and Re200 surface.csv contain zero cf across all 404, 97 and 97 rows respectively, despite nonzero integrated viscous drag. This is a separate required-output defect from full-traction force splitting, not fabricated-force evidence. Viscous rubric5.5→4.5, total63→62; cf and DQ11 no-slip velocity remain distinct. Remaining production binary, DQ boundaries and figure binding partial; no CFD rerun.

@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:23:23.695730+00:00
+Generated: 2026-10-30T10:24:24.526490+00:00
 
 **Overall score: 2.12**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 3 | Eight workspace packages structurally validate, but Re200 periodic/target-success metadata contradicts final strict ratio and force trajectory. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 3 | Eight workspace packages structurally validate, but Re200 periodic/target-success metadata contradicts final strict ratio and force trajectory. output.cpp:107–109 hardcodes surface cf=0; recovered laminar and cylinder rows confirm zeros. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
 | 2 | **res.validator** Automated validator results | 0.10 | 4 | Previously recorded validator passes eight packages and report; structural checks do not verify physical convergence or inner-target semantics. |

@@ -285,8 +285,8 @@
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 2,
-        "notes": "solver.cpp:356\u2013368 integrates full tau\u00b7n traction as viscous force instead of tangential skin friction, and supplied viscous drag is high."
+        "score": 1.5,
+        "notes": "solver.cpp:356\u2013368 integrates full traction, not tangential skin friction; output.cpp:107\u2013109 hardcodes surface cf=0. Recovered viscous/cylinder surfaces confirm zero cf, despite nonzero integrated viscous drag."
       },
       {
         "id": "cfd.implicit",
@@ -342,7 +342,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.13
+    "overall_score": 3.08
   },
   "result_review": {
     "review_area": "result_review",
@@ -353,7 +353,7 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 3,
-        "notes": "Eight workspace packages structurally validate, but Re200 periodic/target-success metadata contradicts final strict ratio and force trajectory."
+        "notes": "Eight workspace packages structurally validate, but Re200 periodic/target-success metadata contradicts final strict ratio and force trajectory. output.cpp:107\u2013109 hardcodes surface cf=0; recovered laminar and cylinder rows confirm zeros."
       },
       {
         "id": "res.validator",

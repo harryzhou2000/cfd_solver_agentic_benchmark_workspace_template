@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:23:23.695449+00:00
+Generated: 2026-10-30T10:24:24.526193+00:00
 
-**Overall score: 3.13**
+**Overall score: 3.08**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T10:23:23.695449+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3.5 | Barth limiter and positivity fallback are implemented; full historical production environment and order verification remain unbound. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2 | solver.cpp:356–368 integrates full tau·n traction as viscous force instead of tangential skin friction, and supplied viscous drag is high. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 1.5 | solver.cpp:356–368 integrates full traction, not tangential skin friction; output.cpp:107–109 hardcodes surface cf=0. Recovered viscous/cylinder surfaces confirm zero cf, despite nonzero integrated viscous drag. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | LU-SGS source exists but capped CFL and evolving forces limit demonstrated performance; Re200 uses relaxed acceptance. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T10:23:23.695449+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.13
+- Overall score (0-5): 3.08
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
