@@ -736,3 +736,6 @@ opus5-02 M080 inviscid force checkpoint: selected final50 recorded steps Cl0.000
 
 
 opus5-02 case-result calibration: M015/M080 inviscid tail sensitivities documented above reduce confidence in selected steady forces; M2 laminar 400-row decay is qualified by final50 settling. Case-result rubric8→7, total91→90; result completion4→3.5, plausibility4→3.5. No DQ7 based solely on near-zero lift or decaying oscillations; no CFD rerun.
+
+
+opus5-02 remaining steady-case checkpoint: selected revision2dff352 final400 Cd M2 inv0.089118–0.092399 (3.138 residual orders), M015 lam0.054313–0.054962 (final50 0.054313–0.054367), M080 lam0.079576–0.079963; Cl ranges and qualifications in individual notes, scores retained3.5/4.5/4. Re20 floor supported by report.tex:1587 velocity wake and :1592 pressure zoom, selected np8 coefficients and final50 range previously recorded. No production CFD rerun.

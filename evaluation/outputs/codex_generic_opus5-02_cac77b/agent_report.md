@@ -129,3 +129,8 @@ The old Re20 note cited the np1 rank-table final rather than the canonical np8 r
 ## Case-result rubric calibration — 2026-10-30
 
 The M015 and M080 inviscid late force variations documented above limit confidence in the final steady forces even though the Cd endpoint/residual checks triggered. M2 laminar's 400-row decay is balanced by its final-50 settling, while its same-Mach inviscid/laminar pressure drag disparity remains a concern rather than a proven failure. Case-results rubric8→7 and total91→90; completion/plausibility review points each fall by 0.5. DQ7 has not been assigned solely from the near-zero-lift and damping evidence. No CFD rerun.
+
+
+## Other steady cases — 2026-10-30
+
+Selected final-400 force windows and canonical report figures were checked case by case. M2 inviscid Cd0.089118–0.092399 at 3.138 residual orders remains 3.5; M015 laminar Cd0.054313–0.054962 remains 4.5, M080 laminar Cd0.079576–0.079963 remains 4, and Re20 has a delivered velocity wake (`report.tex:1587`) as well as the documented final-50 force range. Lift variations and shorter-window qualifications are preserved in their case notes. These checks are not independent production reruns.
