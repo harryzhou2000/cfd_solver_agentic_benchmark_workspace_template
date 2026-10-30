@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T16:12:44.928054+00:00
+Generated: 2026-10-30T16:14:16.246913+00:00
 
-**Overall score: 4.35**
+**Overall score: 4.25**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -36,7 +36,7 @@ Generated: 2026-10-30T16:12:44.928054+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | Matrix-free LU-SGS/local-CFL steady march implemented and contestant outputs converge. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4 | BDF2 outer physical loop and actual inner statistics present; Re200 reaches t=300 but fails the required vortex-shedding behavior. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3 | solver.cpp:1643–1659 permits early stagnation stop while :1777–1779 counts misses only at maximum; fraction definition is wrong. Reconstruction is frozen, no refreshed ratio recheck; actual misses unknown. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | main.cpp:357–384,520–534 retains full Mesh on every rank through solver iterations, prohibited by TASK.md:227; METIS/local state remain real. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T16:12:44.928054+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.35
+- Overall score (0-5): 4.25
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
