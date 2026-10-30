@@ -34,8 +34,8 @@
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Solve CLI and output writer inspected."
+          "score": 2,
+          "notes": "main.cpp:27\u201338 parses --restart but never loads it; OutputWriter.cpp:346\u2013348 emits only a restart placeholder in all eight final packages."
         },
         {
           "id": "code.organization",
@@ -87,7 +87,7 @@
           "notes": "Curation excludes raw results at final tip."
         }
       ],
-      "overall_score": 3.92,
+      "overall_score": 3.71,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -179,8 +179,8 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 4,
-          "notes": "Packages structurally complete."
+          "score": 1.5,
+          "notes": "Each selected 113f01a final case contains 26-byte restart_final.dat stating restart not implemented. Validator passes its structural existence check, but the file is a prohibited placeholder, not restart state."
         },
         {
           "id": "res.validator",
@@ -225,20 +225,20 @@
           "notes": "Manifest links figures to raw sources."
         }
       ],
-      "overall_score": 3.55,
+      "overall_score": 3.05,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 80.0,
+    "total_scored": 77.5,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "Build/CLI/output implementation present; no independent build."
+        "score": 5.5,
+        "notes": "main.cpp:27\u201338 accepts --restart but never uses it; OutputWriter.cpp:346\u2013348 writes only a literal restart placeholder, present identically in all eight checkpoint case directories. Clean evaluator build not yet tested."
       },
       {
         "id": "mesh_geometry",
@@ -347,6 +347,11 @@
         "text": "metadata.json marks incomplete/failed runs as successful",
         "evidence": "Selected checkpoint 113f01a M015 inviscid metadata says converged after 20000 steps at 1.6908 residual orders, but last400 Cd spans \u22121.270249..1.306778 and Cl \u22121.039743..1.379698; report.tex:223 acknowledges the near-zero-drag expectation. M200 laminar metadata says converged at step625 with 3.00036 orders, but final50 Cd changes \u22121.225659\u2192\u22121.020064 (16.8% of initial magnitude), demonstrating the supplied force stability criterion is not met. Both selected force CSVs and metadata match checkpoint 113f01a. No synthetic data or strict inner failure counts inferred.",
         "found": true
+      },
+      {
+        "flag": "Placeholder result files in submitted case directories",
+        "found": true,
+        "evidence": "All eight selected 113f01a:solver/results/final/<case>/restart_final.dat files match workspace and contain only 26 bytes, # restart not implemented followed by newline (SHA256 aad3dadaa2f32b46440f6c511a7cd6d6aebca2ab68747b6ea16dfdbb57b85989). Final OutputWriter.cpp:346\u2013348 writes that literal; main.cpp:27\u201338 accepts --restart but never uses it. TASK.md:226 prohibited shortcut 6 and README_EXAMINER.md:20 mandate rejection for placeholder result files. This does not establish synthetic force or residual files, so numbered DQ2 is not inferred."
       }
     ]
   },

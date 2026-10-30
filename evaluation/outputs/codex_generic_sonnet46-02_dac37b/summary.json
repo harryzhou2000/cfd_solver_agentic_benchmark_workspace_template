@@ -118,8 +118,8 @@
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Solve CLI and output writer inspected."
+        "score": 2,
+        "notes": "main.cpp:27\u201338 parses --restart but never loads it; OutputWriter.cpp:346\u2013348 emits only a restart placeholder in all eight final packages."
       },
       {
         "id": "code.organization",
@@ -213,7 +213,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.92
+    "overall_score": 3.71
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -339,8 +339,8 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 4,
-        "notes": "Packages structurally complete."
+        "score": 1.5,
+        "notes": "Each selected 113f01a final case contains 26-byte restart_final.dat stating restart not implemented. Validator passes its structural existence check, but the file is a prohibited placeholder, not restart state."
       },
       {
         "id": "res.validator",
@@ -412,7 +412,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.55
+    "overall_score": 3.05
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/sonnet46-02",
