@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T09:40:59.983844+00:00
+Generated: 2026-10-30T09:46:16.624030+00:00
 
-**Overall score: 2.82**
+**Overall score: 2.98**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 3 | CMake and README are committed; clean rebuild was not repeated because the external symlink is dangling. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Fresh immutable 8615cdd clean CMake build passed in network-disabled cfd-bench with 2 CPUs, 3 GiB, 256-process cap; CTest found no tests. Runtime binary remains unbound. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | Submitted main.cpp exposes solve --case/--output and reports bad invocation. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 4 | Restart writer/reader stores current state, time and step, but solver.cpp:545–548 duplicates current state into both BDF histories and resets previous dt, limiting transient restart fidelity. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Mesh, physics, output and solver source are separated. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T09:40:59.983844+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.82
+- Overall score (0-5): 2.98
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

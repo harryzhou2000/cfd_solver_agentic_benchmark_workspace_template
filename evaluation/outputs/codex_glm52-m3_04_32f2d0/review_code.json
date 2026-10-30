@@ -6,15 +6,15 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 3,
-      "notes": "CMake and README are committed; clean rebuild was not repeated because the external symlink is dangling."
+      "score": 4,
+      "notes": "Fresh immutable 8615cdd clean CMake build passed in network-disabled cfd-bench with 2 CPUs, 3 GiB, 256-process cap; CTest found no tests. Runtime binary remains unbound."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "Submitted main.cpp exposes solve --case/--output and reports bad invocation."
+      "notes": "Restart writer/reader stores current state, time and step, but solver.cpp:545\u2013548 duplicates current state into both BDF histories and resets previous dt, limiting transient restart fidelity."
     },
     {
       "id": "code.organization",
@@ -73,5 +73,5 @@
       "evidence": "report.tex rank comparison reports NACA M0.15 CL 0.002416 at np=1 versus 53.72 at np=2, while calling the behavior qualitatively consistent."
     }
   ],
-  "overall_score": 2.82
+  "overall_score": 2.98
 }

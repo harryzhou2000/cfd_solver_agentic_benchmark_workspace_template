@@ -37,14 +37,14 @@ The sole project-local Codex root `019fd883-6a9d-7c53-a1b1-96a168fb91ae` and its
 
 | Section | Max | Score | Notes |
 |---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 | 7 | Source is credible; final output package is absent from submission. |
+| Build, CLI, Output Contract | 10 | 6.5 | Clean build passes; transient restart duplicates BDF history. |
 | Mesh And Geometry | 10 | 8 | CGNS/unstructured mesh paths are source-supported. |
 | Finite-Volume Residual And Boundary Conditions | 15 | 10 | Conservative flux and BC branches inspected. |
 | Second-Order Spatial Scheme | 10 | 5 | M2 laminar is reported first-order. |
 | Viscous Terms | 10 | 7 | Source-supported, raw wall proof excluded. |
-| Implicit And Transient Methods | 15 | 11 | BDF2/inner controls exist; Re200 prose conflicts. |
+| Implicit And Transient Methods | 15 | 8.5 | Re200 runtime target was relaxed to 1.0 while metadata reports 0.001; restart duplicates history. |
 | MPI | 10 | 3 | Halo/METIS exist; old rank comparison differs in options and evolving source. |
-| Case Results And Validation | 10 | 3.5 | Re200 and M015 have major force/convergence failures; remaining cases under review. |
+| Case Results And Validation | 10 | 2.5 | Re200 target/forces and multiple steady cases fail physical requirements. |
 | Report, Visualization, Analysis | 5 | 2 | M015 force figure depicts a different run; Re200 claims conflict with data. |
 | Extensibility | 5 | 4 | Reasonable module split. |
 
@@ -62,7 +62,7 @@ Eight contestant checkpoint packages and their available force/residual/field fi
 
 ## Disqualification assessment
 
-DQ remains **true** on triggers 7 and 8. Re200 metadata calls the run statistically periodic despite a final strict target miss and severe nonperiodic force spikes; M015 steady force remains substantially unsettled. The report's M015 force figure depicts an older run rather than the selected final history. The former DQ4 comparison is not controlled: the two recorded launch commands used different CFL/ramp options, and source/binary attribution is uncertain; rank-only causation is not established.
+DQ remains **true** on triggers 7 and 8. Re200 metadata calls the run statistically periodic despite a final strict target miss and severe nonperiodic force spikes; the selected launch uses runtime inner target 1.0 while metadata reports 0.001, so its success fraction pertains to the relaxed threshold if the documented source/binary lineage applies; M015 steady force remains substantially unsettled. The report's M015 force figure depicts an older run rather than the selected final history. The former DQ4 comparison is not controlled: the two recorded launch commands used different CFL/ramp options, and source/binary attribution is uncertain; rank-only causation is not established.
 
 ## Metadata answers & session selection
 
@@ -70,8 +70,8 @@ There are no unanswered metadata questions. This is a post-run legacy reconstruc
 
 ## Limitations
 
-The original runtime environment is incomplete. Curated result tip omits raw packages, but contestant checkpoint `783eb18` preserves them and they are considered as contestant-delivered evidence. The approved report PDF is absent pending provenance review. Re200 was not rerun, per policy.
+The original runtime environment is incomplete. Curated result tip omits raw packages, but contestant checkpoint `783eb18` preserves them and they are considered as contestant-delivered evidence. A clean immutable-source build passed with no registered CTest tests; read-only examiner validation passed all eight checkpoint packages and the historical report. The approved PDF remains absent: the unmodified curated TeX fails `latexmk -halt-on-error` at line 324 on an unescaped underscore. All 44 referenced figures are present, and no suitable contestant main PDF was found. Re200 was not rerun. Re200 was not rerun, per policy.
 
 ## Verdict
 
-Provisional rubric: **60.5/100**. DQ is true for false successful-result metadata and a specific report-figure/data mismatch. Remaining case, source and PDF review is partial; no rank-only cause is inferred from the old comparison.
+Provisional rubric: **56.5/100**. DQ is true for false successful-result metadata and a specific report-figure/data mismatch. Remaining case, source and PDF review is partial; no rank-only cause is inferred from the old comparison.

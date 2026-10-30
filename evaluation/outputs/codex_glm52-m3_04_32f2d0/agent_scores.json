@@ -29,15 +29,15 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 3,
-          "notes": "CMake and README are committed; clean rebuild was not repeated because the external symlink is dangling."
+          "score": 4,
+          "notes": "Fresh immutable 8615cdd clean CMake build passed in network-disabled cfd-bench with 2 CPUs, 3 GiB, 256-process cap; CTest found no tests. Runtime binary remains unbound."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 4,
-          "notes": "Submitted main.cpp exposes solve --case/--output and reports bad invocation."
+          "notes": "Restart writer/reader stores current state, time and step, but solver.cpp:545\u2013548 duplicates current state into both BDF histories and resets previous dt, limiting transient restart fidelity."
         },
         {
           "id": "code.organization",
@@ -89,7 +89,7 @@
           "notes": "Readable C++ source, but many tuning scripts and excluded raw outputs limit reproducibility."
         }
       ],
-      "overall_score": 2.82,
+      "overall_score": 2.98,
       "disqualification_flags": [
         {
           "id": 4,
@@ -167,8 +167,8 @@
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 3,
-          "notes": "BDF2/inner-solve path exists; Re200 report contains mutually contradictory periodicity text."
+          "score": 1.5,
+          "notes": "Selected Re200 launch sets CFDD_INNERTARGET=1.0, MININNER=1, MAXINNER=5 and dt0.0001\u21920.001; 9a88d8d source counts against runtime target while metadata reports0.001. Final ratio0.435 misses strict target; true strict miss count is not reconstructible. Restart duplicates BDF history; exact binary unbound."
         },
         {
           "id": "cfd.mpi_partition",
@@ -178,7 +178,7 @@
           "notes": "METIS/halo code is present, but retained rank comparison establishes severe rank dependence."
         }
       ],
-      "overall_score": 3.24,
+      "overall_score": 3.09,
       "disqualification_flags": []
     },
     "result_review": {
@@ -239,14 +239,14 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 60.5,
+    "total_scored": 56.5,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 7,
-        "notes": "CMake/CLI source is credible, but clean rebuild and final contract output are not reproducible from curated commit."
+        "score": 6.5,
+        "notes": "Clean immutable build passed with no registered CTest tests. Restart restores time and current state but duplicates the previous BDF history; checkpoint data are contestant-delivered."
       },
       {
         "id": "mesh_geometry",
@@ -280,8 +280,8 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 11,
-        "notes": "Implicit/BDF2 machinery and Re200 inner statistics exist, but report periodicity statements conflict."
+        "score": 8.5,
+        "notes": "BDF2/GMRES exist, but selected Re200 launch relaxes inner target to1.0 and min iterations to1, alters dt0.0001\u21920.001; metadata reports target0.001 and fraction for runtime threshold. Restart duplicates BDF history. Exact strict miss count and historic binary hash unverified."
       },
       {
         "id": "mpi",
@@ -294,8 +294,8 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 3.5,
-        "notes": "Recovered 783eb18 contestant checkpoint supplies selected case outputs. M015 inviscid is unsettled; Re200 has extreme force excursions, no credible periodic result and last strict target miss; remaining case-specific physical review ongoing."
+        "score": 2.5,
+        "notes": "Recovered cases include multiple unsettled or implausible steady results and M2 extreme field; Re200 severe nonperiodic forces, final strict miss, relaxed runtime target, variable dt, and no credible vortex street."
       },
       {
         "id": "report_viz",
@@ -344,7 +344,7 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
-      "notes": "Contestant checkpoint 783eb18 canonical results/prod/.../forces.csv SHA256 2a41bb4165a272b3ff85f600b30f17b3dd48b38d3b42831f95828a4c68f0f302 spans t78.8986\u2013300.001 (resumed, 221283 rows). t180\u2013300 Cd\u22127.5496..388.993 and Cl\u221239.5129..171.627; last ratio0.434955 misses target0.001. Metadata says completed/periodic while report.tex:321\u2013324 contradicts itself and admits not periodic. Figure SHA256 c91739ea59b667835db45dd05bf0f476bc1b487fabe65306a42e28f378296e2c visually shows extreme spikes, not credible periodic late lift/drag; no numeric St is supplied. Score1 retained; no transient rerun or inferred total miss count."
+      "notes": "Contestant checkpoint 783eb18 canonical results/prod/.../forces.csv SHA256 2a41bb4165a272b3ff85f600b30f17b3dd48b38d3b42831f95828a4c68f0f302 spans t78.8986\u2013300.001 (resumed, 221283 rows). t180\u2013300 Cd\u22127.5496..388.993 and Cl\u221239.5129..171.627; last ratio0.434955 misses target0.001. Metadata says completed/periodic while report.tex:321\u2013324 contradicts itself and admits not periodic. Figure SHA256 c91739ea59b667835db45dd05bf0f476bc1b487fabe65306a42e28f378296e2c visually shows extreme spikes, not credible periodic late lift/drag; no numeric St is supplied. Score1 retained; no transient rerun or inferred total miss count. Selected root launch call_2321a40cf53d41d68e75a26a sets runtime CFDD_INNERTARGET=1.0, MININNER=1, MAXINNER=5 and dt0.0001\u21920.001, whereas metadata reports original target0.001. Source revision 9a88d8d tests/counts against the overridden threshold while writing the case target. The 0.999028 fraction cannot be interpreted as strict-target success; actual strict miss count is unknown."
     }
   },
   "disqualification": {
@@ -360,7 +360,7 @@
         "id": 7,
         "text": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
-        "evidence": "Checkpoint 783eb18 canonical results/prod/cylinder_m010_laminar_re200 metadata says completed/statistically_periodic while last inner ratio0.434955 misses target0.001 and force history over t180\u2013300 has Cd\u22127.55..388.99, Cl\u221239.51..171.63; report.tex:321\u2013324 explicitly says it did not reach periodic behavior yet elsewhere claims shedding. M015 inviscid also says converged despite final400 drag changing0.07329\u21920.02992 and lift changing substantially; case-specific evidence retained. M2 inviscid metadata converged while sanity flags failed remains an additional lead, not automatic proof absent plateau analysis. Historic binary binding remains qualified. Additional independent evidence: M080 inviscid metadata marks converged while final400 Cd changes0.07580\u21920.05969; M200 laminar final400 Cd0.60929\u21920.47366 while labeled converged, contrary to TASK.md:140,172 stable-force requirement. M200 inviscid sanity flags an extreme field; do not infer a synthetic history."
+        "evidence": "Checkpoint 783eb18 canonical results/prod/cylinder_m010_laminar_re200 metadata says completed/statistically_periodic while last inner ratio0.434955 misses target0.001 and force history over t180\u2013300 has Cd\u22127.55..388.99, Cl\u221239.51..171.63; report.tex:321\u2013324 explicitly says it did not reach periodic behavior yet elsewhere claims shedding. M015 inviscid also says converged despite final400 drag changing0.07329\u21920.02992 and lift changing substantially; case-specific evidence retained. M2 inviscid metadata converged while sanity flags failed remains an additional lead, not automatic proof absent plateau analysis. Historic binary binding remains qualified. Additional independent evidence: M080 inviscid metadata marks converged while final400 Cd changes0.07580\u21920.05969; M200 laminar final400 Cd0.60929\u21920.47366 while labeled converged, contrary to TASK.md:140,172 stable-force requirement. M200 inviscid sanity flags an extreme field; do not infer a synthetic history. Selected root 019fd883 call_2321a40cf53d41d68e75a26a at 2026-08-09T14:02:10.256Z launches re200_final2 with CFDD_INNERTARGET=1.0, MININNER=1, MAXINNER=5 and dt phases 0.0001/0.001. Reported source revision 9a88d8d main.cpp:47\u201350 overrides the runtime target, while :76\u201377 writes the case-file target0.001 and the miss fraction; solver.cpp:674,685 tests/counts against runtime target1.0. The reported 0.999028 fraction therefore concerns the relaxed threshold if this documented binary/source lineage applies, not proven strict 0.001 convergence. Exact strict miss count and executable hash remain unknown."
       },
       {
         "id": 8,
