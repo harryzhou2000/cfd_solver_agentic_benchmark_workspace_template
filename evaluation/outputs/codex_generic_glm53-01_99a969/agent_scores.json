@@ -28,7 +28,7 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "Exact b962bf5 curated source clean CMake build succeeds in restricted network-disabled cfd-bench container; selected results report earlier revision bf6e816."
         },
         {
           "id": "code.cli",
@@ -153,14 +153,14 @@
           "title": "Implicit steady march",
           "weight": 0.1,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "Production bf6e816 fv_solver.cpp:1049\u20131094 uses SGS with lagged gradients/limiter; selected steady metadata records every inner target missed, but separate outer target and force plateau govern convergence."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "bf6e816 fv_solver.cpp:893\u2013926 refreshes gradients/limiter once per physical step and tests frozen-coefficient residual; zero reported misses do not prove fully refreshed nonlinear target. St\u22480.11281 for t>=105 but \u22480.075 peak for t>=100."
         },
         {
           "id": "cfd.mpi_partition",
@@ -201,14 +201,14 @@
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "Selected Re20 Cd0.8469/Cl-0.3897 is inaccurate/asymmetric despite stable forces; Re200 Cd mean1.126 and Cl rms0.0266 but dominant FFT frequency shifts with time window."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
           "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "notes": "Seven immutable steady force plots collapse at physical_time=0, and Re200 full-history Cd startup hides late drag; separate lift plot has no drag. Report includes readable residual and contour assets."
         },
         {
           "id": "res.report",
@@ -231,7 +231,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 94,
+    "total_scored": 84,
     "sections": [
       {
         "id": "build_cli",
@@ -272,8 +272,8 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 14,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "score": 9,
+        "notes": "bf6e816 fv_solver.cpp:893\u2013926 evaluates transient inner ratios using gradients/limiter frozen at start of physical step; selected metadata reports zero misses but does not establish fully refreshed nonlinear residual. All selected steady metadata report 100% inner target misses (Re20 794/794, M015 inviscid 1034/1034). BDF2 and implicit SGS are implemented; final source differs."
       },
       {
         "id": "mpi",
@@ -286,15 +286,15 @@
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 9,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "score": 6,
+        "notes": "Selected Re20 settled Cd0.8469 and Cl-0.3897, physically inaccurate for symmetric cylinder; report discloses. Re200 St0.11281 for t>=105 but dominant raw FFT peak changes to \u22480.075 for t>=100. All steady force plots are unreadable at t=0; raw case values survive."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "score": 2,
+        "notes": "Report supplies detailed numeric tables, residuals and contours and candidly discusses Re20; seven steady force figures collapse at time zero, Re200 late Cd unreadable. Source/report provenance differs bf6e816 vs final b962bf5."
       },
       {
         "id": "extensibility",

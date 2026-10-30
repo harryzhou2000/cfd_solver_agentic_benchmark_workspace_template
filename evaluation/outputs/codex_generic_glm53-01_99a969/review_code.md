@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:16:49.359171+00:00
+Generated: 2026-10-30T05:18:48.086466+00:00
 
 **Overall score: 4.0**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Exact b962bf5 curated source clean CMake build succeeds in restricted network-disabled cfd-bench container; selected results report earlier revision bf6e816. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |

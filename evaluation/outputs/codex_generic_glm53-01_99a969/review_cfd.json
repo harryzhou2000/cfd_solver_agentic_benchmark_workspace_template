@@ -63,14 +63,14 @@
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "Production bf6e816 fv_solver.cpp:1049\u20131094 uses SGS with lagged gradients/limiter; selected steady metadata records every inner target missed, but separate outer target and force plateau govern convergence."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 4,
-      "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+      "notes": "bf6e816 fv_solver.cpp:893\u2013926 refreshes gradients/limiter once per physical step and tests frozen-coefficient residual; zero reported misses do not prove fully refreshed nonlinear target. St\u22480.11281 for t>=105 but \u22480.075 peak for t>=100."
     },
     {
       "id": "cfd.mpi_partition",

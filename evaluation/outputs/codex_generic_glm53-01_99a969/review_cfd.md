@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:16:49.359638+00:00
+Generated: 2026-10-30T05:18:48.086918+00:00
 
 **Overall score: 4.0**
 
@@ -33,10 +33,10 @@ Generated: 2026-10-30T05:16:49.359638+00:00
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
-| 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | Production bf6e816 fv_solver.cpp:1049–1094 uses SGS with lagged gradients/limiter; selected steady metadata records every inner target missed, but separate outer target and force plateau govern convergence. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4 | bf6e816 fv_solver.cpp:893–926 refreshes gradients/limiter once per physical step and tests frozen-coefficient residual; zero reported misses do not prove fully refreshed nonlinear target. St≈0.11281 for t>=105 but ≈0.075 peak for t>=100. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
 | 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
