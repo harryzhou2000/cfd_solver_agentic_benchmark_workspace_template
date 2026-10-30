@@ -62,8 +62,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "METIS and neighbor MPI source; np8 artifacts."
+          "score": 2,
+          "notes": "main.cpp:179\u2013229 keeps a full GlobalMesh on every rank during solver.run; this violates TASK prohibited shortcut 7. METIS partition and neighbor communication are present. Production-source binding is unresolved."
         },
         {
           "id": "code.robustness",
@@ -87,7 +87,7 @@
           "notes": "Large raw outputs required curation."
         }
       ],
-      "overall_score": 3.85,
+      "overall_score": 3.55,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -166,11 +166,11 @@
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "METIS Isend/Irecv plus np8 artifacts."
+          "score": 2,
+          "notes": "main.cpp:179\u2013229 keeps a full GlobalMesh on every rank during solver.run; this violates TASK prohibited shortcut 7. METIS partition and neighbor communication are present. Production-source binding is unresolved."
         }
       ],
-      "overall_score": 3.73,
+      "overall_score": 3.55,
       "disqualification_flags": []
     },
     "result_review": {
@@ -231,7 +231,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 72,
+    "total_scored": 70,
     "sections": [
       {
         "id": "build_cli",
@@ -279,8 +279,8 @@
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 8,
-        "notes": "MPI source and np8 artifacts."
+        "score": 6,
+        "notes": "f679644 main.cpp:179\u2013229 reads and retains the entire GlobalMesh on every rank while solver.run executes, violating TASK prohibited shortcut 7. METIS and local/ghost halos exist; no numbered DQ9 is asserted solely from a full mesh."
       },
       {
         "id": "case_results",
@@ -347,6 +347,11 @@
         "flag": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
         "evidence": "Selected solver/results/cylinder_m010_laminar_re200/metadata.json says completed=true, statistically_periodic, t=300 but the entire submitted t=200\u2013300 force window has exactly constant Cd=4.8532587021 and Cl=\u22120.0023802775736; no late shedding is shown. M2 laminar metadata says converged, but last 65 Cd rows decrease 3.9742929239\u21923.1464435562 (20.8%); report.tex:511\u2013514 and run_manifest.csv mark this case incomplete/not converged. Generation relation between report and workspace results is not established. No CFD rerun."
+      },
+      {
+        "flag": "Full mesh or full state replicated on all MPI ranks during iterations",
+        "found": true,
+        "evidence": "Immutable f679644:solver/src/main.cpp:179\u2013181 reads GlobalMesh on every rank; :192\u2013199 partitions and constructs local mesh without releasing it; :211\u2013229 invokes solver.run() in the same scope while global_mesh remains alive. TASK.md prohibited shortcut 7 prohibits full-mesh replication during iterations. METIS and neighbor halos are real, so this is not numbered DQ9\u2019s narrower full-state/geometric-split condition. Selected metadata revision is null, so exact source/result binding remains uncertain."
       }
     ]
   },

@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:08:16.628624+00:00
+Generated: 2026-10-30T06:09:28.462647+00:00
 
-**Overall score: 3.73**
+**Overall score: 3.55**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -39,7 +39,7 @@ Generated: 2026-10-30T06:08:16.628624+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4 | BDF2 t=300 and source freezing present, but physical result weak. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | METIS Isend/Irecv plus np8 artifacts. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | main.cpp:179–229 keeps a full GlobalMesh on every rank during solver.run; this violates TASK prohibited shortcut 7. METIS partition and neighbor communication are present. Production-source binding is unresolved. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-10-30T06:08:16.628624+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.73
+- Overall score (0-5): 3.55
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

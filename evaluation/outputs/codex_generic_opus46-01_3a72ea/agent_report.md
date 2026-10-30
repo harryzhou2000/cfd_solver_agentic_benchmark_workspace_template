@@ -96,7 +96,7 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 
 ## Verdict
 
-72/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
+70/100, DQ=true (partial calibration). This is structurally complete with substantive solver/MPI evidence, but implausible cylinder physics and report/status inconsistency materially reduce CFD/result credit.
 
 
 ## Selected result and report review — 2026-10-30
@@ -104,3 +104,8 @@ No independent build/rerun was performed and Re200 was not rerun. Raw packages/P
 All 15 pages of accepted report rebuilt from f679644 visually checked; report contains five NACA cases and concludes the cylinder cases and M2 laminar were incomplete. Its generation relationship to current selected results is unresolved. Current Re200 metadata says statistically periodic, yet every row in t=200–300 has exactly Cd4.8532587021 and Cl−0.0023802775736, with no observable shedding; current M2 laminar metadata says converged but last65 Cd falls 3.974293→3.146444 (20.8%). The delivered report and run manifest also classify M2 laminar incomplete/not converged. DQ7 applies and Re200 case2→1. No actual strict inner-failure count can be inferred from the flat force alone.
 
 M015 inviscid 4→2: Cd0.0617 is high for low-Mach inviscid flow and last308 Cd falls 15.2%; M015 laminar 4→2 because Cd0.583 is unusually large for this flow, despite figures and numeric summaries. M080 inviscid/laminar report supplies Cd0.050/0.219 respectively; previous notes saying no numeric summary are corrected to state Cl summary was not found. Other cases, rubric, provenance and DQ checks remain partial. Source writer f679644:solver/src/output.cpp:247–248 fixes timestamp values to 2024, so these are not run-time provenance. No CFD rerun.
+
+
+## Distributed mesh source review — 2026-10-30
+
+Immutable f679644 `solver/src/main.cpp:179–181` reads a complete `GlobalMesh` on each rank, then `:192–199` constructs partitions and local meshes, and `:211–229` calls the solver while the full mesh remains alive in the same scope. This violates TASK prohibited shortcut 7 for full-mesh replication during iteration, independently of the actual METIS partition and local halo exchanges. It is not charged as numbered DQ9, whose full-state/geometric-split wording is narrower. MPI rubric 8→6 and code/CFD MPI review points 4→2; total 72→70. Selected result metadata lacks a usable revision; no claim is made that this exact source produced every historical package.
