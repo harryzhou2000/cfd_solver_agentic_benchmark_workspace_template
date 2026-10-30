@@ -9,8 +9,7 @@ captured final response explicitly reports seven steady cases pass and Re200
 remains honestly failed: it reaches t=300 but has flat lift and failed
 metadata. Re200 was not rerun.
 
-The immutable source/report support a substantial solver effort, but an
-independent rebuild was unavailable because the external symlink is dangling.
+The immutable source/report support a substantial solver effort, but a clean independent build succeeded in a restricted container with bundled dependencies; CTest has no registered tests.
 Result scoring therefore retains the seven steady packages as limited
 contestant evidence and assigns Re200 zero because its terminal status is
 incomplete. No disqualification trigger was established; incomplete Re200 is

@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T12:14:01.089671+00:00
+Generated: 2026-10-30T12:17:32.358423+00:00
 
 **Overall score: 3.0**
 
@@ -27,7 +27,7 @@ Generated: 2026-10-30T12:14:01.089671+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 3 | Source/session evidence reviewed; see agent report. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Source/session evidence reviewed; see agent report. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Original report/field and run evidence remain in historical attempt e7977ee; Re20 Mach figure reproduces pixel-identically from original field (ledger hashes). Current canonical workspace includes later replacements; other image and production-binary bindings need review. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
