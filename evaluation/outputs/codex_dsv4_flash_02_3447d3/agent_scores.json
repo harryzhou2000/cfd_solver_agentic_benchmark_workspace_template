@@ -332,7 +332,7 @@
     },
     "cylinder_m010_laminar_re20": {
       "score": 2,
-      "notes": "Score 2 retained. Final Cd=2.95927, Cl=0.015903; status converged at 23472 with 0.564 residual orders. Last-10% Cd 2.93397\u20132.98136 and Cl \u22120.01575\u20130.05302; last 500 lift rows have half-window means 0.03016\u21920.01327, indicating residual asymmetry/drift. Report.tex:535 gives numeric summary; no rendered wake/force histories survive. This is a substantial but quantitatively limited partial result."
+      "notes": "Score 2 retained. Final Cd=2.95927, Cl=0.015903; status converged at 23472 with 0.564 residual orders. Last-10% Cd 2.93397\u20132.98136 and Cl \u22120.01575\u20130.05302; last 500 lift rows have half-window means 0.03016\u21920.01327, indicating residual asymmetry/drift. Report.tex:535 gives numeric summary; no rendered wake/force histories survive. This is a substantial but quantitatively limited partial result. Final 2000 lift rows have half-window means \u22120.002251\u21920.028140, despite the stated stable-force plateau; source plateau test checks drag only. This supports DQ7 for that case separately from Re200."
     },
     "cylinder_m010_laminar_re200": {
       "score": 1,
@@ -346,7 +346,7 @@
         "id": 7,
         "text": "metadata reports incomplete/failed runs as successful final results",
         "found": true,
-        "evidence": "Immutable 93e8729 driver.cpp:778\u2013782 computes per-step total residual reference; :818\u2013832 accepts strict target OR mere decrease and sets inner_converged; :930\u2013964 counts misses and fraction from this broader flag. Re200 metadata target=0.001, last_inner_residual_ratio=0.3695944591, inner_target_misses=0, fraction=1.0 and status statistically_periodic. Last step demonstrably missed the strict target; the fraction does not establish the number of actual strict misses. Report and terminal response disclose relaxed acceptance."
+        "evidence": "Immutable 93e8729 driver.cpp:778\u2013782 computes per-step total residual reference; :818\u2013832 accepts strict target OR mere decrease and sets inner_converged; :930\u2013964 counts misses and fraction from this broader flag. Re200 metadata target=0.001, last_inner_residual_ratio=0.3695944591, inner_target_misses=0, fraction=1.0 and status statistically_periodic. Last step demonstrably missed the strict target; the fraction does not establish the number of actual strict misses. Report and terminal response disclose relaxed acceptance. Separately Re20 metadata labels converged at 0.564 residual orders, while its final 2000 lift rows range \u22120.01575\u20130.05302 and half-window means change \u22120.002251\u21920.028140; driver.cpp:625\u2013675 tests drag only, while TASK.md:172 and report.tex:345\u2013359 require stable forces for a plateau."
       },
       {
         "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
