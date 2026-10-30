@@ -8,7 +8,7 @@ Selected workspace-local Codex root `019fe243-274e-7961-abdb-42fcc139142e` has e
 
 ## Scores and verdict
 
-Calibrated score **71/100** (previously 86); Code 3.78/5, CFD 4.00/5, Results 4.69/5; DQ=true under TASK full-mesh prohibition and trigger 6 for the absent claimed BDF2 formula. Every rubric, review-point and case note is in `agent_scores.json`; current case scores are 2, 2, 2, 2, 2, 2, 2, 2. Strong source/report and validator evidence support a high result, while no evaluator solver rerun or independent redraw was performed. Re200 was not rerun.
+Calibrated score **71/100** (previously 86); weighted review areas are recorded in agent_scores.json; DQ=true under TASK full-mesh prohibition and trigger 6 for the absent claimed BDF2 formula. Every rubric, review-point and case note is in `agent_scores.json`; current case scores are 2, 2, 2, 2, 2, 2, 2, 2. The validator passes, but the source and visual evidence expose the limitations detailed below. No evaluator solver rerun or independent redraw was performed. Re200 was not rerun.
 
 TASK.md:227 full-mesh prohibition and DQ6 apply as documented below. No internal solver wrapper is evident. Trust policy excluded external similarity search.
 
