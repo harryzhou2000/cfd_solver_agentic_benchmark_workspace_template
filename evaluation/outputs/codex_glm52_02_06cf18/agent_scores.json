@@ -244,14 +244,14 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 9,
-        "notes": "CGNS/mixed mesh source present."
+        "notes": "CGNS reader, mesh.cpp:65\u2013290 mixed-cell/zone input, boundary mapping, face adjacency and geometry are implemented. 3.5/4 input, 1.75/2 geometry, 1.75/2 mixed/zones, 2/2 adjacency; no independent exact geometry test."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 12,
-        "notes": "FV/Rusanov/boundary paths source reviewed."
+        "notes": "solver.cpp:85\u2013127,133\u2013214 provides farfield/slip/no-slip ghost states and conservative inviscid/viscous face residual; Rusanov is robust but dissipative. 4/5 residual, 3/4 Rusanov, 2.5/3 farfield/slip, 2.5/3 no-slip, with numerical convergence limited by case evidence."
       },
       {
         "id": "second_order",
@@ -300,7 +300,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 4,
-        "notes": "Modular C++ organization."
+        "notes": "Modules for case I/O, mesh, partition, fluxes, reconstruction, implicit march and output; physics/BC interfaces generalize within 2-D but mesh assumptions restrict 3-D. 1.5/2 physics, 1/1 BC, 0.5/1 mesh generality, 1/1 organization."
       }
     ]
   },

@@ -36,11 +36,11 @@ The structural validator found all required eight result cases and the report. T
 | Report, Visualization, Analysis | 5 | 2.5 | PDF omits force/rank tables due nested-float errors and asserts unobserved shedding. |
 | Extensibility | 5 | 4 | Modular C++ organization. |
 
-**Provisional total: 62/100. Disqualified under trigger 7 and the separate TASK full-mesh prohibition.**
+**Final pre-DQ total: 62/100. Disqualified under trigger 7 and the separate TASK full-mesh prohibition.**
 
 ## Limitations
 
-This is a legacy provenance reconstruction. Direct project telemetry establishes the Codex root and child tree, but the evaluator did not independently rebuild or rerun submitted cases. The refreshed Codex telemetry reports four rule-violation candidates, retained as telemetry diagnostics rather than a disqualification finding.
+This is a legacy provenance reconstruction. Direct project telemetry establishes the Codex root and child tree, but the evaluator independently rebuilt immutable source in an isolated container but did not rerun submitted cases. The refreshed Codex telemetry reports four rule-violation candidates, retained as telemetry diagnostics rather than a disqualification finding.
 
 ## Calibration evidence and remaining work
 
@@ -48,9 +48,9 @@ Selected final response identifies eight completed cases and canonical Re200 dt0
 
 Immutable 1e29ab3c main.cpp:83–86 reads complete CGNS mesh on every rank; :92–100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150–160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real.
 
-Other case floors, PDF/figure provenance, source criteria and DQ findings remain under review. No CFD or Re200 rerun was performed.
+At that checkpoint other case floors, PDF/figure provenance, source criteria and DQ findings remained under review. No CFD or Re200 rerun was performed.
 
-Individual delivered force plots and histories were reviewed: M015 inviscid Cd falls 0.232600→0.146703 and M200 laminar 3.991995→2.635137 over their final500 rows; Re20 ends Cd8.86975, Cl−0.38716. Scores and exact artifact hashes are in the case notes. The case scores are 1.5, 1.5, 1.5, 2, 2, 1, 1.5 and 1 in benchmark order. Contour/residual figure attribution, all other rubric dimensions and DQ remain partial.
+Individual delivered force plots and histories were reviewed: M015 inviscid Cd falls 0.232600→0.146703 and M200 laminar 3.991995→2.635137 over their final500 rows; Re20 ends Cd8.86975, Cl−0.38716. Scores and exact artifact hashes are in the case notes. The case scores are 1.5, 1.5, 1.5, 2, 2, 1, 1.5 and 1 in benchmark order. At that checkpoint contour/residual figure attribution, other rubric dimensions and DQ remained partial.
 
 All seven pages of accepted sibling PDF SHA256 c5a75b4aace101f18c4f77c7a2dd63aab61c65258b1a6a30b810f5d9b51ce8bf were visually checked; workspace report.tex matches immutable source SHA256 72af1ca7691327971231593973bf700ef96294b0d2011fa7949ae8d34ba779fc. Nested table environments trigger two recorded LaTeX errors and omit the force and rank tables from the PDF, though immutable force_table.tex contains numerical coefficients. Captions claim Re200 shedding although the delivered forces drift without visible oscillation. Rank test final endpoints differ substantially: M015 inviscid np4 step2261 vs np8 step5000, Re20 np4 step30000 vs np8 step5000; starts and binary revision differ or are unbound, so those values alone do not establish a rank-only mismatch.
 
@@ -59,3 +59,7 @@ Clean immutable source builds in network-disabled cfd-bench using bundled extern
 The surface skin-friction coefficient is hardcoded to zero in output.cpp:107–109; the recovered M015 laminar, Re20 and Re200 surface.csv files contain zero cf on all 404, 97 and 97 rows respectively. This separate surface-output defect does not imply the nonzero integrated force histories are fabricated.
 
 Independent DQ7 evidence also appears in Re20: source main.cpp:243–246 marks any max-step steady run converged without testing force stability. Its delivered last5000 rows change Cd7.89684→8.86975 and Cl−0.83702→−0.38716 while metadata says converged. DQ findings for other triggers are evidence-qualified in the scorecard; production binaries and exact image bindings remain unverified.
+
+## Qualified full review — 2026-10-31
+
+All eight case histories and force plots, seven PDF pages, ten rubric sections, 27 weighted review points and DQ1–13 have been reviewed against the immutable source and available contestant-delivered workspace results. Pre-DQ score remains **62/100**, DQ7 and separate TASK shortcut 7 apply. Submitted plotting source `solver/tools/plot_results.py` has Git blob `5e23eaf8f3b853635e3651f6f1a9075336949bf8` both in immutable `1e29ab3c` and workspace. It reads force CSV columns directly and assembles VTU polygons with explicit triangle-to-parent-cell indexing; this is consistent with the delivered manifest and the inspected plots, but does not prove byte-identical generation of every historical image. The Re200 caption claims shedding, contrary to the selected force history; that contradiction does not establish an unrelated figure source under DQ8. Production executable, environment and exact per-image generation remain unbound; the earlier first-order experiment does not prove the selected run used that mode, and unequal rank tests do not establish a rank-only effect. These limitations are incorporated in the qualified verdict. No unsteady case was rerun.
