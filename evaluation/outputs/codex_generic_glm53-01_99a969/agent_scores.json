@@ -145,8 +145,8 @@
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+          "score": 3,
+          "notes": "Production bf6e816 and final b962bf5 fv_solver.cpp:229\u2013255,421\u2013437 read pressure gradient for temperature slot via grad_off(1+q); correction replaces along-connecting-direction component but generally retains wrong transverse component. :449\u2013462 and :718\u2013725 project tangential shear; no-slip surface velocity is zero."
         },
         {
           "id": "cfd.implicit",
@@ -170,7 +170,7 @@
           "notes": "Same revision bf6e816 and matching step-0 Re20 force rows, but settled np4/8 Cl differs by 0.40238 and Cd by 0.07007; Selected root session confirms matching np4 controls and fresh start; DQ4 applies. Numerical rank sensitivity material."
         }
       ],
-      "overall_score": 3.52,
+      "overall_score": 3.42,
       "disqualification_flags": []
     },
     "result_review": {
@@ -231,7 +231,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 80,
+    "total_scored": 77,
     "sections": [
       {
         "id": "build_cli",
@@ -265,8 +265,8 @@
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 10,
-        "notes": "Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence."
+        "score": 7,
+        "notes": "bf6e816 and b962bf5 fv_solver.cpp:229\u2013255 store gradients in rho,u,v,p,T order, but :421\u2013437 uses grad_off(1+q) for u,v,T, so T takes pressure gradient index3 instead of T index4. Directional correction restores only projected component; tangential shear force and no-slip boundary outputs are implemented."
       },
       {
         "id": "implicit_transient",

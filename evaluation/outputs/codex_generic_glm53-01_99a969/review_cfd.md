@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:22:46.341600+00:00
+Generated: 2026-10-30T05:23:41.417031+00:00
 
-**Overall score: 3.52**
+**Overall score: 3.42**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T05:22:46.341600+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Production bf6e816 and final b962bf5 fv_solver.cpp:229–255,421–437 read pressure gradient for temperature slot via grad_off(1+q); correction replaces along-connecting-direction component but generally retains wrong transverse component. :449–462 and :718–725 project tangential shear; no-slip surface velocity is zero. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 2 | Production bf6e816 fv_solver.cpp:1049–1094 uses SGS with lagged gradients/limiter; selected steady metadata records every inner target missed, but separate outer target and force plateau govern convergence. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T05:22:46.341600+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.52
+- Overall score (0-5): 3.42
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

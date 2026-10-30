@@ -4,7 +4,7 @@ Submission `codex/generic/glm53-01` at `b962bf5bfa815f4bf65d8ffc05b5734a7ac53ceb
 
 ## Verdict
 
-**80/100; DQ=true under trigger 4 (partial calibration).** Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence.
+**77/100; DQ=true under trigger 4 (partial calibration).** Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence.
 
 ## Evidence
 
@@ -43,3 +43,8 @@ The accepted workspace-existing 16-page PDF SHA de84aec749fbf635bfed9b43f518e638
 ## DQ4 control reconciliation — 2026-10-30
 
 The previously missing np4 CLI controls were found in the selected root-session tool call timestamp 2026-08-29T22:43:17.883Z: `scripts/run_case.sh cylinder_m010_laminar_re20 4 results/rank_study/cylinder_m010_laminar_re20_np4 --flux rusanov --cfl-initial 5 --cfl-max 10 --max-steps 12000`, with no restart argument. These match the immutable report/run_manifest.md np8 production options. Both packages name bf6e816, and step-0 Cd/Cl match to roundoff, supporting matching fresh starts. Both converged to tight tails. Their last-20 mean Cl differs by 0.40237944 in absolute dimensionless force coefficient, about 44% of the np4 drag scale; Cd differs 7.6%. This is an order-one change in the force vector under DQ4, independent of the unstable relative ratio to near-zero lift. Report.tex:737–756 candidly discloses the discrepancy; disclosure does not eliminate DQ4. DQ false→true, score remains80. No rank rerun. Remaining source and other DQ criteria partial.
+
+
+## Partial viscous source review — 2026-10-30
+
+Both production bf6e816 and final b962bf5 fv_solver.cpp:229–255 store primitive gradients in rho,u,v,p,T order. In residual assembly :421–437 the loop for u,v,T chooses `grad_off(1+q)`, so q=2 selects pressure index3 rather than temperature index4. The directional correction replaces only the projection along the connecting direction; the transverse contribution can remain the pressure gradient, corrupting Fourier heat flux. Tangential traction and skin-friction projections are actually implemented at :449–462 and :718–725, and no-slip rows explicitly use zero wall velocity :694–699. Viscous rubric 10→7, CFD viscous point 4→3, total80→77. This is a defective implementation of an existing claimed method, not a separate DQ6 inference. Other source and DQ review partial; no CFD rerun.
