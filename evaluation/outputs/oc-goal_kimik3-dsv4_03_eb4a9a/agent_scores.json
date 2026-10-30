@@ -31,67 +31,67 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "Immutable source builds in network-disabled cfd-bench with explicit externals; no CTests registered."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "notes": "Input-driven CLI and output/restart controls are source-supported; no full case rerun."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "Separate case, mesh, solver_core and output modules; fixed 2-D state remains."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "notes": "No internal executable wrapper identified in source; external similarity investigation excluded under trust policy."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "Generic case-configured CGNS/BC rather than fixed filenames; CGNS MIXED sections unsupported."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "Rank0 serial mesh partition, METIS, local ghost exchange and reductions; np study close in absolute forces, exact binaries unbound."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
           "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "notes": "Positivity fallback, finite checks and output controls present; no independent memory stress test."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 3,
+          "notes": "Eight original attempts passed recorded validator; clean isolated build succeeds, no registered CTests or unsteady rerun."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "notes": "Modular source, plotting and report tools; output revision fbb predates material final changes."
         }
       ],
-      "overall_score": 4.0,
+      "overall_score": 4.15,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -100,81 +100,81 @@
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "Conservative 2-D perfect-gas equations and coefficient conventions source/report-supported."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
           "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "notes": "Separate TRI_3/QUAD_4 multizone CGNS sections and edge pairing; MIXED section unsupported."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "solver_core.cpp:316\u2013320 refreshes state, gradient and limiter each residual, then assembles conservative faces."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
           "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "notes": "Rusanov and transient low-Mach scaling implemented; no independent shock/order verification."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "notes": "Farfield, slip and no-slip paths exist; wall viscous gradient uses adjacent-cell LSQ without direct wall correction."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "LSQ face reconstruction and positivity fallback present; smooth-grid order not independently established."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "Venkat limiter recomputed in each residual call; production binary/source attribution remains qualified."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 3.5,
-          "notes": "solver_core.cpp:299\u2013311,550\u2013557 integrates full traction, but report.tex:214\u2013217 claims tangential-only; magnitude of normal contribution unknown."
+          "score": 3,
+          "notes": "Full wall traction is accumulated in force split despite report claim of tangential-only; normal contribution not quantified."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 3.5,
+          "notes": "LU-SGS and local pseudo-time implemented; early M2 residual-based stop leaves evolving drag."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "main.cpp:236\u2013255 recomputes full residual and limiter each inner update with fixed BDF histories; exact production binary unbound."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "Rank0 global preprocessing, METIS, owned/ghost state/gradient exchange and reductions; rank-study forces close in absolute terms."
         }
       ],
-      "overall_score": 3.95,
+      "overall_score": 4.12,
       "disqualification_flags": []
     },
     "result_review": {
@@ -183,129 +183,129 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "Original attempt eight outputs passed recorded examiner validation; status claims checked independently."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 4.5,
+          "notes": "Recorded eight-case validator accepted; Re200 not rerun and raw output checked from immutable attempt."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 2,
-          "notes": "M2 laminar marked converged at989 despite final200 Cd0.1311815\u21920.1161380; DQ7."
+          "notes": "M2 laminar completed/converged at989 despite final200 Cd0.1311815\u21920.1161380; DQ7."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "notes": "Re20 Cd2.10053 and Re200 Cd1.19536/St\u22480.178 plausible; M2 laminar early force instability and full-traction split constrain quality."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
           "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "notes": "Re200 committed plot resolves late lift/drag and original attempt includes residual plot; M2 laminar chart compresses both late traces."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 3,
+          "notes": "Report falsely calls M2 early result converged and describes full wall traction as tangential-only, but otherwise gives case results and St."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 4,
-          "notes": "Validated immutable contestant-result evidence."
+          "score": 3.5,
+          "notes": "Original immutable attempt preserves raw results and figures; plotter maps cells correctly, but isolated rerenders differ slightly and exact historic binary is unbound."
         }
       ],
-      "overall_score": 3.6,
+      "overall_score": 3.58,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 68,
+    "total_scored": 82.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 8,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 9.5,
+        "notes": "Immutable source CMake clean-builds network-disabled with 2 CPUs/3GiB/256 processes; original eight packages passed validator. CTest has no registered tests."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
-        "score": 8,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 9,
+        "notes": "main.cpp:364\u2013375 root-preprocesses mesh and loads local partitions; mesh.cpp:150\u2013185 handles separate TRI_3/QUAD_4/BAR_2, not CGNS MIXED sections."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 8,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 13,
+        "notes": "Conservative face residual, Rusanov and boundary-state paths are implemented; solver_core.cpp:293\u2013296 uses adjacent-cell LSQ viscous wall gradient rather than wall-corrected gradient, and no independent order test performed."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 8,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 9,
+        "notes": "LSQ gradients, Venkat limiter and positivity fallback are in source; no independent smooth-order study and exact historic executable unbound."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 6,
-        "notes": "solver_core.cpp:299\u2013311,550\u2013557 accumulates full wall traction, while report.tex:214\u2013217 claims tangential-only. Magnitude of normal contribution is unproven; other viscous review pending."
+        "notes": "solver_core.cpp:299\u2013311,550\u2013557 integrates full wall traction while report.tex:214\u2013217 claims tangential-only. Normal contribution magnitude is unproven; adjacent-cell wall gradients are a further accuracy limitation."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 8,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 13,
+        "notes": "LU-SGS steady and BDF2 full residual are present; main.cpp:236\u2013255 recomputes residual/limiter after updates. M2 early steady residual-only stop has drifting forces; historic binary cannot be bound by reported revision."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 8,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 9,
+        "notes": "Root-only global preprocessing and METIS/neighbor halos; original np1/2/4/8 Re20 Cd2.100510\u20132.100531, while executable hashes are unbound."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
         "score": 7,
-        "notes": "M2 laminar is marked converged at989 while Cd decreases 0.1311815\u21920.1161380 over final200; remaining cases pending."
+        "notes": "M2 laminar marked converged at989 despite Cd0.1311815\u21920.1161380 final200. Remaining steady histories are plausible with caveats; Re20 Cd2.10053 and Re200 mean Cd1.19536/St~0.178 supported."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
         "score": 3,
-        "notes": "Report claims early M2 convergence despite late drag drift and describes full traction force split as tangential-only. Re200 delivered evidence was previously overlooked."
+        "notes": "All16 accepted PDF pages inspected; M2 laminar plot compresses late forces and report incorrectly calls its state converged and wall force split tangential. Original attempt preserves Re200 residual omitted from curated subset."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 3.5,
+        "notes": "Configurable case and modular 2-D mesh/solver/output but fixed 2-D four-variable state limits 3-D and EOS extensions."
       }
     ]
   },
@@ -347,16 +347,88 @@
     "triggered": true,
     "flags": [
       {
+        "id": 1,
+        "text": "Existing solver executable is called internally",
+        "evidence": "No internal wrapper/call identified in source.",
+        "found": false
+      },
+      {
+        "id": 2,
+        "text": "Force or residual files are generated without solving",
+        "evidence": "Original attempt contains solver output histories; no synthetic generation established.",
+        "found": false
+      },
+      {
+        "id": 3,
+        "text": "The code can only read these two mesh filenames through hard-coded branches",
+        "evidence": "Case-configured CGNS/BC reader exists; unsupported MIXED section separate.",
+        "found": false
+      },
+      {
+        "id": 4,
+        "text": "MPI rank count changes results by order-one amounts for steady cases",
+        "evidence": "Original np1/2/4/8 Re20 Cd2.1005116/2.1005098/2.1005165/2.1005306; M015 Cd0.002359/0.002381/0.002480/0.002478. No order-one absolute change established; near-zero lift relative ratios not used. Historical binary hashes unbound.",
+        "found": false
+      },
+      {
+        "id": 5,
+        "text": "The solver uses explicit time stepping only",
+        "evidence": "LU-SGS steady and BDF2 full-residual inner loop exist.",
+        "found": false
+      },
+      {
+        "id": 6,
+        "text": "The report claims algorithms that cannot be found in source",
+        "evidence": "Full viscous traction is used despite a tangential-only split claim; real force algorithm exists and mismatch is penalized under viscous/report consistent with precedents. No absent core algorithm established.",
+        "found": false
+      },
+      {
         "id": 7,
         "text": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
         "evidence": "Original immutable attempt 8285817 M2 laminar metadata SHA256 712f34b1629f8656c9c1da986902fbcd97e470d1610cd6a6e84225b12e121d69 marks completed/converged at989. Force SHA256 2f67e80def9420c60a71a3e1bae6b65ccd0d3953a90982e0bf0d55822cb42c5a shows Cd0.1311815\u21920.1161380 final200 and 0.1201499\u21920.1161380 final100; real 3-order residual reduction does not establish early stable forces required by TASK.md:140,172. Remaining DQ review pending."
+      },
+      {
+        "id": 8,
+        "text": "Report figures do not correspond to submitted field/CSV outputs",
+        "evidence": "Original attempt has figures and data, and correct triangle-to-cell plot mapping. Re20 rerender differs slightly in pixels/dimensions; no specific misrepresentation established.",
+        "found": false
+      },
+      {
+        "id": 9,
+        "text": "metadata.json reports METIS/ParMETIS but code uses only a geometric split or full-state replication",
+        "evidence": "Root-only global preprocessing, METIS graph partition and local/ghost exchange are present.",
+        "found": false
+      },
+      {
+        "id": 10,
+        "text": "A report claims second-order reconstruction or a shock limiter that is disabled for production cases",
+        "evidence": "Production report/metadata claim LSQ/Venkat and source implements them; debug first-order path exists but no production use proven, historic binary unbound.",
+        "found": false
+      },
+      {
+        "id": 11,
+        "text": "Surface no-slip checks fail because reported wall rows are actually adjacent cell-center velocities without documentation",
+        "evidence": "solver_core.cpp:616 writes no-slip boundary u=v=0, not mislabeled cell-center velocities.",
+        "found": false
+      },
+      {
+        "id": 12,
+        "text": "Figure files are misnamed, such as a Mach image that actually plots pressure",
+        "evidence": "Plotter maps field names and no specific incorrect filename established.",
+        "found": false
+      },
+      {
+        "id": 13,
+        "text": "The finite-volume solver core, time integration, or MPI communication is copied, adapted, or wrapped from an existing open-source CFD codebase",
+        "evidence": "No direct internal wrapper evidence found; external similarity investigation excluded by trust policy.",
+        "found": false
       }
     ]
   },
   "limitations": [
-    "All eight packages validate at attempt 8285817960158113d900fad3335bccef9c0f764f; raw data excluded from curated branch.",
-    "No terminal response sidecar due deterministic absence.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "Historical output metadata revision fbb2e6e predates low-Mach transient code in final source; uncommitted changes may have been used, exact historic binary unbound.",
+    "Original immutable attempt 8285817 preserves raw outputs and extra residual images; workspace raw result files were removed. Selected root has no deterministic terminal final answer.",
+    "Re20 isolated redraw differs slightly in dimensions/pixels; individual figure-to-data binding remains unproven. No unsteady rerun or external similarity investigation."
   ]
 }

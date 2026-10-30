@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "Conservative 2-D perfect-gas equations and coefficient conventions source/report-supported."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "notes": "Separate TRI_3/QUAD_4 multizone CGNS sections and edge pairing; MIXED section unsupported."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "solver_core.cpp:316\u2013320 refreshes state, gradient and limiter each residual, then assembles conservative faces."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "notes": "Rusanov and transient low-Mach scaling implemented; no independent shock/order verification."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "notes": "Farfield, slip and no-slip paths exist; wall viscous gradient uses adjacent-cell LSQ without direct wall correction."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "LSQ face reconstruction and positivity fallback present; smooth-grid order not independently established."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "Venkat limiter recomputed in each residual call; production binary/source attribution remains qualified."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 3.5,
-      "notes": "solver_core.cpp:299\u2013311,550\u2013557 integrates full traction, but report.tex:214\u2013217 claims tangential-only; magnitude of normal contribution unknown."
+      "score": 3,
+      "notes": "Full wall traction is accumulated in force split despite report claim of tangential-only; normal contribution not quantified."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 3.5,
+      "notes": "LU-SGS and local pseudo-time implemented; early M2 residual-based stop leaves evolving drag."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "main.cpp:236\u2013255 recomputes full residual and limiter each inner update with fixed BDF histories; exact production binary unbound."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Validated immutable contestant-result evidence."
+      "score": 4.5,
+      "notes": "Rank0 global preprocessing, METIS, owned/ghost state/gradient exchange and reductions; rank-study forces close in absolute terms."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.95
+  "overall_score": 4.12
 }

@@ -96,64 +96,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "Immutable source builds in network-disabled cfd-bench with explicit externals; no CTests registered."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "notes": "Input-driven CLI and output/restart controls are source-supported; no full case rerun."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "Separate case, mesh, solver_core and output modules; fixed 2-D state remains."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "notes": "No internal executable wrapper identified in source; external similarity investigation excluded under trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "Generic case-configured CGNS/BC rather than fixed filenames; CGNS MIXED sections unsupported."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "Rank0 serial mesh partition, METIS, local ghost exchange and reductions; np study close in absolute forces, exact binaries unbound."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "notes": "Positivity fallback, finite checks and output controls present; no independent memory stress test."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 3,
+        "notes": "Eight original attempts passed recorded validator; clean isolated build succeeds, no registered CTests or unsteady rerun."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "notes": "Modular source, plotting and report tools; output revision fbb predates material final changes."
       }
     ],
     "disqualification_flags": [
@@ -198,7 +198,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 4.15
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -208,78 +208,78 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "Conservative 2-D perfect-gas equations and coefficient conventions source/report-supported."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "notes": "Separate TRI_3/QUAD_4 multizone CGNS sections and edge pairing; MIXED section unsupported."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "solver_core.cpp:316\u2013320 refreshes state, gradient and limiter each residual, then assembles conservative faces."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "notes": "Rusanov and transient low-Mach scaling implemented; no independent shock/order verification."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "notes": "Farfield, slip and no-slip paths exist; wall viscous gradient uses adjacent-cell LSQ without direct wall correction."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "LSQ face reconstruction and positivity fallback present; smooth-grid order not independently established."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "Venkat limiter recomputed in each residual call; production binary/source attribution remains qualified."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 3.5,
-        "notes": "solver_core.cpp:299\u2013311,550\u2013557 integrates full traction, but report.tex:214\u2013217 claims tangential-only; magnitude of normal contribution unknown."
+        "score": 3,
+        "notes": "Full wall traction is accumulated in force split despite report claim of tangential-only; normal contribution not quantified."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 3.5,
+        "notes": "LU-SGS and local pseudo-time implemented; early M2 residual-based stop leaves evolving drag."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "main.cpp:236\u2013255 recomputes full residual and limiter each inner update with fixed BDF histories; exact production binary unbound."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "Rank0 global preprocessing, METIS, owned/ghost state/gradient exchange and reductions; rank-study forces close in absolute terms."
       }
     ],
     "disqualification_flags": [
@@ -314,7 +314,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.95
+    "overall_score": 4.12
   },
   "result_review": {
     "review_area": "result_review",
@@ -324,50 +324,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "Original attempt eight outputs passed recorded examiner validation; status claims checked independently."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 4.5,
+        "notes": "Recorded eight-case validator accepted; Re200 not rerun and raw output checked from immutable attempt."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 2,
-        "notes": "M2 laminar marked converged at989 despite final200 Cd0.1311815\u21920.1161380; DQ7."
+        "notes": "M2 laminar completed/converged at989 despite final200 Cd0.1311815\u21920.1161380; DQ7."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "notes": "Re20 Cd2.10053 and Re200 Cd1.19536/St\u22480.178 plausible; M2 laminar early force instability and full-traction split constrain quality."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
         "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "notes": "Re200 committed plot resolves late lift/drag and original attempt includes residual plot; M2 laminar chart compresses both late traces."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 3,
+        "notes": "Report falsely calls M2 early result converged and describes full wall traction as tangential-only, but otherwise gives case results and St."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 4,
-        "notes": "Validated immutable contestant-result evidence."
+        "score": 3.5,
+        "notes": "Original immutable attempt preserves raw results and figures; plotter maps cells correctly, but isolated rerenders differ slightly and exact historic binary is unbound."
       }
     ],
     "disqualification_flags": [
@@ -397,7 +397,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.6
+    "overall_score": 3.58
   },
   "measurements": {
     "note": "opencode harness: codex tool-usage/LOC extraction not applicable",
