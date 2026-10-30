@@ -92,7 +92,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_04_16009f` | partial: DQ10, DQ7, TASK full mesh established; case/rubric/source review pending |
 | `codex_generic_05_2599b1` | partial: TASK full mesh established; report-to-package mapping and rubric pending |
 | `codex_generic_glm53-01_99a969` | fully reviewed: 77/100, DQ4; eight cases 2; both gates pass |
-| `codex_generic_glm53-02_ff20c7` | unreviewed |
+| `codex_generic_glm53-02_ff20c7` | partial: DQ7 plateau correction and cylinder case evidence; remaining DQ/rubric pending |
 | `codex_generic_glm53-03_d469fb` | unreviewed |
 | `codex_generic_glm53-04_adde03` | unreviewed |
 | `codex_generic_opus46-01_3a72ea` | unreviewed |
@@ -599,3 +599,8 @@ glm53-01 DQ4 resolution supersedes previous uncertainty: selected root-session t
 glm53-01 viscous checkpoint: bf6e816 and final b962bf5 fv_solver.cpp:229–255 store gradients rho,u,v,p,T, but :421–437 selects grad_off(1+q) for u,v,T, using pressure instead of temperature for q=2; directional correction only fixes the along-connection projection. Tangential traction and zero wall velocities actually exist (:449–462,694–725). Viscous rubric10→7, total80→77, CFD viscous4→3; defective method does not itself establish DQ6. Remaining review partial, no CFD rerun.
 
 glm53-01 full review: 94→77/100, DQ4=true after matched controls/revision and absolute Re20 Cl difference0.40238; all eight cases 2 due missing readable steady histories and late Re200 drag. All rubric sections, 27 review points and DQ triggers independently assessed; thermal-gradient indexing bug, frozen-coefficient target limitation, source revision difference, FFT window sensitivity and report figure defects documented. Both gates pass; no CFD rerun, direct fully refreshed Re200 target count or external authorship search.
+
+
+## glm53-02 partial plateau and cylinder review — 2026-10-30
+
+DQ7 removed provisionally: prior finding used residual-order shortfalls alone, but TASK.md:172 allows justified stable-force/bounded-residual plateaus. Report.tex:501–509 discloses terminal criterion, and last-10% Cl/Cd and residual half-means for all three inviscid cases independently support stable bounded plateaus (exact values in agent_report). Re20 5→2 despite plausible Cd1.997 and stable tail: accepted PDF p10 and immutable image have startup-dominated force plot and thin-strip Mach/pressure; standalone vorticity also fails to reveal wake. Re200 note corrected numeric force attribution to report_data.tex:20 (Cd0.9727, Cl0.001315±0.01511; St0.14 at :42); raw FFT gives 0.14 for t>=100/150/200, but p10 late lift/drag unreadable so score remains2. Metadata git_revision=null; other DQ/rubric/source review partial. No CFD rerun.

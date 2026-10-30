@@ -331,22 +331,22 @@
       "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=1.392e-04, CD=0.1938 at 1bc8fb6:solver/report/report_data.tex:26; residual history 1bc8fb6:solver/report/figures/residual_history_naca0012_m200_laminar_re5000.png (referenced at solver/report/report.tex:397); no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Run manifest records converged at step 627 with 3.00 orders; readable laminar package has a smaller margin."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 5,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-0.001196, CD=1.997 at 1bc8fb6:solver/report/report_data.tex:19; residual history 1bc8fb6:solver/report/figures/residual_history_cylinder_m010_laminar_re20.png (referenced at solver/report/report.tex:415); force history 1bc8fb6:solver/report/figures/forces_history_cylinder_m010_laminar_re20.png (referenced at solver/report/report.tex:427); computed-field contour 1bc8fb6:solver/report/figures/pressure_contour_cylinder_m010_laminar_re20.png (referenced at solver/report/report.tex:421). Score 5 retained after the post-processing audit. Prior case judgment: Re20 is marked converged at step 1809 with 5.00 orders; complete package passes validator."
+      "score": 2,
+      "notes": "Score 5\u21922: report_data.tex:19 gives Cd1.997, Cl\u22120.001196 and selected raw late Cd 1.99656\u20131.99838 supports a plausible stable result; residual plot is readable. Visually reviewed accepted PDF p10 and immutable force image: startup Cd\u2248103 compresses the late force tail. Its pressure/Mach panels collapse to a thin domain strip, not a wake-revealing contour; standalone vorticity image has the same strip and no other delivered wake plot found. Post-processing floor is unmet. Production metadata git_revision=null; no CFD rerun."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=3.828e-04, CD=7.297e-06 at 1bc8fb6:solver/report/report_data.tex:32; residual history 1bc8fb6:solver/report/figures/residual_history_cylinder_m010_laminar_re200.png (referenced at solver/report/report.tex:444); force history 1bc8fb6:solver/report/figures/forces_history_cylinder_m010_laminar_re200.png (referenced at solver/report/report.tex:445); computed-field contour 1bc8fb6:solver/report/figures/vorticity_contour_cylinder_m010_laminar_re200_re200.png (referenced at solver/report/report.tex:456); shedding statistic St=0.14 at 1bc8fb6:solver/report/report_data.tex:42; no committed/referenced late-time periodic-force plot. Score capped at 2 from 4.5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Re200 is statistically_periodic at step 30000/t=300 with 4.73 orders and report force/wake evidence; no unsteady rerun was performed."
+      "notes": "Score 2 retained: report_data.tex:20 gives post-transient mean Cd0.9727 and mean Cl0.001315\u00b10.01511, correcting prior mistaken citation of residual-statistics line32; :42 gives St0.14. Selected raw force FFT peak 0.14 for t>=100,150,200; Cl range -0.03642\u20130.03765 for t>=150. PDF p10/committed force figure is dominated by startup Cd\u224830 and shows no readable late lift AND drag oscillations; wake zoom on p11 is readable. Metadata git_revision=null and fully refreshed-limiter strict miss count is unknown. No unsteady rerun."
     }
   },
   "disqualification": {
-    "triggered": true,
+    "triggered": false,
     "flags": [
       {
         "id": 7,
-        "text": "metadata/status marks incomplete or failed runs as successful",
-        "evidence": "Validator passes structurally, but three inviscid steady statuses claim converged despite reported residual reductions of 2.51, 2.38, and -0.04 orders and documented plateau acceptance.",
-        "found": true
+        "flag": "metadata.json marks incomplete or failed runs as successful final results",
+        "found": false,
+        "evidence": "Prior flag relied solely on inviscid outer residual reductions 2.509,2.383,-0.040. TASK.md:172 allows a clearly justified stable force/residual plateau. For M015/M080/M200 inviscid the last-10% residual half-means are 1.460e-5\u21921.433e-5, 1.01311e-6\u21921.01318e-6, 1.32099e-4\u21921.31991e-4; Cd half-means 0.00228491\u21920.00228905, 0.00928821490\u21920.00928821492, 0.092531847\u21920.092531879; Cl half-means 0.00041351\u21920.00041146, 0.000435354436\u21920.000435354431, -0.000174608\u2192-0.000174055. The report explicitly discloses plateau criteria; residual-order shortfalls alone do not prove false success. Re200 FFT peak0.14 across t>=100,150,200, with nonzero oscillation; strict refreshed-limiter misses remain unknown. Other DQ triggers remain under review."
       }
     ]
   },
