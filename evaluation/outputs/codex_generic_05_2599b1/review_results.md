@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:11:16.429521+00:00
+Generated: 2026-10-30T05:12:16.203606+00:00
 
 **Overall score: 1.35**
 
@@ -21,7 +21,7 @@ Generated: 2026-10-30T05:11:16.429521+00:00
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 1 | Report admits unrealistic cylinder forces and no Re200 shedding. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 3 | Figures/report source present; many figures not retained by audit. |
+| 5 | **res.visualization** Visualizations | 0.15 | 3 | Accepted eight-page PDF pp4–5 has M015/M080 Mach and M2 pressure figures with blank plot areas despite colorbars; p8 Re200 force history is startup dominated with no readable late lift/drag. Residual and Cp figures exist. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
 | 6 | **res.report** Report quality and honesty | 0.15 | 2 | Terminal response contains contradictory success claims but does document limitations. |
