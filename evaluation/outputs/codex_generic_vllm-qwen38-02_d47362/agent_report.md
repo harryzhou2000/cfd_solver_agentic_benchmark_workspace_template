@@ -91,8 +91,8 @@ No unanswered metadata questions. Selected root `01a027fa-eaf9-77b3-97ad-e7b1445
 
 ## Limitations
 
-No evaluator clean build or MPI rerun. M2 laminar uses first-order B0VOL in 18353/20816 cells; several steady results are documented plateau stops; Re200 was not rerun and lacks a resolved street.
+Clean immutable-source build succeeded in a network-disabled restricted container; CTest found no registered tests. No evaluator MPI or CFD rerun. M2 laminar uses first-order B0VOL in 18353/20816 cells; several steady results are documented plateau stops; Re200 was not rerun and lacks a resolved street.
 
 ## Verdict
 
-Score: **82/100; disqualified: true (trigger 7).** The M2 success labels are inconsistent with the submitted force histories. The 100-point rubric and review-area scores remain provisional pending full recalibration; the previously cited rank-sensitivity statement alone does not establish trigger 4.
+Score: **80/100; disqualified: true (trigger 7).** The M2 success labels are inconsistent with the submitted force histories. The remaining production-binary and rank-diagnostic attribution remain unresolved; the previously cited rank-sensitivity statement alone does not establish trigger 4.

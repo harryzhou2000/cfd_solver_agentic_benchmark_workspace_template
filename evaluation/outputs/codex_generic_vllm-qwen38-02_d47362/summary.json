@@ -274,63 +274,63 @@
         "title": "Build system and reproducibility",
         "weight": 0.15,
         "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "Immutable 84ccf50 clean CMake build succeeded in isolated cfd-bench, 2 CPUs/3 GiB/network disabled; CTest registered no tests. Metadata revision is configure-time cached, not a production binary identifier."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "main.cpp:345\u2013459 implements solve, partition and meshinfo; README:180\u2013187 documents reproduction and bad-path handling. Clean compilation verified; no evaluator CFD run."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "Separate case, mesh, partition, solver, driver and output modules provide extension boundaries; solver.cpp still couples 2-D fluid details to the state."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "Source and repository evidence reviewed for this scope; no copied solver core was established. This is not an external authorship or exhaustive license investigation."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "case.h loads case JSON and main invokes general solve path; driver.cpp:495\u2013535 has an optional diagnostic fixed 20-cell ring perturbation. Its use in selected production is not established."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 4,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "partition.cpp:271\u2013332 root-only setup uses METIS; solver.cpp:500\u2013526 uses depth-two ghost stencil. README rank sensitivity and session5_notes:705\u2013714 leave exact matched np4 binary/result comparison unresolved."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 4,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "solver.cpp:697\u2013716 bounds reconstructed primitives; driver.cpp detects nonfinite residuals. M2 production success labels nevertheless accept unstable force histories, and optional fixed ring perturbation is mesh specific."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "score": 3.5,
+        "notes": "Clean build passed; CTest found no registered tests. Contestant session5_notes:503\u2013507 reports two selftests; no evaluator CFD execution or independent solver validation was performed."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 4,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "Source is modular and report/figure assets are tracked in 84ccf50; raw selected history files are original-workspace evidence, not found at the same checkpoint paths."
       }
     ],
     "disqualification_flags": [
@@ -375,7 +375,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.3
+    "overall_score": 4.25
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -386,77 +386,77 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "report.tex equations/nondimensionalization and solver.cpp conservative flux/stress implement compressible 2-D gas; source uses constant case viscosity, with Sutherland limitation disclosed."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "mesh.cpp:94 onward reads CGNS multizone geometry; partition.cpp:289\u2013332 constructs graph/METIS. Geometry generality and exact production binary remain limited by evidence."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "solver.cpp:733\u2013802 uses canonical face orientation, convective and viscous signs and adds adjacent-cell contributions. Numerical invariance across all rank/configuration combinations remains unproven."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "solver.cpp:153\u2013168,186\u2013227 contains Roe/Harten-Yee and LLF fallback; transient LLF selection is documented. M2 cases show important stability limits."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "solver.cpp:250\u2013307 implements characteristic farfield; wall treatment and boundary-state output are described in report.tex:573 onward. No independent wall-row re-run was performed."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 3.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "solver.cpp:520\u2013526,627\u2013660 computes least-squares gradients and limiter with ghost stencils; report.tex:793\u2013798 explicitly discloses first-order M2 overrides and transient frozen limiter."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 3.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "solver.cpp:592 onward limits gradients and :697\u2013716 clips face primitives with positive floors. Overrides in M2 substantially suppress second order; no blanket DQ10 is inferred when disclosed."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 4,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "solver.cpp:734 onward uses face-averaged velocity/temperature gradients and Newtonian flux; :1431\u20131495 removes normal traction from the stated tangential shear force. Report admits constant viscosity limitation."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 4,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "driver.cpp steady loop uses LU-SGS inner iterations and target plus optional residual plateau; M2 laminar stops with force still rapidly changing, so residual-only success is not physical convergence."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
         "score": 4,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "driver.cpp:476\u2013482,602\u2013679 retains BDF2 histories, evaluates spatial-plus-time residual and checks inner target. Report/session document 281115f Re200 build lineage but no executable hash; no transient rerun."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 3,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "Root-only METIS partition and depth-two ghost stencils in partition.cpp/solver.cpp; report.tex:1638\u20131670 gives Re20 and M080 rank comparisons. A reported np4 divergent diagnostic remains unbound and unquantified against a matched final state."
       }
     ],
     "disqualification_flags": [
@@ -501,50 +501,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "score": 4,
+        "notes": "Output packages and report were structurally accepted by prior examiner; M2 success statuses contradict their force evidence, so correct file layout is not valid convergence."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "Prior examiner evidence reports structural pass; it cannot determine physical convergence or identify the false success labels. No new evaluator CFD run."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 2,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "M2 inviscid periodic and four-step M2 laminar converged labels are unsupported by their submitted force figures. Re200 reaches t300 but report discloses no resolved vortex street."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 2.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "notes": "M2 inviscid irregular lift and laminar Cd1.913 still falling; Re200 weak non-street signal. Remaining steady cases have distinct force-window evidence in case notes; np4 M2 divergence lacks matched binary proof."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "score": 3.5,
+        "notes": "30-page compiled report includes per-case fields and force/residual figures. Re200 full-history force scale hides both late components; several steady plots compress startup-to-tail detail."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "score": 3.5,
+        "notes": "Report documents first-order M2 controls and absent Re200 street, but calls physically unsettled M2 outputs successful. Re200 late force plot is unreadable; report text supplies numeric and drifting frequency estimates."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 4.5,
-        "notes": "Evidence-backed substantive review; see agent report."
+        "score": 3.5,
+        "notes": "Report figure manifest and committed figure assets exist; original workspace selected CSVs were not found at corresponding checkpoint paths and revision stamp is cached. No unverified binary-source link assumed."
       }
     ],
     "disqualification_flags": [
@@ -574,7 +574,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.92
+    "overall_score": 3.3
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/vllm-qwen38-02",

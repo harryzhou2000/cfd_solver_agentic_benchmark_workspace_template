@@ -7,63 +7,63 @@
       "title": "Build system and reproducibility",
       "weight": 0.15,
       "score": 4.5,
-      "notes": "Evidence-backed substantive review; see agent report."
+      "notes": "Immutable 84ccf50 clean CMake build succeeded in isolated cfd-bench, 2 CPUs/3 GiB/network disabled; CTest registered no tests. Metadata revision is configure-time cached, not a production binary identifier."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4.5,
-      "notes": "Evidence-backed substantive review; see agent report."
+      "notes": "main.cpp:345\u2013459 implements solve, partition and meshinfo; README:180\u2013187 documents reproduction and bad-path handling. Clean compilation verified; no evaluator CFD run."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4.5,
-      "notes": "Evidence-backed substantive review; see agent report."
+      "notes": "Separate case, mesh, partition, solver, driver and output modules provide extension boundaries; solver.cpp still couples 2-D fluid details to the state."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4.5,
-      "notes": "Evidence-backed substantive review; see agent report."
+      "notes": "Source and repository evidence reviewed for this scope; no copied solver core was established. This is not an external authorship or exhaustive license investigation."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4.5,
-      "notes": "Evidence-backed substantive review; see agent report."
+      "notes": "case.h loads case JSON and main invokes general solve path; driver.cpp:495\u2013535 has an optional diagnostic fixed 20-cell ring perturbation. Its use in selected production is not established."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "Evidence-backed substantive review; see agent report."
+      "notes": "partition.cpp:271\u2013332 root-only setup uses METIS; solver.cpp:500\u2013526 uses depth-two ghost stencil. README rank sensitivity and session5_notes:705\u2013714 leave exact matched np4 binary/result comparison unresolved."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4,
-      "notes": "Evidence-backed substantive review; see agent report."
+      "notes": "solver.cpp:697\u2013716 bounds reconstructed primitives; driver.cpp detects nonfinite residuals. M2 production success labels nevertheless accept unstable force histories, and optional fixed ring perturbation is mesh specific."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Evidence-backed substantive review; see agent report."
+      "score": 3.5,
+      "notes": "Clean build passed; CTest found no registered tests. Contestant session5_notes:503\u2013507 reports two selftests; no evaluator CFD execution or independent solver validation was performed."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Evidence-backed substantive review; see agent report."
+      "notes": "Source is modular and report/figure assets are tracked in 84ccf50; raw selected history files are original-workspace evidence, not found at the same checkpoint paths."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.3
+  "overall_score": 4.25
 }

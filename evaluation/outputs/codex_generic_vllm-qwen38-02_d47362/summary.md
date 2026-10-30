@@ -99,6 +99,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_generic_vllm-qwen38-02_d47362/review_code.md` (overall: 4.3)
+- Code review scorecard: `codex_generic_vllm-qwen38-02_d47362/review_code.md` (overall: 4.25)
 - CFD methods review: `codex_generic_vllm-qwen38-02_d47362/review_cfd.md` (overall: 4.04)
-- Result review: `codex_generic_vllm-qwen38-02_d47362/review_results.md` (overall: 3.92)
+- Result review: `codex_generic_vllm-qwen38-02_d47362/review_results.md` (overall: 3.3)
