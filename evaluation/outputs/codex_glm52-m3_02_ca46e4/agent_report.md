@@ -3,7 +3,7 @@
 - Result branch: `codex/glm52-m3/02`; immutable submission: `6148b7b8525000945d5591faceda30aeb1bc1180`.
 - Initial branch/commit: `codex/glm52-m3/init` / `746ef3980fddf8558a8b7e29370ff32117604d8e` (operator-authorized post-run reconstruction).
 - Identity: v2 `codex_glm52-m3_02_ca46e4`; `run_identity.json` SHA-256 `18dc46b7b02c18853880ad546084beffdd62f4ee8cbb28d3ec40df13d1681419`.
-- Scope: partial recalibration including recovered contestant-checkpoint results. No evaluator execution was performed, and cylinder Re200 was not rerun.
+- Scope: qualified full recalibration including recovered contestant-checkpoint results. An isolated clean build passed; no CFD case was rerun, and cylinder Re200 was not rerun.
 
 ## Session accounting correction
 
@@ -36,7 +36,7 @@ Important source/report limitations are material. `output.hpp` records the invis
 | Report, Visualization, Analysis | 5 | 1.5 | Checkpoint plots exist; several report numbers and inner-count claims conflict. |
 | Extensibility | 5 | 3 | Modular components, limited architecture. |
 
-**Provisional total: 58.5/100.**
+**Qualified total: 58.5/100.**
 
 ## Review-area scores
 
@@ -67,3 +67,8 @@ The selected project-local Codex root is `019fbf4d-babf-7561-98c3-4f8b7915d4be` 
 ## Verdict and limitations
 
 This is a partial solver implementation, not a complete benchmark submission. Its source earns method credit, but immutable evidence supports no required case result. The evaluation remains unable to pass completion gates until the final-response sidecar is restored, index/report artifacts are refreshed, and the normal gate tooling is run. The original run environment remains unavailable because provenance is reconstructed post-run.
+
+
+## Qualified full review — 2026-10-31
+
+All ten sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to available evidence. Final 58.5/100, DQ7 and TASK full mesh remain. The recovered checkpoint supplies eight case histories and standalone figures; the earlier all-zero absence rationale is superseded. Its Re200 last inner ratio 0.915 versus target 0.001 and disclosed absence of a street support the false-success finding. The reported 120000 misses are summed across ranks and cannot be interpreted as distinct failed physical steps; the metadata fraction is clamped. Exact historic executable and full strict miss counts remain unbound. Earlier partial sections are historical checkpoints; no CFD, rank or Re200 rerun.
