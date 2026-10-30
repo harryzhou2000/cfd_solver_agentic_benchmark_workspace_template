@@ -78,7 +78,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_01_0c1996` | partial: 48/100, DQ 6/7/10 and TASK full mesh; two historical raw np1 packages unavailable |
 | `codex_dsv4_flash_02_3447d3` | fully reviewed: 68/100, DQ7 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_03_294b64` | fully reviewed: 74/100, DQ7; both gates pass |
-| `codex_dsv4_flash_04_755869` | unreviewed |
+| `codex_dsv4_flash_04_755869` | partial: provenance/DQ corrected; source/rubric/remaining DQ review pending |
 | `codex_dsv4_flash_06_5b6b08` | unreviewed |
 | `codex_dsv4_flash_07_aeae21` | unreviewed |
 | `codex_dsv4_flash_08_efba3c` | unreviewed |
@@ -382,3 +382,8 @@ dsv4_flash_03 partial source checkpoint: immutable `9772c16` main.cpp:135–153 
 ## dsv4_flash_03 full calibration — 2026-10-30
 
 Rubric 87→74/100, DQ false→true under 7 for Re20 force-unstable plateau. All ten rubric sections and 27 review points carry criterion-specific evidence. Case scores 2,2,2,2,2,2,2,1 → 2,3,3,2,2,2,1,1. Accepted PDF SHA and immutable TeX provenance documented above; its case figures are delivered despite excluded curated PNGs. Re20 last 2000 Cd half-means 1.96276→2.12848, Cl −0.84047→−1.11943; residual-only stop contradicts stable-force claim. Re200 steady/no shedding is honestly disclosed, score 1; source target includes absolute 1e−14 fallback, so exact strict miss count remains unknown. First-order production exceptions are disclosed, no DQ10; global mesh root-only preprocessing ends before solve. Original np1/2/4/8 continuation forces agree at common steps. Source contains dangling `c_str()` transient postmortem pointer; no fabricated-output inference. Immutable build passed with warnings in network-disabled restricted cfd-bench. Both record gates pass; no CFD/unsteady rerun, exhaustive external authorship or pixel audit.
+
+
+## dsv4_flash_04 partial provenance/DQ correction — 2026-10-30
+
+The selected terminal response explicitly states sibling-workspace results completed the case matrix. Independent SHA-256 checks show all eight case force/residual/metadata/status files match sibling dsv4_flash_03 byte-for-byte (32 comparisons); Re20 force SHA `3767b2f4b388298ce59c39e156f767fe0b545ba745bd2983c2887b73d235f5cd`, residual SHA `a519c26fc01b049558e7a9693b647c28090ad46bccc587a8845bcfb427d14f4a`. Prior DQ2 asserted force/residual files generated without solving, but the evidence establishes reuse of real sibling histories, not that no solver generated them. DQ2 is marked not established, without calling data synthetic. All eight case scores remain 0 because these histories do not establish results of this submitted solver. DQ7 independently applies: copied Re20 metadata reports completed/converged while original last 2000 Cl half-means −0.84047→−1.11943 and Cd 1.96276→2.12848, contradicting stable plateau. Other source/rubric/DQ review partial; both gates pass; no CFD rerun.
