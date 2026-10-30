@@ -6,15 +6,15 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 2,
-      "notes": "CMake declares C++17, MPI, CGNS/HDF5/METIS and README documents a build, but no clean build was performed and hard-coded .so paths reduce portability."
+      "score": 4,
+      "notes": "Fresh immutable 6148b7b CMake build passed in network-disabled cfd-bench, 2 CPUs/3 GiB/256 processes; CTest found no registered tests. Historical executable remains unbound."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 3,
-      "notes": "main.cpp parses solve, --case and --output plus documented options and reports parse/partition errors; no executable or malformed-input behavior was run."
+      "score": 2.5,
+      "notes": "main.cpp:34,61 parses --restart, but no later reference to restartFile exists and no state is loaded. The output writer creates binary state files; parsing alone does not implement restart."
     },
     {
       "id": "code.organization",
@@ -56,7 +56,7 @@
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 1,
-      "notes": "No committed test suite, required case result packages, or reproducible submitted validation record exists."
+      "notes": "Clean immutable-source build passed; CTest reports no registered tests. Historical result packages were recovered; no evaluator CFD run or Re200 rerun."
     },
     {
       "id": "code.hygiene",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.69
+  "overall_score": 2.94
 }

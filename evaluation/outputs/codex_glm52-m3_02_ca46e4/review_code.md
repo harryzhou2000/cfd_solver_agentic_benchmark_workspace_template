@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T09:09:32.447364+00:00
+Generated: 2026-10-30T09:11:35.814378+00:00
 
-**Overall score: 2.69**
+**Overall score: 2.94**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 2 | CMake declares C++17, MPI, CGNS/HDF5/METIS and README documents a build, but no clean build was performed and hard-coded .so paths reduce portability. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Fresh immutable 6148b7b CMake build passed in network-disabled cfd-bench, 2 CPUs/3 GiB/256 processes; CTest found no registered tests. Historical executable remains unbound. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 3 | main.cpp parses solve, --case and --output plus documented options and reports parse/partition errors; no executable or malformed-input behavior was run. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 2.5 | main.cpp:34,61 parses --restart, but no later reference to restartFile exists and no state is loaded. The output writer creates binary state files; parsing alone does not implement restart. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
 | 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Separate case config, CGNS reader, mesh, partitioner, flux, reconstruction, solver, output, and plotting modules are present. |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T09:09:32.447364+00:00
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Positivity checks and errors exist, but main.cpp labels max-step steady runs converged unconditionally and submitted evidence cannot demonstrate robust completion. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 1 | No committed test suite, required case result packages, or reproducible submitted validation record exists. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 1 | Clean immutable-source build passed; CTest reports no registered tests. Historical result packages were recovered; no evaluator CFD run or Re200 rerun. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Readable header-oriented C++ and scripts, but report/source contradictions and unverified generated-result claims remain. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T09:09:32.447364+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.69
+- Overall score (0-5): 2.94
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

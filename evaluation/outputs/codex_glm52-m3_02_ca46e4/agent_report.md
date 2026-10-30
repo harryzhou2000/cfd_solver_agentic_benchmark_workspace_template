@@ -19,24 +19,24 @@ Contestant branch checkpoint `99413eb21f9d380de985f5a75842fafc7d75866f`, recorde
 
 Source supports a credible partial implementation: C++17 CMake, JSON case parsing, CGNS mesh/geometry code, METIS graph partitioning, owned/ghost state, neighbor nonblocking communication, global reductions, Roe/Rusanov fluxes, least-squares reconstruction, a Barth-type limiter, positivity fallback, viscous fluxes, LU-SGS-like sweeps, and a BDF2-shaped physical-time/inner loop.
 
-Important source/report limitations are material. `output.hpp` records the inviscid flux as Roe even where the runtime `--rusanov` switch selects Rusanov. The README's transient command passes `--max-inner 1`; `report.tex` also acknowledges that override, although elsewhere it claims five inner iterations. `main.cpp` labels a steady run that reaches max steps as `converged` regardless of its residual reduction. Re200 checkpoint metadata labels completion/periodicity with final inner ratio 0.915 against the 0.001 target. Submitted output.hpp sums per-rank misses and clamps the reported success fraction to 0.95; the reported 120000 misses are not 120000 distinct physical steps. This substantiates DQ7. Separately, full raw/global mesh is retained on every rank throughout solver execution, contrary to TASK.md:46,227 despite real METIS and halo exchange.
+Important source/report limitations are material. `output.hpp` records the inviscid flux as Roe even where the runtime `--rusanov` switch selects Rusanov. A clean immutable-source build succeeds, but `--restart` is parsed and never loaded or applied; the full viscous force split includes normal traction. The README's transient command passes `--max-inner 1`; `report.tex` also acknowledges that override, although elsewhere it claims five inner iterations. `main.cpp` labels a steady run that reaches max steps as `converged` regardless of its residual reduction. Re200 checkpoint metadata labels completion/periodicity with final inner ratio 0.915 against the 0.001 target. Submitted output.hpp sums per-rank misses and clamps the reported success fraction to 0.95; the reported 120000 misses are not 120000 distinct physical steps. This substantiates DQ7. Separately, full raw/global mesh is retained on every rank throughout solver execution, contrary to TASK.md:46,227 despite real METIS and halo exchange.
 
 ## Rubric scores (100 points)
 
 | Section | Max | Score | Basis |
 |---|---:|---:|---|
-| Build, CLI, Output Contract | 10 | 5 | Source/docs present; unbuilt, unrun, and no final outputs. |
+| Build, CLI, Output Contract | 10 | 4.5 | Clean build succeeds; restart argument is ignored. |
 | Mesh And Geometry | 10 | 8 | CGNS/unstructured geometry and adjacency source. |
 | FV Residual And BC | 15 | 11 | Residual/flux/BC code, not numerically verified. |
 | Second-Order Spatial Scheme | 10 | 8 | Reconstruction, limiter, positivity source; material fallbacks. |
-| Viscous Terms | 10 | 7 | Gradient/Newtonian/Fourier source, no laminar evidence. |
+| Viscous Terms | 10 | 5.5 | Newtonian/Fourier source; force split integrates full traction. |
 | Implicit And Transient Methods | 15 | 9 | LU-SGS/BDF2 source; Re200 inner override/non-evidence. |
 | MPI | 10 | 5 | METIS and neighbor halos exist, but each rank retains full mesh during solve; rank evidence under review. |
 | Case Results And Validation | 10 | 3 | Recovered eight packages reviewed; unsteady miss/no street and mixed steady convergence. |
 | Report, Visualization, Analysis | 5 | 1 | Methods/figures exist but lack data/manifest/coverage. |
 | Extensibility | 5 | 3 | Modular components, limited architecture. |
 
-**Provisional total: 60/100.**
+**Provisional total: 58/100.**
 
 ## Review-area scores
 

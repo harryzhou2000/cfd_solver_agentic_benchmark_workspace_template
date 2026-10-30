@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T09:09:32.447778+00:00
+Generated: 2026-10-30T09:11:35.814852+00:00
 
-**Overall score: 3.29**
+**Overall score: 3.23**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -30,7 +30,7 @@ Generated: 2026-10-30T09:09:32.447778+00:00
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Barth-Jespersen-style limiter plus density/pressure fallback/revert logic is present. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 3 | Newtonian/Fourier normal viscous-flux and wall-gradient code is present, without submitted laminar evidence. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 2.5 | solver.hpp:596–610 computes full viscous traction, including normal stress, in reported force split; rubric requires tangential skin friction. Numerical viscous results and negative M2 viscous drag are independently limited. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | LU-SGS-like sweep and CFL spectral radii are present, but README production command overrides case controls and no credible steady output is submitted. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T09:09:32.447778+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.29
+- Overall score (0-5): 3.23
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
