@@ -32,11 +32,11 @@ Important source/report limitations are material. `output.hpp` records the invis
 | Viscous Terms | 10 | 7 | Gradient/Newtonian/Fourier source, no laminar evidence. |
 | Implicit And Transient Methods | 15 | 9 | LU-SGS/BDF2 source; Re200 inner override/non-evidence. |
 | MPI | 10 | 5 | METIS and neighbor halos exist, but each rank retains full mesh during solve; rank evidence under review. |
-| Case Results And Validation | 10 | 0 | Provisional pending recovered checkpoint package review. |
+| Case Results And Validation | 10 | 3 | Recovered eight packages reviewed; unsteady miss/no street and mixed steady convergence. |
 | Report, Visualization, Analysis | 5 | 1 | Methods/figures exist but lack data/manifest/coverage. |
 | Extensibility | 5 | 3 | Modular components, limited architecture. |
 
-**Provisional total: 57/100.**
+**Provisional total: 60/100.**
 
 ## Review-area scores
 
@@ -50,7 +50,7 @@ All 27 individual review points and their evidence notes are in `agent_scores.js
 
 ## Per-case scores
 
-The previous eight 0/5 case scores are retained temporarily only as provisional values: the now-identified checkpoint contains all eight canonical result packages. Each case and its plots, controls and physical credibility still require independent assessment.
+All eight historical checkpoint packages and their force, residual and contour figures have now been individually reviewed; prior zeros were based on the incorrect assumption that curated-tip omission meant no contestant-delivered outputs. Their independent scores and source hashes are in `agent_scores.json`. Several numerical values in the report force table conflict with the selected histories. Re200 remains incomplete with a final strict target miss and no resolved street; its late force components are unreadable at the delivered plot scale. Binary attribution and remaining rubric/DQ review remain partial.
 
 ## Disqualification assessment
 
