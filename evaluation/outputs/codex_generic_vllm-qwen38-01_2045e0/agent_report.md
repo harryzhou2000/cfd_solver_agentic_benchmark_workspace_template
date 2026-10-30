@@ -4,7 +4,7 @@ Submission `codex/generic/vllm-qwen38-01` at `e185a0a43f42781f93348a4dc85c7f8aec
 
 ## Verdict
 
-**63/100; DQ=false.** One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata.
+**62.5/100; DQ=false (partial review).** One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata.
 
 ## Evidence
 
@@ -43,3 +43,10 @@ Each of the seven failed selected force CSVs matches contestant checkpoint `18e7
 Checkpoint `18e70a9` contains the selected Re20 rank-study force CSVs, matching workspace bytes. At common step300 np1 Cd1.615080/Cl−0.338803 and np2 Cd−0.451645/Cl−0.335014 differ by 2.066725 in absolute drag. The np1 force CSV SHA256 is `9d6163f4b2a2a08de8af65c41b03aca79db01069a8d834af075c47ec2ccc92d2`; np2 SHA256 is `623371f9ccd46d5ea24886b63b0fb3b131cc10c15f832c56c8d1d4c70a3a471b`. Their case JSON files are byte-identical SHA256 `b7eda45660d0292b73af6dd27b9701bacfcd6208929a35a70f60f2e755888b7e`; recorded commands select Rusanov without restart, and stdout reports the same freestream and no-slip initial profile.
 
 Both runs are explicitly failed and revisions are `unknown`. The np1 run was 2026-08-26 03:44–08:16 UTC, np2 2026-08-27 02:15–06:54 UTC; source fix `4722f3a` was committed between them on Aug 26 at 13:09 UTC. This prevents binding the executions to the same binary and does not prove rank alone caused the order-one difference. DQ4 remains unasserted pending decisive source/binary evidence; MPI credit and numerical anomaly are documented separately. No CFD rerun.
+
+
+## Source and review calibration — 2026-10-30
+
+`mesh.cpp:158–176` assumes an HDF5 `/Base` group and discovers multi-zone meshes, with unsupported element types skipped; geometry is less general than the old full mesh score suggested. `grad.cpp:9–14,97–125` computes owned-cell least-squares gradients and a Barth-style limiter, while `residual.cpp:16–21` uses an unreconstructed ghost state across partition boundaries. This is a concrete local accuracy limitation, not proof that all production reconstruction was disabled. Mesh9→8 and second-order7→6; total64.5→62.5.
+
+`main.cpp:102–112` constructs the full mesh only on root during setup; `partition.cpp:355` invokes METIS and `halo.cpp:23–33` exchanges neighbor state. `forces.cpp:24–37` integrates tangential wall shear, while `output.cpp:69–72` writes zero no-slip boundary velocity. The examiner validator independently passed M200 inviscid and the report and rejected seven packages because their metadata honestly says completed=false. All criterion notes now distinguish source implementation from failed results. DQ4 and historical binary binding remain unresolved as documented above; no production CFD rerun.

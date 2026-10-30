@@ -305,36 +305,36 @@
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3.5,
+        "notes": "Distinct mesh, flux, gradients, residual, partition, halo and output modules; driver.cpp remains monolithic."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 4,
+        "notes": "No copied core identified in inspected source; no exhaustive external similarity search performed."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3.5,
+        "notes": "Case configuration supplies input path; mesh.cpp:164 assumes HDF5 /Base layout, a generality limitation distinct from two-filename dispatch."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3,
+        "notes": "Root-only global mesh, METIS and neighbor halos exist; failed Re20 rank-study drag anomaly is unbound to same binary."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 2.5,
+        "notes": "Roe fallback and positivity/rollback paths exist, but seven production attempts explicitly fail; restart reader has unchecked fread warnings."
       },
       {
         "id": "code.testing",
@@ -347,8 +347,8 @@
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 4,
+        "notes": "Checkpoint 18e70a9 contains no tracked solver/build paths and preserves result evidence; manager curation is not contestant misconduct."
       }
     ],
     "disqualification_flags": [
@@ -393,7 +393,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.5
+    "overall_score": 3.43
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -403,71 +403,71 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3.5,
+        "notes": "flux.cpp and residual.cpp implement 2-D compressible inviscid and viscous flux paths; seven selected cases fail."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3.5,
+        "notes": "mesh.cpp:158\u2013176 uses /Base HDF5 layout, discovers zones and handles supported separate element sections; general CGNS names/types are limited."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3,
+        "notes": "residual.cpp uses face fluxes and boundary paths; selected case failures and partition-boundary ghost reconstruction limit confidence."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3.5,
+        "notes": "flux.cpp:39\u201342,76 implements Roe with Rusanov fallback; failed cases limit production credibility."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3.5,
+        "notes": "residual.cpp handles wall/farfield fluxes; output.cpp:69\u201372 writes zero no-slip wall velocities."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 2.5,
+        "notes": "grad.cpp:9\u201314 computes owned-cell least-squares gradients; residual.cpp:16\u201321 uses unreconstructed ghost state at partition boundaries."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3,
+        "notes": "grad.cpp:81\u2013125 applies Barth-style limiting and positivity checks on owned reconstructed states; ghost side remains first order."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3,
+        "notes": "forces.cpp:24\u201337 projects tangential shear, and residual.cpp:57\u201367 evaluates wall viscous stress. All selected laminar/cylinder results are failed."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 2.5,
+        "notes": "driver.cpp implements iterative steady solve and rollback, but six selected steady cases fail and one converges; individual histories documented."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 2.5,
+        "notes": "driver.cpp:1094\u20131112 freezes BDF anchor and records actual outcomes; selected Re200 is failed at t30 with 3000 target misses and max3142 reported inner evaluations."
       },
       {
         "id": "cfd.mpi_partition",
@@ -509,7 +509,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.09
+    "overall_score": 3.02
   },
   "result_review": {
     "review_area": "result_review",
@@ -520,49 +520,49 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "notes": "One selected case passes the final-status requirement; seven are honestly completed=false/failed. Required artifacts remain in checkpoint."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "notes": "Read-only examiner validator passes M200 inviscid and report and rejects seven selected failed packages because metadata completed=false."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 1.5,
+        "notes": "Only M200 inviscid reaches reported residual target; seven runs are explicitly failed, including Re200 at t30/300."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "notes": "M200 inviscid Cd\u22480.0931 is plausible with force variation; failed cases show large lift, negative or frozen drag, or incomplete transient."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3.5,
+        "notes": "Accepted checkpoint-matched 50-page report has actual case histories and contours; the prior missing-plot claim was false. Some plots are small and partial results remain clearly identified."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3.5,
+        "notes": "Report documents seven failures and partial Re200 FFT; references and actual figures are present. Historic source revision unknown and rank-study binary binding unresolved."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 2,
-        "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+        "score": 3,
+        "notes": "Report PDF and selected case histories match checkpoint 18e70a9; source revision is unknown and Re20 rank study spans an intervening source fix."
       }
     ],
     "disqualification_flags": [
@@ -592,7 +592,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.0
+    "overall_score": 2.4
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/generic/vllm-qwen38-01",

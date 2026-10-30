@@ -6,71 +6,71 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 2,
-      "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+      "score": 3.5,
+      "notes": "flux.cpp and residual.cpp implement 2-D compressible inviscid and viscous flux paths; seven selected cases fail."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 2,
-      "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+      "score": 3.5,
+      "notes": "mesh.cpp:158\u2013176 uses /Base HDF5 layout, discovers zones and handles supported separate element sections; general CGNS names/types are limited."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 2,
-      "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+      "score": 3,
+      "notes": "residual.cpp uses face fluxes and boundary paths; selected case failures and partition-boundary ghost reconstruction limit confidence."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 2,
-      "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+      "score": 3.5,
+      "notes": "flux.cpp:39\u201342,76 implements Roe with Rusanov fallback; failed cases limit production credibility."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 2,
-      "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+      "score": 3.5,
+      "notes": "residual.cpp handles wall/farfield fluxes; output.cpp:69\u201372 writes zero no-slip wall velocities."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 2,
-      "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+      "score": 2.5,
+      "notes": "grad.cpp:9\u201314 computes owned-cell least-squares gradients; residual.cpp:16\u201321 uses unreconstructed ghost state at partition boundaries."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 2,
-      "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+      "score": 3,
+      "notes": "grad.cpp:81\u2013125 applies Barth-style limiting and positivity checks on owned reconstructed states; ghost side remains first order."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 2,
-      "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+      "score": 3,
+      "notes": "forces.cpp:24\u201337 projects tangential shear, and residual.cpp:57\u201367 evaluates wall viscous stress. All selected laminar/cylinder results are failed."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 2,
-      "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+      "score": 2.5,
+      "notes": "driver.cpp implements iterative steady solve and rollback, but six selected steady cases fail and one converges; individual histories documented."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 2,
-      "notes": "One production case reaches its residual target; seven are honestly failed and the explicit final validator rejects incomplete metadata."
+      "score": 2.5,
+      "notes": "driver.cpp:1094\u20131112 freezes BDF anchor and records actual outcomes; selected Re200 is failed at t30 with 3000 target misses and max3142 reported inner evaluations."
     },
     {
       "id": "cfd.mpi_partition",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.09
+  "overall_score": 3.02
 }
