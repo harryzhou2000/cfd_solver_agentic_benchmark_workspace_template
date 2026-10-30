@@ -1,6 +1,6 @@
 ## Calibration checkpoint (partial)
 
-**68/100; DQ=true (provisional, trigger 7).** The original M2 laminar result is marked converged at step989, but final200 Cd falls 0.1311815→0.1161380 and final100 0.1201499→0.1161380; its real three-order residual reduction does not prove a force-stable early result. Re200 2→4: the input table defines St, committed force plot resolves late lift and drag, and the original attempt contains a residual plot. Source wall-force integration uses full viscous traction while the report claims tangential-only; this is scored under viscous/report, without inferring fabricated data. Full source, remaining cases, rubric and DQ review continue.
+**68/100; DQ=true (provisional, trigger 7).** The original M2 laminar result is marked converged at step989, but final200 Cd falls 0.1311815→0.1161380 and final100 0.1201499→0.1161380; its real three-order residual reduction does not prove a force-stable early result. Re200 2→4: the input table defines St, committed force plot resolves late lift and drag, and the original attempt contains a residual plot. Source wall-force integration uses full viscous traction while the report claims tangential-only; this is scored under viscous/report, without inferring fabricated data. Other steady case histories have now been checked against original attempt blobs; Re20 4→4.5 for its stable plausible Cd≈2.10. Full source, rubric and DQ review continue.
 
 # Evaluation
 
