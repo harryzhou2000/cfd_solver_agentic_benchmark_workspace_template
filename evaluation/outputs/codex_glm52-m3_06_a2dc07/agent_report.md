@@ -12,7 +12,7 @@ I inspected the committed C++/CMake/report sources and workspace-local output ev
 
 The selected workspace-local Codex root is `019fff60-e8b8-7990-8df2-f0784bde7d60`, with its seven descendants. It is the only root and spans the benchmark work; it ends blocked with an honest report that the AUSM+-up experiments could initiate but not sustain shedding. The exact final response sidecar SHA-256 is `f5bf0361a7cd37cb4cdd08bf6ae15b595878f6e31021ef97c52e9ff7de9d1c85`; `run_identity.json` SHA-256 is `89a4afdb6bc4ddb0a420ddf6aa9ff12e5ac3ea79e640b4065d8de7f3b3a85d70`. These sidecars are unindexed under the current contract and are not validated by `cfdeval check`.
 
-## Rubric: 72/100
+## Rubric: 71/100
 
 | Section | Score | Evidence |
 |---|---:|---|
@@ -23,19 +23,19 @@ The selected workspace-local Codex root is `019fff60-e8b8-7990-8df2-f0784bde7d60
 | Viscous Terms | 7/10 | Formulation exists, but viscous force credibility is weak. |
 | Implicit And Transient | 10/15 | BDF2 source exists; Re200 does not deliver a successful physical transient. |
 | MPI | 8/10 | METIS/neighbor halo/rank sweep evidence. |
-| Case Results | 5/10 | Seven readable cases; Re200 is failed and several forces are implausible. |
+| Case Results | 4/10 | Seven packages pass structural checks; M015 inviscid is labeled converged despite a changing force trajectory, and Re200 is honestly failed. |
 | Report And Analysis | 3/5 | Readable and candid about failure, but completion/traceability is partial. |
 | Extensibility | 3/5 | Modular 2-D code, constrained scalar implicit architecture. |
 
-Case scores: M0.15 inviscid 2.5, M0.80 inviscid 3.0, M2 inviscid 3.0, M0.15 Re5000 1.5, M0.80 Re5000 2.5, M2 Re5000 2.5, cylinder Re20 2.0, cylinder Re200 0.0.
+Case scores: M0.15 inviscid 1.5, M0.80 inviscid 3.0, M2 inviscid 3.0, M0.15 Re5000 1.5, M0.80 Re5000 2.5, M2 Re5000 2.5, cylinder Re20 2.0, cylinder Re200 0.0.
 
 ## Disqualification and limitations
 
-No direct evidence supports any of the 13 DQ triggers. In particular, the Re200 result is not falsely presented as successful: it is marked failed/incomplete and the validator rejects it. The detailed false findings are in `agent_scores.json`.
+Trigger 7 applies to the M015 inviscid case: its workspace metadata labels the 2500-step result converged although its force trajectory continues changing. The selected launch call and exact late-window evidence are documented in the scorecard. Re200 is separately and honestly labeled failed. Other DQ findings remain under review.
 
 No evaluator rerun was performed. Raw results, generated PDF/logs, CSV manifests, and excluded figures were not copied into this manager snapshot. The final identity is `codex_glm52-m3_06_a2dc07`.
 
-Verdict: **72/100, no disqualification**. The solver has meaningful source/MPI work and seven structurally readable steady cases, but cannot receive Re200 case credit and has material physical-credibility limitations.
+Verdict: **71/100, disqualified under trigger 7**. The solver has meaningful source/MPI work and seven structurally readable steady cases, but cannot receive Re200 case credit and has material physical-credibility limitations.
 
 ## Ongoing calibration
 

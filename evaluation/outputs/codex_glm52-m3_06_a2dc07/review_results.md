@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T10:07:20.394673+00:00
+Generated: 2026-10-30T10:11:16.384244+00:00
 
-**Overall score: 2.5**
+**Overall score: 2.3**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,7 +15,7 @@ Generated: 2026-10-30T10:07:20.394673+00:00
 | 2 | **res.validator** Automated validator results | 0.10 | 2 | Immutable source and read-only workspace evidence; no evaluator rerun. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Immutable source and read-only workspace evidence; no evaluator rerun. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 1 | M015 inviscid workspace metadata reports completed/converged at step2500 and residual reduction0.630631 orders. Selected root launch call_0e630484a01143669e0ccd24 at 2026-08-15T06:23:25.620Z (arguments SHA256 41a6bf0fa351694946aaf41e18f6fbdb37cfbf41710ee2157eb0b1c79262603f) sets the canonical case max-steps to 2500; workspace metadata start 06:23:27 and 14db231d manifest match. Final1000 Cd 0.477107→0.432620 and Cl −0.00478578..0.00945677; final500 Cd 0.454068→0.432631, so the force trajectory is not a justified plateau. Recorded revision 937f09c uses a 500-row 5% Cd-only plateau, ignoring Cl; exact binary is unbound. Separately Re200 is honestly failed, not the basis for DQ7. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
 | 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 2 | Immutable source and read-only workspace evidence; no evaluator rerun. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T10:07:20.394673+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.5
+- Overall score (0-5): 2.3
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

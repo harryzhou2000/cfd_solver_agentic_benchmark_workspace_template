@@ -487,8 +487,8 @@
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 2,
-        "notes": "Immutable source and read-only workspace evidence; no evaluator rerun."
+        "score": 1,
+        "notes": "M015 inviscid workspace metadata reports completed/converged at step2500 and residual reduction0.630631 orders. Selected root launch call_0e630484a01143669e0ccd24 at 2026-08-15T06:23:25.620Z (arguments SHA256 41a6bf0fa351694946aaf41e18f6fbdb37cfbf41710ee2157eb0b1c79262603f) sets the canonical case max-steps to 2500; workspace metadata start 06:23:27 and 14db231d manifest match. Final1000 Cd 0.477107\u21920.432620 and Cl \u22120.00478578..0.00945677; final500 Cd 0.454068\u21920.432631, so the force trajectory is not a justified plateau. Recorded revision 937f09c uses a 500-row 5% Cd-only plateau, ignoring Cl; exact binary is unbound. Separately Re200 is honestly failed, not the basis for DQ7."
       },
       {
         "id": "res.plausibility",
@@ -521,32 +521,12 @@
     ],
     "disqualification_flags": [
       {
-        "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "Report figures do not correspond to submitted field/CSV outputs",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "metadata.json marks incomplete or failed runs as successful",
-        "triggered": null,
-        "notes": ""
-      },
-      {
-        "flag": "Debug outputs presented as final case results",
-        "triggered": null,
-        "notes": ""
+        "id": 7,
+        "text": "metadata marks incomplete or failed runs as successful final results",
+        "evidence": "M015 inviscid workspace metadata reports completed/converged at step2500 and residual reduction0.630631 orders. Selected root launch call_0e630484a01143669e0ccd24 at 2026-08-15T06:23:25.620Z (arguments SHA256 41a6bf0fa351694946aaf41e18f6fbdb37cfbf41710ee2157eb0b1c79262603f) sets the canonical case max-steps to 2500; workspace metadata start 06:23:27 and 14db231d manifest match. Final1000 Cd 0.477107\u21920.432620 and Cl \u22120.00478578..0.00945677; final500 Cd 0.454068\u21920.432631, so the force trajectory is not a justified plateau. Recorded revision 937f09c uses a 500-row 5% Cd-only plateau, ignoring Cl; exact binary is unbound. Separately Re200 is honestly failed, not the basis for DQ7."
       }
     ],
-    "overall_score": 2.5
+    "overall_score": 2.3
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/glm52-m3/06",

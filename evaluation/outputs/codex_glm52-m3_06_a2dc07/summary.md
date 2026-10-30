@@ -125,4 +125,4 @@
 
 - Code review scorecard: `codex_glm52-m3_06_a2dc07/review_code.md` (overall: 3.6)
 - CFD methods review: `codex_glm52-m3_06_a2dc07/review_cfd.md` (overall: 3.82)
-- Result review: `codex_glm52-m3_06_a2dc07/review_results.md` (overall: 2.5)
+- Result review: `codex_glm52-m3_06_a2dc07/review_results.md` (overall: 2.3)
