@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 4.5,
+      "notes": "Immutable-source CMake build passed in network-disabled scratch with configured externals, 2 CPUs/4 GiB/128 processes and 240-second timeout."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 2.5,
+      "notes": "main.cpp:35\u201342 parses --restart but never reads the variable; it initializes and solves instead. Required case/output and missing-case checks exist; other bad inputs not exhaustively tested."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 3.5,
+      "notes": "Source separates config, mesh, partition, numerics, solver and output, though fixed 2-D state and monolithic marching constrain extensibility."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "notes": "CMake builds submitted source with MPI/CGNS/METIS; no direct external solver executable wrapper found. External source-similarity and license audit not exhaustive."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 3.5,
+      "notes": "Case inputs drive physics and mesh; mesh.cpp multi-zone logic is specialized to a two-zone connectivity mapping and was not validated for arbitrary layouts."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 2,
+      "notes": "main.cpp:76\u2013104 broadcasts global mesh to every rank, retains gmesh through solve, contrary to TASK.md:227. METIS and state neighbor exchanges are present."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 1.5,
+      "notes": "solver.cpp:181,201\u2013245 caps transient inner loops at 5 without target monitoring; output.cpp:255\u2013267 reports zero misses and periodic completion unconditionally."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 2.5,
+      "notes": "Original eight workspace packages and report passed structural validation; clean immutable build passed. No independent CFD rerun or numerical verification suite established."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 3,
+      "notes": "Modules build, but hardcoded success metadata and a silently ignored restart option undermine contract; report captures an earlier incomplete result snapshot."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.0
+  "overall_score": 3.1
 }

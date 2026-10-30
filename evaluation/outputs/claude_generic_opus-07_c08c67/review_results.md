@@ -2,32 +2,32 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T02:35:57.003821+00:00
+Generated: 2026-10-30T02:37:52.260572+00:00
 
-**Overall score: 4.0**
+**Overall score: 2.33**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 4 | Source and original result evidence reviewed; no evaluator rerun. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 2 | Structural validator accepts original packages, but metadata hardcodes inner success and periodic status, and --restart is ignored. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 4 | Source and original result evidence reviewed; no evaluator rerun. |
+| 2 | **res.validator** Automated validator results | 0.10 | 5 | Original eight case packages and report pass explicit structural validation; validator cannot establish inner convergence or physical accuracy. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Source and original result evidence reviewed; no evaluator rerun. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 2 | Original report captures t=64.9 incomplete Re200 and four pending steady cases, while later workspace results reach t=300. The later Re200 is flat and hardcoded as periodic; M0.15 inviscid hits its step cap. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4 | Source and original result evidence reviewed; no evaluator rerun. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 1.5 | Later workspace M0.15 lam Cd=0.352, M2 lam Cd=5.723 and Re20 Cd=3.565/Cl=0.149; Re200 t≥180 Cl≈0.428 steady. These undermine numerical credibility. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 4 | Source and original result evidence reviewed; no evaluator rerun. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2 | Submitted report provides first three inviscid histories/contours and Re200 partial force/residual plots; four other cases are marked pending with no case figures, and no late periodic force plot. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 4 | Source and original result evidence reviewed; no evaluator rerun. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 2.5 | Report candidly states t=64.9 incomplete and five inner updates without target test, but later result metadata claims perfect success and full report has four cases pending. Report and later workspace are distinct snapshots. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 4 | Source and original result evidence reviewed; no evaluator rerun. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 2.5 | Figure manifest links canonical case plots to result CSV; report snapshot and later workspace output differ. Raw results were removed from curated tip; not every figure pixel was independently matched. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T02:35:57.003821+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.0
+- Overall score (0-5): 2.33
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

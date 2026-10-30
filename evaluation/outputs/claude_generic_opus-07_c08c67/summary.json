@@ -150,64 +150,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 4.5,
+        "notes": "Immutable-source CMake build passed in network-disabled scratch with configured externals, 2 CPUs/4 GiB/128 processes and 240-second timeout."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 2.5,
+        "notes": "main.cpp:35\u201342 parses --restart but never reads the variable; it initializes and solves instead. Required case/output and missing-case checks exist; other bad inputs not exhaustively tested."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3.5,
+        "notes": "Source separates config, mesh, partition, numerics, solver and output, though fixed 2-D state and monolithic marching constrain extensibility."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "notes": "CMake builds submitted source with MPI/CGNS/METIS; no direct external solver executable wrapper found. External source-similarity and license audit not exhaustive."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3.5,
+        "notes": "Case inputs drive physics and mesh; mesh.cpp multi-zone logic is specialized to a two-zone connectivity mapping and was not validated for arbitrary layouts."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 2,
+        "notes": "main.cpp:76\u2013104 broadcasts global mesh to every rank, retains gmesh through solve, contrary to TASK.md:227. METIS and state neighbor exchanges are present."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 1.5,
+        "notes": "solver.cpp:181,201\u2013245 caps transient inner loops at 5 without target monitoring; output.cpp:255\u2013267 reports zero misses and periodic completion unconditionally."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 2.5,
+        "notes": "Original eight workspace packages and report passed structural validation; clean immutable build passed. No independent CFD rerun or numerical verification suite established."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3,
+        "notes": "Modules build, but hardcoded success metadata and a silently ignored restart option undermine contract; report captures an earlier incomplete result snapshot."
       }
     ],
     "disqualification_flags": [
@@ -252,7 +252,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 3.1
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -262,78 +262,78 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3,
+        "notes": "Compressible conservation and gas closure paths exist; low-Mach and viscous results contain elevated drag and large lift, limiting demonstrated fidelity."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3.5,
+        "notes": "mesh.cpp:58\u2013100 reads TRI/QUAD/MIXED; :221\u2013238 multi-zone mapping specializes to two zones. Geometry exists but arbitrary meshes were not independently tested."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3.5,
+        "notes": "numerics.cpp assembles finite-volume fluxes and limited reconstruction. Full-mesh replication and limited production evidence constrain MPI/numerical confidence."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "notes": "Rusanov flux and documented limitations are present; no independent shock rerun."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3,
+        "notes": "Farfield, slip and no-slip wall paths exist, but original Re20 drag 3.565 and lift 0.149 plus large viscous drag limit demonstrated boundary fidelity."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3,
+        "notes": "Least-squares and face limiting exist; steady solver.cpp:312\u2013320 ramps reconstruction only after startup. No independent convergence-order verification established."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3.5,
+        "notes": "Venkat and minmod face limiting are implemented (numerics.cpp); production scales limiter by 0.7. False metadata labels Barth despite source."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3.5,
+        "notes": "numerics.cpp:66\u201395 uses primitive chain-rule gradients and :472\u2013484 projects tangential traction. Large final viscous-case drag and missing report plots limit confidence."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 3,
+        "notes": "Steady SGS/diagonal march exists with CFL controls, but M0.15 inviscid hits max steps with 2.4 residual orders and large force oscillation."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 1,
+        "notes": "solver.cpp:181,201\u2013245 executes five BDF inner updates per step without a target check; metadata unconditionally marks perfect convergence. Original t\u2265180 forces are nearly constant, not shedding."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 2,
+        "notes": "METIS and neighbor state exchange exist, but full gmesh is held on each rank during solve. TASK prohibited shortcut 7 applies; no independent rank comparison rerun."
       }
     ],
     "disqualification_flags": [
@@ -368,7 +368,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 2.99
   },
   "result_review": {
     "review_area": "result_review",
@@ -378,50 +378,50 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 2,
+        "notes": "Structural validator accepts original packages, but metadata hardcodes inner success and periodic status, and --restart is ignored."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 5,
+        "notes": "Original eight case packages and report pass explicit structural validation; validator cannot establish inner convergence or physical accuracy."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 2,
+        "notes": "Original report captures t=64.9 incomplete Re200 and four pending steady cases, while later workspace results reach t=300. The later Re200 is flat and hardcoded as periodic; M0.15 inviscid hits its step cap."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 1.5,
+        "notes": "Later workspace M0.15 lam Cd=0.352, M2 lam Cd=5.723 and Re20 Cd=3.565/Cl=0.149; Re200 t\u2265180 Cl\u22480.428 steady. These undermine numerical credibility."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 2,
+        "notes": "Submitted report provides first three inviscid histories/contours and Re200 partial force/residual plots; four other cases are marked pending with no case figures, and no late periodic force plot."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 2.5,
+        "notes": "Report candidly states t=64.9 incomplete and five inner updates without target test, but later result metadata claims perfect success and full report has four cases pending. Report and later workspace are distinct snapshots."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 4,
-        "notes": "Source and original result evidence reviewed; no evaluator rerun."
+        "score": 2.5,
+        "notes": "Figure manifest links canonical case plots to result CSV; report snapshot and later workspace output differ. Raw results were removed from curated tip; not every figure pixel was independently matched."
       }
     ],
     "disqualification_flags": [
@@ -451,7 +451,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.0
+    "overall_score": 2.33
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/claude/generic/opus-07",

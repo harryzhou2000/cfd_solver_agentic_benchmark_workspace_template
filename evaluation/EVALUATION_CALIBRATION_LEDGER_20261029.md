@@ -69,7 +69,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-05_21cf4d` | fully reviewed — 74.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-06_40b02c` | fully reviewed — 93/100, DQ=false; both gates pass |
-| `claude_generic_opus-07_c08c67` | partial — DQ and all cases reviewed; rubric/areas pending |
+| `claude_generic_opus-07_c08c67` | fully reviewed — 61/100, DQ=true; both gates pass |
 | `claude_generic_opus-08_853afe` | fully reviewed — 50.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-09_9cb2fc` | unreviewed |
 | `claude_generic_opus-10_f6b586` | unreviewed |
@@ -275,3 +275,8 @@ Rubric 73→58.5/100, DQ true under trigger 7 and TASK prohibited full-mesh repl
 DQ false→true under 7 and TASK full-mesh prohibition. Immutable eaae575 solver.cpp:181,201–245 caps inner iterations at 5 without measuring target; output.cpp:255–267 writes misses=0, fraction=1, ratio=0 and completed/periodic unconditionally. `tools/write_metadata.py:38–90` similarly hardcodes these values and estimates wall time from step count. Strict miss count is unknown. Canonical Re200 forces.csv and stdout.log extend to t=300; last t≥180 window Cd=2.374685648–2.374691592, Cl=0.428219991–0.4282388282, 1,201 rows, without credible shedding. Report.tex:447–455,623–626 refers to t=64.9 incomplete; terminal response and later workspace data refer to t=300. Raw files were absent from immutable ancestry; mismatch alone is not proof of synthetic history. Re200 score 2→1. Immutable main.cpp:76–104 broadcasts/rebuilds global mesh on all ranks and :191–199 runs with `gmesh` in scope, violating TASK.md:227; METIS/local U exist and numbered DQ9 is not asserted. Other cases/rubric/areas remain partial; both gates pass, no CFD rerun.
 
 Opus-07 steady-case review: scores 5,5,5,2,2,2,2 → 2,3,3,1,2,1,1. Report supplies first three cases, lists the other four pending; later workspace histories are separately assessed, not assumed to be the same report snapshot. M0.15 inviscid final Cd=0.027472 and last-10% 0.014316–0.049673; later M0.15 lam Cd=0.351849, M2 lam Cd=5.722734, Re20 Cd=3.565314 and Cl=0.148953. Per-case notes include remaining force tails and report evidence. Rubric/review areas still partial; both gates pass, no CFD rerun.
+
+
+## Opus-07 full calibration — 2026-10-30
+
+Rubric 89→61/100; DQ true under trigger 7 and TASK full-mesh prohibition. All 27 review points, ten rubric sections and trigger assessments now have evidence. Case scores in task order 5,5,5,2,2,2,2,2 → 2,3,3,1,2,1,1,1. Report snapshot at t=64.9 and four pending cases is distinct from later workspace CSV/stdout at t=300; no synthetic-history inference. Actual strict transient miss count is unknown because inner target is not monitored. Main.cpp:35–42 accepts but ignores --restart, mesh.cpp has two-zone-specific connectivity, and numerics.cpp:66–95,472–484 implements primitive-gradient and tangential-stress methods. Immutable clean build passed in restricted network-disabled scratch; original structural case/report validation and both record gates pass. No CFD rerun, exhaustive external authorship or pixel-level figure audit.

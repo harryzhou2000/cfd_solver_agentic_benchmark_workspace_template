@@ -6,50 +6,50 @@
       "id": "res.contract",
       "title": "Output contract compliance",
       "weight": 0.2,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 2,
+      "notes": "Structural validator accepts original packages, but metadata hardcodes inner success and periodic status, and --restart is ignored."
     },
     {
       "id": "res.validator",
       "title": "Automated validator results",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 5,
+      "notes": "Original eight case packages and report pass explicit structural validation; validator cannot establish inner convergence or physical accuracy."
     },
     {
       "id": "res.completion",
       "title": "Case completion and convergence",
       "weight": 0.2,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 2,
+      "notes": "Original report captures t=64.9 incomplete Re200 and four pending steady cases, while later workspace results reach t=300. The later Re200 is flat and hardcoded as periodic; M0.15 inviscid hits its step cap."
     },
     {
       "id": "res.plausibility",
       "title": "Result plausibility and MPI consistency",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 1.5,
+      "notes": "Later workspace M0.15 lam Cd=0.352, M2 lam Cd=5.723 and Re20 Cd=3.565/Cl=0.149; Re200 t\u2265180 Cl\u22480.428 steady. These undermine numerical credibility."
     },
     {
       "id": "res.visualization",
       "title": "Visualizations",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 2,
+      "notes": "Submitted report provides first three inviscid histories/contours and Re200 partial force/residual plots; four other cases are marked pending with no case figures, and no late periodic force plot."
     },
     {
       "id": "res.report",
       "title": "Report quality and honesty",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 2.5,
+      "notes": "Report candidly states t=64.9 incomplete and five inner updates without target test, but later result metadata claims perfect success and full report has four cases pending. Report and later workspace are distinct snapshots."
     },
     {
       "id": "res.traceability",
       "title": "Traceability of figures and claims",
       "weight": 0.05,
-      "score": 4,
-      "notes": "Source and original result evidence reviewed; no evaluator rerun."
+      "score": 2.5,
+      "notes": "Figure manifest links canonical case plots to result CSV; report snapshot and later workspace output differ. Raw results were removed from curated tip; not every figure pixel was independently matched."
     }
   ],
   "disqualification_flags": [
@@ -79,5 +79,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.0
+  "overall_score": 2.33
 }
