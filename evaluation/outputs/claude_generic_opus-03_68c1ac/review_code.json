@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "CMake source and a documented solver tree are present; evaluator did not repeat a clean binary build."
+      "score": 4.5,
+      "notes": "Immutable CMake build passes in a network-disabled scratch container with configured externals and 2 CPUs/4 GiB/128 processes/240-second timeout; compiler warnings remain."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 4,
-      "notes": "CLI parsing and case-file loading are implemented in source; all eight delivered packages structurally validate."
+      "score": 3.5,
+      "notes": "main.cpp parses required solve/case/output flags and overrides. No restart read path was confirmed; bad-input behavior was not exhaustively tested."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Solver separates mesh, solver, CGNS reader, scripts, and report components."
+      "score": 3.5,
+      "notes": "main.cpp, solver.cpp, reader and support headers separate major concerns but solver.cpp holds mesh, residual, time integration, diagnostics and output."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 5,
-      "notes": "No direct internal evidence of an external solver executable or wrapper was found; trust policy applied."
+      "score": 4,
+      "notes": "CMake builds submitted source using permitted MPI/CGNS/METIS libraries; no direct existing CFD executable wrapper found. External similarity and licensing not exhaustively audited."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 4,
-      "notes": "Case JSON is parsed for mesh, physics, controls, and BCs rather than branching only on two mesh names."
+      "notes": "Case JSON selects mesh and controls; no two-filename-only branch found. Unseen general meshes were not exercised."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "METIS graph partitioning, ghost state exchange, and MPI reductions are implemented; rank results are reported."
+      "score": 2,
+      "notes": "main.cpp:49\u201398 loads full global mesh per rank and solver.h:68 retains it through solve, prohibited by TASK. METIS and halo paths exist; rank study is reported."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 2,
-      "notes": "Re200 convergence logic relaxes the required target by 100x and force-marks max-inner exhaustion converged."
+      "score": 1.5,
+      "notes": "solver.cpp:1330\u20131338 relaxes transient target 100\u00d7 after 100 iterations and :1381\u20131385 labels max-inner exhaustion converged. Re200 force values are extremely large and metadata reports false success."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
       "score": 3,
-      "notes": "MPI validation scripts and report evidence exist, but no independent clean rerun was needed for the decisive source finding."
+      "notes": "Original eight package/report validator passes; isolated source builds. Report documents rank study, but no independent case rerun or full external verification was performed."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 2,
-      "notes": "Raw result/log/data artifacts were committed during the run and required index-only curation; they remain preserved as workspace evidence."
+      "score": 3,
+      "notes": "Source builds with warnings. solver.cpp:1532 uses cumulative viscous force in each moment contribution; full mesh retention and status metadata conflict with report."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.75
+  "overall_score": 3.29
 }

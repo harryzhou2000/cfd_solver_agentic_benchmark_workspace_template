@@ -2,38 +2,38 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T02:30:48.340865+00:00
+Generated: 2026-10-30T02:32:20.606577+00:00
 
-**Overall score: 3.75**
+**Overall score: 3.29**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 4 | CMake source and a documented solver tree are present; evaluator did not repeat a clean binary build. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 4.5 | Immutable CMake build passes in a network-disabled scratch container with configured externals and 2 CPUs/4 GiB/128 processes/240-second timeout; compiler warnings remain. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 4 | CLI parsing and case-file loading are implemented in source; all eight delivered packages structurally validate. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3.5 | main.cpp parses required solve/case/output flags and overrides. No restart read path was confirmed; bad-input behavior was not exhaustively tested. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Solver separates mesh, solver, CGNS reader, scripts, and report components. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 3.5 | main.cpp, solver.cpp, reader and support headers separate major concerns but solver.cpp holds mesh, residual, time integration, diagnostics and output. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 5 | No direct internal evidence of an external solver executable or wrapper was found; trust policy applied. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 4 | CMake builds submitted source using permitted MPI/CGNS/METIS libraries; no direct existing CFD executable wrapper found. External similarity and licensing not exhaustively audited. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | Case JSON is parsed for mesh, physics, controls, and BCs rather than branching only on two mesh names. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | Case JSON selects mesh and controls; no two-filename-only branch found. Unseen general meshes were not exercised. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4 | METIS graph partitioning, ghost state exchange, and MPI reductions are implemented; rank results are reported. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2 | main.cpp:49–98 loads full global mesh per rank and solver.h:68 retains it through solve, prohibited by TASK. METIS and halo paths exist; rank study is reported. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Re200 convergence logic relaxes the required target by 100x and force-marks max-inner exhaustion converged. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 1.5 | solver.cpp:1330–1338 relaxes transient target 100× after 100 iterations and :1381–1385 labels max-inner exhaustion converged. Re200 force values are extremely large and metadata reports false success. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | MPI validation scripts and report evidence exist, but no independent clean rerun was needed for the decisive source finding. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Original eight package/report validator passes; isolated source builds. Report documents rank study, but no independent case rerun or full external verification was performed. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 2 | Raw result/log/data artifacts were committed during the run and required index-only curation; they remain preserved as workspace evidence. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Source builds with warnings. solver.cpp:1532 uses cumulative viscous force in each moment contribution; full mesh retention and status metadata conflict with report. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 
@@ -50,7 +50,7 @@ Generated: 2026-10-30T02:30:48.340865+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.75
+- Overall score (0-5): 3.29
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

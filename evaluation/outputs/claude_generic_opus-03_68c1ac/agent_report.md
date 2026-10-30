@@ -42,59 +42,13 @@
 
 Read the committed solver source and selected Claude root transcript; ran the examiner explicitly on all eight workspace result directories and `solver/report` (return code 0). The curated immutable submission was audited, then its tracked report rebuilt with `latexmk` and all 39 rendered pages inspected. No solver rerun was performed; Re200 was not rerun.
 
-## Rubric scores (100 points, SCORING_RUBRIC.md)
+## Calibrated assessment — 2026-10-30
 
-| Section | Max | Score | Notes |
-|---------|----:|------:|-------|
-| Build, CLI, Output Contract | 10 | 8 | Source and complete structural packages; no clean evaluator binary build. |
-| Mesh And Geometry | 10 | 9 | CGNS unstructured geometry and graph source visible. |
-| Finite-Volume Residual And Boundary Conditions | 15 | 12 | Rusanov/residual path present; wall handling simplified. |
-| Second-Order Spatial Scheme | 10 | 9 | Active reconstruction, limiter, positivity fallback. |
-| Viscous Terms | 10 | 7 | Gradient-based path, limited wall confidence. |
-| Implicit And Transient Methods | 15 | 6 | Re200 convergence criterion is deliberately relaxed/overridden. |
-| MPI | 10 | 9 | METIS, halo, reductions, rank evidence. |
-| Case Results And Validation | 10 | 6 | Eight packages pass structurally; Re200 completion invalid. |
-| Report, Visualization, Analysis | 5 | 3 | Buildable visual report repeats invalid Re200 claim. |
-| Extensibility | 5 | 4 | Modular source layout. |
+The rubric changes from 73 to **58.5/100**, with criterion-specific source and numerical evidence in the scorecard. Review-area overalls are recomputed from the 27 reviewed points. Independent case scores change from 4,4,4,4,4,4,4,1 to **2,3,3,1,2,1,1,1** in canonical task order; these do not feed the rubric or review-area scores. Original results include Cd=0.06059 for M0.15 inviscid, 0.62044 for M0.15 laminar, 3.157 for M2 laminar and 6.140 for Re20; Re200 late forces vary from roughly −41 to 39 in drag. Case-specific histories and limits are recorded in the scorecard.
 
-## Review-area scores (0-5 weighted, review_*.json)
+DQ remains **true** under trigger 7 and TASK prohibited shortcut 7: the Re200 solver counts relaxed or exhausted inner solves as converged, and each MPI rank retains a full global mesh while solving. The actual number of strict target misses cannot be recovered from the reported success fraction. All seven steady cases end before the code's second-order activation threshold; the report discloses the general activation rule and its case tables supply step counts, although it does not explicitly conclude these outputs are first order and metadata says order 2. This is scored as a severe spatial/metadata defect; DQ10 was not separately affirmed in light of that disclosure. The code uses METIS and local solution state, so the mesh prohibition is not represented as numbered DQ9. Trigger assessments and evidence limits are in the scorecard.
 
-| Area | Overall | Notes |
-|------|--------:|-------|
-| Code |  |  |
-| CFD methods |  |  |
-| Results |  |  |
-
-## Per-case scores (independent 0-5)
-
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid |  |  |
-| NACA0012 M0.80 inviscid |  |  |
-| NACA0012 M2.00 inviscid |  |  |
-| NACA0012 M0.15 Re5000 |  |  |
-| NACA0012 M0.80 Re5000 |  |  |
-| NACA0012 M2.00 Re5000 |  |  |
-| Cylinder M0.10 Re20 |  |  |
-| Cylinder M0.10 Re200 |  |  |
-
-## Disqualification assessment
-
-DQ true, trigger 7: in `solver.cpp` the Re200 loop accepts a ratio below `inner_target * 100` after 100 iterations and marks a max-inner-exhausted solve converged, while the terminal response and metadata report complete successful target convergence. No other trigger was affirmatively established from direct internal evidence.
-
-## Metadata answers & session selection
-
-Selected the sole root `067928d9-a740-48aa-8642-c7f6a09c7d77`, which begins with the benchmark goal and continues through the submission, with its five persisted subagents. Its terminal `end_turn` response is stored verbatim in the sidecar.
-
-## Limitations
-
-The evaluator did not rerun the solver or Re200. Raw outputs were evaluated from the workspace but excluded from the curated immutable tip. Cost was unavailable.
-
-## Verdict
-
-The submitted source is a substantial CFD implementation with structurally complete results and a readable report, but the production Re200 convergence claim is not credible because source relaxes and overrides the specified criterion. Do not represent the run as fully complete.
+An immutable source build succeeded with compiler warnings in a network-disabled scratch container with configured externals, two CPUs, 4 GiB memory, 128-process limit and 240-second timeout. The original eight-case/report validator passed. No CFD case was rerun, and neither an exhaustive external authorship audit nor pixel-level verification of every figure was performed. Selected Claude root `067928d9-a740-48aa-8642-c7f6a09c7d77` spans benchmark work through the terminal response.
 
 ## Sidecar integrity
 
@@ -107,14 +61,14 @@ The submitted source is a substantial CFD implementation with structurally compl
 
 DQ remains true under trigger 7: immutable `solver.cpp:1330–1338` accepts 100 times the strict residual target after 100 iterations, and :1381–1385 marks max-inner exhaustion converged. Metadata therefore reports fraction 1 and no misses without establishing strict-target convergence; the actual number of strict misses is unknown. Report.tex:1192–1198 claims every step met the target. The canonical report figure manifest line 10 maps its Re200 plot to `results/cylinder_m010_laminar_re200/forces.csv`, byte-identical to the `results/re200_final/forces.csv` named by the run-status command (SHA-256 `dca863f47ed5c3e5efc2ce681badf204caa5105cd1a96511a6c0c756aed36d58`). The last 10% of its 30,001 rows has Cd from −41.0911 to 38.5662 and Cl from −18.5503 to 43.4364, not credible physical shedding.
 
-A separate TASK.md:227 prohibited full-mesh finding is added: `main.cpp:49–65` creates a solver and reads the full mesh on every rank; `solver.cpp:88–168` fills global nodes/cells/faces/adjacency; `solver.h:68` retains `global_mesh` as a member while main.cpp:77–98 builds local partitions and solves. Report.tex:579 and metadata falsely deny mesh replication. METIS and local solution state exist, so this is the TASK shortcut, not a claim of numbered trigger 9. Other cases, rubric and review points remain under review; no CFD rerun.
+A separate TASK.md:227 prohibited full-mesh finding is added: `main.cpp:49–65` creates a solver and reads the full mesh on every rank; `solver.cpp:88–168` fills global nodes/cells/faces/adjacency; `solver.h:68` retains `global_mesh` as a member while main.cpp:77–98 builds local partitions and solves. Report.tex:579 and metadata falsely deny mesh replication. METIS and local solution state exist, so this is the TASK shortcut, not a claim of numbered trigger 9. The cases, rubric and review points were subsequently calibrated above; no CFD rerun.
 
 
 ## Partial steady-case correction — 2026-10-30
 
-Seven steady case scores in canonical order change 4,4,4,4,4,4,4 → **2,3,3,1,2,1,1** after reviewing immutable report figures and original force tails. M0.15 inviscid Cd=0.06059 with last-10% range 0.05487–0.07650; M0.15 laminar Cd=0.62044; M2 laminar Cd=3.15702 with last-10% range 3.15702–4.19055; Re20 Cd=6.13992. Those gross or strongly moving values do not warrant the earlier 4/5 scores. M0.8 and M2 inviscid are broadly recognizable but remain limited by force variation. Each scorecard note records case plots and numeric tail data. Re200 stays 1. Rubric and review-area calibration remains pending; no CFD rerun.
+Seven steady case scores in canonical order change 4,4,4,4,4,4,4 → **2,3,3,1,2,1,1** after reviewing immutable report figures and original force tails. M0.15 inviscid Cd=0.06059 with last-10% range 0.05487–0.07650; M0.15 laminar Cd=0.62044; M2 laminar Cd=3.15702 with last-10% range 3.15702–4.19055; Re20 Cd=6.13992. Those gross or strongly moving values do not warrant the earlier 4/5 scores. M0.8 and M2 inviscid are broadly recognizable but remain limited by force variation. Each scorecard note records case plots and numeric tail data. Re200 stays 1. Rubric and review-area calibration was subsequently completed above; no CFD rerun.
 
 
 ## Partial reconstruction and build review
 
-Immutable `solver.cpp:1038–1053` uses first-order gradients until step exceeds `max(ramp_steps/2,200)`. All seven original steady final steps are below their thresholds: M0.15 inv 380/1000, M0.8 inv 383/1500, M2 inv 363/2500, M0.15 lam 597/2500, M0.8 lam 1107/2500, M2 lam 270/3500, and Re20 528/1500. Thus every submitted steady result is first order, despite `spatial_order_claimed=2` metadata. Report.tex:284–286 discloses the general schedule and its tables state controls and step counts, but does not explicitly say these final cases never activated it. Compared with Opus-02, which explicitly discloses first-order steady execution, and Opus-08, which fails to disclose its zero reconstruction, DQ10 is not affirmed solely from the general method description; substantial spatial and metadata deductions remain necessary. Re200 explicitly calls gradient/limiter code at :1301–1302. A clean immutable-source build passed in a network-disabled scratch container with configured externals, 2 CPUs, 4 GiB, 128-process limit and 240-second timeout; no CFD case was run. Full rubric/review areas remain pending.
+Immutable `solver.cpp:1038–1053` uses first-order gradients until step exceeds `max(ramp_steps/2,200)`. All seven original steady final steps are below their thresholds: M0.15 inv 380/1000, M0.8 inv 383/1500, M2 inv 363/2500, M0.15 lam 597/2500, M0.8 lam 1107/2500, M2 lam 270/3500, and Re20 528/1500. Thus every submitted steady result is first order, despite `spatial_order_claimed=2` metadata. Report.tex:284–286 discloses the general schedule and its tables state controls and step counts, but does not explicitly say these final cases never activated it. Compared with Opus-02, which explicitly discloses first-order steady execution, and Opus-08, which fails to disclose its zero reconstruction, DQ10 is not affirmed solely from the general method description; substantial spatial and metadata deductions remain necessary. Re200 explicitly calls gradient/limiter code at :1301–1302. A clean immutable-source build passed in a network-disabled scratch container with configured externals, 2 CPUs, 4 GiB, 128-process limit and 240-second timeout; no CFD case was run. Full rubric/review areas were subsequently calibrated above.

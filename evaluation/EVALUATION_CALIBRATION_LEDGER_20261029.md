@@ -65,7 +65,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 |---|---|
 | `claude_generic_opus-01_9a712c` | fully reviewed — 93.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-02_6fc51c` | fully reviewed — 65.5/100, mandatory placeholder-result rejection; both gates pass |
-| `claude_generic_opus-03_68c1ac` | partial — DQ and all case scores reviewed; rubric/areas pending |
+| `claude_generic_opus-03_68c1ac` | fully reviewed — 58.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-05_21cf4d` | fully reviewed — 74.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-06_40b02c` | fully reviewed — 93/100, DQ=false; both gates pass |
@@ -263,3 +263,8 @@ DQ remains true under 7: immutable 3071a743 solver.cpp:1330–1338 accepts 100 t
 Opus-03 steady-case correction: scores 4,4,4,4,4,4,4 → 2,3,3,1,2,1,1 after reviewing committed histories/contours and original force tails. M0.15 inv Cd=0.06059 with last 10% 0.05487–0.07650; M0.15 lam Cd=0.62044; M2 lam Cd=3.15702 with last 10% 3.15702–4.19055; Re20 Cd=6.13992. Individual notes distinguish physics and plot evidence. Re200 remains 1; rubric and review areas still partial. Both gates pass; no CFD rerun.
 
 Opus-03 source/build checkpoint: immutable solver.cpp:1038–1053 activates second order only after `max(ramp_steps/2,200)`; original steady final/threshold steps are M0.15 inv 380/1000, M0.8 inv 383/1500, M2 inv 363/2500, M0.15 lam 597/2500, M0.8 lam 1107/2500, M2 lam 270/3500, Re20 528/1500. All submitted steady outputs are first order although metadata claims spatial_order=2. Report.tex:284–286 discloses the activation rule and lists steps/controls, but does not explicitly conclude those results are first order; transient invokes gradient/limiter code. Compared with explicit Opus-02 disclosure and undisclosed Opus-08 disabling, DQ10 not affirmed solely from generic method description; scorecard must deduct this defect. Clean immutable build passed in network-disabled restricted scratch with no CFD rerun; full rubric/areas still partial.
+
+
+## Opus-03 full calibration — 2026-10-30
+
+Rubric 73→58.5/100, DQ true under trigger 7 and TASK prohibited full-mesh replication; DQ10 not separately affirmed because the report gives the delayed activation rule and case step counts, despite metadata incorrectly claiming order 2. All 27 review points, ten rubric sections and trigger assessments are recorded with evidence. Case scores in task order 4,4,4,4,4,4,4,1 → 2,3,3,1,2,1,1,1; case-specific force tails and report plots recorded above. Solver.cpp:687–701 omits density-gradient terms when converting momentum gradients to velocity, and :1532 uses cumulative viscous force in each moment contribution. Actual strict Re200 miss count remains unknown; canonical and final-path force histories are identical. Immutable source clean build passes in restricted scratch; original case/report validator passes, both record gates pass, no CFD rerun, exhaustive authorship or pixel-level audit.

@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 4,
-      "notes": "Conservative state, gas closure, and residual assembly are visible in solver.cpp."
+      "score": 3.5,
+      "notes": "Conservative compressible state and Rusanov residual exist; first-order steady execution and gross laminar forces materially limit demonstrated physical fidelity."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 4,
-      "notes": "CGNS reader, unstructured tri/quad connectivity, faces, geometry, and adjacency are implemented."
+      "score": 3.5,
+      "notes": "CGNS reader assembles tri/quad cells, faces and boundary families; general zone/connectivity handling was not independently exercised. Full global mesh is retained on every rank."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 4,
-      "notes": "Face residual assembly includes reconstructed inviscid and viscous contributions."
+      "score": 3,
+      "notes": "solver.cpp:854\u2013931 assembles reconstructed face residuals; all steady outputs stop before second-order activation. Quantitative force and moment anomalies remain."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Rusanov flux is used for interior/farfield states."
+      "notes": "solver.cpp:602\u2013638 uses Rusanov and report discloses the dissipative choice. No independent shock rerun was performed."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 3,
-      "notes": "Slip and no-slip branches are present, but wall treatment is simplified pressure flux plus viscous contribution."
+      "notes": "Pressure wall and simplified viscous wall paths are implemented; original Re20 and laminar forces are grossly elevated, limiting demonstrated wall accuracy."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 4,
-      "notes": "Green-Gauss linear reconstruction is applied at faces with first-order positivity fallback."
+      "score": 1.5,
+      "notes": "solver.cpp:1038\u20131053 zeroes steady gradients until step > max(ramp_steps/2,200); all seven submitted steady cases stop before that threshold. Report gives schedule but metadata claims order 2."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Active Barth-Jespersen limiter is called before residual assembly in steady and transient loops."
+      "score": 2,
+      "notes": "Barth limiter exists and is applied in transient (:1301\u20131302) and after steady activation, but no submitted steady case reached activation."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Gradient-based viscous flux path exists, but the simplified wall handling limits confidence."
+      "score": 2.5,
+      "notes": "solver.cpp:687\u2013701 approximates primitive gradients by \u2207(\u03c1u)/\u03c1 and omits density-gradient terms; temperature uses only cell-center direction. Tangential wall shear is integrated, but force/moment accuracy is poor."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 3,
-      "notes": "Diagonal pseudo-implicit updates and CFL controls exist; not a stronger coupled linear solve."
+      "notes": "solver.cpp:997\u20131017 implements a local pseudo-implicit update and CFL schedule. Original steady cases meet reported residual thresholds while still first order."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
       "score": 1,
-      "notes": "BDF2 two-level structure exists, but production convergence is falsely accepted at 100x target or exhaustion."
+      "notes": "BDF2 total residual exists, but solver.cpp:1330\u20131338 accepts 100\u00d7 target and :1381\u20131385 marks exhaustion successful. Re200 forces have Cd range \u221241.09 to 38.57 in the final 10%."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 4,
-      "notes": "METIS adjacency partitioning and neighbor ghost communication are present; report contains rank comparison."
+      "score": 2,
+      "notes": "METIS partition and ghost exchanges exist but global mesh remains resident on all ranks during solve, violating TASK prohibited shortcut 7. Original rank-study values need further independent audit."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.42
+  "overall_score": 2.6
 }
