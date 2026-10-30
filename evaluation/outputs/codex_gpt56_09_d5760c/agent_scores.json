@@ -307,8 +307,8 @@
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 2,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=0.0179, CD=0.0856 at 7f22dbe:solver/report/report.tex:98; residual history 7f22dbe:solver/report/figures/naca0012_m015_inviscid_residual.png (referenced at solver/report/report.tex:61); no committed/referenced force-history plot; computed-field contour 7f22dbe:solver/report/figures/naca0012_m015_inviscid_mach.png (referenced at solver/report/report.tex:60). Score 2 retained after the post-processing audit. Prior case judgment: Delivered result assessed independently; Re200 not rerun."
+      "score": 1,
+      "notes": "Score2\u21921: contestant report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b records mean Cd0.0582665 and final Cl0.0609251; old note mistook rank-comparison deltas for Cd/Cl. Immutable report references force, residual and field figures; force plot has no tick scale/legend and field image omits body boundary. Canonical workspace forces SHA256 243f522455cdc0f92cecc3c8f0d7da425eb3c227b9e55320b02fc56c09f00ea0 final2000 Cd spans \u22120.68814..0.79436 while metadata marks converged; DQ7 independently of residual target. Exact binary unbound."
     },
     "naca0012_m080_inviscid": {
       "score": 2,
@@ -331,8 +331,8 @@
       "notes": "NACA0012 M2.00 laminar Re5000: no committed case-specific numeric CL/CD summary; residual history 7f22dbe:solver/report/figures/naca0012_m200_laminar_re5000_residual.png (referenced at solver/report/report.tex:86); no committed/referenced force-history plot; computed-field contour 7f22dbe:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/report.tex:85). Score capped at 2 from 4 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Delivered result assessed independently; Re200 not rerun."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 1.5,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=0.0378, CD=0.00133 at 7f22dbe:solver/report/report.tex:94; residual history 7f22dbe:solver/report/figures/cylinder_m010_laminar_re20_residual.png (referenced at solver/report/report.tex:49); no committed/referenced force-history plot; computed-field contour 7f22dbe:solver/report/figures/cylinder_m010_laminar_re20_mach.png (referenced at solver/report/report.tex:48). Score 1.5 retained after the post-processing audit. Prior case judgment: Delivered result assessed independently; Re200 not rerun."
+      "score": 1,
+      "notes": "Score1.5\u21921: contestant-delivered report/run_manifest.csv SHA256 62ed7f09dc47a64af135b0bfd018dc7cbc09eb9af4979b9cfaa34851a4a9662b records mean Cd19.00644 and final Cl0.04556; old note incorrectly read rank-comparison differences as Cd/Cl. Immutable report.tex:48\u201349 includes field, residual and force figures; its force plot lacks numeric ticks/legend and field view has no visible cylinder outline. Canonical workspace forces SHA256 5dda4c4ae3a40448e9cff1a3364bcfb22e632a70485d726e9531352633d59619 final3000 Cd11.3201\u219219.5495, final2000 15.3383\u219219.5495, while metadata says converged. This is not stable force; DQ7. Exact historical binary unbound."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
@@ -345,7 +345,7 @@
       {
         "id": 7,
         "text": "metadata.json marks incomplete/failed runs as successful",
-        "evidence": "Steady run_status files call results converged despite residual reductions far below their targets: Re20 0.876/5, M015 inviscid 1.485/4, M015 laminar 2.094/4, M2 inviscid 2.713/4.",
+        "evidence": "Canonical workspace Re20 forces.csv SHA256 5dda4c4ae3a40448e9cff1a3364bcfb22e632a70485d726e9531352633d59619 shows Cd11.3201\u219219.5495 over final3000 of30000 steps, including 15.3383\u219219.5495 over final2000, while metadata marks converged/completed. NACA M015 inviscid forces SHA256 243f522455cdc0f92cecc3c8f0d7da425eb3c227b9e55320b02fc56c09f00ea0 spans Cd\u22120.68814..0.79436 over its final2000 of20000 steps and is also marked converged. These histories are not sustained stable-force plateaus, independently of missed residual targets. Immutable7f22dbe solver/src/main.cpp:1764\u20131794 accepts a 2000-row absolute/relative force span up to max(2,0.5|mean Cd|), but historical executable remains unbound. Figure/report run_manifest and selected final response identify the named production outputs. No assumption of fabricated forces or Re200 rerun.",
         "found": true
       }
     ]
