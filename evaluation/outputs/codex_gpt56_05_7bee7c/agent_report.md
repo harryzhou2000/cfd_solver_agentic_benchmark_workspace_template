@@ -76,7 +76,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ7 true: the delivered M2 laminar history falls from Cd 0.060559 to 0.040582 over its final 1,000 steps, yet metadata/report mark the run converged with stable forces. The residual target was met; the sustained force trend still establishes an incomplete steady result. The original executable is unbound. Further DQ review remains partial.
+DQ7 true: the delivered M2 laminar history falls from Cd 0.060559 to 0.040582 over its final 1,000 steps, yet metadata/report mark the run converged with stable forces. The residual target was met; the sustained force trend still establishes an incomplete steady result. The original executable is unbound. The remaining numbered DQ rules were reviewed; no other trigger was established within available evidence.
 
 ## Metadata answers & session selection
 
@@ -88,6 +88,9 @@ Raw packages are excluded from the curated commit. The 802 MB Re200 residual exc
 
 ## Verdict
 
-The prior verdict was 85/100 and no DQ; partial recalibration is 79.5/100 before DQ and establishes DQ7 for M2 laminar. Seven historical validator passes are structural; retain the Re200 validation and historical binary limitations.
+The prior verdict was 85/100 and no DQ; the completed qualified recalibration is 79.5/100 before DQ and establishes DQ7 for M2 laminar. Seven historical validator passes are structural; retain the Re200 validation and historical binary limitations.
 
 run_identity.json SHA-256: `8afee0d65b287815ad0d37afe012bdadf21ed1f72ba0600424f36b7a79501a9b`; contestant_final_response.md SHA-256: `e2fa92927636989cfc3d81b33f128add4c59c8926c6658eb3ebdb12579a56f69`. These unindexed sidecars are not validated by cfdeval check.
+
+
+The historic attempt 37b8e68 retains the originally delivered raw results, even though the current workspace lacks them and the curated tip excludes them. Independent review covered all eight force histories, the report and all rubric/review/DQ criteria. A selected Re20 Mach image reproduces pixel-identically from the attempt field; other image bindings and exact production executables remain qualified. A clean build and ten unit/MPI/mesh tests passed without a solver rerun.

@@ -325,11 +325,11 @@
     },
     "cylinder_m010_laminar_re20": {
       "score": 3.5,
-      "notes": "Actual final coefficients at immutable 85d470d:solver/report/report.tex:149 are Cd=1.9713, Cl=0.0042614. Historical note misread the pressure/viscous drag decomposition as total Cd/Cl; score 4\u21923.5 after inspecting immutable historical attempt 37b8e68 histories and report figures. residual history 85d470d:solver/report/figures/cylinder_m010_laminar_re20_residual.png (referenced at solver/report/report.tex:480); force history 85d470d:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:486); computed-field contour 85d470d:solver/report/figures/cylinder_m010_laminar_re20_mach.png (referenced at solver/report/report.tex:498). Score 4 retained after the post-processing audit. Prior case judgment: validator. Final Cd1.971294, Cl0.004261; last1000 Cd1.965384..1.971294 (0.30% of final), residual reduction1.209 orders and reported bounded plateau; plausible drag but limited convergence evidence. Historical executable unbound; no solver rerun."
+      "notes": "Actual final coefficients at immutable 85d470d:solver/report/report.tex:149 are Cd=1.9713, Cl=0.0042614. Historical note misread the pressure/viscous drag decomposition as total Cd/Cl; score 4\u21923.5 after inspecting immutable historical attempt 37b8e68 histories and report figures. residual history 85d470d:solver/report/figures/cylinder_m010_laminar_re20_residual.png (referenced at solver/report/report.tex:480); force history 85d470d:solver/report/figures/cylinder_m010_laminar_re20_forces.png (referenced at solver/report/report.tex:486); computed-field contour 85d470d:solver/report/figures/cylinder_m010_laminar_re20_mach.png (referenced at solver/report/report.tex:498). Score 4 retained after the post-processing audit. Prior case judgment: validator. Final Cd1.971294, Cl0.004261; last1000 Cd1.965384..1.971294 (0.30% of final), residual reduction1.209 orders and reported bounded plateau; plausible drag but limited convergence evidence. Historical executable unbound; no solver rerun. Independently rerendering attempt37b8e68 32 rank pieces through submitted polygon renderer produces the exact committed Mach PNG pixels (SHA256 9c92a7a1aa95fec0acc77cacdef3c1ec5d4f4ad283098cfc8d680663522b0628); this verifies one field/image pairing, not all figures."
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Score 2 retained provisionally: immutable 85d470d:solver/report/report.tex:12,150,165 gives mean Cd=1.1399, mean Cl=-0.00034011, lift amplitude0.33817 and St=0.16667; the old note claimed period=200 without support. Report includes residual, force and wake plots; the committed forces.png startup Cd spike ~33 compresses late drag until its oscillations are unreadable, while late lift is visible. No alternate late lift-and-drag panel was found in the committed figure inventory, so the explicit Re200 late-force floor is unmet. The original attempt 37b8e68 contains forces.csv SHA256 1e7058e188c0e0c2c3a2b841d3c1844824d6690ad68ffbb73997dc61c9102441: t>=150 mean Cd1.139929, Cl -0.337697..0.338640, 25 upward crossings mean period6.03298 (frequency0.16576), consistent with reported spectrum. Original metadata reports 108/30000 inner target misses, fraction0.9964; report.tex:58 discloses that history advances at target or permitted maximum. Exact production executable remains unbound; no solver rerun."
+      "notes": "Score 2 retained: immutable 85d470d:solver/report/report.tex:12,150,165 gives mean Cd=1.1399, mean Cl=-0.00034011, lift amplitude0.33817 and St=0.16667; the old note claimed period=200 without support. Report includes residual, force and wake plots; the committed forces.png startup Cd spike ~33 compresses late drag until its oscillations are unreadable, while late lift is visible. No alternate late lift-and-drag panel was found in the committed figure inventory, so the explicit Re200 late-force floor is unmet. The original attempt 37b8e68 contains forces.csv SHA256 1e7058e188c0e0c2c3a2b841d3c1844824d6690ad68ffbb73997dc61c9102441: t>=150 mean Cd1.139929, Cl -0.337697..0.338640, 25 upward crossings mean period6.03298 (frequency0.16576), consistent with reported spectrum. Original metadata reports 108/30000 inner target misses, fraction0.9964; report.tex:58 discloses that history advances at target or permitted maximum. Exact production executable remains unbound; no solver rerun."
     }
   },
   "disqualification": {
@@ -357,7 +357,7 @@
         "id": 4,
         "text": "Order-one steady MPI result changes",
         "found": false,
-        "evidence": "Attempt rank manifest compares np2/8 M2 Cd0.0910067/0.0910121 and Re20 2.033295/2.005608; no order-one absolute difference established."
+        "evidence": "Attempt rank-comparison force histories match report values: M2 np2/8 end step2119 Cd0.09100674/0.09101211, first Cd0.00174033969/0.00174033967; Re20 np2/8 end step10000 Cd2.033295/2.005608, first Cd155.19140450 for both. Metadata git_revision null and exact binary/controls unbound; no order-one absolute difference established."
       },
       {
         "id": 5,
@@ -381,7 +381,7 @@
         "id": 8,
         "text": "Report figures do not correspond to submitted data",
         "found": false,
-        "evidence": "No specific mismatch established; generator.py:179\u2013209,499\u2013505 uses polygon-per-cell values. Not all historical image/data bindings were independently verified."
+        "evidence": "No specific mismatch established. Submitted generator.py:179\u2013209,499\u2013505 uses polygon-per-cell values; Re20 Mach image SHA256 9c92a7a1aa95fec0acc77cacdef3c1ec5d4f4ad283098cfc8d680663522b0628 reproduced pixel-identically from 32 original attempt pieces. Other figure/data pairings not all independently verified."
       },
       {
         "id": 9,
@@ -419,6 +419,9 @@
     "post_run reconstruction",
     "seven official validator passes; Re200 OOM-unverified",
     "no Re200 rerun",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "Raw result packages and report manifests are retained as immutable historical attempt37b8e68 but absent from curated tip and current workspace.",
+    "Original production executable and some controls are unbound; Re200 official validator was OOM-unverified. No Re200 or other solver rerun.",
+    "One original Re20 field image was reproduced exactly from attempt data; other image/data pairings were not exhaustively reproduced."
   ]
 }
