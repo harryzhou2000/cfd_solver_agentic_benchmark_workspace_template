@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "CMake, documented dependencies, case JSON, and run tooling are committed; no fresh clean build was performed."
+      "score": 4.5,
+      "notes": "Clean immutable CMake build succeeds in network-disabled cfd-bench with explicit external paths; CTest finds no tests."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "Input-driven solver and documented commands are present; no new executable run was needed after validator evidence."
+      "notes": "main.cpp parses case, output and control overrides and rejects invalid flux; no full case rerun."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Committed C++ separates mesh, partition, flux, reconstruction, solver, output, and configuration modules."
+      "score": 4.5,
+      "notes": "Mesh, distribution, physics, solver and output modules are distinct, although fixed 2-D state remains."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No internal executable wrapper was found. Trust policy excludes external similarity investigation."
+      "notes": "No internal solver executable wrapper identified in source; external similarity investigation excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Generic CGNS reader and JSON boundary/case configuration drive the production paths."
+      "score": 4.5,
+      "notes": "Case JSON selects mesh/physics/BC; cgns_mesh reader accepts supported unstructured sections rather than two fixed filenames."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4,
-      "notes": "METIS partitioning, ghost exchange and global reductions are implemented; delivered finals use mixed rank counts, limiting a clean rank comparison."
+      "notes": "Root-only global mesh, METIS K-way, neighbor halo and reductions; exact binary/start match for rank comparisons is unbound."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Finite/admissibility, geometry and input checks are visible; no independent memory stress test."
+      "score": 3.5,
+      "notes": "Positivity fallback and finite checks present; unsupported CGNS sections are silently skipped and environment switches affect reconstruction."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 4,
-      "notes": "Readable eight-case packages passed the explicit validator; no clean unit-test suite was independently executed."
+      "score": 3,
+      "notes": "Eight output layouts passed validator; isolated clean build succeeded, but CTest registers no tests and no unsteady run was repeated."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Structured, commented implementation and report sources; campaign artifacts are appropriately excluded from the immutable submission."
+      "notes": "Readable modular source, contestant run scripts and manifest; historical runtime binary and environment are unbound."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.2
+  "overall_score": 4.04
 }

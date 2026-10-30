@@ -63,6 +63,6 @@ None detected.
 
 ## Reviews
 
-- Code review scorecard: `oc-goal_kimik3-dsv4_01_940dcb/review_code.md` (overall: 4.2)
-- CFD methods review: `oc-goal_kimik3-dsv4_01_940dcb/review_cfd.md` (overall: 4.65)
-- Result review: `oc-goal_kimik3-dsv4_01_940dcb/review_results.md` (overall: 4.2)
+- Code review scorecard: `oc-goal_kimik3-dsv4_01_940dcb/review_code.md` (overall: 4.04)
+- CFD methods review: `oc-goal_kimik3-dsv4_01_940dcb/review_cfd.md` (overall: 4.13)
+- Result review: `oc-goal_kimik3-dsv4_01_940dcb/review_results.md` (overall: 3.35)

@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Conservative perfect-gas equations, nondimensionalization and coefficients are documented and implemented."
+      "score": 4.5,
+      "notes": "physics.hpp and report describe 2-D conservative compressible perfect-gas equations; no independent verification study."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "CGNS unstructured topology, boundary families, geometry and adjacency are handled in source."
+      "score": 4,
+      "notes": "TRI_3/QUAD_4 multizone geometry and edge pairing supported; MIXED CGNS sections skipped at cgns_mesh.cpp:230\u2013231."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Cell-centred conservative face residual assembly and global norms are source-supported."
+      "score": 4.5,
+      "notes": "solver.cpp:345\u2013390 assembles conservative face residual, refreshes state/gradients and applies wall flux."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
       "score": 4,
-      "notes": "Rusanov and selectable HLLC fluxes are documented; no independent shock accuracy study was run."
+      "notes": "Rusanov and HLLC paths exist; no independent shock accuracy test was performed."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Farfield, slip and no-slip/adiabatic paths and wall-output semantics are explicitly documented."
+      "score": 4.5,
+      "notes": "Source has farfield, slip and no-slip adiabatic paths; surface_rows:742\u2013746 explicitly emits wall zero velocities."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 5,
-      "notes": "Least-squares piecewise-linear production reconstruction and fallback are documented and source-supported."
+      "score": 4,
+      "notes": "LSQ plus limited face reconstruction solver.cpp:126\u2013153,156\u2013238; no independent smooth-order diagnostic and production environment is unbound."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 4,
-      "notes": "Venkatakrishnan/Barth-Jespersen and positivity controls are described; final metadata records Barth-Jespersen, so report/config detail is qualified."
+      "notes": "Actual source defaults to Venkat unless CFDSOLVE_BJ; metadata has fixed Barth label. Scratch first-order experiments do not establish production use."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Corrected face gradients, Newtonian/Fourier terms and tangential force split are supported."
+      "score": 4.5,
+      "notes": "Newtonian/heat flux path and tangential wall traction solver.cpp:688\u2013708; wall accuracy not independently tested."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 4,
-      "notes": "LU-SGS implicit pseudo-time source is present; two low-Mach laminar packages are statistically periodic rather than steady converged."
+      "score": 3.5,
+      "notes": "LU-SGS and local pseudo-time present; M015 false plateau and M015 laminar steady oscillation limit steady convergence evidence."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "BDF2 dual-time controls are in source and delivered Re200 metadata is completed/statistically_periodic; Re200 was not rerun."
+      "score": 4,
+      "notes": "Full BDF residual and predictor loop exist; hit counter accepts ratio or absolute floor, so exact strict-ratio misses unproven. Re200 not rerun."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 4,
-      "notes": "METIS k-way, owned/ghost scheduling and MPI paths are source-supported; no controlled rank-only comparison was verified."
+      "notes": "METIS and local/ghost state plus gradient exchange; Re20 np4 status failed despite report converged and exact binary/start matching unproven."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.65
+  "overall_score": 4.13
 }
