@@ -115,7 +115,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
 | `codex_gpt56_01_cb349f` | fully reviewed: 94/100, no DQ found; executable and individual image bindings qualified |
-| `codex_gpt56_02_38616e` | partial: provisional 90/100, no DQ established; remaining source/DQ review ongoing |
+| `codex_gpt56_02_38616e` | fully reviewed: 90/100, no DQ established; historic binary/precursor and image bindings qualified |
 | `codex_gpt56_03_93b257` | unreviewed |
 | `codex_gpt56_04_1e36f2` | partial — see finding below |
 | `codex_gpt56_05_7bee7c` | unreviewed |
@@ -1051,3 +1051,6 @@ gpt56_02 force-split checkpoint: immutable report.tex:24 claims tangential visco
 
 
 gpt56_02 source/rubric/DQ checkpoint: immutable 6183dc8 archive builds in network-disabled cfd-bench with bundled externals; eight selected CTests pass (including fake-launcher supervisor and np1/2/8 mesh tests). The solver-based transient step1 test was intentionally excluded under no-unsteady-rerun rule. Fresh rank_validation np1/np8 starts agree and final Re20 step3716 Cd2.0489691330788324/2.0489691330788284, M015 inviscid step6397 Cd0.00058177301891734/0.00058177301892481; no DQ4. M080 restart-origin cases have bounded final200 force/residual windows but low reductions0.569/0.371; inviscid precursor /tmp/asteria_m080_order1_restart_diag.MpWNbs no longer exists, and laminar precursor staging has force rows but no metadata. Do not infer a failed result from target misses alone. Root-only global mesh, METIS, explicit no-slip values, reconstruction/limiter and strict Re200 inner target reviewed. All 27 review notes and numbered DQ assessments updated individually; force-split remains separate DQ6 precedent. Score90, no DQ established. Historical executable and all individual figure bindings cannot be independently fully verified; no CFD rerun.
+
+
+gpt56_02 full-review qualification: all eight cases, 39 PDF pages, ten rubric sections, 27 review criteria and numbered DQ boundaries were reviewed using delivered evidence; clean source build and eight safe CTests passed. The selected session records a production/rebuild hash, source checkpoint be1f6b0 matches curated solver source, and rank/period checks independently corroborate recorded output. Original executable, one M080 inviscid restart precursor and every individual image-to-data binding are unavailable for complete independent verification; these remain explicit qualifications. Review is complete within feasible evidence, without asserting those unknowns. No CFD rerun.
