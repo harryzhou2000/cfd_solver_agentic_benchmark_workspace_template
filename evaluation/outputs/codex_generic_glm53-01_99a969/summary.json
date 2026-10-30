@@ -201,7 +201,7 @@
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 2,
-        "notes": "Root-only global mesh is released before solver, with METIS and neighbor halo; selected Re20 np4/np8 Cl means +0.012703 vs \u22120.389676 and Cd 0.91697 vs 0.84691. Exact np4 CLI controls are not independently documented."
+        "notes": "Root-only global mesh is released before solver, with METIS and neighbor halo; selected Re20 np4/np8 Cl means +0.012703 vs \u22120.389676 and Cd 0.91697 vs 0.84691. Selected root session confirms the same flux/CFL/max-step controls and no restart as np8."
       },
       {
         "id": "code.robustness",
@@ -348,7 +348,7 @@
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 2,
-        "notes": "Same revision bf6e816 and matching step-0 Re20 force rows, but settled np4/8 Cl differs by 0.40238 and Cd by 0.07007; np4 exact CLI controls unavailable. Numerical rank sensitivity material."
+        "notes": "Same revision bf6e816 and matching step-0 Re20 force rows, but settled np4/8 Cl differs by 0.40238 and Cd by 0.07007; Selected root session confirms matching np4 controls and fresh start; DQ4 applies. Numerical rank sensitivity material."
       }
     ],
     "disqualification_flags": [
@@ -436,7 +436,7 @@
         "title": "Traceability of figures and claims",
         "weight": 0.05,
         "score": 3,
-        "notes": "Metadata identifies bf6e816 for selected results while final b962bf5 fv_solver.cpp differs; report includes tables/manifests but np4 exact controls are not independently recorded."
+        "notes": "Metadata identifies bf6e816 for selected results while final b962bf5 fv_solver.cpp differs; report includes tables/manifests but selected root session records matching np4 CLI controls."
       }
     ],
     "disqualification_flags": [

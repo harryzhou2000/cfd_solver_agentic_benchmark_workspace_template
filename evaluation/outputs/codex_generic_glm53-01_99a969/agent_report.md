@@ -4,7 +4,7 @@ Submission `codex/generic/glm53-01` at `b962bf5bfa815f4bf65d8ffc05b5734a7ac53ceb
 
 ## Verdict
 
-**80/100; DQ=false (partial calibration; DQ4 unresolved).** Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence.
+**80/100; DQ=true under trigger 4 (partial calibration).** Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence.
 
 ## Evidence
 
@@ -38,3 +38,8 @@ Independent FFT on submitted Re200 force history reproduces St≈0.112809 for th
 Original results/cylinder_m010_laminar_re20 and results/rank_study/cylinder_m010_laminar_re20_np4 both identify case/Re20 and revision bf6e816, report converged at steps794/879 with 6.33/6.25 residual orders, and start at Cd156.95244366 and Cl≈1e-10 to roundoff. Last 20 force rows have np8 mean Cd0.84690655/Cl−0.38967612 and np4 mean Cd0.91697169/Cl+0.01270332; tails are individually tight. Absolute Cl difference 0.40237944 is ~44% of np4 drag scale, while Cd differs 0.07006514 (7.6%). The ratio relative to near-zero np4 lift is not alone a robust order-one test. Report.tex:737–756 discloses this sensitivity, but np4 run_status command is a placeholder without actual CFL/step overrides, so exact identical controls are not independently established. DQ4 remains unresolved, not established solely from relative near-zero lift; MPI rubric 9→5 and MPI review points 4→2. No rank rerun.
 
 The accepted workspace-existing 16-page PDF SHA de84aec749fbf635bfed9b43f518e63815a38609c3c770e6640127847c713ff1 matches snapshot; PDF mtime 2026-08-30 02:45:21 UTC follows tracked-matching TeX 02:45:04 UTC. All pages visually reviewed: no missing-asset placeholder found. Its rendered steady force figures have the same collapsed-axis defect. Other source/rubric/DQ assessment remains partial.
+
+
+## DQ4 control reconciliation — 2026-10-30
+
+The previously missing np4 CLI controls were found in the selected root-session tool call timestamp 2026-08-29T22:43:17.883Z: `scripts/run_case.sh cylinder_m010_laminar_re20 4 results/rank_study/cylinder_m010_laminar_re20_np4 --flux rusanov --cfl-initial 5 --cfl-max 10 --max-steps 12000`, with no restart argument. These match the immutable report/run_manifest.md np8 production options. Both packages name bf6e816, and step-0 Cd/Cl match to roundoff, supporting matching fresh starts. Both converged to tight tails. Their last-20 mean Cl differs by 0.40237944 in absolute dimensionless force coefficient, about 44% of the np4 drag scale; Cd differs 7.6%. This is an order-one change in the force vector under DQ4, independent of the unstable relative ratio to near-zero lift. Report.tex:737–756 candidly discloses the discrepancy; disclosure does not eliminate DQ4. DQ false→true, score remains80. No rank rerun. Remaining source and other DQ criteria partial.

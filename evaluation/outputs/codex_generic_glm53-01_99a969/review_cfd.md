@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:20:55.234168+00:00
+Generated: 2026-10-30T05:22:46.341600+00:00
 
 **Overall score: 3.52**
 
@@ -39,7 +39,7 @@ Generated: 2026-10-30T05:20:55.234168+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3 | bf6e816 fv_solver.cpp:893–926 refreshes gradients/limiter once per physical step and tests frozen-coefficient residual; zero reported misses do not prove fully refreshed nonlinear target. St≈0.11281 for t>=105 but ≈0.075 peak for t>=100. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | Same revision bf6e816 and matching step-0 Re20 force rows, but settled np4/8 Cl differs by 0.40238 and Cd by 0.07007; np4 exact CLI controls unavailable. Numerical rank sensitivity material. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | Same revision bf6e816 and matching step-0 Re20 force rows, but settled np4/8 Cl differs by 0.40238 and Cd by 0.07007; Selected root session confirms matching np4 controls and fresh start; DQ4 applies. Numerical rank sensitivity material. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 

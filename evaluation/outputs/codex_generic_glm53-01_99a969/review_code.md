@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:20:55.233692+00:00
+Generated: 2026-10-30T05:22:46.341185+00:00
 
 **Overall score: 3.7**
 
@@ -24,7 +24,7 @@ Generated: 2026-10-30T05:20:55.233692+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 2 | Root-only global mesh is released before solver, with METIS and neighbor halo; selected Re20 np4/np8 Cl means +0.012703 vs −0.389676 and Cd 0.91697 vs 0.84691. Exact np4 CLI controls are not independently documented. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2 | Root-only global mesh is released before solver, with METIS and neighbor halo; selected Re20 np4/np8 Cl means +0.012703 vs −0.389676 and Cd 0.91697 vs 0.84691. Selected root session confirms the same flux/CFL/max-step controls and no restart as np8. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence. |

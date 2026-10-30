@@ -63,7 +63,7 @@
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 2,
-          "notes": "Root-only global mesh is released before solver, with METIS and neighbor halo; selected Re20 np4/np8 Cl means +0.012703 vs \u22120.389676 and Cd 0.91697 vs 0.84691. Exact np4 CLI controls are not independently documented."
+          "notes": "Root-only global mesh is released before solver, with METIS and neighbor halo; selected Re20 np4/np8 Cl means +0.012703 vs \u22120.389676 and Cd 0.91697 vs 0.84691. Selected root session confirms the same flux/CFL/max-step controls and no restart as np8."
         },
         {
           "id": "code.robustness",
@@ -167,7 +167,7 @@
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 2,
-          "notes": "Same revision bf6e816 and matching step-0 Re20 force rows, but settled np4/8 Cl differs by 0.40238 and Cd by 0.07007; np4 exact CLI controls unavailable. Numerical rank sensitivity material."
+          "notes": "Same revision bf6e816 and matching step-0 Re20 force rows, but settled np4/8 Cl differs by 0.40238 and Cd by 0.07007; Selected root session confirms matching np4 controls and fresh start; DQ4 applies. Numerical rank sensitivity material."
         }
       ],
       "overall_score": 3.52,
@@ -222,7 +222,7 @@
           "title": "Traceability of figures and claims",
           "weight": 0.05,
           "score": 3,
-          "notes": "Metadata identifies bf6e816 for selected results while final b962bf5 fv_solver.cpp differs; report includes tables/manifests but np4 exact controls are not independently recorded."
+          "notes": "Metadata identifies bf6e816 for selected results while final b962bf5 fv_solver.cpp differs; report includes tables/manifests but selected root session records matching np4 CLI controls."
         }
       ],
       "overall_score": 3.2,
@@ -280,7 +280,7 @@
         "title": "MPI",
         "max_points": 10,
         "score": 5,
-        "notes": "Root-only global mesh is released before solve (main.cpp:81\u201384,151\u2013168); METIS/halo and reductions exist. Re20 selected np4/np8 Cl tail means +0.012703/\u22120.389676 differ by 0.40238, Cd 0.91697/0.84691 differ 7.6%. Both metadata name bf6e816 and step-0 forces match roundoff, but np4 command omits exact CLI controls; DQ4 unresolved."
+        "notes": "Root-only global mesh is released before solve (main.cpp:81\u201384,151\u2013168); METIS/halo and reductions exist. Re20 selected np4/np8 Cl tail means +0.012703/\u22120.389676 differ by 0.40238, Cd 0.91697/0.84691 differ 7.6%. Both metadata name bf6e816 and step-0 forces match roundoff, and selected root-session 2026-08-29T22:43:17.883Z confirms same flux/CFL/max-step controls and no restart as np8 manifest. Absolute Cl difference 0.40238 is order-one relative to drag scale; DQ4 applies."
       },
       {
         "id": "case_results",
@@ -340,13 +340,19 @@
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
       {
         "id": 7,
         "text": "metadata/status marks incomplete or failed runs as successful",
         "evidence": "No affirmative false-success evidence: Eight packages and report pass the explicit validator; run manifest and report provide complete production evidence.",
         "found": false
+      },
+      {
+        "id": 4,
+        "flag": "MPI rank count changes results by order-one amounts for steady cases",
+        "found": true,
+        "evidence": "Original Re20 np4 and np8 packages both name bf6e816, converge with tight last-20 tails, and start with Cd=156.95244366, Cl\u22481e-10 matching to roundoff. Selected root session at 2026-08-29T22:43:17.883Z launches np4 via scripts/run_case.sh with --flux rusanov --cfl-initial 5 --cfl-max 10 --max-steps 12000, no restart, matching immutable run_manifest np8 controls. Last-20 mean Cl is +0.0127033235 vs -0.3896761175: absolute coefficient difference 0.40237944 (~44% of np4 Cd scale), an order-one force-vector change; Cd 0.91697169 vs 0.84690655 differs 7.6%. Near-zero lift ratio alone is not used as criterion. Report.tex:737\u2013756 discloses rank sensitivity."
       }
     ]
   },

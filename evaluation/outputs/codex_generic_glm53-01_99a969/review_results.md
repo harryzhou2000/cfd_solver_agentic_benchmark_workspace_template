@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T05:20:55.234511+00:00
+Generated: 2026-10-30T05:22:46.341900+00:00
 
 **Overall score: 3.2**
 
@@ -27,7 +27,7 @@ Generated: 2026-10-30T05:20:55.234511+00:00
 | 6 | **res.report** Report quality and honesty | 0.15 | 3 | Report accurately discloses Re20 asymmetric result and rank sensitivity, and includes diagnostics; it calls all steady force histories readable although figures collapse at time zero. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Metadata identifies bf6e816 for selected results while final b962bf5 fv_solver.cpp differs; report includes tables/manifests but np4 exact controls are not independently recorded. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Metadata identifies bf6e816 for selected results while final b962bf5 fv_solver.cpp differs; report includes tables/manifests but selected root session records matching np4 CLI controls. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
