@@ -393,64 +393,64 @@
         "id": "code.build",
         "title": "Build system and reproducibility",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 4,
+        "notes": "Immutable clean build succeeds in network-disabled cfd-bench, 2 CPUs/3 GiB/256 processes; zero CTests registered."
       },
       {
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 4,
+        "notes": "main.cpp parses case/output and rank runs exist; no separate malformed-input execution was performed."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 4,
+        "notes": "Case, CGNS mesh, partition, halo, gas/flux and solver modules are separated; full global mesh remains alive during every-rank solve."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 4,
+        "notes": "No internal complete external solver invocation found; external similarity investigation excluded by trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 4,
+        "notes": "Case JSON and generic CGNS inputs control physics; no hard-coded two-mesh-only branch found."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2,
+        "notes": "Real METIS, local states and neighbor exchange exist; main.cpp:107\u2013108,331 reads/retains full global mesh on each rank during iterations."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2.5,
+        "notes": "Clean build and reported identical np comparisons exist, but laminar Cf is all zero, Re20 drag poor and full-mesh replication scales badly."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2.5,
+        "notes": "Zero CTests; seven structural case checks and M0.15 np1/2/4/8 output exist, but no complete Re200 or valid numerical benchmark."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2.5,
+        "notes": "Clear modular source, but report/metadata falsely assert active second-order production and full-mesh replication false."
       }
     ],
     "disqualification_flags": [
@@ -495,7 +495,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.0
+    "overall_score": 3.33
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -505,78 +505,78 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 4,
+        "notes": "Conservative perfect-gas equations and case-Re viscosity implemented; first-order production and questionable shear outcomes limit validation."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 4,
+        "notes": "CGNS mixed-cell mesh, geometry, adjacency and partition implemented; numerical case evidence does not independently validate every geometry detail."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "notes": "Residual uses conservative face assembly but solver.cpp:439\u2013448 uses first-order states and laminar wall shear results are zero."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 3.5,
+        "notes": "Rusanov flux is implemented; no active Roe solver, and case physics exhibit excess drag."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "notes": "Slip/farfield and no-slip state routines exist; no-slip output u=v=0 but NACA wall Cf and viscous drag are identically zero."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 1,
-        "notes": "fluxes.cpp implements reconstruction, but production residual solver.cpp:439\u2013448 uses first-order cell-average states; report.tex:261\u2013262 falsely claims all runs use second order."
+        "notes": "Reconstruction routine exists but solver.cpp:439\u2013448 disables it; report.tex:261\u2013262 explicitly claims all runs second-order."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 1,
-        "notes": "Barth limiter routine exists in fluxes.cpp but is not called in production residual; no active limited reconstruction evidence."
+        "notes": "Barth limiter routine exists but is unused by production flux; positive-state clamp does not establish limited reconstruction."
       },
       {
         "id": "cfd.viscous",
         "title": "Viscous discretization",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2,
+        "notes": "Viscous gradients implemented, but full traction is reported as skin-friction force and all NACA laminar wall Cf/viscous drag are zero."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "notes": "CFL-ramped local point-implicit iteration reaches reported residual targets with stable final forces; first-order and unphysical forces limit validation."
       },
       {
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2.5,
+        "notes": "Frozen-history BDF2 and inner target loop exist, but Re200 has no final output and completion assigns periodic status without checking shedding."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2.5,
+        "notes": "METIS and halos plus M0.15 rank comparison exist, but full global mesh is retained on every rank throughout the solve."
       }
     ],
     "disqualification_flags": [
@@ -611,7 +611,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.66
+    "overall_score": 2.67
   },
   "result_review": {
     "review_area": "result_review",
@@ -622,49 +622,49 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 2,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "notes": "Seven steady packages pass structural validator; Re200 final metadata absent and all NACA laminar wall Cf values are zero."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "notes": "Official seven steady cases passed structural validation; Re200 fails on missing metadata. Structural pass is not numerical acceptance."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2.5,
+        "notes": "Seven residual targets met with bounded late force tails; Re200 pending, and physical credibility of zero NACA shear and Re20 drag is poor."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 1.5,
+        "notes": "Re20 CD5.482 vs ~2; NACA viscous forces/Cf zero, subsonic inviscid CD0.066 excessive. Rank comparison alone does not establish accuracy."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2,
+        "notes": "Accepted 22-page PDF has per-case force/residual and field panels, but full-domain contours shrink body and wake to a few pixels."
       },
       {
         "id": "res.report",
         "title": "Report quality and honesty",
         "weight": 0.15,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2,
+        "notes": "Report acknowledges missing Re200 and excessive drag, but falsely says all production reconstruction is second order and full-traction force is skin friction."
       },
       {
         "id": "res.traceability",
         "title": "Traceability of figures and claims",
         "weight": 0.05,
-        "score": 3,
-        "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+        "score": 2,
+        "notes": "Accepted sibling PDF matches tracked TeX and provides tables/figures; source figures are uncommitted and exact historical binary/image binding remains qualified."
       }
     ],
     "disqualification_flags": [
@@ -694,7 +694,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.8
+    "overall_score": 2.12
   },
   "measurements": {
     "note": "opencode harness: codex tool-usage/LOC extraction not applicable",

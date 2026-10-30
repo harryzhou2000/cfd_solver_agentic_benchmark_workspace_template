@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+      "score": 4,
+      "notes": "Immutable clean build succeeds in network-disabled cfd-bench, 2 CPUs/3 GiB/256 processes; zero CTests registered."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+      "score": 4,
+      "notes": "main.cpp parses case/output and rank runs exist; no separate malformed-input execution was performed."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 3,
-      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+      "score": 4,
+      "notes": "Case, CGNS mesh, partition, halo, gas/flux and solver modules are separated; full global mesh remains alive during every-rank solve."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+      "score": 4,
+      "notes": "No internal complete external solver invocation found; external similarity investigation excluded by trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+      "score": 4,
+      "notes": "Case JSON and generic CGNS inputs control physics; no hard-coded two-mesh-only branch found."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 3,
-      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+      "score": 2,
+      "notes": "Real METIS, local states and neighbor exchange exist; main.cpp:107\u2013108,331 reads/retains full global mesh on each rank during iterations."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+      "score": 2.5,
+      "notes": "Clean build and reported identical np comparisons exist, but laminar Cf is all zero, Re20 drag poor and full-mesh replication scales badly."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+      "score": 2.5,
+      "notes": "Zero CTests; seven structural case checks and M0.15 np1/2/4/8 output exist, but no complete Re200 or valid numerical benchmark."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 3,
-      "notes": "Source/report and seven-case evidence; Re200 missing where applicable."
+      "score": 2.5,
+      "notes": "Clear modular source, but report/metadata falsely assert active second-order production and full-mesh replication false."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.0
+  "overall_score": 3.33
 }
