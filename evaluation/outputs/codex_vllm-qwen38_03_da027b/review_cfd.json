@@ -7,77 +7,77 @@
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
       "score": 1,
-      "notes": "Immutable eos.h:27\u201355 pressure is not inverse of to_cons. Isolated evaluator-generated algebra probe rho2,u1,p1 produces rhoE3.5 then recovered p0.3; correct p is1. This EOS blob SHA256 fb21a74bd1eab8e77f643fbdda738e65649b94330342b6ee4ce58034e9e06a6b matches historical metadata revision5d8af03 and curated tip. Report.tex:80\u201387 also confuses enthalpy/energy and cp/cv."
+      "notes": "eos.h:27\u201355 pressure inversion is mathematically inconsistent: isolated rho2,u1,p1 round-trip returns p0.3 instead of1; report confuses enthalpy/energy and cp/cv."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Partial."
+      "score": 3.5,
+      "notes": "Python HDF5 CGNS preprocessor merges zones by coordinate and builds cells/boundary families; MIXED sections and general connectivity not demonstrated."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 3,
-      "notes": "Partial."
+      "score": 2,
+      "notes": "Face-based FV residual and correction machinery exist, but EOS defect corrupts primitive states and delivered steady trajectories are nonphysical."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Partial."
+      "score": 2.5,
+      "notes": "HLLC, Roe and LLF code present; all use inconsistent primitive pressure conversion, so nominal flux availability is not numerical validation."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Partial."
+      "score": 2.5,
+      "notes": "Slip and no-slip wall treatments implemented; farfield is extrapolation plus disclosed sponge, not a proper characteristic farfield."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 3,
-      "notes": "Partial."
+      "score": 2.5,
+      "notes": "LSQ reconstruction and local defect-based first-order fallback implemented; cumulative fallback counts do not establish final-cell fraction or accuracy."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 3,
-      "notes": "Partial."
+      "notes": "Barth-type limiting and state clamps exist; cumulative first-order fallback counts are 107319, 19405016 and 113757521 for the three inviscid runs, without known refresh denominator."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Partial."
+      "score": 2.5,
+      "notes": "Viscous stresses, one-sided wall gradients and heat conduction exist, but computed drag uses full traction rather than tangential skin friction and EOS corrupts wall thermodynamics."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Partial."
+      "score": 2.5,
+      "notes": "SGS/JFNK mechanisms and actual 20k\u201340k failed runs; all inner targets missed in the three delivered inviscid packages."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 1,
-      "notes": "No canonical Re200 package."
+      "score": 1.5,
+      "notes": "BDF2/history and fallback substeps exist, but observed Re200 production stops at step1003/t10.03 and does not establish full-horizon target convergence."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 1,
-      "notes": "No canonical MPI evidence."
+      "score": 3,
+      "notes": "Real METIS and neighbor state/reconstruction exchange; rank-study failure and potentially different historical executable builds prevent rank-consistency conclusion."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.5
+  "overall_score": 2.44
 }

@@ -6,50 +6,50 @@
       "id": "res.contract",
       "title": "Output contract compliance",
       "weight": 0.2,
-      "score": 0,
-      "notes": "Three historical canonical submodule result directories contain complete layouts but mark failed; stopped M015 laminar and Re200 have only partial outputs, three cases unrun. Examiner rejects failed metadata completed=false."
+      "score": 1,
+      "notes": "Three inviscid layouts exist in historical benchmark submodule results but are marked failed; two stopped cases retain partial histories and three are unrun."
     },
     {
       "id": "res.validator",
       "title": "Automated validator results",
       "weight": 0.1,
-      "score": 0,
-      "notes": "Prior evaluation checked wrong solver/results path. Evaluator rechecked actual benchmark-submodule result path; validator rejects M015 inviscid because completed=false, not missing metadata."
+      "score": 1,
+      "notes": "Actual-path validator rejects M015 because metadata completed=false, not missing. Structural check cannot convert failed results to successful cases."
     },
     {
       "id": "res.completion",
       "title": "Case completion and convergence",
       "weight": 0.2,
       "score": 0,
-      "notes": "No canonical eight-case delivery."
+      "notes": "No case achieved a deliverable converged/statistically-periodic result; report explicitly discloses failed or unrun outcomes."
     },
     {
       "id": "res.plausibility",
       "title": "Result plausibility and MPI consistency",
       "weight": 0.15,
-      "score": 0,
-      "notes": "No verified canonical results."
+      "score": 0.5,
+      "notes": "Three inviscid outputs have severely nonphysical coefficients; M015 laminar and Re200 are stopped partials, not completed physics."
     },
     {
       "id": "res.visualization",
       "title": "Visualizations",
       "weight": 0.15,
-      "score": 2,
-      "notes": "Partial report figures."
+      "score": 2.5,
+      "notes": "13-page contestant report shows failed-case force, pressure, and Re200 wake/lift figures. Standalone residual figures exist in workspace manifest; data are failed/partial."
     },
     {
       "id": "res.report",
       "title": "Report quality and honesty",
       "weight": 0.15,
-      "score": 2,
-      "notes": "Report exists but references excluded/raw evidence."
+      "score": 3,
+      "notes": "Report makes failures and partial runs explicit and documents debugging; EOS/enthalpy and cp/cv formulas are wrong, plus reported convergence invariance is unsupported."
     },
     {
       "id": "res.traceability",
       "title": "Traceability of figures and claims",
       "weight": 0.05,
-      "score": 1,
-      "notes": "Recovery archive excluded from tip."
+      "score": 3,
+      "notes": "Actual historical output path identified via workspace manifest; submitted immutable plotter reproduces original M015 force, residual and pressure images pixel-identically from saved inputs. Historic executable and remaining plots unbound."
     }
   ],
   "disqualification_flags": [
@@ -79,5 +79,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 0.65
+  "overall_score": 1.35
 }

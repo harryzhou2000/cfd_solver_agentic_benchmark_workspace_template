@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Source exists."
+      "score": 4.5,
+      "notes": "Immutable d0ae91d clean CMake build passes with /opt/external dependencies in network-disabled cfd-bench, 2 CPUs/3GiB/256 processes. No CTests registered."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Partial runner."
+      "score": 4,
+      "notes": "main.cpp supports solve, case/output, restart and initial-state generators, with input error handling; no exhaustive CLI rerun."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 3,
-      "notes": "Large recovery history excluded."
+      "score": 2.5,
+      "notes": "C++ mesh/flux/solver/output modules plus Python mesh preprocessor exist, but solver.cpp exceeds 3500 lines and contains extensive experimental branches."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
-      "score": 3,
-      "notes": "No authorship investigation."
+      "score": 4,
+      "notes": "Trust policy excludes external authorship investigation; no internal solver wrapper found."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Partial evidence."
+      "score": 4,
+      "notes": "Case configuration supplies mesh and physics; generic source with documented controls and sponge, not a two-filename solver."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 2,
-      "notes": "No canonical package."
+      "score": 3,
+      "notes": "Root preprocessing invokes METIS and neighbor halo communication; observed 20k np4/np8 force discrepancy is large but exact binary identity is unbound and runs failed."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Recovery indicates instability."
+      "score": 1.5,
+      "notes": "EOS pressure inversion wrong; source has positivity/fallback controls but all three final inviscid runs failed and transient stopped."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 1,
-      "notes": "Canonical validator fails missing metadata."
+      "score": 2.5,
+      "notes": "Saved rank comparisons, bug probes and honest failure status exist; evaluator clean build passes but no registered CTests. Validator rejects failed metadata."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 2,
-      "notes": "Extensive raw recovery history."
+      "score": 2.5,
+      "notes": "Immutable source and report retained; raw production evidence sits in workspace benchmark submodule, with substantial recovery artifacts and generated-asset curation."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.73
+  "overall_score": 3.29
 }

@@ -30,67 +30,67 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Source exists."
+          "score": 4.5,
+          "notes": "Immutable d0ae91d clean CMake build passes with /opt/external dependencies in network-disabled cfd-bench, 2 CPUs/3GiB/256 processes. No CTests registered."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Partial runner."
+          "score": 4,
+          "notes": "main.cpp supports solve, case/output, restart and initial-state generators, with input error handling; no exhaustive CLI rerun."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
-          "score": 3,
-          "notes": "Large recovery history excluded."
+          "score": 2.5,
+          "notes": "C++ mesh/flux/solver/output modules plus Python mesh preprocessor exist, but solver.cpp exceeds 3500 lines and contains extensive experimental branches."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
-          "score": 3,
-          "notes": "No authorship investigation."
+          "score": 4,
+          "notes": "Trust policy excludes external authorship investigation; no internal solver wrapper found."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
-          "score": 3,
-          "notes": "Partial evidence."
+          "score": 4,
+          "notes": "Case configuration supplies mesh and physics; generic source with documented controls and sponge, not a two-filename solver."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 2,
-          "notes": "No canonical package."
+          "score": 3,
+          "notes": "Root preprocessing invokes METIS and neighbor halo communication; observed 20k np4/np8 force discrepancy is large but exact binary identity is unbound and runs failed."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 3,
-          "notes": "Recovery indicates instability."
+          "score": 1.5,
+          "notes": "EOS pressure inversion wrong; source has positivity/fallback controls but all three final inviscid runs failed and transient stopped."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 1,
-          "notes": "Canonical validator fails missing metadata."
+          "score": 2.5,
+          "notes": "Saved rank comparisons, bug probes and honest failure status exist; evaluator clean build passes but no registered CTests. Validator rejects failed metadata."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
-          "score": 2,
-          "notes": "Extensive raw recovery history."
+          "score": 2.5,
+          "notes": "Immutable source and report retained; raw production evidence sits in workspace benchmark submodule, with substantial recovery artifacts and generated-asset curation."
         }
       ],
-      "overall_score": 2.73,
+      "overall_score": 3.29,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -100,80 +100,80 @@
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 1,
-          "notes": "Immutable eos.h:27\u201355 pressure is not inverse of to_cons. Isolated evaluator-generated algebra probe rho2,u1,p1 produces rhoE3.5 then recovered p0.3; correct p is1. This EOS blob SHA256 fb21a74bd1eab8e77f643fbdda738e65649b94330342b6ee4ce58034e9e06a6b matches historical metadata revision5d8af03 and curated tip. Report.tex:80\u201387 also confuses enthalpy/energy and cp/cv."
+          "notes": "eos.h:27\u201355 pressure inversion is mathematically inconsistent: isolated rho2,u1,p1 round-trip returns p0.3 instead of1; report confuses enthalpy/energy and cp/cv."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Partial."
+          "score": 3.5,
+          "notes": "Python HDF5 CGNS preprocessor merges zones by coordinate and builds cells/boundary families; MIXED sections and general connectivity not demonstrated."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 3,
-          "notes": "Partial."
+          "score": 2,
+          "notes": "Face-based FV residual and correction machinery exist, but EOS defect corrupts primitive states and delivered steady trajectories are nonphysical."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
-          "score": 3,
-          "notes": "Partial."
+          "score": 2.5,
+          "notes": "HLLC, Roe and LLF code present; all use inconsistent primitive pressure conversion, so nominal flux availability is not numerical validation."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": 3,
-          "notes": "Partial."
+          "score": 2.5,
+          "notes": "Slip and no-slip wall treatments implemented; farfield is extrapolation plus disclosed sponge, not a proper characteristic farfield."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 3,
-          "notes": "Partial."
+          "score": 2.5,
+          "notes": "LSQ reconstruction and local defect-based first-order fallback implemented; cumulative fallback counts do not establish final-cell fraction or accuracy."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
           "score": 3,
-          "notes": "Partial."
+          "notes": "Barth-type limiting and state clamps exist; cumulative first-order fallback counts are 107319, 19405016 and 113757521 for the three inviscid runs, without known refresh denominator."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Partial."
+          "score": 2.5,
+          "notes": "Viscous stresses, one-sided wall gradients and heat conduction exist, but computed drag uses full traction rather than tangential skin friction and EOS corrupts wall thermodynamics."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Partial."
+          "score": 2.5,
+          "notes": "SGS/JFNK mechanisms and actual 20k\u201340k failed runs; all inner targets missed in the three delivered inviscid packages."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 1,
-          "notes": "No canonical Re200 package."
+          "score": 1.5,
+          "notes": "BDF2/history and fallback substeps exist, but observed Re200 production stops at step1003/t10.03 and does not establish full-horizon target convergence."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 1,
-          "notes": "No canonical MPI evidence."
+          "score": 3,
+          "notes": "Real METIS and neighbor state/reconstruction exchange; rank-study failure and potentially different historical executable builds prevent rank-consistency conclusion."
         }
       ],
-      "overall_score": 2.5,
+      "overall_score": 2.44,
       "disqualification_flags": []
     },
     "result_review": {
@@ -182,129 +182,129 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 0,
-          "notes": "Three historical canonical submodule result directories contain complete layouts but mark failed; stopped M015 laminar and Re200 have only partial outputs, three cases unrun. Examiner rejects failed metadata completed=false."
+          "score": 1,
+          "notes": "Three inviscid layouts exist in historical benchmark submodule results but are marked failed; two stopped cases retain partial histories and three are unrun."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 0,
-          "notes": "Prior evaluation checked wrong solver/results path. Evaluator rechecked actual benchmark-submodule result path; validator rejects M015 inviscid because completed=false, not missing metadata."
+          "score": 1,
+          "notes": "Actual-path validator rejects M015 because metadata completed=false, not missing. Structural check cannot convert failed results to successful cases."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 0,
-          "notes": "No canonical eight-case delivery."
+          "notes": "No case achieved a deliverable converged/statistically-periodic result; report explicitly discloses failed or unrun outcomes."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 0,
-          "notes": "No verified canonical results."
+          "score": 0.5,
+          "notes": "Three inviscid outputs have severely nonphysical coefficients; M015 laminar and Re200 are stopped partials, not completed physics."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 2,
-          "notes": "Partial report figures."
+          "score": 2.5,
+          "notes": "13-page contestant report shows failed-case force, pressure, and Re200 wake/lift figures. Standalone residual figures exist in workspace manifest; data are failed/partial."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 2,
-          "notes": "Report exists but references excluded/raw evidence."
+          "score": 3,
+          "notes": "Report makes failures and partial runs explicit and documents debugging; EOS/enthalpy and cp/cv formulas are wrong, plus reported convergence invariance is unsupported."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 1,
-          "notes": "Recovery archive excluded from tip."
+          "score": 3,
+          "notes": "Actual historical output path identified via workspace manifest; submitted immutable plotter reproduces original M015 force, residual and pressure images pixel-identically from saved inputs. Historic executable and remaining plots unbound."
         }
       ],
-      "overall_score": 0.65,
+      "overall_score": 1.35,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 33.5,
+    "total_scored": 45.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 5,
-        "notes": "Partial source."
+        "score": 8,
+        "notes": "Isolated clean build passes; generic solve/restart CLI and explicit failed-status output, but incomplete final case contract."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
-        "score": 4,
-        "notes": "Partial."
+        "score": 7,
+        "notes": "CGNS HDF5 preprocessing, triangle/quad sections, node merging, geometry and METIS adjacency; MIXED/general connectivity and rounded-coordinate merge limitations."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 5,
-        "notes": "Real FV/wall source exists, but conservative-to-primitive EOS is inconsistent (rho2,u1,p1 round-trip returns p0.3) and corrupts flux/force calculations."
+        "notes": "FV/HLLC/Roe and wall treatment exist but incorrect EOS primitive conversion corrupts residual and farfield uses extrapolation plus sponge."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 3,
-        "notes": "Unverified."
+        "score": 5,
+        "notes": "LSQ, limiter and positivity controls exist; per-cell first-order fallback cumulative counts do not establish second-order accuracy, and no case converged."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 3,
-        "notes": "Unverified."
+        "score": 4,
+        "notes": "Stress/heat and wall gradients implemented, but force split integrates full traction instead of tangential skin-friction projection."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 4,
-        "notes": "No canonical delivery."
+        "score": 5,
+        "notes": "SGS/JFNK and BDF2 with substeps implemented; all 20k\u201340k inviscid inner targets missed and Re200 stopped at t10.03."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 1,
-        "notes": "No canonical evidence."
+        "score": 4.5,
+        "notes": "METIS and neighbor halos implemented and two rank studies delivered, but large failed-state differences and historical build changes prevent rank-equivalence attribution."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
         "score": 0,
-        "notes": "Missing canonical package directories."
+        "notes": "Three nonphysical failed inviscid runs, two stopped partial runs, and three unrun cases; no successful final result."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
         "score": 3.5,
-        "notes": "Report discloses failures and figures, but EOS/enthalpy and heat-capacity formulas are incorrect; several inputs/plots are workspace-only."
+        "notes": "Report discloses all failures, includes case figures and partial Re200 wake, but thermodynamic formulas are incorrect and many sources/figures are workspace-only."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 5,
-        "notes": "Recovery tooling."
+        "score": 3,
+        "notes": "Case-driven modular interfaces exist, but 2-D fixed state and monolithic solver limit extension to new physics."
       }
     ]
   },
@@ -344,13 +344,92 @@
   },
   "disqualification": {
     "triggered": false,
-    "flags": []
+    "flags": [
+      {
+        "id": 1,
+        "text": "Existing solver executable called internally",
+        "found": false,
+        "evidence": "CMake builds in-repo source; Python code handles mesh preprocessing, not an external solver."
+      },
+      {
+        "id": 2,
+        "text": "Force or residual files generated without solving",
+        "found": false,
+        "evidence": "Run histories and failure logs delivered; no synthetic-history path established."
+      },
+      {
+        "id": 3,
+        "text": "Hard-coded mesh filenames",
+        "found": false,
+        "evidence": "Case input configures mesh and boundary map; preprocessor is generic for supported sections."
+      },
+      {
+        "id": 4,
+        "text": "Order-one steady MPI result changes",
+        "found": false,
+        "evidence": "M015 np8/np4 20000-step Cl last5000 means \u22121.032/+0.229, large but both failed/nonstationary and selected descendant rebuilt the shared executable path during np8. Exact binary identity and rank-only causation are unproven."
+      },
+      {
+        "id": 5,
+        "text": "Explicit time stepping only",
+        "found": false,
+        "evidence": "SGS/JFNK and BDF2 inner solves implemented despite failed results."
+      },
+      {
+        "id": 6,
+        "text": "Report claims algorithms absent from source",
+        "found": false,
+        "evidence": "HLLC/LSQ/limiter/SGS/BDF and METIS exist; incorrect EOS and full-traction viscous split are implementation/report defects scored independently, not a wholly absent algorithm."
+      },
+      {
+        "id": 7,
+        "text": "Metadata marks incomplete or failed runs successful",
+        "found": false,
+        "evidence": "Three delivered inviscid metadata completed=false/status=failed; stopped laminar/Re200 lack terminal metadata and report explicitly identifies failure; unrun cases disclosed."
+      },
+      {
+        "id": 8,
+        "text": "Report figures do not correspond to submitted outputs",
+        "found": false,
+        "evidence": "M015 original force/residual/pressure figures pixel-reproduced from historical submodule data with immutable script; other figure bindings remain qualified."
+      },
+      {
+        "id": 9,
+        "text": "Metadata reports METIS but geometric split or full-state replication",
+        "found": false,
+        "evidence": "Root preprocesses METIS and scatters rank-local partitions; solver iteration uses neighbor halos; no full mesh/state on every rank established."
+      },
+      {
+        "id": 10,
+        "text": "Production second-order reconstruction or limiter disabled",
+        "found": false,
+        "evidence": "Source uses reconstruction/BJ and disclosed per-cell first-order fallback; cumulative fallback counts lack a refresh denominator and do not prove whole production scheme disabled."
+      },
+      {
+        "id": 11,
+        "text": "No-slip surface rows are undisclosed cell-center velocities",
+        "found": false,
+        "evidence": "Historical viscous cases lack a complete final surface package; no demonstrated false no-slip surface success, source wall handling considered separately."
+      },
+      {
+        "id": 12,
+        "text": "Figures misname plotted variable",
+        "found": false,
+        "evidence": "M015 pressure figure reproduced from named saved field; no specific final report variable mislabel proven."
+      },
+      {
+        "id": 13,
+        "text": "Copied or wrapped existing open-source solver core",
+        "found": false,
+        "evidence": "Trust policy excludes external authorship investigation; no internal wrapper found."
+      }
+    ]
   },
   "limitations": [
     "No contestant final response was extractable for multi-root Codex selection.",
-    "No evaluator build or MPI rerun.",
     "Re200 was not rerun.",
     "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
-    "Actual historical results reside in contestant benchmark submodule results/, not solver/results/; three failed complete packages and two stopped partial histories were found. Exact historic binary and remaining DQ review pending."
+    "Actual historical results reside in contestant benchmark submodule results/, not solver/results/; three failed complete packages and two stopped partial histories were found. Exact historic binary and remaining DQ review pending.",
+    "Isolated clean build passed. Exact historical executables, DQ4 rank-only attribution and unsampled figure bindings remain qualified; no CFD case or unsteady rerun."
   ]
 }

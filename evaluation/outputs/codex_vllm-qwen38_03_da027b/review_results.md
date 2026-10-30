@@ -2,32 +2,32 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T14:45:04.048262+00:00
+Generated: 2026-10-30T14:48:34.789271+00:00
 
-**Overall score: 0.65**
+**Overall score: 1.35**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 0 | Three historical canonical submodule result directories contain complete layouts but mark failed; stopped M015 laminar and Re200 have only partial outputs, three cases unrun. Examiner rejects failed metadata completed=false. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 1 | Three inviscid layouts exist in historical benchmark submodule results but are marked failed; two stopped cases retain partial histories and three are unrun. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 0 | Prior evaluation checked wrong solver/results path. Evaluator rechecked actual benchmark-submodule result path; validator rejects M015 inviscid because completed=false, not missing metadata. |
+| 2 | **res.validator** Automated validator results | 0.10 | 1 | Actual-path validator rejects M015 because metadata completed=false, not missing. Structural check cannot convert failed results to successful cases. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 0 | No canonical eight-case delivery. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 0 | No case achieved a deliverable converged/statistically-periodic result; report explicitly discloses failed or unrun outcomes. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 0 | No verified canonical results. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 0.5 | Three inviscid outputs have severely nonphysical coefficients; M015 laminar and Re200 are stopped partials, not completed physics. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
-| 5 | **res.visualization** Visualizations | 0.15 | 2 | Partial report figures. |
+| 5 | **res.visualization** Visualizations | 0.15 | 2.5 | 13-page contestant report shows failed-case force, pressure, and Re200 wake/lift figures. Standalone residual figures exist in workspace manifest; data are failed/partial. |
 |   | Mach AND pressure computed-field figures for main body cases with correct filenames, colorbars, captions, adequate resolution (not scatter-only/tiny/unlabeled); line plots publication-style with labeled axes/legends; Re 200 wake-focused vorticity/velocity figure. | | | |
 |   | *Evidence:* Figures dir + figure_manifest.csv; render a sample; compare with source data. | | | |
-| 6 | **res.report** Report quality and honesty | 0.15 | 2 | Report exists but references excluded/raw evidence. |
+| 6 | **res.report** Report quality and honesty | 0.15 | 3 | Report makes failures and partial runs explicit and documents debugging; EOS/enthalpy and cp/cv formulas are wrong, plus reported convergence invariance is unsupported. |
 |   | Governing equations, nondimensionalization, BCs, schemes accurately described with formulas; histories for all cases; convergence/vortex-street/MPI/limitations analyzed honestly with tables and figure references; reproducible artifacts. | | | |
 |   | *Evidence:* report.pdf/report.tex review; cross-check claims vs metadata and CSVs. | | | |
-| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 1 | Recovery archive excluded from tip. |
+| 7 | **res.traceability** Traceability of figures and claims | 0.05 | 3 | Actual historical output path identified via workspace manifest; submitted immutable plotter reproduces original M015 force, residual and pressure images pixel-identically from saved inputs. Historic executable and remaining plots unbound. |
 |   | Every figure tied to source data via manifest or equivalent; every reported coefficient traceable to forces.csv; residual reduction traceable to residuals.csv; final forces row corresponds to final field/surface state. | | | |
 |   | *Evidence:* figure_manifest.csv; spot-check values in text vs CSVs. | | | |
 
@@ -41,7 +41,7 @@ Generated: 2026-10-30T14:45:04.048262+00:00
 
 ## Summary
 
-- Overall score (0-5): 0.65
+- Overall score (0-5): 1.35
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
