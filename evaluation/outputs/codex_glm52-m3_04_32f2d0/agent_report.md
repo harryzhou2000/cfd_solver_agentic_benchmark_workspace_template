@@ -29,7 +29,7 @@
 
 ## Methodology
 
-Evaluated immutable curated submission `8615cddbc8d507f20c559d9659eccbf41d8021f1` against reconstructed initial commit `a14f203babe6794ad032aea760aed8e302e62b5a`. The commit audit passed and confirms that raw case outputs were intentionally excluded. I inspected source/report and separately validated the eight raw attempt packages in the detached immutable attempt worktree; that is evaluator evidence, not a submitted deliverable. No Re200 or other unsteady rerun was performed.
+Evaluated immutable curated submission `8615cddbc8d507f20c559d9659eccbf41d8021f1` against reconstructed initial commit `a14f203babe6794ad032aea760aed8e302e62b5a`. The commit audit passed and confirms that raw case outputs were intentionally excluded. Contestant checkpoint `783eb18534a278714a4f7e2fe9e392038a95e2f2` contains the actual case packages and figures delivered immediately before the selected final response; curated-tip omission does not remove them as contestant evidence. Source and report match the curated tip except for a removed backup. Historical executable attribution is qualified. No Re200 or other unsteady rerun was performed.
 
 The sole project-local Codex root `019fd883-6a9d-7c53-a1b1-96a168fb91ae` and its 19 descendants were selected from the bundled `.sessions/codex` database/rollouts. Its UTC start is 2026-08-06. Terminal final prose is stored in `contestant_final_response.md` (SHA-256 `ef6734a0152173302fdae290d7cc186f7eb8d5a968e9d2fc914f3811c5ae53f9`). The identity sidecar SHA-256 is `6ce469cd7a9a3f78ed74399634ee9a0a15fb6467bdac32fdd3dd116c8bab4d9c`.
 
@@ -43,9 +43,9 @@ The sole project-local Codex root `019fd883-6a9d-7c53-a1b1-96a168fb91ae` and its
 | Second-Order Spatial Scheme | 10 | 5 | M2 laminar is reported first-order. |
 | Viscous Terms | 10 | 7 | Source-supported, raw wall proof excluded. |
 | Implicit And Transient Methods | 15 | 11 | BDF2/inner controls exist; Re200 prose conflicts. |
-| MPI | 10 | 3 | Severe steady rank dependence. |
-| Case Results And Validation | 10 | 5 | Seven attempt packages pass; M2 inviscid fails. |
-| Report, Visualization, Analysis | 5 | 5 | Broad figure/report coverage, but weak traceability. |
+| MPI | 10 | 3 | Halo/METIS exist; old rank comparison differs in options and evolving source. |
+| Case Results And Validation | 10 | 3.5 | Re200 and M015 have major force/convergence failures; remaining cases under review. |
+| Report, Visualization, Analysis | 5 | 2 | M015 force figure depicts a different run; Re200 claims conflict with data. |
 | Extensibility | 5 | 4 | Reasonable module split. |
 
 ## Review-area scores (0-5 weighted, review_*.json)
@@ -62,7 +62,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 | Case | Score | Notes |
 |------|------:|-------|
-| NACA0012 M0.15 inviscid | 4 | Attempt validates; excluded from submission. |
+| NACA0012 M0.15 inviscid | 2 | Selected final drag is still changing and reported figure depicts a different run. |
 | NACA0012 M0.80 inviscid | 4 | Attempt validates; excluded from submission. |
 | NACA0012 M2.00 inviscid | 1 | Report sanity says failed despite metadata converged. |
 | NACA0012 M0.15 Re5000 | 3.5 | Attempt validates; excluded final raw data. |
@@ -73,7 +73,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ: **true**. Trigger 4 is established by report Table rank comparison: M0.15 inviscid lift changes from 0.002416 at np=1 to 53.72 at np=2. Trigger 7 is established in the immutable attempt evidence: M2 inviscid metadata says `converged`, while the report sanity table calls it failed. No conclusion was made for copying/originality beyond the internal source inspection/trust policy.
+DQ remains **true** on triggers 7 and 8. Re200 metadata calls the run statistically periodic despite a final strict target miss and severe nonperiodic force spikes; M015 steady force remains substantially unsettled. The report's M015 force figure depicts an older run rather than the selected final history. The former DQ4 comparison is not controlled: the two recorded launch commands used different CFL/ramp options, and source/binary attribution is uncertain; rank-only causation is not established.
 
 ## Metadata answers & session selection
 
@@ -81,8 +81,8 @@ There are no unanswered metadata questions. This is a post-run legacy reconstruc
 
 ## Limitations
 
-The original run environment is unavailable. The result commit contains zero raw output-contract packages, logs, fields, manifests, or report PDF. Raw attempt evidence cannot restore submitted-result completeness. Re200 was not rerun, per policy.
+The original runtime environment is incomplete. Curated result tip omits raw packages, but contestant checkpoint `783eb18` preserves them and they are considered as contestant-delivered evidence. The approved report PDF is absent pending provenance review. Re200 was not rerun, per policy.
 
 ## Verdict
 
-Rubric: **65/100**. The source is a substantive CFD implementation and the attempt tree supplies useful diagnostic evidence, but the final immutable submission is not self-contained for result verification. DQ is true for rank dependence and failed-result metadata inconsistency.
+Provisional rubric: **60.5/100**. DQ is true for false successful-result metadata and a specific report-figure/data mismatch. Remaining case, source and PDF review is partial; no rank-only cause is inferred from the old comparison.
