@@ -99,7 +99,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_opus46-02_d8fed8` | partial: 35/100, mandatory placeholder rejection, DQ2 and TASK full mesh; binary/force provenance unresolved |
 | `codex_generic_opus5-01_83492a` | partial: 90/100, DQ not established; Re200 binary/fallback attribution unresolved |
 | `codex_generic_opus5-02_cac77b` | partial: all cases, PDF and source/rubric examined; historical Re200 binary and final DQ adjudication remain uncertain |
-| `codex_generic_sonnet46-01_ac6940` | partial: cylinder cases and DQ7 corrected; other cases/rubric/DQ pending |
+| `codex_generic_sonnet46-01_ac6940` | partial: all cases, PDF, source and rubric reviewed; DQ7/TASK full mesh; historic binary binding and remaining DQ uncertain |
 | `codex_generic_sonnet46-02_dac37b` | unreviewed |
 | `codex_generic_sonnet5-01_540ddf` | unreviewed |
 | `codex_generic_sonnet5-02_6c0ac0` | unreviewed |
