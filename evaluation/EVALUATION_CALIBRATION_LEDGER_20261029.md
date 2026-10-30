@@ -102,7 +102,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_sonnet46-01_ac6940` | fully reviewed, qualified: 66/100, DQ7/TASK full mesh; historic binary/figure binding limited |
 | `codex_generic_sonnet46-02_dac37b` | fully reviewed, qualified: 73/100, DQ6/7 and placeholder rejection; historical binary unbound |
 | `codex_generic_sonnet5-01_540ddf` | fully reviewed, qualified: 77.5/100, DQ8; historical binary/other-figure/fallback provenance limited |
-| `codex_generic_sonnet5-02_6c0ac0` | partial: all cases, PDF, source/rubric reviewed; DQ7 proven; historical binary/remaining figure provenance uncertain |
+| `codex_generic_sonnet5-02_6c0ac0` | fully reviewed, qualified: 75/100, DQ7; historical binary/remaining figure provenance uncertain |
 | `codex_generic_vllm-qwen38-01_2045e0` | partial: all cases/PDF/source/rubric examined; DQ4 rank anomaly unbound to same binary; other figure provenance uncertain |
 | `codex_generic_vllm-qwen38-02_d47362` | partial: source/result, DQ and score adjudication ongoing |
 | `codex_glm52-m3_01_919b67` | partial: 62.5/100, DQ7/10 and TASK full-mesh; binary/remaining review ongoing |
@@ -867,6 +867,8 @@ sonnet5-02 report consistency: replaced obsolete 83/DQ=false verdict with curren
 sonnet5-02 source/validator checkpoint: multi-zone TRI/QUAD/BAR with interface welding, root-only global mesh setup, METIS/neighbor halos and reconstruction exchange inspected. Source plateau test uses residual only, not force stability. Validator passes six NACA packages/report and rejects both honestly failed cylinders. Review points now criterion-specific; exact binary/DQ boundaries partial. No CFD rerun.
 
 sonnet5-02 DQ boundary checkpoint: DQ7 supported by two force-drift cases; explicitly failed cylinders are not false success. Root-only mesh/METIS/neighbors, active reconstruction, no-slip boundary output inspected; no DQ4/6/8/9/10/11/12 inferred without qualifying proof. report.tex:942–945 reverses ordering of quoted 19% and 34% viscous fractions. Historical binary null revision and remaining figure/source attribution partial.
+
+sonnet5-02 qualified full review: all ten sections, eight cases, 27 review points and 13 DQ rules assessed to available evidence. 75/100 and DQ7 unchanged for the two independently demonstrated steady force-drift cases; explicitly failed cylinders are not charged simply for failure. The full-traction force split is scored as an output defect rather than mechanically treated as absent DQ6 algorithm. Historic binary and other figure attribution remain unbound and qualified; earlier partial wording is historical. No CFD/rank/Re200 rerun; both gates required.
 
 vllm-qwen38-01 PDF/case checkpoint: All 50 pages of the accepted sibling main PDF were rendered and visually inspected; the PDF SHA256 `c8943305dfb4e6fdae87518654f1ea6b23f2940fe348a354ac58a794e31dd8c8` matches checkpoint `18e70a9`, and tracked main TeX matches submission `e185a0a`. Contrary to prior notes, the report includes case residual/force histories and computed fields; curated-tip omission of figure blobs remains a reproducibility limitation. Immutable report.tex:942–951 also lists all three laminar numeric CL/CD values.
 

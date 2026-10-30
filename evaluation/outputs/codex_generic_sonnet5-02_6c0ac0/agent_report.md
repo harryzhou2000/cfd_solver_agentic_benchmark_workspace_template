@@ -4,7 +4,7 @@ Submission `codex/generic/sonnet5-02` at `e49016dd97c7f3fe9ae2ae1978e8ff8b9aa507
 
 ## Verdict
 
-**75/100; DQ=true (trigger 7).** The selected M015 inviscid and M200 laminar steady forces continue to drift despite statistically-periodic success labels. Re20 and Re200 are explicitly reported failed; their failure alone is not charged as false success. Further source and DQ review remains partial.
+**75/100; DQ=true (trigger 7).** The selected M015 inviscid and M200 laminar steady forces continue to drift despite statistically-periodic success labels. Re20 and Re200 are explicitly reported failed; their failure alone is not charged as false success. All DQ rules were assessed to the available evidence limit; historic binary/figure attribution remains qualified.
 
 ## Evidence
 
@@ -52,3 +52,8 @@ The examiner validator independently passed six NACA directories and the report 
 DQ7 is based on the independently demonstrated M015 inviscid and M200 laminar force drift despite success labels. Re20 and Re200 explicitly carry failed status and are not charged merely for failure. `partition/distributed_mesh.cpp` builds the full mesh in root-only setup scope and the solver uses METIS plus neighbor halos, so a full-mesh/full-state shortcut is not established. The report's np1/2/4/8 trajectory examples use a `jac_scale` different from final production controls (`report.tex:1070–1072`); this does not establish an order-one same-case final result discrepancy. The final source reconstructs both sides with selected limiter paths, so DQ10 is not established merely from bad case results. `solver/residual.cpp:171–177,199–215` writes imposed zero no-slip wall velocity.
 
 Checkpoint figure manifest and the case-specific force endpoints support the plots examined; no specific unrelated-data or misnamed-variable figure has been demonstrated, so DQ8/12 are not inferred. The force-split claim is handled as an implemented output-path defect, not mechanically as DQ6, consistent with the previously recorded force-split precedent. `report.tex:942–945` also calls 19% the largest and 34% the smallest viscous fraction; the stated arithmetic contradicts that ordering. This is an additional report error, not evidence of fabricated data. No external-solver invocation or two-filename-only mesh dispatch was identified in inspected source; no exhaustive external-authorship search was performed. Selected metadata revisions are null, and exact historic binary/remaining figure attribution remains partial. No CFD rerun.
+
+
+## Qualified full review — 2026-10-31
+
+All ten sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to the available evidence limit. Final 75/100 and DQ7 remain, based on independently demonstrated M0.15 inviscid and M2 laminar force drift despite success labels. The two cylinder cases explicitly report failure and are not charged merely for failing. The full-traction force split is a separately scored output defect, not mechanically an absent-algorithm DQ6. Historic binary and remaining figure/data attribution remain unresolved; prior partial sections are historical. No CFD, rank or Re200 rerun.

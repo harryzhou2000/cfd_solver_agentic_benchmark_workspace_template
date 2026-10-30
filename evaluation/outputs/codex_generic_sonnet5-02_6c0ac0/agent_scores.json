@@ -347,6 +347,66 @@
         "flag": "metadata.json marks incomplete or failed runs as successful final results",
         "found": true,
         "evidence": "Checkpoint 1185ccd selected naca0012_m015_inviscid metadata SHA256 038c0dcd8f1902255e3a411d77a58a2f328e1ae7aa63f6079ecf58270d0b69b3 says completed=true, statistically_periodic. Its checkpoint-matched forces.csv SHA256 8613113c292b69c738b5b35d8a9f5df4c6ead7dd067b9a6f0df49049d76ab511 shows Cd descending from +0.510818 at step12001 to \u22120.054502 at step20000, including \u22120.026512\u2192\u22120.054502 in final400; Cl \u22120.03513\u2192\u22120.016532 over final4000. Delivered force plot visibly confirms continued drift rather than a stationary or periodic state. Immutable report.tex:21,875 and run_manifest.md:23,32\u201335 characterize steady cases as converged/statistically periodic. Re20 and Re200 status=failed are separately disclosed and are not charged merely for failure. No CFD rerun. M200 laminar is separately labelled statistically_periodic/completed despite a claimed stable plateau at step8000/50000; Cd changes 0.103284\u21920.122727 in its last4000 steps and 0.125419\u21920.122727 in the last1000, inconsistent with a stable long-window plateau."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No internal existing CFD executable call found in inspected source; no exhaustive external authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence of synthetic force/residual histories; failed cylinder statuses are disclosed, not treated as fabricated."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Configured case and CGNS input are not limited to two hard-coded filenames."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Report np1/2/4/8 trajectories use jac_scale different from final production controls; no matched order-one final-result difference established."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Source implements implicit and BDF2 loops; explicit-only integration not established."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Claimed force split is produced through full-traction rather than tangential-only integration and is separately penalized; the underlying force algorithm exists, so absence is not inferred."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "Checkpoint figure manifest and examined force endpoints support delivered plots; no specific unrelated-data figure proven."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "Root-only full-mesh setup, METIS and neighbor halos exist; all-rank full-state/geometric-only shortcut not established."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Final source reconstructs both sides using limiter paths; bad numerical cases alone do not prove disabled production reconstruction."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "solver/residual.cpp:171\u2013177,199\u2013215 outputs imposed zero no-slip wall velocity; undocumented adjacent-cell wall check failure not established."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "No specific figure filename/variable swap established."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source CFD core found in inspected source; no exhaustive external authorship search."
       }
     ]
   },
@@ -355,6 +415,7 @@
     "Structural validation is separate from substantive numerical scoring.",
     "Raw solver artifacts remain workspace evidence and were excluded from the curated submission tip.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All ten sections, eight cases, 27 review points and 13 DQ rules assessed to available evidence. Historical producing binary and remaining figure attribution remain qualified; no CFD/Re200 rerun."
   ]
 }
