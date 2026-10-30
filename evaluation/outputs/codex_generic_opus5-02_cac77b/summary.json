@@ -597,7 +597,7 @@
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 4.5,
-        "notes": "METIS ownership, neighbor halos, and reductions are source-backed."
+        "notes": "partition.cpp:52\u201373 calls METIS; halo_exchange.cpp:36\u201355 exchanges neighbor data and communicator.cpp:82,112\u2013159 reduces scalars/vectors; main.cpp:258\u2013278 releases global mesh before solve."
       },
       {
         "id": "code.robustness",
@@ -688,7 +688,7 @@
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 4.5,
-        "notes": "Conservative residual assembly inspected."
+        "notes": "residual.cpp:163\u2013251 assembles each face flux with opposite signs on owned adjacent cells, including inviscid and viscous terms."
       },
       {
         "id": "cfd.flux",
@@ -709,7 +709,7 @@
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 4,
-        "notes": "LS reconstruction is present, but limiter freezes and terminal first-order cells limit production evidence."
+        "notes": "gradients.cpp:9\u201329,103 and residual.cpp:83\u2013108 implement least-squares gradients and limited face states; report.tex:395\u2013410,454\u2013517 documents first-order cells and limiter freezing."
       },
       {
         "id": "cfd.limiter",
@@ -723,7 +723,7 @@
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 4.5,
-        "notes": "Newtonian/Fourier terms, wall outputs, and force split are source/result backed."
+        "notes": "viscous_flux.cpp:41\u201357 removes normal traction; forces.cpp:69\u201374,100\u2013113 integrates tangential shear; boundary-condition values are written to surface rows at forces.cpp:173\u2013179."
       },
       {
         "id": "cfd.implicit",
@@ -744,7 +744,7 @@
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 4.5,
-        "notes": "METIS/ghost/neighbor exchange source and rank-consistency evidence; timing is unusable for scaling."
+        "notes": "partition.cpp:52\u201373 invokes METIS; halo_exchange.cpp:36\u201355 and communicator.cpp:82,112\u2013159 provide neighbor exchanges/reductions. Report rank tables compare np2/4/8; timing is unsuitable to establish scaling."
       }
     ],
     "disqualification_flags": [

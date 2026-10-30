@@ -42,7 +42,7 @@
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4.5,
-      "notes": "METIS ownership, neighbor halos, and reductions are source-backed."
+      "notes": "partition.cpp:52\u201373 calls METIS; halo_exchange.cpp:36\u201355 exchanges neighbor data and communicator.cpp:82,112\u2013159 reduces scalars/vectors; main.cpp:258\u2013278 releases global mesh before solve."
     },
     {
       "id": "code.robustness",

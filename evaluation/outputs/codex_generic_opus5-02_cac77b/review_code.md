@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:17:22.696164+00:00
+Generated: 2026-10-30T07:18:37.600472+00:00
 
 **Overall score: 4.54**
 
@@ -24,7 +24,7 @@ Generated: 2026-10-30T07:17:22.696164+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 5 | Generic case-file paths; no mesh-name-only dispatch found. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4.5 | METIS ownership, neighbor halos, and reductions are source-backed. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 4.5 | partition.cpp:52–73 calls METIS; halo_exchange.cpp:36–55 exchanges neighbor data and communicator.cpp:82,112–159 reduces scalars/vectors; main.cpp:258–278 releases global mesh before solve. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4.5 | Validation, positivity handling, and explicit error paths are present. |

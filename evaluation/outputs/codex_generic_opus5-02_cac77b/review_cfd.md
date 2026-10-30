@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T07:17:22.696577+00:00
+Generated: 2026-10-30T07:18:37.601034+00:00
 
 **Overall score: 4.5**
 
@@ -15,7 +15,7 @@ Generated: 2026-10-30T07:17:22.696577+00:00
 | 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 5 | cgns_reader.cpp:123,293–337 handles multiple zones and TRI_3/QUAD_4/BAR_2 sections; mixed triangles and quads in separate sections are supported. CGNS MIXED element sections fall through to an error. |
 |   | Reads CGNS unstructured zones and boundary families; computes cell volumes, face areas/normals/centers; handles mixed cells and multi-zone meshes; builds cell-face adjacency for partitioning and reconstruction. | | | |
 |   | *Evidence:* Mesh reader code, geometry tests, partition diagnostics. | | | |
-| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4.5 | Conservative residual assembly inspected. |
+| 3 | **cfd.residual** Conservative finite-volume residual | 0.12 | 4.5 | residual.cpp:163–251 assembles each face flux with opposite signs on owned adjacent cells, including inviscid and viscous terms. |
 |   | Cell-centered FV residual with correct face orientation, consistent flux signs, boundary-face treatment; residual assembled once per iteration with global MPI reduction. | | | |
 |   | *Evidence:* residual assembly code; residuals.csv shows global reduction. | | | |
 | 4 | **cfd.flux** Approximate Riemann flux and entropy fix | 0.08 | 4.5 | HLLC production flux plus Roe/Rusanov alternatives are implemented. |
@@ -24,13 +24,13 @@ Generated: 2026-10-30T07:17:22.696577+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 4.5 | Characteristic farfield, slip, and no-slip wall paths inspected. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | LS reconstruction is present, but limiter freezes and terminal first-order cells limit production evidence. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 4 | gradients.cpp:9–29,103 and residual.cpp:83–108 implement least-squares gradients and limited face states; report.tex:395–410,454–517 documents first-order cells and limiter freezing. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
 | 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 4 | Venkat/Barth and positivity exist; production freeze/fallback is documented. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
-| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4.5 | Newtonian/Fourier terms, wall outputs, and force split are source/result backed. |
+| 8 | **cfd.viscous** Viscous discretization | 0.10 | 4.5 | viscous_flux.cpp:41–57 removes normal traction; forces.cpp:69–74,100–113 integrates tangential shear; boundary-condition values are written to surface rows at forces.cpp:173–179. |
 |   | Velocity/temperature gradients on unstructured cells; Newtonian stress tensor and Fourier heat flux; viscosity matches case Reynolds number; wall-normal gradient treatment; pressure vs tangential skin-friction split. | | | |
 |   | *Evidence:* Viscous flux code; forces.csv viscous columns; report formulas. | | | |
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4.5 | CFL local pseudo-time and LU-SGS are implemented. |
@@ -39,7 +39,7 @@ Generated: 2026-10-30T07:17:22.696577+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 4.5 | Selected raw Re200 force history reaches t=300; metadata reports 169/30000 target misses (99.44% success). Final source implements BDF2 and explicit residual-ratio checks, but its exact identity with the executed binary is unproven because the configured revision stamp conflicts with the selected launch option. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4.5 | METIS/ghost/neighbor exchange source and rank-consistency evidence; timing is unusable for scaling. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4.5 | partition.cpp:52–73 invokes METIS; halo_exchange.cpp:36–55 and communicator.cpp:82,112–159 provide neighbor exchanges/reductions. Report rank tables compare np2/4/8; timing is unsuitable to establish scaling. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 

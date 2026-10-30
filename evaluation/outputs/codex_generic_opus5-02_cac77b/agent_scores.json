@@ -63,7 +63,7 @@
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 4.5,
-          "notes": "METIS ownership, neighbor halos, and reductions are source-backed."
+          "notes": "partition.cpp:52\u201373 calls METIS; halo_exchange.cpp:36\u201355 exchanges neighbor data and communicator.cpp:82,112\u2013159 reduces scalars/vectors; main.cpp:258\u2013278 releases global mesh before solve."
         },
         {
           "id": "code.robustness",
@@ -111,7 +111,7 @@
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
           "score": 4.5,
-          "notes": "Conservative residual assembly inspected."
+          "notes": "residual.cpp:163\u2013251 assembles each face flux with opposite signs on owned adjacent cells, including inviscid and viscous terms."
         },
         {
           "id": "cfd.flux",
@@ -132,7 +132,7 @@
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 4,
-          "notes": "LS reconstruction is present, but limiter freezes and terminal first-order cells limit production evidence."
+          "notes": "gradients.cpp:9\u201329,103 and residual.cpp:83\u2013108 implement least-squares gradients and limited face states; report.tex:395\u2013410,454\u2013517 documents first-order cells and limiter freezing."
         },
         {
           "id": "cfd.limiter",
@@ -146,7 +146,7 @@
           "title": "Viscous discretization",
           "weight": 0.1,
           "score": 4.5,
-          "notes": "Newtonian/Fourier terms, wall outputs, and force split are source/result backed."
+          "notes": "viscous_flux.cpp:41\u201357 removes normal traction; forces.cpp:69\u201374,100\u2013113 integrates tangential shear; boundary-condition values are written to surface rows at forces.cpp:173\u2013179."
         },
         {
           "id": "cfd.implicit",
@@ -167,7 +167,7 @@
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 4.5,
-          "notes": "METIS/ghost/neighbor exchange source and rank-consistency evidence; timing is unusable for scaling."
+          "notes": "partition.cpp:52\u201373 invokes METIS; halo_exchange.cpp:36\u201355 and communicator.cpp:82,112\u2013159 provide neighbor exchanges/reductions. Report rank tables compare np2/4/8; timing is unsuitable to establish scaling."
         }
       ],
       "overall_score": 4.5,
@@ -245,42 +245,42 @@
         "title": "Mesh And Geometry",
         "max_points": 10,
         "score": 10,
-        "notes": "CGNS, mixed/multizone geometry, and adjacency source paths verified."
+        "notes": "Final cgns_reader.cpp:123,293\u2013337 handles multiple zones and TRI_3/QUAD_4/BAR_2 sections; a CGNS MIXED section is unsupported. Mixed elements in separate sections satisfy the stated mixed-cell capability. Geometry/adjacency and partition paths inspected."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 14.5,
-        "notes": "Conservative residual, approximate fluxes, and boundary conditions verified in source."
+        "notes": "Final residual.cpp:163\u2013251 assembles signed face fluxes; boundary_conditions.cpp:14\u201341 constructs slip and zero-velocity viscous wall states. Inviscid/viscous paths are separately implemented."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 8,
-        "notes": "Production limiter freezes and terminal first-order cells limit second-order credit."
+        "notes": "gradients.cpp:9\u201329,103 and limiter.cpp:27,114 implement weighted least squares, limiting and positivity. Report.tex:395\u2013410,454\u2013517 discloses first-order cells and steady/transient limiter freezes; source/source-to-run binding is limited as separately documented."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
         "score": 9.5,
-        "notes": "Viscous gradients, stress/heat, walls, and force split are present."
+        "notes": "viscous_flux.cpp:41\u201357 removes the normal part of traction; forces.cpp:69\u201374,100\u2013113 integrates tangential shear. Surface rows use boundary velocity at forces.cpp:173\u2013179, not adjacent cell centers."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 14.5,
-        "notes": "Implicit/LU-SGS and full BDF2 Re200 run, with nonzero misses and known underprediction."
+        "notes": "Final transient_driver.cpp:189\u2013214 constructs spatial plus BDF physical-time residual and checks its ratio; selected raw force history reaches t=300 and metadata reports 169/30000 target misses. The exact historical transient binary source is not established, so implementation attribution remains provisional."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
         "score": 9.5,
-        "notes": "METIS/halo/reductions and rank consistency; unstable wall times cannot establish scaling."
+        "notes": "partition.cpp:52\u201373 calls METIS, halo_exchange.cpp:36\u201355 uses neighbor sends/receives and communicator.cpp:82,112\u2013159 reductions. main.cpp:258\u2013278 releases root global mesh before iteration. Rank table supports comparisons; unstable wall times do not establish scaling."
       },
       {
         "id": "case_results",
@@ -301,7 +301,7 @@
         "title": "Extensibility",
         "max_points": 5,
         "score": 4.5,
-        "notes": "Modular seams are clear, while geometry remains 2-D."
+        "notes": "Physics, boundary, mesh, numerics and solve paths are distinct; mesh geometry and state remain 2-D, limiting 3-D generality."
       }
     ]
   },
