@@ -10,7 +10,7 @@ This is a read-only evaluation of immutable submission `e272cd3f195e4d7cf490acd9
 
 I selected the sole project-local OpenCode root `ses_03e6cdbcaffefVyMLw9N6OIQGR` (DeepSeek V4 Pro, max), 2026-08-02T08:24:33.589Z–10:18:34.601Z. There are no descendants and no bundled Codex alternate. Its terminal completed response is SQLite message `msg_fc1fb50d2001kBVLJGcQ2TwMxo` at 10:18:34.345Z, with four parts. Stored-message SHA-256: `8ef69cfa3273eb4e8ee583c92e89fb25faa6ff4ae14751519f9f51ee0b290c80`; extracted text SHA-256: `898a47098f67c298b64ea0e8cd850987b542cd4ebb03dc5ea1082bb4c7bd48e0`. The extracted final-response file is an unindexed sidecar.
 
-No solver was rebuilt or rerun, and Re200 was never rerun. The explicit structural check finds readable files in all eight directories, but the report check fails: `figure_manifest.csv` has no Re200 wake visualization entry.
+A clean immutable-source build was attempted in network-disabled cfd-bench (2 CPUs, 3 GiB, 256 processes): CMake configured, but compilation failed at `main.cpp:39` because `run_solver` is undeclared. No solver was run, including Re200. The historical run logs establish a separate earlier executable, not a byte-for-byte binding to final source. The explicit structural check finds readable files in all eight directories, but the report check fails: `figure_manifest.csv` has no Re200 wake visualization entry.
 
 ## Core finding
 

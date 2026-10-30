@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T16:33:29.848145+00:00
+Generated: 2026-10-30T16:35:03.502300+00:00
 
 **Overall score: 2.3**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **code.build** Build system and reproducibility | 0.15 | 2 | CMake and README exist, but no clean rebuild was performed and the submitted source cannot reproduce the claimed MPI/transient outputs. |
+| 1 | **code.build** Build system and reproducibility | 0.15 | 2 | Immutable e272cd3 clean isolated build fails: main.cpp:39 references undeclared run_solver; CMake configured, compiler stopped before any tests. Historical run logs show a separately built executable, whose source revision is not bound. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
 | 2 | **code.cli** CLI and error handling | 0.10 | 4 | main.cpp parses solve, --case and --output and rejects unknown/missing arguments. |

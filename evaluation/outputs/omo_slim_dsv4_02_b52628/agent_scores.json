@@ -34,7 +34,7 @@
           "title": "Build system and reproducibility",
           "weight": 0.15,
           "score": 2,
-          "notes": "CMake and README exist, but no clean rebuild was performed and the submitted source cannot reproduce the claimed MPI/transient outputs."
+          "notes": "Immutable e272cd3 clean isolated build fails: main.cpp:39 references undeclared run_solver; CMake configured, compiler stopped before any tests. Historical run logs show a separately built executable, whose source revision is not bound."
         },
         {
           "id": "code.cli",
@@ -244,7 +244,7 @@
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 5,
-        "notes": "Source has a CMake/CLI skeleton, but no clean build evidence and output provenance/contract are deficient."
+        "notes": "CMake configures, but clean immutable-source build fails at undeclared run_solver in main.cpp:39; executable provenance and output contract remain limited."
       },
       {
         "id": "mesh_geometry",
@@ -435,7 +435,7 @@
   },
   "limitations": [
     "Pre-run provenance is an operator-approved post-run reconstruction; original runtime environment is unavailable.",
-    "No evaluator build or solver rerun was performed; Re200 was never rerun.",
+    "Clean immutable-source build was attempted in a network-disabled container and failed to compile at main.cpp:39; no solver was rerun, including Re200.",
     "The terminal OpenCode response is in project-local SQLite: message msg_fc1fb50d2001kBVLJGcQ2TwMxo, completed 2026-08-02T10:18:34.345Z, 4 parts; stored-message SHA-256 8ef69cfa3273eb4e8ee583c92e89fb25faa6ff4ae14751519f9f51ee0b290c80 and extracted text SHA-256 898a47098f67c298b64ea0e8cd850987b542cd4ebb03dc5ea1082bb4c7bd48e0. contestant_final_response.md remains an unindexed sidecar.",
     "run_identity.json SHA-256 is 24d60d0b9ff887a881138ef1ef7d87763d3baf473976e8031ab5af0c183e8f3d.",
     "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
