@@ -353,12 +353,73 @@
         "flag": "Full mesh or full state replicated on all MPI ranks during iterations",
         "found": true,
         "evidence": "Immutable 058801f and checkpoint 8899f00 share solver/src/main.cpp Git blob 77eae4fe67d9ce68227b6293367b8aac91132d68. main.cpp:89\u201397 declares GlobalMesh gm and reads the complete mesh on every rank; :104\u2013109 builds local partitions but leaves gm alive; :136\u2013156 invokes runSteady/runTransient in the same scope, without releasing gm. TASK.md prohibited shortcut 7 forbids per-rank full mesh replication during iterations. The selected metadata says full_mesh_replication_during_iterations=false and has git_revision=null; exact historical binary remains unbound. This is the task prohibition, distinct from numbered DQ9 full-state/geometric-only wording."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No internal existing CFD executable call found in inspected submitted source; no exhaustive external authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence force/residual histories were generated without solving. Constant Re20 values and incorrect metadata do not by themselves prove synthetic histories."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Case-driven CGNS mesh input does not establish a two-filename-only branch."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "NACA np1/8 Cd0.000813/0.000858 and Cl \u22120.000028/+0.0303 differ materially relative to near-zero lift, but absolute change is not order one and convergence states differ; cylinder np8 is a failed pilot."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Source contains implicit and transient methods, so explicit-only integration not established."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Major claimed algorithms exist; full traction versus tangential split is scored as defective output, not an absent algorithm. Exact historic binary remains unbound."
+      },
+      {
+        "id": 8,
+        "found": false,
+        "evidence": "No specific report figure is proven unrelated to its submitted data; checkpoint figures and matching CSVs are documented with hashes."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "METIS and partition-local solution exist. All-rank full mesh is charged separately as TASK prohibited shortcut 7, not inferred full-state/geometric-only DQ9."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Final source keeps M\u22650.5 inviscid cases first order for at least 5000 steps while selected runs end earlier, but an older source used 100 steps and historic binary is unbound. No production-disabled claim is proven."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "Output surface values use boundary wall velocity, so undocumented adjacent-cell no-slip failure is not established."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "No specific named-variable swap found in examined figures."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source solver core found in inspected source; no exhaustive external authorship search."
       }
     ]
   },
   "limitations": [
     "No evaluator solver rerun was performed; Re200 was never rerun.",
     "2928 raw/build/generated artifacts were excluded from immutable tip.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All ten sections, eight cases, 27 review points and 13 DQ rules reviewed to available evidence. Exact historical production binary and selected figure binding remain qualified; no CFD/Re200 rerun."
   ]
 }
