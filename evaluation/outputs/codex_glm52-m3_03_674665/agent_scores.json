@@ -69,8 +69,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "METIS graph partitioning, owned/ghost construction, neighbor Isend/Irecv, and Allreduce paths are directly present. Runtime rank consistency is unavailable."
+          "score": 2.5,
+          "notes": "5b9dded7 main.cpp:100\u2013102 reads complete mesh on every rank; it remains live through :135\u2013138 solver loops and is reused at :152. This violates TASK.md:46,227 despite METIS/neighbor halos."
         },
         {
           "id": "code.robustness",
@@ -94,7 +94,7 @@
           "notes": "Readable header-oriented C++ and scripts, but report/source contradictions and unverified generated-result claims remain."
         }
       ],
-      "overall_score": 2.92,
+      "overall_score": 2.69,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -166,18 +166,18 @@
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Physical-time outer loop, frozen histories and inner iterations exist. README/report state max-inner=1 override, violating requested minimum, and no Re200 artifact demonstrates its execution."
+          "score": 2,
+          "notes": "BDF2 source and t300 historical package exist, but strict relative-target counting reports 11356 misses in checkpoint stdout while metadata claims zero. Report additionally claims an absolute 1e-10 criterion absent from recorded revision source. Binary hash unverified."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "METIS_PartGraphKway, rank-local owned/ghost sets, neighbor communication and reductions are source-evidenced; scalability remains unmeasured."
+          "score": 2.5,
+          "notes": "5b9dded7 main.cpp:100\u2013102 reads complete mesh on every rank; it remains live through :135\u2013138 solver loops and is reused at :152. This violates TASK.md:46,227 despite METIS/neighbor halos."
         }
       ],
-      "overall_score": 3.42,
+      "overall_score": 3.19,
       "disqualification_flags": []
     },
     "result_review": {
@@ -238,7 +238,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 59,
+    "total_scored": 54.5,
     "sections": [
       {
         "id": "build_cli",
@@ -279,22 +279,22 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 9,
-        "notes": "LU-SGS/CFL and BDF2 outer-inner structures exist, but command/report admit max-inner=1 for Re200 and no run logs demonstrate controls."
+        "score": 7.5,
+        "notes": "BDF2 structure exists; checkpoint stdout reports 11356 strict misses while metadata reports zero, and report claims an absolute convergence branch absent from source revision. Historic binary remains unbound."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 8,
-        "notes": "METIS, owned/ghost partitioning, neighbor exchange and reductions are implemented; no submitted np=8 NACA/cylinder comparison exists."
+        "score": 5,
+        "notes": "METIS/neighbor halos exist, but main.cpp retains complete global mesh on every rank through solve; TASK.md:46,227 prohibit this. Rank package review pending."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
         "score": 0,
-        "notes": "All eight required canonical result packages are absent from immutable submission, so each required result and rank comparison receives zero."
+        "notes": "Prior zero is provisional: contestant checkpoint fa9d2b83 contains all eight canonical packages. Individual case physics and delivered floor review pending."
       },
       {
         "id": "report_viz",
@@ -315,39 +315,39 @@
   "case_scores": {
     "naca0012_m015_inviscid": {
       "score": 0,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=2.45, CD=-0.23 at 5b9dded:solver/report/report.tex:105; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required solver/results/naca0012_m015_inviscid is absent from immutable commit 5b9dded7; report claims cannot replace the result package."
+      "notes": "Provisional prior score 0 pending substantive case review. Contestant checkpoint fa9d2b83 includes solver/results/naca0012_m015_inviscid, figures and report; curator omitted them from submission tip. No CFD rerun."
     },
     "naca0012_m080_inviscid": {
       "score": 0,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=-0.001, CD=0.036 at 5b9dded:solver/report/report.tex:106; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required solver/results/naca0012_m080_inviscid is absent from immutable commit 5b9dded7; no credible delivered case-result evidence."
+      "notes": "Provisional prior score 0 pending substantive case review. Contestant checkpoint fa9d2b83 includes solver/results/naca0012_m080_inviscid, figures and report; curator omitted them from submission tip. No CFD rerun."
     },
     "naca0012_m200_inviscid": {
       "score": 0,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=0.0002, CD=0.091 at 5b9dded:solver/report/report.tex:107; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required solver/results/naca0012_m200_inviscid is absent from immutable commit 5b9dded7; no credible delivered case-result evidence."
+      "notes": "Provisional prior score 0 pending substantive case review. Contestant checkpoint fa9d2b83 includes solver/results/naca0012_m200_inviscid, figures and report; curator omitted them from submission tip. No CFD rerun."
     },
     "naca0012_m015_laminar_re5000": {
       "score": 0,
-      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=-0.88, CD=0.103 at 5b9dded:solver/report/report.tex:108; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required solver/results/naca0012_m015_laminar_re5000 is absent from immutable commit 5b9dded7; no credible delivered case-result evidence."
+      "notes": "Provisional prior score 0 pending substantive case review. Contestant checkpoint fa9d2b83 includes solver/results/naca0012_m015_laminar_re5000, figures and report; curator omitted them from submission tip. No CFD rerun."
     },
     "naca0012_m080_laminar_re5000": {
       "score": 0,
-      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.0001, CD=0.165 at 5b9dded:solver/report/report.tex:109; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required solver/results/naca0012_m080_laminar_re5000 is absent from immutable commit 5b9dded7; no credible delivered case-result evidence."
+      "notes": "Provisional prior score 0 pending substantive case review. Contestant checkpoint fa9d2b83 includes solver/results/naca0012_m080_laminar_re5000, figures and report; curator omitted them from submission tip. No CFD rerun."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 0,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=0, CD=2.19 at 5b9dded:solver/report/report.tex:110; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required solver/results/naca0012_m200_laminar_re5000 is absent from immutable commit 5b9dded7; no credible delivered case-result evidence."
+      "notes": "Provisional prior score 0 pending substantive case review. Contestant checkpoint fa9d2b83 includes solver/results/naca0012_m200_laminar_re5000, figures and report; curator omitted them from submission tip. No CFD rerun."
     },
     "cylinder_m010_laminar_re20": {
       "score": 0,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=-0.40, CD=-2.85 at 5b9dded:solver/report/report.tex:111; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Required solver/results/cylinder_m010_laminar_re20 is absent from immutable commit 5b9dded7; no readable final wake/force/surface evidence."
+      "notes": "Provisional prior score 0 pending substantive case review. Contestant checkpoint fa9d2b83 includes solver/results/cylinder_m010_laminar_re20, figures and report; curator omitted them from submission tip. No CFD rerun."
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=-0.001, CD=4.73 at 5b9dded:solver/report/report.tex:112; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Required solver/results/cylinder_m010_laminar_re200 is absent from immutable commit 5b9dded7. Re200 was not rerun; source cannot prove production controls or shedding."
+      "notes": "Provisional prior score 0 pending substantive case review. Contestant checkpoint fa9d2b83 includes solver/results/cylinder_m010_laminar_re200, figures and report; curator omitted them from submission tip. No CFD rerun."
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
       {
         "id": 1,
@@ -371,7 +371,7 @@
         "id": 4,
         "text": "MPI rank changes steady results by order-one amounts",
         "found": false,
-        "evidence": "No submitted rank-comparison data exists, so this trigger is not established."
+        "evidence": "Checkpoint fa9d2b83 includes MPI comparison packages; exact controls, starting states and binary binding still require independent review."
       },
       {
         "id": 5,
@@ -382,38 +382,38 @@
       {
         "id": 6,
         "text": "Report claims algorithms absent from source",
-        "found": false,
-        "evidence": "Core reported Roe/Rusanov, reconstruction, LU-SGS and BDF2 algorithms have source counterparts. The report's completed-run claims are unsupported, but this trigger concerns absent algorithms."
+        "found": true,
+        "evidence": "Report.tex:124 claims Re200 inner acceptance on relative ratio 1e-3 OR absolute residual 1e-10. Immutable reported source revision 800d662 solver.cpp:571\u2013605 computes initial total residual and accepts only lastRatio < innerTarget; there is no absolute-residual branch. Final 5b9dded7 source has the same criterion; only later extra partial-file output differs. Exact historical executable is not independently hashed."
       },
       {
         "id": 7,
         "text": "metadata marks incomplete or failed runs as successful",
-        "found": false,
-        "evidence": "No immutable case metadata.json is submitted; therefore no triggering metadata statement exists to assess."
+        "found": true,
+        "evidence": "Contestant checkpoint fa9d2b83 Re200 metadata reports zero target misses and converged fraction 1.0, while the same checkpoint stdout.log reports 11356 misses and fraction0.621467 for 30000 steps. Metadata marks statistically_periodic/completed; report.tex:124,192 explicitly says forces are steady without a resolved vortex street. The report claims hybrid convergence but the reported revision source counts only strict relative-ratio misses; binary binding is not independently verified."
       },
       {
         "id": 8,
         "text": "Report figures do not correspond to outputs",
         "found": false,
-        "evidence": "No source output files/figure manifest are submitted, so correspondence cannot be established; absence is scored under traceability, not treated as affirmative mismatch."
+        "evidence": "Checkpoint fa9d2b83 includes figures and case outputs; figure-to-data correspondence is under review, with no specific mismatch yet established."
       },
       {
         "id": 9,
         "text": "METIS metadata but geometric/full-replication implementation",
         "found": false,
-        "evidence": "partitioner.hpp calls METIS_PartGraphKway and solver.hpp implements neighbor communication; no submitted metadata is present."
+        "evidence": "Source uses METIS and neighbor halos but retains complete global mesh on each rank during solve; this is recorded separately under TASK prohibited shortcut 7, not automatically numbered DQ9."
       },
       {
         "id": 10,
         "text": "Second-order reconstruction or limiter disabled in production",
         "found": false,
-        "evidence": "Source enables reconstruction after configurable startup; first-order/limited fallbacks are disclosed. No production artifact proves a prohibited always-disabled setting."
+        "evidence": "Report explicitly discloses first-order Re200; remaining steady activation and historic binary are not yet fully verified."
       },
       {
         "id": 11,
         "text": "Surface no-slip rows are adjacent cell-center values without disclosure",
         "found": false,
-        "evidence": "No submitted surface rows exist. Source/report declare boundary-value semantics, with no contrary direct evidence."
+        "evidence": "Historical checkpoint includes surface files; actual wall-output semantics remain under independent review."
       },
       {
         "id": 12,
@@ -426,6 +426,11 @@
         "text": "Copied/adapted/wrapped open-source CFD core",
         "found": false,
         "evidence": "No direct internal wrapper evidence found. Trust policy forbids external code-similarity investigation."
+      },
+      {
+        "flag": "TASK prohibited shortcut 7: full mesh replication during iterations",
+        "found": true,
+        "evidence": "5b9dded7 main.cpp:100\u2013102 reads GlobalMesh on every rank, :114 partitions it, :135\u2013138 runs solver while gm remains alive, and :152 uses gm for final field output. This violates TASK.md:46,227 despite METIS and neighbor halos. Source matches contestant checkpoint fa9d2b83; exact historical binary not independently hashed."
       }
     ]
   },

@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:53:57.989622+00:00
+Generated: 2026-10-30T09:18:43.840715+00:00
 
-**Overall score: 3.42**
+**Overall score: 3.19**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -36,10 +36,10 @@ Generated: 2026-09-07T02:53:57.989622+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 3 | LU-SGS-like sweep and CFL spectral radii are present, but README production command overrides case controls and no credible steady output is submitted. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3 | Physical-time outer loop, frozen histories and inner iterations exist. README/report state max-inner=1 override, violating requested minimum, and no Re200 artifact demonstrates its execution. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 2 | BDF2 source and t300 historical package exist, but strict relative-target counting reports 11356 misses in checkpoint stdout while metadata claims zero. Report additionally claims an absolute 1e-10 criterion absent from recorded revision source. Binary hash unverified. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | METIS_PartGraphKway, rank-local owned/ghost sets, neighbor communication and reductions are source-evidenced; scalability remains unmeasured. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2.5 | 5b9dded7 main.cpp:100–102 reads complete mesh on every rank; it remains live through :135–138 solver loops and is reused at :152. This violates TASK.md:46,227 despite METIS/neighbor halos. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-09-07T02:53:57.989622+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.42
+- Overall score (0-5): 3.19
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

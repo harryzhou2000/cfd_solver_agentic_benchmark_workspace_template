@@ -173,8 +173,8 @@
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 4,
-        "notes": "METIS graph partitioning, owned/ghost construction, neighbor Isend/Irecv, and Allreduce paths are directly present. Runtime rank consistency is unavailable."
+        "score": 2.5,
+        "notes": "5b9dded7 main.cpp:100\u2013102 reads complete mesh on every rank; it remains live through :135\u2013138 solver loops and is reused at :152. This violates TASK.md:46,227 despite METIS/neighbor halos."
       },
       {
         "id": "code.robustness",
@@ -240,7 +240,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.92
+    "overall_score": 2.69
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -313,15 +313,15 @@
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Physical-time outer loop, frozen histories and inner iterations exist. README/report state max-inner=1 override, violating requested minimum, and no Re200 artifact demonstrates its execution."
+        "score": 2,
+        "notes": "BDF2 source and t300 historical package exist, but strict relative-target counting reports 11356 misses in checkpoint stdout while metadata claims zero. Report additionally claims an absolute 1e-10 criterion absent from recorded revision source. Binary hash unverified."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 4,
-        "notes": "METIS_PartGraphKway, rank-local owned/ghost sets, neighbor communication and reductions are source-evidenced; scalability remains unmeasured."
+        "score": 2.5,
+        "notes": "5b9dded7 main.cpp:100\u2013102 reads complete mesh on every rank; it remains live through :135\u2013138 solver loops and is reused at :152. This violates TASK.md:46,227 despite METIS/neighbor halos."
       }
     ],
     "disqualification_flags": [
@@ -356,7 +356,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.42
+    "overall_score": 3.19
   },
   "result_review": {
     "review_area": "result_review",

@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:53:57.989160+00:00
+Generated: 2026-10-30T09:18:43.840298+00:00
 
-**Overall score: 2.92**
+**Overall score: 2.69**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,7 +24,7 @@ Generated: 2026-09-07T02:53:57.989160+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 4 | case_config.hpp reads JSON case parameters and main.cpp uses --case; no two-benchmark-filename-only branch was found. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 4 | METIS graph partitioning, owned/ghost construction, neighbor Isend/Irecv, and Allreduce paths are directly present. Runtime rank consistency is unavailable. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2.5 | 5b9dded7 main.cpp:100–102 reads complete mesh on every rank; it remains live through :135–138 solver loops and is reused at :152. This violates TASK.md:46,227 despite METIS/neighbor halos. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Positivity checks and errors exist, but main.cpp labels max-step steady runs converged unconditionally and submitted evidence cannot demonstrate robust completion. |
@@ -50,7 +50,7 @@ Generated: 2026-09-07T02:53:57.989160+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.92
+- Overall score (0-5): 2.69
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
