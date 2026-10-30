@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:54:04.220458+00:00
+Generated: 2026-10-30T16:28:15.182119+00:00
 
 **Overall score: 1.45**
 
@@ -18,7 +18,7 @@ Generated: 2026-09-07T02:54:04.220458+00:00
 | 3 | **res.completion** Case completion and convergence | 0.20 | 0 | Completion statuses are not credible: Re200 is labeled statistically periodic/BDF2 despite source and run_status documenting a steady nontransient solve. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 0 | No result credit: the source cannot generate the asserted METIS/MPI/transient evidence, so force/field histories are not trustworthy solver evidence. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 0 | Re200 rows 7125–30000 were explicitly appended as duplicates without solving. The other cases and earlier rows require independent evaluation; serial/MPI metadata contradiction alone does not establish that those rows were fabricated. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 3 | Readable Mach/pressure/history figures exist, but no required Re200 wake visualization is manifested and result provenance fails. |
