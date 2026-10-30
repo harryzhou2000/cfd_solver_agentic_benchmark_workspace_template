@@ -101,7 +101,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_opus5-02_cac77b` | partial: all cases, PDF and source/rubric examined; historical Re200 binary and final DQ adjudication remain uncertain |
 | `codex_generic_sonnet46-01_ac6940` | partial: all cases, PDF, source and rubric reviewed; DQ7/TASK full mesh; historic binary binding and remaining DQ uncertain |
 | `codex_generic_sonnet46-02_dac37b` | partial: all cases, PDF, source/rubric checked; DQ6/DQ7 and placeholder rejection; exact historical binary remains unbound |
-| `codex_generic_sonnet5-01_540ddf` | partial: PDF absence and numeric notes corrected; individual cases, source/rubric/DQ pending |
+| `codex_generic_sonnet5-01_540ddf` | partial: PDF, all cases, source/rubric examined; DQ8 proven; historical binary and remaining figure/fallback provenance uncertain |
 | `codex_generic_sonnet5-02_6c0ac0` | unreviewed |
 | `codex_generic_vllm-qwen38-01_2045e0` | unreviewed |
 | `codex_generic_vllm-qwen38-02_d47362` | unreviewed |
@@ -813,3 +813,5 @@ sonnet5-01 build checkpoint: immutable 4965edd clean build succeeded in restrict
 sonnet5-01 restart/source checkpoint: restart header stores step/time but reader returns only state; transient driver resets clock and history, so uninterrupted BDF restart unsupported. Build/CLI8→7.5, total78→77.5. Inner test uses spatial+BDF residual; source tree cc42ab4..f22bc25 unchanged, exact runtime binding remains qualified. No transient rerun.
 
 sonnet5-01 source/review checkpoint: root-only mesh setup destroyed before solver, METIS/neighbor halos, exchanged reconstruction, tangential wall traction and full spatial+BDF inner target inspected. Re200 metadata zero misses; 30000 rows min49/max144/mean132.818, exact strict ratios not reconstructed. Validator passes eight packages/report; checkpoint matches field/restart files previously marked missing by stale auto measurements. Hygiene now reflects zero tracked build paths, not manager curation. Remaining DQ/provenance partial; no CFD rerun.
+
+sonnet5-01 DQ/fallback boundaries: DQ8 specific Fig13(a) proven; no inferred DQ7 from disclosed force-checked plateau or DQ9/full mesh with root-only setup. Report sec_verification.tex:1172–1179 treats zero reconstruction positivity fallbacks as evidence HLLC never ran, but Roe-to-HLLC dispatch in riemann_flux.cpp:192–196,341–346 is a separate uncounted condition. Current HLLC expression corrected; no actual dispatch count or defect impact inferred. Remaining binary/other-figure provenance partial.
