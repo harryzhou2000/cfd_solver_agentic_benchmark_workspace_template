@@ -73,7 +73,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-08_853afe` | fully reviewed — 50.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-09_9cb2fc` | fully reviewed — 65.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-10_f6b586` | fully reviewed — 87/100, DQ=true; both gates pass |
-| `claude_generic_opus-11_fe7eba` | unreviewed |
+| `claude_generic_opus-11_fe7eba` | partial: Re200 delivered report evidence checked; other cases, rubric, review points and DQ pending |
 | `claude_generic_sonnet-01_96c411` | unreviewed |
 | `codex_dsv4_flash_01_0c1996` | unreviewed |
 | `codex_dsv4_flash_02_3447d3` | unreviewed |
@@ -309,3 +309,8 @@ Opus-10 partial DQ7 correction: metadata reports M0.8 inviscid converged at 2.08
 ## Opus-10 full calibration — 2026-10-30
 
 Rubric 99→87/100, DQ true under trigger 7 for M0.8 inviscid force-unstable plateau. All 27 review points, ten rubric sections and remaining trigger assessments carry specific evidence. Case scores 4.5,4.5,4,4.5,4.5,4,4.5,2 → 3,2,2,4,4,2,4,3. Accepted PDF provides Re200 mean/amplitude/St and visible late lift/drag; reported t=2–12 forcing and reference underprediction are disclosed. M2 laminar table Cd=0.05097 is a final-quarter mean mislabeled final; actual final 0.0359543. `mesh.cpp:103–130` rejects CGNS MIXED sections; nonroot full meshes are released before solve, so TASK full-mesh prohibition does not apply. Transient restart stores current U only and does not restore time/previous BDF state; fresh submitted run is separate. Immutable clean build passed in network-disabled restricted scratch; original structural validator and both record gates pass. No CFD rerun, exhaustive external authorship or pixel-level audit.
+
+
+## Opus-11 partial Re200 review — 2026-10-30
+
+Accepted PDF SHA-256 `95a9bf9d109d4c2e2aad1731a8492987fbde3b0a2fd3bd635c9c1d70b3c190ba` matches indexed bytes and immutable report TeX blob `14d9f2de273930cd88df921c79fe9313f7476603`. PDF p3 gives Cd=0.919, lift amplitude=0.388, St=0.190; original t≥150 force history mean Cd=0.9187081 and Cl range −0.387379–0.387772, 28 mean-lift crossing periods averaging 5.26541 give frequency 0.189919. PDF p8 wake/force figure is delivered, but startup Cd≈31 flattens late drag and no Re200 residual plot appears in the eight-page report. Score remains 2 under the delivered-evidence floor; absent curated figure blobs are a separate reproducibility limitation. Other case scores, rubric, review areas and DQ remain partial. Both gates pass; no CFD rerun.

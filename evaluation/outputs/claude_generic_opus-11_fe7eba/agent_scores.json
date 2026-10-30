@@ -336,7 +336,7 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=+0.0352, CD=0.9093 at 9965be8:solver/report/results_tables.tex:25; no committed/referenced residual-history plot; force history 9965be8:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:273); computed-field contour 9965be8:solver/report/figures/cylinder_m010_laminar_re200_vorticity.png (referenced at solver/report/report.tex:272); shedding statistic St=0.190, lift_amplitude=0.388 at 9965be8:solver/report/results_tables.tex:42; no committed/referenced late-time periodic-force plot. Score capped at 2 from 4.5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Re200 status is statistically_periodic at step 30000, t=300, with force/residual/field evidence; no unsteady rerun was performed."
+      "notes": "Score 2 retained pending full numerical review. Contestant-delivered accepted report PDF p3 gives mean Cd=0.919, lift amplitude 0.388, St=0.190; p8 gives wake vorticity and full force history. Original forces.csv at t>=150 has mean Cd=0.9187081 and Cl range -0.387379 to 0.387772; 28 mean-lift crossing periods average 5.26541, frequency 0.189919. The complete PDF has no Re200 residual history or readable late-time drag plot: p8 startup drag spike ~31 compresses the small late oscillation. Thus the delivered-evidence floor still caps at 2. The original numeric/St citations are valid; missing curated figure files are separately a reproducibility limitation, not proof the accepted PDF lacks figures."
     }
   },
   "disqualification": {
@@ -355,6 +355,7 @@
     "Structural validation is separate from substantive numerical scoring.",
     "Raw solver artifacts remain workspace evidence and were excluded from the curated submission tip.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "2026-10-30 partial recalibration: accepted contestant PDF is checked as delivered evidence, separately from reproducibility of figures omitted from the curated tip. Other case scores, rubric and DQ remain under review."
   ]
 }
