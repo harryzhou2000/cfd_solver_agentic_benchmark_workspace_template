@@ -88,6 +88,6 @@ Raw packages are excluded from the curated commit. The 802 MB Re200 residual exc
 
 ## Verdict
 
-The prior verdict was 85/100 and no DQ; partial recalibration now establishes DQ7 for M2 laminar. Seven historical validator passes are structural; retain the Re200 validation and historical binary limitations.
+The prior verdict was 85/100 and no DQ; partial recalibration is 79.5/100 before DQ and establishes DQ7 for M2 laminar. Seven historical validator passes are structural; retain the Re200 validation and historical binary limitations.
 
 run_identity.json SHA-256: `8afee0d65b287815ad0d37afe012bdadf21ed1f72ba0600424f36b7a79501a9b`; contestant_final_response.md SHA-256: `e2fa92927636989cfc3d81b33f128add4c59c8926c6658eb3ebdb12579a56f69`. These unindexed sidecars are not validated by cfdeval check.
