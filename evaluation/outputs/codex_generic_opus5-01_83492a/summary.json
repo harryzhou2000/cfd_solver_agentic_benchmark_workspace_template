@@ -1202,7 +1202,7 @@
         "id": "code.cli",
         "title": "CLI and error handling",
         "weight": 0.1,
-        "score": 5,
+        "score": 4.5,
         "notes": "Required solve CLI, validation, and explicit bad-input paths are implemented. Restart stores one state level plus time/step; transient_driver.cpp:105\u2013108 rebuilds history and takes backward Euler on resumed first step."
       },
       {
@@ -1210,35 +1210,35 @@
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4.5,
-        "notes": "Clear physics, mesh, numerics, I/O, MPI, and driver separation."
+        "notes": "cb2bac0 src separates case/config, mesh, physics, numerics, MPI, drivers and I/O; 2D geometry is a deliberate limit."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 4.5,
-        "notes": "No direct internal evidence of copied core; trust policy excludes web comparison."
+        "notes": "No external solver invocation or copied core found in reviewed implementation; no exhaustive external similarity search."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 5,
-        "notes": "Case configuration drives behavior; no case-name solver branches found."
+        "notes": "main.cpp:57\u2013103 parses case/input options; mesh and scheme selected from configuration rather than benchmark filenames."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 4.5,
-        "notes": "METIS partitioning, neighbor nonblocking halos, reductions, and rank studies are present."
+        "notes": "main.cpp:285\u2013325 creates global mesh on root and releases it before distributed solve; partitioner uses METIS and halo_exchange.cpp:59\u201370 exchanges neighbors. Selected rank studies do not show order-one force changes."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 4.5,
-        "notes": "Input validation, positivity guard, and explicit errors are implemented."
+        "notes": "main.cpp:52\u2013103 checks arguments, cgns_reader rejects unsupported elements, residual.cpp positivity fallback and steady_driver checks nonphysical states. Transient production telemetry and binary version remain qualified."
       },
       {
         "id": "code.testing",
@@ -1252,7 +1252,7 @@
         "title": "Code hygiene",
         "weight": 0.07,
         "score": 4.5,
-        "notes": "Result/build artifacts excluded at curated tip; report source and figures remain reproducible."
+        "notes": "Report and source are curated reproducibly; archived binary-provenance documentation explicitly distinguishes older Re200 build. Report has a fallback-count inconsistency documented separately."
       }
     ],
     "disqualification_flags": [
@@ -1297,7 +1297,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.71
+    "overall_score": 4.67
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -1308,42 +1308,42 @@
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
         "score": 5,
-        "notes": "Report/source consistently state conservative perfect-gas Euler/NS formulation."
+        "notes": "core/types.hpp and physics/perfect_gas.cpp implement 2D conservative perfect-gas equations; report.tex describes nondimensional equations."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4.5,
-        "notes": "CGNS unstructured mixed-cell reading and cylinder zone welding are implemented; scope remains 2-D."
+        "notes": "cgns_reader.cpp supports TRI/QUAD/MIXED and multiple zones with interface welding; production Re200 log reports both zones and 10185 merged cells. No 3D support."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 4.5,
-        "notes": "Conservative FV assembly is implemented and reported consistently."
+        "notes": "numerics/residual.cpp constructs interior and boundary FV fluxes, with positivity fallback. Eight bounded verification checks passed including first- and second-order conservation; these do not prove full-run convergence."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
         "score": 4.5,
-        "notes": "Roe-Harten-Yee is production default, with selectable HLLC/Rusanov."
+        "notes": "numerics/riemann.cpp:94\u2013166 implements Roe/Harten-Yee with Rusanov fallback; HLLC and Rusanov alternatives exist. Re200 exact old binary remains unbound."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 4.5,
-        "notes": "Farfield, slip, and no-slip adiabatic wall paths are source-backed."
+        "notes": "numerics/boundary_conditions.cpp and residual.cpp:264\u2013311 implement farfield, slip and adiabatic no-slip wall paths; wall output semantics use boundary values."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 4.5,
-        "notes": "Least-squares reconstruction is active in production."
+        "notes": "residual.cpp:115\u2013190 reconstructs limited face states; seven steady metadata entries revision b350651 report active second order with documented fallback. Re200 full-run fallback count was not measured on older binary."
       },
       {
         "id": "cfd.limiter",
@@ -1357,14 +1357,14 @@
         "title": "Viscous discretization",
         "weight": 0.1,
         "score": 4.5,
-        "notes": "Newtonian/Fourier viscous discretization and force split are source/report backed."
+        "notes": "numerics/viscous.cpp implements stress/heat transport and solver/forces.cpp:122\u2013131 projects wall traction tangentially; reported pressure/viscous split is not a full normal traction mislabel."
       },
       {
         "id": "cfd.implicit",
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 4.5,
-        "notes": "CFL-controlled implicit steady march and LU-SGS are implemented."
+        "notes": "solver/implicit_lusgs.cpp contains implicit spectral-radius LU-SGS sweeps; steady stopping checks residual and Cd window. Selected M015 laminar lift drift qualifies the Cd-only check."
       },
       {
         "id": "cfd.transient",
@@ -1378,7 +1378,7 @@
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 4.5,
-        "notes": "METIS ownership/ghost design and neighbor exchange; independent MPI rerun not performed."
+        "notes": "main.cpp:285\u2013325 root preprocesses/partitions and destroys global mesh; halo_exchange.cpp:59\u201370 performs neighbor nonblocking exchanges. Submitted np1/np8 comparisons lack order-one absolute force mismatch."
       }
     ],
     "disqualification_flags": [
@@ -1424,28 +1424,28 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 5,
-        "notes": "All eight raw case packages contain required contract artifacts."
+        "notes": "All eight selected production packages are present, and restart_io.cpp saves actual state/time/step; transient restart reconstructs missing prior BDF level and resumes with backward Euler."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 5,
-        "notes": "Explicit eight-case plus report examiner invocation passed."
+        "notes": "Snapshot records explicit examiner checks. Independently ran clean build and 8 bounded NACA/unit tests; these structural/method checks do not replace Re200 production validation."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 4,
-        "notes": "All cases complete; M2 inviscid ends at a documented 2.55-order plateau."
+        "notes": "Seven selected steady runs have b350651 metadata; M2 inviscid reports 2.55-order force plateau and M015 laminar lift drifts in last400. Re200 reaches t300 with reported target counts but exact production binary remains unbound."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 4.5,
-        "notes": "Rank evidence and plausible fields; Re200 St/Cd are modestly low and honestly disclosed."
+        "notes": "Re20 selected Cd2.018 and Re200 raw Cd1.216\u20131.259/Cl\u00b10.513 over t>=100 are plausible with moderate coarse-mesh limitations; St reported0.182, FFT diagnostic0.17999."
       },
       {
         "id": "res.visualization",

@@ -2,23 +2,23 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T06:52:58.424518+00:00
+Generated: 2026-10-30T06:55:01.898944+00:00
 
 **Overall score: 4.47**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 5 | All eight raw case packages contain required contract artifacts. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 5 | All eight selected production packages are present, and restart_io.cpp saves actual state/time/step; transient restart reconstructs missing prior BDF level and resumes with backward Euler. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 5 | Explicit eight-case plus report examiner invocation passed. |
+| 2 | **res.validator** Automated validator results | 0.10 | 5 | Snapshot records explicit examiner checks. Independently ran clean build and 8 bounded NACA/unit tests; these structural/method checks do not replace Re200 production validation. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
-| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | All cases complete; M2 inviscid ends at a documented 2.55-order plateau. |
+| 3 | **res.completion** Case completion and convergence | 0.20 | 4 | Seven selected steady runs have b350651 metadata; M2 inviscid reports 2.55-order force plateau and M015 laminar lift drifts in last400. Re200 reaches t300 with reported target counts but exact production binary remains unbound. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4.5 | Rank evidence and plausible fields; Re200 St/Cd are modestly low and honestly disclosed. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 4.5 | Re20 selected Cd2.018 and Re200 raw Cd1.216–1.259/Cl±0.513 over t>=100 are plausible with moderate coarse-mesh limitations; St reported0.182, FFT diagnostic0.17999. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 4 | Accepted 52-page report contains readable steady histories, fields and Re200 wake/force figure; startup spike compresses late Re200 drag so the explicit late lift/drag criterion is unmet. |

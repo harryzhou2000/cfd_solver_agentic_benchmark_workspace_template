@@ -13,7 +13,7 @@
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
-      "score": 5,
+      "score": 4.5,
       "notes": "Required solve CLI, validation, and explicit bad-input paths are implemented. Restart stores one state level plus time/step; transient_driver.cpp:105\u2013108 rebuilds history and takes backward Euler on resumed first step."
     },
     {
@@ -21,35 +21,35 @@
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4.5,
-      "notes": "Clear physics, mesh, numerics, I/O, MPI, and driver separation."
+      "notes": "cb2bac0 src separates case/config, mesh, physics, numerics, MPI, drivers and I/O; 2D geometry is a deliberate limit."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4.5,
-      "notes": "No direct internal evidence of copied core; trust policy excludes web comparison."
+      "notes": "No external solver invocation or copied core found in reviewed implementation; no exhaustive external similarity search."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 5,
-      "notes": "Case configuration drives behavior; no case-name solver branches found."
+      "notes": "main.cpp:57\u2013103 parses case/input options; mesh and scheme selected from configuration rather than benchmark filenames."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 4.5,
-      "notes": "METIS partitioning, neighbor nonblocking halos, reductions, and rank studies are present."
+      "notes": "main.cpp:285\u2013325 creates global mesh on root and releases it before distributed solve; partitioner uses METIS and halo_exchange.cpp:59\u201370 exchanges neighbors. Selected rank studies do not show order-one force changes."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 4.5,
-      "notes": "Input validation, positivity guard, and explicit errors are implemented."
+      "notes": "main.cpp:52\u2013103 checks arguments, cgns_reader rejects unsupported elements, residual.cpp positivity fallback and steady_driver checks nonphysical states. Transient production telemetry and binary version remain qualified."
     },
     {
       "id": "code.testing",
@@ -63,7 +63,7 @@
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4.5,
-      "notes": "Result/build artifacts excluded at curated tip; report source and figures remain reproducible."
+      "notes": "Report and source are curated reproducibly; archived binary-provenance documentation explicitly distinguishes older Re200 build. Report has a fallback-count inconsistency documented separately."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.71
+  "overall_score": 4.67
 }

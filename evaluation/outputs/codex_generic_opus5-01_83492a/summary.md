@@ -150,6 +150,6 @@
 
 ## Reviews
 
-- Code review scorecard: `codex_generic_opus5-01_83492a/review_code.md` (overall: 4.71)
+- Code review scorecard: `codex_generic_opus5-01_83492a/review_code.md` (overall: 4.67)
 - CFD methods review: `codex_generic_opus5-01_83492a/review_cfd.md` (overall: 4.53)
 - Result review: `codex_generic_opus5-01_83492a/review_results.md` (overall: 4.47)

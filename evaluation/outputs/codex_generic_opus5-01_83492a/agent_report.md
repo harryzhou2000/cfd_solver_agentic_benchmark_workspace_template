@@ -131,3 +131,8 @@ Selected np1/np8 NACA M015 Cd0.000821942/0.000817179, Cl0.000369430/0.000386138;
 Each steady case was compared with its selected b350651 metadata, force tail and delivered report plots. Last-400 drag ranges are recorded per case; the M2 inviscid case remains 3.5 for its justified but below-target 2.55-order plateau, and Re20’s pressure-zoom contour (`fig_atlas.tex:466`) is the wake field required by the cylinder floor. The small M015 laminar lift drift remains the only steady score change in this checkpoint series.
 
 `restart_io.cpp:60–75,127–135` saves one conservative state level plus time and step; `transient_driver.cpp:105–108` initializes both BDF histories from that state and uses backward Euler on the first resumed step. This supports restarting but does not preserve an uninterrupted multistep trajectory. The rubric already has a build/CLI deduction; no unsteady restart rerun was made. DQ/source provenance remain partial.
+
+
+## Available criterion and DQ review — 2026-10-30
+
+All review points and rubric sections now cite criterion-specific source, selected cases or their limits. No disqualification is established from the available evidence: root-only mesh preprocessing releases the global mesh, METIS and neighbor halos are present, and the plotting script maintains triangle-to-source-cell mapping when splitting quads. Seven steady packages identify revision b350651; their rank and force-window evidence is recorded. Re200’s older production binary and full-run positivity fallback telemetry remain unbound/unmeasured, so this record is intentionally partial rather than presented as completely verified. No exhaustive external code-similarity search or Re200 rerun.

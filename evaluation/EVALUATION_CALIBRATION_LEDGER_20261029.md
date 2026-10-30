@@ -97,7 +97,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_glm53-04_adde03` | partial: all cases and rubric reviewed, DQ7 supported; historical production-source attribution unresolved |
 | `codex_generic_opus46-01_3a72ea` | partial: 52/100, DQ7/DQ10 and TASK full mesh; historical binary/source binding unresolved |
 | `codex_generic_opus46-02_d8fed8` | partial: 35/100, mandatory placeholder rejection, DQ2 and TASK full mesh; binary/force provenance unresolved |
-| `codex_generic_opus5-01_83492a` | partial: Re200 plot floor and PDF reviewed; other cases/rubric/DQ pending |
+| `codex_generic_opus5-01_83492a` | partial: 90/100, DQ not established; Re200 binary/fallback attribution unresolved |
 | `codex_generic_opus5-02_cac77b` | unreviewed |
 | `codex_generic_sonnet46-01_ac6940` | unreviewed |
 | `codex_generic_sonnet46-02_dac37b` | unreviewed |
@@ -718,3 +718,6 @@ opus5-01 rank/telemetry checkpoint: selected np1/np8 NACA M015 Cd0.000821942/0.0
 
 
 opus5-01 steady-case checkpoint: all seven b350651 selected raw force tails and report figures reviewed. Last400 Cd ranges: M015 inv .00081980–.00082249; M080 inv .00872456–.00872528; M2 inv .0876837–.0882899 at 2.5495-order documented plateau; M015 lam .0563279–.0564460; M080 lam .0800371–.0801972; M2 lam .1277534–.1280085; Re20 2.0180208–2.0228220. Corresponding lift ranges and physical qualifications are in case notes. Re20 wake floor is supported by pressure_zoom figure at fig_atlas.tex:466, not merely Mach. Existing scores retained except earlier M015 lam4.5→4. `restart_io.cpp:60–75,127–135` stores one state plus time/step; transient_driver.cpp:105–108 reconstructs histories and resumes with backward Euler, so uninterrupted BDF history is not preserved. Existing build/CLI deduction captures this; DQ and production binary/source binding partial; no unsteady rerun.
+
+
+opus5-01 available criterion/DQ checkpoint: all 27 review points and ten rubric sections carry criterion-specific evidence. Main.cpp:285–325 releases root global mesh before iteration; METIS/neighbor halos exist. plot_results.py:123–139 maps each split triangle to its original cell; no specific unrelated-field or variable mismatch established. Seven steady packages identify b350651; Re200 older exact binary and full-run fallback counts remain unverified, and no exhaustive external similarity search was performed. No DQ is established; record stays partial for those limits. Total90, Re200 case2 (late-drag floor), M015 lam4, other cases as previously documented. No Re200 rerun.
