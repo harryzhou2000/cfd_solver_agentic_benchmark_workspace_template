@@ -101,7 +101,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_generic_opus5-02_cac77b` | fully reviewed, qualified: 90/100, no DQ established; historical Re200 binary/figure provenance unbound |
 | `codex_generic_sonnet46-01_ac6940` | fully reviewed, qualified: 66/100, DQ7/TASK full mesh; historic binary/figure binding limited |
 | `codex_generic_sonnet46-02_dac37b` | fully reviewed, qualified: 73/100, DQ6/7 and placeholder rejection; historical binary unbound |
-| `codex_generic_sonnet5-01_540ddf` | partial: PDF, all cases, source/rubric examined; DQ8 proven; historical binary and remaining figure/fallback provenance uncertain |
+| `codex_generic_sonnet5-01_540ddf` | fully reviewed, qualified: 77.5/100, DQ8; historical binary/other-figure/fallback provenance limited |
 | `codex_generic_sonnet5-02_6c0ac0` | partial: all cases, PDF, source/rubric reviewed; DQ7 proven; historical binary/remaining figure provenance uncertain |
 | `codex_generic_vllm-qwen38-01_2045e0` | partial: all cases/PDF/source/rubric examined; DQ4 rank anomaly unbound to same binary; other figure provenance uncertain |
 | `codex_generic_vllm-qwen38-02_d47362` | partial: source/result, DQ and score adjudication ongoing |
@@ -851,6 +851,8 @@ sonnet5-01 restart/source checkpoint: restart header stores step/time but reader
 sonnet5-01 source/review checkpoint: root-only mesh setup destroyed before solver, METIS/neighbor halos, exchanged reconstruction, tangential wall traction and full spatial+BDF inner target inspected. Re200 metadata zero misses; 30000 rows min49/max144/mean132.818, exact strict ratios not reconstructed. Validator passes eight packages/report; checkpoint matches field/restart files previously marked missing by stale auto measurements. Hygiene now reflects zero tracked build paths, not manager curation. Remaining DQ/provenance partial; no CFD rerun.
 
 sonnet5-01 DQ/fallback boundaries: DQ8 specific Fig13(a) proven; no inferred DQ7 from disclosed force-checked plateau or DQ9/full mesh with root-only setup. Report sec_verification.tex:1172–1179 treats zero reconstruction positivity fallbacks as evidence HLLC never ran, but Roe-to-HLLC dispatch in riemann_flux.cpp:192–196,341–346 is a separate uncounted condition. Current HLLC expression corrected; no actual dispatch count or defect impact inferred. Remaining binary/other-figure provenance partial.
+
+sonnet5-01 qualified full review: all ten sections, eight cases, 27 review points and 13 DQ rules assessed to available evidence; 77.5/100 and DQ8 unchanged. Figure13(a)'s specific canonical/scaling-run mismatch is proven without claiming fabricated histories or unrelated defects. Re200 remains 2 for unreadable late drag, despite raw St≈0.1829 and oscillatory force evidence. Exact historical binary, uncounted Roe-to-HLLC dispatch and other figure provenance remain qualified; earlier partial wording is historical. No CFD/rank/Re200 rerun; both gates required.
 
 sonnet5-02 DQ7 correction: checkpoint 1185ccd M015 inviscid metadata completed/statistically_periodic; force CSV SHA8613113c292b69c738b5b35d8a9f5df4c6ead7dd067b9a6f0df49049d76ab511 matches workspace, Cd+0.510818→−0.054502 over steps12001–20000, last400 −0.026512→−0.054502, and lift changes substantially. Delivered plot confirms drift. report/manifest claim periodic success. DQ7 false→true, case2→1; failed cylinder statuses separately disclosed. Other review partial.
 

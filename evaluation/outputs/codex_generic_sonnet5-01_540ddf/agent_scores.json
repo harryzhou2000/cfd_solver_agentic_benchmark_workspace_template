@@ -348,6 +348,66 @@
         "flag": "Report figures do not correspond to submitted field/CSV outputs",
         "found": true,
         "evidence": "Accepted checkpoint-matched PDF p59 Figure 13(a), sourced from 4965edd sec_results.tex:867\u2013910 and f22bc25 figure naca0012_m015_laminar_re5000_forces.png SHA256 2e3066e48d70436cb70d3bb8efcab1b63dd555dcb690a38ed50c437ccf957ea0, labels the M015 laminar force history as case convergence evidence. It ends step1500, Cd\u22480.11887/Cl\u22480.0012046, matching f22bc25 results/scaling/naca0012_m015_laminar_re5000_np8/forces.csv SHA256 031a20c88ff2acdedaaa7a624b61f56096c17c082985b13d351cbb35a3cc2e11; canonical selected results/naca0012_m015_laminar_re5000/forces.csv SHA256 beb6e2b681d0b30160bcfbb1b67e596cb91999b6e9b80c9627c0c6de47ac780e ends step3839, Cd0.0551808/Cl\u22120.00169723. Figure manifest lists same name for canonical and scaling runs, and tools/make_figures.py:115\u2013145,208\u2013217 generates them under shared metadata case_id. This is a proven report-figure-to-selected-data mismatch, not evidence of synthetic solver data."
+      },
+      {
+        "id": 1,
+        "found": false,
+        "evidence": "No internal existing CFD executable call found in inspected source; no exhaustive external authorship search."
+      },
+      {
+        "id": 2,
+        "found": false,
+        "evidence": "No direct evidence force/residual histories were generated without solving. The proven Figure13(a) is a different submitted scaling output, not fabricated data."
+      },
+      {
+        "id": 3,
+        "found": false,
+        "evidence": "Case-driven CGNS input is not limited to two hard-coded filenames."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "evidence": "Report tab_scaling.tex step1500 gives Re20 np1/np8 Cd2.136408/2.136666 and M0.15 laminar 0.118864/0.118870; no order-one absolute difference established."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "evidence": "Final source implements implicit and BDF2 methods; explicit-only integration not established."
+      },
+      {
+        "id": 6,
+        "found": false,
+        "evidence": "Major report-described methods have source counterparts. The report conflates zero positivity fallback with zero HLLC dispatch, but the HLLC method exists and actual dispatch count is unknown."
+      },
+      {
+        "id": 7,
+        "found": false,
+        "evidence": "Steady driver checks force stationarity for disclosed residual plateaus; residual shortfall alone is not evidence of failed success. Re200 metadata zero misses cannot be independently verified for every initial inner residual."
+      },
+      {
+        "id": 9,
+        "found": false,
+        "evidence": "Root-only global mesh is released before solve, with METIS and local state/neighbor halos. No all-rank full-state/geometric-only condition established."
+      },
+      {
+        "id": 10,
+        "found": false,
+        "evidence": "Limited reconstruction exists and report discloses limiter/plateau handling; no bound production-disabled reconstruction demonstrated."
+      },
+      {
+        "id": 11,
+        "found": false,
+        "evidence": "post/surface_output.cpp:54\u201376 emits imposed wall values; no undocumented adjacent-cell no-slip failure established."
+      },
+      {
+        "id": 12,
+        "found": false,
+        "evidence": "Specific Figure13(a) is mapped to a different case-generation output (DQ8), not a proven variable-name swap."
+      },
+      {
+        "id": 13,
+        "found": false,
+        "evidence": "No affirmative copied/wrapped open-source CFD core found in inspected source; no exhaustive external authorship search."
       }
     ]
   },
@@ -355,6 +415,7 @@
     "No evaluator solver rerun was performed; Re200 was never rerun.",
     "Raw artifacts were excluded from curated tip.",
     "Immutable report rendering contains pervasive missing-asset placeholders.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
+    "All ten sections, eight cases, 27 review points and 13 DQ rules reviewed to available evidence. Exact historical producing binary and other figure-generation provenance remain qualified; no CFD/Re200 rerun."
   ]
 }
