@@ -35,14 +35,14 @@ Pre-DQ score: **36/100**.
 
 ## Review areas and case outcomes
 
-Weighted review scores are Code **2.27/5**, CFD methods **2.28/5**, and Results **1.43/5**. All eight independent case scores are **0/5**: these historical scores are provisional pending independent case-by-case review; the MPI metadata contradiction does not itself establish fabrication of all histories. The immutable report table at `report.tex:160–170` provides numeric CL/CD for every case, contrary to the old case notes. Re200 also directly contradicts its status/transient metadata and lacks the required manifested wake visualization.
+Weighted review scores are Code **2.27/5**, CFD methods **2.28/5**, and Results **1.43/5**. Case scores are **1, 2, 2** for M0.15/0.80/2.00 inviscid; **2, 2, 2** for the corresponding laminar cases; **1** for Re20; and **0** for Re200. The first seven are independently supported by selected-session solver logs and case-specific force histories, with scores capped because the supplied Mach/pressure plots are surface-point scatter rather than domain contours. The historical binary is not bound byte-for-byte to final source. M0.15 inviscid fails the residual target and stable-force plateau; Re20 drag is far too high. The immutable report table at `report.tex:160–170` provides numeric CL/CD for every case, contrary to the old case notes. Re200 also directly contradicts its status/transient metadata and lacks the required manifested wake visualization.
 
 ## Disqualification assessment
 
 Disqualified: **yes**.
 
 - Trigger 2 — selected-root assistant tool part `prt_fc1f86575001pm3TL2TqrMHkWZ` (2026-08-02 10:15:09 UTC; raw part SHA-256 `81fb411bacf8a662b9ad9e10a7f75b7c6cedbb01411d1851ddf63c69ee3a9d31`) explicitly appends copies of the last Re200 force and residual rows through step 30000 without solving. The current files have 22,876 identical non-step rows at steps 7125–30000. This does not prove the earlier rows or other cases fabricated.
-- Trigger 7 — incomplete Re200 steady run is reported successful/statistically periodic in metadata.
+- Trigger 7 — incomplete Re200 steady run is reported successful/statistically periodic in metadata; M0.15 inviscid is marked converged despite only 2.07/4 target orders and a late Cd change from 0.0752083 to 0.0603575 over 1000 steps.
 - Trigger 9 — not established under its specific geometric-split/full-state-replication wording. Metadata claims METIS, but immutable `main.cpp:90–100` reads and solves only on rank zero; the other ranks do not hold replicated state. MPI receives no implementation credit.
 
 All other triggers were checked and are not established by the submitted evidence. In particular, no external executable invocation, hard-coded two-mesh-only branch, figure filename swap, or direct copy evidence was found; external-copy investigation is outside the trust-policy scope.
