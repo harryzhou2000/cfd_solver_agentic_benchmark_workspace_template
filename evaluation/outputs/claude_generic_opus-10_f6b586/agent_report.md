@@ -2,7 +2,7 @@
 
 ## Verdict
 
-**99/100; not disqualified.** Explicit validation passed all eight original
+**Prior rubric 99/100; disqualified after partial review.** Explicit validation passed all eight original
 packages and the 32-page report. Submitted source shows CGNS multi-zone mesh
 handling, METIS partitioning, neighbor MPI exchange, Roe/Harten--Yee plus
 Rusanov transient flux, Venkat limiting, viscous terms, LU-SGS, and BDF2
@@ -102,7 +102,7 @@ Read-only source, terminal-response, raw-package, report-PDF and explicit valida
 
 ## Disqualification assessment
 
-No direct internal evidence established any of the 13 disqualification triggers.
+Trigger 7 is established for M0.8 inviscid as documented below; other trigger and rubric review remains pending.
 
 ## Metadata answers & session selection
 
@@ -127,3 +127,10 @@ The prior note incorrectly said no case numeric summary and no late periodic for
 ## Partial steady-case review — 2026-10-30
 
 The accepted PDF contains per-case summaries and plots for all seven steady cases. Scores in canonical order change **4.5,4.5,4,4.5,4.5,4,4.5 → 3,2,2,4,4,2,4** after checking original forces. M0.8 inviscid reports a 2.08-order plateau but last-10% Cl spans −0.01173 to 0.03139; M2 inviscid reports only 0.60 orders and Cd spans 0.08656–0.09027 (~4.1% of final); M2 laminar last-10% Cd 0.03595–0.04313 spans ~20% of final and differs from report Cd≈0.05097. These indicate incomplete force stationarity/traceability despite structurally accepted packages. Remaining source, rubric and DQ review are pending; no CFD rerun.
+
+
+## Partial steady-status and force-table correction — 2026-10-30
+
+DQ changes false→true under trigger 7 for NACA M0.8 inviscid. `fvsolver_run.cpp:382–399` labels a residual-stall case converged without checking force stability. Original metadata/run status reports converged at 2.08396 orders against the required four; its last 500 lift rows span −0.0117325 to +0.0790092, with first-half mean +0.0289760 and second-half mean −0.0077608. Report.tex:232 says mean forces are steady, while TASK.md:172 requires stable forces for a justified plateau. This finding concerns that steady case and does not invalidate the separately measured Re200 inner-target statistics.
+
+The report table caption calls M2 laminar Cd=0.05097 a final value, but the original final row is 0.0359543. It matches the final-quarter mean 0.0509662 computed by committed `tools/analyze.py`; this is a mislabeled averaging window rather than evidence of altered data. Source/rubric and remaining trigger review remain partial; no CFD rerun.

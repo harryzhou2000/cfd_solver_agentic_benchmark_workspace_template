@@ -328,7 +328,7 @@
     },
     "naca0012_m200_laminar_re5000": {
       "score": 2,
-      "notes": "Accepted contestant PDF SHA-256 4900dabfa70aba691f1dfb3575ab4ae5daa08c5a7c19cbacf63a48164ff222ac page 20 and its following figure pages present this case numeric summary, residual and force histories, and computed field. Original final Cd=0.0359543, Cl=\u22120.0000398; last 38 of 373 rows Cd=0.0359543\u20130.0431346 (~20% of final). Report gives a different tabulated Cd\u22480.05097; source report and original force values need traceability follow-up. Strong drift despite 3.00 residual orders limits credible steady result. Case score 4\u21922; no CFD rerun."
+      "notes": "Accepted contestant PDF SHA-256 4900dabfa70aba691f1dfb3575ab4ae5daa08c5a7c19cbacf63a48164ff222ac page 20 and its following figure pages present this case numeric summary, residual and force histories, and computed field. Original final Cd=0.0359543, Cl=\u22120.0000398; last 38 of 373 rows Cd=0.0359543\u20130.0431346 (~20% of final). Report table caption calls Cd\u22480.05097 a final steady value, but that equals the final-quarter mean 0.0509662: committed tools/analyze.py uses the last min(500,n/4) rows. The final-row value is 0.0359543, so this is a mislabeled summary window, not evidence of altered data. Strong drift despite 3.00 residual orders limits credible steady result. Case score 4\u21922; no CFD rerun."
     },
     "cylinder_m010_laminar_re20": {
       "score": 4,
@@ -340,8 +340,14 @@
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "found": true,
+        "evidence": "Immutable d25cd3c fvsolver_run.cpp:382\u2013399 declares converged on residual-stall criteria without testing force stability. Original NACA M0.8 inviscid run_status/metadata says converged at 2.08396 residual orders versus requested 4.0; last 500 forces.csv lift rows span \u22120.0117325 to +0.0790092, with first-half mean +0.0289760 and second-half mean \u22120.0077608. Report.tex:232 calls the mean forces steady, but TASK.md:172 requires stable forces for a justified plateau. This supports a false-success finding for this specific steady case; Re200 inner-target statistics are measured and are not conflated with this issue."
+      }
+    ]
   },
   "limitations": [
     "No evaluator rerun; Re200 never rerun.",
