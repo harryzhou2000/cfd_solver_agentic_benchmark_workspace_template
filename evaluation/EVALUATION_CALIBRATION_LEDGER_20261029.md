@@ -109,10 +109,10 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52-m3_02_ca46e4` | partial: provisional 58.5/100, DQ7 and TASK full-mesh; source and DQ review ongoing |
 | `codex_glm52-m3_03_674665` | partial: provisional 57/100, DQ6/7 and TASK full-mesh; source and DQ review ongoing |
 | `codex_glm52-m3_04_32f2d0` | partial: provisional 58.5/100, DQ7/8; source/DQ ongoing |
-| `codex_glm52-m3_05_f094c1` | partial: provisional 56.5/100, DQ7 and TASK full-mesh; workspace case evidence reviewed |
-| `codex_glm52-m3_06_a2dc07` | partial: historical case figures and workspace histories recovered; physics, DQ and rubric under review |
+| `codex_glm52-m3_05_f094c1` | partial: provisional 54/100, DQ7 and TASK full-mesh; historic binary/figure binding unverified |
+| `codex_glm52-m3_06_a2dc07` | partial: 68/100, DQ7; historical binary and figure binding unverified |
 | `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
-| `codex_glm52_02_06cf18` | unreviewed |
+| `codex_glm52_02_06cf18` | partial: provisional 69/100, DQ7 and TASK full-mesh; case/rubric review ongoing |
 | `codex_glm52_03_e7d38e` | unreviewed |
 | `codex_gpt56_01_cb349f` | unreviewed |
 | `codex_gpt56_02_38616e` | unreviewed |
@@ -985,3 +985,6 @@ glm52-m3-06 source/rubric review checkpoint: updated all 27 criterion notes indi
 
 
 glm52-m3-06 DQ boundaries and PDF: all six accepted compiled PDF pages SHA256 b91fe2181a9e58658ba9ca6ea82b3507208849c5cf6813901f1731026248efe7 rendered and visually checked; contestant checkpoint historical PDF SHA256 337be6a0c8b8079880a4a965cf6d805f25fbb88a761c4c339d48250a79490f2e. Workspace short rank_sweep step200 M015 inviscid Cd0.284832 on np1/2/4/8, Re20 18.9305/18.9305/18.9249/18.9227; each metadata revision baa30de, exact executable/controls unbound. Report.tex:218–219 overstates Re20 agreement at seven significant figures, but the difference is not order-one, so no DQ4. DQ flags now have distinct source/evidence boundaries: root-only METIS, BDF1/BDF2, no-slip boundary values, proper Mach input, disclosed first-order case, no proven figure mismatch and no unauthorized authorship inference. DQ7 remains. Binary and figure source attribution unresolved, so overall partial even though all 27 review notes and case notes were independently addressed. No CFD rerun.
+
+
+glm52_02 provenance/DQ checkpoint: final selected response explicitly identifies all eight delivered cases and Re200 60000 steps dt0.005; original workspace metadata SHA256 0d71cdc2ff36da0714c032a813c3ef2edfba7b470aa2009b7fea7b6c2a17e94a says completed/statistically_periodic, zero misses, fraction1, target0.001 and last ratio0.998594. Immutable 1e29ab3c main.cpp:272–275 relaxes target to 0.1, :307–314 accepts any residual decrease at maximum iterations and :317–322 counts as target success; :348–349 unconditionally declares periodic. Canonical workspace force SHA256 399a6ab0c64cfff3da086b9fbe767305828dfce5280cc6e20b090009df8d2436 t180–300 Cd21.01216..21.23840 and Cl3.74469..3.82989 show no established periodic shedding. DQ7 false→true, final ratio misses strict target; do not infer actual strict miss count from false success statistics, and exact historic binary remains unbound. Separately main.cpp:83–100 constructs full raw/global mesh on every rank and both objects remain in scope during loops, violating TASK.md:46,227 regardless of true METIS. Custom TASK flag added, MPI7→4, implicit10→8, case-results6→4; total76→69 provisional. Other case floors, DQ, PDF/source attribution and rubric remain partial. No CFD rerun.

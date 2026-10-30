@@ -159,8 +159,8 @@
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
-        "score": 4,
-        "notes": "METIS/halo source exists, while credible rank-comparison evidence is incomplete."
+        "score": 2.5,
+        "notes": "Immutable 1e29ab3c main.cpp:83\u201386 reads complete CGNS mesh on every rank; :92\u2013100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150\u2013160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real."
       },
       {
         "id": "code.robustness",
@@ -226,7 +226,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 4.2
+    "overall_score": 3.98
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -299,15 +299,15 @@
         "id": "cfd.transient",
         "title": "Transient BDF2 two-loop method (Re 200)",
         "weight": 0.1,
-        "score": 3,
-        "notes": "METIS/halo implementation is source-evidenced, while submitted rank-comparison support is incomplete."
+        "score": 1.5,
+        "notes": "Selected final response identifies eight completed cases and canonical Re200 dt0.005/t300; workspace metadata SHA256 0d71cdc2ff36da0714c032a813c3ef2edfba7b470aa2009b7fea7b6c2a17e94a reports completed/statistically_periodic, target0.001, zero misses/fraction1, last ratio0.998594. Submitted 1e29ab3c main.cpp:272\u2013275 relaxes acceptance to max(target,0.1), :307\u2013314 also accepts any reduction at the cap, :317\u2013322 counts that as target success and :348\u2013349 declares periodic. Workspace forces SHA256 399a6ab0c64cfff3da086b9fbe767305828dfce5280cc6e20b090009df8d2436 over t180\u2013300 show Cd21.01216..21.23840 and Cl3.74469..3.82989, with no substantiated periodic shedding. The final ratio directly misses target; relaxed success count does not establish actual strict miss proportion, and exact historic binary is unbound."
       },
       {
         "id": "cfd.mpi_partition",
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
-        "score": 4,
-        "notes": "Structural validator found all eight required result cases and report."
+        "score": 2.5,
+        "notes": "Immutable 1e29ab3c main.cpp:83\u201386 reads complete CGNS mesh on every rank; :92\u2013100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150\u2013160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real."
       }
     ],
     "disqualification_flags": [
@@ -342,7 +342,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 3.96
+    "overall_score": 3.67
   },
   "result_review": {
     "review_area": "result_review",

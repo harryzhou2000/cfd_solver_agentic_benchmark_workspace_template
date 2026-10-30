@@ -41,8 +41,8 @@
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 4,
-      "notes": "METIS/halo source exists, while credible rank-comparison evidence is incomplete."
+      "score": 2.5,
+      "notes": "Immutable 1e29ab3c main.cpp:83\u201386 reads complete CGNS mesh on every rank; :92\u2013100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150\u2013160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real."
     },
     {
       "id": "code.robustness",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.2
+  "overall_score": 3.98
 }

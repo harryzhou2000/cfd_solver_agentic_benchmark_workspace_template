@@ -30,14 +30,22 @@ The structural validator found all required eight result cases and the report. T
 | Finite-Volume Residual And Boundary Conditions | 15 | 12 | FV/Rusanov/boundary paths source reviewed. |
 | Second-Order Spatial Scheme | 10 | 8 | Second-order limiter path present. |
 | Viscous Terms | 10 | 7 | Viscous method present; report admits high/incomplete drag. |
-| Implicit And Transient Methods | 15 | 10 | LU-SGS/BDF2 exists; CFL departure and Re200 limitation reduce credit. |
-| MPI | 10 | 7 | METIS/halo source; rank comparison evidence incomplete. |
-| Case Results And Validation | 10 | 6 | Structure passes, with steady-convergence and Re200 inner-convergence caveats. |
+| Implicit And Transient Methods | 15 | 8 | Relaxed target counts cannot establish strict inner convergence. |
+| MPI | 10 | 4 | METIS/halo exists, but full global mesh is replicated during iteration. |
+| Case Results And Validation | 10 | 4 | Re200 claims periodic/completed despite a strict last-step miss and no demonstrated shedding. |
 | Report, Visualization, Analysis | 5 | 5 | Report, figures, and manifest present. |
 | Extensibility | 5 | 4 | Modular C++ organization. |
 
-**Total: 76/100. No disqualification.**
+**Provisional total: 69/100. Disqualified under trigger 7 and the separate TASK full-mesh prohibition.**
 
 ## Limitations
 
 This is a legacy provenance reconstruction. Direct project telemetry establishes the Codex root and child tree, but the evaluator did not independently rebuild or rerun submitted cases. The refreshed Codex telemetry reports four rule-violation candidates, retained as telemetry diagnostics rather than a disqualification finding.
+
+## Calibration evidence and remaining work
+
+Selected final response identifies eight completed cases and canonical Re200 dt0.005/t300; workspace metadata SHA256 0d71cdc2ff36da0714c032a813c3ef2edfba7b470aa2009b7fea7b6c2a17e94a reports completed/statistically_periodic, target0.001, zero misses/fraction1, last ratio0.998594. Submitted 1e29ab3c main.cpp:272–275 relaxes acceptance to max(target,0.1), :307–314 also accepts any reduction at the cap, :317–322 counts that as target success and :348–349 declares periodic. Workspace forces SHA256 399a6ab0c64cfff3da086b9fbe767305828dfce5280cc6e20b090009df8d2436 over t180–300 show Cd21.01216..21.23840 and Cl3.74469..3.82989, with no substantiated periodic shedding. The final ratio directly misses target; relaxed success count does not establish actual strict miss proportion, and exact historic binary is unbound.
+
+Immutable 1e29ab3c main.cpp:83–86 reads complete CGNS mesh on every rank; :92–100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150–160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real.
+
+Other case floors, PDF/figure provenance, source criteria and DQ findings remain under review. No CFD or Re200 rerun was performed.

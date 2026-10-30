@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-09-07T02:53:58.826063+00:00
+Generated: 2026-10-30T10:18:31.414560+00:00
 
-**Overall score: 3.96**
+**Overall score: 3.67**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -36,10 +36,10 @@ Generated: 2026-09-07T02:53:58.826063+00:00
 | 9 | **cfd.implicit** Implicit steady march | 0.10 | 4 | LU-SGS/BDF2 source paths exist; CFL departure and Re200 limitations reduce credit. |
 |   | LU-SGS/matrix-free/block-Jacobi or equivalent with documented Jacobian approximation; CFL ramp/local time stepping honoring case CFL controls; meaningful residual reduction. | | | |
 |   | *Evidence:* Implicit solver code; residuals.csv; metadata time_integrator/implicit_solver. | | | |
-| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 3 | METIS/halo implementation is source-evidenced, while submitted rank-comparison support is incomplete. |
+| 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 1.5 | Selected final response identifies eight completed cases and canonical Re200 dt0.005/t300; workspace metadata SHA256 0d71cdc2ff36da0714c032a813c3ef2edfba7b470aa2009b7fea7b6c2a17e94a reports completed/statistically_periodic, target0.001, zero misses/fraction1, last ratio0.998594. Submitted 1e29ab3c main.cpp:272–275 relaxes acceptance to max(target,0.1), :307–314 also accepts any reduction at the cap, :317–322 counts that as target success and :348–349 declares periodic. Workspace forces SHA256 399a6ab0c64cfff3da086b9fbe767305828dfce5280cc6e20b090009df8d2436 over t180–300 show Cd21.01216..21.23840 and Cl3.74469..3.82989, with no substantiated periodic shedding. The final ratio directly misses target; relaxed success count does not establish actual strict miss proportion, and exact historic binary is unbound. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 4 | Structural validator found all eight required result cases and report. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2.5 | Immutable 1e29ab3c main.cpp:83–86 reads complete CGNS mesh on every rank; :92–100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150–160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 
@@ -54,7 +54,7 @@ Generated: 2026-09-07T02:53:58.826063+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.96
+- Overall score (0-5): 3.67
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

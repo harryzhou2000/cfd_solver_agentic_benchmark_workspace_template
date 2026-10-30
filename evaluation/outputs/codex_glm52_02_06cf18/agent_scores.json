@@ -24,7 +24,7 @@
   },
   "scores": {
     "code_review": {
-      "overall_score": 4.2,
+      "overall_score": 3.98,
       "points": [
         {
           "id": "code.build",
@@ -65,8 +65,8 @@
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 4,
-          "notes": "METIS/halo source exists, while credible rank-comparison evidence is incomplete."
+          "score": 2.5,
+          "notes": "Immutable 1e29ab3c main.cpp:83\u201386 reads complete CGNS mesh on every rank; :92\u2013100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150\u2013160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real."
         },
         {
           "id": "code.robustness",
@@ -92,7 +92,7 @@
       ]
     },
     "cfd_review": {
-      "overall_score": 3.96,
+      "overall_score": 3.67,
       "points": [
         {
           "id": "cfd.equations",
@@ -161,15 +161,15 @@
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 3,
-          "notes": "METIS/halo implementation is source-evidenced, while submitted rank-comparison support is incomplete."
+          "score": 1.5,
+          "notes": "Selected final response identifies eight completed cases and canonical Re200 dt0.005/t300; workspace metadata SHA256 0d71cdc2ff36da0714c032a813c3ef2edfba7b470aa2009b7fea7b6c2a17e94a reports completed/statistically_periodic, target0.001, zero misses/fraction1, last ratio0.998594. Submitted 1e29ab3c main.cpp:272\u2013275 relaxes acceptance to max(target,0.1), :307\u2013314 also accepts any reduction at the cap, :317\u2013322 counts that as target success and :348\u2013349 declares periodic. Workspace forces SHA256 399a6ab0c64cfff3da086b9fbe767305828dfce5280cc6e20b090009df8d2436 over t180\u2013300 show Cd21.01216..21.23840 and Cl3.74469..3.82989, with no substantiated periodic shedding. The final ratio directly misses target; relaxed success count does not establish actual strict miss proportion, and exact historic binary is unbound."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 4,
-          "notes": "Structural validator found all eight required result cases and report."
+          "score": 2.5,
+          "notes": "Immutable 1e29ab3c main.cpp:83\u201386 reads complete CGNS mesh on every rank; :92\u2013100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150\u2013160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real."
         }
       ]
     },
@@ -230,7 +230,7 @@
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 76,
+    "total_scored": 69,
     "sections": [
       {
         "id": "build_cli",
@@ -271,22 +271,22 @@
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 10,
-        "notes": "LU-SGS/BDF2 exists; CFL departure and Re200 misses limit credit."
+        "score": 8,
+        "notes": "BDF2 source exists but counts relaxed or merely decreased inner residual as success against reported 0.001 target; final workspace ratio0.998594. Exact strict miss count and historical binary are unbound."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 7,
-        "notes": "METIS/halo source; rank comparison evidence incomplete."
+        "score": 4,
+        "notes": "Immutable 1e29ab3c main.cpp:83\u201386 reads complete CGNS mesh on every rank; :92\u2013100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150\u2013160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 6,
-        "notes": "All structure passes, but steady convergence and Re200 inner convergence caveats."
+        "score": 4,
+        "notes": "Re200 claims completed/periodic although final strict ratio misses and force history does not demonstrate shedding. Other seven cases and structural results remain under independent review."
       },
       {
         "id": "report_viz",
@@ -339,8 +339,19 @@
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "found": true,
+        "evidence": "Selected final response identifies eight completed cases and canonical Re200 dt0.005/t300; workspace metadata SHA256 0d71cdc2ff36da0714c032a813c3ef2edfba7b470aa2009b7fea7b6c2a17e94a reports completed/statistically_periodic, target0.001, zero misses/fraction1, last ratio0.998594. Submitted 1e29ab3c main.cpp:272\u2013275 relaxes acceptance to max(target,0.1), :307\u2013314 also accepts any reduction at the cap, :317\u2013322 counts that as target success and :348\u2013349 declares periodic. Workspace forces SHA256 399a6ab0c64cfff3da086b9fbe767305828dfce5280cc6e20b090009df8d2436 over t180\u2013300 show Cd21.01216..21.23840 and Cl3.74469..3.82989, with no substantiated periodic shedding. The final ratio directly misses target; relaxed success count does not establish actual strict miss proportion, and exact historic binary is unbound."
+      },
+      {
+        "found": true,
+        "evidence": "Immutable 1e29ab3c main.cpp:83\u201386 reads complete CGNS mesh on every rank; :92\u2013100 builds/partitions a GlobalMesh on every rank. Both rawMesh and gm remain in scope throughout steady loop :150\u2013160 and transient loop; no release occurs. TASK.md:46,227 prohibit full mesh replication during iterations, separately from numbered DQ9 even when METIS is real.",
+        "text": "TASK prohibited shortcut: full mesh replicated during iterations"
+      }
+    ]
   },
   "limitations": [
     "Post-run provenance reconstruction.",
