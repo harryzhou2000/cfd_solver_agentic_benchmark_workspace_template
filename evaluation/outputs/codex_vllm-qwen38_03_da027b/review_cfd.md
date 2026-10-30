@@ -2,14 +2,14 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T14:41:10.168534+00:00
+Generated: 2026-10-30T14:45:04.047979+00:00
 
-**Overall score: 2.62**
+**Overall score: 2.5**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 3 | Source evidence. |
+| 1 | **cfd.equations** Governing equations and nondimensionalization | 0.06 | 1 | Immutable eos.h:27–55 pressure is not inverse of to_cons. Isolated evaluator-generated algebra probe rho2,u1,p1 produces rhoE3.5 then recovered p0.3; correct p is1. This EOS blob SHA256 fb21a74bd1eab8e77f643fbdda738e65649b94330342b6ee4ce58034e9e06a6b matches historical metadata revision5d8af03 and curated tip. Report.tex:80–87 also confuses enthalpy/energy and cp/cv. |
 |   | 2-D compressible Navier-Stokes for a calorically perfect gas written in conservative form; closure p=(gamma-1)rho e; nondimensionalization consistent with case reference quantities; force coefficients defined correctly. | | | |
 |   | *Evidence:* Source flux assembly and report equations. | | | |
 | 2 | **cfd.mesh** Mesh import and unstructured geometry | 0.10 | 3 | Partial. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T14:41:10.168534+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.62
+- Overall score (0-5): 2.5
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

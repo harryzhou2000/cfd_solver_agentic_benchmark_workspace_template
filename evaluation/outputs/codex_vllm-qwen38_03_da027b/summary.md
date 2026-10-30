@@ -106,5 +106,5 @@
 ## Reviews
 
 - Code review scorecard: `codex_vllm-qwen38_03_da027b/review_code.md` (overall: 2.73)
-- CFD methods review: `codex_vllm-qwen38_03_da027b/review_cfd.md` (overall: 2.62)
+- CFD methods review: `codex_vllm-qwen38_03_da027b/review_cfd.md` (overall: 2.5)
 - Result review: `codex_vllm-qwen38_03_da027b/review_results.md` (overall: 0.65)
