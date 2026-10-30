@@ -58,18 +58,7 @@ The sole project-local Codex root `019fd883-6a9d-7c53-a1b1-96a168fb91ae` and its
 
 ## Per-case scores (independent 0-5)
 
-These scores do not contribute to the review-area scores or the 100-point rubric total.
-
-| Case | Score | Notes |
-|------|------:|-------|
-| NACA0012 M0.15 inviscid | 2 | Selected final drag is still changing and reported figure depicts a different run. |
-| NACA0012 M0.80 inviscid | 4 | Attempt validates; excluded from submission. |
-| NACA0012 M2.00 inviscid | 1 | Report sanity says failed despite metadata converged. |
-| NACA0012 M0.15 Re5000 | 3.5 | Attempt validates; excluded final raw data. |
-| NACA0012 M0.80 Re5000 | 3.5 | Attempt validates; excluded final raw data. |
-| NACA0012 M2.00 Re5000 | 3 | First-order fallback limits credibility. |
-| Cylinder M0.10 Re20 | 2.5 | Material MPI inconsistency. |
-| Cylinder M0.10 Re200 | 1 | No rerun; conflicting report claim. |
+Eight contestant checkpoint packages and their available force/residual/field figures were independently inspected. Scores and exact hashes are in `agent_scores.json`; selected M015/M080 inviscid and M015 laminar report force plots depict other runs. The Re200 history has extreme nonperiodic force spikes, while several steady results have force or physical-credibility limits. Historic executable and broader figure binding remain partial.
 
 ## Disqualification assessment
 
