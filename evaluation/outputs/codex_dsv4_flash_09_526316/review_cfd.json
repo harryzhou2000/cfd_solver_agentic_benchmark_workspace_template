@@ -6,50 +6,50 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 4,
-      "notes": "Report/source describe compressible equations."
+      "score": 3,
+      "notes": "flux.cpp:8\u201325,27\u201392 computes Euler numerical flux; solver.cpp:168\u2013263 adds viscous and wall contributions. Submitted runs do not validate physical accuracy."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
       "score": 4,
-      "notes": "CGNS and unstructured mesh paths present."
+      "notes": "mesh.cpp:89 reads CGNS zones/connectivity and geometry; partition.cpp:62 constructs local mesh. Mesh probes are inspection utilities, not independent geometry validation."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 3,
-      "notes": "Assembly source present but failed submitted convergence."
+      "notes": "solver.cpp:168\u2013263 forms interior flux balance and wall/farfield contributions; all canonical runs fail and several end NaN."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Roe flux source/report evidence."
+      "score": 3,
+      "notes": "flux.cpp:27\u201392 implements Roe decomposition and entropy fix, and solver.cpp:178,212 calls it; output.cpp:267 incorrectly labels metadata rusanov_llf. Case output does not validate flux accuracy."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 3,
-      "notes": "Boundary paths implemented; not independently run."
+      "notes": "solver.cpp:208\u2013249 uses farfield ghost and pressure wall plus viscous no-slip gradients; :245\u2013248 writes zero no-slip wall velocity. Canonical viscous cases diverge."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 3,
-      "notes": "Gradient reconstruction source present."
+      "notes": "gradient.cpp:55\u201396 computes weighted LSQ gradients, solver.cpp:154\u2013165 reconstructs face states. No demonstrated order-convergence test."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 3,
-      "notes": "Limiter source present."
+      "notes": "gradient.cpp:98\u2013141 implements extrema-based limiter, used by solver.cpp:435\u2013437 and :496\u2013497; no disabled-production evidence found."
     },
     {
       "id": "cfd.viscous",
@@ -63,7 +63,7 @@
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 3,
-      "notes": "LU-SGS claimed and source present."
+      "notes": "solver.cpp:305\u2013343 has forward/backward implicit sweeps; actual cases diverge, and transient history loss is scored separately."
     },
     {
       "id": "cfd.transient",
@@ -77,7 +77,7 @@
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
       "score": 3,
-      "notes": "Partition source present; no rank comparison."
+      "notes": "partition.cpp:49 METIS, solver.cpp:95\u2013103 neighbor exchanges; main.cpp:97 releases global mesh before solve. Eight-rank diagnostic exists but fails, with no successful cross-rank comparison."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.94
+  "overall_score": 2.8
 }

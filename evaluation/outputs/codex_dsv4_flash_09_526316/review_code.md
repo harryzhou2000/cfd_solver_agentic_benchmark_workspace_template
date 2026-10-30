@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:09:52.810314+00:00
+Generated: 2026-10-30T04:11:17.580848+00:00
 
-**Overall score: 2.74**
+**Overall score: 2.57**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -12,28 +12,28 @@ Generated: 2026-10-30T04:09:52.810314+00:00
 | 1 | **code.build** Build system and reproducibility | 0.15 | 1 | Immutable 11adaa1 clean CMake configure fails: CMakeLists.txt:51 requires src/restart.cpp, absent from submission. Network-disabled cfd-bench with /opt/external dependencies locates MPI and configures through dependency checks before missing-source error. Untracked workspace placeholder exists but is post-session and not submitted at immutable tip. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 3 | CLI source present; not rerun. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3 | main.cpp:63–99 parses solve/restart/report options; solver.cpp:397–415 loads current restart only and ignores stored time/step and previous BDF state. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Modules separate mesh, flux, gradient, partition and solver. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Distinct case, mesh, partition, gradient, flux, solver and output modules; 2-D state types couple implementation. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 3 | No internal wrapper evidence; no external search by trust policy. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 3 | No source-evident internal solver executable wrapper; external authorship/similarity not searched under trust policy. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | Generic case reader, but only limited evidence. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | mesh.cpp:89 CGNS reader accepts configured path and zones; no two-filename branch found. Reader supports task meshes; broader compatibility not tested. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 3 | Partition and MPI source present; result evidence weak. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 3 | main.cpp:91–99 loads mesh on each rank for preprocessing, then resets it before solver; partition.cpp:49 calls METIS and solver.cpp:95–103 exchanges neighbor state. No credible completed rank comparison. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Reported high-CFL instability and failed cases. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Canonical steady runs all fail after 500 steps; four end NaN. solver.cpp:535–548 honestly marks failed but blindly proceeds through nonfinite states; temporal history is wrong. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Two committed probe programs. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | Committed mesh_probe.cpp and partition_probe.cpp print diagnostics; no numerical assertions or independent solver convergence tests found. Curated solver configure itself fails. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Curated code is clean; result artifacts excluded. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 2 | CMakeLists.txt:51 references omitted restart.cpp; raw results excluded as designed. Small modules exist but immutable source cannot clean-configure. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 
@@ -50,7 +50,7 @@ Generated: 2026-10-30T04:09:52.810314+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.74
+- Overall score (0-5): 2.57
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

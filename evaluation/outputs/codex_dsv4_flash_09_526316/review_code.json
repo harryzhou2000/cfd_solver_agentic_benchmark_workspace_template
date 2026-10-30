@@ -14,56 +14,56 @@
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 3,
-      "notes": "CLI source present; not rerun."
+      "notes": "main.cpp:63\u201399 parses solve/restart/report options; solver.cpp:397\u2013415 loads current restart only and ignores stored time/step and previous BDF state."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Modules separate mesh, flux, gradient, partition and solver."
+      "notes": "Distinct case, mesh, partition, gradient, flux, solver and output modules; 2-D state types couple implementation."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 3,
-      "notes": "No internal wrapper evidence; no external search by trust policy."
+      "notes": "No source-evident internal solver executable wrapper; external authorship/similarity not searched under trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
       "score": 3,
-      "notes": "Generic case reader, but only limited evidence."
+      "notes": "mesh.cpp:89 CGNS reader accepts configured path and zones; no two-filename branch found. Reader supports task meshes; broader compatibility not tested."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
       "score": 3,
-      "notes": "Partition and MPI source present; result evidence weak."
+      "notes": "main.cpp:91\u201399 loads mesh on each rank for preprocessing, then resets it before solver; partition.cpp:49 calls METIS and solver.cpp:95\u2013103 exchanges neighbor state. No credible completed rank comparison."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
       "score": 2,
-      "notes": "Reported high-CFL instability and failed cases."
+      "notes": "Canonical steady runs all fail after 500 steps; four end NaN. solver.cpp:535\u2013548 honestly marks failed but blindly proceeds through nonfinite states; temporal history is wrong."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 3,
-      "notes": "Two committed probe programs."
+      "score": 2,
+      "notes": "Committed mesh_probe.cpp and partition_probe.cpp print diagnostics; no numerical assertions or independent solver convergence tests found. Curated solver configure itself fails."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
-      "score": 3,
-      "notes": "Curated code is clean; result artifacts excluded."
+      "score": 2,
+      "notes": "CMakeLists.txt:51 references omitted restart.cpp; raw results excluded as designed. Small modules exist but immutable source cannot clean-configure."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.74
+  "overall_score": 2.57
 }

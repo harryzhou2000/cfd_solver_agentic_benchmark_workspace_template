@@ -213,56 +213,56 @@
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 3,
-        "notes": "CLI source present; not rerun."
+        "notes": "main.cpp:63\u201399 parses solve/restart/report options; solver.cpp:397\u2013415 loads current restart only and ignores stored time/step and previous BDF state."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
         "score": 4,
-        "notes": "Modules separate mesh, flux, gradient, partition and solver."
+        "notes": "Distinct case, mesh, partition, gradient, flux, solver and output modules; 2-D state types couple implementation."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 3,
-        "notes": "No internal wrapper evidence; no external search by trust policy."
+        "notes": "No source-evident internal solver executable wrapper; external authorship/similarity not searched under trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 3,
-        "notes": "Generic case reader, but only limited evidence."
+        "notes": "mesh.cpp:89 CGNS reader accepts configured path and zones; no two-filename branch found. Reader supports task meshes; broader compatibility not tested."
       },
       {
         "id": "code.mpi",
         "title": "MPI correctness",
         "weight": 0.15,
         "score": 3,
-        "notes": "Partition and MPI source present; result evidence weak."
+        "notes": "main.cpp:91\u201399 loads mesh on each rank for preprocessing, then resets it before solver; partition.cpp:49 calls METIS and solver.cpp:95\u2013103 exchanges neighbor state. No credible completed rank comparison."
       },
       {
         "id": "code.robustness",
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 2,
-        "notes": "Reported high-CFL instability and failed cases."
+        "notes": "Canonical steady runs all fail after 500 steps; four end NaN. solver.cpp:535\u2013548 honestly marks failed but blindly proceeds through nonfinite states; temporal history is wrong."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Two committed probe programs."
+        "score": 2,
+        "notes": "Committed mesh_probe.cpp and partition_probe.cpp print diagnostics; no numerical assertions or independent solver convergence tests found. Curated solver configure itself fails."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 3,
-        "notes": "Curated code is clean; result artifacts excluded."
+        "score": 2,
+        "notes": "CMakeLists.txt:51 references omitted restart.cpp; raw results excluded as designed. Small modules exist but immutable source cannot clean-configure."
       }
     ],
     "disqualification_flags": [
@@ -307,7 +307,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.74
+    "overall_score": 2.57
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -317,50 +317,50 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 4,
-        "notes": "Report/source describe compressible equations."
+        "score": 3,
+        "notes": "flux.cpp:8\u201325,27\u201392 computes Euler numerical flux; solver.cpp:168\u2013263 adds viscous and wall contributions. Submitted runs do not validate physical accuracy."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
         "score": 4,
-        "notes": "CGNS and unstructured mesh paths present."
+        "notes": "mesh.cpp:89 reads CGNS zones/connectivity and geometry; partition.cpp:62 constructs local mesh. Mesh probes are inspection utilities, not independent geometry validation."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 3,
-        "notes": "Assembly source present but failed submitted convergence."
+        "notes": "solver.cpp:168\u2013263 forms interior flux balance and wall/farfield contributions; all canonical runs fail and several end NaN."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Roe flux source/report evidence."
+        "score": 3,
+        "notes": "flux.cpp:27\u201392 implements Roe decomposition and entropy fix, and solver.cpp:178,212 calls it; output.cpp:267 incorrectly labels metadata rusanov_llf. Case output does not validate flux accuracy."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 3,
-        "notes": "Boundary paths implemented; not independently run."
+        "notes": "solver.cpp:208\u2013249 uses farfield ghost and pressure wall plus viscous no-slip gradients; :245\u2013248 writes zero no-slip wall velocity. Canonical viscous cases diverge."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 3,
-        "notes": "Gradient reconstruction source present."
+        "notes": "gradient.cpp:55\u201396 computes weighted LSQ gradients, solver.cpp:154\u2013165 reconstructs face states. No demonstrated order-convergence test."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 3,
-        "notes": "Limiter source present."
+        "notes": "gradient.cpp:98\u2013141 implements extrema-based limiter, used by solver.cpp:435\u2013437 and :496\u2013497; no disabled-production evidence found."
       },
       {
         "id": "cfd.viscous",
@@ -374,7 +374,7 @@
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 3,
-        "notes": "LU-SGS claimed and source present."
+        "notes": "solver.cpp:305\u2013343 has forward/backward implicit sweeps; actual cases diverge, and transient history loss is scored separately."
       },
       {
         "id": "cfd.transient",
@@ -388,7 +388,7 @@
         "title": "MPI partitioning and scalability",
         "weight": 0.09,
         "score": 3,
-        "notes": "Partition source present; no rank comparison."
+        "notes": "partition.cpp:49 METIS, solver.cpp:95\u2013103 neighbor exchanges; main.cpp:97 releases global mesh before solve. Eight-rank diagnostic exists but fails, with no successful cross-rank comparison."
       }
     ],
     "disqualification_flags": [
@@ -423,7 +423,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.94
+    "overall_score": 2.8
   },
   "result_review": {
     "review_area": "result_review",
@@ -433,36 +433,36 @@
         "id": "res.contract",
         "title": "Output contract compliance",
         "weight": 0.2,
-        "score": 2,
-        "notes": "Directories exist but validator sees failed status."
+        "score": 1,
+        "notes": "Seven canonical steady cases have failed status at 500; Re200 has only t=1 field/log and missing required completion metadata/force history."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
         "score": 1,
-        "notes": "Explicit validator fails immediately."
+        "notes": "Prior examiner validation stops on first failed canonical metadata; structural check is not physical validation."
       },
       {
         "id": "res.completion",
         "title": "Case completion and convergence",
         "weight": 0.2,
         "score": 1,
-        "notes": "Report admits broad instability/divergence."
+        "notes": "No converged canonical steady case; Re200 is partial. Report acknowledges broad failure but incorrectly describes its own short diagnostic as valid."
       },
       {
         "id": "res.plausibility",
         "title": "Result plausibility and MPI consistency",
         "weight": 0.15,
         "score": 1,
-        "notes": "No credible canonical converged evidence."
+        "notes": "Final inviscid drag is negative and four viscous cases have NaN final force values; no credible converged canonical result."
       },
       {
         "id": "res.visualization",
         "title": "Visualizations",
         "weight": 0.15,
-        "score": 2,
-        "notes": "Committed short-test figures only."
+        "score": 1,
+        "notes": "Accepted PDF pp2\u20133 plots one 8-rank short diagnostic; residual blows up, force has grossly nonphysical coefficients and Cp chart is empty due to NaNs. No full case-field matrix."
       },
       {
         "id": "res.report",
@@ -506,7 +506,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 1.35
+    "overall_score": 1.0
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/09",

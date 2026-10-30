@@ -10,7 +10,7 @@ The selected workspace-local Codex root is `019fdf88-1057-7ea1-8471-24edfbc48dc3
 
 ## Scores and verdict
 
-Provisional score: **49/100** (previously 55); current weighted reviews are in agent_scores.json; DQ remains under review. All detailed rubric, review-point, and per-case evidence is in `agent_scores.json`. Canonical case scores are 1, 1, 1, 0, 0, 0, 1, 0 respectively. This is a modular attempt with source-level method evidence, but it lacks credible completed final results and the validator fails immediately on a claimed canonical output.
+Calibrated score: **48/100** (previously 55); current weighted reviews are in agent_scores.json; DQ=false. All detailed rubric, review-point, and per-case evidence is in `agent_scores.json`. Canonical case scores are 1, 1, 1, 0, 0, 0, 1, 0 respectively. This is a modular attempt with source-level method evidence, but it lacks credible completed final results and the validator fails immediately on a claimed canonical output.
 
 ## Disqualification and limitations
 
@@ -41,3 +41,8 @@ Immutable solver.cpp:345–360 contains BDF1/BDF2 time terms, but :430–432 shi
 ## Partial report/figure trace review — 2026-10-30
 
 The accepted compiled PDF pp2–3 contradicts its own text: report.tex:87–103,155–158 asserts 100-step 8-rank short-test residual 1.5→8.5, Cd≈0.11 and Cl≈0, while its cited residual plot reaches above 10^13 by step 69 and its force plot spans Cd≈-458 to -455, Cl≈402–403. The displayed Cp plot is empty. The submitted results/final_verify/run_status.json says rank 8, step 100, failed; its residuals.csv has first 1.5370 and last finite 1.37659e13 at step 69, and forces.csv first Cd -456.6435, last finite Cd -454.6529 at step 69; later entries are NaN and its surface Cp values are NaN. Force SHA-256 2a4580df3441d9f65ee863d67879001cff7606bf349e4be091d7335a82d6f72d; residual SHA d4a672d4a6e71392b59929ce87772cd15669692fbb27d99cedb72333acccd3a9. These values and time span support a failed-data source, although matching asan_test3 also exists, so the unique precise source is not established. DQ8 is not established merely by contradiction between prose and a plot that may depict submitted failed output; DQ7 requires metadata marking failure successful and this diagnostic status explicitly fails. Report/viz rubric 3→1; remaining source and DQ audit partial. No solver rerun.
+
+
+## Full calibration — 2026-10-30
+
+All ten rubric sections and 27 review points include criterion-specific evidence; cases remain 1,1,1,0,0,0,1,0. The immutable solver does not configure because CMake references absent src/restart.cpp; the contestant report compiles. BDF2 source loses prior history through double shifts; restart lacks physical time/prior state; transient wall-force gradients are stale. Roe is implemented and called (flux.cpp:27–92, solver.cpp:178), while output.cpp:267 incorrectly labels its metadata rusanov_llf. The report 8-rank partition table says rank 0 owns/ghosts 2602/34, but each of six surviving 8-rank partition_diagnostics.csv files reports 2613/95; no inference about an unavailable distinct run. Main.cpp releases the full preprocessing mesh before solve. DQ7 is not established because final statuses explicitly fail; DQ8 is not established solely by erroneous narrative while submitted failed diagnostic curves plausibly match. No external similarity search, CFD rerun, independent rank comparison or exhaustive pixel audit. Both record gates pass.

@@ -82,7 +82,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_06_5b6b08` | partial: 65/100 source assessment, no DQ established; original case packages/figures absent |
 | `codex_dsv4_flash_07_aeae21` | fully reviewed: 68/100, DQ7 and TASK full mesh; three reference cases |
 | `codex_dsv4_flash_08_efba3c` | fully reviewed; 76→71, DQ7 and case evidence corrected |
-| `codex_dsv4_flash_09_526316` | partial: all canonical case outcomes and initial mesh lifetime checked; rubric/DQ pending |
+| `codex_dsv4_flash_09_526316` | fully reviewed: 55→48, DQ false; both gates pass |
 | `codex_dsv4_flash_10_6468ba` | unreviewed |
 | `codex_dsv4_flash_11_6e6ac8` | unreviewed |
 | `codex_dsv4_flash_12_7e965b` | unreviewed |
@@ -453,3 +453,8 @@ dsv4_flash_09 transient source checkpoint: rubric 53→51 provisional, implicit/
 
 
 dsv4_flash_09 report trace checkpoint: rubric 51→49 provisional, report/viz 3→1. Accepted PDF pp2–3 shows residual >10^13 at step 69, Cd≈-458 to -455 and Cl≈402–403, contradicting report.tex:87–103,155–158 claims residual 1.5→8.5, Cd≈0.11, Cl≈0; Cp graph empty. Submitted results/final_verify is an 8-rank failed 100-step run, matching plotted scale and ending finite at step 69 with later NaNs; SHA-256 force 2a4580df3441d9f65ee863d67879001cff7606bf349e4be091d7335a82d6f72d, residual d4a672d4a6e71392b59929ce87772cd15669692fbb27d99cedb72333acccd3a9; asan_test3 has matching finite values so exact source not uniquely established. DQ8 mismatch not established merely from erroneous prose, and DQ7 requires metadata false success while diagnostic status says failed. Full review remains partial; gates pass, no CFD rerun.
+
+
+## dsv4_flash_09 full calibration — 2026-10-30
+
+Rubric 55→48/100; DQ remains false; case scores remain 1,1,1,0,0,0,1,0. Ten sections/27 review points now cite criterion evidence. All seven canonical steady statuses fail, four force histories end NaN; Re200 only partial t=1 field. Curated immutable clean configure fails due missing src/restart.cpp; post-session untracked placeholder and historical raw copy do not repair submitted tip. BDF history double-shift and transient stale wall-gradient defects documented above; restart lacks time and prior state. Report narrative falsely claims valid 8-rank short test with Cd≈0.11/Cl≈0 while its plot and a matching failed diagnostic show Cd≈-455/Cl≈403 and residual >10^13; metadata explicitly reports failure, so no DQ7, and plot-source uniqueness is insufficient for DQ8. Six surviving 8-rank diagnostics rank-0 owned/ghost 2613/95 versus report table 2602/34. Roe implemented/called but metadata incorrectly labels Rusanov. METIS present, full preprocessing mesh reset before solve, limiter active. No CFD rerun, external similarity search, independent rank comparison or exhaustive pixel audit; both gates pass.
