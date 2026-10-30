@@ -111,7 +111,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_glm52-m3_04_32f2d0` | fully reviewed, qualified: 58.5/100, DQ7/8; binary/strict counts and some figure provenance limited |
 | `codex_glm52-m3_05_f094c1` | fully reviewed, qualified: 54/100, DQ7 and TASK full mesh; historic binary/figure binding limited |
 | `codex_glm52-m3_06_a2dc07` | fully reviewed, qualified: 68/100, DQ7; historical binary/figure binding limited |
-| `codex_glm52_01_1307c9` | partial — DQ mapping corrected, full rubric calibration pending |
+| `codex_glm52_01_1307c9` | partial — historical eight packages/PDF recovered; case and full rubric calibration pending |
 | `codex_glm52_02_06cf18` | partial: provisional 62/100, DQ7 and TASK full-mesh; production binary/figure binding unverified |
 | `codex_glm52_03_e7d38e` | partial: provisional 68/100, DQ7; DQ8/report-figure classification and binary unverified |
 | `codex_gpt56_01_cb349f` | fully reviewed: 94/100, no DQ found; executable and individual image bindings qualified |
@@ -156,6 +156,8 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 ## DQ mapping correction — glm52_01
 
 Prior flags 4 and 8 were incorrectly assigned. Immutable submission `17a5ef3c78cda02d6707e1f94858184060318216`, `solver/src/solver.cpp:55–62`, unconditionally marks a transient complete/statistically periodic; lines 743–748 cap inner iterations at 15 and 845–852 count a miss only for ratio >=1 rather than the 1e-3 target. The former report recorded last ratio 0.928488 and a 97.56% fraction, but the original raw metadata is currently unavailable. The source proves the success fraction uses the wrong threshold; it does not prove what fraction of steps missed the strict target. DQ remains true under trigger 7, not trigger 4 (steady MPI discrepancy). Seven absent report figures remain a report/visualization defect but do not alone prove trigger 8 (figures misrepresent outputs). Score unchanged; both gates passed after correction. Full independent rubric calibration remains pending.
+
+glm52_01 2026-10-31 recovery supersedes the prior workspace-only absence statement: contestant checkpoint `f9b3d2d86be7691191d72b8b323de4c503a2597a` includes all eight original result directories, extensive nested case plots and a 22-page PDF SHA-256 `02788a304b97576bface530a1a224b5803f286e4b10727da31306896bee61ee9`. Re200 metadata SHA-256 `bb6ec9e31484739fb64406961f3d91341a8e1e65337f7dc07c2187e5b70fa46e` explicitly records ratio 0.9284884538816688, 731 counted misses and fraction 0.9756333333333334. Source counts ratio≥1 rather than target 0.001, so neither those 731 nor the fraction establish the strict miss count. Production source, CMake and TeX match curated 17a5ef3 except removal of three debug-only source files; exact producing executable remains unbound. Historical PDF is checkpoint-delivered evidence, not falsely labeled workspace-existing. All case scores and full rubric remain provisional pending individual numerical and visual review. No CFD/Re200 rerun; both gates required.
 
 ## Opus-04 case correction — 2026-10-29
 
