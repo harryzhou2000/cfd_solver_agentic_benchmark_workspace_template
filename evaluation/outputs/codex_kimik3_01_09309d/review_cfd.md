@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T13:18:56.390292+00:00
+Generated: 2026-10-30T13:24:01.827664+00:00
 
-**Overall score: 4.79**
+**Overall score: 4.4**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -24,10 +24,10 @@ Generated: 2026-10-30T13:18:56.390292+00:00
 | 5 | **cfd.bc** Boundary conditions | 0.08 | 5 | Characteristic farfield, slip wall and no-slip adiabatic wall paths are described and implemented. |
 |   | Farfield, inviscid slip wall, no-slip adiabatic wall; wall treatment honest (boundary_value vs cell_center in surface output); near-zero wall velocity for no-slip; near-zero normal velocity for slip. | | | |
 |   | *Evidence:* BC code; surface.csv checks; metadata wall_boundary_output_semantics. | | | |
-| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 5 | Least-squares piecewise-linear reconstruction is present, with documented startup first-order continuation. |
+| 6 | **cfd.reconstruction** Second-order reconstruction | 0.09 | 2.5 | Source supports LSQ but session-backed M080/M200 viscous outputs stop at340/69 under the 600-step piecewise-constant startup while report claims second-order finals. |
 |   | Least-squares/Green-Gauss gradients; piecewise-linear face states; reconstruction ACTIVE in production runs; first-order fallback triggers documented and disclosed. | | | |
 |   | *Evidence:* Gradient/reconstruction code; metadata reconstruction field; report disclosure. | | | |
-| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 5 | Production Venkatakrishnan limiter and density/pressure positivity control are source-evidenced. |
+| 7 | **cfd.limiter** Limiter and positivity control | 0.08 | 3 | Limiter source exists but is disabled with piecewise-constant reconstruction for the session-backed M080/M200 viscous outputs. |
 |   | Barth-Jespersen or stronger limiter active in production; positivity protection for reconstructed density/pressure and updates. | | | |
 |   | *Evidence:* Limiter code; metadata limiter/positivity_preservation; shock-captured fields. | | | |
 | 8 | **cfd.viscous** Viscous discretization | 0.10 | 5 | Newtonian/Fourier viscous terms, gradients and tangential skin-friction reporting are evidenced in source and report. |
@@ -54,7 +54,7 @@ Generated: 2026-10-30T13:18:56.390292+00:00
 
 ## Summary
 
-- Overall score (0-5): 4.79
+- Overall score (0-5): 4.4
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

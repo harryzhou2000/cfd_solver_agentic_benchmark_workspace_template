@@ -93,7 +93,7 @@
       "disqualification_flags": []
     },
     "cfd_review": {
-      "overall_score": 4.79,
+      "overall_score": 4.4,
       "points": [
         {
           "id": "cfd.equations",
@@ -134,15 +134,15 @@
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 5,
-          "notes": "Least-squares piecewise-linear reconstruction is present, with documented startup first-order continuation."
+          "score": 2.5,
+          "notes": "Source supports LSQ but session-backed M080/M200 viscous outputs stop at340/69 under the 600-step piecewise-constant startup while report claims second-order finals."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Production Venkatakrishnan limiter and density/pressure positivity control are source-evidenced."
+          "score": 3,
+          "notes": "Limiter source exists but is disabled with piecewise-constant reconstruction for the session-backed M080/M200 viscous outputs."
         },
         {
           "id": "cfd.viscous",
@@ -173,10 +173,17 @@
           "notes": "METIS/halo source present. Re20 np1/2/4 agree; their control overrides differ from np8, so rank-only 5.706 vs 1.953 attribution is unsupported."
         }
       ],
-      "disqualification_flags": []
+      "disqualification_flags": [
+        {
+          "id": 10,
+          "text": "A report claims second-order reconstruction or a shock limiter that is disabled for production cases.",
+          "found": true,
+          "evidence": "Selected rollout 019fc805-989c-7971-b70d-53fd4efa3889 applies the 600-step viscous first-order switch at 2026-08-04T10:18:42Z, successfully builds solver/build/cfd2d (call_NQLWSrThOKAoeFBRBQpBlzX2, 10:21:19Z), then launches that path into canonical M080/M200 laminar directories (call_L6Gm7dtyVaAA1nMF7NdZvx6J, 10:31:17Z, argument SHA256 706fef26ee3d9a7744d7132e5c1e4c57804c4f1f892efd5431f7c24e4b717a93). Metadata begins 10:31:18Z; final steps340/69, both below600. Submitted driver.cpp:250\u2013262 sets secondOrder=false through600; residual.cpp:113\u2013137 then uses cell averages. Report.tex:112\u2013117 explicitly claims all final fields are second order and metadata claims order2. Individual historical executable hash unrecorded; session build/launch and timing support the production binding."
+        }
+      ]
     },
     "result_review": {
-      "overall_score": 3.7,
+      "overall_score": 3.55,
       "points": [
         {
           "id": "res.contract",
@@ -217,8 +224,8 @@
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 3,
-          "notes": "Strong technical coverage and candid plateau note, but table 5 falsely reports cylinder np1/2/4 Cd=1.953 while retained artifacts have 5.706."
+          "score": 2,
+          "notes": "Rank table misstates retained force values and report claims second-order final fields for two session-backed first-order viscous runs."
         },
         {
           "id": "res.traceability",
@@ -234,13 +241,19 @@
           "text": "metadata.json marks incomplete or failed runs as successful final results.",
           "found": true,
           "evidence": "Canonical M200 laminar forces.csv SHA256 4544cf7c208130e10580faf425f13cf94f68cdf26cd391a3a92e8a25b719b233 has 69 steps; Cd drops 0.2352103\u21920.1121686 over the last20 and 0.1470408\u21920.1121686 over the last10, while metadata SHA256 6fa028b49eea07a98035cfbccae813f88c35db423967883d22ca765b01767847 marks completed/converged. Report case_summary.tex:12 and run_manifest identify the same step69/Cd0.112169. The supplied residual target alone does not establish stable forces; historic binary remains unbound."
+        },
+        {
+          "id": 10,
+          "text": "A report claims second-order reconstruction or a shock limiter that is disabled for production cases.",
+          "found": true,
+          "evidence": "Selected rollout 019fc805-989c-7971-b70d-53fd4efa3889 applies the 600-step viscous first-order switch at 2026-08-04T10:18:42Z, successfully builds solver/build/cfd2d (call_NQLWSrThOKAoeFBRBQpBlzX2, 10:21:19Z), then launches that path into canonical M080/M200 laminar directories (call_L6Gm7dtyVaAA1nMF7NdZvx6J, 10:31:17Z, argument SHA256 706fef26ee3d9a7744d7132e5c1e4c57804c4f1f892efd5431f7c24e4b717a93). Metadata begins 10:31:18Z; final steps340/69, both below600. Submitted driver.cpp:250\u2013262 sets secondOrder=false through600; residual.cpp:113\u2013137 then uses cell averages. Report.tex:112\u2013117 explicitly claims all final fields are second order and metadata claims order2. Individual historical executable hash unrecorded; session build/launch and timing support the production binding."
         }
       ]
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 87.5,
+    "total_scored": 83.0,
     "sections": [
       {
         "id": "build_cli_output",
@@ -267,8 +280,8 @@
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 10,
-        "notes": "Limited least-squares reconstruction and positivity control are implemented; startup continuation is disclosed."
+        "score": 6,
+        "notes": "LSQ limiter and positivity source present, but session-backed M080/M200 viscous runs ended within 600-step piecewise-constant mode despite claimed second-order finals."
       },
       {
         "id": "viscous",
@@ -302,8 +315,8 @@
         "id": "report",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 3,
-        "notes": "Detailed report and plateau disclosure, but table 5 pairs actual rank-study steps/timings with incorrect Cd 1.953 instead of 5.706."
+        "score": 2.5,
+        "notes": "Detailed report but rank table misstates actual Cd and claims all final fields second order despite session-backed first-order viscous runs."
       },
       {
         "id": "extensibility",
@@ -332,8 +345,8 @@
       "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=-0.0026, CD=0.0770 at 005d7d9:solver/report/tables/case_summary.tex:8; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validated completed package with no-slip/surface and viscous-drag evidence."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 2,
-      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.0014, CD=0.2235 at 005d7d9:solver/report/tables/case_summary.tex:10; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validated completed package with wall/field evidence."
+      "score": 1.5,
+      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.0014, CD=0.2235 at 005d7d9:solver/report/tables/case_summary.tex:10; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validated completed package with wall/field evidence. Score 2\u21921.5: selected-session build/launch evidence supports that this 340-step viscous run remained in the driver 600-step piecewise-constant startup despite metadata and report claiming a second-order final field; exact historic binary hash is unrecorded."
     },
     "naca0012_m200_laminar_re5000": {
       "score": 1,
@@ -408,8 +421,8 @@
       {
         "id": 10,
         "text": "A report claims second-order reconstruction or a shock limiter that is disabled for production cases.",
-        "found": false,
-        "evidence": "Production metadata identifies least_squares_piecewise_linear and venkatakrishnan; documented finite startup continuation is not a disabled production method."
+        "found": true,
+        "evidence": "Selected rollout 019fc805-989c-7971-b70d-53fd4efa3889 applies the 600-step viscous first-order switch at 2026-08-04T10:18:42Z, successfully builds solver/build/cfd2d (call_NQLWSrThOKAoeFBRBQpBlzX2, 10:21:19Z), then launches that path into canonical M080/M200 laminar directories (call_L6Gm7dtyVaAA1nMF7NdZvx6J, 10:31:17Z, argument SHA256 706fef26ee3d9a7744d7132e5c1e4c57804c4f1f892efd5431f7c24e4b717a93). Metadata begins 10:31:18Z; final steps340/69, both below600. Submitted driver.cpp:250\u2013262 sets secondOrder=false through600; residual.cpp:113\u2013137 then uses cell averages. Report.tex:112\u2013117 explicitly claims all final fields are second order and metadata claims order2. Individual historical executable hash unrecorded; session build/launch and timing support the production binding."
       },
       {
         "id": 11,
