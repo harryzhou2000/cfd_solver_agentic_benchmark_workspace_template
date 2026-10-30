@@ -21,7 +21,7 @@
       "title": "Code organization and extensibility",
       "weight": 0.12,
       "score": 4,
-      "notes": "Source separates mesh, partition, finite-volume solver, gas model, I/O and utilities; numerical result evidence is unavailable."
+      "notes": "Source separates mesh, partition, finite-volume solver, gas model, I/O and utilities; recovered original case outputs inform separate result assessment."
     },
     {
       "id": "code.originality",
@@ -48,15 +48,15 @@
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 3,
-      "notes": "Output.cpp:453 writes completed=true independent of status; no original case metadata survives to establish a submitted false success. Restart does not restore history/time. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+      "score": 2.5,
+      "notes": "Solver.cpp:1741\u20131749 labels reaching transient final time statistically_periodic without testing shedding; 14 Re200 steps violate minimum inner count. Restart loses time/history."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 2,
-      "notes": "Clean build passes; no delivered case packages or figures exist in current workspace to independently validate claimed results or rank checks."
+      "score": 3,
+      "notes": "Clean build passed; recovered original eight packages pass read-only validator, and PDF pp.41\u201342 and mpi_np2 supply comparisons. Structural passes do not establish physics or exact binary binding."
     },
     {
       "id": "code.hygiene",
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 3.62
+  "overall_score": 3.68
 }

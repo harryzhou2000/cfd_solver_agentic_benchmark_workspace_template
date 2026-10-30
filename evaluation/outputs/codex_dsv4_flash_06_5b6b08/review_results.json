@@ -6,78 +6,58 @@
       "id": "res.contract",
       "title": "Output contract compliance",
       "weight": 0.2,
-      "score": 0,
-      "notes": "Current contestant workspace has no case results directory or metadata; raw commit exclusion alone is not the reason for this assessment. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+      "score": 3,
+      "notes": "Eight historical case packages pass structural validator, with genuine output histories and fields. Re200 has 14 inner iterations below required minimum and no supported periodic shedding; restart lacks full transient state."
     },
     {
       "id": "res.validator",
       "title": "Automated validator results",
       "weight": 0.1,
-      "score": 0,
-      "notes": "Original terminal claims validation but current missing case metadata prevents independent verification of that output."
+      "score": 4,
+      "notes": "Read-only validator passes all eight original historical packages and report. Validator is structural and does not establish contour fidelity or numerical convergence."
     },
     {
       "id": "res.completion",
       "title": "Case completion and convergence",
       "weight": 0.2,
-      "score": 0,
-      "notes": "All eight original case packages are absent in the present workspace; terminal and report claims cannot establish completion. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+      "score": 2,
+      "notes": "Seven steady runs marked converged use disclosed plateau logic; some force oscillations/drift remain. Re200 reaches t=300 but the periodic-success status is unsupported by the history."
     },
     {
       "id": "res.plausibility",
       "title": "Result plausibility and MPI consistency",
       "weight": 0.15,
-      "score": 0,
-      "notes": "Report supplies numeric claims, but no original histories, fields or metadata remain to test their physical credibility."
+      "score": 2,
+      "notes": "Many forces are bounded, but Re20 has strong unphysical oscillation, M0.15 inviscid Cd varies substantially and Re200 lift is broadband without a supported coherent shedding period."
     },
     {
       "id": "res.visualization",
       "title": "Visualizations",
       "weight": 0.15,
-      "score": 0,
-      "notes": "No contestant-rendered figures or sibling PDF currently survive, and committed report references absent images. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+      "score": 1,
+      "notes": "Historical 42-page PDF contains case histories and fields, but all 16 reproduced Mach/pressure figures misassign quad values and Re200 vorticity uses cell velocities indexed by node ID; its force plot hides the late interval."
     },
     {
       "id": "res.report",
       "title": "Report quality and honesty",
       "weight": 0.15,
-      "score": 1,
-      "notes": "Tracked report TeX supplies methods and claimed case tables; missing images/PDF/data prevent validating its results or compiling the curated report."
+      "score": 2.5,
+      "notes": "Historical PDF provides methods, case numeric tables and honest discussion of broadband/plateau limitations; numerical figure mapping is invalid and the Re200 claimed periodic state is not supported."
     },
     {
       "id": "res.traceability",
       "title": "Traceability of figures and claims",
       "weight": 0.05,
-      "score": 0,
-      "notes": "Case data, figure manifest and rendered figures are absent in current workspace; report claims cannot be traced to output files. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+      "score": 2,
+      "notes": "Original figure manifest and VTUs/CSVs survived in historical commit, and source-generated figures reproduce byte-for-byte. This exposes data-to-image misassignment; the curated submission excludes figure assets and cannot build the report."
     }
   ],
   "disqualification_flags": [
     {
-      "flag": "Figure files misnamed (e.g., Mach image that actually plots pressure)",
-      "triggered": null,
-      "notes": ""
-    },
-    {
-      "flag": "Report figures do not correspond to submitted field/CSV outputs",
-      "triggered": null,
-      "notes": ""
-    },
-    {
-      "flag": "Placeholder, synthetic, or intentionally partial result files in scored case dirs",
-      "triggered": null,
-      "notes": ""
-    },
-    {
-      "flag": "metadata.json marks incomplete or failed runs as successful",
-      "triggered": null,
-      "notes": ""
-    },
-    {
-      "flag": "Debug outputs presented as final case results",
-      "triggered": null,
-      "notes": ""
+      "id": 8,
+      "found": true,
+      "evidence": "All 16 report Mach/pressure PNGs reproduce byte-for-byte from original case VTUs using make_figures.py:180\u2013193, whose grouped quad-triangle ordering conflicts with adjacent duplicated cell values. M2 inviscid Mach misassigns 20126/20128 quad triangles (mean absolute error 0.5394). Re200 report vorticity PNG SHA256 5e5f1ae907a51521a54381211043c74bf693df46e0ccbc104f006681a75e850c reproduces exactly; make_figures.py:135\u2013161 indexes cell-centered Velocity by node ID and also misassigns triangles. This establishes specific embedded figure/data misrepresentation, not fabricated underlying fields."
     }
   ],
-  "overall_score": 0.15
+  "overall_score": 2.33
 }

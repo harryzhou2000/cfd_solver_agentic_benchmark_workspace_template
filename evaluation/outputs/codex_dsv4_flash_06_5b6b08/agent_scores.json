@@ -22,7 +22,7 @@
   },
   "scores": {
     "code_review": {
-      "overall_score": 3.62,
+      "overall_score": 3.68,
       "points": [
         {
           "id": "code.build",
@@ -43,7 +43,7 @@
           "title": "Code organization and extensibility",
           "weight": 0.12,
           "score": 4,
-          "notes": "Source separates mesh, partition, finite-volume solver, gas model, I/O and utilities; numerical result evidence is unavailable."
+          "notes": "Source separates mesh, partition, finite-volume solver, gas model, I/O and utilities; recovered original case outputs inform separate result assessment."
         },
         {
           "id": "code.originality",
@@ -70,15 +70,15 @@
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 3,
-          "notes": "Output.cpp:453 writes completed=true independent of status; no original case metadata survives to establish a submitted false success. Restart does not restore history/time. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+          "score": 2.5,
+          "notes": "Solver.cpp:1741\u20131749 labels reaching transient final time statistically_periodic without testing shedding; 14 Re200 steps violate minimum inner count. Restart loses time/history."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 2,
-          "notes": "Clean build passes; no delivered case packages or figures exist in current workspace to independently validate claimed results or rank checks."
+          "score": 3,
+          "notes": "Clean build passed; recovered original eight packages pass read-only validator, and PDF pp.41\u201342 and mpi_np2 supply comparisons. Structural passes do not establish physics or exact binary binding."
         },
         {
           "id": "code.hygiene",
@@ -91,14 +91,14 @@
       "disqualification_flags": []
     },
     "cfd_review": {
-      "overall_score": 3.76,
+      "overall_score": 3.55,
       "points": [
         {
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
           "score": 4,
-          "notes": "Gas.cpp and Solver.cpp implement perfect-gas conservative finite-volume, stress/heat and time residual paths; numerical outcomes unavailable."
+          "notes": "Gas.cpp and Solver.cpp implement perfect-gas conservative finite-volume, stress/heat and time residual paths; recovered historical results now permit numerical assessment."
         },
         {
           "id": "cfd.mesh",
@@ -111,8 +111,8 @@
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 4,
-          "notes": "Solver.cpp computes face spatial fluxes and total transient residual; no original case data remain to verify behavior. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+          "score": 3.5,
+          "notes": "Solver.cpp computes spatial and total transient residuals; historical steady cases reduce only 0.388\u20131.713 orders, with persistent case-dependent force oscillations."
         },
         {
           "id": "cfd.flux",
@@ -126,14 +126,14 @@
           "title": "Boundary conditions",
           "weight": 0.08,
           "score": 4,
-          "notes": "Gas/Solver code includes farfield, slip and no-slip wall treatment; no case artifacts survive to validate wall behavior. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+          "notes": "Gas/Solver implements farfield, slip and no-slip walls; original surface output exists, though force split has a distinct normal-traction limitation."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
           "score": 4,
-          "notes": "Solver.cpp:1169\u20131176,1369\u20131378 initializes first order then blends reconstruction after CFL ramp; no surviving run logs establish the exact production mode."
+          "notes": "Solver.cpp:1169\u20131176,1369\u20131378 blends reconstruction after startup; original outputs exist but exact historical executable binding is unproven."
         },
         {
           "id": "cfd.limiter",
@@ -153,92 +153,104 @@
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 3.5,
-          "notes": "Steady pseudo-time implicit path and plateau logic exist; missing histories prevent checking the claimed plateaus."
+          "score": 3,
+          "notes": "Steady implicit path stops on mean-based plateau. Original Re20 and M0.15 inviscid force histories show significant oscillations despite approximately stationary half-window means."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 3,
-          "notes": "Solver.cpp:1693\u20131716 tests total per-step strict target and counts degraded early stops as misses; no original Re200 metadata or force history survives to verify claims."
+          "score": 2,
+          "notes": "Source counts strict misses separately but 14 steps exit below required minimum; reaching final time is labeled statistically_periodic despite no supported coherent shedding in the submitted history."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 4,
-          "notes": "METIS partition, neighbor halos and reductions exist; rank-comparison outputs claimed in report are absent. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+          "notes": "METIS, neighbor halos and reductions exist. Historical np2 packages and PDF pp.41\u201342 compare NACA M0.15 and Re20 with np8; exact historical binary attribution remains qualified."
         }
       ],
-      "disqualification_flags": []
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "found": true,
+          "evidence": "Historical cf36ac0 Re200 metadata says statistically_periodic, while Solver.cpp:1741\u20131749 sets that status whenever final time is reached; t>150 Cl history is broadband (3.85% spectral power below 0.5, autocorrelation -0.0037 at reported 8.83-period), with no credible periodic shedding. Report discloses irregularity. Fourteen steps also stop below the required minimum five; 625 target misses are separately reported, not alleged fabricated. Historical binary binding remains unproven."
+        }
+      ]
     },
     "result_review": {
-      "overall_score": 0.15,
+      "overall_score": 2.33,
       "points": [
         {
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 0,
-          "notes": "Current contestant workspace has no case results directory or metadata; raw commit exclusion alone is not the reason for this assessment. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+          "score": 3,
+          "notes": "Eight historical case packages pass structural validator, with genuine output histories and fields. Re200 has 14 inner iterations below required minimum and no supported periodic shedding; restart lacks full transient state."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 0,
-          "notes": "Original terminal claims validation but current missing case metadata prevents independent verification of that output."
+          "score": 4,
+          "notes": "Read-only validator passes all eight original historical packages and report. Validator is structural and does not establish contour fidelity or numerical convergence."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
-          "score": 0,
-          "notes": "All eight original case packages are absent in the present workspace; terminal and report claims cannot establish completion. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+          "score": 2,
+          "notes": "Seven steady runs marked converged use disclosed plateau logic; some force oscillations/drift remain. Re200 reaches t=300 but the periodic-success status is unsupported by the history."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 0,
-          "notes": "Report supplies numeric claims, but no original histories, fields or metadata remain to test their physical credibility."
+          "score": 2,
+          "notes": "Many forces are bounded, but Re20 has strong unphysical oscillation, M0.15 inviscid Cd varies substantially and Re200 lift is broadband without a supported coherent shedding period."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 0,
-          "notes": "No contestant-rendered figures or sibling PDF currently survive, and committed report references absent images. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+          "score": 1,
+          "notes": "Historical 42-page PDF contains case histories and fields, but all 16 reproduced Mach/pressure figures misassign quad values and Re200 vorticity uses cell velocities indexed by node ID; its force plot hides the late interval."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 1,
-          "notes": "Tracked report TeX supplies methods and claimed case tables; missing images/PDF/data prevent validating its results or compiling the curated report."
+          "score": 2.5,
+          "notes": "Historical PDF provides methods, case numeric tables and honest discussion of broadband/plateau limitations; numerical figure mapping is invalid and the Re200 claimed periodic state is not supported."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 0,
-          "notes": "Case data, figure manifest and rendered figures are absent in current workspace; report claims cannot be traced to output files. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review."
+          "score": 2,
+          "notes": "Original figure manifest and VTUs/CSVs survived in historical commit, and source-generated figures reproduce byte-for-byte. This exposes data-to-image misassignment; the curated submission excludes figure assets and cannot build the report."
         }
       ],
-      "disqualification_flags": []
+      "disqualification_flags": [
+        {
+          "id": 8,
+          "found": true,
+          "evidence": "All 16 report Mach/pressure PNGs reproduce byte-for-byte from original case VTUs using make_figures.py:180\u2013193, whose grouped quad-triangle ordering conflicts with adjacent duplicated cell values. M2 inviscid Mach misassigns 20126/20128 quad triangles (mean absolute error 0.5394). Re200 report vorticity PNG SHA256 5e5f1ae907a51521a54381211043c74bf693df46e0ccbc104f006681a75e850c reproduces exactly; make_figures.py:135\u2013161 indexes cell-centered Velocity by node ID and also misassigns triangles. This establishes specific embedded figure/data misrepresentation, not fabricated underlying fields."
+        }
+      ]
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 65,
+    "total_scored": 70.5,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
         "score": 8,
-        "notes": "Immutable clean build passes with warnings; CLI loads current restart state but does not resume time or BDF history, and case outputs are absent."
+        "notes": "Immutable clean build passes with warnings. Eight recovered historical packages pass structural validation; restart loads current state without restoring time or previous BDF history."
       },
       {
         "id": "mesh",
@@ -252,14 +264,14 @@
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
         "score": 12,
-        "notes": "Source implements conservative Rusanov residual and boundary/viscous paths; no surviving case outputs support numerical validation."
+        "notes": "Source implements conservative Rusanov residual and boundary/viscous paths; recovered results show low residual reduction and case-dependent force oscillations."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
         "score": 8,
-        "notes": "Gradient and limiter source enables second order after startup blend; actual run mode and order cannot be checked without logs or cases."
+        "notes": "Source enables reconstruction after startup blend; historical results and report recoverable but exact production executable binding remains unproven."
       },
       {
         "id": "viscous",
@@ -273,82 +285,91 @@
         "title": "Implicit And Transient Methods",
         "max_points": 15,
         "score": 9,
-        "notes": "Implicit/BDF2 code counts strict misses separately, but no original outcome survives; restart restores current state only, without time/previous BDF level."
+        "notes": "Implicit/BDF2 paths count strict target misses separately; 14 Re200 steps stop below minimum five, and final-time success is labeled periodic without testing it. Restart restores only current state."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
         "score": 8,
-        "notes": "METIS and neighbor halos/reductions exist; root-only global mesh remains during solving, workers drop it. Reported rank results cannot be checked."
+        "notes": "METIS and neighbor halos/reductions exist; root-only global mesh remains during solving. Historical PDF pp.41\u201342 and mpi_np2 packages compare NACA M0.15 and Re20 against np8; report force differences are bounded but exact binary/control attribution remains qualified."
       },
       {
         "id": "cases",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 0,
-        "notes": "All eight case packages are absent in current workspace. Report numeric claims alone do not establish result completion."
+        "score": 4,
+        "notes": "Recovered eight historical structurally valid packages and rank comparisons. All steady cases have low residual reductions and some force oscillation/drift; Re20 Cd is high, Re200 lacks demonstrated periodic shedding and 14 steps fall below minimum inner iterations. Partial credit for plausible force behavior, finite fields and rank comparisons; not full convergence credit."
       },
       {
         "id": "report",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 1,
-        "notes": "Tracked TeX describes methods and claimed values, but no rendered figures, PDF or original output/manifests survive and curated report cannot compile."
+        "score": 2.5,
+        "notes": "Historical 42-page PDF includes methods, numeric tables, individual histories, surface curves, figures, limitations and a data manifest. Scalar contours and Re200 vorticity demonstrably mis-map data; Re200 late force plot is unreadable. Curated submission cannot reproduce PDF because figure assets were excluded."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
         "score": 3,
-        "notes": "Separated gas, mesh, solver and I/O interfaces support some extension even though numerical results are absent; code remains specialized 2-D ideal gas."
+        "notes": "Separated gas, mesh, solver and I/O interfaces support extension; code remains specialized 2-D ideal gas."
       }
     ]
   },
   "case_scores": {
     "naca0012_m015_inviscid": {
-      "score": 0,
-      "notes": "NACA0012 M0.15 inviscid: numeric CL=-0.0029, CD=0.0141 at e998060:solver/report/report.tex:450; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Raw result directory absent. 2026-10-30 recheck: no solver/results directory, case metadata, force/residual history, rendered figure or sibling PDF is currently present in this contestant workspace. Report TeX contains a numeric claim, but those claimed results cannot be independently checked; curated exclusion alone is not the reason for score 0. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains this case package and figure assets, discovered after the previous workspace-only review; score is provisional pending independent case assessment."
+      "score": 1.5,
+      "notes": "Historical contestant evidence cf36ac0e77b12262705387d74bc06566a192258b:solver/results/naca0012_m015_inviscid and solver/report/report.pdf, not the current workspace; original score 0 corrected to 1.5. report.tex:450 gives mean Cd 0.0141 and Cl -0.0029; original PDF pp.8\u201311 shows residual/force and near-body Mach. Last 2500 forces range Cd 0.00806\u20130.02127 and Cl -0.01270\u20130.00705, substantial oscillation despite near-stationary half-window means. Report contour was reproduced exactly from the VTU with make_figures.py:180\u2013193, which misassigns quad values to triangles; the cylinder cell ordering is additionally interleaved. Consequently the case lacks a reliable contestant-delivered field contour and is capped at 2; the diagnostic reproduction is not contestant post-processing."
     },
     "naca0012_m080_inviscid": {
-      "score": 0,
-      "notes": "NACA0012 M0.80 inviscid: numeric CL=-0.0075, CD=0.0090 at e998060:solver/report/report.tex:451; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Raw result directory absent. 2026-10-30 recheck: no solver/results directory, case metadata, force/residual history, rendered figure or sibling PDF is currently present in this contestant workspace. Report TeX contains a numeric claim, but those claimed results cannot be independently checked; curated exclusion alone is not the reason for score 0. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains this case package and figure assets, discovered after the previous workspace-only review; score is provisional pending independent case assessment."
+      "score": 2,
+      "notes": "Historical contestant evidence cf36ac0e77b12262705387d74bc06566a192258b:solver/results/naca0012_m080_inviscid and solver/report/report.pdf, not the current workspace; original score 0 corrected to 2. report.tex:451 gives mean Cd 0.0090 and Cl -0.0075; PDF pp.13\u201316 has histories and near-body fields. Last 2500 rows show Cd 0.00711\u20130.00976 and Cl -0.01255 to -0.00153; residual reduction 1.27 orders with a documented plateau. Report contour was reproduced exactly from the VTU with make_figures.py:180\u2013193, which misassigns quad values to triangles; the cylinder cell ordering is additionally interleaved. Consequently the case lacks a reliable contestant-delivered field contour and is capped at 2; the diagnostic reproduction is not contestant post-processing."
     },
     "naca0012_m200_inviscid": {
-      "score": 0,
-      "notes": "NACA0012 M2.00 inviscid: numeric CL=0.0001, CD=0.0925 at e998060:solver/report/report.tex:452; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Raw result directory absent. 2026-10-30 recheck: no solver/results directory, case metadata, force/residual history, rendered figure or sibling PDF is currently present in this contestant workspace. Report TeX contains a numeric claim, but those claimed results cannot be independently checked; curated exclusion alone is not the reason for score 0. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains this case package and figure assets, discovered after the previous workspace-only review; score is provisional pending independent case assessment."
+      "score": 2,
+      "notes": "Historical contestant evidence cf36ac0e77b12262705387d74bc06566a192258b:solver/results/naca0012_m200_inviscid and solver/report/report.pdf, not the current workspace; original score 0 corrected to 2. report.tex:452 gives mean Cd 0.0925 and Cl 0.0001; PDF pp.17\u201320 has histories and shock-region contours. Last 2500 rows Cd 0.09189\u20130.09273, Cl -0.000460\u20130.000269; residual reduction only 0.459 orders. Report contour was reproduced exactly from the VTU with make_figures.py:180\u2013193, which misassigns quad values to triangles; the cylinder cell ordering is additionally interleaved. Consequently the case lacks a reliable contestant-delivered field contour and is capped at 2; the diagnostic reproduction is not contestant post-processing."
     },
     "naca0012_m015_laminar_re5000": {
-      "score": 0,
-      "notes": "NACA0012 M0.15 laminar Re5000: numeric CL=0.0005, CD=0.2752 at e998060:solver/report/report.tex:453; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Raw result directory absent. 2026-10-30 recheck: no solver/results directory, case metadata, force/residual history, rendered figure or sibling PDF is currently present in this contestant workspace. Report TeX contains a numeric claim, but those claimed results cannot be independently checked; curated exclusion alone is not the reason for score 0. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains this case package and figure assets, discovered after the previous workspace-only review; score is provisional pending independent case assessment."
+      "score": 2,
+      "notes": "Historical contestant evidence cf36ac0e77b12262705387d74bc06566a192258b:solver/results/naca0012_m015_laminar_re5000 and solver/report/report.pdf, not the current workspace; original score 0 corrected to 2. report.tex:453 gives mean Cd 0.2752 and Cl 0.0005; PDF pp.21\u201324 contains histories, surface curves and near-body fields. Last 2500 rows Cd 0.26936\u20130.28033 and Cl -0.01288\u20130.00954; report.tex:941\u2013947 flags excessive wall drag. Report contour was reproduced exactly from the VTU with make_figures.py:180\u2013193, which misassigns quad values to triangles; the cylinder cell ordering is additionally interleaved. Consequently the case lacks a reliable contestant-delivered field contour and is capped at 2; the diagnostic reproduction is not contestant post-processing."
     },
     "naca0012_m080_laminar_re5000": {
-      "score": 0,
-      "notes": "NACA0012 M0.80 laminar Re5000: numeric CL=-0.0086, CD=0.0993 at e998060:solver/report/report.tex:454; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Raw result directory absent. 2026-10-30 recheck: no solver/results directory, case metadata, force/residual history, rendered figure or sibling PDF is currently present in this contestant workspace. Report TeX contains a numeric claim, but those claimed results cannot be independently checked; curated exclusion alone is not the reason for score 0. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains this case package and figure assets, discovered after the previous workspace-only review; score is provisional pending independent case assessment."
+      "score": 2,
+      "notes": "Historical contestant evidence cf36ac0e77b12262705387d74bc06566a192258b:solver/results/naca0012_m080_laminar_re5000 and solver/report/report.pdf, not the current workspace; original score 0 corrected to 2. report.tex:454 gives mean Cd 0.0993 and Cl -0.0086; PDF pp.25\u201328 contains histories and near-body fields. Last 2500 rows Cd 0.09565\u20130.09934 and Cl -0.00886 to -0.00533; last 1000 Cd rises 0.09804 to 0.09934. Report contour was reproduced exactly from the VTU with make_figures.py:180\u2013193, which misassigns quad values to triangles; the cylinder cell ordering is additionally interleaved. Consequently the case lacks a reliable contestant-delivered field contour and is capped at 2; the diagnostic reproduction is not contestant post-processing."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 0,
-      "notes": "NACA0012 M2.00 laminar Re5000: numeric CL=-0.0000, CD=0.1446 at e998060:solver/report/report.tex:455; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Raw result directory absent. 2026-10-30 recheck: no solver/results directory, case metadata, force/residual history, rendered figure or sibling PDF is currently present in this contestant workspace. Report TeX contains a numeric claim, but those claimed results cannot be independently checked; curated exclusion alone is not the reason for score 0. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains this case package and figure assets, discovered after the previous workspace-only review; score is provisional pending independent case assessment."
+      "score": 2,
+      "notes": "Historical contestant evidence cf36ac0e77b12262705387d74bc06566a192258b:solver/results/naca0012_m200_laminar_re5000 and solver/report/report.pdf, not the current workspace; original score 0 corrected to 2. report.tex:455 gives mean Cd 0.1446 and Cl near zero; PDF pp.29\u201332 contains histories and shock-region fields. Last 2500 rows Cd 0.14447\u20130.15122 and Cl -0.000171 to -0.000034; last 1000 Cd decreases 0.14635 to 0.14447. Report contour was reproduced exactly from the VTU with make_figures.py:180\u2013193, which misassigns quad values to triangles; the cylinder cell ordering is additionally interleaved. Consequently the case lacks a reliable contestant-delivered field contour and is capped at 2; the diagnostic reproduction is not contestant post-processing."
     },
     "cylinder_m010_laminar_re20": {
-      "score": 0,
-      "notes": "Cylinder M0.10 laminar Re20: numeric CL=0.0220, CD=2.7433 at e998060:solver/report/report.tex:456; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score 0 retained after the post-processing audit. Prior case judgment: Raw result directory absent. 2026-10-30 recheck: no solver/results directory, case metadata, force/residual history, rendered figure or sibling PDF is currently present in this contestant workspace. Report TeX contains a numeric claim, but those claimed results cannot be independently checked; curated exclusion alone is not the reason for score 0. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains this case package and figure assets, discovered after the previous workspace-only review; score is provisional pending independent case assessment."
+      "score": 2,
+      "notes": "Historical contestant evidence cf36ac0e77b12262705387d74bc06566a192258b:solver/results/cylinder_m010_laminar_re20 and solver/report/report.pdf, not the current workspace; original score 0 corrected to 2. report.tex:456 gives mean Cd 2.7433 and Cl 0.0220; PDF pp.33\u201336 contains histories and wake fields. Last 2500 Cd 2.54158\u20132.77949 and Cl -0.02109\u20130.05979; substantial nonphysical oscillations and only 0.388 residual orders weaken the steady result. Report contour was reproduced exactly from the VTU with make_figures.py:180\u2013193, which misassigns quad values to triangles; the cylinder cell ordering is additionally interleaved. Consequently the case lacks a reliable contestant-delivered field contour and is capped at 2; the diagnostic reproduction is not contestant post-processing."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 0,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.0032, CD=1.6605 at e998060:solver/report/report.tex:457; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour; shedding statistic frequency=0.113, lift_amplitude=0.1706 at e998060:solver/report/report.tex:807; no committed/referenced late-time periodic-force plot. Score 0 retained after the post-processing audit. Prior case judgment: Raw result directory absent; never rerun. 2026-10-30 recheck: no solver/results directory, case metadata, force/residual history, rendered figure or sibling PDF is currently present in this contestant workspace. Report TeX contains a numeric claim, but those claimed results cannot be independently checked; curated exclusion alone is not the reason for score 0. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains this case package and figure assets, discovered after the previous workspace-only review; score is provisional pending independent case assessment."
+      "score": 1.5,
+      "notes": "Historical contestant evidence cf36ac0e77b12262705387d74bc06566a192258b:solver/results/cylinder_m010_laminar_re200 and solver/report/report.pdf, not the current workspace; original score 0 corrected to 1.5. report.tex:801\u2013809 gives Cd\u22481.6613, lift amplitude\u22480.1706 and band-selected St\u22480.113. Original PDF pp.37\u201340 has residual and wake images, but its only force plot is compressed by startup and does not resolve late lift/drag; vorticity is invalid. Original t>150 Cl history has 3.85% of nonzero spectral power below 0.5 and autocorrelation -0.0037 at lag 8.83, so a coherent statistically periodic street is not established; metadata calls it periodic solely on reaching t=300. Fourteen steps violate minimum five inner iterations; 625 strict misses are separately recorded. Report contour was reproduced exactly from the VTU with make_figures.py:180\u2013193, which misassigns quad values to triangles; the cylinder cell ordering is additionally interleaved. Consequently the case lacks a reliable contestant-delivered field contour and is capped at 2; the diagnostic reproduction is not contestant post-processing."
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "found": true,
+        "evidence": "Historical cf36ac0 Re200 metadata says statistically_periodic, while Solver.cpp:1741\u20131749 sets that status whenever final time is reached; t>150 Cl history is broadband (3.85% spectral power below 0.5, autocorrelation -0.0037 at reported 8.83-period), with no credible periodic shedding. Report discloses irregularity. Fourteen steps also stop below the required minimum five; 625 target misses are separately reported, not alleged fabricated. Historical binary binding remains unproven."
+      },
+      {
+        "id": 8,
+        "found": true,
+        "evidence": "All 16 report Mach/pressure PNGs reproduce byte-for-byte from original case VTUs using make_figures.py:180\u2013193, whose grouped quad-triangle ordering conflicts with adjacent duplicated cell values. M2 inviscid Mach misassigns 20126/20128 quad triangles (mean absolute error 0.5394). Re200 report vorticity PNG SHA256 5e5f1ae907a51521a54381211043c74bf693df46e0ccbc104f006681a75e850c reproduces exactly; make_figures.py:135\u2013161 indexes cell-centered Velocity by node ID and also misassigns triangles. This establishes specific embedded figure/data misrepresentation, not fabricated underlying fields."
+      }
+    ]
   },
   "limitations": [
-    "Curated rewrite excluded all raw result/report artifacts; structural validator cannot verify cases or report.",
-    "Recovery commit 8c757a9 is not the evaluated immutable submission.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
-    "2026-10-30 live-workspace recheck found no case packages or rendered report/figures; source/report numerical claims remain unverified. No solver rerun.",
-    "2026-10-30 source assessment: immutable clean build passes with warnings in restricted network-disabled cfd-bench. No solver/unsteady rerun; absent original case/figure/PDF evidence prevents verification of claimed statistics and plots.",
-    "Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains all eight result packages, figures and 42-page report PDF SHA-256 92727fed474ad205eed506735ff76ca01d7c7f8cb4bd528724cf8297f3ffa5c2. Source/CMake/TeX match curated e998060, though curated branch has separate ancestry. Eight cases plus report pass read-only validator. This historical contestant-delivered blob is not relabeled workspace_existing; PDF snapshot remains absent under vendor policy until an appropriate permitted source is identified."
+    "Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b contains original eight result packages, PDF and figures. Source/CMake/TeX match curated e998060 but the result branch has separate ancestry; exact historic executable binding remains unproven.",
+    "Original 42-page PDF SHA256 92727fed474ad205eed506735ff76ca01d7c7f8cb4bd528724cf8297f3ffa5c2 is historical contestant-delivered evidence; it is not falsely labeled workspace_existing. Curated submission excludes report figure assets and cannot rebuild that PDF.",
+    "All eight historical packages and report pass read-only structural validation; this does not certify numerical accuracy or contour fidelity. Original figure reproduction was diagnostic only, not a contestant post-processing deliverable.",
+    "Remaining full-catalog calibration and this run\u2019s remaining DQ/source checks are partial. No CFD or Re200 rerun occurred."
   ]
 }

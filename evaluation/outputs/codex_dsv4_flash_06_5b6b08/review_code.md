@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T17:48:26.661276+00:00
+Generated: 2026-10-30T17:58:00.454145+00:00
 
-**Overall score: 3.62**
+**Overall score: 3.68**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -15,7 +15,7 @@ Generated: 2026-10-30T17:48:26.661276+00:00
 | 2 | **code.cli** CLI and error handling | 0.10 | 3 | main.cpp:106–121 reads current restart state, step and time but only passes the state into solver; transient history and resume time are not restored. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Source separates mesh, partition, finite-volume solver, gas model, I/O and utilities; numerical result evidence is unavailable. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Source separates mesh, partition, finite-volume solver, gas model, I/O and utilities; recovered original case outputs inform separate result assessment. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
 | 4 | **code.originality** Originality and license compliance | 0.15 | 4 | Inspected finite-volume, gas, mesh, partition and halo code; no affirmative copied-core or wrapper evidence, without exhaustive external-authorship search. |
@@ -27,10 +27,10 @@ Generated: 2026-10-30T17:48:26.661276+00:00
 | 6 | **code.mpi** MPI correctness | 0.15 | 4 | main.cpp:93–104 broadcasts preprocessing mesh and drops it on nonroot before solve; METIS, neighbor state exchange and global reductions exist. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 3 | Output.cpp:453 writes completed=true independent of status; no original case metadata survives to establish a submitted false success. Restart does not restore history/time. Historical contestant commit cf36ac0e77b12262705387d74bc06566a192258b was subsequently found to contain eight packages and original figures; the prior absence statement described the live workspace and is superseded for deliverable evidence. Individual scores remain under review. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2.5 | Solver.cpp:1741–1749 labels reaching transient final time statistically_periodic without testing shedding; 14 Re200 steps violate minimum inner count. Restart loses time/history. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 2 | Clean build passes; no delivered case packages or figures exist in current workspace to independently validate claimed results or rank checks. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Clean build passed; recovered original eight packages pass read-only validator, and PDF pp.41–42 and mpi_np2 supply comparisons. Structural passes do not establish physics or exact binary binding. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
 | 9 | **code.hygiene** Code hygiene | 0.07 | 4 | Modular source and extensive comments exist, with compiler/runtime-search-path warnings and environment-dependent tuning. |
@@ -50,7 +50,7 @@ Generated: 2026-10-30T17:48:26.661276+00:00
 
 ## Summary
 
-- Overall score (0-5): 3.62
+- Overall score (0-5): 3.68
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
