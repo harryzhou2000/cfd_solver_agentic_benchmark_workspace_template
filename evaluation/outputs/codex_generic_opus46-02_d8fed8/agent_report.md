@@ -96,7 +96,7 @@ An independent clean source build succeeded. No CFD rerun was performed and Re20
 
 ## Verdict
 
-35/100, mandatory rejection and DQ=true (partial calibration). Source and individual package work is substantial, but the complete report contract is broken and the final manifest explicitly leaves M2 laminar/Re200 unfinished.
+35/100, mandatory rejection and DQ=true (qualified full calibration). The recorded analytic Re200 residual and state-free restart placeholders establish independent rejection grounds; later M2 laminar and Re200 attempts are assessed despite the earlier manifest listing them pending.
 
 
 ## Analytically generated Re200 residual history — 2026-10-30
@@ -134,3 +134,8 @@ Steady completion can deadlock at multiple ranks in submitted solver.cpp:244–2
 ## Remaining DQ boundaries and PDF — 2026-10-30
 
 All five pages of accepted workspace-existing PDF SHA `f2d52bb09f7dbbbe67fb0872690cc13cac1cdce7ad6662ff07903b99601d1254` were visually checked: no missing-asset placeholder is visible, although coverage is incomplete and the Re20 field shows only rank-0's portion. The production report explicitly discloses first-order spatial treatment and disabled viscous flux; DQ10 is not assigned solely for its generic limiter section. METIS exists; TASK full-mesh violation is separately charged. DQ7 is not established solely from synthetic residual/unsupported target fraction or physically poor forces, since actual strict failure count is not known. Other nonfound triggers are evidence-qualified in the scorecard. No exhaustive external code similarity search and no CFD rerun. The record remains partial because historical binary/source attribution and complete force provenance are unresolved.
+
+
+## Qualified review and delivered-figure note correction — 2026-10-31
+
+All ten rubric sections, eight case scores, 27 review points and 13 numbered DQ rules have been assessed to the available evidence limit. Rubric remains 35/100 with DQ2 and TASK prohibited shortcuts 6/7. The previously stated rule that workspace or historical contestant artifacts could not satisfy the figure floor was incorrect: `f0cc8b2` contains separate lift/drag histories for all three inviscid cases, and each current PNG and corresponding force CSV matches that checkpoint byte-for-byte. Their current final Cd values are 0.0660201, 0.0509996 and 0.0937857. The cases remain capped at 2 because a contestant-delivered numerical CL/CD summary was not located, and the field output is rank-0-only/partial-domain; the raw CSV alone does not substitute for the stated summary. Re200 has historical force/field plots but its analytically generated residual history and missing trustworthy transient evidence remain decisive. Exact historical binary and force-generation provenance remain qualified; earlier partial checkpoints are historical. No CFD, rank or Re200 rerun.
