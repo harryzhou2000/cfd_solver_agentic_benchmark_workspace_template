@@ -36,3 +36,7 @@ No direct evidence supports any of the 13 DQ triggers. In particular, the Re200 
 No evaluator rerun was performed. Raw results, generated PDF/logs, CSV manifests, and excluded figures were not copied into this manager snapshot. The final identity is `codex_glm52-m3_06_a2dc07`.
 
 Verdict: **72/100, no disqualification**. The solver has meaningful source/MPI work and seven structurally readable steady cases, but cannot receive Re200 case credit and has material physical-credibility limitations.
+
+## Ongoing calibration
+
+Case-floor and physical review are partial. In particular report.tex:132 supplies M2 inviscid Cd=0.0288 and near-zero Cl, contrary to the earlier missing-summary note, and contestant checkpoint 14db231d contains standalone case figures excluded by curation. Their visual adequacy and provenance must be checked before changing case scores. Manifest links the surviving workspace histories to reported final values; exact executable remains unbound.
