@@ -69,7 +69,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `claude_generic_opus-04_616ae8` | fully reviewed — 92.5/100, DQ=false; both gates pass |
 | `claude_generic_opus-05_21cf4d` | fully reviewed — 74.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-06_40b02c` | fully reviewed — 93/100, DQ=false; both gates pass |
-| `claude_generic_opus-07_c08c67` | unreviewed |
+| `claude_generic_opus-07_c08c67` | partial — DQ 7/full-mesh and Re200 corrected; remaining scoring pending |
 | `claude_generic_opus-08_853afe` | fully reviewed — 50.5/100, DQ=true; both gates pass |
 | `claude_generic_opus-09_9cb2fc` | unreviewed |
 | `claude_generic_opus-10_f6b586` | unreviewed |
@@ -268,3 +268,8 @@ Opus-03 source/build checkpoint: immutable solver.cpp:1038–1053 activates seco
 ## Opus-03 full calibration — 2026-10-30
 
 Rubric 73→58.5/100, DQ true under trigger 7 and TASK prohibited full-mesh replication; DQ10 not separately affirmed because the report gives the delayed activation rule and case step counts, despite metadata incorrectly claiming order 2. All 27 review points, ten rubric sections and trigger assessments are recorded with evidence. Case scores in task order 4,4,4,4,4,4,4,1 → 2,3,3,1,2,1,1,1; case-specific force tails and report plots recorded above. Solver.cpp:687–701 omits density-gradient terms when converting momentum gradients to velocity, and :1532 uses cumulative viscous force in each moment contribution. Actual strict Re200 miss count remains unknown; canonical and final-path force histories are identical. Immutable source clean build passes in restricted scratch; original case/report validator passes, both record gates pass, no CFD rerun, exhaustive authorship or pixel-level audit.
+
+
+## Opus-07 partial DQ and Re200 review — 2026-10-30
+
+DQ false→true under 7 and TASK full-mesh prohibition. Immutable eaae575 solver.cpp:181,201–245 caps inner iterations at 5 without measuring target; output.cpp:255–267 writes misses=0, fraction=1, ratio=0 and completed/periodic unconditionally. `tools/write_metadata.py:38–90` similarly hardcodes these values and estimates wall time from step count. Strict miss count is unknown. Canonical Re200 forces.csv and stdout.log extend to t=300; last t≥180 window Cd=2.374685648–2.374691592, Cl=0.428219991–0.4282388282, 1,201 rows, without credible shedding. Report.tex:447–455,623–626 refers to t=64.9 incomplete; terminal response and later workspace data refer to t=300. Raw files were absent from immutable ancestry; mismatch alone is not proof of synthetic history. Re200 score 2→1. Immutable main.cpp:76–104 broadcasts/rebuilds global mesh on all ranks and :191–199 runs with `gmesh` in scope, violating TASK.md:227; METIS/local U exist and numbered DQ9 is not asserted. Other cases/rubric/areas remain partial; both gates pass, no CFD rerun.

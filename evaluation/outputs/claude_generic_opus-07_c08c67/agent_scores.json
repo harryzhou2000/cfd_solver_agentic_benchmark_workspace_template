@@ -323,12 +323,12 @@
       "notes": "Cylinder M0.10 laminar Re20: no committed case-specific numeric CL/CD summary; no committed/referenced residual-history plot; no committed/referenced force-history plot; no committed/referenced case-appropriate computed-field contour. Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-passing readable original contestant package; no unsteady rerun."
     },
     "cylinder_m010_laminar_re200": {
-      "score": 2,
-      "notes": "Cylinder M0.10 laminar Re200: numeric CL=0.427 at t=64.9, CD=2.375 at t=64.9 at eaae575:solver/report/report.tex:644; residual history eaae575:solver/report/figures/cylinder_m010_laminar_re200_residual.png (referenced at solver/report/report.tex:879); force history eaae575:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:895); no committed/referenced case-appropriate computed-field contour; no committed St/frequency/period statistic; late-time periodic-force evidence eaae575:solver/report/figures/cylinder_m010_laminar_re200_forces.png (referenced at solver/report/report.tex:895). Score capped at 2 from 5 because the immutable contestant report is missing one or more required post-processing classes; raw result/workspace artifacts or evaluator redraws do not satisfy this report-deliverable floor. Earlier case note, now limited by this floor: Validator-passing readable original contestant package; no unsteady rerun."
+      "score": 1,
+      "notes": "Re200 score 2\u21921: original canonical forces.csv and stdout.log extend to t=300, while committed report.tex:447\u2013455,623\u2013626 refers to t=64.9 as incomplete. The original t\u2265180 force window contains 1,201 rows with Cd 2.374685648\u20132.374691592 and Cl 0.428219991\u20130.4282388282, essentially steady and not credible vortex shedding; report has no St or readable late periodic lift/drag. Solver caps inner updates at 5 without monitoring target and metadata hardcodes successful inner statistics; actual strict miss count is unknown. No inference that force history is synthetic and no Re200 rerun."
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
       {
         "id": 1,
@@ -357,8 +357,8 @@
       },
       {
         "id": 7,
-        "found": false,
-        "evidence": "All eight packages structurally validate."
+        "found": true,
+        "evidence": "Immutable eaae575 solver.cpp:181,201\u2013245 caps every transient inner solve at five updates without monitoring a residual target; output.cpp:255\u2013267 writes misses=0, converged_fraction=1, ratio=0, completed=true/statistically_periodic unconditionally. tools/write_metadata.py:38\u201390 also hardcodes these values and derives final step from CSV. Original canonical force history and stdout extend through t=300, but t\u2265180 has Cd 2.374685648\u20132.374691592 and Cl 0.428219991\u20130.4282388282, not a periodic shedding signal. Actual strict target miss count is unknown. Report.tex:447\u2013455,623\u2013626 describes a t=64.9 incomplete snapshot, while terminal response and later workspace history reach t=300; mismatch alone does not establish fabricated histories."
       },
       {
         "id": 9,
@@ -369,6 +369,11 @@
         "id": 10,
         "found": false,
         "evidence": "Production reconstruction path is present."
+      },
+      {
+        "flag": "Prohibited shortcut 7: full mesh retained on every MPI rank during iterations",
+        "found": true,
+        "evidence": "Immutable main.cpp:76\u2013104 broadcasts complete global mesh nodes and connectivity, rebuilds faces/geometry on each rank; :191 builds local mesh and :199 calls solve while gmesh remains in scope. TASK.md:227 forbids full mesh or full state on all ranks during solver iterations; examiner README:83\u201385 includes TASK shortcuts in DQ assessment. METIS and local solution states exist, so this is not asserted as numbered trigger 9."
       }
     ]
   },
