@@ -45,7 +45,9 @@ Disqualified: **yes**.
 - Trigger 7 — incomplete Re200 steady run is reported successful/statistically periodic in metadata; M0.15 inviscid is marked converged despite only 2.07/4 target orders and a late Cd change from 0.0752083 to 0.0603575 over 1000 steps.
 - Trigger 9 — not established under its specific geometric-split/full-state-replication wording. Metadata claims METIS, but immutable `main.cpp:90–100` reads and solves only on rank zero; the other ranks do not hold replicated state. MPI receives no implementation credit.
 
-All other triggers were checked and are not established by the submitted evidence. In particular, no external executable invocation, hard-coded two-mesh-only branch, figure filename swap, or direct copy evidence was found; external-copy investigation is outside the trust-policy scope.
+- TASK prohibited shortcut 6 — each submitted final VTK field has placeholder connectivity: every NACA cell (20,816) or cylinder cell (6,901) repeats `3 0 1 2`. Immutable `solver/src/solver/fvm_solver.cpp:568–570` explicitly writes that placeholder; examiner README:20 requires rejection. This does not establish that the numerical cell states or steady force histories are synthetic.
+
+Other numbered triggers remain under review. In particular, no external executable invocation, hard-coded two-mesh-only branch, figure filename swap, or direct copy evidence was found; external-copy investigation is outside the trust-policy scope.
 
 ## Limitations
 
