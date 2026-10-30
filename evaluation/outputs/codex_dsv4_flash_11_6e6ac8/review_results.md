@@ -2,17 +2,17 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:26:36.115115+00:00
+Generated: 2026-10-30T04:27:57.107122+00:00
 
-**Overall score: 1.2**
+**Overall score: 1.3**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
 |---|-------|--------|--------------|------------------|
-| 1 | **res.contract** Output contract compliance | 0.20 | 2 | Directories exist but validator sees failed status. |
+| 1 | **res.contract** Output contract compliance | 0.20 | 2 | Seven steady directories passed prior structural validator, but M0.15 false stable plateau and weak/incorrect physics limit credibility; Re200 metadata is missing. |
 |   | Every scored case output dir contains metadata.json, partition_diagnostics.csv/.json, residuals.csv, forces.csv, surface.csv, field_final.*, restart_final.*, stdout.log, run_status.json with required headers/schema; completed=true; run_status matches reality. | | | |
 |   | *Evidence:* Directory listing per case; header check; validate_outputs.py --report. | | | |
-| 2 | **res.validator** Automated validator results | 0.10 | 1 | Explicit validator fails immediately. |
+| 2 | **res.validator** Automated validator results | 0.10 | 2 | Prior examiner validation passes seven steady outputs and fails Re200 because metadata absent; earlier note incorrectly said validator failed immediately. Structural validation does not establish physical convergence. |
 |   | validate_outputs.py passes for the submission; validator run included in the workspace or report; any failures explained or fixed. | | | |
 |   | *Evidence:* Validator output/log in workspace. | | | |
 | 3 | **res.completion** Case completion and convergence | 0.20 | 1 | Seven steady outputs claim plateau, but M0.15 inviscid drifts 8.4% over last 100 Cd values; Re200 metadata/force history absent and terminal reports failure. |
@@ -41,7 +41,7 @@ Generated: 2026-10-30T04:26:36.115115+00:00
 
 ## Summary
 
-- Overall score (0-5): 1.2
+- Overall score (0-5): 1.3
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:

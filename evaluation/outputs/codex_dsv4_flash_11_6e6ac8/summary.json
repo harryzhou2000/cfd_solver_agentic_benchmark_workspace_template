@@ -292,28 +292,28 @@
         "title": "CLI and error handling",
         "weight": 0.1,
         "score": 3,
-        "notes": "CLI source present; not rerun."
+        "notes": "main.cpp parses case/output/restart and max-step overrides; transient restart remains first order for all resumed steps, solver.cpp:1271."
       },
       {
         "id": "code.organization",
         "title": "Code organization and extensibility",
         "weight": 0.12,
-        "score": 4,
-        "notes": "Modules separate mesh, flux, gradient, partition and solver."
+        "score": 3,
+        "notes": "Separate config, mesh, partition, physics, solver, Krylov and output modules; solver.cpp combines substantial coupled numerical and reporting logic."
       },
       {
         "id": "code.originality",
         "title": "Originality and license compliance",
         "weight": 0.15,
         "score": 3,
-        "notes": "No internal wrapper evidence; no external search by trust policy."
+        "notes": "No source-evident internal executable wrapper; no external similarity search under trust policy."
       },
       {
         "id": "code.hardcoding",
         "title": "No hard-coded case logic",
         "weight": 0.08,
         "score": 3,
-        "notes": "Generic case reader, but only limited evidence."
+        "notes": "config.cpp:45\u201370 loads arbitrary configured case and physics mode, mesh.cpp reads configured CGNS. No two-filename dispatch found."
       },
       {
         "id": "code.mpi",
@@ -327,21 +327,21 @@
         "title": "Robustness and memory sanity",
         "weight": 0.08,
         "score": 2,
-        "notes": "Reported high-CFL instability and failed cases."
+        "notes": "Early plateau falsely accepts 8.4% changing drag, rank-only collective and restart-order bugs exist, and Re200 is unfinished. Positivity and line search paths exist."
       },
       {
         "id": "code.testing",
         "title": "Testing and validation evidence",
         "weight": 0.1,
-        "score": 3,
-        "notes": "Two committed probe programs."
+        "score": 1,
+        "notes": "No committed solver/tests or solver/tools in immutable submission; untracked workspace plotting scripts and prior validator output are separate evidence. Previous note claiming two committed probes was false."
       },
       {
         "id": "code.hygiene",
         "title": "Code hygiene",
         "weight": 0.07,
-        "score": 3,
-        "notes": "Curated code is clean; result artifacts excluded."
+        "score": 2,
+        "notes": "Curated solver builds but contains rank-only collective and force-accumulation defects; report/plot scripts and result data are excluded."
       }
     ],
     "disqualification_flags": [
@@ -386,7 +386,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.89
+    "overall_score": 2.5
   },
   "cfd_review": {
     "review_area": "cfd_review",
@@ -396,50 +396,50 @@
         "id": "cfd.equations",
         "title": "Governing equations and nondimensionalization",
         "weight": 0.06,
-        "score": 4,
-        "notes": "Report/source describe compressible equations."
+        "score": 3,
+        "notes": "physics.cpp and solver.cpp:249\u2013368 implement conservative compressible flux and viscous contributions; claimed successful case physics conflicts with output."
       },
       {
         "id": "cfd.mesh",
         "title": "Mesh import and unstructured geometry",
         "weight": 0.1,
-        "score": 4,
-        "notes": "CGNS and unstructured mesh paths present."
+        "score": 3,
+        "notes": "mesh.cpp CGNS ingestion and partition.cpp local geometry are present; full mesh persists on all ranks. Figures do not resolve near-body geometry."
       },
       {
         "id": "cfd.residual",
         "title": "Conservative finite-volume residual",
         "weight": 0.12,
         "score": 3,
-        "notes": "Assembly source present but failed submitted convergence."
+        "notes": "solver.cpp:249\u2013368 assembles interior and boundary fluxes and :683\u2013705 full transient residual; seven submitted runs have limited residual reductions and Re200 failed."
       },
       {
         "id": "cfd.flux",
         "title": "Approximate Riemann flux and entropy fix",
         "weight": 0.08,
-        "score": 4,
-        "notes": "Roe flux source/report evidence."
+        "score": 3,
+        "notes": "physics.cpp:45\u201370 implements Mach-scaled Rusanov, called by solver.cpp:270/332\u2013336; report also claims Rusanov. Previous Roe note was incorrect."
       },
       {
         "id": "cfd.bc",
         "title": "Boundary conditions",
         "weight": 0.08,
         "score": 3,
-        "notes": "Boundary paths implemented; not independently run."
+        "notes": "physics.cpp:15\u201335 and solver.cpp:332\u2013368 implement farfield/slip/no-slip paths; output.cpp:388 onward writes no-slip wall velocity and surface Cf. Resulting Re20 wake is not shown."
       },
       {
         "id": "cfd.reconstruction",
         "title": "Second-order reconstruction",
         "weight": 0.09,
         "score": 3,
-        "notes": "Gradient reconstruction source present."
+        "notes": "solver.cpp:120\u2013168 reconstructs primitive faces with LSQ; :222\u2013223 optional environment bypass/override. No production activation established or order-convergence evidence."
       },
       {
         "id": "cfd.limiter",
         "title": "Limiter and positivity control",
         "weight": 0.08,
         "score": 3,
-        "notes": "Limiter source present."
+        "notes": "solver.cpp:170\u2013223 builds bounded limiter with positivity fallback and optional CFD_FIRST_ORDER/PSI overrides; production use of bypass not established."
       },
       {
         "id": "cfd.viscous",
@@ -453,7 +453,7 @@
         "title": "Implicit steady march",
         "weight": 0.1,
         "score": 3,
-        "notes": "LU-SGS claimed and source present."
+        "notes": "solver.cpp:742\u2013794 implements matrix-free Newton/GMRES with LU-SGS preconditioning; seven cases stop with weak reductions and Re200 reports stalled solve."
       },
       {
         "id": "cfd.transient",
@@ -502,7 +502,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 2.76
+    "overall_score": 2.52
   },
   "result_review": {
     "review_area": "result_review",
@@ -513,14 +513,14 @@
         "title": "Output contract compliance",
         "weight": 0.2,
         "score": 2,
-        "notes": "Directories exist but validator sees failed status."
+        "notes": "Seven steady directories passed prior structural validator, but M0.15 false stable plateau and weak/incorrect physics limit credibility; Re200 metadata is missing."
       },
       {
         "id": "res.validator",
         "title": "Automated validator results",
         "weight": 0.1,
-        "score": 1,
-        "notes": "Explicit validator fails immediately."
+        "score": 2,
+        "notes": "Prior examiner validation passes seven steady outputs and fails Re200 because metadata absent; earlier note incorrectly said validator failed immediately. Structural validation does not establish physical convergence."
       },
       {
         "id": "res.completion",
@@ -585,7 +585,7 @@
         "notes": ""
       }
     ],
-    "overall_score": 1.2
+    "overall_score": 1.3
   },
   "measurements": {
     "workspace": "/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template/workspace/codex/dsv4_flash/11",

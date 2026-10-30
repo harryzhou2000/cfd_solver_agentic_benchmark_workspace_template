@@ -84,7 +84,7 @@ The earlier `claude_generic_opus-04_616ae8` record gave 99/100 and case scores 2
 | `codex_dsv4_flash_08_efba3c` | fully reviewed; 76→71, DQ7 and case evidence corrected |
 | `codex_dsv4_flash_09_526316` | fully reviewed: 55→48, DQ false; both gates pass |
 | `codex_dsv4_flash_10_6468ba` | fully reviewed: 86→71, DQ6 and TASK full mesh; both gates pass |
-| `codex_dsv4_flash_11_6e6ac8` | partial: DQ7, TASK full mesh, M0.15 inviscid checked; other cases/rubric pending |
+| `codex_dsv4_flash_11_6e6ac8` | fully reviewed: 70→53, DQ7 and TASK full mesh; both gates pass |
 | `codex_dsv4_flash_12_7e965b` | unreviewed |
 | `codex_dsv4_flash_14_80096b` | unreviewed |
 | `codex_generic_02_ed5ee6` | unreviewed |
@@ -491,3 +491,8 @@ dsv4_flash_11 partial other-case/report review: scores 2,2,2,2,2,2,2,0 → 1,2,2
 
 
 dsv4_flash_11 partial source/build/rubric: provisional 70→56 (viscous 8→5, transient 11→8, MPI 7→3, results 4→2, report 3→1). Immutable clean CMake build passed with warnings in network-disabled cfd-bench, two CPUs/3 GiB and /opt/external; no CFD rerun. solver.cpp:1187–1201 calls MPI_Allreduce only in rank-0 branch, risking mismatched collectives/deadlock; :1271 keeps resumed transient in BDF1 for every step; :1430 labels any completed transient periodic without checking shedding (submitted Re200 incomplete). :875–881 integrates full traction and adds unscaled Fv_local[1] to y contribution. All 999 Re20 force rows have viscous components zero despite surface Cf range -3.24 to +3.24; metadata git_revision=null, so exact source-to-output linkage is unproven. Remaining criteria/DQ partial; both gates pass.
+
+
+## dsv4_flash_11 full calibration — 2026-10-30
+
+Rubric 70→53, DQ7 and TASK full mesh; case scores 2,2,2,2,2,2,2,0 → 1,2,2,1,2,1,1,0. Ten sections and 27 review points include criterion-specific evidence. M0.15 inviscid converged plateau is undermined by 8.4% Cd drift in last 100 rows; full GlobalMesh broadcast/persisted all ranks, and rank-0-only MPI_Allreduce risks collective mismatch. Seven structural validator passes and Re200 fails for missing metadata (correcting old validator note). Source and report use Rusanov, not old review claim of Roe; no committed probes (old note wrong). BDF2 residual present for fresh runs but all resumed steps use BDF1; completed status would label periodic without testing it, though no completed Re200 metadata exists. Force accumulator uses full traction and unscaled Fv_local[1] in y; old raw zero viscous columns versus nonzero surface Cf are not attributed to current source because git_revision=null. Report/PDF provenance, blank near-body/wake detail, force-table misassignments, contradictory Re200 prose and case physics documented above. Clean immutable build succeeds with warnings; both gates pass, no CFD rerun, external similarity search, general MPI comparison or exhaustive pixel audit.

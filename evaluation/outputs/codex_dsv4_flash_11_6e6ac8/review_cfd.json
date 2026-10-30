@@ -6,50 +6,50 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 4,
-      "notes": "Report/source describe compressible equations."
+      "score": 3,
+      "notes": "physics.cpp and solver.cpp:249\u2013368 implement conservative compressible flux and viscous contributions; claimed successful case physics conflicts with output."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 4,
-      "notes": "CGNS and unstructured mesh paths present."
+      "score": 3,
+      "notes": "mesh.cpp CGNS ingestion and partition.cpp local geometry are present; full mesh persists on all ranks. Figures do not resolve near-body geometry."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
       "score": 3,
-      "notes": "Assembly source present but failed submitted convergence."
+      "notes": "solver.cpp:249\u2013368 assembles interior and boundary fluxes and :683\u2013705 full transient residual; seven submitted runs have limited residual reductions and Re200 failed."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Roe flux source/report evidence."
+      "score": 3,
+      "notes": "physics.cpp:45\u201370 implements Mach-scaled Rusanov, called by solver.cpp:270/332\u2013336; report also claims Rusanov. Previous Roe note was incorrect."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
       "score": 3,
-      "notes": "Boundary paths implemented; not independently run."
+      "notes": "physics.cpp:15\u201335 and solver.cpp:332\u2013368 implement farfield/slip/no-slip paths; output.cpp:388 onward writes no-slip wall velocity and surface Cf. Resulting Re20 wake is not shown."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
       "score": 3,
-      "notes": "Gradient reconstruction source present."
+      "notes": "solver.cpp:120\u2013168 reconstructs primitive faces with LSQ; :222\u2013223 optional environment bypass/override. No production activation established or order-convergence evidence."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
       "score": 3,
-      "notes": "Limiter source present."
+      "notes": "solver.cpp:170\u2013223 builds bounded limiter with positivity fallback and optional CFD_FIRST_ORDER/PSI overrides; production use of bypass not established."
     },
     {
       "id": "cfd.viscous",
@@ -63,7 +63,7 @@
       "title": "Implicit steady march",
       "weight": 0.1,
       "score": 3,
-      "notes": "LU-SGS claimed and source present."
+      "notes": "solver.cpp:742\u2013794 implements matrix-free Newton/GMRES with LU-SGS preconditioning; seven cases stop with weak reductions and Re200 reports stalled solve."
     },
     {
       "id": "cfd.transient",
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 2.76
+  "overall_score": 2.52
 }

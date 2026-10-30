@@ -2,9 +2,9 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T04:26:36.114377+00:00
+Generated: 2026-10-30T04:27:57.106040+00:00
 
-**Overall score: 2.89**
+**Overall score: 2.5**
 
 
 | # | Point | Weight | Score (0-5) | Evidence / notes |
@@ -12,28 +12,28 @@ Generated: 2026-10-30T04:26:36.114377+00:00
 | 1 | **code.build** Build system and reproducibility | 0.15 | 4 | Immutable 2cd0844 clean CMake build succeeds with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB, /opt/external dependencies; no CFD rerun. |
 |   | Clean documented build from a clean checkout; CMake or equivalent with configurable external dependency root (CFD_EXTERNALS_ROOT); no absolute machine paths; build works without manual case edits. | | | |
 |   | *Evidence:* CMakeLists.txt and README build commands; try a clean configure/build. | | | |
-| 2 | **code.cli** CLI and error handling | 0.10 | 3 | CLI source present; not rerun. |
+| 2 | **code.cli** CLI and error handling | 0.10 | 3 | main.cpp parses case/output/restart and max-step overrides; transient restart remains first order for all resumed steps, solver.cpp:1271. |
 |   | Required CLI form `solve --case <json> --output <dir>` works for every case; malformed inputs/missing meshes produce nonzero exit and clear messages; no hard-coded case names. | | | |
 |   | *Evidence:* Argument parser, main(), error paths; spot-run bad input. | | | |
-| 3 | **code.organization** Code organization and extensibility | 0.12 | 4 | Modules separate mesh, flux, gradient, partition and solver. |
+| 3 | **code.organization** Code organization and extensibility | 0.12 | 3 | Separate config, mesh, partition, physics, solver, Krylov and output modules; solver.cpp combines substantial coupled numerical and reporting logic. |
 |   | Clear module boundaries; equation/physics interfaces not case-specific; BCs extensible; mesh/geometry abstractions could generalize to 3-D; structure supports EOS/RANS/species extension. | | | |
 |   | *Evidence:* Directory layout, class/interface design, absence of case-specific branches. | | | |
-| 4 | **code.originality** Originality and license compliance | 0.15 | 3 | No internal wrapper evidence; no external search by trust policy. |
+| 4 | **code.originality** Originality and license compliance | 0.15 | 3 | No source-evident internal executable wrapper; no external similarity search under trust policy. |
 |   | Solver core, time integration, and MPI communication are original; no copied/adapted/wrapped open-source CFD solver; no calls to existing solver executables; licenses respected. | | | |
 |   | *Evidence:* Diff against known open-source CFD cores; provenance of large copied blocks; headers/comments. | | | |
-| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | Generic case reader, but only limited evidence. |
+| 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 3 | config.cpp:45–70 loads arbitrary configured case and physics mode, mesh.cpp reads configured CGNS. No two-filename dispatch found. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
 | 6 | **code.mpi** MPI correctness | 0.15 | 1 | main.cpp:87–123 retains full GlobalMesh on every rank through solver iterations; solver.cpp:1187–1201 places MPI_Allreduce inside a rank-0-only steady logging branch, risking deadlock or collective mismatch. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
-| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Reported high-CFL instability and failed cases. |
+| 7 | **code.robustness** Robustness and memory sanity | 0.08 | 2 | Early plateau falsely accepts 8.4% changing drag, rank-only collective and restart-order bugs exist, and Re200 is unfinished. Positivity and line search paths exist. |
 |   | Bounds/error checks on mesh data and allocations; no full-mesh replication per rank during solve; no unbounded recursion or O(n^2) surprises; handles mixed cells and degenerate geometry. | | | |
 |   | *Evidence:* Defensive checks; memory footprint on np=8; crash tests. | | | |
-| 8 | **code.testing** Testing and validation evidence | 0.10 | 3 | Two committed probe programs. |
+| 8 | **code.testing** Testing and validation evidence | 0.10 | 1 | No committed solver/tests or solver/tools in immutable submission; untracked workspace plotting scripts and prior validator output are separate evidence. Previous note claiming two committed probes was false. |
 |   | Unit tests for geometry/flux/reconstruction where practical; smoke runs; serial-vs-parallel force comparison; validator run before submission. | | | |
 |   | *Evidence:* tests/ dir, CI or run logs, validate_outputs.py output. | | | |
-| 9 | **code.hygiene** Code hygiene | 0.07 | 3 | Curated code is clean; result artifacts excluded. |
+| 9 | **code.hygiene** Code hygiene | 0.07 | 2 | Curated solver builds but contains rank-only collective and force-accumulation defects; report/plot scripts and result data are excluded. |
 |   | Readable naming, comments on non-obvious numerics, no dead/debug code in submission, no leftover scratch files in tracked source, consistent formatting. | | | |
 |   | *Evidence:* Skim sources; check for TODO/FIXME/abandoned experiments in tracked files. | | | |
 
@@ -50,7 +50,7 @@ Generated: 2026-10-30T04:26:36.114377+00:00
 
 ## Summary
 
-- Overall score (0-5): 2.89
+- Overall score (0-5): 2.5
 - Key strengths:
 - Key weaknesses:
 - Disqualification triggered? yes/no — explain:
