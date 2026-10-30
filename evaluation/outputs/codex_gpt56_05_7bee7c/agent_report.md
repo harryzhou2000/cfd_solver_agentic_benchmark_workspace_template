@@ -76,7 +76,7 @@ These scores do not contribute to the review-area scores or the 100-point rubric
 
 ## Disqualification assessment
 
-DQ false: source inspection supports a native MPI FV solver; no triggered shortcut is established.
+DQ7 true: the delivered M2 laminar history falls from Cd 0.060559 to 0.040582 over its final 1,000 steps, yet metadata/report mark the run converged with stable forces. The residual target was met; the sustained force trend still establishes an incomplete steady result. The original executable is unbound. Further DQ review remains partial.
 
 ## Metadata answers & session selection
 
@@ -88,6 +88,6 @@ Raw packages are excluded from the curated commit. The 802 MB Re200 residual exc
 
 ## Verdict
 
-High-quality source/report and seven official validator passes; retain the Re200 validation limitation.
+The prior verdict was 85/100 and no DQ; partial recalibration now establishes DQ7 for M2 laminar. Seven historical validator passes are structural; retain the Re200 validation and historical binary limitations.
 
 run_identity.json SHA-256: `8afee0d65b287815ad0d37afe012bdadf21ed1f72ba0600424f36b7a79501a9b`; contestant_final_response.md SHA-256: `e2fa92927636989cfc3d81b33f128add4c59c8926c6658eb3ebdb12579a56f69`. These unindexed sidecars are not validated by cfdeval check.

@@ -320,8 +320,8 @@
       "notes": "Actual final coefficients at immutable 85d470d:solver/report/report.tex:147 are Cd=0.077839, Cl=0.000088901. Historical note misread the pressure/viscous drag decomposition as total Cd/Cl; its previous score 4 remains provisional pending physical and evidence review. residual history 85d470d:solver/report/figures/naca0012_m080_laminar_re5000_residual.png (referenced at solver/report/report.tex:388); force history 85d470d:solver/report/figures/naca0012_m080_laminar_re5000_forces.png (referenced at solver/report/report.tex:394); computed-field contour 85d470d:solver/report/figures/naca0012_m080_laminar_re5000_mach.png (referenced at solver/report/report.tex:406). Score 4 retained after the post-processing audit. Prior case judgment: validator."
     },
     "naca0012_m200_laminar_re5000": {
-      "score": 4,
-      "notes": "Actual final coefficients at immutable 85d470d:solver/report/report.tex:148 are Cd=0.040582, Cl=-0.000003087. Historical note misread the pressure/viscous drag decomposition as total Cd/Cl; its previous score 4 remains provisional pending physical and evidence review. residual history 85d470d:solver/report/figures/naca0012_m200_laminar_re5000_residual.png (referenced at solver/report/report.tex:434); force history 85d470d:solver/report/figures/naca0012_m200_laminar_re5000_forces.png (referenced at solver/report/report.tex:440); computed-field contour 85d470d:solver/report/figures/naca0012_m200_laminar_re5000_mach.png (referenced at solver/report/report.tex:452). Score 4 retained after the post-processing audit. Prior case judgment: validator."
+      "score": 1.5,
+      "notes": "Score 4\u21921.5: immutable historical attempt 37b8e68396300a3b0a103feb8b9e695170e40a98 solver/results/naca0012_m200_laminar_re5000/forces.csv SHA256 c6238f7fd28f9da6adb903ad5a3eaa5ad4b79c4e3cf3ee2783a7380d49337c66 shows sustained Cd decline from 0.0605591 at step4504 to 0.0405819 at step5503 (33.0%); final200 fall 0.0420745\u21920.0405819 (3.55%). Attempt metadata SHA256 af2129cc23b68371543cfa0319d914b6d637ed4ea22bf190ec2b5137d292451c and run_status mark converged, with residual reduction 3.7013 orders; report.tex:138,148 describes stable terminal forces. Submitted Solver.cpp:31\u201344 uses absolute Cd/Cl range <0.02 over up to 1000 rows, which this visibly declining history barely meets (Cd range0.0199773). This is not a sustained force plateau under TASK.md:172 despite residual reduction, so DQ7 is established; historical executable is unbound and no solver rerun. Final Cl=-0.000003087; pressure and viscous drag 0.013059/0.027523."
     },
     "cylinder_m010_laminar_re20": {
       "score": 4,
@@ -333,8 +333,15 @@
     }
   },
   "disqualification": {
-    "triggered": false,
-    "flags": []
+    "triggered": true,
+    "flags": [
+      {
+        "id": 7,
+        "text": "Incomplete run reported successful",
+        "found": true,
+        "evidence": "Attempt 37b8e68396300a3b0a103feb8b9e695170e40a98 M2 laminar metadata SHA256 af2129cc23b68371543cfa0319d914b6d637ed4ea22bf190ec2b5137d292451c and run_status mark converged at step5503, report.tex:138,148 calls terminal forces stable. Attempt force history SHA256 c6238f7fd28f9da6adb903ad5a3eaa5ad4b79c4e3cf3ee2783a7380d49337c66 has sustained Cd 0.0605591\u21920.0405819 over final1000 steps (33.0%) and 0.0420745\u21920.0405819 over final200 (3.55%). The reported residual target was met but force is not stable; submitted Solver.cpp:31\u201344 uses absolute 0.02 range and this history barely passes it. This directly establishes incomplete steady output marked converged under TASK.md:172. Exact historical binary is unbound; no fabrication is inferred."
+      }
+    ]
   },
   "limitations": [
     "post_run reconstruction",
