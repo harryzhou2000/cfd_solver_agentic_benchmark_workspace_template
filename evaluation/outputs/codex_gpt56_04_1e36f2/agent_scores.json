@@ -65,7 +65,7 @@
           "title": "MPI correctness",
           "weight": 0.15,
           "score": 2,
-          "notes": "Source has METIS, neighbour point-to-point halos and reductions, but submitted NACA M0.15 np2/np8 Cd differs by 73.81%; this is an order-one steady inconsistency."
+          "notes": "METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review."
         },
         {
           "id": "code.robustness",
@@ -169,7 +169,7 @@
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
           "score": 2,
-          "notes": "METIS and neighbour halos are source-supported, but the reported NACA M0.15 np2/np8 order-one force mismatch makes the delivered MPI result invalid."
+          "notes": "METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review."
         }
       ],
       "overall_score": 4.38,
@@ -203,7 +203,7 @@
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
           "score": 3,
-          "notes": "Force/residual and Re200 late-window evidence are plausible, but the np2/np8 NACA M0.15 Cd discrepancy is order-one."
+          "notes": "METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review."
         },
         {
           "id": "res.visualization",
@@ -282,7 +282,7 @@
         "title": "MPI",
         "max_points": 10,
         "score": 4,
-        "notes": "Partitioning, halos and reductions are implemented, but a submitted steady np2/np8 NACA force mismatch is order-one and triggers DQ."
+        "notes": "Partitioning, halos and reductions implemented. Reported M0.15 np2/np8 relative drag discrepancy is material but absolute change 0.00089237, with differing endpoints and historical binaries unbound; DQ4 is not established. Section score remains provisional pending full review."
       },
       {
         "id": "case_results",
@@ -365,8 +365,8 @@
       {
         "id": 4,
         "text": "MPI rank count changes results by order-one amounts for steady cases",
-        "found": true,
-        "evidence": "generated_results.tex states naca0012_m015_inviscid Cd=0.00120899 at np2 and 0.00210136 at np8, a 73.81% difference."
+        "found": false,
+        "evidence": "Not established: report generated_results.tex:226 gives np2/np8 Cd=0.00120899/0.00210136, a 73.81% relative difference but only 0.00089237 absolute, on a near-zero inviscid drag. Histories stop at 2741/2495 steps; at common step2495 Cd=0.00120325/0.00210136, and each is still evolving. Metadata names identical case, mesh and inner controls, but both git_revision fields are null and exact production binaries/launch settings remain unbound, so rank alone is not demonstrated. Re20 np2/np8 final Cd=2.036986/2.037206, with similarly differing endpoints. This does not erase the reported relative discrepancy or establish equivalence; it does not establish an order-one absolute result change caused by rank count."
       },
       {
         "id": 5,

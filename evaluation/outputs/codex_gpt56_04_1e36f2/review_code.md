@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:25:31.196234+00:00
+Generated: 2026-10-30T11:27:38.983834+00:00
 
 **Overall score: 3.9**
 
@@ -24,7 +24,7 @@ Generated: 2026-10-30T11:25:31.196234+00:00
 | 5 | **code.hardcoding** No hard-coded case logic | 0.08 | 5 | Production path is JSON/CGNS driven; no case-name or two-mesh-only branch was found. |
 |   | Cases drive behavior through JSON inputs; no branches on mesh filename or case id; production paths not special-cased per benchmark case. | | | |
 |   | *Evidence:* grep for mesh/case names in source; input-driven parameters. | | | |
-| 6 | **code.mpi** MPI correctness | 0.15 | 2 | Source has METIS, neighbour point-to-point halos and reductions, but submitted NACA M0.15 np2/np8 Cd differs by 73.81%; this is an order-one steady inconsistency. |
+| 6 | **code.mpi** MPI correctness | 0.15 | 2 | METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review. |
 |   | Real neighbor halo exchange (isend/irecv or equivalent); global MPI reductions for residuals/forces; no full-state allgather or full-mesh replication during iterations; rank-independent output; partition diagnostics match the actual run. | | | |
 |   | *Evidence:* Communication code review; metadata.json halo_exchange field; diagnostics. | | | |
 | 7 | **code.robustness** Robustness and memory sanity | 0.08 | 4 | Exceptions, mesh checks, positive-state rejection and finite residual checks are present; no independent memory stress run. |

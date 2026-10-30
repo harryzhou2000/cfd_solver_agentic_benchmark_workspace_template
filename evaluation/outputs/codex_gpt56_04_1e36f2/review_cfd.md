@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:25:31.196627+00:00
+Generated: 2026-10-30T11:27:38.984230+00:00
 
 **Overall score: 4.38**
 
@@ -39,7 +39,7 @@ Generated: 2026-10-30T11:25:31.196627+00:00
 | 10 | **cfd.transient** Transient BDF2 two-loop method (Re 200) | 0.10 | 5 | BDF1 startup/BDF2 frozen-history physical-time path and t=300 report evidence are present; Re200 was not rerun. |
 |   | True physical-time outer loop with inner iterations at each step (dt=0.01, t_final=300, 5-1000 inner iterations, inner target 1e-3, frozen BDF2 histories) or stricter documented equivalent; real inner-iteration statistics reported. | | | |
 |   | *Evidence:* Time loop code; metadata true_bdf2_inner_loop + inner stats; forces.csv unsteady behavior. | | | |
-| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | METIS and neighbour halos are source-supported, but the reported NACA M0.15 np2/np8 order-one force mismatch makes the delivered MPI result invalid. |
+| 11 | **cfd.mpi_partition** MPI partitioning and scalability | 0.09 | 2 | METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review. |
 |   | METIS/ParMETIS cell-graph partition with owned/ghost counts, neighbor ranks, send/recv sizes per rank; load balance and edge cut documented; np=8 runs for NACA and cylinder with comparable forces. | | | |
 |   | *Evidence:* partition_diagnostics.csv; metadata partitioner; rank comparison runs. | | | |
 

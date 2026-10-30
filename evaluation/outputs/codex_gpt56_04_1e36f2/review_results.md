@@ -2,7 +2,7 @@
 
 Score scale: 0-5 per point; weights are fractions of the area total.
 Overall score = weighted mean of point scores (weights shown).
-Generated: 2026-10-30T11:25:31.196936+00:00
+Generated: 2026-10-30T11:27:38.984515+00:00
 
 **Overall score: 4.35**
 
@@ -18,7 +18,7 @@ Generated: 2026-10-30T11:25:31.196936+00:00
 | 3 | **res.completion** Case completion and convergence | 0.20 | 5 | Seven steady cases are reported converged and Re200 statistically periodic at t=300, with readable package evidence; no Re200 rerun. |
 |   | All required NACA0012 and cylinder cases completed: inviscid converged/plateaued, laminar converged, Re 20 steady wake, Re 200 statistically periodic; no placeholder/partial/synthetic result files; final rows finite and consistent. | | | |
 |   | *Evidence:* run_status.json + metadata.json per case; residual/force tails; result_statistics.json if present. | | | |
-| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | Force/residual and Re200 late-window evidence are plausible, but the np2/np8 NACA M0.15 Cd discrepancy is order-one. |
+| 4 | **res.plausibility** Result plausibility and MPI consistency | 0.15 | 3 | METIS and neighbour halos are implemented. NACA M0.15 np2/np8 Cd differs 73.81% relative to a near-zero baseline (0.00089237 absolute), with differing endpoints and unbound historical binaries; rank-only causation and an order-one absolute change are not established. Re20 comparison is close. Score is provisional pending full review. |
 |   | Min density/pressure positive; inviscid viscous forces negligible; wall velocities near zero; force histories comparable across np=1/2/4/8; Re 200 shows vortex street and shedding frequency/Strouhal estimate. | | | |
 |   | *Evidence:* Forces/residuals/surface CSVs; rank comparison dirs; report analysis. | | | |
 | 5 | **res.visualization** Visualizations | 0.15 | 5 | Committed plots cover cases, but Re20 report Mach image provably misassigns cell values to triangles; see DQ8 evidence. Full scoring remains under review. |
