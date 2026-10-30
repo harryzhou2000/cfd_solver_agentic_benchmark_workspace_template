@@ -6,78 +6,78 @@
       "id": "cfd.equations",
       "title": "Governing equations and nondimensionalization",
       "weight": 0.06,
-      "score": 5,
-      "notes": "Conservative perfect-gas equations and coefficient conventions are implemented and documented."
+      "score": 4.5,
+      "notes": "2-D compressible perfect-gas conservative equations and reference coefficients documented and implemented."
     },
     {
       "id": "cfd.mesh",
       "title": "Mesh import and unstructured geometry",
       "weight": 0.1,
-      "score": 5,
-      "notes": "CGNS unstructured topology, boundary families, geometry and adjacency are source-supported."
+      "score": 4,
+      "notes": "Separate TRI_3/QUAD_4/BAR_2 multizone sections handled; CGNS MIXED unsupported."
     },
     {
       "id": "cfd.residual",
       "title": "Conservative finite-volume residual",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Cell-centred conservative face-residual assembly and global norms are implemented."
+      "score": 4.5,
+      "notes": "Cell-face conservative residual and MPI norms present; low-Mach Rusanov over-dissipation produces large known errors."
     },
     {
       "id": "cfd.flux",
       "title": "Approximate Riemann flux and entropy fix",
       "weight": 0.08,
-      "score": 4,
-      "notes": "LLF/Rusanov production flux is documented; no independent shock-accuracy study was run."
+      "score": 3.5,
+      "notes": "Rusanov in steady low-Mach produces strong documented dissipation; Roe/entropy-fix transient, no independent shock study."
     },
     {
       "id": "cfd.bc",
       "title": "Boundary conditions",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Farfield, slip and viscous no-slip/adiabatic paths are documented and source-supported."
+      "score": 4.5,
+      "notes": "Farfield, slip, no-slip adiabatic paths; surface output explicitly reports boundary zero velocity."
     },
     {
       "id": "cfd.reconstruction",
       "title": "Second-order reconstruction",
       "weight": 0.09,
-      "score": 5,
-      "notes": "Production metadata and source identify piecewise-linear weighted least-squares reconstruction."
+      "score": 4.5,
+      "notes": "Weighted least-squares face reconstruction and positivity fallback are source-supported; no independent smooth-order test."
     },
     {
       "id": "cfd.limiter",
       "title": "Limiter and positivity control",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Venkatakrishnan limiter and positivity safeguards are active in delivered metadata/source."
+      "score": 4,
+      "notes": "Venkat limiter present; transient loop freezes predictor limiter through inner convergence, without refreshed target recheck."
     },
     {
       "id": "cfd.viscous",
       "title": "Viscous discretization",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Viscous gradients, Newtonian/Fourier terms and force output are source/report supported."
+      "score": 4,
+      "notes": "Tangential skin-friction force projection is implemented; low-Mach laminar forces substantially inaccurate and disclosed."
     },
     {
       "id": "cfd.implicit",
       "title": "Implicit steady march",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Implicit steady iteration is source-supported and the seven steady finals are marked converged."
+      "score": 3.5,
+      "notes": "LU-SGS present, but M2 laminar residual-only early stop occurs with rapidly evolving drag."
     },
     {
       "id": "cfd.transient",
       "title": "Transient BDF2 two-loop method (Re 200)",
       "weight": 0.1,
-      "score": 5,
-      "notes": "Delivered Re200 metadata reports BDF2 dual-time controls and 100 percent inner-target convergence; Re200 was not rerun."
+      "score": 4,
+      "notes": "BDF2 and predictor-frozen limiter inner iteration implemented; post-refresh target fraction unknown. Delivered segment t600\u2013900, no unsteady rerun."
     },
     {
       "id": "cfd.mpi_partition",
       "title": "MPI partitioning and scalability",
       "weight": 0.09,
-      "score": 5,
-      "notes": "METIS k-way partitioning, ghost scheduling and MPI communication are source-supported; submitted np studies provide supporting output evidence."
+      "score": 4.5,
+      "notes": "Root preprocessing, METIS owned/ghost and halos; NACA/Re20 np1/2/4/8 final coefficients closely agree, though exact binary hashes unbound."
     }
   ],
   "disqualification_flags": [
@@ -112,5 +112,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.92
+  "overall_score": 4.13
 }

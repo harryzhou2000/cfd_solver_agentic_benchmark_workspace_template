@@ -31,67 +31,67 @@
           "id": "code.build",
           "title": "Build system and reproducibility",
           "weight": 0.15,
-          "score": 4,
-          "notes": "Committed CMake, README, case files and run tools are reproducible in structure; no independent fresh clean build was performed."
+          "score": 4.5,
+          "notes": "Immutable source clean-builds in isolated network-disabled cfd-bench; CTest registers no tests."
         },
         {
           "id": "code.cli",
           "title": "CLI and error handling",
           "weight": 0.1,
           "score": 4,
-          "notes": "Input-driven executable and documented runner commands are committed; no new executable run was needed after the full validator pass."
+          "notes": "Case/output/restart and control overrides in main.cpp; no production solver rerun."
         },
         {
           "id": "code.organization",
           "title": "Code organization and extensibility",
           "weight": 0.12,
-          "score": 5,
-          "notes": "Mesh, partition, solver, output, case configuration and plotting responsibilities are separated."
+          "score": 4.5,
+          "notes": "Separate case, mesh, partition, solver and output files; fixed 2-D state remains."
         },
         {
           "id": "code.originality",
           "title": "Originality and license compliance",
           "weight": 0.15,
           "score": 4,
-          "notes": "No direct internal executable wrapper was found; trust policy excludes external similarity investigation."
+          "notes": "No internal executable wrapper found in source; external similarity investigation excluded under trust policy."
         },
         {
           "id": "code.hardcoding",
           "title": "No hard-coded case logic",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Generic CGNS/case configuration paths drive the production solver."
+          "score": 4.5,
+          "notes": "CGNS mesh/case/BC paths are case-configured; unsupported CGNS MIXED elements are not parsed."
         },
         {
           "id": "code.mpi",
           "title": "MPI correctness",
           "weight": 0.15,
-          "score": 5,
-          "notes": "METIS partitioning, owned/ghost exchange and reductions are implemented; delivered rank-study packages provide direct steady evidence."
+          "score": 4.5,
+          "notes": "main.cpp:42\u201360 root-only global mesh, METIS partitions and local/ghost exchanges; submitted rank-study executable hashes unbound."
         },
         {
           "id": "code.robustness",
           "title": "Robustness and memory sanity",
           "weight": 0.08,
-          "score": 4,
-          "notes": "Input, geometry, finite-state and positivity safeguards are present; no independent memory stress test."
+          "score": 3.5,
+          "notes": "Positivity and finite checks exist, but output.cpp:272\u2013291 ignores fread return values for restart payloads."
         },
         {
           "id": "code.testing",
           "title": "Testing and validation evidence",
           "weight": 0.1,
-          "score": 5,
-          "notes": "All eight final packages and the report passed the explicit examiner validator."
+          "score": 3,
+          "notes": "Eight output packages passed validator; isolated build succeeds, no registered CTests and no unsteady rerun."
         },
         {
           "id": "code.hygiene",
           "title": "Code hygiene",
           "weight": 0.07,
           "score": 4,
-          "notes": "Structured committed sources and documented report tooling; no independent lint/test suite was run."
+          "notes": "Documented code, scripts and original 66-figure manifest; data live in workspace and metadata revision is stale."
         }
       ],
-      "overall_score": 4.45,
+      "overall_score": 4.11,
       "disqualification_flags": []
     },
     "cfd_review": {
@@ -100,81 +100,81 @@
           "id": "cfd.equations",
           "title": "Governing equations and nondimensionalization",
           "weight": 0.06,
-          "score": 5,
-          "notes": "Conservative perfect-gas equations and coefficient conventions are implemented and documented."
+          "score": 4.5,
+          "notes": "2-D compressible perfect-gas conservative equations and reference coefficients documented and implemented."
         },
         {
           "id": "cfd.mesh",
           "title": "Mesh import and unstructured geometry",
           "weight": 0.1,
-          "score": 5,
-          "notes": "CGNS unstructured topology, boundary families, geometry and adjacency are source-supported."
+          "score": 4,
+          "notes": "Separate TRI_3/QUAD_4/BAR_2 multizone sections handled; CGNS MIXED unsupported."
         },
         {
           "id": "cfd.residual",
           "title": "Conservative finite-volume residual",
           "weight": 0.12,
-          "score": 5,
-          "notes": "Cell-centred conservative face-residual assembly and global norms are implemented."
+          "score": 4.5,
+          "notes": "Cell-face conservative residual and MPI norms present; low-Mach Rusanov over-dissipation produces large known errors."
         },
         {
           "id": "cfd.flux",
           "title": "Approximate Riemann flux and entropy fix",
           "weight": 0.08,
-          "score": 4,
-          "notes": "LLF/Rusanov production flux is documented; no independent shock-accuracy study was run."
+          "score": 3.5,
+          "notes": "Rusanov in steady low-Mach produces strong documented dissipation; Roe/entropy-fix transient, no independent shock study."
         },
         {
           "id": "cfd.bc",
           "title": "Boundary conditions",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Farfield, slip and viscous no-slip/adiabatic paths are documented and source-supported."
+          "score": 4.5,
+          "notes": "Farfield, slip, no-slip adiabatic paths; surface output explicitly reports boundary zero velocity."
         },
         {
           "id": "cfd.reconstruction",
           "title": "Second-order reconstruction",
           "weight": 0.09,
-          "score": 5,
-          "notes": "Production metadata and source identify piecewise-linear weighted least-squares reconstruction."
+          "score": 4.5,
+          "notes": "Weighted least-squares face reconstruction and positivity fallback are source-supported; no independent smooth-order test."
         },
         {
           "id": "cfd.limiter",
           "title": "Limiter and positivity control",
           "weight": 0.08,
-          "score": 5,
-          "notes": "Venkatakrishnan limiter and positivity safeguards are active in delivered metadata/source."
+          "score": 4,
+          "notes": "Venkat limiter present; transient loop freezes predictor limiter through inner convergence, without refreshed target recheck."
         },
         {
           "id": "cfd.viscous",
           "title": "Viscous discretization",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Viscous gradients, Newtonian/Fourier terms and force output are source/report supported."
+          "score": 4,
+          "notes": "Tangential skin-friction force projection is implemented; low-Mach laminar forces substantially inaccurate and disclosed."
         },
         {
           "id": "cfd.implicit",
           "title": "Implicit steady march",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Implicit steady iteration is source-supported and the seven steady finals are marked converged."
+          "score": 3.5,
+          "notes": "LU-SGS present, but M2 laminar residual-only early stop occurs with rapidly evolving drag."
         },
         {
           "id": "cfd.transient",
           "title": "Transient BDF2 two-loop method (Re 200)",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Delivered Re200 metadata reports BDF2 dual-time controls and 100 percent inner-target convergence; Re200 was not rerun."
+          "score": 4,
+          "notes": "BDF2 and predictor-frozen limiter inner iteration implemented; post-refresh target fraction unknown. Delivered segment t600\u2013900, no unsteady rerun."
         },
         {
           "id": "cfd.mpi_partition",
           "title": "MPI partitioning and scalability",
           "weight": 0.09,
-          "score": 5,
-          "notes": "METIS k-way partitioning, ghost scheduling and MPI communication are source-supported; submitted np studies provide supporting output evidence."
+          "score": 4.5,
+          "notes": "Root preprocessing, METIS owned/ghost and halos; NACA/Re20 np1/2/4/8 final coefficients closely agree, though exact binary hashes unbound."
         }
       ],
-      "overall_score": 4.92,
+      "overall_score": 4.13,
       "disqualification_flags": []
     },
     "result_review": {
@@ -183,129 +183,129 @@
           "id": "res.contract",
           "title": "Output contract compliance",
           "weight": 0.2,
-          "score": 5,
-          "notes": "Explicit validator accepted all eight specified original workspace packages and the report."
+          "score": 4.5,
+          "notes": "Validator accepted eight original outputs; an accepted structural status does not establish physics or force convergence."
         },
         {
           "id": "res.validator",
           "title": "Automated validator results",
           "weight": 0.1,
-          "score": 5,
-          "notes": "Recorded full explicit examiner invocation returned rc 0; Re200 was not rerun."
+          "score": 4.5,
+          "notes": "Recorded examiner validation rc0; Re200 not rerun and numerical truth assessed independently."
         },
         {
           "id": "res.completion",
           "title": "Case completion and convergence",
           "weight": 0.2,
           "score": 2,
-          "notes": "M2 laminar marked converged at1000 while final100 drag falls 0.673434\u21920.569866; DQ7."
+          "notes": "M2 laminar completed/converged at1000 despite Cd0.673434\u21920.569866 final100; DQ7."
         },
         {
           "id": "res.plausibility",
           "title": "Result plausibility and MPI consistency",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Finite histories, rank studies and report evidence support plausible results; reported low-Mach dissipation is candidly limited."
+          "score": 2.5,
+          "notes": "Re20 Cd6.03 vs report literature\u22482 and M015 lam Cd0.489 are stable but very inaccurate; Re200 Cd1.218/St0.173 plausible."
         },
         {
           "id": "res.visualization",
           "title": "Visualizations",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Committed report figures cover the cases and manifest has 66 entries with no missing figure files."
+          "score": 3.5,
+          "notes": "Original dd0fabf and manifest deliver readable Re200 late lift/drag, but startup spikes compress both late M015/M080 laminar traces."
         },
         {
           "id": "res.report",
           "title": "Report quality and honesty",
           "weight": 0.15,
-          "score": 5,
-          "notes": "Detailed report documents methods, results, BDF2 behavior and stated low-Mach/limiter limitations."
+          "score": 3.5,
+          "notes": "Report candidly discloses low-Mach limitations but calls M2 early result converged; Re200 predecessor chain differs from the simplified restart description."
         },
         {
           "id": "res.traceability",
           "title": "Traceability of figures and claims",
           "weight": 0.05,
-          "score": 4,
-          "notes": "Figure manifest is present and resolves figure files; raw result inputs remain read-only workspace evidence outside the curated commit."
+          "score": 4.5,
+          "notes": "Original 66-figure manifest and isolated exact Re20 force/residual/Mach plot regeneration; historic binary identity and other image bindings unproven."
         }
       ],
-      "overall_score": 4.35,
+      "overall_score": 3.4,
       "disqualification_flags": []
     }
   },
   "rubric": {
     "total_possible": 100,
-    "total_scored": 92.5,
+    "total_scored": 83.0,
     "sections": [
       {
         "id": "build_cli",
         "title": "Build, CLI, Output Contract",
         "max_points": 10,
-        "score": 9,
-        "notes": "Strong committed build/CLI documentation and validator-compliant outputs; no fresh clean rebuild."
+        "score": 9.5,
+        "notes": "Clean 4698ba1 CMake build succeeds network-disabled with 2 CPUs, 3GiB,256 process limit. Validator accepted output contract; CTest has no registered tests and restart fread returns are unchecked."
       },
       {
         "id": "mesh_geometry",
         "title": "Mesh And Geometry",
         "max_points": 10,
-        "score": 10,
-        "notes": "Generic CGNS unstructured geometry and boundary treatment are implemented."
+        "score": 9,
+        "notes": "main.cpp:42\u201360 root-loads CGNS and partitions; mesh.cpp:184\u2013212 handles separate TRI_3/QUAD_4/BAR_2 sections, not CGNS MIXED."
       },
       {
         "id": "residual_bc",
         "title": "Finite-Volume Residual And Boundary Conditions",
         "max_points": 15,
-        "score": 15,
-        "notes": "Conservative finite-volume residual and documented farfield/slip/no-slip treatment."
+        "score": 13.5,
+        "notes": "Conservative cell-face residual, Rusanov/Roe and no-slip adiabatic paths are implemented; substantial low-Mach dissipation limits accuracy and no independent order study performed."
       },
       {
         "id": "second_order",
         "title": "Second-Order Spatial Scheme",
         "max_points": 10,
-        "score": 10,
-        "notes": "Weighted least-squares reconstruction and active limiter are source/metadata supported."
+        "score": 9,
+        "notes": "Weighted least-squares reconstruction, Venkat limiter and positivity fallback exist; no independent smooth-grid order test or exact historical executable binding."
       },
       {
         "id": "viscous",
         "title": "Viscous Terms",
         "max_points": 10,
-        "score": 10,
-        "notes": "Viscous gradients, heat flux and force decomposition are supported."
+        "score": 9.5,
+        "notes": "solver.cpp:1104\u20131122 integrates tangential wall traction, :1167\u20131170 writes wall-boundary zero velocity. Viscous results are severely over-dissipated in low-Mach cases."
       },
       {
         "id": "implicit_transient",
         "title": "Implicit And Transient Methods",
         "max_points": 15,
-        "score": 15,
-        "notes": "Steady implicit and delivered BDF2 Re200 evidence are strong; Re200 was not rerun."
+        "score": 11,
+        "notes": "LU-SGS steady and BDF2 time-history loop exist; M2 early steady stop ignores clear force drift. Solver.cpp:1497\u20131508 freezes limiter for inner convergence and does not recheck target after refresh, so actual refreshed miss fraction is unknown."
       },
       {
         "id": "mpi",
         "title": "MPI",
         "max_points": 10,
-        "score": 8,
-        "notes": "METIS, halo exchange and reductions are implemented with rank-study evidence; no independent evaluator MPI rerun."
+        "score": 9,
+        "notes": "METIS root partitioning, owned/ghost halos and reductions are present. Rank-study metadata controls match but git_revision is initial baseline and exact historic executables remain unbound."
       },
       {
         "id": "case_results",
         "title": "Case Results And Validation",
         "max_points": 10,
-        "score": 8,
-        "notes": "M2 laminar marked converged at1000 despite strong final force drift; remaining case scoring pending."
+        "score": 5.5,
+        "notes": "M2 laminar is falsely marked converged with large drag drift; M015 laminar and Re20 are stable but Cd0.489 and6.03 are far above physical expectations, explicitly disclosed. Re200 periodic Cd1.218/St0.173 is supported with frozen-limiter and restart qualifications."
       },
       {
         "id": "report_viz",
         "title": "Report, Visualization, Analysis",
         "max_points": 5,
-        "score": 4.5,
-        "notes": "Report claims early M2 laminar convergence while final drag changes materially; other figure/report review pending."
+        "score": 3.5,
+        "notes": "All14 accepted PDF pages reviewed; report candidly discloses low-Mach accuracy failures but calls unstable early M2 laminar converged. Startup spikes flatten both late steady laminar forces; Re200 late force is delivered in original manifest, outside curated image subset."
       },
       {
         "id": "extensibility",
         "title": "Extensibility",
         "max_points": 5,
-        "score": 3,
-        "notes": "Modular configurable solver, limited by no independent clean-build or external reproducibility test."
+        "score": 3.5,
+        "notes": "Modular mesh/partition, case, solver and output, but fixed 2-D four-component state limits 3-D/EOS extension."
       }
     ]
   },
@@ -367,7 +367,7 @@
       {
         "id": 4,
         "text": "MPI rank count changes results by order-one amounts for steady cases",
-        "evidence": "Submitted steady rank studies do not establish an order-one discrepancy.",
+        "evidence": "Re20 np1/2/4/8 Cd6.027177/6.027224/6.027004/6.027568; M015 np1/2/4/8 Cd0.065210/0.065218/0.065189/0.065395, no order-one absolute discrepancy. Metadata controls match but exact binary hashes unknown; near-zero lift relative ratios are not treated as order-one.",
         "found": false
       },
       {
@@ -385,31 +385,31 @@
       {
         "id": 7,
         "text": "metadata.json marks incomplete or failed runs as successful final results",
-        "evidence": "M2 laminar metadata SHA256 46ca7bfc0c841560b787e29dfdbaf5143905e43deb041159407c46cae516d68e marks completed/converged at step1000, repeated by immutable 4698ba1 solver/report/results_body.tex:80\u201382. Force SHA256 d88744c1fe8d5fed2dc4d294a371b58c6c5995a01cc77a466ed59cd488ad419e shows Cd0.6734338\u21920.5698661 final100 and 0.6183646\u21920.5698661 final50; this early laminar state is not clearly converged or force-stable (TASK.md:140,172), despite an actual 3.036-order residual drop. Other DQ review remains pending.",
+        "evidence": "M2 laminar metadata SHA256 46ca7bfc0c841560b787e29dfdbaf5143905e43deb041159407c46cae516d68e marks completed/converged at step1000, repeated by immutable 4698ba1 solver/report/results_body.tex:80\u201382. Force SHA256 d88744c1fe8d5fed2dc4d294a371b58c6c5995a01cc77a466ed59cd488ad419e shows Cd0.6734338\u21920.5698661 final100 and 0.6183646\u21920.5698661 final50; this early laminar state is not clearly converged or force-stable (TASK.md:140,172), despite an actual 3.036-order residual drop. Other DQ review remains pending. Stable but inaccurate Re20 and M015 laminar cases are not separately alleged falsely converged.",
         "found": true
       },
       {
         "id": 8,
         "text": "Report figures do not correspond to submitted field/CSV outputs",
-        "evidence": "The 66-entry figure manifest has no missing figure files; no mismatch was established.",
+        "evidence": "Original delivered figure manifest maps plots to source; isolated Re20 force/residual/Mach redraws reproduce original pixels. Other cases not individually bound; no specific figure/data mismatch established.",
         "found": false
       },
       {
         "id": 9,
         "text": "metadata.json reports METIS/ParMETIS but code uses only a geometric split or full-state replication",
-        "evidence": "METIS k-way partition and owned/ghost communication are source-supported.",
+        "evidence": "main.cpp:42\u201360 root-loads global mesh for METIS partitioning, solve loads local partitions and source exchanges halos; no prohibited all-rank full replication demonstrated.",
         "found": false
       },
       {
         "id": 10,
         "text": "A report claims second-order reconstruction or a shock limiter that is disabled for production cases",
-        "evidence": "Production metadata identifies piecewise-linear reconstruction and Venkatakrishnan limiter.",
+        "evidence": "Source supports production reconstruction/limiter and metadata reports them; no evidence of disabled production scheme established. Exact historical executable unbound.",
         "found": false
       },
       {
         "id": 11,
         "text": "Surface no-slip checks fail because reported wall rows are actually adjacent cell-center velocities without documentation",
-        "evidence": "No validator failure or direct source evidence establishes this trigger.",
+        "evidence": "solver.cpp:1167\u20131170 emits no-slip boundary u=v=0 rather than labeling adjacent cell-center velocity as wall value.",
         "found": false
       },
       {
@@ -427,10 +427,8 @@
     ]
   },
   "limitations": [
-    "Re200 was not rerun.",
-    "No independent clean build, MPI rerun, or memory stress test was performed.",
-    "Aggregate telemetry includes excluded ses_03222a213ffekSXtTAfiqJgU5r; use only the manually selected root and terminal response for attribution.",
-    "run_identity.json and contestant_final_response.md are unindexed sidecars and are not validated by cfdeval check.",
-    "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun."
+    "Re200 original contestant segment is t600.01\u2013900 from a Roe transient predecessor; the report summarizes its earlier steady restart. No unsteady rerun.",
+    "Full refreshed-limiter target miss fraction and exact historical executable hashes remain unproven; Re200 selected-session build/commit/launch sequence is documented.",
+    "Re20 force/residual/Mach image-to-data reproduction is exact; other image bindings unverified. Selected primary session excludes setup root, aggregate telemetry remains contaminated."
   ]
 }

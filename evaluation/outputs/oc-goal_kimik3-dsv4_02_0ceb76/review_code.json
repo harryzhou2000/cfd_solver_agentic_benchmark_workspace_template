@@ -6,64 +6,64 @@
       "id": "code.build",
       "title": "Build system and reproducibility",
       "weight": 0.15,
-      "score": 4,
-      "notes": "Committed CMake, README, case files and run tools are reproducible in structure; no independent fresh clean build was performed."
+      "score": 4.5,
+      "notes": "Immutable source clean-builds in isolated network-disabled cfd-bench; CTest registers no tests."
     },
     {
       "id": "code.cli",
       "title": "CLI and error handling",
       "weight": 0.1,
       "score": 4,
-      "notes": "Input-driven executable and documented runner commands are committed; no new executable run was needed after the full validator pass."
+      "notes": "Case/output/restart and control overrides in main.cpp; no production solver rerun."
     },
     {
       "id": "code.organization",
       "title": "Code organization and extensibility",
       "weight": 0.12,
-      "score": 5,
-      "notes": "Mesh, partition, solver, output, case configuration and plotting responsibilities are separated."
+      "score": 4.5,
+      "notes": "Separate case, mesh, partition, solver and output files; fixed 2-D state remains."
     },
     {
       "id": "code.originality",
       "title": "Originality and license compliance",
       "weight": 0.15,
       "score": 4,
-      "notes": "No direct internal executable wrapper was found; trust policy excludes external similarity investigation."
+      "notes": "No internal executable wrapper found in source; external similarity investigation excluded under trust policy."
     },
     {
       "id": "code.hardcoding",
       "title": "No hard-coded case logic",
       "weight": 0.08,
-      "score": 5,
-      "notes": "Generic CGNS/case configuration paths drive the production solver."
+      "score": 4.5,
+      "notes": "CGNS mesh/case/BC paths are case-configured; unsupported CGNS MIXED elements are not parsed."
     },
     {
       "id": "code.mpi",
       "title": "MPI correctness",
       "weight": 0.15,
-      "score": 5,
-      "notes": "METIS partitioning, owned/ghost exchange and reductions are implemented; delivered rank-study packages provide direct steady evidence."
+      "score": 4.5,
+      "notes": "main.cpp:42\u201360 root-only global mesh, METIS partitions and local/ghost exchanges; submitted rank-study executable hashes unbound."
     },
     {
       "id": "code.robustness",
       "title": "Robustness and memory sanity",
       "weight": 0.08,
-      "score": 4,
-      "notes": "Input, geometry, finite-state and positivity safeguards are present; no independent memory stress test."
+      "score": 3.5,
+      "notes": "Positivity and finite checks exist, but output.cpp:272\u2013291 ignores fread return values for restart payloads."
     },
     {
       "id": "code.testing",
       "title": "Testing and validation evidence",
       "weight": 0.1,
-      "score": 5,
-      "notes": "All eight final packages and the report passed the explicit examiner validator."
+      "score": 3,
+      "notes": "Eight output packages passed validator; isolated build succeeds, no registered CTests and no unsteady rerun."
     },
     {
       "id": "code.hygiene",
       "title": "Code hygiene",
       "weight": 0.07,
       "score": 4,
-      "notes": "Structured committed sources and documented report tooling; no independent lint/test suite was run."
+      "notes": "Documented code, scripts and original 66-figure manifest; data live in workspace and metadata revision is stale."
     }
   ],
   "disqualification_flags": [
@@ -108,5 +108,5 @@
       "notes": ""
     }
   ],
-  "overall_score": 4.45
+  "overall_score": 4.11
 }
