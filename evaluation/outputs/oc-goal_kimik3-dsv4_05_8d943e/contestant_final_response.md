@@ -1,0 +1,1 @@
+The benchmark is complete (goal: *achieved*). We built the C++17/MPI compressible Navier–Stokes unstructured-FV solver in `/workspace/solver/`, ran all 8 cases to converged/settled results (all pass the examiner's validator), captured the Re200 vortex street, verified MPI rank consistency, produced the LaTeX report and manifests, and committed on `solver/k3-cfd`.

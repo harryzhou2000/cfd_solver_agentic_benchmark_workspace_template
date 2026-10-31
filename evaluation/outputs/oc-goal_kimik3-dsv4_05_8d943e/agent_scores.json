@@ -20,9 +20,8 @@
     "started_at": "2026-08-14T01:52:06.145000+00:00",
     "ended_at": "2026-08-19T11:11:43.977000+00:00",
     "time_basis": "selected workspace-local OpenCode session timestamps",
-    "rationale": "Sole OpenCode root selected; terminal extraction ambiguous because latest completed-timestamp assistant row has no finish field and no parts, following a completed stop with terminal text. Operator decision pending.",
-    "contestant_final_response_status": "unknown",
-    "contestant_final_response_absence_reason": null
+    "rationale": "Sole OpenCode root; operator selected its preceding completed assistant stop as terminal despite a later completed-timestamp row with no finish metadata or parts.",
+    "contestant_final_response_status": "present"
   },
   "scores": {
     "code_review": {
@@ -427,8 +426,9 @@
     ]
   },
   "limitations": [
-    "Selected OpenCode root terminal attribution remains ambiguous pending operator decision; latest assistant row has no finish metadata or parts after a completed stop message. Completion gate intentionally remains failing until resolved.",
+    "Operator selected the preceding completed assistant stop; a later assistant row has a completion timestamp but lacks finish metadata and parts, which remains documented.",
     "All production metadata revision7bb0b02 predates solver source commit; exact historical binary/inherited environment unbound. No unsteady rerun.",
-    "Re20 isolated plot replay differs 1\u20132 pixels in dimensions; exact image binding and other figures remain unproven. Original checkpoint preserves extra images omitted by curated tip."
+    "Re20 isolated plot replay differs 1\u20132 pixels in dimensions; exact image binding and other figures remain unproven. Original checkpoint preserves extra images omitted by curated tip.",
+    "Operator decision 2026-10-31: use preceding completed assistant stop msg_019b7d27b0017FWQQfg8pmzrOl, completed 2026-08-19T11:11:37.472000+00:00, ordered text part prt_019b82bbe001FL4e3yECYkfzFz; message SHA256 761e1a85c412db13d605a54721f5bc69e56ccf52dde7729078ed300b45a7a7b6, part SHA256 0f42d302d34c28eb3f133af2363d7ad73744bf4e30a790b0ed6e357ce22d7739, exact text SHA256 0ed3b914295e1d6ae6d38eeda5e49dac7d589a8e9ddcb01ee1f891d8454c37f1. Later msg_019b8350e0017H3xLfZNzRoQY1 has completion timestamp but no finish metadata or parts. No credentials detected; previous unselected state is preserved in Git history."
   ]
 }

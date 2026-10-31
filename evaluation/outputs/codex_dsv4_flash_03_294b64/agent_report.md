@@ -56,7 +56,7 @@ The migration manifest is authoritative session inventory: one Codex root and no
 
 ## Limitations
 
-The initial environment is reconstructed post-run. The report's figures are referenced through an included TeX file, not directly by `report.tex`; strict immutable audit excluded the PNGs, so this committed report is not self-contained. Re200 reached the horizon but did not demonstrate vortex shedding. No evaluator rerun was needed or performed. `run_identity.json` SHA-256 is `fa21fee5e832be6e8679a61f4a065d2b06f147bfd98848fd5474d2b0bfc7d546`; `contestant_final_response.md` SHA-256 is `5f534388dfa7fc777b3f9c2af03aae1edf214501372ba3fab8d50e871f22892d`. These unindexed sidecars are not validated by `cfdeval check`.
+The initial environment is reconstructed post-run. The report's figures are referenced through an included TeX file, not directly by `report.tex`; strict immutable audit excluded the PNGs, so this committed report is not self-contained. Re200 reached the horizon but did not demonstrate vortex shedding. No evaluator rerun was needed or performed. `run_identity.json` SHA-256 is `fa21fee5e832be6e8679a61f4a065d2b06f147bfd98848fd5474d2b0bfc7d546`; `contestant_final_response.md` SHA-256 is `ac129adb8a80cf5b7fb809081f907f3052466ee22cc4d761853dfad059a97f47`. These unindexed sidecars are not validated by `cfdeval check`.
 
 ## Verdict
 
@@ -71,3 +71,7 @@ Accepted PDF pp8–14 also renders the six NACA cases. After inspection against 
 ## Full calibration — 2026-10-30
 
 Rubric 87→74/100, DQ false→true under trigger 7 for Re20: residual stall is accepted without force checking and the last 2000 force rows drift strongly. All ten rubric sections and 27 review points now have source/result-specific evidence. Case scores 2,2,2,2,2,2,2,1 → 2,3,3,2,2,2,1,1. Accepted sibling PDF genuinely contains case figures; missing curated assets still impair report rebuild. Re200 reaches t300 with a steady wake and the report honestly says shedding was not achieved; no exact strict-target miss count is inferred from the absolute-residual fallback. Production first-order modes are disclosed and do not substantiate DQ10. Root-only preprocessing mesh is freed before solving; original np1/2/4/8 continuation force records agree at common steps. Immutable clean build passed with warnings in network-disabled cfd-bench, 2 CPUs/3 GiB. Both record gates pass; no CFD/unsteady rerun or exhaustive external authorship/pixel audit.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fc2bb-3f78-7202-a0de-cfa25e061493 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-03T15:03:35.030Z, task_complete 2026-08-03T15:03:35.090Z; stored response-line SHA256 7f98ac69f5ea42e38ea798ebf75ca68e54b3cd3b7220b754bbffa7eec3afb01d, completion-line SHA256 115e71bde02b176be5015b152811956d6cb71de4c8f2760d01e2744f1f70ee4d, exact text SHA256 ac129adb8a80cf5b7fb809081f907f3052466ee22cc4d761853dfad059a97f47; previous sidecar SHA256 5f534388dfa7fc777b3f9c2af03aae1edf214501372ba3fab8d50e871f22892d is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

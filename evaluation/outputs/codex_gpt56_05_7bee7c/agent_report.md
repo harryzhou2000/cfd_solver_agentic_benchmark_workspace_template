@@ -90,7 +90,11 @@ Raw packages are excluded from the curated commit. The 802 MB Re200 residual exc
 
 The prior verdict was 85/100 and no DQ; the completed qualified recalibration is 79.5/100 before DQ and establishes DQ7 for M2 laminar. Seven historical validator passes are structural; retain the Re200 validation and historical binary limitations.
 
-run_identity.json SHA-256: `8afee0d65b287815ad0d37afe012bdadf21ed1f72ba0600424f36b7a79501a9b`; contestant_final_response.md SHA-256: `e2fa92927636989cfc3d81b33f128add4c59c8926c6658eb3ebdb12579a56f69`. These unindexed sidecars are not validated by cfdeval check.
+run_identity.json SHA-256: `8afee0d65b287815ad0d37afe012bdadf21ed1f72ba0600424f36b7a79501a9b`; contestant_final_response.md SHA-256: `c6bab3f4a90de953fdd7a796b5b4428ff21dfa7ad716ab010c92a849a04bf1f3`. These unindexed sidecars are not validated by cfdeval check.
 
 
 The historic attempt 37b8e68 retains the originally delivered raw results, even though the current workspace lacks them and the curated tip excludes them. Independent review covered all eight force histories, the report and all rubric/review/DQ criteria. A selected Re20 Mach image reproduces pixel-identically from the attempt field; other image bindings and exact production executables remain qualified. A clean build and ten unit/MPI/mesh tests passed without a solver rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fd21c-986b-7cb2-adf8-e274cf4b8308 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-05T19:17:15.736Z, task_complete 2026-08-05T19:17:15.900Z; stored response-line SHA256 f3f5fb9fdf3fe65134676828c913d0c7a7edfd8d9c14f0c5f10ad83e06bf7342, completion-line SHA256 cbdb2c228c07ff3f148a35ada81f19d8ca54bb09ea035dce0f303158c7601473, exact text SHA256 c6bab3f4a90de953fdd7a796b5b4428ff21dfa7ad716ab010c92a849a04bf1f3; previous sidecar SHA256 e2fa92927636989cfc3d81b33f128add4c59c8926c6658eb3ebdb12579a56f69 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

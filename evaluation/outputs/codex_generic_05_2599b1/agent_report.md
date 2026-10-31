@@ -32,7 +32,7 @@
 
 Read source, the root final response, report manifest and the declared v3 packages. Each declared package fails the explicit validator because metadata lacks `partitioner`; final response admits first-order/weak viscous behavior, unreasonable cylinder forces, and no meaningful Re200 shedding. No solver rerun was performed.
 
-`run_identity.json` SHA-256: `a9ffa356b8ca44e8ab76b644868bb7df4c484b41a45393da8b66fd8a1f8016c0`; `contestant_final_response.md` SHA-256: `54071d46306a2e184c0aefe40df9d97e95d5fd72de7e488ea82245b2360c1c97`. They are unindexed sidecars not validated by `cfdeval check`.
+`run_identity.json` SHA-256: `a9ffa356b8ca44e8ab76b644868bb7df4c484b41a45393da8b66fd8a1f8016c0`; `contestant_final_response.md` SHA-256: `a0efee3447962302df7fdf7be4f0e03792a5064b3be2bbf1e6ac6d7515119732`. They are unindexed sidecars not validated by `cfdeval check`.
 
 ## Rubric scores (100 points, SCORING_RUBRIC.md)
 
@@ -126,3 +126,7 @@ Criterion-specific score notes now identify the exact source and selected-result
 ## Qualified full review — 2026-10-31
 
 All ten rubric sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to the available evidence limit. The immutable manifest identifies the v3/v4 result variants; Re200 v3 force history and the report itself establish the nonperiodic outcome despite its statistically-periodic metadata, and source establishes all-rank full mesh. DQ7 and TASK prohibited shortcut 7 remain; other triggers are not established on the available evidence. In particular, selected multi-rank force files are empty, so no DQ4 numerical comparison is asserted, and final-source transient first-order treatment is not attributed to an earlier unbound production binary for DQ10. The previously labeled partial sections are historical checkpoints. Exact historical executable/source and some figure/data identities remain unresolved and explicitly qualify this review; no CFD or Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a0383e-33e3-7213-81ec-591553ab40fd latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-27T04:10:04.594Z, task_complete 2026-08-27T04:10:04.617Z; stored response-line SHA256 a9e112552edf55a17b2d4037f6b1adea8d03265d76463f082f230e6f5fb125e3, completion-line SHA256 4625d0c9abcb4ea632ecfb39548b10c53ba395579a8be2e5b6379415f84a2ac0, exact text SHA256 a0efee3447962302df7fdf7be4f0e03792a5064b3be2bbf1e6ac6d7515119732; previous sidecar SHA256 54071d46306a2e184c0aefe40df9d97e95d5fd72de7e488ea82245b2360c1c97 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

@@ -31,7 +31,7 @@
 
 Evaluated immutable curated submission `8615cddbc8d507f20c559d9659eccbf41d8021f1` against reconstructed initial commit `a14f203babe6794ad032aea760aed8e302e62b5a`. The commit audit passed and confirms that raw case outputs were intentionally excluded. Contestant checkpoint `783eb18534a278714a4f7e2fe9e392038a95e2f2` contains the actual case packages and figures delivered immediately before the selected final response; curated-tip omission does not remove them as contestant evidence. Source and report match the curated tip except for a removed backup. Historical executable attribution is qualified. No Re200 or other unsteady rerun was performed.
 
-The sole project-local Codex root `019fd883-6a9d-7c53-a1b1-96a168fb91ae` and its 19 descendants were selected from the bundled `.sessions/codex` database/rollouts. Its UTC start is 2026-08-06. Terminal final prose is stored in `contestant_final_response.md` (SHA-256 `ef6734a0152173302fdae290d7cc186f7eb8d5a968e9d2fc914f3811c5ae53f9`). The identity sidecar SHA-256 is `6ce469cd7a9a3f78ed74399634ee9a0a15fb6467bdac32fdd3dd116c8bab4d9c`.
+The sole project-local Codex root `019fd883-6a9d-7c53-a1b1-96a168fb91ae` and its 19 descendants were selected from the bundled `.sessions/codex` database/rollouts. Its UTC start is 2026-08-06. Terminal final prose is stored in `contestant_final_response.md` (SHA-256 `912ac42cf983ffa19890f17a95f1acf3005d6c516dd73afa1fbb5b9f63d2cc3c`). The identity sidecar SHA-256 is `6ce469cd7a9a3f78ed74399634ee9a0a15fb6467bdac32fdd3dd116c8bab4d9c`.
 
 ## Rubric scores (100 points, SCORING_RUBRIC.md)
 
@@ -80,3 +80,7 @@ Qualified rubric: **58.5/100**. DQ is true for false successful-result metadata 
 ## Qualified full review and wall-output check — 2026-10-31
 
 All ten sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to available evidence. Final 58.5/100, DQ7/8 remain. In addition to the source’s explicit no-slip boundary zeros at `output.cpp:40–45`, selected checkpoint `783eb18` has 404 M0.15 laminar and 100 Re20 no-slip surface rows, all with u=v=0; DQ11 is not supported. The different-CFL/ramp np1/np2 comparison does not establish DQ4. Re200’s documented relaxed target does not establish a full strict miss count, and its exact binary remains unbound. Earlier partial checkpoints are historical; no CFD, rank or Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fd883-6a9d-7c53-a1b1-96a168fb91ae latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-09T15:47:17.556Z, task_complete 2026-08-09T15:47:17.600Z; stored response-line SHA256 7945549e74d18729875b2e9102bee12e7e7f98bbd4250aa52d1bcaa36e42e9a8, completion-line SHA256 a83e11f480dd645d75077a9eaeefb8f016a6b6042cc0dff0d62ead42a1119c48, exact text SHA256 912ac42cf983ffa19890f17a95f1acf3005d6c516dd73afa1fbb5b9f63d2cc3c; previous sidecar SHA256 ef6734a0152173302fdae290d7cc186f7eb8d5a968e9d2fc914f3811c5ae53f9 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

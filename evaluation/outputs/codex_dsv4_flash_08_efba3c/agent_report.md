@@ -20,7 +20,7 @@ DQ7 is established for the M2 laminar final status, which claims convergence at 
 
 ## Limitations and sidecars
 
-A clean immutable-source solver build succeeds in the network-disabled cfd-bench container using /opt/external; the delivered external symlink itself is dangling. No CFD or unsteady Re200 rerun was performed. Raw result data were used only for validation and remain excluded from the curated result commit. `run_identity.json` SHA-256 is `5340bfba43c31c9cdb82946acb55c027ba3aae4bc8f554f8bcc9801000de8c35`; `contestant_final_response.md` SHA-256 is `58fc59a37fe51e4ae0857bc6563e0844bf518a89a8b2dc9e3f3cfd6f355c6359`. These are unindexed sidecars: `cfdeval check` does **not** validate them.
+A clean immutable-source solver build succeeds in the network-disabled cfd-bench container using /opt/external; the delivered external symlink itself is dangling. No CFD or unsteady Re200 rerun was performed. Raw result data were used only for validation and remain excluded from the curated result commit. `run_identity.json` SHA-256 is `5340bfba43c31c9cdb82946acb55c027ba3aae4bc8f554f8bcc9801000de8c35`; `contestant_final_response.md` SHA-256 is `b2b96d6de9202c77c3610e29111f0717e0ffc75d8532da6c2f1ac3a24eb7024c`. These are unindexed sidecars: `cfdeval check` does **not** validate them.
 
 ## Verdict
 
@@ -45,3 +45,7 @@ Immutable e5d4a7a clean CMake build succeeds in network-disabled cfd-bench with 
 ## Full calibration — 2026-10-30
 
 All ten rubric sections and 27 review points now include criterion-specific evidence. The case scores and DQ7 finding are detailed above. Clean immutable build passed with explicit container dependencies; CLI restart is accepted but ignored. Root-built mesh is cleared before iterations, METIS and halo exchange are implemented, and report explicitly discloses M2 first-order mode. Full viscous traction is used as the viscous force split; NaN transient ratio can escape miss counting, but true strict miss count is unknown and Re200 status itself is failed. driver.cpp:1070–1116 includes a linear LSQ diagnostic that reports error but returns success unconditionally. No solver rerun, external authorship search, exhaustive pixel audit, or independent rank comparison was performed. Both structural/completion gates pass.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fdf7d-fd63-79b1-99a9-61a5ea0a6156 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-09T10:02:06.399Z, task_complete 2026-08-09T10:02:06.456Z; stored response-line SHA256 a632c3f1e77b6b9e00076353bf3d2db0916df86f16ab58cd63f25c9bec260af3, completion-line SHA256 37bf0d41092afceac57f3bb54e5f08b47b283fae95a8848e4df81db815a9e38e, exact text SHA256 b2b96d6de9202c77c3610e29111f0717e0ffc75d8532da6c2f1ac3a24eb7024c; previous sidecar SHA256 58fc59a37fe51e4ae0857bc6563e0844bf518a89a8b2dc9e3f3cfd6f355c6359 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

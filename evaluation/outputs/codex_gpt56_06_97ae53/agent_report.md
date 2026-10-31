@@ -14,7 +14,7 @@ Fork replay previously contributed 103,394,529 inherited tokens. The selected tr
 
 This legacy run has a verified v1.1 `post_run` provenance reconstruction, not a pre-run capture. The workspace-local Codex database and bundled rollout identify root `019fd895-3740-7e11-89a2-f7791227d1e9`, recorded under container cwd `/workspace`, as the sole continuous benchmark tree; it began `2026-08-06T19:39:16.488Z` and ended `2026-08-09T07:15:42.811Z`. It has five selected descendants and no bundled OpenCode store. The recorded branch/SHA before implementation work and `git cat-file` establish the reconstructed initial state. Original run container/environment remain unavailable.
 
-The exact terminal Codex final response is stored in `contestant_final_response.md`: message `msg_05d0fbb7077f24ea016a78291cfd648190ad11ad515e861cc0`, timestamp `2026-08-09T07:15:42.678Z`, one ordered text part, from the bundled root rollout. Stored message/extracted-file SHA-256 is `8980daa6af546d5c6d7086c44ce3dae2d5bb37b2094f451a7e3f93b555fc3496`; it is unredacted. This Markdown sidecar is also unindexed by the current index contract.
+The exact terminal Codex final response is stored in `contestant_final_response.md`: message `msg_05d0fbb7077f24ea016a78291cfd648190ad11ad515e861cc0`, timestamp `2026-08-09T07:15:42.678Z`, one ordered text part, from the bundled root rollout. Stored message/extracted-file SHA-256 is `d07760c4cac8061639866b2fc90f575284936e1d7d39da88744c6474051468a2`; it is unredacted. This Markdown sidecar is also unindexed by the current index contract.
 
 ## Validation and evidence review
 
@@ -34,3 +34,7 @@ An independent clean build of the immutable source succeeded in a restricted con
 
 
 The full qualified review compared all eight original attempt histories, all 16 delivered PDF pages, ten rubric sections, 27 review points and DQ1–13. One Re20 Mach image reproduces pixel-identically from its original field. The source matches the historical attempt, but the original executable and remaining figure bindings are unbound; the clean build has no registered CTests. No solver was rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fd895-3740-7e11-89a2-f7791227d1e9 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-09T07:15:42.678Z, task_complete 2026-08-09T07:15:42.811Z; stored response-line SHA256 8773a5cf78d9d50db84320aec1654450c5860ab7d60c19b3664419a883d41be9, completion-line SHA256 ddb6907316544d1d38f981fcf9dff410b8fa157210db37b2128e641754ef3e26, exact text SHA256 d07760c4cac8061639866b2fc90f575284936e1d7d39da88744c6474051468a2; previous sidecar SHA256 8980daa6af546d5c6d7086c44ce3dae2d5bb37b2094f451a7e3f93b555fc3496 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

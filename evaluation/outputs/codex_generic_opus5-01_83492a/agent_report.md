@@ -91,7 +91,7 @@ No numbered disqualification has been established in the available evidence. All
 
 No unanswered metadata questions. The selected harness is Codex and the exclusive telemetry source is `workspace/codex/generic/opus5-01/.sessions/codex/`. Root `01a03768-0f28-7781-b309-8273bce2a530` was selected because it begins the benchmark work and owns 59 subagents spanning implementation, results, report, and closure audits. Its persisted UTC interval is 2026-08-25T05:33:13.688000+00:00 to 2026-08-27T01:47:42.037000+00:00, so the execution date is 2026-08-25. The database recorded container cwd `/workspace`; extraction was explicitly rooted and confined to the bundled project telemetry.
 
-The terminal root response was extracted from the root rollout's task-complete event and saved as contestant-side evidence. `run_identity.json` SHA-256 is `2ef1ca6ad53ec1cfbe11bd49eea421f92c9db09360e6a50db627333f892574b0`; `contestant_final_response.md` SHA-256 is `275b0b41f6d23199283ab33596b10e5f31e29b9a9972ba39e3b9af1ddf38b441`. Both are unindexed sidecars and are not validated by `cfdeval check`.
+The terminal root response was extracted from the root rollout's task-complete event and saved as contestant-side evidence. `run_identity.json` SHA-256 is `2ef1ca6ad53ec1cfbe11bd49eea421f92c9db09360e6a50db627333f892574b0`; `contestant_final_response.md` SHA-256 is `8add06c4000a8cb9092ec789a45294ec596d5b12b147424ce8e9bf537dba75a4`. Both are unindexed sidecars and are not validated by `cfdeval check`.
 
 ## Limitations
 
@@ -141,3 +141,7 @@ All review points and rubric sections now cite criterion-specific source, select
 ## Qualified full review — 2026-10-31
 
 All ten rubric sections, eight case scores, 27 review points and 13 DQ rules were assessed to the available evidence limit. Final 90/100, no established DQ; Re200 case remains capped at 2 because the contestant-delivered plot does not resolve late drag, while its raw lift period and force ranges show an oscillatory attempt. Seven steady packages identify `b350651`; the Re200 executable was built at `a628093` or earlier per the contestant provenance document, but the exact historical binary and full-run fallback counts remain unbound. Prior partial sections are historical checkpoints; no CFD, rank or Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a03768-0f28-7781-b309-8273bce2a530 latest completed assistant response matched exactly to task_complete despite literal channel missing and phase missing. Assistant timestamp 2026-08-27T01:47:41.923Z, task_complete 2026-08-27T01:47:42.037Z; stored response-line SHA256 e19d815de8d3d79f728f02ca568959c1301859a3033537b15c56255320eb1e3d, completion-line SHA256 7d8c5514619257995d2d76bef0a55235ac990f8e53f5ba881c6b53c8b9f7271c, exact text SHA256 8add06c4000a8cb9092ec789a45294ec596d5b12b147424ce8e9bf537dba75a4; previous sidecar SHA256 275b0b41f6d23199283ab33596b10e5f31e29b9a9972ba39e3b9af1ddf38b441 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

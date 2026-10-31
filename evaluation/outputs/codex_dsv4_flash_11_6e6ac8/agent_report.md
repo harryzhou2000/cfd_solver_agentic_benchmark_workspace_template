@@ -8,7 +8,7 @@ DQ7 and the TASK full-mesh prohibition are established below; no wrapper is evid
 
 `run_identity.json` SHA-256: `ed4e57af78f43f97d910e41e31594354eca8a12477ba56baf85e9952bc2b183d`.
 
-`contestant_final_response.md` SHA-256: `86f4facc91e62a984a1c41c1e81c6585a41bcc21692753a2e7f2e423ae9e13f8`.
+`contestant_final_response.md` SHA-256: `a4ed49aa5d2ef2c41bd4cd8e749ad068187687d6080993095d8b397ea9f66202`.
 
 These are unindexed sidecars; `cfdeval check` does not validate them.
 
@@ -33,3 +33,7 @@ Immutable 2cd0844 clean CMake build succeeds with warnings in network-disabled c
 ## Full calibration — 2026-10-30
 
 All ten rubric sections and 27 review points have criterion-specific evidence. Rubric 70→53, case scores 2,2,2,2,2,2,2,0 → 1,2,2,1,2,1,1,0. DQ7 applies to M0.15 unstable force plateau and TASK.md:227 separately prohibits full mesh on all ranks; METIS/local halos mean numbered DQ9 is not inferred. Seven steady packages pass structural validator; it fails Re200 for absent metadata, correcting old review note that it failed immediately. Rusanov is implemented and reported, correcting prior incorrect Roe note; no committed probe programs exist, correcting prior test note. The true BDF2 residual is present on fresh runs, but restart uses BDF1 for every resumed step; no Re200 completed metadata is available. Actual force histories and field limitations, null output source revision, force accumulation error, MPI collective risk and report contradictions are documented above. Clean immutable build passes with warnings; no CFD rerun, external similarity search, general MPI-invariance proof or exhaustive pixel audit. Both gates pass.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fe864-a126-70a1-9fe5-9d5e378eee12 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-10T09:49:15.353Z, task_complete 2026-08-10T09:49:15.411Z; stored response-line SHA256 c63f62b8ecac8122be5f2320c4d0df34f2b156e1e24d16c8d75097f94e495e84, completion-line SHA256 3bc8b83f7d8b5da658106a8e98d4ad145fd7b4b6d58bb581d9adfe680c7a027d, exact text SHA256 a4ed49aa5d2ef2c41bd4cd8e749ad068187687d6080993095d8b397ea9f66202; previous sidecar SHA256 86f4facc91e62a984a1c41c1e81c6585a41bcc21692753a2e7f2e423ae9e13f8 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

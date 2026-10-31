@@ -52,7 +52,7 @@ The qualified rubric is **69/100**, replacing the old unsupported 3-point assign
 `45a3937acdd6126367ec7137ced2a8e782bbbeb734f4303bf2ef3bcf871acc90`.
 
 `contestant_final_response.md` SHA-256:
-`cda1f369e5a481889edae5bb18775516fd98bc64cb19c8e43e3a6ee5d19336b1`;
+`1634a0c1d38513b88d8e2f73aa5f234adfadf36696376c13bc07aedbbd614dca`;
 stored response-item record SHA-256:
 `2976972490954ff66a391d98197ece19434a1c5d13a807cb592927e50ae78170`.
 
@@ -61,3 +61,11 @@ index contract; `cfdeval check` does not validate unindexed sidecars.
 
 
 The independent review examined all eight original attempt histories, all 36 delivered report pages, ten rubric sections, 27 review points and DQ1–13. The old 30-point rubric assigned 3 points to every section without criterion-specific support; the revised score credits source and report capability while keeping poor case scores low. Original Re200 metadata and report explicitly say failed, and the report discloses 26,720 backward-Euler fallback intervals. The current workspace contains a later different Re200 package and is not substituted for the original. The precise original production binary and other image bindings remain unbound; one Re20 figure was reproduced exactly. No solver was rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fe5fc-728f-7580-81ba-d6e2995347e0 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-16T00:26:56.364Z, task_complete 2026-08-16T00:26:56.617Z; stored response-line SHA256 8c0e4f62613e46f38a32f687d58d1bf9ecfecab9e2b4e2499be583460f794246, completion-line SHA256 eba298f2444f299c1aaf99095e77a2c5396f4736e318fd4a242d7a32ee515859, exact text SHA256 1634a0c1d38513b88d8e2f73aa5f234adfadf36696376c13bc07aedbbd614dca; previous sidecar SHA256 cda1f369e5a481889edae5bb18775516fd98bc64cb19c8e43e3a6ee5d19336b1 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.
+
+## Later selected-final claim requires further review — 2026-10-31
+
+The selected Aug 16 final response claims all eight packages pass and Re200 is statistically periodic; the earlier immutable report/attempt says failed, while a different workspace canonical metadata dated Aug 16 00:03:59 UTC reports success. The relationship between that package, submitted report and selected root is not yet established; case score and DQ7 remain provisional pending provenance and physical review. No unsteady rerun. The earlier description of the terminal response as an honest failure applies to the earlier response, not the newly selected later response.

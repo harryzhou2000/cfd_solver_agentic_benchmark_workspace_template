@@ -18,7 +18,7 @@ No disqualification is established: no internal executable wrapper was found; th
 
 `run_identity.json` SHA-256: `616391f65e0b53a07b3fa7ab90b616e0f9fc7ed80ee530b1a2666b51dd668098`.
 
-`contestant_final_response.md` SHA-256: `44911bcbea7e17fd941dc3b0e642d1d8aaad534904abfe9de713564a23ff93b2`.
+`contestant_final_response.md` SHA-256: `0ec21b4cc266378fc7a5991b73fcf27287e5b8b0df49f31511ac252abf5d4e72`.
 
 Both are unindexed sidecars; `cfdeval check` does not validate them.
 
@@ -46,3 +46,7 @@ The accepted compiled PDF pp2–3 contradicts its own text: report.tex:87–103,
 ## Full calibration — 2026-10-30
 
 All ten rubric sections and 27 review points include criterion-specific evidence; cases remain 1,1,1,0,0,0,1,0. The immutable solver does not configure because CMake references absent src/restart.cpp; the contestant report compiles. BDF2 source loses prior history through double shifts; restart lacks physical time/prior state; transient wall-force gradients are stale. Roe is implemented and called (flux.cpp:27–92, solver.cpp:178), while output.cpp:267 incorrectly labels its metadata rusanov_llf. The report 8-rank partition table says rank 0 owns/ghosts 2602/34, but each of six surviving 8-rank partition_diagnostics.csv files reports 2613/95; no inference about an unavailable distinct run. Main.cpp releases the full preprocessing mesh before solve. DQ7 is not established because final statuses explicitly fail; DQ8 is not established solely by erroneous narrative while submitted failed diagnostic curves plausibly match. No external similarity search, CFD rerun, independent rank comparison or exhaustive pixel audit. Both record gates pass.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fdf88-1057-7ea1-8471-24edfbc48dc3 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-09T10:00:52.023Z, task_complete 2026-08-09T10:00:52.074Z; stored response-line SHA256 aff861b2d1b3ff236b12cf71db0c4f42d57d840132c0fa7c3fd3d23de2e38777, completion-line SHA256 320a1444959349fe82d92de569e7b731a880bae61b0e44aeb48586a16c61c375, exact text SHA256 0ec21b4cc266378fc7a5991b73fcf27287e5b8b0df49f31511ac252abf5d4e72; previous sidecar SHA256 44911bcbea7e17fd941dc3b0e642d1d8aaad534904abfe9de713564a23ff93b2 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

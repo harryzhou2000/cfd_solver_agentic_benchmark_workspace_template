@@ -38,3 +38,7 @@ The ten section scores and 27 weighted review criteria have source- or result-sp
 The rank discrepancy, production binary identity, exact plateau mechanism and individual image bindings remain qualified as described above. Figure and solver output evidence is preserved independently of structural validation; both integrity and completion checks pass.
 
 The unindexed `run_identity.json` SHA256 is `eafa79ef7e2e481a642d91be3c784d2a907cfdb8332ad340b6094f239486ea6c`; `contestant_final_response.md` SHA256 is `fadfd160e4d4844e177b39e88f542ebee25e25af50ab55f595c064a53e90ebaf`. These unindexed sidecars are not validated by `cfdeval check`.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a00e56-e6e8-7411-8fce-12931bff5c71 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-26T06:32:43.591Z, task_complete 2026-08-26T06:32:43.758Z; stored response-line SHA256 1c6e260d60f1dfd0d368ce53c8c6ceec580313114a8466ed71b5cc7790776bf3, completion-line SHA256 0b7efe54947a495933b9b5ddb04ace975ce66ba255eebef1170d4492c771a42b, exact text SHA256 fadfd160e4d4844e177b39e88f542ebee25e25af50ab55f595c064a53e90ebaf; previous sidecar SHA256 fadfd160e4d4844e177b39e88f542ebee25e25af50ab55f595c064a53e90ebaf is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

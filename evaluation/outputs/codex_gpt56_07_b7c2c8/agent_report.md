@@ -4,7 +4,7 @@ Submission `codex/gpt56/07` at `7ad799097f6d8426eb34d5a5ba092956a3e7d7b7` was cu
 
 Primary telemetry is project-local Codex root `019fdbed-a7d0-7072-a8ca-4ce5a84e49c0`, UTC 2026-08-07 to 2026-08-09. The unrelated PONG root was excluded. Exact terminal response message `msg_08755cfb230b1467016a7840a8aee08196b27cdcf2f2837375` is stored verbatim in `contestant_final_response.md` (also unindexed).
 
-`run_identity.json` SHA-256 is `488adebda574202b9382e282a6af01165358f6f80ce43c3bd7c0b2991a2e9257`; `contestant_final_response.md` SHA-256 is `824440d6c874c9057309a18c8f3ff855672a1e16c298839312d87a0d009289ab`. These unindexed sidecars are not validated by `cfdeval check`.
+`run_identity.json` SHA-256 is `488adebda574202b9382e282a6af01165358f6f80ce43c3bd7c0b2991a2e9257`; `contestant_final_response.md` SHA-256 is `a60deb0842d16f2b8aacc51eb8d6a533cdc19411756ee35cebfe009bee258df8`. These unindexed sidecars are not validated by `cfdeval check`.
 
 The official validator passed all eight named canonical packages and `solver/report` from immutable original attempt `0b925edb552ae31c3606748051f36b7ca24509e0`. This is contestant-result evidence, not evidence that raw data belongs in the curated branch. A committed-tree `pdflatex -halt-on-error report.tex` was attempted from detached `7ad7990` and failed at missing `figures/cylinder_m010_laminar_re200_residual.pdf`; all PDF/SVG/report-PDF dependencies were deliberately excluded under curation policy. Original PDF/SVG figures were read only from the immutable attempt.
 
@@ -18,3 +18,7 @@ The earlier found flag lacked a numeric rubric ID. It maps to **trigger 7**, not
 
 
 Independent calibration examined all eight original case histories, all 36 delivered PDF pages, ten rubric sections, 27 review points and DQ1–13. A selected Re20 Mach figure reproduces byte-identically from both original rank fields; the manifest names only one. A clean source build succeeds with no registered CTests. M2 reconstruction scale 0.25 is supported by the selected launch, whereas the possible 500-step first-order startup cannot be attributed to the unbound historical binary/environment. No solver was rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fdbed-a7d0-7072-a8ca-4ce5a84e49c0 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-09T08:56:12.607Z, task_complete 2026-08-09T08:56:12.800Z; stored response-line SHA256 c78185efd249fcfa1af6265c8e0c2ec52942df768832c7db38eee19514b84ea2, completion-line SHA256 01a5d814c1d4aa14b4bc0ca4951a7ef75efe208369d2f0b237e0e8bd76497eef, exact text SHA256 a60deb0842d16f2b8aacc51eb8d6a533cdc19411756ee35cebfe009bee258df8; previous sidecar SHA256 824440d6c874c9057309a18c8f3ff855672a1e16c298839312d87a0d009289ab is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

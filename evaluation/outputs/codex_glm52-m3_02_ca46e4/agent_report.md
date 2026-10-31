@@ -62,7 +62,7 @@ The selected project-local Codex root is `019fbf4d-babf-7561-98c3-4f8b7915d4be` 
 
 `sessions.json` SHA-256: `b7347fc27113d415ec2d8e4972a056f53f98d6f7d9e00c100fc67110628587db`. `metadata.json`, `expenses.json`, and `measurements.json` SHA-256 values are respectively `9262600f76c59b3a5fce898e1bb7921fc98ace1f66d0c6800a0e967f3894b98a`, `f72d9973c3689a863f74a5aa304267d1487a4ea4b3eb97a47b59b68ba52bf3c7`, and `01c444175f4a46de9af83a0a44282874268385bdbbb16ded5810e57c4fd4349d`.
 
-`contestant_final_response.md` is extracted from that terminal message with SHA-256 `c84fe49c85a74b2650a5e953b8ac81d7ae303fc7c4cc66f10eedc260bd0a17da`. `run_identity.json` and this final-response Markdown sidecar are unindexed by the present index contract; `cfdeval check` does not validate these unindexed sidecars.
+`contestant_final_response.md` is extracted from that terminal message with SHA-256 `1cc3d991c7dab98876b0e7b3a6bca265ecb89cb22a3bae17d9bd9a8390235d99`. `run_identity.json` and this final-response Markdown sidecar are unindexed by the present index contract; `cfdeval check` does not validate these unindexed sidecars.
 
 ## Verdict and limitations
 
@@ -72,3 +72,7 @@ This is a partial solver implementation, not a complete benchmark submission. It
 ## Qualified full review — 2026-10-31
 
 All ten sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to available evidence. Final 58.5/100, DQ7 and TASK full mesh remain. The recovered checkpoint supplies eight case histories and standalone figures; the earlier all-zero absence rationale is superseded. Its Re200 last inner ratio 0.915 versus target 0.001 and disclosed absence of a street support the false-success finding. The reported 120000 misses are summed across ranks and cannot be interpreted as distinct failed physical steps; the metadata fraction is clamped. Exact historic executable and full strict miss counts remain unbound. Earlier partial sections are historical checkpoints; no CFD, rank or Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fbf4d-babf-7561-98c3-4f8b7915d4be latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-02T09:10:45.211Z, task_complete 2026-08-02T09:10:45.277Z; stored response-line SHA256 a26299a13c2053b6e5924c757d4916ecb97d67b39ac5ffd95413dda9eb157462, completion-line SHA256 b349cc095e502d4c513bf7ceece17bb585d916373ddd22a53fd327d5cb3beb73, exact text SHA256 1cc3d991c7dab98876b0e7b3a6bca265ecb89cb22a3bae17d9bd9a8390235d99; previous sidecar SHA256 c84fe49c85a74b2650a5e953b8ac81d7ae303fc7c4cc66f10eedc260bd0a17da is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

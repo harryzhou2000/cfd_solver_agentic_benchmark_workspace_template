@@ -14,4 +14,8 @@ All ten rubric sections, 27 review points, eight cases and DQ1–13 were examine
 
 SHA-256 `run_identity.json`: `2e46522b314345f542d59023766865ce48519e98dd818df5639128490b47cbcc`.
 
-Final-response status: absent. Two selected Codex continuation roots have no unambiguous single terminal root, so no response was invented. The identity sidecar is unindexed and not validated by `cfdeval check`. No Re200 or unsteady solver rerun was performed.
+Final-response status: absent. Two selected Codex continuation The operator selected the later substantive continuation as the terminal root. The identity sidecar is unindexed and not validated by `cfdeval check`. No Re200 or unsteady solver rerun was performed.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a0283e-5d68-7bc2-87d5-f3d7371d1c27 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-26T05:54:48.678Z, task_complete 2026-08-26T05:54:48.693Z; stored response-line SHA256 7bb1c45caca287caf8921c370aa994c6c4a944fca8735275ee414fe3634910a6, completion-line SHA256 49c3f0a60f26dc87325e662b82cc45bc061b16b0d8c693bbc09eb89ccc336bba, exact text SHA256 ae429177810ecfeb4b0a3f4c6c0f56abf0279c8ceea6c689fb67f676bcf61b56; previous sidecar SHA256 absent is preserved in Git history. Credential scan found no credential. Operator selected the later substantive continuation as terminal. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

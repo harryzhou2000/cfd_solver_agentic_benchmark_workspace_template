@@ -42,7 +42,7 @@
 
 Read source, report manifest, raw result/status packages, and final response. The explicit validator passes all eight packages and report. Substantive review found report/status disagreement for M2 cases, Re20 drag about 7.23, and Re200 drag about 4.85 with near-zero lift. No solver rerun was performed.
 
-`run_identity.json` SHA-256: `e75eccd7679bb5bd0980f8a169be57952393f4b6f96e7082d9f5ec105a34137e`; `contestant_final_response.md` SHA-256: `e385551c3147d91112c4cfd0aad324d25eba1191470bc598b9ec799f2dbfd922`. These are unindexed sidecars not validated by `cfdeval check`.
+`run_identity.json` SHA-256: `e75eccd7679bb5bd0980f8a169be57952393f4b6f96e7082d9f5ec105a34137e`; `contestant_final_response.md` SHA-256: `883869a54eca2846817ad1303f7438de7899dcbf217e57991e27e74f10965ac4`. These are unindexed sidecars not validated by `cfdeval check`.
 
 ## Rubric scores (100 points, SCORING_RUBRIC.md)
 
@@ -148,3 +148,7 @@ Reviewed available source and rank evidence for the other numbered triggers, wit
 ## Qualified full review — 2026-10-31
 
 All ten rubric sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to the evidence limit. 52/100, DQ7/10 and TASK full-mesh prohibition remain supported. Source commits `12f77fb`, `0b4616f` and `f679644` share the same limiter-disabled solver.cpp SHA, strengthening the source lineage but not proving the exact historical executable. The contestant historical manifest and matching outputs supply the standalone evidence described above; other figure/production binding remains qualified. No unsupported DQ2 is inferred from zero surface Cf or edited metadata. Earlier partial checkpoint descriptions are historical. No CFD, rank or Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a0340e-8e50-7490-b64e-976393b0d123 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-24T16:13:38.430Z, task_complete 2026-08-24T16:13:38.448Z; stored response-line SHA256 d6a710760bc35b8b5de81d010d6da8b3c0256d5931ea901d7e9233a528cd445e, completion-line SHA256 8f14970fca0287c6c0235f15168878be9811da9c8797ba340a922a95963b47d1, exact text SHA256 883869a54eca2846817ad1303f7438de7899dcbf217e57991e27e74f10965ac4; previous sidecar SHA256 e385551c3147d91112c4cfd0aad324d25eba1191470bc598b9ec799f2dbfd922 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

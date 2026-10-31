@@ -42,7 +42,7 @@
 
 Read source, final response, final run manifest and raw packages. Each case directory passes alone, but the explicit complete validator fails because the report figure manifest maps paths as `figures/figures/...`; the final manifest leaves M2 laminar and Re200 pending. No solver rerun was performed.
 
-`run_identity.json` SHA-256: `849ea0290da49190e7fc766dab050317b8bfe21726baa88ef2f5c7408e942269`; `contestant_final_response.md` SHA-256: `fe36d58f081aa1976ffe561f9bafef3c4015b6f0fde783309a7526d92472e497`. These are unindexed sidecars not validated by `cfdeval check`.
+`run_identity.json` SHA-256: `849ea0290da49190e7fc766dab050317b8bfe21726baa88ef2f5c7408e942269`; `contestant_final_response.md` SHA-256: `e81256d1faef2f2f8d06d8b51840ad1f2b16d46b3a6f639b87e3922c271b1ddc`. These are unindexed sidecars not validated by `cfdeval check`.
 
 ## Rubric scores (100 points, SCORING_RUBRIC.md)
 
@@ -139,3 +139,7 @@ All five pages of accepted workspace-existing PDF SHA `f2d52bb09f7dbbbe67fb08726
 ## Qualified review and delivered-figure note correction — 2026-10-31
 
 All ten rubric sections, eight case scores, 27 review points and 13 numbered DQ rules have been assessed to the available evidence limit. Rubric remains 35/100 with DQ2 and TASK prohibited shortcuts 6/7. The previously stated rule that workspace or historical contestant artifacts could not satisfy the figure floor was incorrect: `f0cc8b2` contains separate lift/drag histories for all three inviscid cases, and each current PNG and corresponding force CSV matches that checkpoint byte-for-byte. Their current final Cd values are 0.0660201, 0.0509996 and 0.0937857. The cases remain capped at 2 because a contestant-delivered numerical CL/CD summary was not located, and the field output is rank-0-only/partial-domain; the raw CSV alone does not substitute for the stated summary. Re200 has historical force/field plots but its analytically generated residual history and missing trustworthy transient evidence remain decisive. Exact historical binary and force-generation provenance remain qualified; earlier partial checkpoints are historical. No CFD, rank or Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a0367d-d349-7061-afc5-967548eecef7 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-25T03:27:57.860Z, task_complete 2026-08-25T03:27:57.876Z; stored response-line SHA256 a681f6d0d6b90b9eeb8561c5d824773c2957640dfa623982099869a2168dbaf7, completion-line SHA256 957f0467e63ff4150ff25071d26541d37ae29deb419fa1fe62703af9e91fba4a, exact text SHA256 e81256d1faef2f2f8d06d8b51840ad1f2b16d46b3a6f639b87e3922c271b1ddc; previous sidecar SHA256 fe36d58f081aa1976ffe561f9bafef3c4015b6f0fde783309a7526d92472e497 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

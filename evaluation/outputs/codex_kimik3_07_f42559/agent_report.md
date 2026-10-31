@@ -15,3 +15,7 @@ SHA-256 `run_identity.json`: `b6d41c34aaa3b2f4f5ae731bfc6ff392e0c5cc7dc16f8086c5
 SHA-256 `contestant_final_response.md`: `772f9c8a4c8c0d66b7fec62ab98b1b3d032707ab3a36b1d24ecc363686b15db3`.
 
 These are unindexed sidecars and are not validated by `cfdeval check`. The structural validator does not prove physical convergence; no Re200 or unsteady solver rerun was performed.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a03d68-6067-7e23-9e07-14204c3074f3 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-26T16:37:23.299Z, task_complete 2026-08-26T16:37:23.338Z; stored response-line SHA256 e51c1619bf9d131deb244da60cd67f658b9fead97be7f9039a2745ec4d9693a1, completion-line SHA256 1edd237fa845f1c27a4b4954fcbea1635bc23b89dc92b29c89df63beb5336bb9, exact text SHA256 772f9c8a4c8c0d66b7fec62ab98b1b3d032707ab3a36b1d24ecc363686b15db3; previous sidecar SHA256 772f9c8a4c8c0d66b7fec62ab98b1b3d032707ab3a36b1d24ecc363686b15db3 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

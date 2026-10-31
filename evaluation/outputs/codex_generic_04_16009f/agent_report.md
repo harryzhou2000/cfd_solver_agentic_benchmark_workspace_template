@@ -32,7 +32,7 @@
 
 Read source, final response, report manifest and raw output packages. The explicit validator fails because the only fuller package has an invalid `equation_set`; the report calls seven cases Running. No solver rerun was performed.
 
-`run_identity.json` SHA-256: `683b34d23c7de6eeceb42287a3ebcb128f4b68371334ec7b69f057997a395e5d`; `contestant_final_response.md` SHA-256: `4f82d7fcd8b009cdbdff5046247e470155d28e19876c0aa597ddf1204cd91bec`. They are unindexed sidecars not validated by `cfdeval check`.
+`run_identity.json` SHA-256: `683b34d23c7de6eeceb42287a3ebcb128f4b68371334ec7b69f057997a395e5d`; `contestant_final_response.md` SHA-256: `8098f8dc704f035c1eb0c465c7804c629fb1b0d2b0e000fe8aa344b556772d8b`. They are unindexed sidecars not validated by `cfdeval check`.
 
 ## Rubric scores (100 points, SCORING_RUBRIC.md)
 
@@ -125,3 +125,7 @@ Evidence-specific rubric/review notes now identify source methods and current ca
 All ten rubric sections, eight case histories, 27 review points and 13 DQ rules were assessed to the available evidence limit. Selected main root `01a03685-bd59-78a3-9346-e89cb6153308` completed-run event at 2026-08-25 03:40:31.034 UTC (stdout SHA-256 `e560990c4dd9e91e415d1e7a25b9680c515e85c0685c957406f19f1287f15e3a`) records wall time 99.561593 s, matching the preserved M0.15 run status, and a monotonically rising residual 0.012767→0.016470 from step 19100 to 19900, about 29% in 800 steps. Its metadata nevertheless marks the 20000-step run converged and its final residual-reduction value is −0.5033 orders. The late residual is actively worsening, not a demonstrated stable plateau, supporting DQ7 independently of the subsequently overwritten, unpaired force CSV.
 
 Final DQ6/7/10 and the task full-mesh prohibition remain supported by the source and evidence documented above; the submitted first-order source lacks the report-claimed production reconstruction. No historical executable or exact figure-to-data binding is established, and no DQ8/9/11/12 is inferred from the respective ambiguities. Prior checkpoint sections marked partial are historical. No CFD or Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a03685-bd59-78a3-9346-e89cb6153308 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-25T04:35:17.606Z, task_complete 2026-08-25T04:35:17.632Z; stored response-line SHA256 ab85ebe9091c1ec8104cd7d27e1917b9fae8cef05c76ee23e850c9a79477ef40, completion-line SHA256 d29966eece7c089b234bb42e90490cf3e39e63464524a1aef2b344b04dde3036, exact text SHA256 8098f8dc704f035c1eb0c465c7804c629fb1b0d2b0e000fe8aa344b556772d8b; previous sidecar SHA256 4f82d7fcd8b009cdbdff5046247e470155d28e19876c0aa597ddf1204cd91bec is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

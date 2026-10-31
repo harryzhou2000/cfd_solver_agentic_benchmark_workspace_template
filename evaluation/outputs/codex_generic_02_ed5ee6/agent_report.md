@@ -38,7 +38,7 @@
 
 Read the final response, submitted source/report and raw workspace packages. The explicit eight-case validator failed on missing M0.15-inviscid metadata and Re200's missing t=300 horizon. No solver was rerun; Re200 was not rerun.
 
-`run_identity.json` SHA-256: `3188a831b912158728b6e55ba17d62e0a27fd85f6b52a816bd398088909cc5dd`; `contestant_final_response.md` SHA-256: `1937e2cc0590ccd93ac0272d300726889a1238eff5ed59d6bcb4bfa0c082bba0`. These are unindexed sidecars not validated by `cfdeval check`.
+`run_identity.json` SHA-256: `3188a831b912158728b6e55ba17d62e0a27fd85f6b52a816bd398088909cc5dd`; `contestant_final_response.md` SHA-256: `b5b25b2ae174793e952ea9172f3b6ac6447d5da3cda71c2c0c9113b69be84766`. These are unindexed sidecars not validated by `cfdeval check`.
 
 ## Qualified rubric: 33/100 (previously 36)
 
@@ -86,3 +86,7 @@ All ten rubric sections and 27 review points now contain criterion-specific evid
 ## Qualified review and missing-package correction — 2026-10-31
 
 The historical checkpoints below document earlier partial stages; all ten rubric sections, eight case scores, 27 review points and 13 DQ triggers are now assessed to the evidence limit. The M0.15 inviscid raw package remains absent, but submission `d477eaf:solver/report/report.tex:92` gives Cd 0.450249/Cl 0.002361, and its committed residual, force and Cp figures document a recognizable case attempt. The residual graph contains roughly 50 sampled iterations; the force graph collapses at x=0, the report has a missing field placeholder, and the final response gives a different Cd≈0.403. Thus the score changes 0→1 for a severely incomplete, physically implausible attempt; no missing raw final data or producing source are invented. Other scores and 33/100 DQ7/TASK full mesh remain unchanged. The source-to-run and report/current-output conflicts cannot be resolved from available saved evidence; this qualification remains. No CFD/Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a02255-f5df-7840-b43d-b6e51aa2f3a7 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-21T06:06:37.428Z, task_complete 2026-08-21T06:06:37.458Z; stored response-line SHA256 db94078433378c93779d18cbb39b4de3e3a4cd9a45e157ffeaca3547eda27434, completion-line SHA256 6c0c0c92b928c346910fc78e3588abc407e7722082dc045b5fa24cd08dabd98c, exact text SHA256 b5b25b2ae174793e952ea9172f3b6ac6447d5da3cda71c2c0c9113b69be84766; previous sidecar SHA256 1937e2cc0590ccd93ac0272d300726889a1238eff5ed59d6bcb4bfa0c082bba0 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

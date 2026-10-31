@@ -14,7 +14,7 @@ TASK.md:227 full-mesh prohibition and DQ6 apply as documented below. No internal
 
 `run_identity.json` SHA-256: `7317c40ba3aab6dff476a4af01e3f6c726cd16bb037c4e3db6b489998543b1ff`.
 
-`contestant_final_response.md` SHA-256: `4b412bd2c6f85b2d8f901194102b3cf4d585aaa2b96bd144358892438d8d968a`.
+`contestant_final_response.md` SHA-256: `efd19b9f6daa8ebb8df5ad3f742410b9aabf02a7296907ce28f0844b5771e6db`.
 
 These are unindexed sidecars; `cfdeval check` does not validate them.
 
@@ -49,3 +49,7 @@ Immutable 47dff36 CMake build passes with warnings in network-disabled cfd-bench
 ## Full calibration — 2026-10-30
 
 All ten rubric sections and 27 weighted review points now carry source- or result-specific evidence. The eight scores remain 2 because all residual plot frames are blank; original case histories, contours and individual physics are documented above. Rubric 86→71; DQ6 for absent claimed BDF2 formula and TASK.md:227 for all-rank full mesh are independent. Full-horizon Re200 has real lift zero crossings under the implemented inconsistent time formula; neither strict BDF2 miss count nor fabricated output is inferred. Genuine METIS, neighbor exchange, tangential viscous projection and optional first-order switch exist; production use of the latter is not established. Root-only restart read can return before MPI broadcasts on error. Immutable clean CMake build passes with warnings in network-disabled cfd-bench; no CFD rerun, external similarity search, exhaustive pixel audit or general rank-invariance proof. Both record gates pass.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fe243-274e-7961-abdb-42fcc139142e latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-08T22:21:38.863Z, task_complete 2026-08-08T22:21:38.989Z; stored response-line SHA256 c9aa2c872dc38de2772401044ea5c993582eedfc756bf4f5a821bac1bd80325c, completion-line SHA256 e4092287d309bfee3a4d2c68b58f82b8f46d52709d13c3dc40fb4cf588b953e8, exact text SHA256 efd19b9f6daa8ebb8df5ad3f742410b9aabf02a7296907ce28f0844b5771e6db; previous sidecar SHA256 4b412bd2c6f85b2d8f901194102b3cf4d585aaa2b96bd144358892438d8d968a is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

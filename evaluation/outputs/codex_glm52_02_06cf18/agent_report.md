@@ -13,7 +13,7 @@ All telemetry was refreshed from the workspace-local Codex bundle only: `.sessio
 - Included spawned child: `019fbd68-a78e-71b2-9d01-1eb7c8e5d86f` (plotting)
 - Execution date: 2026-08-01 UTC; window 11:52:37.928Z–15:46:50.451Z
 - Telemetry: 87,815,105 tokens, 533 tools, 9,296 s goal time, 14,053 s wall time, estimated $10.00
-- Terminal response: `msg_1bb0189f24da407ea65ff5911ca0cdac`, one output-text part at 15:46:50.400Z; extracted response SHA-256 `65cab2561c31bc15b046be18abca492d6f2b45a0909603d87a785779fe751902`.
+- Terminal response: `msg_1bb0189f24da407ea65ff5911ca0cdac`, one output-text part at 15:46:50.400Z; extracted response SHA-256 `0bfa11f95242e0486bd725d35182ae7bb6852b653bf19533b0212e2b01aff01d`.
 
 `contestant_final_response.md` and `run_identity.json` remain unindexed sidecars, so `cfdeval check` does not validate their digests. The immutable `run_identity.json` SHA-256 is `f6d086a8507f2df19ff4eae3acca60f73a8a7fd534dc8a32bd5913b5a5b3a305`.
 
@@ -63,3 +63,7 @@ Independent DQ7 evidence also appears in Re20: source main.cpp:243–246 marks a
 ## Qualified full review — 2026-10-31
 
 All eight case histories and force plots, seven PDF pages, ten rubric sections, 27 weighted review points and DQ1–13 have been reviewed against the immutable source and available contestant-delivered workspace results. Pre-DQ score remains **62/100**, DQ7 and separate TASK shortcut 7 apply. Submitted plotting source `solver/tools/plot_results.py` has Git blob `5e23eaf8f3b853635e3651f6f1a9075336949bf8` both in immutable `1e29ab3c` and workspace. It reads force CSV columns directly and assembles VTU polygons with explicit triangle-to-parent-cell indexing; this is consistent with the delivered manifest and the inspected plots, but does not prove byte-identical generation of every historical image. The Re200 caption claims shedding, contrary to the selected force history; that contradiction does not establish an unrelated figure source under DQ8. Production executable, environment and exact per-image generation remain unbound; the earlier first-order experiment does not prove the selected run used that mode, and unequal rank tests do not establish a rank-only effect. These limitations are incorporated in the qualified verdict. No unsteady case was rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fbd2b-002f-7981-8f53-61c34659cce0 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-01T15:46:50.400Z, task_complete 2026-08-01T15:46:50.451Z; stored response-line SHA256 6ed8d009115e107be1680b0da3b784c818adc0e751cedfe8359ee388bd8cfb60, completion-line SHA256 85ba77fea1c493cb807e9bb5abec3b194424317b2b4039951e24c883e7f780de, exact text SHA256 0bfa11f95242e0486bd725d35182ae7bb6852b653bf19533b0212e2b01aff01d; previous sidecar SHA256 65cab2561c31bc15b046be18abca492d6f2b45a0909603d87a785779fe751902 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

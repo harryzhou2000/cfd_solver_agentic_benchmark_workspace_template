@@ -49,3 +49,7 @@ All ten rubric sections, 27 review points, eight cases and DQ1–13 were examine
 ## Scope and limitations
 
 The examiner validator is structural. Raw workspace histories, PDF and report figures were inspected, and the selected session/final response provides delivery context. Exact historical executable and every figure-to-data relationship are not individually verified. The evaluator rerender was used only for provenance comparison and no Re200 or unsteady solver rerun was performed.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a037b9-3a44-7213-9cfd-f76875b82b68 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-27T13:33:17.750Z, task_complete 2026-08-27T13:33:17.771Z; stored response-line SHA256 24eea661e45cb27663ec5089f5d02db560b2a741b42ec8ca48f6e51db5eb2656, completion-line SHA256 fb0c3a6e831baf6670006299c9ae56d24d7835134db4bf1addd14d3ae39500d3, exact text SHA256 bad10610bd33242165172abb6f0c29594ba4989c7d2b22d7b922b97f8829ff14; previous sidecar SHA256 bad10610bd33242165172abb6f0c29594ba4989c7d2b22d7b922b97f8829ff14 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

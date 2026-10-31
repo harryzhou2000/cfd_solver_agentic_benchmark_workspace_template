@@ -10,7 +10,7 @@ Fork replay previously added 717,212 inherited tokens to descendant accounting. 
 
 I inspected the committed C++/CMake/report sources and workspace-local output evidence read-only. The official validator returned `OK` for all seven steady final packages, but correctly rejected `cylinder_m010_laminar_re200`: its metadata has `completed=false`. This is a substantive failed case, not an infrastructure error. Re200 was not rerun.
 
-The selected workspace-local Codex root is `019fff60-e8b8-7990-8df2-f0784bde7d60`, with its seven descendants. It is the only root and spans the benchmark work; it ends blocked with an honest report that the AUSM+-up experiments could initiate but not sustain shedding. The exact final response sidecar SHA-256 is `f5bf0361a7cd37cb4cdd08bf6ae15b595878f6e31021ef97c52e9ff7de9d1c85`; `run_identity.json` SHA-256 is `89a4afdb6bc4ddb0a420ddf6aa9ff12e5ac3ea79e640b4065d8de7f3b3a85d70`. These sidecars are unindexed under the current contract and are not validated by `cfdeval check`.
+The selected workspace-local Codex root is `019fff60-e8b8-7990-8df2-f0784bde7d60`, with its seven descendants. It is the only root and spans the benchmark work; it ends blocked with an honest report that the AUSM+-up experiments could initiate but not sustain shedding. The exact final response sidecar SHA-256 is `48338c5318077a893f211c4c093b1fdd1d48fefd50a38d44a23dce5c5be3b4bc`; `run_identity.json` SHA-256 is `89a4afdb6bc4ddb0a420ddf6aa9ff12e5ac3ea79e640b4065d8de7f3b3a85d70`. These sidecars are unindexed under the current contract and are not validated by `cfdeval check`.
 
 ## Rubric: 68/100
 
@@ -49,3 +49,7 @@ The report’s claim that both rank sweeps agree to about seven significant figu
 ## Qualified full review — 2026-10-31
 
 All ten rubric sections, eight case scores, 27 review points and 13 numbered DQ rules were assessed to available evidence. Final 68/100 and DQ7 remain for M0.15 inviscid: the selected launch capped the run at 2500 steps and its last 1000 drag rows fall 0.477107→0.432620 while lift varies, despite a converged label. Re200 is explicitly failed and is not charged as false success. The fixed 0.3–0.5 reconstruction cap weakens linear accuracy but is nonzero; disclosed first-order M2 viscous operation is not automatically DQ10. Historical binary and exact figure-generation binding remain qualified. Earlier partial sections are historical checkpoints; no CFD, rank or Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 019fff60-e8b8-7990-8df2-f0784bde7d60 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-15T15:19:02.945Z, task_complete 2026-08-15T15:19:03.014Z; stored response-line SHA256 e4269a60fef4616c6e8de8b67d17f3cdd3e4d4c9161aadf112ae4cfad63af278, completion-line SHA256 9c1bea723d6c5d03b80906b621f3ac8df2df85d319ebf9814d4e3e61bccd2f51, exact text SHA256 48338c5318077a893f211c4c093b1fdd1d48fefd50a38d44a23dce5c5be3b4bc; previous sidecar SHA256 f5bf0361a7cd37cb4cdd08bf6ae15b595878f6e31021ef97c52e9ff7de9d1c85 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

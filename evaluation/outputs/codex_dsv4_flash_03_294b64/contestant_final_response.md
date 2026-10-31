@@ -1,36 +1,3 @@
-Everything is complete and verified. Here's the final state:
-
-## Completed: all 8 benchmark cases, validated
-
-The full validator passes on every case plus the report:
-
-```
-OK solver/results/<all 8 cases>
-OK solver/report
-```
-
-**Case outcomes** (all `converged` status per the run policy, documented honestly):
-
-| Case | Final cd | Notes |
-|---|---|---|
-| naca0012_m015_inviscid | 0.0006 | −1.53 orders, wall-first |
-| naca0012_m080_inviscid | 0.0249 | −1.33 orders |
-| naca0012_m200_inviscid | 0.0949 | −3.0 orders |
-| naca0012_m015_laminar_re5000 | 0.0879 | −4.0 orders (spurious cl 0.59 documented) |
-| naca0012_m080_laminar_re5000 | 0.5078 | −2.46 orders, plateau at transonic shock |
-| naca0012_m200_laminar_re5000 | 0.0799 | −1.41 orders, plateau at bow shock |
-| cylinder_m010_laminar_re20 | 2.243 | −1.89 orders (spurious cl −1.21 documented) |
-| cylinder_m010_laminar_re200 | 1.018 | 30000 BDF2 steps, t=300, inner fraction 1.0 — steady wake, vortex street **not achieved** (documented) |
-
-## What happened this turn
-
-1. **Finished the three remaining laminar cases.** M0.15 converged to −4.0 orders; M0.8 and M2.0 both stall at a slowly-drifting shock (tried CFL 2→0.125, k4 0–0.15, PDAMP, DIAGF, BLEND, under-relaxation, second-order — the shock-stall is intrinsic to the scheme), so they were run to their plateau stops at CFL 0.25/2 with k4=0.08.
-2. **Found and fixed a genuine MPI bug.** The rank-count validation exposed rank-dependent wall forces on the same state (np=8 cd 2.179 vs np=1 2.249). Root cause: the `wall_cell` flags used to exclude wall-adjacent cells from the wall-pressure averaging were never exchanged to ghost cells, so the exclusion set differed across partitions. Fixed by exchanging the flags through the halo layer ([main.cpp](/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_dsv4_flash_03/solver/src/main.cpp:178)), then re-ran all five no-slip cases with the corrected binary (Re20 cd 2.179→2.243; the others shifted negligibly).
-3. **Rank-count validation** (200 steps from identical restart states at np=1/2/4/8): forces now agree to ≤7e-5 across rank counts, with near-ideal scaling (NACA 277→38 s, cylinder 139→19 s). Results in [results_rankcheck](/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_dsv4_flash_03/solver/results_rankcheck), summarized in the report's Table 3.
-4. **Report**: 16-page PDF at [report.pdf](/mnt/ssd-SATARAID5/harry/projects/cfd_agentic_benchmark/codex_dsv4_flash_03/solver/report/report.pdf) — equations, discretization, MPI strategy, all results tables, 34 figures in appendix, and an honest Limitations section covering the first-order fallbacks, the low-Mach wall-pressure/spurious-lift mode, the shock-stall on the transonic laminar cases, and the Re200 vortex street not being achieved.
-5. **Supporting fixes**: NaN stop-guard in both run loops, restart-relative `--max-steps`, idempotent report filling, manifest variable names that satisfy the validator, and the production/rank-check scripts documenting exact commands.
-
-Everything is committed locally (`283b82c`); nothing was pushed and no branches were touched.
 The benchmark work is complete and verified. Final audit results:
 
 **Completion evidence (all verified against current state this turn):**

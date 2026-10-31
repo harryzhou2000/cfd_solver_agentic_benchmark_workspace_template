@@ -12,23 +12,15 @@
   "session_selection": {
     "source": "project",
     "roots": [
-      "01a00bc5-383f-7722-be28-d3f43d0ca3df",
-      "01a00e71-1f88-7d61-8876-492c0f5ed578",
-      "01a00f87-f0c7-7992-ad17-527f8128fe43",
-      "01a0106b-0201-7242-b447-cd2493f9d9ae",
-      "01a0106c-4b82-7680-aabc-f2e2a230cf56",
-      "01a010f9-7cdf-7302-8151-3c979befd6ea",
-      "01a0120d-c872-79e1-8290-ccd2049fdaff",
-      "01a012e6-6e2b-7620-8ed3-4688d1b99ac2",
-      "01a01396-0cc2-7e01-a273-5858a1fa4464",
-      "01a013cc-3c41-7a92-9734-357100fcf685",
-      "01a013cc-4d6d-7a72-92b6-d7e503c3237f"
+      "01a00bc5-383f-7722-be28-d3f43d0ca3df"
     ],
     "execution_date": "2026-08-16",
     "started_at": "2026-08-16T18:11:45.163000+00:00",
-    "ended_at": "2026-08-18T08:04:52.506000+00:00",
-    "time_basis": "UTC timestamp of first persisted event in root 01a00bc5; terminal task_complete record in confirmed continuation root 01a013cc-4d6d-7a72-92b6-d7e503c3237f.",
-    "rationale": "Codex workspace-local state_5.sqlite and bundled rollout JSONL identify 01a00bc5 as the benchmark root (/goal Complete the task defined in cfd_solver_agentic_benchmark/) and ten direct spawned descendants as one continuous implementation, validation, and final-deliverables sequence. The terminal continuation was selected manually by its completed task_complete record; no evaluator-home telemetry was used."
+    "ended_at": "2026-08-18T08:25:31.656Z",
+    "time_basis": "Workspace-local selected user root timestamps; ten spawned descendants are not terminal roots.",
+    "rationale": "One user root and ten spawned descendants identified by workspace SQLite spawn edges. Operator authorized matching phase-final and task_complete despite missing literal channel.",
+    "contestant_final_response_status": "present",
+    "terminal_root": "01a00bc5-383f-7722-be28-d3f43d0ca3df"
   },
   "scores": {
     "code_review": {
@@ -424,6 +416,7 @@
     "The result branch intentionally excludes raw case packages and the compiled report PDF; raw workspace evidence was inspected read-only but is not reproducible from result-tip Git alone.",
     "run_identity.json and contestant_final_response.md are unindexed sidecars; cfdeval check does not validate either sidecar.",
     "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
-    "Qualified full review: exact historical production binary and rank-control provenance remain unbound despite inspecting saved binary timestamps, commit history and the selected verification. All feasible source, case, review-area and DQ checks are documented; no CFD/Re200 rerun."
+    "Qualified full review: exact historical production binary and rank-control provenance remain unbound despite inspecting saved binary timestamps, commit history and the selected verification. All feasible source, case, review-area and DQ checks are documented; no CFD/Re200 rerun.",
+    "Operator decision 2026-10-31: accepted selected root 01a00bc5-383f-7722-be28-d3f43d0ca3df latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-18T08:25:31.560Z, task_complete 2026-08-18T08:25:31.656Z; stored response-line SHA256 006ee5185fc834ec97e3b6ee6afe21d56b6c033cd0f14c6a1cf306403bf5e4ff, completion-line SHA256 388253bab87a55aa14ecda9a4bf713faef0be84bf86360f259361b663d6c3d42, exact text SHA256 aa5895db3b1a66c6ebd938e8e41afb542f86e13580976a577d1652ca816c31bc; previous sidecar SHA256 0e89ec7e8cfeb9d8b1db4c71711e61c2691a744a2937953f26341d9236128b17 is preserved in Git history. Credential scan found no credential. Workspace spawn graph confirms ten listed prior roots were children; the main user root, not a child, supplies the selected response. "
   ]
 }

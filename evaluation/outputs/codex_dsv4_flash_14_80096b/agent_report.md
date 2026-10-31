@@ -43,7 +43,7 @@
 
 I read the contestant final response, task/contract/rubric, committed source and the untracked final result packages read-only. The explicit validator was run against the eight named `solver/results/<case>` directories and `solver/report`, returning exit 0. I inspected the rendered 41-page PDF and representative M2 Mach and Re200 vorticity figures, source locations for METIS, MPI halo exchange, residual reductions, and BDF2, and result CSV/JSON terminal values. I did not rerun any solver case; in particular Re200 was not rerun.
 
-The identity sidecar SHA-256 is `b7b99a32688ad8ed7fa88d76f79cccf5bee8bff7f903f0d8769d03166765016a`; the contestant final-response sidecar SHA-256 is `0e89ec7e8cfeb9d8b1db4c71711e61c2691a744a2937953f26341d9236128b17`. These are deliberately unindexed sidecars, so `cfdeval check` does not validate either one.
+The identity sidecar SHA-256 is `b7b99a32688ad8ed7fa88d76f79cccf5bee8bff7f903f0d8769d03166765016a`; the contestant final-response sidecar SHA-256 is `aa5895db3b1a66c6ebd938e8e41afb542f86e13580976a577d1652ca816c31bc`. These are deliberately unindexed sidecars, so `cfdeval check` does not validate either one.
 
 ## Scores
 
@@ -55,7 +55,7 @@ No DQ trigger is established from available evidence; each rule has a specific n
 
 ## Metadata answers & session selection
 
-Only workspace-local `.sessions/codex` telemetry was used. Root `01a00bc5-383f-7722-be28-d3f43d0ca3df` begins the benchmark objective; the ten listed child roots are its recorded sequential implementation/audit continuations. Terminal response comes from the completed `task_complete` record in `01a013cc-4d6d-7a72-92b6-d7e503c3237f` at 2026-08-18T08:04:52.506Z. Start time is the root's first persisted event, 2026-08-16T18:11:45.163Z, giving execution date 2026-08-16 UTC.
+Only workspace-local `.sessions/codex` telemetry was used. Root `01a00bc5-383f-7722-be28-d3f43d0ca3df` begins the benchmark objective; the ten listed child threads are its spawned implementation/audit subagents. The earlier assessment mistakenly selected a spawned child. The operator selected the actual main-root completion at 2026-08-18T08:25:31.656Z; its exact text is preserved below. Start time is the root's first persisted event, 2026-08-16T18:11:45.163Z, giving execution date 2026-08-16 UTC.
 
 ## Limitations
 
@@ -93,3 +93,7 @@ All ten rubric sections and 27 review points now have criterion-specific evidenc
 Independent visual comparison with glm53-04 shows the three NACA laminar force plots merge both curves into the startup-dominated baseline, unlike the separately resolved lift panels in that precedent; their 2-point floor caps remain. Re20 force figure at 05261f8 has blob `3ec9879a92e56b89a763611e7e0ff57dac4ca83a` and visibly shows drag settling above lift even though a startup spike reduces late resolution. `results_summary.tex:21` gives Cd 2.10341/Cl 0.00554, residual reduction 6.97 orders, and references its force/residual/wake figures. The final 10% of original drag rows spans 2.10338502–2.10340547. The steady floor does not demand a late-drag zoom, so the earlier automatic cap was inconsistent: Re20 2→3.5, retaining deductions for scale and numerical/provenance limitations. Re200 has a separate explicit late-lift/drag requirement and remains 2.
 
 Ten sections, eight cases, 27 review points and 13 DQ rules have now been reviewed to the available evidence limit. Original run metadata has null git_revision; current build and verify executables were rebuilt after the Re200 run, and earlier ASan/UBSan binaries do not establish the production executable. Git tracked history contains no archived `cfd_solver` binary. The actual historic binary and exact rank-test controls remain unbound; no claim that final source produced the results is made. No CFD or Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a00bc5-383f-7722-be28-d3f43d0ca3df latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-18T08:25:31.560Z, task_complete 2026-08-18T08:25:31.656Z; stored response-line SHA256 006ee5185fc834ec97e3b6ee6afe21d56b6c033cd0f14c6a1cf306403bf5e4ff, completion-line SHA256 388253bab87a55aa14ecda9a4bf713faef0be84bf86360f259361b663d6c3d42, exact text SHA256 aa5895db3b1a66c6ebd938e8e41afb542f86e13580976a577d1652ca816c31bc; previous sidecar SHA256 0e89ec7e8cfeb9d8b1db4c71711e61c2691a744a2937953f26341d9236128b17 is preserved in Git history. Credential scan found no credential. Workspace spawn graph confirms ten listed prior roots were children; the main user root, not a child, supplies the selected response. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

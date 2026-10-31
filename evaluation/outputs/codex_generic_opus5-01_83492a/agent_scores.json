@@ -18,7 +18,9 @@
     "started_at": "2026-08-25T05:33:13.688000+00:00",
     "ended_at": "2026-08-27T01:47:42.037000+00:00",
     "time_basis": "UTC timestamp of the first persisted event in the manually selected root rollout",
-    "rationale": "Selected the workspace-local Codex root 01a03768-0f28-7781-b309-8273bce2a530: it begins with benchmark implementation and owns 59 named subagent threads spanning mesh, solver, report, results, and completion audits. Excluded no independent root candidates. Database cwd is the Docker path /workspace; all telemetry was rebased only within this workspace .sessions bundle."
+    "rationale": "Selected the workspace-local Codex root 01a03768-0f28-7781-b309-8273bce2a530: it begins with benchmark implementation and owns 59 named subagent threads spanning mesh, solver, report, results, and completion audits. Excluded no independent root candidates. Database cwd is the Docker path /workspace; all telemetry was rebased only within this workspace .sessions bundle.",
+    "contestant_final_response_status": "present",
+    "terminal_root": "01a03768-0f28-7781-b309-8273bce2a530"
   },
   "scores": {
     "code_review": {
@@ -415,6 +417,7 @@
     "Re200 wake resolution is limited: reported St=0.1824 and mean Cd=1.2359 are modestly low and the report discloses this.",
     "The solver and geometry abstractions are 2-D.",
     "2026-09-06 retrospective: all eight independent case scores were re-audited against the immutable contestant report at the recorded submission commit. Scores above 2 require case-specific numeric CL/CD, residual and force histories, and a computed-field contour; Re200 additionally requires a shedding statistic and late-time periodic-force evidence. No solver was rerun.",
-    "All ten rubric sections, eight cases, 27 review points and 13 numbered DQ rules were reviewed to available evidence. Exact Re200 producing executable and complete-run fallback counts remain unbound. No CFD/Re200 rerun."
+    "All ten rubric sections, eight cases, 27 review points and 13 numbered DQ rules were reviewed to available evidence. Exact Re200 producing executable and complete-run fallback counts remain unbound. No CFD/Re200 rerun.",
+    "Operator decision 2026-10-31: accepted selected root 01a03768-0f28-7781-b309-8273bce2a530 latest completed assistant response matched exactly to task_complete despite literal channel missing and phase missing. Assistant timestamp 2026-08-27T01:47:41.923Z, task_complete 2026-08-27T01:47:42.037Z; stored response-line SHA256 e19d815de8d3d79f728f02ca568959c1301859a3033537b15c56255320eb1e3d, completion-line SHA256 7d8c5514619257995d2d76bef0a55235ac990f8e53f5ba881c6b53c8b9f7271c, exact text SHA256 8add06c4000a8cb9092ec789a45294ec596d5b12b147424ce8e9bf537dba75a4; previous sidecar SHA256 275b0b41f6d23199283ab33596b10e5f31e29b9a9972ba39e3b9af1ddf38b441 is preserved in Git history. Credential scan found no credential. "
   ]
 }

@@ -102,3 +102,7 @@ The independent case review confirms Re20 and M0.15 inviscid DQ7 from their nons
 
 
 The qualified review assessed all eight canonical histories, all 13 compiled report pages, ten rubric sections, 27 review points and DQ1–13. Original selected production metadata dates the Re20, M015 inviscid and Re200 runs to 2026-08-16, before the selected final response; the run manifest and report identify them. The curated source and output data are traceable, but exact historical executable bytes are unbound. No solver was rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a009f1-0252-7e80-acd4-2783b82d1076 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-16T19:19:01.139Z, task_complete 2026-08-16T19:19:01.264Z; stored response-line SHA256 945ee04792af291177c7399538b2e5b88fcbf53d793777293cbaacffc360fb20, completion-line SHA256 acbdd845dcaf32af499362a4825cd0c3e3f6a26456a63ef64d2dbffd771fb6a1, exact text SHA256 e8a3430eefc6f55656d570df8f0409f736f4bdcf9a62371da496041d2285c556; previous sidecar SHA256 e8a3430eefc6f55656d570df8f0409f736f4bdcf9a62371da496041d2285c556 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

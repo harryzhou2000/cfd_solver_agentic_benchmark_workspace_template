@@ -57,3 +57,7 @@ These are unindexed sidecars; `cfdeval check` does not validate them.
 ## Scope and limitations
 
 The exact historical executable and every figure-to-data binding are not individually verified. No Re200 or unsteady solver rerun was performed.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a04155-66b4-7dd1-9672-2fe9cfc28407 latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-27T15:15:55.687Z, task_complete 2026-08-27T15:15:55.698Z; stored response-line SHA256 e691ca574514d7ba8a306f2c93760753fb8caccf380456e7219230033f46da23, completion-line SHA256 a792ad85bab14a7da486576bf45c700889a9c84c1c4a6c78b6ec75fa8624db29, exact text SHA256 8629c6b48726bc8ef4363cce6fb60d2664ada9aea8e7f42d6b397b745b747296; previous sidecar SHA256 8629c6b48726bc8ef4363cce6fb60d2664ada9aea8e7f42d6b397b745b747296 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.

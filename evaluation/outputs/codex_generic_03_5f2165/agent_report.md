@@ -43,7 +43,7 @@
 
 Read the contestant final response, report/run manifest, raw statuses, and source. The explicit validator fails because M0.15-inviscid metadata has invalid `not_converged`; Re200 raw status is failed at step 218 and physical time zero. No solver was rerun.
 
-`run_identity.json` SHA-256: `c06bf6a5852630804f29bd0c6464ee7635853a45339ca510d1fd65c6a508409b`; `contestant_final_response.md` SHA-256: `ffe69dee84634fc7b48f0b33ae3e1a90257f35d13c7a12418a324ae914be7656`. They are unindexed sidecars not validated by `cfdeval check`.
+`run_identity.json` SHA-256: `c06bf6a5852630804f29bd0c6464ee7635853a45339ca510d1fd65c6a508409b`; `contestant_final_response.md` SHA-256: `c7b5bf41df3baab2a27df1575d2aaf7e4beee538472b49b251c7e2110aee9aa8`. They are unindexed sidecars not validated by `cfdeval check`.
 
 ## Rubric scores (100 points, SCORING_RUBRIC.md)
 
@@ -156,3 +156,7 @@ The other final-manifest-linked v3 histories were examined individually. M0.15/M
 
 
 The preceding partial-checkpoint descriptions are historical. All available v3 case histories and the current `solver/results` packages have now been individually examined. Selected root call `call_d54c5ff9a67c4f0baaea4873` at 17:24:25 UTC switched the workspace plotting script to `results_final` and ran it; successful output lists the Re200 vorticity figure, whose committed bytes match the workspace figure and whose timestamp falls during that call. The later v3 manifest and final TeX refer to distinct histories; independent rerender is visually similar but not byte-identical. Exact figure/data identity and historical producing executable cannot be established beyond this evidence. These irrecoverable qualifications are retained in the full review; DQ8/12 are not inferred. Both gates passed; no CFD or Re200 rerun.
+
+## Operator-authorized terminal attribution — 2026-10-31
+
+Operator decision 2026-10-31: accepted selected root 01a026e2-7da6-7130-966e-145bb2b7555d latest completed assistant response matched exactly to task_complete despite literal channel missing (phase=final_answer). Assistant timestamp 2026-08-24T23:38:08.511Z, task_complete 2026-08-24T23:38:08.697Z; stored response-line SHA256 e56f7e4bd1256a889de1ef7183d3f710faeb530d995e032f8c6ffb15c3c8e177, completion-line SHA256 28c8e11635be2bcc9215f66fed9feae02a7b0b305c5a5b42831b9fa19723b795, exact text SHA256 c7b5bf41df3baab2a27df1575d2aaf7e4beee538472b49b251c7e2110aee9aa8; previous sidecar SHA256 ffe69dee84634fc7b48f0b33ae3e1a90257f35d13c7a12418a324ae914be7656 is preserved in Git history. Credential scan found no credential. The selected response is preserved exactly in the unindexed sidecar; cfdeval check does not validate unindexed sidecars.
