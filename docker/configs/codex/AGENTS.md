@@ -8,3 +8,17 @@ In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the re
 
 If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->
+
+## Local services (this machine)
+
+The ComfyUI server lives in `/mnt/ssd-SATARAID5/harry/projects/comfyui` and runs
+long-term on `http://127.0.0.1:8188`, shared by several projects.
+
+- Never start, stop, restart, repair, or reconfigure that service on your own
+  initiative — not even to pick up new models or configuration.
+- If a restart or any other lifecycle action looks necessary, stop and ask the user
+  first, and state exactly what needs restarting and why.
+- Read-only inspection is always fine: `/system_stats`, `/object_info`, `/queue`,
+  `/history`, log files, process and folder listings. Weight files dropped into `models/`
+  are picked up without a restart.
+- Queueing generation prompts against the running server is fine; that is what it is for.

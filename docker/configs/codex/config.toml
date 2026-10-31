@@ -1,9 +1,15 @@
 service_tier = "default"
-model_provider = "openai_vanilla"
-model = "gpt-5.6-sol"
+# model_provider = "openai_vanilla"
 # model_context_window = 380000
 model_reasoning_effort = "medium"
 approvals_reviewer = "user"
+# auto_review_model = "deepseek/deepseek-flash"
+model = "gpt-6.1-sol"
+model_catalog_json = "/home/cfd_agent/.codex/opencodex-catalog.json"
+# Auto-injected by opencodex (undo: ocx restore)
+openai_base_url = "http://127.0.0.1:10109/v1"
+# Auto-injected by opencodex (undo: ocx restore)
+experimental_realtime_ws_base_url = "http://127.0.0.1:10109/v1"
 [mcp_servers.codegraph]
 command = "codegraph"
 args = ["serve", "--mcp"]
@@ -74,18 +80,56 @@ trust_level = "trusted"
 [projects."/mnt/ssd-SATARAID5/harry/projects/vllm-serve"]
 trust_level = "trusted"
 
+[projects."/mnt/ssd-SATARAID5/share"]
+trust_level = "trusted"
+
+[projects."/home/harry/projects/management"]
+trust_level = "trusted"
+
+[projects."/home/harry/projects/literature"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/bkp/elite-crawl"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/flux2"]
+trust_level = "trusted"
+
+[projects."/home/harry/projects/hugo-harry"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/comfyui"]
+trust_level = "trusted"
+
+[projects."/mnt/ssd-SATARAID5/harry/projects/bby-compose"]
+trust_level = "trusted"
+
+[projects."/home/harry/ssd1/projects/cfd_agentic_benchmark/cfd_solver_benchmark_workspace_template"]
+trust_level = "trusted"
+
 [tui]
 status_line = ["model-with-reasoning", "project-name", "git-branch", "permissions", "approval-mode", "context-remaining", "used-tokens", "total-input-tokens", "total-output-tokens", "fast-mode", "context-window-size"]
 status_line_use_colors = true
 session_picker_view = "comfortable"
+theme = "solarized-light"
+screen_reader_detection_done = true
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
 "gpt-5.6-sol" = 4
+gpt-6-astra = 2
+"gpt-6.1-sol" = 4
 
 [features]
 memories = true
 multi_agent_v2 = { enabled = true, max_concurrent_threads_per_session = 4 }
+# Shared app-server daemon feature settings, kept in sync with attaching TUIs
+# (see codex-app-server/README.md). Pinned here so replace.sh starts the
+# managed daemon with them and other clients cannot flip them at runtime.
+api_key_model_discovery = true
+auth_elicitation = true
+code_mode_host = true
+mcp_oauth_refresh_coordination = false
 
 [memories]
 use_memories = true
@@ -98,12 +142,11 @@ wire_api = "responses"
 requires_openai_auth = true
 
 [marketplaces.openai-bundled]
-last_updated = "2026-08-24T07:15:11Z"
 source_type = "local"
 source = "/home/cfd_agent/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
-[plugins."sites@openai-bundled"]
-enabled = true
-
 [plugins."visualize@openai-bundled"]
 enabled = true
+
+[notice]
+hide_rate_limit_model_nudge = true
