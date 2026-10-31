@@ -173,7 +173,13 @@
         }
       ],
       "overall_score": 3.46,
-      "disqualification_flags": []
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "text": "Incomplete or failed run reported successful",
+          "evidence": "Operator-selected final response explicitly claims periodic Re200, 30000 steps, 99.9967% inner-target fraction and zero best-effort steps; later canonical workspace metadata SHA256 0b8d7a9790fe22b69220e1491f847d5756cb92dc481fbc93037e0c6e6d321275 matches all these attributes and marks completed/statistically_periodic. Its forces SHA256 fea2faecd42c125fea8ff6641a9cf2ba1a3c0e2529934572a6b04f9ef6f687c4 t180\u2013300 have Cd1.99932\u20131.99974 and Cl\u22120.00155019..\u22120.0014559; delivered force plot is flat, so no resolved vortex shedding supports the periodic label. The earlier immutable e7977ee package honestly reports failed; do not conflate the two. Historical binary and strict inner count remain unbound; no unsteady rerun."
+        }
+      ]
     },
     "result_review": {
       "points": [
@@ -228,7 +234,13 @@
         }
       ],
       "overall_score": 2.6,
-      "disqualification_flags": []
+      "disqualification_flags": [
+        {
+          "id": 7,
+          "text": "Incomplete or failed run reported successful",
+          "evidence": "Operator-selected final response explicitly claims periodic Re200, 30000 steps, 99.9967% inner-target fraction and zero best-effort steps; later canonical workspace metadata SHA256 0b8d7a9790fe22b69220e1491f847d5756cb92dc481fbc93037e0c6e6d321275 matches all these attributes and marks completed/statistically_periodic. Its forces SHA256 fea2faecd42c125fea8ff6641a9cf2ba1a3c0e2529934572a6b04f9ef6f687c4 t180\u2013300 have Cd1.99932\u20131.99974 and Cl\u22120.00155019..\u22120.0014559; delivered force plot is flat, so no resolved vortex shedding supports the periodic label. The earlier immutable e7977ee package honestly reports failed; do not conflate the two. Historical binary and strict inner count remain unbound; no unsteady rerun."
+        }
+      ]
     }
   },
   "rubric": {
@@ -338,11 +350,11 @@
     },
     "cylinder_m010_laminar_re200": {
       "score": 0,
-      "notes": "Score 0 retained: immutable04cd1ee report.tex:138,148 explicitly marks original 30000-step Re200 failed with unresolved lift, mean Cd2.816, mean Cl\u22120.00009743, lift amplitude7.552e\u22127; previous note misread viscous drag and amplitude as Cd/Cl and falsely said referenced plots absent. Historical attempt e7977ee forces SHA256 79a0fbcee0649371a861096aa8fdbe1375955d8780095b1c394ebf42923f0141 ends Cd2.81563, Cl\u22120.0000970193 with failed metadata; no strict-shedding success inferred. Current workspace canonical result is a later different 2026-08-15/16 run reporting periodic, not the immutable report result; its provenance does not justify substituting it. No unsteady rerun. Original metadata records 26720 BE fallback intervals from resumed step3280 to30000 and reconstruction slope0.1; report.tex:159 explicitly gives these counts and labels run failed."
+      "notes": "Score 0 retained: immutable04cd1ee report.tex:138,148 explicitly marks original 30000-step Re200 failed with unresolved lift, mean Cd2.816, mean Cl\u22120.00009743, lift amplitude7.552e\u22127; previous note misread viscous drag and amplitude as Cd/Cl and falsely said referenced plots absent. Historical attempt e7977ee forces SHA256 79a0fbcee0649371a861096aa8fdbe1375955d8780095b1c394ebf42923f0141 ends Cd2.81563, Cl\u22120.0000970193 with failed metadata; no strict-shedding success inferred. Current workspace canonical result is a later different 2026-08-15/16 run reporting periodic, not the immutable report result; its provenance does not justify substituting it. No unsteady rerun. Original metadata records 26720 BE fallback intervals from resumed step3280 to30000 and reconstruction slope0.1; report.tex:159 explicitly gives these counts and labels run failed. Operator-selected later final response at 2026-08-16 00:26:56 explicitly claims 30000-step BDF2, 99.9967% inner target and zero best-effort steps; later workspace canonical metadata SHA256 0b8d7a9790fe22b69220e1491f847d5756cb92dc481fbc93037e0c6e6d321275 independently matches these exact distinctive attributes, linking the final claim to that package. Its force CSV SHA256 fea2faecd42c125fea8ff6641a9cf2ba1a3c0e2529934572a6b04f9ef6f687c4 over t180\u2013300 gives Cd1.99932\u20131.99974 and Cl\u22120.00155019..\u22120.0014559, without resolved shedding. Actual target count is reported, not inferred fraudulent. Score0 remains appropriate for failed physical shedding; provenance and report/other cases require further review."
     }
   },
   "disqualification": {
-    "triggered": false,
+    "triggered": true,
     "flags": [
       {
         "id": 1,
@@ -383,8 +395,8 @@
       {
         "id": 7,
         "text": "Incomplete run reported successful",
-        "found": false,
-        "evidence": "Not established on curated submission: original Re200 is explicitly failed. Seven 300-step runs are labeled converged plateau despite unmet target and weak drag-only 10% rule; data and short budget are concerning, but a justified plateau is permitted and definite failed state not proven solely by them. Later workspace Re200 status is a different, unbound run and not substituted."
+        "found": true,
+        "evidence": "Operator-selected final response explicitly claims periodic Re200, 30000 steps, 99.9967% inner-target fraction and zero best-effort steps; later canonical workspace metadata SHA256 0b8d7a9790fe22b69220e1491f847d5756cb92dc481fbc93037e0c6e6d321275 matches all these attributes and marks completed/statistically_periodic. Its forces SHA256 fea2faecd42c125fea8ff6641a9cf2ba1a3c0e2529934572a6b04f9ef6f687c4 t180\u2013300 have Cd1.99932\u20131.99974 and Cl\u22120.00155019..\u22120.0014559; delivered force plot is flat, so no resolved vortex shedding supports the periodic label. The earlier immutable e7977ee package honestly reports failed; do not conflate the two. Historical binary and strict inner count remain unbound; no unsteady rerun."
       },
       {
         "id": 8,

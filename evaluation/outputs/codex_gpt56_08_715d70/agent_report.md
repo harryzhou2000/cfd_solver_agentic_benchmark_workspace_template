@@ -12,7 +12,7 @@ metadata. Re200 was not rerun.
 The immutable source/report support a substantial solver effort, but a clean independent build succeeded in a restricted container with bundled dependencies; CTest has no registered tests.
 Result scoring therefore retains the seven steady packages as limited
 contestant evidence and assigns Re200 zero because its terminal status is
-incomplete. No disqualification trigger was established; incomplete Re200 is
+incomplete. The earlier review did not establish a disqualification trigger; its original incomplete Re200 was
 scored rather than relabeled.
 
 ## Session accounting correction
@@ -44,7 +44,7 @@ telemetry repair.
 
 ## Recorded scoring
 
-The qualified rubric is **69/100**, replacing the old unsupported 3-point assignment in every section. Seven steady cases remain low due to weak 300-step plateaus and implausible forces; M2 inviscid receives 1.5/5, and the honestly failed Re200 remains 0/5. DQ is not established. The original report figures are present; current workspace packages include later replacements and are not attributed to the curated report. The available case, rubric, review and DQ evidence has been assessed; original binary/source binding and later workspace replacements remain qualified. Detailed evidence is recorded in `agent_scores.json` and the ledger.
+The qualified rubric is **69/100**, replacing the old unsupported 3-point assignment in every section. Seven steady cases remain low due to weak 300-step plateaus and implausible forces; M2 inviscid receives 1.5/5, and the honestly failed Re200 remains 0/5. The earlier DQ=false verdict is superseded by the later-result DQ7 finding below. The original report figures are present; current workspace packages include later replacements and are not attributed to the curated report. The available case, rubric, review and DQ evidence has been assessed; original binary/source binding and later workspace replacements remain qualified. Detailed evidence is recorded in `agent_scores.json` and the ledger.
 
 ## Integrity and limitations
 
@@ -69,3 +69,7 @@ Operator decision 2026-10-31: accepted selected root 019fe5fc-728f-7580-81ba-d6e
 ## Later selected-final claim requires further review — 2026-10-31
 
 The selected Aug 16 final response claims all eight packages pass and Re200 is statistically periodic; the earlier immutable report/attempt says failed, while a different workspace canonical metadata dated Aug 16 00:03:59 UTC reports success. The relationship between that package, submitted report and selected root is not yet established; case score and DQ7 remain provisional pending provenance and physical review. No unsteady rerun. The earlier description of the terminal response as an honest failure applies to the earlier response, not the newly selected later response.
+
+## Later Re200 delivery and DQ7 correction — 2026-10-31
+
+Operator-selected final response explicitly claims periodic Re200, 30000 steps, 99.9967% inner-target fraction and zero best-effort steps; later canonical workspace metadata SHA256 0b8d7a9790fe22b69220e1491f847d5756cb92dc481fbc93037e0c6e6d321275 matches all these attributes and marks completed/statistically_periodic. Its forces SHA256 fea2faecd42c125fea8ff6641a9cf2ba1a3c0e2529934572a6b04f9ef6f687c4 t180–300 have Cd1.99932–1.99974 and Cl−0.00155019..−0.0014559; delivered force plot is flat, so no resolved vortex shedding supports the periodic label. The earlier immutable e7977ee package honestly reports failed; do not conflate the two. Historical binary and strict inner count remain unbound; no unsteady rerun. The selected final response matches distinctive metadata values rather than being attributed from timestamps alone. Case score remains 0; DQ false→true under trigger 7. Other selected-final case packages, report/figure provenance and source binding are still being reviewed, so the full overall calibration remains partial.
